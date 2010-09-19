@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="testlib" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/testlib" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-Wall" />
+					<Add option="-g" />
+					<Add option="-D_LM_DEBUG_" />
+					<Add option="-D_LOMSE_LINUX_CODEBLOCKS" />
+					<Add directory="../../../../include" />
+					<Add directory="/usr/include/unittest++" />
+				</Compiler>
+				<Linker>
+					<Add library="/usr/lib/libunittest++.a" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="../../../../include/lomse_analyser.h" />
+		<Unit filename="../../../../include/lomse_basic.h" />
+		<Unit filename="../../../../include/lomse_basic_model.h" />
+		<Unit filename="../../../../include/lomse_basic_model_browser.h" />
+		<Unit filename="../../../../include/lomse_basic_objects.h" />
+		<Unit filename="../../../../include/lomse_build_options.h" />
+		<Unit filename="../../../../include/lomse_command.h" />
+		<Unit filename="../../../../include/lomse_compiler.h" />
+		<Unit filename="../../../../include/lomse_config.h" />
+		<Unit filename="../../../../include/lomse_document.h" />
+		<Unit filename="../../../../include/lomse_document_iterator.h" />
+		<Unit filename="../../../../include/lomse_exceptions.h" />
+		<Unit filename="../../../../include/lomse_functor.h" />
+		<Unit filename="../../../../include/lomse_id_assigner.h" />
+		<Unit filename="../../../../include/lomse_im_note.h" />
+		<Unit filename="../../../../include/lomse_injectors.h" />
+		<Unit filename="../../../../include/lomse_internal_model.h" />
+		<Unit filename="../../../../include/lomse_ldp_elements.h" />
+		<Unit filename="../../../../include/lomse_ldp_exporter.h" />
+		<Unit filename="../../../../include/lomse_ldp_factory.h" />
+		<Unit filename="../../../../include/lomse_model_builder.h" />
+		<Unit filename="../../../../include/lomse_observable.h" />
+		<Unit filename="../../../../include/lomse_parser.h" />
+		<Unit filename="../../../../include/lomse_reader.h" />
+		<Unit filename="../../../../include/lomse_score_iterator.h" />
+		<Unit filename="../../../../include/lomse_smart_pointer.h" />
+		<Unit filename="../../../../include/lomse_stack.h" />
+		<Unit filename="../../../../include/lomse_staffobjs_table.h" />
+		<Unit filename="../../../../include/lomse_time.h" />
+		<Unit filename="../../../../include/lomse_tokenizer.h" />
+		<Unit filename="../../../../include/lomse_tree.h" />
+		<Unit filename="../../../../include/lomse_user_command.h" />
+		<Unit filename="../../../../include/lomse_values.h" />
+		<Unit filename="../../../../include/lomse_visitor.h" />
+		<Unit filename="../../../../src/basic_model/lomse_basic_model.cpp" />
+		<Unit filename="../../../../src/basic_model/lomse_basic_model_browser.cpp" />
+		<Unit filename="../../../../src/basic_model/lomse_basic_objects.cpp" />
+		<Unit filename="../../../../src/document/lomse_document.cpp" />
+		<Unit filename="../../../../src/document/lomse_document_iterator.cpp" />
+		<Unit filename="../../../../src/document/lomse_id_assigner.cpp" />
+		<Unit filename="../../../../src/export/lomse_ldp_exporter.cpp" />
+		<Unit filename="../../../../src/module/lomse_injectors.cpp" />
+		<Unit filename="../../../../src/module/lomse_time.cpp" />
+		<Unit filename="../../../../src/parser/lomse_analyser.cpp" />
+		<Unit filename="../../../../src/parser/lomse_compiler.cpp" />
+		<Unit filename="../../../../src/parser/lomse_ldp_elements.cpp" />
+		<Unit filename="../../../../src/parser/lomse_ldp_factory.cpp" />
+		<Unit filename="../../../../src/parser/lomse_linker.cpp" />
+		<Unit filename="../../../../src/parser/lomse_model_builder.cpp" />
+		<Unit filename="../../../../src/parser/lomse_parser.cpp" />
+		<Unit filename="../../../../src/parser/lomse_reader.cpp" />
+		<Unit filename="../../../../src/parser/lomse_staffobjs_table.cpp" />
+		<Unit filename="../../../../src/parser/lomse_tokenizer.cpp" />
+		<Unit filename="../../../../src/parser/lomse_values.cpp" />
+		<Unit filename="../../../../src/score/lomse_im_note.cpp" />
+		<Unit filename="../../../../src/score/lomse_internal_model.cpp" />
+		<Unit filename="../../../../src/score/lomse_score_iterator.cpp" />
+		<Unit filename="../../../../src/tests/lomse_test_analyser.cpp" />
+		<Unit filename="../../../../src/tests/lomse_test_colstaffobjs_builder.cpp" />
+		<Unit filename="../../../../src/tests/lomse_test_compiler.cpp" />
+		<Unit filename="../../../../src/tests/lomse_test_elements.cpp" />
+		<Unit filename="../../../../src/tests/lomse_test_imobjs_builder.cpp" />
+		<Unit filename="../../../../src/tests/lomse_test_ldp_exporter.cpp" />
+		<Unit filename="../../../../src/tests/lomse_test_model_builder.cpp" />
+		<Unit filename="../../../../src/tests/lomse_test_parser.cpp" />
+		<Unit filename="../../../../src/tests/lomse_test_reader.cpp" />
+		<Unit filename="../../../../src/tests/lomse_test_stack.cpp" />
+		<Unit filename="../../../../src/tests/lomse_test_tokenizer.cpp" />
+		<Unit filename="../../../../src/tests/lomse_test_tree.cpp" />
+		<Unit filename="../../../../src/tests/lomse_the_test_runner.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+			<envvars />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

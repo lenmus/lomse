@@ -1,0 +1,12 @@
+lomse README file
+Version: v0.0
+Last update: 2010-09-17
+-----------------------
+
+LenMus open music score edition library (lomse library) for C++ is a free open source library to add capabilities to any program for editing, rendering and playing back music scores. It is witten in C++ and it is platform independent.
+
+Lomse is based on the experience gained developping the LenMus project (www.lenmus.org) and it is, currently a work in progress. 
+
+website:   http://lomse.sourceforge.net/
+email: cecilios@users.sourceforge.net
+

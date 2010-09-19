@@ -1,0 +1,15 @@
+(score
+   (vers 1.6)(language en iso-8859-1)
+   (systemLayout first (systemMargins 0 0 0 2000))
+   (systemLayout other (systemMargins 0 0 1200 2000))
+   (opt Score.FillPageWithEmptyStaves true)
+   (opt StaffLines.StopAtFinalBarline false)
+   (instrument
+      (musicData
+         (clef G)
+         (n c4 q) 
+            (text "Текст на кирилица" dx:15 dy:-10 (font normal 10))
+      )
+   )
+)
+
