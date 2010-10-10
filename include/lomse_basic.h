@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__BASIC_H__
-#define __LOMSE__BASIC_H__
+#ifndef __LOMSE_BASIC_H__
+#define __LOMSE_BASIC_H__
 
 namespace lomse
 {
@@ -32,12 +32,11 @@ namespace lomse
 #define textdomain(Domain)
 #define bindtextdomain(Package, Directory)
 
-// class FloatPoint
-class FloatPoint
+//----------------------------------------------------------------------------------
+struct FloatPoint
 {
-public:
-    // members are public to simplify.
-    float x, y;
+    float x;
+    float y;
 
     // constructors
     FloatPoint() : x(0.0f), y(0.0f) { }
@@ -55,9 +54,39 @@ public:
     FloatPoint& operator-=(const FloatPoint& pt) { x -= pt.x; y -= pt.y; return *this; }
 };
 
+//----------------------------------------------------------------------------------
+struct FloatSize
+{
+    float width;
+    float height;
+
+    // constructors
+    FloatSize() : width(0.0f), height(0.0f) {}
+    FloatSize(float w, float h) : width(w), height(h) {}
+
+    // no copy ctor or assignment operator - the defaults are ok
+
+    bool operator==(const FloatSize& sz) const { return width == sz.width && height == sz.height; }
+    bool operator!=(const FloatSize& sz) const { return width != sz.width || height != sz.height; }
+
+    FloatSize operator+(const FloatSize& sz) const { return FloatSize(width + sz.width, height + sz.height); }
+    FloatSize operator-(const FloatSize& sz) const { return FloatSize(width - sz.width, height - sz.height); }
+    FloatSize operator/(float i) const { return FloatSize(width / i, height / i); }
+    FloatSize operator*(float i) const { return FloatSize(width * i, height * i); }
+
+    FloatSize& operator+=(const FloatSize& sz) { width += sz.width; height += sz.height; return *this; }
+    FloatSize& operator-=(const FloatSize& sz) { width -= sz.width; height -= sz.height; return *this; }
+    FloatSize& operator/=(const float i) { width /= i; height /= i; return *this; }
+    FloatSize& operator*=(const float i) { width *= i; height *= i; return *this; }
+};
+
 //specific types
 typedef float Tenths;       //relative unit: one tenth of staff interline space
 typedef FloatPoint TPoint;  //point, in Tenths
+typedef FloatSize TSize;    //size, in Tenths
+typedef float LUnits;       //absolute unit (logical unit): one cent of mm
+typedef FloatPoint UPoint;  //point, in LUnits
+typedef FloatSize USize;    //size, in LUnits
 typedef unsigned short int16u;
 
 //------------------------------------------------------------------------------
@@ -74,11 +103,9 @@ struct rgba16
     int16u b;
     int16u a;
 
-    enum base_scale_e
+    enum 
     {
-        base_shift = 16,
-        base_scale = 1 << base_shift,
-        base_mask  = base_scale - 1
+        base_mask  = 255
     };
 
     rgba16() : r(0), g(0), b(0), a(base_mask) {}
@@ -91,6 +118,11 @@ struct rgba16
 
     rgba16(const rgba16& c, unsigned a_) :
         r(c.r), g(c.g), b(c.b), a(int16u(a_)) {}
+
+    bool operator == (rgba16 color)
+    {
+        return r == color.r && g == color.g && b == color.b && a == color.a ;
+    }
 
     bool operator != (rgba16 color)
     {
@@ -110,12 +142,10 @@ struct rgba16
 
     static rgba16 no_color() { return rgba16(0,0,0,0); }
 
-
-
 };
 
 
 }   //namespace lomse
 
-#endif	// __LOMSE__BASIC_H__
+#endif	// __LOMSE_BASIC_H__
 

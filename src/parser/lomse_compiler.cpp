@@ -13,8 +13,6 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -46,7 +44,6 @@ LdpCompiler::LdpCompiler(LdpParser* p, Analyser* a, ModelBuilder* mb, IdAssigner
     , m_pModelBuilder(mb)
     , m_pIdAssigner(ida)
     , m_pFinalTree(NULL)
-    , m_pImDocument(NULL)
 {
 }
 
@@ -56,7 +53,6 @@ LdpCompiler::LdpCompiler(LibraryScope& libraryScope, DocumentScope& documentScop
     , m_pModelBuilder( Injector::inject_ModelBuilder(documentScope) )
     , m_pIdAssigner( documentScope.id_assigner() )
     , m_pFinalTree(NULL)
-    , m_pImDocument(NULL)
 {
 }
 
@@ -72,35 +68,35 @@ LdpCompiler::~LdpCompiler()
     }
 }
 
-ImoDocument* LdpCompiler::compile_file(const std::string& filename)
+InternalModel* LdpCompiler::compile_file(const std::string& filename)
 {
     m_pFinalTree = m_pParser->parse_file(filename);
     m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile(m_pFinalTree);
 }
 
-ImoDocument* LdpCompiler::compile_string(const std::string& source)
+InternalModel* LdpCompiler::compile_string(const std::string& source)
 {
     m_pFinalTree = m_pParser->parse_text(source);
     m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile(m_pFinalTree);
 }
 
-ImoDocument* LdpCompiler::create_empty()
+InternalModel* LdpCompiler::create_empty()
 {
     m_pFinalTree = parse_empty_doc();
     m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile(m_pFinalTree);
 }
 
-ImoDocument* LdpCompiler::create_with_empty_score()
+InternalModel* LdpCompiler::create_with_empty_score()
 {
     m_pFinalTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6)(instrument (musicData)))))");
     m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile(m_pFinalTree);
 }
 
-ImoDocument* LdpCompiler::compile(LdpTree* pParseTree)
+InternalModel* LdpCompiler::compile(LdpTree* pParseTree)
 {
     if (pParseTree->get_root()->is_type(k_score))
     {
@@ -110,9 +106,9 @@ ImoDocument* LdpCompiler::compile(LdpTree* pParseTree)
     else
         m_pFinalTree = pParseTree;
 
-    BasicModel* pBasicModel = m_pAnalyser->analyse_tree(m_pFinalTree);
-    m_pImDocument = m_pModelBuilder->build_model(pBasicModel);
-    return m_pImDocument;
+    InternalModel* IModel = m_pAnalyser->analyse_tree(m_pFinalTree);
+    m_pModelBuilder->build_model(IModel);
+    return IModel;
 }
 
 LdpTree* LdpCompiler::wrap_score_in_lenmusdoc(LdpTree* pParseTree)
@@ -138,18 +134,18 @@ LdpTree* LdpCompiler::parse_empty_doc()
 //LdpElement* LdpCompiler::create_element(const std::string& source)
 //{
 //    SpLdpTree tree = m_pParser->parse_text(source);
-//    m_pBasicModel = m_pAnalyser->analyse_tree(tree);
-//    delete m_pBasicModel;
-//    m_pBasicModel = NULL;
+//    m_IModel = m_pAnalyser->analyse_tree(tree);
+//    delete m_IModel;
+//    m_IModel = NULL;
 //    return tree->get_root();
 //}
 //
-//BasicModel* LdpCompiler::create_basic_model(const std::string& source)
+//InternalModel* LdpCompiler::create_basic_model(const std::string& source)
 //{
 //    SpLdpTree tree = m_pParser->parse_text(source);
-//    m_pBasicModel = m_pAnalyser->analyse_tree(tree);
+//    m_IModel = m_pAnalyser->analyse_tree(tree);
 //    delete tree->get_root();
-//    return m_pBasicModel;
+//    return m_IModel;
 //}
 
 int LdpCompiler::get_num_errors()

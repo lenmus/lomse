@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__IM_NOTE_H__        //to avoid nested includes
-#define __LOMSE__IM_NOTE_H__
+#ifndef __LOMSE_IM_NOTE_H__        //to avoid nested includes
+#define __LOMSE_IM_NOTE_H__
 
 #include "lomse_internal_model.h"
 
@@ -163,5 +163,5 @@ public:
 
 }   //namespace lomse
 
-#endif    // __LOMSE__IM_NOTE_H__
+#endif    // __LOMSE_IM_NOTE_H__
 

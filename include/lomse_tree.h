@@ -24,8 +24,8 @@
 /// @brief Generic classes to build and traverse trees
 ///
 
-#ifndef __LOMSE__TREE_H__
-#define __LOMSE__TREE_H__
+#ifndef __LOMSE_TREE_H__
+#define __LOMSE_TREE_H__
 
 #include <iostream>
 #include <stack>
@@ -494,4 +494,4 @@ typename Tree<T>::depth_first_iterator Tree<T>::insert(depth_first_iterator posi
 
 }   //namespace lomse
 
-#endif      //__LOMSE__TREE_H__
+#endif      //__LOMSE_TREE_H__

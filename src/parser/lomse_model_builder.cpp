@@ -13,8 +13,6 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -23,7 +21,6 @@
 #include "lomse_model_builder.h"
 
 #include "lomse_document.h"
-#include "lomse_document_iterator.h"
 #include "lomse_internal_model.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_basic_model.h"
@@ -39,20 +36,20 @@ namespace lomse
 
 ImObjectsBuilder::ImObjectsBuilder(ostream& reporter)
     : m_reporter(reporter)
-    , m_pBasicModel(NULL)
+    , m_IModel(NULL)
 {
-    if (m_pBasicModel)
-        delete m_pBasicModel;
+    if (m_IModel)
+        delete m_IModel;
 }
 
 ImObjectsBuilder::~ImObjectsBuilder()
 {
 }
 
-ImoDocument* ImObjectsBuilder::create_objects(BasicModel* pBasicModel)
+ImoDocument* ImObjectsBuilder::create_objects(InternalModel* IModel)
 {
-    m_pBasicModel = pBasicModel;
-    return dynamic_cast<ImoDocument*>( pBasicModel->get_root() );
+    m_IModel = IModel;
+    return dynamic_cast<ImoDocument*>( IModel->get_root() );
 }
 
 
@@ -70,10 +67,10 @@ ModelBuilder::~ModelBuilder()
 {
 }
 
-ImoDocument* ModelBuilder::build_model(BasicModel* pBasicModel)
+ImoDocument* ModelBuilder::build_model(InternalModel* IModel)
 {
     ImObjectsBuilder imb(m_reporter);
-    ImoDocument* pDoc = imb.create_objects(pBasicModel);
+    ImoDocument* pDoc = imb.create_objects(IModel);
     int numContent = pDoc->get_num_content_items();
     for (int i = 0; i < numContent; i++)
         structurize( pDoc->get_content_item(i) );
@@ -81,7 +78,7 @@ ImoDocument* ModelBuilder::build_model(BasicModel* pBasicModel)
 }
 
 
-//void ModelBuilder::update_model(LdpTree* pTree)
+//void ModelBuilder::update_model(InternalModel* IModel)
 //{
 //    m_pTree = pTree;
 //    DocIterator it(m_pTree);
@@ -100,17 +97,6 @@ ImoDocument* ModelBuilder::build_model(BasicModel* pBasicModel)
 //    }
 //}
 
-//void ModelBuilder::structurize(DocIterator it)
-//{
-//    //in future this should invoke a factory object
-//
-//    if ((*it)->is_type(k_score))
-//    {
-//        ColStaffObjsBuilder builder(m_pTree);
-//        builder.build(*it);
-//    }
-//}
-
 void ModelBuilder::structurize(ImoObj* pImo)
 {
     //in future this should invoke a factory object
@@ -118,7 +104,7 @@ void ModelBuilder::structurize(ImoObj* pImo)
     ImoScore* pScore = dynamic_cast<ImoScore*>(pImo);
     if (pScore)
     {
-        ColStaffObjsBuilder builder(m_pTree);
+        ColStaffObjsBuilder builder;
         builder.build(pScore);
     }
 }

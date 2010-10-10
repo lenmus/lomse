@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__VISITOR_H__
-#define __LOMSE__VISITOR_H__
+#ifndef __LOMSE_VISITOR_H__
+#define __LOMSE_VISITOR_H__
 
 namespace lomse
 {
@@ -73,4 +73,4 @@ public:
 } //namespace lomse
 
 
-#endif      //__LOMSE__VISITOR_H__
+#endif      //__LOMSE_VISITOR_H__

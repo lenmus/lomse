@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__COMPILER_H__
-#define __LOMSE__COMPILER_H__
+#ifndef __LOMSE_COMPILER_H__
+#define __LOMSE_COMPILER_H__
 
 
 #include "lomse_ldp_elements.h"
@@ -38,7 +38,7 @@ class ModelBuilder;
 class DocumentScope;
 class LibraryScope;
 class IdAssigner;
-class BasicModel;
+class InternalModel;
 class ImoDocument;
 
 
@@ -54,29 +54,28 @@ protected:
     ModelBuilder*   m_pModelBuilder;
     IdAssigner*     m_pIdAssigner;
     LdpTree*        m_pFinalTree;
-    ImoDocument*    m_pImDocument;
 
 public:
     LdpCompiler(LibraryScope& libraryScope, DocumentScope& documentScope);
     LdpCompiler(LdpParser* p, Analyser* a, ModelBuilder* mb, IdAssigner* ida);   //for testing: direct inyection of dependencies
     ~LdpCompiler();
 
-    ImoDocument* compile_file(const std::string& filename);
-    ImoDocument* compile_string(const std::string& source);
-    ImoDocument* create_empty();
-    ImoDocument* create_with_empty_score();
+    InternalModel* compile_file(const std::string& filename);
+    InternalModel* compile_string(const std::string& source);
+    InternalModel* create_empty();
+    InternalModel* create_with_empty_score();
 
     int get_num_errors();
 //    LdpElement* create_element(const std::string& source);
-//    BasicModel* create_basic_model(const std::string& source);
-//    inline BasicModel* get_outcome() { return m_pBasicModel; }
+//    InternalModel* create_basic_model(const std::string& source);
+//    inline InternalModel* get_outcome() { return m_IModel; }
 //
 //    //access to Ldp tree result
 //    LdpTree* get_final_tree() { return m_pFinalTree; }
 
 
 protected:
-    ImoDocument* compile(LdpTree* pParseTree);
+    InternalModel* compile(LdpTree* pParseTree);
     LdpTree* wrap_score_in_lenmusdoc(LdpTree* pParseTree);
     LdpTree* parse_empty_doc();
 
@@ -85,4 +84,4 @@ protected:
 
 }   //namespace lomse
 
-#endif      //__LOMSE__COMPILER_H__
+#endif      //__LOMSE_COMPILER_H__

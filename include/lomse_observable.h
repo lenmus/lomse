@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__OBSERVABLE_H__
-#define __LOMSE__OBSERVABLE_H__
+#ifndef __LOMSE_OBSERVABLE_H__
+#define __LOMSE_OBSERVABLE_H__
 
 #include <list>
 
@@ -75,4 +75,4 @@ protected:
 
 }   //namespace lomse
 
-#endif      //__LOMSE__OBSERVABLE_H__
+#endif      //__LOMSE_OBSERVABLE_H__

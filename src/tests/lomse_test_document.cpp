@@ -18,7 +18,7 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifdef _LM_DEBUG_
+#ifdef _LOMSE_DEBUG
 
 #include <UnitTest++.h>
 #include <sstream>
@@ -31,7 +31,6 @@
 #include "lomse_compiler.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
-#include "lomse_document_iterator.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -60,7 +59,7 @@ public:
     {
         m_pLibraryScope = new LibraryScope(cout);
         m_pLdpFactory = m_pLibraryScope->ldp_factory();
-        m_scores_path = LML_TEST_SCORES_PATH;
+        m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
 
     ~DocumentTestFixture()    //TearDown fixture
@@ -80,8 +79,8 @@ SUITE(DocumentTest)
     {
         Document doc(*m_pLibraryScope);
         doc.create_empty();
-        ImoDocument* pModel = doc.get_model();
-        CHECK( pModel != NULL );
+        ImoDocument* pImoDoc = doc.get_imodoc();
+        CHECK( pImoDoc != NULL );
         CHECK( doc.is_modified() == false );
         //cout << doc.to_string() << endl;
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content))" );
@@ -91,8 +90,8 @@ SUITE(DocumentTest)
     {
         Document doc(*m_pLibraryScope);
         doc.from_file(m_scores_path + "00011-empty-fill-page.lms");
-        ImoDocument* pModel = doc.get_model();
-        CHECK( pModel != NULL );
+        ImoDocument* pImoDoc = doc.get_imodoc();
+        CHECK( pImoDoc != NULL );
         CHECK( doc.is_modified() == false );
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData)))))" );
@@ -103,8 +102,8 @@ SUITE(DocumentTest)
         Document doc(*m_pLibraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q))))))");
-        ImoDocument* pModel = doc.get_model();
-        CHECK( pModel != NULL );
+        ImoDocument* pImoDoc = doc.get_imodoc();
+        CHECK( pImoDoc != NULL );
         CHECK( doc.is_modified() == false );
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
@@ -132,8 +131,8 @@ SUITE(DocumentTest)
     {
         Document doc(*m_pLibraryScope);
         doc.create_with_empty_score();
-        ImoDocument* pModel = doc.get_model();
-        CHECK( pModel != NULL );
+        ImoDocument* pImoDoc = doc.get_imodoc();
+        CHECK( pImoDoc != NULL );
         CHECK( doc.is_modified() == false );
         ImoScore* pScore = doc.get_score();
         CHECK( pScore != NULL );
@@ -712,5 +711,5 @@ SUITE(DocumentTest)
 
 };
 
-#endif  // _LM_DEBUG_
+#endif  // _LOMSE_DEBUG
 

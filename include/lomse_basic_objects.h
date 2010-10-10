@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__BASIC_OBJECTS_H__        //to avoid nested includes
-#define __LOMSE__BASIC_OBJECTS_H__
+#ifndef __LOMSE_BASIC_OBJECTS_H__        //to avoid nested includes
+#define __LOMSE_BASIC_OBJECTS_H__
 
 #include <string>
 #include <list>
@@ -375,5 +375,5 @@ public:
 
 }   //namespace lomse
 
-#endif    // __LOMSE__BASIC_OBJECTS_H__
+#endif    // __LOMSE_BASIC_OBJECTS_H__
 

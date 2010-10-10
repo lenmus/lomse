@@ -26,8 +26,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__SMART_POINTER_H__
-#define __LOMSE__SMART_POINTER_H__
+#ifndef __LOMSE_SMART_POINTER_H__
+#define __LOMSE_SMART_POINTER_H__
 
 #include <cassert>
 
@@ -154,4 +154,4 @@ public:
 
 }   //namespace lomse
 
-#endif      //__LOMSE__SMART_POINTER_H__
+#endif      //__LOMSE_SMART_POINTER_H__

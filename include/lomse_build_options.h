@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__BUILDOPTIONS_H__
-#define __LOMSE__BUILDOPTIONS_H__
+#ifndef __LOMSE_BUILDOPTIONS_H__
+#define __LOMSE_BUILDOPTIONS_H__
 
 //==================================================================
 //
@@ -54,5 +54,5 @@
 
 #endif
 
-#endif	// __LOMSE__BUILDOPTIONS_H__
+#endif	// __LOMSE_BUILDOPTIONS_H__
 

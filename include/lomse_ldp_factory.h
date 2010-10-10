@@ -26,8 +26,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__LDP_FACTORY_H__
-#define __LOMSE__LDP_FACTORY_H__
+#ifndef __LOMSE_LDP_FACTORY_H__
+#define __LOMSE_LDP_FACTORY_H__
 
 #include <string>
 #include <map>
@@ -95,4 +95,4 @@ public:
 
 }   //namespace lomse
 
-#endif      //__LOMSE__LDP_FACTORY_H__
+#endif      //__LOMSE_LDP_FACTORY_H__

@@ -33,14 +33,19 @@ namespace lomse
 //forward declarations
 class ImoAuxObj;
 class ImoBezierInfo;
+class ImoCursorInfo;
+class ImoFontInfo;
 class ImoInstrGroup;
 class ImoInstrument;
 class ImoMidiInfo;
 class ImoObj;
 class ImoOptionInfo;
+class ImoPageInfo;
 class ImoStaffObj;
 class ImoSystemInfo;
-class ImoTextString;
+class ImoScoreText;
+class ImoScoreTitle;
+class ImoTextStyleInfo;
 
 
 //Linker: responsible for code generation phase, step 1: links ImObjs in the
@@ -61,11 +66,16 @@ protected:
 
     ImoObj* add_instruments_group(ImoInstrGroup* pGrp);
     ImoObj* add_option(ImoOptionInfo* pOpt);
+    ImoObj* add_page_info(ImoPageInfo* pPI);
     ImoObj* add_system_info(ImoSystemInfo* pSI);
     ImoObj* add_bezier(ImoBezierInfo* pBezier);
+    ImoObj* add_cursor(ImoCursorInfo* pCursor);
     ImoObj* add_midi_info(ImoMidiInfo* pInfo);
     ImoObj* add_instrument(ImoInstrument* pInstrument);
-    ImoObj* add_text(ImoTextString* pText);
+    ImoObj* add_text(ImoScoreText* pText);
+    ImoObj* add_title(ImoScoreTitle* pTitle);
+    ImoObj* add_font_info(ImoFontInfo* pFont);
+    ImoObj* add_text_style_info(ImoTextStyleInfo* pStyle);
     ImoObj* add_staffobj(ImoStaffObj* pSO);
     ImoObj* add_auxobj(ImoAuxObj* pAuxObj);
     ImoObj* add_child(int parentType, ImoObj* pImo);

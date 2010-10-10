@@ -13,8 +13,6 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -32,6 +30,7 @@
 #include "lomse_parser.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
+#include "lomse_im_figured_bass.h"
 #include "lomse_ldp_elements.h"
 #include "lomse_basic_model.h"
 #include "lomse_basic_objects.h"
@@ -312,6 +311,7 @@ protected:
     void add_to_model(ImoObj* pImo);
 
     //auxiliary
+    inline long get_node_id() { return m_pAnalysedNode->get_id(); }
     bool contains(ELdpElement type, ELdpElement* pValid, int nValid);
     void error_and_remove_invalid_param();
     void error_and_remove_element(const string& msg);
@@ -368,7 +368,7 @@ protected:
         return !((iss >> std::dec >> nNumber).fail());
     }
 
-    long get_long_number(long nDefault=0L)
+    long get_long_value(long nDefault=0L)
     {
         string number = m_pParamToAnalyse->get_value();
         long nNumber;
@@ -388,9 +388,9 @@ protected:
             return nNumber;
     }
 
-    int get_integer_number(int nDefault)
+    int get_integer_value(int nDefault)
     {
-        return static_cast<int>( get_long_number(static_cast<int>(nDefault)) );
+        return static_cast<int>( get_long_value(static_cast<int>(nDefault)) );
     }
 
     bool is_float_value()
@@ -401,7 +401,7 @@ protected:
         return !((iss >> std::dec >> rNumber).fail());
     }
 
-    float get_float_number(float rDefault=0.0f)
+    float get_float_value(float rDefault=0.0f)
     {
         string number = m_pParamToAnalyse->get_value();
         float rNumber;
@@ -452,7 +452,146 @@ protected:
     {
         return m_pParamToAnalyse->get_value();
     }
+    
+    rgba16 get_color_value()
+    {
+        ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
+        ImoColorDto* pColor = dynamic_cast<ImoColorDto*>( pImo );
+        rgba16 color;
+        if (pColor)
+            color = pColor->get_color();
+        delete pImo;
+        return color;
+    }
+    
+    TPoint get_point_value()
+    {
+        ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
+        ImoPointDto* pPoint = dynamic_cast<ImoPointDto*>( pImo );
+        TPoint point;
+        if (pPoint)
+            point = pPoint->get_point();
+        delete pImo;
+        return point;
+    }
+    
+    TSize get_size_value()
+    {
+        ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
+        ImoSizeDto* pSize = dynamic_cast<ImoSizeDto*>( pImo );
+        TSize size;
+        if (pSize)
+            size = pSize->get_size();
+        delete pImo;
+        return size;
+    }
+    
+    float get_location_value()
+    {
+        m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+        return get_float_value(0.0f);
+    }
 
+    float get_width_value(float rDefault=1.0f)
+    {
+        m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+        return get_float_value(rDefault);
+    }
+
+    float get_height_value(float rDefault=1.0f)
+    {
+        m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+        return get_float_value(rDefault);
+    }
+
+    EHAlign get_alignment_value(EHAlign defaultValue)
+    {
+        const std::string& value = m_pParamToAnalyse->get_value();
+        if (value == "left")
+            return k_halign_left;
+        else if (value == "right")
+            return k_halign_right;
+        else if (value == "center")
+            return k_halign_center;
+        else
+        {
+            report_msg(m_pParamToAnalyse->get_line_number(),
+                    "Invalid alignment value '" + value + "'. Assumed 'center'.");
+            return defaultValue;
+        }
+    }
+
+    ImoTextStyleInfo* get_text_style_value()
+    {
+        m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+        string styleName = get_string_value();
+        ImoTextStyleInfo* pStyle = NULL;
+
+        if (m_pAnchor && m_pAnchor->is_score())
+        {
+            ImoScore* pScore = dynamic_cast<ImoScore*>(m_pAnchor);
+            pStyle = pScore->get_style_info(styleName);
+            if (!pStyle)
+            {
+                report_msg(m_pParamToAnalyse->get_line_number(),
+                        "Style '" + styleName + "' is not defined. Default style will be used.");
+                pStyle = pScore->get_default_style_info();
+            }
+        }
+
+        return pStyle;
+    }
+
+    ELineStyle get_line_style_value()
+    {
+        m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+        const std::string& value = m_pParamToAnalyse->get_value();
+        if (value == "none")
+            return k_line_none;
+        else if (value == "dot")
+            return k_line_dot;
+        else if (value == "solid")
+            return k_line_solid;
+        else if (value == "longDash")
+            return k_line_long_dash;
+        else if (value == "shortDash")
+            return k_line_short_dash;
+        else if (value == "dotDash")
+            return k_line_dot_dash;
+        else
+        {
+            report_msg(m_pAnalysedNode->get_line_number(),
+                "Element 'lineStyle': Invalid value '" + value
+                + "'. Replaced by 'solid'." );
+            return k_line_solid;
+        }
+    }
+
+    ELineCap get_line_cap_value()
+    {
+        m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+        const std::string& value = m_pParamToAnalyse->get_value();
+        if (value == "none")
+            return k_cap_none;
+        else if (value == "arrowhead")
+            return k_cap_arrowhead;
+        else if (value == "arrowtail")
+            return k_cap_arrowtail;
+        else if (value == "circle")
+            return k_cap_circle;
+        else if (value == "square")
+            return k_cap_square;
+        else if (value == "diamond")
+            return k_cap_diamond;
+        else
+        {
+            report_msg(m_pAnalysedNode->get_line_number(),
+                "Element 'lineCap': Invalid value '" + value
+                + "'. Replaced by 'none'." );
+            return k_cap_none;
+        }
+    }
+   
     void check_visible(ImoComponentObj* pCO)
     {
         string value = m_pParamToAnalyse->get_value();
@@ -517,6 +656,57 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
+//@ <anchorLine> = (anchorLine <destination-point>[<lineStyle>][<color>][<width>]
+//@                            [<lineCapEnd>])
+//@ <destination-point> = <location>    in Tenths
+//@     i.e.: (anchorLine (dx value)(dy value)(lineStyle value)(color value)(width value))
+//@
+
+class AnchorLineAnalyser : public ElementAnalyser
+{
+public:
+    AnchorLineAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                       ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoLineInfo line;
+        line.set_start_point( TPoint(0.0f, 0.0f) );
+        line.set_start_edge(k_edge_normal);
+        line.set_start_style(k_cap_none);
+        line.set_end_edge(k_edge_normal);
+
+        // <destination-point> = <dx><dy>
+        TPoint point;
+        if (get_mandatory(k_dx))
+            point.x = get_location_value();
+        if (get_mandatory(k_dy))
+            point.y = get_location_value();
+        line.set_end_point( point );
+        
+        // [<lineStyle>]
+        if (get_optional(k_lineStyle))
+            line.set_line_style( get_line_style_value() );
+        
+        // [<color>])
+        if (get_optional(k_color))
+            line.set_color( get_color_value() );
+        
+        // [<width>]
+        if (get_optional(k_width))
+            line.set_width( get_width_value(1.0f) );
+
+        // [<lineCapEnd>])
+        if (get_optional(k_lineCapEnd))
+            line.set_end_style( get_line_cap_value() );
+
+        add_to_model( new ImoLineInfo(line) );
+    }
+
+};
+
+//@-------------------------------------------------------------------------------------
 //@ ImoBarline StaffObj
 //@ <barline> = (barline) | (barline <type>[<visible>][<location>])
 //@ <type> = label: { start | end | double | simple | startRepetition |
@@ -542,7 +732,7 @@ public:
 
         error_if_more_elements();
 
-        add_to_model( new ImoBarline(dto) );
+        add_to_model( new ImoBarline(dto, get_node_id()) );
     }
 
 protected:
@@ -602,7 +792,7 @@ public:
 
         // num
         if (get_optional(k_number))
-            pInfo->set_beam_number( get_integer_number(0) );
+            pInfo->set_beam_number( get_integer_value(0) );
         else
         {
             error_and_remove_element("Missing or invalid beam number. Beam ignored.");
@@ -696,7 +886,7 @@ public:
     void set_x_in_point(int i, ImoBezierInfo* pBezier)
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-        float value = get_float_number(0.0f);
+        float value = get_float_value(0.0f);
         TPoint& point = pBezier->get_point(i);
         point.x = value;
     }
@@ -704,10 +894,56 @@ public:
     void set_y_in_point(int i, ImoBezierInfo* pBezier)
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-        float value = get_float_number(0.0f);
+        float value = get_float_value(0.0f);
         TPoint& point = pBezier->get_point(i);
         point.y = value;
     }
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <border> = (border <width><lineStyle><color>)
+//@     i.e.: (border (width 2.5)(lineStyle solid)(color #ff0000))
+
+class BorderAnalyser : public ElementAnalyser
+{
+public:
+    BorderAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                   ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoBorderDto border;
+
+        // <width>
+        if (get_mandatory(k_width))
+            border.set_width( get_width_value(1.0f) );
+        
+        // <lineStyle>
+        if (get_mandatory(k_lineStyle))
+            border.set_style( get_line_style_value() );
+       
+        // <color>
+        if (get_mandatory(k_color))
+            border.set_color( get_color_value() );
+
+        add_to_model( new ImoBorderDto(border) );
+    }
+
+protected:
+
+        void set_box_border(ImoBoxInfo& box)
+        {
+            ImoObj* pImo = proceed(k_border, NULL);
+            if (pImo)
+            {
+                ImoBorderDto* pBorder = dynamic_cast<ImoBorderDto*>(pImo);
+                if (pBorder)
+                    box.set_border(pBorder);
+                delete pImo;
+            }
+        }
+
 };
 
 //@-------------------------------------------------------------------------------------
@@ -736,10 +972,22 @@ public:
             }
         }
 
+        add_notes_to_chord(pAuxMD);
         add_to_music_data(pAuxMD);
     }
 
 protected:
+
+    void add_notes_to_chord(ImoMusicData* pChordNotes)
+    {
+        ImoObj::children_iterator it;
+        int i = 0;
+        for (it = pChordNotes->begin(); it != pChordNotes->end(); ++it, ++i)
+        {
+            ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+            pNote->set_in_chord(i > 0);
+        }
+    }
 
     void add_to_music_data(ImoMusicData* pChordNotes)
     {
@@ -759,7 +1007,6 @@ protected:
                 ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
                 ImoNote* pClone = new ImoNote();
                 *pClone = *pNote;
-                pClone->set_in_chord(i > 0);
                 pMD->append_child(pClone);
             }
         }
@@ -768,7 +1015,6 @@ protected:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ ImoClef StaffObj
 //@ <clef> = (clef <type>[<staffNum>][<visible>][<location>] )
 //@ <type> = label: { G | F4 | F3 | C1 | C2 | C3 | C4 | percussion |
 //@                   C3 | C5 | F5 | G1 | 8_G | G_8 | 8_F4 | F4_8 |
@@ -858,7 +1104,6 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ property
 //@ <color> = (color <rgba>}
 //@ <rgba> = label: { #rrggbb | #rrggbbaa }
 
@@ -884,7 +1129,7 @@ protected:
 
     bool set_color()
     {
-        ImoColorInfo* pColor = new ImoColorInfo();
+        ImoColorDto* pColor = new ImoColorDto();
         m_pAnalysedNode->set_imo(pColor);
         std::string value = get_string_value();
         pColor->get_from_string(value);
@@ -924,7 +1169,6 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ ImoControl StaffObj
 //@ <newSystem> = (newSystem}
 
 class ControlAnalyser : public ElementAnalyser
@@ -941,7 +1185,83 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ ImoFermata StaffObj
+//@ <cursor> = (cursor <instrNumber><staffNumber><timePos><objID>)
+//@ <instrNumber> = integer number (0..n-1)
+//@ <staffNumber> = integer number (0..n-1)
+//@ <timePos> = float number
+//@ <objID> = integer number
+//@ 
+
+class CursorAnalyser : public ElementAnalyser
+{
+public:
+    CursorAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                   ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoCursorInfo* pCursor = new ImoCursorInfo();
+
+        // <instrNumber>
+        if (get_mandatory(k_number))
+            pCursor->set_instrument( get_integer_value(0) );
+        
+        // <staffNumber>
+        if (get_mandatory(k_number))
+            pCursor->set_staff( get_integer_value(0) );
+        
+        // <timePos>
+        if (get_mandatory(k_number))
+            pCursor->set_time( get_float_value(0.0f) );
+        
+        // <objID>
+        if (get_mandatory(k_number))
+            pCursor->set_id( get_long_value(-1L) );
+        
+        add_to_model(pCursor);
+    }
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <defineStyle> = (defineStyle <name><font><color>)
+//@ 
+//@ Examples:
+//@     (defineStyle "Composer" (font "Times New Roman" 12pt normal) (color #000000))
+//@     (defineStyle "Instruments" (font "Times New Roman" 14pt bold) (color #000000))
+
+class DefineStyleAnalyser : public ElementAnalyser
+{
+public:
+    DefineStyleAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                        ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoTextStyleInfo dto;
+
+        //<name>
+        if (get_mandatory(k_string))
+            dto.set_name( get_string_value() );
+        else
+            return;
+
+        //<font>
+        analyse_mandatory(k_font, &dto);
+
+        //<color>
+        if (get_mandatory(k_color))
+            dto.set_color( get_color_value() );
+
+        error_if_more_elements();
+
+        add_to_model( new ImoTextStyleInfo(dto) );
+    }
+
+};
+
+//@-------------------------------------------------------------------------------------
 //@ <fermata> = (fermata <placement>[<componentOptions>*])
 //@ <placement> = { above | below }
 
@@ -986,11 +1306,14 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
-//@  <figuredBass> = (figuredBass <figuredBassSymbols>[<parenthesis>][<fbline>]
-//@                               [<componentOptions>*] )
-//@  <parenthesis> = (parenthesis { yes | no })  default: no
+//@ <figuredBass> = (figuredBass <figuredBassSymbols>[<parenthesis>][<fbline>]
+//@                              [<componentOptions>*] )
+//@ <parenthesis> = (parenthesis { yes | no })  default: no
 //@
-//@  <figuredBassSymbols> = an string.
+//@ <fbline> = (fbline <numLine> start <startPoint><endPoint><width><color>)
+//@ <fbline> = (fbline num {start | stop} [<startPoint>][<endPoint>][<width>][<color>])
+
+//@ <figuredBassSymbols> = an string.
 //@        It is formed by concatenation of individual strings for each interval.
 //@        Each interval string is separated by a blank space from the previous one.
 //@        And it can be enclosed in parenthesis.
@@ -1000,13 +1323,17 @@ public:
 //@            prefix = { + | - | # | b | = | x | bb | ## }
 //@            suffix = { + | - | # | b | = | x | bb | ## | / | \ }
 //@
-//@  examples:
+//@ examples:
 //@
-//@    b6              (figuredBass "b6 b")
-//@    b
-//@
-//@    6               (figuredBass "6 (3)")
-//@   (3)
+//@        b6              (figuredBass "b6 b")
+//@        b
+//@        
+//@        7 ________      (figuredBass "7 5 2" (fbline 15 start))
+//@        5 
+//@        2
+//@        
+//@        6               (figuredBass "6 (3)")
+//@        (3)
 //@
 
 class FiguredBassAnalyser : public ElementAnalyser
@@ -1018,23 +1345,39 @@ public:
 
     void do_analysis()
     {
-        //DtoFiguredBass dto;
 
         // <figuredBassSymbols> (string)
         if (get_mandatory(k_string))
-        {}
+        {
+            ImoFiguredBassInfo info( get_string_value() );
 
-        add_to_model( new ImoFiguredBass() );
+            // [<parenthesis>]
+            if (get_optional(k_parenthesis))
+            {
+                //TODO: Not yet necessary. Not implemented in LenMus
+            }
+            
+            // [<fbline>]
+            if (get_optional(k_fbline))
+            {}
+            
+            // [<componentOptions>*]
+            //analyse_component_options(dto);
+
+            error_if_more_elements();
+
+            add_to_model( new ImoFiguredBass(info) );
+        }
     }
 };
 
 ////    //get figured bass string and split it into components
-////    wxString sData = GetNodeName(pNode->GetParameter(1));
-////    lmFiguredBassData oFBData(sData);
-////    if (oFBData.GetError() != _T(""))
+////    std::string sData = GetNodeName(pNode->GetParameter(1));
+////    ImoFiguredBassInfo oFBData(sData);
+////    if (oFBData.get_error_msg() != "")
 ////    {
-////        AnalysisError(pNode, oFBData.GetError());
-////        return (lmFiguredBass*)NULL;    //error
+////        AnalysisError(pNode, oFBData.get_error_msg());
+////        return (ImoFiguredBass*)NULL;    //error
 ////    }
 ////
 ////    //initialize options with default values
@@ -1050,19 +1393,19 @@ public:
 ////    for(iP=2; iP <= nNumParms; ++iP)
 ////    {
 ////        lmLDPNode* pX = pNode->GetParameter(iP);
-////        wxString sName = GetNodeName(pX);
-////        if (sName == _T("parenthesis"))
+////        std::string sName = GetNodeName(pX);
+////        if (sName == "parenthesis")
 ////            ;   //TODO
-////        else if (sName == _T("fbline"))     //start/end of figured bass line
+////        else if (sName == "fbline")     //start/end of figured bass line
 ////        {
 ////            if (nFBL > 1)
-////                AnalysisError(pX, _T("[Element '%s'. More than two 'fbline'. Ignored."),
+////                AnalysisError(pX, "[Element '%s'. More than two 'fbline'. Ignored.",
 ////                            sElmName.c_str() );
 ////            else
 ////                pFBLineInfo[nFBL++] = AnalyzeFBLine(pX, pVStaff);
 ////        }
 ////        else
-////            AnalysisError(pX, _T("[Element '%s'. Invalid parameter '%s'. Ignored."),
+////            AnalysisError(pX, "[Element '%s'. Invalid parameter '%s'. Ignored.",
 ////                          sElmName.c_str(), sName.c_str() );
 ////    }
 ////
@@ -1073,7 +1416,7 @@ public:
 ////	oOptTags.AnalyzeCommonOptions(pNode, iP, pVStaff, NULL, NULL, &tPos);
 ////
 ////	//create the Figured Bass object
-////    lmFiguredBass* pFB = pVStaff->AddFiguredBass(&oFBData, nId);
+////    ImoFiguredBass* pFB = pVStaff->AddFiguredBass(&oFBData, nId);
 ////	pFB->SetUserLocation(tPos);
 ////
 ////    //save cursor data
@@ -1103,7 +1446,98 @@ public:
 ////}
 
 //@-------------------------------------------------------------------------------------
-//@ ImoGoBackFwd StaffObj
+//@ <font> = (font <name> <size> <font-style>)
+//@ <name> = string   i.e. "Times New Roman", "Trebuchet"
+//@ <size> = num      in points
+//@ <font-style> = { "bold" | "normal" | "italic" | "bold-italic" }
+//@
+//@ Compatibility 1.5
+//@     size is a number followed by 'pt'. i.e.: 12pt
+
+
+class FontAnalyser : public ElementAnalyser
+{
+public:
+    FontAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                 ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoFontInfo font;
+
+        //<name> = string
+        if (get_mandatory(k_string))
+            font.name = get_string_value();
+        
+        //<size> = num
+        if (get_optional(k_number))
+            font.size = get_integer_value(8);
+        //<size>. Compatibility 1.5
+        else if (get_mandatory(k_label))
+            font.size = get_font_size();
+
+        //<font-style>
+        if (get_mandatory(k_label))
+            set_font_style_weight(font);
+
+        add_to_model( new ImoFontInfo(font) );
+    }
+
+    int get_font_size()
+    {
+        const string& value = m_pParamToAnalyse->get_value();
+        int size = static_cast<int>(value.size()) - 2;
+        string points = value.substr(0, size);
+        string number = m_pParamToAnalyse->get_value();
+        long nNumber;
+        std::istringstream iss(number);
+        if ((iss >> std::dec >> nNumber).fail())
+        {
+            stringstream replacement;
+            report_msg(m_pParamToAnalyse->get_line_number(),
+                "Invalid size '" + value + "'. Replaced by '10'.");
+            return 10;
+        }
+        else
+            return nNumber;
+    }
+
+    void set_font_style_weight(ImoFontInfo& font)
+    {
+        const string& value = m_pParamToAnalyse->get_value();
+        if (value == "bold")
+        {
+            font.weight = ImoFontInfo::k_bold;
+            font.style = ImoFontInfo::k_normal;
+        }
+        else if (value == "normal")
+        {
+            font.weight = ImoFontInfo::k_normal;
+            font.style = ImoFontInfo::k_normal;
+        }
+        else if (value == "italic")
+        {
+            font.weight = ImoFontInfo::k_normal;
+            font.style = ImoFontInfo::k_italic;
+        }
+        else if (value == "bold-italic")
+        {
+            font.weight = ImoFontInfo::k_bold;
+            font.style = ImoFontInfo::k_italic;
+        }
+        else
+        {
+            report_msg(m_pParamToAnalyse->get_line_number(),
+                "Unknown font style '" + value + "'. Replaced by 'normal'.");
+            font.weight = ImoFontInfo::k_normal;
+            font.style = ImoFontInfo::k_normal;
+        }
+    }
+
+};
+
+//@-------------------------------------------------------------------------------------
 //@ <goBack> = (goBack <timeShift>)
 //@ <goFwd> = (goFwd <timeShift>)
 //@ <timeShift> = { start | end | <number> | <duration> }
@@ -1323,7 +1757,7 @@ protected:
 
     bool set_instrument(ImoMidiInfo& dto)
     {
-        int value = get_integer_number(0);
+        int value = get_integer_value(0);
         if (value < 1 || value > 256)
             return false;   //error
         dto.set_instrument(value-1);
@@ -1332,7 +1766,7 @@ protected:
 
     bool set_channel(ImoMidiInfo& dto)
     {
-        int value = get_integer_number(0);
+        int value = get_integer_value(0);
         if (value < 1 || value > 16)
             return false;   //error
         dto.set_channel(value-1);
@@ -1412,7 +1846,7 @@ protected:
             //sNumStaves.ToLong(&nNumStaves);
             //if (nNumStaves > lmMAX_STAFF)
             //{
-            //    AnalysisError(pX, _T("Program limit reached: the number of staves per instrument must not be greater than %d. Please inform Lomse developers."),
+            //    AnalysisError(pX, "Program limit reached: the number of staves per instrument must not be greater than %d. Please inform Lomse developers.",
             //                  lmMAX_STAFF);
             //    nNumStaves = lmMAX_STAFF;
             //}
@@ -1423,7 +1857,6 @@ protected:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ ImoKeySignature StaffObj
 //@ <key> = (key <type>[<staffobjOptions>*] )
 //@ <type> = label: { C | G | D | A | E | B | F+ | C+ | C- | G- | D- | A- |
 //@                   E- | B- | F | a | e | b | f+ | c+ | g+ | d+ | a+ | a- |
@@ -1546,7 +1979,7 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ <lenmusdoc> = (lenmusdoc <vers> <content>)
+//@ <lenmusdoc> = (lenmusdoc <vers>[<cursor>]<content>)
 
 class LenmusdocAnalyser : public ElementAnalyser
 {
@@ -1565,6 +1998,9 @@ public:
             pDoc = new ImoDocument(version);
         }
 
+        // [<cursor>]
+        analyse_optional(k_cursor, pDoc);
+
         // <content>
         analyse_mandatory(k_content, pDoc);
 
@@ -1579,6 +2015,66 @@ protected:
     {
         return m_pParamToAnalyse->get_parameter(1)->get_value();
     }
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <line> = (line <startPoint><endPoint>[<width>][<color>]
+//@                [<lineStyle>][<startCap>][<endCap>])
+//@ <startPoint> = (startPoint <location>)      (coordinates in tenths)
+//@ <endPoint> = (endPoint <location>)      (coordinates in tenths)
+//@ <lineStyle> = (lineStyle { none | solid | longDash | shortDash | dot | dotDash } )
+//@ <startCap> = (lineCapStart <capType>)
+//@ <endCap> = (lineCapEnd <capType>)
+//@ <capType> = label: { none | arrowhead | arrowtail | circle | square | diamond }
+//@
+//@ Example:
+//@     (line (startPoint (dx 5.0)(dy 5.0)) (endPoint (dx 80.0)(dy -10.0))
+//@           (width 1.0)(color #000000)(lineStyle solid)
+//@           (lineCapStart arrowhead)(lineCapEnd none) )
+//@
+
+class LineAnalyser : public ElementAnalyser
+{
+public:
+    LineAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                 ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoLineInfo line;
+
+        // <startPoint>
+        if (get_mandatory(k_startPoint))
+            line.set_start_point( get_point_value() );
+
+        // <endPoint>
+        if (get_mandatory(k_endPoint))
+            line.set_end_point( get_point_value() );
+
+        // [<width>]
+        if (get_optional(k_width))
+            line.set_width( get_width_value(1.0f) );
+
+        // [<color>])
+        if (get_optional(k_color))
+            line.set_color( get_color_value() );
+
+        // [<lineStyle>]
+        if (get_optional(k_lineStyle))
+            line.set_line_style( get_line_style_value() );
+
+        // [<startCap>]
+        if (get_optional(k_lineCapStart))
+            line.set_start_style( get_line_cap_value() );
+
+        // [<endCap>]
+        if (get_optional(k_lineCapEnd))
+            line.set_end_style( get_line_cap_value() );
+
+        add_to_model( new ImoLine(line) );
+    }
+
 };
 
 //@-------------------------------------------------------------------------------------
@@ -1614,7 +2110,7 @@ public:
             if (get_optional(k_number))
             {
                 // case 1: <NoteType><TicksPerMinute>
-                dto.set_ticks_per_minute( get_integer_number(60) );
+                dto.set_ticks_per_minute( get_integer_value(60) );
                 dto.set_mark_type(ImoMetronomeMark::k_note_value);
             }
             else if (get_optional(k_label))
@@ -1638,7 +2134,7 @@ public:
         else if (get_optional(k_number))
         {
             // case 3: <TicksPerMinute>
-            dto.set_ticks_per_minute( get_integer_number(60) );
+            dto.set_ticks_per_minute( get_integer_value(60) );
             dto.set_mark_type(ImoMetronomeMark::k_value);
         }
         else
@@ -1694,8 +2190,9 @@ public:
         {
             if (! (analyse_optional(k_note, pMD)
                    || analyse_optional(k_rest, pMD)
-                   || analyse_optional(k_barline, pMD)
+                   || analyse_optional(k_na, pMD)
                    || analyse_optional(k_chord, pMD)
+                   || analyse_optional(k_barline, pMD)
                    || analyse_optional(k_clef, pMD)
                    || analyse_optional(k_figuredBass, pMD)
                    || analyse_optional(k_graphic, pMD)
@@ -1782,7 +2279,7 @@ public:
       //  if (fInChord && m_pLastNoteRest && m_pLastNoteRest->IsNote()
       //      && !IsEqualTime(m_pLastNoteRest->GetDuration(), rDuration) )
       //  {
-      //      report_msg("Error: note in chord has different duration than base note. Duration changed."));
+      //      report_msg("Error: note in chord has different duration than base note. Duration changed.");
 		    //rDuration = m_pLastNoteRest->GetDuration();
       //      nNoteType = m_pLastNoteRest->GetNoteType();
       //      nDots = m_pLastNoteRest->GetNumDots();
@@ -2175,7 +2672,7 @@ protected:
     void set_voice_element(DtoNoteRest* pDto)
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-        int voice = get_integer_number( m_pAnalyser->get_current_voice() );
+        int voice = get_integer_value( m_pAnalyser->get_current_voice() );
         m_pAnalyser->set_current_voice(voice);
         pDto->set_voice(voice);
     }
@@ -2184,7 +2681,7 @@ protected:
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
         int curStaff = m_pAnalyser->get_current_staff() + 1;
-        int staff = get_integer_number(curStaff) - 1;
+        int staff = get_integer_value(curStaff) - 1;
         m_pAnalyser->set_current_staff(staff);
         pDto->set_staff(staff);
     }
@@ -2328,7 +2825,7 @@ public:
     {
         if (is_long_value())
         {
-            pOpt->set_long_value( get_long_number() );
+            pOpt->set_long_value( get_long_value() );
             pOpt->set_type(ImoOptionInfo::k_number_long);
             return true;    //ok
         }
@@ -2339,7 +2836,7 @@ public:
     {
         if (is_float_value())
         {
-            pOpt->set_float_value( get_float_number() );
+            pOpt->set_float_value( get_float_value() );
             pOpt->set_type(ImoOptionInfo::k_number_float);
             return true;    //ok
         }
@@ -2357,8 +2854,168 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
+//@ <pageLayout> = (pageLayout <pageSize><pageMargins><pageOrientation>)
+//@ <pageSize> = (pageSize width height)
+//@ <pageMargins> = (pageMargins left top right bottom binding)
+//@ <pageOrientation> = [ "portrait" | "landscape" ]
+//@ width, height, left, top right, bottom, binding = <num> in LUnits
+
+class PageLayoutAnalyser : public ElementAnalyser
+{
+public:
+    PageLayoutAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                       ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoPageInfo dto;
+
+        // <pageSize>
+        analyse_mandatory(k_pageSize, &dto);
+
+        // <pageMargins>
+        analyse_mandatory(k_pageMargins, &dto);
+
+        // [ "portrait" | "landscape" ]
+        if (!get_mandatory(k_label) || !set_orientation(dto))
+        {
+            report_msg(m_pParamToAnalyse->get_line_number(),
+                    "Invalid orientation. Expected 'portrait' or 'landscape'."
+                    " 'portrait' assumed.");
+            dto.set_portrait(true);
+        }
+
+        error_if_more_elements();
+
+        add_to_model( new ImoPageInfo(dto) );
+    }
+
+protected:
+
+    bool set_orientation(ImoPageInfo& dto)
+    {
+        // return true if ok
+        string type = m_pParamToAnalyse->get_value();
+        if (type == "portrait")
+        {
+            dto.set_portrait(true);
+            return true;
+        }
+        else if (type == "landscape")
+        {
+            dto.set_portrait(false);
+            return true;
+        }
+        return false;
+    }
+
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <pageMargins> = (pageMargins left top right bottom binding)     LUnits
+
+class PageMarginsAnalyser : public ElementAnalyser
+{
+public:
+    PageMarginsAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                        ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoPageInfo dto;
+        ImoPageInfo* pDto;
+        if (m_pAnchor && m_pAnchor->is_page_info())
+            pDto = dynamic_cast<ImoPageInfo*>(m_pAnchor);
+        else
+            pDto = &dto;
+
+        //left
+        if (get_mandatory(k_number))
+            pDto->set_left_margin( get_float_value(2000.0f) );
+
+        //top
+        if (get_mandatory(k_number))
+            pDto->set_top_margin( get_float_value(2000.0f) );
+
+        //right
+        if (get_mandatory(k_number))
+            pDto->set_right_margin( get_float_value(1500.0f) );
+
+        //bottom
+        if (get_mandatory(k_number))
+            pDto->set_bottom_margin( get_float_value(2000.0f) );
+
+        //binding
+        if (get_mandatory(k_number))
+            pDto->set_binding_margin( get_float_value(0.0f) );
+
+    }
+
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <pageSize> = (pageSize width height)        LUnits
+
+class PageSizeAnalyser : public ElementAnalyser
+{
+public:
+    PageSizeAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                     ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoPageInfo dto;
+        ImoPageInfo* pDto;
+        if (m_pAnchor && m_pAnchor->is_page_info())
+            pDto = dynamic_cast<ImoPageInfo*>(m_pAnchor);
+        else
+            pDto = &dto;
+
+        //width
+        if (get_mandatory(k_number))
+            pDto->set_page_width( get_float_value(21000.0f) );
+
+        //height
+        if (get_mandatory(k_number))
+            pDto->set_page_height( get_float_value(29700.0f) );
+    }
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <point> = (tag (dx value)(dy value))
+
+class PointAnalyser : public ElementAnalyser
+{
+public:
+    PointAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                  ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoPointDto point;
+
+        // <dx>
+        if (get_mandatory(k_dx))
+            point.set_x( get_location_value() );
+
+        // <dy>
+        if (get_mandatory(k_dy))
+            point.set_y( get_location_value() );
+
+        error_if_more_elements();
+
+        //m_pAnalysedNode->set_imo( new ImoPointDto(point) );
+        add_to_model( new ImoPointDto(point) );
+    }
+};
+
+//@-------------------------------------------------------------------------------------
 //@ <score> = (score <vers>[<language>][<undoData>][<creationMode>][<defineStyle>*]
-//@                  [<title>*][<pageLayout>*][<systemLayout>*][<cursor>][<option>*]
+//@                  [<title>*][<pageLayout>*][<systemLayout>*][<option>*]
 //@                  {<instrument> | <group>}* )
 
 class ScoreAnalyser : public ElementAnalyser
@@ -2380,25 +3037,29 @@ public:
         analyse_optional(k_language);
 
         // [<undoData>]
-        analyse_optional(k_undoData);
+        //TODO: Not implemented in LenMus. Postponed until need is confirmed
+        analyse_optional(k_undoData, pScore);
 
         // [<creationMode>]
-        analyse_optional(k_creationMode);
+        analyse_optional(k_creationMode, pScore);
 
         // [<defineStyle>*]
-        while (analyse_optional(k_defineStyle));
+        while (analyse_optional(k_defineStyle, pScore));
 
         // [<title>*]
-        while (analyse_optional(k_title));
+        while (analyse_optional(k_title, pScore));
 
         // [<pageLayout>*]
-        while (analyse_optional(k_pageLayout));
+        while (analyse_optional(k_pageLayout, pScore));
 
         // [<systemLayout>*]
         while (analyse_optional(k_systemLayout, pScore));
 
         // [<cursor>]
-        analyse_optional(k_cursor);
+        // Obsolete since 1.6, as cursor is now a document attribute
+        if (get_optional(k_cursor))
+            report_msg(m_pParamToAnalyse->get_line_number(),
+                    "'cursor' in score is obsolete. Now must be in 'lenmusdoc' element. Ignored.");
 
         // [<option>*]
         while (analyse_optional(k_opt, pScore));
@@ -2431,6 +3092,65 @@ protected:
         return m_pParamToAnalyse->get_parameter(1)->get_value();
     }
 
+//bool lmLDPParser::AnalyzeCreationMode(lmLDPNode* pNode, lmScore* pScore)
+//{
+//    // <creationMode> = (creationMode <modeName><modeVersion>)
+//
+//    //Returns true if success.
+//
+//    wxASSERT(GetNodeName(pNode) == "creationMode");
+//
+//    //check that two parameters are specified
+//    if(GetNodeNumParms(pNode) != 2) {
+//        AnalysisError(
+//            pNode,
+//            "Element '%s' has less parameters than the minimum required. Element ignored.",
+//            GetNodeName(pNode).c_str() );
+//        return false;
+//    }
+//
+//    //get the mode info
+//    std::string sModeName = GetNodeName(pNode->GetParameter(1));
+//    std::string sModeVers = GetNodeName(pNode->GetParameter(2));
+//
+//    //transfer to the score
+//    pScore->SetCreationMode(sModeName, sModeVers);
+//
+//    return true;
+//}
+
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <size> = (size <width><height>)
+//@ <width> = (width number)        value in LUnits
+//@ <height> = (height number)      value in LUnits
+//@     i.e.; (size (width 160)(height 100.7))
+
+class SizeAnalyser : public ElementAnalyser
+{
+public:
+    SizeAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                 ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoSizeDto size;
+
+        // <width>
+        if (get_mandatory(k_width))
+            size.set_width( get_width_value() );
+
+        // <height>
+        if (get_mandatory(k_height))
+            size.set_height( get_height_value() );
+
+        error_if_more_elements();
+
+        //m_pAnalysedNode->set_imo( new ImoPointDto(point) );
+        add_to_model( new ImoSizeDto(size) );
+    }
 };
 
 //@-------------------------------------------------------------------------------------
@@ -2451,7 +3171,7 @@ public:
         // <width>
         if (get_optional(k_number))
         {
-            dto.set_width( get_float_number() );
+            dto.set_width( get_float_value() );
         }
         else
         {
@@ -2536,16 +3256,16 @@ public:
             pDto = &dto;
 
         if (get_mandatory(k_number))
-            pDto->set_left_margin(get_float_number());
+            pDto->set_left_margin(get_float_value());
 
         if (get_mandatory(k_number))
-            pDto->set_right_margin(get_float_number());
+            pDto->set_right_margin(get_float_value());
 
         if (get_mandatory(k_number))
-            pDto->set_system_distance(get_float_number());
+            pDto->set_system_distance(get_float_value());
 
         if (get_mandatory(k_number))
-            pDto->set_top_system_distance(get_float_number());
+            pDto->set_top_system_distance(get_float_value());
 
         error_if_more_elements();
     }
@@ -2553,12 +3273,125 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ <textString> = (<textTag> string [<location>][{<font> | <style>}][<alingment>])
+//@ <textbox> = (textbox <location><size>[<bgColor>][<border>]<text>[<anchorLine>])
+//@ <location> = (dx value)(dy value)       values in Tenths, relative to cur.pos
+//@     i.e.: (dx 50.0)(dy 5)
+//@ <size> = (size <width><height>)
+//@ <width> = (width number)        value in LUnits
+//@ <height> = (height number)      value in LUnits
+//@     i.e.; (size (width 160)(height 100.7))
+//@ <border> = (border <width><lineStyle><color>)
+//@     i.e.: (border (width 2.5)(lineStyle solid)(color #ff0000))
+//@ <anchorLine> = (anchorLine <destination-point>[<lineStyle>][<color>][<width>]
+//@                            [<lineCapEnd>])
+//@     i.e.: (anchorLine (dx value)(dy value)(lineStyle value)(color value)
+//@                       (width value) )
+//@
+//@ Example:
+//@     (textbox (dx 50)(dy 5)
+//@         (size (width 160)(height 100))
+//@         (color #fffeb0)
+//@         (border (width 5)(lineStyle dot)(color #000000))
+//@         (text "This is a test of a textbox" (style "Textbox")
+//@         (anchorLine (dx 0)(dy 0)(width 1)(color #ff0000)
+//@                     (lineStyle dot)(lineCapEnd arrowhead))
+//@     )
+//@
+
+class TextBoxAnalyser : public ElementAnalyser
+{
+public:
+    TextBoxAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                    ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoBoxInfo box;
+
+        // <location>
+        if (get_mandatory(k_dx))
+            box.set_position_x( get_location_value() );
+        if (get_mandatory(k_dy))
+            box.set_position_y( get_location_value() );
+
+        // <size>
+        if (get_mandatory(k_size))
+            box.set_size( get_size_value() );
+
+        // [<bgColor>])
+        if (get_optional(k_color))
+            box.set_bg_color( get_color_value() );
+
+        // [<border>]
+        if (get_optional(k_border))
+            set_box_border(box);
+
+        ImoTextBox* pTB = new ImoTextBox(box);
+
+        // <text>
+        if (get_mandatory(k_text))
+            set_box_text(pTB);
+
+        // [<anchorLine>]
+        if (get_optional(k_anchorLine))
+            set_anchor_line(pTB);
+
+        error_if_more_elements();
+
+        add_to_model(pTB);
+    }
+
+protected:
+
+    void set_box_border(ImoBoxInfo& box)
+    {
+        ImoObj* pImo = proceed(k_border, NULL);
+        if (pImo)
+        {
+            ImoBorderDto* pBorder = dynamic_cast<ImoBorderDto*>(pImo);
+            if (pBorder)
+                box.set_border(pBorder);
+            delete pImo;
+        }
+    }
+
+    void set_box_text(ImoTextBox* pTB)
+    {
+        ImoObj* pImo = proceed(k_text, NULL);
+        if (pImo)
+        {
+            ImoScoreText* pText = dynamic_cast<ImoScoreText*>(pImo);
+            if (pText)
+                pTB->set_text(pText->get_text_info());
+            delete pImo;
+        }
+    }
+
+    void set_anchor_line(ImoTextBox* pTB)
+    {
+        ImoObj* pImo = proceed(k_anchorLine, NULL);
+        if (pImo)
+        {
+            ImoLineInfo* pLine = dynamic_cast<ImoLineInfo*>(pImo);
+            if (pLine)
+                pTB->set_anchor_line(pLine);
+            delete pImo;
+        }
+    }
+
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <textString> = (<textTag> string [<alingment>][<style>][<location>])
 //@ <textTag> = { name | abbrev | text }
 //@ <style> = (style <name>)
 //@
-//@ Notes:
-//@ - <font> is obsolete (since 1.6) and maintained just for compatibility
+//@ Compatibility 1.5:
+//@ <alignment> = { center | left | right }
+//@     alignement just indicates the position of the anchor point: at string
+//@     center, at start of string (left) or at end of string (right).
+//@     Since version 1.6 anchor point is always start of string.
 
 class TextStringAnalyser : public ElementAnalyser
 {
@@ -2572,86 +3405,33 @@ public:
         // <string>
         if (get_mandatory(k_string))
         {
-            ImoTextString* pText = new ImoTextString(get_string_value());
-
-            // [<location>]
-            //TODO
-
-            // [{<font> | <style>}]
-            //TODO
+            ImoScoreText* pText = new ImoScoreText(get_string_value());
 
             // [<alingment>]
-            //TODO
+            if (get_optional(k_label))
+                pText->set_h_align( get_alignment_value(k_halign_left) );
+
+            // [<style>]
+            if (get_optional(k_style))
+                pText->set_style( get_text_style_value() );
+
+            // [<location>]
+            while (more_params_to_analyse())
+            {
+                if (get_optional(k_dx))
+                    pText->set_user_location_x( get_location_value() );
+                else if (get_optional(k_dy))
+                    pText->set_user_location_y( get_location_value() );
+                else
+                    error_and_remove_invalid_param();
+            }
+            error_if_more_elements();
 
             add_to_model(pText);
         }
     }
 
-protected:
-
 };
-////bool lmLDPParser::AnalyzeText(lmLDPNode* pNode, lmVStaff* pVStaff, lmStaffObj* pTarget)
-////{
-////    //returns true if error; in this case nothing is added to the VStaff
-////    // <text> = (text string <location>[<font><alingment>])
-////
-////    wxASSERT(GetNodeName(pNode) == _T("text"));
-////    long nId = GetNodeID(pNode);
-////
-////    //check that at least two parameters (location and text string) are specified
-////    if(GetNodeNumParms(pNode) < 2) {
-////        AnalysisError(
-////            pNode,
-////            _T("Element '%s' has less parameters than the minimum required. Element ignored."),
-////            _T("text") );
-////        return true;
-////    }
-////
-////    wxString sText;
-////    wxString sStyle;
-////    lmEHAlign nAlign = lmHALIGN_LEFT;     //TODO user options instead of fixed values
-////    lmFontInfo tFont = {m_sTextFontName, m_nTextFontSize, m_nTextStyle, m_nTextWeight};
-////    lmLocation tPos;
-////    tPos.xUnits = lmTENTHS;
-////    tPos.yUnits = lmTENTHS;
-////    tPos.x = 0.0f;
-////    tPos.y = 0.0f;
-////
-////    if (AnalyzeTextString(pNode, &sText, &sStyle, &nAlign, &tPos, &tFont))
-////        return true;
-////
-////    //no error:
-////    //save font values as new default for texts
-////    m_sTextFontName = tFont.sFontName;
-////    m_nTextFontSize = tFont.nFontSize;
-////    m_nTextStyle = tFont.nFontStyle;
-////    m_nTextWeight = tFont.nFontWeight;
-////
-////    //create the text
-////    lmTextStyle* pStyle = (lmTextStyle*)NULL;
-////    if (sStyle != _T(""))
-////    {
-////        pStyle = pVStaff->GetScore()->GetStyleInfo(sStyle);
-////        if (!pStyle)
-////            AnalysisError(pNode, _T("Style '%s' is not defined. Default style will be used."),
-////                           sStyle.c_str());
-////    }
-////
-////    if (!pStyle)
-////        pStyle = pVStaff->GetScore()->GetStyleName(tFont);
-////
-////    if (!pTarget)
-////        pTarget = pVStaff->AddAnchorObj();  //AWARE: generating a text element without anchor
-////                                            //object is no longer possible since v1.6. Therefore,
-////                                            //for undo/redo all text elements will have anchor
-////                                            //with ID correctly saved/restored
-////
-////    lmTextItem* pText = pVStaff->AddText(sText, nAlign, pStyle, pTarget, nId);
-////	pText->SetUserLocation(tPos);
-////
-////    return false;
-////}
-
 
 //@-------------------------------------------------------------------------------------
 //@ <tie> = (tie num <tieType>[<bezier>][color] )   ;num = tie number. integer
@@ -2670,7 +3450,7 @@ public:
 
         // num
         if (get_mandatory(k_number))
-            pInfo->set_tie_number( get_integer_number(0) );
+            pInfo->set_tie_number( get_integer_value(0) );
 
         // <tieType> (label)
         if (!get_mandatory(k_label) || !set_tie_type(pInfo))
@@ -2684,7 +3464,8 @@ public:
         analyse_optional(k_bezier, pInfo);
 
         // [<color>]
-        //TODO
+        if (get_optional(k_color))
+            pInfo->set_color( get_color_value() );
 
         m_pAnalysedNode->set_imo(pInfo);
     }
@@ -2705,7 +3486,6 @@ protected:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ ImoTimeSignature StaffObj
 //@ <timeSignature> = (time <beats><beatType>[<visible>][<location>])
 //@ <beats> = <num>
 //@ <beatType> = <num>
@@ -2723,16 +3503,68 @@ public:
 
         // <beats> (num)
         if (get_mandatory(k_number))
-            dto.set_beats( get_integer_number(2) );
+            dto.set_beats( get_integer_value(2) );
 
         // <beatType> (num)
         if (get_mandatory(k_number))
-            dto.set_beat_type( get_integer_number(4) );
+            dto.set_beat_type( get_integer_value(4) );
 
         // [<visible>][<location>]
         analyse_staffobjs_options(dto);
 
         add_to_model( new ImoTimeSignature(dto) );
+    }
+
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <title> = (title <h-alignment> string [<style>][<location>])
+//@ <h-alignment> = label: {left | center | right }
+//@ <style> = (style name)
+//@         name = string.  Must be a style name defined with defineStyle
+//@
+//@ Examples:
+//@     (title center "Prelude" (style "Title")
+//@     (title center "Op. 28, No. 20" (style "Subtitle")
+//@     (title right "F. Chopin" (style "Composer"(dy 30))
+
+class TitleAnalyser : public ElementAnalyser
+{
+public:
+    TitleAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                  ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        // <h-alignment>
+        int nAlignment = k_halign_left;
+        if (get_mandatory(k_label))
+            nAlignment = get_alignment_value(k_halign_center);
+
+        // <string>
+        if (get_mandatory(k_string))
+        {
+            ImoScoreTitle* pTitle = new ImoScoreTitle(get_string_value(), nAlignment);
+
+            // [<style>]
+            if (get_optional(k_style))
+                pTitle->set_style( get_text_style_value() );
+
+            // [<location>]
+            while (more_params_to_analyse())
+            {
+                if (get_optional(k_dx))
+                    pTitle->set_user_location_x( get_location_value() );
+                else if (get_optional(k_dy))
+                    pTitle->set_user_location_y( get_location_value() );
+                else
+                    error_and_remove_invalid_param();
+            }
+            error_if_more_elements();
+
+            add_to_model(pTitle);
+        }
     }
 
 };
@@ -2829,7 +3661,7 @@ protected:
 
     bool set_actual_notes(ImoTupletDto* pInfo)
     {
-        int actual = get_integer_number(0);
+        int actual = get_integer_value(0);
         pInfo->set_actual_number(actual);
         if (actual == 2)
             pInfo->set_normal_number(3);   //duplet
@@ -2846,7 +3678,7 @@ protected:
 
     void set_normal_notes(ImoTupletDto* pInfo)
     {
-        int normal = get_integer_number(0);
+        int normal = get_integer_value(0);
         pInfo->set_normal_number(normal);
     }
 
@@ -3075,25 +3907,21 @@ void ElementAnalyser::analyse_component_options(DtoComponentObj& dto)
             }
             case k_color:
             {
-                ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
-                ImoColorInfo* pColor = dynamic_cast<ImoColorInfo*>( pImo );
-                if (pColor)
-                {
-                    dto.set_color( pColor->get_color() );
-                    delete pColor;
-                }
+                dto.set_color( get_color_value() );
                 break;
             }
             case k_dx:
             {
-                m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-                dto.set_user_location_x( get_float_number(0.0f) );
+                //m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+                //dto.set_user_location_x( get_float_value(0.0f) );
+                dto.set_user_location_x( get_location_value() );
                 break;
             }
             case k_dy:
             {
-                m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-                dto.set_user_location_y( get_float_number(0.0f) );
+                //m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+                //dto.set_user_location_y( get_float_value(0.0f) );
+                dto.set_user_location_y( get_location_value() );
                 break;
             }
             default:
@@ -3107,6 +3935,7 @@ void ElementAnalyser::analyse_component_options(DtoComponentObj& dto)
 void ElementAnalyser::add_to_model(ImoObj* pImo)
 {
     int ldpNodeType = m_pAnalysedNode->get_type();
+    pImo->set_id(m_pAnalysedNode->get_id());        //transfer id
     Linker linker;
     ImoObj* pObj = linker.add_child_to_model(m_pAnchor, pImo, ldpNodeType);
     m_pAnalysedNode->set_imo(pObj);
@@ -3126,7 +3955,7 @@ Analyser::Analyser(ostream& reporter, LdpFactory* pFactory)
     , m_pBeamsBuilder(NULL)
     , m_pOldBeamsBuilder(NULL)
     , m_pTupletsBuilder(NULL)
-    , m_pBasicModel(NULL)
+    , m_IModel(NULL)
     , m_pTree(NULL)
     , m_fShowTupletBracket(true)
     , m_fShowTupletNumber(true)
@@ -3145,24 +3974,9 @@ Analyser::~Analyser()
         delete m_pTupletsBuilder;
 }
 
-//void Analyser::add_beam(ImoBeam* pBeam)
-//{
-//    m_pBasicModel->add_beam(pBeam);
-//}
-//
-//void Analyser::add_tuplet(ImoTuplet* pTuplet)
-//{
-//    m_pBasicModel->add_tuplet(pTuplet);
-//}
-//
-//void Analyser::add_tie(ImoTie* pTie)
-//{
-//    m_pBasicModel->add_tie(pTie);
-//}
-
-BasicModel* Analyser::analyse_tree(LdpTree* tree)
+InternalModel* Analyser::analyse_tree(LdpTree* tree)
 {
-    m_pBasicModel = new BasicModel();
+    m_IModel = new InternalModel();
     if (m_pTiesBuilder)
         delete m_pTiesBuilder;
     if (m_pBeamsBuilder)
@@ -3171,10 +3985,10 @@ BasicModel* Analyser::analyse_tree(LdpTree* tree)
         delete m_pOldBeamsBuilder;
     if (m_pTupletsBuilder)
         delete m_pTupletsBuilder;
-    m_pTiesBuilder = new TiesBuilder(m_reporter, m_pBasicModel, this);
-    m_pBeamsBuilder = new BeamsBuilder(m_reporter, m_pBasicModel, this);
-    m_pOldBeamsBuilder = new OldBeamsBuilder(m_reporter, m_pBasicModel, this);
-    m_pTupletsBuilder = new TupletsBuilder(m_reporter, m_pBasicModel, this);
+    m_pTiesBuilder = new TiesBuilder(m_reporter, m_IModel, this);
+    m_pBeamsBuilder = new BeamsBuilder(m_reporter, m_IModel, this);
+    m_pOldBeamsBuilder = new OldBeamsBuilder(m_reporter, m_IModel, this);
+    m_pTupletsBuilder = new TupletsBuilder(m_reporter, m_IModel, this);
 
     m_pTree = tree;
     m_curStaff = 0;
@@ -3184,11 +3998,11 @@ BasicModel* Analyser::analyse_tree(LdpTree* tree)
 
     LdpElement* pRoot = tree->get_root();
     if (pRoot)
-        m_pBasicModel->set_root( pRoot->get_imo() );
+        m_IModel->set_root( pRoot->get_imo() );
 
-    BasicModel* pBM = m_pBasicModel;
-    m_pBasicModel = NULL;
-    return pBM;
+    InternalModel* pIModel = m_IModel;
+    m_IModel = NULL;
+    return pIModel;
 }
 
 void Analyser::analyse_node(LdpTree::iterator itNode)
@@ -3248,72 +4062,58 @@ ElementAnalyser* Analyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
     switch (type)
     {
         case k_abbrev:          return new TextStringAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_above:
+        case k_anchorLine:      return new AnchorLineAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_barline:         return new BarlineAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_below:
         case k_beam:            return new BeamAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_bezier:          return new BezierAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_bold:
-//        case k_bold_italic:
-//        case k_brace:
-//        case k_bracket:
-//        case k_center:
+        case k_border:          return new BorderAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_chord:           return new ChordAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_clef:            return new ClefAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_content:         return new ContentAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_creationMode:
+//        case k_creationMode:    return new ContentAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_color:           return new ColorAnalyser(this, m_reporter, m_pLdpFactory);
-//        case k_cursor:
-//        case k_defineStyle:   return new  XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
-//        case k_end:
+        case k_cursor:          return new CursorAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
+        case k_defineStyle:     return new DefineStyleAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
+        case k_endPoint:        return new PointAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_fermata:         return new FermataAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_figuredBass:     return new FiguredBassAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_font:
+        case k_font:            return new FontAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_goBack:          return new GoBackFwdAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_goFwd:           return new GoBackFwdAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_graphic:   return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
+//        case k_graphic:         return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_group:           return new GroupAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_hasWidth:
         case k_infoMIDI:        return new InfoMidiAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_instrument:      return new InstrumentAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_italic:
-//        case k_joinBarlines:
-        case k_key_signature:             return new KeySignatureAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_landscape:
+        case k_key_signature:   return new KeySignatureAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_language:        return new LanguageAnalyser(this, m_reporter, m_pLdpFactory);
-//        case k_left:
         case k_lenmusdoc:       return new LenmusdocAnalyser(this, m_reporter, m_pLdpFactory);
-//        case k_line:  return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
+        case k_line:            return new LineAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_metronome:       return new MetronomeAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_musicData:       return new MusicDataAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
+        case k_na:              return new NoteRestAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_name:            return new TextStringAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_newSystem:       return new ControlAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_no:
-//        case k_normal:
         case k_note:            return new NoteRestAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_opt:             return new OptAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_pageLayout:    return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
-//        case k_pageMargins:   return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
-//        case k_pageSize:
+        case k_pageLayout:      return new PageLayoutAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
+        case k_pageMargins:     return new PageMarginsAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
+        case k_pageSize:        return new PageSizeAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_rest:            return new NoteRestAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_right: return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
         case k_score:           return new ScoreAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
+        case k_size:            return new SizeAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_spacer:          return new SpacerAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_split: return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
-//        case k_staff: return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
-//        case k_start: return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
-//        case k_style:
-//        case k_symbol:    return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
+//        case k_staff:           return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
+//        case k_symbol:          return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
+        case k_startPoint:      return new PointAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_systemLayout:    return new SystemLayoutAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_systemMargins:   return new SystemMarginsAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_text:            return new TextStringAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_textbox:       return new TextBoxAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
+        case k_textbox:         return new TextBoxAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_time_signature:  return new TimeSignatureAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_tie:             return new TieAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_title:         return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
+        case k_title:           return new TitleAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_tuplet:          return new TupletAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_undoData:  return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
-//        case k_yes:   return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
+//        case k_undoData:        return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
 
         default:
             return new NullAnalyser(this, m_reporter, m_pLdpFactory);
@@ -3325,10 +4125,10 @@ ElementAnalyser* Analyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
 // TiesBuilder implementation
 //-------------------------------------------------------------------------------
 
-TiesBuilder::TiesBuilder(ostream& reporter, BasicModel* pBasicModel, Analyser* pAnalyser)
+TiesBuilder::TiesBuilder(ostream& reporter, InternalModel* pIModel, Analyser* pAnalyser)
     : m_reporter(reporter)
     , m_pAnalyser(pAnalyser)
-    , m_pBasicModel(pBasicModel)
+    , m_IModel(pIModel)
     , m_pStartNoteTieOld(NULL)
 {
 }
@@ -3421,9 +4221,7 @@ void TiesBuilder::tie_notes(ImoTieDto* pStartInfo, ImoTieDto* pEndInfo)
     pStartNote->set_tie_next(pTie);
     pEndNote->set_tie_prev(pTie);
 
-    //pStartNote->set_tied_next(true);
-    //pEndNote->set_tied_prev(true);
-    m_pBasicModel->add_tie(pTie);
+    m_IModel->add_tie(pTie);
 }
 
 void TiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNewInfo)
@@ -3519,7 +4317,7 @@ void TiesBuilder::tie_notes(ImoNote* pStartNote, ImoNote* pEndNote)
     pStartNote->set_tie_next(pTie);
     pEndNote->set_tie_prev(pTie);
 
-    m_pBasicModel->add_tie(pTie);
+    m_IModel->add_tie(pTie);
 }
 
 
@@ -3528,10 +4326,10 @@ void TiesBuilder::tie_notes(ImoNote* pStartNote, ImoNote* pEndNote)
 // BeamsBuilder implementation
 //-------------------------------------------------------------------------------
 
-BeamsBuilder::BeamsBuilder(ostream& reporter, BasicModel* pBasicModel, Analyser* pAnalyser)
+BeamsBuilder::BeamsBuilder(ostream& reporter, InternalModel* IModel, Analyser* pAnalyser)
     : m_reporter(reporter)
     , m_pAnalyser(pAnalyser)
-    , m_pBasicModel(pBasicModel)
+    , m_IModel(IModel)
 {
 }
 
@@ -3597,7 +4395,7 @@ void BeamsBuilder::do_beam_notes_rests(ImoBeamInfo* pEndInfo)
         pBeam->push_back(pNR);
     }
 
-    m_pBasicModel->add_beam(pBeam);
+    m_IModel->add_beam(pBeam);
 }
 
 void BeamsBuilder::delete_consumed_info_items(ImoBeamInfo* pEndInfo)
@@ -3658,10 +4456,10 @@ void BeamsBuilder::error_no_end_beam(ImoBeamInfo* pInfo)
 // OldBeamsBuilder implementation
 //-------------------------------------------------------------------------------
 
-OldBeamsBuilder::OldBeamsBuilder(ostream& reporter, BasicModel* pBasicModel, Analyser* pAnalyser)
+OldBeamsBuilder::OldBeamsBuilder(ostream& reporter, InternalModel* IModel, Analyser* pAnalyser)
     : m_reporter(reporter)
     , m_pAnalyser(pAnalyser)
-    , m_pBasicModel(pBasicModel)
+    , m_IModel(IModel)
 {
 }
 
@@ -3724,7 +4522,7 @@ void OldBeamsBuilder::do_create_old_beam()
     AutoBeamer autobeamer(pBeam);
     autobeamer.do_autobeam();
 
-    m_pBasicModel->add_beam(pBeam);
+    m_IModel->add_beam(pBeam);
 }
 
 
@@ -3733,10 +4531,10 @@ void OldBeamsBuilder::do_create_old_beam()
 // TupletsBuilder implementation
 //-------------------------------------------------------------------------------
 
-TupletsBuilder::TupletsBuilder(ostream& reporter, BasicModel* pBasicModel, Analyser* pAnalyser)
+TupletsBuilder::TupletsBuilder(ostream& reporter, InternalModel* IModel, Analyser* pAnalyser)
     : m_reporter(reporter)
     , m_pAnalyser(pAnalyser)
-    , m_pBasicModel(pBasicModel)
+    , m_IModel(IModel)
 {
 }
 
@@ -3773,7 +4571,7 @@ void TupletsBuilder::create_tuplet(ImoTupletDto* pEndInfo)
     }
     m_pendingTuplets.clear();
 
-    m_pBasicModel->add_tuplet(pTuplet);
+    m_IModel->add_tuplet(pTuplet);
 }
 
 void TupletsBuilder::clear_pending_tuplets()

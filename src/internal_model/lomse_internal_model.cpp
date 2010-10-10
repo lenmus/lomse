@@ -13,8 +13,6 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -229,10 +227,11 @@ ImoAuxObj::ImoAuxObj(int objtype, DtoAuxObj& dto)
 // ImoBarline implementation
 //-------------------------------------------------------------------------------------
 
-ImoBarline::ImoBarline(DtoBarline& dto)
+ImoBarline::ImoBarline(DtoBarline& dto, long id)
     : ImoStaffObj(ImoObj::k_barline, dto)
     , m_type( dto.get_barline_type() )
 {
+    set_id(id);
 }
 
 
@@ -328,17 +327,17 @@ ImoClef::ImoClef(int clefType)
 
 
 //-------------------------------------------------------------------------------------
-// ImoColorInfo implementation
+// ImoColorDto implementation
 //-------------------------------------------------------------------------------------
 
-ImoColorInfo::ImoColorInfo(int16u r, int16u g, int16u b, int16u a)
+ImoColorDto::ImoColorDto(int16u r, int16u g, int16u b, int16u a)
     : ImoSimpleObj(ImoObj::k_color_info)
     , m_color(r, g, b, a)
     , m_ok(true)
 {
 }
 
-int16u ImoColorInfo::convert_from_hex(const std::string& hex)
+int16u ImoColorDto::convert_from_hex(const std::string& hex)
 {
     int value = 0;
 
@@ -395,7 +394,7 @@ int16u ImoColorInfo::convert_from_hex(const std::string& hex)
     return static_cast<int16u>(value);
 }
 
-rgba16& ImoColorInfo::get_from_rgb_string(const std::string& rgb)
+rgba16& ImoColorDto::get_from_rgb_string(const std::string& rgb)
 {
     m_ok = true;
 
@@ -413,7 +412,7 @@ rgba16& ImoColorInfo::get_from_rgb_string(const std::string& rgb)
     return m_color;
 }
 
-rgba16& ImoColorInfo::get_from_rgba_string(const std::string& rgba)
+rgba16& ImoColorDto::get_from_rgba_string(const std::string& rgba)
 {
     m_ok = true;
 
@@ -431,7 +430,7 @@ rgba16& ImoColorInfo::get_from_rgba_string(const std::string& rgba)
     return m_color;
 }
 
-rgba16& ImoColorInfo::get_from_string(const std::string& hex)
+rgba16& ImoColorDto::get_from_string(const std::string& hex)
 {
     if (hex.length() == 7)
         return get_from_rgb_string(hex);
@@ -540,7 +539,10 @@ int ImoDocument::get_num_content_items()
 ImoDocObj* ImoDocument::get_content_item(int iItem)
 {
     ImoContent* pContent = get_content();
-    return dynamic_cast<ImoDocObj*>( pContent->get_child(iItem) );
+    if (iItem < pContent->get_num_children())
+        return dynamic_cast<ImoDocObj*>( pContent->get_child(iItem) );
+    else
+        return NULL;
 }
 
 ImoContent* ImoDocument::get_content()
@@ -594,13 +596,13 @@ ImoInstrument::~ImoInstrument()
 {
 }
 
-void ImoInstrument::set_name(ImoTextString* pText)
+void ImoInstrument::set_name(ImoScoreText* pText)
 {
     m_name = *pText;
     delete pText;
 }
 
-void ImoInstrument::set_abbrev(ImoTextString* pText)
+void ImoInstrument::set_abbrev(ImoScoreText* pText)
 {
     m_abbrev = *pText;
     delete pText;
@@ -636,22 +638,17 @@ ImoInstrGroup::~ImoInstrGroup()
     m_instruments.clear();
 }
 
-void ImoInstrGroup::set_name(ImoTextString* pText)
+void ImoInstrGroup::set_name(ImoScoreText* pText)
 {
     m_name = *pText;
     delete pText;
 }
 
-void ImoInstrGroup::set_abbrev(ImoTextString* pText)
+void ImoInstrGroup::set_abbrev(ImoScoreText* pText)
 {
     m_abbrev = *pText;
     delete pText;
 }
-
-//ImoInstruments* ImoInstrGroup::get_instruments()
-//{
-//    return dynamic_cast<ImoInstruments*>( get_child_of_type(ImoObj::k_instruments) );
-//}
 
 ImoInstrument* ImoInstrGroup::get_instrument(int iInstr)    //iInstr = 0..n-1
 {
@@ -684,6 +681,16 @@ int ImoInstrGroup::get_num_instruments()
 ImoKeySignature::ImoKeySignature(DtoKeySignature& dto)
     : ImoStaffObj(ImoObj::k_key_signature, dto)
     , m_keyType( dto.get_key_type() )
+{
+}
+
+//-------------------------------------------------------------------------------------
+// ImoLine implementation
+//-------------------------------------------------------------------------------------
+
+ImoLine::ImoLine(ImoLineInfo& info)
+    : ImoAuxObj(ImoObj::k_line)
+    , m_lineInfo(info)
 {
 }
 
@@ -731,6 +738,7 @@ ImoScore::ImoScore()
     , m_pColStaffObjs(NULL)
     , m_systemInfoFirst()
     , m_systemInfoOther()
+    , m_pageInfo()
 {
     append_child( new ImoInstruments() );
     append_child( new ImoOptions() );
@@ -739,12 +747,22 @@ ImoScore::ImoScore()
 ImoScore::~ImoScore()
 {
     delete_staffobjs_collection();
+    delete_text_styles();
 }
 
 void ImoScore::delete_staffobjs_collection()
 {
     if (m_pColStaffObjs)
         delete m_pColStaffObjs;
+}
+
+void ImoScore::delete_text_styles()
+{
+    map<std::string, ImoTextStyleInfo*>::const_iterator it;
+    for (it = m_nameToStyle.begin(); it != m_nameToStyle.end(); ++it)
+        delete it->second;
+
+    m_nameToStyle.clear();
 }
 
 ImoInstruments* ImoScore::get_instruments()
@@ -808,6 +826,11 @@ void ImoScore::add_sytem_info(ImoSystemInfo* pSL)
         m_systemInfoOther = *pSL;
 }
 
+void ImoScore::add_page_info(ImoPageInfo* pPI)
+{
+    m_pageInfo = *pPI;
+}
+
 ImoInstrGroups* ImoScore::get_instrument_groups()
 {
     return dynamic_cast<ImoInstrGroups*>( get_child_of_type(ImoObj::k_instrument_groups) );
@@ -827,6 +850,78 @@ void ImoScore::add_instruments_group(ImoInstrGroup* pGroup)
         add_instrument(pGroup->get_instrument(i));
 }
 
+void ImoScore::add_title(ImoScoreTitle* pTitle)
+{
+    m_titles.push_back(pTitle);
+    append_child(pTitle);
+}
+
+void ImoScore::add_style_info(ImoTextStyleInfo* pStyle)
+{
+    m_nameToStyle[pStyle->get_name()] = pStyle;
+}
+
+ImoTextStyleInfo* ImoScore::get_style_info(const std::string& name) 
+{
+	map<std::string, ImoTextStyleInfo*>::const_iterator it
+        = m_nameToStyle.find(name);
+	if (it != m_nameToStyle.end())
+		return it->second;
+    else
+        return NULL;
+}
+
+ImoTextStyleInfo* ImoScore::get_default_style_info()
+{
+    ImoTextStyleInfo* pStyle = get_style_info("Default style");
+    if (pStyle)
+		return pStyle;
+    else
+        return create_default_style();
+}
+
+ImoTextStyleInfo* ImoScore::create_default_style()
+{
+	ImoTextStyleInfo* pStyle = new ImoTextStyleInfo();
+	pStyle->set_name("Default style");
+    pStyle->set_color( rgba16(0,0,0,255) );
+    pStyle->set_font_name("Times New Roman");
+    pStyle->set_font_size(10);
+    pStyle->set_font_style(ImoFontInfo::k_normal);
+    pStyle->set_font_weight(ImoFontInfo::k_normal);
+    m_nameToStyle["Default style"] = pStyle;
+    return pStyle;
+}
+
+
+//-------------------------------------------------------------------------------------
+// ImoPageInfo implementation
+//-------------------------------------------------------------------------------------
+
+ImoPageInfo::ImoPageInfo()
+    : ImoSimpleObj(ImoObj::k_page_info)
+    , m_uLeftMargin(2000.0f)
+    , m_uRightMargin(1500.0f)
+    , m_uTopMargin(2000.0f)
+    , m_uBottomMargin(2000.0f)
+    , m_uBindingMargin(0.0f)
+    , m_uPageSize(21000.0f, 29700.0f)
+    , m_fPortrait(true)
+{
+    //defaults: DIN A4 (210.0 x 297.0 mm), portrait
+}
+
+ImoPageInfo::ImoPageInfo(ImoPageInfo& dto)
+    : ImoSimpleObj(ImoObj::k_page_info)
+    , m_uLeftMargin( dto.get_left_margin() )
+    , m_uRightMargin( dto.get_right_margin() )
+    , m_uTopMargin( dto.get_top_margin() )
+    , m_uBottomMargin( dto.get_bottom_margin() )
+    , m_uBindingMargin( dto.get_binding_margin() )
+    , m_uPageSize( dto.get_page_size() )
+    , m_fPortrait( dto.is_portrait() )
+{
+}
 
 //-------------------------------------------------------------------------------------
 // ImoSpacer implementation
@@ -861,6 +956,37 @@ ImoSystemInfo::ImoSystemInfo(ImoSystemInfo& dto)
     , m_topSystemDistance( dto.get_top_system_distance() )
 {
 }
+
+//-------------------------------------------------------------------------------------
+// ImoTextInfo implementation
+//-------------------------------------------------------------------------------------
+
+const std::string& ImoTextInfo::get_font_name() 
+{ 
+    return m_pStyle->get_font_name(); 
+}
+
+int ImoTextInfo::get_font_size()
+ 
+{ 
+    return m_pStyle->get_font_size(); 
+}
+
+int ImoTextInfo::get_font_style()
+{ 
+    return m_pStyle->get_font_style(); 
+}
+
+int ImoTextInfo::get_font_weight()
+{ 
+    return m_pStyle->get_font_weight(); 
+}
+
+rgba16 ImoTextInfo::get_color()
+{ 
+    return m_pStyle->get_color(); 
+}
+
 
 //-------------------------------------------------------------------------------------
 // ImoTie implementation

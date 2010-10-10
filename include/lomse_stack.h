@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__STACK_H__
-#define __LOMSE__STACK_H__
+#ifndef __LOMSE_STACK_H__
+#define __LOMSE_STACK_H__
 
 #include <list>
 
@@ -149,4 +149,4 @@ protected:
 
 }   //namespace lomse
 
-#endif      //__LOMSE__STACK_H__
+#endif      //__LOMSE_STACK_H__

@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__LDP_READER_H__
-#define __LOMSE__LDP_READER_H__
+#ifndef __LOMSE_LDP_READER_H__
+#define __LOMSE_LDP_READER_H__
 
 #include <fstream>
 #include <iostream>
@@ -103,4 +103,4 @@ namespace lomse
 
 }   //namespace lomse
 
-#endif      //__LOMSE__LDP_READER_H__
+#endif      //__LOMSE_LDP_READER_H__

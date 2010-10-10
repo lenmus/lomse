@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__LDP_PARSER_H__
-#define __LOMSE__LDP_PARSER_H__
+#ifndef __LOMSE_LDP_PARSER_H__
+#define __LOMSE_LDP_PARSER_H__
 
 #include <vector>
 #include <set>
@@ -103,4 +103,4 @@ protected:
 
 } //namespace lomse
 
-#endif    //__LOMSE__LDP_PARSER_H__
+#endif    //__LOMSE_LDP_PARSER_H__

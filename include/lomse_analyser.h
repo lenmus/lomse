@@ -13,15 +13,13 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__ANALYSER_H__
-#define __LOMSE__ANALYSER_H__
+#ifndef __LOMSE_ANALYSER_H__
+#define __LOMSE_ANALYSER_H__
 
 #include <list>
 #include "lomse_ldp_elements.h"
@@ -48,7 +46,7 @@ class ImoBeamInfo;
 class ImoBeam;
 class ImoTupletDto;
 class ImoTuplet;
-class BasicModel;
+class InternalModel;
 
 
 // helper class to save start of tie info, match it against stop info and
@@ -59,13 +57,13 @@ class TiesBuilder
 protected:
     ostream& m_reporter;
     Analyser* m_pAnalyser;
-    BasicModel* m_pBasicModel;
+    InternalModel* m_IModel;
     std::list<ImoTieDto*> m_pendingTies;
     ImoNote* m_pStartNoteTieOld;     //tie: old syntax
     LdpElement* m_pOldTieParam;
 
 public:
-    TiesBuilder(ostream& reporter, BasicModel* pBasicModel, Analyser* pAnalyser);
+    TiesBuilder(ostream& reporter, InternalModel* IModel, Analyser* pAnalyser);
     ~TiesBuilder();
 
     void start_tie(ImoTieDto* pInfo);
@@ -99,11 +97,11 @@ class BeamsBuilder
 protected:
     ostream& m_reporter;
     Analyser* m_pAnalyser;
-    BasicModel* m_pBasicModel;
+    InternalModel* m_IModel;
     std::list<ImoBeamInfo*> m_pendingBeams;
 
 public:
-    BeamsBuilder(ostream& reporter, BasicModel* pBasicModel, Analyser* pAnalyser);
+    BeamsBuilder(ostream& reporter, InternalModel* IModel, Analyser* pAnalyser);
     ~BeamsBuilder();
 
     void add_beam_info(ImoBeamInfo* pBeamInfo);
@@ -135,11 +133,11 @@ class OldBeamsBuilder
 protected:
     ostream& m_reporter;
     Analyser* m_pAnalyser;
-    BasicModel* m_pBasicModel;
+    InternalModel* m_IModel;
     std::list<ImoBeamInfo*> m_pendingOldBeams;
 
 public:
-    OldBeamsBuilder(ostream& reporter, BasicModel* pBasicModel, Analyser* pAnalyser);
+    OldBeamsBuilder(ostream& reporter, InternalModel* IModel, Analyser* pAnalyser);
     ~OldBeamsBuilder();
 
     void add_old_beam(ImoBeamInfo* pInfo);
@@ -163,11 +161,11 @@ class TupletsBuilder
 protected:
     ostream& m_reporter;
     Analyser* m_pAnalyser;
-    BasicModel* m_pBasicModel;
+    InternalModel* m_IModel;
     std::list<ImoTupletDto*> m_pendingTuplets;
 
 public:
-    TupletsBuilder(ostream& reporter, BasicModel* pBasicModel, Analyser* pAnalyser);
+    TupletsBuilder(ostream& reporter, InternalModel* IModel, Analyser* pAnalyser);
     ~TupletsBuilder();
 
     void add_tuplet_info(ImoTupletDto* pTupletInfo);
@@ -198,7 +196,7 @@ protected:
     BeamsBuilder* m_pBeamsBuilder;
     OldBeamsBuilder* m_pOldBeamsBuilder;
     TupletsBuilder* m_pTupletsBuilder;
-    BasicModel* m_pBasicModel;
+    InternalModel* m_IModel;
 
     //analysis input
     LdpTree* m_pTree;
@@ -214,7 +212,7 @@ public:
     ~Analyser();
 
     //access to results
-    BasicModel* analyse_tree(LdpTree* tree);
+    InternalModel* analyse_tree(LdpTree* tree);
 
     //analysis
     void analyse_node(LdpTree::iterator itNode);
@@ -333,4 +331,4 @@ protected:
 
 }   //namespace lomse
 
-#endif      //__LOMSE__ANALYSER_H__
+#endif      //__LOMSE_ANALYSER_H__

@@ -18,7 +18,7 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifdef _LM_DEBUG_
+#ifdef _LOMSE_DEBUG
 
 #include <UnitTest++.h>
 #include <sstream>

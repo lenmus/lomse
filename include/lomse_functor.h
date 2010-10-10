@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__FUNCTOR_H__
-#define __LOMSE__FUNCTOR_H__
+#ifndef __LOMSE_FUNCTOR_H__
+#define __LOMSE_FUNCTOR_H__
 
 namespace lomse
 {
@@ -35,4 +35,4 @@ public:
 
 }   //namespace lomse
 
-#endif      //__LOMSE__FUNCTOR_H__
+#endif      //__LOMSE_FUNCTOR_H__

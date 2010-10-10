@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__LDP_TOKEN_H__
-#define __LOMSE__LDP_TOKEN_H__
+#ifndef __LOMSE_LDP_TOKEN_H__
+#define __LOMSE_LDP_TOKEN_H__
 
 #include <sstream>
 
@@ -105,4 +105,4 @@ enum ETokenType {
 
 } //namespace lomse
 
-#endif      //__LOMSE__LDP_TOKEN_H__
+#endif      //__LOMSE_LDP_TOKEN_H__

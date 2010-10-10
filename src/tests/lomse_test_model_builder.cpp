@@ -13,14 +13,12 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //
-//
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
 //-------------------------------------------------------------------------------------
 
-#ifdef _LM_DEBUG_
+#ifdef _LOMSE_DEBUG
 
 #include <UnitTest++.h>
 #include <sstream>
@@ -63,6 +61,7 @@ public:
 SUITE(ModelBuilderTest)
 {
 
+    //This just checks that the score has an associated ColStaffObjs
     TEST_FIXTURE(ModelBuilderTestFixture, ModelBuilderScore)
     {
         DocumentScope documentScope(cout);
@@ -70,15 +69,18 @@ SUITE(ModelBuilderTest)
         Analyser* analyser = Injector::inject_Analyser(*m_pLibraryScope, documentScope);
         ModelBuilder* builder = Injector::inject_ModelBuilder(documentScope);
         LdpCompiler compiler(parser, analyser, builder, documentScope.id_assigner());
-        ImoDocument* pDoc = compiler.compile_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (barline simple))))))" );
+        InternalModel* pIModel = compiler.compile_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (barline simple))))))" );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != NULL );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_staffobjs_table() != NULL );
+
+        delete pIModel;
     }
 
 }
 
 
-#endif  // _LM_DEBUG_
+#endif  // _LOMSE_DEBUG
 

@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__INJECTORS_H__
-#define __LOMSE__INJECTORS_H__
+#ifndef __LOMSE_INJECTORS_H__
+#define __LOMSE_INJECTORS_H__
 
 #include <iostream>
 #include "lomse_ldp_factory.h"
@@ -120,4 +120,4 @@ public:
 
 }   //namespace lomse
 
-#endif      //__LOMSE__INJECTORS_H__
+#endif      //__LOMSE_INJECTORS_H__

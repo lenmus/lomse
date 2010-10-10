@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__LDP_ELEMENTS_H__        //to avoid nested includes
-#define __LOMSE__LDP_ELEMENTS_H__
+#ifndef __LOMSE_LDP_ELEMENTS_H__        //to avoid nested includes
+#define __LOMSE_LDP_ELEMENTS_H__
 
 #include <vector>
 
@@ -513,5 +513,5 @@ typedef LdpObject<k_yes>          LdpYes;
 
 
 }   //namespace lomse
-#endif    // __LOMSE__LDP_ELEMENTS_H__
+#endif    // __LOMSE_LDP_ELEMENTS_H__
 

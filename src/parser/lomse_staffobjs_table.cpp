@@ -13,8 +13,6 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -23,8 +21,6 @@
 #include "lomse_staffobjs_table.h"
 
 #include <algorithm>
-#include "lomse_document_iterator.h"
-#include "lomse_ldp_elements.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_ldp_exporter.h"
@@ -121,8 +117,7 @@ void ColStaffObjs::sort()
 // ColStaffObjsBuilder implementation: algorithm to create a ColStaffObjs
 //-------------------------------------------------------------------------------------
 
-ColStaffObjsBuilder::ColStaffObjsBuilder(LdpTree* pTree)
-    : m_pTree(pTree)
+ColStaffObjsBuilder::ColStaffObjsBuilder()
 {
 }
 

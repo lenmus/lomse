@@ -14,7 +14,7 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
-					<Add option="-D_LM_DEBUG_" />
+					<Add option="-D_LOMSE_DEBUG" />
 					<Add option="-D_LOMSE_LINUX_CODEBLOCKS" />
 					<Add directory="../../../../include" />
 					<Add directory="/usr/include/unittest++" />
@@ -82,6 +82,7 @@
 		<Unit filename="../../../../src/parser/lomse_staffobjs_table.cpp" />
 		<Unit filename="../../../../src/parser/lomse_tokenizer.cpp" />
 		<Unit filename="../../../../src/parser/lomse_values.cpp" />
+		<Unit filename="../../../../src/score/lomse_im_figured_bass.cpp" />
 		<Unit filename="../../../../src/score/lomse_im_note.cpp" />
 		<Unit filename="../../../../src/score/lomse_internal_model.cpp" />
 		<Unit filename="../../../../src/score/lomse_score_iterator.cpp" />

@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__ID_ASSIGNER_H__
-#define __LOMSE__ID_ASSIGNER_H__
+#ifndef __LOMSE_ID_ASSIGNER_H__
+#define __LOMSE_ID_ASSIGNER_H__
 
 #include "lomse_ldp_elements.h"
 
@@ -52,4 +52,4 @@ protected:
 
 } //namespace lomse
 
-#endif    //__LOMSE__ID_ASSIGNER_H__
+#endif    //__LOMSE_ID_ASSIGNER_H__

@@ -47,17 +47,32 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
         case ImoObj::k_system_info:
             return add_system_info(dynamic_cast<ImoSystemInfo*>(pChild));
 
-        case ImoObj::k_bezier:
+        case ImoObj::k_page_info:
+            return add_page_info(dynamic_cast<ImoPageInfo*>(pChild));
+
+        case ImoObj::k_bezier_info:
             return add_bezier(dynamic_cast<ImoBezierInfo*>(pChild));
+
+        case ImoObj::k_cursor_info:
+            return add_cursor(dynamic_cast<ImoCursorInfo*>(pChild));
 
         case ImoObj::k_midi_info:
             return add_midi_info(dynamic_cast<ImoMidiInfo*>(pChild));
 
+        case ImoObj::k_font_info:
+            return add_font_info(dynamic_cast<ImoFontInfo*>(pChild));
+
+        case ImoObj::k_text_style_info:
+            return add_text_style_info(dynamic_cast<ImoTextStyleInfo*>(pChild));
+
         case ImoObj::k_instrument:
             return add_instrument(dynamic_cast<ImoInstrument*>(pChild));
 
-        case ImoObj::k_text_string:
-            return add_text(dynamic_cast<ImoTextString*>(pChild));
+        case ImoObj::k_score_text:
+            return add_text(dynamic_cast<ImoScoreText*>(pChild));
+
+        case ImoObj::k_score_title:
+            return add_title(dynamic_cast<ImoScoreTitle*>(pChild));
 
         case ImoObj::k_score:
             return add_child(ImoObj::k_content, pChild);
@@ -74,7 +89,7 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
             else if (pChild->is_auxobj())
                 return add_auxobj(dynamic_cast<ImoAuxObj*>(pChild));
             else
-                return NULL;
+                return pChild;
     }
 }
 
@@ -98,14 +113,66 @@ ImoObj* Linker::add_option(ImoOptionInfo* pOpt)
     return pOpt;
 }
 
+ImoObj* Linker::add_page_info(ImoPageInfo* pPI)
+{
+    if (m_pParent && m_pParent->is_score())
+    {
+        ImoScore* pScore = dynamic_cast<ImoScore*>(m_pParent);
+        pScore->add_page_info(pPI);
+        delete pPI;
+        return NULL;
+    }
+    return pPI;
+}
+
+ImoObj* Linker::add_cursor(ImoCursorInfo* pCursor)
+{
+    if (m_pParent && m_pParent->is_document())
+    {
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(m_pParent);
+        pDoc->add_cursor_info(pCursor);
+        delete pCursor;
+        return NULL;
+    }
+    return pCursor;
+}
+
 ImoObj* Linker::add_system_info(ImoSystemInfo* pSI)
 {
     if (m_pParent && m_pParent->is_score())
     {
         ImoScore* pScore = dynamic_cast<ImoScore*>(m_pParent);
         pScore->add_sytem_info(pSI);
+        delete pSI;
+        return NULL;
     }
     return pSI;
+}
+
+ImoObj* Linker::add_text_style_info(ImoTextStyleInfo* pStyle)
+{
+    if (m_pParent && m_pParent->is_score())
+    {
+        ImoScore* pScore = dynamic_cast<ImoScore*>(m_pParent);
+        pScore->add_style_info(pStyle);
+        return NULL;
+    }
+    return pStyle;
+}
+
+ImoObj* Linker::add_font_info(ImoFontInfo* pFont)
+{
+    if (m_pParent && m_pParent->is_text_style_info())
+    {
+        ImoTextStyleInfo* pStyle = dynamic_cast<ImoTextStyleInfo*>(m_pParent);
+        pStyle->set_font_size(pFont->size);
+        pStyle->set_font_weight(pFont->weight);
+        pStyle->set_font_style(pFont->style);
+        pStyle->set_font_name(pFont->name);
+        delete pFont;
+        return NULL;
+    }
+    return pFont;
 }
 
 ImoObj* Linker::add_bezier(ImoBezierInfo* pBezier)
@@ -148,7 +215,7 @@ ImoObj* Linker::add_instrument(ImoInstrument* pInstrument)
     return pInstrument;
 }
 
-ImoObj* Linker::add_text(ImoTextString* pText)
+ImoObj* Linker::add_text(ImoScoreText* pText)
 {
     if (m_pParent)
     {
@@ -194,6 +261,16 @@ ImoObj* Linker::add_text(ImoTextString* pText)
         return add_auxobj(pText);
     }
     return pText;
+}
+
+ImoObj* Linker::add_title(ImoScoreTitle* pTitle)
+{
+    if (m_pParent && m_pParent->is_score())
+    {
+        ImoScore* pScore = dynamic_cast<ImoScore*>(m_pParent);
+        pScore->add_title(pTitle);
+    }
+    return pTitle;
 }
 
 ImoObj* Linker::add_child(int parentType, ImoObj* pImo)

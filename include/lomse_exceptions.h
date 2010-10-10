@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__EXCEPTIONS_H__
-#define __LOMSE__EXCEPTIONS_H__
+#ifndef __LOMSE_EXCEPTIONS_H__
+#define __LOMSE_EXCEPTIONS_H__
 
 
 #include <stdexcept>
@@ -43,4 +43,4 @@ public:
 
 }   //namespace lomse
 
-#endif      //__LOMSE__EXCEPTIONS_H__
+#endif      //__LOMSE_EXCEPTIONS_H__

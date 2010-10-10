@@ -13,14 +13,12 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
 //-------------------------------------------------------------------------------------
 
-#ifdef _LM_DEBUG_
+#ifdef _LOMSE_DEBUG
 
 #include <UnitTest++.h>
 #include <sstream>
@@ -29,6 +27,7 @@
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_internal_model.h"
+#include "lomse_im_figured_bass.h"
 #include "lomse_basic_model.h"
 
 using namespace UnitTest;
@@ -43,7 +42,7 @@ public:
     InternalModelTestFixture()     //SetUp fixture
     {
         m_pLibraryScope = new LibraryScope(cout);
-        m_scores_path = LML_TEST_SCORES_PATH;
+        m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
 
     ~InternalModelTestFixture()    //TearDown fixture
@@ -69,12 +68,12 @@ SUITE(InternalModelTest)
     {
         ImoClef* pClef = new ImoClef(ImoClef::k_G3);
         CHECK( pClef->has_attachments() == false );
-        ImoTextString* pText = new ImoTextString("Hello world");
+        ImoScoreText* pText = new ImoScoreText("Hello world");
         pClef->attach(pText);
         CHECK( pClef->has_attachments() == true );
         ImoObj* pImo = pClef->get_attachment(0);
-        CHECK( pImo->is_text_string() );
-        ImoTextString* pTS = dynamic_cast<ImoTextString*>( pImo );
+        CHECK( pImo->is_score_text() );
+        ImoScoreText* pTS = dynamic_cast<ImoScoreText*>( pImo );
         CHECK( pTS->get_text() == "Hello world" );
         delete pClef;
     }
@@ -94,7 +93,7 @@ SUITE(InternalModelTest)
         ImoDocument* pDoc = new ImoDocument();
         ImoContent* pContent = new ImoContent();
         pDoc->append_child(pContent);
-        ImoTextString* pText = new ImoTextString("Hello world");
+        ImoScoreText* pText = new ImoScoreText("Hello world");
         pContent->append_child(pText);
         CHECK( pDoc->get_num_content_items() == 1 );
         CHECK( pDoc->get_content_item(0) == pText );
@@ -157,7 +156,7 @@ SUITE(InternalModelTest)
         ImoMusicData* pMD = new ImoMusicData();
         pInstr->append_child(pMD);
         ImoClef* pClef = new ImoClef(ImoClef::k_G3);
-        ImoTextString* pText = new ImoTextString("Hello world");
+        ImoScoreText* pText = new ImoScoreText("Hello world");
         pClef->attach(pText);
         pMD->append_child(pClef);
         pScore->add_instrument(pInstr);
@@ -235,7 +234,7 @@ SUITE(InternalModelTest)
         ImoMusicData* pMD = new ImoMusicData();
         pInstr->append_child(pMD);
         ImoClef* pClef = new ImoClef(ImoClef::k_G3);
-        ImoTextString* pText = new ImoTextString("Hello world");
+        ImoScoreText* pText = new ImoScoreText("Hello world");
         pClef->attach(pText);
         pMD->append_child(pClef);
         pScore->add_instrument(pInstr);
@@ -249,8 +248,167 @@ SUITE(InternalModelTest)
         delete pDoc;
     }
 
+    // ImoPageInfo ---------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_PageInfoDefaults)
+    {
+        ImoPageInfo info;
+        CHECK( info.is_page_info() == true );
+        CHECK( info.get_top_margin() == 2000.0f );
+        CHECK( info.get_bottom_margin() == 2000.0f );
+        CHECK( info.get_left_margin() == 2000.0f );
+        CHECK( info.get_right_margin() == 1500.0f );
+        CHECK( info.get_binding_margin() == 0.0f );
+        CHECK( info.is_portrait() == true );
+    }
+
+    // ImoTextStyleInfo ---------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_Score_GetDefaultStyle)
+    {
+        ImoScore score;
+        ImoTextStyleInfo* pStyle = score.get_default_style_info();
+        CHECK( pStyle != NULL );
+        CHECK( pStyle->get_name() == "Default style" );
+        CHECK( pStyle->get_color() == rgba16(0,0,0,255) );
+        CHECK( pStyle->get_font_name() == "Times New Roman" );
+        CHECK( pStyle->get_font_style() == ImoFontInfo::k_normal );
+        CHECK( pStyle->get_font_weight() == ImoFontInfo::k_normal );
+        CHECK( pStyle->get_font_size() == 10 );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_Score_GetStyle)
+    {
+        ImoScore score;
+	    ImoTextStyleInfo* pStyle = new ImoTextStyleInfo();
+	    pStyle->set_name("Test style");
+        pStyle->set_color( rgba16(15,16,27,132) );
+        pStyle->set_font_name("Callamet");
+        pStyle->set_font_size(12);
+        pStyle->set_font_style(ImoFontInfo::k_normal);
+        pStyle->set_font_weight(ImoFontInfo::k_bold);
+        score.add_style_info(pStyle);
+
+        ImoTextStyleInfo* pStyle2 = score.get_style_info("Test style");
+        CHECK( pStyle == pStyle2 );
+    }
+
+    // ImoBoxInfo -------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_BoxInfoDefaults)
+    {
+        ImoBoxInfo info;
+        CHECK( info.is_box_info() == true );
+        CHECK( info.get_height() == 100.0f );
+        CHECK( info.get_width() == 160.0f );
+        CHECK( info.get_position() == TPoint(0.0f, 0.0f) );
+        CHECK( info.get_bg_color() == rgba16(255,255,255,255) );
+        CHECK( info.get_border_color() == rgba16(0,0,0,255) );
+        CHECK( info.get_border_width() == 1.0f );
+        CHECK( info.get_border_style() == k_line_solid );
+    }
+
+    // ImoCursorInfo -------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_CursorInfoDefaults)
+    {
+        ImoCursorInfo info;
+        CHECK( info.is_cursor_info() == true );
+        CHECK( info.get_instrument() == 0 );
+        CHECK( info.get_staff() == 0 );
+        CHECK( info.get_time() == 0.0f );
+        CHECK( info.get_id() == -1L );
+    }
+
+    // ImoFiguredBassInfo ---------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_63)
+    {
+        ImoFiguredBassInfo info("6 3");
+        CHECK( info.get_quality(3) == k_interval_as_implied );
+        CHECK( info.get_source(3) == "3" );
+        CHECK( info.get_prefix(3) == "" );
+        CHECK( info.get_suffix(3) == "" );
+        CHECK( info.get_over(3) == "" );
+        CHECK( info.get_figured_bass_string() == "6 3" );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_5)
+    {
+        ImoFiguredBassInfo info("5");
+        //CHECK( info.get_quality(3) == k_interval_as_implied );
+        //CHECK( info.get_source(3) == "3" );
+        //CHECK( info.get_prefix(3) == "" );
+        //CHECK( info.get_suffix(3) == "" );
+        //CHECK( info.get_over(3) == "" );
+        CHECK( info.get_figured_bass_string() == "5" );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_6)
+    {
+        ImoFiguredBassInfo info("6");
+        //CHECK( info.get_quality(3) == k_interval_as_implied );
+        //CHECK( info.get_source(3) == "3" );
+        //CHECK( info.get_prefix(3) == "" );
+        //CHECK( info.get_suffix(3) == "" );
+        //CHECK( info.get_over(3) == "" );
+        CHECK( info.get_figured_bass_string() == "6" );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_64)
+    {
+        ImoFiguredBassInfo info("6 4");
+        //CHECK( info.get_quality(3) == k_interval_as_implied );
+        //CHECK( info.get_source(3) == "3" );
+        //CHECK( info.get_prefix(3) == "" );
+        //CHECK( info.get_suffix(3) == "" );
+        //CHECK( info.get_over(3) == "" );
+        CHECK( info.get_figured_bass_string() == "6 4" );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_7)
+    {
+        ImoFiguredBassInfo info("7");
+        //CHECK( info.get_quality(3) == k_interval_as_implied );
+        //CHECK( info.get_source(3) == "3" );
+        //CHECK( info.get_prefix(3) == "" );
+        //CHECK( info.get_suffix(3) == "" );
+        //CHECK( info.get_over(3) == "" );
+        CHECK( info.get_figured_bass_string() == "7" );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_7m)
+    {
+        ImoFiguredBassInfo info("7/");
+        //CHECK( info.get_quality(3) == k_interval_as_implied );
+        //CHECK( info.get_source(3) == "3" );
+        //CHECK( info.get_prefix(3) == "" );
+        //CHECK( info.get_suffix(3) == "" );
+        //CHECK( info.get_over(3) == "" );
+        CHECK( info.get_figured_bass_string() == "7/" );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_4)
+    {
+        ImoFiguredBassInfo info("4");   //5 4
+        CHECK( info.is_sounding(3) == false );
+        CHECK( info.is_sounding(5) == true );
+        CHECK( info.get_figured_bass_string() == "4" );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_9)
+    {
+        ImoFiguredBassInfo info("9");
+        //CHECK( info.get_quality(3) == k_interval_as_implied );
+        //CHECK( info.get_source(3) == "3" );
+        //CHECK( info.get_prefix(3) == "" );
+        //CHECK( info.get_suffix(3) == "" );
+        //CHECK( info.get_over(3) == "" );
+        CHECK( info.get_figured_bass_string() == "9" );
+    }
+
 }
 
 
-#endif  // _LM_DEBUG_
+#endif  // _LOMSE_DEBUG
 

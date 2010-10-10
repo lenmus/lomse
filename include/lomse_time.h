@@ -13,15 +13,13 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__TIME_H__
-#define __LOMSE__TIME_H__
+#ifndef __LOMSE_TIME_H__
+#define __LOMSE_TIME_H__
 
 
 namespace lomse
@@ -40,4 +38,4 @@ extern bool is_greater_time(float t1, float t2);
 
 }   //namespace lomse
 
-#endif      //__LOMSE__TIME_H__
+#endif      //__LOMSE_TIME_H__

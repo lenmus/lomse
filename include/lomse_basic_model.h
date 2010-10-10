@@ -20,8 +20,8 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__BASIC_MODEL_H__        //to avoid nested includes
-#define __LOMSE__BASIC_MODEL_H__
+#ifndef __LOMSE_BASIC_MODEL_H__        //to avoid nested includes
+#define __LOMSE_BASIC_MODEL_H__
 
 #include <list>
 
@@ -37,9 +37,9 @@ class ImoTuplet;
 class ImoTie;
 
 
-// BasicModel: A container for the objects composing the basic model
+// InternalModel: A container for the objects composing the internal model
 //----------------------------------------------------------------------------------
-class BasicModel
+class InternalModel
 {
 protected:
     ImoObj* m_pRoot;
@@ -48,8 +48,8 @@ protected:
     std::list<ImoTie*> m_ties;
 
 public:
-    BasicModel();
-    ~BasicModel();
+    InternalModel();
+    ~InternalModel();
 
     //building the model
     inline void set_root(ImoObj* pRoot) { m_pRoot = pRoot; }
@@ -72,5 +72,5 @@ protected:
 
 }   //namespace lomse
 
-#endif    // __LOMSE__BASIC_MODEL_H__
+#endif    // __LOMSE_BASIC_MODEL_H__
 

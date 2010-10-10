@@ -12,20 +12,19 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
-//  
 //
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
 //-------------------------------------------------------------------------------------
 
-#ifndef __LOMSE__INTERNAL_MODEL_H__        //to avoid nested includes
-#define __LOMSE__INTERNAL_MODEL_H__
+#ifndef __LOMSE_INTERNAL_MODEL_H__        //to avoid nested includes
+#define __LOMSE_INTERNAL_MODEL_H__
 
 #include <string>
 #include <list>
 #include <vector>
+#include <map>
 #include "lomse_visitor.h"
 #include "lomse_tree.h"
 #include "lomse_basic.h"
@@ -36,6 +35,52 @@ namespace lomse
 {
 
 
+// enums for common values: aligment, justification, placement, etc.
+//--------------------------------------------------------------------
+
+//line styles
+enum ELineStyle { k_line_none=0, k_line_solid, k_line_long_dash,
+                  k_line_short_dash, k_line_dot, k_line_dot_dash, };
+
+//line termination styles
+enum ELineCap { k_cap_none = 0, k_cap_arrowhead, k_cap_arrowtail,
+                k_cap_circle, k_cap_square, k_cap_diamond, };
+
+//line edges
+enum ELineEdge {
+    k_edge_normal = 0,        // edge is perpendicular to line
+    k_edge_vertical,          // edge is always a vertical line
+    k_edge_horizontal         // edge is always a horizontal line
+};
+
+//EVAlign is used to indicate vertical alignment within a block: to the top,
+//middle or bottom
+enum EVAlign
+{
+    k_valign_default = 0,   //alignment is not specified
+    k_valign_top,
+    k_valign_middle,
+    k_valign_bottom,
+};
+
+// EHAlign is used to indicate object justification
+enum EHAlign
+{
+    k_halign_default = 0,   //alignment is not specified
+    k_halign_left,          //object aligned on left side
+    k_halign_right,         //object aligned on right side
+    k_halign_justify,       //object justified on both sides
+    k_halign_center,        //object centered
+};
+
+// EPlacement indicates whether something is above or below another element,
+// such as a note or a notation.
+enum EPlacement
+{
+    k_placement_default = 0,
+    k_placement_above,
+    k_placement_below
+};
 
 
 
@@ -45,7 +90,6 @@ class LdpElement;
 
 class ImoAttachments;
 class ImoAuxObj;
-class ImoColorInfo;
 class ImoDocObj;
 class ImoInstrument;
 class ImoMusicData;
@@ -53,7 +97,8 @@ class ImoNote;
 class ImoNoteRest;
 class ImoObjVisitor;
 class ImoOptionInfo;
-class ImoTextString;
+class ImoScoreText;
+class ImoTextStyleInfo;
 
 class DtoAuxObj;
 class DtoBarline;
@@ -110,8 +155,12 @@ public:
         // ImoObj (A)
         k_obj=0,
             // ImoSimpleObj (A)
-            k_simpleobj, k_beam_info, k_bezier, k_color_info, k_instr_group, k_midi_info,
-            k_option, k_system_info, k_text_info, k_tie_info, k_tuplet_info,
+            k_simpleobj, k_beam_info, k_bezier_info,
+            k_border_info, k_box_info, k_color_info, k_cursor_info, k_figured_bass_info,
+            k_font_info, k_instr_group,
+            k_line_info, k_midi_info, k_option, k_page_info, k_point_info,
+            k_size_info, k_system_info, k_text_info, k_text_style_info,
+            k_tie_info, k_tuplet_info,
                 //ImoCollection(A)
                 k_collection, k_attachments, k_content, k_instruments,
                 k_instrument_groups, k_music_data, k_options,
@@ -126,11 +175,13 @@ public:
                 k_componentobj,
 
                     // ImoStaffObj (A)
-                    k_staffobj, k_barline, k_clef, k_key_signature, k_time_signature, k_note, k_rest,
-                    k_go_back_fwd, k_metronome_mark, k_control, k_spacer, k_figured_bass,
+                    k_staffobj, k_barline, k_clef, k_key_signature, k_time_signature,
+                    k_note, k_rest, k_go_back_fwd, k_metronome_mark, k_control,
+                    k_spacer, k_figured_bass,
 
                     // ImoAuxObj (A)
-                    k_auxobj, k_text_string, k_fermata,
+                    k_auxobj, k_fermata, k_line, k_score_text, k_score_title,
+                    k_text_box,
                         //ImoRelObj (A)
                         k_relobj,
                             // BinaryRelObj (A)
@@ -159,19 +210,31 @@ public:
 	inline bool has_children() { return !is_terminal(); }
 
     //simple objs
+        // properties
     inline bool is_simpleobj() { return m_objtype >= k_simpleobj && m_objtype < k_docobj; }
     inline bool is_beam_info() { return m_objtype == k_beam_info; }
-    inline bool is_bezier() { return m_objtype == k_bezier; }
+    inline bool is_bezier_info() { return m_objtype == k_bezier_info; }
+    inline bool is_border_info() { return m_objtype == k_border_info; }
+    inline bool is_box_info() { return m_objtype == k_box_info; }
     inline bool is_color_info() { return m_objtype == k_color_info; }
-    inline bool is_content() { return m_objtype == k_content; }
+    inline bool is_cursor_info() { return m_objtype == k_cursor_info; }
+    inline bool is_figured_bass_info() { return m_objtype == k_figured_bass_info; }
+    inline bool is_font_info() { return m_objtype == k_font_info; }
     inline bool is_instr_group() { return m_objtype == k_instr_group; }
-    inline bool is_music_data() { return m_objtype == k_music_data; }
+    inline bool is_line_info() { return m_objtype == k_line_info; }
     inline bool is_midi_info() { return m_objtype == k_midi_info; }
-    inline bool is_option() { return m_objtype == k_option; }
+    inline bool is_page_info() { return m_objtype == k_page_info; }
+    inline bool is_point_info() { return m_objtype == k_point_info; }
+    inline bool is_size_info() { return m_objtype == k_size_info; }
     inline bool is_system_info() { return m_objtype == k_system_info; }
     inline bool is_text_info() { return m_objtype == k_text_info; }
+    inline bool is_text_style_info() { return m_objtype == k_text_style_info; }
     inline bool is_tie_info() { return m_objtype == k_tie_info; }
     inline bool is_tuplet_info() { return m_objtype == k_tuplet_info; }
+        // containers
+    inline bool is_content() { return m_objtype == k_content; }
+    inline bool is_music_data() { return m_objtype == k_music_data; }
+    inline bool is_option() { return m_objtype == k_option; }
 
     // doc objs
     inline bool is_docobj() { return m_objtype >= k_docobj; }
@@ -187,8 +250,6 @@ public:
 
 	// staff objs
 	inline bool is_staffobj() { return m_objtype >= k_staffobj && m_objtype < k_auxobj; }
-
-    //StaffObjs
     inline bool is_barline() { return m_objtype == k_barline; }
     inline bool is_clef() { return m_objtype == k_clef; }
     inline bool is_key_signature() { return m_objtype == k_key_signature; }
@@ -204,8 +265,10 @@ public:
 
     // aux objs
 	inline bool is_auxobj() { return m_objtype >= k_auxobj; }
-    inline bool is_text_string() { return m_objtype == k_text_string; }
     inline bool is_fermata() { return m_objtype == k_fermata; }
+    inline bool is_line() { return m_objtype == k_line; }
+    inline bool is_score_text() { return m_objtype == k_score_text; }
+    inline bool is_score_title() { return m_objtype == k_score_title; }
 
     // rel objs
     inline bool is_relobj() { return m_objtype >= k_relobj && m_objtype < k_binary_relobj; }
@@ -443,54 +506,9 @@ public:
 
 
 //===================================================
-// Real objects
+// Simple objects: Info and Dto
 //===================================================
 
-//----------------------------------------------------------------------------------
-class ImoAttachments : public ImoCollection
-{
-public:
-    ImoAttachments() : ImoCollection(ImoObj::k_attachments) {}
-    ~ImoAttachments() {}
-
-};
-
-//----------------------------------------------------------------------------------
-class ImoBarline : public ImoStaffObj
-{
-protected:
-    long m_type;
-
-public:
-    ImoBarline(int type) : ImoStaffObj(ImoObj::k_barline) , m_type(type) {}
-    ImoBarline(DtoBarline& dto);
-    ~ImoBarline() {}
-
-	enum { k_simple=0, k_double, k_start, k_end, k_end_repetition, k_start_repetition,
-           k_double_repetition, };
-
-    //getters and setters
-    inline int get_type() { return m_type; }
-    //inline void set_type(int type) { m_type = type; }
-
-    //overrides: barlines always in staff 0
-    void set_staff(int staff) { m_staff = 0; }
-
-};
-
-//----------------------------------------------------------------------------------
-class ImoBeam : public ImoMultiRelObj
-{
-public:
-    ImoBeam() : ImoMultiRelObj(ImoObj::k_beam) {}
-    ~ImoBeam() {}
-
-    //type of beam
-    enum { k_none = 0, k_begin, k_continue, k_end, k_forward, k_backward, };
-
-};
-
-// raw info about a note beam
 //----------------------------------------------------------------------------------
 class ImoBeamInfo : public ImoSimpleObj
 {
@@ -533,7 +551,7 @@ protected:
     TPoint m_tPoints[4];   //start, end, ctrol1, ctrol2
 
 public:
-    ImoBezierInfo() : ImoSimpleObj(ImoObj::k_bezier) {}
+    ImoBezierInfo() : ImoSimpleObj(ImoObj::k_bezier_info) {}
     ~ImoBezierInfo() {}
 
 	enum { k_start=0, k_end, k_ctrol1, k_ctrol2, };     // point number
@@ -545,8 +563,360 @@ public:
 };
 
 //----------------------------------------------------------------------------------
+class ImoBorderDto : public ImoSimpleObj
+{
+    rgba16        m_color;
+    Tenths        m_width;
+    ELineStyle    m_style;
+
+public:
+    ImoBorderDto() : ImoSimpleObj(ImoObj::k_border_info)
+        , m_color(rgba16(0,0,0,255)), m_width(1.0f), m_style(k_line_solid) {}
+    ~ImoBorderDto() {}
+
+    //getters
+    inline rgba16 get_color() { return m_color; }
+    inline Tenths get_width() { return m_width; }
+    inline ELineStyle get_style() { return m_style; }
+
+    //setters
+    inline void set_color(rgba16 value) { m_color = value; }
+    inline void set_width(Tenths value) { m_width = value; }
+    inline void set_style(ELineStyle value) { m_style = value; }
+
+};
+
+//----------------------------------------------------------------------------------
+class ImoColorDto : public ImoSimpleObj
+{
+protected:
+    rgba16 m_color;
+    bool m_ok;
+
+public:
+    ImoColorDto() : ImoSimpleObj(ImoObj::k_color_info), m_color(0, 0, 0, 255), m_ok(true) {}
+    ImoColorDto(int16u r, int16u g, int16u b, int16u a = 255);
+    ~ImoColorDto() {}
+
+    rgba16& get_from_rgb_string(const std::string& rgb);
+    rgba16& get_from_rgba_string(const std::string& rgba);
+    rgba16& get_from_string(const std::string& hex);
+    inline bool is_ok() { return m_ok; }
+
+    inline int16u red() { return m_color.r; }
+    inline int16u blue() { return m_color.b; }
+    inline int16u green() { return m_color.g; }
+    inline int16u alpha() { return m_color.a; }
+    inline rgba16& get_color() { return m_color; }
 
 
+protected:
+    int16u convert_from_hex(const std::string& hex);
+
+};
+
+//----------------------------------------------------------------------------------
+class ImoCursorInfo : public ImoSimpleObj
+{
+protected:
+    int m_instrument;
+    int m_staff;
+    float m_time;
+    long m_id;
+
+public:
+    ImoCursorInfo() : ImoSimpleObj(ImoObj::k_cursor_info)
+                    , m_instrument(0), m_staff(0), m_time(0.0f), m_id(-1L) {}
+    ~ImoCursorInfo() {}
+
+    //getters
+    inline int get_instrument() { return m_instrument; }
+    inline int get_staff() { return m_staff; }
+    inline float get_time() { return m_time; }
+    inline long get_id() { return m_id; }
+
+    //setters
+    inline void set_instrument(int value) { m_instrument = value; }
+    inline void set_staff(int value) { m_staff = value; }
+    inline void set_time(float value) { m_time = value; }
+    inline void set_id(long value) { m_id = value; }
+};
+
+//----------------------------------------------------------------------------------
+class ImoLineInfo : public ImoSimpleObj
+{
+protected:
+    ELineStyle  m_lineStyle;
+    ELineEdge   m_startEdge;
+    ELineEdge   m_endEdge;
+    ELineCap    m_startStyle;
+    ELineCap    m_endStyle;
+    rgba16      m_color;
+    Tenths      m_width;
+    TPoint      m_startPoint;
+    TPoint      m_endPoint;
+
+public:
+
+    ImoLineInfo()
+        : ImoSimpleObj(ImoObj::k_line_info)
+        , m_lineStyle(k_line_solid)
+        , m_startEdge(k_edge_normal)
+        , m_endEdge(k_edge_normal)
+        , m_startStyle(k_cap_none)
+        , m_endStyle(k_cap_none)
+        , m_color(rgba16(0,0,0,255))
+        , m_width(1.0f)
+        , m_startPoint(0.0f, 0.0f)
+        , m_endPoint(0.0f, 0.0f)
+    {
+    }
+
+    ImoLineInfo(ImoLineInfo& info)
+        : ImoSimpleObj(ImoObj::k_line_info)
+        , m_lineStyle( info.get_line_style() )
+        , m_startEdge( info.get_start_edge() )
+        , m_endEdge( info.get_end_edge() )
+        , m_startStyle( info.get_start_style() )
+        , m_endStyle( info.get_end_style() )
+        , m_color( info.get_color() )
+        , m_width( info.get_width() )
+        , m_startPoint( info.get_start_point() )
+        , m_endPoint( info.get_end_point() )
+    {
+    }
+
+    ~ImoLineInfo() {}
+
+    //getters
+    inline ELineStyle get_line_style() { return m_lineStyle; }
+    inline ELineEdge get_start_edge() { return m_startEdge; }
+    inline ELineEdge get_end_edge() { return m_endEdge; }
+    inline ELineCap get_start_style() { return m_startStyle; }
+    inline ELineCap get_end_style() { return m_endStyle; }
+    inline rgba16 get_color() { return m_color; }
+    inline Tenths get_width() { return m_width; }
+    inline TPoint get_start_point() { return m_startPoint; }
+    inline TPoint get_end_point() { return m_endPoint; }
+
+    //setters
+    inline void set_line_style(ELineStyle value) { m_lineStyle = value; }
+    inline void set_start_edge(ELineEdge value) { m_startEdge = value; }
+    inline void set_end_edge(ELineEdge value) { m_endEdge = value; }
+    inline void set_start_style(ELineCap value) { m_startStyle = value; }
+    inline void set_end_style(ELineCap value) { m_endStyle = value; }
+    inline void set_color(rgba16 value) { m_color = value; }
+    inline void set_width(Tenths value) { m_width = value; }
+    inline void set_start_point(TPoint point) { m_startPoint = point; }
+    inline void set_end_point(TPoint point) { m_endPoint = point; }
+
+};
+
+//----------------------------------------------------------------------------------
+class ImoBoxInfo : public ImoSimpleObj
+{
+//<location>[<size>][<color>][<border>]<text>[<anchorLine>]
+protected:
+    //block position and size
+    TSize     m_size;
+    TPoint    m_topLeftPoint;
+
+    ////block position within a possible parent block
+    //EHAlign       m_hAlign;
+    //EVAlign       m_vAlign;
+
+    //block looking
+    rgba16        m_bgColor;
+    rgba16        m_borderColor;
+    Tenths        m_borderWidth;
+    ELineStyle    m_borderStyle;
+
+public:
+    ImoBoxInfo()
+        : ImoSimpleObj(k_box_info)
+        , m_size(TSize(160.0f, 100.0f))
+        , m_topLeftPoint(TPoint(0.0f, 0.0f))
+        , m_bgColor( rgba16(255, 255, 255, 255) )
+        , m_borderColor( rgba16(0, 0, 0, 255) )
+        , m_borderWidth(1.0f)
+        , m_borderStyle(k_line_solid)
+    {
+    }
+
+    ~ImoBoxInfo() {}
+
+    //getters
+    inline Tenths get_height() { return m_size.height; }
+    inline Tenths get_width() { return m_size.width; }
+    inline TPoint get_position() { return m_topLeftPoint; }
+    inline rgba16 get_bg_color() { return m_bgColor; }
+    inline rgba16 get_border_color() { return m_borderColor; }
+    inline Tenths get_border_width() { return m_borderWidth; }
+    inline ELineStyle get_border_style() { return m_borderStyle; }
+
+    //setters
+    inline void set_position_x(Tenths value) { m_topLeftPoint.x = value; }
+    inline void set_position_y(Tenths value) { m_topLeftPoint.y = value; }
+    inline void set_size(TSize size) { m_size = size; }
+    inline void set_bg_color(rgba16 color) { m_bgColor = color; }
+    inline void set_border(ImoBorderDto* pBorder) {
+        m_borderColor = pBorder->get_color();
+        m_borderWidth = pBorder->get_width();
+        m_borderStyle = pBorder->get_style();
+    }
+};
+
+//----------------------------------------------------------------------------------
+class ImoMidiInfo : public ImoSimpleObj
+{
+protected:
+    int m_instr;
+    int m_channel;
+
+public:
+    ImoMidiInfo();
+    ImoMidiInfo(ImoMidiInfo& dto);
+    ~ImoMidiInfo() {}
+
+    //getters
+    inline int get_instrument() { return m_instr; }
+    inline int get_channel() { return m_channel; }
+
+    //setters
+    inline void set_instrument(int value) { m_instr = value; }
+    inline void set_channel(int value) { m_channel = value; }
+
+};
+
+//----------------------------------------------------------------------------------
+class ImoFontInfo : public ImoSimpleObj
+{
+public:
+    string name;
+    int size;         // in points
+    int style;        // k_normal, k_italic
+    int weight;       // k_normal, k_bold
+
+    ImoFontInfo() : ImoSimpleObj(ImoObj::k_font_info)
+                  , size(8), style(k_normal), weight(k_normal) {}
+
+    enum { k_normal=0, k_italic, k_bold, };
+};
+
+//----------------------------------------------------------------------------------
+class ImoTextInfo : public ImoSimpleObj
+{
+protected:
+    string m_text;
+    ImoTextStyleInfo* m_pStyle;
+
+public:
+    ImoTextInfo(const std::string& value="")
+        : ImoSimpleObj(ImoObj::k_text_info), m_text(value), m_pStyle(NULL) {}
+    ~ImoTextInfo() {}
+
+    //getters
+    inline string& get_text() { return m_text; }
+    inline ImoTextStyleInfo* get_style() { return m_pStyle; }
+    const std::string& get_font_name();
+    int get_font_size();
+    int get_font_style();
+    int get_font_weight();
+    rgba16 get_color();
+
+    //setters
+    inline void set_text(const string& text) { m_text = text; }
+    inline void set_style(ImoTextStyleInfo* pStyle) { m_pStyle = pStyle; }
+};
+
+
+//===================================================
+// Real objects
+//===================================================
+
+//----------------------------------------------------------------------------------
+class ImoAttachments : public ImoCollection
+{
+public:
+    ImoAttachments() : ImoCollection(ImoObj::k_attachments) {}
+    ~ImoAttachments() {}
+
+};
+
+//----------------------------------------------------------------------------------
+class ImoBarline : public ImoStaffObj
+{
+protected:
+    long m_type;
+
+public:
+    ImoBarline(DtoBarline& dto, long id);
+    ~ImoBarline() {}
+
+	enum { k_simple=0, k_double, k_start, k_end, k_end_repetition, k_start_repetition,
+           k_double_repetition, };
+
+    //getters
+    inline int get_type() { return m_type; }
+
+    //overrides: barlines always in staff 0
+    void set_staff(int staff) { m_staff = 0; }
+
+};
+
+//----------------------------------------------------------------------------------
+class ImoBeam : public ImoMultiRelObj
+{
+public:
+    ImoBeam() : ImoMultiRelObj(ImoObj::k_beam) {}
+    ~ImoBeam() {}
+
+    //type of beam
+    enum { k_none = 0, k_begin, k_continue, k_end, k_forward, k_backward, };
+
+};
+
+//----------------------------------------------------------------------------------
+class ImoBlock : public ImoAuxObj
+{
+protected:
+    ImoBoxInfo m_box;
+
+    ImoBlock(int objtype) : ImoAuxObj(objtype) {}
+    ImoBlock(int objtype, ImoBoxInfo& box) : ImoAuxObj(objtype), m_box(box) {}
+
+public:
+    ~ImoBlock() {}
+
+};
+
+//----------------------------------------------------------------------------------
+class ImoTextBox : public ImoBlock
+{
+protected:
+    ImoTextInfo m_text;
+    ImoLineInfo m_line;
+    bool m_fHasAnchorLine;
+    //TPoint m_anchorJoinPoint;     //point on the box rectangle
+
+public:
+    ImoTextBox() : ImoBlock(k_text_box), m_fHasAnchorLine(false) {}
+    ImoTextBox(ImoBoxInfo& box) : ImoBlock(k_text_box, box), m_fHasAnchorLine(false) {}
+    ~ImoTextBox() {}
+
+    inline ImoBoxInfo* get_box_info() { return &m_box; }
+    inline ImoLineInfo* get_anchor_line_info() { return &m_line; }
+    inline bool has_anchor_line() { return m_fHasAnchorLine; }
+
+    inline const std::string& get_text() { return m_text.get_text(); }
+    inline void set_text(ImoTextInfo* pTI) { m_text = *pTI; }
+    inline void set_anchor_line(ImoLineInfo* pLine) {
+        m_line = *pLine;
+        m_fHasAnchorLine = true;
+    }
+};
+
+//----------------------------------------------------------------------------------
 class ImoClef : public ImoStaffObj
 {
 protected:
@@ -584,36 +954,6 @@ public:
     //getters and setters
     inline int get_clef_type() { return m_clefType; }
     inline void set_clef_type(int type) { m_clefType = type; }
-
-};
-
-// a color in rgba16 format
-//----------------------------------------------------------------------------------
-class ImoColorInfo : public ImoSimpleObj
-{
-protected:
-    rgba16 m_color;
-    bool m_ok;
-
-public:
-    ImoColorInfo() : ImoSimpleObj(ImoObj::k_color_info), m_color(0, 0, 0, 255), m_ok(true) {}
-    ImoColorInfo(int16u r, int16u g, int16u b, int16u a = 255);
-    ~ImoColorInfo() {}
-
-    rgba16& get_from_rgb_string(const std::string& rgb);
-    rgba16& get_from_rgba_string(const std::string& rgba);
-    rgba16& get_from_string(const std::string& hex);
-    inline bool is_ok() { return m_ok; }
-
-    inline int16u red() { return m_color.r; }
-    inline int16u blue() { return m_color.b; }
-    inline int16u green() { return m_color.g; }
-    inline int16u alpha() { return m_color.a; }
-    inline rgba16& get_color() { return m_color; }
-
-
-protected:
-    int16u convert_from_hex(const std::string& hex);
 
 };
 
@@ -659,6 +999,10 @@ public:
     int get_num_content_items();
     ImoContent* get_content();
 
+    //cursor
+    //TODO
+    void add_cursor_info(ImoCursorInfo* pCursor) {};
+
 };
 
 //----------------------------------------------------------------------------------
@@ -683,25 +1027,6 @@ public:
     //setters
     inline void set_placement(int placement) { m_placement = placement; }
     inline void set_symbol(int symbol) { m_symbol = symbol; }
-
-};
-
-//----------------------------------------------------------------------------------
-class ImoFiguredBass : public ImoStaffObj
-{
-protected:
-    long m_type;
-
-public:
-    ImoFiguredBass() : ImoStaffObj(ImoObj::k_figured_bass) {}
-    ~ImoFiguredBass() {}
-
-	enum { kSimple=0, kDouble, kStart, kEnd, kEndRepetition, kStartRepetition,
-           k_double_repetition, };
-
-    //getters and setters
-    inline int get_type() { return m_type; }
-    inline void set_type(int type) { m_type = type; }
 
 };
 
@@ -731,57 +1056,46 @@ public:
 };
 
 //----------------------------------------------------------------------------------
-class ImoMidiInfo : public ImoSimpleObj
-{
-protected:
-    int m_instr;
-    int m_channel;
-
-public:
-    ImoMidiInfo();
-    ImoMidiInfo(ImoMidiInfo& dto);
-    ~ImoMidiInfo() {}
-
-    //getters
-    inline int get_instrument() { return m_instr; }
-    inline int get_channel() { return m_channel; }
-
-    //setters
-    inline void set_instrument(int value) { m_instr = value; }
-    inline void set_channel(int value) { m_channel = value; }
-
-};
-
-//----------------------------------------------------------------------------------
-class ImoTextInfo : public ImoSimpleObj
-{
-protected:
-    string  m_text;
-
-public:
-    ImoTextInfo(const std::string& value="")
-        : ImoSimpleObj(ImoObj::k_text_info), m_text(value) {}
-    ~ImoTextInfo() {}
-
-    //getters and setters
-    inline string& get_text() { return m_text; }
-    inline void set_text(const string& text) { m_text = text; }
-
-};
-
-//----------------------------------------------------------------------------------
-class ImoTextString : public ImoAuxObj
+class ImoScoreText : public ImoAuxObj
 {
 protected:
     ImoTextInfo m_text;
+    int m_hAlign;
+
+    ImoScoreText(int objtype, const std::string& value)
+        : ImoAuxObj(objtype), m_text(value), m_hAlign(k_halign_left) {}
 
 public:
-    ImoTextString(const std::string& value="")
-        : ImoAuxObj(ImoObj::k_text_string), m_text(value) {}
-    ~ImoTextString() {}
+    ImoScoreText(const std::string& value="")
+        : ImoAuxObj(ImoObj::k_score_text), m_text(value), m_hAlign(k_halign_left) {}
+    virtual ~ImoScoreText() {}
 
+    //getters
+    inline int get_h_align() { return m_hAlign; }
     inline string& get_text() { return m_text.get_text(); }
+    inline ImoTextStyleInfo* get_style() { return m_text.get_style(); }
+    inline ImoTextInfo* get_text_info() { return &m_text; }
 
+    //setters
+    inline void set_h_align(int value) { m_hAlign = value; }
+    inline void set_style(ImoTextStyleInfo* pStyle) { m_text.set_style(pStyle); }
+
+};
+
+//----------------------------------------------------------------------------------
+class ImoScoreTitle : public ImoScoreText
+{
+protected:
+    int m_hAlign;
+
+public:
+    ImoScoreTitle(const std::string& value="", int hAlign=k_halign_center)
+        : ImoScoreText(ImoObj::k_score_title, value), m_hAlign(hAlign) {}
+    ~ImoScoreTitle() {}
+
+    inline int get_h_align() { return m_hAlign; }
+    inline void set_style(ImoTextStyleInfo* pStyle) { m_text.set_style(pStyle); }
+    inline ImoTextStyleInfo* get_style() { return m_text.get_style(); }
 };
 
 //----------------------------------------------------------------------------------
@@ -790,8 +1104,8 @@ class ImoInstrGroup : public ImoSimpleObj
 protected:
     bool m_fJoinBarlines;
     int m_symbol;           // enum k_none, k_brace, k_bracket, ...
-    ImoTextString m_name;
-    ImoTextString m_abbrev;
+    ImoScoreText m_name;
+    ImoScoreText m_abbrev;
     std::list<ImoInstrument*> m_instruments;
 
 public:
@@ -807,8 +1121,8 @@ public:
     inline const std::string& get_abbrev() { return m_abbrev.get_text(); }
 
     //setters
-    void set_name(ImoTextString* pText);
-    void set_abbrev(ImoTextString* pText);
+    void set_name(ImoScoreText* pText);
+    void set_abbrev(ImoScoreText* pText);
     inline void set_symbol(int symbol) { m_symbol = symbol; }
     inline void set_join_barlines(bool value) { m_fJoinBarlines = value; }
 
@@ -825,8 +1139,8 @@ class ImoInstrument : public ImoContainerObj
 {
 protected:
     int m_numStaves;
-    ImoTextString m_name;
-    ImoTextString m_abbrev;
+    ImoScoreText m_name;
+    ImoScoreText m_abbrev;
     ImoMidiInfo m_midi;
     ImoInstrGroup* m_pGroup;
 
@@ -846,8 +1160,8 @@ public:
 
     //setters
     inline void set_num_staves(int staves) { m_numStaves = staves; }
-    void set_name(ImoTextString* pText);
-    void set_abbrev(ImoTextString* pText);
+    void set_name(ImoScoreText* pText);
+    void set_abbrev(ImoScoreText* pText);
     void set_midi_info(ImoMidiInfo* pInfo);
     inline void set_in_group(ImoInstrGroup* pGroup) { m_pGroup = pGroup; }
 
@@ -891,6 +1205,20 @@ public:
 
     //overrides: key signatures always in staff 0
     void set_staff(int staff) { m_staff = 0; }
+
+};
+
+//----------------------------------------------------------------------------------
+class ImoLine : public ImoAuxObj
+{
+    ImoLineInfo m_lineInfo;
+
+public:
+    //ImoLine() : ImoStaffObj(ImoObj::k_line) {}
+    ImoLine(ImoLineInfo& info);
+    ~ImoLine() {}
+
+    inline ImoLineInfo* get_line_info() { return &m_lineInfo; }
 
 };
 
@@ -1005,6 +1333,78 @@ public:
 };
 
 //----------------------------------------------------------------------------------
+class ImoPageInfo : public ImoSimpleObj
+{
+protected:
+    LUnits  m_uLeftMargin;
+    LUnits  m_uRightMargin;
+    LUnits  m_uTopMargin;
+    LUnits  m_uBottomMargin;
+    LUnits  m_uBindingMargin;
+    USize   m_uPageSize;
+    bool    m_fPortrait;
+
+public:
+    ImoPageInfo();
+    ImoPageInfo(ImoPageInfo& dto);
+    ~ImoPageInfo() {}
+
+    //getters
+    inline LUnits get_left_margin() { return m_uLeftMargin; }
+    inline LUnits get_right_margin() { return m_uRightMargin; }
+    inline LUnits get_top_margin() { return m_uTopMargin; }
+    inline LUnits get_bottom_margin() { return m_uBottomMargin; }
+    inline LUnits get_binding_margin() { return m_uBindingMargin; }
+    inline bool is_portrait() { return m_fPortrait; }
+    inline USize get_page_size() { return m_uPageSize; }
+    inline LUnits get_page_width() { return m_uPageSize.width; }
+    inline LUnits get_page_height() { return m_uPageSize.height; }
+
+    //setters
+    inline void set_left_margin(LUnits value) { m_uLeftMargin = value; }
+    inline void set_right_margin(LUnits value) { m_uRightMargin = value; }
+    inline void set_top_margin(LUnits value) { m_uTopMargin = value; }
+    inline void set_bottom_margin(LUnits value) { m_uBottomMargin = value; }
+    inline void set_binding_margin(LUnits value) { m_uBindingMargin = value; }
+    inline void set_portrait(bool value) { m_fPortrait = value; }
+    inline void set_page_size(USize uPageSize) { m_uPageSize = uPageSize; }
+    inline void set_page_width(LUnits value) { m_uPageSize.width = value; }
+    inline void set_page_height(LUnits value) { m_uPageSize.height = value; }
+};
+
+//----------------------------------------------------------------------------------
+class ImoPointDto : public ImoSimpleObj
+{
+    TPoint m_point;
+
+public:
+    ImoPointDto() : ImoSimpleObj(ImoObj::k_point_info) {}
+    ~ImoPointDto() {}
+
+    inline TPoint get_point() { return m_point; }
+
+    inline void set_x(Tenths x) { m_point.x = x; }
+    inline void set_y(Tenths y) { m_point.y = y; }
+
+};
+
+//----------------------------------------------------------------------------------
+class ImoSizeDto : public ImoSimpleObj
+{
+    TSize m_size;
+
+public:
+    ImoSizeDto() : ImoSimpleObj(ImoObj::k_size_info) {}
+    ~ImoSizeDto() {}
+
+    inline TSize get_size() { return m_size; }
+
+    inline void set_width(Tenths w) { m_size.width = w; }
+    inline void set_height(Tenths h) { m_size.height = h; }
+
+};
+
+//----------------------------------------------------------------------------------
 class ImoSpacer : public ImoStaffObj
 {
 protected:
@@ -1024,14 +1424,43 @@ public:
 };
 
 //----------------------------------------------------------------------------------
+class ImoTextStyleInfo : public ImoSimpleObj
+{
+protected:
+    string m_name;
+    ImoFontInfo m_fontInfo;
+    rgba16 m_color;
+
+public:
+    ImoTextStyleInfo() : ImoSimpleObj(ImoObj::k_text_style_info) {}
+    ~ImoTextStyleInfo() {}
+
+    //getters
+    inline const std::string& get_name() { return m_name; }
+    inline const std::string& get_font_name() { return m_fontInfo.name; }
+    inline int get_font_size() { return m_fontInfo.size; }
+    inline int get_font_style() { return m_fontInfo.style; }
+    inline int get_font_weight() { return m_fontInfo.weight; }
+    inline rgba16 get_color() { return m_color; }
+
+    //setters
+    inline void set_name (const std::string& value) { m_name = value; }
+    inline void set_font_name(const std::string& value) { m_fontInfo.name = value; }
+    inline void set_font_size(int points) { m_fontInfo.size = points; }
+    inline void set_font_style(int value) { m_fontInfo.style = value; }
+    inline void set_font_weight(int value) { m_fontInfo.weight = value; }
+    inline void set_color(rgba16 value) { m_color = value; }
+};
+
+//----------------------------------------------------------------------------------
 class ImoSystemInfo : public ImoSimpleObj
 {
 protected:
     bool    m_fFirst;   //true=first, false=other
-    float   m_leftMargin;       //LUnits
-    float   m_rightMargin;
-    float   m_systemDistance;
-    float   m_topSystemDistance;    //LUnits
+    LUnits   m_leftMargin;
+    LUnits   m_rightMargin;
+    LUnits   m_systemDistance;
+    LUnits   m_topSystemDistance;
 
 public:
     ImoSystemInfo();
@@ -1040,17 +1469,17 @@ public:
 
     //getters
     inline bool is_first() { return m_fFirst; }
-    inline float get_left_margin() { return m_leftMargin; }
-    inline float get_right_margin() { return m_rightMargin; }
-    inline float get_system_distance() { return m_systemDistance; }
-    inline float get_top_system_distance() { return m_topSystemDistance; }
+    inline LUnits get_left_margin() { return m_leftMargin; }
+    inline LUnits get_right_margin() { return m_rightMargin; }
+    inline LUnits get_system_distance() { return m_systemDistance; }
+    inline LUnits get_top_system_distance() { return m_topSystemDistance; }
 
     //setters
     inline void set_first(bool fValue) { m_fFirst = fValue; }
-    inline void set_left_margin(float rValue) { m_leftMargin = rValue; }
-    inline void set_right_margin(float rValue) { m_rightMargin = rValue; }
-    inline void set_system_distance(float rValue) { m_systemDistance = rValue; }
-    inline void set_top_system_distance(float rValue) { m_topSystemDistance = rValue; }
+    inline void set_left_margin(LUnits rValue) { m_leftMargin = rValue; }
+    inline void set_right_margin(LUnits rValue) { m_rightMargin = rValue; }
+    inline void set_system_distance(LUnits rValue) { m_systemDistance = rValue; }
+    inline void set_top_system_distance(LUnits rValue) { m_topSystemDistance = rValue; }
 };
 
 //----------------------------------------------------------------------------------
@@ -1061,6 +1490,9 @@ protected:
     ColStaffObjs*   m_pColStaffObjs;
     ImoSystemInfo   m_systemInfoFirst;
     ImoSystemInfo   m_systemInfoOther;
+    ImoPageInfo     m_pageInfo;
+    std::list<ImoScoreTitle*> m_titles;
+	std::map<std::string, ImoTextStyleInfo*> m_nameToStyle;
 
 public:
     ImoScore();
@@ -1089,11 +1521,24 @@ public:
     bool has_options();
     ImoOptionInfo* get_option(const std::string& name);
 
-    //systems layout info
+    //score layout
     void add_sytem_info(ImoSystemInfo* pSL);
+    void add_page_info(ImoPageInfo* pPI);
+    inline ImoPageInfo* get_page_info() { return &m_pageInfo; }
+
+    //titles
+    void add_title(ImoScoreTitle* pTitle);
+    inline std::list<ImoScoreTitle*>& get_titles() { return m_titles; }
+
+    //styles
+    void add_style_info(ImoTextStyleInfo* pStyle);
+    ImoTextStyleInfo* get_style_info(const std::string& name);
+    ImoTextStyleInfo* get_default_style_info();
 
 protected:
     void delete_staffobjs_collection();
+    void delete_text_styles();
+    ImoTextStyleInfo* create_default_style();
 
 };
 
@@ -1136,11 +1581,12 @@ public:
 class ImoTieDto : public ImoSimpleObj
 {
 protected:
-    bool        m_fStart;
-    int         m_tieNum;
-    ImoNote*     m_pNote;
-    ImoBezierInfo*   m_pBezier;
+    bool m_fStart;
+    int m_tieNum;
+    ImoNote* m_pNote;
+    ImoBezierInfo* m_pBezier;
     LdpElement* m_pTieElm;
+    rgba16 m_color;
 
 public:
     ImoTieDto() : ImoSimpleObj(ImoObj::k_tie_info), m_fStart(true), m_tieNum(0), m_pNote(NULL)
@@ -1154,6 +1600,7 @@ public:
     inline ImoBezierInfo* get_bezier() { return m_pBezier; }
     inline LdpElement* get_tie_element() { return m_pTieElm; }
     int get_line_number();
+    inline rgba16 get_color() { return m_color; }
 
     //setters
     inline void set_start(bool value) { m_fStart = value; }
@@ -1161,6 +1608,7 @@ public:
     inline void set_note(ImoNote* pNote) { m_pNote = pNote; }
     inline void set_bezier(ImoBezierInfo* pBezier) { m_pBezier = pBezier; }
     inline void set_tie_element(LdpElement* pElm) { m_pTieElm = pElm; }
+    inline void set_color(rgba16 value) { m_color = value; }
 
 };
 
@@ -1276,5 +1724,5 @@ extern float to_duration(int nNoteType, int nDots);
 
 }   //namespace lomse
 
-#endif    // __LOMSE__INTERNAL_MODEL_H__
+#endif    // __LOMSE_INTERNAL_MODEL_H__
 

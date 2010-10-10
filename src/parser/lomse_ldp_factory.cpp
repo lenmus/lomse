@@ -13,16 +13,8 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
-//
-//  Credits:
-//      This file is based on the "LdpFactory.cpp" file from the MusicXML Library
-//      v.2.00, distributed under LGPL 2.1 or greater. Copyright (c) 2006 Grame,
-//      Grame Research Laboratory, 9 rue du Garet, 69001 Lyon - France,
-//      research@grame.fr.
 //
 //-------------------------------------------------------------------------------------
 

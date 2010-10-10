@@ -35,14 +35,15 @@
 //#define _LML_VS_EXPRESS
 
 //path for test scores ---------------------------------------------
-#if defined(_LOMSE_LINUX_CODEBLOCKS)
-    #define LOMSE_TEST_SCORES_PATH    "../../../../test-scores/";   //linux CodeBlobks
-#elif defined(_LOMSE_WIN32_VSTUDIO)
-    #define LOMSE_TEST_SCORES_PATH    "../../../test-scores/" //windows MS Visual studio .NET
-#else
-    #error("Unknown OS and IDE");
-#endif
+#define LOMSE_TEST_SCORES_PATH    "../../test-scores/"   //codeblocks generated makefiles
+//#if defined(_LOMSE_LINUX_CODEBLOCKS)
+//    #define LOMSE_TEST_SCORES_PATH    "../../../../test-scores/";   //linux CodeBlobks
+//#elif defined(_LOMSE_WIN32_VSTUDIO)
+//    #define LOMSE_TEST_SCORES_PATH    "../../../test-scores/" //windows MS Visual studio .NET
+//#else
+//#error("Lomse config.: Unknown OS and IDE");
+//#endif
 
 
-#endif	// __LOMSE_CONFIG_H__
+#endif  // __LOMSE_CONFIG_H__
 

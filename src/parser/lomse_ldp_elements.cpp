@@ -13,8 +13,6 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -176,8 +174,8 @@ float LdpElement::get_value_as_float()
 void LdpElement::set_imo(ImoObj* pImo)
 {
     m_pImo = pImo;
-    if (pImo)
-        pImo->set_id(this->get_id());
+    //if (pImo)
+    //    pImo->set_id(this->get_id());
 }
 
 
