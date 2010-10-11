@@ -18,8 +18,6 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifdef _LOMSE_DEBUG
-
 #include <UnitTest++.h>
 #include <iostream>
 #include "lomse_config.h"
@@ -172,5 +170,3 @@ SUITE(LdpFileReaderTest)
     }
 
 }
-
-#endif  // _LOMSE_DEBUG

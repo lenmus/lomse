@@ -18,8 +18,6 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifdef _LOMSE_DEBUG
-
 #include <UnitTest++.h>
 #include <sstream>
 #include "lomse_config.h"
@@ -69,7 +67,7 @@ SUITE(LdpCompilerTest)
 
     TEST_FIXTURE(LdpCompilerTestFixture, LdpCompilerFromString)
     {
-        DocumentScope documentScope(cout); 
+        DocumentScope documentScope(cout);
         LdpCompiler compiler(*m_pLibraryScope, documentScope);
         InternalModel* pIModel = compiler.compile_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (language en iso-8859-1) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData )))))" );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
@@ -143,6 +141,4 @@ SUITE(LdpCompilerTest)
 //    }
 
 };
-
-#endif  // _LOMSE_DEBUG
 

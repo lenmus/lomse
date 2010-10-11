@@ -18,8 +18,6 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifdef _LOMSE_DEBUG
-
 #include <UnitTest++.h>
 #include <sstream>
 #include "lomse_config.h"
@@ -81,6 +79,4 @@ SUITE(ModelBuilderTest)
 
 }
 
-
-#endif  // _LOMSE_DEBUG
 

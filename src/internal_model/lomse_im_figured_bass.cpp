@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -228,12 +228,12 @@ void ImoFiguredBassInfo::set_from_string(const std::string& sData)
     initialize_intervals();
 
     //interval being parsed
-    const char* pStart;             //pointer to first char of interval string
+    const char* pStart = NULL;          //pointer to first char of interval string
     std::string prefix, suffix, over;
-    EIntervalQuality quality;
-    bool fParenthesis;
+    EIntervalQuality quality = k_interval_as_implied;
+    bool fParenthesis = false;
     std::string interval;
-    std::string fingerprint = "";     //explicit present intervals (i.e. "53", "642"
+    std::string fingerprint = "";       //explicit present intervals (i.e. "53", "642"
 
     //Finite automata to parse the string
 
@@ -380,8 +380,8 @@ void ImoFiguredBassInfo::set_from_string(const std::string& sData)
                     //check interval. Greater than 1 and lower than 13
                     if (nIntv < 2 || nIntv > lmFB_MAX_INTV)
                     {
-                        m_error = "Invalid interval '" + interval 
-                            + "' in figured bass string '" + sData 
+                        m_error = "Invalid interval '" + interval
+                            + "' in figured bass string '" + sData
                             + "'. Figured bass ignored";
                         fContinueParsing = false;
                         break;

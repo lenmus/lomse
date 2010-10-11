@@ -12,13 +12,11 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
 //-------------------------------------------------------------------------------------
-
-#ifdef _LOMSE_DEBUG
 
 #include <UnitTest++.h>
 #include <sstream>
@@ -409,6 +407,4 @@ SUITE(InternalModelTest)
 
 }
 
-
-#endif  // _LOMSE_DEBUG
 

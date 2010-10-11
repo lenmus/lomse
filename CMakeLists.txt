@@ -17,53 +17,82 @@
 #  the project at cecilios@users.sourceforge.net
 #
 #-------------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------------
 #  This is a CMake configuration file for building makefiles and installfiles for
 #  the library and all test/demo programs
 #
 #  To use it you need CMake which can be downloaded from http://www.cmake.org/
+#
+#  This file has been tested with the following generators:
+# 	Windows:
+#   	Visual Studio 7 .NET
+#   	Visual Studio 2008
+# 	Linux:
+#   	Unix Makefiles
+#   	CodeBlocks - Unix Makefiles
+#
 #-------------------------------------------------------------------------------------
 
+cmake_minimum_required(VERSION 2.8)
+
 project(lomse)
-cmake_minimum_required(VERSION 2.6)
+
+# configuration
+set(LOMSE_VERSION_MAJOR "0")
+set(LOMSE_VERSION_MINOR "0")
+
+# set directories 
+set(ROOT_DIR  ${CMAKE_CURRENT_SOURCE_DIR} )
+set(SRC_DIR  ${ROOT_DIR}/src )
+set(OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/bin )
+set(EXECUTABLE_OUTPUT_PATH ${OUTDIR})
+set(LIBRARY_OUTPUT_PATH ${OUTDIR})
+# path to scores for tests
+set(LOMSE_TEST_SCORES_PATH "\"${ROOT_DIR}/test-scores/\"" )
 
 
-# Currently this file suppoorts the following generators:
-#   Visual Studio 7 .NET
-#   Visual Studio 2008
-#   Unix makefiles
-#   CodeBlocks with GCC
+
+# check that compiler supports namespace sdt
+include(TestForSTDNamespace)
+if(CMAKE_NO_STD_NAMESPACE)
+  message(FATAL_ERROR "The compiler doesn't support namespace sdt.")
+endif()
 
 
-#----------------------------------------------------------------------
-# Define possible builds
-#----------------------------------------------------------------------
 
+
+# set path to include unittest++ header files
 if(WIN32)
-
-    if(CMAKE_GENERATOR MATCHES "CodeBlocks" OR 
-       CMAKE_GENERATOR MATCHES "Visual Studio")
-        
-        set(CMAKE_CONFIGURATION_TYPES Debug Release)
-        set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
-            "Reset the configurations to what we need" FORCE)
-    else()
-        set( CMAKE_CONFIGURATION_TYPES RelWithDebInfo )
-    endif()
-
+	set(UNITTEST_LIBDIR  ${ROOT_DIR}/packages/UnitTest++/lib )
+	set(UNITTEST_INCLUDE_DIRS  ${ROOT_DIR}/packages/UnitTest++/scr )
+else()
+	include(FindPkgConfig)
+	pkg_check_modules(UNITTEST REQUIRED unittest++)
+	#if found, it sets several variables, in particular:
+	#message("version=" ${UNITTEST_VERSION} )
+	#message("include_dirs=" ${UNITTEST_INCLUDE_DIRS} )
+	#message("library_dirs=" "${UNITTEST_LIBRARY_DIRS}" )
+	#message("libdir=" ${UNITTEST_LIBDIR} )
+	#message("includedir=" ${UNITTEST_INCLUDEDIR} )
 endif()
+ 
+include_directories(
+	${ROOT_DIR}/include
+	${UNITTEST_INCLUDE_DIRS}
+)
 
-if(UNIX)
-
-    set(CMAKE_CONFIGURATION_TYPES RelWithDebInfo)
-    list(APPEND CMAKE_CONFIGURATION_TYPES Debug Release)
-
-endif()
+link_directories(
+	${UNITTEST_LIBDIR}
+	${LIBRARY_OUTPUT_PATH} 
+)
 
 
-#----------------------------------------------------------------------
+# Define possible builds
+set(CMAKE_CONFIGURATION_TYPES Debug Release)
+
+
 # names for libraries and execs.
-#----------------------------------------------------------------------
-
 if( WIN32 )
     set( CMAKE_STATIC_LIBRARY_PREFIX "" )
     set( CMAKE_STATIC_LIBRARY_SUFFIX ".lib" )
@@ -72,7 +101,6 @@ if( WIN32 )
     set( CMAKE_EXECUTABLE_SUFFIX ".exe" )
 
 endif( WIN32 )
-
 
 if( UNIX )
     set( CMAKE_STATIC_LIBRARY_PREFIX "lib" )
@@ -106,31 +134,21 @@ if(MSVC)
     endif(${CMAKE_GENERATOR} STREQUAL "Visual Studio 6")
 endif(MSVC)
 
-# lomse: debug built
-add_definitions(-D_LOMSE_DEBUG)
-
-#some flags for MSVC
+# some flags for MSVC
 if(MSVC)
     set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL" ) 
     set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG" )
 endif()
 
 
-
-# directories
-#------------------------------------------
-
-set(ROOT_DIR  ${CMAKE_CURRENT_SOURCE_DIR} )
-set(SRC_DIR  ${ROOT_DIR}/src )
-set(MAKEFILES_DIR ${ROOT_DIR}/makefiles )
-
-include_directories(
-    ${ROOT_DIR}/include
+#define a header file to pass CMake settings to source code
+configure_file(
+	"${CMAKE_CURRENT_SOURCE_DIR}/lomse_config.h.cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h"
 )
 
-# The build location for libraries and for executables
-set(EXECUTABLE_OUTPUT_PATH "${ROOT_DIR}/bin")
-set(LIBRARY_OUTPUT_PATH "${ROOT_DIR}/bin")
+include_directories("${PROJECT_BINARY_DIR}")
+
 
 
 
@@ -139,7 +157,7 @@ set(LIBRARY_OUTPUT_PATH "${ROOT_DIR}/bin")
 #////////////////////////////////////////////////////////////////////////
 
 
-# source files to compile -----------------------------------
+# source files to compile
 
 set(PARSER_FILES
     ${SRC_DIR}/parser/lomse_analyser.cpp
@@ -197,7 +215,7 @@ set(ALL_SOURCES
 )
 
 
-# Adds folders for Visual Studio and other IDEs -----------------------------------
+# Adds folders for Visual Studio and other IDEs
 source_group( "document"        FILES ${DOCUMENT_FILES} )
 source_group( "exporters"       FILES ${EXPORTERS_FILES} )
 source_group( "graphic_model"   FILES ${GRAPHIC_MODEL_FILES} )
@@ -230,20 +248,22 @@ set_target_properties(${LOMSE}  PROPERTIES
 
 # library makefile generation. Dynamic library
 #-------------------------------------------------------------
+if(0)
 
-set(LOMSE_SH  lomse_dll)
-add_library( ${LOMSE_SH} SHARED ${ALL_SOURCES} )
+	set(LOMSE_SH  lomse_dll)
+	add_library( ${LOMSE_SH} SHARED ${ALL_SOURCES} )
 
-# The library target LOMSE_SH has a default OUTPUT_NAME of "lomse_dll", so change it.
-set_target_properties(${LOMSE_SH} PROPERTIES OUTPUT_NAME "liblomse")
+	# The library target LOMSE_SH has a default OUTPUT_NAME of "lomse_dll", so change it.
+	set_target_properties(${LOMSE_SH} PROPERTIES OUTPUT_NAME "liblomse")
 
 
-# hack to remove 'Debug' subdirectory from output path. --------------
-# see: http://www.cmake.org/Bug/view.php?id=8243
-if(MSVC)
-    set_target_properties(${LOMSE}  PROPERTIES  PREFIX "../")
-endif()
+	# hack to remove 'Debug' subdirectory from output path. --------------
+	# see: http://www.cmake.org/Bug/view.php?id=8243
+	if(MSVC)
+		set_target_properties(${LOMSE}  PROPERTIES  PREFIX "../")
+	endif()
 
+endif(0)
 
 #////////////////////////////////////////////////////////////////////////
 # Target: program for testing the library
@@ -251,20 +271,16 @@ endif()
 
 set (TESTLIB  testlib)
 
-include_directories(
-    ${ROOT_DIR}/include
-    ${ROOT_DIR}/packages/UnitTest++/src
-)
-
-link_directories(
-    ${ROOT_DIR}/packages/UnitTest++/lib 
-    ${LIBRARY_OUTPUT_PATH} 
-)
-
-set( CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} "/NODEFAULTLIB:LIBCD" )
+# Dirty hack: I don't know why it conflicts with LIBCD. But for
+# now I need to continue
+if(WIN32)
+	set(CMAKE_SHARED_LINKER_FLAGS
+		 ${CMAKE_SHARED_LINKER_FLAGS} "/NODEFAULTLIB:LIBCD"
+	)
+endif(WIN32)
 
 
-# source files to compile -----------------------------------
+# source files to compile
 add_executable( ${TESTLIB} 
         ${SRC_DIR}/tests/lomse_test_analyser.cpp
         ${SRC_DIR}/tests/lomse_test_colstaffobjs_builder.cpp
@@ -287,14 +303,14 @@ add_executable( ${TESTLIB}
 )
 
 
-# libraries to link -----------------------------------
+# libraries to link
 if(UNIX)
-    target_link_libraries ( ${TESTLIB} liblomse.so UnitTest++.vsnet2003.so )
+    target_link_libraries ( ${TESTLIB} liblomse.so libunittest++.a )
 elseif(WIN32)
     target_link_libraries ( ${TESTLIB} lomse.lib UnitTest++.vsnet2003.lib )
 endif()
 
-# properties -----------------------------------
+# properties
 if(WIN32)
     set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:LIBCD" )
     set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
@@ -305,38 +321,31 @@ endif(WIN32)
 
 
 # once generated, run tests
+if(WIN32)
+    set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/debug/${TESTLIB}.exe )
+else()
+    set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB} )
+endif()
+
 add_custom_command(
     TARGET ${TESTLIB} POST_BUILD
-    COMMAND ${EXECUTABLE_OUTPUT_PATH}/debug/testlib.exe
+    COMMAND ${TESTLIB_EXECUTABLE}
     WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
 )
 
 
 
-# installation
-#-----------------------------------------------------------------
-
-# install the executable
-#------------------------------------------
-
-#if(UNIX)
-#    install (TARGETS  ${TESTLIB}  DESTINATION  ${ROOT_DIR}/makefiles/unix )
-#endif()
-
-#if(WIN32)
-#    install (TARGETS  ${TESTLIB}  DESTINATION  ${ROOT_DIR}/makefiles/win32 )
-#endif()
-
-
-# library install
+#-----------------------------------------------------------------------------
+# library installation
 # You can change the install location by running cmake like this:
 #
 #   cmake -DCMAKE_INSTALL_PREFIX=/new/install/prefix
 #
 # By default, the prefix is "/usr/local"
+#-----------------------------------------------------------------------------
 # 
 #if( UNIX AND NOT APPLE )
-#    install( TARGETS ${LOMSE} RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin )
+#    install( TARGETS ${LOMSE} RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX} )
 #endif()
 
 ## Set the path of the application executable

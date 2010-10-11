@@ -22,27 +22,17 @@
 #define __LOMSE_CONFIG_H__
 
 //==================================================================
-// Configuration file
+// Template configuration file.
+// Variables are replaced by CMake settings
 //==================================================================
 
-//target operating sytem -------------------------------------------
-#define _LML_OS_WIN32
-//#define _LML_OS_LINUX
 
-//build method -----------------------------------------------------
-#define _LML_VS_NET
-//#define _LML_CODE_BLOCKS
-//#define _LML_VS_EXPRESS
+//path for test scores
+#define LOMSE_TEST_SCORES_PATH    @LOMSE_TEST_SCORES_PATH@
 
-//path for test scores ---------------------------------------------
-#define LOMSE_TEST_SCORES_PATH    "../../test-scores/"   //codeblocks generated makefiles
-//#if defined(_LOMSE_LINUX_CODEBLOCKS)
-//    #define LOMSE_TEST_SCORES_PATH    "../../../../test-scores/";   //linux CodeBlobks
-//#elif defined(_LOMSE_WIN32_VSTUDIO)
-//    #define LOMSE_TEST_SCORES_PATH    "../../../test-scores/" //windows MS Visual studio .NET
-//#else
-//#error("Lomse config.: Unknown OS and IDE");
-//#endif
+//library version
+#define LOMSE_VERSION_MAJOR    @LOMSE_VERSION_MAJOR@
+#define LOMSE_VERSION_MINOR    @LOMSE_VERSION_MINOR@
 
 
 #endif  // __LOMSE_CONFIG_H__

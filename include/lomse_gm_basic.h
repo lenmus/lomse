@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -88,7 +88,7 @@ public:
     //child boxes
     inline int get_num_children() { return static_cast<int>( m_childBoxes.size() ); }
     inline void add_child_box(GmoBox* child) { m_childBoxes.push_back(child); }
-    GmoBox* GmoBox::get_child_box(int i);  //i = 0..n-1
+    GmoBox* get_child_box(int i);  //i = 0..n-1
 
 };
 
