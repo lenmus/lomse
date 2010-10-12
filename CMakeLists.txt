@@ -25,12 +25,12 @@
 #  To use it you need CMake which can be downloaded from http://www.cmake.org/
 #
 #  This file has been tested with the following generators:
-# 	Windows:
-#   	Visual Studio 7 .NET
-#   	Visual Studio 2008
-# 	Linux:
-#   	Unix Makefiles
-#   	CodeBlocks - Unix Makefiles
+#   Windows:
+#       Visual Studio 7 .NET
+#       Visual Studio 2008
+#   Linux:
+#       Unix Makefiles
+#       CodeBlocks - Unix Makefiles
 #
 #-------------------------------------------------------------------------------------
 
@@ -60,31 +60,23 @@ if(CMAKE_NO_STD_NAMESPACE)
 endif()
 
 
-
-
 # set path to include unittest++ header files
 if(WIN32)
-	set(UNITTEST_LIBDIR  ${ROOT_DIR}/packages/UnitTest++/lib )
-	set(UNITTEST_INCLUDE_DIRS  ${ROOT_DIR}/packages/UnitTest++/scr )
+    set(UNITTEST_LIBDIR  ${ROOT_DIR}/packages/UnitTest++/lib )
+    set(UNITTEST_INCLUDE_DIRS  ${ROOT_DIR}/packages/UnitTest++/src )
 else()
-	include(FindPkgConfig)
-	pkg_check_modules(UNITTEST REQUIRED unittest++)
-	#if found, it sets several variables, in particular:
-	#message("version=" ${UNITTEST_VERSION} )
-	#message("include_dirs=" ${UNITTEST_INCLUDE_DIRS} )
-	#message("library_dirs=" "${UNITTEST_LIBRARY_DIRS}" )
-	#message("libdir=" ${UNITTEST_LIBDIR} )
-	#message("includedir=" ${UNITTEST_INCLUDEDIR} )
+    include(FindPkgConfig)
+    pkg_check_modules(UNITTEST REQUIRED unittest++)
 endif()
  
 include_directories(
-	${ROOT_DIR}/include
-	${UNITTEST_INCLUDE_DIRS}
+    ${ROOT_DIR}/include
+    ${UNITTEST_INCLUDE_DIRS}
 )
 
 link_directories(
-	${UNITTEST_LIBDIR}
-	${LIBRARY_OUTPUT_PATH} 
+    ${UNITTEST_LIBDIR}
+    ${LIBRARY_OUTPUT_PATH} 
 )
 
 
@@ -112,42 +104,38 @@ if( UNIX )
 endif( UNIX )
 
 
-# compiler settings
-#------------------------------------------
-
 # "Print all warnings" flag for GCC
 if(UNIX)
     add_definitions(-Wall -DGCC)
 endif(UNIX)
 
-# "Link time code generation" flags for MSVC
+# Force to use static libraries in MSVC
+# This doesn't work
+if(0)
 if(MSVC)
-    add_definitions(
-        /DUNICODE /D_UNICODE
-        -DWINVER=0x0400 -DWIN32 
-        -D_LOMSE_WIN32_VSTUDIO
-    )
-    if(${CMAKE_GENERATOR} STREQUAL "Visual Studio 6")
-        add_definitions(-DVC6)
-    elseif(${CMAKE_GENERATOR} STREQUAL "Visual Studio 8 2005")
-        add_definitions(-DVC2005)
-    endif(${CMAKE_GENERATOR} STREQUAL "Visual Studio 6")
+    message("Debug=" ${CMAKE_CXX_FLAGS_DEBUG} )
+    message("Release=" ${CMAKE_CXX_FLAGS_RELEASE} )
+    message("Linker Debug=" ${CMAKE_EXE_LINKER_FLAGS_DEBUG} )
+    message("Linker Release=" ${CMAKE_EXE_LINKER_FLAGS_RELEASE} )
+    #set( CMAKE_CXX_FLAGS_RELEASE "/D_DEBUG /MLd /Zi /Ob0 /Od /GZ" ) 
+    #set( CMAKE_CXX_FLAGS_DEBUG "/ML /O2 /Ob2 /D NDEBUG" ) 
+    #set( CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /NODEFAULTLIB:LIBCD" )
+    #set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /NODEFAULTLIB:LIBCD" )
+    message("Debug=" ${CMAKE_CXX_FLAGS_DEBUG} )
+    message("Release=" ${CMAKE_CXX_FLAGS_RELEASE} )
+    message("Linker Debug=" ${CMAKE_EXE_LINKER_FLAGS_DEBUG} )
+    message("Linker Release=" ${CMAKE_EXE_LINKER_FLAGS_RELEASE} )
 endif(MSVC)
-
-# some flags for MSVC
-if(MSVC)
-    set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Oi /GL" ) 
-    set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG" )
-endif()
+endif(0)
 
 
 #define a header file to pass CMake settings to source code
 configure_file(
-	"${CMAKE_CURRENT_SOURCE_DIR}/lomse_config.h.cmake"
-	"${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lomse_config.h.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h"
 )
 
-include_directories("${PROJECT_BINARY_DIR}")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 
 
@@ -250,18 +238,18 @@ set_target_properties(${LOMSE}  PROPERTIES
 #-------------------------------------------------------------
 if(0)
 
-	set(LOMSE_SH  lomse_dll)
-	add_library( ${LOMSE_SH} SHARED ${ALL_SOURCES} )
+    set(LOMSE_SH  lomse_dll)
+    add_library( ${LOMSE_SH} SHARED ${ALL_SOURCES} )
 
-	# The library target LOMSE_SH has a default OUTPUT_NAME of "lomse_dll", so change it.
-	set_target_properties(${LOMSE_SH} PROPERTIES OUTPUT_NAME "liblomse")
+    # The library target LOMSE_SH has a default OUTPUT_NAME of "lomse_dll", so change it.
+    set_target_properties(${LOMSE_SH} PROPERTIES OUTPUT_NAME "liblomse")
 
 
-	# hack to remove 'Debug' subdirectory from output path. --------------
-	# see: http://www.cmake.org/Bug/view.php?id=8243
-	if(MSVC)
-		set_target_properties(${LOMSE}  PROPERTIES  PREFIX "../")
-	endif()
+    # hack to remove 'Debug' subdirectory from output path. --------------
+    # see: http://www.cmake.org/Bug/view.php?id=8243
+    if(MSVC)
+        set_target_properties(${LOMSE}  PROPERTIES  PREFIX "../")
+    endif()
 
 endif(0)
 
@@ -272,13 +260,13 @@ endif(0)
 set (TESTLIB  testlib)
 
 # Dirty hack: I don't know why it conflicts with LIBCD. But for
-# now I need to continue
-if(WIN32)
-	set(CMAKE_SHARED_LINKER_FLAGS
-		 ${CMAKE_SHARED_LINKER_FLAGS} "/NODEFAULTLIB:LIBCD"
-	)
-endif(WIN32)
-
+# now I need to continue. See:
+# http://mygoldenchariot.blogspot.com/2006/07/link-warning-lnk4098-defaultlib-libcd.html
+if(MSVC)
+    set(CMAKE_LINKER_FLAGS_DEBUG
+         ${CMAKE_LINKER_FLAGS_DEBUG} "/NODEFAULTLIB:LIBCD"
+    )
+endif()
 
 # source files to compile
 add_executable( ${TESTLIB} 
@@ -311,13 +299,15 @@ elseif(WIN32)
 endif()
 
 # properties
-if(WIN32)
+if(MSVC)
     set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:LIBCD" )
+    set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS "/MACHINE:X86" )
     set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
     set_target_properties(${TESTLIB} PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
+
     set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
     set_target_properties(${TESTLIB} PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
-endif(WIN32)
+endif()
 
 
 # once generated, run tests
