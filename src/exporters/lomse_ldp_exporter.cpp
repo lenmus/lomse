@@ -269,8 +269,8 @@ protected:
     void add_color()
     {
         //color (if not black)
-        rgba16 color = m_pObj->get_color();
-        if (color != rgba16(0,0,0))
+        Color color = m_pObj->get_color();
+        if (color != Color(0,0,0))
             m_source << " (color " << LdpExporter::color_to_ldp(color) << ")";
     }
 };
@@ -569,7 +569,7 @@ std::string LdpExporter::clef_type_to_ldp(int clefType)
         return name[clefType];
 }
 
-std::string LdpExporter::color_to_ldp(rgba16& color)
+std::string LdpExporter::color_to_ldp(Color& color)
 {
     stringstream source;
     source << "#";

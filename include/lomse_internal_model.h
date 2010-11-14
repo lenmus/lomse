@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_INTERNAL_MODEL_H__        //to avoid nested includes
 #define __LOMSE_INTERNAL_MODEL_H__
@@ -36,7 +36,7 @@ namespace lomse
 
 
 // enums for common values: aligment, justification, placement, etc.
-//--------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 //line styles
 enum ELineStyle { k_line_none=0, k_line_solid, k_line_long_dash,
@@ -53,6 +53,7 @@ enum ELineEdge {
     k_edge_horizontal         // edge is always a horizontal line
 };
 
+//---------------------------------------------------------------------------------------
 //EVAlign is used to indicate vertical alignment within a block: to the top,
 //middle or bottom
 enum EVAlign
@@ -63,6 +64,7 @@ enum EVAlign
     k_valign_bottom,
 };
 
+//---------------------------------------------------------------------------------------
 // EHAlign is used to indicate object justification
 enum EHAlign
 {
@@ -73,6 +75,7 @@ enum EHAlign
     k_halign_center,        //object centered
 };
 
+//---------------------------------------------------------------------------------------
 // EPlacement indicates whether something is above or below another element,
 // such as a note or a notation.
 enum EPlacement
@@ -84,6 +87,7 @@ enum EPlacement
 
 
 
+//---------------------------------------------------------------------------------------
 //forward declarations
 class ColStaffObjs;
 class LdpElement;
@@ -98,6 +102,7 @@ class ImoNoteRest;
 class ImoObjVisitor;
 class ImoOptionInfo;
 class ImoScoreText;
+class ImoStaffInfo;
 class ImoTextStyleInfo;
 
 class DtoAuxObj;
@@ -115,6 +120,7 @@ class DtoStaffObj;
 class DtoTimeSignature;
 
 
+//---------------------------------------------------------------------------------------
 // a struct to contain note/rest figure and dots
 struct NoteTypeAndDots
 {
@@ -135,9 +141,8 @@ struct NoteTypeAndDots
 // Abstarct hierachy
 //===================================================
 
+//---------------------------------------------------------------------------------------
 // the root. Any object must derive from it
-//-------------------------------------------------------------------------------
-
 class ImoObj : public Visitable, public NodeInTree<ImoObj>
 {
 protected:
@@ -159,7 +164,7 @@ public:
             k_border_info, k_box_info, k_color_info, k_cursor_info, k_figured_bass_info,
             k_font_info, k_instr_group,
             k_line_info, k_midi_info, k_option, k_page_info, k_point_info,
-            k_size_info, k_system_info, k_text_info, k_text_style_info,
+            k_size_info, k_staff_info, k_system_info, k_text_info, k_text_style_info,
             k_tie_info, k_tuplet_info,
                 //ImoCollection(A)
                 k_collection, k_attachments, k_content, k_instruments,
@@ -226,6 +231,7 @@ public:
     inline bool is_page_info() { return m_objtype == k_page_info; }
     inline bool is_point_info() { return m_objtype == k_point_info; }
     inline bool is_size_info() { return m_objtype == k_size_info; }
+    inline bool is_staff_info() { return m_objtype == k_staff_info; }
     inline bool is_system_info() { return m_objtype == k_system_info; }
     inline bool is_text_info() { return m_objtype == k_text_info; }
     inline bool is_text_style_info() { return m_objtype == k_text_style_info; }
@@ -286,7 +292,7 @@ public:
 };
 
 // just auxiliary objects or data transfer objects
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoSimpleObj : public ImoObj
 {
 protected:
@@ -299,7 +305,7 @@ public:
 };
 
 // Any object for a music score, including the score itself
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoDocObj : public ImoObj
 {
 protected:
@@ -330,7 +336,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoCollection : public ImoSimpleObj
 {
 protected:
@@ -348,7 +354,7 @@ public:
 };
 
 // ContainerObj: A collection of containers and contained objs.
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoContainerObj : public ImoDocObj
 {
 protected:
@@ -361,12 +367,12 @@ public:
 
 // ComponentObj: Any atomic displayable object. Must be attached to
 //               containers (ContainerObj) or to other ComponentObj
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoComponentObj : public ImoDocObj
 {
 protected:
     bool m_fVisible;
-    rgba16 m_color;
+    Color m_color;
 
     ImoComponentObj(long id, int objtype) : ImoDocObj(id, objtype), m_fVisible(true) {}
     ImoComponentObj(int objtype) : ImoDocObj(objtype), m_fVisible(true) {}
@@ -377,16 +383,16 @@ public:
 
     //getters
     inline bool is_visible() { return m_fVisible; }
-    inline rgba16& get_color() { return m_color; }
+    inline Color& get_color() { return m_color; }
 
     //setters
     inline void set_visible(bool visible) { m_fVisible = visible; }
-    void set_color(rgba16 color);
+    void set_color(Color color);
 
 };
 
 // StaffObj: A ComponentObj that is attached to an Staff. Consume time
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoStaffObj : public ImoComponentObj
 {
 protected:
@@ -411,7 +417,7 @@ public:
 
 // AuxObj: a ComponentObj that must be attached to other objects but not
 //         directly to an staff. Do not consume time
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoAuxObj : public ImoComponentObj
 {
 protected:
@@ -427,7 +433,7 @@ protected:
 };
 
 //An abstract AuxObj relating at least two StaffObjs
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoRelObj : public ImoAuxObj
 {
 protected:
@@ -451,7 +457,7 @@ public:
 
 
 //An abstract AuxObj relating two and only two StaffObjs
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoBinaryRelObj : public ImoRelObj
 {
 protected:
@@ -475,7 +481,7 @@ public:
 };
 
 //An abstract AuxObj relating two or more StaffObjs
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoMultiRelObj : public ImoRelObj
 {
 protected:
@@ -509,7 +515,7 @@ public:
 // Simple objects: Info and Dto
 //===================================================
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoBeamInfo : public ImoSimpleObj
 {
 protected:
@@ -544,7 +550,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoBezierInfo : public ImoSimpleObj
 {
 protected:
@@ -562,60 +568,60 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoBorderDto : public ImoSimpleObj
 {
-    rgba16        m_color;
+    Color        m_color;
     Tenths        m_width;
     ELineStyle    m_style;
 
 public:
     ImoBorderDto() : ImoSimpleObj(ImoObj::k_border_info)
-        , m_color(rgba16(0,0,0,255)), m_width(1.0f), m_style(k_line_solid) {}
+        , m_color(Color(0,0,0,255)), m_width(1.0f), m_style(k_line_solid) {}
     ~ImoBorderDto() {}
 
     //getters
-    inline rgba16 get_color() { return m_color; }
+    inline Color get_color() { return m_color; }
     inline Tenths get_width() { return m_width; }
     inline ELineStyle get_style() { return m_style; }
 
     //setters
-    inline void set_color(rgba16 value) { m_color = value; }
+    inline void set_color(Color value) { m_color = value; }
     inline void set_width(Tenths value) { m_width = value; }
     inline void set_style(ELineStyle value) { m_style = value; }
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoColorDto : public ImoSimpleObj
 {
 protected:
-    rgba16 m_color;
+    Color m_color;
     bool m_ok;
 
 public:
     ImoColorDto() : ImoSimpleObj(ImoObj::k_color_info), m_color(0, 0, 0, 255), m_ok(true) {}
-    ImoColorDto(int16u r, int16u g, int16u b, int16u a = 255);
+    ImoColorDto(Int8u r, Int8u g, Int8u b, Int8u a = 255);
     ~ImoColorDto() {}
 
-    rgba16& get_from_rgb_string(const std::string& rgb);
-    rgba16& get_from_rgba_string(const std::string& rgba);
-    rgba16& get_from_string(const std::string& hex);
+    Color& get_from_rgb_string(const std::string& rgb);
+    Color& get_from_rgba_string(const std::string& rgba);
+    Color& get_from_string(const std::string& hex);
     inline bool is_ok() { return m_ok; }
 
-    inline int16u red() { return m_color.r; }
-    inline int16u blue() { return m_color.b; }
-    inline int16u green() { return m_color.g; }
-    inline int16u alpha() { return m_color.a; }
-    inline rgba16& get_color() { return m_color; }
+    inline Int8u red() { return m_color.r; }
+    inline Int8u blue() { return m_color.b; }
+    inline Int8u green() { return m_color.g; }
+    inline Int8u alpha() { return m_color.a; }
+    inline Color& get_color() { return m_color; }
 
 
 protected:
-    int16u convert_from_hex(const std::string& hex);
+    Int8u convert_from_hex(const std::string& hex);
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoCursorInfo : public ImoSimpleObj
 {
 protected:
@@ -642,7 +648,7 @@ public:
     inline void set_id(long value) { m_id = value; }
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoLineInfo : public ImoSimpleObj
 {
 protected:
@@ -651,7 +657,7 @@ protected:
     ELineEdge   m_endEdge;
     ELineCap    m_startStyle;
     ELineCap    m_endStyle;
-    rgba16      m_color;
+    Color      m_color;
     Tenths      m_width;
     TPoint      m_startPoint;
     TPoint      m_endPoint;
@@ -665,7 +671,7 @@ public:
         , m_endEdge(k_edge_normal)
         , m_startStyle(k_cap_none)
         , m_endStyle(k_cap_none)
-        , m_color(rgba16(0,0,0,255))
+        , m_color(Color(0,0,0,255))
         , m_width(1.0f)
         , m_startPoint(0.0f, 0.0f)
         , m_endPoint(0.0f, 0.0f)
@@ -694,7 +700,7 @@ public:
     inline ELineEdge get_end_edge() { return m_endEdge; }
     inline ELineCap get_start_style() { return m_startStyle; }
     inline ELineCap get_end_style() { return m_endStyle; }
-    inline rgba16 get_color() { return m_color; }
+    inline Color get_color() { return m_color; }
     inline Tenths get_width() { return m_width; }
     inline TPoint get_start_point() { return m_startPoint; }
     inline TPoint get_end_point() { return m_endPoint; }
@@ -705,14 +711,14 @@ public:
     inline void set_end_edge(ELineEdge value) { m_endEdge = value; }
     inline void set_start_style(ELineCap value) { m_startStyle = value; }
     inline void set_end_style(ELineCap value) { m_endStyle = value; }
-    inline void set_color(rgba16 value) { m_color = value; }
+    inline void set_color(Color value) { m_color = value; }
     inline void set_width(Tenths value) { m_width = value; }
     inline void set_start_point(TPoint point) { m_startPoint = point; }
     inline void set_end_point(TPoint point) { m_endPoint = point; }
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoBoxInfo : public ImoSimpleObj
 {
 //<location>[<size>][<color>][<border>]<text>[<anchorLine>]
@@ -726,8 +732,8 @@ protected:
     //EVAlign       m_vAlign;
 
     //block looking
-    rgba16        m_bgColor;
-    rgba16        m_borderColor;
+    Color        m_bgColor;
+    Color        m_borderColor;
     Tenths        m_borderWidth;
     ELineStyle    m_borderStyle;
 
@@ -736,8 +742,8 @@ public:
         : ImoSimpleObj(k_box_info)
         , m_size(TSize(160.0f, 100.0f))
         , m_topLeftPoint(TPoint(0.0f, 0.0f))
-        , m_bgColor( rgba16(255, 255, 255, 255) )
-        , m_borderColor( rgba16(0, 0, 0, 255) )
+        , m_bgColor( Color(255, 255, 255, 255) )
+        , m_borderColor( Color(0, 0, 0, 255) )
         , m_borderWidth(1.0f)
         , m_borderStyle(k_line_solid)
     {
@@ -749,8 +755,8 @@ public:
     inline Tenths get_height() { return m_size.height; }
     inline Tenths get_width() { return m_size.width; }
     inline TPoint get_position() { return m_topLeftPoint; }
-    inline rgba16 get_bg_color() { return m_bgColor; }
-    inline rgba16 get_border_color() { return m_borderColor; }
+    inline Color get_bg_color() { return m_bgColor; }
+    inline Color get_border_color() { return m_borderColor; }
     inline Tenths get_border_width() { return m_borderWidth; }
     inline ELineStyle get_border_style() { return m_borderStyle; }
 
@@ -758,7 +764,7 @@ public:
     inline void set_position_x(Tenths value) { m_topLeftPoint.x = value; }
     inline void set_position_y(Tenths value) { m_topLeftPoint.y = value; }
     inline void set_size(TSize size) { m_size = size; }
-    inline void set_bg_color(rgba16 color) { m_bgColor = color; }
+    inline void set_bg_color(Color color) { m_bgColor = color; }
     inline void set_border(ImoBorderDto* pBorder) {
         m_borderColor = pBorder->get_color();
         m_borderWidth = pBorder->get_width();
@@ -766,7 +772,7 @@ public:
     }
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoMidiInfo : public ImoSimpleObj
 {
 protected:
@@ -788,7 +794,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoFontInfo : public ImoSimpleObj
 {
 public:
@@ -803,7 +809,7 @@ public:
     enum { k_normal=0, k_italic, k_bold, };
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoTextInfo : public ImoSimpleObj
 {
 protected:
@@ -822,11 +828,51 @@ public:
     int get_font_size();
     int get_font_style();
     int get_font_weight();
-    rgba16 get_color();
+    Color get_color();
 
     //setters
     inline void set_text(const string& text) { m_text = text; }
     inline void set_style(ImoTextStyleInfo* pStyle) { m_pStyle = pStyle; }
+};
+
+//---------------------------------------------------------------------------------------
+class ImoPageInfo : public ImoSimpleObj
+{
+protected:
+    LUnits  m_uLeftMargin;
+    LUnits  m_uRightMargin;
+    LUnits  m_uTopMargin;
+    LUnits  m_uBottomMargin;
+    LUnits  m_uBindingMargin;
+    USize   m_uPageSize;
+    bool    m_fPortrait;
+
+public:
+    ImoPageInfo();
+    ImoPageInfo(ImoPageInfo& dto);
+    ~ImoPageInfo() {}
+
+    //getters
+    inline LUnits get_left_margin() { return m_uLeftMargin; }
+    inline LUnits get_right_margin() { return m_uRightMargin; }
+    inline LUnits get_top_margin() { return m_uTopMargin; }
+    inline LUnits get_bottom_margin() { return m_uBottomMargin; }
+    inline LUnits get_binding_margin() { return m_uBindingMargin; }
+    inline bool is_portrait() { return m_fPortrait; }
+    inline USize get_page_size() { return m_uPageSize; }
+    inline LUnits get_page_width() { return m_uPageSize.width; }
+    inline LUnits get_page_height() { return m_uPageSize.height; }
+
+    //setters
+    inline void set_left_margin(LUnits value) { m_uLeftMargin = value; }
+    inline void set_right_margin(LUnits value) { m_uRightMargin = value; }
+    inline void set_top_margin(LUnits value) { m_uTopMargin = value; }
+    inline void set_bottom_margin(LUnits value) { m_uBottomMargin = value; }
+    inline void set_binding_margin(LUnits value) { m_uBindingMargin = value; }
+    inline void set_portrait(bool value) { m_fPortrait = value; }
+    inline void set_page_size(USize uPageSize) { m_uPageSize = uPageSize; }
+    inline void set_page_width(LUnits value) { m_uPageSize.width = value; }
+    inline void set_page_height(LUnits value) { m_uPageSize.height = value; }
 };
 
 
@@ -834,7 +880,7 @@ public:
 // Real objects
 //===================================================
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoAttachments : public ImoCollection
 {
 public:
@@ -843,7 +889,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoBarline : public ImoStaffObj
 {
 protected:
@@ -864,7 +910,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoBeam : public ImoMultiRelObj
 {
 public:
@@ -876,7 +922,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoBlock : public ImoAuxObj
 {
 protected:
@@ -890,7 +936,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoTextBox : public ImoBlock
 {
 protected:
@@ -916,7 +962,7 @@ public:
     }
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoClef : public ImoStaffObj
 {
 protected:
@@ -957,7 +1003,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoContent : public ImoCollection
 {
 public:
@@ -966,7 +1012,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoControl : public ImoStaffObj
 {
 protected:
@@ -978,17 +1024,16 @@ public:
     //getters & setters
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoDocument : public ImoContainerObj
 {
 protected:
     string m_version;
+    ImoPageInfo m_pageInfo;
 
 public:
-    ImoDocument(const std::string& version="")
-        : ImoContainerObj(ImoObj::k_document)
-        , m_version(version) {}
-    ~ImoDocument() {}
+    ImoDocument(const std::string& version="");
+    ~ImoDocument();
 
     //getters and setters
     inline std::string& get_version() { return m_version; }
@@ -999,13 +1044,19 @@ public:
     int get_num_content_items();
     ImoContent* get_content();
 
+    //document intended paper size
+    void add_page_info(ImoPageInfo* pPI);
+    inline ImoPageInfo* get_page_info() { return &m_pageInfo; }
+    inline LUnits get_paper_width() { return m_pageInfo.get_page_width(); }
+    inline LUnits get_paper_height() { return m_pageInfo.get_page_height(); }
+
     //cursor
     //TODO
     void add_cursor_info(ImoCursorInfo* pCursor) {};
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoFermata : public ImoAuxObj
 {
 protected:
@@ -1030,7 +1081,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoGoBackFwd : public ImoStaffObj
 {
 protected:
@@ -1055,7 +1106,7 @@ public:
     inline void set_time_shift(float rTime) { m_rTimeShift = (m_fFwd ? rTime : -rTime); }
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoScoreText : public ImoAuxObj
 {
 protected:
@@ -1082,7 +1133,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoScoreTitle : public ImoScoreText
 {
 protected:
@@ -1098,12 +1149,12 @@ public:
     inline ImoTextStyleInfo* get_style() { return m_text.get_style(); }
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoInstrGroup : public ImoSimpleObj
 {
 protected:
     bool m_fJoinBarlines;
-    int m_symbol;           // enum k_none, k_brace, k_bracket, ...
+    int m_symbol;           // enum k_none, k_default, k_brace, k_bracket, ...
     ImoScoreText m_name;
     ImoScoreText m_abbrev;
     std::list<ImoInstrument*> m_instruments;
@@ -1112,7 +1163,7 @@ public:
     ImoInstrGroup();
     ~ImoInstrGroup();
 
-    enum { k_none=0, k_brace, k_bracket, };
+    enum { k_none=0, k_default, k_brace, k_bracket, };
 
     //getters
     inline bool join_barlines() { return m_fJoinBarlines; }
@@ -1134,22 +1185,22 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoInstrument : public ImoContainerObj
 {
 protected:
-    int m_numStaves;
     ImoScoreText m_name;
     ImoScoreText m_abbrev;
     ImoMidiInfo m_midi;
     ImoInstrGroup* m_pGroup;
+    std::list<ImoStaffInfo*> m_staves;
 
 public:
     ImoInstrument();
     ~ImoInstrument();
 
     //getters
-    inline int get_num_staves() { return m_numStaves; }
+    inline int get_num_staves() { return static_cast<int>(m_staves.size()); }
     inline const std::string& get_name() { return m_name.get_text(); }
     inline const std::string& get_abbrev() { return m_abbrev.get_text(); }
     inline int get_instrument() { return m_midi.get_instrument(); }
@@ -1157,17 +1208,20 @@ public:
     ImoMusicData* get_musicdata();
     inline bool is_in_group() { return m_pGroup != NULL; }
     inline ImoInstrGroup* get_group() { return m_pGroup; }
+    ImoStaffInfo* get_staff(int iStaff);
 
     //setters
-    inline void set_num_staves(int staves) { m_numStaves = staves; }
+    void add_staff();
     void set_name(ImoScoreText* pText);
     void set_abbrev(ImoScoreText* pText);
     void set_midi_info(ImoMidiInfo* pInfo);
     inline void set_in_group(ImoInstrGroup* pGroup) { m_pGroup = pGroup; }
 
+protected:
+
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoInstruments : public ImoCollection
 {
 public:
@@ -1176,7 +1230,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoInstrGroups : public ImoCollection
 {
 public:
@@ -1185,7 +1239,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoKeySignature : public ImoStaffObj
 {
 protected:
@@ -1208,7 +1262,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoLine : public ImoAuxObj
 {
     ImoLineInfo m_lineInfo;
@@ -1222,7 +1276,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoMetronomeMark : public ImoStaffObj
 {
 protected:
@@ -1274,7 +1328,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoMusicData : public ImoCollection
 {
 public:
@@ -1283,7 +1337,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoOptionInfo : public ImoSimpleObj
 {
 protected:
@@ -1323,7 +1377,7 @@ public:
 //class ImoOptionLong : public ImoOptionInfo
 //class ImoOptionFloat : public ImoOptionInfo
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoOptions : public ImoCollection
 {
 public:
@@ -1332,47 +1386,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
-class ImoPageInfo : public ImoSimpleObj
-{
-protected:
-    LUnits  m_uLeftMargin;
-    LUnits  m_uRightMargin;
-    LUnits  m_uTopMargin;
-    LUnits  m_uBottomMargin;
-    LUnits  m_uBindingMargin;
-    USize   m_uPageSize;
-    bool    m_fPortrait;
-
-public:
-    ImoPageInfo();
-    ImoPageInfo(ImoPageInfo& dto);
-    ~ImoPageInfo() {}
-
-    //getters
-    inline LUnits get_left_margin() { return m_uLeftMargin; }
-    inline LUnits get_right_margin() { return m_uRightMargin; }
-    inline LUnits get_top_margin() { return m_uTopMargin; }
-    inline LUnits get_bottom_margin() { return m_uBottomMargin; }
-    inline LUnits get_binding_margin() { return m_uBindingMargin; }
-    inline bool is_portrait() { return m_fPortrait; }
-    inline USize get_page_size() { return m_uPageSize; }
-    inline LUnits get_page_width() { return m_uPageSize.width; }
-    inline LUnits get_page_height() { return m_uPageSize.height; }
-
-    //setters
-    inline void set_left_margin(LUnits value) { m_uLeftMargin = value; }
-    inline void set_right_margin(LUnits value) { m_uRightMargin = value; }
-    inline void set_top_margin(LUnits value) { m_uTopMargin = value; }
-    inline void set_bottom_margin(LUnits value) { m_uBottomMargin = value; }
-    inline void set_binding_margin(LUnits value) { m_uBindingMargin = value; }
-    inline void set_portrait(bool value) { m_fPortrait = value; }
-    inline void set_page_size(USize uPageSize) { m_uPageSize = uPageSize; }
-    inline void set_page_width(LUnits value) { m_uPageSize.width = value; }
-    inline void set_page_height(LUnits value) { m_uPageSize.height = value; }
-};
-
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoPointDto : public ImoSimpleObj
 {
     TPoint m_point;
@@ -1388,7 +1402,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoSizeDto : public ImoSimpleObj
 {
     TSize m_size;
@@ -1404,7 +1418,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoSpacer : public ImoStaffObj
 {
 protected:
@@ -1423,13 +1437,13 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoTextStyleInfo : public ImoSimpleObj
 {
 protected:
     string m_name;
     ImoFontInfo m_fontInfo;
-    rgba16 m_color;
+    Color m_color;
 
 public:
     ImoTextStyleInfo() : ImoSimpleObj(ImoObj::k_text_style_info) {}
@@ -1441,7 +1455,7 @@ public:
     inline int get_font_size() { return m_fontInfo.size; }
     inline int get_font_style() { return m_fontInfo.style; }
     inline int get_font_weight() { return m_fontInfo.weight; }
-    inline rgba16 get_color() { return m_color; }
+    inline Color get_color() { return m_color; }
 
     //setters
     inline void set_name (const std::string& value) { m_name = value; }
@@ -1449,10 +1463,10 @@ public:
     inline void set_font_size(int points) { m_fontInfo.size = points; }
     inline void set_font_style(int value) { m_fontInfo.style = value; }
     inline void set_font_weight(int value) { m_fontInfo.weight = value; }
-    inline void set_color(rgba16 value) { m_color = value; }
+    inline void set_color(Color value) { m_color = value; }
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoSystemInfo : public ImoSimpleObj
 {
 protected:
@@ -1482,7 +1496,7 @@ public:
     inline void set_top_system_distance(LUnits rValue) { m_topSystemDistance = rValue; }
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoScore : public ImoContainerObj
 {
 protected:
@@ -1523,6 +1537,8 @@ public:
 
     //score layout
     void add_sytem_info(ImoSystemInfo* pSL);
+    inline ImoSystemInfo* get_first_system_info() { return &m_systemInfoFirst; }
+    inline ImoSystemInfo* get_other_system_info() { return &m_systemInfoOther; }
     void add_page_info(ImoPageInfo* pPI);
     inline ImoPageInfo* get_page_info() { return &m_pageInfo; }
 
@@ -1539,10 +1555,56 @@ protected:
     void delete_staffobjs_collection();
     void delete_text_styles();
     ImoTextStyleInfo* create_default_style();
+    void set_defaults_for_system_info();
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+class ImoStaffInfo : public ImoSimpleObj
+{
+protected:
+    int m_nNumLines;
+    LUnits m_uSpacing;      //between line centers
+    LUnits m_uLineThickness;
+    LUnits m_uMarging;      //distance from the bottom line of the previous staff
+
+public:
+    //Default values for staff. Line spacing: 1.8 mm (staff height = 7.2 mm),
+    //line thickness: 0.15 millimeters, top margin: 10 millimeters
+    ImoStaffInfo(int lines=5, LUnits spacing=180.0f, LUnits thickness=15.0f,
+                 LUnits margin=1000.0f)
+        : ImoSimpleObj(ImoObj::k_staff_info)
+        , m_nNumLines(lines)
+        , m_uSpacing(spacing)
+        , m_uLineThickness(thickness)
+        , m_uMarging(margin)
+    {
+    }
+    ~ImoStaffInfo() {}
+
+	//margins
+    inline LUnits get_staff_margin() { return m_uMarging; }
+    inline void set_staff_margin(LUnits uSpace) { m_uMarging = uSpace; }
+
+    //spacing and size
+    inline LUnits get_line_spacing() { return m_uSpacing; }
+    inline void set_line_spacing(LUnits uSpacing) { m_uSpacing = uSpacing; }
+    LUnits get_height() {
+        if (m_nNumLines > 1)
+            return (m_nNumLines - 1) * m_uSpacing + m_uLineThickness; 
+        else
+            return m_uLineThickness; 
+    }
+
+    //lines
+    inline LUnits get_line_thickness() { return m_uLineThickness; }
+    inline void set_line_thickness(LUnits uTickness) { m_uLineThickness = uTickness; }
+    inline int get_num_lines() { return m_nNumLines; }
+    inline void set_num_lines(int nLines) { m_nNumLines = nLines; }
+
+};
+
+//---------------------------------------------------------------------------------------
 class ImoTie : public ImoAuxObj
 {
 protected:
@@ -1577,7 +1639,7 @@ public:
 };
 
 // raw info about a pending tie
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoTieDto : public ImoSimpleObj
 {
 protected:
@@ -1586,7 +1648,7 @@ protected:
     ImoNote* m_pNote;
     ImoBezierInfo* m_pBezier;
     LdpElement* m_pTieElm;
-    rgba16 m_color;
+    Color m_color;
 
 public:
     ImoTieDto() : ImoSimpleObj(ImoObj::k_tie_info), m_fStart(true), m_tieNum(0), m_pNote(NULL)
@@ -1600,7 +1662,7 @@ public:
     inline ImoBezierInfo* get_bezier() { return m_pBezier; }
     inline LdpElement* get_tie_element() { return m_pTieElm; }
     int get_line_number();
-    inline rgba16 get_color() { return m_color; }
+    inline Color get_color() { return m_color; }
 
     //setters
     inline void set_start(bool value) { m_fStart = value; }
@@ -1608,11 +1670,11 @@ public:
     inline void set_note(ImoNote* pNote) { m_pNote = pNote; }
     inline void set_bezier(ImoBezierInfo* pBezier) { m_pBezier = pBezier; }
     inline void set_tie_element(LdpElement* pElm) { m_pTieElm = pElm; }
-    inline void set_color(rgba16 value) { m_color = value; }
+    inline void set_color(Color value) { m_color = value; }
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoTimeSignature : public ImoStaffObj
 {
 protected:
@@ -1635,7 +1697,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoTuplet : public ImoMultiRelObj
 {
 protected:
@@ -1658,7 +1720,7 @@ public:
 };
 
 // raw info about a tuplet
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoTupletDto : public ImoSimpleObj
 {
 protected:
@@ -1710,7 +1772,7 @@ typedef NodeInTree<ImoObj>      ImoNode;
 
 
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 // global functions
 
 extern int to_step(const char& letter);

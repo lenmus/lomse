@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -288,6 +288,9 @@ protected:
     bool error_missing_element(ELdpElement type);
     void report_msg(int numLine, const std::string& msg);
     void report_msg(int numLine, const std::stringstream& msg);
+    void error_if_more_elements();
+    void error_invalid_param();
+    void error_msg(const string& msg);
 
     //helpers, to simplify writting grammar rules
     LdpElement* m_pAnalysedNode;
@@ -300,7 +303,6 @@ protected:
     bool get_optional(ELdpElement type);
     bool analyse_optional(ELdpElement type, ImoObj* pAnchor=NULL);
     void analyse_one_or_more(ELdpElement* pValid, int nValid);
-    void error_if_more_elements();
     void analyse_staffobjs_options(DtoStaffObj& dto);
     void analyse_component_options(DtoComponentObj& dto);
     inline ImoObj* proceed(ELdpElement type, ImoObj* pAnchor) {
@@ -313,9 +315,6 @@ protected:
     //auxiliary
     inline long get_node_id() { return m_pAnalysedNode->get_id(); }
     bool contains(ELdpElement type, ELdpElement* pValid, int nValid);
-    void error_and_remove_invalid_param();
-    void error_and_remove_element(const string& msg);
-    void remove_this_element();
 
     inline bool more_params_to_analyse() {
         return m_pNextParam != NULL;
@@ -352,8 +351,6 @@ protected:
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Invalid staff 'p" + staff + "'. Replaced by 'p1'.");
-            LdpElement* value = m_pLdpFactory->new_value(k_label, "p1");
-            m_pAnalyser->replace_node(m_pParamToAnalyse, value);
             m_pAnalyser->set_current_staff(0);
         }
         else
@@ -380,8 +377,6 @@ protected:
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Invalid integer number '" + number + "'. Replaced by '"
                 + replacement.str() + "'.");
-            LdpElement* value = m_pLdpFactory->new_value(k_number, replacement.str());
-            m_pAnalyser->replace_node(m_pParamToAnalyse, value);
             return nDefault;
         }
         else
@@ -413,8 +408,6 @@ protected:
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Invalid real number '" + number + "'. Replaced by '"
                 + replacement.str() + "'.");
-            LdpElement* value = m_pLdpFactory->new_value(k_number, replacement.str());
-            m_pAnalyser->replace_node(m_pParamToAnalyse, value);
             return rDefault;
         }
         else
@@ -442,8 +435,6 @@ protected:
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Invalid boolean value '" + value + "'. Replaced by '"
                 + replacement.str() + "'.");
-            LdpElement* value = m_pLdpFactory->new_value(k_string, replacement.str());
-            m_pAnalyser->replace_node(m_pParamToAnalyse, value);
             return fDefault;
         }
     }
@@ -452,18 +443,18 @@ protected:
     {
         return m_pParamToAnalyse->get_value();
     }
-    
-    rgba16 get_color_value()
+
+    Color get_color_value()
     {
         ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
         ImoColorDto* pColor = dynamic_cast<ImoColorDto*>( pImo );
-        rgba16 color;
+        Color color;
         if (pColor)
             color = pColor->get_color();
         delete pImo;
         return color;
     }
-    
+
     TPoint get_point_value()
     {
         ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
@@ -474,7 +465,7 @@ protected:
         delete pImo;
         return point;
     }
-    
+
     TSize get_size_value()
     {
         ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
@@ -485,7 +476,7 @@ protected:
         delete pImo;
         return size;
     }
-    
+
     float get_location_value()
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
@@ -591,7 +582,7 @@ protected:
             return k_cap_none;
         }
     }
-   
+
     void check_visible(ImoComponentObj* pCO)
     {
         string value = m_pParamToAnalyse->get_value();
@@ -601,7 +592,7 @@ protected:
             pCO->set_visible(false);
         else
         {
-            error_and_remove_invalid_param();
+            error_invalid_param();
             pCO->set_visible(true);
         }
     }
@@ -614,8 +605,6 @@ protected:
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Unknown note/rest duration '" + duration + "'. Replaced by 'q'.");
-            LdpElement* value = m_pLdpFactory->new_value(k_duration, "q");
-            m_pAnalyser->replace_node(m_pParamToAnalyse, value);
             figdots.noteType = ImoNoteRest::k_quarter;
         }
         return figdots;
@@ -630,7 +619,7 @@ protected:
             if (is_auxobj(type))
                 m_pAnalyser->analyse_node(m_pParamToAnalyse, pAnchor);
             else
-                error_and_remove_invalid_param();
+                error_invalid_param();
 
             move_to_next_param();
         }
@@ -650,8 +639,7 @@ public:
     void do_analysis()
     {
         string name = m_pLdpFactory->get_name( m_pAnalysedNode->get_type() );
-        cout << "Missing analyser for element '" << name << "'. Node removed." << endl;
-        remove_this_element();
+        cout << "Missing analyser for element '" << name << "'. Node ignored." << endl;
     }
 };
 
@@ -684,15 +672,15 @@ public:
         if (get_mandatory(k_dy))
             point.y = get_location_value();
         line.set_end_point( point );
-        
+
         // [<lineStyle>]
         if (get_optional(k_lineStyle))
             line.set_line_style( get_line_style_value() );
-        
+
         // [<color>])
         if (get_optional(k_color))
             line.set_color( get_color_value() );
-        
+
         // [<width>]
         if (get_optional(k_width))
             line.set_width( get_width_value(1.0f) );
@@ -759,8 +747,6 @@ protected:
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                     "Unknown barline type '" + value + "'. 'simple' barline assumed.");
-            LdpElement* value = m_pLdpFactory->new_value(k_label, "simple");
-            m_pAnalyser->replace_node(m_pParamToAnalyse, value);
         }
 
         return type;
@@ -795,7 +781,7 @@ public:
             pInfo->set_beam_number( get_integer_value(0) );
         else
         {
-            error_and_remove_element("Missing or invalid beam number. Beam ignored.");
+            error_msg("Missing or invalid beam number. Beam ignored.");
             delete pInfo;
             return;
         }
@@ -806,7 +792,7 @@ public:
         {
             if (!get_optional(k_label) || !set_beam_type(level++, pInfo))
             {
-                error_and_remove_element("Missing or invalid beam type. Beam ignored.");
+                error_msg("Missing or invalid beam type. Beam ignored.");
                 delete pInfo;
                 return;
             }
@@ -875,7 +861,7 @@ public:
                 set_y_in_point(ImoBezierInfo::k_ctrol2, pBezier);
             else
             {
-                error_and_remove_invalid_param();
+                error_invalid_param();
                 move_to_next_param();
             }
         }
@@ -918,11 +904,11 @@ public:
         // <width>
         if (get_mandatory(k_width))
             border.set_width( get_width_value(1.0f) );
-        
+
         // <lineStyle>
         if (get_mandatory(k_lineStyle))
             border.set_style( get_line_style_value() );
-       
+
         // <color>
         if (get_mandatory(k_color))
             border.set_color( get_color_value() );
@@ -967,7 +953,7 @@ public:
         {
             if (!analyse_optional(k_note, pAuxMD))
             {
-                error_and_remove_invalid_param();
+                error_invalid_param();
                 move_to_next_param();
             }
         }
@@ -1094,8 +1080,6 @@ public:
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                     "Unknown clef type '" + value + "'. Assumed 'G'.");
-            LdpElement* value = m_pLdpFactory->new_value(k_label, "G");
-            m_pAnalyser->replace_node(m_pParamToAnalyse, value);
         }
 
         return type;
@@ -1118,7 +1102,7 @@ public:
 
         if (!get_optional(k_label) || !set_color())
         {
-            error_and_remove_element("Missing or invalid color value. Must be #rrggbbaa. Color ignored.");
+            error_msg("Missing or invalid color value. Must be #rrggbbaa. Color ignored.");
             return;
         }
 
@@ -1157,7 +1141,7 @@ public:
             if (! (analyse_optional(k_score, pContent)
                  || analyse_optional(k_text, pContent) ))
             {
-                error_and_remove_invalid_param();
+                error_invalid_param();
                 move_to_next_param();
             }
         }
@@ -1190,7 +1174,7 @@ public:
 //@ <staffNumber> = integer number (0..n-1)
 //@ <timePos> = float number
 //@ <objID> = integer number
-//@ 
+//@
 
 class CursorAnalyser : public ElementAnalyser
 {
@@ -1206,26 +1190,26 @@ public:
         // <instrNumber>
         if (get_mandatory(k_number))
             pCursor->set_instrument( get_integer_value(0) );
-        
+
         // <staffNumber>
         if (get_mandatory(k_number))
             pCursor->set_staff( get_integer_value(0) );
-        
+
         // <timePos>
         if (get_mandatory(k_number))
             pCursor->set_time( get_float_value(0.0f) );
-        
+
         // <objID>
         if (get_mandatory(k_number))
             pCursor->set_id( get_long_value(-1L) );
-        
+
         add_to_model(pCursor);
     }
 };
 
 //@-------------------------------------------------------------------------------------
 //@ <defineStyle> = (defineStyle <name><font><color>)
-//@ 
+//@
 //@ Examples:
 //@     (defineStyle "Composer" (font "Times New Roman" 12pt normal) (color #000000))
 //@     (defineStyle "Instruments" (font "Times New Roman" 14pt bold) (color #000000))
@@ -1327,11 +1311,11 @@ public:
 //@
 //@        b6              (figuredBass "b6 b")
 //@        b
-//@        
+//@
 //@        7 ________      (figuredBass "7 5 2" (fbline 15 start))
-//@        5 
+//@        5
 //@        2
-//@        
+//@
 //@        6               (figuredBass "6 (3)")
 //@        (3)
 //@
@@ -1356,11 +1340,11 @@ public:
             {
                 //TODO: Not yet necessary. Not implemented in LenMus
             }
-            
+
             // [<fbline>]
             if (get_optional(k_fbline))
             {}
-            
+
             // [<componentOptions>*]
             //analyse_component_options(dto);
 
@@ -1469,7 +1453,7 @@ public:
         //<name> = string
         if (get_mandatory(k_string))
             font.name = get_string_value();
-        
+
         //<size> = num
         if (get_optional(k_number))
             font.size = get_integer_value(8);
@@ -1571,7 +1555,6 @@ public:
                 {
                     report_msg(m_pParamToAnalyse->get_line_number(),
                         "Element 'goFwd' has an incoherent value: go forward to start?. Element ignored.");
-                    remove_this_element();
                     return;
                 }
             }
@@ -1583,7 +1566,6 @@ public:
                 {
                     report_msg(m_pParamToAnalyse->get_line_number(),
                         "Element 'goBack' has an incoherent value: go backwards to end?. Element ignored.");
-                    remove_this_element();
                     return;
                 }
             }
@@ -1594,7 +1576,6 @@ public:
                 {
                     report_msg(m_pParamToAnalyse->get_line_number(),
                         "Unknown duration '" + duration + "'. Element ignored.");
-                    m_pAnalyser->erase_node(m_pParamToAnalyse);
                     return;
                 }
                 else
@@ -1611,7 +1592,6 @@ public:
             {
                 report_msg(m_pParamToAnalyse->get_line_number(),
                     "Negative value for element 'goFwd/goBack'. Element ignored.");
-                remove_this_element();
                 return;
             }
             else
@@ -1621,7 +1601,6 @@ public:
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Unknown duration '" + m_pParamToAnalyse->get_name() + "'. Element ignored.");
-            m_pAnalyser->erase_node(m_pParamToAnalyse);
             return;
         }
 
@@ -1660,7 +1639,7 @@ public:
         // <grpSymbol>
         if (!get_optional(k_symbol) || !set_symbol(pGrp))
         {
-            error_and_remove_element("Missing or invalid group symbol. Must be 'none', 'brace' or 'bracket'. Group removed.");
+            error_msg("Missing or invalid group symbol. Must be 'none', 'brace' or 'bracket'. Group ignored.");
             delete pGrp;
             return;
         }
@@ -1672,7 +1651,7 @@ public:
         // <instrument>+
         if (!more_params_to_analyse())
         {
-            error_and_remove_element("Missing instruments in group!. Group removed.");
+            error_msg("Missing instruments in group!. Group ignored.");
             delete pGrp;
             return;
         }
@@ -1682,7 +1661,7 @@ public:
             {
                 if (!analyse_optional(k_instrument, pGrp))
                 {
-                    error_and_remove_invalid_param();
+                    error_invalid_param();
                     move_to_next_param();
                 }
             }
@@ -1737,7 +1716,7 @@ public:
         // num_instr
         if (!get_optional(k_number) || !set_instrument(dto))
         {
-            error_and_remove_element("Missing or invalid MIDI instrument (1..256). MIDI info ignored.");
+            error_msg("Missing or invalid MIDI instrument (1..256). MIDI info ignored.");
             return;
         }
 
@@ -1836,21 +1815,11 @@ protected:
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Invalid value '" + staves + "' for staves. Replaced by 1.");
-            LdpElement* value = m_pLdpFactory->new_value(k_number, "1");
-            m_pAnalyser->replace_node(m_pParamToAnalyse, value);
-            pInstrument->set_num_staves(1);
         }
         else
         {
-            //TODO: check that maximum number of supported staves is not reached
-            //sNumStaves.ToLong(&nNumStaves);
-            //if (nNumStaves > lmMAX_STAFF)
-            //{
-            //    AnalysisError(pX, "Program limit reached: the number of staves per instrument must not be greater than %d. Please inform Lomse developers.",
-            //                  lmMAX_STAFF);
-            //    nNumStaves = lmMAX_STAFF;
-            //}
-            pInstrument->set_num_staves(nStaves);
+            for(; nStaves > 1; --nStaves)
+                pInstrument->add_staff();
         }
     }
 
@@ -1953,8 +1922,6 @@ public:
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                     "Unknown key '" + value + "'. Assumed 'C'.");
-            LdpElement* value = m_pLdpFactory->new_value(k_label, "C");
-            m_pAnalyser->replace_node(m_pParamToAnalyse, value);
         }
 
         return type;
@@ -1974,12 +1941,11 @@ public:
 
     void do_analysis()
     {
-        remove_this_element();
     }
 };
 
 //@-------------------------------------------------------------------------------------
-//@ <lenmusdoc> = (lenmusdoc <vers>[<cursor>]<content>)
+//@ <lenmusdoc> = (lenmusdoc <vers>[<cursor>][<pageLayout>*]<content>)
 
 class LenmusdocAnalyser : public ElementAnalyser
 {
@@ -2000,6 +1966,9 @@ public:
 
         // [<cursor>]
         analyse_optional(k_cursor, pDoc);
+
+        // [<pageLayout>*]
+        while (analyse_optional(k_pageLayout, pDoc));
 
         // <content>
         analyse_mandatory(k_content, pDoc);
@@ -2153,7 +2122,7 @@ public:
             if (m_pParamToAnalyse->get_value() == "parenthesis")
                 dto.set_parenthesis(true);
             else
-                error_and_remove_invalid_param();
+                error_invalid_param();
         }
 
         // [<componentOptions>*]
@@ -2205,7 +2174,7 @@ public:
                    || analyse_optional(k_goFwd, pMD)
                    || analyse_optional(k_goBack, pMD) ))
             {
-                error_and_remove_invalid_param();
+                error_invalid_param();
                 move_to_next_param();
             }
         }
@@ -2310,7 +2279,7 @@ public:
             else if (firstChar == 'p')
                 get_num_staff();
             else
-                error_and_remove_invalid_param();
+                error_invalid_param();
         }
         pDto->set_staff( m_pAnalyser->get_current_staff() );
         pDto->set_voice( m_pAnalyser->get_current_voice() );
@@ -2427,8 +2396,6 @@ protected:
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Unknown note pitch '" + pitch + "'. Replaced by 'c4'.");
-            LdpElement* value = m_pLdpFactory->new_value(k_pitch, "c4");
-            m_pAnalyser->replace_node(m_pParamToAnalyse, value);
             dto.set_pitch(ImoNote::C, 4, ImoNote::k_no_accidentals);
         }
         else
@@ -2452,8 +2419,7 @@ protected:
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Invalid parameter '" + m_pParamToAnalyse->get_value()
-                + "'. Removed.");
-            m_pAnalyser->erase_node(m_pParamToAnalyse);
+                + "'. Ignored.");
         }
     }
 
@@ -2466,8 +2432,6 @@ protected:
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Invalid voice 'v" + voice + "'. Replaced by 'v1'.");
-            LdpElement* value = m_pLdpFactory->new_value(k_label, "v1");
-            m_pAnalyser->replace_node(m_pParamToAnalyse, value);
             m_pAnalyser->set_current_voice(1);
         }
         else
@@ -2476,7 +2440,6 @@ protected:
 
     void set_stem(DtoNote& dto)
     {
-        LdpElement* pStem = m_pParamToAnalyse;
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
         string value = get_string_value();
         if (value == "up")
@@ -2489,7 +2452,6 @@ protected:
             report_msg(m_pParamToAnalyse->get_line_number(),
                             "Invalid value '" + value
                             + "' for stem type. Default stem asigned.");
-            m_pAnalyser->erase_node(pStem);
         }
     }
 
@@ -2518,21 +2480,18 @@ protected:
     {
         report_msg(m_pParamToAnalyse->get_line_number(),
             "Requesting beaming a note longer than eighth. Beam ignored.");
-        m_pAnalyser->erase_node(m_pParamToAnalyse);
     }
 
     void error_beam_already_open()
     {
         report_msg(m_pParamToAnalyse->get_line_number(),
             "Requesting to start a beam (g+) but there is already an open beam. Beam ignored.");
-        m_pAnalyser->erase_node(m_pParamToAnalyse);
     }
 
     void error_no_beam_open()
     {
         report_msg(m_pParamToAnalyse->get_line_number(),
             "Requesting to end a beam (g-) but there is no matching g+. Beam ignored.");
-        m_pAnalyser->erase_node(m_pParamToAnalyse);
     }
 
     void end_g_beam(ImoNoteRest* pNR)
@@ -2613,8 +2572,7 @@ protected:
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Invalid parameter '" + m_pParamToAnalyse->get_value()
-                + "'. Removed.");
-            m_pAnalyser->erase_node(m_pParamToAnalyse);
+                + "'. Ignored.");
         }
         else
         {
@@ -2622,8 +2580,6 @@ protected:
             {
                 report_msg(m_pParamToAnalyse->get_line_number(),
                     "Requesting to start a tuplet but there is already an open tuplet. Tuplet ignored.");
-                m_pAnalyser->erase_node(m_pParamToAnalyse);
-
                 add_to_current_tuplet(pNR);
             }
             else
@@ -2753,12 +2709,10 @@ public:
                 else
                     report_msg(m_pParamToAnalyse->get_line_number(),
                         "Invalid option '" + name + "'. Option ignored.");
-
-                remove_this_element();
             }
         }
         else
-            error_and_remove_element("Missing value for option '"
+            error_msg("Missing value for option '"
                                      + name + "'. Option ignored.");
     }
 
@@ -3074,7 +3028,7 @@ public:
                 if (! (analyse_optional(k_instrument, pScore)
                     || analyse_optional(k_group) ))
                 {
-                    error_and_remove_invalid_param();
+                    error_invalid_param();
                     move_to_next_param();
                 }
             }
@@ -3175,7 +3129,7 @@ public:
         }
         else
         {
-            error_and_remove_element("Missing width for spacer. Spacer removed.");
+            error_msg("Missing width for spacer. Spacer ignored.");
             return;
         }
 
@@ -3218,8 +3172,6 @@ public:
                 report_msg(m_pParamToAnalyse->get_line_number(),
                         "Expected 'first' or 'other' value but found '" + type
                         + "'. 'first' assumed.");
-                LdpElement* value = m_pLdpFactory->new_value(k_label, "first");
-                m_pAnalyser->replace_node(m_pParamToAnalyse, value);
                 dto.set_first(true);
             }
         }
@@ -3423,7 +3375,7 @@ public:
                 else if (get_optional(k_dy))
                     pText->set_user_location_y( get_location_value() );
                 else
-                    error_and_remove_invalid_param();
+                    error_invalid_param();
             }
             error_if_more_elements();
 
@@ -3455,7 +3407,7 @@ public:
         // <tieType> (label)
         if (!get_mandatory(k_label) || !set_tie_type(pInfo))
         {
-            error_and_remove_element("Missing or invalid tie type. Tie ignored.");
+            error_msg("Missing or invalid tie type. Tie ignored.");
             delete pInfo;
             return;
         }
@@ -3559,7 +3511,7 @@ public:
                 else if (get_optional(k_dy))
                     pTitle->set_user_location_y( get_location_value() );
                 else
-                    error_and_remove_invalid_param();
+                    error_invalid_param();
             }
             error_if_more_elements();
 
@@ -3607,7 +3559,7 @@ public:
         // { + | - }
         if (!get_mandatory(k_label) || !set_tuplet_type(pInfo))
         {
-            error_and_remove_element("Missing or invalid tuplet type. Tuplet ignored.");
+            error_msg("Missing or invalid tuplet type. Tuplet ignored.");
             delete pInfo;
             return;
         }
@@ -3617,7 +3569,7 @@ public:
             // <actualNotes>
             if (!get_mandatory(k_number) || !set_actual_notes(pInfo))
             {
-                error_and_remove_element("Tuplet: missing or invalid actual notes number. Tuplet ignored.");
+                error_msg("Tuplet: missing or invalid actual notes number. Tuplet ignored.");
                 delete pInfo;
                 return;
             }
@@ -3627,7 +3579,7 @@ public:
                 set_normal_notes(pInfo);
             if (pInfo->get_normal_number() == 0)
             {
-                error_and_remove_element("Tuplet: Missing or invalid normal notes number. Tuplet ignored.");
+                error_msg("Tuplet: Missing or invalid normal notes number. Tuplet ignored.");
                 delete pInfo;
                 return;
             }
@@ -3695,10 +3647,10 @@ protected:
                 if (value == "noBracket")
                     fShowBracket = false;
                 else
-                    error_and_remove_invalid_param();
+                    error_invalid_param();
             }
             else
-                error_and_remove_invalid_param();
+                error_invalid_param();
 
             move_to_next_param();
         }
@@ -3805,8 +3757,7 @@ void ElementAnalyser::analyse_one_or_more(ELdpElement* pValid, int nValid)
         {
             string name = m_pLdpFactory->get_name(type);
             report_msg(m_pParamToAnalyse->get_line_number(),
-                "Element '" + name + "' unknown or not possible here. Removed.");
-            m_pAnalyser->erase_node(m_pParamToAnalyse);
+                "Element '" + name + "' unknown or not possible here. Ignored.");
         }
         move_to_next_param();
     }
@@ -3819,26 +3770,19 @@ bool ElementAnalyser::contains(ELdpElement type, ELdpElement* pValid, int nValid
     return false;
 }
 
-void ElementAnalyser::error_and_remove_invalid_param()
+void ElementAnalyser::error_invalid_param()
 {
     ELdpElement type = m_pParamToAnalyse->get_type();
     string name = m_pLdpFactory->get_name(type);
     if (name == "label")
         name += ":" + m_pParamToAnalyse->get_value();
     report_msg(m_pParamToAnalyse->get_line_number(),
-        "Element '" + name + "' unknown or not possible here. Removed.");
-    m_pAnalyser->erase_node(m_pParamToAnalyse);
+        "Element '" + name + "' unknown or not possible here. Ignored.");
 }
 
-void ElementAnalyser::error_and_remove_element(const string& msg)
+void ElementAnalyser::error_msg(const string& msg)
 {
     report_msg(m_pAnalysedNode->get_line_number(), msg);
-    remove_this_element();
-}
-
-void ElementAnalyser::remove_this_element()
-{
-    m_pAnalyser->erase_node(m_pAnalysedNode);
 }
 
 void ElementAnalyser::error_if_more_elements()
@@ -3852,13 +3796,7 @@ void ElementAnalyser::error_if_more_elements()
         report_msg(m_pAnalysedNode->get_line_number(),
                 "Element '" + m_pAnalysedNode->get_name()
                 + "': too many parameters. Extra parameters from '"
-                + name + "' have been removed.");
-        while (more_params_to_analyse())
-        {
-            m_pParamToAnalyse = get_param_to_analyse();
-            move_to_next_param();
-            m_pAnalyser->erase_node(m_pParamToAnalyse);
-        }
+                + name + "' have been ignored.");
     }
 }
 
@@ -3875,7 +3813,7 @@ void ElementAnalyser::analyse_staffobjs_options(DtoStaffObj& dto)
         if (type == 'p')
             get_num_staff();
         else
-            error_and_remove_invalid_param();
+            error_invalid_param();
     }
 
     //set staff: either found value or inherited one
@@ -4018,41 +3956,13 @@ ImoObj* Analyser::analyse_node(LdpElement* pNode, ImoObj* pAnchor)
     return pNode->get_imo();
 }
 
-void Analyser::erase_node(LdpElement* pNode)
-{
-    if (pNode)
-    {
-        ImoObj* pImo = pNode->get_imo();
-        if (pImo) delete pImo;
-        LdpTree::iterator it(pNode);
-        m_pTree->erase(it);
-        delete pNode;
-    }
-}
-
-void Analyser::replace_node(LdpElement* pOldNode, LdpElement* pNewNode)
-{
-    ImoObj* pImo = pOldNode->get_imo();
-    if (pImo) delete pImo;
-    LdpTree::iterator it(pOldNode);
-    m_pTree->replace_node(it, pNewNode);
-    delete pOldNode;
-}
-
 void Analyser::remove_tie_element(ImoTieDto* pInfo)
 {
-//    LdpElement* pNode = pInfo->get_tie_element();
-//    if (pNode)      //in tests node could no exist
-//        erase_node(pNode);      //also deletes pInfo
-//    else
-//    //    pInfo->clear_tie();     //prevent ImoTieDto to delete pTie
-//    //}
-        delete pInfo;
+    delete pInfo;
 }
 
 void Analyser::remove_old_tie_element(LdpElement* pOldTieParam)
 {
-    erase_node(pOldTieParam);
 }
 
 ElementAnalyser* Analyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
@@ -4237,7 +4147,7 @@ void TiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
     m_reporter << "Line " << pEndInfo->get_line_number()
                << ". Requesting to tie notes of different voice or pitch. Tie number "
                << pEndInfo->get_tie_number()
-               << " will be removed." << endl;
+               << " will be ignored." << endl;
 }
 
 void TiesBuilder::error_no_start_tie(ImoTieDto* pEndInfo)
@@ -4245,7 +4155,7 @@ void TiesBuilder::error_no_start_tie(ImoTieDto* pEndInfo)
     m_reporter << "Line " << pEndInfo->get_line_number()
                << ". No 'start' element for tie number "
                << pEndInfo->get_tie_number()
-               << ". Tie removed." << endl;
+               << ". Tie ignored." << endl;
 }
 
 void TiesBuilder::error_no_end_tie(ImoTieDto* pStartInfo)
@@ -4253,13 +4163,13 @@ void TiesBuilder::error_no_end_tie(ImoTieDto* pStartInfo)
     m_reporter << "Line " << pStartInfo->get_line_number()
                << ". No 'stop' element for tie number "
                << pStartInfo->get_tie_number()
-               << ". Tie removed." << endl;
+               << ". Tie ignored." << endl;
 }
 
 void TiesBuilder::error_invalid_tie_old_syntax(int line)
 {
     m_reporter << "Line " << line
-               << ". No note found to match old syntax tie. Tie removed." << endl;
+               << ". No note found to match old syntax tie. Tie ignored." << endl;
 }
 
 void TiesBuilder::remove_from_pending(ImoTieDto* pTieInfo)
@@ -4418,19 +4328,14 @@ void BeamsBuilder::delete_consumed_info_items(ImoBeamInfo* pEndInfo)
 
 void BeamsBuilder::delete_beam_element(ImoBeamInfo* pInfo)
 {
-    LdpElement* pBeam = pInfo->get_beam_element();
-    m_pAnalyser->erase_node(pBeam);
-    //pInfo is deleted automatically when erasing node
+    //Nothing to do: pInfo is deleted automatically when erasing node
 }
 
 void BeamsBuilder::clear_pending_beams()
 {
     std::list<ImoBeamInfo*>::iterator it;
     for (it = m_pendingBeams.begin(); it != m_pendingBeams.end(); ++it)
-    {
         error_no_end_beam(*it);
-        m_pAnalyser->erase_node( (*it)->get_beam_element() );
-    }
     m_pendingBeams.clear();
 }
 
@@ -4439,7 +4344,8 @@ void BeamsBuilder::error_no_matching_items(ImoBeamInfo* pInfo)
     m_reporter << "Line " << pInfo->get_line_number()
                << ". No 'begin/continue' elements for beam number "
                << pInfo->get_beam_number()
-               << ". Beam removed." << endl;
+               << ". Beam ignored." << endl;
+    delete pInfo;
 }
 
 void BeamsBuilder::error_no_end_beam(ImoBeamInfo* pInfo)
@@ -4447,7 +4353,8 @@ void BeamsBuilder::error_no_end_beam(ImoBeamInfo* pInfo)
     m_reporter << "Line " << pInfo->get_line_number()
                << ". No 'end' element for beam number "
                << pInfo->get_beam_number()
-               << ". Beam removed." << endl;
+               << ". Beam ignored." << endl;
+    delete pInfo;
 }
 
 
@@ -4479,7 +4386,6 @@ void OldBeamsBuilder::clear_pending_old_beams()
     for (it = m_pendingOldBeams.begin(); it != m_pendingOldBeams.end(); ++it)
     {
         error_no_end_old_beam(*it);
-        //m_pAnalyser->erase_node( (*it)->get_beam_element() );
         delete *it;
     }
     m_pendingOldBeams.clear();
@@ -4493,7 +4399,7 @@ bool OldBeamsBuilder::is_old_beam_open()
 void OldBeamsBuilder::error_no_end_old_beam(ImoBeamInfo* pInfo)
 {
     m_reporter << "Line " << pInfo->get_line_number()
-               << ". No matching 'g-' element for 'g+'. Beam removed." << endl;
+               << ". No matching 'g-' element for 'g+'. Beam ignored." << endl;
 }
 
 void OldBeamsBuilder::close_old_beam(ImoBeamInfo* pInfo)
@@ -4583,7 +4489,6 @@ void TupletsBuilder::clear_pending_tuplets()
         LdpElement* pElm = (*it)->get_tuplet_element();
         if (!pElm || pElm->get_imo() == NULL)
             delete *it;
-        m_pAnalyser->erase_node( pElm );
     }
     m_pendingTuplets.clear();
 }
@@ -4591,7 +4496,7 @@ void TupletsBuilder::clear_pending_tuplets()
 void TupletsBuilder::error_no_end_tuplet(ImoTupletDto* pInfo)
 {
     m_reporter << "Line " << pInfo->get_line_number()
-               << ". No 'end' element for tuplet. Tuplet removed." << endl;
+               << ". No 'end' element for tuplet. Tuplet ignored." << endl;
 }
 
 

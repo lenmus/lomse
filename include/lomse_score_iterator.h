@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010 Lomse project
 //
@@ -13,12 +13,10 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_SCORE_ITERATOR_H__
 #define __LOMSE_SCORE_ITERATOR_H__
@@ -36,10 +34,8 @@ namespace lomse
 class ColStaffObjs;
 
 
-//-------------------------------------------------------------------------------------
 // ScoreIterator: A cursor to traverse the ColStaffObjs
-//-------------------------------------------------------------------------------------
-
+//---------------------------------------------------------------------------------------
 class ScoreIterator
 {
 protected:
@@ -50,14 +46,12 @@ public:
     ScoreIterator(ColStaffObjs* pColStaffObjs);
     ~ScoreIterator();
 
- //   inline bool FirstOfCollection() {
- //                   return (m_pSO && m_pSO == m_pColStaffObjs->GetFirstSO()); }
+    inline bool is_first() { return m_it == m_pColStaffObjs->begin(); }
  //   inline bool LastOfCollection() {
  //                   return (m_pSO && m_pSO == m_pColStaffObjs->GetLastSO()); }
  //   inline bool StartOfCollection() {
  //                   return FirstOfCollection() || m_pColStaffObjs->IsEmpty(); }
- //   inline bool EndOfCollection() {
- //                   return (m_pSO == (lmStaffObj*)NULL || (FirstOfCollection() && m_fEnd)); }
+    inline bool is_end() { return m_it == m_pColStaffObjs->end(); }
 
  //   inline bool ChangeOfMeasure() { return m_fChangeOfMeasure; }
 	//inline lmStaffObj* GetCurrent() { return m_pSO; }

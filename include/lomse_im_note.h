@@ -12,8 +12,8 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
-//  
+//
+//
 //
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
@@ -74,13 +74,6 @@ public:
     inline void set_tuplet(ImoTuplet* pTuplet) { m_pTuplet = pTuplet; }
     inline bool is_in_tuplet() { return m_pTuplet != NULL; }
 
-    //setters
-    //inline void set_note_type(int noteType) { m_nNoteType = noteType; }
-    //inline void set_duration(float duration) { m_rDuration = duration; }
-    //inline void get_dots(int dots) { m_nDots = dots; }
-    //inline void set_voice(int voice) { m_nVoice = voice; }
-    //void set_note_type_and_dots(int noteType, int dots);
-
 };
 
 //----------------------------------------------------------------------------------
@@ -128,26 +121,15 @@ public:
     inline int get_step() { return m_step; }
     inline int get_octave() { return m_octave; }
     inline int get_accidentals() { return m_accidentals; }
-//    inline void set_step(int step) { m_step = step; }
-//    inline void set_octave(int octave) { m_octave = octave; }
-//    inline void set_accidentals(int accidentals) { m_accidentals = accidentals; }
-//    inline void set_pitch(int step, int octave, int accidentals) {
-//        m_step = step;
-//        m_octave = octave;
-//        m_accidentals = accidentals;
-//    }
 
     //ties
     inline bool is_tied_next() { return m_pTieNext != NULL; }
     inline bool is_tied_prev() { return m_pTiePrev != NULL; }
     inline void set_tie_next(ImoTie* pStartTie) { m_pTieNext = pStartTie; }
     inline void set_tie_prev(ImoTie* pEndTie) { m_pTiePrev = pEndTie; }
-    //inline ImoTie* get_tie_next() { return m_pTieNext; }
-    //inline ImoTie* get_tie_prev() { return m_pTiePrev; }
     void remove_tie(ImoTie* pTie);
 
     //stem
-//    inline void set_stem_direction(int value) { m_stemDirection = value; }
     inline int get_stem_direction() { return m_stemDirection; }
     inline bool is_stem_up() { return m_stemDirection == k_up; }
     inline bool is_stem_down() { return m_stemDirection == k_down; }

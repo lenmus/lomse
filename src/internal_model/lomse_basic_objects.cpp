@@ -33,7 +33,7 @@ namespace lomse
 // DtoComponentObj implementation
 //-------------------------------------------------------------------------------------
 
-void DtoComponentObj::set_color(rgba16 color)
+void DtoComponentObj::set_color(Color color)
 {
     m_color = color;
 }

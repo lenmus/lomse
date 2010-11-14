@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010 Lomse project
 //
@@ -16,141 +16,51 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_SCORE_LAYOUTER_H__        //to avoid nested includes
 #define __LOMSE_SCORE_LAYOUTER_H__
 
 #include "lomse_content_layouter.h"
-//#include <sstream>
-//
-//using namespace std;
+#include "lomse_basic.h"
+#include "lomse_score_iterator.h"
+#include <vector>
+using namespace std;
 
 namespace lomse
 {
 
 //forward declarations
 class InternalModel;
+class TextMeter;
 class GraphicModel;
 class ImoDocObj;
+class ImoScore;
+class ImoInstrument;
+class GmoBoxScorePage;
+class GmoBoxSlice;
+class GmoBoxSystem;
+class GmoBoxSliceInstr;
+class GmoStubScore;
+class InstrumentEngraver;
+class SystemLayouter;
+//class SystemCursor;
 
 
-// ScoreLayouter: Generates LDP source code for a basic model object
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ScoreLayouter : public ContentLayouter
 {
 protected:
+    TextMeter* m_pTextMeter;
+    UPoint m_pageCursor;
+    ScoreIterator m_scoreIt;
 
-public:
-    ScoreLayouter(ImoDocObj* pImo);
-    virtual ~ScoreLayouter();
-
-    void do_layout(GmoBox* pContainerBox);
-
-
-protected:
-    void initializations();
-
-};
-
-
-
-
-// OLD CODE ============================================================================
-
-//class lmBoxScore;
-//class lmPaper;
-//class lmScore;
-//
-//class lmScoreLayouter
-//{
-//public:
-//    lmScoreLayouter(lmPaper* pPaper) : m_pPaper(pPaper), m_pScore((lmScore*)NULL) {}
-//    virtual ~lmScoreLayouter() {}
-//
-//    //measure phase
-//    virtual lmBoxScore* LayoutScore(lmScore* pScore)=0;
-//
-//protected:
-//    lmPaper*        m_pPaper;       //the paper to use
-//    lmScore*        m_pScore;       //the score to layout
-//
-//};
-//
-//
-//#include <vector>
-//
-//class lmSystemScoreLayouter;
-//class lmColumnScoreLayouter;
-//class lmBoxSystem;
-//class lmBoxSliceInstr;
-//class lmSystemCursor;
-//
-//class ScoreLayouter : public lmScoreLayouter
-//{
-//public:
-//    ScoreLayouter(lmPaper* pPaper);
-//    ~ScoreLayouter();
-//
-//    //measure phase
-//    lmBoxScore* LayoutScore(lmScore* pScore); 
-//
-//    //Public methods coded only for Unit Tests
-//#if defined(_LOMSE_DEBUG)
-//
-//    int GetNumSystemScoreLayouters();
-//    int GetNumColumns(int iSys);      //iSys=[0..n-1]
-//    int GetNumLines(int iSys, int iCol);    //iSys=[0..n-1], iCol=[0..n-1]
-//    lmSystemScoreLayouter* GetSystemScoreLayouter(int iSys);  //iSys=[0..n-1]
-//
-//#endif
-//
-//
-//private:
-//    bool SizeBarColumn(int nSystem, lmBoxSystem* pBoxSystem, lmLUnits nSystemIndent);
-//    lmLUnits AddEmptySystem(int nSystem, lmBoxSystem* pBoxSystem);
-//    void RedistributeFreeSpace(lmLUnits nAvailable, bool fLastSystem);
-//    bool SizeBar(lmBoxSliceInstr* pBSV, lmVStaff* pVStaff, int nInstr);
-//    void SplitColumn(lmLUnits uAvailable);
-//	void AddProlog(lmBoxSliceInstr* pBSV, bool fDrawTimekey, lmVStaff* pVStaff, int nInstr);
-//	void AddKey(lmKeySignature* pKey, lmBox* pBox, lmVStaff* pVStaff, int nInstr, bool fProlog);
-//	void AddTime(lmTimeSignature* pTime, lmBox* pBox, lmVStaff* pVStaff, int nInstr, bool fProlog);
-//    void AddColumnToSystem();
-//
-//    void AddScoreTitlesToCurrentPage();
-//    void PositionCursorsAfterHeaders();
-//    void RepositionStaffObjs();
-//    bool AddNewPageIfRequired();
-//    void CreateSystemBox(bool fFirstSystemInPage);
-//    void MoveCursorToTopLeftCorner();
-//    void GetScoreRenderizationOptions();
-//    void PrepareFontsThatMatchesStavesSizes();
-//    void DecideSystemsIndentation();
-//    void DecideSpaceBeforeProlog();
-//    void CreateSystemCursor();
-//    void ComputeMeasuresSizesToJustifyCurrentSystem(bool fThisIsLastSystem);
-//    void AddInitialLineJoiningAllStavesInSystem();
-//    bool CreateColumnAndAddItToCurrentSystem();
-//    bool FillCurrentSystemWithColumns();
-//    void SetCurrentSystemLenght(bool fThisIsLastSystem);
-//    void GetSystemHeightAndAdvancePaperCursor();
-//    void UpdateBoxSlicesSizes();
-//    bool RequestedToFillScoreWithEmptyStaves();
-//    void FillPageWithEmptyStaves();
-//
-//    void DeleteSystemScoreLayouters();
-//
-//
-//        // member variables
-//
-//
 //    //auxiliary data for computing and justifying systems
-//    std::vector<lmSystemScoreLayouter*> m_SysScoreLayouters;  //the formatter object for each system
-//    int             m_nCurSystem;               //[1..n] Current system number
-//    int             m_nRelColumn;               //[0..n-1] number of column in process, relative to current system
-//    int             m_nAbsColumn;               //[1..n] number of column in process, absolute
+    int m_nCurSystem;   //[0..n-1] Current system number
+    int m_nAbsColumn;   //[0..n-1] number of column in process, absolute
+    int m_nRelColumn;   //[0..n-1] number of column in process, relative to current system
 //
-//    lmLUnits        m_uFreeSpace;               //free space available on current system
+//    LUnits        m_uFreeSpace;               //free space available on current system
 //    int             m_nColumnsInSystem;         //the number of columns in current system
 //
 //    //renderization options and parameters
@@ -160,27 +70,115 @@ protected:
 //    lmESpacingMethod    m_nSpacingMethod;           //fixed, proportional, etc.
 //    lmTenths            m_nSpacingValue;            //spacing for 'fixed' method
 //
-//    // variables for debugging
-//    bool            m_fDebugMode;           //debug on/off
-//    long            m_nTraceMeasure;        //measure to trace. 0 = all
+    //space values to use
+//	LUnits	    m_uSpaceBeforeProlog;   //space between start of system and clef
+    LUnits        m_uFirstSystemIndent;
+    LUnits        m_uOtherSystemIndent;
+
+
+    //current boxes being layouted
+    GmoStubScore*       m_pStubScore;
+    GmoBoxScorePage*    m_pCurBoxPage;
+    GmoBoxSystem*       m_pCurBoxSystem;
+    GmoBoxSlice*        m_pCurSlice;
+    int         m_nCurrentPageNumber;       //1..n. if 0 no page yet created!
+    LUnits      m_uLastSystemHeight;
 //
-//    //spacings to use
-//	lmLUnits	    m_uSpaceBeforeProlog;   //space between start of system and clef
-//    lmLUnits        m_uFirstSystemIndent;
-//    lmLUnits        m_uOtherSystemIndent;
-//
-//    //new global vars
-//    lmSystemCursor* m_pSysCursor;
-//
-//    //
-//    lmBoxScore*     m_pBoxScore;                //the graphical model being created
-//    lmBoxPage*      m_pCurrentBoxPage;
-//    lmBoxSystem*    m_pCurrentBoxSystem;
-//    int             m_nCurrentPageNumber;       //1..n. if 0 no page yet created!
-//    lmLUnits        m_uStartOfCurrentSystem;
-//    lmLUnits        m_uLastSystemHeight;
-//
-//};
+
+public:
+    ScoreLayouter(ImoDocObj* pImo, GraphicModel* pGModel, TextMeter* pMeter);
+    virtual ~ScoreLayouter();
+
+    void layout_in_page(GmoBox* pContainerBox);
+    GmoBox* create_pagebox(GmoBox* pParentBox);
+    void prepare_to_start_layout();
+
+
+protected:
+
+    //helpers
+    inline bool is_first_column_in_system() { return m_nRelColumn == 0; }
+    inline bool is_first_page() { return m_nCurrentPageNumber == 0; }
+    inline LUnits get_system_indent() {
+        return (m_nCurSystem == 1 ? m_uFirstSystemIndent : m_uOtherSystemIndent);
+    }
+    InstrumentEngraver* get_instrument_engraver(int iInstr);
+    LUnits get_line_spacing(int iInstr, int iStaff);
+
+
+
+    //level 1: invoked from public methods
+    //---------------------------------------------------------------
+    void page_initializations(GmoBox* pContainerBox);
+    ImoScore* get_imo_score();
+    void create_stub_for_score();
+    void create_instrument_engravers();
+    void decide_systems_indentation();
+    void add_titles_if_first_page();
+    bool enough_space_in_page();
+    void add_next_system();
+    void delete_instrument_layouters();
+    void delete_system_layouters();
+    //void delete_system_cursor();
+
+    std::vector<InstrumentEngraver*> m_instrEngravers;
+    bool m_fFirstSystemInPage;
+    inline void is_first_system_in_page(bool value) { m_fFirstSystemInPage = value; }
+    inline bool is_first_system_in_page() { return m_fFirstSystemInPage; }
+    bool m_fThereAreMoreSystems;
+    inline void more_systems_to_add(bool value) { m_fThereAreMoreSystems = value; }
+    inline bool more_systems_to_add() { return m_fThereAreMoreSystems; }
+
+
+    //level 2: invoked from level 1 methods
+    //---------------------------------------------------------------
+    void add_score_titles();
+    void move_cursor_to_top_left_corner();
+    void move_cursor_after_headers();
+    LUnits remaining_height();
+    //void create_system_cursor();
+    void create_system_layouter();
+    void create_system_box();
+    void set_system_height_and_advance_paper_cursor();
+    void fill_current_system_with_columns();
+    void justify_current_system();
+    void truncate_current_system();
+
+    //SystemCursor* m_pSysCursor;
+    std::vector<SystemLayouter*> m_sysLayouters;
+
+
+
+    //level 3: invoked from level 2 methods
+    //---------------------------------------------------------------
+    void create_column_and_add_it_to_current_system();
+    inline bool must_terminate_system() { return m_fTerminateSystem; }
+    inline void must_terminate_system(bool value) { m_fTerminateSystem = value; }
+
+    bool m_fTerminateSystem;
+
+
+    //level 4: invoked from level 3 methods
+    //---------------------------------------------------------------
+    void create_column_boxes();
+    void collect_content_for_this_bar();
+    void measure_this_bar();
+    void add_column_to_system();
+
+    //level 5: invoked from level 4 methods
+    //---------------------------------------------------------------
+    void add_slice_box();
+    LUnits determine_top_space(int nInstr, ImoInstrument* pInstr);
+    void start_slice_instr(ImoInstrument* pInstr, int iInstr, LUnits uTopMargin);
+    void terminate_slice_instr(int iInstr, LUnits uBottomMargin);
+    void add_staff_lines_name_and_bracket(int iInstr, LUnits uTopMargin);
+    void add_shapes_for_score_objs();
+
+    std::vector<GmoBoxSliceInstr*> m_sliceInstrBoxes;
+    GmoBoxSliceInstr* m_pCurBSI;
+
+};
+
 
 }   //namespace lomse
 

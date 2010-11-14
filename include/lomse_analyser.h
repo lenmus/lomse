@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -219,8 +219,6 @@ public:
     ImoObj* analyse_node(LdpElement* pNode, ImoObj* pAnchor=NULL);
 
     //auxiliary
-    void erase_node(LdpElement* pNode);
-    void replace_node(LdpElement* pOldNode, LdpElement* pNewNode);
     void remove_tie_element(ImoTieDto* pInfo);
     void remove_old_tie_element(LdpElement* pOldTieParam);
 

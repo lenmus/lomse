@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010 Lomse project
 //
@@ -13,12 +13,10 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_INJECTORS_H__
 #define __LOMSE_INJECTORS_H__
@@ -39,43 +37,38 @@ class ModelBuilder;
 class LdpCompiler;
 class Document;
 class LdpFactory;
+class FontStorage;
 //class UserCommandExecuter;
-//class EditView;
+//class GraphicView;
 //class Controller;
 //class MvcElement;
 
 
-//-----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class LibraryScope
 {
+protected:
+    ostream& m_reporter;
+    LdpFactory* m_pLdpFactory;
+    FontStorage* m_pFontStorage;
+
 public:
     LibraryScope(ostream& reporter=cout)
         : m_reporter(reporter)
         , m_pLdpFactory(NULL)       //lazzy instantiation. Singleton scope.
+        , m_pFontStorage(NULL)      //lazzy instantiation. Singleton scope.
     {
     }
 
-    ~LibraryScope()
-    {
-        if (m_pLdpFactory)
-            delete m_pLdpFactory;
-    }
+    ~LibraryScope();
 
     ostream& default_reporter() { return m_reporter; }
-    LdpFactory* ldp_factory()   //Singleton scope
-    {
-        if (!m_pLdpFactory)
-            m_pLdpFactory = new LdpFactory();
-        return m_pLdpFactory;
-    }
-
-protected:
-    ostream& m_reporter;
-    LdpFactory* m_pLdpFactory;
+    LdpFactory* ldp_factory();
+    FontStorage* font_storage();
 
 };
 
-//-----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class DocumentScope
 {
 public:
@@ -91,7 +84,7 @@ protected:
 
 };
 
-//-----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class Injector
 {
 public:
@@ -107,7 +100,7 @@ public:
                                            DocumentScope& documentScope);
     static Document* inject_Document(LibraryScope& libraryScope);
 //    static UserCommandExecuter* inject_UserCommandExecuter(Document* pDoc);
-//    static EditView* inject_EditView(LibraryScope& libraryScope, Document* pDoc,
+//    static GraphicView* inject_EditView(LibraryScope& libraryScope, Document* pDoc,
 //                                     UserCommandExecuter* pExec);
 //    static Controller* inject_Controller(LibraryScope& libraryScope,
 //                                         Document* pDoc, UserCommandExecuter* pExec);

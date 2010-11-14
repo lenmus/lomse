@@ -18,24 +18,25 @@
 //
 //-------------------------------------------------------------------------------------
 
-
                  =========================================
                   Lomse library installation instructions  
                  =========================================
 
-This document contains instructions for building Lomse library and tests program from sources, on all platforms.
+This document contains instructions for building Lomse library and tests
+program from sources, on all platforms.
 
 
 Requirements
 ============
 - CMake version 2.8 or higher
 - UnitTest++ 1.3.0 or higher (for running the test program)
+- FreeType 2.3.5-1
 
 
 Table Of Content
 ================
     A. General notes and requirements. ***** PLEASE READ THIS FIRST *****
-	B. Quick installation guide
+    B. Quick installation guide
     C. How to generate the makefile or project file for Lomse
         1) Building on Linux
         2) Building on Windows
@@ -48,22 +49,33 @@ Table Of Content
 A. General notes and requirements
 ==================================
 
-1. No makefiles or IDE project files are provided. All makefiles are generated with CMakeusing CMake build system. CMake can generate different kinds of native build files for your system (e.g. Unix Makefiles, Eclipse CDT 4.0 project files, Visual Studio project files). You need CMake 2.8.0 or later on your platform. You can download it from http://www.cmake.org/cmake/resources/software.html. Just download and install it (very simple). In Linux, you can install it using the package manager:
+1. No makefiles or IDE project files are provided. All makefiles are generated
+   with CMakeusing CMake build system. CMake can generate different kinds of
+   native build files for your system (e.g. Unix Makefiles, Eclipse CDT 4.0
+   project files, Visual Studio project files). You need CMake 2.8.0 or later
+   on your platform. You can download it from
+        http://www.cmake.org/cmake/resources/software.html
+   Just download and install it (very simple). In Linux, you can install it
+   using the package manager:
 
-	sudo apt-get install cmake
+        sudo apt-get install cmake
 
 
-2. For testing, Lomse project uses UnitTest++. For Windows a pre-built library is included in source tree, so you do not have to do anything to get this package. But for Linux and other platforms you must install UnitTest++ package. Instructions are provided in the Linux section.
+2. For testing, Lomse project uses UnitTest++. For Windows a pre-built library
+   is included in source tree, so you do not have to do anything to get this
+   package. But for Linux and other platforms you must install UnitTest++
+   package. Instructions are provided in the Linux section.
 
 
 3. I have only generated and tested on following platforms:
 
-        - Windows XP, using Visual Studio .NET 2003 (VS7) (generator "Visual Studio 7 .NET")
-        - Windows XP, using Visual Studio 2008 (VS8) (generator "Visual Studio ????")
-        - Linux Ubuntu 10.4, Using CodeBlocs with linux makefiles (generator "CodeBlocks - Unix Makefiles")
-        - Linux Ubuntu 10.4, Using linux makefiles  (generator "Unix Makefiles")
+    - Windows XP, using Visual Studio .NET 2003 (VS7) (generator "Visual Studio 7 .NET")
+    - Windows XP, using Visual Studio 2008 (VS8) (generator "Visual Studio ????")
+    - Linux Ubuntu 10.4, Using CodeBlocs with linux makefiles (generator "CodeBlocks - Unix Makefiles")
+    - Linux Ubuntu 10.4, Using linux makefiles  (generator "Unix Makefiles")
 
-    No idea if there will be problems for other platforms/configurations. But if yoy try, please let me know for updating the documentation.
+   No idea if there will be problems for other platforms/configurations. But if
+   you try, please let me know for updating the documentation.
 
 
 
@@ -78,11 +90,15 @@ Using CMake command-line interface:
 
 3. Change directory to the directory you created in the previous step (for the above example, you can use 'cd build')
 
-4. Run cmake to generate the makefiles. (e.g., on Linux:
-	cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../lomse 
+4. Run cmake to generate the makefiles. For example, in linux:
+        For using CodeBlocs:
+            cmake -G "CodeBlocks - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../lomse
+        For using makefiles:
+            cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../lomse 
 
 
 5. Now you've generated Makefiles using cmake. So run 'make' to build the package.
+
     
     
 
@@ -96,24 +112,53 @@ You need CMake 2.8.0 or later.
 1) Building on Linux
 --------------------
 
-First, you will also need to install package libunittest++-dev which could not be included in your Linux distro. Installing it should be as simple as typing in the following command in your terminal (on Debian-like systems):
+First, you will also need to install package libunittest++-dev which could not
+be included in your Linux distro. Installing it should be as simple as typing
+in the following command in your terminal (on Debian-like systems):
 
     sudo apt-get install libunittest++-dev
 
-In following instructions it is assumed you want to generate Makefiles. Open a terminal window, move to the folder in which you have unpackaged the lomse sources, and create a folder for the makefiles:
+In following instructions it is assumed you want to generate Makefiles. Open a
+terminal window, move to the folder in which you have unpackaged the lomse
+sources, and create a folder for the makefiles:
 
     cd /path/to/lomse/root
-	cd ..
+    cd ..
     mkdir build-lomse
-	cd build-lomse
+    cd build-lomse
 
 Now, using CMake, proceed to create the makefile:
 
     cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../lomse  
 
-Now, build the lomse library and the testlib program:
+Now, build the lomse library, the library unit-testing program (testlib) and
+the examples:
 
     make
+
+Alternatively, build by step-by-step, checking results:
+
+	make lomse			# build the library
+		...
+		[100%] Built target lomse
+
+	make testlib		# build testlib and check library is ok
+		...
+		Lomse library tests runner
+
+		Success: 423 tests passed.
+		Test time: 0.17 seconds.
+		[100%] Built target testlib
+
+	make demo_1			# build example application:
+		...
+		[100%] Built target demo_1
+
+	cd bin				# run example app.
+	./demo_1
+	
+
+
 
 That builds and installs Lomse on Linux. By default, Lomse is installed in ${CMAKE_INSTALL_PREFIX}/bin, with CMAKE_INSTALL_PREFIX defaulting to usr/local.
 
@@ -122,13 +167,16 @@ You can change the install location by running cmake like this:
     cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/new/install/prefix  \
         -DCMAKE_BUILD_TYPE=Release ./
 
-Building from source in the repository is recommended, since code in the repository should always be stable. If it's not, that's a bug to report.
+Building from source in the repository is recommended, since code in the
+repository should always be stable. If it's not, that's a bug to report.
 
 
 2) Building on Windows
 ----------------------
 
-In this description it is assumed you want to generate Visual Studio .NET 2003 project files. The procedure for CodeBlocks or any other tool is similar. Just replace Visual Studio with your favourite tool.
+In this description it is assumed you want to generate Visual Studio .NET 2003
+project files. The procedure for CodeBlocks or any other tool is similar. Just
+replace Visual Studio with your favourite tool.
 
 To create the project file / makefile you have two options:
 
@@ -138,7 +186,7 @@ To create the project file / makefile you have two options:
 
 2.a) Using CMake GUI program.
 
-    1. Open CMake GUI program. (C:\Program files\CMake\bin\??????.exe)
+    1. Open CMake GUI program. (C:\Program files\CMake\bin\cmake-gui.exe)
     
     2. Enter requested data in following fields:
         - Where is the sorce code: <path-to-lomse-root>
@@ -185,29 +233,36 @@ D. "In-source" vs. "Out-of-source" builds
 
 RECOMMENDED WAY OF INSTALLING LOMSE: Out-of-source
 
-When you generates the makefiles, they have to go somewhere. An "in-source" build puts them in your source tree (i.e. /lomse/build). In the next example the makefiles are placed in the same directory as the source code. Therefore, it is an "in-place" build:
+When you generates the makefiles, they have to go somewhere. An "in-source"
+build puts them in your source tree (i.e. /lomse/build). In the next example
+the makefiles are placed in the same directory as the source code. Therefore,
+it is an "in-place" build:
 
- 	cd lomse
- 	mkdir build
- 	cmake -G "Unix Makefiles" ./
-	make
+    cd lomse
+    mkdir build
+    cmake -G "Unix Makefiles" ./
+    make
 
-An out-of-source build puts them in a completely separate directory, so that your source tree is unchanged. Out-of-source builds are recommended, as you can build multiple variants in separate directories, i.e.:
+An out-of-source build puts them in a completely separate directory, so that
+your source tree is unchanged. Out-of-source builds are recommended, as you can
+build multiple variants in separate directories, i.e.:
 
-		/projects
-			/lomse  				<-- the source tree
-			/lomse-debug
-			/lomse-release
+        /projects
+            /lomse                  <-- the source tree
+            /lomse-debug
+            /lomse-release
 
 In the following example, an out-of-place build is performed:
 
- 	cd lomse
- 	mkdir lomse-debug
- 	cd lomse-debug
- 	cmake -G "Unix Makefiles" ../lomse
-	make
+    cd lomse
+    mkdir lomse-debug
+    cd lomse-debug
+    cmake -G "Unix Makefiles" ../lomse
+    make
 
-Note: Before performing an out-of-source build, ensure that all CMake generated in-source build information is removed from the source directory, e.g., CMakeFiles directory, CMakeCache.txt. 
+Note: Before performing an out-of-source build, ensure that all CMake generated
+in-source build information is removed from the source directory, e.g.,
+CMakeFiles directory, CMakeCache.txt.
 
 
 

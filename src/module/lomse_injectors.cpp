@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include "lomse_injectors.h"
 
@@ -26,6 +26,7 @@
 #include "lomse_compiler.h"
 #include "lomse_model_builder.h"
 #include "lomse_document.h"
+#include "lomse_font_storage.h"
 //#include "lomse_user_command.h"
 //#include "lomse_view.h"
 //#include "lomse_controller.h"
@@ -36,6 +37,36 @@ using namespace std;
 namespace lomse
 {
 
+//---------------------------------------------------------------------------------------
+// LibraryScope implementation
+//---------------------------------------------------------------------------------------
+LibraryScope::~LibraryScope()
+{
+    if (m_pLdpFactory)
+        delete m_pLdpFactory;
+    if (m_pFontStorage)
+        delete m_pFontStorage;
+}
+
+LdpFactory* LibraryScope::ldp_factory()
+{
+    if (!m_pLdpFactory)
+        m_pLdpFactory = new LdpFactory();
+    return m_pLdpFactory;
+}
+
+//---------------------------------------------------------------------------------------
+FontStorage* LibraryScope::font_storage()
+{
+    if (!m_pFontStorage)
+        m_pFontStorage = new FontStorage();
+    return m_pFontStorage;
+}
+
+
+//---------------------------------------------------------------------------------------
+// Injector implementation
+//---------------------------------------------------------------------------------------
 LdpParser* Injector::inject_LdpParser(LibraryScope& libraryScope,
                                       DocumentScope& documentScope)
 {
@@ -43,17 +74,20 @@ LdpParser* Injector::inject_LdpParser(LibraryScope& libraryScope,
                          libraryScope.ldp_factory());
 }
 
+//---------------------------------------------------------------------------------------
 Analyser* Injector::inject_Analyser(LibraryScope& libraryScope,
                                     DocumentScope& documentScope)
 {
     return new Analyser(documentScope.default_reporter(), libraryScope.ldp_factory());
 }
 
+//---------------------------------------------------------------------------------------
 ModelBuilder* Injector::inject_ModelBuilder(DocumentScope& documentScope)
 {
     return new ModelBuilder(documentScope.default_reporter());
 }
 
+//---------------------------------------------------------------------------------------
 LdpCompiler* Injector::inject_LdpCompiler(LibraryScope& libraryScope,
                                           DocumentScope& documentScope)
 {
@@ -63,34 +97,39 @@ LdpCompiler* Injector::inject_LdpCompiler(LibraryScope& libraryScope,
                            documentScope.id_assigner() );
 }
 
+//---------------------------------------------------------------------------------------
 Document* Injector::inject_Document(LibraryScope& libraryScope)
 {
     return new Document(libraryScope);
 }
 
+////---------------------------------------------------------------------------------------
 //UserCommandExecuter* Injector::inject_UserCommandExecuter(Document* pDoc)
 //{
 //    return new UserCommandExecuter(pDoc);
 //}
 //
-//EditView* Injector::inject_EditView(LibraryScope& libraryScope, Document* pDoc,
+////---------------------------------------------------------------------------------------
+//GraphicView* Injector::inject_EditView(LibraryScope& libraryScope, Document* pDoc,
 //                                    UserCommandExecuter* pExec)
 //{
 //    Controller* pController = Injector::inject_Controller(libraryScope, pDoc, pExec);
-//    return new EditView(pDoc, pController);
+//    return new GraphicView(pDoc, pController);
 //}
-//
+
+////---------------------------------------------------------------------------------------
 //Controller* Injector::inject_Controller(LibraryScope& libraryScope,
 //                                        Document* pDoc, UserCommandExecuter* pExec)
 //{
 //    return new EditController(libraryScope, pDoc, pExec);
 //}
 //
+////---------------------------------------------------------------------------------------
 //MvcElement* Injector::inject_MvcElement(LibraryScope& libraryScope,
 //                                        int viewType, Document* pDoc)
 //{
 //    UserCommandExecuter* pExec = Injector::inject_UserCommandExecuter(pDoc);
-//    EditView* pView = Injector::inject_EditView(libraryScope, pDoc, pExec);
+//    GraphicView* pView = Injector::inject_EditView(libraryScope, pDoc, pExec);
 //    return new MvcElement(pDoc, pExec, pView);
 //}
 

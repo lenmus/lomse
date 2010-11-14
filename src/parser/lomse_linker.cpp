@@ -122,6 +122,13 @@ ImoObj* Linker::add_page_info(ImoPageInfo* pPI)
         delete pPI;
         return NULL;
     }
+    else if (m_pParent && m_pParent->is_document())
+    {
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(m_pParent);
+        pDoc->add_page_info(pPI);
+        delete pPI;
+        return NULL;
+    }
     return pPI;
 }
 

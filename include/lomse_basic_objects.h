@@ -13,8 +13,6 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -81,7 +79,7 @@ class DtoComponentObj : public DtoDocObj
 {
 protected:
     bool m_fVisible;
-    rgba16 m_color;
+    Color m_color;
 
 public:
     DtoComponentObj() : DtoDocObj(), m_fVisible(true), m_color(0,0,0,255) {}
@@ -89,11 +87,11 @@ public:
 
     //getters
     inline bool is_visible() { return m_fVisible; }
-    inline rgba16& get_color() { return m_color; }
+    inline Color& get_color() { return m_color; }
 
     //setters
     inline void set_visible(bool visible) { m_fVisible = visible; }
-    void set_color(rgba16 color);
+    void set_color(Color color);
 };
 
 //----------------------------------------------------------------------------------

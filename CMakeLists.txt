@@ -39,18 +39,21 @@ cmake_minimum_required(VERSION 2.8)
 project(lomse)
 
 # configuration
-set(LOMSE_VERSION_MAJOR "0")
-set(LOMSE_VERSION_MINOR "0")
+set( LOMSE_VERSION_MAJOR "0")
+set( LOMSE_VERSION_MINOR "0")
 
 # set directories 
-set(ROOT_DIR  ${CMAKE_CURRENT_SOURCE_DIR} )
-set(SRC_DIR  ${ROOT_DIR}/src )
-set(OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/bin )
-set(EXECUTABLE_OUTPUT_PATH ${OUTDIR})
-set(LIBRARY_OUTPUT_PATH ${OUTDIR})
+set( ROOT_DIR  ${CMAKE_CURRENT_SOURCE_DIR} )
+set( SRC_DIR  ${ROOT_DIR}/src )
+set( OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/bin )
+set( EXECUTABLE_OUTPUT_PATH ${OUTDIR})
+set( LIBRARY_OUTPUT_PATH ${OUTDIR})
+
 # path to scores for tests
 set(LOMSE_TEST_SCORES_PATH "\"${ROOT_DIR}/test-scores/\"" )
 
+# directories to search for CMake modules
+set( CMAKE_MODULE_PATH "${ROOT_DIR}/cmake-modules" )
 
 
 # check that compiler supports namespace sdt
@@ -62,8 +65,8 @@ endif()
 
 # set path to include unittest++ header files
 if(WIN32)
-    set(UNITTEST_LIBDIR  ${ROOT_DIR}/packages/UnitTest++/lib )
-    set(UNITTEST_INCLUDE_DIRS  ${ROOT_DIR}/packages/UnitTest++/src )
+    set( UNITTEST_LIBDIR  ${ROOT_DIR}/packages/UnitTest++/lib )
+    set( UNITTEST_INCLUDE_DIRS  ${ROOT_DIR}/packages/UnitTest++/src )
 else()
     include(FindPkgConfig)
     pkg_check_modules(UNITTEST REQUIRED unittest++)
@@ -71,6 +74,10 @@ endif()
  
 include_directories(
     ${ROOT_DIR}/include
+    ${ROOT_DIR}/include/platform
+    ${ROOT_DIR}/packages/utfcpp
+    ${ROOT_DIR}/src/agg/include
+    ${ROOT_DIR}/src/agg/font_freetype
     ${UNITTEST_INCLUDE_DIRS}
 )
 
@@ -84,7 +91,21 @@ link_directories(
 set(CMAKE_CONFIGURATION_TYPES Debug Release)
 
 
+# Set all includes, flags, libraries, related to freetype
+#-------------------------------------------------------------------------------------
+
+find_package( Freetype )                    
+if( FREETYPE_FOUND )
+    include_directories( ${FREETYPE_INCLUDE_DIRS} )
+    link_libraries( ${FREETYPE_LIBRARIES} )
+    link_directories( ${FREETYPE_LINK_DIR} )        
+else()
+    message(SEND_ERROR "FreeType package not found.")
+endif()
+
+
 # names for libraries and execs.
+#-------------------------------------------------------------------------------------
 if( WIN32 )
     set( CMAKE_STATIC_LIBRARY_PREFIX "" )
     set( CMAKE_STATIC_LIBRARY_SUFFIX ".lib" )
@@ -104,9 +125,9 @@ if( UNIX )
 endif( UNIX )
 
 
-# "Print all warnings" flag for GCC
+# "Print all warnings", macros for GCC & __UNIX__
 if(UNIX)
-    add_definitions(-Wall -DGCC)
+    add_definitions( -Wall -DGCC -D__UNIX__ )
 endif(UNIX)
 
 # Force to use static libraries in MSVC
@@ -147,6 +168,65 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 # source files to compile
 
+set(AGG_FILES
+    ${SRC_DIR}/agg/src/agg_line_aa_basics.cpp
+    ${SRC_DIR}/agg/src/agg_trans_affine.cpp
+    ${SRC_DIR}/agg/src/agg_vcgen_contour.cpp
+    ${SRC_DIR}/agg/src/agg_vcgen_stroke.cpp
+    ${SRC_DIR}/agg/src/agg_bezier_arc.cpp
+    ${SRC_DIR}/agg/src/agg_curves.cpp
+    ${SRC_DIR}/agg/src/agg_gsv_text.cpp
+    ${SRC_DIR}/agg/font_freetype/agg_font_freetype.cpp
+)
+
+set(DOCUMENT_FILES
+    ${SRC_DIR}/document/lomse_document.cpp
+    ${SRC_DIR}/document/lomse_document_iterator.cpp
+    ${SRC_DIR}/document/lomse_id_assigner.cpp
+)
+
+set(EXPORTERS_FILES
+    ${SRC_DIR}/exporters/lomse_ldp_exporter.cpp
+)
+
+set(GRAPHIC_MODEL_FILES
+    ${SRC_DIR}/graphic_model/lomse_box_score_page.cpp
+    ${SRC_DIR}/graphic_model/lomse_box_slice.cpp
+    ${SRC_DIR}/graphic_model/lomse_box_slice_instr.cpp
+    ${SRC_DIR}/graphic_model/lomse_box_system.cpp
+    ${SRC_DIR}/graphic_model/lomse_clef_engraver.cpp
+    ${SRC_DIR}/graphic_model/lomse_document_layouter.cpp
+    ${SRC_DIR}/graphic_model/lomse_gm_basic.cpp
+    ${SRC_DIR}/graphic_model/lomse_instrument_engraver.cpp
+    ${SRC_DIR}/graphic_model/lomse_score_layouter.cpp
+    ${SRC_DIR}/graphic_model/lomse_shape_base.cpp
+    ${SRC_DIR}/graphic_model/lomse_shape_brace_bracket.cpp
+    ${SRC_DIR}/graphic_model/lomse_shape_staff.cpp
+    ${SRC_DIR}/graphic_model/lomse_shape_text.cpp
+    ${SRC_DIR}/graphic_model/lomse_shapes.cpp
+    ${SRC_DIR}/graphic_model/lomse_sizers.cpp
+    ${SRC_DIR}/graphic_model/lomse_system_layouter.cpp
+    ${SRC_DIR}/graphic_model/lomse_text_engraver.cpp
+)
+
+set(INTERNAL_MODEL_FILES
+    ${SRC_DIR}/internal_model/lomse_basic_model.cpp
+    ${SRC_DIR}/internal_model/lomse_basic_objects.cpp
+    ${SRC_DIR}/internal_model/lomse_im_figured_bass.cpp
+    ${SRC_DIR}/internal_model/lomse_im_note.cpp
+    ${SRC_DIR}/internal_model/lomse_internal_model.cpp
+)
+
+set(MODULE_FILES
+    ${SRC_DIR}/module/lomse_injectors.cpp
+    ${SRC_DIR}/module/lomse_time.cpp
+)
+
+set(MVC_FILES
+    ${SRC_DIR}/mvc/lomse_view.cpp
+    ${SRC_DIR}/mvc/lomse_graphic_view.cpp
+)
+
 set(PARSER_FILES
     ${SRC_DIR}/parser/lomse_analyser.cpp
     ${SRC_DIR}/parser/lomse_compiler.cpp
@@ -160,50 +240,27 @@ set(PARSER_FILES
     ${SRC_DIR}/parser/lomse_tokenizer.cpp
 )
 
-set(DOCUMENT_FILES
-    ${SRC_DIR}/document/lomse_document.cpp
-    ${SRC_DIR}/document/lomse_id_assigner.cpp
-)
-
-set(EXPORTERS_FILES
-    ${SRC_DIR}/exporters/lomse_ldp_exporter.cpp
+set(RENDER_FILES
+    ${SRC_DIR}/render/lomse_calligrapher.cpp
+    ${SRC_DIR}/render/lomse_font_storage.cpp
+    ${SRC_DIR}/render/lomse_renderer.cpp
+    ${SRC_DIR}/render/lomse_screen_drawer.cpp
 )
 
 set(SCORE_FILES
     ${SRC_DIR}/score/lomse_score_iterator.cpp
 )
 
-set(MODULE_FILES
-    ${SRC_DIR}/module/lomse_injectors.cpp
-    ${SRC_DIR}/module/lomse_time.cpp
-)
-
-set(INTERNAL_MODEL_FILES
-    ${SRC_DIR}/internal_model/lomse_basic_model.cpp
-    ${SRC_DIR}/internal_model/lomse_basic_objects.cpp
-    ${SRC_DIR}/internal_model/lomse_im_figured_bass.cpp
-    ${SRC_DIR}/internal_model/lomse_im_note.cpp
-    ${SRC_DIR}/internal_model/lomse_internal_model.cpp
-)
-
-set(MVC_FILES
-    ${SRC_DIR}/mvc/lomse_view.cpp
-)
-
-set(GRAPHIC_MODEL_FILES
-    ${SRC_DIR}/graphic_model/lomse_document_layouter.cpp
-    ${SRC_DIR}/graphic_model/lomse_gm_basic.cpp
-    ${SRC_DIR}/graphic_model/lomse_score_layouter.cpp
-)
-
 set(ALL_SOURCES 
-    ${PARSER_FILES} ${DOCUMENT_FILES} ${EXPORTERS_FILES} ${SCORE_FILES}
-    ${MODULE_FILES} ${INTERNAL_MODEL_FILES} ${MVC_FILES}
-    ${GRAPHIC_MODEL_FILES}
+    ${AGG_FILES} ${DOCUMENT_FILES} ${EXPORTERS_FILES}
+    ${GRAPHIC_MODEL_FILES} ${INTERNAL_MODEL_FILES} 
+    ${MODULE_FILES} ${MVC_FILES}
+    ${PARSER_FILES} ${RENDER_FILES} ${SCORE_FILES} 
 )
 
 
 # Adds folders for Visual Studio and other IDEs
+source_group( "agg"             FILES ${AGG_FILES} )
 source_group( "document"        FILES ${DOCUMENT_FILES} )
 source_group( "exporters"       FILES ${EXPORTERS_FILES} )
 source_group( "graphic_model"   FILES ${GRAPHIC_MODEL_FILES} )
@@ -211,6 +268,7 @@ source_group( "internal_model"  FILES ${INTERNAL_MODEL_FILES} )
 source_group( "module"          FILES ${MODULE_FILES} )
 source_group( "mvc"             FILES ${MVC_FILES} )
 source_group( "parser"          FILES ${PARSER_FILES} )
+source_group( "render"          FILES ${RENDER_FILES} )
 source_group( "score"           FILES ${SCORE_FILES} )
 
 
@@ -271,9 +329,9 @@ endif()
 # source files to compile
 add_executable( ${TESTLIB} 
         ${SRC_DIR}/tests/lomse_test_analyser.cpp
-        ${SRC_DIR}/tests/lomse_test_colstaffobjs_builder.cpp
         ${SRC_DIR}/tests/lomse_test_compiler.cpp
         ${SRC_DIR}/tests/lomse_test_document.cpp
+        ${SRC_DIR}/tests/lomse_test_document_iterator.cpp
         ${SRC_DIR}/tests/lomse_test_document_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_elements.cpp
         ${SRC_DIR}/tests/lomse_test_gm_objects.cpp
@@ -282,14 +340,16 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_model_builder.cpp
         ${SRC_DIR}/tests/lomse_test_parser.cpp
         ${SRC_DIR}/tests/lomse_test_reader.cpp
+        ${SRC_DIR}/tests/lomse_test_score_iterator.cpp
         ${SRC_DIR}/tests/lomse_test_score_layouter.cpp
+        ${SRC_DIR}/tests/lomse_test_sizers.cpp
         ${SRC_DIR}/tests/lomse_test_stack.cpp
+        ${SRC_DIR}/tests/lomse_test_staffobjs_table.cpp
         ${SRC_DIR}/tests/lomse_test_tokenizer.cpp
         ${SRC_DIR}/tests/lomse_test_tree.cpp
         ${SRC_DIR}/tests/lomse_test_view.cpp
         ${SRC_DIR}/tests/lomse_the_test_runner.cpp
 )
-
 
 # libraries to link
 if(UNIX)
@@ -310,6 +370,10 @@ if(MSVC)
 endif()
 
 
+# dependencies
+add_dependencies(testlib lomse)
+
+
 # once generated, run tests
 if(WIN32)
     set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/debug/${TESTLIB}.exe )
@@ -323,6 +387,70 @@ add_custom_command(
     WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
 )
 
+
+
+#////////////////////////////////////////////////////////////////////////
+# Target: Examples
+#////////////////////////////////////////////////////////////////////////
+
+
+set (DEMO1 demo_1)
+
+# set directories
+#------------------------------------------------
+set( DEMO_CTROL  ${SRC_DIR}/agg/src/ctrl )
+set( DEMO1_SRC  ${ROOT_DIR}/examples )
+
+if( WIN32 )
+    set( DEMO_PLATFORM  
+        ${SRC_DIR}/agg/src/platform/win32/agg_platform_support.cpp
+        ${SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp
+    )
+
+    
+elseif( UNIX )
+    set( DEMO_PLATFORM  
+        ${SRC_DIR}/agg/src/platform/X11/agg_platform_support.cpp )
+
+    find_package(X11)
+    if(X11_FOUND)  
+        include_directories(${X11_INCLUDE_DIRS})
+        link_libraries(${X11_LIBRARIES})
+    endif(X11_FOUND)
+        
+endif()
+
+
+# set 'WIN32' parameter for Windows executables
+#------------------------------------------------
+if( WIN32 )
+    set( HAS_GUI WIN32 )    
+else()
+    set( HAS_GUI "" )
+endif()
+
+
+# source files to compile
+#------------------------------------------------
+add_executable( ${DEMO1} ${HAS_GUI}
+        ${DEMO1_SRC}/demo_1.cpp
+        ${DEMO_PLATFORM}
+        ${DEMO_CTROL}/agg_slider_ctrl.cpp
+)
+
+
+# libraries to link
+#------------------------------------------------
+if(UNIX)
+    target_link_libraries ( ${DEMO1} liblomse.so )
+elseif(WIN32)
+    target_link_libraries ( ${DEMO1} lomse.lib )
+endif()
+
+
+
+# dependencies
+add_dependencies(demo_1 lomse)
 
 
 #-----------------------------------------------------------------------------

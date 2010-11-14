@@ -18,8 +18,6 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifdef _LOMSE_DEBUG
-
 #include <UnitTest++.h>
 #include <sstream>
 #include "lomse_config.h"
@@ -41,23 +39,22 @@ class DocIteratorTestFixture
 public:
 
     DocIteratorTestFixture()     //SetUp fixture
+        : m_libraryScope(cout)
     {
-        m_pLibraryScope = new LibraryScope(cout);
     }
 
     ~DocIteratorTestFixture()    //TearDown fixture
     {
-        delete m_pLibraryScope;
     }
 
-    LibraryScope* m_pLibraryScope;
+    LibraryScope m_libraryScope;
 };
 
 SUITE(DocIteratorTest)
 {
     TEST_FIXTURE(DocIteratorTestFixture, DocIteratorPointsToFirst)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
         DocIterator it(&doc);
         CHECK( (*it)->is_score() == true );
@@ -65,21 +62,21 @@ SUITE(DocIteratorTest)
 
     TEST_FIXTURE(DocIteratorTestFixture, DocIteratorNext)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
         DocIterator it(&doc);
         CHECK( (*it)->is_score() == true );
         ++it;
-        CHECK( (*it)->is_text_string() == true );
+        CHECK( (*it)->is_score_text() == true );
     }
 
     TEST_FIXTURE(DocIteratorTestFixture, DocIteratorNextRemainsAtEnd)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
         DocIterator it(&doc);
         ++it;
-        CHECK( (*it)->is_text_string() == true );
+        CHECK( (*it)->is_score_text() == true );
         ++it;
         CHECK( *it == NULL );
         ++it;
@@ -88,7 +85,7 @@ SUITE(DocIteratorTest)
 
     TEST_FIXTURE(DocIteratorTestFixture, DocIteratorStartOfContent)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
         DocIterator it(&doc);
         ++it;
@@ -101,16 +98,16 @@ SUITE(DocIteratorTest)
 
     TEST_FIXTURE(DocIteratorTestFixture, DocIteratorLastOfContent)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
         DocIterator it(&doc);
         it.last_of_content();
-        CHECK( (*it)->is_text_string() == true );
+        CHECK( (*it)->is_score_text() == true );
     }
 
     TEST_FIXTURE(DocIteratorTestFixture, DocIteratorPrev)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
         DocIterator it(&doc);
         it.last_of_content();
@@ -120,7 +117,7 @@ SUITE(DocIteratorTest)
 
     TEST_FIXTURE(DocIteratorTestFixture, DocIteratorPrevRemainsAtStart)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
         DocIterator it(&doc);
         --it;
@@ -129,18 +126,18 @@ SUITE(DocIteratorTest)
         CHECK( *it == NULL );
     }
 
-//    TEST_FIXTURE(DocIteratorTestFixture, DocIteratorEnterElement)
-//    {
-//        Document doc(*m_pLibraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
-//        DocIterator it(&doc);
-//        it.enter_element();
-//        CHECK( (*it)->is_instrument() == true );
-//    }
+    //TEST_FIXTURE(DocIteratorTestFixture, DocIteratorEnterElement)
+    //{
+    //    Document doc(m_libraryScope);
+    //    doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
+    //    DocIterator it(&doc);
+    //    it.enter_element();
+    //    CHECK( (*it)->is_instrument() == true );
+    //}
 
 //    TEST_FIXTURE(DocIteratorTestFixture, DocIteratorExitElement)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
 //        DocIterator it(&doc);
 //        ++it;
@@ -157,7 +154,7 @@ SUITE(DocIteratorTest)
 //
 //    TEST_FIXTURE(DocIteratorTestFixture, ScoreElmIteratorNext)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
 //        DocIterator it(&doc);
 //        ++it;
@@ -179,7 +176,7 @@ SUITE(DocIteratorTest)
 //
 //    TEST_FIXTURE(DocIteratorTestFixture, ScoreElmIteratorPrev)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
 //        DocIterator it(&doc);
 //        ++it;
@@ -200,7 +197,7 @@ SUITE(DocIteratorTest)
 //
 //    TEST_FIXTURE(DocIteratorTestFixture, ScoreElmIteratorPointToType)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
 //        DocIterator it(&doc);
 //        ++it;
@@ -216,7 +213,7 @@ SUITE(DocIteratorTest)
 //
 //    TEST_FIXTURE(DocIteratorTestFixture, ScoreElmIteratorFindInstrument)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData (n c4 q) (r q))) (instrument (musicData (n a3 e)))) (text \"this is text\")))" );
 //        DocIterator it(&doc);
 //        ++it;
@@ -232,7 +229,7 @@ SUITE(DocIteratorTest)
 //
 //    TEST_FIXTURE(DocIteratorTestFixture, ScoreElmIteratorStartOfInstrument)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData (n c4 q) (r q))) (instrument (musicData (n a3 e)))) (text \"this is text\")))" );
 //        DocIterator it(&doc);
 //        ++it;
@@ -249,7 +246,7 @@ SUITE(DocIteratorTest)
 //
 //    TEST_FIXTURE(DocIteratorTestFixture, ScoreElmIteratorIncrement)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
 //        DocIterator it(&doc);
 //        ++it;
@@ -263,7 +260,7 @@ SUITE(DocIteratorTest)
 //
 //    TEST_FIXTURE(DocIteratorTestFixture, ScoreElmIteratorDecrement)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
 //        DocIterator it(&doc);
 //        ++it;
@@ -277,6 +274,4 @@ SUITE(DocIteratorTest)
 //    }
 
 }
-
-#endif  // _LM_DEBUG_
 

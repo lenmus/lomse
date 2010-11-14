@@ -30,6 +30,7 @@ namespace lomse
 
 //forward declarations
 class ImoDocObj;
+class GraphicModel;
 class GmoBox;
 
 
@@ -40,12 +41,24 @@ class ContentLayouter
 {
 protected:
     ImoDocObj* m_pImo;
+    bool m_fIsLayouted;
+    GraphicModel* m_pGModel;
 
 public:
-    ContentLayouter(ImoDocObj* pImo) : m_pImo(pImo) {}
+    ContentLayouter(ImoDocObj* pImo, GraphicModel* pGModel) 
+        : m_pImo(pImo)
+        , m_fIsLayouted(false)
+        , m_pGModel(pGModel) 
+    {
+    }
+
     virtual ~ContentLayouter() {}
 
-    virtual void do_layout(GmoBox* pContainerBox) = 0;
+    virtual void layout_in_page(GmoBox* pContainerBox) = 0;
+    virtual void prepare_to_start_layout() { m_fIsLayouted = false; }
+    virtual bool is_item_layouted() { return m_fIsLayouted; }
+    virtual void set_layout_is_finished(bool value) { m_fIsLayouted = value; }
+    virtual GmoBox* create_pagebox(GmoBox* pParentBox) = 0;
 };
 
 
@@ -55,10 +68,13 @@ class NullLayouter : public ContentLayouter
 protected:
 
 public:
-    NullLayouter(ImoDocObj* pImo) : ContentLayouter(pImo) {}
+    NullLayouter(ImoDocObj* pImo, GraphicModel* pGModel) 
+        : ContentLayouter(pImo, pGModel) {}
     ~NullLayouter() {}
 
-    void do_layout(GmoBox* pContainerBox) {}
+    void layout_in_page(GmoBox* pContainerBox) {}
+    bool is_item_layouted() { return true; }
+    GmoBox* create_pagebox(GmoBox* pParentBox) { return 0; }
 };
 
 

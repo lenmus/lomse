@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010 Lomse project
 //
@@ -16,12 +16,13 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_DOCUMENT_LAYOUTER_H__        //to avoid nested includes
 #define __LOMSE_DOCUMENT_LAYOUTER_H__
 
 #include "lomse_basic.h"
+#include "lomse_drawer.h"
 #include <sstream>
 
 using namespace std;
@@ -34,29 +35,52 @@ class InternalModel;
 class GraphicModel;
 class ImoDocObj;
 class ContentLayouter;
+class FlowSizer;
+class ImoDocument;
+class GmoBox;
+class GmoBoxDocPage;
+class TextMeter;
 
 
-// DocLayouter: Generates LDP source code for a basic model object
-//----------------------------------------------------------------------------------
+// DocLayouter: layouts a document
+//---------------------------------------------------------------------------------------
 class DocLayouter
 {
 protected:
     InternalModel* m_pIModel;
     GraphicModel* m_pGModel;
+    TextMeter* m_pTextMeter;
+    //FlowSizer* m_pMainSizer;
+    GmoBox* m_pCurrentBox;
+    LUnits m_availableWidth;
+    LUnits m_availableHeight;
+    UPoint m_pageCursor;            //to point to current position. Relative to BoxDocPage
+
 
 public:
-    DocLayouter(InternalModel* pIModel);
+    DocLayouter(InternalModel* pIModel, TextMeter* pTextMeter);
     virtual ~DocLayouter();
 
-    void layout_document(USize pagesize);
+    void layout_document();
     inline GraphicModel* get_gm_model() { return m_pGModel; }
 
 
 protected:
-    void initializations(USize pagesize);
-    void assign_space();
+    void initializations();
     void layout_content();
+    void layout_item(GmoBox* pParentBox, ImoDocObj* pItem);
+    //void add_content_to_main_sizer();
+    //void assign_space_to_content_items();
+    ImoDocument* get_document();
     ContentLayouter* new_item_layouter(ImoDocObj* pImo);
+    void start_new_document_page();
+    GmoBoxDocPage* create_document_page();
+    void assign_paper_size_to(GmoBox* pBox);
+    void add_margins_to_page(GmoBoxDocPage* pPage);
+    void add_headers_to_page(GmoBoxDocPage* pPage);
+    void add_footers_to_page(GmoBoxDocPage* pPage);
+    void add_contents_wrapper_box_to_page(GmoBoxDocPage* pPage);
+    GmoBox* create_item_pagebox(GmoBox* pParentBox, ContentLayouter* pLayouter);
 
 };
 

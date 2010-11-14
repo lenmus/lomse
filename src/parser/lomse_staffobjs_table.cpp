@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include "lomse_staffobjs_table.h"
 
@@ -30,10 +30,9 @@ using namespace std;
 namespace lomse
 {
 
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 // ColStaffObjsEntry implementation
-//-------------------------------------------------------------------------------------
-
+//---------------------------------------------------------------------------------------
 void ColStaffObjsEntry::dump()
 {
     //cout << to_string() << ", time=" << m_time << ", staff=" << m_staff
@@ -44,12 +43,14 @@ void ColStaffObjsEntry::dump()
 
 }
 
+//---------------------------------------------------------------------------------------
 std::string ColStaffObjsEntry::to_string()
 {
     LdpExporter exporter;
     return exporter.get_source(m_pImo);
 }
 
+//---------------------------------------------------------------------------------------
 std::string ColStaffObjsEntry::to_string_with_ids()
 {
     LdpExporter exporter;
@@ -58,9 +59,10 @@ std::string ColStaffObjsEntry::to_string_with_ids()
 }
 
 
-//-------------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------------
 // ColStaffObjs implementation
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 //auxiliary, for sort: by segment, time, line and staff
 bool is_lower_entry(ColStaffObjsEntry* a, ColStaffObjsEntry* b)
@@ -73,10 +75,12 @@ bool is_lower_entry(ColStaffObjsEntry* a, ColStaffObjsEntry* b)
             && a->line() == b->line() && a->staff() < b->staff()) ;
 }
 
+//---------------------------------------------------------------------------------------
 ColStaffObjs::ColStaffObjs()
 {
 }
 
+//---------------------------------------------------------------------------------------
 ColStaffObjs::~ColStaffObjs()
 {
     std::vector<ColStaffObjsEntry*>::iterator it;
@@ -85,6 +89,7 @@ ColStaffObjs::~ColStaffObjs()
     m_table.clear();
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjs::AddEntry(int segment, float time, int instr, int voice, int staff,
                             ImoObj* pImo)
 {
@@ -93,6 +98,7 @@ void ColStaffObjs::AddEntry(int segment, float time, int instr, int voice, int s
     m_table.push_back(pEntry);
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjs::dump()
 {
     std::vector<ColStaffObjsEntry*>::iterator it;
@@ -106,6 +112,7 @@ void ColStaffObjs::dump()
     }
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjs::sort()
 {
     std::stable_sort(m_table.begin(), m_table.end(), is_lower_entry);
@@ -113,14 +120,14 @@ void ColStaffObjs::sort()
 
 
 
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 // ColStaffObjsBuilder implementation: algorithm to create a ColStaffObjs
-//-------------------------------------------------------------------------------------
-
+//---------------------------------------------------------------------------------------
 ColStaffObjsBuilder::ColStaffObjsBuilder()
 {
 }
 
+////---------------------------------------------------------------------------------------
 //ColStaffObjs* ColStaffObjsBuilder::build(LdpElement* pScore, bool fSort)
 //{
 //    //param fSort is to prevent sorting the table for unit tests
@@ -134,6 +141,7 @@ ColStaffObjsBuilder::ColStaffObjsBuilder()
 //    return m_pColStaffObjs;
 //}
 
+//---------------------------------------------------------------------------------------
 ColStaffObjs* ColStaffObjsBuilder::build(ImoScore* pScore, bool fSort)
 {
     //param fSort is to prevent sorting the table for unit tests
@@ -147,6 +155,7 @@ ColStaffObjs* ColStaffObjsBuilder::build(ImoScore* pScore, bool fSort)
     return m_pColStaffObjs;
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::create_table()
 {
     int nTotalInstruments = m_pImScore->get_num_instruments();
@@ -158,10 +167,12 @@ void ColStaffObjsBuilder::create_table()
     }
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::find_voices_per_staff(int nInstr)
 {
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::create_entries(int nInstr)
 {
     ImoInstrument* pInstr = m_pImScore->get_instrument(nInstr);
@@ -193,6 +204,7 @@ void ColStaffObjsBuilder::create_entries(int nInstr)
     }
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::add_entry_for_staffobj(ImoObj* pImo, int nInstr)
 {
     ImoStaffObj* pSO = static_cast<ImoStaffObj*>(pImo);
@@ -206,6 +218,7 @@ void ColStaffObjsBuilder::add_entry_for_staffobj(ImoObj* pImo, int nInstr)
     m_pColStaffObjs->AddEntry(m_nCurSegment, rTime, nInstr, nLine, nStaff, pSO);
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::add_entries_for_key_signature(ImoObj* pImo, int nInstr)
 {
     ImoInstrument* pInstr = m_pImScore->get_instrument(nInstr);
@@ -220,17 +233,20 @@ void ColStaffObjsBuilder::add_entries_for_key_signature(ImoObj* pImo, int nInstr
     }
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::prepare_for_next_instrument()
 {
     m_lines.new_instrument();
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::sort_table(bool fSort)
 {
     if (fSort)
         m_pColStaffObjs->sort();
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::reset_counters()
 {
     m_nCurSegment = 0;
@@ -239,11 +255,13 @@ void ColStaffObjsBuilder::reset_counters()
     m_rMaxTime = 0.0f;
 }
 
+//---------------------------------------------------------------------------------------
 int ColStaffObjsBuilder::get_line_for(int nVoice, int nStaff)
 {
     return m_lines.get_line_assigned_to(nVoice, nStaff);
 }
 
+//---------------------------------------------------------------------------------------
 float ColStaffObjsBuilder::determine_timepos(ImoStaffObj* pSO)
 {
     float rTime = m_rCurTime;
@@ -252,6 +270,7 @@ float ColStaffObjsBuilder::determine_timepos(ImoStaffObj* pSO)
     return rTime;
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::update_segment(ImoStaffObj* pSO)
 {
     ImoBarline* pBL = dynamic_cast<ImoBarline*>(pSO);
@@ -263,6 +282,7 @@ void ColStaffObjsBuilder::update_segment(ImoStaffObj* pSO)
     }
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::update_time_counter(ImoGoBackFwd* pGBF)
 {
     if (pGBF->is_to_start())
@@ -276,6 +296,7 @@ void ColStaffObjsBuilder::update_time_counter(ImoGoBackFwd* pGBF)
     }
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::update(LdpElement* pElmScore)
 {
 //    ColStaffObjs* pOldColStaffObjs = m_pImScore->get_staffobjs_table();
@@ -286,6 +307,7 @@ void ColStaffObjsBuilder::update(LdpElement* pElmScore)
 //    this->build(pScore);
 }
 
+//---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::update(ImoScore* pScore)
 {
     ColStaffObjs* pOldColStaffObjs = pScore->get_staffobjs_table();
@@ -296,6 +318,7 @@ void ColStaffObjsBuilder::update(ImoScore* pScore)
     this->build(pScore);
 }
 
+//---------------------------------------------------------------------------------------
 ImoSpacer* ColStaffObjsBuilder::anchor_object(ImoAuxObj* pAux)
 {
     ImoSpacer* pAnchor = new ImoSpacer();
@@ -304,10 +327,9 @@ ImoSpacer* ColStaffObjsBuilder::anchor_object(ImoAuxObj* pAux)
 }
 
 
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 // StaffVoiceLineTable implementation
-//-------------------------------------------------------------------------------------
-
+//---------------------------------------------------------------------------------------
 StaffVoiceLineTable::StaffVoiceLineTable()
     : m_lastAssignedLine(-1)
 {
@@ -318,6 +340,7 @@ StaffVoiceLineTable::StaffVoiceLineTable()
         m_firstVoiceForStaff.push_back(0);
 }
 
+//---------------------------------------------------------------------------------------
 int StaffVoiceLineTable::get_line_assigned_to(int nVoice, int nStaff)
 {
     int key = form_key(nVoice, nStaff);
@@ -328,6 +351,7 @@ int StaffVoiceLineTable::get_line_assigned_to(int nVoice, int nStaff)
         return assign_line_to(nVoice, nStaff);
 }
 
+//---------------------------------------------------------------------------------------
 int StaffVoiceLineTable::assign_line_to(int nVoice, int nStaff)
 {
     int key = form_key(nVoice, nStaff);
@@ -350,6 +374,7 @@ int StaffVoiceLineTable::assign_line_to(int nVoice, int nStaff)
     return line;
 }
 
+//---------------------------------------------------------------------------------------
 void StaffVoiceLineTable::new_instrument()
 {
     m_lineForStaffVoice.clear();

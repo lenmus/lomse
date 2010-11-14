@@ -13,8 +13,6 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -24,7 +22,6 @@
 #define __LOMSE__LDP_EXPORTER_H__
 
 #include <sstream>
-
 using namespace std;
 
 namespace lomse
@@ -33,7 +30,7 @@ namespace lomse
 //forward declarations
 class ImoObj;
 class LdpGenerator;
-struct rgba16;
+struct Color;
 
 
 // LdpExporter: Generates LDP source code for a basic model object
@@ -61,7 +58,7 @@ public:
 
     //static methods for ldp names to types conversion
     static std::string clef_type_to_ldp(int clefType);
-    static std::string color_to_ldp(rgba16& color);
+    static std::string color_to_ldp(Color& color);
     static std::string float_to_string(float num);
 
 protected:

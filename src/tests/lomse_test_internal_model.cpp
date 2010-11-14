@@ -100,23 +100,55 @@ SUITE(InternalModelTest)
         delete pDoc;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_EmptyInstrument)
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_EmptyInstrument_OneStaff)
     {
-        ImoInstrument* pInstr = new ImoInstrument();
-        CHECK( pInstr->get_musicdata() == NULL );
-        CHECK( pInstr->has_attachments() == false );
-        delete pInstr;
+        ImoInstrument instr;
+        CHECK( instr.get_musicdata() == NULL );
+        CHECK( instr.has_attachments() == false );
+        CHECK( instr.get_num_staves() == 1 );
+        CHECK( instr.is_in_group() == false );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_EmptyInstrument_AddStaff)
+    {
+        ImoInstrument instr;
+        instr.add_staff();
+        CHECK( instr.get_musicdata() == NULL );
+        CHECK( instr.has_attachments() == false );
+        CHECK( instr.get_num_staves() == 2 );
+        CHECK( instr.is_in_group() == false );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_Instrument_SetNumStaves)
+    {
+        ImoInstrument instr;
+        instr.add_staff();
+        instr.add_staff();
+        CHECK( instr.get_num_staves() == 3 );
+        ImoStaffInfo* pStaff = instr.get_staff(0);
+        CHECK( pStaff != NULL );
+        CHECK( pStaff->get_num_lines() == 5 );
+        CHECK( pStaff->get_staff_margin() == 1000.0f );
+        CHECK( pStaff->get_line_spacing() == 180.0f );
+        CHECK( pStaff->get_line_thickness() == 15.0f );
+        CHECK( pStaff->get_height() == 735.0f );
+        pStaff = instr.get_staff(2);
+        CHECK( pStaff != NULL );
+        CHECK( pStaff->get_num_lines() == 5 );
+        CHECK( pStaff->get_staff_margin() == 1000.0f );
+        CHECK( pStaff->get_line_spacing() == 180.0f );
+        CHECK( pStaff->get_line_thickness() == 15.0f );
+        CHECK( pStaff->get_height() == 735.0f );
     }
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_InstrumentWithContent)
     {
-        ImoInstrument* pInstr = new ImoInstrument();
+        ImoInstrument instr;
         ImoMusicData* pMD = new ImoMusicData();
-        pInstr->append_child(pMD);
-        CHECK( pInstr->get_musicdata() == pMD );
-        ImoClef* pClef = new ImoClef(ImoClef::k_G3);
-        pMD->append_child(pClef);
-        delete pInstr;
+        instr.append_child(pMD);
+        CHECK( instr.get_musicdata() == pMD );
+        //ImoClef* pClef = new ImoClef(ImoClef::k_G3);
+        //pMD->append_child(pClef);
     }
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_EmptyScore)
@@ -268,7 +300,7 @@ SUITE(InternalModelTest)
         ImoTextStyleInfo* pStyle = score.get_default_style_info();
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Default style" );
-        CHECK( pStyle->get_color() == rgba16(0,0,0,255) );
+        CHECK( pStyle->get_color() == Color(0,0,0,255) );
         CHECK( pStyle->get_font_name() == "Times New Roman" );
         CHECK( pStyle->get_font_style() == ImoFontInfo::k_normal );
         CHECK( pStyle->get_font_weight() == ImoFontInfo::k_normal );
@@ -280,7 +312,7 @@ SUITE(InternalModelTest)
         ImoScore score;
 	    ImoTextStyleInfo* pStyle = new ImoTextStyleInfo();
 	    pStyle->set_name("Test style");
-        pStyle->set_color( rgba16(15,16,27,132) );
+        pStyle->set_color( Color(15,16,27,132) );
         pStyle->set_font_name("Callamet");
         pStyle->set_font_size(12);
         pStyle->set_font_style(ImoFontInfo::k_normal);
@@ -300,8 +332,8 @@ SUITE(InternalModelTest)
         CHECK( info.get_height() == 100.0f );
         CHECK( info.get_width() == 160.0f );
         CHECK( info.get_position() == TPoint(0.0f, 0.0f) );
-        CHECK( info.get_bg_color() == rgba16(255,255,255,255) );
-        CHECK( info.get_border_color() == rgba16(0,0,0,255) );
+        CHECK( info.get_bg_color() == Color(255,255,255,255) );
+        CHECK( info.get_border_color() == Color(0,0,0,255) );
         CHECK( info.get_border_width() == 1.0f );
         CHECK( info.get_border_style() == k_line_solid );
     }

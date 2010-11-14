@@ -23,11 +23,13 @@
 #include "lomse_config.h"
 
 //classes related to these tests
-#include "lomse_score_layouter.h"
+#include "lomse_document_layouter.h"
 #include "lomse_injectors.h"
 #include "lomse_document.h"
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
+#include "lomse_box_system.h"
+#include "lomse_calligrapher.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -37,42 +39,60 @@ using namespace lomse;
 class ScoreLayouterTestFixture
 {
 public:
+    LibraryScope* m_pLibraryScope;
+    LdpFactory* m_pLdpFactory;
+    std::string m_scores_path;
     //wxSize m_ScoreSize;
     //double m_rScale;
     //lmScore* m_pScore;
-    //wxString m_sTestName;
-    //wxString m_sTestNum;
+    std::string m_sTestName;
+    std::string m_sTestNum;
     //ScoreLayouter* m_pScoreLayouter;
     //lmBoxScore* m_pBoxScore;
     //lmSystemScoreLayouter* m_pSysFmt;
+    DocLayouter* m_pDocLayouter;
+
+
+    ScoreLayouterTestFixture()   // setUp()
+    {
+        m_pLibraryScope = new LibraryScope(cout);
+        m_pLdpFactory = m_pLibraryScope->ldp_factory();
+        m_scores_path = LOMSE_TEST_SCORES_PATH;
+
+        m_pDocLayouter = NULL;
+        //m_ScoreSize = wxSize(700, 1000);
+        //m_rScale = 1.0f * lmSCALE;
+        //m_pScore = (lmScore*)NULL;
+        //m_pScoreLayouter = (ScoreLayouter*)NULL;
+        //m_pBoxScore = (lmBoxScore*)NULL;
+    }
+
+    ~ScoreLayouterTestFixture()  // tearDown()
+    {
+        delete m_pLibraryScope;
+        delete_test_data();
+    }
 
     ////void SaveScoreBitmap(lmGraphicManager* pGM)
     ////{
     ////    wxBitmap* pBitmap = pGM->RenderScore(1);
     ////    wxString sPath = g_pPaths->GetTestScoresPath();
-    ////    wxFileName oFilename(sPath, _T("zimg-")+m_sTestName, _T("bmp"), wxPATH_NATIVE);
+    ////    wxFileName oFilename(sPath, "zimg-")+m_sTestName, "bmp"), wxPATH_NATIVE);
     ////    pBitmap->SaveFile(oFilename.GetFullPath(), wxBITMAP_TYPE_BMP);
     ////}
 
-    //void LoadScoreForTest(const wxString& sTestNum, const wxString& sTestName)
-    //{
-    //    DeleteTestData();
-    //    m_sTestNum = sTestNum;
-    //    m_sTestName = sTestName;
-    //    wxString sPath = g_pPaths->GetTestScoresPath();
-    //    wxString sFilename = m_sTestNum + _T("-") + m_sTestName;
-    //    wxFileName oFilename(sPath, sFilename, _T("lms"), wxPATH_NATIVE);
-    //    lmLDPParser parser;
-    //    m_pScore = parser.ParseFile( oFilename.GetFullPath() );
-    //    CHECK( m_pScore != NULL );
-
-    //    lmAggDrawer* pDrawer = new lmAggDrawer(m_ScoreSize.x, m_ScoreSize.y, m_rScale);
-    //    lmPaper m_oPaper;
-    //    m_oPaper.SetDrawer(pDrawer);
-    //    m_pScoreLayouter = new ScoreLayouter(&m_oPaper);
-    //    m_pBoxScore = m_pScore->Layout(&m_oPaper, m_pScoreLayouter);
-    //    m_pSysFmt = m_pScoreLayouter->GetSystemScoreLayouter(0);
-    //}
+    void load_score_for_test(const std::string& sTestNum, const std::string& score)
+    {
+        delete_test_data();
+        m_sTestNum = sTestNum;
+        m_sTestName = score;
+        std::string filename = m_scores_path + m_sTestNum + "-" + m_sTestName + ".lms";
+        Document doc(*m_pLibraryScope);
+        doc.from_file(filename);
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        m_pDocLayouter = new DocLayouter( doc.get_im_model(), &meter);
+        m_pDocLayouter->layout_document();
+    }
 
     //void CheckLineDataEqual(int iSys, int iCol, int nSrcLine)
     //{
@@ -88,9 +108,9 @@ public:
 
     //    //read reference file to get expected data
     //    wxString sPath = g_pPaths->GetTestScoresPath();
-    //    wxString sInFile = wxString::Format(_T("ref-%s-%d-%d-%s"),
+    //    wxString sInFile = wxString::Format("ref-%s-%d-%d-%s"),
     //                            m_sTestNum.c_str(), iSys, iCol, m_sTestName.c_str() );
-    //    wxFileName oFilename(sPath, sInFile, _T("txt"), wxPATH_NATIVE);
+    //    wxFileName oFilename(sPath, sInFile, "txt"), wxPATH_NATIVE);
     //    wxString sExpectedData;
     //    wxFFile file(oFilename.GetFullPath());
     //    if ( !file.IsOpened() || !file.ReadAll(&sExpectedData) )
@@ -121,7 +141,7 @@ public:
     //    CHECK( m_pSysFmt->GetNumColumns() > 0 );
 
     //    //get actual data
-    //    wxString sActualData = _T("");
+    //    wxString sActualData = "");
 
     //    for (int iSys=0; iSys < m_pBoxScore->GetNumSystems(); iSys++)
     //    {
@@ -135,9 +155,9 @@ public:
 
     //    //read reference file to get expected data
     //    wxString sPath = g_pPaths->GetTestScoresPath();
-    //    wxString sInFile = wxString::Format(_T("ref-%s-%s"),
+    //    wxString sInFile = wxString::Format("ref-%s-%s"),
     //                                        m_sTestNum.c_str(), m_sTestName.c_str() );
-    //    wxFileName oFilename(sPath, sInFile, _T("txt"), wxPATH_NATIVE);
+    //    wxFileName oFilename(sPath, sInFile, "txt"), wxPATH_NATIVE);
     //    wxString sExpectedData;
     //    wxFFile file(oFilename.GetFullPath());
     //    if ( !file.IsOpened() || !file.ReadAll(&sExpectedData) )
@@ -164,16 +184,16 @@ public:
     //void SaveAsActualData(const wxString& sActualData, int iSys, int iCol)
     //{
     //    wxString sPath = g_pPaths->GetTestScoresPath();
-    //    wxString sOutFile = wxString::Format(_T("dat-%s-%d-%d-%s"),
+    //    wxString sOutFile = wxString::Format("dat-%s-%d-%d-%s"),
     //                                            m_sTestNum.c_str(),
     //                                            iSys, iCol, m_sTestName.c_str() );
-    //    wxFileName oFilename(sPath, sOutFile, _T("txt"), wxPATH_NATIVE);
+    //    wxFileName oFilename(sPath, sOutFile, "txt"), wxPATH_NATIVE);
     //    wxFile oFile;
     //    oFile.Create(oFilename.GetFullPath(), true);    //true=overwrite
     //    oFile.Open(oFilename.GetFullPath(), wxFile::write);
     //    if (!oFile.IsOpened())
     //    {
-    //        wxLogMessage(_T("[ScoreLayouterTest::SaveAsActualData] File '%s' could not be openned. Write to file cancelled"),
+    //        wxLogMessage("[ScoreLayouterTest::SaveAsActualData] File '%s' could not be openned. Write to file cancelled"),
     //            oFilename.GetFullPath().c_str());
     //    }
     //    else
@@ -186,16 +206,16 @@ public:
     //void SaveAsActualScoreData(const wxString& sActualData)
     //{
     //    wxString sPath = g_pPaths->GetTestScoresPath();
-    //    wxString sOutFile = wxString::Format(_T("dat-%s-%s"),
+    //    wxString sOutFile = wxString::Format("dat-%s-%s"),
     //                                         m_sTestNum.c_str(),
     //                                         m_sTestName.c_str() );
-    //    wxFileName oFilename(sPath, sOutFile, _T("txt"), wxPATH_NATIVE);
+    //    wxFileName oFilename(sPath, sOutFile, "txt"), wxPATH_NATIVE);
     //    wxFile oFile;
     //    oFile.Create(oFilename.GetFullPath(), true);    //true=overwrite
     //    oFile.Open(oFilename.GetFullPath(), wxFile::write);
     //    if (!oFile.IsOpened())
     //    {
-    //        wxLogMessage(_T("[ScoreLayouterTest::SaveAsActualScoreData] File '%s' could not be openned. Write to file cancelled"),
+    //        wxLogMessage("[ScoreLayouterTest::SaveAsActualScoreData] File '%s' could not be openned. Write to file cancelled"),
     //            oFilename.GetFullPath().c_str());
     //    }
     //    else
@@ -205,84 +225,84 @@ public:
     //    }
     //}
 
-    //void DeleteTestData()
-    //{
-    //    if (m_pScore)
-    //    {
-    //        delete m_pScore;
-    //        m_pScore = (lmScore*)NULL;
-    //    }
-    //    if (m_pScoreLayouter)
-    //    {
-    //        delete m_pScoreLayouter;
-    //        m_pScoreLayouter = (ScoreLayouter*)NULL;
-    //    }
-    //    if (m_pBoxScore)
-    //    {
-    //        delete m_pBoxScore;
-    //        m_pBoxScore = (lmBoxScore*)NULL;
-    //    }
-    //}
-
-    ScoreLayouterTestFixture()   // setUp()
+    void delete_test_data()
     {
-        m_pLibraryScope = new LibraryScope(cout);
-        m_pLdpFactory = m_pLibraryScope->ldp_factory();
-        m_scores_path = LOMSE_TEST_SCORES_PATH;
-
-        //m_ScoreSize = wxSize(700, 1000);
-        //m_rScale = 1.0f * lmSCALE;
-        //m_pScore = (lmScore*)NULL;
-        //m_pScoreLayouter = (ScoreLayouter*)NULL;
-        //m_pBoxScore = (lmBoxScore*)NULL;
+        //if (m_pScore)
+        //{
+        //    delete m_pScore;
+        //    m_pScore = (lmScore*)NULL;
+        //}
+        if (m_pDocLayouter)
+        {
+            delete m_pDocLayouter;
+            m_pDocLayouter = NULL;
+        }
+        //if (m_pBoxScore)
+        //{
+        //    delete m_pBoxScore;
+        //    m_pBoxScore = (lmBoxScore*)NULL;
+        //}
     }
-
-    ~ScoreLayouterTestFixture()  // tearDown()
-    {
-        delete m_pLibraryScope;
-        //DeleteTestData();
-    }
-
-    LibraryScope* m_pLibraryScope;
-    LdpFactory* m_pLdpFactory;
-    std::string m_scores_path;
 };
+
+
+//==============================================================
+//  Tests start 
+//==============================================================
+
 
 SUITE(ScoreLayouterTest)
 {
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_ReturnsGModel)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_CreatesScoreStub)
     {
         Document doc(*m_pLibraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        InternalModel* pIModel = doc.get_im_model();
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        ImoContent* pContent = pDoc->get_content();
-        ScoreLayouter scl( pContent->get_item(0) );
-        GmoBox* pContainerBox = NULL;
-        scl.do_layout(pContainerBox);
-        //GraphicModel* pGModel = fmt.get_gm_model();
-        //CHECK( pGModel != NULL );
-        //delete pGModel;
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        GmoStubScore* pStub = pGModel->get_score_stub(0);
+        CHECK( pStub != NULL );
+        delete pGModel;
     }
+
+    TEST_FIXTURE(ScoreLayouterTestFixture, T00010_EmptyScoreRendersOneStaff)
+    {
+        //an empty score with no options only renders one staff
+        load_score_for_test("00010", "empty-renders-one-staff");
+        GraphicModel* pGModel = m_pDocLayouter->get_gm_model();
+        GmoStubScore* pStub = pGModel->get_score_stub(0);
+        CHECK( pStub != NULL );
+        CHECK( pStub->get_num_pages() == 1 );
+        GmoBoxScorePage* pPage = pStub->get_page(0);
+        CHECK( pPage != NULL );
+        CHECK( pStub->get_num_systems() == 1 );
+        GmoBoxSystem* pSys = pPage->get_system(0);
+        CHECK( pSys != NULL );
+        CHECK( pSys->get_num_slices() == 1 );
+        delete pGModel;
+        delete_test_data();
+    }
+
 
 //            //empty scores
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00010_EmptyScoreRendersOneStaff)
 //    {
 //        //an empty score with no options only renders one staff
-//        LoadScoreForTest(_T("00010"), _T("empty-renders-one-staff"));
+//        load_score_for_test("00010", "empty-renders-one-staff");
 //        CHECK( m_pSysFmt->GetNumObjectsInColumnLine(0, 0) == 1 );
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00011_EmptyScoreFillPage)
 //    {
 //        //an empty score with fill option renders a page full of staves (manuscript paper)
 //
-//        LoadScoreForTest(_T("00011"), _T("empty-fill-page"));
+//        load_score_for_test("00011", "empty-fill-page");
 //        CHECK( m_pScore != NULL );
 //
 //        lmGraphicManager oGraphMngr;
@@ -296,180 +316,180 @@ SUITE(ScoreLayouterTest)
 //        CHECK( pBoxScore->GetNumPages() == 1 );
 //        CHECK( pBoxScore->GetNumSystems() > 1 );
 //
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //        //spacing a single line
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00020_SpaceBeforeClef)
 //    {
-//        LoadScoreForTest(_T("00020"), _T("space-before-clef"));
+//        load_score_for_test("00020", "space-before-clef");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00021_SpacingInProlog)
 //    {
-//        LoadScoreForTest(_T("00021"), _T("spacing-in-prolog"));
+//        load_score_for_test("00021", "spacing-in-prolog");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00022_SpaceAfterPrologOneNote)
 //    {
-//        LoadScoreForTest(_T("00022"), _T("spacing-in-prolog-one-note"));
+//        load_score_for_test("00022", "spacing-in-prolog-one-note");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00023_SameDurationNotesEquallySpaced)
 //    {
-//        LoadScoreForTest(_T("00023"), _T("same-duration-notes-equally-spaced"));
+//        load_score_for_test("00023", "same-duration-notes-equally-spaced");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00024_NotesSpacingProportionalToNotesDuration)
 //    {
-//        LoadScoreForTest(_T("00024"), _T("notes-spacing-proportional-to-notes-duration"));
+//        load_score_for_test("00024", "notes-spacing-proportional-to-notes-duration");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00025_AccidentalsDoNotAlterSpacing)
 //    {
-//        LoadScoreForTest(_T("00025"), _T("accidentals-do-no-alter-spacing"));
+//        load_score_for_test("00025", "accidentals-do-no-alter-spacing");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00026_AccidentalsDoNotAlterFixedSpacing)
 //    {
-//        LoadScoreForTest(_T("00026"), _T("accidentals-do-no-alter-fixed-spacing"));
+//        load_score_for_test("00026", "accidentals-do-no-alter-fixed-spacing");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00027_Spacing_notes_with_figured_bass)
 //    {
-//        LoadScoreForTest(_T("00027"), _T("spacing-notes-with-figured-bass"));
+//        load_score_for_test("00027", "spacing-notes-with-figured-bass");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00030_ChordNotesAreAligned)
 //    {
-//        LoadScoreForTest(_T("00030"), _T("chord-notes-are-aligned"));
+//        load_score_for_test("00030", "chord-notes-are-aligned");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00031_ChordStemUpNoteReversedNoFlag)
 //    {
-//        LoadScoreForTest(_T("00031"), _T("chord-stem-up-note-reversed-no-flag"));
+//        load_score_for_test("00031", "chord-stem-up-note-reversed-no-flag");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00032_ChordStemDownNoteReversedNoFlag)
 //    {
-//        LoadScoreForTest(_T("00032"), _T("chord-stem-down-note-reversed-no-flag"));
+//        load_score_for_test("00032", "chord-stem-down-note-reversed-no-flag");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00033_ChordsWithReversedNotesDoNotOverlap)
 //    {
-//        LoadScoreForTest(_T("00033"), _T("chords-with-reversed-notes-do-not-overlap"));
+//        load_score_for_test("00033", "chords-with-reversed-notes-do-not-overlap");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00034_ChordWithAccidentalsAligned)
 //    {
-//        LoadScoreForTest(_T("00034"), _T("chord-with-accidentals-aligned"));
+//        load_score_for_test("00034", "chord-with-accidentals-aligned");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00038_ChordsWithAccidentalsAndReversedNotesAligned)
 //    {
-//        LoadScoreForTest(_T("00038"), _T("chords-with-accidentals-and-reversed-notes-aligned"));
+//        load_score_for_test("00038", "chords-with-accidentals-and-reversed-notes-aligned");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 1);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00040_ClefBetweenNotesProperlySpacedWhenEnoughSpace)
 //    {
-//        LoadScoreForTest(_T("00040"), _T("clef-between-notes-properly-spaced-when-enough-space"));
+//        load_score_for_test("00040", "clef-between-notes-properly-spaced-when-enough-space");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00041_ClefBetweenNotesProperlySpacedWhenRemovingVariableSpace)
 //    {
-//        LoadScoreForTest(_T("00041"), _T("clef-between-notes-properly-spaced-when-removing-variable-space"));
+//        load_score_for_test("00041", "clef-between-notes-properly-spaced-when-removing-variable-space");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00042_ClefBetweenNotesAddsLittleSpacedWhenNotEnoughSpace)
 //    {
-//        LoadScoreForTest(_T("00042"), _T("clef-between-notes-adds-little-space-when-not-enough-space"));
+//        load_score_for_test("00042", "clef-between-notes-adds-little-space-when-not-enough-space");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //        // vertical alignment
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00101_VerticalRightAlignmentPrologOneNote)
 //    {
-//        LoadScoreForTest(_T("00101"), _T("vertical-right-alignment-prolog-one-note"));
+//        load_score_for_test("00101", "vertical-right-alignment-prolog-one-note");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00102_VerticalRightAlignmentSameTimePositions)
 //    {
-//        LoadScoreForTest(_T("00102"), _T("vertical-right-alignment-same-time-positions"));
+//        load_score_for_test("00102", "vertical-right-alignment-same-time-positions");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00103_VerticalRightAlignmentDifferentTimePositions)
 //    {
-//        LoadScoreForTest(_T("00103"), _T("vertical-right-alignment-different-time-positions"));
+//        load_score_for_test("00103", "vertical-right-alignment-different-time-positions");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    //TEST_FIXTURE(ScoreLayouterTestFixture, T00104_VerticalRightAlignmentWhenAccidentalRequiresMoreSpace)
 //    //{
-//    //    LoadScoreForTest(_T("00104"), _T("vertical-right-alignment-when-accidental-requires-more-space"));
+//    //    load_score_for_test("00104", "vertical-right-alignment-when-accidental-requires-more-space");
 //    //    LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//    //    DeleteTestData();
+//    //    delete_test_data();
 //    //}
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00105_VerticalRightAlignmentWhenClefsBetweenNotes)
 //    {
-//        LoadScoreForTest(_T("00105"), _T("vertical-right-alignment-when-clefs-between-notes"));
+//        load_score_for_test("00105", "vertical-right-alignment-when-clefs-between-notes");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00106_ClefFollowsNoteWhenNoteDisplaced)
 //    {
-//        LoadScoreForTest(_T("00106"), _T("clef-follows-note-when-note-displaced"));
+//        load_score_for_test("00106", "clef-follows-note-when-note-displaced");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00107_PrologProperlyAlignedInSecondSystem)
 //    {
-//        LoadScoreForTest(_T("00107"), _T("prolog-properly-aligned-in-second-system"));
+//        load_score_for_test("00107", "prolog-properly-aligned-in-second-system");
 //        LM_ASSERT_LINE_DATA_EQUAL(1, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //        //Gourlays' algorithm spacing problems
@@ -478,51 +498,51 @@ SUITE(ScoreLayouterTest)
 //
 //    //TEST_FIXTURE(ScoreLayouterTestFixture, T00110_triplet_against_5_tuplet_4_14)
 //    //{
-//    //    LoadScoreForTest(_T("00110"), _T("triplet-against-5-tuplet-4.14"));
+//    //    load_score_for_test("00110", "triplet-against-5-tuplet-4.14");
 //    //    LM_ASSERT_SCORE_DATA_EQUAL();
-//    //    DeleteTestData();
+//    //    delete_test_data();
 //    //}
 //
 //        // systems justification (lmLineResizer object)
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00200_BarsGoOneAfterTheOther)
 //    {
-//        LoadScoreForTest(_T("00200"), _T("bars-go-one-after-the-other"));
+//        load_score_for_test("00200", "bars-go-one-after-the-other");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 1);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00201_SystemsAreJustified)
 //    {
-//        LoadScoreForTest(_T("00201"), _T("systems-are-justified"));
+//        load_score_for_test("00201", "systems-are-justified");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 1);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00202_LongSingleBarIsSplitted)
 //    {
-//        LoadScoreForTest(_T("00202"), _T("long-single-bar-is-splitted"));
+//        load_score_for_test("00202", "long-single-bar-is-splitted");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
 //        LM_ASSERT_LINE_DATA_EQUAL(1, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00203_repositioning_at_justification)
 //    {
-//        LoadScoreForTest(_T("00203"), _T("repositioning-at-justification"));
+//        load_score_for_test("00203", "repositioning-at-justification");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //        //other
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00000_ErrorAlignRests)
 //    {
-//        LoadScoreForTest(_T("00000"), _T("error-align-rests"));
+//        load_score_for_test("00000", "error-align-rests");
 //        LM_ASSERT_LINE_DATA_EQUAL(0, 0);
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //        //Regression tests ---------------------------------------------------
@@ -530,366 +550,366 @@ SUITE(ScoreLayouterTest)
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80010_accidental_after_barline)
 //    {
-//        LoadScoreForTest(_T("80010"), _T("accidental-after-barline"));
+//        load_score_for_test("80010", "accidental-after-barline");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80011_accidentals)
 //    {
-//        LoadScoreForTest(_T("80011"), _T("accidentals"));
+//        load_score_for_test("80011", "accidentals");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80020_chord_no_stem_no_flag)
 //    {
-//        LoadScoreForTest(_T("80020"), _T("chord-no-stem-no-flag"));
+//        load_score_for_test("80020", "chord-no-stem-no-flag");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80021_chord_stem_up_no_flag)
 //    {
-//        LoadScoreForTest(_T("80021"), _T("chord-stem-up-no-flag"));
+//        load_score_for_test("80021", "chord-stem-up-no-flag");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80022_chord_stem_down_no_flag)
 //    {
-//        LoadScoreForTest(_T("80022"), _T("chord-stem-down-no-flag"));
+//        load_score_for_test("80022", "chord-stem-down-no-flag");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80023_chord_stem_up_note_reversed_no_flag)
 //    {
-//        LoadScoreForTest(_T("80023"), _T("chord-stem-up-note-reversed-no-flag"));
+//        load_score_for_test("80023", "chord-stem-up-note-reversed-no-flag");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80024_chord_stem_down_note_reversed_no_flag)
 //    {
-//        LoadScoreForTest(_T("80024"), _T("chord-stem-down-note-reversed-no-flag"));
+//        load_score_for_test("80024", "chord-stem-down-note-reversed-no-flag");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80025_chord_stem_up_no_flag_accidental)
 //    {
-//        LoadScoreForTest(_T("80025"), _T("chord-stem-up-no-flag-accidental"));
+//        load_score_for_test("80025", "chord-stem-up-no-flag-accidental");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80026_chord_flags)
 //    {
-//        LoadScoreForTest(_T("80026"), _T("chord-flags"));
+//        load_score_for_test("80026", "chord-flags");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80027_chord_spacing)
 //    {
-//        LoadScoreForTest(_T("80027"), _T("chord-spacing"));
+//        load_score_for_test("80027", "chord-spacing");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80028_chord_notes_ordering)
 //    {
-//        LoadScoreForTest(_T("80028"), _T("chord-notes-ordering"));
+//        load_score_for_test("80028", "chord-notes-ordering");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80030_tuplet_triplets)
 //    {
-//        LoadScoreForTest(_T("80030"), _T("tuplet-triplets"));
+//        load_score_for_test("80030", "tuplet-triplets");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80031_tuplet_duplets)
 //    {
-//        LoadScoreForTest(_T("80031"), _T("tuplet-duplets"));
+//        load_score_for_test("80031", "tuplet-duplets");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80032_tuplet_tuplet)
 //    {
-//        LoadScoreForTest(_T("80032"), _T("tuplet-tuplet"));
+//        load_score_for_test("80032", "tuplet-tuplet");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80040_beams)
 //    {
-//        LoadScoreForTest(_T("80040"), _T("beams"));
+//        load_score_for_test("80040", "beams");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80041_chords_beamed)
 //    {
-//        LoadScoreForTest(_T("80041"), _T("chords-beamed"));
+//        load_score_for_test("80041", "chords-beamed");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80042_beams)
 //    {
-//        LoadScoreForTest(_T("80042"), _T("beams"));
+//        load_score_for_test("80042", "beams");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80043_beam_4s_q)
 //    {
-//        LoadScoreForTest(_T("80043"), _T("beam-4s-q"));
+//        load_score_for_test("80043", "beam-4s-q");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80050_ties)
 //    {
-//        LoadScoreForTest(_T("80050"), _T("ties"));
+//        load_score_for_test("80050", "ties");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80051_tie_bezier)
 //    {
-//        LoadScoreForTest(_T("80051"), _T("tie-bezier"));
+//        load_score_for_test("80051", "tie-bezier");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80052_tie_bezier_break)
 //    {
-//        LoadScoreForTest(_T("80052"), _T("tie-bezier-break"));
+//        load_score_for_test("80052", "tie-bezier-break");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80053_tie_bezier_barline)
 //    {
-//        LoadScoreForTest(_T("80053"), _T("tie-bezier-barline"));
+//        load_score_for_test("80053", "tie-bezier-barline");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80054_tie_after_barline)
 //    {
-//        LoadScoreForTest(_T("80054"), _T("tie-after-barline"));
+//        load_score_for_test("80054", "tie-after-barline");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80060_go_back)
 //    {
-//        LoadScoreForTest(_T("80060"), _T("go-back"));
+//        load_score_for_test("80060", "go-back");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80070_some_time_signatures)
 //    {
-//        LoadScoreForTest(_T("80070"), _T("some-time-signatures"));
+//        load_score_for_test("80070", "some-time-signatures");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80071_12_8_time_signature)
 //    {
-//        LoadScoreForTest(_T("80071"), _T("12-8-time-signature"));
+//        load_score_for_test("80071", "12-8-time-signature");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80072_2_4_time_signature)
 //    {
-//        LoadScoreForTest(_T("80072"), _T("2-4-time-signature"));
+//        load_score_for_test("80072", "2-4-time-signature");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80080_one_instr_2_staves)
 //    {
-//        LoadScoreForTest(_T("80080"), _T("one-instr-2-staves"));
+//        load_score_for_test("80080", "one-instr-2-staves");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80081_two_instr_3_staves)
 //    {
-//        LoadScoreForTest(_T("80081"), _T("two-instr-3-staves"));
+//        load_score_for_test("80081", "two-instr-3-staves");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80082_choir_STB_piano)
 //    {
-//        LoadScoreForTest(_T("80082"), _T("choir-STB-piano"));
+//        load_score_for_test("80082", "choir-STB-piano");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80083_critical_line)
 //    {
-//        LoadScoreForTest(_T("80083"), _T("critical-line"));
+//        load_score_for_test("80083", "critical-line");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80090_all_rests)
 //    {
-//        LoadScoreForTest(_T("80090"), _T("all-rests"));
+//        load_score_for_test("80090", "all-rests");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80091_rests_in_beam)
 //    {
-//        LoadScoreForTest(_T("80091"), _T("rests-in-beam"));
+//        load_score_for_test("80091", "rests-in-beam");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80092_short_rests_in_beam)
 //    {
-//        LoadScoreForTest(_T("80092"), _T("short-rests-in-beam"));
+//        load_score_for_test("80092", "short-rests-in-beam");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80100_spacer)
 //    {
-//        LoadScoreForTest(_T("80100"), _T("spacer"));
+//        load_score_for_test("80100", "spacer");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80110_graphic_line_text)
 //    {
-//        LoadScoreForTest(_T("80110"), _T("graphic-line-text"));
+//        load_score_for_test("80110", "graphic-line-text");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80111_line_after_barline)
 //    {
-//        LoadScoreForTest(_T("80111"), _T("line-after-barline"));
+//        load_score_for_test("80111", "line-after-barline");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80120_fermatas)
 //    {
-//        LoadScoreForTest(_T("80120"), _T("fermatas"));
+//        load_score_for_test("80120", "fermatas");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80130_metronome)
 //    {
-//        LoadScoreForTest(_T("80130"), _T("metronome"));
+//        load_score_for_test("80130", "metronome");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80131_metronome)
 //    {
-//        LoadScoreForTest(_T("80131"), _T("metronome"));
+//        load_score_for_test("80131", "metronome");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80132_metronome)
 //    {
-//        LoadScoreForTest(_T("80132"), _T("metronome"));
+//        load_score_for_test("80132", "metronome");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80140_text)
 //    {
-//        LoadScoreForTest(_T("80140"), _T("text"));
+//        load_score_for_test("80140", "text");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80141_text_titles)
 //    {
-//        LoadScoreForTest(_T("80141"), _T("text-titles"));
+//        load_score_for_test("80141", "text-titles");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80150_all_clefs)
 //    {
-//        LoadScoreForTest(_T("80150"), _T("all-clefs"));
+//        load_score_for_test("80150", "all-clefs");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80151_all_clefs)
 //    {
-//        LoadScoreForTest(_T("80151"), _T("all-clefs"));
+//        load_score_for_test("80151", "all-clefs");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80160_textbox)
 //    {
-//        LoadScoreForTest(_T("80160"), _T("textbox"));
+//        load_score_for_test("80160", "textbox");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80161_textbox_with_anchor_line)
 //    {
-//        LoadScoreForTest(_T("80161"), _T("textbox-with-anchor-line"));
+//        load_score_for_test("80161", "textbox-with-anchor-line");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80162_stacked_textboxes)
 //    {
-//        LoadScoreForTest(_T("80162"), _T("stacked-textboxes"));
+//        load_score_for_test("80162", "stacked-textboxes");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80170_figured_bass)
 //    {
-//        LoadScoreForTest(_T("80170"), _T("figured-bass"));
+//        load_score_for_test("80170", "figured-bass");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80171_figured_bass_several)
 //    {
-//        LoadScoreForTest(_T("80171"), _T("figured-bass-several"));
+//        load_score_for_test("80171", "figured-bass-several");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80172_figured_bass_line)
 //    {
-//        LoadScoreForTest(_T("80172"), _T("figured-bass-line"));
+//        load_score_for_test("80172", "figured-bass-line");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T80180_new_system_tag)
 //    {
-//        LoadScoreForTest(_T("80180"), _T("new-system-tag"));
+//        load_score_for_test("80180", "new-system-tag");
 //        LM_ASSERT_SCORE_DATA_EQUAL();
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //}
@@ -932,11 +952,11 @@ SUITE(ScoreLayouterTest)
 //    lmTimeGridTable* m_pTable;
 //
 //
-//    void LoadScoreForTest(const wxString& sFilename)
+//    void load_score_for_test(const wxString& sFilename)
 //    {
-//        DeleteTestData();
+//        delete_test_data();
 //        wxString sPath = g_pPaths->GetTestScoresPath();
-//        wxFileName oFilename(sPath, sFilename, _T("lms"), wxPATH_NATIVE);
+//        wxFileName oFilename(sPath, sFilename, "lms"), wxPATH_NATIVE);
 //        lmLDPParser parser;
 //        m_pScore = parser.ParseFile( oFilename.GetFullPath() );
 //        CHECK( m_pScore != NULL );
@@ -954,7 +974,7 @@ SUITE(ScoreLayouterTest)
 //        //wxLogMessage( m_pTable->Dump() );
 //    }
 //
-//    void DeleteTestData()
+//    void delete_test_data()
 //    {
 //        if (m_pScore)
 //        {
@@ -992,7 +1012,7 @@ SUITE(ScoreLayouterTest)
 //    // tearDown
 //    ~lmTimeGridTableTestFixture()
 //    {
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //};
@@ -1004,34 +1024,34 @@ SUITE(ScoreLayouterTest)
 //
 //    TEST_FIXTURE(lmTimeGridTableTestFixture, empty_score_builds_empty_table)
 //    {
-//        LoadScoreForTest(_T("00010-empty-renders-one-staff"));
+//        load_score_for_test("00010-empty-renders-one-staff");
 //        CHECK( m_pTable->GetSize() == 0 );
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(lmTimeGridTableTestFixture, just_barline_creates_one_entry)
 //    {
-//        LoadScoreForTest(_T("90003-empty-bar-with-barline"));
+//        load_score_for_test("90003-empty-bar-with-barline");
 //        CHECK( m_pTable->GetSize() == 1 );
 //        CHECK( m_pTable->GetTimepos(0) == 0.0f );
 //        CHECK( m_pTable->GetDuration(0) == 0.0f );
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(lmTimeGridTableTestFixture, one_note_no_barline_creates_two_entries)
 //    {
-//        LoadScoreForTest(_T("00022-spacing-in-prolog-one-note"));
+//        load_score_for_test("00022-spacing-in-prolog-one-note");
 //        CHECK( m_pTable->GetSize() == 2 );
 //        CHECK( m_pTable->GetTimepos(0) == 0.0f );
 //        CHECK( m_pTable->GetDuration(0) == 64.0f );
 //        CHECK( m_pTable->GetTimepos(1) == 64.0f );
 //        CHECK( m_pTable->GetDuration(1) == 0.0f );
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(lmTimeGridTableTestFixture, three_consecutive_notes_creates_four_entries)
 //    {
-//        LoadScoreForTest(_T("00023-same-duration-notes-equally-spaced"));
+//        load_score_for_test("00023-same-duration-notes-equally-spaced");
 //        CHECK( m_pTable->GetSize() == 4 );
 //        CHECK( m_pTable->GetTimepos(0) == 0.0f );
 //        CHECK( m_pTable->GetDuration(0) == 64.0f );
@@ -1041,34 +1061,34 @@ SUITE(ScoreLayouterTest)
 //        CHECK( m_pTable->GetDuration(2) == 64.0f );
 //        CHECK( m_pTable->GetTimepos(3) == 192.0f );
 //        CHECK( m_pTable->GetDuration(3) == 0.0f );
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(lmTimeGridTableTestFixture, one_chord_and_barline_creates_two_entries)
 //    {
-//        LoadScoreForTest(_T("00030-chord-notes-are-aligned"));
+//        load_score_for_test("00030-chord-notes-are-aligned");
 //        CHECK( m_pTable->GetSize() == 2 );
 //        CHECK( m_pTable->GetTimepos(0) == 0.0f );
 //        CHECK( m_pTable->GetDuration(0) == 256.0f );
 //        CHECK( m_pTable->GetTimepos(1) == 256.0f );
 //        CHECK( m_pTable->GetDuration(1) == 0.0f );
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(lmTimeGridTableTestFixture, when_two_notes_at_same_time_choose_the_shortest_one)
 //    {
-//        LoadScoreForTest(_T("90001-two-notes-different-duration"));
+//        load_score_for_test("90001-two-notes-different-duration");
 //        CHECK( m_pTable->GetSize() == 2 );
 //        CHECK( m_pTable->GetTimepos(0) == 0.0f );
 //        CHECK( m_pTable->GetDuration(0) == 32.0f );
 //        CHECK( m_pTable->GetTimepos(1) == 32.0f );
 //        CHECK( m_pTable->GetDuration(1) == 0.0f );
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(lmTimeGridTableTestFixture, interpolate_missing_time_between_two_notes)
 //    {
-//        LoadScoreForTest(_T("90004-two-voices-missing-timepos"));
+//        load_score_for_test("90004-two-voices-missing-timepos");
 //        CHECK( m_pTable->GetSize() == 4 );
 //        CHECK( m_pTable->GetTimepos(0) == 0.0f );
 //        CHECK( m_pTable->GetDuration(0) == 32.0f );
@@ -1078,12 +1098,12 @@ SUITE(ScoreLayouterTest)
 //        CHECK( m_pTable->GetDuration(2) == 64.0f );
 //        CHECK( m_pTable->GetTimepos(3) == 128.0f );
 //        CHECK( m_pTable->GetDuration(3) == 0.0f );
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 //
 //    TEST_FIXTURE(lmTimeGridTableTestFixture, several_lines_with_different_durations)
 //    {
-//        LoadScoreForTest(_T("90002-several-lines-with-different-durations"));
+//        load_score_for_test("90002-several-lines-with-different-durations");
 //        CHECK( m_pTable->GetSize() == 5 );
 //        CHECK( m_pTable->GetTimepos(0) == 0.0f );
 //        CHECK( m_pTable->GetDuration(0) == 64.0f );
@@ -1095,7 +1115,7 @@ SUITE(ScoreLayouterTest)
 //        CHECK( m_pTable->GetDuration(3) == 16.0f );
 //        CHECK( m_pTable->GetTimepos(4) == 128.0f );
 //        CHECK( m_pTable->GetDuration(4) == 0.0f );
-//        DeleteTestData();
+//        delete_test_data();
 //    }
 
 };

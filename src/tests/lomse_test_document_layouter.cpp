@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include <UnitTest++.h>
 #include <sstream>
@@ -27,12 +27,30 @@
 #include "lomse_injectors.h"
 #include "lomse_document.h"
 #include "lomse_gm_basic.h"
+#include "lomse_box_system.h"
+#include "lomse_shape_staff.h"
+#include "lomse_instrument_engraver.h"
+#include "lomse_internal_model.h"
+#include "lomse_calligrapher.h"
 
 using namespace UnitTest;
 using namespace std;
 using namespace lomse;
 
 
+////derived classes, for accessing protected members
+//class MyDocLayouter : public DocLayouter
+//{
+//public:
+//    MyDocLayouter(InternalModel* pIModel) : DocLayouter(pIModel) {}
+//    ~MyDocLayouter() {}
+//
+//    //access to protected members
+//    FlowSizer* get_main_sizer() { return m_pMainSizer; }
+//};
+
+
+//---------------------------------------------------------------------------------------
 class DocLayouterTestFixture
 {
 public:
@@ -54,6 +72,7 @@ public:
     std::string m_scores_path;
 };
 
+//---------------------------------------------------------------------------------------
 SUITE(DocLayouterTest)
 {
 
@@ -62,13 +81,464 @@ SUITE(DocLayouterTest)
         Document doc(*m_pLibraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        DocLayouter dl( doc.get_im_model() );
-        USize pagesize(21000.0f, 29700.0f);
-        dl.layout_document(pagesize);
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        CHECK( pGModel != NULL );
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_CreatesModelAndFirstPage)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         CHECK( pGModel != NULL );
         CHECK( pGModel->get_num_pages() == 1 );
         delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_DocPageHasPaperSize)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
+            "(content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        CHECK( pPage->is_box_doc_page() == true );
+        CHECK( pPage->get_width() == 24000.0f );
+        CHECK( pPage->get_height() == 35700.0f );
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_DocPageHasBoxContent)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
+            "(content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        GmoBox* pBox = pPage->get_child_box(0);
+        CHECK( pBox->is_box_doc_page_content() == true );
+        CHECK( pBox->get_width() == 16000.0f );
+        CHECK( pBox->get_height() == 31700.0f );
+        CHECK( pBox->get_left() == 1000.0f );
+        CHECK( pBox->get_top() == 1500.0f );
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_HasScoreStub)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        GmoStubScore* pStub = pGModel->get_score_stub(0);
+        CHECK( pStub != NULL );
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_DocPageHasBoxScore)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
+            "(content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        GmoBox* pBDPC = pPage->get_child_box(0);     //DocPageContent
+        GmoBox* pBox = pBDPC->get_child_box(0);      //ScorePage
+        CHECK( pBox != NULL );
+        CHECK( pBox->is_box_score_page() == true );
+        CHECK( pBox->get_width() == 16000.0f );
+        CHECK( pBox->get_height() == 31700.0f );
+        CHECK( pBox->get_left() == 1000.0f );
+        CHECK( pBox->get_top() == 1500.0f );
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_BoxScoreHasBoxSystem)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
+            "(content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        GmoBox* pBDPC = pPage->get_child_box(0);     //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);      //ScorePage
+        GmoBox* pBox = pBSP->get_child_box(0);       //System
+        CHECK( pBox != NULL );
+        CHECK( pBox->is_box_system() == true );
+        //CHECK( pBox->get_width() == 16000.0f );
+        //CHECK( pBox->get_height() == 735.0f );
+        //CHECK( pBox->get_left() == 1000.0f );
+        //CHECK( pBox->get_top() == 1500.0f );
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_BoxSystemHasBoxSlice)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
+            "(content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        GmoBox* pBDPC = pPage->get_child_box(0);     //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);      //ScorePage
+        GmoBox* pBSys = pBSP->get_child_box(0);      //System
+        GmoBox* pBox = pBSys->get_child_box(0);      //Slice
+        CHECK( pBox != NULL );
+        CHECK( pBox->is_box_slice() == true );
+        //CHECK( pBox->get_width() == 16000.0f );
+        //CHECK( pBox->get_height() == 735.0f );
+        //CHECK( pBox->get_left() == 1000.0f );
+        //CHECK( pBox->get_top() == 1500.0f );
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_BoxSliceHasBoxSliceInstr)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
+            "(content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        GmoBox* pBDPC = pPage->get_child_box(0);     //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);      //ScorePage
+        GmoBox* pBSys = pBSP->get_child_box(0);      //System
+        GmoBox* pBSlice = pBSys->get_child_box(0);   //Slice
+        GmoBox* pBox = pBSlice->get_child_box(0);    //SliceInstr
+        CHECK( pBox != NULL );
+        CHECK( pBox->is_box_slice_instr() == true );
+        //CHECK( pBox->get_width() == 16000.0f );
+        //CHECK( pBox->get_height() == 735.0f );
+        //CHECK( pBox->get_left() == 1000.0f );
+        //CHECK( pBox->get_top() == 1500.0f );
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_BoxSystemHasStaffShape)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
+            "(content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
+        GmoBox* pBSys = pBSP->get_child_box(0);     //System
+        GmoShape* pShape = pBSys->get_shape(0);     //ShapeStaff
+        CHECK( pShape != NULL );
+        CHECK( pShape->is_shape_staff() == true );
+        //CHECK( pShape->get_width() == 16000.0f );
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_BoxSystemGetStaffShape)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
+            "(content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
+        GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
+        GmoShape* pShape = pBSys->get_staff_shape(0);
+        CHECK( pShape != NULL );
+        CHECK( pShape->is_shape_staff() == true );
+        GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+        CHECK( pSS->get_num_staff() == 0 );
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_EmptyScore_OneStaff)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(content (score (vers 1.6) "
+            "(instrument (musicData )))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        CHECK( pGModel->get_num_pages() == 1 );
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        CHECK( pPage->get_num_boxes() == 1 );
+        GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
+        CHECK( pBDPC->get_num_boxes() == 1 );
+        GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
+        CHECK( pBSP->get_num_boxes() == 1 );
+        GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
+        CHECK( pBSys->get_num_shapes() == 1 );
+        GmoShape* pShape = pBSys->get_staff_shape(0);
+        CHECK( pShape != NULL );
+        CHECK( pShape->is_shape_staff() == true );
+        GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+        CHECK( pSS->get_num_staff() == 0 );
+        CHECK( pBSys->get_num_boxes() == 1 );
+        GmoBox* pBSlice = pBSys->get_child_box(0);     //Slice
+        CHECK( pBSlice->get_num_boxes() == 1 );
+        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);     //SliceInsr
+        CHECK( pBSliceInstr->get_num_boxes() == 0 );
+
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_BoxesPositionAndMargins)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(content (score (vers 1.6) "
+            "(instrument (musicData )))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        CHECK( pGModel->get_num_pages() == 1 );
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        CHECK( pPage->get_num_boxes() == 1 );
+        GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
+        CHECK( pBDPC->get_num_boxes() == 1 );
+        GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
+        CHECK( pBSP->get_num_boxes() == 1 );
+        GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
+        CHECK( pBSys->get_top_margin() == 0.0f );
+        CHECK( pBSys->get_bottom_margin() == 0.0f );
+
+        CHECK( pBSys->get_num_boxes() == 1 );
+        GmoBox* pBSlice = pBSys->get_child_box(0);     //Slice
+        CHECK( pBSlice->get_top_margin() == 0.0f );
+        CHECK( pBSlice->get_bottom_margin() == 0.0f );
+        CHECK( pBSlice->get_left_margin() == 0.0f );
+        CHECK( pBSlice->get_right_margin() == 0.0f );
+        CHECK( pBSlice->get_top() == pBSys->get_top() );
+
+        CHECK( pBSlice->get_num_boxes() == 1 );
+        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);     //SliceInsr
+        CHECK( pBSliceInstr->get_num_boxes() == 0 );
+        CHECK( pBSliceInstr->get_top_margin() == 0.0f );
+        CHECK( pBSliceInstr->get_bottom_margin() == 0.0f );
+        CHECK( pBSliceInstr->get_left_margin() == 0.0f );
+        CHECK( pBSliceInstr->get_right_margin() == 0.0f );
+        CHECK( pBSliceInstr->get_top() == pBSlice->get_top() );
+
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_EmptyScore_StaffTop)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(content (score (vers 1.6) "
+            "(instrument (musicData )))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        CHECK( pGModel->get_num_pages() == 1 );
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        CHECK( pPage->get_num_boxes() == 1 );
+        GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
+        CHECK( pBDPC->get_num_boxes() == 1 );
+        GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
+        CHECK( pBSP->get_num_boxes() == 1 );
+        GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
+        CHECK( pBSys->get_num_shapes() == 1 );
+        GmoShape* pShape = pBSys->get_staff_shape(0);
+        CHECK( pShape != NULL );
+        CHECK( pShape->is_shape_staff() == true );
+        GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+        CHECK( pSS->get_num_staff() == 0 );
+        CHECK( pSS->get_top() > 0.0f );
+
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_EmptyScore_TwoStaves)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(content (score (vers 1.6) "
+            "(instrument (staves 2)(musicData )))))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        CHECK( pGModel->get_num_pages() == 1 );
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        CHECK( pPage->get_num_boxes() == 1 );
+        GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
+        CHECK( pBDPC->get_num_boxes() == 1 );
+        GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
+        CHECK( pBSP->get_num_boxes() == 1 );
+        GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
+        CHECK( pBSys->get_num_shapes() == 2 );
+        GmoShape* pShape = pBSys->get_staff_shape(0);
+        CHECK( pShape != NULL );
+        CHECK( pShape->is_shape_staff() == true );
+        GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+        CHECK( pSS->get_num_staff() == 0 );
+        pShape = pBSys->get_staff_shape(1);
+        CHECK( pShape != NULL );
+        CHECK( pShape->is_shape_staff() == true );
+        pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+        CHECK( pSS->get_num_staff() == 1 );
+        CHECK( pBSys->get_num_boxes() == 1 );
+        GmoBox* pBSlice = pBSys->get_child_box(0);     //Slice
+        CHECK( pBSlice->get_num_boxes() == 1 );
+        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);     //SliceInsr
+        CHECK( pBSliceInstr->get_num_boxes() == 0 );
+
+        delete pGModel;
+    }
+
+    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_EmptyScore_TwoInstruments)
+    {
+        Document doc(*m_pLibraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData )) (instrument (musicData )) )))" );
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        DocLayouter dl( doc.get_im_model(), &meter);
+        dl.layout_document();
+        GraphicModel* pGModel = dl.get_gm_model();
+        CHECK( pGModel->get_num_pages() == 1 );
+        GmoBoxDocPage* pPage = pGModel->get_page(0);
+        CHECK( pPage->get_num_boxes() == 1 );
+        GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
+        CHECK( pBDPC->get_num_boxes() == 1 );
+        GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
+        CHECK( pBSP->get_num_boxes() == 1 );
+        GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
+        CHECK( pBSys->get_num_shapes() == 2 );
+        GmoShape* pShape = pBSys->get_staff_shape(0);
+        CHECK( pShape != NULL );
+        CHECK( pShape->is_shape_staff() == true );
+        GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+        CHECK( pSS->get_num_staff() == 0 );
+        pShape = pBSys->get_staff_shape(1);
+        CHECK( pShape != NULL );
+        CHECK( pShape->is_shape_staff() == true );
+        pSS = dynamic_cast<GmoShapeStaff*>(pShape);
+        CHECK( pSS->get_num_staff() == 0 );
+        CHECK( pBSys->get_num_boxes() == 1 );
+        GmoBox* pBSlice = pBSys->get_child_box(0);     //Slice
+        CHECK( pBSlice->get_num_boxes() == 2 );
+        GmoBox* pBSliceInstr1 = pBSlice->get_child_box(0);     //SliceInsr 1
+        CHECK( pBSliceInstr1->get_num_boxes() == 0 );
+        GmoBox* pBSliceInstr2 = pBSlice->get_child_box(1);     //SliceInsr 2
+        CHECK( pBSliceInstr2->get_num_boxes() == 0 );
+        CHECK( pBSliceInstr1->get_top() < pBSliceInstr2->get_top() );
+
+        delete pGModel;
+    }
+
+    //TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_HasMainSizer)
+    //{
+    //    Document doc(*m_pLibraryScope);
+    //    doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+    //        "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+    //    MyDocLayouter dl( doc.get_im_model() );
+    //    CHECK( dl.get_main_sizer() != NULL );
+    //}
+
+};
+
+
+//---------------------------------------------------------------------------------------
+// InstrumentEngraver
+//---------------------------------------------------------------------------------------
+class InstrLayouterTestFixture
+{
+public:
+
+    InstrLayouterTestFixture()
+    {
+        m_pLibraryScope = new LibraryScope(cout);
+        m_pLdpFactory = m_pLibraryScope->ldp_factory();
+        m_scores_path = LOMSE_TEST_SCORES_PATH;
+    }
+
+    ~InstrLayouterTestFixture()
+    {
+        delete m_pLibraryScope;
+    }
+
+    LibraryScope* m_pLibraryScope;
+    LdpFactory* m_pLdpFactory;
+    std::string m_scores_path;
+};
+
+//---------------------------------------------------------------------------------------
+SUITE(InstrLayouterTest)
+{
+
+    TEST_FIXTURE(InstrLayouterTestFixture, InstrLayouter_MeasureIndents_NoBracket)
+    {
+        ImoInstrument instr;
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        InstrumentEngraver engraver(&instr, &meter);
+        engraver.measure_indents();
+        CHECK( engraver.get_indent_first() == 0.0f );
+        CHECK( engraver.get_indent_other() == 0.0f );
+    }
+
+    TEST_FIXTURE(InstrLayouterTestFixture, InstrLayouter_MeasureIndents_Bracket)
+    {
+        ImoInstrument instr;
+        instr.add_staff();
+        TextMeter meter( m_pLibraryScope->font_storage() );
+        InstrumentEngraver engraver(&instr, &meter);
+        engraver.measure_indents();
+        CHECK( engraver.get_indent_first() > 0.0f );
+        CHECK( engraver.get_indent_other() > 0.0f );
     }
 
 };

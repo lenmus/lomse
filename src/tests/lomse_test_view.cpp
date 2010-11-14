@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include <UnitTest++.h>
 #include <sstream>
@@ -25,24 +25,61 @@
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_document.h"
-#include "lomse_view.h"
+#include "lomse_graphic_view.h"
+#include "platform/lomse_platform.h"
+#include "lomse_screen_drawer.h"
 
 using namespace UnitTest;
 using namespace std;
 using namespace lomse;
 
-class EditViewTestFixture
+
+//---------------------------------------------------------------------------------------
+class MyPlatformSupport : public PlatformSupport
+{
+protected:
+    bool m_fUpdateWindowInvoked;
+    bool m_fSetWindowTitleInvoked;
+    std::string m_title;
+    RenderingBuffer m_buffer;
+
+public:
+    MyPlatformSupport(EPixelFormat format, bool flip_y) 
+        : PlatformSupport(format, flip_y)
+    { 
+    }
+    virtual ~MyPlatformSupport() {}
+
+    void update_window() { m_fUpdateWindowInvoked = true; }
+    void set_window_title(const std::string& title) {
+        m_fSetWindowTitleInvoked = true; 
+        m_title = title;
+    }
+    void force_redraw() {}
+    RenderingBuffer& get_window_buffer() { return m_buffer; }
+
+    bool set_window_title_invoked() { return m_fSetWindowTitleInvoked; }
+    bool update_window_invoked() { return m_fUpdateWindowInvoked; }
+    const std::string& get_title() { return m_title; }
+    void start_timer() {}
+    double elapsed_time() const { return 0.0; }
+
+};
+
+
+//---------------------------------------------------------------------------------------
+class GraphicViewTestFixture
 {
 public:
 
-    EditViewTestFixture()     //SetUp fixture
+    GraphicViewTestFixture()     //SetUp fixture
     {
         m_pLibraryScope = new LibraryScope(cout);
         m_pLdpFactory = m_pLibraryScope->ldp_factory();
         m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
 
-    ~EditViewTestFixture()    //TearDown fixture
+    ~GraphicViewTestFixture()    //TearDown fixture
     {
         delete m_pLibraryScope;
     }
@@ -53,17 +90,43 @@ public:
 };
 
 
-SUITE(EditViewTest)
+//---------------------------------------------------------------------------------------
+SUITE(GraphicViewTest)
 {
 
-    TEST_FIXTURE(EditViewTestFixture, EditView_CreatesGraphicModel)
+    TEST_FIXTURE(GraphicViewTestFixture, EditView_CreatesGraphicModel)
     {
         Document doc(*m_pLibraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        EditView view(&doc);
+        MyPlatformSupport platform(k_pix_format_bgra32, false);
+        ScreenDrawer drawer(*m_pLibraryScope);
+        VerticalBookView view(*m_pLibraryScope, &doc, &platform, &drawer);
         CHECK( view.get_graphic_model() != NULL );
     }
+
+    //TEST_FIXTURE(GraphicViewTestFixture, EditView_UpdateWindow)
+    //{
+    //    Document doc(*m_pLibraryScope);
+    //    doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+    //        "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+    //    MyPlatformSupport platform(k_pix_format_bgra32, false);
+    //    GraphicView view(&doc, &platform);
+    //    CHECK( platform.update_window_invoked() == false );
+    //    view.update_window();
+    //    CHECK( platform.update_window_invoked() == true );
+    //}
+
+    //TEST_FIXTURE(GraphicViewTestFixture, EditView_CreatesBitmap)
+    //{
+    //    Document doc(*m_pLibraryScope);
+    //    doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+    //        "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+    //    MyPlatformSupport platform(k_pix_format_bgra32, false);
+    //    GraphicView view(&doc, &platform);
+    //    view.on_draw();
+    //    CHECK( ????????????????????????? );
+    //}
 
 }
 
