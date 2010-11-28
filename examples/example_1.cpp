@@ -37,7 +37,6 @@
 
 #include "lomse_exceptions.h"
 #include "lomse_drawer.h"
-#include "lomse_agg_drawer.h"
 #include "lomse_gm_basic.h"
 
 #include "lomse_injectors.h"
