@@ -22,6 +22,7 @@
 #define __LOMSE_CLEF_ENGRAVER_H__
 
 #include "lomse_basic.h"
+#include "lomse_injectors.h"
 
 namespace lomse
 {
@@ -31,6 +32,7 @@ class ImoClef;
 class GmoBoxSliceInstr;
 class GmoShape;
 class GmoBox;
+class FontStorage;
 
 //---------------------------------------------------------------------------------------
 class ClefEngraver
@@ -39,9 +41,10 @@ protected:
     int m_nClefType;
     bool m_fSmallClef;
     int m_iGlyph;
+    LibraryScope& m_libraryScope;
 
 public:
-    ClefEngraver() {}
+    ClefEngraver(LibraryScope& libraryScope);
     ~ClefEngraver() {}
 
     GmoShape* create_shape(ImoClef* pClef, GmoBoxSliceInstr* pBox,

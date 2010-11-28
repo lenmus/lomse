@@ -22,8 +22,8 @@
 
 #include "lomse_drawer.h"
 #include "lomse_gm_basic.h"
-//#include "lomse_box_system.h"
-//#include "lomse_engraving_options.h"
+#include "lomse_internal_model.h"
+#include "lomse_calligrapher.h"
 
 
 namespace lomse
@@ -33,45 +33,57 @@ namespace lomse
 // GmoShapeText implementation
 //---------------------------------------------------------------------------------------
 
-GmoShapeText::GmoShapeText(GmoBox* owner, const std::string& text, LUnits x, LUnits y)
-                        //, wxFont* pFont
-    : GmoSimpleShape(owner, GmoObj::k_shape_text)
+GmoShapeText::GmoShapeText(GmoBox* owner, const std::string& text,
+                           ImoTextStyleInfo* pStyle, LUnits x, LUnits y,
+                           LibraryScope& libraryScope)
+    : GmoSimpleShape(owner, GmoObj::k_shape_text, Color(0,0,0))
+    , m_pStyle(pStyle)
+    , m_pFontStorage( libraryScope.font_storage() )
+    , m_libraryScope(libraryScope)
     , m_text(text)
-    , m_xPos(x)
-    , m_yPos(y)
 {
- //   m_pFont = pFont;
+    //bounds
+    select_font();
+    TextMeter meter(m_libraryScope);
+    m_size.width = meter.measure_width(text);
+    m_size.height = meter.get_font_height();
 
- //   // compute and store position
- //   m_uPos.x = offset.x;
- //   m_uPos.y = offset.y;
+    //position
+    m_origin.x = x;
+    m_origin.y = y - m_size.height;     //reference is at text bottom 
 
- //   // store boundling rectangle position and size
- //   LUnits uWidth, uHeight;
- //   pPaper->SetFont(*m_pFont);
- //   pPaper->GetTextExtent(m_text, &uWidth, &uHeight);
-
- //   m_uBoundsTop.x = offset.x;
- //   m_uBoundsTop.y = offset.y;
- //   m_uBoundsBottom.x = m_uBoundsTop.x + uWidth;
- //   m_uBoundsBottom.y = m_uBoundsTop.y + uHeight;
-
- //   // store selection rectangle position and size
-	//m_uSelRect = GetBounds();
-
+    //color
+    if (m_pStyle)
+        m_color = m_pStyle->get_color();
 }
 
 //---------------------------------------------------------------------------------------
 void GmoShapeText::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
 {
-//    pDrawer->set_font(*m_pFont);
-//    pDrawer->set_text_color(color);
-    pDrawer->draw_text(m_xPos + origin.x, m_yPos + origin.y, m_text);
+    select_font();
+    pDrawer->set_text_color( m_pStyle->get_color() );
+    LUnits x = m_origin.x + origin.x;
+    LUnits y = m_origin.y + origin.y + m_size.height;     //reference is at text bottom 
+    pDrawer->draw_text(x, y, m_text);
 
     //std::string str("¿This? is a test: Ñ € & abc. Ruso:Текст на кирилица");
     //pDrawer->draw_text(m_xPos + origin.x, m_yPos + origin.y, str);
 
-//    GmoSimpleShape::Render(pPaper, color);
+    GmoSimpleShape::on_draw(pDrawer, opt, origin);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeText::select_font()
+{
+    //FIXME: is no style, must use score default style
+    TextMeter meter(m_libraryScope);
+    if (!m_pStyle)
+        meter.select_font("Times New Roman", 18.0);
+    else
+        meter.select_font(m_pStyle->get_font_name(),
+                          m_pStyle->get_font_size(),
+                          m_pStyle->is_bold(),
+                          m_pStyle->is_italic() );
 }
 
 ////---------------------------------------------------------------------------------------

@@ -28,64 +28,12 @@
 #include "lomse_visitor.h"
 #include "lomse_tree.h"
 #include "lomse_basic.h"
+#include "lomse_score_enums.h"
 
 using namespace std;
 
 namespace lomse
 {
-
-
-// enums for common values: aligment, justification, placement, etc.
-//---------------------------------------------------------------------------------------
-
-//line styles
-enum ELineStyle { k_line_none=0, k_line_solid, k_line_long_dash,
-                  k_line_short_dash, k_line_dot, k_line_dot_dash, };
-
-//line termination styles
-enum ELineCap { k_cap_none = 0, k_cap_arrowhead, k_cap_arrowtail,
-                k_cap_circle, k_cap_square, k_cap_diamond, };
-
-//line edges
-enum ELineEdge {
-    k_edge_normal = 0,        // edge is perpendicular to line
-    k_edge_vertical,          // edge is always a vertical line
-    k_edge_horizontal         // edge is always a horizontal line
-};
-
-//---------------------------------------------------------------------------------------
-//EVAlign is used to indicate vertical alignment within a block: to the top,
-//middle or bottom
-enum EVAlign
-{
-    k_valign_default = 0,   //alignment is not specified
-    k_valign_top,
-    k_valign_middle,
-    k_valign_bottom,
-};
-
-//---------------------------------------------------------------------------------------
-// EHAlign is used to indicate object justification
-enum EHAlign
-{
-    k_halign_default = 0,   //alignment is not specified
-    k_halign_left,          //object aligned on left side
-    k_halign_right,         //object aligned on right side
-    k_halign_justify,       //object justified on both sides
-    k_halign_center,        //object centered
-};
-
-//---------------------------------------------------------------------------------------
-// EPlacement indicates whether something is above or below another element,
-// such as a note or a notation.
-enum EPlacement
-{
-    k_placement_default = 0,
-    k_placement_above,
-    k_placement_below
-};
-
-
 
 //---------------------------------------------------------------------------------------
 //forward declarations
@@ -511,9 +459,9 @@ public:
 
 
 
-//===================================================
+//=======================================================================================
 // Simple objects: Info and Dto
-//===================================================
+//=======================================================================================
 
 //---------------------------------------------------------------------------------------
 class ImoBeamInfo : public ImoSimpleObj
@@ -799,7 +747,7 @@ class ImoFontInfo : public ImoSimpleObj
 {
 public:
     string name;
-    int size;         // in points
+    float size;       // in points
     int style;        // k_normal, k_italic
     int weight;       // k_normal, k_bold
 
@@ -825,7 +773,7 @@ public:
     inline string& get_text() { return m_text; }
     inline ImoTextStyleInfo* get_style() { return m_pStyle; }
     const std::string& get_font_name();
-    int get_font_size();
+    float get_font_size();
     int get_font_style();
     int get_font_weight();
     Color get_color();
@@ -1201,14 +1149,15 @@ public:
 
     //getters
     inline int get_num_staves() { return static_cast<int>(m_staves.size()); }
-    inline const std::string& get_name() { return m_name.get_text(); }
-    inline const std::string& get_abbrev() { return m_abbrev.get_text(); }
+    inline ImoScoreText& get_name() { return m_name; }
+    inline ImoScoreText& get_abbrev() { return m_abbrev; }
     inline int get_instrument() { return m_midi.get_instrument(); }
     inline int get_channel() { return m_midi.get_channel(); }
     ImoMusicData* get_musicdata();
     inline bool is_in_group() { return m_pGroup != NULL; }
     inline ImoInstrGroup* get_group() { return m_pGroup; }
     ImoStaffInfo* get_staff(int iStaff);
+    LUnits get_line_spacing_for_staff(int iStaff); 
 
     //setters
     void add_staff();
@@ -1216,6 +1165,11 @@ public:
     void set_abbrev(ImoScoreText* pText);
     void set_midi_info(ImoMidiInfo* pInfo);
     inline void set_in_group(ImoInstrGroup* pGroup) { m_pGroup = pGroup; }
+
+    //info
+    inline bool has_name() { return m_name.get_text() != ""; }
+    inline bool has_abbrev() { return m_abbrev.get_text() != ""; }
+
 
 protected:
 
@@ -1452,15 +1406,17 @@ public:
     //getters
     inline const std::string& get_name() { return m_name; }
     inline const std::string& get_font_name() { return m_fontInfo.name; }
-    inline int get_font_size() { return m_fontInfo.size; }
+    inline float get_font_size() { return m_fontInfo.size; }
     inline int get_font_style() { return m_fontInfo.style; }
     inline int get_font_weight() { return m_fontInfo.weight; }
     inline Color get_color() { return m_color; }
+    inline bool is_bold() { return get_font_weight() == ImoFontInfo::k_bold; }
+    inline bool is_italic() { return get_font_style() == ImoFontInfo::k_italic; }
 
     //setters
     inline void set_name (const std::string& value) { m_name = value; }
     inline void set_font_name(const std::string& value) { m_fontInfo.name = value; }
-    inline void set_font_size(int points) { m_fontInfo.size = points; }
+    inline void set_font_size(float points) { m_fontInfo.size = points; }
     inline void set_font_style(int value) { m_fontInfo.style = value; }
     inline void set_font_weight(int value) { m_fontInfo.weight = value; }
     inline void set_color(Color value) { m_color = value; }
@@ -1534,6 +1490,9 @@ public:
     void add_option(ImoOptionInfo* pOpt);
     bool has_options();
     ImoOptionInfo* get_option(const std::string& name);
+    void set_float_option(const std::string& name, float value);
+    void set_bool_option(const std::string& name, bool value);
+    void set_long_option(const std::string& name, long value);
 
     //score layout
     void add_sytem_info(ImoSystemInfo* pSL);
@@ -1556,6 +1515,7 @@ protected:
     void delete_text_styles();
     ImoTextStyleInfo* create_default_style();
     void set_defaults_for_system_info();
+    void set_defaults_for_options();
 
 };
 

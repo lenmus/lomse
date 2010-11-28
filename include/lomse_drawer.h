@@ -119,6 +119,7 @@ class Drawer
 protected:
     LibraryScope& m_libraryScope;
     FontStorage* m_pFonts;
+    Color m_textColor;
 
 public:
     Drawer(LibraryScope& libraryScope);
@@ -167,18 +168,30 @@ public:
     // not the same but similar to SVG path command 
     virtual void add_path(VertexSource& vs, unsigned path_id = 0, bool solid_path = true) = 0;
     
+    // current font
+    virtual bool select_font(const std::string& fontName, double height,
+                             bool fBold=false, bool fItalic=false) = 0;
+    virtual bool select_raster_font(const std::string& fontName, double height,
+                                    bool fBold=false, bool fItalic=false) = 0;
+    virtual bool select_vector_font(const std::string& fontName, double height,
+                                    bool fBold=false, bool fItalic=false) = 0;
+
+    // text attributes
+    virtual void set_text_color(Color color);
+
     // text rederization
     virtual int draw_text(double x, double y, const std::string& str) = 0;
+    virtual void draw_glyph(double x, double y, unsigned int ch) = 0;
 
     // Attribute setting functions.
-    virtual void fill(const rgba8& f) = 0;
-    virtual void stroke(const rgba8& s) = 0;
+    virtual void fill(Color color) = 0;
+    virtual void stroke(Color color) = 0;
     virtual void even_odd(bool flag) = 0;
     virtual void stroke_width(double w) = 0;
     virtual void fill_none() = 0;
     virtual void stroke_none() = 0;
-    virtual void fill_opacity(double op) = 0;
-    virtual void stroke_opacity(double op) = 0;
+    virtual void fill_opacity(unsigned op) = 0;
+    virtual void stroke_opacity(unsigned op) = 0;
     virtual void line_join(line_join_e join) = 0;
     virtual void line_cap(line_cap_e cap) = 0;
     virtual void miter_limit(double ml) = 0;
@@ -187,11 +200,10 @@ public:
 
     // settings
     //-----------------------
-    //inline void reset(RenderingBuffer& buf) { m_renderer.initialize(buf); }
-    //inline void set_viewport(Pixels x, Pixels y) { m_renderer.set_viewport(x, y); }
-    //inline void set_scale(double scale) { m_renderer.set_scale(scale); }
+    virtual void set_shift(LUnits x, LUnits y) = 0;
     virtual void render(bool fillColor)= 0;
-    //void render(FontRasterizer& ras, FontScanline& sl);
+
+
 
 
 };

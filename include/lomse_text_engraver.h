@@ -22,29 +22,32 @@
 #define __LOMSE_TEXT_ENGRAVER_H__
 
 #include "lomse_basic.h"
-//#include <sstream>
-//using namespace std;
+#include "lomse_injectors.h"
 
 namespace lomse
 {
 
 //forward declarations
 class ImoScoreText;
-//class GmoBox;
-//class GmoBoxSystem;
+class FontStorage;
+class ImoScore;
+class GmoBox;
 
 //---------------------------------------------------------------------------------------
 class TextEngraver
 {
 protected:
-    ImoScoreText* m_pText;
+    ImoScoreText& m_text;
+    ImoScore* m_pScore;
+    FontStorage* m_pFontStorage;
+    LibraryScope& m_libraryScope;
 
 public:
-    TextEngraver(ImoScoreText* pText);
+    TextEngraver(LibraryScope& libraryScope, ImoScoreText& text, ImoScore* pScore);
     ~TextEngraver();
 
-
-protected:
+    LUnits measure_width();
+    void add_shape(GmoBox* pBox, LUnits xLeft, LUnits yTop, int valign);
 
 };
 

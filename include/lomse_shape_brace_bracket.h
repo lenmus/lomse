@@ -56,7 +56,7 @@ public:
 
 
 protected:
-    GmoShapeBracketBrace(GmoBox* owner, int type);
+    GmoShapeBracketBrace(GmoBox* owner, int type, Color color);
     virtual void set_affine_transform() = 0;
 
 };
@@ -66,7 +66,7 @@ class GmoShapeBracket : public GmoShapeBracketBrace
 {
 public:
     GmoShapeBracket(GmoBox* owner, LUnits xLeft, LUnits yTop,
-                 LUnits xRight, LUnits yBottom);   //, wxColour color = *wxBLACK);
+                 LUnits xRight, LUnits yBottom, Color color);
 	~GmoShapeBracket();
 
     //VertexSource
@@ -87,7 +87,7 @@ protected:
 
 public:
     GmoShapeBrace(GmoBox* owner, LUnits xLeft, LUnits yTop, LUnits xRight,
-               LUnits yBottom, LUnits dyHook);    //, wxColour color = *wxBLACK);
+               LUnits yBottom, LUnits dyHook, Color color);
 	~GmoShapeBrace();
 
     //VertexSource

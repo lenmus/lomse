@@ -56,12 +56,13 @@ FontStorage::FontStorage()
     //if I finally use FreeType for all fonts.
 
     //font settings
+    m_fontEngine.resolution(96);    //96 dpi
     m_fontEngine.gamma(agg::gamma_none());
     m_fontEngine.hinting(m_fHinting);
     m_fontEngine.flip_y(m_fFlip_y);
 
-    //load a default font
-    set_font("lmbasic2.ttf", 24.0); //timesi.ttf", 18.0);
+    //load music font
+    set_font("lmbasic2.ttf", 24.0);
 }
 
 //---------------------------------------------------------------------------------------
@@ -70,11 +71,12 @@ FontStorage::~FontStorage()
 }
 
 //---------------------------------------------------------------------------------------
-bool FontStorage::set_font(const char* fontFullName, double height, EFontCacheType type)
+bool FontStorage::set_font(const std::string& fontFullName, double height,
+                           EFontCacheType type)
 {
     m_fValidFont = false;
-    agg::glyph_rendering gren = agg::glyph_ren_agg_gray8;
-    if(! m_fontEngine.load_font(fontFullName, 0, gren))
+    lomse::glyph_rendering gren = lomse::glyph_ren_agg_gray8;
+    if(! m_fontEngine.select_font(fontFullName, 0, gren))
         return !m_fValidFont;    //error
 
     //set curren values for renderization
@@ -113,6 +115,33 @@ void FontStorage::set_font_width(double rPoints)
 {
     m_fontWidth = rPoints;
     m_fontEngine.width(rPoints);
+}
+
+//---------------------------------------------------------------------------------------
+bool FontStorage::select_font(const std::string& fontName, double height,
+                               bool fBold, bool fItalic)
+{
+    return select_raster_font(fontName, height, fBold, fItalic);
+}
+
+//---------------------------------------------------------------------------------------
+bool FontStorage::select_raster_font(const std::string& fontName, double height,
+                                      bool fBold, bool fItalic)
+{
+    //Returns true if any error
+    FontSelector fs;
+    string fontFile = fs.find_font(fontName, fBold, fItalic);
+    return set_font(fontFile, height, k_raster_font_cache);
+}
+
+//---------------------------------------------------------------------------------------
+bool FontStorage::select_vector_font(const std::string& fontName, double height,
+                                      bool fBold, bool fItalic)
+{
+    //Returns true if any error
+    FontSelector fs;
+    string fontFile = fs.find_font(fontName, fBold, fItalic);
+    return set_font(fontFile, height, k_vector_font_cache);
 }
 
 ////---------------------------------------------------------------------------------------
@@ -157,6 +186,40 @@ void FontStorage::set_font_width(double rPoints)
 //    }
 //    return num_glyphs;
 //}
+
+
+
+//---------------------------------------------------------------------------------------
+// FontSelector implementation
+//---------------------------------------------------------------------------------------
+std::string FontSelector::find_font(const std::string& name, bool fBold, bool fItalic)
+{
+    //TODO: this is platform specific. Should be moved there, as it MUST return
+    //not only font filename but also its full path.
+
+    //Code just for being able to continue development
+    if (name == "Times New Roman")
+    {
+        if (fItalic && fBold)
+            return "timesbi.ttf";
+        else if (fItalic)
+            return "timesi.ttf";
+        else if (fBold)
+            return "timesbd.ttf";
+        else
+            return "times.ttf";
+    }
+
+    else if (name == "LenMus basic")
+        return "lmbasic2.ttf";
+
+    else if (name == "Arial")
+        return "arial.ttf";
+
+    else
+        return "times.ttf";
+}
+
 
 
 }   //namespace lomse

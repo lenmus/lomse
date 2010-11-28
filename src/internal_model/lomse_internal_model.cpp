@@ -631,7 +631,6 @@ ImoGoBackFwd::ImoGoBackFwd(DtoGoBackFwd& dto)
 //---------------------------------------------------------------------------------------
 // ImoInstrument implementation
 //---------------------------------------------------------------------------------------
-
 ImoInstrument::ImoInstrument()
     : ImoContainerObj(ImoObj::k_instrument)
     , m_name("")
@@ -695,6 +694,11 @@ ImoStaffInfo* ImoInstrument::get_staff(int iStaff)
     return *it;
 }
 
+//---------------------------------------------------------------------------------------
+LUnits ImoInstrument::get_line_spacing_for_staff(int iStaff)
+{ 
+    return get_staff(iStaff)->get_line_spacing(); 
+}
 
 //---------------------------------------------------------------------------------------
 // ImoInstrGroup implementation
@@ -819,6 +823,63 @@ ImoMidiInfo::ImoMidiInfo(ImoMidiInfo& dto)
 // ImoScore implementation
 //---------------------------------------------------------------------------------------
 
+//tables with default values for options
+typedef struct 
+{
+    string  sOptName;
+    bool    fBoolValue;
+}
+BoolOption;
+
+typedef struct
+{
+    string  sOptName;
+    string  sStringValue;
+}
+StringOption;
+
+typedef struct
+{
+    string  sOptName;
+    float   rFloatValue;
+}
+FloatOption;
+
+typedef struct
+{
+    string  sOptName;
+    long    nLongValue;
+}
+LongOption;
+
+static BoolOption m_BoolOptions[] =
+{
+    {"Score.FillPageWithEmptyStaves", false },
+    {"StaffLines.StopAtFinalBarline", true },
+    {"Score.JustifyFinalBarline", false },
+    {"StaffLines.Hide", false },
+    {"Staff.DrawLeftBarline", true },
+};
+
+//static StringOption m_StringOptions[] = {};
+
+static FloatOption m_FloatOptions[] =
+{
+    {"Render.SpacingFactor", 0.547f },
+        // Note spacing is proportional to duration.
+        // As the duration of quarter note is 64 (duration units), I am
+        // going to map it to 35 tenths. This gives a conversion factor
+        // of 35/64 = 0.547
+};
+
+static LongOption m_LongOptions[] =
+{
+    {"Staff.UpperLegerLines.Displacement", 0L },
+    {"Render.SpacingMethod", long(k_spacing_proportional) },
+    {"Render.SpacingValue", 15L },       // 15 tenths (1.5 lines)
+};
+
+
 ImoScore::ImoScore()
     : ImoContainerObj(ImoObj::k_score)
     , m_version("")
@@ -830,6 +891,14 @@ ImoScore::ImoScore()
     append_child( new ImoInstruments() );
     append_child( new ImoOptions() );
     set_defaults_for_system_info();
+    set_defaults_for_options();
+}
+
+//---------------------------------------------------------------------------------------
+ImoScore::~ImoScore()
+{
+    delete_staffobjs_collection();
+    delete_text_styles();
 }
 
 //---------------------------------------------------------------------------------------
@@ -845,10 +914,34 @@ void ImoScore::set_defaults_for_system_info()
 }
 
 //---------------------------------------------------------------------------------------
-ImoScore::~ImoScore()
+void ImoScore::set_defaults_for_options()
 {
-    delete_staffobjs_collection();
-    delete_text_styles();
+    //bool
+    for (int i=0; i < sizeof(m_BoolOptions)/sizeof(BoolOption); i++)
+    {
+        ImoOptionInfo* pOpt = new ImoOptionInfo(m_BoolOptions[i].sOptName);
+        pOpt->set_type(ImoOptionInfo::k_boolean);
+        pOpt->set_bool_value( m_BoolOptions[i].fBoolValue );
+        add_option(pOpt);
+    }
+
+    //long
+    for (int i=0; i < sizeof(m_LongOptions)/sizeof(LongOption); i++)
+    {
+        ImoOptionInfo* pOpt = new ImoOptionInfo(m_LongOptions[i].sOptName);
+        pOpt->set_type(ImoOptionInfo::k_number_long);
+        pOpt->set_long_value( m_LongOptions[i].nLongValue );
+        add_option(pOpt);
+    }
+
+    //double
+    for (int i=0; i < sizeof(m_FloatOptions)/sizeof(FloatOption); i++)
+    {
+        ImoOptionInfo* pOpt = new ImoOptionInfo(m_FloatOptions[i].sOptName);
+        pOpt->set_type(ImoOptionInfo::k_number_float);
+        pOpt->set_float_value( m_FloatOptions[i].rFloatValue );
+        add_option(pOpt);
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -866,6 +959,57 @@ void ImoScore::delete_text_styles()
         delete it->second;
 
     m_nameToStyle.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void ImoScore::set_float_option(const std::string& name, float value)
+{
+     ImoOptionInfo* pOpt = get_option(name);
+     if (pOpt)
+     {
+         pOpt->set_float_value(value);
+     }
+     else
+     {
+        pOpt = new ImoOptionInfo(name);
+        pOpt->set_type(ImoOptionInfo::k_number_float);
+        pOpt->set_float_value(value);
+        add_option(pOpt);
+     }
+}
+
+//---------------------------------------------------------------------------------------
+void ImoScore::set_bool_option(const std::string& name, bool value)
+{
+     ImoOptionInfo* pOpt = get_option(name);
+     if (pOpt)
+     {
+         pOpt->set_bool_value(value);
+     }
+     else
+     {
+        pOpt = new ImoOptionInfo(name);
+        pOpt->set_type(ImoOptionInfo::k_boolean);
+        pOpt->set_bool_value(value);
+        add_option(pOpt);
+     }
+}
+
+//---------------------------------------------------------------------------------------
+void ImoScore::set_long_option(const std::string& name, long value)
+{
+     ImoOptionInfo* pOpt = get_option(name);
+     if (pOpt)
+     {
+         pOpt->set_long_value(value);
+     }
+     else
+     {
+        pOpt = new ImoOptionInfo(name);
+        pOpt->set_type(ImoOptionInfo::k_number_long);
+        pOpt->set_long_value(value);
+        add_option(pOpt);
+     }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1006,7 +1150,7 @@ ImoTextStyleInfo* ImoScore::create_default_style()
 	pStyle->set_name("Default style");
     pStyle->set_color( Color(0,0,0,255) );
     pStyle->set_font_name("Times New Roman");
-    pStyle->set_font_size(10);
+    pStyle->set_font_size(10.0f);
     pStyle->set_font_style(ImoFontInfo::k_normal);
     pStyle->set_font_weight(ImoFontInfo::k_normal);
     m_nameToStyle["Default style"] = pStyle;
@@ -1020,7 +1164,7 @@ ImoTextStyleInfo* ImoScore::create_default_style()
 
 ImoPageInfo::ImoPageInfo()
     : ImoSimpleObj(ImoObj::k_page_info)
-    , m_uLeftMargin(2000.0f)
+    , m_uLeftMargin(1500.0f)
     , m_uRightMargin(1500.0f)
     , m_uTopMargin(2000.0f)
     , m_uBottomMargin(2000.0f)
@@ -1090,8 +1234,7 @@ const std::string& ImoTextInfo::get_font_name()
 }
 
 //---------------------------------------------------------------------------------------
-int ImoTextInfo::get_font_size()
-
+float ImoTextInfo::get_font_size()
 {
     return m_pStyle->get_font_size();
 }

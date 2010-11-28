@@ -40,9 +40,10 @@ namespace lomse
 // ScoreLayouter implementation
 //---------------------------------------------------------------------------------------
 
-ScoreLayouter::ScoreLayouter(ImoDocObj* pImo, GraphicModel* pGModel, TextMeter* pMeter)
+ScoreLayouter::ScoreLayouter(ImoDocObj* pImo, GraphicModel* pGModel,
+                             LibraryScope& libraryScope)
     : ContentLayouter(pImo, pGModel)
-    , m_pTextMeter(pMeter)
+    , m_libraryScope(libraryScope)
     , m_scoreIt( get_imo_score()->get_staffobjs_table() )
 //    , m_pSysCursor((SystemCursor*)NULL)
     , m_pStubScore(NULL)
@@ -72,10 +73,9 @@ void ScoreLayouter::prepare_to_start_layout()
 
     create_stub_for_score();
     create_instrument_engravers();
- //   GetScoreRenderizationOptions();
+    get_score_renderization_options();
  //   PrepareFontsThatMatchesStavesSizes();
     decide_systems_indentation();
- //   DecideSpaceBeforeProlog();
 
 	m_nCurrentPageNumber = 0;
     m_nCurSystem = 0;
@@ -97,7 +97,7 @@ void ScoreLayouter::create_instrument_engravers()
     for (int iInstr = 0; iInstr < pScore->get_num_instruments(); iInstr++)
     {
         ImoInstrument* pInstr = pScore->get_instrument(iInstr);
-        m_instrEngravers.push_back( new InstrumentEngraver(pInstr, m_pTextMeter) );
+        m_instrEngravers.push_back( new InstrumentEngraver(pInstr, pScore, m_libraryScope) );
     }
 }
 
@@ -108,6 +108,27 @@ void ScoreLayouter::delete_instrument_layouters()
     for (it = m_instrEngravers.begin(); it != m_instrEngravers.end(); ++it)
         delete *it;
     m_instrEngravers.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreLayouter::get_score_renderization_options()
+{
+    ImoScore* pScore = get_imo_score();
+
+    ImoOptionInfo* pOpt = pScore->get_option("StaffLines.StopAtFinalBarline");
+    m_fStopStaffLinesAtFinalBarline = pOpt->get_bool_value();
+
+    pOpt = pScore->get_option("Score.JustifyFinalBarline");
+    m_fJustifyFinalBarline = pOpt->get_bool_value();
+
+    pOpt = pScore->get_option("Render.SpacingFactor");
+    m_rSpacingFactor = pOpt->get_float_value();
+
+    pOpt = pScore->get_option("Render.SpacingMethod");
+    m_nSpacingMethod = static_cast<ESpacingMethod>( pOpt->get_long_value() );
+
+    pOpt = pScore->get_option("Render.SpacingValue");
+    m_nSpacingValue = static_cast<Tenths>( pOpt->get_long_value() );
 }
 
 //---------------------------------------------------------------------------------------
@@ -189,7 +210,7 @@ void ScoreLayouter::add_next_system()
     fill_current_system_with_columns();
     justify_current_system();
 
-    if (!more_systems_to_add())  // && m_fStopStaffLinesAtFinalBarline)
+    if (!more_systems_to_add() && m_fStopStaffLinesAtFinalBarline)
         truncate_current_system();
     //AddInitialLineJoiningAllStavesInSystem();
     //UpdateBoxSlicesSizes();
@@ -258,26 +279,23 @@ void ScoreLayouter::move_cursor_after_headers()
 void ScoreLayouter::create_system_layouter()
 {
     m_sysLayouters.push_back(
-        new SystemLayouter() );   //m_rSpacingFactor, m_nSpacingMethod, m_nSpacingValue) );
+        new SystemLayouter(m_rSpacingFactor, m_nSpacingMethod, m_nSpacingValue) );
 }
 
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::create_system_box()
 {
-    //m_nColumnsInSystem = 0;
+    m_nColumnsInSystem = 0;
 
     //create system box
     m_pCurBoxSystem = m_pCurBoxPage->add_system(m_nCurSystem++);
     //m_pCurBoxSystem->SetFirstMeasure(m_nAbsColumn);
 
-    //set origin
     m_pCurBoxSystem->set_origin(m_pageCursor.x, m_pageCursor.y);
 
-    //left margin
-    LUnits left = 500.0f; //pScore->get_system_left_space(iSystem);
+    LUnits left = 0.0f; //TODO-LOG: pScore->get_system_left_space(iSystem);
     m_pCurBoxSystem->set_left_margin(left);
 
-    //width
     m_pCurBoxSystem->set_width( m_pCurBoxPage->get_width() );
 
     //move x cursor to system left marging
@@ -319,8 +337,8 @@ void ScoreLayouter::fill_current_system_with_columns()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::justify_current_system()
 {
-    //ComputeMeasuresSizesToJustifyCurrentSystem(fThisIsLastSystem);
-    //RepositionStaffObjs();
+    compute_bar_sizes_to_justify_current_system();  //fThisIsLastSystem);
+    reposition_staffobjs();
 }
 
 //---------------------------------------------------------------------------------------
@@ -345,19 +363,9 @@ void ScoreLayouter::create_column_and_add_it_to_current_system()
     collect_content_for_this_bar();
     measure_this_bar();
 
-//    //if this is the first column compute the space available in
-//    //this system. The method is a little tricky. The total space available
-//    //is (pScore->GetPageRightMargin() - pScore->GetCursorX()). But we have
-//    //to take into account the space that will be used by the prolog. As the
-//    //left position of the first column has taken all this into account,
-//    //it is posible to use that value by just doing:
-//    if (is_first_column_in_system())
-//    {
-//        m_uFreeSpace = m_pScore->GetRightMarginXPos()
-//                       - m_pScore->GetSystemLeftSpace(m_nCurSystem - 1)
-//                       - m_sysLayouters[m_nCurSystem-1]->GetStartPositionForColumn(m_nRelColumn);
-//    }
-//
+    if (is_first_column_in_system())
+        m_uFreeSpace = get_available_space_in_system();
+
 //    //check if there is enough space to add this column to current system
 //    if(m_uFreeSpace < m_sysLayouters[m_nCurSystem-1]->GetMinimumSize(m_nRelColumn))
 //	{
@@ -384,10 +392,27 @@ void ScoreLayouter::create_column_and_add_it_to_current_system()
 //            return true;    //terminate system
 //    }
 //    else
-//    {
-//        //there is enough space for this column. Add it to system
+    {
+        //there is enough space for this column. Add it to system
         add_column_to_system();
-//    }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+LUnits ScoreLayouter::get_available_space_in_system()
+{
+    //if this is the first column compute the space available in
+    //this system. The method is a little tricky. The total space available
+    //is (pScore->GetPageRightMargin() - pScore->GetCursorX()). But we have
+    //to take into account the space that will be used by the prolog. As the
+    //left position of the first column has taken all this into account,
+    //it is posible to use that value by just doing:
+
+    //ImoScore* pScore = get_imo_score();
+    //return pScore->GetRightMarginXPos()
+//                       - m_pScore->GetSystemLeftSpace(m_nCurSystem - 1)
+//                       - m_sysLayouters[m_nCurSystem-1]->get_start_position_for_column(m_nRelColumn);
+    return 16000.0f;
 }
 
 //---------------------------------------------------------------------------------------
@@ -444,10 +469,10 @@ void ScoreLayouter::measure_this_bar()
 //    //all measures in column number m_nAbsColumn have been sized. The information is stored in
 //    //object SystemLayouter. Now proced to re-position the StaffObjs so that all StaffObjs
 //    //sounding at the same time will have the same x coordinate.
-//    bool fTrace =  m_fDebugMode && (m_nTraceMeasure == 0  || m_nTraceMeasure == m_nAbsColumn);
-//
-//    m_sysLayouters[m_nCurSystem-1]->EndOfSystemMeasurements();
-//    m_sysLayouters[m_nCurSystem-1]->DoColumnSpacing(m_nRelColumn, fTrace);
+    bool fTrace = false;    //m_fDebugMode && (m_nTraceMeasure == 0  || m_nTraceMeasure == m_nAbsColumn);
+
+    m_sysLayouters[m_nCurSystem-1]->end_of_system_measurements();
+    m_sysLayouters[m_nCurSystem-1]->do_column_spacing(m_nRelColumn, fTrace);
 }
 
 //---------------------------------------------------------------------------------------
@@ -501,7 +526,9 @@ void ScoreLayouter::add_staff_lines_name_and_bracket(int iInstr, LUnits uTopMarg
     engraver->add_staff_lines(m_pCurBoxSystem, m_pageCursor.x, m_pageCursor.y, indent);
     engraver->add_name_abbrev(m_pCurBSI, m_nCurSystem);
     engraver->add_brace_bracket(m_pCurBSI);
-    m_pageCursor.y = engraver->get_staff_bottom();
+
+    m_pageCursor.x += indent;
+    m_pageCursor.y = engraver->get_staves_bottom();
 }
 
 //---------------------------------------------------------------------------------------
@@ -545,63 +572,33 @@ void ScoreLayouter::truncate_current_system()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::collect_content_for_this_bar()  //ImoInstrument* pInstr, int iInstr)
 {
-//    // Compute the width of the current measure (or remaining part of it) of the lmVStaff
-//    // Input variables:
-//    //   pVStaff - lmVStaff to process
-//	//   nInstr - instrument number 0..n
-//    //   m_pSysCursor is pointing to current position
-//    //   m_nRelColumn and m_nAbsColumn have the relative and absolute numbers for current
-//    //      column beign measured
-//    //   flag is_first_column_in_system() signals if this is the first column of current system
-//    //
-//    // Results:
-//    //   all measurements are stored in SystemLayouter
-//    //   Return bool: true if newSystem tag found in this measure
-//
-//    //add some space at start of measure, if necessary
-    LUnits uSpaceAfterStart = 0.0f;
-//    if (is_first_column_in_system())
-//    {
-//        //if first measure of system, add some space before prolog
-//        uSpaceAfterStart = m_uSpaceBeforeProlog;
-//    }
-//    else
-//    {
-//        //Not first measure of system. Get the previous barline and add some space if
-//        //the previous barline is visible.
-//        ImoBarline* pBar = m_pSysCursor->GetPreviousBarline(nInstr);
-//        if (pBar)
-//        {
-//            if (pBar->IsVisible())
-//                uSpaceAfterStart = pVStaff->TenthsToLogical(20.0f);    // TODO: user options
-//        }
-//    }
-//
-//    //ask system formatter to prepare to receive data for this instrument objects in this column
-    LUnits uxStart = m_pageCursor.x;
+    LUnits uInitialSpace = determine_initial_space();
 
+    //ask system formatter to prepare to receive data for this instrument objects in this column
+    LUnits uxStart = m_pageCursor.x;
     SystemLayouter* pSysLayouter = m_sysLayouters[m_nCurSystem-1];
-    pSysLayouter->start_bar_measurements(m_nRelColumn, uxStart, uSpaceAfterStart);
-//
-//    //The prolog (clef and key signature) must be rendered on each system, but the
-//    //matching StaffObjs only exist in the first system. In the first system the prolog
-//	//is rendered as part as the normal StaffObj rendering process, so there is nothig
-//	//special to do to render the prolog. But for the other systems we must force the
-//	//rendering of the prolog because there are no StaffObjs representing the prolog.
-    bool fProlog = (is_first_column_in_system());        //fProlog -> we are adding prolog objects
-//    if (m_nAbsColumn != 1 && is_first_column_in_system())
+    pSysLayouter->start_bar_measurements(m_nRelColumn, uxStart, uInitialSpace);
+
+    //The prolog (clef and key signature) must be rendered on each system, but the
+    //matching StaffObjs only exist in the first system. In the first system the prolog
+	//is rendered as part as the normal StaffObj rendering process, so there is nothig
+	//special to do to render the prolog. But for the other systems we must force the
+	//rendering of the prolog because there are no StaffObjs representing the prolog.
+    bool fProlog = is_first_column_in_system();        //fProlog -> we are adding prolog objects
+//    if (m_nAbsColumn != 1 && fProlog)
 //	{
 //		AddProlog(m_pCurBSI, false, pVStaff, nInstr);
 //        fProlog = false;                    //prolog added
 //	}
 
     //Pre-allocate common engravers
-    ClefEngraver clefEngrv;
+    ClefEngraver clefEngrv(m_libraryScope);
 
 
-//    //loop to process all StaffObjs in this measure
+    //loop to process all StaffObjs in this measure
     bool fNewSystemTagFound = false;                //newSystem tag found
     ImoStaffObj* pSO = NULL;
+    ImoScore* pScore = get_imo_score();
     //ScoreIterator sit = m_pSysCursor->get_iterator(iInstr);
 ////    m_scoreIt.ResetFlags();
     while(!m_scoreIt.is_end() )   //&& !m_scoreIt.change_of_measure())
@@ -609,8 +606,12 @@ void ScoreLayouter::collect_content_for_this_bar()  //ImoInstrument* pInstr, int
         pSO = dynamic_cast<ImoStaffObj*>( (*m_scoreIt)->imo_object() );
         int iInstr = (*m_scoreIt)->num_instrument();
         int iStaff = (*m_scoreIt)->staff();
-        LUnits lineSpacing = get_line_spacing(iInstr, iStaff);
-//
+        ImoInstrument* pInstr = pScore->get_instrument(iInstr);
+        m_pageCursor.y = m_instrEngravers[iInstr]->get_top_of_staff(iStaff);
+        LUnits lineSpacing = pInstr->get_line_spacing_for_staff(iStaff);
+        int iLine = (*m_scoreIt)->line();
+        float rTime = (*m_scoreIt)->time();
+
 //        if (pSO->IsBarline() || IsHigherTime(pSO->GetTimePos(), m_pSysCursor->GetBreakTime()) )
 //        {
 //             break;         //End of measure: exit loop.
@@ -633,13 +634,11 @@ void ScoreLayouter::collect_content_for_this_bar()  //ImoInstrument* pInstr, int
         /*else*/ if (pSO->is_clef())
 		{
 			m_pageCursor.x = uxStart;
-			//pSO->Layout(m_pCurBSI, m_pPaper);
-			//GmoShape* pShape = pSO->GetShape();
             ImoClef* pClef = dynamic_cast<ImoClef*>(pSO);
             GmoShape* pShape = clefEngrv.create_shape(pClef, m_pCurBSI, m_pageCursor,
                                                       lineSpacing);
-            pSysLayouter->include_object(m_nRelColumn, iInstr, pSO, fProlog,
-                                         iStaff, pShape);
+            pSysLayouter->include_object(m_nRelColumn, iLine, iInstr, pInstr, pSO,
+                                         -1.0f, fProlog, iStaff, pShape);
 		}
 //        else if (pSO->IsKeySignature())
 //		{
@@ -659,10 +658,10 @@ void ScoreLayouter::collect_content_for_this_bar()  //ImoInstrument* pInstr, int
 //            fProlog = false;
 //
 //			//create this lmStaffObj shape and add to table
-//			m_pageCursor.x =uxStart);
+//			m_pageCursor.x =uxStart;
 //			pSO->Layout(m_pCurBSI, m_pPaper);
 //			GmoShape* pShape = pSO->GetShape();
-//            pSysLayouter->IncludeObject(m_nRelColumn, nInstr, pSO, pShape, fProlog);
+//            pSysLayouter->IncludeObject(m_nRelColumn, iLine, nInstr, pSO, pShape, fProlog);
         }
 
         ++m_scoreIt;
@@ -683,7 +682,7 @@ void ScoreLayouter::collect_content_for_this_bar()  //ImoInstrument* pInstr, int
 //    else
 //	{
 //        // no barline at the end of the measure.
-        pSysLayouter->terminate_bar_measurements_without_barline(m_nRelColumn, uxStart);
+        pSysLayouter->terminate_bar_measurements_without_barline(m_nRelColumn, uxStart, -1.0f);
 
 //        //force new system if a break point reached
 //        if (pSO && IsHigherTime(pSO->GetTimePos(), m_pSysCursor->GetBreakTime()))
@@ -694,25 +693,49 @@ void ScoreLayouter::collect_content_for_this_bar()  //ImoInstrument* pInstr, int
 }
 
 //---------------------------------------------------------------------------------------
+LUnits ScoreLayouter::determine_initial_space()
+{
+    //LUnits uInitialSpace = 0.0f;
+    //if (is_first_column_in_system())
+    //{
+    //    //TODO. Now a fixed value of 7.5 tenths is used. User options ?
+    //
+    //    Tenths rSpaceBeforeProlog = 7.5f;
+    //	ImoInstrument* pInstr = m_pScore->GetFirstInstrument();
+    //	lmVStaff* pVStaff = pInstr->GetVStaff();
+    //	uInitialSpace = pVStaff->TenthsToLogical(rSpaceBeforeProlog, 1);
+    //}
+    //else
+    //{
+    //    //Not first measure of system. Get the previous barline and add some space if
+    //    //the previous barline is visible.
+    //    ImoBarline* pBar = m_pSysCursor->GetPreviousBarline(nInstr);
+    //    if (pBar)
+    //    {
+    //        if (pBar->IsVisible())
+    //            uInitialSpace = pVStaff->TenthsToLogical(20.0f);    // TODO: user options
+    //    }
+    //}
+    //return uInitialSpace;
+   return 200.0f;
+}
+
+//---------------------------------------------------------------------------------------
 void ScoreLayouter::add_column_to_system()
 {
-//    //A column has been processed, it has been checked that there is enough space to include it
-//    //in current system and, finally, decided to include it. This method does whatever
-//    //is necessary to include the column and consolidate the situation.
-//
-//    //Add column to current system and discount the space that the measure will take
-//    m_uFreeSpace -= m_sysLayouters[m_nCurSystem-1]->GetMinimumSize(m_nRelColumn);
-//    m_nColumnsInSystem++;
-//    m_pSysCursor->CommitCursors();
+    //Add column to current system and discount the space that the measure will take
     add_shapes_for_score_objs();
+    m_uFreeSpace -= m_sysLayouters[m_nCurSystem-1]->get_minimum_size(m_nRelColumn);
+    m_nColumnsInSystem++;
+//    m_pSysCursor->CommitCursors();
 
 //
 //    //mark all objects in column as 'non dirty'
 //    m_sysLayouters[m_nCurSystem-1]->ClearDirtyFlags(m_nRelColumn);
-//
-//    //prepare to create a new column
-//    m_nRelColumn++;
-//    m_nAbsColumn++;
+
+    //prepare to create a new column
+    m_nRelColumn++;
+    m_nAbsColumn++;
 }
 
 //---------------------------------------------------------------------------------------
@@ -722,28 +745,44 @@ void ScoreLayouter::add_shapes_for_score_objs()
 }
 
 //---------------------------------------------------------------------------------------
-LUnits ScoreLayouter::get_line_spacing(int iInstr, int iStaff)
+void ScoreLayouter::reposition_staffobjs()
 {
-    ImoScore* pScore = get_imo_score();
-    ImoInstrument* pInstr = pScore->get_instrument(iInstr);
-    return pInstr->get_staff(iStaff)->get_line_spacing();
+    //SystemLayouter stores the final size that must have each column
+    //of this system. This method changes StaffObjs locations so that they are evenly
+    //distributed across the the bar.
+
+    if (!m_sysLayouters[m_nCurSystem-1]->has_content())
+        return;
+
+    LUnits uxStartOfMeasure = m_sysLayouters[m_nCurSystem-1]->get_start_position_for_column(0);
+    for (int i=0; i < m_nColumnsInSystem; i++)
+    {
+//        GmoBoxSlice* pBSlice = (GmoBoxSlice*)m_pCurBoxSystem->GetChildBox(i);
+        uxStartOfMeasure = m_sysLayouters[m_nCurSystem-1]->redistribute_space(i, uxStartOfMeasure);
+//        m_sysLayouters[m_nCurSystem-1]->AddTimeGridToBoxSlice(i, pBSlice);
+    }
 }
+
+//---------------------------------------------------------------------------------------
+void ScoreLayouter::compute_bar_sizes_to_justify_current_system()   //bool fThisIsLastSystem)
+{
+    //To compute_bar_sizes_to_justify_current_system divide up the remaining space
+    //between all bars, except if current system is the last one and flag
+    //"JustifyFinalBarline" is not set or there is no final barline.
+
+//    if (!fThisIsLastSystem || (fThisIsLastSystem && m_fJustifyFinalBarline))
+//        RedistributeFreeSpace(m_uFreeSpace, fThisIsLastSystem);
+}
+
+
+
+
 
 
 
 ////-----------------------------------------------------------------------------------------
 //// ScoreLayouter implementation OLD CODE TO REVIEW
 ////-----------------------------------------------------------------------------------------
-//
-//---------------------------------------------------------------------------------------
-//void ScoreLayouter::DeleteSystemLayouters()
-//{
-//    std::vector<SystemLayouter*>::iterator it;
-//    for (it=m_sysLayouters.begin(); it != m_sysLayouters.end(); ++it)
-//        delete *it;
-//    m_sysLayouters.clear();
-//
-//}
 //
 //---------------------------------------------------------------------------------------
 //void ScoreLayouter::SplitColumn(LUnits uAvailable)
@@ -835,11 +874,9 @@ LUnits ScoreLayouter::get_line_spacing(int iInstr, int iStaff)
 //---------------------------------------------------------------------------------------
 //void ScoreLayouter::RedistributeFreeSpace(LUnits uAvailable, bool fLastSystem)
 //{
-//    //Step 3: Justify measures (distribute remainnig space across all measures)
+//    //Step 3: Justify bars (distribute remainnig space across all bars in system)
 //    //-------------------------------------------------------------------------------
 //    //Redistributes the space to try to have all columns with equal witdh.
-//    //The system is not justified if this is the last system and there is no barline
-//    //in the last measure.
 //    //
 //    //on entering in this function:
 //    // - object SystemLayouter stores the minimum size for each column for
@@ -1051,51 +1088,6 @@ LUnits ScoreLayouter::get_line_spacing(int iInstr, int iStaff)
 //}
 //
 //---------------------------------------------------------------------------------------
-//void ScoreLayouter::RepositionStaffObjs()
-//{
-//    //SystemLayouter stores the final size that must have each column
-//    //of this system. This method changes StaffObjs locations so that they are evenly
-//    //distributed across the the bar.
-//
-//    //dbg ------------------------------------------------------------------------------
-//    if (m_fDebugMode) {
-//        wxLogMessage(_T("Before repositioning objects"));
-//        wxLogMessage(_T("***************************************\n"));
-//        wxLogMessage( m_pScore->Dump() );
-//    }
-//    //dbg ------------------------------------------------------------------------------
-//
-//    LUnits uxStartOfMeasure = m_sysLayouters[m_nCurSystem-1]->GetStartPositionForColumn(0);
-//    for (int i=0; i < m_nColumnsInSystem; i++)
-//    {
-//        GmoBoxSlice* pBSlice = (GmoBoxSlice*)m_pCurBoxSystem->GetChildBox(i);
-//        uxStartOfMeasure = m_sysLayouters[m_nCurSystem-1]->RedistributeSpace(i, uxStartOfMeasure);
-//        m_sysLayouters[m_nCurSystem-1]->AddTimeGridToBoxSlice(i, pBSlice);
-//    }
-//
-//    //dbg ------------------------------------------------------------------------------
-//    if (m_fDebugMode) {
-//        wxLogMessage(_T("After repositioning objects"));
-//        wxLogMessage(_T("***************************************\n"));
-//        wxLogMessage( m_pScore->Dump() );
-//    }
-//    //dbg ------------------------------------------------------------------------------
-//
-//}
-//
-//---------------------------------------------------------------------------------------
-//void ScoreLayouter::GetScoreRenderizationOptions()
-//{
-//    // get options for renderization
-//
-//    m_fStopStaffLinesAtFinalBarline = m_pScore->GetOptionBool(_T("StaffLines.StopAtFinalBarline"));
-//    m_fJustifyFinalBarline = m_pScore->GetOptionBool(_T("Score.JustifyFinalBarline"));
-//    m_rSpacingFactor = (float) m_pScore->GetOptionDouble(_T("Render.SpacingFactor"));
-//    m_nSpacingMethod = (ESpacingMethod) m_pScore->GetOptionLong(_T("Render.SpacingMethod"));
-//    m_nSpacingValue = (Tenths) m_pScore->GetOptionLong(_T("Render.SpacingValue"));
-//}
-//
-//---------------------------------------------------------------------------------------
 //void ScoreLayouter::PrepareFontsThatMatchesStavesSizes()
 //{
 //    //for each staff size, setup fonts of right point size for that staff size
@@ -1104,40 +1096,6 @@ LUnits ScoreLayouter::get_line_spacing(int iInstr, int iStaff)
 //    {
 //        pInstr->GetVStaff()->SetUpFonts(m_pPaper);
 //    }
-//}
-//
-//---------------------------------------------------------------------------------------
-//void ScoreLayouter::DecideSpaceBeforeProlog()
-//{
-//    //TODO. Now a fixed value of 7.5 tenths is used. User options ?
-//
-//    Tenths rSpaceBeforeProlog = 7.5f;
-//	ImoInstrument* pInstr = m_pScore->GetFirstInstrument();
-//	lmVStaff* pVStaff = pInstr->GetVStaff();
-//	m_uSpaceBeforeProlog = pVStaff->TenthsToLogical(rSpaceBeforeProlog, 1);
-//}
-//
-//---------------------------------------------------------------------------------------
-//void ScoreLayouter::ComputeMeasuresSizesToJustifyCurrentSystem(bool fThisIsLastSystem)
-//{
-//    //TO ComputeMeasuresSizesToJustifyCurrentSystem divide up the remaining space
-//    //between all bars, except if current system is the last one and flag
-//    //"JustifyFinalBarline" is not set or there is no final barline.
-//
-//    //At this point the number of measures to include in current system has been computed
-//    //and some data is stored in the following global variables:
-//    //
-//    //   SystemLayouter - positioning information for columns and
-//    //          minimum size for each column for current system.
-//    //   m_uFreeSpace - free space available on this system
-//    //   m_nColumnsInSystem  - the number of measures that fit in this system
-//    //
-//    //Now we are going to compute new column sizes and store results
-//    //in SystemLayouter but changes nothing in the StaffObjs
-//
-//    if (!fThisIsLastSystem || (fThisIsLastSystem && m_fJustifyFinalBarline))
-//        RedistributeFreeSpace(m_uFreeSpace, fThisIsLastSystem);
-//
 //}
 //
 //---------------------------------------------------------------------------------------
@@ -1161,7 +1119,7 @@ LUnits ScoreLayouter::get_line_spacing(int iInstr, int iStaff)
 //						uxPos, m_pCurBoxSystem->GetYBottom(),
 //						uLineThickness, 0.0, *wxBLACK, _T("System joining line"),
 //						lm_eEdgeHorizontal);
-//	    m_pCurBoxSystem->AddShape(pLine, lm_eLayerBarlines);
+//	    m_pCurBoxSystem->AddShape(pLine, lm_eLayerStaff);
 //	}
 //}
 //
@@ -1260,6 +1218,9 @@ LUnits ScoreLayouter::get_line_spacing(int iInstr, int iStaff)
 //    //iSys=[0..n-1]
 //    return m_sysLayouters[iSys];
 //}
-
+// any gain?
+//m_sysLayouters[m_nCurSystem-1]
+//get_system_layouter(m_nCurSystem-1)
+//get_current_system_layouter()
 
 }  //namespace lomse

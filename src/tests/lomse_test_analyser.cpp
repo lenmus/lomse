@@ -2053,8 +2053,8 @@ SUITE(AnalyserTest)
         ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
         CHECK( pInstr != NULL );
         CHECK( pInstr->get_num_staves() == 1 );
-        CHECK( pInstr->get_name() == "Guitar" );
-        CHECK( pInstr->get_abbrev() == "" );
+        CHECK( pInstr->get_name().get_text() == "Guitar" );
+        CHECK( pInstr->get_abbrev().get_text() == "" );
 
         delete tree->get_root();
         delete pIModel;
@@ -2077,8 +2077,8 @@ SUITE(AnalyserTest)
         ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
         CHECK( pInstr != NULL );
         CHECK( pInstr->get_num_staves() == 1 );
-        CHECK( pInstr->get_name() == "" );
-        CHECK( pInstr->get_abbrev() == "G." );
+        CHECK( pInstr->get_name().get_text() == "" );
+        CHECK( pInstr->get_abbrev().get_text() == "G." );
 
         delete tree->get_root();
         delete pIModel;
@@ -2101,8 +2101,8 @@ SUITE(AnalyserTest)
         ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
         CHECK( pInstr != NULL );
         CHECK( pInstr->get_num_staves() == 1 );
-        CHECK( pInstr->get_name() == "Guitar" );
-        CHECK( pInstr->get_abbrev() == "G." );
+        CHECK( pInstr->get_name().get_text() == "Guitar" );
+        CHECK( pInstr->get_abbrev().get_text() == "G." );
 
         delete tree->get_root();
         delete pIModel;
@@ -2238,8 +2238,8 @@ SUITE(AnalyserTest)
         ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
         CHECK( pInstr != NULL );
         CHECK( pInstr->get_num_staves() == 1 );
-        CHECK( pInstr->get_name() == "" );
-        CHECK( pInstr->get_abbrev() == "" );
+        CHECK( pInstr->get_name().get_text() == "" );
+        CHECK( pInstr->get_abbrev().get_text() == "" );
         CHECK( pInstr->get_channel() == 11 );
         CHECK( pInstr->get_instrument() == 55 );
 

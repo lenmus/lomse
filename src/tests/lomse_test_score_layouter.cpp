@@ -39,8 +39,8 @@ using namespace lomse;
 class ScoreLayouterTestFixture
 {
 public:
-    LibraryScope* m_pLibraryScope;
-    LdpFactory* m_pLdpFactory;
+    LibraryScope m_libraryScope;
+    FontStorage* m_pFonts;
     std::string m_scores_path;
     //wxSize m_ScoreSize;
     //double m_rScale;
@@ -54,9 +54,9 @@ public:
 
 
     ScoreLayouterTestFixture()   // setUp()
+        : m_libraryScope(cout)
     {
-        m_pLibraryScope = new LibraryScope(cout);
-        m_pLdpFactory = m_pLibraryScope->ldp_factory();
+        m_pFonts = m_libraryScope.font_storage();
         m_scores_path = LOMSE_TEST_SCORES_PATH;
 
         m_pDocLayouter = NULL;
@@ -69,7 +69,6 @@ public:
 
     ~ScoreLayouterTestFixture()  // tearDown()
     {
-        delete m_pLibraryScope;
         delete_test_data();
     }
 
@@ -87,10 +86,9 @@ public:
         m_sTestNum = sTestNum;
         m_sTestName = score;
         std::string filename = m_scores_path + m_sTestNum + "-" + m_sTestName + ".lms";
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_file(filename);
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        m_pDocLayouter = new DocLayouter( doc.get_im_model(), &meter);
+        m_pDocLayouter = new DocLayouter( doc.get_im_model(), m_libraryScope);
         m_pDocLayouter->layout_document();
     }
 
@@ -256,11 +254,10 @@ SUITE(ScoreLayouterTest)
 
     TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_CreatesScoreStub)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         GmoStubScore* pStub = pGModel->get_score_stub(0);

@@ -39,10 +39,10 @@ namespace lomse
 // DocLayouter implementation
 //---------------------------------------------------------------------------------------
 
-DocLayouter::DocLayouter(InternalModel* pIModel, TextMeter* pTextMeter)
+DocLayouter::DocLayouter(InternalModel* pIModel, LibraryScope& libraryScope)
     : m_pIModel(pIModel)
     , m_pGModel(NULL)
-    , m_pTextMeter(pTextMeter)
+    , m_libraryScope(libraryScope)
     //, m_pMainSizer( new FlowSizer(FlowSizer::k_vertical) )
     , m_pCurrentBox(NULL)
 {
@@ -211,7 +211,7 @@ ContentLayouter* DocLayouter::new_item_layouter(ImoDocObj* pImo)
 
     switch (pImo->get_obj_type())
     {
-        case ImoObj::k_score:   return new ScoreLayouter(pImo, m_pGModel, m_pTextMeter);
+        case ImoObj::k_score:   return new ScoreLayouter(pImo, m_pGModel, m_libraryScope);
         default:
             return new NullLayouter(pImo, m_pGModel);
     }

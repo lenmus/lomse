@@ -49,7 +49,8 @@ protected:
 	int m_iStaff;			    //num of staff in the instrument (0..n-1)
 
 public:
-    GmoShapeStaff(GmoBox* owner, ImoStaffInfo* m_pStaff, int iStaff, LUnits indent);
+    GmoShapeStaff(GmoBox* owner, ImoStaffInfo* m_pStaff, int iStaff, LUnits indent,
+                  Color color);
 	~GmoShapeStaff();
 
 //	//implementation of pure virtual methods in base class

@@ -25,7 +25,7 @@
 #include "lomse_view.h"
 #include "lomse_drawer.h"
 #include "platform/lomse_platform.h"
-
+#include "lomse_agg_types.h"
 #include <vector>
 using namespace std;
 
@@ -64,12 +64,12 @@ public:
     //--------------------------------------------------------------------
     // Methods to serve platform dependent event handlers. 
     //virtual void on_init();
-    virtual void on_resize(Pixels vx, Pixels vy);
+    virtual void on_resize(Pixels x, Pixels y);
     //virtual void on_idle();
-    virtual void on_mouse_move(int x, int y, unsigned flags);
-    virtual void on_mouse_button_down(int x, int y, unsigned flags);
-    virtual void on_mouse_button_up(int x, int y, unsigned flags);
-    //virtual void on_key(int x, int y, unsigned key, unsigned flags);
+    virtual void on_mouse_move(Pixels x, Pixels y, unsigned flags);
+    virtual void on_mouse_button_down(Pixels x, Pixels y, unsigned flags);
+    virtual void on_mouse_button_up(Pixels x, Pixels y, unsigned flags);
+    //virtual void on_key(Pixels x, Pixels y, unsigned key, unsigned flags);
     //virtual void on_ctrl_change();
 
     //--------------------------------------------------------------------
@@ -95,10 +95,10 @@ public:
     GraphicModel* get_graphic_model();
 
     //scale
-    inline void zoom_in() { m_scale *= 1.05; }
-    inline void zoom_out() { m_scale /= 1.05; }
-    inline void set_scale(double scale) { m_scale = scale; }
-    inline double get_scale() { return m_scale; }
+    void zoom_in(Pixels x=0, Pixels y=0);
+    void zoom_out(Pixels x=0, Pixels y=0);
+    void set_scale(double scale, Pixels x=0, Pixels y=0);
+    double get_scale();
 
     //rendering options
     inline void set_option_draw_box_doc_page_content(bool value) { 
@@ -126,8 +126,9 @@ protected:
     //renderization parameters
     double m_expand;
     double m_gamma;
-    double m_scale;
     double m_rotation;
+    TransAffine m_transform;
+
 
     ////agg renderization related 
     //agg::slider_ctrl<agg::rgba8> m_expand;

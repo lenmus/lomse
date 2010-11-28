@@ -33,8 +33,8 @@ namespace lomse
 struct PathAttributes
 {
     unsigned     index;
-    rgba8        fill_color;
-    rgba8        stroke_color;
+    Color        fill_color;
+    Color        stroke_color;
     bool         fill_flag;
     bool         stroke_flag;
     bool         even_odd_flag;
@@ -47,8 +47,8 @@ struct PathAttributes
     // Empty constructor
     PathAttributes()
         : index(0)
-        , fill_color(rgba(0,0,0))
-        , stroke_color(rgba(0,0,0))
+        , fill_color(Color(0,0,0))
+        , stroke_color(Color(0,0,0))
         , fill_flag(true)
         , stroke_flag(false)
         , even_odd_flag(false)

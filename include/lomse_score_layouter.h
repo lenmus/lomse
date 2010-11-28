@@ -23,7 +23,9 @@
 
 #include "lomse_content_layouter.h"
 #include "lomse_basic.h"
+#include "lomse_injectors.h"
 #include "lomse_score_iterator.h"
+#include "lomse_score_enums.h"
 #include <vector>
 using namespace std;
 
@@ -32,7 +34,7 @@ namespace lomse
 
 //forward declarations
 class InternalModel;
-class TextMeter;
+class FontStorage;
 class GraphicModel;
 class ImoDocObj;
 class ImoScore;
@@ -51,42 +53,37 @@ class SystemLayouter;
 class ScoreLayouter : public ContentLayouter
 {
 protected:
-    TextMeter* m_pTextMeter;
-    UPoint m_pageCursor;
-    ScoreIterator m_scoreIt;
+    LibraryScope&   m_libraryScope;
+    UPoint          m_pageCursor;
+    ScoreIterator   m_scoreIt;
 
-//    //auxiliary data for computing and justifying systems
+    //auxiliary data for computing and justifying systems
     int m_nCurSystem;   //[0..n-1] Current system number
     int m_nAbsColumn;   //[0..n-1] number of column in process, absolute
     int m_nRelColumn;   //[0..n-1] number of column in process, relative to current system
-//
-//    LUnits        m_uFreeSpace;               //free space available on current system
-//    int             m_nColumnsInSystem;         //the number of columns in current system
-//
-//    //renderization options and parameters
-//    bool                m_fStopStaffLinesAtFinalBarline;
-//    bool                m_fJustifyFinalBarline;
-//    float               m_rSpacingFactor;           //for proportional spacing of notes
-//    lmESpacingMethod    m_nSpacingMethod;           //fixed, proportional, etc.
-//    lmTenths            m_nSpacingValue;            //spacing for 'fixed' method
-//
-    //space values to use
-//	LUnits	    m_uSpaceBeforeProlog;   //space between start of system and clef
-    LUnits        m_uFirstSystemIndent;
-    LUnits        m_uOtherSystemIndent;
 
+    //renderization options and parameters
+    bool                m_fStopStaffLinesAtFinalBarline;
+    bool                m_fJustifyFinalBarline;
+    float               m_rSpacingFactor;    //for proportional spacing of notes
+    ESpacingMethod      m_nSpacingMethod;    //fixed, proportional, etc.
+    Tenths              m_nSpacingValue;     //spacing for 'fixed' method
+
+    //space values to use
+    LUnits              m_uFirstSystemIndent;
+    LUnits              m_uOtherSystemIndent;
 
     //current boxes being layouted
     GmoStubScore*       m_pStubScore;
     GmoBoxScorePage*    m_pCurBoxPage;
     GmoBoxSystem*       m_pCurBoxSystem;
     GmoBoxSlice*        m_pCurSlice;
-    int         m_nCurrentPageNumber;       //1..n. if 0 no page yet created!
-    LUnits      m_uLastSystemHeight;
+    int                 m_nCurrentPageNumber;       //1..n. if 0 no page yet created!
+    LUnits              m_uLastSystemHeight;
 //
 
 public:
-    ScoreLayouter(ImoDocObj* pImo, GraphicModel* pGModel, TextMeter* pMeter);
+    ScoreLayouter(ImoDocObj* pImo, GraphicModel* pGModel, LibraryScope& libraryScope);
     virtual ~ScoreLayouter();
 
     void layout_in_page(GmoBox* pContainerBox);
@@ -103,8 +100,6 @@ protected:
         return (m_nCurSystem == 1 ? m_uFirstSystemIndent : m_uOtherSystemIndent);
     }
     InstrumentEngraver* get_instrument_engraver(int iInstr);
-    LUnits get_line_spacing(int iInstr, int iStaff);
-
 
 
     //level 1: invoked from public methods
@@ -119,6 +114,7 @@ protected:
     void add_next_system();
     void delete_instrument_layouters();
     void delete_system_layouters();
+    void get_score_renderization_options();
     //void delete_system_cursor();
 
     std::vector<InstrumentEngraver*> m_instrEngravers;
@@ -146,7 +142,7 @@ protected:
 
     //SystemCursor* m_pSysCursor;
     std::vector<SystemLayouter*> m_sysLayouters;
-
+    int m_nColumnsInSystem;         //the number of columns in current system
 
 
     //level 3: invoked from level 2 methods
@@ -154,6 +150,8 @@ protected:
     void create_column_and_add_it_to_current_system();
     inline bool must_terminate_system() { return m_fTerminateSystem; }
     inline void must_terminate_system(bool value) { m_fTerminateSystem = value; }
+    void compute_bar_sizes_to_justify_current_system();
+    void reposition_staffobjs();
 
     bool m_fTerminateSystem;
 
@@ -164,6 +162,10 @@ protected:
     void collect_content_for_this_bar();
     void measure_this_bar();
     void add_column_to_system();
+    LUnits get_available_space_in_system();
+
+    LUnits m_uFreeSpace;    //free space available on current system
+
 
     //level 5: invoked from level 4 methods
     //---------------------------------------------------------------
@@ -173,6 +175,7 @@ protected:
     void terminate_slice_instr(int iInstr, LUnits uBottomMargin);
     void add_staff_lines_name_and_bracket(int iInstr, LUnits uTopMargin);
     void add_shapes_for_score_objs();
+    LUnits determine_initial_space();
 
     std::vector<GmoBoxSliceInstr*> m_sliceInstrBoxes;
     GmoBoxSliceInstr* m_pCurBSI;

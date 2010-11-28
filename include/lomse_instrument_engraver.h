@@ -22,6 +22,8 @@
 #define __LOMSE_INSTRUMENT_ENGRAVER_H__
 
 #include "lomse_basic.h"
+#include "lomse_injectors.h"
+#include <vector>
 #include <string>
 using namespace std;
 
@@ -30,7 +32,8 @@ namespace lomse
 
 //forward declarations
 class ImoInstrument;
-class TextMeter;
+class ImoScore;
+class FontStorage;
 class GmoBox;
 class GmoBoxSystem;
 
@@ -39,19 +42,23 @@ class InstrumentEngraver
 {
 protected:
     ImoInstrument* m_pInstr;
-    TextMeter* m_pTextMeter;
+    ImoScore* m_pScore;
+    FontStorage* m_pFontStorage;
+    LibraryScope& m_libraryScope;
     LUnits m_uIndentFirst;
     LUnits m_uIndentOther;
     LUnits m_uBracketWidth;
     LUnits m_uBracketGap;
     //int m_bracketSymbol;      
 
-    LUnits m_staffTop; 
-    LUnits m_staffBottom; 
-    LUnits m_staffLeft;
+    LUnits m_stavesTop; 
+    LUnits m_stavesBottom; 
+    LUnits m_stavesLeft;
+
+    std::vector<LUnits> m_staffTop;
 
 public:
-    InstrumentEngraver(ImoInstrument* pInstr, TextMeter* pMeter);
+    InstrumentEngraver(ImoInstrument* pInstr, ImoScore* pScore, LibraryScope& libraryScope);
     ~InstrumentEngraver();
 
     //indents
@@ -63,7 +70,8 @@ public:
     void add_staff_lines(GmoBoxSystem* pBox, LUnits x, LUnits y, LUnits indent);
     void add_name_abbrev(GmoBox* pBox, int nSystem);
     void add_brace_bracket(GmoBox* pBox);
-    LUnits get_staff_bottom() { return m_staffBottom; }
+    LUnits get_staves_bottom() { return m_stavesBottom; }
+    LUnits get_top_of_staff(int iStaff);
 
     //helper
     LUnits tenths_to_logical(Tenths value, int iStaff=0);
@@ -72,7 +80,6 @@ protected:
     void measure_name_abbrev();
     void measure_brace_or_bracket();
     bool has_brace_or_bracket();
-    void add_text_shape(GmoBox* pBox, const std::string& text);
 
 };
 

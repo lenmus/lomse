@@ -25,8 +25,7 @@
 #include "lomse_glyphs.h"
 #include "lomse_shapes.h"
 #include "lomse_box_slice_instr.h"
-//#include "lomse_shape_staff.h"
-//#include "lomse_box_system.h"
+#include "lomse_font_storage.h"
 
 
 namespace lomse
@@ -34,6 +33,12 @@ namespace lomse
 
 //---------------------------------------------------------------------------------------
 // ClefEngraver implementation
+//---------------------------------------------------------------------------------------
+ClefEngraver::ClefEngraver(LibraryScope& libraryScope)
+    : m_libraryScope(libraryScope)
+{
+}
+
 //---------------------------------------------------------------------------------------
 GmoShape* ClefEngraver::create_shape(ImoClef* pClef, GmoBoxSliceInstr* pBox,
                                      UPoint uPos, LUnits lineSpacing, bool fSmallClef)
@@ -56,7 +61,8 @@ GmoShape* ClefEngraver::create_shape(ImoClef* pClef, GmoBoxSliceInstr* pBox,
 
         //create the shape object
         int nIdx = 0;   //TODO
-        pShape = new GmoShapeClef(pBox, nIdx, m_iGlyph, UPoint(uPos.x, yPos), m_fSmallClef);
+        pShape = new GmoShapeClef(pBox, nIdx, m_iGlyph, UPoint(uPos.x, yPos),
+                                  m_fSmallClef, Color(0,0,0), m_libraryScope);
     }
 
     return pShape;
@@ -101,7 +107,7 @@ Tenths ClefEngraver::get_glyph_offset()
     // returns the y-axis offset from paper cursor position so that shape get correctly
     // positioned over a five-lines staff (units: tenths of inter-line space)
 
-    Tenths yOffset = 0; //aGlyphsInfo[m_iGlyph].GlyphOffset;
+    Tenths yOffset = glyphs_lmbasic2[m_iGlyph].GlyphOffset;
 
     //add offset to move the clef up/down the required lines
     if (m_fSmallClef)

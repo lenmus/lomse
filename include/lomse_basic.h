@@ -84,11 +84,9 @@ struct Size
 template<class T>
 struct Rectangle
 {
-    T xTop;
-    T yLeft;
     T width;
     T height;
-    T x, y;
+    T x, y;     //top left point
 
     Rectangle()
         : x(0), y(0), width(0), height(0)
@@ -106,61 +104,58 @@ struct Rectangle
 
     // default copy ctor and assignment operators ok
 
-    T GetX() const { return x; }
-    void SetX(T xx) { x = xx; }
+    T get_x() const { return x; }
+    void set_x(T xx) { x = xx; }
 
-    T GetY() const { return y; }
-    void SetY(T yy) { y = yy; }
+    T get_y() const { return y; }
+    void set_y(T yy) { y = yy; }
 
-    T GetWidth() const { return width; }
-    void SetWidth(T w) { width = w; }
+    T get_width() const { return width; }
+    void set_width(T w) { width = w; }
 
-    T GetHeight() const { return height; }
-    void SetHeight(T h) { height = h; }
+    T get_height() const { return height; }
+    void set_height(T h) { height = h; }
 
-    Point<T> GetPosition() const { return Point<T>(x, y); }
-    void SetPosition( const Point<T> &p ) { x = p.x; y = p.y; }
+    Point<T> position() const { return Point<T>(x, y); }
+    void position( const Point<T> &p ) { x = p.x; y = p.y; }
 
-    Size<T> GetSize() const { return Size<T>(width, height); }
-    void SetSize( const Size<T> &s ) { width = s.GetWidth(); height = s.GetHeight(); }
+    Size<T> size() const { return Size<T>(width, height); }
+    void size( const Size<T> &s ) { width = s.width(); height = s.height(); }
 
-    bool IsEmpty() const { return (width <= 0) || (height <= 0); }
+    bool is_empty() const { return (width <= 0) || (height <= 0); }
 
-    T GetLeft()   const { return x; }
-    T GetTop()    const { return y; }
-    T GetBottom() const { return y + height - 1; }
-    T GetRight()  const { return x + width - 1; }
+    T left()   const { return x; }
+    T top()    const { return y; }
+    T bottom() const { return y + height - 1; }
+    T right()  const { return x + width - 1; }
 
-    void SetLeft(T left) { x = left; }
-    void SetRight(T right) { width = right - x + 1; }
-    void SetTop(T top) { y = top; }
-    void SetBottom(T bottom) { height = bottom - y + 1; }
+    void left(T left) { x = left; }
+    void right(T right) { width = right - x + 1; }
+    void top(T top) { y = top; }
+    void bottom(T bottom) { height = bottom - y + 1; }
 
-    Point<T> GetTopLeft() const { return GetPosition(); }
-    Point<T> GetLeftTop() const { return GetTopLeft(); }
-    void SetTopLeft(const Point<T> &p) { SetPosition(p); }
-    void SetLeftTop(const Point<T> &p) { SetTopLeft(p); }
+    Point<T> top_left_point() const { return position(); }
+    void top_left_point(const Point<T> &p) { position(p); }
 
-    Point<T> GetBottomRight() const { return Point<T>(GetRight(), GetBottom()); }
-    Point<T> GetRightBottom() const { return GetBottomRight(); }
-    void SetBottomRight(const Point<T> &p) { SetRight(p.x); SetBottom(p.y); }
-    void SetRightBottom(const Point<T> &p) { SetBottomRight(p); }
+    Point<T> bottom_right_point() const { return Point<T>(right(), bottom()); }
+    void bottom_right_point(const Point<T> &p) { right(p.x); bottom(p.y); }
+    void SetRightBottom(const Point<T> &p) { bottom_right_point(p); }
 
-    Point<T> GetTopRight() const { return Point<T>(GetRight(), GetTop()); }
-    Point<T> GetRightTop() const { return GetTopRight(); }
-    void SetTopRight(const Point<T> &p) { SetRight(p.x); SetTop(p.y); }
-    void SetRightTop(const Point<T> &p) { SetTopLeft(p); }
+    Point<T> get_top_right() const { return Point<T>(right(), top()); }
+    Point<T> get_right_top() const { return get_top_right(); }
+    void SetTopRight(const Point<T> &p) { right(p.x); top(p.y); }
+    void SetRightTop(const Point<T> &p) { top_left_point(p); }
 
-    Point<T> GetBottomLeft() const { return Point<T>(GetLeft(), GetBottom()); }
-    Point<T> GetLeftBottom() const { return GetBottomLeft(); }
-    void SetBottomLeft(const Point<T> &p) { SetLeft(p.x); SetBottom(p.y); }
+    Point<T> get_bottom_left() const { return Point<T>(left(), bottom()); }
+    Point<T> GetLeftBottom() const { return get_bottom_left(); }
+    void SetBottomLeft(const Point<T> &p) { left(p.x); bottom(p.y); }
     void SetLeftBottom(const Point<T> &p) { SetBottomLeft(p); }
 
-    Rectangle& Intersect(const Rectangle& rect);
-    Rectangle Intersect(const Rectangle& rect) const
+    Rectangle& intersect(const Rectangle& rect);
+    Rectangle intersect(const Rectangle& rect) const
     {
         Rectangle r = *this;
-        r.Intersect(rect);
+        r.intersect(rect);
         return r;
     }
 
@@ -177,13 +172,25 @@ struct Rectangle
     bool operator!=(const Rectangle& rect) const { return !(*this == rect); }
 
     // return true if the point is (not strictly) inside the rect
-    bool Contains(T x, T y) const;
-    bool Contains(const Point<T>& pt) const { return Contains(pt.x, pt.y); }
+    bool contains(T px, T py) const
+    {
+        return ( (px >= x)
+                 && (py >= y)
+                 && ((py - y) < height)
+                 && ((px - x) < width) 
+               );
+    }
+
+    bool contains(const Point<T>& pt) const { return contains(pt.x, pt.y); }
     // return true if the rectangle is (not strictly) inside the rect
-    bool Contains(const Rectangle& rect) const;
+    bool contains(const Rectangle& rect) const
+    {
+        return contains(rect.get_top_left()) && contains(rect.get_bottom_right());
+    }
+
 
     // return true if the rectangles have a non empty intersection
-    bool Intersects(const Rectangle& rect) const;
+    bool intersects(const Rectangle& rect) const;
 };
 
 
@@ -240,6 +247,11 @@ struct Color
         a = 0;
         return *this;
     }
+
+    void red(unsigned value) { r = value; }
+    void green(unsigned value) { g = value; }
+    void blue(unsigned value) { b = value; }
+    void opacity(unsigned value) { a = value; }
 
     static Color no_color() { return Color(0,0,0,0); }
 

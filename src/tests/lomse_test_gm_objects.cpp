@@ -138,53 +138,136 @@ SUITE(GmoTest)
         CHECK( box.get_slice(0) == pSlice );
     }
 
+    TEST_FIXTURE(GmoTestFixture, BoxSystem_AddShapeUpdatesLayerPointers)
+    {
+        GmoBoxDocPage page(NULL);
+        GmoBoxDocPageContent dpc(&page);
+        //GmoBoxScorePage scorePage(&dpc);        //<<<----- no uniform creation
+        GmoStubScore stub(NULL);
+        GmoBoxScorePage scorePage(&stub, &dpc);
+        GmoBoxSystem box(&scorePage);
+        CHECK( page.get_first_shape_for_layer(GmoShape::k_layer_staff) == NULL );
+        ImoStaffInfo staff;
+        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
+        box.add_staff_shape(pShape);
+        CHECK( page.get_first_shape_for_layer(GmoShape::k_layer_staff) == pShape );
+    }
+
+    // GmoShape -------------------------------------------------------------------------
+
     TEST_FIXTURE(GmoTestFixture, BoxSystem_StoreShapes)
     {
-        GmoBoxSystem box(NULL);
+        GmoBoxDocPage page(NULL);
+        GmoBoxDocPageContent dpc(&page);
+        //GmoBoxScorePage scorePage(&dpc);        //<<<----- no uniform creation
+        GmoStubScore stub(NULL);
+        GmoBoxScorePage scorePage(&stub, &dpc);
+        GmoBoxSystem box(&scorePage);
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f);
+        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
         box.add_staff_shape(pShape);
         CHECK( box.get_staff_shape(0) == pShape );
     }
 
+    TEST_FIXTURE(GmoTestFixture, Box_StoreShapes)
+    {
+        GmoBoxDocPage page(NULL);
+        GmoBoxDocPageContent dpc(&page);
+        //GmoBoxScorePage scorePage(&dpc);        //<<<----- no uniform creation
+        GmoStubScore stub(NULL);
+        GmoBoxScorePage scorePage(&stub, &dpc);
+        GmoBoxSystem box(&scorePage);
+        ImoStaffInfo staff;
+        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
+        box.add_shape(pShape, GmoShape::k_layer_staff);
+        CHECK( box.get_shape(0) == pShape );
+    }
+
     TEST_FIXTURE(GmoTestFixture, BoxSystem_ShapesHaveLayer)
     {
-        GmoBoxSystem box(NULL);
+        GmoBoxDocPage page(NULL);
+        GmoBoxDocPageContent dpc(&page);
+        //GmoBoxScorePage scorePage(&dpc);        //<<<----- no uniform creation
+        GmoStubScore stub(NULL);
+        GmoBoxScorePage scorePage(&stub, &dpc);
+        GmoBoxSystem box(&scorePage);
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f);
+        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
         box.add_staff_shape(pShape);
         CHECK( pShape->get_layer() == GmoShape::k_layer_staff );
     }
 
+    TEST_FIXTURE(GmoTestFixture, BoxSystem_ShapesOrderedByLayer)
+    {
+        GmoBoxDocPage page(NULL);
+        GmoBoxDocPageContent dpc(&page);
+        //GmoBoxScorePage scorePage(&dpc);        //<<<----- no uniform creation
+        GmoStubScore stub(NULL);
+        GmoBoxScorePage scorePage(&stub, &dpc);
+        GmoBoxSystem box(&scorePage);
+        ImoStaffInfo staff;
+        GmoShapeStaff* pShape0 = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
+        box.add_shape(pShape0, 2);
+        GmoShapeStaff* pShape1 = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
+        box.add_shape(pShape1, 1);
+        GmoShapeStaff* pShape2 = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
+        box.add_shape(pShape2, 3);
+        GmoShapeStaff* pShape3 = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
+        box.add_shape(pShape3, 1);
+        GmoShapeStaff* pShape4 = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
+        box.add_shape(pShape4, 0);
+        GmoShapeStaff* pShape5 = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
+        box.add_shape(pShape5, 1);
+
+        //cout << "shape 0 at layer " << box.get_shape(0)->get_layer() << endl;
+        //cout << "shape 1 at layer " << box.get_shape(1)->get_layer() << endl;
+        //cout << "shape 2 at layer " << box.get_shape(2)->get_layer() << endl;
+        //cout << "shape 3 at layer " << box.get_shape(3)->get_layer() << endl;
+        //cout << "shape 4 at layer " << box.get_shape(4)->get_layer() << endl;
+        //cout << "shape 5 at layer " << box.get_shape(5)->get_layer() << endl;
+
+        CHECK( box.get_shape(0) == pShape4 );
+        CHECK( box.get_shape(0)->get_layer() == 0 );
+
+        CHECK( box.get_shape(1) == pShape1 );
+        CHECK( box.get_shape(1)->get_layer() == 1 );
+
+        CHECK( box.get_shape(2) == pShape3 );
+        CHECK( box.get_shape(2)->get_layer() == 1 );
+
+        CHECK( box.get_shape(3) == pShape5 );
+        CHECK( box.get_shape(3)->get_layer() == 1 );
+
+        CHECK( box.get_shape(4) == pShape0 );
+        CHECK( box.get_shape(4)->get_layer() == 2 );
+
+        CHECK( box.get_shape(5) == pShape2 );
+        CHECK( box.get_shape(5)->get_layer() == 3 );
+    }
+
     TEST_FIXTURE(GmoTestFixture, Shape_SetOrigin)
     {
-        GmoBoxSystem box(NULL);
+        GmoBoxDocPage page(NULL);
+        GmoBoxDocPageContent dpc(&page);
+        //GmoBoxScorePage scorePage(&dpc);        //<<<----- no uniform creation
+        GmoStubScore stub(NULL);
+        GmoBoxScorePage scorePage(&stub, &dpc);
+        GmoBoxSystem box(&scorePage);
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f);
-        box.add_staff_shape(pShape);
+        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
+        box.add_shape(pShape, 0);
         pShape->set_origin(2000.0f, 3000.0f);
         CHECK( pShape->get_left() == 2000.0f );
         CHECK( pShape->get_top() == 3000.0f );
     }
 
-    TEST_FIXTURE(GmoTestFixture, BoxSystem_AddShapeUpdatesLayerPointers)
-    {
-        GmoBoxSystem box(NULL);
-        CHECK( box.get_first_shape_for_layer(GmoShape::k_layer_staff) == NULL );
-        ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f);
-        box.add_staff_shape(pShape);
-        CHECK( box.get_first_shape_for_layer(GmoShape::k_layer_staff) == pShape );
-    }
+    // GmoBox ---------------------------------------------------------------------------
 
-    // GmoBoxSlice ---------------------------------------------------------------
-
-    //TEST_FIXTURE(GmoTestFixture, BoxSlice_InitiallyEmpty)
+    //TEST_FIXTURE(GmoTestFixture, Box_xxxxxxxxx)
     //{
     //    GmoBoxSlice box;
     //    CHECK( box.get_num_?() == 0 );
     //}
-
 
 }
 

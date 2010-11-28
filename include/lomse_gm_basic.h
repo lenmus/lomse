@@ -47,10 +47,12 @@ class ImoObj;
 class ImoScore;
 class Drawer;
 struct RenderOptions;
+class GmoLayer;
 
 
-//the graphic model
 //---------------------------------------------------------------------------------------
+// GraphicModel: storage for the graphic objects
+//
 class GraphicModel
 {
 protected:
@@ -64,7 +66,6 @@ public:
 
     inline GmoBoxDocument* get_root() { return m_root; }
     int get_num_pages();
-    //////GmoBox* create_main_box_for(ImoDocObj* pItem);
     GmoBoxDocPage* get_page(int i);
     inline void add_stub(GmoStub* pStub) { m_stubs.push_back(pStub); }
     GmoStubScore* get_score_stub(int i);
@@ -73,20 +74,25 @@ public:
     inline void set_ready(bool value) { m_fCanBeDrawn = value; }
     void draw_page(int iPage, UPoint& origin, Drawer* pDrawer, RenderOptions& opt);
 
+    ////hit testing
+    //GmoObj* find_deepest_box_at(UPoint& p);
+
+
 protected:
     void delete_stubs();
 
 };
 
-//Abstract class from which all graphic objects must derive
 //---------------------------------------------------------------------------------------
+//Abstract class from which all graphic objects must derive
+//
 class GmoObj
 {
 protected:
     GmoObj* m_pOwnerGmo;
     int m_objtype;
+    UPoint m_origin;        //Relative to DocPage, for boxes. Relative to owner box, for shapes
     USize m_size;
-    UPoint m_origin;
 
 public:
     virtual ~GmoObj();
@@ -135,6 +141,13 @@ public:
     void set_top(LUnits yTop);
     virtual void shift_origin(USize& shift) = 0;
 
+    //bounds
+    bool bounds_contains_point(UPoint& p);
+    URect get_bounds();
+
+    //info
+    inline GmoObj* get_gm_owner() { return m_pOwnerGmo; }
+
 protected:
     GmoObj(GmoObj* owner, int objtype);
 
@@ -145,7 +158,9 @@ class GmoShape : public GmoObj
 {
 protected:
     int m_layer;
-	//lmBox*		m_pOwnerBox;	//box in which this shape is included
+	Color m_color;
+	GmoBox* m_pOwnerBox;	//box in which this shape is included
+
 	//bool		m_fVisible;
  //   wxWindow*   m_pMouseCursorWindow;      //to optimize mouse cursor changes
 
@@ -155,7 +170,6 @@ protected:
 	////list of shapes to which this one is attached
 	//std::list<GmoShape*>	        m_cAttachedTo;
 
-	//wxColour	m_color;
  //   long        m_nOrder;
  //   long        m_nLayer;
 
@@ -165,7 +179,7 @@ protected:
 public:
     virtual ~GmoShape();
 
-    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin) = 0;
+    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
 
     //-------------------------------------------------------------------------
     // layer identifiers. Shapes are placed in layers. The first layer to 
@@ -208,7 +222,7 @@ public:
 
 	////owners and related
 	//inline lmBox* GetOwnerBox() { return m_pOwnerBox; }
-	//inline void SetOwnerBox(lmBox* pOwnerBox) { m_pOwnerBox = pOwnerBox; }
+	inline void set_owner_box(GmoBox* pBox) { m_pOwnerBox = pBox; }
 	//lmBoxSystem* GetOwnerSystem() { return m_pOwnerBox->GetOwnerSystem(); }
 
 	////for composite shapes
@@ -236,7 +250,7 @@ public:
     void shift_origin(USize& shift);
 
 protected:
-    GmoShape(GmoObj* owner, int objtype);
+    GmoShape(GmoObj* owner, int objtype, Color color);
    // GmoShape(lmEGMOType m_nType, lmScoreObj* pOwner, int nOwnerIdx, wxString sName=_T("Shape"),
 			//bool fDraggable = false, bool fSelectable = false, wxColour color = *wxBLACK,
 			//bool fVisible = true);
@@ -250,7 +264,6 @@ class GmoBox : public GmoObj
 protected:
     std::vector<GmoBox*> m_childBoxes;      //contained boxes
 	std::list<GmoShape*> m_shapes;		    //contained shapes, organised in layers
-    GmoShape* m_pStartOfLayer[GmoShape::k_layer_max]; //ptrs to start of each layer
 
     // All boxes have four margins (top, bottom, left and right) around the 
     // box area (bounds rectangle). The margins defines a smaller rectangle
@@ -273,7 +286,6 @@ public:
     inline int get_num_shapes() { return static_cast<int>( m_shapes.size() ); }
     virtual void add_shape(GmoShape* shape, int layer);
     GmoShape* get_shape(int i);  //i = 0..n-1
-    inline GmoShape* get_first_shape_for_layer(int layer) { return m_pStartOfLayer[layer]; }
 
     //margins
     inline LUnits get_top_margin() { return m_uTopMargin; }
@@ -294,19 +306,27 @@ public:
     //drawing
     void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
 
+    //hit testing
+    GmoBox* find_inner_box_at(LUnits x, LUnits y);
+    GmoShape* find_shape_at(LUnits x, LUnits y);
+    GmoObj* hit_test(LUnits x, LUnits y);
+
 protected:
     GmoBox(GmoObj* owner, int objtype);
     void shift_origin(USize& shift);
     void delete_boxes();
     void delete_shapes();
-    bool draw_box_requested(RenderOptions& opt);
+    GmoBoxDocPage* get_parent_box_page();
+    GmoBox* get_parent_box() { return dynamic_cast<GmoBox*>(m_pOwnerGmo); }
+    bool must_draw_bounds(RenderOptions& opt);
     Color get_box_color();
     void draw_box_bounds(Drawer* pDrawer, double xorg, double yorg, Color& color);
+    void draw_shapes(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
 
 };
 
 //---------------------------------------------------------------------------------------
-class GmoStub : public GmoObj
+class GmoStub //: public GmoObj
 {
 protected:
     ImoObj* m_pImoOwner;
@@ -315,8 +335,7 @@ public:
     virtual ~GmoStub() {}
 
 protected:
-    GmoStub(int objtype, ImoObj* pImo) : GmoObj(NULL, objtype), m_pImoOwner(pImo) {}
-    void shift_origin(USize& shift) {}
+    GmoStub(int objtype, ImoObj* pImo) : /*GmoObj(NULL, objtype),*/ m_pImoOwner(pImo) {}
 
 };
 
@@ -343,14 +362,26 @@ class GmoBoxDocPage : public GmoBox
 {
 protected:
     int m_numPage;
+	std::list<GmoLayer*> m_Layers;     //contained shapes, ordered by layer
+    std::list<GmoShape*> m_allShapes;		//contained shapes, ordered by creation order
 
 public:
     GmoBoxDocPage(GmoObj* owner);
     ~GmoBoxDocPage() {}
 
+    //page number
     inline void set_number(int num) { m_numPage = num; }
     inline int get_number() { return m_numPage; }
-    void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin); 
+
+    //renderization
+    void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
+
+    //shapes
+    void store_shape(GmoShape* pShape, int layer);
+    GmoShape* get_first_shape_for_layer(int order);
+    GmoShape* get_shape_in_box(GmoBox* pBox, int order);
+
+
 
 protected:
     void draw_page_background(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);

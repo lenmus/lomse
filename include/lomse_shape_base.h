@@ -115,7 +115,7 @@ public:
  //   virtual UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos) { return uPos; };
 
 protected:
-    GmoSimpleShape(GmoObj* owner, int objtype);
+    GmoSimpleShape(GmoObj* owner, int objtype, Color color);
     //GmoSimpleShape(lmEGMOType m_nType, lmScoreObj* pOwner, int nOwnerIdx,
     //              wxString sName=_T("SimpleShape"),
 				//  bool fDraggable = true, bool fSelectable = true,
@@ -133,10 +133,6 @@ protected:
 	//std::vector<GmoShape*>	m_Components;	//list of its constituent shapes
 
 public:
-    GmoCompositeShape(GmoObj* owner, int objtype);
-    //GmoCompositeShape(lmScoreObj* pOwner, int nOwnerIdx, wxColour color = *wxBLACK,
-    //                 wxString sName = _T("CompositeShape"), bool fDraggable = false,
-    //                 lmEGMOType nType = eGMO_ShapeComposite, bool fVisible = true);
     virtual ~GmoCompositeShape();
 
  //   //dealing with components
@@ -162,6 +158,10 @@ public:
 
 
 protected:
+    GmoCompositeShape(GmoObj* owner, int objtype, Color color);
+    //GmoCompositeShape(lmScoreObj* pOwner, int nOwnerIdx, wxColour color = *wxBLACK,
+    //                 wxString sName = _T("CompositeShape"), bool fDraggable = false,
+    //                 lmEGMOType nType = eGMO_ShapeComposite, bool fVisible = true);
 	//GmoShape* GetShape(int nShape);
 
 };

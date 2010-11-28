@@ -20,18 +20,7 @@
 
 #include "lomse_shape_base.h"
 
-//#include "ShapeNote.h"          //function lmDrawLegerLines()
-//#include "../score/Score.h"
-//#include "../score/VStaff.h"
-//#include "../score/Staff.h"
-//
-//#include "ShapeStaff.h"
-//
-//
-//#include "lomse_internal_model.h"
-//#include <sstream>
-//
-//using namespace std;
+#include "lomse_drawer.h"
 
 namespace lomse
 {
@@ -54,9 +43,11 @@ namespace lomse
 // Implementation of class GmoShape: any renderizable object, such as a line,
 // a glyph, a note head, an arch, etc.
 //---------------------------------------------------------------------------------------
-GmoShape::GmoShape(GmoObj* owner, int objtype)
+GmoShape::GmoShape(GmoObj* owner, int objtype, Color color)
     : GmoObj(owner, objtype)
     , m_layer(GmoShape::k_layer_background)
+    , m_color(color)
+    , m_pOwnerBox(NULL)
 {
 }
 //GmoShape::GmoShape(lmEGMOType nType, lmScoreObj* pOwner, int nOwnerIdx, wxString sName,
@@ -121,14 +112,28 @@ void GmoShape::shift_origin(USize& shift)
 //    //    rect.x, rect.y, rect.width, rect.height );
 //    return rect.Contains(rect1);
 //}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShape::Render(lmPaper* pPaper)
-//{
+
+//---------------------------------------------------------------------------------------
+void GmoShape::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
+{
 //    if (IsVisible())
 //        Render(pPaper, (IsSelected() ? g_pColors->ScoreSelected() : m_color) );
-//}
-//
+
+    //draw bounding box
+    LUnits x = m_origin.x + origin.x;
+    LUnits y = m_origin.y + origin.y;
+    pDrawer->begin_path();
+    pDrawer->fill(Color(0, 0, 0, 0));
+    pDrawer->stroke(Color(0, 0, 255));
+    pDrawer->stroke_width(15.0);
+    pDrawer->move_to(x, y);
+    pDrawer->hline_to(x + m_size.width);
+    pDrawer->vline_to(y + m_size.height);
+    pDrawer->hline_to(x);
+    pDrawer->vline_to(y);
+    pDrawer->end_path();
+}
+
 ////---------------------------------------------------------------------------------------
 //void GmoShape::OnMouseIn(wxWindow* pWindow, UPoint& uPoint)
 //{
@@ -272,8 +277,8 @@ void GmoShape::shift_origin(USize& shift)
 // Implementation of class GmoSimpleShape
 //=======================================================================================
 
-GmoSimpleShape::GmoSimpleShape(GmoObj* owner, int objtype)
-    : GmoShape(owner, objtype) 
+GmoSimpleShape::GmoSimpleShape(GmoObj* owner, int objtype, Color color)
+    : GmoShape(owner, objtype, color) 
 {
 }
 //GmoSimpleShape::GmoSimpleShape(lmEGMOType nType, lmScoreObj* pOwner, int nOwnerIdx,
@@ -312,8 +317,8 @@ GmoSimpleShape::~GmoSimpleShape()
 // Implementation of class GmoCompositeShape
 //=======================================================================================
 
-GmoCompositeShape::GmoCompositeShape(GmoObj* owner, int objtype) 
-    : GmoShape(owner, objtype) 
+GmoCompositeShape::GmoCompositeShape(GmoObj* owner, int objtype, Color color) 
+    : GmoShape(owner, objtype, color) 
 {
 }
 //GmoCompositeShape::GmoCompositeShape(lmScoreObj* pOwner, int nOwnerIdx, wxColour color,

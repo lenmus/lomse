@@ -22,17 +22,15 @@
 #define __LOMSE_SHAPES_H__
 
 #include "lomse_shape_base.h"
+#include "lomse_injectors.h"
 //#include <sstream>
 //using namespace std;
 
 namespace lomse
 {
 
-////forward declarations
-//class ImoStaffInfo;
-//class lmScoreObj;
-//class GmoShapeLine;
-//class GmoShapeFBLine;
+//forward declarations
+class FontStorage;
 
 
 //---------------------------------------------------------------------------------------
@@ -40,8 +38,10 @@ namespace lomse
 class GmoShapeGlyph : public GmoSimpleShape
 {
 protected:
-    int m_nGlyph;
-    UPoint m_uGlyphPos;
+    unsigned int m_glyph;
+    USize m_shiftToDraw;
+    FontStorage* m_pFontStorage;
+    LibraryScope& m_libraryScope;
 
 public:
     virtual ~GmoShapeGlyph() {}
@@ -58,7 +58,8 @@ public:
 //	UPoint GetObjectOrigin();
 
 protected:
-    GmoShapeGlyph(GmoBox* owner, int type, int nShapeIdx, int nGlyph, UPoint pos);
+    GmoShapeGlyph(GmoBox* owner, int type, int nShapeIdx, unsigned int nGlyph,
+                  UPoint pos, Color color, LibraryScope& libraryScope);
 
 //    wxBitmap* GetBitmapFromShape(double rScale, Color colorF, Color colorB = *wxWHITE);
 //    virtual double GetPointSize();
@@ -69,7 +70,8 @@ protected:
 class GmoShapeClef : public GmoShapeGlyph
 {
 public:
-    GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos, bool fSmallClef);
+    GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos, bool fSmallClef,
+                 Color color, LibraryScope& libraryScope);
     ~GmoShapeClef() {}
 
 //	//overrides

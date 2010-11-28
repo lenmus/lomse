@@ -71,22 +71,18 @@ public:
 class GraphicViewTestFixture
 {
 public:
+    LibraryScope m_libraryScope;
+    std::string m_scores_path;
 
     GraphicViewTestFixture()     //SetUp fixture
+        : m_libraryScope(cout)
     {
-        m_pLibraryScope = new LibraryScope(cout);
-        m_pLdpFactory = m_pLibraryScope->ldp_factory();
         m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
 
     ~GraphicViewTestFixture()    //TearDown fixture
     {
-        delete m_pLibraryScope;
     }
-
-    LibraryScope* m_pLibraryScope;
-    LdpFactory* m_pLdpFactory;
-    std::string m_scores_path;
 };
 
 
@@ -96,18 +92,18 @@ SUITE(GraphicViewTest)
 
     TEST_FIXTURE(GraphicViewTestFixture, EditView_CreatesGraphicModel)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         MyPlatformSupport platform(k_pix_format_bgra32, false);
-        ScreenDrawer drawer(*m_pLibraryScope);
-        VerticalBookView view(*m_pLibraryScope, &doc, &platform, &drawer);
+        ScreenDrawer drawer(m_libraryScope);
+        VerticalBookView view(m_libraryScope, &doc, &platform, &drawer);
         CHECK( view.get_graphic_model() != NULL );
     }
 
     //TEST_FIXTURE(GraphicViewTestFixture, EditView_UpdateWindow)
     //{
-    //    Document doc(*m_pLibraryScope);
+    //    Document doc(m_libraryScope);
     //    doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
     //        "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
     //    MyPlatformSupport platform(k_pix_format_bgra32, false);
@@ -119,7 +115,7 @@ SUITE(GraphicViewTest)
 
     //TEST_FIXTURE(GraphicViewTestFixture, EditView_CreatesBitmap)
     //{
-    //    Document doc(*m_pLibraryScope);
+    //    Document doc(m_libraryScope);
     //    doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
     //        "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
     //    MyPlatformSupport platform(k_pix_format_bgra32, false);

@@ -88,14 +88,14 @@ public:
 
     // Attribute setting functions.
     //-----------------------
-    void fill(const rgba8& f);
-    void stroke(const rgba8& s);
+    void fill(Color color);
+    void stroke(Color color);
     void even_odd(bool flag);
     void stroke_width(double w);
     void fill_none();
     void stroke_none();
-    void fill_opacity(double op);
-    void stroke_opacity(double op);
+    void fill_opacity(unsigned op);
+    void stroke_opacity(unsigned op);
     void line_join(line_join_e join);
     void line_cap(line_cap_e cap);
     void miter_limit(double ml);
@@ -104,8 +104,13 @@ public:
 
     // current font
     //-----------------------
-    bool set_font(const char* fontFullName, double height,
-                  EFontCacheType type = k_raster_font_cache);
+    bool select_font(const std::string& fontName, double height,
+                     bool fBold=false, bool fItalic=false);
+    bool select_raster_font(const std::string& fontName, double height,
+                            bool fBold=false, bool fItalic=false);
+    bool select_vector_font(const std::string& fontName, double height,
+                            bool fBold=false, bool fItalic=false);
+
     //inline void FtSetFontSize(double rPoints) { return m_pMFM->SetFontSize(rPoints); }
     //inline void FtSetFontHeight(double rPoints) { return m_pMFM->SetFontHeight(rPoints); }
     //inline void FtSetFontWidth(double rPoints) { return m_pMFM->SetFontWidth(rPoints); }
@@ -122,12 +127,12 @@ public:
     //void set_text_hints(bool hints);
     //double get_text_width(const char* str);
 
+    // text attributes
+
     // text rederization
-    //-----------------------
     void gsv_text(double x, double y, const char* str);
     int draw_text(double x, double y, const std::string& str);
-    //int FtDrawChar(unsigned int nChar);
-    //int FtDrawText(wxString& sText);
+    void draw_glyph(double x, double y, unsigned int ch);
 
     //void FtSetTextPosition(lmLUnits uxPos, lmLUnits uyPos);
     //void FtSetTextPositionPixels(lmPixels vxPos, lmPixels vyPos);
@@ -147,9 +152,10 @@ public:
     //-----------------------
     void reset(RenderingBuffer& buf);
     void set_viewport(Pixels x, Pixels y);
-    void set_scale(double scale);
+    void set_transform(TransAffine& transform);
+    void set_shift(LUnits x, LUnits y);
     void render(bool fillColor);
-    void render(FontRasterizer& ras, FontScanline& sl);
+    void render(FontRasterizer& ras, FontScanline& sl, Color color);
 
 
 protected:

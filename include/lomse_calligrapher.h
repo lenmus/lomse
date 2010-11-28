@@ -27,6 +27,7 @@
 #ifndef __LOMSE_CALLIGRAPHER_H__
 #define __LOMSE_CALLIGRAPHER_H__
 
+#include "lomse_injectors.h"
 #include "lomse_renderer.h"
 
 
@@ -53,10 +54,13 @@ public:
     Calligrapher(FontStorage* fonts, Renderer* renderer);
     ~Calligrapher();
 
-    int draw_text(double x, double y, const std::string& str, double scale=1.0);
-
+    int draw_text(double x, double y, const std::string& str, Color color,
+                  double scale=1.0);
+    void draw_glyph(double x, double y, unsigned int ch, Color color, double scale);
 
 protected:
+    void draw_glyph(double x, double y, unsigned int ch, Color color);
+    void set_scale(double scale);
 
 };
 
@@ -68,15 +72,28 @@ class TextMeter
 {
 protected:
     FontStorage* m_pFonts;
+    double m_scale;
 
 public:
-    TextMeter(FontStorage* fonts);
+    TextMeter(LibraryScope& libraryScope);
     ~TextMeter();
 
     LUnits measure_width(const std::string& str);
     LUnits get_ascender();
     LUnits get_descender();
     LUnits get_font_height();
+    URect bounding_rectangle(unsigned int ch);
+
+    bool select_font(const std::string& fontName, double height,
+                     bool fBold=false, bool fItalic=false);
+    bool select_raster_font(const std::string& fontName, double height,
+                            bool fBold=false, bool fItalic=false);
+    bool select_vector_font(const std::string& fontName, double height,
+                            bool fBold=false, bool fItalic=false);
+
+protected:
+    void set_transform();
+
 };
 
 

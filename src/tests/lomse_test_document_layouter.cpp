@@ -54,22 +54,20 @@ using namespace lomse;
 class DocLayouterTestFixture
 {
 public:
+    LibraryScope m_libraryScope;
+    FontStorage* m_pFonts;
+    std::string m_scores_path;
 
-    DocLayouterTestFixture()
+    DocLayouterTestFixture()     //SetUp fixture
+        : m_libraryScope(cout)
     {
-        m_pLibraryScope = new LibraryScope(cout);
-        m_pLdpFactory = m_pLibraryScope->ldp_factory();
+        m_pFonts = m_libraryScope.font_storage();
         m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
 
     ~DocLayouterTestFixture()
     {
-        delete m_pLibraryScope;
     }
-
-    LibraryScope* m_pLibraryScope;
-    LdpFactory* m_pLdpFactory;
-    std::string m_scores_path;
 };
 
 //---------------------------------------------------------------------------------------
@@ -78,11 +76,10 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_ReturnsGModel)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         CHECK( pGModel != NULL );
@@ -91,11 +88,10 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_CreatesModelAndFirstPage)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         CHECK( pGModel != NULL );
@@ -105,13 +101,12 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_DocPageHasPaperSize)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -123,13 +118,12 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_DocPageHasBoxContent)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -144,11 +138,10 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_HasScoreStub)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         GmoStubScore* pStub = pGModel->get_score_stub(0);
@@ -158,13 +151,12 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_DocPageHasBoxScore)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -181,13 +173,12 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_BoxScoreHasBoxSystem)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -205,13 +196,12 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_BoxSystemHasBoxSlice)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -230,13 +220,12 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_BoxSliceHasBoxSliceInstr)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -256,13 +245,12 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_BoxSystemHasStaffShape)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -278,13 +266,12 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_BoxSystemGetStaffShape)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
@@ -301,12 +288,11 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_EmptyScore_OneStaff)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (musicData )))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         CHECK( pGModel->get_num_pages() == 1 );
@@ -334,12 +320,11 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_BoxesPositionAndMargins)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (musicData )))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         CHECK( pGModel->get_num_pages() == 1 );
@@ -375,12 +360,11 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_EmptyScore_StaffTop)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (musicData )))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         CHECK( pGModel->get_num_pages() == 1 );
@@ -404,12 +388,11 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_EmptyScore_TwoStaves)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (staves 2)(musicData )))))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         CHECK( pGModel->get_num_pages() == 1 );
@@ -442,11 +425,10 @@ SUITE(DocLayouterTest)
 
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_EmptyScore_TwoInstruments)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData )) (instrument (musicData )) )))" );
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        DocLayouter dl( doc.get_im_model(), &meter);
+        DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
         CHECK( pGModel->get_num_pages() == 1 );
@@ -482,7 +464,7 @@ SUITE(DocLayouterTest)
 
     //TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_HasMainSizer)
     //{
-    //    Document doc(*m_pLibraryScope);
+    //    Document doc(m_libraryScope);
     //    doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
     //        "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
     //    MyDocLayouter dl( doc.get_im_model() );
@@ -495,47 +477,39 @@ SUITE(DocLayouterTest)
 //---------------------------------------------------------------------------------------
 // InstrumentEngraver
 //---------------------------------------------------------------------------------------
-class InstrLayouterTestFixture
+class InstrEngraverTestFixture
 {
 public:
+    LibraryScope m_libraryScope;
 
-    InstrLayouterTestFixture()
+    InstrEngraverTestFixture()     //SetUp fixture
+        : m_libraryScope(cout)
     {
-        m_pLibraryScope = new LibraryScope(cout);
-        m_pLdpFactory = m_pLibraryScope->ldp_factory();
-        m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
 
-    ~InstrLayouterTestFixture()
+    ~InstrEngraverTestFixture()
     {
-        delete m_pLibraryScope;
     }
-
-    LibraryScope* m_pLibraryScope;
-    LdpFactory* m_pLdpFactory;
-    std::string m_scores_path;
 };
 
 //---------------------------------------------------------------------------------------
-SUITE(InstrLayouterTest)
+SUITE(InstrEngraverTest)
 {
 
-    TEST_FIXTURE(InstrLayouterTestFixture, InstrLayouter_MeasureIndents_NoBracket)
+    TEST_FIXTURE(InstrEngraverTestFixture, InstrEngraver_MeasureIndents_NoBracket)
     {
         ImoInstrument instr;
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        InstrumentEngraver engraver(&instr, &meter);
+        InstrumentEngraver engraver(&instr, NULL, m_libraryScope);
         engraver.measure_indents();
         CHECK( engraver.get_indent_first() == 0.0f );
         CHECK( engraver.get_indent_other() == 0.0f );
     }
 
-    TEST_FIXTURE(InstrLayouterTestFixture, InstrLayouter_MeasureIndents_Bracket)
+    TEST_FIXTURE(InstrEngraverTestFixture, InstrEngraver_MeasureIndents_Bracket)
     {
         ImoInstrument instr;
         instr.add_staff();
-        TextMeter meter( m_pLibraryScope->font_storage() );
-        InstrumentEngraver engraver(&instr, &meter);
+        InstrumentEngraver engraver(&instr, NULL, m_libraryScope);
         engraver.measure_indents();
         CHECK( engraver.get_indent_first() > 0.0f );
         CHECK( engraver.get_indent_other() > 0.0f );

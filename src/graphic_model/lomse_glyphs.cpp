@@ -36,9 +36,9 @@ GlyphData::GlyphData(const unsigned int glyph, int yOffset, int yShift, int selH
                      int top, int bottom, int xPos, int yPos, int width, int height,
                      int xDrag, int yDrag)
     : GlyphChar(glyph)
-    , GlyphOffset(yOffset)
-    , Top(top)
-    , Bottom(bottom)
+    , GlyphOffset(Tenths(yOffset))
+    , Top(Tenths(top))
+    , Bottom(Tenths(bottom))
 {
     // Table data is in FUnits. As 1 line (10 tenths) is 512 FU, it is simple
     // to convert table data into tenths: just divide FU by 51.2
@@ -52,15 +52,20 @@ GlyphData::GlyphData(const unsigned int glyph, int yOffset, int yShift, int selH
 	if (yShift == 0 && selHeight == 0)
     {
         //not specified. Use full glyph rectangle
-		SelRectShift = (int)(((3072.0 -(float)(height + yPos)) / 51.2) + 0.5);
-		SelRectHeight = (int)(((float)(height) / 51.2) + 0.5);
+		SelRectShift = (3072.0f - Tenths(height + yPos)) / 51.2f + 0.5f;
+		SelRectHeight = Tenths(height) / 51.2f + 0.5f;
 	}
 	else
     {
         //use specified rectangle
-		SelRectHeight = selHeight;
-		SelRectShift = yShift; 
+		SelRectHeight = Tenths(selHeight);
+		SelRectShift = Tenths(yShift); 
 	}
+
+    ////compute bounding box
+    //URect bbox = m_pTextMeter->bounding_rectangle(ch);
+
+
 }
 
 //---------------------------------------------------------------------------------------
@@ -68,7 +73,7 @@ GlyphData::GlyphData(const unsigned int glyph, int yOffset, int yShift, int selH
 //IMPORTANT: The table inicialization values MUST be ordered following the
 //           enum EGlyphIndex, defined in lomse_glyphs.h
 //---------------------------------------------------------------------------------------
-const GlyphData aGlyphsInfo[] =
+const GlyphData glyphs_lmbasic2[] =
 {
 // notheads
 	//                                                      ----- FUnits ------------      -- FUnits--
@@ -255,6 +260,12 @@ const GlyphData aGlyphsInfo[] =
 //height = 1604; FU = 1604/51,2 = 31,33 = 31
 
 // see: lenmus/fonts/font_metrics.xml
+
+
+//MusicGlyphs::MusicGlyphs()
+//    : m_glyphs(glyphs_lmbasic2)
+//{
+//}
 
 
 

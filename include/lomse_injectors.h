@@ -38,6 +38,7 @@ class LdpCompiler;
 class Document;
 class LdpFactory;
 class FontStorage;
+class MusicGlyphs;
 //class UserCommandExecuter;
 //class GraphicView;
 //class Controller;
@@ -51,20 +52,25 @@ protected:
     ostream& m_reporter;
     LdpFactory* m_pLdpFactory;
     FontStorage* m_pFontStorage;
+    double m_ppi;
+    //MusicGlyphs* m_pMusicGlyphs;
 
 public:
-    LibraryScope(ostream& reporter=cout)
+    LibraryScope(ostream& reporter=cout, double ppi=96.0)
         : m_reporter(reporter)
         , m_pLdpFactory(NULL)       //lazzy instantiation. Singleton scope.
         , m_pFontStorage(NULL)      //lazzy instantiation. Singleton scope.
+        , m_ppi(ppi)
     {
     }
 
     ~LibraryScope();
 
-    ostream& default_reporter() { return m_reporter; }
+    inline ostream& default_reporter() { return m_reporter; }
     LdpFactory* ldp_factory();
     FontStorage* font_storage();
+    inline double pixels_per_inch() { return m_ppi; }
+    //MusicGlyphs* music_glyphs();
 
 };
 

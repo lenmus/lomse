@@ -196,6 +196,7 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/lomse_box_system.cpp
     ${SRC_DIR}/graphic_model/lomse_clef_engraver.cpp
     ${SRC_DIR}/graphic_model/lomse_document_layouter.cpp
+    ${SRC_DIR}/graphic_model/lomse_glyphs.cpp
     ${SRC_DIR}/graphic_model/lomse_gm_basic.cpp
     ${SRC_DIR}/graphic_model/lomse_instrument_engraver.cpp
     ${SRC_DIR}/graphic_model/lomse_score_layouter.cpp
@@ -205,6 +206,7 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/lomse_shape_text.cpp
     ${SRC_DIR}/graphic_model/lomse_shapes.cpp
     ${SRC_DIR}/graphic_model/lomse_sizers.cpp
+    ${SRC_DIR}/graphic_model/lomse_system_cursor.cpp
     ${SRC_DIR}/graphic_model/lomse_system_layouter.cpp
     ${SRC_DIR}/graphic_model/lomse_text_engraver.cpp
 )
@@ -242,6 +244,7 @@ set(PARSER_FILES
 
 set(RENDER_FILES
     ${SRC_DIR}/render/lomse_calligrapher.cpp
+    ${SRC_DIR}/render/lomse_font_freetype.cpp
     ${SRC_DIR}/render/lomse_font_storage.cpp
     ${SRC_DIR}/render/lomse_renderer.cpp
     ${SRC_DIR}/render/lomse_screen_drawer.cpp
@@ -390,27 +393,32 @@ add_custom_command(
 
 
 #////////////////////////////////////////////////////////////////////////
-# Target: Examples
+# Target: Example_1
 #////////////////////////////////////////////////////////////////////////
 
 
-set (DEMO1 demo_1)
+set (EXAMPLE1 example_1)
 
 # set directories
 #------------------------------------------------
 set( DEMO_CTROL  ${SRC_DIR}/agg/src/ctrl )
-set( DEMO1_SRC  ${ROOT_DIR}/examples )
+set( EXAMPLE1_SRC  ${ROOT_DIR}/examples )
 
 if( WIN32 )
     set( DEMO_PLATFORM  
-        ${SRC_DIR}/agg/src/platform/win32/agg_platform_support.cpp
-        ${SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp
+        ${EXAMPLE1_SRC}/win32/lomse_platform_win32.cpp
+        ${EXAMPLE1_SRC}/win32/lomse_win32_bmp.cpp
+    )        
+    
+    include_directories(
+        ${EXAMPLE1_SRC}/win32/lomse_win32_bmp.h
     )
 
     
 elseif( UNIX )
     set( DEMO_PLATFORM  
-        ${SRC_DIR}/agg/src/platform/X11/agg_platform_support.cpp )
+        ${EXAMPLE1_SRC}/x11/lomse_platform_x11.cpp
+    )
 
     find_package(X11)
     if(X11_FOUND)  
@@ -432,8 +440,8 @@ endif()
 
 # source files to compile
 #------------------------------------------------
-add_executable( ${DEMO1} ${HAS_GUI}
-        ${DEMO1_SRC}/demo_1.cpp
+add_executable( ${EXAMPLE1} ${HAS_GUI}
+        ${EXAMPLE1_SRC}/example_1.cpp
         ${DEMO_PLATFORM}
         ${DEMO_CTROL}/agg_slider_ctrl.cpp
 )
@@ -442,15 +450,15 @@ add_executable( ${DEMO1} ${HAS_GUI}
 # libraries to link
 #------------------------------------------------
 if(UNIX)
-    target_link_libraries ( ${DEMO1} liblomse.so )
+    target_link_libraries ( ${EXAMPLE1} liblomse.so )
 elseif(WIN32)
-    target_link_libraries ( ${DEMO1} lomse.lib )
+    target_link_libraries ( ${EXAMPLE1} lomse.lib )
 endif()
 
 
 
 # dependencies
-add_dependencies(demo_1 lomse)
+add_dependencies(example_1 lomse)
 
 
 #-----------------------------------------------------------------------------

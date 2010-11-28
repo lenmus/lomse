@@ -154,12 +154,48 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_EmptyScore)
     {
         ImoScore* pScore = new ImoScore();
-        CHECK( pScore->has_options() == false );
+        CHECK( pScore->has_options() == true );
+        CHECK( pScore->get_options()->get_num_items() == 9 );
+        CHECK( pScore->get_option("Render.SpacingFactor")->get_float_value() == 0.547f );
+        CHECK( pScore->get_option("Score.FillPageWithEmptyStaves")->get_bool_value() == false );
+        CHECK( pScore->get_option("StaffLines.StopAtFinalBarline")->get_bool_value() == true );
+        CHECK( pScore->get_option("Score.JustifyFinalBarline")->get_bool_value() == false );
+        CHECK( pScore->get_option("StaffLines.Hide")->get_bool_value() == false );
+        CHECK( pScore->get_option("Staff.DrawLeftBarline")->get_bool_value() == true );
+        CHECK( pScore->get_option("Staff.UpperLegerLines.Displacement")->get_long_value() == 0L  );
+        CHECK( pScore->get_option("Render.SpacingMethod")->get_long_value() == long(k_spacing_proportional) );
+        CHECK( pScore->get_option("Render.SpacingValue")->get_long_value() == 15L );
         ImoInstruments* pColInstr = pScore->get_instruments();
         CHECK( pColInstr != NULL );
         CHECK( pColInstr->get_num_children() == 0 );
         CHECK( pScore->get_num_instruments() == 0 );
         delete pScore;
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ChangeFloatOption)
+    {
+        ImoScore score;
+        CHECK( score.has_options() == true );
+        CHECK( score.get_options()->get_num_items() == 9 );
+        CHECK( score.get_option("Render.SpacingFactor")->get_float_value() == 0.547f );
+
+        score.set_float_option("Render.SpacingFactor", 0.600f);
+
+        CHECK( score.get_options()->get_num_items() == 9 );
+        CHECK( score.get_option("Render.SpacingFactor")->get_float_value() == 0.600f );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ChangeBoolOption)
+    {
+        ImoScore score;
+        CHECK( score.has_options() == true );
+        CHECK( score.get_options()->get_num_items() == 9 );
+        CHECK( score.get_option("StaffLines.Hide")->get_bool_value() == false );
+
+        score.set_bool_option("StaffLines.Hide", true);
+
+        CHECK( score.get_options()->get_num_items() == 9 );
+        CHECK( score.get_option("StaffLines.Hide")->get_bool_value() == true );
     }
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithOption)
@@ -173,6 +209,33 @@ SUITE(InternalModelTest)
         CHECK( pScore->get_option("Staff.Green") == pOpt );
         CHECK( pScore->get_num_instruments() == 0 );
         delete pScore;
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreAddBoolOption)
+    {
+        ImoScore score;
+        score.set_bool_option("Staff.Green", true);
+        CHECK( score.has_options() == true );
+        CHECK( score.get_options()->get_num_items() == 10 );
+        CHECK( score.get_option("Staff.Green")->get_bool_value() == true );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreAddLongOption)
+    {
+        ImoScore score;
+        score.set_long_option("Staff.LongWidth", 700L);
+        CHECK( score.has_options() == true );
+        CHECK( score.get_options()->get_num_items() == 10 );
+        CHECK( score.get_option("Staff.LongWidth")->get_long_value() == 700L );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreAddFloatOption)
+    {
+        ImoScore score;
+        score.set_float_option("Staff.Green", 0.66f);
+        CHECK( score.has_options() == true );
+        CHECK( score.get_options()->get_num_items() == 10 );
+        CHECK( score.get_option("Staff.Green")->get_float_value() == 0.66f );
     }
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithInstrument)
@@ -286,7 +349,7 @@ SUITE(InternalModelTest)
         CHECK( info.is_page_info() == true );
         CHECK( info.get_top_margin() == 2000.0f );
         CHECK( info.get_bottom_margin() == 2000.0f );
-        CHECK( info.get_left_margin() == 2000.0f );
+        CHECK( info.get_left_margin() == 1500.0f );
         CHECK( info.get_right_margin() == 1500.0f );
         CHECK( info.get_binding_margin() == 0.0f );
         CHECK( info.is_portrait() == true );

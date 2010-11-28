@@ -35,8 +35,8 @@
 #include "agg_bounding_rect.h"
 #include "agg_rasterizer_scanline_aa.h"
 
-#include "agg_font_cache_manager.h"     //font renderization using FreeType
-#include "agg_font_freetype.h"
+#include "lomse_font_cache_manager.h"     //font renderization using FreeType
+#include "lomse_font_freetype.h"
 
 using namespace agg;
 
@@ -71,8 +71,8 @@ typedef conv_transform<CurvedConverter>     CurvedTrans;
 typedef conv_contour<CurvedTrans>           CurvedTransContour;
 
 //to render fonts
-typedef agg::font_engine_freetype_int32             FontEngine;
-typedef agg::font_cache_manager<FontEngine>         FontCacheManager;
+typedef lomse::font_engine_freetype_int32           FontEngine;
+typedef lomse::font_cache_manager<FontEngine>       FontCacheManager;
 typedef FontCacheManager::gray8_adaptor_type        FontRasterizer;
 typedef FontCacheManager::gray8_scanline_type       FontScanline;
 

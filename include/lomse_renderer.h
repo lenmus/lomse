@@ -31,9 +31,6 @@ namespace lomse
 
 //forward declarations
 class GraphicModel;
-//class GmoObj;
-//struct rgba16;
-
 
 
 //---------------------------------------------------------------------------------------
@@ -42,12 +39,13 @@ class GraphicModel;
 class Renderer
 {
 public:
-    Renderer(AttrStorage& attr_storage, AttrStorage& attr_stack, PathStorage& path);
+    Renderer(double ppi, AttrStorage& attr_storage, AttrStorage& attr_stack,
+             PathStorage& path);
     virtual ~Renderer() {}
 
     void initialize(RenderingBuffer& buf);
     void render(bool fillColor);
-    void render(FontRasterizer& ras, FontScanline& sl);
+    void render(FontRasterizer& ras, FontScanline& sl, Color color);
     void render_gsv_text(double x, double y, const char* str);
 
 
@@ -71,15 +69,21 @@ public:
         agg::bounding_rect(trans, *this, 0, m_attr_storage.size(), x1, y1, x2, y2);
     }
 
-    void set_viewport(Pixels x, Pixels y)
+    inline void set_viewport(Pixels x, Pixels y)
     {
         m_vxOrg = double(x);
         m_vyOrg = double(y);
     }
 
-    inline void set_scale(double scale) { m_scale = scale; }
-    TransAffine& get_transform() { return set_transformation(); }
-    inline double get_scale() { return m_scale; }
+    inline void set_scale(double scale) { m_userScale = scale; }
+    inline double get_scale() { return m_userScale; }
+    inline void set_shift(LUnits x, LUnits y)
+    {
+        m_uxShift = x;
+        m_uyShift = y;
+    }
+    inline TransAffine& get_transform() { return m_mtx; }
+    void set_transform(TransAffine& transform);
 
 
 
@@ -91,7 +95,8 @@ protected:
 
     //void clear_all(Color c);
     void reset();
-
+    agg::rgba to_rgba(Color c);
+    agg::rgba8 to_rgba8(Color c);
 
     // Rendering. One can specify two additional parameters: 
     // trans_affine and opacity. They can be used to transform the whole
@@ -134,7 +139,7 @@ protected:
                     ras.add_path(m_curved_trans_contour, attr.index);
                 }
 
-                color = attr.fill_color;
+                color = to_rgba8( attr.fill_color );
                 color.opacity(color.opacity() * opacity);
                 ren.color(color);
                 agg::render_scanlines(ras, sl, ren);
@@ -160,7 +165,7 @@ protected:
                 ras.reset();
                 ras.filling_rule(fill_non_zero);
                 ras.add_path(m_curved_stroked_trans, attr.index);
-                color = attr.stroke_color;
+                color = to_rgba8( attr.stroke_color );
                 color.opacity(color.opacity() * opacity);
                 ren.color(color);
                 agg::render_scanlines(ras, sl, ren);
@@ -169,24 +174,22 @@ protected:
     }
 
 private:
+    double m_lunitsToPixels;
 
     //renderization parameters
     double m_expand;
     double m_gamma;
-    double m_scale;
-    double m_rotation;
 
-    //image bounding area (LUnits)
-    double m_uxMin; 
-    double m_uyMin;
-    double m_uxMax;
-    double m_uyMax;
-
-    //current viewport origin (pixels)
-    double m_vxOrg;      
+    //affine transformation parameters
+    double m_userScale;         //not including LUnits to pixels conversion factor
+    double m_rotation;          //degrees: -180.0 to 180.0
+    double m_uxShift;           //additional translation (LUnits)
+    double m_uyShift;           //additional translation (LUnits)
+    double m_vxOrg;             //current viewport origin (pixels)
     double m_vyOrg;
 
-
+    TransAffine m_transform;    //specific transform for paths
+    TransAffine m_mtx;          //global transform
 
     RenderingBuffer         m_rbuf;
     PixFormat               m_pixFormat;
@@ -197,8 +200,6 @@ private:
     AttrStorage&            m_attr_stack;
     PathStorage&            m_path;
 
-    TransAffine             m_transform;
-    TransAffine             m_mtx;
     CurvedConverter         m_curved;
     CurvedStroked           m_curved_stroked;
     CurvedStrokedTrans      m_curved_stroked_trans;
@@ -206,8 +207,6 @@ private:
     CurvedTransContour      m_curved_trans_contour;
 
 };
-
-
 
 
 }   //namespace lomse

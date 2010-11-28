@@ -16,8 +16,8 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//  Credits:
 //  -------------------------
+//  Credits:
 //  This file is based on Anti-Grain Geometry version 2.4 examples' code.
 //  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev
 //  (http://www.antigrain.com). AGG 2.4 is distributed under BSD license.
@@ -27,8 +27,6 @@
 #include "lomse_screen_drawer.h"
 
 #include "lomse_renderer.h"
-
-//#include "lomse_gm_basic.h"
 
 using namespace std;
 
@@ -44,6 +42,12 @@ Drawer::Drawer(LibraryScope& libraryScope)
     m_pFonts = libraryScope.font_storage();
 }
 
+//---------------------------------------------------------------------------------------
+void Drawer::set_text_color(Color color)
+{
+    m_textColor = color;
+}
+
 
 
 //---------------------------------------------------------------------------------------
@@ -52,7 +56,8 @@ Drawer::Drawer(LibraryScope& libraryScope)
 
 ScreenDrawer::ScreenDrawer(LibraryScope& libraryScope)
     : Drawer(libraryScope)
-    , m_pRenderer( new Renderer(m_attr_storage, m_attr_stack, m_path) )
+    , m_pRenderer( new Renderer(libraryScope.pixels_per_inch(), m_attr_storage,
+                                m_attr_stack, m_path) )
     , m_pCalligrapher( new Calligrapher(m_pFonts, m_pRenderer) )
 {
 }
@@ -251,18 +256,18 @@ void ScreenDrawer::pop_attr()
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::fill(const rgba8& f)
+void ScreenDrawer::fill(Color color)
 {
     PathAttributes& attr = cur_attr();
-    attr.fill_color = f;
+    attr.fill_color = color;
     attr.fill_flag = true;
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::stroke(const rgba8& s)
+void ScreenDrawer::stroke(Color color)
 {
     PathAttributes& attr = cur_attr();
-    attr.stroke_color = s;
+    attr.stroke_color = color;
     attr.stroke_flag = true;
 }
 
@@ -291,13 +296,13 @@ void ScreenDrawer::stroke_none()
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::fill_opacity(double op)
+void ScreenDrawer::fill_opacity(unsigned op)
 {
     cur_attr().fill_color.opacity(op);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::stroke_opacity(double op)
+void ScreenDrawer::stroke_opacity(unsigned op)
 {
     cur_attr().stroke_color.opacity(op);
 }
@@ -329,180 +334,14 @@ TransAffine& ScreenDrawer::transform()
 //---------------------------------------------------------------------------------------
 void ScreenDrawer::add_path(VertexSource& vs,  unsigned path_id, bool solid_path)
 {
-    begin_path();
     m_path.concat_path(vs, path_id);
 }
 
-
-
-
-////---------------------------------------------------------------------------------------
-////text. Agg2D font methods
-////---------------------------------------------------------------------------------------
-//
-////---------------------------------------------------------------------------------------
-//void ScreenDrawer::set_font(const char* fontFullName, double height,
-//                            EFontCacheType type, double angle)
-//{
-//    m_textAngle = angle;
-//    m_fontHeight = height;
-//    m_fontCacheType = type;
-//
-//    if (type == k_vector_font_cache)
-//    {
-//        m_fontEngine.load_font(fontFullName, 0, agg::glyph_ren_outline);
-//        m_fontEngine.height(height);
-//    }
-//    else
-//    {
-//        m_fontEngine.load_font(fontFullName, 0, agg::glyph_ren_agg_gray8);
-//        m_fontEngine.height( worldToScreen(height) );
-//    }
-//
-//    m_fontEngine.hinting(m_textHints);
-//}
-//
-////---------------------------------------------------------------------------------------
-//double ScreenDrawer::get_font_height() const
-//{
-//   return m_fontHeight;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ScreenDrawer::set_text_alignment(ETextAlignment align_x, ETextAlignment align_y)
-//{
-//   m_textAlignX = align_x;
-//   m_textAlignY = align_y;
-//}
-//
-////---------------------------------------------------------------------------------------
-//double ScreenDrawer::get_text_width(const char* str)
-//{
-//    double x = 0;
-//    double y = 0;
-//    bool first = true;
-//    while(*str)
-//    {
-//        const agg::glyph_cache* glyph = m_fontCacheManager.glyph(*str);
-//        if(glyph)
-//        {
-//            if(!first) m_fontCacheManager.add_kerning(&x, &y);
-//            x += glyph->advance_x;
-//            y += glyph->advance_y;
-//            first = false;
-//        }
-//        ++str;
-//    }
-//    return (m_fontCacheType == k_vector_font_cache) ? x : screenToWorld(x);
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool ScreenDrawer::get_text_hints() const
-//{
-//   return m_textHints;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ScreenDrawer::set_text_hints(bool hints)
-//{
-//   m_textHints = hints;
-//}
-//
-//
-//
-////---------------------------------------------------------------------------------------
-//void ScreenDrawer::text(double x, double y, const char* str, bool roundOff,
-//                        double ddx, double ddy)
-//{
-//    double dx = 0.0;
-//    double dy = 0.0;
-//
-//    switch(m_textAlignX)
-//    {
-//        case k_align_center:  dx = -get_text_width(str) * 0.5;   break;
-//        case k_align_right:   dx = -get_text_width(str);         break;
-//        default:
-//            break;
-//    }
-//
-//
-//    double asc = get_font_height();
-//    const agg::glyph_cache* glyph = m_fontCacheManager.glyph('H');
-//    if(glyph)
-//    {
-//        asc = glyph->bounds.y2 - glyph->bounds.y1;
-//    }
-//
-//    if(m_fontCacheType == k_raster_font_cache)
-//    {
-//        asc = screenToWorld(asc);
-//    }
-//
-//    switch(m_textAlignY)
-//    {
-//        case k_align_center:  dy = -asc * 0.5; break;
-//        case k_align_top:     dy = -asc;       break;
-//        default: break;
-//    }
-//
-//    if(m_fontEngine.flip_y()) dy = -dy;
-//
-//    agg::trans_affine  mtx;
-//
-//    double start_x = x + dx;
-//    double start_y = y + dy;
-//
-//    if (roundOff)
-//    {
-//        start_x = int(start_x);
-//        start_y = int(start_y);
-//    }
-//    start_x += ddx;
-//    start_y += ddy;
-//
-//    mtx *= agg::trans_affine_translation(-x, -y);
-//    mtx *= agg::trans_affine_rotation(m_textAngle);
-//    mtx *= agg::trans_affine_translation(x, y);
-//
-//    agg::conv_transform<FontCacheManager::path_adaptor_type> tr(m_fontCacheManager.path_adaptor(), mtx);
-//
-//    if(m_fontCacheType == k_raster_font_cache)
-//    {
-//        worldToScreen(start_x, start_y);
-//    }
-//
-//    int i;
-//    for (i = 0; str[i]; i++)
-//    {
-//        glyph = m_fontCacheManager.glyph(str[i]);
-//        if(glyph)
-//        {
-//            if(i) m_fontCacheManager.add_kerning(&start_x, &start_y);
-//            m_fontCacheManager.init_embedded_adaptors(glyph, start_x, start_y);
-//
-//            if(glyph->data_type == agg::glyph_data_outline)
-//            {
-//                m_path.remove_all();
-//				m_path.concat_path(tr,0);
-//                render(true);
-//            }
-//
-//            if(glyph->data_type == agg::glyph_data_gray8)
-//            {
-//                render(m_fontCacheManager.gray8_adaptor(),
-//                       m_fontCacheManager.gray8_scanline());
-//            }
-//            start_x += glyph->advance_x;
-//            start_y += glyph->advance_y;
-//        }
-//    }
-//}
-
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::render(FontRasterizer& ras, FontScanline& sl)
+void ScreenDrawer::render(FontRasterizer& ras, FontScanline& sl, Color color)
 {
     //if(m_blendMode == BlendAlpha)
-        m_pRenderer->render(ras, sl);
+        m_pRenderer->render(ras, sl, color);
     //else
     //    m_pRenderer->render(*this, m_renBaseComp, m_renSolidComp, ras, sl);
 }
@@ -514,41 +353,36 @@ void ScreenDrawer::gsv_text(double x, double y, const char* str)
 }
 
 //---------------------------------------------------------------------------------------
-//text. FreeType with AGG rederization using my font manager
-//---------------------------------------------------------------------------------------
-
-bool ScreenDrawer::set_font(const char* fontFullName, double height, EFontCacheType type)
+bool ScreenDrawer::select_font(const std::string& fontName, double height,
+                               bool fBold, bool fItalic)
 {
-    //Returns true if any error
-
-    return m_pFonts->set_font(fontFullName, height, type);
+    return m_pFonts->select_font(fontName, height, fBold, fItalic);
 }
 
+//---------------------------------------------------------------------------------------
+bool ScreenDrawer::select_raster_font(const std::string& fontName, double height,
+                                      bool fBold, bool fItalic)
+{
+    return m_pFonts->select_raster_font(fontName, height, fBold, fItalic);
+}
 
-////---------------------------------------------------------------------------------------
-//int ScreenDrawer::FtDrawText(const char* sText)
-//{
-//    //render text (FreeType) at current position, using current settings for font.
-//    //Returns the number of chars drawn
-//
-//    if (!m_pFonts->is_font_valid()) return 0;
-//
-//    ////convert text to utf-32
-//    //size_t nLength = sText.Length();
-//    //wxMBConvUTF32 oConv32;
-//    //wxCharBuffer s32Text = sText.mb_str(oConv32);
-//
-//    return FtDrawText(sText, nLength);
-//}
+//---------------------------------------------------------------------------------------
+bool ScreenDrawer::select_vector_font(const std::string& fontName, double height,
+                                      bool fBold, bool fItalic)
+{
+    return m_pFonts->select_vector_font(fontName, height, fBold, fItalic);
+}
 
-////---------------------------------------------------------------------------------------
-//int ScreenDrawer::FtDrawChar(unsigned int nChar)
-//{
-//    //render char (FreeType) at current position, using current settings for font
-//    //Returns 0 if error. 1 if ok
-//
-//    return FtDrawText(&nChar, 1);
-//}
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::draw_glyph(double x, double y, unsigned int ch)
+{
+    if (m_path.total_vertices() > 0)
+        render(true);
+
+    TransAffine& mtx = m_pRenderer->get_transform();
+    mtx.transform(&x, &y);
+    m_pCalligrapher->draw_glyph(x, y, ch, m_textColor, m_pRenderer->get_scale());
+}
 
 //---------------------------------------------------------------------------------------
 int ScreenDrawer::draw_text(double x, double y, const std::string& str)
@@ -560,8 +394,7 @@ int ScreenDrawer::draw_text(double x, double y, const std::string& str)
 
     TransAffine& mtx = m_pRenderer->get_transform();
     mtx.transform(&x, &y);
-    //return m_pFonts->draw_text(x, y, str, m_pRenderer->get_scale());
-    return m_pCalligrapher->draw_text(x, y, str, m_pRenderer->get_scale());
+    return m_pCalligrapher->draw_text(x, y, str, m_textColor, m_pRenderer->get_scale());
 }
 
 ////---------------------------------------------------------------------------------------
@@ -696,15 +529,22 @@ void ScreenDrawer::set_viewport(Pixels x, Pixels y)
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::set_scale(double scale)
+void ScreenDrawer::set_transform(TransAffine& transform)
 {
-    m_pRenderer->set_scale(scale);
+    m_pRenderer->set_transform(transform);
+    //m_pRenderer->set_scale(transform.scale());
 }
 
 //---------------------------------------------------------------------------------------
 void ScreenDrawer::render(bool fillColor)
 {
     m_pRenderer->render(fillColor);
+}
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::set_shift(LUnits x, LUnits y)
+{
+    m_pRenderer->set_shift(x, y);
 }
 
 

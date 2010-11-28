@@ -1456,7 +1456,7 @@ public:
 
         //<size> = num
         if (get_optional(k_number))
-            font.size = get_integer_value(8);
+            font.size = get_float_value(8.0f);
         //<size>. Compatibility 1.5
         else if (get_mandatory(k_label))
             font.size = get_font_size();
@@ -1468,23 +1468,22 @@ public:
         add_to_model( new ImoFontInfo(font) );
     }
 
-    int get_font_size()
+    float get_font_size()
     {
         const string& value = m_pParamToAnalyse->get_value();
         int size = static_cast<int>(value.size()) - 2;
         string points = value.substr(0, size);
         string number = m_pParamToAnalyse->get_value();
-        long nNumber;
+        float rNumber;
         std::istringstream iss(number);
-        if ((iss >> std::dec >> nNumber).fail())
+        if ((iss >> std::dec >> rNumber).fail())
         {
-            stringstream replacement;
             report_msg(m_pParamToAnalyse->get_line_number(),
-                "Invalid size '" + value + "'. Replaced by '10'.");
-            return 10;
+                "Invalid size '" + number + "'. Replaced by '10'.");
+            return 10.0f;
         }
         else
-            return nNumber;
+            return rNumber;
     }
 
     void set_font_style_weight(ImoFontInfo& font)
@@ -2712,8 +2711,7 @@ public:
             }
         }
         else
-            error_msg("Missing value for option '"
-                                     + name + "'. Option ignored.");
+            error_msg("Missing value for option '" + name + "'. Option ignored.");
     }
 
 
@@ -3335,7 +3333,7 @@ protected:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ <textString> = (<textTag> string [<alingment>][<style>][<location>])
+//@ <textString> = (<textTag> string [<alingment>] <style> [<location>])
 //@ <textTag> = { name | abbrev | text }
 //@ <style> = (style <name>)
 //@
@@ -3344,7 +3342,11 @@ protected:
 //@     alignement just indicates the position of the anchor point: at string
 //@     center, at start of string (left) or at end of string (right).
 //@     Since version 1.6 anchor point is always start of string.
-
+//@
+//@ <style> is now mandatory
+//@     For compatibility with 1.5, if no style is specified default style is
+//@     assigned.
+//@
 class TextStringAnalyser : public ElementAnalyser
 {
 public:

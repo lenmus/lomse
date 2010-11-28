@@ -21,11 +21,9 @@
 #include "lomse_text_engraver.h"
 
 #include "lomse_internal_model.h"
-#include "lomse_engraving_options.h"
-//#include "lomse_gm_basic.h"
-//#include "lomse_shape_brace_bracket.h"
-//#include "lomse_shape_staff.h"
-//#include "lomse_box_system.h"
+#include "lomse_calligrapher.h"
+#include "lomse_gm_basic.h"
+#include "lomse_shape_text.h"
 
 
 namespace lomse
@@ -34,9 +32,12 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // TextEngraver implementation
 //---------------------------------------------------------------------------------------
-
-TextEngraver::TextEngraver(ImoScoreText* pText)
-    : m_pText(pText)
+TextEngraver::TextEngraver(LibraryScope& libraryScope, ImoScoreText& text,
+                           ImoScore* pScore)
+    : m_text(text)
+    , m_pScore(pScore)
+    , m_pFontStorage( libraryScope.font_storage() )
+    , m_libraryScope(libraryScope)
 {
 }
 
@@ -45,6 +46,36 @@ TextEngraver::~TextEngraver()
 {
 }
 
+//---------------------------------------------------------------------------------------
+LUnits TextEngraver::measure_width()
+{
+    ImoTextStyleInfo* pStyle = m_text.get_style();
+    if (!pStyle)
+        pStyle = m_pScore->get_default_style_info();
+
+    TextMeter meter(m_libraryScope);
+    meter.select_font( pStyle->get_font_name(), pStyle->get_font_size() );
+    return meter.measure_width(m_text.get_text());
+}
+
+//---------------------------------------------------------------------------------------
+void TextEngraver::add_shape(GmoBox* pBox, LUnits xLeft, LUnits yTop, int valign)
+{
+    //TODO-LOG
+    //if (valign == k_center)
+    {
+        TextMeter meter(m_libraryScope);
+        yTop -= meter.get_descender();
+    }
+
+    ImoTextStyleInfo* pStyle = m_text.get_style();
+    if (!pStyle)
+        pStyle = m_pScore->get_default_style_info();
+
+    GmoShape* pShape = new GmoShapeText(pBox, m_text.get_text(), pStyle, xLeft, yTop,
+                                        m_libraryScope);
+    pBox->add_shape(pShape, GmoShape::k_layer_staff);
+}
 
 
 }  //namespace lomse

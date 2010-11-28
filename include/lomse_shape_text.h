@@ -23,6 +23,7 @@
 
 #include "lomse_shape_base.h"
 #include "lomse_basic.h"
+#include "lomse_injectors.h"
 #include <string>
 using namespace std;
 
@@ -31,20 +32,21 @@ namespace lomse
 
 //forward declarations
 class GmoBox;
-//class GmoBoxSystem;
+class ImoTextStyleInfo;
+class FontStorage;
 
 //---------------------------------------------------------------------------------------
 class GmoShapeText : public GmoSimpleShape
 {
 protected:
     const std::string& m_text;
-    LUnits m_xPos;
-    LUnits m_yPos;
-    //wxFont*     m_pFont;
+    ImoTextStyleInfo* m_pStyle;
+    FontStorage* m_pFontStorage;
+    LibraryScope& m_libraryScope;
 
 public:
-    GmoShapeText(GmoBox* owner, const std::string& text, LUnits x, LUnits y);
-            //, wxFont* pFont);
+    GmoShapeText(GmoBox* owner, const std::string& text, ImoTextStyleInfo* pStyle,
+                 LUnits x, LUnits y, LibraryScope& libraryScope);
     virtual ~GmoShapeText() {}
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
@@ -57,6 +59,8 @@ public:
  //   void SetFont(wxFont *pFont);
  //   std::string* GetText() { return &m_text; }
 
+protected:
+    void select_font();
 
 };
 

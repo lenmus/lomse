@@ -31,11 +31,13 @@ namespace lomse
 //#define lmNO_LEDGER_LINES   -100000.0f
 
 //---------------------------------------------------------------------------------------
-GmoShapeStaff::GmoShapeStaff(GmoBox* owner, ImoStaffInfo* pStaff, int iStaff, LUnits indent)
-    : GmoSimpleShape(owner, GmoObj::k_shape_staff) 
+GmoShapeStaff::GmoShapeStaff(GmoBox* owner, ImoStaffInfo* pStaff, int iStaff,
+                             LUnits indent, Color color)
+    : GmoSimpleShape(owner, GmoObj::k_shape_staff, color) 
     , m_pStaff(pStaff)
 	, m_iStaff(iStaff)
 {
+    //bounding box
     set_width(owner->get_content_width() - indent);
     set_height(m_pStaff->get_height());
 }
@@ -60,7 +62,7 @@ void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
     double spacing = m_pStaff->get_line_spacing();
 
     pDrawer->begin_path();
-    pDrawer->stroke( rgba(0.0, 0.0, 0.0, 1.0) );    //solid black
+    pDrawer->stroke( m_color );
     pDrawer->stroke_width( m_pStaff->get_line_thickness() );
     for (int iL=0; iL < m_pStaff->get_num_lines(); iL++ )
 	{
@@ -69,7 +71,8 @@ void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
         yPos += spacing;
     }
     pDrawer->end_path();
-//    GmoSimpleShape::Render(pPaper,color);
+
+    GmoSimpleShape::on_draw(pDrawer, opt, origin);
 }
 
 ////---------------------------------------------------------------------------------------

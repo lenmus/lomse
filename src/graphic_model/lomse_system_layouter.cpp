@@ -22,80 +22,84 @@
 
 #include "lomse_box_slice_instr.h"
 #include "lomse_engraving_options.h"
-//#include "lomse_basic_model.h"
-//#include "lomse_gm_basic.h"
-//#include "lomse_internal_model.h"
-//
-//// Encapsulation of the table and management algoritms to compute the positioning
-//// data for each ImoStaffObj, when a bar column must be rendered.
-//
-////#include <vector>
-////#include <list>
-////#include <algorithm>
-////#include <math.h>
+#include "lomse_internal_model.h"
+#include "lomse_im_note.h"
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <algorithm>
+#include <math.h>
+using namespace std;
+
+//to save tables into a file, for debugging
+#define LOMSE_DUMP_TABLES   1
+
+#if (LOMSE_DUMP_TABLES)
+    ofstream m_debugFile;
+#endif
 
 
 namespace lomse
 {
 
-//class BreaksTable;
-//
-//#define lmDUMP_TABLES   0
-//
-//#define lmNO_DURATION   100000000000.0f     //any impossible high value
-//#define lmNO_TIME       100000000000.0f     //any impossible high value
-//#define lmNO_POSITION   100000000000.0f     //any impossible high value
+//forward declarations
+class BreaksTable;
+
+
+#define LOMSE_NO_DURATION   100000000000.0f     //any impossible high value
+#define LOMSE_NO_TIME       100000000000.0f     //any impossible high value
+#define LOMSE_NO_POSITION   100000000000.0f     //any impossible high value
 
 
 
-////=====================================================================================
-////BreaksTable implementation
-////=====================================================================================
-//
-////---------------------------------------------------------------------------------------
-//BreaksTable::BreaksTable()
-//{
-//}
-//
-////---------------------------------------------------------------------------------------
-//BreaksTable::~BreaksTable()
-//{
-//    std::list<BreaksTimeEntry*>::iterator it;
-//    for (it = m_BreaksTable.begin(); it != m_BreaksTable.end(); ++it)
-//        delete *it;
-//    m_BreaksTable.clear();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void BreaksTable::add_entry(float rTime, LUnits uxStart, LUnits uWidth, bool fInBeam,
-//                             LUnits uxBeam, float rPriority)
-//{
-//    BreaksTimeEntry* pBTE = new BreaksTimeEntry;
-//    pBTE->rPriority = rPriority;
-//    pBTE->rTimepos = rTime;
-//    pBTE->uxStart = uxStart;
-//    pBTE->uxEnd = uxStart + uWidth;
-//    pBTE->fInBeam = fInBeam;
-//    pBTE->uxBeam = uxBeam;
-//
-//    m_BreaksTable.push_back(pBTE);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void BreaksTable::add_entry(BreaksTimeEntry* pBTE)
-//{
-//    add_entry(pBTE->rTimepos, pBTE->uxStart, pBTE->uxEnd - pBTE->uxStart, pBTE->fInBeam,
-//             pBTE->uxBeam, pBTE->rPriority);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void BreaksTable::change_priority(int iEntry, float rMultiplier)
-//{
-//}
-//
+//=======================================================================================
+//BreaksTable implementation
+//=======================================================================================
+BreaksTable::BreaksTable()
+{
+}
+
+//---------------------------------------------------------------------------------------
+BreaksTable::~BreaksTable()
+{
+    std::list<BreaksTimeEntry*>::iterator it;
+    for (it = m_BreaksTable.begin(); it != m_BreaksTable.end(); ++it)
+        delete *it;
+    m_BreaksTable.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void BreaksTable::add_entry(float rTime, LUnits uxStart, LUnits uWidth, bool fInBeam,
+                             LUnits uxBeam, float rPriority)
+{
+    BreaksTimeEntry* pBTE = new BreaksTimeEntry;
+    pBTE->rPriority = rPriority;
+    pBTE->rTimepos = rTime;
+    pBTE->uxStart = uxStart;
+    pBTE->uxEnd = uxStart + uWidth;
+    pBTE->fInBeam = fInBeam;
+    pBTE->uxBeam = uxBeam;
+
+    m_BreaksTable.push_back(pBTE);
+}
+
+//---------------------------------------------------------------------------------------
+void BreaksTable::add_entry(BreaksTimeEntry* pBTE)
+{
+    add_entry(pBTE->rTimepos, pBTE->uxStart, pBTE->uxEnd - pBTE->uxStart, pBTE->fInBeam,
+             pBTE->uxBeam, pBTE->rPriority);
+}
+
+//---------------------------------------------------------------------------------------
+void BreaksTable::change_priority(int iEntry, float rMultiplier)
+{
+}
+
 ////---------------------------------------------------------------------------------------
 //std::string BreaksTable::dump()
 //{
+//#if (LOMSE_DUMP_TABLES)
+
 //    std::string sMsg = _T("Breaks table\n");
 //    sMsg += _T("===================================================================\n\n");
 //
@@ -115,234 +119,252 @@ namespace lomse
 //                    (*it)->rPriority, (*it)->rTimepos, (*it)->uxStart, (*it)->uxEnd,
 //                    ((*it)->fInBeam ? _T("yes   ") : _T("no    ")), (*it)->uxBeam );
 //    }
-//    return sMsg;
+//#endif
 //}
-//
-////---------------------------------------------------------------------------------------
-//BreaksTimeEntry* BreaksTable::get_first()
-//{
-//    m_it = m_BreaksTable.begin();
-//    if (m_it == m_BreaksTable.end())
-//        return (BreaksTimeEntry*)NULL;
-//
-//    return *m_it;
-//}
-//
-////---------------------------------------------------------------------------------------
-//BreaksTimeEntry* BreaksTable::get_next()
-//{
-//    //advance to next one
-//    ++m_it;
-//    if (m_it != m_BreaksTable.end())
-//        return *m_it;
-//
-//    //no more items
-//    return (BreaksTimeEntry*)NULL;
-//}
-//
-//
-//
-//
-//
-//
-////=====================================================================================
-////LineEntry implementation
-////=====================================================================================
-//
-////---------------------------------------------------------------------------------------
-//LineEntry::LineEntry(ImoStaffObj* pSO, GmoShape* pShape,
-//                         bool fProlog)
-//    : m_fIsBarlineEntry(false)
-//    , m_pSO(pSO)
-//    , m_pShape(pShape)
-//	, m_fProlog(fProlog)
-//    , m_xFinal(0.0f)
-//    , m_uFixedSpace(0.0f)
-//    , m_uVariableSpace(0.0f)
-//    , m_rTimePos((pSO && pSO->IsAligned()) ? pSO->GetTimePos() : -1.0f )
-//    , m_uSize(pShape ? pShape->GetWidth() : 0.0f )
-//    , m_xLeft(pShape ? pShape->GetXLeft() : 0.0f )
-//    , m_uxAnchor((pSO && pSO->IsNote()) ? - pSO->GetAnchorPos(): 0.0f )
-//{
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineEntry::assign_fixed_and_variable_space(ColumnLayouter* pColFmt, float rFactor)
-//{
-//	//assign fixed and variable after spaces to this object and compute the xFinal pos
-//
-//    if (m_fIsBarlineEntry)
-//    {
-//		if (!m_pSO)
-//            m_uSize = 0.0f;
-//    }
-//    else
-//    {
-//		if (!m_pSO->IsVisible())
-//            assign_no_space();
-//		else
-//		{
-//			if (m_pSO->is_note_rest())
-//			{
-//				set_note_rest_space(pColFmt, rFactor);
-//			}
-//			else if (m_pSO->IsClef() || m_pSO->IsKeySignature() || m_pSO->IsTimeSignature())
-//			{
-//                m_uFixedSpace = pColFmt->TenthsToLogical(LOMSE_EXCEPTIONAL_MIN_SPACE, 1);
-//                m_uVariableSpace = pColFmt->TenthsToLogical(LOMSE_MIN_SPACE, 1) - m_uFixedSpace;
-//			}
-//			else if (m_pSO->IsSpacer() || m_pSO->IsScoreAnchor())
-//			{
-//                m_uFixedSpace = 0.0f;
-//                m_uVariableSpace = m_uSize;
-//			}
-//			else
-//                assign_no_space();
-//		}
-//    }
-//
-//    //compute final position
-//    m_xFinal = m_xLeft + get_total_size();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineEntry::set_note_rest_space(ColumnLayouter* pColFmt, float rFactor)
-//{
-//    assign_minimum_fixed_space(pColFmt);
-//    LUnits uIdeal = compute_ideal_distance(pColFmt, rFactor);
-//    assign_variable_space(uIdeal);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineEntry::assign_minimum_fixed_space(ColumnLayouter* pColFmt)
-//{
-//    m_uFixedSpace = pColFmt->TenthsToLogical(LOMSE_EXCEPTIONAL_MIN_SPACE, 1);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineEntry::assign_variable_space(LUnits uIdeal)
-//{
-//    m_uVariableSpace = uIdeal - m_uSize - m_uFixedSpace - m_uxAnchor;
-//    if (m_uVariableSpace < 0)
-//        m_uVariableSpace = 0.0f;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineEntry::assign_no_space()
-//{
-//    //Doesn't have after space requirements
-//    m_uFixedSpace = 0.0f;
-//    m_uVariableSpace = 0.0f;
-//
-//    //Doesn't consume time-pos grid space.
-//    m_uSize = 0.0f;
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits LineEntry::compute_ideal_distance(ColumnLayouter* pColFmt, float rFactor)
-//{
-//    if (pColFmt->IsProportionalSpacing())
-//        return compute_ideal_distance_proportional(pColFmt, rFactor);
-//    else
-//        return compute_ideal_distance_fixed(pColFmt);
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits LineEntry::compute_ideal_distance_fixed(ColumnLayouter* pColFmt)
-//{
-//	int iStaff = m_pSO->GetStaffNum();
-//    return pColFmt->TenthsToLogical(pColFmt->GetFixedSpacingValue(), iStaff);
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits LineEntry::compute_ideal_distance_proportional(ColumnLayouter* pColFmt,
-//                                                       float rFactor)
-//{
-//	static const float rLog2 = 0.3010299956640f;		// log(2)
-//	int iStaff = m_pSO->GetStaffNum();
-//
-//	//spacing function:   Space(Di) = Smin*[1 + A*log2(Di/Dmin)]
-//	LUnits uSmin = pColFmt->TenthsToLogical(LOMSE_MIN_SPACE, iStaff);
-//    float rVar = log(((lmNoteRest*)m_pSO)->get_duration() / LOMSE_DMIN) / rLog2;     //log2(Di/Dmin)
-//    if (rVar > 0.0f)
-//        return uSmin * (1.0f + rFactor * rVar);
-//    else
-//        return uSmin;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineEntry::reposition_at(LUnits uxNewXLeft)
-//{
-//    m_xLeft = uxNewXLeft;
-//    m_xFinal = m_xLeft + get_total_size();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineEntry::move_shape()
-//{
-//    if (m_pSO && m_pShape)
-//    {
-//        LUnits uShift = m_xLeft - m_pShape->GetXLeft();
+
+//---------------------------------------------------------------------------------------
+BreaksTimeEntry* BreaksTable::get_first()
+{
+    m_it = m_BreaksTable.begin();
+    if (m_it == m_BreaksTable.end())
+        return (BreaksTimeEntry*)NULL;
+
+    return *m_it;
+}
+
+//---------------------------------------------------------------------------------------
+BreaksTimeEntry* BreaksTable::get_next()
+{
+    //advance to next one
+    ++m_it;
+    if (m_it != m_BreaksTable.end())
+        return *m_it;
+
+    //no more items
+    return (BreaksTimeEntry*)NULL;
+}
+
+
+
+//=====================================================================================
+//LineEntry implementation
+//=====================================================================================
+LineEntry::LineEntry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, float rTime)
+    : m_fIsBarlineEntry(false)
+    , m_pSO(pSO)
+    , m_pShape(pShape)
+	, m_fProlog(fProlog)
+    , m_xFinal(0.0f)
+    , m_uFixedSpace(0.0f)
+    , m_uVariableSpace(0.0f)
+    , m_rTimePos(rTime)
+    , m_uSize(pShape ? pShape->get_width() : 0.0f )
+    , m_xLeft(pShape ? pShape->get_left() : 0.0f )
+    , m_uxAnchor(0.0f)     //TODO (pSO && pSO->is_note()) ? - pSO->GetAnchorPos(): 0.0f )
+{
+}
+
+//---------------------------------------------------------------------------------------
+bool LineEntry::is_note_rest() 
+{ 
+    return m_pSO && m_pSO->is_note_rest(); 
+}
+
+//---------------------------------------------------------------------------------------
+bool LineEntry::has_barline() 
+{ 
+    return m_pSO && m_pSO->is_barline(); 
+}
+
+//---------------------------------------------------------------------------------------
+void LineEntry::assign_fixed_and_variable_space(ColumnLayouter* pColLyt, float rFactor)
+{
+	//assign fixed and variable after spaces to this object and compute the xFinal pos
+
+    if (m_fIsBarlineEntry)
+    {
+		if (!m_pSO)
+            m_uSize = 0.0f;
+    }
+    else
+    {
+		if (!m_pSO->is_visible())
+            assign_no_space();
+		else
+		{
+			if (m_pSO->is_note_rest())
+			{
+				set_note_rest_space(pColLyt, rFactor);
+			}
+			else if (m_pSO->is_clef() || m_pSO->is_key_signature() || m_pSO->is_time_signature())
+			{
+                m_uFixedSpace = pColLyt->tenths_to_logical(LOMSE_EXCEPTIONAL_MIN_SPACE, 0);
+                m_uVariableSpace = pColLyt->tenths_to_logical(LOMSE_MIN_SPACE, 0) - m_uFixedSpace;
+			}
+			else if (m_pSO->is_spacer())    // || m_pSO->is_score_anchor())
+			{
+                m_uFixedSpace = 0.0f;
+                m_uVariableSpace = m_uSize;
+			}
+			else
+                assign_no_space();
+		}
+    }
+
+    //compute final position
+    m_xFinal = m_xLeft + get_total_size();
+}
+
+//---------------------------------------------------------------------------------------
+void LineEntry::set_note_rest_space(ColumnLayouter* pColLyt, float rFactor)
+{
+    assign_minimum_fixed_space(pColLyt);
+    LUnits uIdeal = compute_ideal_distance(pColLyt, rFactor);
+    assign_variable_space(uIdeal);
+}
+
+//---------------------------------------------------------------------------------------
+void LineEntry::assign_minimum_fixed_space(ColumnLayouter* pColLyt)
+{
+    m_uFixedSpace = pColLyt->tenths_to_logical(LOMSE_EXCEPTIONAL_MIN_SPACE, 0);
+}
+
+//---------------------------------------------------------------------------------------
+void LineEntry::assign_variable_space(LUnits uIdeal)
+{
+    m_uVariableSpace = uIdeal - m_uSize - m_uFixedSpace - m_uxAnchor;
+    if (m_uVariableSpace < 0)
+        m_uVariableSpace = 0.0f;
+}
+
+//---------------------------------------------------------------------------------------
+void LineEntry::assign_no_space()
+{
+    //no after space requirements
+    m_uFixedSpace = 0.0f;
+    m_uVariableSpace = 0.0f;
+
+    //do not consume time-pos grid space.
+    m_uSize = 0.0f;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits LineEntry::compute_ideal_distance(ColumnLayouter* pColLyt, float rFactor)
+{
+    if (pColLyt->is_proportional_spacing())
+        return compute_ideal_distance_proportional(pColLyt, rFactor);
+    else
+        return compute_ideal_distance_fixed(pColLyt);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits LineEntry::compute_ideal_distance_fixed(ColumnLayouter* pColLyt)
+{
+	int iStaff = m_pSO->get_staff();
+    return pColLyt->tenths_to_logical(pColLyt->get_fixed_spacing_value(), iStaff);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits LineEntry::compute_ideal_distance_proportional(ColumnLayouter* pColLyt,
+                                                       float rFactor)
+{
+	static const float rLog2 = 0.3010299956640f;		// log(2)
+	int iStaff = m_pSO->get_staff();
+
+	//spacing function:   Space(Di) = Smin*[1 + A*log2(Di/Dmin)]
+	LUnits uSmin = pColLyt->tenths_to_logical(LOMSE_MIN_SPACE, iStaff);
+    ImoNoteRest* pNR = static_cast<ImoNoteRest*>(m_pSO);
+    float rVar = log(pNR->get_duration() / LOMSE_DMIN) / rLog2;     //log2(Di/Dmin)
+    if (rVar > 0.0f)
+        return uSmin * (1.0f + rFactor * rVar);
+    else
+        return uSmin;
+}
+
+//---------------------------------------------------------------------------------------
+void LineEntry::reposition_at(LUnits uxNewXLeft)
+{
+    m_xLeft = uxNewXLeft;
+    m_xFinal = m_xLeft + get_total_size();
+}
+
+//---------------------------------------------------------------------------------------
+void LineEntry::move_shape()
+{
+    if (m_pSO && m_pShape)
+    {
+        LUnits uShift = m_xLeft - m_pShape->get_left();
 //        m_pSO->StoreOriginAndShiftShapes( uShift, m_pShape->GetOwnerIDX() );
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//std::string LineEntry::dump_header()
-//{
-//    //         ...+  ..+   ...+ ..+   +  ..........+........+........+........+........+........+........+........+......+
-//    return _T("item    Type      ID Prolog   Timepos  xAnchor    xLeft     Size  SpFixed    SpVar    Space   xFinal ShpIdx\n");
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits LineEntry::get_shift_to_noterest_center()
-//{
+        m_pShape->set_left(m_xLeft);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void LineEntry::dump_header()
+{
+#if (LOMSE_DUMP_TABLES)
+    //              ...+  ..+   ...+ ..+   +  ..........+........+........+........+........+........+........+........+......+
+    m_debugFile << "item    Type      ID Prolog   Timepos  xAnchor    xLeft     size  SpFixed    SpVar    Space   xFinal ShpIdx\n";
+#endif
+}
+
+//---------------------------------------------------------------------------------------
+LUnits LineEntry::get_shift_to_noterest_center()
+{
 //    if (m_pSO && m_pSO->is_note_rest())
 //    {
 //        //determine notehead width or rest width
 //        LUnits uxWidth = 0.0f;
-//        if (m_pSO->IsRest())
-//            uxWidth = m_pShape->GetWidth();
-//        else if (m_pSO->IsNote())
-//            uxWidth = ((lmShapeNote*)m_pShape)->GetNoteHead()->GetWidth();
+//        if (m_pSO->is_rest())
+//            uxWidth = m_pShape->get_width();
+//        else
+//            uxWidth = ((GmoShapeNote*)m_pShape)->GetNoteHead()->get_width();
 //
 //        return uxWidth / 2.0f;
 //    }
 //    else
-//        return 0.0f;
-//}
-//
-////---------------------------------------------------------------------------------------
-//std::string LineEntry::dump(int iEntry)
-//{
-//    std::string sMsg = std::string::Format(_T("%4d: "), iEntry);
-//    if (m_fIsBarlineEntry)
-//    {
-//        sMsg += _T("  Omega");
-//        if (m_pSO)
-//            sMsg += std::string::Format(_T("%3d          "), m_pSO->GetScoreObjType() );
-//        else
-//            sMsg += _T("  -          ");
-//    }
-//    else
-//    {
-//		sMsg += std::string::Format(_T("  pSO %4d %3d   %s  "),
-//								m_pSO->GetScoreObjType(),
-//								m_pSO->GetID(),
-//								(m_fProlog ? _T("S") : _T(" ")) );
-//    }
-//
-//    sMsg += std::string::Format(_T("%11.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f %8.2f"),
-//                m_rTimePos, m_uxAnchor, m_xLeft, m_uSize, m_uFixedSpace,
-//                m_uVariableSpace, get_total_size(), m_xFinal );
-//
-//    if (m_pShape)
-//        sMsg += std::string::Format(_T("  %4d\n"), m_pShape->GetOwnerIDX());
-//    else
-//        sMsg += _T("    --\n");
-//
-//    return sMsg;
-//}
+        return 0.0f;
+}
+
+//---------------------------------------------------------------------------------------
+void LineEntry::dump(int iEntry)
+{
+#if (LOMSE_DUMP_TABLES)
+    m_debugFile << setw(4) << iEntry << ": ";      //"%4d: "
+    if (m_fIsBarlineEntry)
+    {
+        m_debugFile << "  Omega";
+        if (m_pSO)
+            m_debugFile << setw(4) << m_pSO->get_obj_type();
+        else
+            m_debugFile << "  - ";
+        m_debugFile << "         ";
+    }
+    else
+    {
+		m_debugFile << "  pSO " 
+					<< setw(4) << m_pSO->get_obj_type()
+					<< setw(4) << m_pSO->get_id()
+					<< (m_fProlog ? "   S  " : "      ");
+    }
+
+    m_debugFile << fixed << setprecision(2) << setfill(' ')
+                << setw(11) << m_rTimePos
+                << setw(9) << m_uxAnchor
+                << setw(9) << m_xLeft
+                << setw(9) << m_uSize
+                << setw(9) << m_uFixedSpace
+                << setw(9) << m_uVariableSpace
+                << setw(9) << get_total_size()
+                << setw(9) << m_xFinal;
+
+    //if (m_pShape)
+    //    m_debugFile << "  " << setw(4) << m_pShape->GetOwnerIDX() << "\n";
+    //else
+        m_debugFile << "    --\n";
+
+#endif
+}
 
 
 
@@ -361,106 +383,106 @@ ColumnSplitter::~ColumnSplitter()
 {
 }
 
-////---------------------------------------------------------------------------------------
-//void ColumnSplitter::ComputeBreakPoints(BreaksTable* pBT)
-//{
-//    //This method computes the break points for this line and adds them to received
-//    //break points table.
-//    //
-//    //Algorithm:
-//    //
-//    //In a first approach, add an entry for each timepos at which there is an object placed.
-//    //Assign priority 0.8 to all entries.
-//    //
-//    //Now lower or raise priority of some entries according to empiric rules:
-//    //
-//    //  1. If there is a time signature, strongly penalize those timepos not in beat
-//    //     position (priority *= 0.5)
-//    //
-//    //  2. Do not split notes/rests. Penalize those entries occupied in some
-//    //     line (priority *= 0.7).
-//    //
-//    //  3. Do not to break beams. Penalize those entries  in which, at some line, there
-//    //     is a beam (priority *=0.9).
-//    //
-//    //Finally, when all priorities have been computed, sort the table by priority (high to
-//    //low) and by space (max to min).
-//    //
-//    //In order to accelerate the computation of this table, LineTables must have all
-//    //necesary data so that it doesn't become necessary to traverse the StaffObjs
-//    //colection again.
-//
-//    //TODO: Add filters for priority
-//    const LineEntryIterator itEnd = m_pLineTable->end();
-//	LineEntryIterator it = m_pLineTable->begin();
-//
-//    //skip initial non-timed entries
-//	for (it = m_pLineTable->begin(); it != itEnd && IsLowerTime((*it)->get_timepos(), 0.0f); ++it);
-//    if (it == itEnd) return;
-//
-//    //process current time
-//    float rTime = (*it)->get_timepos();
-//    LUnits uxStart = (*it)->get_position();
-//    LUnits uxWidth = (*it)->get_shape_size();
-//    LUnits uxBeam = 0.0f;
-//    bool fInBeam = false;
-//    ImoStaffObj* pSO = (*it)->m_pSO;
-//    if (pSO && pSO->is_note_rest() && ((lmNoteRest*)pSO)->IsBeamed())
-//    {
-//        fInBeam = true;
-//        ImoStaffObj* pSOEnd = ((lmNoteRest*)pSO)->GetBeam()->GetEndNoteRest();
-//        GmoShape* pShape = pSOEnd->GetShape();
-//        uxBeam = pShape->GetXLeft() + pShape->GetWidth();
-//    }
-//
-//	while (it != itEnd)
-//    {
-//		if (IsEqualTime((*it)->get_timepos(), rTime) || IsLowerTime((*it)->get_timepos(), 0.0f))
-//        {
-//		    //skip any not-timed entry
-//            if (IsEqualTime((*it)->get_timepos(), rTime))
-//            {
-//                uxWidth = wxMax(uxWidth, (*it)->get_shape_size());
-//                ImoStaffObj* pSO = (*it)->m_pSO;
-//                if (pSO && pSO->is_note_rest() && ((lmNoteRest*)pSO)->IsBeamed())
-//                {
-//                    fInBeam = true;
-//                    ImoStaffObj* pSOEnd = ((lmNoteRest*)pSO)->GetBeam()->GetEndNoteRest();
-//                    GmoShape* pShape = pSOEnd->GetShape();
-//                    uxBeam = wxMax(uxBeam, pShape->GetXLeft() + pShape->GetWidth());
-//                }
-//            }
-//        }
-//        else
-//        {
-//            //new timepos. Add entry for previous timepos
-//            pBT->add_entry(rTime, uxStart, uxWidth, fInBeam, uxBeam);
-//
-//            //start collecting data for new timepos
-//            rTime = (*it)->get_timepos();
-//            uxStart = (*it)->get_position();
-//            uxWidth = (*it)->get_shape_size();
-//            ImoStaffObj* pSO = (*it)->m_pSO;
-//            if (pSO && pSO->is_note_rest() && ((lmNoteRest*)pSO)->IsBeamed())
-//            {
-//                fInBeam = true;
-//                ImoStaffObj* pSOEnd = ((lmNoteRest*)pSO)->GetBeam()->GetEndNoteRest();
-//                GmoShape* pShape = pSOEnd->GetShape();
-//                uxBeam = pShape->GetXLeft() + pShape->GetWidth();
-//            }
-//            else
-//            {
-//                uxBeam = 0.0f;
-//                fInBeam = false;
-//            }
-//       }
-//		++it;
-//    }
-//
-//    pBT->add_entry(rTime, uxStart, uxWidth, fInBeam, uxBeam);
-//
-//    //wxLogMessage( pBT->dump() );
-//}
+//---------------------------------------------------------------------------------------
+void ColumnSplitter::compute_break_points(BreaksTable* pBT)
+{
+    //This method computes the break points for this line and adds them to received
+    //break points table.
+    //
+    //Algorithm:
+    //
+    //In a first approach, add an entry for each timepos at which there is an object placed.
+    //Assign priority 0.8 to all entries.
+    //
+    //Now lower or raise priority of some entries according to empiric rules:
+    //
+    //  1. If there is a time signature, strongly penalize those timepos not in beat
+    //     position (priority *= 0.5)
+    //
+    //  2. Do not split notes/rests. Penalize those entries occupied in some
+    //     line (priority *= 0.7).
+    //
+    //  3. Do not to break beams. Penalize those entries  in which, at some line, there
+    //     is a beam (priority *=0.9).
+    //
+    //Finally, when all priorities have been computed, sort the table by priority (high to
+    //low) and by space (max to min).
+    //
+    //In order to accelerate the computation of this table, LineTables must have all
+    //necesary data so that it doesn't become necessary to traverse the StaffObjs
+    //colection again.
+
+    //TODO: Add filters for priority
+    const LineEntryIterator itEnd = m_pLineTable->end();
+	LineEntryIterator it = m_pLineTable->begin();
+
+    //skip initial non-timed entries
+	for (it = m_pLineTable->begin(); it != itEnd && is_lower_time((*it)->get_timepos(), 0.0f); ++it);
+    if (it == itEnd) return;
+
+    //process current time
+    float rTime = (*it)->get_timepos();
+    LUnits uxStart = (*it)->get_position();
+    LUnits uxWidth = (*it)->get_shape_size();
+    LUnits uxBeam = 0.0f;
+    bool fInBeam = false;
+    ImoStaffObj* pSO = (*it)->m_pSO;
+    if (pSO && pSO->is_note_rest() && static_cast<ImoNoteRest*>(pSO)->is_beamed())
+    {
+        fInBeam = true;
+        //ImoStaffObj* pSOEnd = static_cast<ImoNoteRest*>(pSO)->GetBeam()->GetEndNoteRest();
+        //GmoShape* pShape = pSOEnd->get_shape();
+        //uxBeam = pShape->get_left() + pShape->get_width();
+    }
+
+	while (it != itEnd)
+    {
+		if (is_equal_time((*it)->get_timepos(), rTime) || is_lower_time((*it)->get_timepos(), 0.0f))
+        {
+		    //skip any not-timed entry
+            if (is_equal_time((*it)->get_timepos(), rTime))
+            {
+                uxWidth = max(uxWidth, (*it)->get_shape_size());
+                ImoStaffObj* pSO = (*it)->m_pSO;
+                //if (pSO && pSO->is_note_rest() && static_cast<ImoNoteRest*>(pSO)->is_beamed())
+                //{
+                //    fInBeam = true;
+                //    ImoStaffObj* pSOEnd = (static_cast<ImoNoteRest*>(pSO)->GetBeam()->GetEndNoteRest();
+                //    GmoShape* pShape = pSOEnd->get_shape();
+                //    uxBeam = max(uxBeam, pShape->get_left() + pShape->get_width());
+                //}
+            }
+        }
+        else
+        {
+            //new timepos. Add entry for previous timepos
+            pBT->add_entry(rTime, uxStart, uxWidth, fInBeam, uxBeam);
+
+            //start collecting data for new timepos
+            rTime = (*it)->get_timepos();
+            uxStart = (*it)->get_position();
+            uxWidth = (*it)->get_shape_size();
+            ImoStaffObj* pSO = (*it)->m_pSO;
+            if (pSO && pSO->is_note_rest() && static_cast<ImoNoteRest*>(pSO)->is_beamed())
+            {
+                fInBeam = true;
+                //ImoStaffObj* pSOEnd = static_cast<ImoNoteRest*>(pSO)->GetBeam()->GetEndNoteRest();
+                //GmoShape* pShape = pSOEnd->get_shape();
+                //uxBeam = pShape->get_left() + pShape->get_width();
+            }
+            else
+            {
+                uxBeam = 0.0f;
+                fInBeam = false;
+            }
+       }
+		++it;
+    }
+
+    pBT->add_entry(rTime, uxStart, uxWidth, fInBeam, uxBeam);
+
+    //cout << pBT->dump() );
+}
 
 
 
@@ -468,9 +490,10 @@ ColumnSplitter::~ColumnSplitter()
 //LineTable:
 //  An object to encapsulate positioning data for a line
 //=======================================================================================
-LineTable::LineTable(int nInstr, int nVoice, LUnits uxStart, LUnits uSpace)
-    : m_nInstr(nInstr)
-	, m_nVoice(nVoice)
+LineTable::LineTable(int line, int nInstr, LUnits uxStart, LUnits uSpace)
+    : m_line(line)
+    , m_nInstr(nInstr)
+	, m_nVoice(line+1)
     , m_uxLineStart(uxStart)
     , m_uInitialSpace(uSpace)
 {
@@ -479,69 +502,83 @@ LineTable::LineTable(int nInstr, int nVoice, LUnits uxStart, LUnits uSpace)
 //---------------------------------------------------------------------------------------
 LineTable::~LineTable()
 {
-//    for (LineEntryIterator it = m_LineEntries.begin(); it != m_LineEntries.end(); ++it)
-//		delete *it;
-//
-//    m_LineEntries.clear();
+    for (LineEntryIterator it = m_LineEntries.begin(); it != m_LineEntries.end(); ++it)
+		delete *it;
+    m_LineEntries.clear();
 }
 
-////---------------------------------------------------------------------------------------
-//LineEntry* LineTable::add_entry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog)
-//{
-//    LineEntry* pEntry = new LineEntry(pSO, pShape, fProlog);
-//    push_back(pEntry);
-//	return pEntry;
-//}
-//
-////---------------------------------------------------------------------------------------
-//LineEntry* LineTable::add_final_entry(ImoStaffObj* pSO, GmoShape* pShape)
-//{
-//    LineEntry* pEntry = new LineEntry(pSO, pShape, false);
-//    pEntry->mark_as_barline_entry();
-//    push_back(pEntry);
-//	return pEntry;
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool LineTable::ContainsBarline()
-//{
-//    LineEntry* pEntry = get_last_entry();
-//    return pEntry->is_barline_entry() && pEntry->has_barline();
-//}
-//
-////---------------------------------------------------------------------------------------
-//std::string LineTable::DumpMainTable()
-//{
-//    std::string sMsg = std::string::Format(_T("Line table dump. Instr=%d, voice=%d, xStart=%.2f, initSpace=%.2f\n"),
-//									 GetInstrument(), GetVoice(), GetLineStartPosition(),
-//                                     GetSpaceAtBeginning() );
-//    sMsg += _T("===================================================================\n\n");
-//
-//    if (Size() == 0)
-//    {
-//        sMsg += _T("The table is empty.");
-//        return sMsg;
-//    }
-//
-//    //headers
-//    sMsg += LineEntry::dump_header();
-//
-//    //loop to dump table entries
-//    LineEntry* pTE;
-//    for (int i = 0; i < (int)Size(); i++)
-//    {
-//        if (i % 4 == 0) {
-//            sMsg += wxT("----------------------------------------------------------------------------\n");
-//        }
-//        pTE = item(i);
-//        sMsg += pTE->dump(i);
-//    }
-//
-//    sMsg += _T("=== end of table ==================================================\n\n");
-//    return sMsg;
-//
-//}
-//
+//---------------------------------------------------------------------------------------
+LineEntry* LineTable::add_entry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog,
+                                float rTime)
+{
+    LineEntry* pEntry = new LineEntry(pSO, pShape, fProlog, rTime);
+    push_back(pEntry);
+	return pEntry;
+}
+
+//---------------------------------------------------------------------------------------
+LineEntry* LineTable::add_final_entry(ImoStaffObj* pSO, GmoShape* pShape, float rTime)
+{
+    LineEntry* pEntry = new LineEntry(pSO, pShape, false, rTime);
+    pEntry->mark_as_barline_entry();
+    push_back(pEntry);
+	return pEntry;
+}
+
+//---------------------------------------------------------------------------------------
+void LineTable::add_shapes(std::vector<GmoBoxSliceInstr*>& sliceInstrBoxes)
+{
+    for (LineEntryIterator it = m_LineEntries.begin(); it != m_LineEntries.end(); ++it)
+    {
+        if ((*it)->get_shape())
+            sliceInstrBoxes[m_nInstr]->add_shape((*it)->get_shape(),
+                                                 GmoShape::k_layer_notes);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+bool LineTable::contains_barline()
+{
+    LineEntry* pEntry = get_last_entry();
+    return pEntry->is_barline_entry() && pEntry->has_barline();
+}
+
+//---------------------------------------------------------------------------------------
+void LineTable::dump_main_table()
+{
+#if (LOMSE_DUMP_TABLES)
+
+    m_debugFile << fixed << setprecision(2) << setfill(' ')
+                << "Line table dump. Instr=" << get_instrument() 
+                << ", voice=" << get_voice()
+                << ", xStart=" << setw(2) << get_line_start_position()
+                << ", initSpace=" << setw(2) << get_space_at_beginning()
+                << "\n"
+                << "===================================================================\n\n";
+
+    if (size() == 0)
+    {
+        m_debugFile << "The table is empty.";
+        return;
+    }
+
+    //headers
+    LineEntry::dump_header();
+
+    //loop to dump table entries
+    for (int i = 0; i < (int)size(); i++)
+    {
+        if (i % 4 == 0) {
+            m_debugFile << "----------------------------------------------------------------------------\n";
+        }
+        LineEntry* pTE = item(i);
+        pTE->dump(i);
+    }
+
+    m_debugFile << "=== end of table ==================================================\n\n";
+#endif
+}
+
 ////---------------------------------------------------------------------------------------
 //void LineTable::ClearDirtyFlags()
 //{
@@ -553,17 +590,17 @@ LineTable::~LineTable()
 //		    (*it)->m_pSO->SetDirty(false, true);    //true-> propagate change
 //    }
 //}
-//
-////---------------------------------------------------------------------------------------
-//LUnits LineTable::GetLineWidth()
-//{
-//	//Return the size of the measure represented by this line or zero if invalid line
-//
-//	if (m_LineEntries.size() > 0 && m_LineEntries.back()->is_barline_entry())
-//        return m_LineEntries.back()->m_xFinal - GetLineStartPosition();
-//    else
-//        return 0.0f;
-//}
+
+//---------------------------------------------------------------------------------------
+LUnits LineTable::get_line_width()
+{
+	//Return the size of the measure represented by this line or zero if invalid line
+
+	if (m_LineEntries.size() > 0 && m_LineEntries.back()->is_barline_entry())
+        return m_LineEntries.back()->m_xFinal - get_line_start_position();
+    else
+        return 0.0f;
+}
 
 
 //=======================================================================================
@@ -581,135 +618,138 @@ ColumnLayouter::ColumnLayouter(ColumnStorage* pStorage, float rSpacingFactor,
 //---------------------------------------------------------------------------------------
 ColumnLayouter::~ColumnLayouter()
 {
-//    DeleteLineSpacers();
+    delete_line_spacers();
 }
 
-////---------------------------------------------------------------------------------------
-//LUnits ColumnLayouter::TenthsToLogical(Tenths rTenths, int nStaff)
-//{
-//    return m_pColStorage->TenthsToLogical(rTenths, nStaff);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ColumnLayouter::DeleteLineSpacers()
-//{
-//    LineSpacersIterator it;
-//    for (it = m_LineSpacers.begin(); it != m_LineSpacers.end(); ++it)
-//        delete *it;
-//    m_LineSpacers.clear();
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool ColumnLayouter::IsThereBarline()
-//{
-//    //returns true if there is at least one line containing a barline
-//
-//    for (LinesIterator it=m_pColStorage->begin(); it != m_pColStorage->end(); ++it)
-//    {
-//        if ((*it)->ContainsBarline())
-//            return true;
-//    }
-//    return false;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ColumnLayouter::DoSpacing(bool fTrace)
-//{
-//    //computes the minimum space required by this column
-//
-//#if lmDUMP_TABLES
-//    wxLogMessage( m_pColStorage->DumpColumnStorage() );
-//#endif
-//
-//    m_uMinColumnSize = ComputeSpacing();
-//
-//#if lmDUMP_TABLES
-//    wxLogMessage( m_pColStorage->DumpColumnStorage() );
-//#endif
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits ColumnLayouter::ComputeSpacing()
-//{
-//    //Spacing algorithm. Returns the resulting minimum column width
-//
-//    CreateLineSpacers();
-//    ProcessNonTimedAtProlog();
-//    ProcessTimedAtCurrentTimepos();
-//    while (ThereAreObjects())
-//    {
-//        ProcessNonTimedAtCurrentTimepos();
-//        ProcessTimedAtCurrentTimepos();
-//    }
-//
-//    DeleteLineSpacers();
-//	return m_pColStorage->GetColumnWitdh();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ColumnLayouter::CreateLineSpacers()
-//{
-//    const LinesIterator itEnd = m_pColStorage->end();
-//    for (LinesIterator it=m_pColStorage->begin(); it != itEnd; ++it)
-//	{
-//        LineSpacer* pLinSpacer = new LineSpacer(*it, this, m_rSpacingFactor);
-//        m_LineSpacers.push_back(pLinSpacer);
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ColumnLayouter::ProcessNonTimedAtProlog()
-//{
-//    LUnits uSpaceAfterProlog = TenthsToLogical(LOMSE_SPACE_AFTER_PROLOG, 1);
-//    m_rCurrentTime = lmNO_TIME;           //any impossible high value
-//    m_rCurrentPos = 0.0f;
-//    for (LineSpacersIterator it=m_LineSpacers.begin(); it != m_LineSpacers.end(); ++it)
-//	{
-//        (*it)->ProcessNonTimedAtProlog(uSpaceAfterProlog);
-//        LUnits uxNextPos = (*it)->GetNextPosition();
-//        m_rCurrentTime = wxMin(m_rCurrentTime, (*it)->GetNextAvailableTime());
-//        m_rCurrentPos = wxMax(m_rCurrentPos, uxNextPos);
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ColumnLayouter::ProcessTimedAtCurrentTimepos()
-//{
-//    m_fThereAreObjects = false;
-//    float rNextTime = lmNO_TIME;           //any impossible high value
-//    LUnits uxPosForNextTime = lmNO_POSITION;    //any impossible high value
-//    for (LineSpacersIterator it=m_LineSpacers.begin(); it != m_LineSpacers.end(); ++it)
-//	{
-//        if ((*it)->CurrentTimeIs(m_rCurrentTime) && (*it)->ThereAreTimedObjs())
-//        {
-//            (*it)->ProcessTimedAtCurrentTimepos(m_rCurrentPos);
-//            LUnits uxNextPos = (*it)->GetNextPosition();
-//            uxPosForNextTime = wxMin(uxPosForNextTime, uxNextPos);
-//        }
-//        if ((*it)->ThereAreMoreObjects())
-//        {
-//            m_fThereAreObjects = true;
-//            rNextTime = wxMin(rNextTime, (*it)->GetNextAvailableTime());
-//        }
-//    }
-//
-//    m_rCurrentTime = rNextTime;
-//    if (uxPosForNextTime < lmNO_POSITION)
-//        m_rCurrentPos = uxPosForNextTime;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ColumnLayouter::ProcessNonTimedAtCurrentTimepos()
-//{
-//    LUnits uxPosForNextTime = 0.0f;
-//    for (LineSpacersIterator it=m_LineSpacers.begin(); it != m_LineSpacers.end(); ++it)
-//	{
-//        (*it)->ProcessNonTimedAtCurrentTimepos(m_rCurrentPos);
-//        LUnits uxNextPos = (*it)->GetNextPosition();
-//        uxPosForNextTime = wxMax(uxPosForNextTime, uxNextPos);
-//    }
-//    m_rCurrentPos = uxPosForNextTime;
-//}
+//---------------------------------------------------------------------------------------
+LUnits ColumnLayouter::tenths_to_logical(Tenths value, int staff)
+{
+    return m_pColStorage->tenths_to_logical(value, staff);
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnLayouter::delete_line_spacers()
+{
+    LineSpacersIterator it;
+    for (it = m_LineSpacers.begin(); it != m_LineSpacers.end(); ++it)
+        delete *it;
+    m_LineSpacers.clear();
+}
+
+//---------------------------------------------------------------------------------------
+bool ColumnLayouter::is_there_barline()
+{
+    //returns true if there is at least one line containing a barline
+
+    for (LinesIterator it=m_pColStorage->begin(); it != m_pColStorage->end(); ++it)
+    {
+        if ((*it)->contains_barline())
+            return true;
+    }
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnLayouter::do_spacing(bool fTrace)
+{
+    //computes the minimum space required by this column
+
+#if LOMSE_DUMP_TABLES
+    m_pColStorage->dump_column_storage();
+#endif
+
+    m_uMinColumnSize = compute_spacing();
+
+#if LOMSE_DUMP_TABLES
+    m_pColStorage->dump_column_storage();
+#endif
+}
+
+//---------------------------------------------------------------------------------------
+LUnits ColumnLayouter::compute_spacing()
+{
+    //Spacing algorithm. Returns the resulting minimum column width
+
+    if (there_are_lines())
+    {
+        create_line_spacers();
+        process_non_timed_at_prolog();
+        process_timed_at_current_timepos();
+        while (there_are_objects())
+        {
+            process_non_timed_at_current_timepos();
+            process_timed_at_current_timepos();
+        }
+
+        delete_line_spacers();
+    }
+	return m_pColStorage->get_column_width();
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnLayouter::create_line_spacers()
+{
+    const LinesIterator itEnd = m_pColStorage->end();
+    for (LinesIterator it=m_pColStorage->begin(); it != itEnd; ++it)
+	{
+        LineSpacer* pLinSpacer = new LineSpacer(*it, this, m_rSpacingFactor);
+        m_LineSpacers.push_back(pLinSpacer);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnLayouter::process_non_timed_at_prolog()
+{
+    LUnits uSpaceAfterProlog = tenths_to_logical(LOMSE_SPACE_AFTER_PROLOG, 0);
+    m_rCurrentTime = LOMSE_NO_TIME;           //any impossible high value
+    m_rCurrentPos = 0.0f;
+    for (LineSpacersIterator it=m_LineSpacers.begin(); it != m_LineSpacers.end(); ++it)
+	{
+        (*it)->process_non_timed_at_prolog(uSpaceAfterProlog);
+        LUnits uxNextPos = (*it)->get_next_position();
+        m_rCurrentTime = min(m_rCurrentTime, (*it)->get_next_available_time());
+        m_rCurrentPos = max(m_rCurrentPos, uxNextPos);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnLayouter::process_timed_at_current_timepos()
+{
+    m_fThereAreObjects = false;
+    float rNextTime = LOMSE_NO_TIME;           //any impossible high value
+    LUnits uxPosForNextTime = LOMSE_NO_POSITION;    //any impossible high value
+    for (LineSpacersIterator it=m_LineSpacers.begin(); it != m_LineSpacers.end(); ++it)
+	{
+        if ((*it)->current_time_is(m_rCurrentTime) && (*it)->are_there_timed_objs())
+        {
+            (*it)->process_timed_at_current_timepos(m_rCurrentPos);
+            LUnits uxNextPos = (*it)->get_next_position();
+            uxPosForNextTime = min(uxPosForNextTime, uxNextPos);
+        }
+        if ((*it)->are_there_more_objects())
+        {
+            m_fThereAreObjects = true;
+            rNextTime = min(rNextTime, (*it)->get_next_available_time());
+        }
+    }
+
+    m_rCurrentTime = rNextTime;
+    if (uxPosForNextTime < LOMSE_NO_POSITION)
+        m_rCurrentPos = uxPosForNextTime;
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnLayouter::process_non_timed_at_current_timepos()
+{
+    LUnits uxPosForNextTime = 0.0f;
+    for (LineSpacersIterator it=m_LineSpacers.begin(); it != m_LineSpacers.end(); ++it)
+	{
+        (*it)->process_non_timed_at_current_timepos(m_rCurrentPos);
+        LUnits uxNextPos = (*it)->get_next_position();
+        uxPosForNextTime = max(uxPosForNextTime, uxNextPos);
+    }
+    m_rCurrentPos = uxPosForNextTime;
+}
 
 
 
@@ -717,12 +757,15 @@ ColumnLayouter::~ColumnLayouter()
 //=======================================================================================
 // SystemLayouter implementation
 //=======================================================================================
-SystemLayouter::SystemLayouter()    //float rSpacingFactor, ESpacingMethod nSpacingMethod,
-                                    //Tenths rSpacingValue)
-//    : m_rSpacingFactor(rSpacingFactor)
-//    , m_nSpacingMethod(nSpacingMethod)
-//    , m_rSpacingValue(rSpacingValue)
+SystemLayouter::SystemLayouter(float rSpacingFactor, ESpacingMethod nSpacingMethod,
+                               Tenths rSpacingValue)
+    : m_rSpacingFactor(rSpacingFactor)
+    , m_nSpacingMethod(nSpacingMethod)
+    , m_rSpacingValue(rSpacingValue)
 {
+#if (LOMSE_DUMP_TABLES)
+    m_debugFile.open("dbg_tables.txt");
+#endif
 }
 
 //---------------------------------------------------------------------------------------
@@ -742,16 +785,20 @@ SystemLayouter::~SystemLayouter()
     for (itLB=m_LinesBuilder.begin(); itLB != m_LinesBuilder.end(); ++itLB)
         delete *itLB;
     m_LinesBuilder.clear();
+
+#if (LOMSE_DUMP_TABLES)
+    m_debugFile.close();
+#endif
 }
 
 //---------------------------------------------------------------------------------------
-//void SystemLayouter::EndOfSystemMeasurements()
-//{
-//    //caller informs that all data for this system has been suplied.
-//    //This is the right place to do any preparatory work, not to be repeated if re-spacing.
-//
-//    //Nothing to do for current implementation
-//}
+void SystemLayouter::end_of_system_measurements()
+{
+    //caller informs that all data for this system has been suplied.
+    //This is the right place to do any preparatory work, not to be repeated if re-spacing.
+
+    //Nothing to do for current implementation
+}
 
 //---------------------------------------------------------------------------------------
 void SystemLayouter::start_bar_measurements(int iCol, LUnits uxStart, LUnits uSpace)
@@ -759,7 +806,7 @@ void SystemLayouter::start_bar_measurements(int iCol, LUnits uxStart, LUnits uSp
     //prepare to receive data for a new bar in column iCol [0..n-1].
 
     //If not yet created, create ColumnLayouter object to store measurements
-    //LinesBuilder* pLB;
+    LinesBuilder* pLB;
     if (m_ColLayouters.size() == (size_t)iCol)
     {
         //create storage for this column
@@ -767,159 +814,160 @@ void SystemLayouter::start_bar_measurements(int iCol, LUnits uxStart, LUnits uSp
         m_ColStorage.push_back(pStorage);
 
         //create a lines builder object for this column
-        LinesBuilder* pLB = new LinesBuilder(pStorage);
+        pLB = new LinesBuilder(pStorage);
         m_LinesBuilder.push_back(pLB);
 
         //create the column formatter object
-        ColumnLayouter* pColFmt = new ColumnLayouter(pStorage, m_rSpacingFactor,
+        ColumnLayouter* pColLyt = new ColumnLayouter(pStorage, m_rSpacingFactor,
                                                      m_nSpacingMethod, m_rSpacingValue);
-        m_ColLayouters.push_back(pColFmt);
+        m_ColLayouters.push_back(pColLyt);
     }
-    //else
-    //    pLB = m_LinesBuilder[iCol];
+    else
+        pLB = m_LinesBuilder[iCol];
 
-    ////start lines
+    //save start position and initial space
     //pLB->start_measurements_for_instrument(nInstr, uxStart, pInstr, uSpace);
+    pLB->set_start_position(uxStart);
+    pLB->set_initial_space(uSpace);
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::include_object(int iCol, int iInstr, ImoStaffObj* pSO, bool fProlog,
+void SystemLayouter::include_object(int iCol, int iLine, int iInstr, ImoInstrument* pInstr,
+                                    ImoStaffObj* pSO, float rTime, bool fProlog,
                                     int nStaff, GmoShape* pShape)
 {
     //caller sends data about one staffobj in current bar, for column iCol [0..n-1]
 
-    m_LinesBuilder[iCol]->include_object(iInstr, pSO, fProlog, nStaff);
+    m_LinesBuilder[iCol]->include_object(iLine, iInstr, pInstr, pSO, rTime,
+                                         fProlog, nStaff, pShape);
 }
 
 //---------------------------------------------------------------------------------------
 void SystemLayouter::include_barline_and_terminate_bar_measurements(int iCol,
                                                                     ImoStaffObj* pSO,
-                                                                    LUnits xStart)
+                                                                    GmoShape* pShape,
+                                                                    LUnits xStart,
+                                                                    float rTime)
 {
     //caller sends lasts object to store in current bar, for column iCol [0..n-1].
 
-    m_LinesBuilder[iCol]->close_line(pSO, xStart);
+    m_LinesBuilder[iCol]->close_line(pSO, NULL, xStart, rTime);
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::terminate_bar_measurements_without_barline(int iCol, LUnits xStart)
+void SystemLayouter::terminate_bar_measurements_without_barline(int iCol, LUnits xStart,
+                                                                float rTime)
 {
     //caller informs that there are no barline and no more objects in column iCol [0..n-1].
 
-    m_LinesBuilder[iCol]->close_line(NULL, xStart);
+    m_LinesBuilder[iCol]->close_line(NULL, NULL, xStart, rTime);
 }
 
-////---------------------------------------------------------------------------------------
-//void SystemLayouter::DiscardMeasurementsForColumn(int iCol)
-//{
-//    //caller request to ignore measurements for column iCol [0..n-1]
-//
-//    m_ColStorage[iCol]->Initialize();
-//    m_ColLayouters[iCol]->Initialize();
-//    m_LinesBuilder[iCol]->Initialize();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void SystemLayouter::DoColumnSpacing(int iCol, bool fTrace)
-//{
-//    m_ColLayouters[iCol]->DoSpacing(fTrace);
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits SystemLayouter::RedistributeSpace(int iCol, LUnits uNewStart)
-//{
-//    LUnits uNewBarSize = m_ColLayouters[iCol]->GetMinimumSize();
-//    ColumnResizer oResizer(m_ColStorage[iCol], uNewBarSize);
-//	oResizer.RepositionShapes(uNewStart);
-//
-//    LUnits uBarFinalPosition = uNewStart + uNewBarSize;
-//    return uBarFinalPosition;
-//}
-//
+//---------------------------------------------------------------------------------------
+void SystemLayouter::discard_measurements_for_column(int iCol)
+{
+    //caller request to ignore measurements for column iCol [0..n-1]
+
+    m_ColStorage[iCol]->initialize();
+    m_ColLayouters[iCol]->initialize();
+    //m_LinesBuilder[iCol]->initialize();
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::do_column_spacing(int iCol, bool fTrace)
+{
+    m_ColLayouters[iCol]->do_spacing(fTrace);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits SystemLayouter::redistribute_space(int iCol, LUnits uNewStart)
+{
+    LUnits uNewBarSize = m_ColLayouters[iCol]->get_minimum_size();
+    ColumnResizer oResizer(m_ColStorage[iCol], uNewBarSize);
+	oResizer.reposition_shapes(uNewStart);
+
+    LUnits uBarFinalPosition = uNewStart + uNewBarSize;
+    return uBarFinalPosition;
+}
+
 ////---------------------------------------------------------------------------------------
 //void SystemLayouter::AddTimeGridToBoxSlice(int iCol, GmoBoxSlice* pBSlice)
 //{
 //    //create the time-grid table and transfer it (and its ownership) to GmoBoxSlice
 //    pBSlice->SetTimeGridTable( new TimeGridTable(m_ColStorage[iCol]) );
 //}
-//
-////---------------------------------------------------------------------------------------
-//void SystemLayouter::IncrementColumnSize(int iCol, LUnits uIncr)
-//{
-//    m_ColLayouters[iCol]->IncrementColumnSize(uIncr);
-//}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::increment_column_size(int iCol, LUnits uIncr)
+{
+    m_ColLayouters[iCol]->increment_column_size(uIncr);
+}
 
 //---------------------------------------------------------------------------------------
 void SystemLayouter::add_shapes(std::vector<GmoBoxSliceInstr*>& sliceInstrBoxes)
 {
-    int iInstr = 0;
-    std::vector<GmoBoxSliceInstr*>::iterator it;
-    for (it = sliceInstrBoxes.begin(); it != sliceInstrBoxes.end(); ++it, ++iInstr)
-    {
-  //      GmoBoxSliceInstr* pBox = *it;
-  //      ImoObj* pImo = NULL;
-  //      ClefEngraver engraver(pBox, pImo);
-		//GmoShape* pShape = engraver.create_shape(pBox, pImo);
-  //                     //(GmoBox* pBox, UPoint uPos, Color colorC, bool fSmallClef);
-  //      (*it)->add_shape(pShape, GmoShape::k_layer_notes);
-    }
+    std::vector<ColumnStorage*>::iterator itS;
+    for (itS=m_ColStorage.begin(); itS != m_ColStorage.end(); ++itS)
+        (*itS)->add_shapes(sliceInstrBoxes);
 }
 
-////---------------------------------------------------------------------------------------
-//LUnits SystemLayouter::GetStartPositionForColumn(int iCol)
-//{
-//    return m_ColStorage[iCol]->GetStartOfBarPosition();
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits SystemLayouter::GetMinimumSize(int iCol)
-//{
-//    return m_ColLayouters[iCol]->GetMinimumSize();
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool SystemLayouter::GetOptimumBreakPoint(int iCol, LUnits uAvailable,
-//                                        float* prTime, LUnits* puWidth)
-//{
-//    //return m_ColLayouters[iCol]->GetOptimumBreakPoint(uAvailable, prTime, puWidth);
-//    BreakPoints oBreakPoints(m_ColStorage[iCol]);
-//    if (oBreakPoints.FindOptimunBreakPointForSpace(uAvailable))
-//    {
-//        *prTime = oBreakPoints.GetOptimumTimeForFoundBreakPoint();
-//        *puWidth = oBreakPoints.GetOptimumPosForFoundBreakPoint();
-//        return false;
-//    }
-//    else
-//        return true;
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool SystemLayouter::ColumnHasBarline(int iCol)
-//{
-//    return m_ColLayouters[iCol]->IsThereBarline();
-//}
-//
+//---------------------------------------------------------------------------------------
+LUnits SystemLayouter::get_start_position_for_column(int iCol)
+{
+    return m_ColStorage[iCol]->get_start_of_bar_position();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits SystemLayouter::get_minimum_size(int iCol)
+{
+    return m_ColLayouters[iCol]->get_minimum_size();
+}
+
+//---------------------------------------------------------------------------------------
+bool SystemLayouter::get_optimum_break_point(int iCol, LUnits uAvailable,
+                                        float* prTime, LUnits* puWidth)
+{
+    //return m_ColLayouters[iCol]->get_optimum_break_point(uAvailable, prTime, puWidth);
+    BreakPoints oBreakPoints(m_ColStorage[iCol]);
+    if (oBreakPoints.find_optimum_break_point_for_space(uAvailable))
+    {
+        *prTime = oBreakPoints.get_optimum_time_for_found_break_point();
+        *puWidth = oBreakPoints.get_optimum_position_for_break_point();
+        return false;
+    }
+    else
+        return true;
+}
+
+//---------------------------------------------------------------------------------------
+bool SystemLayouter::column_has_barline(int iCol)
+{
+    return m_ColLayouters[iCol]->is_there_barline();
+}
+
 ////---------------------------------------------------------------------------------------
 //void SystemLayouter::ClearDirtyFlags(int iCol)
 //{
 //    m_ColStorage[iCol]->ClearDirtyFlags();
 //}
-//
-////---------------------------------------------------------------------------------------
-//std::string SystemLayouter::DumpColumnData(int iCol)
-//{
-//    return m_ColStorage[iCol]->DumpColumnStorage();
-//}
-//
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::dump_column_data(int iCol)
+{
+#if (LOMSE_DUMP_TABLES)
+    m_ColStorage[iCol]->dump_column_storage();
+#endif
+}
+
 ////------------------------------------------------
 //// Debug build: methods coded only for Unit Tests
 ////------------------------------------------------
 //#if defined(_LM_DEBUG_)
 //
-//int SystemLayouter::GetNumObjectsInColumnLine(int iCol, int iLine)
+//int SystemLayouter::get_num_objects_in_column_line(int iCol, int iLine)
 //{
 //    //iCol, iLine = [0..n-1]
-//    return m_ColStorage[iCol]->GetNumObjectsInLine(iLine);
+//    return m_ColStorage[iCol]->get_num_objects_in_line(iLine);
 //}
 //
 //#endif
@@ -936,64 +984,81 @@ ColumnStorage::ColumnStorage()
 //---------------------------------------------------------------------------------------
 ColumnStorage::~ColumnStorage()
 {
-//    DeleteLines();
+    delete_lines();
 }
 
-////---------------------------------------------------------------------------------------
-//void ColumnStorage::Initialize()
-//{
-//    DeleteLines();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ColumnStorage::DeleteLines()
-//{
-//	for (LinesIterator it=m_Lines.begin(); it != m_Lines.end(); ++it)
-//	{
-//		delete *it;
-//	}
-//	m_Lines.clear();
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits ColumnStorage::TenthsToLogical(Tenths rTenths, int nStaff)
-//{
-//    wxASSERT(nStaff > 0);
-//	return m_pStaff[nStaff-1]->TenthsToLogical(rTenths);
-//}
-//
+//---------------------------------------------------------------------------------------
+void ColumnStorage::initialize()
+{
+    delete_lines();
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnStorage::delete_lines()
+{
+	for (LinesIterator it=m_Lines.begin(); it != m_Lines.end(); ++it)
+	{
+		delete *it;
+	}
+	m_Lines.clear();
+}
+
+//---------------------------------------------------------------------------------------
+LinesIterator ColumnStorage::find_line(int line)
+{
+	for (LinesIterator it=m_Lines.begin(); it != m_Lines.end(); ++it)
+    {
+		if ((*it)->is_for_line(line))
+            return it;
+	}
+    return m_Lines.end();
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnStorage::set_staff_spacing(int staff, LUnits space)
+{ 
+    m_lineSpace.reserve(staff+1);
+    m_lineSpace[staff] = space; 
+}
+
+//---------------------------------------------------------------------------------------
+LUnits ColumnStorage::tenths_to_logical(Tenths value, int staff)
+{
+	return (value * m_lineSpace[staff]) / 10.0f;
+}
+
 ////---------------------------------------------------------------------------------------
 //LinesIterator ColumnStorage::FindLineForInstrAndVoice(int nInstr, int nVoice)
 //{
 //    //return m_pColStorage->FindLineForInstrAndVoice(nInstr, nVoice);
 //	for (LinesIterator it=m_Lines.begin(); it != m_Lines.end(); ++it)
 //    {
-//		if ((*it)->IsLineForInstrument(nInstr) && (*it)->IsLineForVoice(nVoice) )
+//		if ((*it)->is_line_for_instrument(nInstr) && (*it)->is_line_for_voice(nVoice) )
 //            return it;
 //	}
 //    return m_Lines.end();
 //}
-//
-////---------------------------------------------------------------------------------------
-//LineTable* ColumnStorage::OpenNewLine(int nInstr, int nVoice, LUnits uxStart,
-//                                               LUnits uSpace)
-//{
-//    LineTable* pLineTable = new LineTable(nInstr, nVoice, uxStart, uSpace);
-//    m_Lines.push_back(pLineTable);
-//    return pLineTable;
-//}
-//
-////---------------------------------------------------------------------------------------
-//std::string ColumnStorage::DumpColumnStorage()
-//{
-//    std::string sMsg = _T("Start of dump. ColumnStorage\n");
-//	for (LinesIterator it = m_Lines.begin(); it != m_Lines.end(); ++it)
-//	{
-//        sMsg += (*it)->DumpMainTable();
-//    }
-//    return sMsg;
-//}
-//
+
+//---------------------------------------------------------------------------------------
+LineTable* ColumnStorage::open_new_line(int line, int instr, LUnits uxStart, LUnits uSpace)
+{
+    LineTable* pLineTable = new LineTable(line, instr, uxStart, uSpace);
+    m_Lines.push_back(pLineTable);
+    return pLineTable;
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnStorage::dump_column_storage()
+{
+#if (LOMSE_DUMP_TABLES)
+    m_debugFile << "Start of dump. ColumnStorage" <<endl;
+	for (LinesIterator it = m_Lines.begin(); it != m_Lines.end(); ++it)
+	{
+        (*it)->dump_main_table();
+    }
+#endif
+}
+
 ////---------------------------------------------------------------------------------------
 //void ColumnStorage::ClearDirtyFlags()
 //{
@@ -1004,24 +1069,31 @@ ColumnStorage::~ColumnStorage()
 //	for (LinesIterator it = m_Lines.begin(); it != m_Lines.end(); ++it)
 //		(*it)->ClearDirtyFlags();
 //}
-//
-////---------------------------------------------------------------------------------------
-//LUnits ColumnStorage::GetColumnWitdh()
-//{
-//    LUnits uColWidth = 0;
-//	for (LinesIterator it = m_Lines.begin(); it != m_Lines.end(); ++it)
-//        uColWidth = wxMax(uColWidth, (*it)->GetLineWidth());
-//
-//    return uColWidth;
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits ColumnStorage::GetStartOfBarPosition()
-//{
-//    //returns the x position for the start of the bar column
-//
-//    return m_Lines.front()->GetLineStartPosition();
-//}
+
+//---------------------------------------------------------------------------------------
+LUnits ColumnStorage::get_column_width()
+{
+    LUnits uColWidth = 0;
+	for (LinesIterator it = m_Lines.begin(); it != m_Lines.end(); ++it)
+        uColWidth = max(uColWidth, (*it)->get_line_width());
+
+    return uColWidth;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits ColumnStorage::get_start_of_bar_position()
+{
+    //returns the x position for the start of the bar column
+
+    return m_Lines.front()->get_line_start_position();
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnStorage::add_shapes(std::vector<GmoBoxSliceInstr*>& sliceInstrBoxes)
+{
+	for (LinesIterator it=m_Lines.begin(); it != m_Lines.end(); ++it)
+        (*it)->add_shapes(sliceInstrBoxes);
+}
 
 
 
@@ -1033,7 +1105,7 @@ LinesBuilder::LinesBuilder(ColumnStorage* pStorage)
     : m_pColStorage(pStorage)
 	, m_pCurEntry((LineEntry*)NULL)
 {
-//    Initialize();
+    //initialize();
 }
 
 //---------------------------------------------------------------------------------------
@@ -1042,128 +1114,137 @@ LinesBuilder::~LinesBuilder()
 }
 
 ////---------------------------------------------------------------------------------------
-//void LinesBuilder::Initialize()
+//void LinesBuilder::initialize()
 //{
-//    ResetDefaultStaffVoices();
+//    reset_default_voices();
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void LinesBuilder::ResetDefaultStaffVoices()
+//void LinesBuilder::reset_default_voices()
 //{
-//    for(int i=0; i < lmMAX_STAFF; i++)
+//    for(size_t i=0; i < m_nStaffVoice.size(); i++)
 //        m_nStaffVoice[i] = 0;
 //}
-//
+
 ////---------------------------------------------------------------------------------------
 //void LinesBuilder::start_measurements_for_instrument(int nInstr, LUnits uxStart,
 //                                                      ImoInstrument* pInstr, LUnits uSpace)
 //{
-//    CreateLinesForEachStaff(nInstr, uxStart, pInstr, uSpace);
+//    create_lines_for_each_staff(nInstr, uxStart, pInstr, uSpace);
 //}
-//
+
 ////---------------------------------------------------------------------------------------
-//void LinesBuilder::CreateLinesForEachStaff(int nInstr, LUnits uxStart,
-//                                                ImoInstrument* pInstr, LUnits uSpace)
+//void LinesBuilder::create_lines_for_each_staff(int nInstr, LUnits uxStart,
+//                                               ImoInstrument* pInstr, LUnits uSpace)
 //{
 //    //We need at least one line for each staff, for the music on each staff.
 //    //As we don'y know yet which voice number will be the first note/rest on each staff we
 //    //cannot yet assign voice to these lines. Therefore, we will assign voice 0 (meaning
 //    //'no voice assigned yet') and voice will be updated when finding the first note/rest.
 //
-//	int nNumStaves = pInstr->GetNumStaves();
-//    wxASSERT(nNumStaves < lmMAX_STAFF);
-//
-//    for(int iS=0; iS < nNumStaves; iS++)
+//	int numStaves = pInstr->get_num_staves();
+//    for(int iS=0; iS < numStaves; iS++)
 //    {
-//        m_pColStorage->SaveStaffPointer(iS, pInstr->GetStaff(iS+1));
+//        m_pColStorage->set_staff_spacing(iS, pInstr->get_line_spacing_for_staff(iS));
+//        m_nStaffVoice.reserve(iS+1);
 //        m_nStaffVoice[iS] = iS+1;
-//        StartLine(nInstr, iS+1, uxStart, uSpace);
+//        start_line(nInstr, iS+1, uxStart, uSpace);
 //    }
 //}
-//
+
 ////---------------------------------------------------------------------------------------
-//void LinesBuilder::StartLineInheritInitialPostionAndSpace(int nInstr, int nVoice)
+//void LinesBuilder::start_line_inherit_initial_postion_and_space(int line, int instr,
+//                                                                int voice)
 //{
-//    LUnits uxStart = m_pColStorage->front()->GetLineStartPosition();
-//    LUnits uSpace = m_pColStorage->front()->GetSpaceAtBeginning();
-//    StartLine(nInstr, nVoice, uxStart, uSpace);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LinesBuilder::StartLine(int nInstr, int nVoice, LUnits uxStart, LUnits uSpace)
-//{
-//    //Start a new line for instrument nInstr (0..n-1), to be used for voice nVoice.
-//    //The line starts at position uxStart and space before first object must be uSpace.
-//
-//    //create the line and store it
-//    LineTable* pLineTable = m_pColStorage->OpenNewLine(nInstr, nVoice, uxStart, uSpace);
-//
-//    //created line is set as 'current line' to receive new data.
-//    m_itCurLine = m_pColStorage->GetLastLine();
-//
-//    //as line is empty, pointer to last added entry is NULL
-//	m_pCurEntry = (LineEntry*)NULL;
+//    //LUnits uxStart = m_pColStorage->front()->get_line_start_position();
+//    //LUnits uSpace = m_pColStorage->front()->get_space_at_beginning();
+//    //start_line(line, instr, voice, uxStart, uSpace);
+//    start_line(line, instr, voice, m_uxStart, m_uInitialSpace);
 //}
 
 //---------------------------------------------------------------------------------------
-void LinesBuilder::close_line(ImoStaffObj* pSO, LUnits xStart)  //GmoShape* pShape,
+void LinesBuilder::start_line(int line, int instr)
 {
-//	//close current line.
-//
-//    m_pCurEntry = (*m_itCurLine)->add_final_entry(pSO, pShape);
-//    m_pCurEntry->set_position(xStart);
+    //Start a new line for instrument instr (0..n-1), to be used for voice voice.
+    //The line starts at position uxStart and space before first object must be uSpace.
+
+    //create the line and store it
+    LineTable* pLineTable 
+        = m_pColStorage->open_new_line(line, instr, m_uxStart, m_uInitialSpace);
+
+    //created line is set as 'current line' to receive new data.
+    m_itCurLine = m_pColStorage->get_last_line();
+
+    //as line is empty, pointer to last added entry is NULL
+	m_pCurEntry = (LineEntry*)NULL;
 }
 
 //---------------------------------------------------------------------------------------
-void LinesBuilder::include_object(int iInstr, ImoStaffObj* pSO, bool fProlog, int nStaff)
+void LinesBuilder::close_line(ImoStaffObj* pSO, GmoShape* pShape, LUnits xStart,
+                              float rTime)
 {
-//    int nVoice = DecideVoiceToUse(pSO, nStaff);
-//    m_itCurLine = m_pColStorage->FindLineForInstrAndVoice(nInstr, nVoice);
-//
-//    //if doesn't exist, start it
-//    if (m_pColStorage->IsEndOfTable(m_itCurLine))
-//    {
-//        wxASSERT(nVoice != 0);          //it must be a valid voice. Otherwise the default
-//                                        //line must have been found!
-//        StartLineInheritInitialPostionAndSpace(nInstr, nVoice);
-//    }
-//
-//    //add new entry for this object
-//	m_pCurEntry = (*m_itCurLine)->add_entry(pSO, pShape, fProlog);
-//
-//	//if line found was the default one for the staff, assigne voice to this line and to
-//    //the staff if not yet assigned
-//    if (nVoice != 0 && (*m_itCurLine)->IsVoiceNotYetDefined())
-//    {
-//		(*m_itCurLine)->SetVoice(nVoice);
-//    }
+	//close current line.
+
+    if (is_there_current_line())
+    {
+        m_pCurEntry = (*m_itCurLine)->add_final_entry(pSO, pShape, rTime);
+        m_pCurEntry->set_position(xStart);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void LinesBuilder::include_object(int line, int instr, ImoInstrument* pInstr,
+                                  ImoStaffObj* pSO, float rTime, bool fProlog,
+                                  int nStaff, GmoShape* pShape)
+{
+    //int voice = decide_voice_to_use(pSO, nStaff);
+
+    //if doesn't exist, start it
+    m_itCurLine = m_pColStorage->find_line(line);
+    if (m_pColStorage->is_end_of_table(m_itCurLine))
+    {
+        start_line(line, instr);
+        m_pColStorage->set_staff_spacing(nStaff,
+                                         pInstr->get_line_spacing_for_staff(nStaff));
+    }
+
+    //add new entry for this object
+	m_pCurEntry = (*m_itCurLine)->add_entry(pSO, pShape, fProlog, rTime);
+
+	////if line found was the default one for the staff, assigne voice to this line and to
+ //   //the staff if not yet assigned
+ //   if (voice != 0 && !(*m_itCurLine)->is_voiced_defined())
+ //   {
+	//	(*m_itCurLine)->set_voice(voice);
+ //   }
 }
 
 ////---------------------------------------------------------------------------------------
-//int LinesBuilder::DecideVoiceToUse(ImoStaffObj* pSO, int nStaff)
+//int LinesBuilder::decide_voice_to_use(ImoStaffObj* pSO, int nStaff)
 //{
-//	if (nStaff != 0)    //multi-shaped object (clef, key)
-//    {
-//        wxASSERT(pSO->IsMultishaped());
-//        return m_nStaffVoice[nStaff - 1];
-//    }
-//    else    //single shape object
-//    {
-//		if (pSO->is_note_rest())
-//            //pSO has voice: return it
-//			return ((lmNoteRest*)pSO)->GetVoice();
-//		else
-//            //pSO has no voice. Use voice assigned to the staff in which this pSO is placed
-//			return m_nStaffVoice[ pSO->GetStaffNum() - 1 ];
-//	}
+////	if (nStaff != 0)    //multi-shaped object (clef, key)
+////    {
+////        wxASSERT(pSO->IsMultishaped());
+////        return m_nStaffVoice[nStaff - 1];
+////    }
+////    else    //single shape object
+////    {
+////		if (pSO->is_note_rest())
+////            //pSO has voice: return it
+////			return ((lmNoteRest*)pSO)->get_voice();
+////		else
+////            //pSO has no voice. Use voice assigned to the staff in which this pSO is placed
+////			return m_nStaffVoice[ pSO->GetStaffNum() - 1 ];
+////	}
+//    return 0;
 //}
-//
-////---------------------------------------------------------------------------------------
-//void LinesBuilder::EndOfData()
-//{
-//    //this method is invoked to inform that all data has been suplied. Therefore, we
-//    //can do any preparatory work, not to be repeated if re-spacing.
-//}
+
+//---------------------------------------------------------------------------------------
+void LinesBuilder::end_of_data()
+{
+    //this method is invoked to inform that all data has been suplied. Therefore, we
+    //can do any preparatory work, not to be repeated when re-spacing.
+}
 
 
 
@@ -1181,85 +1262,85 @@ LineResizer::LineResizer(LineTable* pTable, LUnits uOldBarSize,
 {
 }
 
-////---------------------------------------------------------------------------------------
-//float LineResizer::MovePrologShapes()
-//{
-//    //all non-timed entries, at beginning, marked as fProlog must be only re-located
-//    //returns the first timepos found after the prolog or 0 if no valid timepos
-//
-//    LUnits uLineStartPos = m_pTable->GetLineStartPosition();
-//    LUnits uLineShift = m_uNewStart - uLineStartPos;
-//    LineEntryIterator it = m_pTable->begin();
-//    while (it != m_pTable->end() && (*it)->get_timepos() < 0.0f)
-//    {
-//        if ((*it)->m_pShape)
-//        {
-//            if ((*it)->m_fProlog)
-//            {
-//                LUnits uNewPos = uLineShift + (*it)->get_position();
-//                (*it)->reposition_at(uNewPos);
-//                (*it)->move_shape();
-//            }
-//            else
-//			    break;
-//        }
-//        ++it;
-//    }
-//    m_itCurrent = it;
-//
-//    //return first timepos in this line
-//    if (it != m_pTable->end())
-//    {
-//        if ((*it)->get_timepos() < 0.0f)
-//            return 0.0f;
-//        else
-//            return (*it)->get_timepos();
-//    }
-//    else
-//        return 0.0f;
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits LineResizer::GetTimeLinePositionIfTimeIs(float rFirstTime)
-//{
-//    if (m_itCurrent != m_pTable->end() && (*m_itCurrent)->get_timepos() == rFirstTime)
-//        return (*m_itCurrent)->get_position() - (*m_itCurrent)->get_anchor();
-//    else
-//        return 0.0f;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineResizer::ReassignPositionToAllOtherObjects(LUnits uFizedSizeAtStart)
-//{
-//    if (m_itCurrent == m_pTable->end())
-//        return;
-//
-//    //Compute proportion factor
-//    LUnits uLineStartPos = m_pTable->GetLineStartPosition();
-//    LUnits uLineShift = m_uNewStart - uLineStartPos;
-//    LUnits uDiscount = uFizedSizeAtStart - uLineStartPos;
-//    float rProp = (m_uNewBarSize-uDiscount) / (m_uOldBarSize-uDiscount);
-//
-//	//Reposition the remainder entries
-//    for (LineEntryIterator it = m_itCurrent; it != m_pTable->end(); ++it)
-//	{
-//        if ((*it)->is_barline_entry())
-//        {
-//            LUnits uNewPos = m_uNewStart + m_uNewBarSize - (*it)->get_shape_size();
-//            (*it)->reposition_at(uNewPos);
-//            (*it)->move_shape();
-//        }
-//        else
-//        {
-//            LUnits uOldPos = (*it)->get_position() - (*it)->get_anchor();
-//            LUnits uShift = uDiscount + (m_uNewStart + (uOldPos - uFizedSizeAtStart) * rProp) - uOldPos;
-//            LUnits uNewPos = uOldPos + uShift + (*it)->get_anchor();;
-//            (*it)->reposition_at(uNewPos);
-//            (*it)->move_shape();
-//        }
-//    }
-//}
-//
+//---------------------------------------------------------------------------------------
+float LineResizer::move_prolog_shapes()
+{
+    //all non-timed entries, at beginning, marked as fProlog must be only re-located
+    //returns the first timepos found after the prolog or 0 if no valid timepos
+
+    LUnits uLineStartPos = m_pTable->get_line_start_position();
+    LUnits uLineShift = m_uNewStart - uLineStartPos;
+    LineEntryIterator it = m_pTable->begin();
+    while (it != m_pTable->end() && (*it)->get_timepos() < 0.0f)
+    {
+        if ((*it)->m_pShape)
+        {
+            if ((*it)->m_fProlog)
+            {
+                LUnits uNewPos = uLineShift + (*it)->get_position();
+                (*it)->reposition_at(uNewPos);
+                (*it)->move_shape();
+            }
+            else
+			    break;
+        }
+        ++it;
+    }
+    m_itCurrent = it;
+
+    //return first timepos in this line
+    if (it != m_pTable->end())
+    {
+        if ((*it)->get_timepos() < 0.0f)
+            return 0.0f;
+        else
+            return (*it)->get_timepos();
+    }
+    else
+        return 0.0f;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits LineResizer::get_time_line_position_if_time_is(float rFirstTime)
+{
+    if (m_itCurrent != m_pTable->end() && (*m_itCurrent)->get_timepos() == rFirstTime)
+        return (*m_itCurrent)->get_position() - (*m_itCurrent)->get_anchor();
+    else
+        return 0.0f;
+}
+
+//---------------------------------------------------------------------------------------
+void LineResizer::reasign_position_to_all_other_objects(LUnits uFizedSizeAtStart)
+{
+    if (m_itCurrent == m_pTable->end())
+        return;
+
+    //Compute proportion factor
+    LUnits uLineStartPos = m_pTable->get_line_start_position();
+    LUnits uLineShift = m_uNewStart - uLineStartPos;
+    LUnits uDiscount = uFizedSizeAtStart - uLineStartPos;
+    float rProp = (m_uNewBarSize-uDiscount) / (m_uOldBarSize-uDiscount);
+
+	//Reposition the remainder entries
+    for (LineEntryIterator it = m_itCurrent; it != m_pTable->end(); ++it)
+	{
+        if ((*it)->is_barline_entry())
+        {
+            LUnits uNewPos = m_uNewStart + m_uNewBarSize - (*it)->get_shape_size();
+            (*it)->reposition_at(uNewPos);
+            (*it)->move_shape();
+        }
+        else
+        {
+            LUnits uOldPos = (*it)->get_position() - (*it)->get_anchor();
+            LUnits uShift = uDiscount + (m_uNewStart + (uOldPos - uFizedSizeAtStart) * rProp) - uOldPos;
+            LUnits uNewPos = uOldPos + uShift + (*it)->get_anchor();;
+            (*it)->reposition_at(uNewPos);
+            (*it)->move_shape();
+        }
+    }
+}
+
 ////---------------------------------------------------------------------------------------
 //void LineResizer::InformAttachedObjs()
 //{
@@ -1276,7 +1357,7 @@ LineResizer::LineResizer(LineTable* pTable, LUnits uOldBarSize,
 //            {
 //                //end of tie note. Inform the tie shape.
 //                wxASSERT((*it)->m_pShape);
-//				((lmShapeNote*)(*it)->m_pShape)->ApplyUserShiftsToTieShape();
+//				((GmoShapeNote*)(*it)->m_pShape)->ApplyUserShiftsToTieShape();
 //            }
 //        }
 //    }
@@ -1288,262 +1369,262 @@ LineResizer::LineResizer(LineTable* pTable, LUnits uOldBarSize,
 //LineSpacer:
 //  encapsulates the algorithm to assign spaces and positions to a single line
 //=======================================================================================
-LineSpacer::LineSpacer(LineTable* pLineTable, ColumnLayouter* pColFmt,
+LineSpacer::LineSpacer(LineTable* pLineTable, ColumnLayouter* pColLyt,
                            float rFactor)
     : m_pTable(pLineTable)
     , m_rFactor(rFactor)
-    , m_pColFmt(pColFmt)
+    , m_pColFmt(pColLyt)
     , m_itCur(pLineTable->end())
     , m_rCurTime(0.0f)
 	, m_uxCurPos(0.0f)
     , m_uxRemovable(0.0f)
 {
-//    InitializeForTraversing();
+    prepare_for_traversing();
 }
 
-////---------------------------------------------------------------------------------------
-//void LineSpacer::InitializeForTraversing()
-//{
-//    //initialize iteration control data, to traverse by timepos
-//
-//    m_itCur = m_pTable->begin();
-//    m_rCurTime = GetNextAvailableTime();
-//    m_uxCurPos = m_pTable->GetLineStartPosition() + m_pTable->GetSpaceAtBeginning();
-//    m_itNonTimedAtCurPos = m_pTable->end();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineSpacer::ProcessNonTimedAtCurrentTimepos(LUnits uxPos)
-//{
-//    //update current pos with new xPos required for column alignment
-//    m_uxRemovable += uxPos - m_uxCurPos;
-//    m_uxCurPos = uxPos;
-//
-//    //proceed if there are non-timed objects
-//    if (CurrentObjectIsNonTimed())
-//    {
-//        ComputeMaxAndMinOcuppiedSpace();
-//        PositionNonTimed();
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits LineSpacer::GetNextPosition()
-//{
-//    return m_uxCurPos;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineSpacer::ComputeMaxAndMinOcuppiedSpace()
-//{
-//	//Starting at current position, explores the not-timed objects until next timed
-//    //or end of line. Computes the maximum and minimum space they could occupy.
-//    //Current position is not altered
-//
-//    m_uxMaxOcuppiedSpace = 0.0f;
-//    m_uxMinOcuppiedSpace = 0.0f;
-//    LineEntryIterator it = m_itCur;
-//	while (IsNonTimedObject(it))
-//    {
-//        (*it)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
-//        LUnits uxMax = (*it)->get_total_size();
-//        m_uxMaxOcuppiedSpace += uxMax;
-//        m_uxMinOcuppiedSpace += uxMax - (*it)->get_variable_space();
-//        ++it;
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineSpacer::PositionNonTimed()
-//{
-//    m_itNonTimedAtCurPos = m_itCur;
-//    if (m_uxRemovable >= m_uxMaxOcuppiedSpace)
-//    {
-//        PositionUsingMaxSpaceWithShift(m_uxRemovable - m_uxMaxOcuppiedSpace);
-//    }
-//    else if (m_uxRemovable >= m_uxMinOcuppiedSpace)
-//    {
-//        LUnits uShift = m_uxRemovable - m_uxMinOcuppiedSpace;
-//        PositionUsingMinSpaceWithShift(uShift);
-//    }
-//    else
-//    {
-//        PositionUsingMinSpaceWithShift(0.0f);
-//    }
-//    m_uxNotTimedFinalPos = m_uxCurPos;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineSpacer::PositionUsingMaxSpaceWithShift(LUnits uShift)
-//{
-//    LUnits uxNextPos = m_uxCurPos - m_uxRemovable + uShift;
-//	while (CurrentObjectIsNonTimed())
-//    {
-//        (*m_itCur)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
-//        (*m_itCur)->reposition_at(uxNextPos);
-//
-//        uxNextPos += (*m_itCur)->get_total_size();
-//        ++m_itCur;
-//    }
-//
-//    //update iteration data
-//    m_uxCurPos = uxNextPos;
-//    m_uxRemovable = 0.0f;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineSpacer::PositionUsingMinSpaceWithShift(LUnits uShift)
-//{
-//    LUnits uxNextPos = m_uxCurPos - m_uxRemovable + uShift;
-//	while (CurrentObjectIsNonTimed())
-//    {
-//        (*m_itCur)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
-//        (*m_itCur)->set_variable_space(0.0f);
-//        (*m_itCur)->reposition_at(uxNextPos);
-//
-//        uxNextPos += (*m_itCur)->get_total_size();
-//        ++m_itCur;
-//    }
-//
-//    //update iteration data
-//    m_uxCurPos = uxNextPos;
-//    m_uxRemovable = 0.0f;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineSpacer::ProcessNonTimedAtProlog(LUnits uSpaceAfterProlog)
-//{
-//    if (CurrentObjectIsNonTimed())
-//    {
-//        LUnits uxNextPos = m_uxCurPos;
-//	    while (CurrentObjectIsNonTimed())
-//        {
-//            (*m_itCur)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
-//            (*m_itCur)->reposition_at(uxNextPos);
-//
-//            uxNextPos += (*m_itCur)->get_total_size();
-//            ++m_itCur;
-//        }
-//
-//        //update iteration data and add some additional space after prolog
-//        m_uxCurPos = uxNextPos + uSpaceAfterProlog;
-//        m_uxRemovable = uSpaceAfterProlog;
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineSpacer::ProcessTimedAtCurrentTimepos(LUnits uxPos)
-//{
-//	//Starting at current position, explores the line to set the position of all timed
-//    //objects placed at current time, until we reach a time greater that current
-//    //time or end of line
-//
-//    //update current pos with new xPos required for column alignment
-//    m_uxRemovable += uxPos - m_uxCurPos;
-//    m_uxCurPos = uxPos;
-//
-//    DragAnyPreviousCleftToPlaceItNearThisNote();
-//
-//    //procced to process this timepos
-//    LUnits uxRequiredPos = m_uxCurPos + ComputeShiftToAvoidOverlapWithPrevious();
-//    LUnits uxNextPos = uxRequiredPos;
-//    LUnits uxMinNextPos = 0.0f;
-//    LUnits uxMargin = 0.0f;
-//    LineEntryIterator itLast;
-//	while (ThereAreTimedObjs())
-//    {
-//        //AssignPositionToCurrentEntry();
-//		(*m_itCur)->set_position( uxRequiredPos + (*m_itCur)->get_anchor() );
-//
-//        //AssignFixedAndVariableSpacingToCurrentEntry();
-//        (*m_itCur)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
-//
-//        //DetermineSpaceRequirementsForCurrentEntry();
-//        if ((*m_itCur)->is_note_rest())
-//		    uxNextPos = wxMax(uxNextPos, (*m_itCur)->m_xFinal);
-//        else
-//            uxMinNextPos = wxMax(uxMinNextPos, (*m_itCur)->m_xFinal);
-//
-//        uxMargin = (uxMargin==0.0f ?
-//                        (*m_itCur)->m_uVariableSpace
-//                        : wxMin(uxMargin, (*m_itCur)->m_uVariableSpace) );
-//
-//        //AdvanceToNextEntry();
-//        itLast = m_itCur++;
-//    }
-//
-//    //update iteration data
-//    if (uxNextPos == uxRequiredPos)     //No note/rest found
-//        m_uxCurPos = uxRequiredPos + uxMinNextPos;
-//    else
-//        m_uxCurPos = uxNextPos;
-//
-//    m_uxRemovable = uxMargin;
-//    m_rCurTime = GetNextAvailableTime();
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits LineSpacer::ComputeShiftToAvoidOverlapWithPrevious()
-//{
-//	//Starting at current position, explores the objects placed at current time
-//    //to check if there is enought removable space to deal with any anchor left shifted
-//    //object. If not, computes the required additional space that should be added to
-//    //'removable' space.
-//
-//    LineEntryIterator it = m_itCur;
-//    LUnits uxNextPos = m_uxCurPos;
-//    LUnits uxShift = 0.0f;
-//    const LineEntryIterator itEnd = m_pTable->end();
-//	while (it != itEnd && IsEqualTime((*it)->m_rTimePos, m_rCurTime))
-//    {
-//        LUnits uAnchor = - (*it)->get_anchor();     // > 0 if need to shift left
-//        if (uAnchor > 0.0f && m_uxRemovable < uAnchor)
-//            uxShift = wxMax(uxShift, uAnchor - m_uxRemovable);
-//
-//        it++;
-//    }
-//    return uxShift;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineSpacer::ShiftNonTimed(LUnits uxShift)
-//{
-//    LineEntryIterator it = m_itNonTimedAtCurPos;
-//	while (IsNonTimedObject(it))
-//    {
-//        LUnits uxCurPos = (*it)->get_position();
-//        (*it)->reposition_at(uxCurPos + uxShift);
-//        ++it;
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//float LineSpacer::GetNextAvailableTime()
-//{
-//	LineEntryIterator it = m_itCur;
-//    if (it != m_pTable->end())
-//    {
-//        while (IsNonTimedObject(it))
-//            ++it;
-//
-//        if (IsTimedObject(it))
-//            return (*it)->get_timepos();
-//        else
-//            return lmNO_TIME;
-//    }
-//    else
-//        return lmNO_TIME;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void LineSpacer::DragAnyPreviousCleftToPlaceItNearThisNote()
-//{
-//    if (m_itNonTimedAtCurPos != m_pTable->end() && m_uxCurPos > m_uxNotTimedFinalPos)
-//    {
-//        ShiftNonTimed(m_uxCurPos - m_uxNotTimedFinalPos);
-//    }
-//    m_itNonTimedAtCurPos = m_pTable->end();     //no longer needed. Discart value now to avoid problmes at next timepos
-//}
+//---------------------------------------------------------------------------------------
+void LineSpacer::prepare_for_traversing()
+{
+    //initialize iteration control data, to traverse by timepos
+
+    m_itCur = m_pTable->begin();
+    m_rCurTime = get_next_available_time();
+    m_uxCurPos = m_pTable->get_line_start_position() + m_pTable->get_space_at_beginning();
+    m_itNonTimedAtCurPos = m_pTable->end();
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::process_non_timed_at_current_timepos(LUnits uxPos)
+{
+    //update current pos with new xPos required for column alignment
+    m_uxRemovable += uxPos - m_uxCurPos;
+    m_uxCurPos = uxPos;
+
+    //proceed if there are non-timed objects
+    if (is_current_object_non_timed())
+    {
+        compute_max_and_min_occupied_space();
+        position_non_timed();
+    }
+}
+
+//---------------------------------------------------------------------------------------
+LUnits LineSpacer::get_next_position()
+{
+    return m_uxCurPos;
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::compute_max_and_min_occupied_space()
+{
+	//Starting at current position, explores the not-timed objects until next timed
+    //or end of line. Computes the maximum and minimum space they could occupy.
+    //Current position is not altered
+
+    m_uxMaxOcuppiedSpace = 0.0f;
+    m_uxMinOcuppiedSpace = 0.0f;
+    LineEntryIterator it = m_itCur;
+	while (is_non_timed_object(it))
+    {
+        (*it)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
+        LUnits uxMax = (*it)->get_total_size();
+        m_uxMaxOcuppiedSpace += uxMax;
+        m_uxMinOcuppiedSpace += uxMax - (*it)->get_variable_space();
+        ++it;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::position_non_timed()
+{
+    m_itNonTimedAtCurPos = m_itCur;
+    if (m_uxRemovable >= m_uxMaxOcuppiedSpace)
+    {
+        position_using_max_space_with_shift(m_uxRemovable - m_uxMaxOcuppiedSpace);
+    }
+    else if (m_uxRemovable >= m_uxMinOcuppiedSpace)
+    {
+        LUnits uShift = m_uxRemovable - m_uxMinOcuppiedSpace;
+        position_using_min_space_with_shift(uShift);
+    }
+    else
+    {
+        position_using_min_space_with_shift(0.0f);
+    }
+    m_uxNotTimedFinalPos = m_uxCurPos;
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::position_using_max_space_with_shift(LUnits uShift)
+{
+    LUnits uxNextPos = m_uxCurPos - m_uxRemovable + uShift;
+	while (is_current_object_non_timed())
+    {
+        (*m_itCur)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
+        (*m_itCur)->reposition_at(uxNextPos);
+
+        uxNextPos += (*m_itCur)->get_total_size();
+        ++m_itCur;
+    }
+
+    //update iteration data
+    m_uxCurPos = uxNextPos;
+    m_uxRemovable = 0.0f;
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::position_using_min_space_with_shift(LUnits uShift)
+{
+    LUnits uxNextPos = m_uxCurPos - m_uxRemovable + uShift;
+	while (is_current_object_non_timed())
+    {
+        (*m_itCur)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
+        (*m_itCur)->set_variable_space(0.0f);
+        (*m_itCur)->reposition_at(uxNextPos);
+
+        uxNextPos += (*m_itCur)->get_total_size();
+        ++m_itCur;
+    }
+
+    //update iteration data
+    m_uxCurPos = uxNextPos;
+    m_uxRemovable = 0.0f;
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::process_non_timed_at_prolog(LUnits uSpaceAfterProlog)
+{
+    if (is_current_object_non_timed())
+    {
+        LUnits uxNextPos = m_uxCurPos;
+	    while (is_current_object_non_timed())
+        {
+            (*m_itCur)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
+            (*m_itCur)->reposition_at(uxNextPos);
+
+            uxNextPos += (*m_itCur)->get_total_size();
+            ++m_itCur;
+        }
+
+        //update iteration data and add some additional space after prolog
+        m_uxCurPos = uxNextPos + uSpaceAfterProlog;
+        m_uxRemovable = uSpaceAfterProlog;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::process_timed_at_current_timepos(LUnits uxPos)
+{
+	//Starting at current position, explores the line to set the position of all timed
+    //objects placed at current time, until we reach a time greater that current
+    //time or end of line
+
+    //update current pos with new xPos required for column alignment
+    m_uxRemovable += uxPos - m_uxCurPos;
+    m_uxCurPos = uxPos;
+
+    drag_any_previous_clef_to_place_it_near_this_one();
+
+    //procced to process this timepos
+    LUnits uxRequiredPos = m_uxCurPos + compute_shift_to_avoid_overlap_with_previous();
+    LUnits uxNextPos = uxRequiredPos;
+    LUnits uxMinNextPos = 0.0f;
+    LUnits uxMargin = 0.0f;
+    LineEntryIterator itLast;
+	while (are_there_timed_objs())
+    {
+        //AssignPositionToCurrentEntry();
+		(*m_itCur)->set_position( uxRequiredPos + (*m_itCur)->get_anchor() );
+
+        //AssignFixedAndVariableSpacingToCurrentEntry();
+        (*m_itCur)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
+
+        //DetermineSpaceRequirementsForCurrentEntry();
+        if ((*m_itCur)->is_note_rest())
+		    uxNextPos = max(uxNextPos, (*m_itCur)->m_xFinal);
+        else
+            uxMinNextPos = max(uxMinNextPos, (*m_itCur)->m_xFinal);
+
+        uxMargin = (uxMargin==0.0f ?
+                        (*m_itCur)->m_uVariableSpace
+                        : min(uxMargin, (*m_itCur)->m_uVariableSpace) );
+
+        //AdvanceToNextEntry();
+        itLast = m_itCur++;
+    }
+
+    //update iteration data
+    if (uxNextPos == uxRequiredPos)     //No note/rest found
+        m_uxCurPos = uxRequiredPos + uxMinNextPos;
+    else
+        m_uxCurPos = uxNextPos;
+
+    m_uxRemovable = uxMargin;
+    m_rCurTime = get_next_available_time();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits LineSpacer::compute_shift_to_avoid_overlap_with_previous()
+{
+	//Starting at current position, explores the objects placed at current time
+    //to check if there is enought removable space to deal with any anchor left shifted
+    //object. If not, computes the required additional space that should be added to
+    //'removable' space.
+
+    LineEntryIterator it = m_itCur;
+    LUnits uxNextPos = m_uxCurPos;
+    LUnits uxShift = 0.0f;
+    const LineEntryIterator itEnd = m_pTable->end();
+	while (it != itEnd && is_equal_time((*it)->m_rTimePos, m_rCurTime))
+    {
+        LUnits uAnchor = - (*it)->get_anchor();     // > 0 if need to shift left
+        if (uAnchor > 0.0f && m_uxRemovable < uAnchor)
+            uxShift = max(uxShift, uAnchor - m_uxRemovable);
+
+        it++;
+    }
+    return uxShift;
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::shift_non_timed(LUnits uxShift)
+{
+    LineEntryIterator it = m_itNonTimedAtCurPos;
+	while (is_non_timed_object(it))
+    {
+        LUnits uxCurPos = (*it)->get_position();
+        (*it)->reposition_at(uxCurPos + uxShift);
+        ++it;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+float LineSpacer::get_next_available_time()
+{
+	LineEntryIterator it = m_itCur;
+    if (it != m_pTable->end())
+    {
+        while (is_non_timed_object(it))
+            ++it;
+
+        if (is_timed_object(it))
+            return (*it)->get_timepos();
+        else
+            return LOMSE_NO_TIME;
+    }
+    else
+        return LOMSE_NO_TIME;
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::drag_any_previous_clef_to_place_it_near_this_one()
+{
+    if (m_itNonTimedAtCurPos != m_pTable->end() && m_uxCurPos > m_uxNotTimedFinalPos)
+    {
+        shift_non_timed(m_uxCurPos - m_uxNotTimedFinalPos);
+    }
+    m_itNonTimedAtCurPos = m_pTable->end();     //no longer needed. Discart value now to avoid problmes at next timepos
+}
 
 
 
@@ -1561,124 +1642,124 @@ BreakPoints::BreakPoints(ColumnStorage* pColStorage)
 //---------------------------------------------------------------------------------------
 BreakPoints::~BreakPoints()
 {
-//    DeleteBreaksTable();
+    delete_breaks_table();
 }
 
-////---------------------------------------------------------------------------------------
-//void BreakPoints::DeleteBreaksTable()
-//{
-//    if (m_pPossibleBreaks)
-//    {
-//        delete m_pPossibleBreaks;
-//        m_pPossibleBreaks = (BreaksTable*)NULL;
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool BreakPoints::FindOptimunBreakPointForSpace(LUnits uAvailable)
-//{
-//    //returns false if no break point found (exceptional case).
-//    //In all other cases updates m_pOptimumEntry and returns true
-//
-//    if (!m_pPossibleBreaks)
-//        ComputeBreaksTable();
-//
-//    //select highest entry with space <= uAvailable
-//    BreaksTimeEntry* pBTE = m_pPossibleBreaks->get_first();
-//    m_pOptimumEntry = (BreaksTimeEntry*)NULL;
-//    while (pBTE && pBTE->uxEnd <= uAvailable)
-//    {
-//        m_pOptimumEntry = pBTE;
-//        pBTE = m_pPossibleBreaks->get_next();
-//    }
-//    if (!m_pOptimumEntry)
-//        return false;        //big problem: no break points!
-//
-//    //wxLogMessage(_T("[ColumnLayouter::GetOptimumBreakPoint] uAvailable=%.2f, returned=%.2f, time=%.2f"),
-//    //             uAvailable, m_pOptimumEntry->uxEnd, m_pOptimumEntry->rTimepos);
-//
-//    return true;       //no problems. There are break points
-//}
-//
-////---------------------------------------------------------------------------------------
-//float BreakPoints::GetOptimumTimeForFoundBreakPoint()
-//{
-//    return m_pOptimumEntry->rTimepos;
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits BreakPoints::GetOptimumPosForFoundBreakPoint()
-//{
-//    return m_pOptimumEntry->uxEnd;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void BreakPoints::ComputeBreaksTable()
-//{
-//    //This method computes the BreaksTable. This is a table sumarizing break points
-//    //information, that is, suitable places through all staves and voices where it is
-//    //possible to break a system and start a new one. The best break locations are
-//    //usually are the bar lines common to all staves. But in certain rare cases (i.e.
-//    //scores without time signature or having instrumens not sharing a common
-//    //time signature, or when it is requested to render the score in very narrow
-//    //paper, etc.) it is necessary to split music in unnusual points.
-//
-//    //Step 1. Build a table for each line
-//    std::vector<BreaksTable*> partialTables;
-//	for (LinesIterator itTL = m_pColStorage->begin(); itTL != m_pColStorage->end(); ++itTL)
-//	{
-//        BreaksTable* pBT = new BreaksTable();
-//        ColumnSplitter oSplitter(*itTL);
-//        oSplitter.ComputeBreakPoints(pBT);
-//        partialTables.push_back(pBT);
-//    }
-//
-//
-//    //Step 2. Combine the partial tables
-//    if (m_pPossibleBreaks)
-//        DeleteBreaksTable();
-//    m_pPossibleBreaks = new BreaksTable();
-//
-//    std::vector<BreaksTable*>::iterator itBT;
-//    for (itBT = partialTables.begin(); itBT != partialTables.end(); ++itBT)
-//    {
-//        if (m_pPossibleBreaks->is_empty())
-//        {
-//            //just copy entries
-//            BreaksTimeEntry* pEP = (*itBT)->get_first();       //pEP Entry from Partial list
-//            while (pEP)
-//            {
-//                m_pPossibleBreaks->add_entry(pEP);
-//                pEP = (*itBT)->get_next();
-//            }
-//        }
-//        else
-//        {
-//            //merge current table with total table
-//            //BreaksTimeEntry* pEP = (*itBT)->get_first();       //pEP Entry from Partial list
-//            //while (pEP)
-//            //{
-//            //    m_pPossibleBreaks->add_entry(pEP);
-//            //    pEP = (*itBT)->get_next();
-//            //}
-//        }
-//    }
-//
-//
-//    //Delete partial tables, no longer needed
-//    for (itBT = partialTables.begin(); itBT != partialTables.end(); ++itBT)
-//        delete *itBT;
-//    partialTables.clear();
-//
-//    //wxLogMessage(_T("Total Breaks Table:"));
-//    //wxLogMessage( m_pPossibleBreaks->dump() );
-//
-//    //Step 3. Sort breaks table by priority and final x position
-//    //TODO
-//}
-//
-//
-//
+//---------------------------------------------------------------------------------------
+void BreakPoints::delete_breaks_table()
+{
+    if (m_pPossibleBreaks)
+    {
+        delete m_pPossibleBreaks;
+        m_pPossibleBreaks = (BreaksTable*)NULL;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+bool BreakPoints::find_optimum_break_point_for_space(LUnits uAvailable)
+{
+    //returns false if no break point found (exceptional case).
+    //In all other cases updates m_pOptimumEntry and returns true
+
+    if (!m_pPossibleBreaks)
+        compute_breaks_table();
+
+    //select highest entry with space <= uAvailable
+    BreaksTimeEntry* pBTE = m_pPossibleBreaks->get_first();
+    m_pOptimumEntry = (BreaksTimeEntry*)NULL;
+    while (pBTE && pBTE->uxEnd <= uAvailable)
+    {
+        m_pOptimumEntry = pBTE;
+        pBTE = m_pPossibleBreaks->get_next();
+    }
+    if (!m_pOptimumEntry)
+        return false;        //big problem: no break points!
+
+    //wxLogMessage(_T("[ColumnLayouter::get_optimum_break_point] uAvailable=%.2f, returned=%.2f, time=%.2f"),
+    //             uAvailable, m_pOptimumEntry->uxEnd, m_pOptimumEntry->rTimepos);
+
+    return true;       //no problems. There are break points
+}
+
+//---------------------------------------------------------------------------------------
+float BreakPoints::get_optimum_time_for_found_break_point()
+{
+    return m_pOptimumEntry->rTimepos;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits BreakPoints::get_optimum_position_for_break_point()
+{
+    return m_pOptimumEntry->uxEnd;
+}
+
+//---------------------------------------------------------------------------------------
+void BreakPoints::compute_breaks_table()
+{
+    //This method computes the BreaksTable. This is a table sumarizing break points
+    //information, that is, suitable places through all staves and voices where it is
+    //possible to break a system and start a new one. The best break locations are
+    //usually are the bar lines common to all staves. But in certain rare cases (i.e.
+    //scores without time signature or having instrumens not sharing a common
+    //time signature, or when it is requested to render the score in very narrow
+    //paper, etc.) it is necessary to split music in unnusual points.
+
+    //Step 1. Build a table for each line
+    std::vector<BreaksTable*> partialTables;
+	for (LinesIterator itTL = m_pColStorage->begin(); itTL != m_pColStorage->end(); ++itTL)
+	{
+        BreaksTable* pBT = new BreaksTable();
+        ColumnSplitter oSplitter(*itTL);
+        oSplitter.compute_break_points(pBT);
+        partialTables.push_back(pBT);
+    }
+
+
+    //Step 2. Combine the partial tables
+    if (m_pPossibleBreaks)
+        delete_breaks_table();
+    m_pPossibleBreaks = new BreaksTable();
+
+    std::vector<BreaksTable*>::iterator itBT;
+    for (itBT = partialTables.begin(); itBT != partialTables.end(); ++itBT)
+    {
+        if (m_pPossibleBreaks->is_empty())
+        {
+            //just copy entries
+            BreaksTimeEntry* pEP = (*itBT)->get_first();       //pEP Entry from Partial list
+            while (pEP)
+            {
+                m_pPossibleBreaks->add_entry(pEP);
+                pEP = (*itBT)->get_next();
+            }
+        }
+        else
+        {
+            ////merge current table with total table
+            ////BreaksTimeEntry* pEP = (*itBT)->get_first();       //pEP Entry from Partial list
+            ////while (pEP)
+            ////{
+            ////    m_pPossibleBreaks->add_entry(pEP);
+            ////    pEP = (*itBT)->get_next();
+            ////}
+        }
+    }
+
+
+    //Delete partial tables, no longer needed
+    for (itBT = partialTables.begin(); itBT != partialTables.end(); ++itBT)
+        delete *itBT;
+    partialTables.clear();
+
+    //wxLogMessage(_T("Total Breaks Table:"));
+    //cout << m_pPossibleBreaks->dump() );
+
+    //Step 3. Sort breaks table by priority and final x position
+    //TODO
+}
+
+
+
 //////----------------------------------------------------------------------------------------
 ////DirtyFlagsCleaner:
 ////
@@ -1701,130 +1782,130 @@ BreakPoints::~BreakPoints()
 //	//for (LinesIterator it = m_Lines.begin(); it != m_Lines.end(); ++it)
 //	//	(*it)->ClearDirtyFlags();
 //}
-//
-//
-//
-//
-//////----------------------------------------------------------------------------------------
-////TimeGridTable:
-////  A table with the relation timepos <-> position for all valid positions to insert
-////  a note.
-////  This object is responsible for supplying all valid timepos and their positions so
-////  that other objects (in fact only GmoBoxSlice) could:
-////      a) Determine the timepos to assign to a mouse click in a certain position.
-////      b) Draw a grid of valid timepos
-//////----------------------------------------------------------------------------------------
-//
-//TimeGridTable::TimeGridTable(ColumnStorage* pColStorage)
-//    : m_pColStorage(pColStorage)
-//{
-//    //build the table
-//
-//    CreateLineExplorers();
-//    while (ThereAreObjects())
-//    {
-//        SkipNonTimedAtCurrentTimepos();
-//        if (TimedObjectsFound())
-//        {
-//            FindShortestNoteRestAtCurrentTimepos();
-//            CreateTableEntry();
-//        }
-//    }
-//    InterpolateMissingTimes();
-//    DeleteLineExplorers();
-//}
-//
-////---------------------------------------------------------------------------------------
-//TimeGridTable::~TimeGridTable()
-//{
-//    m_PosTimes.clear();
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool TimeGridTable::ThereAreObjects()
-//{
-//    std::vector<TimeGridLineExplorer*>::iterator it;
-//    for (it = m_LineExplorers.begin(); it != m_LineExplorers.end(); ++it)
-//    {
-//        if ((*it)->ThereAreObjects())
-//            return true;
-//    }
-//    return false;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TimeGridTable::CreateTableEntry()
-//{
-//    PosTimeItem tPosTime = {m_rCurrentTime, m_rMinDuration, m_uCurPos };
-//    m_PosTimes.push_back(tPosTime);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TimeGridTable::DeleteLineExplorers()
-//{
-//    std::vector<TimeGridLineExplorer*>::iterator it;
-//    for (it = m_LineExplorers.begin(); it != m_LineExplorers.end(); ++it)
-//        delete *it;
-//    m_LineExplorers.clear();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TimeGridTable::CreateLineExplorers()
-//{
-//    const LinesIterator itEnd = m_pColStorage->end();
-//    for (LinesIterator it=m_pColStorage->begin(); it != itEnd; ++it)
-//	{
-//        TimeGridLineExplorer* pLinExplorer = new TimeGridLineExplorer(*it);
-//        m_LineExplorers.push_back(pLinExplorer);
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TimeGridTable::SkipNonTimedAtCurrentTimepos()
-//{
-//    m_fTimedObjectsFound = false;
-//    std::vector<TimeGridLineExplorer*>::iterator it;
-//    for (it = m_LineExplorers.begin(); it != m_LineExplorers.end(); ++it)
-//	{
-//        m_fTimedObjectsFound |= (*it)->SkipNonTimedAtCurrentTimepos();
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TimeGridTable::FindShortestNoteRestAtCurrentTimepos()
-//{
-//    GetCurrentTime();
-//    m_rMinDuration = lmNO_DURATION;
-//    m_uCurPos = lmNO_POSITION;
-//    std::vector<TimeGridLineExplorer*>::iterator it;
-//    for (it = m_LineExplorers.begin(); it != m_LineExplorers.end(); ++it)
-//	{
-//        if (m_rCurrentTime == (*it)->GetCurrentTime())
-//        {
-//            (*it)->FindShortestNoteRestAtCurrentTimepos();
-//            if (m_rMinDuration > (*it)->GetDurationForFoundEntry())
-//            {
-//                m_rMinDuration = (*it)->GetDurationForFoundEntry();
-//                m_uCurPos = wxMin(m_uCurPos, (*it)->GetPositionForFoundEntry());
-//            }
-//        }
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TimeGridTable::GetCurrentTime()
-//{
-//    m_rCurrentTime = lmNO_TIME;
-//    std::vector<TimeGridLineExplorer*>::iterator it;
-//    for (it = m_LineExplorers.begin(); it != m_LineExplorers.end(); ++it)
-//	{
-//        m_rCurrentTime = wxMin(m_rCurrentTime, (*it)->GetCurrentTime());
-//    }
-//}
-//
+
+
+
+
+//=======================================================================================
+//TimeGridTable:
+//  A table with the relation timepos <=> position for all valid positions to insert
+//  a note.
+//  This object is responsible for supplying all valid timepos and their positions so
+//  that other objects (in fact only GmoBoxSlice) could:
+//      a) Determine the timepos to assign to a mouse click in a certain position.
+//      b) Draw a grid of valid timepos
+//=======================================================================================
+TimeGridTable::TimeGridTable(ColumnStorage* pColStorage)
+    : m_pColStorage(pColStorage)
+{
+    //build the table
+
+    create_line_explorers();
+    while (there_are_objects())
+    {
+        skip_non_timed_at_current_timepos();
+        if (timed_objects_found())
+        {
+            find_shortest_noterest_at_current_timepos();
+            create_table_entry();
+        }
+    }
+    interpolate_missing_times();
+    delete_line_explorers();
+}
+
+//---------------------------------------------------------------------------------------
+TimeGridTable::~TimeGridTable()
+{
+    m_PosTimes.clear();
+}
+
+//---------------------------------------------------------------------------------------
+bool TimeGridTable::there_are_objects()
+{
+    std::vector<TimeGridLineExplorer*>::iterator it;
+    for (it = m_LineExplorers.begin(); it != m_LineExplorers.end(); ++it)
+    {
+        if ((*it)->there_are_objects())
+            return true;
+    }
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+void TimeGridTable::create_table_entry()
+{
+    PosTimeItem tPosTime = {m_rCurrentTime, m_rMinDuration, m_uCurPos };
+    m_PosTimes.push_back(tPosTime);
+}
+
+//---------------------------------------------------------------------------------------
+void TimeGridTable::delete_line_explorers()
+{
+    std::vector<TimeGridLineExplorer*>::iterator it;
+    for (it = m_LineExplorers.begin(); it != m_LineExplorers.end(); ++it)
+        delete *it;
+    m_LineExplorers.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void TimeGridTable::create_line_explorers()
+{
+    const LinesIterator itEnd = m_pColStorage->end();
+    for (LinesIterator it=m_pColStorage->begin(); it != itEnd; ++it)
+	{
+        TimeGridLineExplorer* pLinExplorer = new TimeGridLineExplorer(*it);
+        m_LineExplorers.push_back(pLinExplorer);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void TimeGridTable::skip_non_timed_at_current_timepos()
+{
+    m_fTimedObjectsFound = false;
+    std::vector<TimeGridLineExplorer*>::iterator it;
+    for (it = m_LineExplorers.begin(); it != m_LineExplorers.end(); ++it)
+	{
+        m_fTimedObjectsFound |= (*it)->skip_non_timed_at_current_timepos();
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void TimeGridTable::find_shortest_noterest_at_current_timepos()
+{
+    get_current_time();
+    m_rMinDuration = LOMSE_NO_DURATION;
+    m_uCurPos = LOMSE_NO_POSITION;
+    std::vector<TimeGridLineExplorer*>::iterator it;
+    for (it = m_LineExplorers.begin(); it != m_LineExplorers.end(); ++it)
+	{
+        if (m_rCurrentTime == (*it)->get_current_time())
+        {
+            (*it)->find_shortest_noterest_at_current_timepos();
+            if (m_rMinDuration > (*it)->get_duration_for_found_entry())
+            {
+                m_rMinDuration = (*it)->get_duration_for_found_entry();
+                m_uCurPos = min(m_uCurPos, (*it)->get_position_for_found_entry());
+            }
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void TimeGridTable::get_current_time()
+{
+    m_rCurrentTime = LOMSE_NO_TIME;
+    std::vector<TimeGridLineExplorer*>::iterator it;
+    for (it = m_LineExplorers.begin(); it != m_LineExplorers.end(); ++it)
+	{
+        m_rCurrentTime = min(m_rCurrentTime, (*it)->get_current_time());
+    }
+}
+
 ////---------------------------------------------------------------------------------------
 //std::string TimeGridTable::dump()
 //{
+//#if (LOMSE_DUMP_TABLES)
 //                      //   .......+.......+.......+
 //    std::string sDump = _T("\n timepos     Dur     Pos\n");
 //    std::vector<PosTimeItem>::iterator it;
@@ -1833,275 +1914,272 @@ BreakPoints::~BreakPoints()
 //        sDump += std::string::Format(_T("%8.2f %8.2f %8.2f\n"),
 //                                (*it).rTimepos, (*it).rDuration, (*it).uxPos );
 //    }
-//    return sDump;
+//#endif
 //}
-//
-////---------------------------------------------------------------------------------------
-//float TimeGridTable::GetTimeForPosititon(LUnits uxPos)
-//{
-//    //timepos = 0 if measure is empty
-//    if (m_PosTimes.size() == 0)
-//        return 0.0f;
-//
-//    //timepos = 0 if xPos < first entry xPos
-//    float rTime = 0.0f;
-//    LUnits uxPrev = m_PosTimes.front().uxPos;
-//    if (uxPos <= uxPrev)
-//        return rTime;
-//
-//    //otherwise find in table
-//    std::vector<PosTimeItem>::iterator it = m_PosTimes.begin();
-//    for (++it; it != m_PosTimes.end(); ++it)
-//    {
-//        int uxLimit = uxPrev + ((*it).uxPos - uxPrev) / 2.0;
-//        if (uxPos <= uxLimit)
-//            return rTime;
-//        uxPrev = (*it).uxPos;
-//        rTime = (*it).rTimepos;
-//    }
-//
-//    //if not found return last entry timepos
-//    return m_PosTimes.back().rTimepos;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TimeGridTable::InterpolateMissingTimes()
-//{
-//    TimeInserter oInserter(m_PosTimes);
-//    oInserter.InterpolateMissingTimes();
-//}
-//
-//
-//
-//////----------------------------------------------------------------------------------------
-////TimeInserter
-//// helper class to interpolate missing entries
-//////----------------------------------------------------------------------------------------
-//
-//TimeInserter::TimeInserter(std::vector<PosTimeItem>& oPosTimes)
-//    : m_PosTimes(oPosTimes)
-//{
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TimeInserter::InterpolateMissingTimes()
-//{
-//    for (int i=0; i < (int)m_PosTimes.size(); ++i)
-//    {
-//        float rNextTime = m_PosTimes[i].rTimepos + m_PosTimes[i].rDuration;
-//        if (!IsTimeInTable(rNextTime))
-//        {
-//            FindInsertionPoint(rNextTime);
-//            InsertTimeInterpolatingPosition(rNextTime);
-//        }
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool TimeInserter::IsTimeInTable(float rTimepos)
-//{
-//    if (m_PosTimes.size() == 0)
-//        return false;
-//
-//    std::vector<PosTimeItem>::iterator it;
-//    for (it=m_PosTimes.begin(); it != m_PosTimes.end(); ++it)
-//    {
-//        if (IsEqualTime(rTimepos, (*it).rTimepos))
-//            return true;
-//    }
-//    return false;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TimeInserter::FindInsertionPoint(float rTimepos)
-//{
-//    m_uPositionBeforeInsertionPoint = m_PosTimes.front().uxPos;
-//    m_rTimeBeforeInsertionPoint = m_PosTimes.front().rTimepos;
-//
-//    std::vector<PosTimeItem>::iterator it;
-//    for (it=m_PosTimes.begin(); it != m_PosTimes.end(); ++it)
-//    {
-//        if (IsHigherTime((*it).rTimepos, rTimepos))
-//            break;
-//        m_uPositionBeforeInsertionPoint = (*it).uxPos;
-//        m_rTimeBeforeInsertionPoint = (*it).rTimepos;
-//    }
-//    m_itInsertionPoint = it;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TimeInserter::InsertTimeInterpolatingPosition(float rTimepos)
-//{
-//    PosTimeItem oItem;
-//    oItem.rTimepos = rTimepos;
-//    oItem.rDuration = 0.0f;
-//    oItem.uxPos = m_uPositionBeforeInsertionPoint;
-//
-//    if (m_itInsertionPoint == m_PosTimes.end())
-//    {
-//        //insert at the end
-//        oItem.uxPos += 1000;       //TODO: Estimate space based on measure duration
-//        m_PosTimes.push_back(oItem);
-//    }
-//    else
-//    {
-//        //insert before item pointed by iterator
-//        float rTimeGap = (*m_itInsertionPoint).rTimepos - m_rTimeBeforeInsertionPoint;
-//        float rPosGap = (*m_itInsertionPoint).uxPos - m_uPositionBeforeInsertionPoint;
-//        float rTimeIncrement = rTimepos - m_rTimeBeforeInsertionPoint;
-//        oItem.uxPos += rTimeIncrement * (rPosGap / rTimeGap);
-//        m_PosTimes.insert(m_itInsertionPoint, oItem);
-//    }
-//}
-//
-//
-//////----------------------------------------------------------------------------------------
-////TimeGridLineExplorer:
-////  line traversal algorithm for creating the time-pos table
-//////----------------------------------------------------------------------------------------
-//
-//TimeGridLineExplorer::TimeGridLineExplorer(LineTable* pLineTable)
-//    : m_pTable(pLineTable)
-//{
-//    m_itCur = m_pTable->begin();
-//}
-//
-////---------------------------------------------------------------------------------------
-//TimeGridLineExplorer::~TimeGridLineExplorer()
-//{
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool TimeGridLineExplorer::SkipNonTimedAtCurrentTimepos()
-//{
-//    //returns true if there are timed objects after the skipped non-timed
-//
-//	while (CurrentObjectIsNonTimed())
-//        ++m_itCur;
-//
-//    return CurrentObjectIsTimed();
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool TimeGridLineExplorer::FindShortestNoteRestAtCurrentTimepos()
-//{
-//    //returns true if there are more objects after current timepos
-//
-//	if (CurrentObjectIsTimed())
-//    {
-//        m_rCurTime = (*m_itCur)->get_timepos();
-//        m_uCurPos = (*m_itCur)->get_position() - (*m_itCur)->get_anchor();
-//        m_rMinDuration = (*m_itCur)->get_duration();
-//        m_uShiftToNoteRestCenter = (*m_itCur)->get_shift_to_noterest_center();
-//
-//	    while (CurrentObjectIsTimed() && (*m_itCur)->get_timepos() == m_rCurTime)
-//        {
-//            m_rMinDuration = wxMin(m_rMinDuration, (*m_itCur)->get_duration());
-//            if (m_uShiftToNoteRestCenter == 0.0f)
-//                m_uShiftToNoteRestCenter = (*m_itCur)->get_shift_to_noterest_center();
-//
-//            ++m_itCur;
-//        }
-//    }
-//    return ThereAreObjects();
-//}
-//
-////---------------------------------------------------------------------------------------
-//float TimeGridLineExplorer::GetCurrentTime()
-//{
-//    if (CurrentObjectIsTimed())
-//        return (*m_itCur)->get_timepos();
-//    else
-//        return lmNO_TIME;
-//}
-//
-////---------------------------------------------------------------------------------------
-//float TimeGridLineExplorer::GetDurationForFoundEntry()
-//{
-//    return m_rMinDuration;
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits TimeGridLineExplorer::GetPositionForFoundEntry()
-//{
-//    return m_uCurPos + m_uShiftToNoteRestCenter;
-//}
-//
-//
-//
-//////----------------------------------------------------------------------------------------
-////ColumnResizer: encapsulates the methods to recompute shapes positions so that the
-////column will have the desired width, and to move the shapes to those positions
-//////----------------------------------------------------------------------------------------
-//
-//ColumnResizer::ColumnResizer(ColumnStorage* pColStorage, LUnits uNewBarSize)
-//    : m_pColStorage(pColStorage)
-//    , m_uNewBarSize(uNewBarSize)
-//{
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ColumnResizer::RepositionShapes(LUnits uNewStart)
-//{
-//    m_uNewStart = uNewStart;
-//    m_uOldBarSize = m_pColStorage->GetColumnWitdh();
-//
-//    CreateLineResizers();
-//    MovePrologShapesAndGetInitialTime();
-//    DetermineFixedSizeAtStartOfColumn();
-//    RepositionAllOtherShapes();
-//    DeleteLineResizers();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ColumnResizer::CreateLineResizers()
-//{
-//	for (LinesIterator it=m_pColStorage->begin(); it != m_pColStorage->end(); ++it)
-//	{
-//        LineResizer* pResizer = new LineResizer(*it, m_uOldBarSize, m_uNewBarSize,
-//                                                    m_uNewStart);
-//        m_LineResizers.push_back(pResizer);
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ColumnResizer::MovePrologShapesAndGetInitialTime()
-//{
-//    m_rFirstTime = lmNO_TIME;
-//    std::vector<LineResizer*>::iterator itR;
-//	for (itR = m_LineResizers.begin(); itR != m_LineResizers.end(); ++itR)
-//	{
-//        m_rFirstTime = wxMin(m_rFirstTime, (*itR)->MovePrologShapes());
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ColumnResizer::DetermineFixedSizeAtStartOfColumn()
-//{
-//    m_uFixedPart = 0.0f;
-//    std::vector<LineResizer*>::iterator itR;
-//	for (itR = m_LineResizers.begin(); itR != m_LineResizers.end(); ++itR)
-//	{
-//        m_uFixedPart = wxMax(m_uFixedPart, (*itR)->GetTimeLinePositionIfTimeIs(m_rFirstTime));
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ColumnResizer::RepositionAllOtherShapes()
-//{
-//    std::vector<LineResizer*>::iterator itR;
-//	for (itR = m_LineResizers.begin(); itR != m_LineResizers.end(); ++itR)
-//		(*itR)->ReassignPositionToAllOtherObjects(m_uFixedPart);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ColumnResizer::DeleteLineResizers()
-//{
-//    std::vector<LineResizer*>::iterator itR;
-//	for (itR = m_LineResizers.begin(); itR != m_LineResizers.end(); ++itR)
-//		delete *itR;
-//    m_LineResizers.clear();
-//}
+
+//---------------------------------------------------------------------------------------
+float TimeGridTable::get_time_for_position(LUnits uxPos)
+{
+    //timepos = 0 if measure is empty
+    if (m_PosTimes.size() == 0)
+        return 0.0f;
+
+    //timepos = 0 if xPos < first entry xPos
+    float rTime = 0.0f;
+    LUnits uxPrev = m_PosTimes.front().uxPos;
+    if (uxPos <= uxPrev)
+        return rTime;
+
+    //otherwise find in table
+    std::vector<PosTimeItem>::iterator it = m_PosTimes.begin();
+    for (++it; it != m_PosTimes.end(); ++it)
+    {
+        LUnits uxLimit = uxPrev + ((*it).uxPos - uxPrev) / 2.0f;
+        if (uxPos <= uxLimit)
+            return rTime;
+        uxPrev = (*it).uxPos;
+        rTime = (*it).rTimepos;
+    }
+
+    //if not found return last entry timepos
+    return m_PosTimes.back().rTimepos;
+}
+
+//---------------------------------------------------------------------------------------
+void TimeGridTable::interpolate_missing_times()
+{
+    TimeInserter oInserter(m_PosTimes);
+    oInserter.interpolate_missing_times();
+}
+
+
+
+//=======================================================================================
+//TimeInserter
+// helper class to interpolate missing entries
+//=======================================================================================
+TimeInserter::TimeInserter(std::vector<PosTimeItem>& oPosTimes)
+    : m_PosTimes(oPosTimes)
+{
+}
+
+//---------------------------------------------------------------------------------------
+void TimeInserter::interpolate_missing_times()
+{
+    for (int i=0; i < (int)m_PosTimes.size(); ++i)
+    {
+        float rNextTime = m_PosTimes[i].rTimepos + m_PosTimes[i].rDuration;
+        if (!is_time_in_table(rNextTime))
+        {
+            find_insertion_point(rNextTime);
+            insert_time_interpolating_position(rNextTime);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+bool TimeInserter::is_time_in_table(float rTimepos)
+{
+    if (m_PosTimes.size() == 0)
+        return false;
+
+    std::vector<PosTimeItem>::iterator it;
+    for (it=m_PosTimes.begin(); it != m_PosTimes.end(); ++it)
+    {
+        if (is_equal_time(rTimepos, (*it).rTimepos))
+            return true;
+    }
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+void TimeInserter::find_insertion_point(float rTimepos)
+{
+    m_uPositionBeforeInsertionPoint = m_PosTimes.front().uxPos;
+    m_rTimeBeforeInsertionPoint = m_PosTimes.front().rTimepos;
+
+    std::vector<PosTimeItem>::iterator it;
+    for (it=m_PosTimes.begin(); it != m_PosTimes.end(); ++it)
+    {
+        if (is_greater_time((*it).rTimepos, rTimepos))
+            break;
+        m_uPositionBeforeInsertionPoint = (*it).uxPos;
+        m_rTimeBeforeInsertionPoint = (*it).rTimepos;
+    }
+    m_itInsertionPoint = it;
+}
+
+//---------------------------------------------------------------------------------------
+void TimeInserter::insert_time_interpolating_position(float rTimepos)
+{
+    PosTimeItem oItem;
+    oItem.rTimepos = rTimepos;
+    oItem.rDuration = 0.0f;
+    oItem.uxPos = m_uPositionBeforeInsertionPoint;
+
+    if (m_itInsertionPoint == m_PosTimes.end())
+    {
+        //insert at the end
+        oItem.uxPos += 1000;       //TODO: Estimate space based on measure duration
+        m_PosTimes.push_back(oItem);
+    }
+    else
+    {
+        //insert before item pointed by iterator
+        float rTimeGap = (*m_itInsertionPoint).rTimepos - m_rTimeBeforeInsertionPoint;
+        float rPosGap = (*m_itInsertionPoint).uxPos - m_uPositionBeforeInsertionPoint;
+        float rTimeIncrement = rTimepos - m_rTimeBeforeInsertionPoint;
+        oItem.uxPos += rTimeIncrement * (rPosGap / rTimeGap);
+        m_PosTimes.insert(m_itInsertionPoint, oItem);
+    }
+}
+
+
+//=======================================================================================
+//TimeGridLineExplorer:
+//  line traversal algorithm for creating the time-pos table
+//=======================================================================================
+TimeGridLineExplorer::TimeGridLineExplorer(LineTable* pLineTable)
+    : m_pTable(pLineTable)
+{
+    m_itCur = m_pTable->begin();
+}
+
+//---------------------------------------------------------------------------------------
+TimeGridLineExplorer::~TimeGridLineExplorer()
+{
+}
+
+//---------------------------------------------------------------------------------------
+bool TimeGridLineExplorer::skip_non_timed_at_current_timepos()
+{
+    //returns true if there are timed objects after the skipped non-timed
+
+	while (is_current_object_non_timed())
+        ++m_itCur;
+
+    return current_object_is_timed();
+}
+
+//---------------------------------------------------------------------------------------
+bool TimeGridLineExplorer::find_shortest_noterest_at_current_timepos()
+{
+    //returns true if there are more objects after current timepos
+
+	if (current_object_is_timed())
+    {
+        m_rCurTime = (*m_itCur)->get_timepos();
+        m_uCurPos = (*m_itCur)->get_position() - (*m_itCur)->get_anchor();
+        m_rMinDuration = (*m_itCur)->get_duration();
+        m_uShiftToNoteRestCenter = (*m_itCur)->get_shift_to_noterest_center();
+
+	    while (current_object_is_timed() && (*m_itCur)->get_timepos() == m_rCurTime)
+        {
+            m_rMinDuration = min(m_rMinDuration, (*m_itCur)->get_duration());
+            if (m_uShiftToNoteRestCenter == 0.0f)
+                m_uShiftToNoteRestCenter = (*m_itCur)->get_shift_to_noterest_center();
+
+            ++m_itCur;
+        }
+    }
+    return there_are_objects();
+}
+
+//---------------------------------------------------------------------------------------
+float TimeGridLineExplorer::get_current_time()
+{
+    if (current_object_is_timed())
+        return (*m_itCur)->get_timepos();
+    else
+        return LOMSE_NO_TIME;
+}
+
+//---------------------------------------------------------------------------------------
+float TimeGridLineExplorer::get_duration_for_found_entry()
+{
+    return m_rMinDuration;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits TimeGridLineExplorer::get_position_for_found_entry()
+{
+    return m_uCurPos + m_uShiftToNoteRestCenter;
+}
+
+
+
+//=======================================================================================
+//ColumnResizer: encapsulates the methods to recompute shapes positions so that the
+//column will have the desired width, and to move the shapes to those positions
+//=======================================================================================
+ColumnResizer::ColumnResizer(ColumnStorage* pColStorage, LUnits uNewBarSize)
+    : m_pColStorage(pColStorage)
+    , m_uNewBarSize(uNewBarSize)
+{
+}
+
+//-------------------------------------------------------------------------------------
+void ColumnResizer::reposition_shapes(LUnits uNewStart)
+{
+    m_uNewStart = uNewStart;
+    m_uOldBarSize = m_pColStorage->get_column_width();
+
+    create_line_resizers();
+    move_prolog_shapes_and_get_initial_time();
+    determine_fixed_size_at_start_of_column();
+    reposition_all_other_shapes();
+    delete_line_resizers();
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnResizer::create_line_resizers()
+{
+	for (LinesIterator it=m_pColStorage->begin(); it != m_pColStorage->end(); ++it)
+	{
+        LineResizer* pResizer = new LineResizer(*it, m_uOldBarSize, m_uNewBarSize,
+                                                    m_uNewStart);
+        m_LineResizers.push_back(pResizer);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnResizer::move_prolog_shapes_and_get_initial_time()
+{
+    m_rFirstTime = LOMSE_NO_TIME;
+    std::vector<LineResizer*>::iterator itR;
+	for (itR = m_LineResizers.begin(); itR != m_LineResizers.end(); ++itR)
+	{
+        m_rFirstTime = min(m_rFirstTime, (*itR)->move_prolog_shapes());
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnResizer::determine_fixed_size_at_start_of_column()
+{
+    m_uFixedPart = 0.0f;
+    std::vector<LineResizer*>::iterator itR;
+	for (itR = m_LineResizers.begin(); itR != m_LineResizers.end(); ++itR)
+	{
+        m_uFixedPart = max(m_uFixedPart, (*itR)->get_time_line_position_if_time_is(m_rFirstTime));
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnResizer::reposition_all_other_shapes()
+{
+    std::vector<LineResizer*>::iterator itR;
+	for (itR = m_LineResizers.begin(); itR != m_LineResizers.end(); ++itR)
+		(*itR)->reasign_position_to_all_other_objects(m_uFixedPart);
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnResizer::delete_line_resizers()
+{
+    std::vector<LineResizer*>::iterator itR;
+	for (itR = m_LineResizers.begin(); itR != m_LineResizers.end(); ++itR)
+		delete *itR;
+    m_LineResizers.clear();
+}
 
 
 }  //namespace lomse

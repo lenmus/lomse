@@ -47,8 +47,8 @@ GraphicView::GraphicView(LibraryScope& libraryScope, Document* pDoc,
 
     , m_expand(0.0)
     , m_gamma(1.0)
-    , m_scale(1.0)
     , m_rotation(0.0)   //degrees: -180.0 to 180.0
+    , m_transform()
     , m_vxOrg(0)
     , m_vyOrg(0)
     , m_dx(0)
@@ -75,8 +75,7 @@ GraphicModel* GraphicView::get_graphic_model()
 //---------------------------------------------------------------------------------------
 GraphicModel* GraphicView::create_graphic_model()
 {
-    TextMeter meter( m_libraryScope.font_storage() );
-    DocLayouter layouter( m_pDoc->get_im_model(), &meter);
+    DocLayouter layouter( m_pDoc->get_im_model(), m_libraryScope);
     layouter.layout_document();
     return layouter.get_gm_model();
 }
@@ -107,33 +106,19 @@ void GraphicView::draw_graphic_model()
 
     m_pDrawer->reset(m_pPlatform->get_window_buffer());
     m_pDrawer->set_viewport(m_vxOrg, m_vyOrg);
-    m_pDrawer->set_scale(m_scale);
+    m_pDrawer->set_transform(m_transform);
 
     generate_paths();
-    //m_pDrawer->render(true);
-
-    //m_pDrawer->draw_text(1000.0, 3000.0, "Rasterized text placed at (10, 300)");
-
-    //m_pDrawer->begin_path();
-    //m_pDrawer->move_to(50.0, 50.0);
-    //m_pDrawer->line_to(2000.0, 2000.0);
-    //m_pDrawer->line_to(2000.0, 2500.0);
-    //m_pDrawer->line_to(50.0, 50.0);
-    //m_pDrawer->render(true);
-
-    //m_pDrawer->set_font("timesi.ttf", 1400.0, k_vector_font_cache);
-    //m_pDrawer->text(10.0, 400.0, "Vector Text -- Slower, but can be rotated");
-
-    //m_pRenderer->get_bounding_rect(&m_uxMin, &m_uyMin, &m_uxMax, &m_uyMax);
+    m_pDrawer->render(true);
 
     //render statistics
     double tm = m_pPlatform->elapsed_time();
     char buf[256];
-    sprintf(buf, "Time=%.3f ms\n\n"
-                 "+/- : ZoomIn / ZoomOut\n\n"
-                 "1-5 : draw boxes. 0- remove boxes\n\n"
+    sprintf(buf, "Time=%.3f ms, scale=%.3f\n\n"
+                 "+/- : ZoomIn / ZoomOut (zoom center at mouse point)\n\n"
+                 "1-5 : draw boxes  |  0- remove boxes  |  "
                  "Click and drag: move score",
-                 tm);
+                 tm, m_transform.scale() );
     m_pDrawer->gsv_text(10.0, 20.0, buf);
 }
 
@@ -168,7 +153,7 @@ void GraphicView::add_controls()
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::on_mouse_button_down(int x, int y, unsigned flags)
+void GraphicView::on_mouse_button_down(Pixels x, Pixels y, unsigned flags)
 {
     m_dx = x - m_vxOrg;
     m_dy = y - m_vyOrg;
@@ -176,7 +161,7 @@ void GraphicView::on_mouse_button_down(int x, int y, unsigned flags)
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::on_mouse_move(int x, int y, unsigned flags)
+void GraphicView::on_mouse_move(Pixels x, Pixels y, unsigned flags)
 {
     if(flags == 0)
     {
@@ -187,14 +172,61 @@ void GraphicView::on_mouse_move(int x, int y, unsigned flags)
     {
         m_vxOrg = x - m_dx;
         m_vyOrg = y - m_dy;
+        
+        m_transform.tx = double(m_vxOrg);
+        m_transform.ty = double(m_vyOrg);
+
         m_pPlatform->force_redraw();
     }
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::on_mouse_button_up(int x, int y, unsigned flags)
+void GraphicView::on_mouse_button_up(Pixels x, Pixels y, unsigned flags)
 {
     m_drag_flag = false;
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::zoom_in(Pixels x, Pixels y)
+{ 
+    double rx(x);
+    double ry(y);
+
+    //move origin (left-top window corner) to rx, ry
+    m_transform *= agg::trans_affine_translation(-rx, -ry);
+    //apply scaling
+    m_transform *= agg::trans_affine_scaling(1.05);
+    //move origin back to (rx, ry) so this point remains un-moved
+    m_transform *= agg::trans_affine_translation(rx, ry);
+
+    m_vxOrg = Pixels(m_transform.tx);
+    m_vyOrg = Pixels(m_transform.ty);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::zoom_out(Pixels x, Pixels y)
+{ 
+    double rx(x);
+    double ry(y);
+
+    m_transform *= agg::trans_affine_translation(-rx, -ry);
+    m_transform *= agg::trans_affine_scaling(1.0/1.05);
+    m_transform *= agg::trans_affine_translation(rx, ry);
+
+    m_vxOrg = Pixels(m_transform.tx);
+    m_vyOrg = Pixels(m_transform.ty);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::set_scale(double scale, Pixels x, Pixels y) 
+{ 
+    m_transform.scale(scale);
+}
+
+//---------------------------------------------------------------------------------------
+double GraphicView::get_scale() 
+{ 
+    return m_transform.scale();
 }
 
 ////---------------------------------------------------------------------------------------
@@ -302,7 +334,7 @@ HorizontalBookView::HorizontalBookView(LibraryScope& libraryScope, Document* pDo
 void HorizontalBookView::generate_paths()
 {
     GraphicModel* pGModel = get_graphic_model();
-    UPoint origin(0.0f, 0.0f);
+    UPoint origin(500.0f, 500.0f);
 
     m_options.background_color = Color(127,127,127);
     m_options.page_border_flag = true;

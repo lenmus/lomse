@@ -22,6 +22,7 @@
 #define __LOMSE_DOCUMENT_LAYOUTER_H__
 
 #include "lomse_basic.h"
+#include "lomse_injectors.h"
 #include "lomse_drawer.h"
 #include <sstream>
 
@@ -39,7 +40,7 @@ class FlowSizer;
 class ImoDocument;
 class GmoBox;
 class GmoBoxDocPage;
-class TextMeter;
+class FontStorage;
 
 
 // DocLayouter: layouts a document
@@ -49,7 +50,7 @@ class DocLayouter
 protected:
     InternalModel* m_pIModel;
     GraphicModel* m_pGModel;
-    TextMeter* m_pTextMeter;
+    LibraryScope& m_libraryScope;
     //FlowSizer* m_pMainSizer;
     GmoBox* m_pCurrentBox;
     LUnits m_availableWidth;
@@ -58,7 +59,7 @@ protected:
 
 
 public:
-    DocLayouter(InternalModel* pIModel, TextMeter* pTextMeter);
+    DocLayouter(InternalModel* pIModel, LibraryScope& libraryScope);
     virtual ~DocLayouter();
 
     void layout_document();

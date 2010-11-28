@@ -26,9 +26,6 @@
 
 #include "lomse_renderer.h"
 
-//#include "lomse_exceptions.h"
-//#include "lomse_gm_basic.h"
-
 using namespace std;
 
 namespace lomse
@@ -39,17 +36,19 @@ namespace lomse
 // Renderer: 
 // Knows how to render bitmaps and paths created by Calligrapher and Drawer objects
 //---------------------------------------------------------------------------------------
-Renderer::Renderer(AttrStorage& attr_storage, AttrStorage& attr_stack, PathStorage& path)
+Renderer::Renderer(double ppi, AttrStorage& attr_storage, AttrStorage& attr_stack,
+                   PathStorage& path)
     : m_expand(0.0)
     , m_gamma(1.0)
-    , m_scale(1.0)
-    , m_rotation(0.0)   //degrees: -180.0 to 180.0
-    , m_uxMin(0.0)
-    , m_uyMin(0.0)
-    , m_uxMax(0.0)
-    , m_uyMax(0.0)
+    , m_userScale(1.0)
+    , m_rotation(0.0)
+    , m_uxShift(0.0)
+    , m_uyShift(0.0)
     , m_vxOrg(0.0)
     , m_vyOrg(0.0)
+
+    , m_transform()
+    , m_mtx()
 
     , m_rbuf()
     , m_pixFormat(m_rbuf)
@@ -59,14 +58,19 @@ Renderer::Renderer(AttrStorage& attr_storage, AttrStorage& attr_stack, PathStora
     , m_attr_storage(attr_storage)
     , m_attr_stack(attr_stack)
     , m_path(path)
-    , m_transform()
-    , m_mtx()
     , m_curved(m_path)
     , m_curved_stroked(m_curved)
     , m_curved_stroked_trans(m_curved_stroked, m_transform)
     , m_curved_trans(m_curved, m_transform)
     , m_curved_trans_contour(m_curved_trans)
 {
+    //LUnits to pixels conversion factor
+    // device units are pixels. Therefore we must convert from LUnits to pixels:
+    //      ppi px/inch = ppi/25.4 px/mm = ppi/2540 px/LU
+    // example:
+    //      96 px/inch = 96/25.4 px/mm = 96/2540 px/LU = 0.037795275 px/LU
+    m_lunitsToPixels = ppi/2540.0;
+    set_transformation();
 }
 
 void Renderer::initialize(RenderingBuffer& buf)
@@ -77,9 +81,10 @@ void Renderer::initialize(RenderingBuffer& buf)
     //////set backgound color
     ////Color bgcolor = m_options.background_color;
     ////m_renBase.clear(agg::rgba(bgcolor.r, bgcolor.b, bgcolor.g, bgcolor.a));
-    m_renBase.clear(agg::rgba(0.5,0.5,0.5));
+    m_renBase.clear(agg::rgba(0.5, 0.5, 0.5));
 
     reset();
+    set_transformation();
 }
 
 //---------------------------------------------------------------------------------------
@@ -104,7 +109,6 @@ void Renderer::render(bool fillColor)
     //////ras.gamma(agg::gamma_none());
     //////agg::render_ctrl(ras, sl, m_renBase, m_expand);
     //////agg::render_ctrl(ras, sl, m_renBase, m_gamma);
-    //////agg::render_ctrl(ras, sl, m_renBase, m_scale);
     //////agg::render_ctrl(ras, sl, m_renBase, m_rotate);
 
     //clear paths
@@ -134,9 +138,9 @@ void Renderer::render_gsv_text(double x, double y, const char* str)
 }
 
 //---------------------------------------------------------------------------------------
-void Renderer::render(FontRasterizer& ras, FontScanline& sl)
+void Renderer::render(FontRasterizer& ras, FontScanline& sl, Color color)
 {
-    m_renSolid.color(agg::rgba(0,0,0));
+    m_renSolid.color( to_rgba(color) );
     agg::render_scanlines(ras, sl, m_renSolid);
 }
 
@@ -146,7 +150,6 @@ void Renderer::reset()
     m_path.remove_all();
     m_attr_storage.remove_all();
     m_attr_stack.remove_all();
-    m_transform.reset();
 }
 
 //---------------------------------------------------------------------------------------
@@ -154,27 +157,41 @@ TransAffine& Renderer::set_transformation()
 {
     m_mtx.reset();
 
-    //LUnits to pixels conversion factor
-    // agg units are pixels. Therefore we must convert from LUnits to pixels:
-    //      96 px/inch = 96/25.6 px/mm = 96/2560 px/LU = 0.0375 px/LU
-    double f = 0.0375;
+    //add shift
+    m_mtx *= agg::trans_affine_translation(m_uxShift, m_uyShift);
 
-    //move origin to the center of image, so rotation center is there
-    m_mtx *= agg::trans_affine_translation((m_uxMin + m_uxMax) * -0.5,
-                                           (m_uyMin + m_uyMax) * -0.5);
     //scale LUnits -> pixels
-    m_mtx *= agg::trans_affine_scaling(m_scale * f);
+    m_mtx *= agg::trans_affine_scaling(m_userScale * m_lunitsToPixels);
 
-    //rotation (normally 0 degrees). Could be useful when rotating 90 degrees
-    m_mtx *= agg::trans_affine_rotation(agg::deg2rad(m_rotation));
-
-    //undo centering and move origin to current scroll/drag origin
-    m_mtx *= agg::trans_affine_translation((m_uxMin + m_uxMax) * 0.5 * f + m_vxOrg,
-                                           (m_uyMin + m_uyMax) * 0.5 * f + m_vyOrg);
+    //move origin to current scroll/drag origin
+    m_mtx *= agg::trans_affine_translation(m_vxOrg, m_vyOrg);
 
     return m_mtx;
 }
 
+//---------------------------------------------------------------------------------------
+void Renderer::set_transform(TransAffine& transform)
+{
+    m_uxShift = (transform.tx - m_vxOrg) / m_lunitsToPixels;
+    m_uyShift = (transform.ty - m_vyOrg) / m_lunitsToPixels;
+    m_userScale = transform.scale();
+}
+
+//---------------------------------------------------------------------------------------
+agg::rgba Renderer::to_rgba(Color c)
+{
+    double red = double(c.r)/255.0;
+    double green = double(c.g)/255.0;
+    double blue = double(c.b)/255.0;
+    double opacity = double(c.a)/255.0;
+    return agg::rgba(red, green, blue, opacity);
+}
+
+//---------------------------------------------------------------------------------------
+agg::rgba8 Renderer::to_rgba8(Color c)
+{
+    return agg::rgba8(c.r, c.g, c.b, c.a);
+}
 
 
 }  //namespace lomse

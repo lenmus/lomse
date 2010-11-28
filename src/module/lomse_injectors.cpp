@@ -27,6 +27,7 @@
 #include "lomse_model_builder.h"
 #include "lomse_document.h"
 #include "lomse_font_storage.h"
+//#include "lomse_glyphs.h"
 //#include "lomse_user_command.h"
 //#include "lomse_view.h"
 //#include "lomse_controller.h"
@@ -46,6 +47,8 @@ LibraryScope::~LibraryScope()
         delete m_pLdpFactory;
     if (m_pFontStorage)
         delete m_pFontStorage;
+    //if (m_pMusicGlyphs)
+    //    delete m_pMusicGlyphs;
 }
 
 LdpFactory* LibraryScope::ldp_factory()
@@ -62,6 +65,15 @@ FontStorage* LibraryScope::font_storage()
         m_pFontStorage = new FontStorage();
     return m_pFontStorage;
 }
+
+////---------------------------------------------------------------------------------------
+//MusicGlyphs* LibraryScope::music_glyphs()
+//{
+//    if (!m_pMusicGlyphs)
+//        m_pMusicGlyphs = new MusicGlyphs();
+//    return m_pMusicGlyphs;
+//}
+
 
 
 //---------------------------------------------------------------------------------------

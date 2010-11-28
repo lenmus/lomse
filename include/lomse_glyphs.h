@@ -29,32 +29,32 @@ namespace lomse
 //forward declarations
 
 
-//---------------------------------------------------------
-//   Glyphs info
-//---------------------------------------------------------
-
-// Definition of an entry of the Glyphs table
+//---------------------------------------------------------------------------------------
+//   Glyphs info: an entry of the Glyphs table
+//---------------------------------------------------------------------------------------
 struct GlyphData
 {
     // all measurements in tenths
     unsigned int GlyphChar;
-    int		    GlyphOffset;
-    int		    SelRectShift;
-    int		    SelRectHeight;
-    int		    Top;
-    int		    Bottom;
-	Tenths	thxPos;
-	Tenths	thyPos;
-	Tenths	thWidth;
-	Tenths	thHeight;
-	Tenths	txDrag;
-	Tenths	tyDrag;
+    Tenths GlyphOffset;
+    Tenths SelRectShift;
+    Tenths SelRectHeight;
+    Tenths Top;
+    Tenths Bottom;
+	Tenths thxPos;
+	Tenths thyPos;
+	Tenths thWidth;
+	Tenths thHeight;
+	Tenths txDrag;
+	Tenths tyDrag;
 
-    GlyphData(const unsigned int glyph, int yOffset, int yShift, int selHeight, int top, int bottom, 
-		    int xPos, int yPos, int width, int height, int xDrag, int yDrag);
+    GlyphData(const unsigned int glyph, int yOffset, int yShift, int selHeight,
+              int top, int bottom, int xPos, int yPos, int width, int height,
+              int xDrag, int yDrag);
 
 };
 
+//---------------------------------------------------------------------------------------
 //indexes for the table
 enum EGlyphIndex
 {
@@ -183,8 +183,19 @@ enum EGlyphIndex
 
 };
 
+//class MusicGlyphs
+//{
+//protected:
+//    const GlyphData* m_glyphs;
+//
+//public:
+//    MusicGlyphs();
+//    ~MusicGlyphs() {}
+//
+//    inline const GlyphData& get_glyph_data(int iGlyph) { return *(m_glyphs+iGlyph); }
+//};
 
-extern const GlyphData aGlyphsInfo[];     //the glyphs table
+extern const GlyphData glyphs_lmbasic2[];     //the glyphs table
 
 
 }   //namespace lomse

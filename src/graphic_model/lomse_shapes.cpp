@@ -22,8 +22,8 @@
 
 #include "lomse_internal_model.h"
 #include "lomse_drawer.h"
-//#include <sstream>
-//using namespace std;
+#include "lomse_glyphs.h"
+#include "lomse_calligrapher.h"
 
 namespace lomse
 {
@@ -31,41 +31,40 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // GmoShapeGlyph object implementation
 //---------------------------------------------------------------------------------------
-GmoShapeGlyph::GmoShapeGlyph(GmoBox* owner, int type, int nShapeIdx, int nGlyph, UPoint pos)
-    : GmoSimpleShape(owner, type)  //, pOwner, nShapeIdx, color)
-    , m_nGlyph(nGlyph)
-    , m_uGlyphPos(pos)
+GmoShapeGlyph::GmoShapeGlyph(GmoBox* owner, int type, int nShapeIdx, unsigned int nGlyph,
+                             UPoint pos, Color color, LibraryScope& libraryScope)
+    : GmoSimpleShape(owner, type, color)  //, pOwner, nShapeIdx)
+    , m_pFontStorage( libraryScope.font_storage() )
+    , m_libraryScope(libraryScope)
 {
-//    // store boundling rectangle position and size
-//    wxASSERT(pOwner->IsComponentObj());
-//    wxString sGlyph( aGlyphsInfo[m_nGlyph].GlyphChar );
-//    lmComponentObj* pSO = ((lmComponentObj*)m_pOwner);
-//    lmStaff* pStaff = pSO->GetStaff();
-//    double rPointSize = pStaff->GetMusicFontSize();
-//    pPaper->FtSetFontSize(rPointSize);
-//    lmURect bbox = ((lmAggDrawer*)(pPaper->GetDrawer()))->FtGetGlyphBounds( (unsigned int)sGlyph.GetChar(0) );
-//
-//	m_uBoundsTop.x = m_uGlyphPos.x + bbox.x;
-//	m_uBoundsTop.y = m_uGlyphPos.y + bbox.y + pSO->TenthsToLogical(60);
-//	m_uBoundsBottom.x = m_uBoundsTop.x + bbox.width;
-//	m_uBoundsBottom.y = m_uBoundsTop.y + bbox.height;
-//
-//    // store selection rectangle position and size
-//	m_uSelRect = GetBounds();
+    m_glyph = glyphs_lmbasic2[nGlyph].GlyphChar;
+
+    pos.y += 1080.0f;     //TODO-LOG TenthsToLogical(60);
+
+    //glyph bounds
+    TextMeter meter(m_libraryScope);
+    meter.select_font("LenMus basic", 21.0);
+    URect bbox = meter.bounding_rectangle(m_glyph);
+
+    m_origin.x = pos.x + bbox.x;
+    m_origin.y = pos.y + bbox.y;
+    m_size.width = bbox.width;
+    m_size.height = bbox.height;            
+
+    m_shiftToDraw.width = pos.x - m_origin.x;
+    m_shiftToDraw.height = pos.y - m_origin.y;
 }
 
 //---------------------------------------------------------------------------------------
 void GmoShapeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
 {
-//    wxString sGlyph( aGlyphsInfo[m_nGlyph].GlyphChar );
-//
-//    pPaper->FtSetFontSize(GetPointSize());
-//    pPaper->SetTextForeground(color);
-//    lmComponentObj* pSO = ((lmComponentObj*)m_pOwner);
-//    pPaper->FtSetTextPosition(m_uGlyphPos.x, m_uGlyphPos.y + pSO->TenthsToLogical(60) );
-//    pPaper->FtDrawChar( (unsigned int)sGlyph.GetChar(0) );
+    pDrawer->select_font("LenMus basic", 21.0);
+    pDrawer->set_text_color(m_color);
+    LUnits x = m_shiftToDraw.width + m_origin.x + origin.x;
+    LUnits y = m_shiftToDraw.height + m_origin.y + origin.y;
+    pDrawer->draw_glyph(x, y, m_glyph);
 
-    //GmoSimpleShape::Render(pPaper, color);
+    GmoSimpleShape::on_draw(pDrawer, opt, origin);
 }
 
 ////---------------------------------------------------------------------------------------
@@ -203,8 +202,9 @@ void GmoShapeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
 // GmoShapeClef
 //---------------------------------------------------------------------------------------
 GmoShapeClef::GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos,
-                           bool fSmallClef)
-    : GmoShapeGlyph(owner, GmoObj::k_shape_clef, nShapeIdx, nGlyph, pos)
+                           bool fSmallClef, Color color, LibraryScope& libraryScope)
+    : GmoShapeGlyph(owner, GmoObj::k_shape_clef, nShapeIdx, nGlyph, pos, color,
+                    libraryScope)
 //    , m_fSmallClef(fSmallClef)
 {
 //    //In ShapeGlyph constructor, bounds have been set without taking into accont 
@@ -214,7 +214,7 @@ GmoShapeClef::GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos,
 //    {
 //        // store boundling rectangle position and size
 //        lmComponentObj* pSO = ((lmComponentObj*)m_pOwner);
-//        wxString sGlyph( aGlyphsInfo[m_nGlyph].GlyphChar );
+//        wxString sGlyph( glyphs_lmbasic2[m_nGlyph].GlyphChar );
 //        double rPointSize = GetPointSize();
 //        pPaper->FtSetFontSize(rPointSize);
 //        lmURect bbox = ((lmAggDrawer*)(pPaper->GetDrawer()))->FtGetGlyphBounds( (unsigned int)sGlyph.GetChar(0) );
@@ -1097,7 +1097,7 @@ GmoShapeClef::GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos,
 //    lmAggDrawer* pDrawer = new lmAggDrawer(&dummyBitmap, rScale);
 //
 //    // Get size of glyph, in logical units
-//    wxString sGlyph( aGlyphsInfo[nGlyph].GlyphChar );
+//    wxString sGlyph( glyphs_lmbasic2[nGlyph].GlyphChar );
 //    //wxLogMessage(_T("[Shapes/GetBitmapForGlyph] rPointSize=%.2f, rScale=%.2f, sGlyph='%s'"),
 //    //             rPointSize, rScale, sGlyph.c_str());
 //    pDrawer->FtSetFontSize(rPointSize);
