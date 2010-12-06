@@ -47,14 +47,14 @@ public:
     virtual ~GmoShapeGlyph() {}
 
     //implementation of virtual methods from base class
-    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
+    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
 //    void RenderHighlighted(wxDC* pDC, Color colorC);
 
 //    wxString Dump(int nIndent);
 //    void Shift(LUnits xIncr, LUnits yIncr);
 //	virtual wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
 //    virtual UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos);
-//	virtual void OnEndDrag(lmPaper* pPaper, lmController* pCanvas, const UPoint& uPos);
+//	virtual void OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos);
 //	UPoint GetObjectOrigin();
 
 protected:
@@ -76,7 +76,7 @@ public:
 
 //	//overrides
 //    UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos);
-//    void OnEndDrag(lmPaper* pPaper, lmController* pCanvas, const UPoint& uPos);
+//    void OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos);
 //    double GetPointSize();
 //
 //protected:
@@ -94,7 +94,7 @@ public:
 //    ~GmoShapeSimpleLine() {}
 //
 //    //implementation of virtual methods from base class
-//    void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
+//    void on_draw(Drawer* pDrawer, RenderOptions& opt);
 //    wxString Dump(int nIndent);
 //    void Shift(LUnits xIncr, LUnits yIncr);
 //
@@ -139,7 +139,7 @@ public:
 //    virtual ~GmoShapeRectangle();
 //
 //    //implementation of virtual methods from base class
-//    void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
+//    void on_draw(Drawer* pDrawer, RenderOptions& opt);
 //    void RenderNormal(lmPaper* pPaper, Color color);
 //    void RenderWithHandlers(lmPaper* pPaper);
 //    wxString Dump(int nIndent);
@@ -168,11 +168,11 @@ public:
 //    //shape dragging
 //    wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
 //	UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos);
-//	void OnEndDrag(lmPaper* pPaper, lmController* pCanvas, const UPoint& uPos);
+//	void OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos);
 //
 //    //handlers dragging
 //    UPoint OnHandlerDrag(lmPaper* pPaper, const UPoint& uPos, long nHandlerID);
-//    void OnHandlerEndDrag(lmController* pCanvas, const UPoint& uPos, long nHandlerID);
+//    void OnHandlerEndDrag(lmInteractor* pCanvas, const UPoint& uPos, long nHandlerID);
 //
 //    //call backs
 //    void MovePoints(int nNumPoints, int nShapeIdx, UPoint* pShifts, bool fAddShifts);
@@ -280,7 +280,7 @@ public:
 //    virtual ~GmoShapeWindow() {}
 //
 //    //renderization
-//    void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
+//    void on_draw(Drawer* pDrawer, RenderOptions& opt);
 //
 //	//specific methods
 //

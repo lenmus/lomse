@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010 Lomse project
 //
@@ -13,16 +13,10 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
-
-/// @file Tree.h
-/// @brief Generic classes to build and traverse trees
-///
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_TREE_H__
 #define __LOMSE_TREE_H__
@@ -41,7 +35,7 @@ namespace lomse
 
 
 template <typename T>
-class LM_EXPORT Tree : virtual public RefCounted
+class LOMSE_EXPORT Tree : virtual public RefCounted
 {
 protected:
 	T* m_root;
@@ -152,6 +146,7 @@ public:
 };
 
 
+//---------------------------------------------------------------------------------------
 /// A node in the tree. It is a base abstract class from which any tree node must derive.
 /// It adds the links to place the node in the tree and provides iterators for traversing
 /// the tree.
@@ -257,6 +252,7 @@ public:
 };
 
 
+//---------------------------------------------------------------------------------------
 template <class T>
 void NodeInTree<T>::append_child(T* child)
 {
@@ -292,6 +288,7 @@ void NodeInTree<T>::append_child(T* child)
 
 }
 
+//---------------------------------------------------------------------------------------
 template <class T>
 int NodeInTree<T>::get_num_children()
 {
@@ -306,6 +303,7 @@ int NodeInTree<T>::get_num_children()
     return numChildren;
 }
 
+//---------------------------------------------------------------------------------------
 template <class T>
 T* NodeInTree<T>::get_child(int i)
 {
@@ -321,6 +319,7 @@ T* NodeInTree<T>::get_child(int i)
         throw std::runtime_error( "[NodeInTree<T>::get_child]. Num child greater than available children" );
 }
 
+//---------------------------------------------------------------------------------------
 template <class T>
 void NodeInTree<T>::set_modified()
 {
@@ -331,6 +330,7 @@ void NodeInTree<T>::set_modified()
         m_parent->set_modified();
 }
 
+//---------------------------------------------------------------------------------------
 template <class T>
 void NodeInTree<T>::reset_modified()
 {
@@ -341,6 +341,7 @@ void NodeInTree<T>::reset_modified()
         m_parent->reset_modified();
 }
 
+//---------------------------------------------------------------------------------------
 template <class T>
 void NodeInTree<T>::clear_modified()
 {
@@ -355,6 +356,7 @@ void NodeInTree<T>::clear_modified()
     }
 }
 
+//---------------------------------------------------------------------------------------
 template <class T>
 T* Tree<T>::get_last_node()
 {
@@ -371,6 +373,7 @@ T* Tree<T>::get_last_node()
     return dynamic_cast<T*>(node);
 }
 
+//---------------------------------------------------------------------------------------
 template <class T>
 typename Tree<T>::depth_first_iterator Tree<T>::erase(depth_first_iterator position)
 {
@@ -416,6 +419,7 @@ typename Tree<T>::depth_first_iterator Tree<T>::erase(depth_first_iterator posit
     }
 }
 
+//---------------------------------------------------------------------------------------
 /// Replaces iterator pointed node (and all its sub-tree) by the received node (and
 /// its sub-tree). Return iterator pointing to new node
 template <class T>
@@ -459,6 +463,7 @@ typename Tree<T>::depth_first_iterator Tree<T>::replace_node(depth_first_iterato
 }
 
 
+//---------------------------------------------------------------------------------------
 /// Insert a node as previous sibling of pointed node. Returns an iterator
 /// that points to the newly inserted element
 template <class T>

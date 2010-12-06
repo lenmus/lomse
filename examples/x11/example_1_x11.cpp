@@ -1,0 +1,717 @@
+//---------------------------------------------------------------------------------------
+//  This file is part of the Lomse library.
+//  Copyright (c) 2010 Lomse project
+//
+//  Lomse is free software; you can redistribute it and/or modify it under the
+//  terms of the GNU General Public License as published by the Free Software Foundation,
+//  either version 3 of the License, or (at your option) any later version.
+//
+//  Lomse is distributed in the hope that it will be useful, but WITHOUT ANY
+//  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+//  PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License along
+//  with Lomse; if not, see <http://www.gnu.org/licenses/>.
+//
+//  For any comment, suggestion or feature request, please contact the manager of
+//  the project at cecilios@users.sourceforge.net
+//
+//---------------------------------------------------------------------------------------
+
+// header files required for X11. The order is important:
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xos.h>
+
+//some additional needed stuff
+#include <stdio.h>
+#include <stdlib.h>
+
+//lomse headers
+#include "lomse_doorway.h"
+#include "lomse_document.h"
+#include "lomse_graphic_view.h"
+
+using namespace lomse;
+
+
+//---------------------------------------------------------------------------------------
+// In this first example we are just going to display an score on the main window.
+// Let's define the necessary variables:
+//
+LomseDoorway    m_lomse;        //the Lomse library doorway
+GraphicView*    m_pView;        //the View for displaying a score
+Document*       m_pDoc;         //the score to display
+
+//the Lomse View renders its content on a bitmap. To manage it, Lomse
+//associates the bitmap to a RenderingBuffer object.
+//It is your responsibility to render the bitmap on a window.
+//Here you define the rendering buffer and its associated bitmap to be
+//used by the previously defined View.
+unsigned char*      m_buf_window;
+RenderingBuffer     m_rbuf_window;
+XImage*             m_ximg_window;
+int                 m_depth;
+Visual*             m_visual;
+
+
+//Lomse can manage a lot of bitmap formats and pixel formats. You must
+//define the format that you are going to use
+int              m_byte_order;
+pix_format_e     m_format;      //bitmap format
+unsigned         m_bpp;         //bits per pixel
+bool             m_flip_y;      //true if y axis is reversed
+
+//some additinal variables
+bool    m_view_needs_redraw;      //to control when the View must be re-drawed
+
+//to measure ellapsed time (for performance measurements)
+struct timeval m_start_tv;
+
+
+//for keyboard support
+unsigned      m_last_translated_key;    //last pressed key once translated
+unsigned      m_keymap[256];            //Win32 keys <-> Lomse keys translation map
+
+
+//for mouse click & move position
+int           m_xMouse;
+int           m_yMouse;
+
+
+//To be moved to platform support
+XSetWindowAttributes m_window_attributes;
+Atom                 m_close_atom;
+
+
+//user options for processing events
+bool m_wait_mode;
+
+// All typical X stuff needed to run the program and the main events handler loop.
+// X has a number of important variables for handling windows:
+
+Display *m_pDisplay;    //points to the X Server.
+int m_screen;           //refers to which screen of the display to use.
+Window m_window;        //the actual window itself
+GC m_gc;                //And the GC is the graphics context.
+
+
+
+//---------------------------------------------------------------------------------------
+void display_view_content(const rendering_buffer* rbuf)
+{
+    if(m_ximg_window == 0) return;
+
+    //copy the view bitmap onto the image
+    m_ximg_window->data = (char*)m_buf_window;
+
+    //display the image
+    XPutImage(m_pDisplay,
+              m_window,
+              m_gc,
+              m_ximg_window,
+              0, 0, 0, 0,
+              rbuf->width(),
+              rbuf->height()
+             );
+}
+
+//---------------------------------------------------------------------------------------
+void force_redraw()
+{
+    // Callback method for Lomse. It can be used also by your application.
+    // force_redraw() is an analog of the Win32 InvalidateRect() function.
+    // When invoked by Lomse it must it set a flag (or send a message) which
+    // results in invoking View->on_paint() and then updating the content of
+    // the window when the next event cycle comes.
+
+    m_view_needs_redraw = true;             //force to invoke View->on_paint()
+}
+
+//---------------------------------------------------------------------------------------
+void update_window()
+{
+    // Callback method for Lomse. It can be used also by your application.
+    // Invoking update_window() results in just putting immediately the content
+    // of the currently rendered buffer to the window without calling
+    // any View methods (i.e. on_paint)
+
+    display_view_content(&m_rbuf_window);
+
+    // When m_wait_mode is true we can discard all the events
+    // caming while the image is being drawn. In this case
+    // the X server does not accumulate mouse motion events.
+    // When m_wait_mode is false (i.e. we have some idle drawing)
+    // we cannot afford to miss any events
+    XSync(m_pDisplay, m_wait_mode);
+}
+
+//-------------------------------------------------------------------------
+void open_document()
+{
+    //Normally you will create by loading the content of a file. But in this
+    //simple //example the score is defined in a text string
+
+    m_pDoc = new Document( *(m_lomse.get_library_scope()) );
+    m_pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        //"(instrument (musicData (clef G)(clef F3)(clef C1)(clef F4)) )))" );
+
+        //"(instrument (name \"Violin\")(musicData (clef G)(clef F4)(clef C1)) )))" );
+
+        //"(instrument (musicData )) )))" );
+
+        //"(instrument (staves 2) (musicData )) )))" );
+        //"(instrument (musicData )) (instrument (musicData )) )))" );
+
+        "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData (clef G))) "
+        "(instrument (name \"pilano\")(abbrev \"P\")(staves 2)(musicData (clef G p1)(clef F4 p2))) )))" );
+
+    //create the View for this document
+    m_pView = m_lomse.create_horizontal_book_view(m_pDoc);
+    m_pView->set_rendering_buffer(&m_rbuf_window);
+}
+
+//-------------------------------------------------------------------------
+void update_view_content()
+{
+    //request the view to re-draw the bitmap
+
+    if (!m_pView) return;
+    m_pView->on_paint();
+}
+
+//-------------------------------------------------------------------------
+void on_mouse_button_down(int x, int y, unsigned flags)
+{
+    if (!m_pView) return;
+    m_pView->on_mouse_button_down(x, y, flags);
+}
+
+//-------------------------------------------------------------------------
+void on_mouse_move(int x, int y, unsigned flags)
+{
+    if (!m_pView) return;
+    m_pView->on_mouse_move(x, y, flags);
+}
+
+//-------------------------------------------------------------------------
+void on_mouse_button_up(int x, int y, unsigned flags)
+{
+    if (!m_pView) return;
+    m_pView->on_mouse_button_up(x, y, flags);
+}
+
+//-------------------------------------------------------------------------
+void on_key(int x, int y, unsigned key, unsigned flags)
+{
+    if (!m_pView) return;
+
+    switch (key)
+    {
+        case '1':
+            m_pView->set_option_draw_box_doc_page_content(true);
+            break;
+        case '2':
+            m_pView->set_option_draw_box_score_page(true);
+            break;
+        case '3':
+            m_pView->set_option_draw_box_system(true);
+            break;
+        case '4':
+            m_pView->set_option_draw_box_slice(true);
+            break;
+        case '5':
+            m_pView->set_option_draw_box_slice_instr(true);
+            break;
+        case '0':
+            m_pView->set_option_draw_box_doc_page_content(false);
+            m_pView->set_option_draw_box_score_page(false);
+            m_pView->set_option_draw_box_system(false);
+            m_pView->set_option_draw_box_slice(false);
+            m_pView->set_option_draw_box_slice_instr(false);
+            break;
+        case '+':
+            m_pView->zoom_in(x, y);
+            break;
+        case '-':
+            m_pView->zoom_out(x, y);
+            break;
+        default:
+            ;
+    }
+
+    force_redraw();
+}
+
+//---------------------------------------------------------------------------------------
+void start_timer()
+{
+    gettimeofday(&m_start_tv, NULL);
+}
+
+//---------------------------------------------------------------------------------------
+double elapsed_time()
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    double ms = (tv.tv_usec - m_start_tv.tv_usec) / 1000.0;
+    if (tv.tv_sec > m_start_tv.tv_sec)
+    {
+         double seconds = double(tv.tv_sec - m_start_tv.tv_sec);
+         ms += seconds * 1000000.0;
+   }
+   m_start_tv = tv;
+   return ms;
+}
+
+//---------------------------------------------------------------------------------------
+void get_mouse_position(XEvent& event)
+{
+    m_xMouse = event.xbutton.x;
+    m_yMouse = m_flip_y ? m_rbuf_window.height() - event.xbutton.y
+                        : event.xbutton.y;
+}
+
+//---------------------------------------------------------------------------------------
+unsigned get_keyboard_flags(XEvent& event)
+{
+    unsigned flags = 0;
+    if(event.xkey.state & Button1Mask) flags |= mouse_left;
+    if(event.xkey.state & Button3Mask) flags |= mouse_right;
+    if(event.xkey.state & ShiftMask)   flags |= kbd_shift;
+    if(event.xkey.state & ControlMask) flags |= kbd_ctrl;
+    return flags;
+}
+
+//---------------------------------------------------------------------------------------
+unsigned get_mouse_flags(XEvent& event)
+{
+    unsigned flags = 0;
+    if(event.xbutton.state & ShiftMask)   flags |= kbd_shift;
+    if(event.xbutton.state & ControlMask) flags |= kbd_ctrl;
+    if(event.xbutton.state & Button1Mask) flags |= mouse_left;
+    if(event.xbutton.state & Button3Mask) flags |= mouse_right;
+    if(event.xbutton.button == Button1)   flags |= mouse_left;
+    if(event.xbutton.button == Button3)   flags |= mouse_right;
+    return flags;
+}
+
+//---------------------------------------------------------------------------------------
+bool determine_bitmap_format()
+{
+    //TODO: This code must be moved to Lomse platform support library
+    //Returns false if Lomse can not find a suitable bitmap format
+    //for this /operating system / platform
+
+    //determine color depth
+    m_depth  = XDefaultDepth(m_pDisplay, m_screen);
+    m_visual = XDefaultVisual(m_pDisplay, m_screen);
+    unsigned long r_mask = m_visual->red_mask;
+    unsigned long g_mask = m_visual->green_mask;
+    unsigned long b_mask = m_visual->blue_mask;
+
+    if(m_depth < 15 || r_mask == 0 || g_mask == 0 || b_mask == 0)
+    {
+        fprintf(stderr,
+               "There's no Visual compatible with minimal Lomse requirements:\n"
+               "At least 15-bit color depth and TrueColor or DirectColor class.\n\n");
+        XCloseDisplay(m_pDisplay);
+        return false;
+    }
+
+    //determine byte ordering
+    int t = 1;
+    int hw_byte_order = LSBFirst;
+    if(*(char*)&t == 0)
+        hw_byte_order = MSBFirst;
+
+    //use mask to determine the bitmap format to use
+    switch(m_depth)
+    {
+        case 15:
+            m_bpp = 16;
+            if(r_mask == 0x7C00 && g_mask == 0x3E0 && b_mask == 0x1F)
+            {
+                m_format = pix_format_rgb555;
+                m_byte_order = hw_byte_order;
+            }
+            break;
+
+        case 16:
+            m_bpp = 16;
+            if(r_mask == 0xF800 && g_mask == 0x7E0 && b_mask == 0x1F)
+            {
+                m_format = pix_format_rgb565;
+                m_byte_order = hw_byte_order;
+            }
+            break;
+
+        case 24:
+        case 32:
+            m_bpp = 32;
+            if(g_mask == 0xFF00)
+            {
+                if(r_mask == 0xFF && b_mask == 0xFF0000)
+                {
+                    switch(m_format)
+                    {
+                        case pix_format_rgba32:
+                            m_format = pix_format_rgba32;
+                            m_byte_order = LSBFirst;
+                            break;
+
+                        case pix_format_abgr32:
+                            m_format = pix_format_abgr32;
+                            m_byte_order = MSBFirst;
+                            break;
+
+                        default:
+                            m_byte_order = hw_byte_order;
+                            m_format =
+                                (hw_byte_order == LSBFirst) ?
+                                pix_format_rgba32 :
+                                pix_format_abgr32;
+                            break;
+                    }
+                }
+
+                if(r_mask == 0xFF0000 && b_mask == 0xFF)
+                {
+                    switch(m_format)
+                    {
+                        case pix_format_argb32:
+                            m_format = pix_format_argb32;
+                            m_byte_order = MSBFirst;
+                            break;
+
+                        case pix_format_bgra32:
+                            m_format = pix_format_bgra32;
+                            m_byte_order = LSBFirst;
+                            break;
+
+                        default:
+                            m_byte_order = hw_byte_order;
+                            m_format =
+                                (hw_byte_order == MSBFirst) ?
+                                pix_format_argb32 :
+                                pix_format_bgra32;
+                            break;
+                    }
+                }
+            }
+            break;
+    }
+
+    //if no suitable format found, terminate
+    if(m_format == pix_format_undefined)
+    {
+        fprintf(stderr,
+               "RGB masks are not compatible with Lomse pixel formats:\n"
+               "R=%08lx, R=%08lx, B=%08lx\n", r_mask, g_mask, b_mask);
+        XCloseDisplay(m_pDisplay);
+        return false;
+    }
+
+    return true;
+}
+
+//---------------------------------------------------------------------------------------
+bool create_rendering_buffer(unsigned width, unsigned height, unsigned flags)
+{
+    m_buf_window = new unsigned char[width * height * (m_bpp / 8)];
+    memset(m_buf_window, 255, width * height * (m_bpp / 8));
+
+    m_rbuf_window.attach(m_buf_window, width, height,
+                         (m_flip_y ? -width * (m_bpp / 8) : width * (m_bpp / 8)) );
+
+    m_ximg_window = XCreateImage(m_pDisplay,
+                                 m_visual,
+                                 m_depth,
+                                 ZPixmap,
+                                 0,
+                                 (char*)m_buf_window,
+                                 width,
+                                 height,
+                                 m_bpp,
+                                 width * (m_bpp / 8)
+                                );
+    m_ximg_window->byte_order = m_byte_order;
+    m_view_needs_redraw = true;
+
+    return true;
+}
+
+//---------------------------------------------------------------------------------------
+void delete_rendering_buffer()
+{
+    delete [] m_buf_window;
+    if (m_ximg_window)
+    {
+        m_ximg_window->data = 0;
+        XDestroyImage(m_ximg_window);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+// application main events handler loop
+int handle_events()
+{
+    XFlush(m_pDisplay);
+
+    bool quit = false;
+//    unsigned flags;
+//    int cur_x;
+//    int cur_y;
+
+    while(!quit)
+    {
+        if(m_view_needs_redraw)
+        {
+            update_view_content();
+            update_window();
+            m_view_needs_redraw = false;
+        }
+
+//        if(!m_wait_mode)
+//        {
+//            if(XPending(m_pDisplay) == 0)
+//            {
+//                on_idle();
+//                continue;
+//            }
+//        }
+
+        XEvent event;
+        XNextEvent(m_pDisplay, &event);
+
+//        // In the Idle mode discard all intermediate MotionNotify events
+//        if(!m_wait_mode && event.type == MotionNotify)
+//        {
+//            XEvent te = event;
+//            for(;;)
+//            {
+//                if(XPending(m_pDisplay) == 0) break;
+//                XNextEvent(m_pDisplay, &te);
+//                if(te.type != MotionNotify) break;
+//            }
+//            event = te;
+//        }
+
+        switch(event.type)
+        {
+            //--------------------------------------------------------------------
+            case ConfigureNotify:
+            {
+                if(event.xconfigure.width  != int(m_rbuf_window.width()) ||
+                   event.xconfigure.height != int(m_rbuf_window.height()))
+                {
+                    int width  = event.xconfigure.width;
+                    int height = event.xconfigure.height;
+                    delete_rendering_buffer();
+                    create_rendering_buffer(width, height, 0);
+                    update_window();
+                }
+                break;
+            }
+
+            //--------------------------------------------------------------------
+            case Expose:
+                if (event.xexpose.count == 0)
+                {
+                    display_view_content(&m_rbuf_window);
+                    XFlush(m_pDisplay);
+                    XSync(m_pDisplay, false);
+                }
+                break;
+
+            //--------------------------------------------------------------------
+            case KeyPress:
+            {
+                KeySym key = XLookupKeysym(&event.xkey, 0);
+                on_key(event.xkey.x,
+                       m_flip_y ?
+                           m_rbuf_window.height() - event.xkey.y :
+                           event.xkey.y,
+                       key,
+                       0);
+                break;
+            }
+
+            //--------------------------------------------------------------------
+            case ButtonPress:
+            {
+                unsigned flags = get_mouse_flags(event);
+                get_mouse_position(event);
+
+                if(flags & (mouse_left | mouse_right))
+                    on_mouse_button_down(m_xMouse, m_yMouse, flags);
+
+                break;
+            }
+
+            //--------------------------------------------------------------------
+            case ButtonRelease:
+            {
+                unsigned flags = get_mouse_flags(event);
+                get_mouse_position(event);
+
+                if(flags & (mouse_left | mouse_right))
+                    on_mouse_button_up(m_xMouse, m_yMouse, flags);
+
+                break;
+            }
+
+            //--------------------------------------------------------------------
+            case MotionNotify:
+            {
+                unsigned flags = get_mouse_flags(event);
+                get_mouse_position(event);
+                on_mouse_move(m_xMouse, m_yMouse, flags);
+                break;
+            }
+
+            //--------------------------------------------------------------------
+            case ClientMessage:
+                if(event.xclient.format == 32
+                   && event.xclient.data.l[0] == int(m_close_atom) )
+                {
+                    quit = true;
+                }
+                break;
+        }
+    }
+
+    return 0;
+}
+
+//---------------------------------------------------------------------------------------
+void define_events_to_process()
+{
+    XSelectInput(m_pDisplay, m_window, PointerMotionMask
+                                       | ButtonPressMask
+                                       | ButtonReleaseMask
+                                       | ExposureMask
+                                       | KeyPressMask
+                                       | StructureNotifyMask );
+
+}
+
+//---------------------------------------------------------------------------------------
+void create_main_window(unsigned width, unsigned height)
+{
+    memset(&m_window_attributes, 0, sizeof(m_window_attributes));
+    m_window_attributes.border_pixel = XBlackPixel(m_pDisplay, m_screen);
+    m_window_attributes.background_pixel = XWhitePixel(m_pDisplay, m_screen);
+    m_window_attributes.override_redirect = 0;
+
+    unsigned long window_mask = CWBackPixel | CWBorderPixel;
+
+    m_window = XCreateWindow(m_pDisplay,
+                             XDefaultRootWindow(m_pDisplay),
+                             0, 0,
+                             width, height,
+                             0,
+                             m_depth,
+                             InputOutput,
+                             CopyFromParent,
+                             window_mask,
+                             &m_window_attributes
+                            );
+
+    //set window title
+    XSetStandardProperties(m_pDisplay,
+                           m_window,
+                           "Lomse examples. Example_1",     //window title
+                           "Lomse_1",                       //name in tasks bar
+                           None,
+                           NULL,
+                           0,
+                           NULL
+                          );
+
+
+    // create the Graphics Context
+    m_gc = XCreateGC(m_pDisplay, m_window, 0, 0);
+
+}
+
+//---------------------------------------------------------------------------------------
+bool init_x()
+{
+    //returns false if an error occurs
+
+    //create X connection
+    m_pDisplay = XOpenDisplay(NULL);
+    if(m_pDisplay == 0)
+    {
+        fprintf(stderr, "Unable to open DISPLAY!\n");
+        return false;
+    }
+
+    m_screen = XDefaultScreen(m_pDisplay);
+
+    //As lomse renders on a bitmap it is necessary to determine the best
+    //bitmap format suited for your specific OS and platform
+    if (!determine_bitmap_format())
+        return false;
+
+    create_main_window(600, 400);       //600 x 400 pixels
+    create_rendering_buffer(600, 400, 0);
+
+    XMapWindow(m_pDisplay, m_window);
+
+    m_close_atom = XInternAtom(m_pDisplay, "WM_DELETE_WINDOW", false);
+
+    XSetWMProtocols(m_pDisplay, m_window, &m_close_atom, 1);
+    return true;        //no error
+};
+
+//---------------------------------------------------------------------------------------
+void close_x()
+{
+    XFreeGC(m_pDisplay, m_gc);
+    XDestroyWindow(m_pDisplay,m_window);
+    XCloseDisplay(m_pDisplay);
+};
+
+//---------------------------------------------------------------------------------------
+// application entry point
+int main ()
+{
+    if (!init_x())
+        exit(1);
+
+    m_wait_mode = true;
+
+    //initialize lomse related variables
+    m_flip_y = false;               //y axis is not reversed
+    m_pView = NULL;
+    m_pDoc = NULL;
+    m_view_needs_redraw = true;
+
+    //initialize the library and set the required callbacks
+    m_lomse.init_library(LomseDoorway::k_platform_x11);
+    m_lomse.set_start_timer_callbak(start_timer);
+    m_lomse.set_elapsed_time_callbak(elapsed_time);
+    m_lomse.set_force_redraw_callbak(force_redraw);
+    m_lomse.set_update_window_callbak(update_window);
+
+    //create a music score and a View. The view will display the score
+    //when the paint event is sent to lomse, once the main windows is
+    //shown and the event handling loop is started
+    open_document();
+
+	//run the main events handling loop
+	define_events_to_process();
+    handle_events();
+
+    //delete the view and the rendering buffer
+    delete m_pView;             //this will also delete the Document
+    delete_rendering_buffer();
+
+    //close X connection
+    close_x();
+
+    return 0;
+}

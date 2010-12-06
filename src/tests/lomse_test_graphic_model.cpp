@@ -30,7 +30,7 @@
 
 #include "lomse_document.h"
 #include "lomse_graphic_view.h"
-#include "platform/lomse_platform.h"
+#include "lomse_doorway.h"
 #include "lomse_screen_drawer.h"
 
 using namespace UnitTest;
@@ -43,7 +43,7 @@ using namespace lomse;
 
 
 //---------------------------------------------------------------------------------------
-class MyPlatformSupport : public PlatformSupport
+class MyDoorway : public LomseDoorway
 {
 protected:
     bool m_fUpdateWindowInvoked;
@@ -52,11 +52,12 @@ protected:
     RenderingBuffer m_buffer;
 
 public:
-    MyPlatformSupport(EPixelFormat format, bool flip_y)
-        : PlatformSupport(format, flip_y)
+    MyDoorway()
+        : LomseDoorway()
     {
+        init_library(k_platform_win32);
     }
-    virtual ~MyPlatformSupport() {}
+    virtual ~MyDoorway() {}
 
     void update_window() { m_fUpdateWindowInvoked = true; }
     void set_window_title(const std::string& title) {
@@ -69,6 +70,7 @@ public:
     bool set_window_title_invoked() { return m_fSetWindowTitleInvoked; }
     bool update_window_invoked() { return m_fUpdateWindowInvoked; }
     const std::string& get_title() { return m_title; }
+    double get_screen_ppi() const { return 0.0; }
     void start_timer() {}
     double elapsed_time() const { return 0.0; }
 
@@ -79,11 +81,9 @@ public:
 class GraphicModelTestFixture
 {
 public:
-    LibraryScope m_libraryScope;
     std::string m_scores_path;
 
     GraphicModelTestFixture()     //SetUp fixture
-        : m_libraryScope(cout)
     {
         m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
@@ -106,16 +106,17 @@ SUITE(GraphicModelTest)
 
     TEST_FIXTURE(GraphicModelTestFixture, GraphicModel_BoxFound)
     {
-        Document doc(m_libraryScope);
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        Document doc(libraryScope);
         //doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
         //    "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (staves 2)(musicData )))))" );
-        MyPlatformSupport platform(k_pix_format_bgra32, false);
-        ScreenDrawer drawer(m_libraryScope);
-        VerticalBookView view(m_libraryScope, &doc, &platform, &drawer);
-        GraphicModel* pModel = view.get_graphic_model();
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, Injector::k_vertical_book_view, &doc) );
+        GraphicModel* pModel = pView->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
         GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
@@ -138,18 +139,21 @@ SUITE(GraphicModelTest)
 
         CHECK ( pHit != NULL );
         CHECK ( pHit == pBSliceInstr );
+
+        delete pView;
     }
 
     TEST_FIXTURE(GraphicModelTestFixture, GraphicModel_NoBox)
     {
-        Document doc(m_libraryScope);
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (staves 2)(musicData )))))" );
-        MyPlatformSupport platform(k_pix_format_bgra32, false);
-        ScreenDrawer drawer(m_libraryScope);
-        VerticalBookView view(m_libraryScope, &doc, &platform, &drawer);
-        GraphicModel* pModel = view.get_graphic_model();
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, Injector::k_vertical_book_view, &doc) );
+        GraphicModel* pModel = pView->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);
         LUnits x = pPage->get_left();
         LUnits y = pPage->get_top();
@@ -157,52 +161,58 @@ SUITE(GraphicModelTest)
         GmoObj* pHit = pPage->find_inner_box_at(x - 1.0f, y - 1.0f);
 
         CHECK ( pHit == NULL );
+
+        delete pView;
     }
 
-//    TEST_FIXTURE(GraphicModelTestFixture, GraphicModel_ClefAt)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-//            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-//        MyPlatformSupport platform(k_pix_format_bgra32, false);
-//        ScreenDrawer drawer(m_libraryScope);
-//        VerticalBookView view(m_libraryScope, &doc, &platform, &drawer);
-//        GraphicModel* pModel = view.get_graphic_model();
-//
-//        GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
-//        GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
-//        GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
-//        GmoBox* pBSys = pBSP->get_child_box(0);         //System
-//        GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
-//        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
-//        GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
-//        LUnits x = pShape->get_left() + 1.0f;
-//        LUnits y = pShape->get_top() + 1.0f;
-//
-//        //cout << "DocPage: " << pPage->get_left() << ", " << pPage->get_top() << endl;
-//        //cout << "DocPageContent: " << pBDPC->get_left() << ", " << pBDPC->get_top() << endl;
-//        //cout << "ScorePage: " << pBSP->get_left() << ", " << pBSP->get_top() << endl;
-//        //cout << "System: " << pBSys->get_left() << ", " << pBSys->get_top() << endl;
-//        //cout << "Slice: " << pBSlice->get_left() << ", " << pBSlice->get_top() << endl;
-//        //cout << "SliceInsr: " << pBSliceInstr->get_left() << ", " << pBSliceInstr->get_top() << endl;
-//        //cout << "Shape: " << pShape->get_left() << ", " << pShape->get_top() << endl;
-//        //cout << "Finding: " << x << ", " << y << endl;
-//
-//        GmoObj* pHit = pBSliceInstr->find_shape_at(x, y);
-//
-//        CHECK ( pHit != NULL );
-//        CHECK ( pHit == pShape );
-//    }
+    TEST_FIXTURE(GraphicModelTestFixture, GraphicModel_ClefAt)
+    {
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        Document doc(libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, Injector::k_vertical_book_view, &doc) );
+        GraphicModel* pModel = pView->get_graphic_model();
+
+        GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
+        GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
+        GmoBox* pBSys = pBSP->get_child_box(0);         //System
+        GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
+        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
+        GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
+        LUnits x = pShape->get_left() + 1.0f;
+        LUnits y = pShape->get_top() + 1.0f;
+
+        //cout << "DocPage: " << pPage->get_left() << ", " << pPage->get_top() << endl;
+        //cout << "DocPageContent: " << pBDPC->get_left() << ", " << pBDPC->get_top() << endl;
+        //cout << "ScorePage: " << pBSP->get_left() << ", " << pBSP->get_top() << endl;
+        //cout << "System: " << pBSys->get_left() << ", " << pBSys->get_top() << endl;
+        //cout << "Slice: " << pBSlice->get_left() << ", " << pBSlice->get_top() << endl;
+        //cout << "SliceInsr: " << pBSliceInstr->get_left() << ", " << pBSliceInstr->get_top() << endl;
+        //cout << "Shape: " << pShape->get_left() << ", " << pShape->get_top() << endl;
+        //cout << "Finding: " << x << ", " << y << endl;
+
+        GmoObj* pHit = pPage->find_shape_at(x, y);
+
+        CHECK ( pHit != NULL );
+        CHECK ( pHit == pShape );
+
+        delete pView;
+    }
 
     TEST_FIXTURE(GraphicModelTestFixture, GraphicModel_StaffAt)
     {
-        Document doc(m_libraryScope);
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        MyPlatformSupport platform(k_pix_format_bgra32, false);
-        ScreenDrawer drawer(m_libraryScope);
-        VerticalBookView view(m_libraryScope, &doc, &platform, &drawer);
-        GraphicModel* pModel = view.get_graphic_model();
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, Injector::k_vertical_book_view, &doc) );
+        GraphicModel* pModel = pView->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
         GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
@@ -219,24 +229,27 @@ SUITE(GraphicModelTest)
         //cout << "Staff: " << pShape->get_left() << ", " << pShape->get_top() << endl;
         //cout << "Finding: " << x << ", " << y << endl;
 
-        GmoObj* pHit = pBSys->find_shape_at(x, y);
+        GmoObj* pHit = pPage->find_shape_at(x, y);
 
         CHECK ( pHit != NULL );
         CHECK ( pHit == pShape );
+
+        delete pView;
     }
 
     TEST_FIXTURE(GraphicModelTestFixture, GraphicModel_HitTestBoxFound)
     {
-        Document doc(m_libraryScope);
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        Document doc(libraryScope);
         //doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
         //    "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (staves 2)(musicData )))))" );
-        MyPlatformSupport platform(k_pix_format_bgra32, false);
-        ScreenDrawer drawer(m_libraryScope);
-        VerticalBookView view(m_libraryScope, &doc, &platform, &drawer);
-        GraphicModel* pModel = view.get_graphic_model();
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, Injector::k_vertical_book_view, &doc) );
+        GraphicModel* pModel = pView->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
         GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
@@ -259,18 +272,21 @@ SUITE(GraphicModelTest)
 
         CHECK ( pHit != NULL );
         CHECK ( pHit == pBSliceInstr );
+
+        delete pView;
     }
 
     TEST_FIXTURE(GraphicModelTestFixture, GraphicModel_HitTestNoBox)
     {
-        Document doc(m_libraryScope);
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (staves 2)(musicData )))))" );
-        MyPlatformSupport platform(k_pix_format_bgra32, false);
-        ScreenDrawer drawer(m_libraryScope);
-        VerticalBookView view(m_libraryScope, &doc, &platform, &drawer);
-        GraphicModel* pModel = view.get_graphic_model();
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, Injector::k_vertical_book_view, &doc) );
+        GraphicModel* pModel = pView->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);
         LUnits x = pPage->get_left() - 1.0f;
         LUnits y = pPage->get_top() - 1.0f;
@@ -278,33 +294,85 @@ SUITE(GraphicModelTest)
         GmoObj* pHit = pPage->hit_test(x, y);
 
         CHECK ( pHit == NULL );
+
+        delete pView;
     }
 
-    //TEST_FIXTURE(GraphicModelTestFixture, GraphicModel_HitTestShape)
-    //{
-    //    Document doc(m_libraryScope);
-    //    doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-    //        "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-    //    MyPlatformSupport platform(k_pix_format_bgra32, false);
-    //    ScreenDrawer drawer(m_libraryScope);
-    //    VerticalBookView view(m_libraryScope, &doc, &platform, &drawer);
-    //    GraphicModel* pModel = view.get_graphic_model();
+    TEST_FIXTURE(GraphicModelTestFixture, GraphicModel_HitTestShape)
+    {
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        Document doc(libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, Injector::k_vertical_book_view, &doc) );
+        GraphicModel* pModel = pView->get_graphic_model();
 
-    //    GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
-    //    GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
-    //    GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
-    //    GmoBox* pBSys = pBSP->get_child_box(0);         //System
-    //    GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
-    //    GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
-    //    GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
-    //    LUnits x = pShape->get_left() + 1.0f;
-    //    LUnits y = pShape->get_top() + 1.0f;
+        GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
+        GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
+        GmoBox* pBSys = pBSP->get_child_box(0);         //System
+        GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
+        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
+        GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
+        LUnits x = pShape->get_left() + 1.0f;
+        LUnits y = pShape->get_top() + 1.0f;
 
-    //    GmoObj* pHit = pPage->hit_test(x, y);
+        //cout << "DocPage: " << pPage->get_left() << ", " << pPage->get_top() << endl;
+        //cout << "DocPageContent: " << pBDPC->get_left() << ", " << pBDPC->get_top() << endl;
+        //cout << "ScorePage: " << pBSP->get_left() << ", " << pBSP->get_top() << endl;
+        //cout << "System: " << pBSys->get_left() << ", " << pBSys->get_top() << endl;
+        //cout << "Slice: " << pBSlice->get_left() << ", " << pBSlice->get_top() << endl;
+        //cout << "SliceInsr: " << pBSliceInstr->get_left() << ", " << pBSliceInstr->get_top() << endl;
+        //cout << "Shape: " << pShape->get_left() << ", " << pShape->get_top() << endl;
+        //cout << "Finding: " << x << ", " << y << endl;
 
-    //    CHECK ( pHit != NULL );
-    //    CHECK ( pHit == pShape );
-    //}
+        GmoObj* pHit = pPage->hit_test(x, y);
+
+        CHECK ( pHit != NULL );
+        CHECK ( pHit == pShape );
+
+        delete pView;
+    }
+
+    TEST_FIXTURE(GraphicModelTestFixture, GraphicModel_ModelHitTestShape)
+    {
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        Document doc(libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, Injector::k_vertical_book_view, &doc) );
+        GraphicModel* pModel = pView->get_graphic_model();
+
+        GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
+        GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
+        GmoBox* pBSys = pBSP->get_child_box(0);         //System
+        GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
+        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
+        GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
+        LUnits x = pShape->get_left() + 1.0f;
+        LUnits y = pShape->get_top() + 1.0f;
+
+        //cout << "DocPage: " << pPage->get_left() << ", " << pPage->get_top() << endl;
+        //cout << "DocPageContent: " << pBDPC->get_left() << ", " << pBDPC->get_top() << endl;
+        //cout << "ScorePage: " << pBSP->get_left() << ", " << pBSP->get_top() << endl;
+        //cout << "System: " << pBSys->get_left() << ", " << pBSys->get_top() << endl;
+        //cout << "Slice: " << pBSlice->get_left() << ", " << pBSlice->get_top() << endl;
+        //cout << "SliceInsr: " << pBSliceInstr->get_left() << ", " << pBSliceInstr->get_top() << endl;
+        //cout << "Shape: " << pShape->get_left() << ", " << pShape->get_top() << endl;
+        //cout << "Finding: " << x << ", " << y << endl;
+
+        GmoObj* pHit = pModel->hit_test(0, x, y);
+
+        CHECK ( pHit != NULL );
+        CHECK ( pHit == pShape );
+
+        delete pView;
+    }
 
 }
 

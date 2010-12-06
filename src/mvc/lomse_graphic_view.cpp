@@ -25,8 +25,8 @@
 #include "lomse_gm_basic.h"
 #include "lomse_screen_drawer.h"
 #include "lomse_document_layouter.h"
-//#include "lomse_mvc_builder.h"
-//#include "lomse_controller.h"
+#include "lomse_presenter.h"
+#include "lomse_interactor.h"
 
 using namespace std;
 
@@ -34,15 +34,14 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-//GraphicView::GraphicView(Document* pDoc)  //, Controller* pController)
 GraphicView::GraphicView(LibraryScope& libraryScope, Document* pDoc,
-                         PlatformSupport* pPlatform, ScreenDrawer* pDrawer)
-    : View(pDoc)    //, pController)
+                         Interactor* pInteractor, ScreenDrawer* pDrawer)
+    : View(pDoc, pInteractor)
     , m_libraryScope(libraryScope)
     , m_pGraficModel(NULL)
     , m_pDrawer(pDrawer)    // new ScreenDrawer() )
-    , m_pPlatform(pPlatform)
     , m_options()
+    , m_pRenderBuf(NULL)
     //, m_cursor(pDoc)
 
     , m_expand(0.0)
@@ -55,6 +54,7 @@ GraphicView::GraphicView(LibraryScope& libraryScope, Document* pDoc,
     , m_dy(0)
     , m_drag_flag(false)
 {
+    m_pDoorway = libraryScope.platform_interface();
 }
 
 //---------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ void GraphicView::on_resize(Pixels vx, Pixels vy)
 //---------------------------------------------------------------------------------------
 void GraphicView::update_window()
 {
-    m_pPlatform->update_window();
+    m_pDoorway->update_window();
 }
 
 //---------------------------------------------------------------------------------------
@@ -102,24 +102,27 @@ void GraphicView::on_paint() //, RepaintOptions& opt)
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_graphic_model()
 {
-    m_pPlatform->start_timer();
+    if (m_pRenderBuf)
+    {
+        m_pDoorway->start_timer();
 
-    m_pDrawer->reset(m_pPlatform->get_window_buffer());
-    m_pDrawer->set_viewport(m_vxOrg, m_vyOrg);
-    m_pDrawer->set_transform(m_transform);
+        m_pDrawer->reset(*m_pRenderBuf);
+        m_pDrawer->set_viewport(m_vxOrg, m_vyOrg);
+        m_pDrawer->set_transform(m_transform);
 
-    generate_paths();
-    m_pDrawer->render(true);
+        generate_paths();
+        m_pDrawer->render(true);
 
-    //render statistics
-    double tm = m_pPlatform->elapsed_time();
-    char buf[256];
-    sprintf(buf, "Time=%.3f ms, scale=%.3f\n\n"
-                 "+/- : ZoomIn / ZoomOut (zoom center at mouse point)\n\n"
-                 "1-5 : draw boxes  |  0- remove boxes  |  "
-                 "Click and drag: move score",
-                 tm, m_transform.scale() );
-    m_pDrawer->gsv_text(10.0, 20.0, buf);
+        //render statistics
+        double tm = m_pDoorway->elapsed_time();
+        char buf[256];
+        sprintf(buf, "Time=%.3f ms, scale=%.3f\n\n"
+                    "+/- : ZoomIn / ZoomOut (zoom center at mouse point)\n\n"
+                    "1-5 : draw boxes  |  0- remove boxes  |  "
+                    "Click and drag: move score",
+                    tm, m_transform.scale() );
+        m_pDrawer->gsv_text(10.0, 20.0, buf);
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -176,7 +179,7 @@ void GraphicView::on_mouse_move(Pixels x, Pixels y, unsigned flags)
         m_transform.tx = double(m_vxOrg);
         m_transform.ty = double(m_vyOrg);
 
-        m_pPlatform->force_redraw();
+        m_pDoorway->force_redraw();
     }
 }
 
@@ -229,12 +232,13 @@ double GraphicView::get_scale()
     return m_transform.scale();
 }
 
-////---------------------------------------------------------------------------------------
-//void GraphicView::on_document_reloaded()
-//{
-//    DocCursor cursor(m_pDoc);
-//    m_cursor = cursor;
-//}
+//---------------------------------------------------------------------------------------
+void GraphicView::on_document_reloaded()
+{
+    //TODO
+    //DocCursor cursor(m_pDoc);
+    //m_cursor = cursor;
+}
 
 ////---------------------------------------------------------------------------------------
 //void GraphicView::caret_right()
@@ -267,13 +271,13 @@ void GraphicView::handle_event(Observable* ref)
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // SimpleView implementation
 // A graphic view with one page, no margins (i.e. LenMus SscoreAuxCtrol)
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 SimpleView::SimpleView(LibraryScope& libraryScope, Document* pDoc,
-                       PlatformSupport* pPlatform, ScreenDrawer* pDrawer)
-    : GraphicView(libraryScope, pDoc, pPlatform, pDrawer)
+                       Interactor* pInteractor, ScreenDrawer* pDrawer)
+    : GraphicView(libraryScope, pDoc, pInteractor, pDrawer)
 {
 }
 
@@ -291,13 +295,13 @@ void SimpleView::generate_paths()
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // VerticalBookView implementation
 // A graphic view with pages in vertical (i.e. Adobe PDF Reader, MS Word)
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 VerticalBookView::VerticalBookView(LibraryScope& libraryScope, Document* pDoc,
-                                   PlatformSupport* pPlatform, ScreenDrawer* pDrawer)
-    : GraphicView(libraryScope, pDoc, pPlatform, pDrawer)
+                                   Interactor* pInteractor, ScreenDrawer* pDrawer)
+    : GraphicView(libraryScope, pDoc, pInteractor, pDrawer)
 {
 }
 
@@ -320,13 +324,13 @@ void VerticalBookView::generate_paths()
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // HorizontalBookView implementation
 // A graphic view with pages in vertical (i.e. Adobe PDF Reader, MS Word)
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 HorizontalBookView::HorizontalBookView(LibraryScope& libraryScope, Document* pDoc,
-                                       PlatformSupport* pPlatform, ScreenDrawer* pDrawer)
-    : GraphicView(libraryScope, pDoc, pPlatform, pDrawer)
+                                       Interactor* pInteractor, ScreenDrawer* pDrawer)
+    : GraphicView(libraryScope, pDoc, pInteractor, pDrawer)
 {
 }
 

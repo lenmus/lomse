@@ -610,7 +610,7 @@ void ScoreLayouter::collect_content_for_this_bar()  //ImoInstrument* pInstr, int
         m_pageCursor.y = m_instrEngravers[iInstr]->get_top_of_staff(iStaff);
         LUnits lineSpacing = pInstr->get_line_spacing_for_staff(iStaff);
         int iLine = (*m_scoreIt)->line();
-        float rTime = (*m_scoreIt)->time();
+//        float rTime = (*m_scoreIt)->time();
 
 //        if (pSO->IsBarline() || IsHigherTime(pSO->GetTimePos(), m_pSysCursor->GetBreakTime()) )
 //        {

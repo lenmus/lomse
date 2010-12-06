@@ -201,14 +201,14 @@ GmoShapeBracketBrace::~GmoShapeBracketBrace()
 //}
 
 //---------------------------------------------------------------------------------------
-void GmoShapeBracketBrace::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
+void GmoShapeBracketBrace::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     pDrawer->begin_path();
     pDrawer->fill(m_color);
     pDrawer->add_path(*this);
     pDrawer->end_path();
 
-    GmoSimpleShape::on_draw(pDrawer, opt, origin);
+    GmoSimpleShape::on_draw(pDrawer, opt);
 }
 
 

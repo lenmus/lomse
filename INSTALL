@@ -150,7 +150,7 @@ Alternatively, build by step-by-step, checking results:
 		Test time: 0.17 seconds.
 		[100%] Built target testlib
 
-	make demo_1			# build example application:
+	make example_1			# build example application:
 		...
 		[100%] Built target demo_1
 

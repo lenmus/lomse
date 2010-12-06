@@ -89,7 +89,7 @@ struct Rectangle
     T x, y;     //top left point
 
     Rectangle()
-        : x(0), y(0), width(0), height(0)
+        : width(0), height(0), x(0), y(0)
         { }
     Rectangle(T xx, T yy, T ww, T hh)
         : x(xx), y(yy), width(ww), height(hh)
@@ -177,7 +177,7 @@ struct Rectangle
         return ( (px >= x)
                  && (py >= y)
                  && ((py - y) < height)
-                 && ((px - x) < width) 
+                 && ((px - x) < width)
                );
     }
 

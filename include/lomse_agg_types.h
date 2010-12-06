@@ -21,7 +21,7 @@
 #ifndef __LOMSE_AGG_TYPES_H__        //to avoid nested includes
 #define __LOMSE_AGG_TYPES_H__
 
-#include "platform/lomse_platform.h"
+#include "lomse_doorway.h"
 #include "agg_color_rgba.h"     //rgba & rgba8
 #include "agg_math_stroke.h"    //line_cap_e & line_join_e 
 #include "agg_trans_affine.h"   //trans_affine
@@ -32,8 +32,10 @@
 #include "agg_conv_curve.h"
 #include "agg_color_rgba.h"
 #include "agg_renderer_scanline.h"
-#include "agg_bounding_rect.h"
 #include "agg_rasterizer_scanline_aa.h"
+#include "agg_scanline_p.h"
+#include "agg_bounding_rect.h"
+#include "agg_gsv_text.h"
 
 #include "lomse_font_cache_manager.h"     //font renderization using FreeType
 #include "lomse_font_freetype.h"

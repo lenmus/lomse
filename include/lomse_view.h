@@ -35,8 +35,8 @@ namespace lomse
 //forward declarations
 class Document;
 class GraphicModel;
-//class MvcElement;
-//class Controller;
+class Presenter;
+class Interactor;
 
 
 // Abstract class from which all views must derive
@@ -44,18 +44,18 @@ class GraphicModel;
 class View : public Observer
 {
 protected:
-    Document*   m_pDoc;
-    //Controller* m_pController;
-    //MvcElement* m_pOwner;
+    Document* m_pDoc;
+    Interactor* m_pInteractor;
+    Presenter* m_pOwner;
 
 public:
-    View(Document* pDoc); //, Controller* pController);
+    View(Document* pDoc, Interactor* pInteractor);
     virtual ~View();
 
-    //virtual void on_document_reloaded()=0;
+    virtual void on_document_reloaded()=0;
 
-    //void set_owner(MvcElement* pMvc) { m_pOwner = pMvc; }
-    //inline Controller* get_controller() { return m_pController; }
+    void set_owner(Presenter* pPresenter) { m_pOwner = pPresenter; }
+    inline Interactor* get_interactor() { return m_pInteractor; }
 
 };
 

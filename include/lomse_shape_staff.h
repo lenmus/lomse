@@ -54,7 +54,7 @@ public:
 	~GmoShapeStaff();
 
 //	//implementation of pure virtual methods in base class
-    void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt);
 //	void Render(lmPaper* pPaper) { Render(pPaper, m_color); }
 //    wxString Dump(int nIndent);
 //    void Shift(LUnits xIncr, LUnits yIncr);

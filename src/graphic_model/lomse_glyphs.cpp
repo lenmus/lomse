@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -59,7 +59,7 @@ GlyphData::GlyphData(const unsigned int glyph, int yOffset, int yShift, int selH
     {
         //use specified rectangle
 		SelRectHeight = Tenths(selHeight);
-		SelRectShift = Tenths(yShift); 
+		SelRectShift = Tenths(yShift);
 	}
 
     ////compute bounding box
@@ -87,25 +87,26 @@ const GlyphData glyphs_lmbasic2[] =
 	//                                                           ----- FUnits ------------      -- FUnits--
     //                            sel rectangle                  Position    Size                drag point
     //            Glyph   offset  shift   height                 x       y   width   height      x       y
-    GlyphData('\uF04B',   0,      0,      0,   0,      0,      0,   -369,    960,    738,    480,    369 ),    // "Longa note"
-    GlyphData('\uF04D',   0,      0,      0,   0,      0,      0,   -283,   1182,    567,    591,    283 ),    // "Breve note"
-    GlyphData('\uF04E',  10,      0,      0,   0,      0,      0,   -282,   1010,    566,    505,    283 ),    // "Whole note"
-    GlyphData('\uF086',   0,      0,      0,   0,      0,      0,  -1847,    709,   2127,    354,    279 ),    // "Half note, stem down"
-    GlyphData('\uF087',   0,      0,      0,   0,      0,      0,   -279,    709,   2171,    354,   1923 ),    // "Half note, stem up"
-    GlyphData('\uF088',   0,      0,      0,   0,      0,      0,  -1779,    640,   2027,    320,    248 ),    // "Quarter note, stem down"
-    GlyphData('\uF089',   0,      0,      0,   0,      0,      0,   -248,    640,   2027,    320,   1779 ),    // "Quarter note, stem up"
-    GlyphData('\uF08A',   0,      0,      0,   0,      0,      0,  -1782,    640,   2030,    320,    248 ),    // "Eight note, flag bottom"
-    GlyphData('\uF08B',   0,      0,      0,   0,      0,      0,   -248,   1068,   2027,    320,   1779 ),    // "Eight note, flag top"
-    GlyphData('\uF08C',   0,      0,      0,   0,      0,      0,  -1779,    640,   2027,    320,    248 ),    // "16th note, flag bottom"
-    GlyphData('\uF08D',   0,      0,      0,   0,      0,      0,   -248,   1070,   2027,    320,   1779 ),    // "16th note, flag top"
-    GlyphData('\uF08E',   0,      0,      0,   0,      0,      0,  -2241,    640,   2489,    320,    248 ),    // "32nd note, flag bottom"
-    GlyphData('\uF08F',   0,      0,      0,   0,      0,      0,   -248,   1071,   2439,    320,   2191 ),    // "32nd note, flag top"
-    GlyphData('\uF090',   0,      0,      0,   0,      0,      0,  -2508,    640,   2756,    320,    248 ),    // "64th note, flag bottom"
-    GlyphData('\uF091',   0,      0,      0,   0,      0,      0,   -248,   1067,   2954,    320,   2706 ),    // "64th note, flag top")),
-    GlyphData('\uF092',   0,      0,      0,   0,      0,      0,  -2735,    640,   2983,    320,    248 ),    // "128th note, flag bottom"
-    GlyphData('\uF093',   0,      0,      0,   0,      0,      0,   -248,   1067,   3189,    320,   2941 ),    // "128th note, flag top")),
-    GlyphData('\uF094',   0,      0,      0,   0,      0,      0,  -3132,    640,   3380,    320,    248 ),    // "256th note, flag bottom"
-    GlyphData('\uF095',   0,      0,      0,   0,      0,      0,   -248,   1093,   3578,    320,   3330 ),    // "256th note, flag top")),
+    //GlyphData('\uF04B',   0,      0,      0,   0,      0,      0,   -369,    960,    738,    480,    369 ),    // "Longa note"
+    GlyphData(0xF04B,   0,      0,      0,   0,      0,      0,   -369,    960,    738,    480,    369 ),    // "Longa note"
+    GlyphData(0xF04D,   0,      0,      0,   0,      0,      0,   -283,   1182,    567,    591,    283 ),    // "Breve note"
+    GlyphData(0xF04E,  10,      0,      0,   0,      0,      0,   -282,   1010,    566,    505,    283 ),    // "Whole note"
+    GlyphData(0xF086,   0,      0,      0,   0,      0,      0,  -1847,    709,   2127,    354,    279 ),    // "Half note, stem down"
+    GlyphData(0xF087,   0,      0,      0,   0,      0,      0,   -279,    709,   2171,    354,   1923 ),    // "Half note, stem up"
+    GlyphData(0xF088,   0,      0,      0,   0,      0,      0,  -1779,    640,   2027,    320,    248 ),    // "Quarter note, stem down"
+    GlyphData(0xF089,   0,      0,      0,   0,      0,      0,   -248,    640,   2027,    320,   1779 ),    // "Quarter note, stem up"
+    GlyphData(0xF08A,   0,      0,      0,   0,      0,      0,  -1782,    640,   2030,    320,    248 ),    // "Eight note, flag bottom"
+    GlyphData(0xF08B,   0,      0,      0,   0,      0,      0,   -248,   1068,   2027,    320,   1779 ),    // "Eight note, flag top"
+    GlyphData(0xF08C,   0,      0,      0,   0,      0,      0,  -1779,    640,   2027,    320,    248 ),    // "16th note, flag bottom"
+    GlyphData(0xF08D,   0,      0,      0,   0,      0,      0,   -248,   1070,   2027,    320,   1779 ),    // "16th note, flag top"
+    GlyphData(0xF08E,   0,      0,      0,   0,      0,      0,  -2241,    640,   2489,    320,    248 ),    // "32nd note, flag bottom"
+    GlyphData(0xF08F,   0,      0,      0,   0,      0,      0,   -248,   1071,   2439,    320,   2191 ),    // "32nd note, flag top"
+    GlyphData(0xF090,   0,      0,      0,   0,      0,      0,  -2508,    640,   2756,    320,    248 ),    // "64th note, flag bottom"
+    GlyphData(0xF091,   0,      0,      0,   0,      0,      0,   -248,   1067,   2954,    320,   2706 ),    // "64th note, flag top")),
+    GlyphData(0xF092,   0,      0,      0,   0,      0,      0,  -2735,    640,   2983,    320,    248 ),    // "128th note, flag bottom"
+    GlyphData(0xF093,   0,      0,      0,   0,      0,      0,   -248,   1067,   3189,    320,   2941 ),    // "128th note, flag top")),
+    GlyphData(0xF094,   0,      0,      0,   0,      0,      0,  -3132,    640,   3380,    320,    248 ),    // "256th note, flag bottom"
+    GlyphData(0xF095,   0,      0,      0,   0,      0,      0,   -248,   1093,   3578,    320,   3330 ),    // "256th note, flag top")),
 
 // rests
 	//                                                      ----- FUnits ------------      -- FUnits--
@@ -207,24 +208,24 @@ const GlyphData glyphs_lmbasic2[] =
 	//                                                           ----- FUnits ------------      -- FUnits--
     //                            sel rectangle                  Position    Size                drag point
     //            Glyph   offset  shift   height                 x       y   width   height      x       y
-    GlyphData('\uF09F',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 0"
-    GlyphData('\uF096',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 1"
-    GlyphData('\uF097',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 2"
-    GlyphData('\uF098',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 3"
-    GlyphData('\uF099',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 4"
-    GlyphData('\uF09A',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 5"
-    GlyphData('\uF09B',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 6"
-    GlyphData('\uF09C',   0,      0,      0,   0,      0,      0,      0,      0,    664,      0,      0 ),    // "Figured bass. Number 7"
-    GlyphData('\uF09D',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 8"
-    GlyphData('\uF09E',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 9"
-    GlyphData('\uF0A0',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Sharp symbol"
-    GlyphData('\uF0A1',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_FLAT,                //Flat symbol
-    GlyphData('\uF0A2',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_NATURAL,             //Natural symbol
-    GlyphData('\uF0AB',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_PLUS,                // +
-    GlyphData('\uF0AC',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_MINUS,               // -
-    GlyphData('\uF0A8',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_OPEN_PARENTHESIS,    // (
-    GlyphData('\uF0A3',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_CLOSE_PARENTHESIS,   // )
-    GlyphData('\uF0AA',   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_7_STRIKED,           // 7 with overlayered /
+    GlyphData(0xF09F,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 0"
+    GlyphData(0xF096,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 1"
+    GlyphData(0xF097,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 2"
+    GlyphData(0xF098,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 3"
+    GlyphData(0xF099,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 4"
+    GlyphData(0xF09A,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 5"
+    GlyphData(0xF09B,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 6"
+    GlyphData(0xF09C,   0,      0,      0,   0,      0,      0,      0,      0,    664,      0,      0 ),    // "Figured bass. Number 7"
+    GlyphData(0xF09D,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 8"
+    GlyphData(0xF09E,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Number 9"
+    GlyphData(0xF0A0,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Figured bass. Sharp symbol"
+    GlyphData(0xF0A1,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_FLAT,                //Flat symbol
+    GlyphData(0xF0A2,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_NATURAL,             //Natural symbol
+    GlyphData(0xF0AB,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_PLUS,                // +
+    GlyphData(0xF0AC,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_MINUS,               // -
+    GlyphData(0xF0A8,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_OPEN_PARENTHESIS,    // (
+    GlyphData(0xF0A3,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_CLOSE_PARENTHESIS,   // )
+    GlyphData(0xF0AA,   0,      0,      0,   0,      0,      0,      0,      0,      0,      0,      0 ),    //GLYPH_FIGURED_BASS_7_STRIKED,           // 7 with overlayered /
 };
 
 //em=2048

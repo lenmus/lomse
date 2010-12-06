@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010 Lomse project
 //
@@ -13,12 +13,10 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_LDP_ELEMENTS_H__        //to avoid nested includes
 #define __LOMSE_LDP_ELEMENTS_H__
@@ -182,7 +180,7 @@ class LdpElement;
 class ImoObj;
 typedef SmartPtr<LdpElement>    SpLdpElement;
 
-//-------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 // A generic LDP element representation.
 //
 // An LdpElement is the content of a node in the Ldp source tree. I combines
@@ -192,10 +190,10 @@ typedef SmartPtr<LdpElement>    SpLdpElement;
 //     are similar to LISP atoms.
 //   - composite: they have a name and any number of parameters (zero
 //     is allowed). They are like LISP lists.
-//-------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
-class LM_EXPORT LdpElement : public Visitable, virtual public RefCounted,
-                             public NodeInTree<LdpElement>
+class LOMSE_EXPORT LdpElement : public Visitable, virtual public RefCounted,
+                                public NodeInTree<LdpElement>
 {
 protected:
 	ELdpElement m_type;     // the element type
@@ -269,13 +267,12 @@ public:
     //---------------------------------------------------------------------------
 };
 
-/*!
- \brief A specific LDP element representation.
-
-    For each ldp element we define a specific class. It is equivalent to defining
-    specific lmLDPNodes for each ldp tag. In this way we have specific nodes
-    LdpObject<type>.
-*/
+//---------------------------------------------------------------------------------------
+// A specific LDP element representation.
+// For each ldp element we define a specific class. It is equivalent to defining
+// specific lmLDPNodes for each ldp tag. In this way we have specific nodes
+// LdpObject<type>.
+//
 template <ELdpElement type>
 class LdpObject : public LdpElement
 {
@@ -513,5 +510,6 @@ typedef LdpObject<k_yes>          LdpYes;
 
 
 }   //namespace lomse
+
 #endif    // __LOMSE_LDP_ELEMENTS_H__
 

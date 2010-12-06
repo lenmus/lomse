@@ -48,7 +48,7 @@ GmoShapeStaff::~GmoShapeStaff()
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
+void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
 //    if (!m_fVisible) return;
 //
@@ -56,9 +56,9 @@ void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
 //    m_uSelRect = GetBounds();
 //
     //draw the staff
-    double xStart = m_origin.x + origin.x;
+    double xStart = m_origin.x;
     double xEnd = xStart + m_size.width;
-    double yPos = m_origin.y + origin.y;
+    double yPos = m_origin.y;
     double spacing = m_pStaff->get_line_spacing();
 
     pDrawer->begin_path();
@@ -72,7 +72,7 @@ void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
     }
     pDrawer->end_path();
 
-    GmoSimpleShape::on_draw(pDrawer, opt, origin);
+    GmoSimpleShape::on_draw(pDrawer, opt);
 }
 
 ////---------------------------------------------------------------------------------------

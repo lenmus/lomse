@@ -82,10 +82,27 @@ void GraphicModel::draw_page(int iPage, UPoint& origin, Drawer* pDrawer,
     if (!m_fCanBeDrawn) return;
 
     pDrawer->set_shift(origin.x, origin.y);
-    UPoint org(0.0, 0.0);
-    get_page(iPage)->on_draw(pDrawer, opt, org);
+    get_page(iPage)->on_draw(pDrawer, opt);
     pDrawer->render(true);
     pDrawer->set_shift(-origin.x, -origin.y);
+}
+
+//---------------------------------------------------------------------------------------
+GmoObj* GraphicModel::hit_test(int iPage, LUnits x, LUnits y)
+{
+    return get_page(iPage)->hit_test(x, y);
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* GraphicModel::find_shape_at(int iPage, LUnits x, LUnits y)
+{
+    return get_page(iPage)->find_shape_at(x, y);
+}
+
+//---------------------------------------------------------------------------------------
+GmoBox* GraphicModel::find_inner_box_at(int iPage, LUnits x, LUnits y)
+{
+    return get_page(iPage)->find_inner_box_at(x, y);
 }
 
 
@@ -242,10 +259,10 @@ GmoShape* GmoBox::get_shape(int i)  //i = 0..n-1
 }
 
 //---------------------------------------------------------------------------------------
-void GmoBox::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
+void GmoBox::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    double xorg = m_origin.x;   // + origin.x;
-    double yorg = m_origin.y;   // + origin.y;
+    double xorg = m_origin.x;
+    double yorg = m_origin.y;
 
     if (must_draw_bounds(opt))
     {
@@ -253,21 +270,20 @@ void GmoBox::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
         draw_box_bounds(pDrawer, xorg, yorg, color);
     }
 
-    draw_shapes(pDrawer, opt, origin);
+    draw_shapes(pDrawer, opt);
 
     //draw contained boxes
     std::vector<GmoBox*>::iterator it;
-    UPoint org(0.0, 0.0);
     for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
-        (*it)->on_draw(pDrawer, opt, org);   //, origin);  // <==== only relative to outter box: BoxDocPage
+        (*it)->on_draw(pDrawer, opt);
 }
 
 //---------------------------------------------------------------------------------------
-void GmoBox::draw_shapes(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
+void GmoBox::draw_shapes(Drawer* pDrawer, RenderOptions& opt)
 {
     std::list<GmoShape*>::iterator itS;
     for (itS=m_shapes.begin(); itS != m_shapes.end(); ++itS)
-        (*itS)->on_draw(pDrawer, opt, origin);
+        (*itS)->on_draw(pDrawer, opt);
 }
 
 //---------------------------------------------------------------------------------------
@@ -346,49 +362,14 @@ GmoBox* GmoBox::find_inner_box_at(LUnits x, LUnits y)
     return NULL;
 }
 
-//---------------------------------------------------------------------------------------
-GmoShape* GmoBox::find_shape_at(LUnits x, LUnits y)
-{
-    std::list<GmoShape*>::reverse_iterator it;
-    for (it = m_shapes.rbegin(); it != m_shapes.rend(); ++it)
-    {
-        URect bbox = (*it)->get_bounds();
-        if (bbox.contains(x, y))
-            return *it;
-    }
-    return NULL;
-}
-
-//---------------------------------------------------------------------------------------
-GmoObj* GmoBox::hit_test(LUnits x, LUnits y)
-{
-    GmoObj* pShape = find_shape_at(x, y);
-    if (pShape)
-        return pShape;
-
-    URect bbox = get_bounds();
-    if (bbox.contains(x, y))
-    {
-        std::vector<GmoBox*>::iterator it;
-        for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
-        {
-            GmoObj* pObj = (*it)->hit_test(x, y);
-            if (pObj)
-			    return pObj;
-        }
-        return this;
-    }
-
-    return NULL;
-}
 
 
 //=======================================================================================
 // GmoLayer: helper class. A collection of GmoShape objects
 //=======================================================================================
 
-//to assign ID to user layers
-static long m_nLayerCounter = GmoShape::k_layer_user;
+////to assign ID to user layers
+//static long m_nLayerCounter = GmoShape::k_layer_user;
 
 class GmoLayer
 {
@@ -482,15 +463,14 @@ GmoBoxDocPage::GmoBoxDocPage(GmoObj* owner)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoBoxDocPage::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
+void GmoBoxDocPage::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     ////clear lists with renderization information
     //m_ActiveHandlers.clear();
     //m_GMObjsWithHandlers.clear();
 
-    UPoint org(0.0, 0.0);
-    draw_page_background(pDrawer, opt, org);   //origin);
-    GmoBox::on_draw(pDrawer, opt, org);    //origin);
+    draw_page_background(pDrawer, opt);
+    GmoBox::on_draw(pDrawer, opt);
 
     ////if requested, book to render page margins
     //if (g_fShowMargins)
@@ -498,8 +478,7 @@ void GmoBoxDocPage::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoBoxDocPage::draw_page_background(Drawer* pDrawer, RenderOptions& opt,
-                                         UPoint& origin)
+void GmoBoxDocPage::draw_page_background(Drawer* pDrawer, RenderOptions& opt)
 {
     pDrawer->begin_path();
     pDrawer->fill( Color(255, 255, 255) );     //background white
@@ -509,11 +488,6 @@ void GmoBoxDocPage::draw_page_background(Drawer* pDrawer, RenderOptions& opt,
     pDrawer->vline_to(get_height());
     pDrawer->hline_to(0.0);
     pDrawer->vline_to(0.0);
-    //pDrawer->move_to(origin.x, origin.y);
-    //pDrawer->hline_to(origin.x + get_width());
-    //pDrawer->vline_to(origin.y + get_height());
-    //pDrawer->hline_to(origin.x);
-    //pDrawer->vline_to(origin.y);
     pDrawer->end_path();
 }
 
@@ -555,6 +529,33 @@ GmoShape* GmoBoxDocPage::get_shape_in_box(GmoBox* pBox, int order)
                 ++i;
         }
     }
+
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* GmoBoxDocPage::find_shape_at(LUnits x, LUnits y)
+{
+    std::list<GmoShape*>::reverse_iterator it;
+    for (it = m_allShapes.rbegin(); it != m_allShapes.rend(); ++it)
+    {
+        URect bbox = (*it)->get_bounds();
+        if (bbox.contains(x, y))
+            return *it;
+    }
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+GmoObj* GmoBoxDocPage::hit_test(LUnits x, LUnits y)
+{
+    GmoObj* pShape = find_shape_at(x, y);
+    if (pShape)
+        return pShape;
+
+    GmoBox* pBox = find_inner_box_at(x, y);
+    if (pBox)
+	    return pBox;
 
     return NULL;
 }

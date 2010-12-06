@@ -58,7 +58,7 @@ typedef UndoableStack<DocCommand*>     UndoStack;
 //        manage this flag, only reset when the document is created/loaded)
 //------------------------------------------------------------------------------------
 
-class Document : public Observable
+class LOMSE_EXPORT Document : public Observable
 {
 protected:
     DocumentScope*  m_pDocScope;
@@ -129,7 +129,7 @@ public:
     //Views observing the document will be notified about modifications only
     //when the following method is invoked. Commands (atomic, DocCommands and
     //UserCommands)don't invoke it. Invoking this method is a responsibility
-    //of the Controller (or the user application if Controller is not used)
+    //of the Interactor (or the user application if Interactor is not used)
     void notify_that_document_has_been_modified() { notify_observers(); }
 
 

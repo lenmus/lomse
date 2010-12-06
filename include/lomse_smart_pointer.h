@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010 Lomse project
 //
@@ -13,18 +13,17 @@
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
 //  
-//  
-//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
+// -----------------------------
 //  Credits:
 //      This file is based on the "smartpointer.h" file from the MusicXML Library
 //      v.2.00, distributed under LGPL 2.1 or greater. Copyright (c) 2006 Grame,
 //      Grame Research Laboratory, 9 rue du Garet, 69001 Lyon - France,
 //      research@grame.fr.
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_SMART_POINTER_H__
 #define __LOMSE_SMART_POINTER_H__
@@ -47,7 +46,7 @@ namespace lomse
     would like to have support for smart pointers.
 
 */
-class LM_EXPORT RefCounted
+class LOMSE_EXPORT RefCounted
 {
 private:
 	unsigned int m_count;

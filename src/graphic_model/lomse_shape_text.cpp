@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -37,10 +37,10 @@ GmoShapeText::GmoShapeText(GmoBox* owner, const std::string& text,
                            ImoTextStyleInfo* pStyle, LUnits x, LUnits y,
                            LibraryScope& libraryScope)
     : GmoSimpleShape(owner, GmoObj::k_shape_text, Color(0,0,0))
+    , m_text(text)
     , m_pStyle(pStyle)
     , m_pFontStorage( libraryScope.font_storage() )
     , m_libraryScope(libraryScope)
-    , m_text(text)
 {
     //bounds
     select_font();
@@ -50,7 +50,7 @@ GmoShapeText::GmoShapeText(GmoBox* owner, const std::string& text,
 
     //position
     m_origin.x = x;
-    m_origin.y = y - m_size.height;     //reference is at text bottom 
+    m_origin.y = y - m_size.height;     //reference is at text bottom
 
     //color
     if (m_pStyle)
@@ -58,18 +58,18 @@ GmoShapeText::GmoShapeText(GmoBox* owner, const std::string& text,
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeText::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
+void GmoShapeText::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     select_font();
     pDrawer->set_text_color( m_pStyle->get_color() );
-    LUnits x = m_origin.x + origin.x;
-    LUnits y = m_origin.y + origin.y + m_size.height;     //reference is at text bottom 
+    LUnits x = m_origin.x;
+    LUnits y = m_origin.y + m_size.height;     //reference is at text bottom
     pDrawer->draw_text(x, y, m_text);
 
     //std::string str("¿This? is a test: Ñ € & abc. Ruso:Текст на кирилица");
-    //pDrawer->draw_text(m_xPos + origin.x, m_yPos + origin.y, str);
+    //pDrawer->draw_text(m_xPos, m_yPos, str);
 
-    GmoSimpleShape::on_draw(pDrawer, opt, origin);
+    GmoSimpleShape::on_draw(pDrawer, opt);
 }
 
 //---------------------------------------------------------------------------------------
@@ -203,7 +203,7 @@ void GmoShapeText::select_font()
 ////GmoShapeTitle::GmoShapeTitle(lmScoreObj* pOwner, const std::string& sText, wxFont* pFont,
 ////                         lmPaper* pPaper, UPoint offset, std::string sName,
 ////				         bool fDraggable, wxColour color)
-////    : GmoShapeRectangle(pOwner, offset.x, offset.y, 0.0f, 0.0f, 0.0f, color, 
+////    : GmoShapeRectangle(pOwner, offset.x, offset.y, 0.0f, 0.0f, 0.0f, color,
 ////                       sName, fDraggable, true)
 ////{
 ////    //measure text size
@@ -235,7 +235,7 @@ void GmoShapeText::select_font()
 //void GmoShapeTitle::Create(const std::string& sText, wxFont* pFont, lmPaper* pPaper,
 //                         lmEBlockAlign nBlockAlign, lmEHAlign nHAlign, lmEVAlign nVAlign,
 //                         LUnits xLeft, LUnits yTop, LUnits xRight, LUnits yBottom)
-//{                         
+//{
 //    //The simplest constructor: just a text using a single font. No break lines
 //
 //	m_nType = eGMO_ShapeTextBlock;
@@ -246,7 +246,7 @@ void GmoShapeText::select_font()
 //    m_nHAlign = nHAlign;
 //    m_nVAlign = nVAlign;
 //
-//    //For now, behaviour wiil be that of a SimpleText object. Rectangle will be 
+//    //For now, behaviour wiil be that of a SimpleText object. Rectangle will be
 //    //adjusted to text
 //
 //    // store boundling rectangle position and size
@@ -494,8 +494,8 @@ void GmoShapeText::select_font()
 //	// The view informs that the user continues dragging. We receive the new desired
 //	// shape position and we must return the new allowed shape position.
 //	//
-//	// The default behaviour is to return the received position, so the view redraws 
-//	// the drag image at that position. No action must be performed by the shape on 
+//	// The default behaviour is to return the received position, so the view redraws
+//	// the drag image at that position. No action must be performed by the shape on
 //	// the score and score objects.
 //	//
 //	// The received new desired shape position is in logical units and referred to page
@@ -518,12 +518,12 @@ void GmoShapeText::select_font()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void GmoShapeTitle::OnEndDrag(lmPaper* pPaper, lmController* pCanvas, const UPoint& uPos)
+//void GmoShapeTitle::OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos)
 //{
 //	// End drag. Receives the command processor associated to the view and the
 //	// final position of the object (logical units referred to page origin).
-//	// This method must validate/adjust final position and, if ok, it must 
-//	// send a move object command to the controller.
+//	// This method must validate/adjust final position and, if ok, it must
+//	// send a move object command to the Interactor.
 //
 //	UPoint uFinalPos(uPos.x, uPos.y);
 //    if (m_nBlockAlign == lmBLOCK_ALIGN_NONE)
@@ -537,7 +537,7 @@ void GmoShapeText::select_font()
 //        uFinalPos.x = m_uBoundsTop.x;
 //    }
 //
-//	//send a move object command to the controller
+//	//send a move object command to the Interactor
 //	pCanvas->MoveObject(this, uFinalPos);
 //}
 //
@@ -552,7 +552,7 @@ void GmoShapeText::select_font()
 //class lmTextLine
 //{
 //public:
-//    lmTextLine(std::string text, LUnits width, LUnits height) 
+//    lmTextLine(std::string text, LUnits width, LUnits height)
 //        : sText(text), uWidth(width), uHeight(height) {}
 //    ~lmTextLine() {}
 //
@@ -564,7 +564,7 @@ void GmoShapeText::select_font()
 //
 //
 ////---------------------------------------------------------------------------------------
-//GmoShapeTextbox::GmoShapeTextbox(lmScoreObj* pOwner, int nShapeIdx, 
+//GmoShapeTextbox::GmoShapeTextbox(lmScoreObj* pOwner, int nShapeIdx,
 //                //text related
 //                lmPaper* pPaper,
 //                const std::string& sText, wxFont* pFont, wxColour nTxtColor,
@@ -634,7 +634,7 @@ void GmoShapeText::select_font()
 //	//split text in lines
 //    lmTextLine* pCurLine;
 //    LUnits uxLine = uxMargin;
-//    LUnits uyLine = uyMargin;      
+//    LUnits uyLine = uyMargin;
 //	if (uBoxAreaWidth >= m_uTextWidth)
 //    {
 //        //the text fits in one line
@@ -741,7 +741,7 @@ void GmoShapeText::select_font()
 //    for (it = m_TextLines.begin(); it != m_TextLines.end(); ++it)
 //    {
 //        LUnits uySpaceLeft = uySpace - (*it)->uPos.y - (*it)->uHeight;
-//        if (uySpaceLeft < 0.0f) break; 
+//        if (uySpaceLeft < 0.0f) break;
 //        pPaper->DrawText((*it)->sText, (*it)->uPos.x + m_uBoundsTop.x,
 //                         (*it)->uPos.y + m_uBoundsTop.y);
 //    }
@@ -809,7 +809,7 @@ void GmoShapeText::select_font()
 //    for (it = m_TextLines.begin(); it != m_TextLines.end(); ++it)
 //    {
 //        LUnits uySpaceLeft = uySpace - (*it)->uPos.y - (*it)->uHeight;
-//        if (uySpaceLeft < 0.0f) break; 
+//        if (uySpaceLeft < 0.0f) break;
 //        dc2.DrawText((*it)->sText, (*it)->uPos.x, (*it)->uPos.y);
 //    }
 //    dc2.SelectObject(wxNullBitmap);

@@ -56,7 +56,7 @@ void Drawer::set_text_color(Color color)
 
 ScreenDrawer::ScreenDrawer(LibraryScope& libraryScope)
     : Drawer(libraryScope)
-    , m_pRenderer( new Renderer(libraryScope.pixels_per_inch(), m_attr_storage,
+    , m_pRenderer( new Renderer(libraryScope.get_screen_ppi(), m_attr_storage,
                                 m_attr_stack, m_path) )
     , m_pCalligrapher( new Calligrapher(m_pFonts, m_pRenderer) )
 {

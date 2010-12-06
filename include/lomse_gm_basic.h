@@ -74,9 +74,10 @@ public:
     inline void set_ready(bool value) { m_fCanBeDrawn = value; }
     void draw_page(int iPage, UPoint& origin, Drawer* pDrawer, RenderOptions& opt);
 
-    ////hit testing
-    //GmoObj* find_deepest_box_at(UPoint& p);
-
+    //hit testing
+    GmoObj* hit_test(int iPage, LUnits x, LUnits y);
+    GmoShape* find_shape_at(int iPage, LUnits x, LUnits y);
+    GmoBox* find_inner_box_at(int iPage, LUnits x, LUnits y);
 
 protected:
     void delete_stubs();
@@ -179,7 +180,7 @@ protected:
 public:
     virtual ~GmoShape();
 
-    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
+    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
     //-------------------------------------------------------------------------
     // layer identifiers. Shapes are placed in layers. The first layer to 
@@ -304,12 +305,10 @@ public:
     inline LUnits get_content_left() { return get_left() + m_uLeftMargin; }
 
     //drawing
-    void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
     //hit testing
     GmoBox* find_inner_box_at(LUnits x, LUnits y);
-    GmoShape* find_shape_at(LUnits x, LUnits y);
-    GmoObj* hit_test(LUnits x, LUnits y);
 
 protected:
     GmoBox(GmoObj* owner, int objtype);
@@ -321,7 +320,7 @@ protected:
     bool must_draw_bounds(RenderOptions& opt);
     Color get_box_color();
     void draw_box_bounds(Drawer* pDrawer, double xorg, double yorg, Color& color);
-    void draw_shapes(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
+    void draw_shapes(Drawer* pDrawer, RenderOptions& opt);
 
 };
 
@@ -374,17 +373,20 @@ public:
     inline int get_number() { return m_numPage; }
 
     //renderization
-    void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
     //shapes
     void store_shape(GmoShape* pShape, int layer);
     GmoShape* get_first_shape_for_layer(int order);
     GmoShape* get_shape_in_box(GmoBox* pBox, int order);
 
+    //hit testing
+    GmoObj* hit_test(LUnits x, LUnits y);
+    GmoShape* find_shape_at(LUnits x, LUnits y);
 
 
 protected:
-    void draw_page_background(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
+    void draw_page_background(Drawer* pDrawer, RenderOptions& opt);
 };
 
 //---------------------------------------------------------------------------------------
@@ -437,7 +439,7 @@ public:
 //	int GetSystemNumber(GmoBoxSystem* pSystem);
 //
 	////operations
- //   void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin); 
+ //   void on_draw(Drawer* pDrawer, RenderOptions& opt); 
 //    void RenderWithHandlers(lmPaper* pPaper);
 //    void DrawAllHandlers(lmPaper* pPaper);
 //    void OnNeedToDrawHandlers(lmGMObject* pGMO);

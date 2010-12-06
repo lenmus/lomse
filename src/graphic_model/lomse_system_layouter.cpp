@@ -154,26 +154,26 @@ LineEntry::LineEntry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, float rTi
     , m_pSO(pSO)
     , m_pShape(pShape)
 	, m_fProlog(fProlog)
-    , m_xFinal(0.0f)
-    , m_uFixedSpace(0.0f)
-    , m_uVariableSpace(0.0f)
     , m_rTimePos(rTime)
-    , m_uSize(pShape ? pShape->get_width() : 0.0f )
     , m_xLeft(pShape ? pShape->get_left() : 0.0f )
     , m_uxAnchor(0.0f)     //TODO (pSO && pSO->is_note()) ? - pSO->GetAnchorPos(): 0.0f )
+    , m_xFinal(0.0f)
+    , m_uSize(pShape ? pShape->get_width() : 0.0f )
+    , m_uFixedSpace(0.0f)
+    , m_uVariableSpace(0.0f)
 {
 }
 
 //---------------------------------------------------------------------------------------
-bool LineEntry::is_note_rest() 
-{ 
-    return m_pSO && m_pSO->is_note_rest(); 
+bool LineEntry::is_note_rest()
+{
+    return m_pSO && m_pSO->is_note_rest();
 }
 
 //---------------------------------------------------------------------------------------
-bool LineEntry::has_barline() 
-{ 
-    return m_pSO && m_pSO->is_barline(); 
+bool LineEntry::has_barline()
+{
+    return m_pSO && m_pSO->is_barline();
 }
 
 //---------------------------------------------------------------------------------------
@@ -293,7 +293,7 @@ void LineEntry::move_shape()
 {
     if (m_pSO && m_pShape)
     {
-        LUnits uShift = m_xLeft - m_pShape->get_left();
+//        LUnits uShift = m_xLeft - m_pShape->get_left();
 //        m_pSO->StoreOriginAndShiftShapes( uShift, m_pShape->GetOwnerIDX() );
         m_pShape->set_left(m_xLeft);
     }
@@ -342,7 +342,7 @@ void LineEntry::dump(int iEntry)
     }
     else
     {
-		m_debugFile << "  pSO " 
+		m_debugFile << "  pSO "
 					<< setw(4) << m_pSO->get_obj_type()
 					<< setw(4) << m_pSO->get_id()
 					<< (m_fProlog ? "   S  " : "      ");
@@ -443,7 +443,7 @@ void ColumnSplitter::compute_break_points(BreaksTable* pBT)
             if (is_equal_time((*it)->get_timepos(), rTime))
             {
                 uxWidth = max(uxWidth, (*it)->get_shape_size());
-                ImoStaffObj* pSO = (*it)->m_pSO;
+//                ImoStaffObj* pSO = (*it)->m_pSO;
                 //if (pSO && pSO->is_note_rest() && static_cast<ImoNoteRest*>(pSO)->is_beamed())
                 //{
                 //    fInBeam = true;
@@ -549,7 +549,7 @@ void LineTable::dump_main_table()
 #if (LOMSE_DUMP_TABLES)
 
     m_debugFile << fixed << setprecision(2) << setfill(' ')
-                << "Line table dump. Instr=" << get_instrument() 
+                << "Line table dump. Instr=" << get_instrument()
                 << ", voice=" << get_voice()
                 << ", xStart=" << setw(2) << get_line_start_position()
                 << ", initSpace=" << setw(2) << get_space_at_beginning()
@@ -1016,9 +1016,9 @@ LinesIterator ColumnStorage::find_line(int line)
 
 //---------------------------------------------------------------------------------------
 void ColumnStorage::set_staff_spacing(int staff, LUnits space)
-{ 
+{
     m_lineSpace.reserve(staff+1);
-    m_lineSpace[staff] = space; 
+    m_lineSpace[staff] = space;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1168,9 +1168,8 @@ void LinesBuilder::start_line(int line, int instr)
     //Start a new line for instrument instr (0..n-1), to be used for voice voice.
     //The line starts at position uxStart and space before first object must be uSpace.
 
-    //create the line and store it
-    LineTable* pLineTable 
-        = m_pColStorage->open_new_line(line, instr, m_uxStart, m_uInitialSpace);
+    //create the line
+    m_pColStorage->open_new_line(line, instr, m_uxStart, m_uInitialSpace);
 
     //created line is set as 'current line' to receive new data.
     m_itCurLine = m_pColStorage->get_last_line();
@@ -1317,7 +1316,7 @@ void LineResizer::reasign_position_to_all_other_objects(LUnits uFizedSizeAtStart
 
     //Compute proportion factor
     LUnits uLineStartPos = m_pTable->get_line_start_position();
-    LUnits uLineShift = m_uNewStart - uLineStartPos;
+    //LUnits uLineShift = m_uNewStart - uLineStartPos;
     LUnits uDiscount = uFizedSizeAtStart - uLineStartPos;
     float rProp = (m_uNewBarSize-uDiscount) / (m_uOldBarSize-uDiscount);
 
@@ -1572,7 +1571,7 @@ LUnits LineSpacer::compute_shift_to_avoid_overlap_with_previous()
     //'removable' space.
 
     LineEntryIterator it = m_itCur;
-    LUnits uxNextPos = m_uxCurPos;
+    //LUnits uxNextPos = m_uxCurPos;
     LUnits uxShift = 0.0f;
     const LineEntryIterator itEnd = m_pTable->end();
 	while (it != itEnd && is_equal_time((*it)->m_rTimePos, m_rCurTime))

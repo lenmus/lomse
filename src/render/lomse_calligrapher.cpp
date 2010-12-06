@@ -135,7 +135,7 @@ void Calligrapher::set_scale(double scale)
 //---------------------------------------------------------------------------------------
 TextMeter::TextMeter(LibraryScope& libraryScope)
     : m_pFonts( libraryScope.font_storage() )
-    , m_scale( libraryScope.pixels_per_inch() / 2540.0 )
+    , m_scale( libraryScope.get_screen_ppi() / 2540.0 )
 {
 }
 

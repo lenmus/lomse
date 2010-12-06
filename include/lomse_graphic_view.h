@@ -24,7 +24,7 @@
 #include "lomse_injectors.h"
 #include "lomse_view.h"
 #include "lomse_drawer.h"
-#include "platform/lomse_platform.h"
+#include "lomse_doorway.h"
 #include "lomse_agg_types.h"
 #include <vector>
 using namespace std;
@@ -38,8 +38,8 @@ class Document;
 class GraphicModel;
 class ScreenDrawer;
 class Drawer;
-//class MvcElement;
-//class Controller;
+class Presenter;
+class Interactor;
 
 
 //---------------------------------------------------------------------------------------
@@ -51,16 +51,17 @@ protected:
     GraphicModel* m_pGraficModel;
     ScreenDrawer* m_pDrawer;
     std::vector<RenderingBuffer*> m_pPages;
-    PlatformSupport* m_pPlatform;
+    LomseDoorway* m_pDoorway;
     RenderOptions m_options;
+    RenderingBuffer* m_pRenderBuf;
     //DocCursor       m_cursor;
 
 public:
-    //GraphicView(Document* pDoc);   //, Controller* pController);
-    GraphicView(LibraryScope& libraryScope, Document* pDoc, PlatformSupport* pPlatform,
+    GraphicView(LibraryScope& libraryScope, Document* pDoc, Interactor* pInteractor,
                 ScreenDrawer* pDrawer);
     virtual ~GraphicView();
 
+    void set_rendering_buffer(RenderingBuffer* rbuf) { m_pRenderBuf = rbuf; }
     //--------------------------------------------------------------------
     // Methods to serve platform dependent event handlers. 
     //virtual void on_init();
@@ -81,7 +82,7 @@ public:
     void update_window();
 
     //inline DocCursor& get_cursor() { return m_cursor; }
-    //void on_document_reloaded();
+    void on_document_reloaded();
 
     ////caret movement
     //void caret_right();
@@ -149,13 +150,13 @@ protected:
 
 //---------------------------------------------------------------------------------------
 // A graphic view with one page, no margins (i.e. LenMus ScoreAuxCtrol)
-class SimpleView : public GraphicView
+class LOMSE_EXPORT SimpleView : public GraphicView
 {
 protected:
 
 public:
-    SimpleView(LibraryScope& libraryScope, Document* pDoc, PlatformSupport* pPlatform,
-               ScreenDrawer* pDrawer);
+    SimpleView(LibraryScope& libraryScope, Document* pDoc, 
+               Interactor* pInteractor, ScreenDrawer* pDrawer);
     virtual ~SimpleView() {}
 
 protected:
@@ -166,13 +167,13 @@ protected:
 
 //---------------------------------------------------------------------------------------
 // A graphic view with pages in vertical (i.e. Adobe PDF Reader, MS Word)
-class VerticalBookView : public GraphicView
+class LOMSE_EXPORT VerticalBookView : public GraphicView
 {
 protected:
 
 public:
     VerticalBookView(LibraryScope& libraryScope, Document* pDoc, 
-                     PlatformSupport* pPlatform, ScreenDrawer* pDrawer);
+                     Interactor* pInteractor, ScreenDrawer* pDrawer);
     virtual ~VerticalBookView() {}
 
 protected:
@@ -183,13 +184,13 @@ protected:
 
 //---------------------------------------------------------------------------------------
 // A graphic view with pages in horizontall (i.e. Finale, Sibelius)
-class HorizontalBookView : public GraphicView
+class LOMSE_EXPORT HorizontalBookView : public GraphicView
 {
 protected:
 
 public:
     HorizontalBookView(LibraryScope& libraryScope, Document* pDoc,
-                       PlatformSupport* pPlatform, ScreenDrawer* pDrawer);
+                       Interactor* pInteractor, ScreenDrawer* pDrawer);
     virtual ~HorizontalBookView() {}
 
 protected:

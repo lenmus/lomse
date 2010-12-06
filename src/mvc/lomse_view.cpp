@@ -23,8 +23,8 @@
 //#include <sstream>
 #include "lomse_document.h"
 //#include "lomse_gm_basic.h"
-//#include "lomse_mvc_builder.h"
-//#include "lomse_controller.h"
+#include "lomse_presenter.h"
+#include "lomse_interactor.h"
 
 using namespace std;
 
@@ -32,18 +32,18 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-View::View(Document* pDoc)  //, Controller* pController)
+View::View(Document* pDoc, Interactor* pInteractor)
     : Observer()
     , m_pDoc(pDoc)
-    //, m_pController(pController)
-    //, m_pOwner(NULL)
+    , m_pInteractor(pInteractor)
+    , m_pOwner(NULL)
 {
 } 
 
 //---------------------------------------------------------------------------------------
 View::~View()
 {
-    //delete m_pController;
+    delete m_pInteractor;
 }
 
 

@@ -41,44 +41,23 @@
 
 
 //---------------------------------------------------------------------------------------
-// Specifies the pixel format to use for the rendering buffer. 
-//
-// Some OSs can render several formats and it doesn't obligatory mean the necessity of 
-// software conversion. For example, win32 API can natively display  gray8, 15-bit RGB, 
-// 24-bit BGR, and 32-bit BGRA formats. Value for LOMSE_BITMAP_FORMAT must be one of 
-// the following:
-//
-//    k_pix_format_bw,        // 1 bit per color B/W
-//    k_pix_format_gray8,     // Simple 256 level grayscale
-//    k_pix_format_gray16,    // Simple 65535 level grayscale
-//    k_pix_format_rgb555,    // 15 bit rgb. Depends on the byte ordering!
-//    k_pix_format_rgb565,    // 16 bit rgb. Depends on the byte ordering!
-//    k_pix_format_rgbAAA,    // 30 bit rgb. Depends on the byte ordering!
-//    k_pix_format_rgbBBA,    // 32 bit rgb. Depends on the byte ordering!
-//    k_pix_format_bgrAAA,    // 30 bit bgr. Depends on the byte ordering!
-//    k_pix_format_bgrABB,    // 32 bit bgr. Depends on the byte ordering!
-//    k_pix_format_rgb24,     // R-G-B, one byte per color component
-//    k_pix_format_bgr24,     // B-G-R, native win32 BMP format.
-//    k_pix_format_rgba32,    // R-G-B-A, one byte per color component
-//    k_pix_format_argb32,    // A-R-G-B, native MAC format
-//    k_pix_format_abgr32,    // A-B-G-R, one byte per color component
-//    k_pix_format_bgra32,    // B-G-R-A, native win32 BMP format
-//    k_pix_format_rgb48,     // R-G-B, 16 bits per color component
-//    k_pix_format_bgr48,     // B-G-R, native win32 BMP format.
-//    k_pix_format_rgba64,    // R-G-B-A, 16 bits byte per color component
-//    k_pix_format_argb64,    // A-R-G-B, native MAC format
-//    k_pix_format_abgr64,    // A-B-G-R, one byte per color component
-//    k_pix_format_bgra64,    // B-G-R-A, native win32 BMP format
-//
-// Default values are as follows:
-//
-//    Win32 - k_pix_format_bgra32     // B-G-R-A, native win32 BMP format
-//    Mac   - k_pix_format_argb32,    // A-R-G-B, native MAC format
-//    X11   - k_pix_format_rgba32,    // R-G-B-A, one byte per color
-//
+// platform and compiler
 //---------------------------------------------------------------------------------------
-#define LOMSE_BITMAP_FORMAT     @LOMSE_BITMAP_FORMAT@
-    
+#define LOMSE_PLATFORM_WIN32      @LOMSE_PLATFORM_WIN32@
+#define LOMSE_PLATFORM_UNIX       @LOMSE_PLATFORM_UNIX@
+#define LOMSE_COMPILER_MSVC       @LOMSE_COMPILER_MSVC@
+#define LOMSE_COMPILER_GCC        @LOMSE_COMPILER_GCC@
+
+
+//---------------------------------------------------------------------------------------
+// what are you doing?
+//    - creating the library as shared library   LOMSE_CREATE_DLL == 1
+//    - using the library as shared library      LOMSE_USE_DLL == 1
+//    - creating the library as static library   LOMSE_CREATE_DLL == 0 
+//    - using the library as static library      LOMSE_USE_DLL == 0
+//---------------------------------------------------------------------------------------
+#define LOMSE_CREATE_DLL    @LOMSE_CREATE_DLL@
+#define LOMSE_USE_DLL       @LOMSE_USE_DLL@
 
         
 

@@ -56,15 +56,15 @@ GmoShapeGlyph::GmoShapeGlyph(GmoBox* owner, int type, int nShapeIdx, unsigned in
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
+void GmoShapeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     pDrawer->select_font("LenMus basic", 21.0);
     pDrawer->set_text_color(m_color);
-    LUnits x = m_shiftToDraw.width + m_origin.x + origin.x;
-    LUnits y = m_shiftToDraw.height + m_origin.y + origin.y;
+    LUnits x = m_shiftToDraw.width + m_origin.x;
+    LUnits y = m_shiftToDraw.height + m_origin.y;
     pDrawer->draw_glyph(x, y, m_glyph);
 
-    GmoSimpleShape::on_draw(pDrawer, opt, origin);
+    GmoSimpleShape::on_draw(pDrawer, opt);
 }
 
 ////---------------------------------------------------------------------------------------
@@ -130,14 +130,14 @@ void GmoShapeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void GmoShapeGlyph::OnEndDrag(lmPaper* pPaper, lmController* pCanvas, const UPoint& uPos)
+//void GmoShapeGlyph::OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos)
 //{
 //	// End drag. Receives the command processor associated to the view and the
 //	// final position of the object (logical units referred to page origin).
 //	// This method must validate/adjust final position and, if ok, it must
-//	// send a move object command to the controller.
+//	// send a move object command to the Interactor.
 //
-//	//send a move object command to the controller
+//	//send a move object command to the Interactor
 //	pCanvas->MoveObject(this, uPos);
 //}
 //
@@ -259,12 +259,12 @@ GmoShapeClef::GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos,
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void GmoShapeClef::OnEndDrag(lmPaper* pPaper, lmController* pCanvas, const UPoint& uPos)
+//void GmoShapeClef::OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos)
 //{
 //	// End drag. Receives the command processor associated to the view and the
 //	// final position of the object (logical units referred to page origin).
 //	// This method must validate/adjust final position and, if ok, it must
-//	// send a move object command to the controller.
+//	// send a move object command to the Interactor.
 //
 //	UPoint uFinalPos(uPos.x, uPos.y);
 //	if (!g_fFreeMove)
@@ -273,7 +273,7 @@ GmoShapeClef::GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos,
 //		uFinalPos.y = GetYTop();
 //	}
 //
-//	//send a move object command to the controller
+//	//send a move object command to the Interactor
 //	pCanvas->MoveObject(this, uFinalPos);
 //
 //}
@@ -755,12 +755,12 @@ GmoShapeClef::GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos,
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::OnEndDrag(lmPaper* pPaper, lmController* pCanvas, const UPoint& uPos)
+//void GmoShapeRectangle::OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos)
 //{
 //	// End drag. Receives the command processor associated to the view and the
 //	// final position of the object (logical units referred to page origin).
 //	// This method must validate/adjust final position and, if ok, it must
-//	// send a move object command to the controller.
+//	// send a move object command to the Interactor.
 //
 //    //compute shift from start of drag point
 //    UPoint uShift = uPos - m_uSavePoint[0];
@@ -902,13 +902,13 @@ GmoShapeClef::GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos,
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::OnHandlerEndDrag(lmController* pCanvas, const UPoint& uPos,
+//void GmoShapeRectangle::OnHandlerEndDrag(lmInteractor* pCanvas, const UPoint& uPos,
 //                                   long nHandlerID)
 //{
 //	// End drag. Receives the command processor associated to the view and the
 //	// final position of the object (logical units referred to page origin).
 //	// This method must validate/adjust final position and, if ok, it must
-//	// send a move object command to the controller.
+//	// send a move object command to the Interactor.
 //
 //    //compute new rectangle and handlers positions
 //    ComputeNewPointsAndHandlersPositions(uPos, nHandlerID);

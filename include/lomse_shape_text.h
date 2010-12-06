@@ -49,7 +49,7 @@ public:
                  LUnits x, LUnits y, LibraryScope& libraryScope);
     virtual ~GmoShapeText() {}
 
-    void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
  //   std::string Dump(int nIndent);
  //   void Shift(LUnits xIncr, LUnits yIncr);
@@ -92,7 +92,7 @@ protected:
 //    //call backs
 //    wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
 //	UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos);
-//	void OnEndDrag(lmPaper* pPaper, lmController* pCanvas, const UPoint& uPos);
+//	void OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos);
 //
 //
 //

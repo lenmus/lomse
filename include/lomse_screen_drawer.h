@@ -22,7 +22,7 @@
 #define __LOMSE_SCREEN_DRAWER_H__
 
 #include "lomse_drawer.h"
-#include "platform/lomse_platform.h"
+#include "lomse_doorway.h"
 #include "lomse_agg_types.h"
 #include "lomse_path_attributes.h"
 #include "lomse_font_storage.h"
@@ -39,7 +39,7 @@ class Renderer;
 
 // ScreenDrawer: a Drawer that renders on screen using agg
 //---------------------------------------------------------------------------------------
-class ScreenDrawer : public Drawer
+class LOMSE_EXPORT ScreenDrawer : public Drawer
 {
 private:
     AttrStorage     m_attr_storage;      

@@ -696,8 +696,8 @@ ImoStaffInfo* ImoInstrument::get_staff(int iStaff)
 
 //---------------------------------------------------------------------------------------
 LUnits ImoInstrument::get_line_spacing_for_staff(int iStaff)
-{ 
-    return get_staff(iStaff)->get_line_spacing(); 
+{
+    return get_staff(iStaff)->get_line_spacing();
 }
 
 //---------------------------------------------------------------------------------------
@@ -824,7 +824,7 @@ ImoMidiInfo::ImoMidiInfo(ImoMidiInfo& dto)
 //---------------------------------------------------------------------------------------
 
 //tables with default values for options
-typedef struct 
+typedef struct
 {
     string  sOptName;
     bool    fBoolValue;
@@ -917,7 +917,7 @@ void ImoScore::set_defaults_for_system_info()
 void ImoScore::set_defaults_for_options()
 {
     //bool
-    for (int i=0; i < sizeof(m_BoolOptions)/sizeof(BoolOption); i++)
+    for (unsigned i=0; i < sizeof(m_BoolOptions)/sizeof(BoolOption); i++)
     {
         ImoOptionInfo* pOpt = new ImoOptionInfo(m_BoolOptions[i].sOptName);
         pOpt->set_type(ImoOptionInfo::k_boolean);
@@ -926,7 +926,7 @@ void ImoScore::set_defaults_for_options()
     }
 
     //long
-    for (int i=0; i < sizeof(m_LongOptions)/sizeof(LongOption); i++)
+    for (unsigned i=0; i < sizeof(m_LongOptions)/sizeof(LongOption); i++)
     {
         ImoOptionInfo* pOpt = new ImoOptionInfo(m_LongOptions[i].sOptName);
         pOpt->set_type(ImoOptionInfo::k_number_long);
@@ -935,7 +935,7 @@ void ImoScore::set_defaults_for_options()
     }
 
     //double
-    for (int i=0; i < sizeof(m_FloatOptions)/sizeof(FloatOption); i++)
+    for (unsigned i=0; i < sizeof(m_FloatOptions)/sizeof(FloatOption); i++)
     {
         ImoOptionInfo* pOpt = new ImoOptionInfo(m_FloatOptions[i].sOptName);
         pOpt->set_type(ImoOptionInfo::k_number_float);

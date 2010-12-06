@@ -114,23 +114,21 @@ void GmoShape::shift_origin(USize& shift)
 //}
 
 //---------------------------------------------------------------------------------------
-void GmoShape::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
+void GmoShape::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
 //    if (IsVisible())
 //        Render(pPaper, (IsSelected() ? g_pColors->ScoreSelected() : m_color) );
 
     //draw bounding box
-    LUnits x = m_origin.x + origin.x;
-    LUnits y = m_origin.y + origin.y;
     pDrawer->begin_path();
     pDrawer->fill(Color(0, 0, 0, 0));
     pDrawer->stroke(Color(0, 0, 255));
     pDrawer->stroke_width(15.0);
-    pDrawer->move_to(x, y);
-    pDrawer->hline_to(x + m_size.width);
-    pDrawer->vline_to(y + m_size.height);
-    pDrawer->hline_to(x);
-    pDrawer->vline_to(y);
+    pDrawer->move_to(m_origin.x, m_origin.y);
+    pDrawer->hline_to(m_origin.x + m_size.width);
+    pDrawer->vline_to(m_origin.y + m_size.height);
+    pDrawer->hline_to(m_origin.x);
+    pDrawer->vline_to(m_origin.y);
     pDrawer->end_path();
 }
 

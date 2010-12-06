@@ -49,7 +49,7 @@ protected:
 public:
 	virtual ~GmoShapeBracketBrace();
 
-    void on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
     //VertexSource
     void rewind(int pathId = 0) { m_nCurVertex = 0; }

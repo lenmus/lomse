@@ -29,28 +29,45 @@
 #include "lomse_font_storage.h"
 //#include "lomse_glyphs.h"
 //#include "lomse_user_command.h"
-//#include "lomse_view.h"
-//#include "lomse_controller.h"
-//#include "lomse_mvc_builder.h"
+#include "lomse_graphic_view.h"
+#include "lomse_interactor.h"
+#include "lomse_presenter.h"
+#include "lomse_doorway.h"
+#include "lomse_screen_drawer.h"
 
 using namespace std;
 
 namespace lomse
 {
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // LibraryScope implementation
+//=======================================================================================
+LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
+    : m_reporter(reporter)
+    , m_pDoorway(pDoorway)
+    , m_pNullDoorway(NULL)
+    , m_pLdpFactory(NULL)       //lazzy instantiation. Singleton scope.
+    , m_pFontStorage(NULL)      //lazzy instantiation. Singleton scope.
+{
+    if (!m_pDoorway)
+    {
+        m_pNullDoorway = new LomseDoorway();
+        m_pNullDoorway->init_library(LomseDoorway::k_platform_win32);
+        m_pDoorway = m_pNullDoorway;
+    }
+}
+
 //---------------------------------------------------------------------------------------
 LibraryScope::~LibraryScope()
 {
-    if (m_pLdpFactory)
-        delete m_pLdpFactory;
-    if (m_pFontStorage)
-        delete m_pFontStorage;
-    //if (m_pMusicGlyphs)
-    //    delete m_pMusicGlyphs;
+    delete m_pLdpFactory;
+    delete m_pFontStorage;
+    delete m_pNullDoorway;
+//    delete m_pMusicGlyphs;
 }
 
+//---------------------------------------------------------------------------------------
 LdpFactory* LibraryScope::ldp_factory()
 {
     if (!m_pLdpFactory)
@@ -66,6 +83,12 @@ FontStorage* LibraryScope::font_storage()
     return m_pFontStorage;
 }
 
+//---------------------------------------------------------------------------------------
+double LibraryScope::get_screen_ppi() const
+{
+    return m_pDoorway->get_screen_ppi();
+}
+
 ////---------------------------------------------------------------------------------------
 //MusicGlyphs* LibraryScope::music_glyphs()
 //{
@@ -76,9 +99,9 @@ FontStorage* LibraryScope::font_storage()
 
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // Injector implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 LdpParser* Injector::inject_LdpParser(LibraryScope& libraryScope,
                                       DocumentScope& documentScope)
 {
@@ -115,35 +138,83 @@ Document* Injector::inject_Document(LibraryScope& libraryScope)
     return new Document(libraryScope);
 }
 
+//---------------------------------------------------------------------------------------
+ScreenDrawer* Injector::inject_ScreenDrawer(LibraryScope& libraryScope)
+{
+    return new ScreenDrawer(libraryScope);
+}
+
 ////---------------------------------------------------------------------------------------
 //UserCommandExecuter* Injector::inject_UserCommandExecuter(Document* pDoc)
 //{
 //    return new UserCommandExecuter(pDoc);
 //}
-//
-////---------------------------------------------------------------------------------------
-//GraphicView* Injector::inject_EditView(LibraryScope& libraryScope, Document* pDoc,
-//                                    UserCommandExecuter* pExec)
-//{
-//    Controller* pController = Injector::inject_Controller(libraryScope, pDoc, pExec);
-//    return new GraphicView(pDoc, pController);
-//}
 
-////---------------------------------------------------------------------------------------
-//Controller* Injector::inject_Controller(LibraryScope& libraryScope,
-//                                        Document* pDoc, UserCommandExecuter* pExec)
-//{
-//    return new EditController(libraryScope, pDoc, pExec);
-//}
-//
-////---------------------------------------------------------------------------------------
-//MvcElement* Injector::inject_MvcElement(LibraryScope& libraryScope,
-//                                        int viewType, Document* pDoc)
-//{
-//    UserCommandExecuter* pExec = Injector::inject_UserCommandExecuter(pDoc);
-//    GraphicView* pView = Injector::inject_EditView(libraryScope, pDoc, pExec);
-//    return new MvcElement(pDoc, pExec, pView);
-//}
+//---------------------------------------------------------------------------------------
+SimpleView* Injector::inject_SimpleView(LibraryScope& libraryScope, Document* pDoc)  //UserCommandExecuter* pExec)
+{
+    Interactor* pInteractor = Injector::inject_Interactor(libraryScope, pDoc);  //, pExec);
+    ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+    return new SimpleView(libraryScope, pDoc, pInteractor, pDrawer);
+}
+
+//---------------------------------------------------------------------------------------
+VerticalBookView* Injector::inject_VerticalBookView(LibraryScope& libraryScope,
+                                                    Document* pDoc)  //UserCommandExecuter* pExec)
+{
+    Interactor* pInteractor = Injector::inject_Interactor(libraryScope, pDoc);  //, pExec);
+    ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+    return new VerticalBookView(libraryScope, pDoc, pInteractor, pDrawer);
+}
+
+//---------------------------------------------------------------------------------------
+HorizontalBookView* Injector::inject_HorizontalBookView(LibraryScope& libraryScope,
+                                                        Document* pDoc)  //UserCommandExecuter* pExec)
+{
+    Interactor* pInteractor = Injector::inject_Interactor(libraryScope, pDoc);  //, pExec);
+    ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+    return new HorizontalBookView(libraryScope, pDoc, pInteractor, pDrawer);
+}
+
+//---------------------------------------------------------------------------------------
+View* Injector::inject_View(LibraryScope& libraryScope, int viewType, Document* pDoc)
+                            //UserCommandExecuter* pExec)
+{
+    //factory method
+
+    switch(viewType)
+    {
+        case Injector::k_simple_view: 
+            return Injector::inject_SimpleView(libraryScope, pDoc);
+        
+        case Injector::k_vertical_book_view: 
+            return Injector::inject_VerticalBookView(libraryScope, pDoc);
+
+        case Injector::k_horizontal_book_view: 
+            return Injector::inject_HorizontalBookView(libraryScope, pDoc);
+
+        default:
+            throw "Injector::inject_View: invalid view type";
+    }
+}
+
+//---------------------------------------------------------------------------------------
+Interactor* Injector::inject_Interactor(LibraryScope& libraryScope,
+                                        Document* pDoc) //, UserCommandExecuter* pExec)
+{
+    //factory method
+
+    return new EditInteractor(libraryScope, pDoc);  //, pExec);
+}
+
+//---------------------------------------------------------------------------------------
+Presenter* Injector::inject_Presenter(LibraryScope& libraryScope,
+                                      int viewType, Document* pDoc)
+{
+    //UserCommandExecuter* pExec = Injector::inject_UserCommandExecuter(pDoc);
+    View* pView = Injector::inject_View(libraryScope, viewType, pDoc); //, pExec);
+    return new Presenter(pDoc, pView);  //, pExec);
+}
 
 
 }  //namespace lomse

@@ -41,6 +41,29 @@ project(lomse)
 # configuration
 set( LOMSE_VERSION_MAJOR "0")
 set( LOMSE_VERSION_MINOR "0")
+set( LOMSE_USE_DLL "0")
+set( LOMSE_CREATE_DLL "0")
+
+#set platform
+if(WIN32)
+    set( LOMSE_PLATFORM_WIN32 "1")
+    set( LOMSE_PLATFORM_UNIX "0")
+    
+elseif(UNIX)
+    set( LOMSE_PLATFORM_WIN32 "0")
+    set( LOMSE_PLATFORM_UNIX "1")
+endif()
+
+#set compiler
+if(MSVC)
+    set( LOMSE_COMPILER_MSVC "1")
+    set( LOMSE_COMPILER_GCC "0")
+    
+elseif(CMAKE_COMPILER_IS_GNUCC)
+    set( LOMSE_COMPILER_MSVC "0")
+    set( LOMSE_COMPILER_GCC "1")
+endif()
+
 
 # set directories 
 set( ROOT_DIR  ${CMAKE_CURRENT_SOURCE_DIR} )
@@ -59,7 +82,7 @@ set( CMAKE_MODULE_PATH "${ROOT_DIR}/cmake-modules" )
 # check that compiler supports namespace sdt
 include(TestForSTDNamespace)
 if(CMAKE_NO_STD_NAMESPACE)
-  message(FATAL_ERROR "The compiler doesn't support namespace sdt.")
+  message(FATAL_ERROR "The compiler doesn't support namespace std.")
 endif()
 
 
@@ -220,13 +243,16 @@ set(INTERNAL_MODEL_FILES
 )
 
 set(MODULE_FILES
+    ${SRC_DIR}/module/lomse_doorway.cpp
     ${SRC_DIR}/module/lomse_injectors.cpp
     ${SRC_DIR}/module/lomse_time.cpp
 )
 
 set(MVC_FILES
-    ${SRC_DIR}/mvc/lomse_view.cpp
     ${SRC_DIR}/mvc/lomse_graphic_view.cpp
+    ${SRC_DIR}/mvc/lomse_interactor.cpp
+    ${SRC_DIR}/mvc/lomse_presenter.cpp 
+    ${SRC_DIR}/mvc/lomse_view.cpp
 )
 
 set(PARSER_FILES
@@ -254,16 +280,27 @@ set(SCORE_FILES
     ${SRC_DIR}/score/lomse_score_iterator.cpp
 )
 
+if(WIN32)
+    set(PLATFORM_FILES
+        ${SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp
+    )
+elseif(UNIX)
+    set(PLATFORM_FILES
+        
+    )
+endif()
+
 set(ALL_SOURCES 
     ${AGG_FILES} ${DOCUMENT_FILES} ${EXPORTERS_FILES}
     ${GRAPHIC_MODEL_FILES} ${INTERNAL_MODEL_FILES} 
     ${MODULE_FILES} ${MVC_FILES}
     ${PARSER_FILES} ${RENDER_FILES} ${SCORE_FILES} 
+    ${PLATFORM_FILES}
 )
 
 
 # Adds folders for Visual Studio and other IDEs
-source_group( "agg"             FILES ${AGG_FILES} )
+source_group( "agg"             FILES ${AGG_FILES} ${PLATFORM_FILES} )
 source_group( "document"        FILES ${DOCUMENT_FILES} )
 source_group( "exporters"       FILES ${EXPORTERS_FILES} )
 source_group( "graphic_model"   FILES ${GRAPHIC_MODEL_FILES} )
@@ -280,20 +317,29 @@ source_group( "score"           FILES ${SCORE_FILES} )
 #-------------------------------------------------------------
 
 set(LOMSE  lomse)
+
 add_library( ${LOMSE} STATIC ${ALL_SOURCES} )
 
 
 # hack to remove 'Debug' subdirectory from output path. -------------
 # see: http://www.cmake.org/Bug/view.php?id=8243
 if(MSVC)
-    set_target_properties(${LOMSE}  PROPERTIES  PREFIX "../")
+    set_target_properties(${LOMSE} PROPERTIES  PREFIX "../")
+endif()
+
+# properties
+# Force not to link with standard MSVC libraries: /NODEFAULTLIB
+if(MSVC)
+    set_target_properties(${LOMSE} PROPERTIES  LINK_FLAGS "/NODEFAULTLIB")
 endif()
 
 # once built, place library at lomse/bin
 set_target_properties(${LOMSE}  PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY  ${ROOT_DIR}/bin )
     
-    
+get_target_property(VAR ${LOMSE} LINK_FLAGS)
+message("library target properties=" ${VAR})
+
 
 # library makefile generation. Dynamic library
 #-------------------------------------------------------------
@@ -339,9 +385,11 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_elements.cpp
         ${SRC_DIR}/tests/lomse_test_gm_objects.cpp
         ${SRC_DIR}/tests/lomse_test_graphic_model.cpp
+        ${SRC_DIR}/tests/lomse_test_interactor.cpp
         ${SRC_DIR}/tests/lomse_test_internal_model.cpp
         ${SRC_DIR}/tests/lomse_test_model_builder.cpp
         ${SRC_DIR}/tests/lomse_test_parser.cpp
+        ${SRC_DIR}/tests/lomse_test_presenter.cpp
         ${SRC_DIR}/tests/lomse_test_reader.cpp
         ${SRC_DIR}/tests/lomse_test_score_iterator.cpp
         ${SRC_DIR}/tests/lomse_test_score_layouter.cpp
@@ -398,64 +446,44 @@ add_custom_command(
 
 
 set (EXAMPLE1 example_1)
-
-# set directories
-#------------------------------------------------
-set( DEMO_CTROL  ${SRC_DIR}/agg/src/ctrl )
 set( EXAMPLE1_SRC  ${ROOT_DIR}/examples )
 
 if( WIN32 )
-    set( DEMO_PLATFORM  
-        ${EXAMPLE1_SRC}/win32/lomse_platform_win32.cpp
-        ${EXAMPLE1_SRC}/win32/lomse_win32_bmp.cpp
-    )        
-    
+#-------------------------------------------------------------
     include_directories(
-        ${EXAMPLE1_SRC}/win32/lomse_win32_bmp.h
+        ${SRC_DIR}/agg/include/platform/win32/agg_win32_bmp.h
     )
+
+    add_executable( ${EXAMPLE1} WIN32
+        ${EXAMPLE1_SRC}/win32/example_1_win32.cpp
+        ${EXAMPLE1_SRC}/win32/stdafx.cpp
+        ${EXAMPLE1_SRC}/win32/resource.h
+        ${EXAMPLE1_SRC}/win32/stdafx.h
+        ${EXAMPLE1_SRC}/win32/small.ico
+        ${EXAMPLE1_SRC}/win32/example_1.ico
+        ${EXAMPLE1_SRC}/win32/example_1.rc
+        ${SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp 
+    )
+
+    target_link_libraries( ${EXAMPLE1} lomse.lib )
 
     
 elseif( UNIX )
-    set( DEMO_PLATFORM  
-        ${EXAMPLE1_SRC}/x11/lomse_platform_x11.cpp
-    )
-
+#-------------------------------------------------------------
     find_package(X11)
     if(X11_FOUND)  
         include_directories(${X11_INCLUDE_DIRS})
         link_libraries(${X11_LIBRARIES})
     endif(X11_FOUND)
+
+    add_executable( ${EXAMPLE1} ""
+        ${EXAMPLE1_SRC}/x11/example_1_x11.cpp
+    )
+
+    target_link_libraries ( ${EXAMPLE1} liblomse.so )
+
         
 endif()
-
-
-# set 'WIN32' parameter for Windows executables
-#------------------------------------------------
-if( WIN32 )
-    set( HAS_GUI WIN32 )    
-else()
-    set( HAS_GUI "" )
-endif()
-
-
-# source files to compile
-#------------------------------------------------
-add_executable( ${EXAMPLE1} ${HAS_GUI}
-        ${EXAMPLE1_SRC}/example_1.cpp
-        ${DEMO_PLATFORM}
-        ${DEMO_CTROL}/agg_slider_ctrl.cpp
-)
-
-
-# libraries to link
-#------------------------------------------------
-if(UNIX)
-    target_link_libraries ( ${EXAMPLE1} liblomse.so )
-elseif(WIN32)
-    target_link_libraries ( ${EXAMPLE1} lomse.lib )
-endif()
-
-
 
 # dependencies
 add_dependencies(example_1 lomse)

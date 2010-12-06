@@ -21,10 +21,9 @@
 #ifndef __LOMSE_INJECTORS_H__
 #define __LOMSE_INJECTORS_H__
 
-#include <iostream>
 #include "lomse_ldp_factory.h"
 #include "lomse_id_assigner.h"
-
+#include <iostream>
 using namespace std;
 
 namespace lomse
@@ -40,36 +39,38 @@ class LdpFactory;
 class FontStorage;
 class MusicGlyphs;
 //class UserCommandExecuter;
-//class GraphicView;
-//class Controller;
-//class MvcElement;
+class View;
+class SimpleView;
+class VerticalBookView;
+class HorizontalBookView;
+class Interactor;
+class Presenter;
+class LomseDoorway;
+class Drawer;
+class ScreenDrawer;
 
 
 //---------------------------------------------------------------------------------------
-class LibraryScope
+class LOMSE_EXPORT LibraryScope
 {
 protected:
     ostream& m_reporter;
+    LomseDoorway* m_pDoorway;
+    LomseDoorway* m_pNullDoorway;
     LdpFactory* m_pLdpFactory;
     FontStorage* m_pFontStorage;
-    double m_ppi;
     //MusicGlyphs* m_pMusicGlyphs;
 
 public:
-    LibraryScope(ostream& reporter=cout, double ppi=96.0)
-        : m_reporter(reporter)
-        , m_pLdpFactory(NULL)       //lazzy instantiation. Singleton scope.
-        , m_pFontStorage(NULL)      //lazzy instantiation. Singleton scope.
-        , m_ppi(ppi)
-    {
-    }
-
+    LibraryScope(ostream& reporter=cout, LomseDoorway* pDoorway=NULL);
     ~LibraryScope();
 
     inline ostream& default_reporter() { return m_reporter; }
+    inline LomseDoorway* platform_interface() { return m_pDoorway; }
     LdpFactory* ldp_factory();
     FontStorage* font_storage();
-    inline double pixels_per_inch() { return m_ppi; }
+
+    double get_screen_ppi() const;
     //MusicGlyphs* music_glyphs();
 
 };
@@ -97,6 +98,8 @@ public:
     Injector() {}
     ~Injector() {}
 
+    enum { k_simple_view=0, k_vertical_book_view, k_horizontal_book_view, };
+
     static LdpParser* inject_LdpParser(LibraryScope& libraryScope,
                                        DocumentScope& documentScope);
     static Analyser* inject_Analyser(LibraryScope& libraryScope,
@@ -105,13 +108,18 @@ public:
     static LdpCompiler* inject_LdpCompiler(LibraryScope& libraryScope,
                                            DocumentScope& documentScope);
     static Document* inject_Document(LibraryScope& libraryScope);
+    static ScreenDrawer* inject_ScreenDrawer(LibraryScope& libraryScope);
 //    static UserCommandExecuter* inject_UserCommandExecuter(Document* pDoc);
-//    static GraphicView* inject_EditView(LibraryScope& libraryScope, Document* pDoc,
-//                                     UserCommandExecuter* pExec);
-//    static Controller* inject_Controller(LibraryScope& libraryScope,
-//                                         Document* pDoc, UserCommandExecuter* pExec);
-//    static MvcElement* inject_MvcElement(LibraryScope& libraryScope,
-//                                         int viewType, Document* pDoc);
+    static View* inject_View(LibraryScope& libraryScope, int viewType, Document* pDoc);  //UserCommandExecuter* pExec)
+    static SimpleView* inject_SimpleView(LibraryScope& libraryScope, Document* pDoc);  //UserCommandExecuter* pExec)
+    static VerticalBookView* inject_VerticalBookView(LibraryScope& libraryScope,
+                                                     Document* pDoc);  //UserCommandExecuter* pExec)
+    static HorizontalBookView* inject_HorizontalBookView(LibraryScope& libraryScope,
+                                                         Document* pDoc);  //UserCommandExecuter* pExec)
+    static Interactor* inject_Interactor(LibraryScope& libraryScope,
+                                         Document* pDoc);   //, UserCommandExecuter* pExec);
+    static Presenter* inject_Presenter(LibraryScope& libraryScope,
+                                       int viewType, Document* pDoc);
 
 };
 

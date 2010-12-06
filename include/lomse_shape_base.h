@@ -59,7 +59,7 @@ namespace lomse
 //class lmPaper;
 //class lmScoreObj;
 //class lmStaffObj;
-//class lmController;
+//class lmInteractor;
 //class lmBoxScore;
 //class lmBoxPage;
 //class lmGMSelection;

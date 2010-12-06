@@ -265,7 +265,7 @@ GmoBoxSystem* GmoBoxScorePage::get_system(int iSystem)
 //    return (lmGMObject*)NULL;
 //}
 
-//void GmoBoxScorePage::on_draw(Drawer* pDrawer, RenderOptions& opt, UPoint& origin)
+//void GmoBoxScorePage::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //{
 //    //clear lists with renderization information
 //    m_ActiveHandlers.clear();
