@@ -22,7 +22,7 @@
 
 #include "lomse_injectors.h"
 #include "lomse_document.h"
-#include "lomse_user_command.h"
+//#include "lomse_user_command.h"
 #include "lomse_view.h"
 #include "lomse_interactor.h"
 #include <sstream>
