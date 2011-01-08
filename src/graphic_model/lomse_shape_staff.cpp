@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -31,14 +31,14 @@ namespace lomse
 //#define lmNO_LEDGER_LINES   -100000.0f
 
 //---------------------------------------------------------------------------------------
-GmoShapeStaff::GmoShapeStaff(GmoBox* owner, ImoStaffInfo* pStaff, int iStaff,
-                             LUnits indent, Color color)
-    : GmoSimpleShape(owner, GmoObj::k_shape_staff, color) 
+GmoShapeStaff::GmoShapeStaff(int idx, ImoStaffInfo* pStaff, int iStaff,
+                             LUnits width, Color color)
+    : GmoSimpleShape(GmoObj::k_shape_staff, idx, color)
     , m_pStaff(pStaff)
 	, m_iStaff(iStaff)
 {
     //bounding box
-    set_width(owner->get_content_width() - indent);
+    set_width(width);
     set_height(m_pStaff->get_height());
 }
 
@@ -61,8 +61,9 @@ void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt)
     double yPos = m_origin.y;
     double spacing = m_pStaff->get_line_spacing();
 
+    Color color = determine_color_to_use(opt);
     pDrawer->begin_path();
-    pDrawer->stroke( m_color );
+    pDrawer->stroke(color);
     pDrawer->stroke_width( m_pStaff->get_line_thickness() );
     for (int iL=0; iL < m_pStaff->get_num_lines(); iL++ )
 	{
@@ -131,7 +132,7 @@ void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //    //             uyPos, uHalfLine, m_uBoundsTop.y, rStep, nStep);
 //	return  10 + nStep;
 //    //AWARE: Note that y axis is reversed. Therefore we return 10 + steps instead
-//    // of 10 - steps. 
+//    // of 10 - steps.
 //}
 //
 ////---------------------------------------------------------------------------------------

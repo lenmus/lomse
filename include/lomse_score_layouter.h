@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -46,6 +46,7 @@ class GmoBoxSliceInstr;
 class GmoStubScore;
 class InstrumentEngraver;
 class SystemLayouter;
+class GmoShape;
 //class SystemCursor;
 
 
@@ -176,6 +177,7 @@ protected:
     void add_staff_lines_name_and_bracket(int iInstr, LUnits uTopMargin);
     void add_shapes_for_score_objs();
     LUnits determine_initial_space();
+    GmoShape* create_staffobj_shape(ImoStaffObj* pSO, LUnits lineSpacing);
 
     std::vector<GmoBoxSliceInstr*> m_sliceInstrBoxes;
     GmoBoxSliceInstr* m_pCurBSI;

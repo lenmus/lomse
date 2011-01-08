@@ -1,18 +1,18 @@
 //--------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
-//  Lomse is free software; you can redistribute it and/or modify it under the 
+//  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
 //  either version 3 of the License, or (at your option) any later version.
 //
-//  Lomse is distributed in the hope that it will be useful, but WITHOUT ANY 
-//  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+//  Lomse is distributed in the hope that it will be useful, but WITHOUT ANY
+//  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//   
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -40,10 +40,10 @@ using namespace lomse;
 class TestUserCommand : public UserCommand
 {
 public:
-    TestUserCommand(DocCursor& cursor1, DocCursor& cursor2) 
+    TestUserCommand(DocCursor& cursor1, DocCursor& cursor2)
         : UserCommand("test command")
         , m_it1(*cursor1)
-        , m_it2(*cursor2) 
+        , m_it2(*cursor2)
     {
     }
     ~TestUserCommand() {};

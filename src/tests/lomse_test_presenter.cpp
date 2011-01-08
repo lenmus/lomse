@@ -1,18 +1,18 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
-//  Lomse is free software; you can redistribute it and/or modify it under the 
+//  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
 //  either version 3 of the License, or (at your option) any later version.
 //
-//  Lomse is distributed in the hope that it will be useful, but WITHOUT ANY 
-//  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+//  Lomse is distributed in the hope that it will be useful, but WITHOUT ANY
+//  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//   
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -56,7 +56,7 @@ public:
     }
 };
 
-SUITE(MvcModelTest)
+SUITE(PresenterTest)
 {
 
 //    //TEST_FIXTURE(PresenterBuilderTestFixture, PresenterBuilderCreatesPresenter)
@@ -74,14 +74,16 @@ SUITE(MvcModelTest)
     {
         PresenterBuilder builder(m_libraryScope);
 
-        Presenter* pPresenter = builder.new_document(Injector::k_simple_view);
+        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
         CHECK( pPresenter != NULL );
         Document* pDoc = pPresenter->get_document();
         CHECK( pDoc->to_string() == "(lenmusdoc (vers 0.0) (content))" );
-        CHECK( pPresenter->get_num_views() == 1 );
-        SimpleView* pView = dynamic_cast<SimpleView*>( pPresenter->get_view(0) );
+        CHECK( pPresenter->get_num_interactors() == 1 );
+        Interactor* pIntor = pPresenter->get_interactor(0);
+        CHECK( pIntor != NULL );
+        CHECK( pIntor->get_view() != NULL );
+        SimpleView* pView = dynamic_cast<SimpleView*>( pIntor->get_view() );
         CHECK( pView != NULL );
-        CHECK( pView->get_interactor() != NULL );
 
         delete pPresenter;
     }
@@ -89,7 +91,7 @@ SUITE(MvcModelTest)
     //TEST_FIXTURE(PresenterBuilderTestFixture, PresenterBuilderCreatesViewCursorAtEnd)
     //{
     //    PresenterBuilder builder(m_libraryScope);
-    //    Presenter* pPresenter = builder.new_document(Injector::k_simple_view);
+    //    Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
     //    SimpleView* pView = dynamic_cast<SimpleView*>( pPresenter->get_view(0) );
     //    DocCursor& cursor = pView->get_cursor();
     //    //cout << (*cursor)->to_string() << endl;
@@ -100,7 +102,7 @@ SUITE(MvcModelTest)
     //TEST_FIXTURE(PresenterBuilderTestFixture, PresenterBuilderCreatesViewCursorAtStart)
     //{
     //    PresenterBuilder builder(m_libraryScope);
-    //    Presenter* pPresenter = builder.new_document(Injector::k_simple_view,
+    //    Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple,
     //              "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))");
     //    SimpleView* pView = dynamic_cast<SimpleView*>( pPresenter->get_view(0) );
     //    DocCursor& cursor = pView->get_cursor();
@@ -114,7 +116,7 @@ SUITE(MvcModelTest)
     //{
     //    PresenterBuilder builder(m_libraryScope);
 
-    //    Presenter* pPresenter = builder.open_document(Injector::k_simple_view,
+    //    Presenter* pPresenter = builder.open_document(ViewFactory::k_view_simple,
     //                            m_scores_path + "00011-empty-fill-page.lms");
     //    CHECK( pPresenter != NULL );
     //    Document* pDoc = pPresenter->get_document();
@@ -133,7 +135,7 @@ SUITE(MvcModelTest)
     TEST_FIXTURE(PresenterBuilderTestFixture, PresentersCollection_CloseDocumentByIndex)
     {
         PresenterBuilder builder(m_libraryScope);
-        Presenter* pPresenter = builder.new_document(Injector::k_simple_view);
+        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
         PresentersCollection elements;
         elements.add(pPresenter);
         CHECK( elements.get_num_documents() == 1 );
@@ -145,7 +147,7 @@ SUITE(MvcModelTest)
     TEST_FIXTURE(PresenterBuilderTestFixture, PresentersCollection_CloseDocumentByPointer)
     {
         PresenterBuilder builder(m_libraryScope);
-        Presenter* pPresenter = builder.new_document(Injector::k_simple_view);
+        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
         PresentersCollection elements;
         elements.add(pPresenter);
         CHECK( elements.get_num_documents() == 1 );
@@ -159,7 +161,7 @@ SUITE(MvcModelTest)
 //    {
 //        PresentersCollection elements;
 //        PresenterBuilder builder(m_libraryScope);
-//        Document* pDoc = builder.new_document(Injector::k_simple_view);
+//        Document* pDoc = builder.new_document(ViewFactory::k_view_simple);
 //        View* pView = new SimpleView(pDoc);
 //        CHECK( elements.get_num_views(pDoc) == 0 );
 //        elements.add_view(pDoc, pView);
@@ -177,7 +179,7 @@ SUITE(MvcModelTest)
     //TEST_FIXTURE(PresenterBuilderTestFixture, MvcModel_ViewIsNotifiedWhenModifications)
     //{
     //    PresenterBuilder builder(m_libraryScope);
-    //    Presenter* pPresenter = builder.new_document(Injector::k_simple_view,
+    //    Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple,
     //              "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))");
     //    SimpleView* pView = dynamic_cast<SimpleView*>( pPresenter->get_view(0) );
     //    DocCursor& cursor = pView->get_cursor();

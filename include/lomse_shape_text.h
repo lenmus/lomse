@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -45,7 +45,7 @@ protected:
     LibraryScope& m_libraryScope;
 
 public:
-    GmoShapeText(GmoBox* owner, const std::string& text, ImoTextStyleInfo* pStyle,
+    GmoShapeText(int idx, const std::string& text, ImoTextStyleInfo* pStyle,
                  LUnits x, LUnits y, LibraryScope& libraryScope);
     virtual ~GmoShapeText() {}
 
@@ -61,6 +61,7 @@ public:
 
 protected:
     void select_font();
+    Color get_normal_color();
 
 };
 

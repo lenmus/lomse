@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -57,14 +57,14 @@ SUITE(InternalModelTest)
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_Clef)
     {
-        ImoClef* pClef = new ImoClef(ImoClef::k_G3);
+        ImoClef* pClef = new ImoClef(ImoClef::k_G2);
         CHECK( pClef->has_attachments() == false );
         delete pClef;
     }
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_ClefWithAttachments)
     {
-        ImoClef* pClef = new ImoClef(ImoClef::k_G3);
+        ImoClef* pClef = new ImoClef(ImoClef::k_G2);
         CHECK( pClef->has_attachments() == false );
         ImoScoreText* pText = new ImoScoreText("Hello world");
         pClef->attach(pText);
@@ -147,7 +147,7 @@ SUITE(InternalModelTest)
         ImoMusicData* pMD = new ImoMusicData();
         instr.append_child(pMD);
         CHECK( instr.get_musicdata() == pMD );
-        //ImoClef* pClef = new ImoClef(ImoClef::k_G3);
+        //ImoClef* pClef = new ImoClef(ImoClef::k_G2);
         //pMD->append_child(pClef);
     }
 
@@ -248,7 +248,7 @@ SUITE(InternalModelTest)
         ImoInstrument* pInstr = new ImoInstrument();
         ImoMusicData* pMD = new ImoMusicData();
         pInstr->append_child(pMD);
-        ImoClef* pClef = new ImoClef(ImoClef::k_G3);
+        ImoClef* pClef = new ImoClef(ImoClef::k_G2);
         ImoScoreText* pText = new ImoScoreText("Hello world");
         pClef->attach(pText);
         pMD->append_child(pClef);
@@ -326,7 +326,7 @@ SUITE(InternalModelTest)
         ImoInstrument* pInstr = new ImoInstrument();
         ImoMusicData* pMD = new ImoMusicData();
         pInstr->append_child(pMD);
-        ImoClef* pClef = new ImoClef(ImoClef::k_G3);
+        ImoClef* pClef = new ImoClef(ImoClef::k_G2);
         ImoScoreText* pText = new ImoScoreText("Hello world");
         pClef->attach(pText);
         pMD->append_child(pClef);

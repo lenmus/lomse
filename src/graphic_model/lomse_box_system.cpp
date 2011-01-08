@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -30,8 +30,8 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-GmoBoxSystem::GmoBoxSystem(GmoBoxScorePage* pParent)    //, int nNumPage, int iSystem,
-    : GmoBox(pParent, GmoObj::k_box_system)
+GmoBoxSystem::GmoBoxSystem()    //, int nNumPage, int iSystem,
+    : GmoBox(GmoObj::k_box_system)
 //    , m_nNumPage(nNumPage)
 //    , m_pBPage(pParent)
 //	, m_pTopSpacer(NULL)
@@ -48,8 +48,7 @@ GmoBoxSystem::~GmoBoxSystem()
 //---------------------------------------------------------------------------------------
 GmoBoxSlice* GmoBoxSystem::add_slice(int nAbsMeasure)   //, LUnits xStart, LUnits xEnd)
 {
-    GmoBoxSlice* pBSlice = 
-        new GmoBoxSlice(this, nAbsMeasure); //, (int)m_childBoxes.size(), xStart, xEnd);
+    GmoBoxSlice* pBSlice = new GmoBoxSlice(nAbsMeasure); //, (int)m_childBoxes.size(), xStart, xEnd);
     add_child_box(pBSlice);
     return pBSlice;
 }

@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -1821,7 +1821,7 @@ SUITE(AnalyserTest)
         CHECK( pIModel->get_root()->is_clef() == true );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
         CHECK( pClef != NULL );
-        CHECK( pClef->get_clef_type() == ImoClef::k_G3 );
+        CHECK( pClef->get_clef_type() == ImoClef::k_G2 );
         delete tree->get_root();
         delete pIModel;
     }
@@ -1840,7 +1840,7 @@ SUITE(AnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
         CHECK( pClef != NULL );
-        CHECK( pClef->get_clef_type() == ImoClef::k_G3 );
+        CHECK( pClef->get_clef_type() == ImoClef::k_G2 );
         delete tree->get_root();
         delete pIModel;
     }
@@ -1853,7 +1853,7 @@ SUITE(AnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree);
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
         CHECK( pClef != NULL );
-        CHECK( pClef->get_clef_type() == ImoClef::k_G3 );
+        CHECK( pClef->get_clef_type() == ImoClef::k_G2 );
         CHECK( pClef->is_visible() );
         CHECK( pClef->get_user_location_x() == 70.0f );
         CHECK( pClef->get_user_location_y() == 0.0f );

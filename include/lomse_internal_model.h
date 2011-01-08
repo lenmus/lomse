@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -29,6 +29,7 @@
 #include "lomse_tree.h"
 #include "lomse_basic.h"
 #include "lomse_score_enums.h"
+#include "lomse_shape_base.h"
 
 using namespace std;
 
@@ -923,7 +924,7 @@ public:
 
     enum {
         k_undefined=-1,
-        k_G3 = 0,
+        k_G2 = 0,
         k_F4,
         k_F3,
         k_C1,
@@ -935,12 +936,12 @@ public:
         k_C5,
         k_F5,
         k_G1,
-        k_8_G3,        //8 above
-        k_G3_8,        //8 below
+        k_8_G2,        //8 above
+        k_G2_8,        //8 below
         k_8_F4,        //8 above
         k_F4_8,        //8 below
-        k_15_G3,       //15 above
-        k_G3_15,       //15 below
+        k_15_G2,       //15 above
+        k_G2_15,       //15 below
         k_15_F4,       //15 above
         k_F4_15,       //15 below
     };
@@ -1157,7 +1158,7 @@ public:
     inline bool is_in_group() { return m_pGroup != NULL; }
     inline ImoInstrGroup* get_group() { return m_pGroup; }
     ImoStaffInfo* get_staff(int iStaff);
-    LUnits get_line_spacing_for_staff(int iStaff); 
+    LUnits get_line_spacing_for_staff(int iStaff);
 
     //setters
     void add_staff();
@@ -1551,9 +1552,9 @@ public:
     inline void set_line_spacing(LUnits uSpacing) { m_uSpacing = uSpacing; }
     LUnits get_height() {
         if (m_nNumLines > 1)
-            return (m_nNumLines - 1) * m_uSpacing + m_uLineThickness; 
+            return (m_nNumLines - 1) * m_uSpacing + m_uLineThickness;
         else
-            return m_uLineThickness; 
+            return m_uLineThickness;
     }
 
     //lines

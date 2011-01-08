@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,15 +12,15 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
 //  -------------------------
 //  Credits:
-//  This code is based on file agg_font_freetype.h from 
+//  This code is based on file agg_font_freetype.h from
 //  Anti-Grain Geometry version 2.4
-//  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev 
+//  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev
 //  (http://www.antigrain.com). AGG 2.4 is distributed under BSD license.
 //
 //---------------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ private:
     void update_signature();
     int  find_face(const char* face_name) const;
     void determine_rendering_mode(glyph_rendering ren_type);
-    void load_font_file(const std::string& font_name, unsigned face_index, 
+    void load_font_file(const std::string& font_name, unsigned face_index,
                         const char* font_mem, const long font_mem_size);
 
     bool            m_flag32;
@@ -133,9 +133,9 @@ private:
     bool            m_hinting;
     bool            m_flip_y;
     bool            m_library_initialized;
-    FT_Library      m_library;    // handle to library    
+    FT_Library      m_library;    // handle to library
     FT_Face*        m_faces;      // A pool of font faces
-    char**          m_face_names; 
+    char**          m_face_names;
     unsigned        m_num_faces;
     unsigned        m_max_faces;
     FT_Face         m_cur_face;  // handle to the current face object
@@ -164,7 +164,7 @@ private:
 
 //---------------------------------------------------------------------------------------
 // font_engine_freetype_int32
-// This class uses values of type int32 (26.6 format) for the vector cache. 
+// This class uses values of type int32 (26.6 format) for the vector cache.
 // It allows you to render glyphs of very large sizes.
 //
 class font_engine_freetype_int32 : public font_engine_freetype_base
@@ -176,7 +176,7 @@ public:
     typedef font_engine_freetype_base::scanlines_aa_type  scanlines_aa_type;
     typedef font_engine_freetype_base::scanlines_bin_type scanlines_bin_type;
 
-    font_engine_freetype_int32(unsigned max_faces = 32) : 
+    font_engine_freetype_int32(unsigned max_faces = 32) :
         font_engine_freetype_base(true, max_faces) {}
 };
 

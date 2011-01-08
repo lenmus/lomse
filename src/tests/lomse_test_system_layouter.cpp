@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -115,7 +115,7 @@ SUITE(LinesBuilderTest)
         ImoInstrument instr;
         ImoMusicData* pMD = new ImoMusicData();
         instr.append_child(pMD);
-        ImoClef* pClef = new ImoClef(ImoClef::k_G3);
+        ImoClef* pClef = new ImoClef(ImoClef::k_G2);
         pMD->append_child(pClef);
         GmoShape* pShape = NULL;
         bool fProlog = false;

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -42,7 +42,7 @@ class Renderer;
 class LOMSE_EXPORT ScreenDrawer : public Drawer
 {
 private:
-    AttrStorage     m_attr_storage;      
+    AttrStorage     m_attr_storage;
     AttrStorage     m_attr_stack;
     PathStorage     m_path;
     Renderer*       m_pRenderer;
@@ -54,7 +54,7 @@ public:
     virtual ~ScreenDrawer();
 
     // SVG path commands
-    // http://www.w3.org/TR/SVG/paths.html#PathData 
+    // http://www.w3.org/TR/SVG/paths.html#PathData
     void begin_path();                                  //SVG: <path>
     void end_path();                                    //SVG: </path>
     void close_subpath();                               //SVG: Z, z
@@ -71,19 +71,19 @@ public:
     void cubic_bezier_rel(double x1, double y1,         //SVG: q
                           double x, double y);
     void cubic_bezier(double x, double y);              //SVG: T
-    void cubic_bezier_rel(double x, double y);          //SVG: t 
+    void cubic_bezier_rel(double x, double y);          //SVG: t
     void quadratic_bezier(double x1, double y1,         //SVG: C
-                          double x2, double y2, 
+                          double x2, double y2,
                           double x, double y);
     void quadratic_bezier_rel(double x1, double y1,     //SVG: c
-                              double x2, double y2, 
+                              double x2, double y2,
                               double x, double y);
     void quadratic_bezier(double x2, double y2,         //SVG: S
                           double x, double y);
     void quadratic_bezier_rel(double x2, double y2,     //SVG: s
                               double x, double y);
 
-    // not the same but similar to SVG path command 
+    // not the same but similar to SVG path command
     void add_path(VertexSource& vs, unsigned path_id = 0, bool solid_path = true);
 
     // Attribute setting functions.
@@ -99,7 +99,6 @@ public:
     void line_join(line_join_e join);
     void line_cap(line_cap_e cap);
     void miter_limit(double ml);
-    TransAffine& transform();
 
 
     // current font
@@ -117,7 +116,7 @@ public:
     //void font_family();
     //void font_size();
     //void font_style();  // normal | italic
-    //void font_weight(); // normal | bold 
+    //void font_weight(); // normal | bold
 
     //// text settings
     ////-----------------------
@@ -141,12 +140,13 @@ public:
     //lmURect FtGetGlyphBounds(unsigned int nGlyph);
     //wxRect FtGetGlyphBoundsInPixels(unsigned int nGlyph);
 
-    // unit conversion
+    // point conversion
     //-----------------------
-    void LUnitsToPixels(double& x, double& y) const;
-    void PixelsToLUnits(double& x, double& y) const;
-    double LUnitsToPixels(double scalar) const;
-    double PixelsToLUnits(double scalar) const;
+    void screen_point_to_model(double* x, double* y) const;
+    void model_point_to_screen(double* x, double* y) const;
+
+    //units conversion
+    double PixelsToLUnits(Pixels value);
 
     // settings
     //-----------------------
@@ -154,6 +154,7 @@ public:
     void set_viewport(Pixels x, Pixels y);
     void set_transform(TransAffine& transform);
     void set_shift(LUnits x, LUnits y);
+    void remove_shift();
     void render(bool fillColor);
     void render(FontRasterizer& ras, FontScanline& sl, Color color);
 

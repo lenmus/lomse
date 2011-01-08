@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,14 +12,14 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
 //  Credits:
 //  -------------------------
 //  This file is based on Anti-Grain Geometry version 2.4 examples' code.
-//  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev 
+//  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev
 //  (http://www.antigrain.com). AGG 2.4 is distributed under BSD license.
 //
 //---------------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ class Renderer;
 class FontStorage;
 
 
-// Calligrapher: A speciallized drawer that knows how to create bitmaps and 
+// Calligrapher: A speciallized drawer that knows how to create bitmaps and
 //               paths to render fonts
 //---------------------------------------------------------------------------------------
 class Calligrapher

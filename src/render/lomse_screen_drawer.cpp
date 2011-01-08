@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -326,12 +326,6 @@ void ScreenDrawer::miter_limit(double ml)
 }
 
 //---------------------------------------------------------------------------------------
-TransAffine& ScreenDrawer::transform()
-{
-    return cur_attr().transform;
-}
-
-//---------------------------------------------------------------------------------------
 void ScreenDrawer::add_path(VertexSource& vs,  unsigned path_id, bool solid_path)
 {
     m_path.concat_path(vs, path_id);
@@ -494,26 +488,24 @@ int ScreenDrawer::draw_text(double x, double y, const std::string& str)
 //}
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::LUnitsToPixels(double& x, double& y) const
+void ScreenDrawer::screen_point_to_model(double* x, double* y) const
 {
+    TransAffine& mtx = m_pRenderer->get_transform();
+    mtx.inverse_transform(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::PixelsToLUnits(double& x, double& y) const
+void ScreenDrawer::model_point_to_screen(double* x, double* y) const
 {
+    TransAffine& mtx = m_pRenderer->get_transform();
+    mtx.transform(x, y);
 }
 
 //---------------------------------------------------------------------------------------
-double ScreenDrawer::LUnitsToPixels(double scalar) const
+double ScreenDrawer::PixelsToLUnits(Pixels value)
 {
-    return scalar;
-}
-
-//---------------------------------------------------------------------------------------
-
-double ScreenDrawer::PixelsToLUnits(double scalar) const
-{
-    return scalar;
+    TransAffine& mtx = m_pRenderer->get_transform();
+    return double(value) / mtx.scale();
 }
 
 //---------------------------------------------------------------------------------------
@@ -545,6 +537,12 @@ void ScreenDrawer::render(bool fillColor)
 void ScreenDrawer::set_shift(LUnits x, LUnits y)
 {
     m_pRenderer->set_shift(x, y);
+}
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::remove_shift()
+{
+    m_pRenderer->remove_shift();
 }
 
 

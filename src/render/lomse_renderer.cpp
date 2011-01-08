@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,14 +12,14 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
 //  Credits:
 //  -------------------------
 //  This file is based on Anti-Grain Geometry version 2.4 examples' code.
-//  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev 
+//  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev
 //  (http://www.antigrain.com). AGG 2.4 is distributed under BSD license.
 //
 //-------------------------------------------------------------------------------------
@@ -33,7 +33,7 @@ namespace lomse
 
 
 //---------------------------------------------------------------------------------------
-// Renderer: 
+// Renderer:
 // Knows how to render bitmaps and paths created by Calligrapher and Drawer objects
 //---------------------------------------------------------------------------------------
 Renderer::Renderer(double ppi, AttrStorage& attr_storage, AttrStorage& attr_stack,
@@ -167,6 +167,13 @@ TransAffine& Renderer::set_transformation()
     m_mtx *= agg::trans_affine_translation(m_vxOrg, m_vyOrg);
 
     return m_mtx;
+}
+
+//---------------------------------------------------------------------------------------
+void Renderer::remove_shift()
+{
+    set_shift(0.0f, 0.0f);
+    set_transformation();
 }
 
 //---------------------------------------------------------------------------------------

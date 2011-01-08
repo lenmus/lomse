@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -62,9 +62,9 @@ Document::~Document()
 {
     clear();
     delete m_pCompiler;
-    if (m_pDocScope)
-        delete m_pDocScope;
+    delete m_pDocScope;
 }
+
 int Document::from_file(const std::string& filename)
 {
     clear();
@@ -97,11 +97,8 @@ void Document::create_with_empty_score()
 
 void Document::clear()
 {
-    if (m_pIModel)
-    {
-        delete m_pIModel;
-        m_pIModel = NULL;
-    }
+    delete m_pIModel;
+    m_pIModel = NULL;
 }
 
 std::string Document::to_string()

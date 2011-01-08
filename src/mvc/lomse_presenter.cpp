@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -132,7 +132,7 @@ void PresentersCollection::close_document(Document* pDoc)
 //}
 
 //---------------------------------------------------------------------------------------
-void PresentersCollection::add_view(Document* pDoc, View* pView)
+void PresentersCollection::add_interactor(Document* pDoc, Interactor* pIntor)
 {
     //Presenter* pPresenter = get_presenter(pDoc);
     //pPresenter->add_view(pView);
@@ -142,7 +142,7 @@ void PresentersCollection::add_view(Document* pDoc, View* pView)
 int PresentersCollection::get_num_views(Document* pDoc)
 {
     Presenter* pPresenter = get_presenter(pDoc);
-    return pPresenter->get_num_views();
+    return pPresenter->get_num_interactors();
 }
 
 //---------------------------------------------------------------------------------------
@@ -191,24 +191,24 @@ Presenter* PresenterBuilder::open_document(int viewType, const std::string& file
 //=======================================================================================
 //Presenter implementation
 //=======================================================================================
-Presenter::Presenter(Document* pDoc, View* pView)   //, UserCommandExecuter* pExec)
+Presenter::Presenter(Document* pDoc, Interactor* pIntor)   //, UserCommandExecuter* pExec)
     : m_pDoc(pDoc)
     , m_userData(NULL)
     //, m_pExec(pExec)
     , m_callback(NULL)
 {
-    m_views.push_back(pView);
-    m_pDoc->add_observer(pView);
-    pView->set_owner(this);
+    m_interactors.push_back(pIntor);
+    m_pDoc->add_observer(pIntor);
+    //pIntor->set_owner(this);
 }
 
 //---------------------------------------------------------------------------------------
 Presenter::~Presenter()
 {
-    std::list<View*>::iterator it;
-    for (it=m_views.begin(); it != m_views.end(); ++it)
+    std::list<Interactor*>::iterator it;
+    for (it=m_interactors.begin(); it != m_interactors.end(); ++it)
         delete *it;
-    m_views.clear();
+    m_interactors.clear();
 
     delete m_pDoc;
     //delete m_pExec;
@@ -220,23 +220,12 @@ void Presenter::close_document()
 }
 
 //---------------------------------------------------------------------------------------
-View* Presenter::add_view()
+Interactor* Presenter::get_interactor(int iIntor)
 {
-    return NULL;
-}
-
-//---------------------------------------------------------------------------------------
-void Presenter::delete_view(View* pView)
-{
-}
-
-//---------------------------------------------------------------------------------------
-View* Presenter::get_view(int iView)
-{
-    std::list<View*>::iterator it;
+    std::list<Interactor*>::iterator it;
     int i = 0;
-    for (it=m_views.begin(); it != m_views.end()&& i != iView; ++it, ++i);
-    if (i == iView)
+    for (it=m_interactors.begin(); it != m_interactors.end()&& i != iIntor; ++it, ++i);
+    if (i == iIntor)
         return *it;
     else
         throw "invalid index";
@@ -245,8 +234,8 @@ View* Presenter::get_view(int iView)
 //---------------------------------------------------------------------------------------
 void Presenter::on_document_reloaded()
 {
-    std::list<View*>::iterator it;
-    for (it=m_views.begin(); it != m_views.end(); ++it)
+    std::list<Interactor*>::iterator it;
+    for (it=m_interactors.begin(); it != m_interactors.end(); ++it)
         (*it)->on_document_reloaded();
 }
 
@@ -262,15 +251,6 @@ void Presenter::set_callback( void (*pt2Func)(Notification* event) )
 {
     m_callback = pt2Func;
 }
-
-////---------------------------------------------------------------------------------------
-//void Presenter::insert_rest(View* pView, std::string source)
-//{
-//	EditInteractor* pInteractor = dynamic_cast<EditInteractor*>( pView->get_interactor() );
-//    EditView* pEditView = dynamic_cast<EditView*>( pView );
-//    if (pInteractor && pEditView)
-//        pInteractor->insert_rest(pEditView->get_cursor(), source);
-//}
 
 
 }  //namespace lomse

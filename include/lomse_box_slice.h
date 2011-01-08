@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -42,7 +42,6 @@ class ImoInstrument;
 class GmoBoxSlice : public GmoBox
 {
 protected:
-    GmoBoxSystem* m_pBoxSystem;     //parent system box
 //    int             m_nAbsMeasure;		//number of this measure (absolute, 1..n)
 //	int				m_nNumInSystem;		//number of slice for this system (0..n-1)
 //
@@ -53,7 +52,7 @@ protected:
 //    lmTimeGridTable*            m_pGridTable;
 
 public:
-    GmoBoxSlice(GmoBoxSystem* pParent, int nAbsMeasure);    //, int nNumInSystem,
+    GmoBoxSlice(int nAbsMeasure);    //, int nNumInSystem,
 			    //LUnits xStart=0, LUnits xEnd=0);
     ~GmoBoxSlice();
 
@@ -88,6 +87,9 @@ public:
 //    float GetGridTimeForPosition(LUnits uxPos);
 //    void DrawTimeLines(lmPaper* pPaper, wxColour color, LUnits uyTop,
 //                       LUnits uyBottom);
+protected:
+    GmoBoxSystem* get_system_box();
+
 
 };
 

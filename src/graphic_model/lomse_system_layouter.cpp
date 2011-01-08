@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -24,6 +24,7 @@
 #include "lomse_engraving_options.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
+#include "lomse_shape_note.h"
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -311,18 +312,18 @@ void LineEntry::dump_header()
 //---------------------------------------------------------------------------------------
 LUnits LineEntry::get_shift_to_noterest_center()
 {
-//    if (m_pSO && m_pSO->is_note_rest())
-//    {
-//        //determine notehead width or rest width
-//        LUnits uxWidth = 0.0f;
-//        if (m_pSO->is_rest())
-//            uxWidth = m_pShape->get_width();
-//        else
-//            uxWidth = ((GmoShapeNote*)m_pShape)->GetNoteHead()->get_width();
-//
-//        return uxWidth / 2.0f;
-//    }
-//    else
+    if (m_pSO && m_pSO->is_note_rest())
+    {
+        //determine notehead width or rest width
+        LUnits uxWidth = 0.0f;
+        if (m_pSO->is_rest())
+            uxWidth = m_pShape->get_width();
+        else
+            uxWidth = (dynamic_cast<GmoShapeNote*>(m_pShape))->get_notehead_width();
+
+        return uxWidth / 2.0f;
+    }
+    else
         return 0.0f;
 }
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -54,7 +54,7 @@ public:
         m_path.arrange_orientations_all_paths(path_flags_ccw);
     }
 
-    // Expand all polygons 
+    // Expand all polygons
     inline void expand(double value) { m_curved_trans_contour.width(value); }
 
     unsigned operator [](unsigned idx)
@@ -82,6 +82,7 @@ public:
         m_uxShift = x;
         m_uyShift = y;
     }
+    void remove_shift();
     inline TransAffine& get_transform() { return m_mtx; }
     void set_transform(TransAffine& transform);
 
@@ -98,14 +99,14 @@ protected:
     agg::rgba to_rgba(Color c);
     agg::rgba8 to_rgba8(Color c);
 
-    // Rendering. One can specify two additional parameters: 
+    // Rendering. One can specify two additional parameters:
     // trans_affine and opacity. They can be used to transform the whole
     // image and/or to make it translucent.
-    template<class Rasterizer, class Scanline, class Renderer> 
-    void render(Rasterizer& ras, 
+    template<class Rasterizer, class Scanline, class Renderer>
+    void render(Rasterizer& ras,
                 Scanline& sl,
-                Renderer& ren, 
-                const TransAffine& mtx, 
+                Renderer& ren,
+                const TransAffine& mtx,
                 const rect_i& cb,
                 double opacity=1.0)
     {
@@ -155,7 +156,7 @@ protected:
                 m_curved_stroked.inner_join(inner_round);
                 m_curved_stroked.approximation_scale(scl);
 
-                // If the *visual* line width is considerable we 
+                // If the *visual* line width is considerable we
                 // turn on processing of curve cusps.
                 //---------------------
                 if(attr.stroke_width * scl > 1.0)
@@ -196,7 +197,7 @@ private:
     RendererBase            m_renBase;
     RendererSolid           m_renSolid;
 
-    AttrStorage&            m_attr_storage;      
+    AttrStorage&            m_attr_storage;
     AttrStorage&            m_attr_stack;
     PathStorage&            m_path;
 

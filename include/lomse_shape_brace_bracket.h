@@ -1,6 +1,6 @@
 //-------------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -56,7 +56,7 @@ public:
 
 
 protected:
-    GmoShapeBracketBrace(GmoBox* owner, int type, Color color);
+    GmoShapeBracketBrace(int type, int idx, Color color);
     virtual void set_affine_transform() = 0;
 
 };
@@ -65,8 +65,8 @@ protected:
 class GmoShapeBracket : public GmoShapeBracketBrace
 {
 public:
-    GmoShapeBracket(GmoBox* owner, LUnits xLeft, LUnits yTop,
-                 LUnits xRight, LUnits yBottom, Color color);
+    GmoShapeBracket(int idx, LUnits xLeft, LUnits yTop,
+                    LUnits xRight, LUnits yBottom, Color color);
 	~GmoShapeBracket();
 
     //VertexSource
@@ -86,8 +86,8 @@ protected:
     LUnits m_udyHook;
 
 public:
-    GmoShapeBrace(GmoBox* owner, LUnits xLeft, LUnits yTop, LUnits xRight,
-               LUnits yBottom, LUnits dyHook, Color color);
+    GmoShapeBrace(int idx, LUnits xLeft, LUnits yTop, LUnits xRight,
+                  LUnits yBottom, LUnits dyHook, Color color);
 	~GmoShapeBrace();
 
     //VertexSource

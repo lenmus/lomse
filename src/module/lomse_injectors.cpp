@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -34,6 +34,7 @@
 #include "lomse_presenter.h"
 #include "lomse_doorway.h"
 #include "lomse_screen_drawer.h"
+#include "lomse_tasks.h"
 
 using namespace std;
 
@@ -153,58 +154,50 @@ ScreenDrawer* Injector::inject_ScreenDrawer(LibraryScope& libraryScope)
 //---------------------------------------------------------------------------------------
 SimpleView* Injector::inject_SimpleView(LibraryScope& libraryScope, Document* pDoc)  //UserCommandExecuter* pExec)
 {
-    Interactor* pInteractor = Injector::inject_Interactor(libraryScope, pDoc);  //, pExec);
-    ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
-    return new SimpleView(libraryScope, pDoc, pInteractor, pDrawer);
+    return dynamic_cast<SimpleView*>(
+                        inject_View(libraryScope,
+                                    ViewFactory::k_view_simple,
+                                    pDoc)
+                       );
 }
 
 //---------------------------------------------------------------------------------------
 VerticalBookView* Injector::inject_VerticalBookView(LibraryScope& libraryScope,
                                                     Document* pDoc)  //UserCommandExecuter* pExec)
 {
-    Interactor* pInteractor = Injector::inject_Interactor(libraryScope, pDoc);  //, pExec);
-    ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
-    return new VerticalBookView(libraryScope, pDoc, pInteractor, pDrawer);
+    return dynamic_cast<VerticalBookView*>(
+                        inject_View(libraryScope,
+                                    ViewFactory::k_view_vertical_book,
+                                    pDoc)
+                       );
 }
 
 //---------------------------------------------------------------------------------------
 HorizontalBookView* Injector::inject_HorizontalBookView(LibraryScope& libraryScope,
                                                         Document* pDoc)  //UserCommandExecuter* pExec)
 {
-    Interactor* pInteractor = Injector::inject_Interactor(libraryScope, pDoc);  //, pExec);
-    ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
-    return new HorizontalBookView(libraryScope, pDoc, pInteractor, pDrawer);
+    return dynamic_cast<HorizontalBookView*>(
+                        inject_View(libraryScope,
+                                    ViewFactory::k_view_horizontal_book,
+                                    pDoc)
+                       );
 }
 
 //---------------------------------------------------------------------------------------
 View* Injector::inject_View(LibraryScope& libraryScope, int viewType, Document* pDoc)
                             //UserCommandExecuter* pExec)
 {
-    //factory method
-
-    switch(viewType)
-    {
-        case Injector::k_simple_view: 
-            return Injector::inject_SimpleView(libraryScope, pDoc);
-        
-        case Injector::k_vertical_book_view: 
-            return Injector::inject_VerticalBookView(libraryScope, pDoc);
-
-        case Injector::k_horizontal_book_view: 
-            return Injector::inject_HorizontalBookView(libraryScope, pDoc);
-
-        default:
-            throw "Injector::inject_View: invalid view type";
-    }
+    ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+    return ViewFactory::create_view(libraryScope, viewType, pDrawer);
 }
 
 //---------------------------------------------------------------------------------------
 Interactor* Injector::inject_Interactor(LibraryScope& libraryScope,
-                                        Document* pDoc) //, UserCommandExecuter* pExec)
+                                        Document* pDoc, View* pView) //, UserCommandExecuter* pExec)
 {
     //factory method
 
-    return new EditInteractor(libraryScope, pDoc);  //, pExec);
+    return new EditInteractor(libraryScope, pDoc, pView);  //, pExec);
 }
 
 //---------------------------------------------------------------------------------------
@@ -213,7 +206,15 @@ Presenter* Injector::inject_Presenter(LibraryScope& libraryScope,
 {
     //UserCommandExecuter* pExec = Injector::inject_UserCommandExecuter(pDoc);
     View* pView = Injector::inject_View(libraryScope, viewType, pDoc); //, pExec);
-    return new Presenter(pDoc, pView);  //, pExec);
+    Interactor* pInteractor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+    pView->set_interactor(pInteractor);
+    return new Presenter(pDoc, pInteractor);  //, pExec);
+}
+
+//---------------------------------------------------------------------------------------
+Task* Injector::inject_Task(int taskType, Interactor* pIntor)
+{
+    return TaskFactory::create_task(taskType, pIntor);
 }
 
 

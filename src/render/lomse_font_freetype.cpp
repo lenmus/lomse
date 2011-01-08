@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,15 +12,15 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
 //  -------------------------
 //  Credits:
-//  This code is based on file agg_font_freetype.cpp from 
+//  This code is based on file agg_font_freetype.cpp from
 //  Anti-Grain Geometry version 2.4
-//  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev 
+//  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev
 //  (http://www.antigrain.com). AGG 2.4 is distributed under BSD license.
 //
 //---------------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ namespace lomse
 //   x^12 + x^11 + x^10 + x^8 + x^7 + x^5 + x^4 + x^2 + x^1 + 1
 //
 
-static const unsigned crc32tab[256] = 
+static const unsigned crc32tab[256] =
 {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba,
     0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
@@ -122,10 +122,10 @@ static unsigned calc_crc32(const unsigned char* buf, unsigned size)
 {
     unsigned crc = (unsigned)~0;
     const unsigned char* p;
-    unsigned len = 0; 
+    unsigned len = 0;
     unsigned nr = size;
 
-    for (len += nr, p = buf; nr--; ++p) 
+    for (len += nr, p = buf; nr--; ++p)
     {
         crc = (crc >> 8) ^ crc32tab[(crc ^ *p) & 0xff];
     }
@@ -154,7 +154,7 @@ static inline int dbl_to_int26p6(double p)
 template<class PathStorage>
 bool decompose_ft_outline(const FT_Outline& outline, bool flip_y, const trans_affine& mtx,
                           PathStorage& path)
-{   
+{
     typedef typename PathStorage::value_type value_type;
 
     FT_Vector   v_last;
@@ -219,7 +219,7 @@ bool decompose_ft_outline(const FT_Outline& outline, bool flip_y, const trans_af
         y1 = int26p6_to_dbl(v_start.y);
         if(flip_y) y1 = -y1;
         mtx.transform(&x1, &y1);
-        path.move_to(value_type(dbl_to_int26p6(x1)), 
+        path.move_to(value_type(dbl_to_int26p6(x1)),
                         value_type(dbl_to_int26p6(y1)));
 
         while(point < limit)
@@ -236,7 +236,7 @@ bool decompose_ft_outline(const FT_Outline& outline, bool flip_y, const trans_af
                     y1 = int26p6_to_dbl(point->y);
                     if(flip_y) y1 = -y1;
                     mtx.transform(&x1, &y1);
-                    path.line_to(value_type(dbl_to_int26p6(x1)), 
+                    path.line_to(value_type(dbl_to_int26p6(x1)),
                                     value_type(dbl_to_int26p6(y1)));
                     //path.line_to(conv(point->x), flip_y ? -conv(point->y) : conv(point->y));
                     continue;
@@ -269,9 +269,9 @@ bool decompose_ft_outline(const FT_Outline& outline, bool flip_y, const trans_af
                             if(flip_y) { y1 = -y1; y2 = -y2; }
                             mtx.transform(&x1, &y1);
                             mtx.transform(&x2, &y2);
-                            path.curve3(value_type(dbl_to_int26p6(x1)), 
+                            path.curve3(value_type(dbl_to_int26p6(x1)),
                                         value_type(dbl_to_int26p6(y1)),
-                                        value_type(dbl_to_int26p6(x2)), 
+                                        value_type(dbl_to_int26p6(x2)),
                                         value_type(dbl_to_int26p6(y2)));
                             continue;
                         }
@@ -288,14 +288,14 @@ bool decompose_ft_outline(const FT_Outline& outline, bool flip_y, const trans_af
                         if(flip_y) { y1 = -y1; y2 = -y2; }
                         mtx.transform(&x1, &y1);
                         mtx.transform(&x2, &y2);
-                        path.curve3(value_type(dbl_to_int26p6(x1)), 
+                        path.curve3(value_type(dbl_to_int26p6(x1)),
                                     value_type(dbl_to_int26p6(y1)),
-                                    value_type(dbl_to_int26p6(x2)), 
+                                    value_type(dbl_to_int26p6(x2)),
                                     value_type(dbl_to_int26p6(y2)));
 
-                        //path.curve3(conv(v_control.x), 
-                        //            flip_y ? -conv(v_control.y) : conv(v_control.y), 
-                        //            conv(v_middle.x), 
+                        //path.curve3(conv(v_control.x),
+                        //            flip_y ? -conv(v_control.y) : conv(v_control.y),
+                        //            conv(v_middle.x),
                         //            flip_y ? -conv(v_middle.y) : conv(v_middle.y));
 
                         v_control = vec;
@@ -309,14 +309,14 @@ bool decompose_ft_outline(const FT_Outline& outline, bool flip_y, const trans_af
                     if(flip_y) { y1 = -y1; y2 = -y2; }
                     mtx.transform(&x1, &y1);
                     mtx.transform(&x2, &y2);
-                    path.curve3(value_type(dbl_to_int26p6(x1)), 
+                    path.curve3(value_type(dbl_to_int26p6(x1)),
                                 value_type(dbl_to_int26p6(y1)),
-                                value_type(dbl_to_int26p6(x2)), 
+                                value_type(dbl_to_int26p6(x2)),
                                 value_type(dbl_to_int26p6(y2)));
 
-                    //path.curve3(conv(v_control.x), 
-                    //            flip_y ? -conv(v_control.y) : conv(v_control.y), 
-                    //            conv(v_start.x), 
+                    //path.curve3(conv(v_control.x),
+                    //            flip_y ? -conv(v_control.y) : conv(v_control.y),
+                    //            conv(v_start.x),
                     //            flip_y ? -conv(v_start.y) : conv(v_start.y));
                     goto Close;
                 }
@@ -330,9 +330,9 @@ bool decompose_ft_outline(const FT_Outline& outline, bool flip_y, const trans_af
                         return false;
                     }
 
-                    vec1.x = point[0].x; 
+                    vec1.x = point[0].x;
                     vec1.y = point[0].y;
-                    vec2.x = point[1].x; 
+                    vec2.x = point[1].x;
                     vec2.y = point[1].y;
 
                     point += 2;
@@ -355,18 +355,18 @@ bool decompose_ft_outline(const FT_Outline& outline, bool flip_y, const trans_af
                         mtx.transform(&x1, &y1);
                         mtx.transform(&x2, &y2);
                         mtx.transform(&x3, &y3);
-                        path.curve4(value_type(dbl_to_int26p6(x1)), 
+                        path.curve4(value_type(dbl_to_int26p6(x1)),
                                     value_type(dbl_to_int26p6(y1)),
-                                    value_type(dbl_to_int26p6(x2)), 
+                                    value_type(dbl_to_int26p6(x2)),
                                     value_type(dbl_to_int26p6(y2)),
-                                    value_type(dbl_to_int26p6(x3)), 
+                                    value_type(dbl_to_int26p6(x3)),
                                     value_type(dbl_to_int26p6(y3)));
 
-                        //path.curve4(conv(vec1.x), 
-                        //            flip_y ? -conv(vec1.y) : conv(vec1.y), 
-                        //            conv(vec2.x), 
+                        //path.curve4(conv(vec1.x),
+                        //            flip_y ? -conv(vec1.y) : conv(vec1.y),
+                        //            conv(vec2.x),
                         //            flip_y ? -conv(vec2.y) : conv(vec2.y),
-                        //            conv(vec.x), 
+                        //            conv(vec.x),
                         //            flip_y ? -conv(vec.y) : conv(vec.y));
                         continue;
                     }
@@ -381,18 +381,18 @@ bool decompose_ft_outline(const FT_Outline& outline, bool flip_y, const trans_af
                     mtx.transform(&x1, &y1);
                     mtx.transform(&x2, &y2);
                     mtx.transform(&x3, &y3);
-                    path.curve4(value_type(dbl_to_int26p6(x1)), 
+                    path.curve4(value_type(dbl_to_int26p6(x1)),
                                 value_type(dbl_to_int26p6(y1)),
-                                value_type(dbl_to_int26p6(x2)), 
+                                value_type(dbl_to_int26p6(x2)),
                                 value_type(dbl_to_int26p6(y2)),
-                                value_type(dbl_to_int26p6(x3)), 
+                                value_type(dbl_to_int26p6(x3)),
                                 value_type(dbl_to_int26p6(y3)));
 
-                    //path.curve4(conv(vec1.x), 
-                    //            flip_y ? -conv(vec1.y) : conv(vec1.y), 
-                    //            conv(vec2.x), 
+                    //path.curve4(conv(vec1.x),
+                    //            flip_y ? -conv(vec1.y) : conv(vec1.y),
+                    //            conv(vec2.x),
                     //            flip_y ? -conv(vec2.y) : conv(vec2.y),
-                    //            conv(v_start.x), 
+                    //            conv(v_start.x),
                     //            flip_y ? -conv(v_start.y) : conv(v_start.y));
                     goto Close;
                 }
@@ -402,7 +402,7 @@ bool decompose_ft_outline(const FT_Outline& outline, bool flip_y, const trans_af
         path.close_polygon();
 
     Close:
-        first = last + 1; 
+        first = last + 1;
     }
 
     return true;
@@ -489,7 +489,7 @@ void decompose_ft_bitmap_gray8(const FT_Bitmap& bitmap,
 //---------------------------------------------------------------------------------------
 // font_engine_freetype_base implementation
 //---------------------------------------------------------------------------------------
-font_engine_freetype_base::font_engine_freetype_base(bool flag32, 
+font_engine_freetype_base::font_engine_freetype_base(bool flag32,
                                                      unsigned max_faces)
     : m_flag32(flag32)
     , m_change_stamp(0)
@@ -552,8 +552,8 @@ font_engine_freetype_base::~font_engine_freetype_base()
 }
 
 //---------------------------------------------------------------------------------------
-void font_engine_freetype_base::resolution(unsigned dpi) 
-{ 
+void font_engine_freetype_base::resolution(unsigned dpi)
+{
     m_resolution = dpi;
     update_char_size();
 }
@@ -590,10 +590,10 @@ double font_engine_freetype_base::descender() const
 }
 
 //---------------------------------------------------------------------------------------
-bool font_engine_freetype_base::select_font(const std::string& font_name, 
+bool font_engine_freetype_base::select_font(const std::string& font_name,
                                             unsigned face_index,
                                             glyph_rendering ren_type,
-                                            const char* font_mem, 
+                                            const char* font_mem,
                                             const long font_mem_size)
 {
     if(!m_library_initialized)
@@ -628,21 +628,21 @@ void font_engine_freetype_base::load_font_file(const std::string& font_name,
     {
         delete [] m_face_names[0];
         FT_Done_Face(m_faces[0]);
-        memcpy(m_faces, 
-                m_faces + 1, 
+        memcpy(m_faces,
+                m_faces + 1,
                 (m_max_faces - 1) * sizeof(FT_Face));
-        memcpy(m_face_names, 
-                m_face_names + 1, 
+        memcpy(m_face_names,
+                m_face_names + 1,
                 (m_max_faces - 1) * sizeof(char*));
         m_num_faces = m_max_faces - 1;
     }
 
     if (font_mem && font_mem_size)
     {
-        m_last_error = FT_New_Memory_Face(m_library, 
-                                            (const FT_Byte*)font_mem, 
-                                            font_mem_size, 
-                                            face_index, 
+        m_last_error = FT_New_Memory_Face(m_library,
+                                            (const FT_Byte*)font_mem,
+                                            font_mem_size,
+                                            face_index,
                                             &m_faces[m_num_faces]);
     }
     else
@@ -769,9 +769,9 @@ bool font_engine_freetype_base::width(double w)
 
 //---------------------------------------------------------------------------------------
 void font_engine_freetype_base::hinting(bool h)
-{ 
+{
     //set hintig  (for current face)
-    m_hinting = h; 
+    m_hinting = h;
     if(m_cur_face)
     {
         update_signature();
@@ -780,9 +780,9 @@ void font_engine_freetype_base::hinting(bool h)
 
 //---------------------------------------------------------------------------------------
 void font_engine_freetype_base::flip_y(bool f)
-{ 
+{
     // set filp  (for current face)
-    m_flip_y = f; 
+    m_flip_y = f;
     if(m_cur_face)
     {
         update_signature();
@@ -815,7 +815,7 @@ void font_engine_freetype_base::update_signature()
 
         unsigned gamma_hash = 0;
         if(m_glyph_rendering == glyph_ren_native_gray8 ||
-            m_glyph_rendering == glyph_ren_agg_mono || 
+            m_glyph_rendering == glyph_ren_agg_mono ||
             m_glyph_rendering == glyph_ren_agg_gray8)
         {
             unsigned char gamma_table[rasterizer_scanline_aa<>::aa_scale];
@@ -827,8 +827,8 @@ void font_engine_freetype_base::update_signature()
             gamma_hash = calc_crc32(gamma_table, sizeof(gamma_table));
         }
 
-        sprintf(m_signature, 
-                "%s,%u,%d,%d,%d:%dx%d,%d,%d,%08X", 
+        sprintf(m_signature,
+                "%s,%u,%d,%d,%d:%dx%d,%d,%d,%08X",
                 m_name,
                 m_char_map,
                 m_face_index,
@@ -846,12 +846,12 @@ void font_engine_freetype_base::update_signature()
             double mtx[6];
             char buf[100];
             m_affine.store_to(mtx);
-            sprintf(buf, ",%08X%08X%08X%08X%08X%08X", 
-                dbl_to_plain_fx(mtx[0]), 
-                dbl_to_plain_fx(mtx[1]), 
-                dbl_to_plain_fx(mtx[2]), 
-                dbl_to_plain_fx(mtx[3]), 
-                dbl_to_plain_fx(mtx[4]), 
+            sprintf(buf, ",%08X%08X%08X%08X%08X%08X",
+                dbl_to_plain_fx(mtx[0]),
+                dbl_to_plain_fx(mtx[1]),
+                dbl_to_plain_fx(mtx[2]),
+                dbl_to_plain_fx(mtx[3]),
+                dbl_to_plain_fx(mtx[4]),
                 dbl_to_plain_fx(mtx[5]));
             strcat(m_signature, buf);
         }
@@ -866,7 +866,7 @@ void font_engine_freetype_base::update_char_size()
     {
         if(m_resolution)
         {
-            FT_Set_Char_Size(m_cur_face, 
+            FT_Set_Char_Size(m_cur_face,
                              m_width,       // char_width in 1/64th of points
                              m_height,      // char_height in 1/64th of points
                              m_resolution,  // horizontal device resolution in dpi
@@ -874,7 +874,7 @@ void font_engine_freetype_base::update_char_size()
         }
         else
         {
-            FT_Set_Pixel_Sizes(m_cur_face,    
+            FT_Set_Pixel_Sizes(m_cur_face,
                                m_width >> 6,    // pixel_width
                                m_height >> 6);  // pixel_height
         }
@@ -886,8 +886,8 @@ void font_engine_freetype_base::update_char_size()
 bool font_engine_freetype_base::prepare_glyph(unsigned glyph_code)
 {
     m_glyph_index = FT_Get_Char_Index(m_cur_face, glyph_code);
-    m_last_error = FT_Load_Glyph(m_cur_face, 
-                                    m_glyph_index, 
+    m_last_error = FT_Load_Glyph(m_cur_face,
+                                    m_glyph_index,
                                     m_hinting ? FT_LOAD_DEFAULT : FT_LOAD_NO_HINTING);
     if(m_last_error == 0)
     {
@@ -897,9 +897,9 @@ bool font_engine_freetype_base::prepare_glyph(unsigned glyph_code)
             m_last_error = FT_Render_Glyph(m_cur_face->glyph, FT_RENDER_MODE_MONO);
             if(m_last_error == 0)
             {
-                decompose_ft_bitmap_mono(m_cur_face->glyph->bitmap, 
+                decompose_ft_bitmap_mono(m_cur_face->glyph->bitmap,
                                             m_cur_face->glyph->bitmap_left,
-                                            m_flip_y ? -m_cur_face->glyph->bitmap_top : 
+                                            m_flip_y ? -m_cur_face->glyph->bitmap_top :
                                                         m_cur_face->glyph->bitmap_top,
                                             m_flip_y,
                                             m_scanline_bin,
@@ -908,7 +908,7 @@ bool font_engine_freetype_base::prepare_glyph(unsigned glyph_code)
                 m_bounds.y1 = m_scanlines_bin.min_y();
                 m_bounds.x2 = m_scanlines_bin.max_x() + 1;
                 m_bounds.y2 = m_scanlines_bin.max_y() + 1;
-                m_data_size = m_scanlines_bin.byte_size(); 
+                m_data_size = m_scanlines_bin.byte_size();
                 m_data_type = glyph_data_mono;
                 m_advance_x = int26p6_to_dbl(m_cur_face->glyph->advance.x);
                 m_advance_y = int26p6_to_dbl(m_cur_face->glyph->advance.y);
@@ -921,9 +921,9 @@ bool font_engine_freetype_base::prepare_glyph(unsigned glyph_code)
             m_last_error = FT_Render_Glyph(m_cur_face->glyph, FT_RENDER_MODE_NORMAL);
             if(m_last_error == 0)
             {
-                decompose_ft_bitmap_gray8(m_cur_face->glyph->bitmap, 
+                decompose_ft_bitmap_gray8(m_cur_face->glyph->bitmap,
                                             m_cur_face->glyph->bitmap_left,
-                                            m_flip_y ? -m_cur_face->glyph->bitmap_top : 
+                                            m_flip_y ? -m_cur_face->glyph->bitmap_top :
                                                         m_cur_face->glyph->bitmap_top,
                                             m_flip_y,
                                             m_rasterizer,
@@ -933,7 +933,7 @@ bool font_engine_freetype_base::prepare_glyph(unsigned glyph_code)
                 m_bounds.y1 = m_scanlines_aa.min_y();
                 m_bounds.x2 = m_scanlines_aa.max_x() + 1;
                 m_bounds.y2 = m_scanlines_aa.max_y() + 1;
-                m_data_size = m_scanlines_aa.byte_size(); 
+                m_data_size = m_scanlines_aa.byte_size();
                 m_data_type = glyph_data_gray8;
                 m_advance_x = int26p6_to_dbl(m_cur_face->glyph->advance.x);
                 m_advance_y = int26p6_to_dbl(m_cur_face->glyph->advance.y);
@@ -949,7 +949,7 @@ bool font_engine_freetype_base::prepare_glyph(unsigned glyph_code)
                 {
                     m_path32.remove_all();
                     if(decompose_ft_outline(m_cur_face->glyph->outline,
-                                            m_flip_y, 
+                                            m_flip_y,
                                             m_affine,
                                             m_path32))
                     {
@@ -970,7 +970,7 @@ bool font_engine_freetype_base::prepare_glyph(unsigned glyph_code)
                 {
                     m_path16.remove_all();
                     if(decompose_ft_outline(m_cur_face->glyph->outline,
-                                            m_flip_y, 
+                                            m_flip_y,
                                             m_affine,
                                             m_path16))
                     {
@@ -998,7 +998,7 @@ bool font_engine_freetype_base::prepare_glyph(unsigned glyph_code)
                 {
                     m_path32.remove_all();
                     decompose_ft_outline(m_cur_face->glyph->outline,
-                                            m_flip_y, 
+                                            m_flip_y,
                                             m_affine,
                                             m_path32);
                     m_rasterizer.add_path(m_curves32);
@@ -1007,18 +1007,18 @@ bool font_engine_freetype_base::prepare_glyph(unsigned glyph_code)
                 {
                     m_path16.remove_all();
                     decompose_ft_outline(m_cur_face->glyph->outline,
-                                            m_flip_y, 
+                                            m_flip_y,
                                             m_affine,
                                             m_path16);
                     m_rasterizer.add_path(m_curves16);
                 }
-                m_scanlines_bin.prepare(); // Remove all 
+                m_scanlines_bin.prepare(); // Remove all
                 render_scanlines(m_rasterizer, m_scanline_bin, m_scanlines_bin);
                 m_bounds.x1 = m_scanlines_bin.min_x();
                 m_bounds.y1 = m_scanlines_bin.min_y();
                 m_bounds.x2 = m_scanlines_bin.max_x() + 1;
                 m_bounds.y2 = m_scanlines_bin.max_y() + 1;
-                m_data_size = m_scanlines_bin.byte_size(); 
+                m_data_size = m_scanlines_bin.byte_size();
                 m_data_type = glyph_data_mono;
                 m_advance_x = int26p6_to_dbl(m_cur_face->glyph->advance.x);
                 m_advance_y = int26p6_to_dbl(m_cur_face->glyph->advance.y);
@@ -1036,7 +1036,7 @@ bool font_engine_freetype_base::prepare_glyph(unsigned glyph_code)
                 {
                     m_path32.remove_all();
                     decompose_ft_outline(m_cur_face->glyph->outline,
-                                            m_flip_y, 
+                                            m_flip_y,
                                             m_affine,
                                             m_path32);
                     m_rasterizer.add_path(m_curves32);
@@ -1045,18 +1045,18 @@ bool font_engine_freetype_base::prepare_glyph(unsigned glyph_code)
                 {
                     m_path16.remove_all();
                     decompose_ft_outline(m_cur_face->glyph->outline,
-                                            m_flip_y, 
+                                            m_flip_y,
                                             m_affine,
                                             m_path16);
                     m_rasterizer.add_path(m_curves16);
                 }
-                m_scanlines_aa.prepare(); // Remove all 
+                m_scanlines_aa.prepare(); // Remove all
                 render_scanlines(m_rasterizer, m_scanline_aa, m_scanlines_aa);
                 m_bounds.x1 = m_scanlines_aa.min_x();
                 m_bounds.y1 = m_scanlines_aa.min_y();
                 m_bounds.x2 = m_scanlines_aa.max_x() + 1;
                 m_bounds.y2 = m_scanlines_aa.max_y() + 1;
-                m_data_size = m_scanlines_aa.byte_size(); 
+                m_data_size = m_scanlines_aa.byte_size();
                 m_data_type = glyph_data_gray8;
                 m_advance_x = int26p6_to_dbl(m_cur_face->glyph->advance.x);
                 m_advance_y = int26p6_to_dbl(m_cur_face->glyph->advance.y);
@@ -1079,7 +1079,7 @@ void font_engine_freetype_base::write_glyph_to(int8u* data) const
         default: return;
         case glyph_data_mono:    m_scanlines_bin.serialize(data); break;
         case glyph_data_gray8:   m_scanlines_aa.serialize(data);  break;
-        case glyph_data_outline: 
+        case glyph_data_outline:
             if(m_flag32)
             {
                 m_path32.serialize(data);

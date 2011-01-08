@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -25,7 +25,7 @@
 #include "lomse_injectors.h"
 #include "lomse_vertex_source.h"
 #include "agg_color_rgba.h"     //rgba & rgba8
-#include "agg_math_stroke.h"    //line_cap_e & line_join_e 
+#include "agg_math_stroke.h"    //line_cap_e & line_join_e
 #include "agg_trans_affine.h"   //trans_affine
 
 #include <string>
@@ -110,7 +110,7 @@ struct RenderOptions
 
 //---------------------------------------------------------------------------------------
 // Drawer: Abstract class for drawers
-// A drawer is responsible for transforming drawing commands into a final 
+// A drawer is responsible for transforming drawing commands into a final
 // product (bitmap, svg file, paths, etc.)
 //
 // Implementation is in file lomse_screen_drawer.cpp
@@ -126,7 +126,7 @@ public:
     virtual ~Drawer() {}
 
     // SVG path commands
-    // http://www.w3.org/TR/SVG/paths.html#PathData 
+    // http://www.w3.org/TR/SVG/paths.html#PathData
     virtual void begin_path() = 0;                                  //SVG: <path>
     virtual void end_path() = 0;                                    //SVG: </path>
     virtual void close_subpath() = 0;                               //SVG: Z, z
@@ -143,12 +143,12 @@ public:
     virtual void cubic_bezier_rel(double x1, double y1,             //SVG: q
                                   double x, double y) = 0;
     virtual void cubic_bezier(double x, double y) = 0;              //SVG: T
-    virtual void cubic_bezier_rel(double x, double y) = 0;          //SVG: t 
+    virtual void cubic_bezier_rel(double x, double y) = 0;          //SVG: t
     virtual void quadratic_bezier(double x1, double y1,             //SVG: C
-                                  double x2, double y2, 
+                                  double x2, double y2,
                                   double x, double y) = 0;
     virtual void quadratic_bezier_rel(double x1, double y1,         //SVG: c
-                                      double x2, double y2, 
+                                      double x2, double y2,
                                       double x, double y) = 0;
     virtual void quadratic_bezier(double x2, double y2,             //SVG: S
                                   double x, double y) = 0;
@@ -165,9 +165,9 @@ public:
     //virtual void polyline() = 0;                                  //SVG: <polyline>
     //virtual void polygon() = 0;                                   //SVG: <polygon>
 
-    // not the same but similar to SVG path command 
+    // not the same but similar to SVG path command
     virtual void add_path(VertexSource& vs, unsigned path_id = 0, bool solid_path = true) = 0;
-    
+
     // current font
     virtual bool select_font(const std::string& fontName, double height,
                              bool fBold=false, bool fItalic=false) = 0;
@@ -195,12 +195,12 @@ public:
     virtual void line_join(line_join_e join) = 0;
     virtual void line_cap(line_cap_e cap) = 0;
     virtual void miter_limit(double ml) = 0;
-    //virtual TransAffine& transform() = 0;
 
 
     // settings
     //-----------------------
     virtual void set_shift(LUnits x, LUnits y) = 0;
+    virtual void remove_shift() = 0;
     virtual void render(bool fillColor)= 0;
 
 

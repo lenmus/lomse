@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -73,7 +73,7 @@ namespace lomse
 //    //objects already present in the list, the entire list needs to be traversed
 //    //before doing the insertion. Therefore, the total running time for the insert
 //    //operation is O(n).
-//    
+//
 //    //wxLogMessage(_T("[lmLayer::InsertShapeInLayer] Shape %d inserted in layer %d"),
 //    //    pShape->GetID(), m_nLayerID);
 //
@@ -91,13 +91,13 @@ namespace lomse
 //        if ((*itCur)->GetOrder() < pShape->GetOrder())
 //            break;      //insertion point found
 //    }
-//    
+//
 //    //position found: insert before itCur
 //    if (itCur != m_Shapes.end())
 //        m_Shapes.insert(itCur, pShape);
 //    else
 //        m_Shapes.push_back(pShape);
-//        
+//
 //    return;
 //}
 //
@@ -132,8 +132,8 @@ namespace lomse
 // GmoBoxScorePage implementation
 //-------------------------------------------------------------------------------------
 
-GmoBoxScorePage::GmoBoxScorePage(GmoStubScore* pStub, GmoObj* owner) 
-    : GmoBox(owner, GmoObj::k_box_score_page)
+GmoBoxScorePage::GmoBoxScorePage(GmoStubScore* pStub)
+    : GmoBox(GmoObj::k_box_score_page)
 //    , m_nNumPage(nNumPage)
     , m_pStubScore(pStub)
     , m_nFirstSystem(-1)
@@ -150,9 +150,9 @@ GmoBoxScorePage::GmoBoxScorePage(GmoStubScore* pStub, GmoObj* owner)
 //    LUnits uyBottomMargin = pScore->GetMaximumY();
 //    LUnits uPageWidth = pScore->GetPaperSize().GetWidth();
 //    LUnits uPageHeight = pScore->GetPaperSize().GetHeight();
-//	
+//
 //    m_pMarginShapes[0] =
-//        new lmShapeMargin(pScore, this, lmMARGIN_TOP, m_nNumPage, lmHORIZONTAL, 
+//        new lmShapeMargin(pScore, this, lmMARGIN_TOP, m_nNumPage, lmHORIZONTAL,
 //                          uyTopMargin, uPageWidth);
 //
 //    m_pMarginShapes[1] =
@@ -226,8 +226,7 @@ GmoBoxSystem* GmoBoxScorePage::add_system(int iSystem)  //, LUnits uxPos, LUnits
     m_nLastSystem = iSystem;
 
     //create the system
-    GmoBoxSystem* pSystem = 
-        new GmoBoxSystem(this);  //TODO, m_nNumPage, iSystem, uxPos, uyPos, fFirstOfPage);
+    GmoBoxSystem* pSystem = new GmoBoxSystem();  //TODO, m_nNumPage, iSystem, uxPos, uyPos, fFirstOfPage);
     add_child_box(pSystem);
 
     return pSystem;
@@ -314,12 +313,12 @@ GmoBoxSystem* GmoBoxScorePage::get_system(int iSystem)
 //
 //void GmoBoxScorePage::OnNeedToDrawHandlers(lmGMObject* pGMO)
 //{
-//    //This method is invoked by objects contained in this BoxPage. 
+//    //This method is invoked by objects contained in this BoxPage.
 //    //Handlers are not rendered during shapes renderization. Instead, if
 //    //during renderization and object has the need to draw handlers (for instance,
 //    //if the object is selected) if MUST inform its parent BoxPage by invoking this
 //    //method. BoxPage mantains a list of objects having requested to draw handlers
-//    //and, when appropriate, it will invoke method DrawHandlers for those objects, 
+//    //and, when appropriate, it will invoke method DrawHandlers for those objects,
 //    //so that they can do it.
 //
 //    m_GMObjsWithHandlers.push_back(pGMO);

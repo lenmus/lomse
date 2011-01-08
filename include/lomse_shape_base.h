@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -100,6 +100,61 @@ namespace lomse
 
 
 
+// enums for common values: aligment, justification, placement, etc.
+//---------------------------------------------------------------------------------------
+
+//line styles
+enum ELineStyle { k_line_none=0, k_line_solid, k_line_long_dash,
+                  k_line_short_dash, k_line_dot, k_line_dot_dash, };
+
+//line termination styles
+enum ELineCap { k_cap_none = 0, k_cap_arrowhead, k_cap_arrowtail,
+                k_cap_circle, k_cap_square, k_cap_diamond, };
+
+//line edges
+enum ELineEdge
+{
+    k_edge_normal = 0,        // edge is perpendicular to line
+    k_edge_vertical,          // edge is always a vertical line
+    k_edge_horizontal         // edge is always a horizontal line
+};
+
+
+//---------------------------------------------------------------------------------------
+//EVAlign is used to indicate vertical alignment within a block: to the top,
+//middle or bottom
+enum EVAlign
+{
+    k_valign_default = 0,   //alignment is not specified
+    k_valign_top,
+    k_valign_middle,
+    k_valign_bottom,
+};
+
+//---------------------------------------------------------------------------------------
+// EHAlign is used to indicate object justification
+enum EHAlign
+{
+    k_halign_default = 0,   //alignment is not specified
+    k_halign_left,          //object aligned on left side
+    k_halign_right,         //object aligned on right side
+    k_halign_justify,       //object justified on both sides
+    k_halign_center,        //object centered
+};
+
+//---------------------------------------------------------------------------------------
+// EPlacement indicates whether something is above or below another element,
+// such as a note or a notation.
+enum EPlacement
+{
+    k_placement_default = 0,
+    k_placement_above,
+    k_placement_below
+};
+
+
+
+
 //---------------------------------------------------------------------------------------
 class GmoSimpleShape : public GmoShape
 {
@@ -115,7 +170,7 @@ public:
  //   virtual UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos) { return uPos; };
 
 protected:
-    GmoSimpleShape(GmoObj* owner, int objtype, Color color);
+    GmoSimpleShape(int objtype, int idx, Color color);
     //GmoSimpleShape(lmEGMOType m_nType, lmScoreObj* pOwner, int nOwnerIdx,
     //              wxString sName=_T("SimpleShape"),
 				//  bool fDraggable = true, bool fSelectable = true,
@@ -130,21 +185,21 @@ class GmoCompositeShape : public GmoShape
 protected:
 	//bool					m_fDoingShift;	//semaphore to avoid recomputing constantly the bounds
  //   bool					m_fGrouped;		//its component shapes must be rendered as a single object
-	//std::vector<GmoShape*>	m_Components;	//list of its constituent shapes
+	std::vector<GmoShape*>	m_Components;	//list of its constituent shapes
 
 public:
     virtual ~GmoCompositeShape();
 
  //   //dealing with components
- //   virtual int Add(GmoShape* pShape);
+    virtual int add(GmoShape* pShape);
 	//inline int GetNumComponents() const { return (int)m_Components.size(); }
 	//virtual void RecomputeBounds();
 
  //   //virtual methods from base class
  //   virtual wxString Dump(int nIndent);
- //   virtual void Shift(LUnits xIncr, LUnits yIncr);
-	//virtual void Render(lmPaper* pPaper, wxColour color);
- //   virtual void RenderHighlighted(wxDC* pDC, wxColour colorC);
+    virtual void shift_origin(USize& shift);
+    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+//   virtual void RenderHighlighted(wxDC* pDC, wxColour colorC);
  //   virtual void RenderWithHandlers(lmPaper* pPaper);
 
 	////overrides
@@ -156,9 +211,12 @@ public:
  //   virtual wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
  //   virtual UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos);
 
+    //for unit tests
+    inline std::vector<GmoShape*>& get_components() { return m_Components; }
+
 
 protected:
-    GmoCompositeShape(GmoObj* owner, int objtype, Color color);
+    GmoCompositeShape(int objtype, int idx, Color color);
     //GmoCompositeShape(lmScoreObj* pOwner, int nOwnerIdx, wxColour color = *wxBLACK,
     //                 wxString sName = _T("CompositeShape"), bool fDraggable = false,
     //                 lmEGMOType nType = eGMO_ShapeComposite, bool fVisible = true);

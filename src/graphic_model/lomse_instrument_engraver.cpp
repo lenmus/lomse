@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -156,7 +156,7 @@ void InstrumentEngraver::add_brace_bracket(GmoBox* pBox)
 
         GmoShape* pShape;
 //        if (nSymbol == lm_eBracket)
-            pShape = new GmoShapeBracket(pBox, xLeft, yTop, xRight, yBottom, Color(0,0,0));
+            pShape = new GmoShapeBracket(0, xLeft, yTop, xRight, yBottom, Color(0,0,0));
 //        else
 //        {
 //            LUnits dyHook = tenths_to_logical(6.0f);
@@ -173,6 +173,8 @@ void InstrumentEngraver::add_staff_lines(GmoBoxSystem* pBox, LUnits x, LUnits y,
 {
  //   bool fVisible = !HideStaffLines();
     m_stavesLeft = x + indent;
+    LUnits width = pBox->get_content_width() - indent;
+
     m_stavesTop = y;
     for (int iStaff=0; iStaff < m_pInstr->get_num_staves(); iStaff++)
 	{
@@ -180,8 +182,8 @@ void InstrumentEngraver::add_staff_lines(GmoBoxSystem* pBox, LUnits x, LUnits y,
         if (iStaff > 0)
             y += pStaff->get_staff_margin();
         m_staffTop[iStaff] = y;
-        GmoShapeStaff* pShape 
-            = new GmoShapeStaff(pBox, pStaff, iStaff, indent, Color(0,0,0));
+        GmoShapeStaff* pShape
+            = new GmoShapeStaff(iStaff, pStaff, iStaff, width, Color(0,0,0));
         pShape->set_origin(m_stavesLeft, y);
         pBox->add_staff_shape(pShape);
  //       pShape->SetVisible(fVisible);

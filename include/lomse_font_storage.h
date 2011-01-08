@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,14 +12,14 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
 //  -------------------------
 //  Credits:
 //  This file is based on Anti-Grain Geometry version 2.4 examples' code.
-//  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev 
+//  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev
 //  (http://www.antigrain.com). AGG 2.4 is distributed under BSD license.
 //
 //---------------------------------------------------------------------------------------
@@ -93,27 +93,27 @@ public:
 
     //transitional. For Calligrapher
     inline const lomse::glyph_cache* get_glyph_cache(unsigned int nChar) {
-        return m_fontCacheManager.glyph(nChar); 
+        return m_fontCacheManager.glyph(nChar);
     }
     inline void add_kerning(double* x, double* y) {
         if(m_fKerning)
-            m_fontCacheManager.add_kerning(x, y); 
+            m_fontCacheManager.add_kerning(x, y);
     }
-    inline void init_adaptors(const lomse::glyph_cache* glyph, double x, double y) { 
-        m_fontCacheManager.init_embedded_adaptors(glyph, x, y); 
+    inline void init_adaptors(const lomse::glyph_cache* glyph, double x, double y) {
+        m_fontCacheManager.init_embedded_adaptors(glyph, x, y);
     }
-    inline Gray8Adaptor& get_gray8_adaptor() { 
-        return m_fontCacheManager.gray8_adaptor(); 
+    inline Gray8Adaptor& get_gray8_adaptor() {
+        return m_fontCacheManager.gray8_adaptor();
     }
-    inline Gary8Scanline& get_gray8_scanline() { 
-        return m_fontCacheManager.gray8_scanline(); 
+    inline Gary8Scanline& get_gray8_scanline() {
+        return m_fontCacheManager.gray8_scanline();
     }
     inline void set_transform(agg::trans_affine& mtx) {
         m_fontEngine.transform(mtx);
     }
 
 protected:
-    bool set_font(const std::string& fontFullName, double height, 
+    bool set_font(const std::string& fontFullName, double height,
                   EFontCacheType type = k_raster_font_cache);
 
 };

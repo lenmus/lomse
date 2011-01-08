@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -48,6 +48,7 @@ class ImoScore;
 class Drawer;
 struct RenderOptions;
 class GmoLayer;
+class SelectionSet;
 
 
 //---------------------------------------------------------------------------------------
@@ -79,6 +80,10 @@ public:
     GmoShape* find_shape_at(int iPage, LUnits x, LUnits y);
     GmoBox* find_inner_box_at(int iPage, LUnits x, LUnits y);
 
+    //selection
+    void select_objects_in_rectangle(int iPage, SelectionSet& selection,
+                                     const URect& selRect, unsigned flags=0);
+
 protected:
     void delete_stubs();
 
@@ -90,10 +95,10 @@ protected:
 class GmoObj
 {
 protected:
-    GmoObj* m_pOwnerGmo;
     int m_objtype;
     UPoint m_origin;        //Relative to DocPage, for boxes. Relative to owner box, for shapes
     USize m_size;
+    bool m_fSelected;
 
 public:
     virtual ~GmoObj();
@@ -102,9 +107,10 @@ public:
                 k_box_document=0, k_box_doc_page, k_box_doc_page_content,
                 k_box_score_page, k_box_slice, k_box_slice_instr, k_box_system,
            k_shape,
-                k_shape_brace, k_shape_bracket, k_shape_clef, k_shape_staff,
-                k_shape_text,
-    
+                k_shape_brace, k_shape_bracket, k_shape_clef, k_shape_dot,
+                k_shape_flag, k_shape_note, k_shape_notehead, k_shape_stem,
+                k_shape_staff, k_shape_text,
+
            k_stub,
                 k_stub_score,
          };
@@ -121,6 +127,11 @@ public:
     inline bool is_shape_brace() { return m_objtype == k_shape_brace; }
     inline bool is_shape_bracket() { return m_objtype == k_shape_bracket; }
     inline bool is_shape_clef() { return m_objtype == k_shape_clef; }
+    inline bool is_shape_dot() { return m_objtype == k_shape_dot; }
+    inline bool is_shape_flag() { return m_objtype == k_shape_flag; }
+    inline bool is_shape_note() { return m_objtype == k_shape_note; }
+    inline bool is_shape_notehead() { return m_objtype == k_shape_notehead; }
+    inline bool is_shape_stem() { return m_objtype == k_shape_stem; }
     inline bool is_shape_staff() { return m_objtype == k_shape_staff; }
     inline bool is_shape_text() { return m_objtype == k_shape_text; }
     inline bool is_stub_score() { return m_objtype == k_stub_score; }
@@ -145,12 +156,15 @@ public:
     //bounds
     bool bounds_contains_point(UPoint& p);
     URect get_bounds();
+    inline UPoint get_origin() { return m_origin; }
+    inline USize get_size() { return m_size; }
 
-    //info
-    inline GmoObj* get_gm_owner() { return m_pOwnerGmo; }
+    //selection
+    inline bool is_selected() { return m_fSelected; }
+    inline void set_selected(bool value) { m_fSelected = value; }
 
 protected:
-    GmoObj(GmoObj* owner, int objtype);
+    GmoObj(int objtype);
 
 };
 
@@ -158,9 +172,10 @@ protected:
 class GmoShape : public GmoObj
 {
 protected:
+    int m_idx;
     int m_layer;
 	Color m_color;
-	GmoBox* m_pOwnerBox;	//box in which this shape is included
+	//GmoBox* m_pOwnerBox;	//box in which this shape is included
 
 	//bool		m_fVisible;
  //   wxWindow*   m_pMouseCursorWindow;      //to optimize mouse cursor changes
@@ -183,7 +198,7 @@ public:
     virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
     //-------------------------------------------------------------------------
-    // layer identifiers. Shapes are placed in layers. The first layer to 
+    // layer identifiers. Shapes are placed in layers. The first layer to
     // render is layer 0 (background). Then, layer 1 (staves), and so on.
     enum { k_layer_background = 0, k_layer_staff, k_layer_barlines, k_layer_notes,
            k_layer_aux_objs, k_layer_top, k_layer_user,
@@ -223,7 +238,7 @@ public:
 
 	////owners and related
 	//inline lmBox* GetOwnerBox() { return m_pOwnerBox; }
-	inline void set_owner_box(GmoBox* pBox) { m_pOwnerBox = pBox; }
+	//inline void set_owner_box(GmoBox* pBox) { m_pOwnerBox = pBox; }
 	//lmBoxSystem* GetOwnerSystem() { return m_pOwnerBox->GetOwnerSystem(); }
 
 	////for composite shapes
@@ -251,7 +266,10 @@ public:
     void shift_origin(USize& shift);
 
 protected:
-    GmoShape(GmoObj* owner, int objtype, Color color);
+    GmoShape(int objtype, int idx, Color color);
+    Color determine_color_to_use(RenderOptions& opt);
+    virtual Color get_normal_color() { return m_color; }
+
    // GmoShape(lmEGMOType m_nType, lmScoreObj* pOwner, int nOwnerIdx, wxString sName=_T("Shape"),
 			//bool fDraggable = false, bool fSelectable = false, wxColour color = *wxBLACK,
 			//bool fVisible = true);
@@ -263,12 +281,13 @@ protected:
 class GmoBox : public GmoObj
 {
 protected:
-    std::vector<GmoBox*> m_childBoxes;      //contained boxes
-	std::list<GmoShape*> m_shapes;		    //contained shapes, organised in layers
+    GmoBox* m_pParentBox;
+    std::vector<GmoBox*> m_childBoxes;
+	std::list<GmoShape*> m_shapes;		    //contained shapes
 
-    // All boxes have four margins (top, bottom, left and right) around the 
+    // All boxes have four margins (top, bottom, left and right) around the
     // box area (bounds rectangle). The margins defines a smaller rectangle
-    // (content rectangle) contained into the bounds rectangle. You can consider 
+    // (content rectangle) contained into the bounds rectangle. You can consider
     // the box as a content rectanglesorrounded blank space, defined by the margins.
     LUnits m_uTopMargin;
     LUnits m_uBottomMargin;
@@ -280,8 +299,9 @@ public:
 
     //child boxes
     inline int get_num_boxes() { return static_cast<int>( m_childBoxes.size() ); }
-    inline void add_child_box(GmoBox* child) { m_childBoxes.push_back(child); }
+    void add_child_box(GmoBox* child);
     GmoBox* get_child_box(int i);  //i = 0..n-1
+    void set_owner_box(GmoBox* pBox) { m_pParentBox = pBox; };
 
     //contained shapes
     inline int get_num_shapes() { return static_cast<int>( m_shapes.size() ); }
@@ -311,12 +331,12 @@ public:
     GmoBox* find_inner_box_at(LUnits x, LUnits y);
 
 protected:
-    GmoBox(GmoObj* owner, int objtype);
+    GmoBox(int objtype);
     void shift_origin(USize& shift);
     void delete_boxes();
     void delete_shapes();
     GmoBoxDocPage* get_parent_box_page();
-    GmoBox* get_parent_box() { return dynamic_cast<GmoBox*>(m_pOwnerGmo); }
+    GmoBox* get_parent_box() { return m_pParentBox; }   //dynamic_cast<GmoBox*>(m_pOwnerGmo); }
     bool must_draw_bounds(RenderOptions& opt);
     Color get_box_color();
     void draw_box_bounds(Drawer* pDrawer, double xorg, double yorg, Color& color);
@@ -346,7 +366,7 @@ protected:
 
 public:
     GmoBoxDocument();
-    ~GmoBoxDocument() {}
+    virtual ~GmoBoxDocument() {}
 
     //doc pages
     GmoBoxDocPage* add_new_page();
@@ -365,8 +385,8 @@ protected:
     std::list<GmoShape*> m_allShapes;		//contained shapes, ordered by creation order
 
 public:
-    GmoBoxDocPage(GmoObj* owner);
-    ~GmoBoxDocPage() {}
+    GmoBoxDocPage();
+    virtual ~GmoBoxDocPage() {}
 
     //page number
     inline void set_number(int num) { m_numPage = num; }
@@ -378,12 +398,14 @@ public:
     //shapes
     void store_shape(GmoShape* pShape, int layer);
     GmoShape* get_first_shape_for_layer(int order);
-    GmoShape* get_shape_in_box(GmoBox* pBox, int order);
 
     //hit testing
     GmoObj* hit_test(LUnits x, LUnits y);
     GmoShape* find_shape_at(LUnits x, LUnits y);
 
+    //selection
+    void select_objects_in_rectangle(SelectionSet& selection, const URect& selRect,
+                                     unsigned flags=0);
 
 protected:
     void draw_page_background(Drawer* pDrawer, RenderOptions& opt);
@@ -395,8 +417,8 @@ class GmoBoxDocPageContent : public GmoBox
 protected:
 
 public:
-    GmoBoxDocPageContent(GmoObj* owner);
-    ~GmoBoxDocPageContent() {}
+    GmoBoxDocPageContent();
+    virtual ~GmoBoxDocPageContent() {}
 
 };
 
@@ -419,27 +441,27 @@ protected:
 //    std::vector<lmGMObject*>    m_GMObjsWithHandlers;
 //
 //	//list of active handlers contained within this page
-//    std::list<lmHandler*>       m_ActiveHandlers;  
+//    std::list<lmHandler*>       m_ActiveHandlers;
 //
 //    //layers and shapes
 //	std::list<lmLayer*>	    m_Layers;		//contained shapes, ordered by layer
 
 public:
-    GmoBoxScorePage(GmoStubScore* pStub, GmoObj* owner);
-    ~GmoBoxScorePage();
+    GmoBoxScorePage(GmoStubScore* pStub);
+    virtual ~GmoBoxScorePage();
 
 	//systems
     GmoBoxSystem* add_system(int iSystem);  //, LUnits uxPos, LUnits uyPos);
 //    inline int get_num_first_system() const { return m_nFirstSystem; }
     inline int get_num_last_system() const { return m_nLastSystem; }
-    inline int get_num_systems() { 
+    inline int get_num_systems() {
         return (m_nFirstSystem == -1 ? 0 : m_nLastSystem - m_nFirstSystem + 1);
     }
 	GmoBoxSystem* get_system(int iSystem);		//nSystem = 0..n-1
 //	int GetSystemNumber(GmoBoxSystem* pSystem);
 //
 	////operations
- //   void on_draw(Drawer* pDrawer, RenderOptions& opt); 
+ //   void on_draw(Drawer* pDrawer, RenderOptions& opt);
 //    void RenderWithHandlers(lmPaper* pPaper);
 //    void DrawAllHandlers(lmPaper* pPaper);
 //    void OnNeedToDrawHandlers(lmGMObject* pGMO);
@@ -489,11 +511,11 @@ protected:
 
 public:
     GmoStubScore(ImoScore* pScore);
-    ~GmoStubScore();
+    virtual ~GmoStubScore();
 
     void add_page(GmoBoxScorePage* pPage);
 //    void RenderPage(int nPage, lmPaper* pPaper, wxWindow* pRenderWindow,
-//                    wxPoint& vOffset); 
+//                    wxPoint& vOffset);
 //    void PopulateLayers();
 //
     // pages

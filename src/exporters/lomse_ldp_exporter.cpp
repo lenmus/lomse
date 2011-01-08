@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -555,8 +555,8 @@ std::string LdpExporter::clef_type_to_ldp(int clefType)
         "G_8",     //8 below
         "8_F4",    //8 above
         "F4_8",    //8 below
-        "15_G3",   //15 above
-        "G3_15",   //15 below
+        "15_G2",   //15 above
+        "G2_15",   //15 below
         "15_F4",   //15 above
         "F4_15",   //15 below
     };

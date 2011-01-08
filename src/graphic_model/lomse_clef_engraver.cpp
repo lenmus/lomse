@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -60,8 +60,8 @@ GmoShape* ClefEngraver::create_shape(ImoClef* pClef, GmoBoxSliceInstr* pBox,
         yPos += tenths_to_logical(get_glyph_offset(), lineSpacing);
 
         //create the shape object
-        int nIdx = 0;   //TODO
-        pShape = new GmoShapeClef(pBox, nIdx, m_iGlyph, UPoint(uPos.x, yPos),
+        int nIdx = 0;   //single-shape
+        pShape = new GmoShapeClef(nIdx, m_iGlyph, UPoint(uPos.x, yPos),
                                   m_fSmallClef, Color(0,0,0), m_libraryScope);
     }
 
@@ -76,7 +76,7 @@ int ClefEngraver::find_glyph()
 
     switch (m_nClefType)
     {
-        case ImoClef::k_G3: return k_glyph_g_clef;
+        case ImoClef::k_G2: return k_glyph_g_clef;
         case ImoClef::k_F4: return k_glyph_f_clef;
         case ImoClef::k_F3: return k_glyph_f_clef;
         case ImoClef::k_C1: return k_glyph_c_clef;
@@ -87,12 +87,12 @@ int ClefEngraver::find_glyph()
         case ImoClef::k_C5: return k_glyph_c_clef;
         case ImoClef::k_F5: return k_glyph_f_clef;
         case ImoClef::k_G1: return k_glyph_g_clef;
-        case ImoClef::k_8_G3: return k_glyph_g_clef;        //8 above
-        case ImoClef::k_G3_8: return k_glyph_g_clef;        //8 below
+        case ImoClef::k_8_G2: return k_glyph_g_clef;        //8 above
+        case ImoClef::k_G2_8: return k_glyph_g_clef;        //8 below
         case ImoClef::k_8_F4: return k_glyph_f_clef;        //8 above
         case ImoClef::k_F4_8: return k_glyph_f_clef;        //8 below
-        case ImoClef::k_15_G3: return k_glyph_g_clef;       //15 above
-        case ImoClef::k_G3_15: return k_glyph_g_clef;       //15 below
+        case ImoClef::k_15_G2: return k_glyph_g_clef;       //15 above
+        case ImoClef::k_G2_15: return k_glyph_g_clef;       //15 below
         case ImoClef::k_15_F4: return k_glyph_f_clef;       //15 above
         case ImoClef::k_F4_15: return k_glyph_f_clef;       //15 below
         case ImoClef::k_Percussion: return k_glyph_percussion_clef_block;
@@ -114,9 +114,9 @@ Tenths ClefEngraver::get_glyph_offset()
     {
         switch(m_nClefType)
         {
-            case ImoClef::k_G3:     return yOffset;
-            case ImoClef::k_8_G3:   return yOffset;         //8 above
-            case ImoClef::k_G3_8:   return yOffset;         //8 below
+            case ImoClef::k_G2:     return yOffset;
+            case ImoClef::k_8_G2:   return yOffset;         //8 above
+            case ImoClef::k_G2_8:   return yOffset;         //8 below
             case ImoClef::k_F4:     return yOffset - 7.0f;
             case ImoClef::k_F3:     return yOffset + 3.0f;
             case ImoClef::k_C1:     return yOffset + 16.0f;
@@ -128,8 +128,8 @@ Tenths ClefEngraver::get_glyph_offset()
             case ImoClef::k_G1:     return yOffset;
             case ImoClef::k_8_F4:   return yOffset - 7.0f;  //8 above
             case ImoClef::k_F4_8:   return yOffset - 7.0f;  //8 below
-            case ImoClef::k_15_G3:  return yOffset;         //15 above
-            case ImoClef::k_G3_15:  return yOffset;         //15 below
+            case ImoClef::k_15_G2:  return yOffset;         //15 above
+            case ImoClef::k_G2_15:  return yOffset;         //15 below
             case ImoClef::k_15_F4:  return yOffset - 7.0f;  //15 above
             case ImoClef::k_F4_15:  return yOffset - 7.0f;  //15 below
             case ImoClef::k_Percussion:     return yOffset - 6.0f;
@@ -141,7 +141,7 @@ Tenths ClefEngraver::get_glyph_offset()
     {
         switch(m_nClefType)
         {
-            case ImoClef::k_G3:     return yOffset;
+            case ImoClef::k_G2:     return yOffset;
             case ImoClef::k_F4:     return yOffset;
             case ImoClef::k_F3:     return yOffset + 10.0f;
             case ImoClef::k_C1:     return yOffset + 20.0f;
@@ -151,12 +151,12 @@ Tenths ClefEngraver::get_glyph_offset()
             case ImoClef::k_C5:     return yOffset - 20.0f;
             case ImoClef::k_F5:     return yOffset - 10.0f;
             case ImoClef::k_G1:     return yOffset;
-            case ImoClef::k_8_G3:   return yOffset;     //8 above
-            case ImoClef::k_G3_8:   return yOffset;     //8 below
+            case ImoClef::k_8_G2:   return yOffset;     //8 above
+            case ImoClef::k_G2_8:   return yOffset;     //8 below
             case ImoClef::k_8_F4:   return yOffset;     //8 above
             case ImoClef::k_F4_8:   return yOffset;     //8 below
-            case ImoClef::k_15_G3:  return yOffset;     //15 above
-            case ImoClef::k_G3_15:  return yOffset;     //15 below
+            case ImoClef::k_15_G2:  return yOffset;     //15 above
+            case ImoClef::k_G2_15:  return yOffset;     //15 below
             case ImoClef::k_15_F4:  return yOffset;     //15 above
             case ImoClef::k_F4_15:  return yOffset;     //15 below
             case ImoClef::k_Percussion:     return yOffset - 1.0f;

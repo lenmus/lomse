@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -33,10 +33,9 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-GmoBoxSlice::GmoBoxSlice(GmoBoxSystem* pParent, int nAbsMeasure)    //, int nNumInSystem,
+GmoBoxSlice::GmoBoxSlice(int nAbsMeasure)    //, int nNumInSystem,
 					     //LUnits xStart, LUnits xEnd)
-    : GmoBox(pParent, GmoBox::k_box_slice)
-    , m_pBoxSystem(pParent)
+    : GmoBox(GmoBox::k_box_slice)
 //    , m_nAbsMeasure(nAbsMeasure)
 //	, m_nNumInSystem(nNumInSystem)
 //    , m_xStart(xStart)
@@ -52,10 +51,15 @@ GmoBoxSlice::~GmoBoxSlice()
 //        delete m_pGridTable;
 }
 
+GmoBoxSystem* GmoBoxSlice::get_system_box()
+{
+    return dynamic_cast<GmoBoxSystem*>(m_pParentBox);
+}
+
 //--------------------------------------------------------------------------------------
 GmoBoxSliceInstr* GmoBoxSlice::add_box_for_instrument(ImoInstrument* pInstr)
 {
-    GmoBoxSliceInstr* pBox = new GmoBoxSliceInstr(this);    //, pInstr);
+    GmoBoxSliceInstr* pBox = new GmoBoxSliceInstr();    //, pInstr);
     add_child_box(pBox);
     return pBox;
 }
@@ -64,11 +68,11 @@ GmoBoxSliceInstr* GmoBoxSlice::add_box_for_instrument(ImoInstrument* pInstr)
 //void GmoBoxSlice::DrawSelRectangle(lmPaper* pPaper)
 //{
 //	//draw system border in red
-//	m_pBoxSystem->DrawBounds(pPaper, *wxRED);
+//	get_system_box()->DrawBounds(pPaper, *wxRED);
 //
 //    //draw a border around slice region in cyan
-//	LUnits yTop = m_pBoxSystem->GetYTop();
-//    LUnits yBottom = m_pBoxSystem->GetYBottom();
+//	LUnits yTop = get_system_box()->GetYTop();
+//    LUnits yBottom = get_system_box()->GetYBottom();
 //
 //    pPaper->SketchRectangle(lmUPoint(m_xStart, yTop),
 //                            lmUSize(m_xEnd - m_xStart, yBottom - yTop),
@@ -78,25 +82,25 @@ GmoBoxSliceInstr* GmoBoxSlice::add_box_for_instrument(ImoInstrument* pInstr)
 //
 ////--------------------------------------------------------------------------------------
 //int GmoBoxSlice::GetPageNumber() const
-//{ 
-//	return m_pBoxSystem->GetPageNumber(); 
+//{
+//	return get_system_box()->GetPageNumber();
 //}
 //
 ////--------------------------------------------------------------------------------------
-//GmoBoxScore* GmoBoxSlice::GetOwnerBoxScore() 
-//{ 
-//    return m_pBoxSystem->GetOwnerBoxScore(); 
+//GmoBoxScore* GmoBoxSlice::GetOwnerBoxScore()
+//{
+//    return get_system_box()->GetOwnerBoxScore();
 //}
 //
 ////--------------------------------------------------------------------------------------
 //GmoBoxPage* GmoBoxSlice::GetOwnerBoxPage()
-//{ 
-//    return m_pBoxSystem->GetOwnerBoxPage(); 
+//{
+//    return get_system_box()->GetOwnerBoxPage();
 //}
 //
 ////--------------------------------------------------------------------------------------
-//void GmoBoxSlice::SetBottomSpace(LUnits uyValue) 
-//{ 
+//void GmoBoxSlice::SetBottomSpace(LUnits uyValue)
+//{
 //    //overrided. To propagate bottom space to last instrument
 //
 //    m_uBottomSpace = uyValue;

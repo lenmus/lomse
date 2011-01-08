@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -185,7 +185,7 @@ protected:
 	int     m_line;		        //line (0..n-1)
 	int     m_nInstr;		    //instrument (1..n)
 	int     m_nVoice;		    //voice (1..n) [ = m_line + 1 ]
-    LUnits  m_uxLineStart;      //initial position      
+    LUnits  m_uxLineStart;      //initial position
     LUnits  m_uInitialSpace;    //space at beginning
 
 public:
@@ -238,9 +238,9 @@ public:
 //protected:
 //    ColumnStorage*    m_pColStorage;
 //
-//public: 
+//public:
 //    DirtyFlagsCleaner(ColumnStorage* pColStorage);
-//    
+//
 //    void ClearDirtyFlags();
 //};
 
@@ -331,7 +331,7 @@ public:
     inline void set_initial_space(LUnits uSpace) { m_uInitialSpace = uSpace; }
 
     //methods to build the lines
-    //void start_measurements_for_instrument(int iInstr, LUnits uxStart, 
+    //void start_measurements_for_instrument(int iInstr, LUnits uxStart,
     //                                       ImoInstrument* pInstr, LUnits uSpace);
     void close_line(ImoStaffObj* pSO, GmoShape* pShape, LUnits xStart, float rTime);
     void include_object(int iLine, int iInstr, ImoInstrument* pInstr, ImoStaffObj* pSO,
@@ -343,7 +343,7 @@ protected:
     //int decide_voice_to_use(ImoStaffObj* pSO, int nStaff);
     void start_line(int line, int instr);
     //void start_line_inherit_initial_postion_and_space(int line, int instr, int voice);
-    //void create_lines_for_each_staff(int nInstr, LUnits uxStart, 
+    //void create_lines_for_each_staff(int nInstr, LUnits uxStart,
     //                                 ImoInstrument* pInstr, LUnits uSpace);
 
     inline bool is_there_current_line() { return m_itCurLine != m_pColStorage->end(); }
@@ -385,7 +385,7 @@ public:
     inline LUnits get_minimum_size() { return m_uMinColumnSize; }
 
     //methods for spacing
-	LUnits tenths_to_logical(Tenths value, int staff); 
+	LUnits tenths_to_logical(Tenths value, int staff);
     inline bool is_proportional_spacing() { return m_nSpacingMethod == k_spacing_proportional; }
     inline Tenths get_fixed_spacing_value() const { return m_rSpacingValue; }
 
@@ -413,7 +413,7 @@ private:
 
 
 //---------------------------------------------------------------------------------------
-//BreakPoints: 
+//BreakPoints:
 //  encloses the algorithm to determine optimum break points to split a column
 //---------------------------------------------------------------------------------------
 class BreakPoints
@@ -463,7 +463,7 @@ public:
         //Collecting measurements
 
     //caller informs that all data for this system has been suplied
-    void end_of_system_measurements();             
+    void end_of_system_measurements();
 
     //caller ask to prepare for receiving data about column iCol [0..n-1] for
     //the given instrument
@@ -473,12 +473,12 @@ public:
     void include_object(int iCol, int iLine, int iInstr, ImoInstrument* pInstr,
                         ImoStaffObj* pSO, float rTime, bool fProlog, int nStaff,
                         GmoShape* pShape);
-    //caller sends lasts object to store in column iCol [0..n-1]. 
+    //caller sends lasts object to store in column iCol [0..n-1].
     void include_barline_and_terminate_bar_measurements(int iCol, ImoStaffObj* pSO,
                                                         GmoShape* pShape, LUnits xStart,
                                                         float rTime);
 
-    //caller informs that there are no barline and no more objects in column iCol [0..n-1]. 
+    //caller informs that there are no barline and no more objects in column iCol [0..n-1].
     void terminate_bar_measurements_without_barline(int iCol, LUnits xStart, float rTime);
 
     //caller request to ignore measurements for column iCol [0..n-1]
@@ -518,7 +518,7 @@ public:
 
 //---------------------------------------------------------------------------------------
 //ColumnSplitter:
-//  Algorithm to determine optimum break points to split a column 
+//  Algorithm to determine optimum break points to split a column
 //---------------------------------------------------------------------------------------
 class ColumnSplitter
 {
@@ -586,7 +586,7 @@ public:
     void process_timed_at_current_timepos(LUnits uxPos);
 	inline bool current_time_is(float rTime) { return m_rCurTime == rTime; }
     inline bool are_there_timed_objs() {
-        return m_itCur != m_pTable->end() 
+        return m_itCur != m_pTable->end()
                && is_equal_time((*m_itCur)->get_timepos(), m_rCurTime);
     }
     inline bool are_there_more_objects() { return (m_itCur != m_pTable->end()); }

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -135,7 +135,7 @@ void DocLayouter::add_footers_to_page(GmoBoxDocPage* pPage)
 //---------------------------------------------------------------------------------------
 void DocLayouter::add_contents_wrapper_box_to_page(GmoBoxDocPage* pPage)
 {
-    m_pCurrentBox = new GmoBoxDocPageContent(pPage);
+    m_pCurrentBox = new GmoBoxDocPageContent();
     pPage->add_child_box(m_pCurrentBox);
     m_pCurrentBox->set_origin(m_pageCursor.x, m_pageCursor.y);
     m_pCurrentBox->set_width(m_availableWidth);
@@ -184,7 +184,6 @@ void DocLayouter::layout_item(GmoBox* pParentBox, ImoDocObj* pItem)
     while (!pLayouter->is_item_layouted())
     {
         GmoBox* pPageBox = create_item_pagebox(pParentBox, pLayouter);
-        pParentBox->add_child_box(pPageBox);
         pLayouter->layout_in_page(pPageBox);
         //prepare_next_document_page_if_needed();
     }
@@ -218,8 +217,8 @@ ContentLayouter* DocLayouter::new_item_layouter(ImoDocObj* pImo)
 }
 
 //---------------------------------------------------------------------------------------
-ImoDocument* DocLayouter::get_document() 
-{ 
+ImoDocument* DocLayouter::get_document()
+{
     return dynamic_cast<ImoDocument*>( m_pIModel->get_root() );
 }
 

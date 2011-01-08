@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -58,8 +58,8 @@ public:
 //	UPoint GetObjectOrigin();
 
 protected:
-    GmoShapeGlyph(GmoBox* owner, int type, int nShapeIdx, unsigned int nGlyph,
-                  UPoint pos, Color color, LibraryScope& libraryScope);
+    GmoShapeGlyph(int type, int nShapeIdx, unsigned int nGlyph, UPoint pos,
+                  Color color, LibraryScope& libraryScope);
 
 //    wxBitmap* GetBitmapFromShape(double rScale, Color colorF, Color colorB = *wxWHITE);
 //    virtual double GetPointSize();
@@ -70,8 +70,8 @@ protected:
 class GmoShapeClef : public GmoShapeGlyph
 {
 public:
-    GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos, bool fSmallClef,
-                 Color color, LibraryScope& libraryScope);
+    GmoShapeClef(int nShapeIdx, int nGlyph, UPoint pos, bool fSmallClef, Color color,
+                 LibraryScope& libraryScope);
     ~GmoShapeClef() {}
 
 //	//overrides
@@ -83,35 +83,34 @@ public:
 //    bool        m_fSmallClef;
 };
 
-////---------------------------------------------------------------------------------------
-//class GmoShapeSimpleLine : public GmoSimpleShape
-//{
-//public:
-//    GmoShapeSimpleLine(GmoBox* owner, LUnits xStart, LUnits yStart,
-//                LUnits xEnd, LUnits yEnd, LUnits uWidth,
-//				LUnits uBoundsExtraWidth, Color nColor, wxString sName = _T("Line"),
-//				ELineEdges nEdge = lm_eEdgeNormal);
-//    ~GmoShapeSimpleLine() {}
-//
-//    //implementation of virtual methods from base class
-//    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+//---------------------------------------------------------------------------------------
+class GmoShapeSimpleLine : public GmoSimpleShape
+{
+protected:
+    LUnits		m_xStart, m_yStart;
+    LUnits		m_xEnd, m_yEnd;
+    LUnits		m_uWidth;
+	LUnits		m_uBoundsExtraWidth;
+	ELineEdge	m_nEdge;
+
+public:
+    virtual ~GmoShapeSimpleLine() {}
+
+    //implementation of virtual methods from base class
+    void on_draw(Drawer* pDrawer, RenderOptions& opt);
 //    wxString Dump(int nIndent);
 //    void Shift(LUnits xIncr, LUnits yIncr);
-//
-//protected:
-//	void Create(LUnits xStart, LUnits yStart, LUnits xEnd, LUnits yEnd,
-//				LUnits uWidth, LUnits uBoundsExtraWidth, Color nColor,
-//				ELineEdges nEdge);
-//
-//
-//    LUnits		m_xStart, m_yStart;
-//    LUnits		m_xEnd, m_yEnd;
-//    LUnits		m_uWidth;
-//	LUnits		m_uBoundsExtraWidth;
-//	ELineEdges	m_nEdge;
-//
-//};
-//
+
+protected:
+    GmoShapeSimpleLine(int type, LUnits xStart, LUnits yStart, LUnits xEnd, LUnits yEnd,
+                       LUnits uWidth, LUnits uBoundsExtraWidth, Color color,
+                       ELineEdge nEdge = k_edge_normal);
+    void set_new_values(LUnits xStart, LUnits yStart, LUnits xEnd, LUnits yEnd,
+                        LUnits uWidth, LUnits uBoundsExtraWidth,
+                        Color color, ELineEdge nEdge);
+
+};
+
 ////---------------------------------------------------------------------------------------
 //class GmoShapeRectangle : public GmoSimpleShape
 //{
@@ -217,30 +216,30 @@ public:
 //
 //
 //};
-//
-////---------------------------------------------------------------------------------------
-//class GmoShapeStem : public GmoShapeSimpleLine
-//{
-//public:
-//    GmoShapeStem(GmoBox* owner, LUnits xPos, LUnits yStart, LUnits uExtraLength,
-//                LUnits yEnd, bool fStemDown, LUnits uWidth, Color nColor);
-//    ~GmoShapeStem() {}
-//
+
+//---------------------------------------------------------------------------------------
+class GmoShapeStem : public GmoShapeSimpleLine
+{
+private:
+	bool m_fStemDown;
+    LUnits m_uExtraLength;
+
+public:
+    GmoShapeStem(LUnits xPos, LUnits yStart, LUnits uExtraLength,
+                 LUnits yEnd, bool fStemDown, LUnits uWidth, Color color);
+    ~GmoShapeStem() {}
+
 //	//specific methods
 //	void SetLength(LUnits uLenght, bool fModifyTop);
 //	inline bool StemDown() const { return m_fStemDown; }
-//	void Adjust(LUnits xPos, LUnits yStart, LUnits yEnd, bool fStemDown);
+	void adjust(LUnits xPos, LUnits yStart, LUnits yEnd, bool fStemDown);
 //	LUnits GetYStartStem();
 //	LUnits GetYEndStem();
 //	LUnits GetXCenterStem();
 //    inline LUnits GetExtraLenght() { return m_uExtraLength; }
-//
-//private:
-//	bool	    m_fStemDown;
-//    LUnits    m_uExtraLength;
-//
-//};
-//
+
+};
+
 ////---------------------------------------------------------------------------------------
 //class GmoShapeFiguredBass : public lmCompositeShape
 //{
@@ -251,7 +250,7 @@ public:
 //    ~GmoShapeFiguredBass() {}
 //
 //	//info about related shapes
-//    inline void OnFBLineAttached(int nLine, GmoShapeLine* pShapeFBLine) 
+//    inline void OnFBLineAttached(int nLine, GmoShapeLine* pShapeFBLine)
 //                    { m_pFBLineShape[nLine] = pShapeFBLine; }
 //
 //    //overrides

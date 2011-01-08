@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -33,10 +33,10 @@ namespace lomse
 // GmoShapeText implementation
 //---------------------------------------------------------------------------------------
 
-GmoShapeText::GmoShapeText(GmoBox* owner, const std::string& text,
+GmoShapeText::GmoShapeText(int idx, const std::string& text,
                            ImoTextStyleInfo* pStyle, LUnits x, LUnits y,
                            LibraryScope& libraryScope)
-    : GmoSimpleShape(owner, GmoObj::k_shape_text, Color(0,0,0))
+    : GmoSimpleShape(GmoObj::k_shape_text, idx, Color(0,0,0))
     , m_text(text)
     , m_pStyle(pStyle)
     , m_pFontStorage( libraryScope.font_storage() )
@@ -58,10 +58,19 @@ GmoShapeText::GmoShapeText(GmoBox* owner, const std::string& text,
 }
 
 //---------------------------------------------------------------------------------------
+Color GmoShapeText::get_normal_color()
+{
+    if (m_pStyle)
+        return m_pStyle->get_color();
+    else
+        return m_color;
+}
+
+//---------------------------------------------------------------------------------------
 void GmoShapeText::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     select_font();
-    pDrawer->set_text_color( m_pStyle->get_color() );
+    pDrawer->set_text_color( determine_color_to_use(opt) );
     LUnits x = m_origin.x;
     LUnits y = m_origin.y + m_size.height;     //reference is at text bottom
     pDrawer->draw_text(x, y, m_text);

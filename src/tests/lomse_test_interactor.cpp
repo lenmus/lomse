@@ -1,18 +1,18 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
-//  Lomse is free software; you can redistribute it and/or modify it under the 
+//  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
 //  either version 3 of the License, or (at your option) any later version.
 //
-//  Lomse is distributed in the hope that it will be useful, but WITHOUT ANY 
-//  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+//  Lomse is distributed in the hope that it will be useful, but WITHOUT ANY
+//  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//   
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -26,8 +26,10 @@
 #include "lomse_injectors.h"
 #include "lomse_presenter.h"
 #include "lomse_document.h"
-#include "lomse_view.h"
 #include "lomse_interactor.h"
+#include "lomse_graphic_view.h"
+#include "lomse_tasks.h"
+#include "lomse_shapes.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -39,6 +41,118 @@ static void my_callback_function(Notification* event)
 {
     fNotified = true;
 }
+
+
+//---------------------------------------------------------------------------------------
+//MyDoorway: Derived class to avoid platform depentent code
+class MyDoorway : public LomseDoorway
+{
+protected:
+    bool m_fUpdateWindowInvoked;
+    bool m_fSetWindowTitleInvoked;
+    std::string m_title;
+    RenderingBuffer m_buffer;
+
+public:
+    MyDoorway()
+        : LomseDoorway()
+    {
+        init_library(k_platform_win32);
+    }
+    virtual ~MyDoorway() {}
+
+    void update_window() { m_fUpdateWindowInvoked = true; }
+    void set_window_title(const std::string& title) {
+        m_fSetWindowTitleInvoked = true;
+        m_title = title;
+    }
+    void force_redraw() {}
+    RenderingBuffer& get_window_buffer() { return m_buffer; }
+
+    bool set_window_title_invoked() { return m_fSetWindowTitleInvoked; }
+    bool update_window_invoked() { return m_fUpdateWindowInvoked; }
+    const std::string& get_title() { return m_title; }
+    double get_screen_ppi() const { return 96.0; }
+    void start_timer() {}
+    double elapsed_time() const { return 0.0; }
+
+};
+
+//---------------------------------------------------------------------------------------
+//MyTaskDragView: Derived class to access protected members
+class MyTaskDragView : public TaskDragView
+{
+public:
+    MyTaskDragView(Interactor* pIntor) : TaskDragView(pIntor) {}
+
+    bool is_waiting_for_first_point() { return m_state == k_waiting_for_first_point; }
+    bool is_waiting_for_second_point() { return m_state == k_waiting_for_second_point; }
+    int get_state() { return m_state; }
+};
+
+//---------------------------------------------------------------------------------------
+//MyTaskSelection: Derived class to access protected members
+class MyTaskSelection : public TaskSelection
+{
+public:
+    MyTaskSelection(Interactor* pIntor) : TaskSelection(pIntor) {}
+
+    bool is_waiting_for_first_point() { return m_state == k_waiting_for_first_point; }
+    bool is_waiting_for_point_2_left() { return m_state == k_waiting_for_point_2_left; }
+    bool is_waiting_for_point_2_right() { return m_state == k_waiting_for_point_2_right; }
+    int get_state() { return m_state; }
+    Pixels first_point_x() { return m_xStart; }
+    Pixels first_point_y() { return m_yStart; }
+};
+
+//---------------------------------------------------------------------------------------
+//MyInteractor: Mock class for tests
+class MyInteractor : public EditInteractor
+{
+protected:
+    bool m_fSelRectInvoked;
+    bool m_fSelObjInvoked;
+    Rectangle<Pixels> m_selRectangle;
+    Point<Pixels> m_selPoint;
+
+public:
+    MyInteractor(LibraryScope& libraryScope, Document* pDoc, View* pView)
+        : EditInteractor(libraryScope, pDoc, pView)
+        , m_fSelRectInvoked(false)
+        , m_fSelObjInvoked(false)
+    {
+    }
+    //selection
+    void select_object_at_screen_point(Pixels x, Pixels y, unsigned flags=0)
+    {
+        m_fSelObjInvoked = true;
+        m_selPoint = Point<Pixels>(x, y);
+    }
+    void select_objects_in_screen_rectangle(Pixels x1, Pixels y1, Pixels x2, Pixels y2,
+                                            unsigned flags=0)
+    {
+        m_fSelRectInvoked = true;
+        m_selRectangle.set_top_left( Point<Pixels>(x1, y1) );
+        m_selRectangle.set_bottom_right( Point<Pixels>(x2, y2) );
+    }
+
+    //specific for tests
+    bool select_objects_in_rectangle_invoked() { return m_fSelRectInvoked; }
+    bool select_object_invoked() { return m_fSelObjInvoked; }
+    bool sel_rectangle_is(Pixels x1, Pixels y1, Pixels x2, Pixels y2)
+    {
+        return  m_selRectangle.left() == x1
+                && m_selRectangle.top() == y1
+                && m_selRectangle.right() == x2
+                && m_selRectangle.bottom() == y2;
+    }
+    bool sel_point_is(Pixels x, Pixels y)
+    {
+        return m_selPoint.x == x && m_selPoint.y == y;
+    }
+
+
+};
 
 //---------------------------------------------------------------------------------------
 class InteractorTestFixture
@@ -60,22 +174,352 @@ public:
 SUITE(InteractorTest)
 {
 
-    TEST_FIXTURE(InteractorTestFixture, Interactor_Create)
+    TEST_FIXTURE(InteractorTestFixture, Interactor_CreatesGraphicModel)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
+                                            &doc);
+        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, &doc, pView);
+
+        CHECK( pIntor != NULL );
+        CHECK( pIntor->get_graphic_model() != NULL );
+
+        delete pIntor;
+    }
+
+    //-- selecting objects --------------------------------------------------------------
+
+    TEST_FIXTURE(InteractorTestFixture, Interactor_SelectObject)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
+                                            &doc);
+        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, &doc, pView);
+        GraphicModel* pModel = pIntor->get_graphic_model();
+        GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
+        GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
+        GmoBox* pBSys = pBSP->get_child_box(0);         //System
+        GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
+        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
+        GmoShape* pClef = pBSliceInstr->get_shape(0);      //Clef
+
+        CHECK( pClef->is_selected() == false );
+        pIntor->select_object(pClef);
+
+        CHECK( pIntor->is_in_selection(pClef) == true );
+        CHECK( pClef->is_selected() == true );
+
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(InteractorTestFixture, Interactor_SelectObjectAtScreenPoint)
+    {
+        //as coordinates conversion is involved, the View must be rendered
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        Document doc(libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, &doc);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        pView->set_interactor(pIntor);
+        RenderingBuffer rbuf;
+        pView->set_rendering_buffer(&rbuf);
+        pView->on_paint();
+
+        GraphicModel* pModel = pIntor->get_graphic_model();
+        GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
+        GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
+        GmoBox* pBSys = pBSP->get_child_box(0);         //System
+        GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
+        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
+        GmoShape* pClef = pBSliceInstr->get_shape(0);   //Clef
+        LUnits x = (pClef->get_left() + pClef->get_right()) / 2.0f;
+        LUnits y = (pClef->get_top() + pClef->get_bottom()) / 2.0f;
+
+        double vx = x;
+        double vy = y;
+        pIntor->model_point_to_screen(&vx, &vy, 0);
+
+        CHECK( pClef->is_selected() == false );
+        pIntor->select_object_at_screen_point(vx, vy);
+
+        CHECK( pIntor->is_in_selection(pClef) == true );
+        CHECK( pClef->is_selected() == true );
+
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(InteractorTestFixture, Interactor_SelectObjectsAtScreenRectangle)
+    {
+        //as coordinates conversion is involved, the View must be rendered
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        Document doc(libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, &doc);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        pView->set_interactor(pIntor);
+        RenderingBuffer rbuf;
+        pView->set_rendering_buffer(&rbuf);
+        pView->on_paint();
+
+        GraphicModel* pModel = pIntor->get_graphic_model();
+        GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
+        GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
+        GmoBox* pBSys = pBSP->get_child_box(0);         //System
+        GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
+        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
+        GmoShape* pClef = pBSliceInstr->get_shape(0);   //Clef
+        LUnits xLeft = pClef->get_left() - 200.0f;
+        LUnits xRight = pClef->get_right() + 200.0f;
+        LUnits yTop = pClef->get_top() - 200.0f;
+        LUnits yBottom = pClef->get_bottom() + 200.0f;
+
+        double x1 = xLeft;
+        double y1 = yTop;
+        pIntor->model_point_to_screen(&x1, &y1, 0);
+        double x2 = xRight;
+        double y2 = yBottom;
+        pIntor->model_point_to_screen(&x2, &y2, 0);
+
+        CHECK( pClef->is_selected() == false );
+        pIntor->select_objects_in_screen_rectangle(Pixels(x1), Pixels(y1),
+                                                   Pixels(x2), Pixels(y2));
+
+        CHECK( pIntor->is_in_selection(pClef) == true );
+        CHECK( pClef->is_selected() == true );
+
+        delete pIntor;
+    }
+
+
+    // TaskDragView ---------------------------------------------------------------------
+
+    TEST_FIXTURE(InteractorTestFixture, TaskDragView_Creation)
     {
         Document* pDoc = Injector::inject_Document(m_libraryScope);
         pDoc->create_empty();
-        EditInteractor interactor(m_libraryScope, pDoc);  //, pExec);
+        View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
+                                            pDoc);
+        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, pDoc, pView);
+        MyTaskDragView task(pIntor);
+        task.init_task();
 
-    //    Presenter* pPresenter = Injector::inject_Presenter(m_libraryScope, 
-    //                                                   PresenterBuilder::k_edit_view, pDoc);
-    //    View* pView = pPresenter->get_view(0);
-    //    Interactor* pInteractor = pView->get_interactor();
-    //    CHECK( pInteractor );
-    //    EditInteractor* pEC = dynamic_cast<EditInteractor*>( pInteractor );
-    //    CHECK( pEC );
+        CHECK( task.is_waiting_for_first_point() == true );
 
         delete pDoc;
+        delete pIntor;
     }
+
+    TEST_FIXTURE(InteractorTestFixture, TaskDragView_MouseLeftDown)
+    {
+        Document* pDoc = Injector::inject_Document(m_libraryScope);
+        pDoc->create_empty();
+        View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
+                                            pDoc);
+        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, pDoc, pView);
+        MyTaskDragView task(pIntor);
+        task.init_task();
+
+        task.process_event( Event(Event::k_mouse_move) );
+        CHECK( task.is_waiting_for_first_point() == true );
+
+        task.process_event( Event(Event::k_mouse_right_down) );
+        CHECK( task.is_waiting_for_first_point() == true );
+
+        task.process_event( Event(Event::k_mouse_left_down) );
+        CHECK( task.is_waiting_for_second_point() == true );
+
+        delete pDoc;
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(InteractorTestFixture, TaskDragView_MouseMove)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        Document* pDoc= new Document(libraryScope);
+        pDoc->create_empty();
+        View* pView = Injector::inject_View(libraryScope, ViewFactory::k_view_simple,
+                                            pDoc);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        MyTaskDragView task(pIntor);
+        task.init_task();
+        task.process_event( Event(Event::k_mouse_left_down) );
+
+        task.process_event( Event(Event::k_mouse_move) );
+        CHECK( task.is_waiting_for_second_point() == true );
+
+        task.process_event( Event(Event::k_mouse_right_down) );
+        CHECK( task.is_waiting_for_second_point() == true );
+
+        task.process_event( Event(Event::k_mouse_left_up) );
+        CHECK( task.is_waiting_for_first_point() == true );
+
+        delete pDoc;
+        delete pIntor;
+    }
+
+    // TaskSelection --------------------------------------------------------------------
+
+    TEST_FIXTURE(InteractorTestFixture, TaskSelection_Creation)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        Document* pDoc = Injector::inject_Document(libraryScope);
+        pDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        MyTaskSelection task(pIntor);
+        task.init_task();
+
+        CHECK( task.is_waiting_for_first_point() == true );
+        CHECK( task.first_point_x() == 0 );
+        CHECK( task.first_point_y() == 0 );
+
+        delete pDoc;
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseLeftDown)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        Document* pDoc = Injector::inject_Document(libraryScope);
+        pDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        MyTaskSelection task(pIntor);
+        task.init_task();
+
+        task.process_event( Event(Event::k_mouse_move, 20, 70) );
+        CHECK( task.is_waiting_for_first_point() == true );
+
+        task.process_event( Event(Event::k_mouse_left_down, 10, 33, k_mouse_left) );
+        CHECK( task.is_waiting_for_point_2_left() == true );
+        CHECK( task.first_point_x() == 10 );
+        CHECK( task.first_point_y() == 33 );
+
+        delete pDoc;
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseLeftMove)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        Document* pDoc = Injector::inject_Document(libraryScope);
+        pDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        MyTaskSelection task(pIntor);
+        task.init_task();
+        task.process_event( Event(Event::k_mouse_left_down, 10, 33, k_mouse_left) );
+
+        task.process_event( Event(Event::k_mouse_move, 20, 70, k_mouse_left) );
+        CHECK( task.is_waiting_for_point_2_left() == true );
+
+        delete pDoc;
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseLeftUp)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        Document* pDoc = Injector::inject_Document(libraryScope);
+        pDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
+        MyInteractor* pIntor = new MyInteractor(libraryScope, pDoc, pView);
+        MyTaskSelection task(pIntor);
+        task.init_task();
+        task.process_event( Event(Event::k_mouse_left_down, 10, 33, k_mouse_left) );
+        task.process_event( Event(Event::k_mouse_move, 20, 70, k_mouse_left) );
+        CHECK( pIntor->select_objects_in_rectangle_invoked() == false );
+
+        task.process_event( Event(Event::k_mouse_left_up, 21, 75, k_mouse_left) );
+        CHECK( task.is_waiting_for_first_point() == true );
+        CHECK( pIntor->select_objects_in_rectangle_invoked() == true );
+        CHECK( pIntor->sel_rectangle_is(10, 33, 21, 75) == true );
+
+        delete pDoc;
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseRightDown)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        Document* pDoc = Injector::inject_Document(libraryScope);
+        pDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        MyTaskSelection task(pIntor);
+        task.init_task();
+
+        task.process_event( Event(Event::k_mouse_move, 20, 70) );
+        CHECK( task.is_waiting_for_first_point() == true );
+
+        task.process_event( Event(Event::k_mouse_right_down, 10, 33, k_mouse_right) );
+        CHECK( task.is_waiting_for_point_2_right() == true );
+        CHECK( task.first_point_x() == 10 );
+        CHECK( task.first_point_y() == 33 );
+
+        delete pDoc;
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseRightMove)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        Document* pDoc = Injector::inject_Document(libraryScope);
+        pDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        MyTaskSelection task(pIntor);
+        task.init_task();
+        task.process_event( Event(Event::k_mouse_right_down, 10, 33, k_mouse_right) );
+
+        task.process_event( Event(Event::k_mouse_move, 11, 35, k_mouse_right) );
+        CHECK( task.is_waiting_for_point_2_right() == true );
+
+        delete pDoc;
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseRightUp)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        Document* pDoc = Injector::inject_Document(libraryScope);
+        pDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
+        MyInteractor* pIntor = new MyInteractor(libraryScope, pDoc, pView);
+        MyTaskSelection task(pIntor);
+        task.init_task();
+        task.process_event( Event(Event::k_mouse_right_down, 10, 33, k_mouse_right) );
+        task.process_event( Event(Event::k_mouse_move, 11, 35, k_mouse_right) );
+        CHECK( pIntor->select_object_invoked() == false );
+
+        task.process_event( Event(Event::k_mouse_right_up, 12, 34, k_mouse_right) );
+        CHECK( task.is_waiting_for_first_point() == true );
+        CHECK( pIntor->select_object_invoked() == true );
+        CHECK( pIntor->sel_point_is(10, 33) == true );
+
+        delete pDoc;
+        delete pIntor;
+    }
+
 
     //TEST_FIXTURE(InteractorTestFixture, Presenter_InsertRest)
     //{

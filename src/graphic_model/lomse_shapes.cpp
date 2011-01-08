@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -24,6 +24,7 @@
 #include "lomse_drawer.h"
 #include "lomse_glyphs.h"
 #include "lomse_calligrapher.h"
+#include "lomse_gm_basic.h"
 
 namespace lomse
 {
@@ -31,9 +32,9 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // GmoShapeGlyph object implementation
 //---------------------------------------------------------------------------------------
-GmoShapeGlyph::GmoShapeGlyph(GmoBox* owner, int type, int nShapeIdx, unsigned int nGlyph,
+GmoShapeGlyph::GmoShapeGlyph(int type, int idx, unsigned int nGlyph,
                              UPoint pos, Color color, LibraryScope& libraryScope)
-    : GmoSimpleShape(owner, type, color)  //, pOwner, nShapeIdx)
+    : GmoSimpleShape(type, idx, color)
     , m_pFontStorage( libraryScope.font_storage() )
     , m_libraryScope(libraryScope)
 {
@@ -49,7 +50,7 @@ GmoShapeGlyph::GmoShapeGlyph(GmoBox* owner, int type, int nShapeIdx, unsigned in
     m_origin.x = pos.x + bbox.x;
     m_origin.y = pos.y + bbox.y;
     m_size.width = bbox.width;
-    m_size.height = bbox.height;            
+    m_size.height = bbox.height;
 
     m_shiftToDraw.width = pos.x - m_origin.x;
     m_shiftToDraw.height = pos.y - m_origin.y;
@@ -59,7 +60,7 @@ GmoShapeGlyph::GmoShapeGlyph(GmoBox* owner, int type, int nShapeIdx, unsigned in
 void GmoShapeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     pDrawer->select_font("LenMus basic", 21.0);
-    pDrawer->set_text_color(m_color);
+    pDrawer->set_text_color( determine_color_to_use(opt) );
     LUnits x = m_shiftToDraw.width + m_origin.x;
     LUnits y = m_shiftToDraw.height + m_origin.y;
     pDrawer->draw_glyph(x, y, m_glyph);
@@ -201,13 +202,13 @@ void GmoShapeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //---------------------------------------------------------------------------------------
 // GmoShapeClef
 //---------------------------------------------------------------------------------------
-GmoShapeClef::GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos,
-                           bool fSmallClef, Color color, LibraryScope& libraryScope)
-    : GmoShapeGlyph(owner, GmoObj::k_shape_clef, nShapeIdx, nGlyph, pos, color,
+GmoShapeClef::GmoShapeClef(int idx, int nGlyph, UPoint pos, bool fSmallClef,
+                           Color color, LibraryScope& libraryScope)
+    : GmoShapeGlyph(GmoObj::k_shape_clef, idx, nGlyph, pos, color,
                     libraryScope)
 //    , m_fSmallClef(fSmallClef)
 {
-//    //In ShapeGlyph constructor, bounds have been set without taking into accont 
+//    //In ShapeGlyph constructor, bounds have been set without taking into accont
 //    //that this is a clef and could be small size. So bounds have been computed for
 //    //normal size. If this clef is small size, recompute bounds
 //    if (m_fSmallClef)
@@ -280,32 +281,38 @@ GmoShapeClef::GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos,
 
 
 
-////---------------------------------------------------------------------------------------
-//// GmoShapeSimpleLine object implementation
-////---------------------------------------------------------------------------------------
-//GmoShapeSimpleLine::GmoShapeSimpleLine(GmoBox* owner, LUnits xStart, LUnits yStart,
-//                LUnits xEnd, LUnits yEnd, LUnits uWidth, LUnits uBoundsExtraWidth,
-//				Color nColor, wxString sName, ELineEdges nEdge)
-//    : GmoSimpleShape(GmoObj::k_shape_Line, pOwner, 0, sName)
-//{
-//	Create(xStart, yStart, xEnd, yEnd, uWidth, uBoundsExtraWidth, nColor, nEdge);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeSimpleLine::Create(LUnits xStart, LUnits yStart,
-//						 LUnits xEnd, LUnits yEnd, LUnits uWidth,
-//						 LUnits uBoundsExtraWidth, Color nColor,
-//						 ELineEdges nEdge)
-//{
-//    m_xStart = xStart;
-//    m_yStart = yStart;
-//    m_xEnd = xEnd;
-//    m_yEnd = yEnd;
-//    m_color = nColor;
-//    m_uWidth = uWidth;
-//	m_uBoundsExtraWidth = uBoundsExtraWidth;
-//	m_nEdge = nEdge;
-//
+//---------------------------------------------------------------------------------------
+// GmoShapeSimpleLine implementation
+//---------------------------------------------------------------------------------------
+GmoShapeSimpleLine::GmoShapeSimpleLine(int type,
+                                       LUnits xStart, LUnits yStart, LUnits xEnd,
+                                       LUnits yEnd, LUnits uWidth,
+                                       LUnits uBoundsExtraWidth, Color color,
+                                       ELineEdge nEdge)
+    : GmoSimpleShape(type, 0, color)
+{
+    set_new_values(xStart, yStart, xEnd, yEnd, uWidth, uBoundsExtraWidth, color, nEdge);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeSimpleLine::set_new_values(LUnits xStart, LUnits yStart,
+                                        LUnits xEnd, LUnits yEnd,
+                                        LUnits uWidth, LUnits uBoundsExtraWidth,
+                                        Color color, ELineEdge nEdge)
+{
+    m_xStart = xStart;
+    m_yStart = yStart;
+    m_xEnd = xEnd;
+    m_yEnd = yEnd;
+    m_uWidth = uWidth;
+	m_uBoundsExtraWidth = uBoundsExtraWidth;
+	m_nEdge = nEdge;
+
+    m_origin.x = xStart;
+    m_origin.y = yStart;
+    m_size.width = xEnd - xStart + uBoundsExtraWidth;
+    m_size.height = yEnd - yStart + uBoundsExtraWidth;
+
 ///*
 //	//TODO
 //    // if line is neither vertical nor horizontal, should we use a strait rectangle or a
@@ -332,9 +339,8 @@ GmoShapeClef::GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos,
 //
 //	//For now assume the line is either vertical or horizontal
 //	//TODO
-//
 //    // store boundling rectangle position and size
-//	LUnits uWidthRect = (m_uWidth + uBoundsExtraWidth) / 2.0;
+//	LUnits uWidthRect = (m_uWidth + uBoundsExtraWidth) / 2.0f;
 //	if (xStart == xEnd)
 //	{
 //		//vertical line
@@ -356,16 +362,25 @@ GmoShapeClef::GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos,
 //
 //    // store selection rectangle position and size
 //	m_uSelRect = GetBounds();
-//
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeSimpleLine::Render(lmPaper* pPaper, Color color)
-//{
-//    pPaper->SolidLine(m_xStart, m_yStart, m_xEnd, m_yEnd, m_uWidth, m_nEdge, color);
-//    GmoSimpleShape::Render(pPaper, color);
-//}
-//
+
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeSimpleLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    Color color = determine_color_to_use(opt);
+    pDrawer->begin_path();
+    pDrawer->fill(color);
+    pDrawer->stroke(color);
+    pDrawer->stroke_width(m_uWidth);
+    pDrawer->move_to(m_xStart, m_yStart);
+    pDrawer->line_to(m_xEnd, m_yEnd);
+    pDrawer->end_path();
+    pDrawer->render(true);
+
+    GmoSimpleShape::on_draw(pDrawer, opt);
+}
+
 ////---------------------------------------------------------------------------------------
 //wxString GmoShapeSimpleLine::Dump(int nIndent)
 //{
@@ -956,23 +971,22 @@ GmoShapeClef::GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos,
 //    ComputeCenterPoints();
 //    UpdateBounds();
 //}
-//
-//
-//
-////---------------------------------------------------------------------------------------
-//// GmoShapeStem object implementation: a vertical line
-////---------------------------------------------------------------------------------------
-//GmoShapeStem::GmoShapeStem(GmoBox* owner, LUnits xPos, LUnits yStart,
-//                         LUnits uExtraLength, LUnits yEnd, bool fStemDown,
-//                         LUnits uWidth, Color nColor)
-//	: GmoShapeSimpleLine(pOwner, xPos, yStart, xPos, yEnd, uWidth, 0.0, nColor,
-//				  _T("Stem"), lm_eEdgeHorizontal)
-//{
-//    m_nType = GmoObj::k_shape_Stem;
-//	m_fStemDown = fStemDown;
-//    m_uExtraLength = uExtraLength;
-//}
-//
+
+
+
+//---------------------------------------------------------------------------------------
+// GmoShapeStem implementation: a vertical line
+//---------------------------------------------------------------------------------------
+GmoShapeStem::GmoShapeStem(LUnits xPos, LUnits yStart,
+                           LUnits uExtraLength, LUnits yEnd, bool fStemDown,
+                           LUnits uWidth, Color color)
+	: GmoShapeSimpleLine(GmoObj::k_shape_stem, xPos, yStart, xPos, yEnd,
+                         uWidth, 0.0f, color, k_edge_horizontal)
+	, m_fStemDown(fStemDown)
+    , m_uExtraLength(uExtraLength)
+{
+}
+
 ////---------------------------------------------------------------------------------------
 //void GmoShapeStem::SetLength(LUnits uLenght, bool fModifyTop)
 //{
@@ -996,16 +1010,15 @@ GmoShapeClef::GmoShapeClef(GmoBox* owner, int nShapeIdx, int nGlyph, UPoint pos,
 //		   m_color, m_nEdge);
 //
 //}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeStem::Adjust(LUnits xPos, LUnits yStart, LUnits yEnd, bool fStemDown)
-//{
-//	m_fStemDown = fStemDown;
-//	//re-create the shape
-//	Create(xPos, yStart, xPos, yEnd, m_uWidth, m_uBoundsExtraWidth,
-//		   m_color, m_nEdge);
-//}
-//
+
+//---------------------------------------------------------------------------------------
+void GmoShapeStem::adjust(LUnits xPos, LUnits yStart, LUnits yEnd, bool fStemDown)
+{
+	m_fStemDown = fStemDown;
+	set_new_values(xPos, yStart, xPos, yEnd, m_uWidth, m_uBoundsExtraWidth,
+                   m_color, m_nEdge);
+}
+
 ////---------------------------------------------------------------------------------------
 //LUnits GmoShapeStem::GetYStartStem()
 //{

@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -1015,7 +1015,7 @@ public:
 
     void do_analysis()
     {
-        DtoClef dto(ImoClef::k_G3);
+        DtoClef dto(ImoClef::k_G2);
 
         // <type> (label)
         if (get_optional(k_label))
@@ -1035,9 +1035,9 @@ public:
     int get_clef_type()
     {
         string value = m_pParamToAnalyse->get_value();
-        int type = ImoClef::k_G3;
+        int type = ImoClef::k_G2;
         if (value == "G")
-            type = ImoClef::k_G3;
+            type = ImoClef::k_G2;
         else if (value == "F4")
             type = ImoClef::k_F4;
         else if (value == "F3")
@@ -1061,17 +1061,17 @@ public:
         else if (value == "G1")
             type = ImoClef::k_G1;
         else if (value == "8_G")
-            type = ImoClef::k_8_G3;
+            type = ImoClef::k_8_G2;
         else if (value == "G_8")
-            type = ImoClef::k_G3_8;
+            type = ImoClef::k_G2_8;
         else if (value == "8_F4")
             type = ImoClef::k_8_F4;
         else if (value == "F4_8")
             type = ImoClef::k_F4_8;
         else if (value == "15_G")
-            type = ImoClef::k_15_G3;
+            type = ImoClef::k_15_G2;
         else if (value == "G_15")
-            type = ImoClef::k_G3_15;
+            type = ImoClef::k_G2_15;
         else if (value == "15_F4")
             type = ImoClef::k_15_F4;
         else if (value == "F4_15")

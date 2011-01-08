@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,8 +12,6 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//
-//
 //
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
@@ -33,6 +31,19 @@ namespace lomse
 class DtoNoteRest;
 class DtoNote;
 class DtoRest;
+
+//noteheads
+enum ENoteHeads
+{
+    k_notehead_longa = 1,
+    k_notehead_breve,
+    k_notehead_whole,              //Whole note
+    k_notehead_half,               //Half note
+    k_notehead_quarter,            //Quarter note
+    k_notehead_cross,              //Cross (for percussion)
+};
+
+
 
 
 //----------------------------------------------------------------------------------
@@ -112,7 +123,7 @@ public:
            bool fVisible, bool fBeamed, ImoBeamInfo* pBeamInfo);
     ~ImoNote();
 
-    enum    { C=0, D=1, E=2, F=3, G=4, A=5, B=6, last=B, NoPitch=-1, };     //steps
+    enum    { C=0, D=1, E=2, F=3, G=4, A=5, B=6, last=B, k_no_pitch=-1, };     //steps
     enum    { k_no_accidentals=0, k_sharp, k_sharp_sharp, k_double_sharp, k_natural_sharp,
               k_flap, k_flat_flat, k_natural_flat, k_natural, };
     enum    { k_default=0, k_up, k_down, };
@@ -121,6 +132,7 @@ public:
     inline int get_step() { return m_step; }
     inline int get_octave() { return m_octave; }
     inline int get_accidentals() { return m_accidentals; }
+    inline bool is_pitch_defined() { return m_step != k_no_pitch; }
 
     //ties
     inline bool is_tied_next() { return m_pTieNext != NULL; }

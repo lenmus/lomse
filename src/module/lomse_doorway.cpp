@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -22,6 +22,7 @@
 
 #include "lomse_injectors.h"
 #include "lomse_agg_types.h"
+#include "lomse_presenter.h"
 
 namespace lomse
 {
@@ -38,6 +39,13 @@ LomseDoorway::LomseDoorway()
 LomseDoorway::~LomseDoorway()
 {
     delete m_pLibraryScope;
+}
+
+//---------------------------------------------------------------------------------------
+Presenter* LomseDoorway::new_document(int viewType)
+{
+    PresenterBuilder builder(*m_pLibraryScope);
+    return builder.new_document(viewType);
 }
 
 //---------------------------------------------------------------------------------------

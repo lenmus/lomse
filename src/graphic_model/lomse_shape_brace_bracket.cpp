@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -156,8 +156,8 @@ const int m_nNumVerticesBrace2 = sizeof(m_BraceVertices2)/sizeof(Vertex);
 //---------------------------------------------------------------------------------------
 // Implementation of GmoShapeBracketBrace
 //---------------------------------------------------------------------------------------
-GmoShapeBracketBrace::GmoShapeBracketBrace(GmoBox* owner, int type, Color color)
-    : GmoSimpleShape(owner, type, color) 
+GmoShapeBracketBrace::GmoShapeBracketBrace(int type, int idx, Color color)
+    : GmoSimpleShape(type, idx, color)
     //, m_nSymbol(nSymbol)
 {
 }
@@ -203,8 +203,9 @@ GmoShapeBracketBrace::~GmoShapeBracketBrace()
 //---------------------------------------------------------------------------------------
 void GmoShapeBracketBrace::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
+    Color color = determine_color_to_use(opt);
     pDrawer->begin_path();
-    pDrawer->fill(m_color);
+    pDrawer->fill(color);
     pDrawer->add_path(*this);
     pDrawer->end_path();
 
@@ -215,9 +216,9 @@ void GmoShapeBracketBrace::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //---------------------------------------------------------------------------------------
 // Implementation of GmoShapeBracket
 //---------------------------------------------------------------------------------------
-GmoShapeBracket::GmoShapeBracket(GmoBox* owner, LUnits xLeft, LUnits yTop,
+GmoShapeBracket::GmoShapeBracket(int idx, LUnits xLeft, LUnits yTop,
                                  LUnits xRight, LUnits yBottom, Color color)
-    : GmoShapeBracketBrace(owner, GmoObj::k_shape_staff, color) 
+    : GmoShapeBracketBrace(GmoObj::k_shape_staff, idx, color)
 {
     set_origin(xLeft, yTop);
 	set_width(xRight - xLeft);
@@ -260,10 +261,10 @@ unsigned GmoShapeBracket::vertex(double* px, double* py)
 //---------------------------------------------------------------------------------------
 // Implementation of GmoShapeBrace
 //---------------------------------------------------------------------------------------
-GmoShapeBrace::GmoShapeBrace(GmoBox* owner, LUnits xLeft, LUnits yTop,
+GmoShapeBrace::GmoShapeBrace(int idx, LUnits xLeft, LUnits yTop,
                              LUnits xRight, LUnits yBottom,
                              LUnits dyHook, Color color)
-    : GmoShapeBracketBrace(owner, GmoObj::k_shape_brace, color) 
+    : GmoShapeBracketBrace(GmoObj::k_shape_brace, idx, color)
 {
     set_origin(xLeft, yTop - dyHook);
 	set_width(xRight - xLeft);

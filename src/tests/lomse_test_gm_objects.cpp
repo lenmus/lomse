@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -23,6 +23,7 @@
 #include "lomse_config.h"
 
 //classes related to these tests
+#include <list>
 #include "lomse_injectors.h"
 #include "lomse_gm_basic.h"
 #include "lomse_box_system.h"
@@ -33,6 +34,17 @@
 using namespace UnitTest;
 using namespace std;
 using namespace lomse;
+
+//---------------------------------------------------------------------------------------
+// for accessing protected members
+class MyGmoBoxDocPage : public GmoBoxDocPage
+{
+public:
+    MyGmoBoxDocPage() : GmoBoxDocPage() {}
+    ~MyGmoBoxDocPage() {}
+
+    inline std::list<GmoShape*>& get_all_shapes() { return m_allShapes; }
+};
 
 
 //---------------------------------------------------------------------------------------
@@ -99,7 +111,7 @@ SUITE(GmoTest)
     TEST_FIXTURE(GmoTestFixture, StubScore_HasPages)
     {
         GmoStubScore stub(NULL);
-        GmoBoxScorePage box(&stub, NULL);
+        GmoBoxScorePage box(&stub);
         CHECK( stub.get_num_pages() == 1 );
         CHECK( stub.get_num_systems() == 0 );
     }
@@ -109,14 +121,14 @@ SUITE(GmoTest)
     TEST_FIXTURE(GmoTestFixture, BoxScorePage_InitiallyEmpty)
     {
         GmoStubScore stub(NULL);
-        GmoBoxScorePage box(&stub, NULL);
+        GmoBoxScorePage box(&stub);
         CHECK( box.get_num_systems() == 0 );
     }
 
     TEST_FIXTURE(GmoTestFixture, BoxScorePage_AddSystem)
     {
         GmoStubScore stub(NULL);
-        GmoBoxScorePage box(&stub, NULL);
+        GmoBoxScorePage box(&stub);
         GmoBoxSystem* pSys = box.add_system(0);
         CHECK( box.get_num_systems() == 1 );
         CHECK( pSys = box.get_system(0) );
@@ -126,13 +138,13 @@ SUITE(GmoTest)
 
     TEST_FIXTURE(GmoTestFixture, BoxSystem_InitiallyEmpty)
     {
-        GmoBoxSystem box(NULL);
+        GmoBoxSystem box;
         CHECK( box.get_num_slices() == 0 );
     }
 
     TEST_FIXTURE(GmoTestFixture, BoxSystem_AddSlice)
     {
-        GmoBoxSystem box(NULL);
+        GmoBoxSystem box;
         GmoBoxSlice* pSlice = box.add_slice(0);
         CHECK( box.get_num_slices() == 1 );
         CHECK( box.get_slice(0) == pSlice );
@@ -140,16 +152,18 @@ SUITE(GmoTest)
 
     TEST_FIXTURE(GmoTestFixture, BoxSystem_AddShapeUpdatesLayerPointers)
     {
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent dpc(&page);
-        //GmoBoxScorePage scorePage(&dpc);        //<<<----- no uniform creation
+        GmoBoxDocPage page;
+        GmoBoxDocPageContent* pDPC = new GmoBoxDocPageContent();
+        page.add_child_box(pDPC);
         GmoStubScore stub(NULL);
-        GmoBoxScorePage scorePage(&stub, &dpc);
-        GmoBoxSystem box(&scorePage);
+        GmoBoxScorePage* pScorePage = new GmoBoxScorePage(&stub);
+        pDPC->add_child_box(pScorePage);
+        GmoBoxSystem* pBox = new GmoBoxSystem();
+        pScorePage->add_child_box(pBox);
         CHECK( page.get_first_shape_for_layer(GmoShape::k_layer_staff) == NULL );
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
-        box.add_staff_shape(pShape);
+        GmoShapeStaff* pShape = new GmoShapeStaff(0, &staff, 0, 20.0f, Color(0,0,0));
+        pBox->add_staff_shape(pShape);
         CHECK( page.get_first_shape_for_layer(GmoShape::k_layer_staff) == pShape );
     }
 
@@ -157,105 +171,120 @@ SUITE(GmoTest)
 
     TEST_FIXTURE(GmoTestFixture, BoxSystem_StoreShapes)
     {
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent dpc(&page);
-        //GmoBoxScorePage scorePage(&dpc);        //<<<----- no uniform creation
+        GmoBoxDocPage page;
+        GmoBoxDocPageContent* pDPC = new GmoBoxDocPageContent();
+        page.add_child_box(pDPC);
         GmoStubScore stub(NULL);
-        GmoBoxScorePage scorePage(&stub, &dpc);
-        GmoBoxSystem box(&scorePage);
+        GmoBoxScorePage* pScorePage = new GmoBoxScorePage(&stub);
+        pDPC->add_child_box(pScorePage);
+        GmoBoxSystem* pBox = new GmoBoxSystem();
+        pScorePage->add_child_box(pBox);
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
-        box.add_staff_shape(pShape);
-        CHECK( box.get_staff_shape(0) == pShape );
+        GmoShapeStaff* pShape = new GmoShapeStaff(0, &staff, 0, 20.0f, Color(0,0,0));
+        pBox->add_staff_shape(pShape);
+        CHECK( pBox->get_staff_shape(0) == pShape );
     }
 
     TEST_FIXTURE(GmoTestFixture, Box_StoreShapes)
     {
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent dpc(&page);
-        //GmoBoxScorePage scorePage(&dpc);        //<<<----- no uniform creation
+        GmoBoxDocPage page;
+        GmoBoxDocPageContent* pDPC = new GmoBoxDocPageContent();
+        page.add_child_box(pDPC);
         GmoStubScore stub(NULL);
-        GmoBoxScorePage scorePage(&stub, &dpc);
-        GmoBoxSystem box(&scorePage);
+        GmoBoxScorePage* pScorePage = new GmoBoxScorePage(&stub);
+        pDPC->add_child_box(pScorePage);
+        GmoBoxSystem* pBox = new GmoBoxSystem();
+        pScorePage->add_child_box(pBox);
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
-        box.add_shape(pShape, GmoShape::k_layer_staff);
-        CHECK( box.get_shape(0) == pShape );
+        GmoShapeStaff* pShape = new GmoShapeStaff(0, &staff, 0, 20.0f, Color(0,0,0));
+        pBox->add_shape(pShape, GmoShape::k_layer_staff);
+        CHECK( pBox->get_shape(0) == pShape );
     }
 
     TEST_FIXTURE(GmoTestFixture, BoxSystem_ShapesHaveLayer)
     {
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent dpc(&page);
-        //GmoBoxScorePage scorePage(&dpc);        //<<<----- no uniform creation
+        GmoBoxDocPage page;
+        GmoBoxDocPageContent* pDPC = new GmoBoxDocPageContent();
+        page.add_child_box(pDPC);
         GmoStubScore stub(NULL);
-        GmoBoxScorePage scorePage(&stub, &dpc);
-        GmoBoxSystem box(&scorePage);
+        GmoBoxScorePage* pScorePage = new GmoBoxScorePage(&stub);
+        pDPC->add_child_box(pScorePage);
+        GmoBoxSystem* pBox = new GmoBoxSystem();
+        pScorePage->add_child_box(pBox);
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
-        box.add_staff_shape(pShape);
+        GmoShapeStaff* pShape = new GmoShapeStaff(0, &staff, 0, 20.0f, Color(0,0,0));
+        pBox->add_staff_shape(pShape);
         CHECK( pShape->get_layer() == GmoShape::k_layer_staff );
     }
 
     TEST_FIXTURE(GmoTestFixture, BoxSystem_ShapesOrderedByLayer)
     {
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent dpc(&page);
-        //GmoBoxScorePage scorePage(&dpc);        //<<<----- no uniform creation
+        MyGmoBoxDocPage page;
+        GmoBoxDocPageContent* pDPC = new GmoBoxDocPageContent();
+        page.add_child_box(pDPC);
         GmoStubScore stub(NULL);
-        GmoBoxScorePage scorePage(&stub, &dpc);
-        GmoBoxSystem box(&scorePage);
+        GmoBoxScorePage* pScorePage = new GmoBoxScorePage(&stub);
+        pDPC->add_child_box(pScorePage);
+        GmoBoxSystem* pBox = new GmoBoxSystem();
+        pScorePage->add_child_box(pBox);
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape0 = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
-        box.add_shape(pShape0, 2);
-        GmoShapeStaff* pShape1 = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
-        box.add_shape(pShape1, 1);
-        GmoShapeStaff* pShape2 = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
-        box.add_shape(pShape2, 3);
-        GmoShapeStaff* pShape3 = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
-        box.add_shape(pShape3, 1);
-        GmoShapeStaff* pShape4 = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
-        box.add_shape(pShape4, 0);
-        GmoShapeStaff* pShape5 = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
-        box.add_shape(pShape5, 1);
+        GmoShapeStaff* pShape0 = new GmoShapeStaff(0, &staff, 0, 20.0f, Color(0,0,0));
+        pBox->add_shape(pShape0, 2);
+        GmoShapeStaff* pShape1 = new GmoShapeStaff(1, &staff, 0, 20.0f, Color(0,0,0));
+        pBox->add_shape(pShape1, 1);
+        GmoShapeStaff* pShape2 = new GmoShapeStaff(2, &staff, 0, 20.0f, Color(0,0,0));
+        pBox->add_shape(pShape2, 3);
+        GmoShapeStaff* pShape3 = new GmoShapeStaff(3, &staff, 0, 20.0f, Color(0,0,0));
+        pBox->add_shape(pShape3, 1);
+        GmoShapeStaff* pShape4 = new GmoShapeStaff(4, &staff, 0, 20.0f, Color(0,0,0));
+        pBox->add_shape(pShape4, 0);
+        GmoShapeStaff* pShape5 = new GmoShapeStaff(5, &staff, 0, 20.0f, Color(0,0,0));
+        pBox->add_shape(pShape5, 1);
 
-        //cout << "shape 0 at layer " << box.get_shape(0)->get_layer() << endl;
-        //cout << "shape 1 at layer " << box.get_shape(1)->get_layer() << endl;
-        //cout << "shape 2 at layer " << box.get_shape(2)->get_layer() << endl;
-        //cout << "shape 3 at layer " << box.get_shape(3)->get_layer() << endl;
-        //cout << "shape 4 at layer " << box.get_shape(4)->get_layer() << endl;
-        //cout << "shape 5 at layer " << box.get_shape(5)->get_layer() << endl;
+        std::list<GmoShape*>& shapes = page.get_all_shapes();
+        std::list<GmoShape*>::iterator it = shapes.begin();
 
-        CHECK( box.get_shape(0) == pShape4 );
-        CHECK( box.get_shape(0)->get_layer() == 0 );
+        //cout << (*it)->get_layer() << endl;
+        CHECK( (*it) == pShape4 );
+        CHECK( (*it)->get_layer() == 0 );
+        ++it;
 
-        CHECK( box.get_shape(1) == pShape1 );
-        CHECK( box.get_shape(1)->get_layer() == 1 );
+        CHECK( (*it) == pShape1 );
+        CHECK( (*it)->get_layer() == 1 );
+        ++it;
 
-        CHECK( box.get_shape(2) == pShape3 );
-        CHECK( box.get_shape(2)->get_layer() == 1 );
+        CHECK( (*it) == pShape3 );
+        CHECK( (*it)->get_layer() == 1 );
+        ++it;
 
-        CHECK( box.get_shape(3) == pShape5 );
-        CHECK( box.get_shape(3)->get_layer() == 1 );
+        CHECK( (*it) == pShape5 );
+        CHECK( (*it)->get_layer() == 1 );
+        ++it;
 
-        CHECK( box.get_shape(4) == pShape0 );
-        CHECK( box.get_shape(4)->get_layer() == 2 );
+        CHECK( (*it) == pShape0 );
+        CHECK( (*it)->get_layer() == 2 );
+        ++it;
 
-        CHECK( box.get_shape(5) == pShape2 );
-        CHECK( box.get_shape(5)->get_layer() == 3 );
+        CHECK( (*it) == pShape2 );
+        CHECK( (*it)->get_layer() == 3 );
+        ++it;
+
+        CHECK( it == shapes.end() );
     }
 
     TEST_FIXTURE(GmoTestFixture, Shape_SetOrigin)
     {
-        GmoBoxDocPage page(NULL);
-        GmoBoxDocPageContent dpc(&page);
-        //GmoBoxScorePage scorePage(&dpc);        //<<<----- no uniform creation
+        GmoBoxDocPage page;
+        GmoBoxDocPageContent* pDPC = new GmoBoxDocPageContent();
+        page.add_child_box(pDPC);
         GmoStubScore stub(NULL);
-        GmoBoxScorePage scorePage(&stub, &dpc);
-        GmoBoxSystem box(&scorePage);
+        GmoBoxScorePage* pScorePage = new GmoBoxScorePage(&stub);
+        pDPC->add_child_box(pScorePage);
+        GmoBoxSystem* pBox = new GmoBoxSystem();
+        pScorePage->add_child_box(pBox);
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(&box, &staff, 0, 0.0f, Color(0,0,0));
-        box.add_shape(pShape, 0);
+        GmoShapeStaff* pShape = new GmoShapeStaff(0, &staff, 0, 0.0f, Color(0,0,0));
+        pBox->add_shape(pShape, 0);
         pShape->set_origin(2000.0f, 3000.0f);
         CHECK( pShape->get_left() == 2000.0f );
         CHECK( pShape->get_top() == 3000.0f );

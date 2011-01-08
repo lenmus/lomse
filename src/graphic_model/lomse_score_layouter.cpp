@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -24,6 +24,7 @@
 #include "lomse_calligrapher.h"
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
+#include "lomse_im_note.h"
 #include "lomse_box_system.h"
 #include "lomse_box_slice.h"
 #include "lomse_box_slice_instr.h"
@@ -31,6 +32,7 @@
 #include "lomse_instrument_engraver.h"
 #include "lomse_system_layouter.h"
 #include "lomse_clef_engraver.h"
+#include "lomse_note_engraver.h"
 
 
 namespace lomse
@@ -160,7 +162,7 @@ void ScoreLayouter::layout_in_page(GmoBox* pContainerBox)
     //AWARE: This method is invoked to layout a page. If there are more pages to
     //layout, it will be invoked more times. Therefore, this method must not initialize
     //anything. All initializations must be done in 'prepare_to_start_layout()'.
-    //layout_in_page() method must allways continue layouting from current state.
+    //layout_in_page() method must always continue layouting from current state.
 
     page_initializations(pContainerBox);
     move_cursor_to_top_left_corner();
@@ -185,7 +187,8 @@ void ScoreLayouter::page_initializations(GmoBox* pContainerBox)
 //---------------------------------------------------------------------------------------
 GmoBox* ScoreLayouter::create_pagebox(GmoBox* pParentBox)
 {
-    GmoBox* pBox = new GmoBoxScorePage(m_pStubScore, pParentBox);
+    GmoBox* pBox = new GmoBoxScorePage(m_pStubScore);
+    pParentBox->add_child_box(pBox);
     pBox->set_left( pParentBox->get_left() );
     pBox->set_top( pParentBox->get_top() );
     return pBox;
@@ -610,7 +613,7 @@ void ScoreLayouter::collect_content_for_this_bar()  //ImoInstrument* pInstr, int
         m_pageCursor.y = m_instrEngravers[iInstr]->get_top_of_staff(iStaff);
         LUnits lineSpacing = pInstr->get_line_spacing_for_staff(iStaff);
         int iLine = (*m_scoreIt)->line();
-//        float rTime = (*m_scoreIt)->time();
+        float rTime = (*m_scoreIt)->time();
 
 //        if (pSO->IsBarline() || IsHigherTime(pSO->GetTimePos(), m_pSysCursor->GetBreakTime()) )
 //        {
@@ -648,26 +651,28 @@ void ScoreLayouter::collect_content_for_this_bar()  //ImoInstrument* pInstr, int
 //
 //        else if (pSO->IsTimeSignature())
 //		{
-//			m_pageCursor.x =uxStart);
+//			m_pageCursor.x = uxStart;
 //			AddTime((TimeSignature*)pSO, m_pCurBSI, pVStaff, nInstr, fProlog);
 //		}
 
 		else
 		{
-//            //it is neither clef, key signature nor time signature. Finish prologue
-//            fProlog = false;
-//
-//			//create this lmStaffObj shape and add to table
-//			m_pageCursor.x =uxStart;
-//			pSO->Layout(m_pCurBSI, m_pPaper);
-//			GmoShape* pShape = pSO->GetShape();
-//            pSysLayouter->IncludeObject(m_nRelColumn, iLine, nInstr, pSO, pShape, fProlog);
+            //it is neither clef, key signature nor time signature. Finish prologue
+            //for current instrument
+            fProlog = false;
+
+			//create this ImoStaffObj shape and add it to table
+			m_pageCursor.x = uxStart;
+            GmoShape* pShape = create_staffobj_shape(pSO, lineSpacing);
+            pSysLayouter->include_object(m_nRelColumn, iLine, iInstr, pInstr, pSO,
+                                         rTime, false, iStaff, pShape);
+            //fProlog = true; //to check second intr. problem
         }
 
         ++m_scoreIt;
     }
 
-//    //The barline lmStaffObj is not included in the loop as it might not exist in the last
+//    //The barline ImoStaffObj is not included in the loop as it might not exist in the last
 //    //bar of a score. In theses cases, the loop is exited because the end of the score is
 //    //reached. In any case we have to close the line
 //    if (pSO && pSO->IsBarline())
@@ -718,6 +723,32 @@ LUnits ScoreLayouter::determine_initial_space()
     //}
     //return uInitialSpace;
    return 200.0f;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* ScoreLayouter::create_staffobj_shape(ImoStaffObj* pSO, LUnits lineSpacing)
+{
+    //factory method to create shapes for staffobjs
+
+    switch (pSO->get_obj_type())
+    {
+        case ImoObj::k_clef:
+        {
+            ImoClef* pClef = dynamic_cast<ImoClef*>(pSO);
+            ClefEngraver engrv(m_libraryScope);
+            return engrv.create_shape(pClef, m_pCurBSI, m_pageCursor, lineSpacing);
+        }
+        case ImoObj::k_note:
+        {
+            ImoNote* pNote = dynamic_cast<ImoNote*>(pSO);
+            NoteEngraver engrv(m_libraryScope);
+            //TODO
+            int clefType = ImoClef::k_G2;
+            return engrv.create_shape(pNote, clefType, m_pageCursor, lineSpacing);    //m_pCurBSI,
+        }
+        default:
+            return NULL;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1055,7 +1086,7 @@ void ScoreLayouter::compute_bar_sizes_to_justify_current_system()   //bool fThis
 //
 //	//add the shapes to the timepos table
 //    SystemLayouter* pSysLayouter = m_sysLayouters[m_nCurSystem-1];
-//	GmoShape* pMainShape = ((lmStaffObj*)pKey)->GetShape();          //cast forced because otherwise the compiler complains
+//	GmoShape* pMainShape = ((ImoStaffObj*)pKey)->GetShape();          //cast forced because otherwise the compiler complains
 //    for (int nStaff=1; nStaff <= pVStaff->GetNumStaves(); nStaff++)
 //    {
 //        GmoShape* pShape = pKey->GetShape(nStaff);
@@ -1078,7 +1109,7 @@ void ScoreLayouter::compute_bar_sizes_to_justify_current_system()   //bool fThis
 //
 //	//add the shapes to the timepos table
 //    SystemLayouter* pSysLayouter = m_sysLayouters[m_nCurSystem-1];
-//	GmoShape* pMainShape = ((lmStaffObj*)pTime)->GetShape();          //cast forced because otherwise the compiler complains
+//	GmoShape* pMainShape = ((ImoStaffObj*)pTime)->GetShape();          //cast forced because otherwise the compiler complains
 //    for (int nStaff=1; nStaff <= pVStaff->GetNumStaves(); nStaff++)
 //    {
 //        GmoShape* pShape = pTime->GetShape(nStaff);

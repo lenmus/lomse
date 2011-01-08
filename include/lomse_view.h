@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -22,40 +22,34 @@
 #define __LOMSE_VIEW_H__
 
 #include "lomse_basic.h"
-#include "lomse_observable.h"
 //#include <list>
 //#include <iostream>
 //using namespace std;
-//#include "lomse_document_cursor.h"
 
 
 namespace lomse
 {
 
 //forward declarations
-class Document;
-class GraphicModel;
-class Presenter;
 class Interactor;
 
 
 // Abstract class from which all views must derive
 //---------------------------------------------------------------------------------------
-class View : public Observer
+class View
 {
 protected:
-    Document* m_pDoc;
     Interactor* m_pInteractor;
-    Presenter* m_pOwner;
 
 public:
-    View(Document* pDoc, Interactor* pInteractor);
+    //View(Document* pDoc, Interactor* pInteractor);
+    View();
     virtual ~View();
 
-    virtual void on_document_reloaded()=0;
+    inline void set_interactor(Interactor* pIntor) { m_pInteractor = pIntor; }
 
-    void set_owner(Presenter* pPresenter) { m_pOwner = pPresenter; }
-    inline Interactor* get_interactor() { return m_pInteractor; }
+    virtual void new_viewport(Pixels x, Pixels y) {}
+    virtual void get_viewport(Pixels* x, Pixels* y) {}
 
 };
 

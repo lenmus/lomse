@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -274,7 +274,7 @@ public:
 
     //setters
     inline void set_note_type(int noteType) { m_nNoteType = noteType; }
-    inline void get_dots(int dots) { m_nDots = dots; }
+    inline void set_dots(int dots) { m_nDots = dots; }
     inline void set_voice(int voice) { m_nVoice = voice; }
     void set_note_type_and_dots(int noteType, int dots);
 

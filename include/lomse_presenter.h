@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -65,7 +65,7 @@ public:
     Presenter* get_presenter(Document* pDoc);
 
     //other
-    void add_view(Document* pDoc, View* pView);
+    void add_interactor(Document* pDoc, Interactor* pIntor);
     void on_document_reloaded(Document* pDoc);
 
     //access to info
@@ -99,30 +99,28 @@ public:
 
 
 //---------------------------------------------------------------------------------------
-//Presenter: A façade object responsible for maintaining the lifecycle and 
+//Presenter: A façade object responsible for maintaining the life cycle and
 //relationships between MVC objects: Views, Interactors, Commands, Selections and the
 //Document.
 class Presenter
 {
 protected:
-    Document*           m_pDoc;
-    std::list<View*>    m_views;
-    void*               m_userData;
+    Document* m_pDoc;
+    std::list<Interactor*> m_interactors;
+    void* m_userData;
     //UserCommandExecuter* m_pExec;
-    void                (*m_callback)(Notification* event);
+    void (*m_callback)(Notification* event);
 
 public:
-    Presenter(Document* pDoc, View* pView);     //, UserCommandExecuter* pExec);
+    Presenter(Document* pDoc, Interactor* pIntor);     //, UserCommandExecuter* pExec);
     virtual ~Presenter();
 
     void close_document();
     void on_document_reloaded();
 
-    //views management
-    View* add_view();
-    void delete_view(View* pView);
-    inline int get_num_views() { return static_cast<int>( m_views.size() ); }
-    View* get_view(int iView);
+    //interactors management
+    inline int get_num_interactors() { return static_cast<int>( m_interactors.size() ); }
+    Interactor* get_interactor(int iIntor);
 
     //accessors
     inline Document* get_document() { return m_pDoc; }
@@ -136,13 +134,6 @@ public:
     inline void set_user_data(void* pData) { m_userData = pData; }
     inline void* get_user_data() { return m_userData; }
 
-
-    //    //score edition commands
-
-    ////insert a rest at current cursor position
-    //void insert_rest(View* pView, std::string source);
-
-
 };
 
 //---------------------------------------------------------------------------------------
@@ -154,13 +145,13 @@ protected:
     View*       m_pView;
 
 public:
-    Notification() 
+    Notification()
         : m_pPresenter(NULL), m_pDoc(NULL), m_pView(NULL)
     {
     }
 
-    Notification(Presenter* pPresenter, Document* pDoc, View* pView) 
-        : m_pPresenter(pPresenter), m_pDoc(pDoc), m_pView(pView) 
+    Notification(Presenter* pPresenter, Document* pDoc, View* pView)
+        : m_pPresenter(pPresenter), m_pDoc(pDoc), m_pView(pView)
     {
     }
 

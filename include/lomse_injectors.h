@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -48,6 +48,7 @@ class Presenter;
 class LomseDoorway;
 class Drawer;
 class ScreenDrawer;
+class Task;
 
 
 //---------------------------------------------------------------------------------------
@@ -98,8 +99,6 @@ public:
     Injector() {}
     ~Injector() {}
 
-    enum { k_simple_view=0, k_vertical_book_view, k_horizontal_book_view, };
-
     static LdpParser* inject_LdpParser(LibraryScope& libraryScope,
                                        DocumentScope& documentScope);
     static Analyser* inject_Analyser(LibraryScope& libraryScope,
@@ -117,9 +116,10 @@ public:
     static HorizontalBookView* inject_HorizontalBookView(LibraryScope& libraryScope,
                                                          Document* pDoc);  //UserCommandExecuter* pExec)
     static Interactor* inject_Interactor(LibraryScope& libraryScope,
-                                         Document* pDoc);   //, UserCommandExecuter* pExec);
+                                         Document* pDoc, View* pView);   //, UserCommandExecuter* pExec);
     static Presenter* inject_Presenter(LibraryScope& libraryScope,
                                        int viewType, Document* pDoc);
+    static Task* inject_Task(int taskType, Interactor* pIntor);
 
 };
 

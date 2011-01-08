@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -72,8 +72,9 @@ void TextEngraver::add_shape(GmoBox* pBox, LUnits xLeft, LUnits yTop, int valign
     if (!pStyle)
         pStyle = m_pScore->get_default_style_info();
 
-    GmoShape* pShape = new GmoShapeText(pBox, m_text.get_text(), pStyle, xLeft, yTop,
-                                        m_libraryScope);
+    int idx = 0;
+    GmoShape* pShape = new GmoShapeText(idx, m_text.get_text(), pStyle,
+                                        xLeft, yTop, m_libraryScope);
     pBox->add_shape(pShape, GmoShape::k_layer_staff);
 }
 

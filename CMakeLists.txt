@@ -252,6 +252,7 @@ set(MVC_FILES
     ${SRC_DIR}/mvc/lomse_graphic_view.cpp
     ${SRC_DIR}/mvc/lomse_interactor.cpp
     ${SRC_DIR}/mvc/lomse_presenter.cpp 
+    ${SRC_DIR}/mvc/lomse_tasks.cpp
     ${SRC_DIR}/mvc/lomse_view.cpp
 )
 

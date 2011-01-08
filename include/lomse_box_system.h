@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -38,7 +38,7 @@ class GmoBoxScorePage;
 //class lmShapeMargin;
 
 //
-// Class GmoBoxSystem represents a line of music in the printed score. 
+// Class GmoBoxSystem represents a line of music in the printed score.
 //
 
 class GmoBoxSystem : public GmoBox
@@ -49,11 +49,11 @@ protected:
 //    LUnits    m_xPos, m_yPos;     //system position: pos to render first staff
 //    LUnits    m_nIndent;          //indentation for this system
     //int m_nNumPage;         //page number (1..n) on which this system is included
-//	lmShapeMargin*	m_pTopSpacer;	
+//	lmShapeMargin*	m_pTopSpacer;
 	std::vector<GmoShapeStaff*> m_staffShapes;
 
 public:
-    GmoBoxSystem(GmoBoxScorePage* pParent);
+    GmoBoxSystem();
     //GmoBoxSystem(GmoBoxScorePage* pParent, int nNumPage, int iSystem,
     //             LUnits uxPos, LUnits uyPos, bool fFirstOfPage);
     ~GmoBoxSystem();
@@ -78,11 +78,11 @@ public:
 //    inline LUnits GetSystemIndent() const { return m_nIndent; }
 //    inline LUnits GetSystemFinalX() const { return m_uBoundsBottom.x; }
 //
-//	//miscellaneous info 
+//	//miscellaneous info
 //	LUnits GetYTopFirstStaff();
-    GmoShapeStaff* get_staff_shape(int iStaff); 
-//    GmoShapeStaff* get_staff_shape(lmInstrument* pInstr, int nStaff); 
-//    GmoShapeStaff* get_staff_shape(lmInstrument* pInstr, lmUPoint uPoint); 
+    GmoShapeStaff* get_staff_shape(int iStaff);
+//    GmoShapeStaff* get_staff_shape(lmInstrument* pInstr, int nStaff);
+//    GmoShapeStaff* get_staff_shape(lmInstrument* pInstr, lmUPoint uPoint);
 //
 //    //pointing at
 //	lmShapeStaff* FindStaffAtPosition(lmUPoint& uPoint);

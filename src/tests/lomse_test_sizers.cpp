@@ -1,6 +1,6 @@
-//--------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include <UnitTest++.h>
 #include <sstream>
@@ -60,7 +60,7 @@ SUITE(SizersTest)
     {
         FlowSizer sizer(FlowSizer::k_vertical);
         GmoStubScore stub(NULL);
-        GmoBoxScorePage box(&stub, NULL);
+        GmoBoxScorePage box(&stub);
         sizer.add_child( new SizerChild(&box) );
         sizer.layout(2100.0f, 2970.0f);
         CHECK( sizer.is_vertical() == true );
@@ -74,7 +74,7 @@ SUITE(SizersTest)
     {
         FlowSizer sizer(FlowSizer::k_horizontal);
         GmoStubScore stub(NULL);
-        GmoBoxScorePage box(&stub, NULL);
+        GmoBoxScorePage box(&stub);
         sizer.add_child( new SizerChild(&box) );
         sizer.layout(2100.0f, 2970.0f);
         CHECK( sizer.is_vertical() == false );

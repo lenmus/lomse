@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -22,6 +22,7 @@
 
 #include "lomse_internal_model.h"
 #include "lomse_drawer.h"
+#include "lomse_selections.h"
 
 //#include <sstream>
 //
@@ -84,7 +85,7 @@ void GraphicModel::draw_page(int iPage, UPoint& origin, Drawer* pDrawer,
     pDrawer->set_shift(origin.x, origin.y);
     get_page(iPage)->on_draw(pDrawer, opt);
     pDrawer->render(true);
-    pDrawer->set_shift(-origin.x, -origin.y);
+    pDrawer->remove_shift();
 }
 
 //---------------------------------------------------------------------------------------
@@ -105,17 +106,24 @@ GmoBox* GraphicModel::find_inner_box_at(int iPage, LUnits x, LUnits y)
     return get_page(iPage)->find_inner_box_at(x, y);
 }
 
+//---------------------------------------------------------------------------------------
+void GraphicModel::select_objects_in_rectangle(int iPage, SelectionSet& selection,
+                                               const URect& selRect, unsigned flags)
+{
+    selection.clear();
+    get_page(iPage)->select_objects_in_rectangle(selection, selRect, flags);
+}
 
 
 
 //=======================================================================================
 // GmoObj implementation
 //=======================================================================================
-GmoObj::GmoObj(GmoObj* owner, int objtype)
-    : m_pOwnerGmo(owner)
-    , m_objtype(objtype)
+GmoObj::GmoObj(int objtype)
+    : m_objtype(objtype)
     , m_origin(0.0f, 0.0f)
     , m_size(0.0f, 0.0f)
+    , m_fSelected(false)
 {
 }
 
@@ -155,27 +163,23 @@ void GmoObj::set_top(LUnits yTop)
 //---------------------------------------------------------------------------------------
 URect GmoObj::get_bounds()
 {
-    URect bbox;
-    bbox.x = m_origin.x;
-    bbox.y = m_origin.y;
-    bbox.width = m_size.width;
-    bbox.height = m_size.height;
-    return bbox;
+    return URect(m_origin.x, m_origin.y, m_size.width, m_size.height);
 }
 
 //---------------------------------------------------------------------------------------
 bool GmoObj::bounds_contains_point(UPoint& p)
 {
-    URect bbox = get_bounds();
-    return bbox.contains(p);
+    return get_bounds().contains(p);
 }
+
 
 
 //=======================================================================================
 // GmoBox
 //=======================================================================================
-GmoBox::GmoBox(GmoObj* owner, int objtype)
-    : GmoObj(owner, objtype)
+GmoBox::GmoBox(int objtype)
+    : GmoObj(objtype)
+    , m_pParentBox(NULL)
     , m_uTopMargin(0.0f)
     , m_uBottomMargin(0.0f)
     , m_uLeftMargin(0.0f)
@@ -209,6 +213,13 @@ void GmoBox::delete_shapes()
 }
 
 //---------------------------------------------------------------------------------------
+void GmoBox::add_child_box(GmoBox* child)
+{
+    m_childBoxes.push_back(child);
+    child->set_owner_box(this);
+}
+
+//---------------------------------------------------------------------------------------
 GmoBox* GmoBox::get_child_box(int i)  //i = 0..n-1
 {
     if (i < get_num_boxes())
@@ -221,19 +232,11 @@ GmoBox* GmoBox::get_child_box(int i)  //i = 0..n-1
 void GmoBox::add_shape(GmoShape* shape, int layer)
 {
     shape->set_layer(layer);
-    shape->set_owner_box(this);
+    //shape->set_owner_box(this);
     m_shapes.push_back(shape);
 
     GmoBoxDocPage* pPage = get_parent_box_page();
     pPage->store_shape(shape, layer);
-
-    //std::list<GmoShape*>::iterator it = m_shapes.begin();
-    //for (; it != m_shapes.end() && (*it)->get_layer() <= layer; ++it);
-
-    //if (it == m_shapes.end())
-    //    m_shapes.push_back(shape);
-    //else
-    //    m_shapes.insert(it, shape);
 }
 
 //---------------------------------------------------------------------------------------
@@ -248,14 +251,12 @@ GmoBoxDocPage* GmoBox::get_parent_box_page()
 //---------------------------------------------------------------------------------------
 GmoShape* GmoBox::get_shape(int i)  //i = 0..n-1
 {
-    GmoBoxDocPage* pPage = get_parent_box_page();
-    return pPage->get_shape_in_box(this, i);
-    //std::list<GmoShape*>::iterator it = m_shapes.begin();
-    //for (; it != m_shapes.end() && i > 0; ++it, --i);
-    //if (it != m_shapes.end())
-    //    return *it;
-    //else
-    //    return NULL;
+    std::list<GmoShape*>::iterator it = m_shapes.begin();
+    for (; it != m_shapes.end() && i > 0; ++it, --i);
+    if (it != m_shapes.end())
+        return *it;
+    else
+        return NULL;
 }
 
 //---------------------------------------------------------------------------------------
@@ -457,8 +458,8 @@ public:
 //=======================================================================================
 // GmoBoxDocPage
 //=======================================================================================
-GmoBoxDocPage::GmoBoxDocPage(GmoObj* owner)
-    : GmoBox(owner, GmoObj::k_box_doc_page)
+GmoBoxDocPage::GmoBoxDocPage()
+    : GmoBox(GmoObj::k_box_doc_page)
 {
 }
 
@@ -516,24 +517,6 @@ GmoShape* GmoBoxDocPage::get_first_shape_for_layer(int layer)
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* GmoBoxDocPage::get_shape_in_box(GmoBox* pBox, int order)
-{
-    std::list<GmoShape*>::iterator it = m_allShapes.begin();
-    for (int i=0; it != m_allShapes.end(); ++it)
-    {
-        if ((*it)->get_gm_owner() == pBox)
-        {
-            if (i == order)
-                return *it;
-            else
-                ++i;
-        }
-    }
-
-    return NULL;
-}
-
-//---------------------------------------------------------------------------------------
 GmoShape* GmoBoxDocPage::find_shape_at(LUnits x, LUnits y)
 {
     std::list<GmoShape*>::reverse_iterator it;
@@ -560,13 +543,27 @@ GmoObj* GmoBoxDocPage::hit_test(LUnits x, LUnits y)
     return NULL;
 }
 
+//---------------------------------------------------------------------------------------
+void GmoBoxDocPage::select_objects_in_rectangle(SelectionSet& selection,
+                                                const URect& selRect,
+                                                unsigned flags)
+{
+    std::list<GmoShape*>::reverse_iterator it;
+    for (it = m_allShapes.rbegin(); it != m_allShapes.rend(); ++it)
+    {
+        URect bbox = (*it)->get_bounds();
+        if (selRect.contains(bbox))
+            selection.add(*it);
+    }
+}
+
 
 
 //=======================================================================================
 // GmoBoxDocument
 //=======================================================================================
 GmoBoxDocument::GmoBoxDocument()
-    : GmoBox(NULL, GmoObj::k_box_document)
+    : GmoBox(GmoObj::k_box_document)
     , m_pLastPage(NULL)
 {
 }
@@ -574,9 +571,9 @@ GmoBoxDocument::GmoBoxDocument()
 //---------------------------------------------------------------------------------------
 GmoBoxDocPage* GmoBoxDocument::add_new_page()
 {
-    m_pLastPage = new GmoBoxDocPage(this);
-    m_pLastPage->set_number(get_num_pages()+1);
+    m_pLastPage = new GmoBoxDocPage();
     add_child_box(m_pLastPage);
+    m_pLastPage->set_number(get_num_pages());
     return m_pLastPage;
 }
 
@@ -590,8 +587,8 @@ GmoBoxDocPage* GmoBoxDocument::get_page(int i)
 //=======================================================================================
 // GmoBoxDocPageContent
 //=======================================================================================
-GmoBoxDocPageContent::GmoBoxDocPageContent(GmoObj* owner)
-    : GmoBox(owner, GmoObj::k_box_doc_page_content)
+GmoBoxDocPageContent::GmoBoxDocPageContent()
+    : GmoBox(GmoObj::k_box_doc_page_content)
 {
 }
 

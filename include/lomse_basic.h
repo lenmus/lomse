@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -84,17 +84,22 @@ struct Size
 template<class T>
 struct Rectangle
 {
+    T x, y;     //top left point
     T width;
     T height;
-    T x, y;     //top left point
 
     Rectangle()
-        : width(0), height(0), x(0), y(0)
+        : x(0), y(0), width(0), height(0)
         { }
     Rectangle(T xx, T yy, T ww, T hh)
         : x(xx), y(yy), width(ww), height(hh)
         { }
-    Rectangle(const Point<T>& topLeft, const Point<T>& bottomRight);
+    Rectangle(const Point<T>& topLeft, const Point<T>& bottomRight)
+        : x(topLeft.x)
+        , y(topLeft.y)
+        , width(bottomRight.x - topLeft.x)
+        , height(bottomRight.y - topLeft.y)
+        { }
     Rectangle(const Point<T>& pt, const Size<T>& size)
         : x(pt.x), y(pt.y), width(size.x), height(size.y)
         { }
@@ -126,30 +131,19 @@ struct Rectangle
 
     T left()   const { return x; }
     T top()    const { return y; }
-    T bottom() const { return y + height - 1; }
-    T right()  const { return x + width - 1; }
+    T bottom() const { return y + height; }
+    T right()  const { return x + width; }
 
     void left(T left) { x = left; }
-    void right(T right) { width = right - x + 1; }
+    void right(T right) { width = right - x; }
     void top(T top) { y = top; }
-    void bottom(T bottom) { height = bottom - y + 1; }
+    void bottom(T bottom) { height = bottom - y; }
 
-    Point<T> top_left_point() const { return position(); }
-    void top_left_point(const Point<T> &p) { position(p); }
+    Point<T> get_top_left() const { return position(); }
+    void set_top_left(const Point<T> &p) { position(p); }
 
-    Point<T> bottom_right_point() const { return Point<T>(right(), bottom()); }
-    void bottom_right_point(const Point<T> &p) { right(p.x); bottom(p.y); }
-    void SetRightBottom(const Point<T> &p) { bottom_right_point(p); }
-
-    Point<T> get_top_right() const { return Point<T>(right(), top()); }
-    Point<T> get_right_top() const { return get_top_right(); }
-    void SetTopRight(const Point<T> &p) { right(p.x); top(p.y); }
-    void SetRightTop(const Point<T> &p) { top_left_point(p); }
-
-    Point<T> get_bottom_left() const { return Point<T>(left(), bottom()); }
-    Point<T> GetLeftBottom() const { return get_bottom_left(); }
-    void SetBottomLeft(const Point<T> &p) { left(p.x); bottom(p.y); }
-    void SetLeftBottom(const Point<T> &p) { SetBottomLeft(p); }
+    Point<T> get_bottom_right() const { return Point<T>(right(), bottom()); }
+    void set_bottom_right(const Point<T> &p) { right(p.x); bottom(p.y); }
 
     Rectangle& intersect(const Rectangle& rect);
     Rectangle intersect(const Rectangle& rect) const
@@ -159,7 +153,31 @@ struct Rectangle
         return r;
     }
 
-    Rectangle& Union(const Rectangle& rect);
+    Rectangle& Union(const Rectangle& rect)
+    {
+        // ignore empty rectangles: union with an empty rectangle shouldn't extend
+        // this one to (0, 0)
+        if ( !width || !height )
+        {
+            *this = rect;
+        }
+        else if ( rect.width && rect.height )
+        {
+            float x1 = min(x, rect.x);
+            float y1 = min(y, rect.y);
+            float y2 = max(y + height, rect.height + rect.y);
+            float x2 = max(x + width, rect.width + rect.x);
+
+            x = x1;
+            y = y1;
+            width = x2 - x1;
+            height = y2 - y1;
+        }
+        //else: we're not empty and rect is empty
+
+        return *this;
+    }
+
     Rectangle Union(const Rectangle& rect) const
     {
         Rectangle r = *this;
@@ -168,7 +186,13 @@ struct Rectangle
     }
 
     // compare rectangles
-    bool operator==(const Rectangle& rect) const;
+    bool operator==(const Rectangle& rect) const
+    {
+        return this->x() == rect.x()
+               && this->y() == rect.y()
+               && this->width() == rect.width()
+               && this->height() == rect.height();
+    }
     bool operator!=(const Rectangle& rect) const { return !(*this == rect); }
 
     // return true if the point is (not strictly) inside the rect
@@ -189,8 +213,8 @@ struct Rectangle
     }
 
 
-    // return true if the rectangles have a non empty intersection
-    bool intersects(const Rectangle& rect) const;
+//    // return true if the rectangles have a non empty intersection
+//    bool intersects(const Rectangle& rect) const;
 };
 
 
@@ -205,6 +229,7 @@ typedef float LUnits;           //absolute unit (logical unit): one cent of mm
 typedef Point<LUnits> UPoint;   //point, in LUnits
 typedef Size<LUnits> USize;     //size, in LUnits
 typedef Rectangle<LUnits> URect; //rectangle, in LUnits
+#define LOMSE_OUT_OF_MODEL    -1000000.0f       //LUnits, when value is out of model
 
 typedef int Pixels;             //device units: pixels
 typedef Point<Pixels> VPoint;   //point, in pixels

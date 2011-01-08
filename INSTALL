@@ -50,7 +50,7 @@ A. General notes and requirements
 ==================================
 
 1. No makefiles or IDE project files are provided. All makefiles are generated
-   with CMakeusing CMake build system. CMake can generate different kinds of
+   with CMake using CMake build system. CMake can generate different kinds of
    native build files for your system (e.g. Unix Makefiles, Eclipse CDT 4.0
    project files, Visual Studio project files). You need CMake 2.8.0 or later
    on your platform. You can download it from
@@ -120,12 +120,17 @@ in the following command in your terminal (on Debian-like systems):
 
 In following instructions it is assumed you want to generate Makefiles. Open a
 terminal window, move to the folder in which you have unpackaged the lomse
-sources, and create a folder for the makefiles:
+sources, and create a folder for building. For instance:
 
-    cd /path/to/lomse/root
-    cd ..
-    mkdir build-lomse
-    cd build-lomse
+	checkout a working copy:
+		mkdir lomse
+		cd lomse
+		svn co https://lomse.svn.sourceforge.net/svnroot/lomse/trunk .
+
+	create folder to build:
+    	cd ..
+    	mkdir build-lomse
+    	cd build-lomse
 
 Now, using CMake, proceed to create the makefile:
 
@@ -136,7 +141,7 @@ the examples:
 
     make
 
-Alternatively, build by step-by-step, checking results:
+Alternatively, build step-by-step, checking results:
 
 	make lomse			# build the library
 		...
@@ -150,12 +155,15 @@ Alternatively, build by step-by-step, checking results:
 		Test time: 0.17 seconds.
 		[100%] Built target testlib
 
+		The number of tests will grow over time, and the times reported will
+		depend on your computer. 
+
 	make example_1			# build example application:
 		...
-		[100%] Built target demo_1
+		[100%] Built target example_1
 
 	cd bin				# run example app.
-	./demo_1
+	./example_1
 	
 
 

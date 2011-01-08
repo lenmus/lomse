@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -12,7 +12,7 @@
 //
 //  You should have received a copy of the GNU General Public License along
 //  with Lomse; if not, see <http://www.gnu.org/licenses/>.
-//  
+//
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
@@ -28,8 +28,8 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-GmoBoxSliceInstr::GmoBoxSliceInstr(GmoBoxSlice* owner)  //, ImoInstrument* pInstr)
-    : GmoBox(owner, GmoObj::k_box_slice_instr)
+GmoBoxSliceInstr::GmoBoxSliceInstr()  //, ImoInstrument* pInstr)
+    : GmoBox(GmoObj::k_box_slice_instr)
     //, m_pSlice(pParent)
     //, m_pInstr(pInstr)
 {
@@ -42,13 +42,13 @@ GmoBoxSliceInstr::~GmoBoxSliceInstr()
 
 ////---------------------------------------------------------------------------------------
 //int GmoBoxSliceInstr::GetPageNumber() const
-//{ 
+//{
 //	return m_pSlice->GetPageNumber();
 //}
 //
 ////---------------------------------------------------------------------------------------
 //GmoShapeStaff* GmoBoxSliceInstr::GetStaffShape(int nStaff)
-//{ 
+//{
 //    //nStaff = 1..n
 //
 //    wxASSERT(nStaff > 0 && nStaff <= m_pInstr->GetNumStaves());
@@ -66,7 +66,7 @@ GmoBoxSliceInstr::~GmoBoxSliceInstr()
 //
 ////---------------------------------------------------------------------------------------
 //void GmoBoxSliceInstr::DrawTimeGrid(lmPaper* pPaper)
-//{ 
+//{
 //	//as painting uses XOR we need the complementary color
 //	wxColour color(192,192,192);    //TODO: User option
 //	wxColour colorC(255 - (int)color.Red(), 255 - (int)color.Green(), 255 - (int)color.Blue() );
@@ -87,7 +87,7 @@ GmoBoxSliceInstr::~GmoBoxSliceInstr()
 //
 ////---------------------------------------------------------------------------------------
 //void GmoBoxSliceInstr::DrawMeasureFrame(lmPaper* pPaper)
-//{ 
+//{
 //	//as painting uses XOR we need the complementary color
 //	wxColour color(255,0,0);    //TODO: User option
 //	wxColour colorC(255 - (int)color.Red(), 255 - (int)color.Green(), 255 - (int)color.Blue() );

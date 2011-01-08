@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -18,8 +18,8 @@
 //
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_PLATFORM_H__
-#define __LOMSE_PLATFORM_H__
+#ifndef __LOMSE_DOORWAY_H__
+#define __LOMSE_DOORWAY_H__
 
 //---------------------------------------------------------------------------------------
 // This file MUST NOT include any system dependent .h files such as "windows.h" or
@@ -32,6 +32,8 @@
 #include "agg_pixfmt_rgba.h"
 #include "agg_rendering_buffer.h"
 #include "agg_trans_viewport.h"
+#include "lomse_tasks.h"
+#include "lomse_agg_types.h"
 using namespace agg;
 
 #include <string>
@@ -51,40 +53,16 @@ class HorizontalBookView;
 class SimpleView;
 class Document;
 
-typedef agg::rendering_buffer  RenderingBuffer;
-
-//-------------------------------------------------------------input_flag_e
-// Mouse and keyboard flags. They can be different on different platforms
-// and the ways they are obtained are also different. But in any case
-// the system dependent flags should be mapped into these ones. The meaning
-// of that is as follows. For example, if kbd_ctrl is set it means that the 
-// ctrl key is pressed and being held at the moment. They are also used in 
-// the overridden methods such as on_mouse_move(), on_mouse_button_down(),
-// on_mouse_button_dbl_click(), on_mouse_button_up(), on_key(). 
-// In the method on_mouse_button_up() the mouse flags have different
-// meaning. They mean that the respective button is being released, but
-// the meaning of the keyboard flags remains the same.
-// There's absolut minimal set of flags is used because they'll be most
-// probably supported on different platforms. Even the mouse_right flag
-// is restricted because Mac's mice have only one button, but AFAIK
-// it can be simulated with holding a special key on the keydoard.
-enum input_flag_e
-{
-    mouse_left  = 1,
-    mouse_right = 2,
-    kbd_shift   = 4,
-    kbd_ctrl    = 8
-};
 
 //--------------------------------------------------------------key_code_e
-// Keyboard codes. There's also a restricted set of codes that are most 
+// Keyboard codes. There's also a restricted set of codes that are most
 // probably supported on different platforms. Any platform dependent codes
 // should be converted into these ones. There're only those codes are
-// defined that cannot be represented as printable ASCII-characters. 
-// All printable ASCII-set can be used in a regular C/C++ manner: 
+// defined that cannot be represented as printable ASCII-characters.
+// All printable ASCII-set can be used in a regular C/C++ manner:
 // ' ', 'A', '0' '+' and so on.
 // Since the class is used for creating very simple demo-applications
-// we don't need very rich possibilities here, just basic ones. 
+// we don't need very rich possibilities here, just basic ones.
 // Actually the numeric key codes are taken from the SDL library, so,
 // the implementation of the SDL support does not require any mapping.
 enum key_code_e
@@ -97,7 +75,7 @@ enum key_code_e
     key_pause          = 19,
     key_escape         = 27,
 
-    // Keypad 
+    // Keypad
     key_delete         = 127,
     key_kp0            = 256,
     key_kp1            = 257,
@@ -129,7 +107,7 @@ enum key_code_e
     key_page_down      = 281,
 
     // Functional keys. You'd better avoid using
-    // f11...f15 in your applications if you want 
+    // f11...f15 in your applications if you want
     // the applications to be portable
     key_f1             = 282,
     key_f2             = 283,
@@ -147,8 +125,8 @@ enum key_code_e
     key_f14            = 295,
     key_f15            = 296,
 
-    // The possibility of using these keys is 
-    // very restricted. Actually it's guaranteed 
+    // The possibility of using these keys is
+    // very restricted. Actually it's guaranteed
     // only in win32_api and win32_sdl implementations
     key_numlock        = 300,
     key_capslock       = 301,
@@ -168,7 +146,7 @@ enum key_code_e
 //
 enum pix_format_e
 {
-    pix_format_undefined = 0,  // By default. No conversions are applied 
+    pix_format_undefined = 0,  // By default. No conversions are applied
     pix_format_bw,             // 1 bit per color B/W
     pix_format_gray8,          // Simple 256 level grayscale
     pix_format_gray16,         // Simple 65535 level grayscale
@@ -257,10 +235,10 @@ protected:
 
 public:
     LomseDoorway();
-    ~LomseDoorway();
+    virtual ~LomseDoorway();
 
     enum EPlatformType { k_platform_win32, k_platform_x11, };
-    enum EViewType { k_horizontal_book_view=0, k_vertical_book_view, k_simple_view, };
+    enum EViewType { k_view_simple=0, k_view_vertical_book, k_view_horizontal_book, };
 
     int init_library(EPlatformType platform, ostream& reporter=cout);
     inline LibraryScope* get_library_scope() { return m_pLibraryScope; }
@@ -275,19 +253,21 @@ public:
     inline double get_screen_ppi() { return m_platform.screen_ppi; }
 
     //common operations
+    Presenter* new_document(int viewType);
     View* create_view(int viewType, Document* pDoc);
     HorizontalBookView* create_horizontal_book_view(Document* pDoc);
 
     //providing platform services to lomse
-    void update_window() { m_pFunc_update_window(); }
-    void force_redraw() { m_pFunc_force_redraw(); }
-    void start_timer() { m_pFunc_start_timer(); }
+    virtual void update_window() { if (m_pFunc_update_window) m_pFunc_update_window(); }
+    virtual void force_redraw() { if (m_pFunc_force_redraw) m_pFunc_force_redraw(); }
+    virtual void start_timer() { if (m_pFunc_start_timer) m_pFunc_start_timer(); }
     //millisecods since last start_timer() invocation
-    double elapsed_time() const { return m_pFunc_elapsed_time(); }
+    virtual double elapsed_time() const {
+        return (m_pFunc_elapsed_time ? m_pFunc_elapsed_time() : 0.0); }
 
 };
 
 
 }   //namespace lomse
 
-#endif      //__LOMSE_PLATFORM_H__
+#endif      //__LOMSE_DOORWAY_H__
