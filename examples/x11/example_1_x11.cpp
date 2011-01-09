@@ -31,6 +31,8 @@
 #include "lomse_doorway.h"
 #include "lomse_document.h"
 #include "lomse_graphic_view.h"
+#include "lomse_interactor.h"
+#include "lomse_presenter.h"
 
 using namespace lomse;
 
@@ -40,7 +42,9 @@ using namespace lomse;
 // Let's define the necessary variables:
 //
 LomseDoorway    m_lomse;        //the Lomse library doorway
+Presenter*      m_pPresenter;
 GraphicView*    m_pView;        //the View for displaying a score
+Interactor*     m_pInteractor;  //to interact with the View
 Document*       m_pDoc;         //the score to display
 
 //the Lomse View renders its content on a bitmap. To manage it, Lomse
@@ -83,9 +87,6 @@ int           m_yMouse;
 XSetWindowAttributes m_window_attributes;
 Atom                 m_close_atom;
 
-
-//user options for processing events
-bool m_wait_mode;
 
 // All typical X stuff needed to run the program and the main events handler loop.
 // X has a number of important variables for handling windows:
@@ -137,22 +138,27 @@ void update_window()
     // any View methods (i.e. on_paint)
 
     display_view_content(&m_rbuf_window);
-
-    // When m_wait_mode is true we can discard all the events
-    // caming while the image is being drawn. In this case
-    // the X server does not accumulate mouse motion events.
-    // When m_wait_mode is false (i.e. we have some idle drawing)
-    // we cannot afford to miss any events
-    XSync(m_pDisplay, m_wait_mode);
+    XSync(m_pDisplay, false);
 }
 
 //-------------------------------------------------------------------------
 void open_document()
 {
-    //Normally you will create by loading the content of a file. But in this
-    //simple //example the score is defined in a text string
+    //Normally you will load the content of a file. But in this
+    //simple example we wiil crete an empty document and define its content
+    //from a text string
 
-    m_pDoc = new Document( *(m_lomse.get_library_scope()) );
+    //first, we will create a 'presenter'. It takes care of cretaing and maintaining
+    //all objects and relationships between the document, its views and the interactors
+    //to interct with the view
+    m_pPresenter = m_lomse.new_document(ViewFactory::k_view_horizontal_book);
+
+    //now, get the pointers to the relevant components
+    m_pDoc = m_pPresenter->get_document();
+    m_pInteractor = m_pPresenter->get_interactor(0);
+    m_pView = dynamic_cast<HorizontalBookView*>( m_pInteractor->get_view() );
+
+    //Now let's place content on the created document
     m_pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
         //"(instrument (musicData (clef G)(clef F3)(clef C1)(clef F4)) )))" );
 
@@ -163,11 +169,9 @@ void open_document()
         //"(instrument (staves 2) (musicData )) )))" );
         //"(instrument (musicData )) (instrument (musicData )) )))" );
 
-        "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData (clef G))) "
+        "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData (clef G)(n c4 e.)) )"
         "(instrument (name \"pilano\")(abbrev \"P\")(staves 2)(musicData (clef G p1)(clef F4 p2))) )))" );
 
-    //create the View for this document
-    m_pView = m_lomse.create_horizontal_book_view(m_pDoc);
     m_pView->set_rendering_buffer(&m_rbuf_window);
 }
 
@@ -183,22 +187,22 @@ void update_view_content()
 //-------------------------------------------------------------------------
 void on_mouse_button_down(int x, int y, unsigned flags)
 {
-    if (!m_pView) return;
-    m_pView->on_mouse_button_down(x, y, flags);
+    if (!m_pInteractor) return;
+    m_pInteractor->on_mouse_button_down(x, y, flags);
 }
 
 //-------------------------------------------------------------------------
 void on_mouse_move(int x, int y, unsigned flags)
 {
-    if (!m_pView) return;
-    m_pView->on_mouse_move(x, y, flags);
+    if (!m_pInteractor) return;
+    m_pInteractor->on_mouse_move(x, y, flags);
 }
 
 //-------------------------------------------------------------------------
 void on_mouse_button_up(int x, int y, unsigned flags)
 {
-    if (!m_pView) return;
-    m_pView->on_mouse_button_up(x, y, flags);
+    if (!m_pInteractor) return;
+    m_pInteractor->on_mouse_button_up(x, y, flags);
 }
 
 //-------------------------------------------------------------------------
@@ -222,6 +226,12 @@ void on_key(int x, int y, unsigned key, unsigned flags)
             break;
         case '5':
             m_pView->set_option_draw_box_slice_instr(true);
+            break;
+        case '8':
+            m_pInteractor->switch_task(TaskFactory::k_task_drag_view);
+            break;
+        case '9':
+            m_pInteractor->switch_task(TaskFactory::k_task_selection);
             break;
         case '0':
             m_pView->set_option_draw_box_doc_page_content(false);
@@ -277,10 +287,10 @@ void get_mouse_position(XEvent& event)
 unsigned get_keyboard_flags(XEvent& event)
 {
     unsigned flags = 0;
-    if(event.xkey.state & Button1Mask) flags |= mouse_left;
-    if(event.xkey.state & Button3Mask) flags |= mouse_right;
-    if(event.xkey.state & ShiftMask)   flags |= kbd_shift;
-    if(event.xkey.state & ControlMask) flags |= kbd_ctrl;
+    if(event.xkey.state & Button1Mask) flags |= k_mouse_left;
+    if(event.xkey.state & Button3Mask) flags |= k_mouse_right;
+    if(event.xkey.state & ShiftMask)   flags |= k_kbd_shift;
+    if(event.xkey.state & ControlMask) flags |= k_kbd_ctrl;
     return flags;
 }
 
@@ -288,12 +298,12 @@ unsigned get_keyboard_flags(XEvent& event)
 unsigned get_mouse_flags(XEvent& event)
 {
     unsigned flags = 0;
-    if(event.xbutton.state & ShiftMask)   flags |= kbd_shift;
-    if(event.xbutton.state & ControlMask) flags |= kbd_ctrl;
-    if(event.xbutton.state & Button1Mask) flags |= mouse_left;
-    if(event.xbutton.state & Button3Mask) flags |= mouse_right;
-    if(event.xbutton.button == Button1)   flags |= mouse_left;
-    if(event.xbutton.button == Button3)   flags |= mouse_right;
+    if(event.xbutton.state & ShiftMask)   flags |= k_kbd_shift;
+    if(event.xbutton.state & ControlMask) flags |= k_kbd_ctrl;
+    if(event.xbutton.state & Button1Mask) flags |= k_mouse_left;
+    if(event.xbutton.state & Button3Mask) flags |= k_mouse_right;
+    if(event.xbutton.button == Button1)   flags |= k_mouse_left;
+    if(event.xbutton.button == Button3)   flags |= k_mouse_right;
     return flags;
 }
 
@@ -473,30 +483,28 @@ int handle_events()
             m_view_needs_redraw = false;
         }
 
-//        if(!m_wait_mode)
+//        if(XPending(m_pDisplay) == 0)
 //        {
-//            if(XPending(m_pDisplay) == 0)
-//            {
-//                on_idle();
-//                continue;
-//            }
+//            on_idle();
+//            continue;
 //        }
 
         XEvent event;
-        XNextEvent(m_pDisplay, &event);
 
-//        // In the Idle mode discard all intermediate MotionNotify events
-//        if(!m_wait_mode && event.type == MotionNotify)
-//        {
-//            XEvent te = event;
-//            for(;;)
-//            {
-//                if(XPending(m_pDisplay) == 0) break;
-//                XNextEvent(m_pDisplay, &te);
-//                if(te.type != MotionNotify) break;
-//            }
-//            event = te;
-//        }
+        // In the Idle mode discard all intermediate MotionNotify events
+        if(event.type == MotionNotify)
+        {
+            XEvent te = event;
+            for(;;)
+            {
+                if(XPending(m_pDisplay) == 0) break;
+                XNextEvent(m_pDisplay, &te);
+                if(te.type != MotionNotify) break;
+            }
+            event = te;
+        }
+        else
+            XNextEvent(m_pDisplay, &event);
 
         switch(event.type)
         {
@@ -544,7 +552,7 @@ int handle_events()
                 unsigned flags = get_mouse_flags(event);
                 get_mouse_position(event);
 
-                if(flags & (mouse_left | mouse_right))
+                if(flags & (k_mouse_left | k_mouse_right))
                     on_mouse_button_down(m_xMouse, m_yMouse, flags);
 
                 break;
@@ -556,7 +564,7 @@ int handle_events()
                 unsigned flags = get_mouse_flags(event);
                 get_mouse_position(event);
 
-                if(flags & (mouse_left | mouse_right))
+                if(flags & (k_mouse_left | k_mouse_right))
                     on_mouse_button_up(m_xMouse, m_yMouse, flags);
 
                 break;
@@ -682,11 +690,10 @@ int main ()
     if (!init_x())
         exit(1);
 
-    m_wait_mode = true;
-
     //initialize lomse related variables
     m_flip_y = false;               //y axis is not reversed
     m_pView = NULL;
+    m_pInteractor = NULL;
     m_pDoc = NULL;
     m_view_needs_redraw = true;
 
@@ -707,8 +714,10 @@ int main ()
     handle_events();
 
     //delete the view and the rendering buffer
-    delete m_pView;             //this will also delete the Document
     delete_rendering_buffer();
+    delete m_pPresenter;    //this will also delete the Document, the Views and all other stuff
+
+    //delete m_pView;             //this will also delete the Document
 
     //close X connection
     close_x();
