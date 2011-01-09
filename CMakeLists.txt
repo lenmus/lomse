@@ -403,7 +403,6 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_sizers.cpp
         ${SRC_DIR}/tests/lomse_test_stack.cpp
         ${SRC_DIR}/tests/lomse_test_staffobjs_table.cpp
-        ${SRC_DIR}/tests/lomse_test_tasks.cpp
         ${SRC_DIR}/tests/lomse_test_tokenizer.cpp
         ${SRC_DIR}/tests/lomse_test_tree.cpp
         ${SRC_DIR}/tests/lomse_test_view.cpp
