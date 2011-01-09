@@ -399,7 +399,6 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_score_iterator.cpp
         ${SRC_DIR}/tests/lomse_test_score_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_selections.cpp
-        ${SRC_DIR}/tests/lomse_test_shape_note.cpp
         ${SRC_DIR}/tests/lomse_test_shapes.cpp
         ${SRC_DIR}/tests/lomse_test_sizers.cpp
         ${SRC_DIR}/tests/lomse_test_stack.cpp
