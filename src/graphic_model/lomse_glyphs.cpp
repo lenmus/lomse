@@ -24,7 +24,7 @@
 namespace lomse
 {
 
-// offset:  the y-axis offset from paper cursor position so that shape get correctly
+// offset:  the y-axis offset from page cursor position so that shape get correctly
 //          positioned over a five-lines staff (units: tenths of inter-line space)
 // shift:   the y-axis offset from bitmap rectangle to the selection rectangle origin
 //          (units: tenths of inter-line space)
@@ -79,9 +79,9 @@ const GlyphData glyphs_lmbasic2[] =
 	//                                                      ----- FUnits ------------      -- FUnits--
     //                       sel rectangle                  Position    Size                drag point
     //       Glyph   offset  shift   height                 x       y   width   height      x       y
-    GlyphData('O',  10,     55,     10,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Half note"
-    GlyphData('P',  10,     55,     10,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Quarter note notehead"
-    GlyphData('L',  10,     55,     10,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Cross notehead"
+    GlyphData('O',  50,     55,     10,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Half note"
+    GlyphData('P',  50,     55,     10,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Quarter note notehead"
+    GlyphData('L',  50,     55,     10,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Cross notehead"
 
 //notes with stem and flag, in single char
 	//                                                           ----- FUnits ------------      -- FUnits--
@@ -130,18 +130,18 @@ const GlyphData glyphs_lmbasic2[] =
 	//                                                      ----- FUnits ------------      -- FUnits--
     //                       sel rectangle                  Position    Size                drag point
     //       Glyph   offset  shift   height                 x       y   width   height      x       y
-    GlyphData('o', -20,      1,     29,  2956, 1570,      0,      0,      0,      0,      0,      0 ),    // "Eight note flag down"
-    GlyphData('n', -20,     10,     30,  2606, 1310,      0,   1024,    621,   1539,      0,      0 ),    // "16th note flag down"
-    GlyphData('m', -20,     11,     39,  2586,  912,      0,    512,    618,   1994,      0,      0 ),    // "32nd note flag down"
-    GlyphData('l', -20,     16,     44,  2435,  545,      0,      0,    621,   2250,      0,      0 ),    // "64th note flag down"
-    GlyphData('k', -20,     12,     48,  2437,  180,      0,     -3,    621,   2483,      0,      0 ),    // "128th note flag down"
-    GlyphData('j', -20,     14,     56,  2434, -180,      0,   -512,    621,   2875,      0,      0 ),    // "256th note flag down"
-    GlyphData('f', -60,     50,     30,   508, -1043,   -70,  -1027,    498,   1540,      0,      0 ),    // "Eight note flag up"
-    GlyphData('e', -60,     40,     35,   890, -945,    -69,   -779,    499,   1795,      0,      0 ),    // "16th note flag up"
-    GlyphData('d', -60,     30,     43,  1120, -727,    -69,   -661,    498,   2197,      0,      0 ),    // "32nd note flag up"
-    GlyphData('c', -60,     20,     53,  1541, -770,    -69,   -663,    497,   2711,      0,      0 ),    // "64th note flag up")),
-    GlyphData('b', -60,     15,     58,  1901, -756,    -69,   -628,    496,   2945,      0,      0 ),    // "128th note flag up"
-    GlyphData('a', -60,     10,     65,  2280, -766,    -69,   -766,    523,   3332,      0,      0 ),    // "256th note flag up")),
+    GlyphData('o',  40,      1,     29,  2956, 1570,      0,      0,      0,      0,      0,      0 ),    // "Eight note flag down"
+    GlyphData('n',  40,     10,     30,  2606, 1310,      0,   1024,    621,   1539,      0,      0 ),    // "16th note flag down"
+    GlyphData('m',  40,     11,     39,  2586,  912,      0,    512,    618,   1994,      0,      0 ),    // "32nd note flag down"
+    GlyphData('l',  40,     16,     44,  2435,  545,      0,      0,    621,   2250,      0,      0 ),    // "64th note flag down"
+    GlyphData('k',  40,     12,     48,  2437,  180,      0,     -3,    621,   2483,      0,      0 ),    // "128th note flag down"
+    GlyphData('j',  40,     14,     56,  2434, -180,      0,   -512,    621,   2875,      0,      0 ),    // "256th note flag down"
+    GlyphData('f',   0,     50,     30,   508, -1043,   -70,  -1027,    498,   1540,      0,      0 ),    // "Eight note flag up"
+    GlyphData('e',   0,     40,     35,   890, -945,    -69,   -779,    499,   1795,      0,      0 ),    // "16th note flag up"
+    GlyphData('d',   0,     30,     43,  1120, -727,    -69,   -661,    498,   2197,      0,      0 ),    // "32nd note flag up"
+    GlyphData('c',   0,     20,     53,  1541, -770,    -69,   -663,    497,   2711,      0,      0 ),    // "64th note flag up")),
+    GlyphData('b',   0,     15,     58,  1901, -756,    -69,   -628,    496,   2945,      0,      0 ),    // "128th note flag up"
+    GlyphData('a',   0,     10,     65,  2280, -766,    -69,   -766,    523,   3332,      0,      0 ),    // "256th note flag up")),
 
 //accidentals
 	//                                                      ----- FUnits ------------      -- FUnits--
@@ -158,12 +158,12 @@ const GlyphData glyphs_lmbasic2[] =
 	//                                                      ----- FUnits ------------      -- FUnits--
     //                       sel rectangle                  Position    Size                drag point
     //       Glyph   offset  shift   height                 x       y   width   height      x       y
-    GlyphData('A', -20,      0,      0,   0,      0,      0,   -853,   1243,   3606,    621,   1377 ),    // "G clef"
-    GlyphData('B', -20,      0,      0,   0,      0,      0,    324,   1451,   1728,    725,   1026 ),    // "F clef"
-    GlyphData('D', -20,     20,     35,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "F clef ottava alta"
-    GlyphData('E', -20,     20,     35,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "F clef ottava bassa"
-    GlyphData('C', -20,      0,      0,   0,      0,      0,      0,   1393,   2050,    681,   1025 ),    // "C clef"
-    GlyphData('G', -19,     20,     35,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Percussion clef, block"
+    GlyphData('A',  40,      0,      0,   0,      0,      0,   -853,   1243,   3606,    621,   1377 ),    // "G clef"
+    GlyphData('B',  40,      0,      0,   0,      0,      0,    324,   1451,   1728,    725,   1026 ),    // "F clef"
+    GlyphData('D',  40,     20,     35,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "F clef ottava alta"
+    GlyphData('E',  40,     20,     35,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "F clef ottava bassa"
+    GlyphData('C',  40,      0,      0,   0,      0,      0,      0,   1393,   2050,    681,   1025 ),    // "C clef"
+    GlyphData('G',  41,     20,     35,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Percussion clef, block"
 
 //numbers for time signatures
 	//                                                      ----- FUnits ------------      -- FUnits--
@@ -188,7 +188,7 @@ const GlyphData glyphs_lmbasic2[] =
 	//                                                      ----- FUnits ------------      -- FUnits--
     //                       sel rectangle                  Position    Size                drag point
     //       Glyph   offset  shift   height                 x       y   width   height      x       y
-    GlyphData('.', -60,     58,     5,   121,  -112,      0,      0,      0,      0,      0,      0 ),    // "Dot (for dotted notes)"
+    GlyphData('.',  50,     58,     5,   121,  -112,      0,      0,      0,      0,      0,      0 ),    // "Dot (for dotted notes)"
     GlyphData('_',   0,     33,    31,  1403,  -201,      0,      0,      0,      0,      0,      0 ),    // "small quarter note up (for metronome marks)"
     GlyphData('`',   0,     33,    31,  1403,  -201,      0,      0,      0,      0,      0,      0 ),    // "small dotted quarter note up"
     GlyphData(']',   0,     32,    32,  1432,  -205,      0,      0,      0,      0,      0,      0 ),    // "small eighth note up"

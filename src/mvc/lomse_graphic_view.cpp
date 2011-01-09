@@ -247,11 +247,12 @@ void GraphicView::zoom_in(Pixels x, Pixels y)
 
     //move origin (left-top window corner) to rx, ry
     m_transform *= agg::trans_affine_translation(-rx, -ry);
+
     //apply scaling
     m_transform *= agg::trans_affine_scaling(1.05);
+
     //move origin back to (rx, ry) so this point remains un-moved
     m_transform *= agg::trans_affine_translation(rx, ry);
-
     m_vxOrg = Pixels(m_transform.tx);
     m_vyOrg = Pixels(m_transform.ty);
 }
@@ -262,10 +263,14 @@ void GraphicView::zoom_out(Pixels x, Pixels y)
     double rx(x);
     double ry(y);
 
+    //move origin (left-top window corner) to rx, ry
     m_transform *= agg::trans_affine_translation(-rx, -ry);
-    m_transform *= agg::trans_affine_scaling(1.0/1.05);
-    m_transform *= agg::trans_affine_translation(rx, ry);
 
+    //apply scaling
+    m_transform *= agg::trans_affine_scaling(1.0/1.05);
+
+    //move origin back to (rx, ry) so this point remains un-moved
+    m_transform *= agg::trans_affine_translation(rx, ry);
     m_vxOrg = Pixels(m_transform.tx);
     m_vyOrg = Pixels(m_transform.ty);
 }

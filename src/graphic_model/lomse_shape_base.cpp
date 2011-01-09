@@ -90,13 +90,6 @@ GmoShape::~GmoShape()
 //    }
 }
 
-//---------------------------------------------------------------------------------------
-void GmoShape::shift_origin(USize& shift)
-{
-    m_origin.x += shift.width;
-    m_origin.y += shift.height;
-}
-
 ////---------------------------------------------------------------------------------------
 //bool GmoShape::Collision(GmoShape* pShape)
 //{
@@ -380,8 +373,8 @@ int GmoCompositeShape::add(GmoShape* pShape)
 //---------------------------------------------------------------------------------------
 void GmoCompositeShape::shift_origin(USize& shift)
 {
-    m_origin.x += shift.width;
-    m_origin.y += shift.height;
+//    m_origin.x += shift.width;
+//    m_origin.y += shift.height;
 
     //shift components
     for (int i=0; i < (int)m_Components.size(); i++)

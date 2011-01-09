@@ -40,8 +40,6 @@ GmoShapeGlyph::GmoShapeGlyph(int type, int idx, unsigned int nGlyph,
 {
     m_glyph = glyphs_lmbasic2[nGlyph].GlyphChar;
 
-    pos.y += 1080.0f;     //TODO-LOG TenthsToLogical(60);
-
     //glyph bounds
     TextMeter meter(m_libraryScope);
     meter.select_font("LenMus basic", 21.0);

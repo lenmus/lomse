@@ -151,7 +151,8 @@ protected:
     void create_column_and_add_it_to_current_system();
     inline bool must_terminate_system() { return m_fTerminateSystem; }
     inline void must_terminate_system(bool value) { m_fTerminateSystem = value; }
-    void compute_bar_sizes_to_justify_current_system();
+    bool system_must_be_justified();
+    void redistribute_free_space();
     void reposition_staffobjs();
 
     bool m_fTerminateSystem;

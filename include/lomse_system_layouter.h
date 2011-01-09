@@ -553,7 +553,7 @@ public:
 
     float move_prolog_shapes();
     void reasign_position_to_all_other_objects(LUnits uFizedSizeAtStart);
-    LUnits get_time_line_position_if_time_is(float rFirstTime);
+    LUnits get_time_line_position_for_time(float rFirstTime);
 
 protected:
 //    void InformAttachedObjs();

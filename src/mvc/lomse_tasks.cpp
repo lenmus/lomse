@@ -103,9 +103,6 @@ void TaskDragView::process_event(Event event)
 //---------------------------------------------------------------------------------------
 void TaskDragView::init_task()
 {
-    m_pIntor->get_viewport(&m_vxOrg, &m_vyOrg);
-    m_dx = 0;
-    m_dy = 0;
     m_drag_flag = false;
     m_state = k_waiting_for_first_point;
 }
@@ -113,6 +110,7 @@ void TaskDragView::init_task()
 //---------------------------------------------------------------------------------------
 void TaskDragView::start_drag(Event& event)
 {
+    m_pIntor->get_viewport(&m_vxOrg, &m_vyOrg);
     m_dx = event.x() - m_vxOrg;
     m_dy = event.y() - m_vyOrg;
     m_drag_flag = true;

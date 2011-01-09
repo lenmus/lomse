@@ -56,12 +56,11 @@ GmoShape* ClefEngraver::create_shape(ImoClef* pClef, GmoBoxSliceInstr* pBox,
 //    else
     {
         // get the shift to the staff on which the clef must be drawn
-	    LUnits yPos = uPos.y;
-        yPos += tenths_to_logical(get_glyph_offset(), lineSpacing);
+	    LUnits y = uPos.y + tenths_to_logical(get_glyph_offset(), lineSpacing);
 
         //create the shape object
         int nIdx = 0;   //single-shape
-        pShape = new GmoShapeClef(nIdx, m_iGlyph, UPoint(uPos.x, yPos),
+        pShape = new GmoShapeClef(nIdx, m_iGlyph, UPoint(uPos.x, y),
                                   m_fSmallClef, Color(0,0,0), m_libraryScope);
     }
 

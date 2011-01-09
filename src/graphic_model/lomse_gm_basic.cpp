@@ -172,6 +172,13 @@ bool GmoObj::bounds_contains_point(UPoint& p)
     return get_bounds().contains(p);
 }
 
+//---------------------------------------------------------------------------------------
+void GmoObj::shift_origin(USize& shift)
+{
+    m_origin.x += shift.width;
+    m_origin.y += shift.height;
+}
+
 
 
 //=======================================================================================
@@ -329,23 +336,6 @@ void GmoBox::draw_box_bounds(Drawer* pDrawer, double xorg, double yorg, Color& c
 }
 
 //---------------------------------------------------------------------------------------
-void GmoBox::shift_origin(USize& shift)
-{
-    m_origin.x += shift.width;
-    m_origin.y += shift.height;
-
-    //shift contained boxes
-    std::vector<GmoBox*>::iterator itB;
-    for (itB=m_childBoxes.begin(); itB != m_childBoxes.end(); ++itB)
-        (*itB)->shift_origin(shift);
-
-    //shift contained shapes
-    std::list<GmoShape*>::iterator itS;
-    for (itS=m_shapes.begin(); itS != m_shapes.end(); ++itS)
-        (*itS)->shift_origin(shift);
-}
-
-//---------------------------------------------------------------------------------------
 GmoBox* GmoBox::find_inner_box_at(LUnits x, LUnits y)
 {
     URect bbox = get_bounds();
@@ -361,6 +351,23 @@ GmoBox* GmoBox::find_inner_box_at(LUnits x, LUnits y)
         return this;
     }
     return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBox::shift_origin(USize& shift)
+{
+    m_origin.x += shift.width;
+    m_origin.y += shift.height;
+
+    //shift contained boxes
+    std::vector<GmoBox*>::iterator itB;
+    for (itB=m_childBoxes.begin(); itB != m_childBoxes.end(); ++itB)
+        (*itB)->shift_origin(shift);
+
+    //shift contained shapes
+    std::list<GmoShape*>::iterator itS;
+    for (itS=m_shapes.begin(); itS != m_shapes.end(); ++itS)
+        (*itS)->shift_origin(shift);
 }
 
 

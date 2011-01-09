@@ -222,9 +222,12 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/lomse_glyphs.cpp
     ${SRC_DIR}/graphic_model/lomse_gm_basic.cpp
     ${SRC_DIR}/graphic_model/lomse_instrument_engraver.cpp
+    ${SRC_DIR}/graphic_model/lomse_note_engraver.cpp
     ${SRC_DIR}/graphic_model/lomse_score_layouter.cpp
+    ${SRC_DIR}/graphic_model/lomse_selections.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_base.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_brace_bracket.cpp
+    ${SRC_DIR}/graphic_model/lomse_shape_note.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_staff.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_text.cpp
     ${SRC_DIR}/graphic_model/lomse_shapes.cpp
@@ -389,14 +392,19 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_interactor.cpp
         ${SRC_DIR}/tests/lomse_test_internal_model.cpp
         ${SRC_DIR}/tests/lomse_test_model_builder.cpp
+        ${SRC_DIR}/tests/lomse_test_note_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_parser.cpp
         ${SRC_DIR}/tests/lomse_test_presenter.cpp
         ${SRC_DIR}/tests/lomse_test_reader.cpp
         ${SRC_DIR}/tests/lomse_test_score_iterator.cpp
         ${SRC_DIR}/tests/lomse_test_score_layouter.cpp
+        ${SRC_DIR}/tests/lomse_test_selections.cpp
+        ${SRC_DIR}/tests/lomse_test_shape_note.cpp
+        ${SRC_DIR}/tests/lomse_test_shapes.cpp
         ${SRC_DIR}/tests/lomse_test_sizers.cpp
         ${SRC_DIR}/tests/lomse_test_stack.cpp
         ${SRC_DIR}/tests/lomse_test_staffobjs_table.cpp
+        ${SRC_DIR}/tests/lomse_test_tasks.cpp
         ${SRC_DIR}/tests/lomse_test_tokenizer.cpp
         ${SRC_DIR}/tests/lomse_test_tree.cpp
         ${SRC_DIR}/tests/lomse_test_view.cpp

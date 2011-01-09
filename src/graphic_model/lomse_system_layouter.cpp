@@ -202,7 +202,7 @@ void LineEntry::assign_fixed_and_variable_space(ColumnLayouter* pColLyt, float r
                 m_uFixedSpace = pColLyt->tenths_to_logical(LOMSE_EXCEPTIONAL_MIN_SPACE, 0);
                 m_uVariableSpace = pColLyt->tenths_to_logical(LOMSE_MIN_SPACE, 0) - m_uFixedSpace;
 			}
-			else if (m_pSO->is_spacer())    // || m_pSO->is_score_anchor())
+			else if (m_pSO->is_spacer())    //TODO || m_pSO->is_score_anchor())
 			{
                 m_uFixedSpace = 0.0f;
                 m_uVariableSpace = m_uSize;
@@ -294,7 +294,8 @@ void LineEntry::move_shape()
 {
     if (m_pSO && m_pShape)
     {
-//        LUnits uShift = m_xLeft - m_pShape->get_left();
+        //TODO
+        //LUnits uShift = m_xLeft - m_pShape->get_left();
 //        m_pSO->StoreOriginAndShiftShapes( uShift, m_pShape->GetOwnerIDX() );
         m_pShape->set_left(m_xLeft);
     }
@@ -431,6 +432,7 @@ void ColumnSplitter::compute_break_points(BreaksTable* pBT)
     if (pSO && pSO->is_note_rest() && static_cast<ImoNoteRest*>(pSO)->is_beamed())
     {
         fInBeam = true;
+        //TODO
         //ImoStaffObj* pSOEnd = static_cast<ImoNoteRest*>(pSO)->GetBeam()->GetEndNoteRest();
         //GmoShape* pShape = pSOEnd->get_shape();
         //uxBeam = pShape->get_left() + pShape->get_width();
@@ -444,6 +446,7 @@ void ColumnSplitter::compute_break_points(BreaksTable* pBT)
             if (is_equal_time((*it)->get_timepos(), rTime))
             {
                 uxWidth = max(uxWidth, (*it)->get_shape_size());
+                //TODO
 //                ImoStaffObj* pSO = (*it)->m_pSO;
                 //if (pSO && pSO->is_note_rest() && static_cast<ImoNoteRest*>(pSO)->is_beamed())
                 //{
@@ -467,6 +470,7 @@ void ColumnSplitter::compute_break_points(BreaksTable* pBT)
             if (pSO && pSO->is_note_rest() && static_cast<ImoNoteRest*>(pSO)->is_beamed())
             {
                 fInBeam = true;
+                //TODO
                 //ImoStaffObj* pSOEnd = static_cast<ImoNoteRest*>(pSO)->GetBeam()->GetEndNoteRest();
                 //GmoShape* pShape = pSOEnd->get_shape();
                 //uxBeam = pShape->get_left() + pShape->get_width();
@@ -1301,7 +1305,7 @@ float LineResizer::move_prolog_shapes()
 }
 
 //---------------------------------------------------------------------------------------
-LUnits LineResizer::get_time_line_position_if_time_is(float rFirstTime)
+LUnits LineResizer::get_time_line_position_for_time(float rFirstTime)
 {
     if (m_itCurrent != m_pTable->end() && (*m_itCurrent)->get_timepos() == rFirstTime)
         return (*m_itCurrent)->get_position() - (*m_itCurrent)->get_anchor();
@@ -1312,13 +1316,13 @@ LUnits LineResizer::get_time_line_position_if_time_is(float rFirstTime)
 //---------------------------------------------------------------------------------------
 void LineResizer::reasign_position_to_all_other_objects(LUnits uFizedSizeAtStart)
 {
-    if (m_itCurrent == m_pTable->end())
+    if (m_itCurrent == m_pTable->end() || m_uNewBarSize == m_uOldBarSize)
         return;
 
     //Compute proportion factor
     LUnits uLineStartPos = m_pTable->get_line_start_position();
     //LUnits uLineShift = m_uNewStart - uLineStartPos;
-    LUnits uDiscount = uFizedSizeAtStart - uLineStartPos;
+    LUnits uDiscount = 0.0f;    //TODO  uFizedSizeAtStart - uLineStartPos;
     float rProp = (m_uNewBarSize-uDiscount) / (m_uOldBarSize-uDiscount);
 
 	//Reposition the remainder entries
@@ -2160,7 +2164,7 @@ void ColumnResizer::determine_fixed_size_at_start_of_column()
     std::vector<LineResizer*>::iterator itR;
 	for (itR = m_LineResizers.begin(); itR != m_LineResizers.end(); ++itR)
 	{
-        m_uFixedPart = max(m_uFixedPart, (*itR)->get_time_line_position_if_time_is(m_rFirstTime));
+        m_uFixedPart = max(m_uFixedPart, (*itR)->get_time_line_position_for_time(m_rFirstTime));
     }
 }
 

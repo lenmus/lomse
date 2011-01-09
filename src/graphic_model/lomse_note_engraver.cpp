@@ -218,7 +218,6 @@ void NoteEngraver::add_shapes_for_dots_if_required()
 //---------------------------------------------------------------------------------------
 LUnits NoteEngraver::add_dot_shape(LUnits x, LUnits y, Color color)
 {
-    y += tenths_to_logical(50.0f);
     y += tenths_to_logical(get_glyph_offset(k_glyph_dot));
     GmoShapeDot* pShape = new GmoShapeDot(0, k_glyph_dot, UPoint(x, y), color,
                                           m_libraryScope);
@@ -429,8 +428,8 @@ int NoteEngraver::get_glyph_for_flag()
 void NoteEngraver::add_flag_shape(UPoint uPos, Color color)
 {
     int iGlyph = get_glyph_for_flag();
-    LUnits yPos = uPos.y + tenths_to_logical(get_glyph_offset(iGlyph));
-    GmoShapeFlag* pShape = new GmoShapeFlag(0, iGlyph, UPoint(uPos.x, yPos),
+    LUnits y = uPos.y + tenths_to_logical(get_glyph_offset(iGlyph));
+    GmoShapeFlag* pShape = new GmoShapeFlag(0, iGlyph, UPoint(uPos.x, y),
                                             color, m_libraryScope);
 	m_pNoteShape->add_flag(pShape);
 }

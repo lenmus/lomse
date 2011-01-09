@@ -340,7 +340,9 @@ void ScoreLayouter::fill_current_system_with_columns()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::justify_current_system()
 {
-    compute_bar_sizes_to_justify_current_system();  //fThisIsLastSystem);
+    if (system_must_be_justified())
+        redistribute_free_space();  //fThisIsLastSystem);
+
     reposition_staffobjs();
 }
 
@@ -776,6 +778,85 @@ void ScoreLayouter::add_shapes_for_score_objs()
 }
 
 //---------------------------------------------------------------------------------------
+bool ScoreLayouter::system_must_be_justified()
+{
+    //all systems needs justification except:
+
+    //1. it is the last system and flag "JustifyFinalBarline" is not set
+    //TODO
+    //if (fThisIsLastSystem && !m_fJustifyFinalBarline)
+    //    return false;         //user required not to justify it
+
+    //2. it is the last system but there is no final barline
+    //TODO
+//    SystemLayouter* m_sysLayouters[m_nCurSystem-1] = m_sysLayouters[m_nCurSystem-1];
+//    if (fLastSystem && !m_sysLayouters[m_nCurSystem-1]->ColumnHasBarline(m_nColumnsInSystem-1))
+//            return false;     //no need to justify because no final barline
+//
+
+    return true;        //do justification
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreLayouter::redistribute_free_space()
+{
+    //Space is redistributed to try to have all columns with equal witdh.
+
+    if (m_uFreeSpace <= 0.0f)
+        return;           //no space to distribute
+
+   //compute average column size and total occupied
+    LUnits uTotal = 0.0f;
+    for (int i = 0; i < m_nColumnsInSystem; i++)
+    {
+         uTotal += m_sysLayouters[m_nCurSystem-1]->get_minimum_size(i);
+    }
+    LUnits uAverage = (uTotal + m_uFreeSpace) / m_nColumnsInSystem;
+
+    //For each column, compute the diference between its size and the average target size.
+    //Sum up all the diferences in uDifTotal
+    std::vector<LUnits> uDif(m_nColumnsInSystem, 0.0f);
+    LUnits uDifTotal = 0;
+    int nNumSmallerColumns = 0;      //num of columns smaller than average
+    for (int i = 0; i < m_nColumnsInSystem; i++)
+    {
+        uDif[i] = uAverage - m_sysLayouters[m_nCurSystem-1]->get_minimum_size(i);
+        if (uDif[i] > 0.0f)
+        {
+            uDifTotal += uDif[i];
+            nNumSmallerColumns++;
+        }
+    }
+
+    //distribute space
+    if (uDifTotal > m_uFreeSpace)
+    {
+        //not enough space to make all equal
+        LUnits uReduce = (uDifTotal - m_uFreeSpace) / nNumSmallerColumns;
+        for (int i = 0; i < m_nColumnsInSystem; i++)
+        {
+            if (uDif[i] > 0.0f)
+            {
+                uDif[i] -= uReduce;
+                m_sysLayouters[m_nCurSystem-1]->increment_column_size(i, uDif[i]);
+            }
+        }
+    }
+    else
+    {
+        //enough space to make all columns equal size
+        for (int i = 0; i < m_nColumnsInSystem; i++)
+        {
+            if (uDif[i] > 0.0f)
+            {
+                m_sysLayouters[m_nCurSystem-1]->increment_column_size(i, uDif[i]);
+            }
+        }
+    }
+
+}
+
+//---------------------------------------------------------------------------------------
 void ScoreLayouter::reposition_staffobjs()
 {
     //SystemLayouter stores the final size that must have each column
@@ -794,16 +875,6 @@ void ScoreLayouter::reposition_staffobjs()
     }
 }
 
-//---------------------------------------------------------------------------------------
-void ScoreLayouter::compute_bar_sizes_to_justify_current_system()   //bool fThisIsLastSystem)
-{
-    //To compute_bar_sizes_to_justify_current_system divide up the remaining space
-    //between all bars, except if current system is the last one and flag
-    //"JustifyFinalBarline" is not set or there is no final barline.
-
-//    if (!fThisIsLastSystem || (fThisIsLastSystem && m_fJustifyFinalBarline))
-//        RedistributeFreeSpace(m_uFreeSpace, fThisIsLastSystem);
-}
 
 
 
@@ -900,83 +971,6 @@ void ScoreLayouter::compute_bar_sizes_to_justify_current_system()   //bool fThis
 //
 //    uSystemHeight += m_pageCursor.y;
 //    return uSystemHeight;
-//}
-//
-//---------------------------------------------------------------------------------------
-//void ScoreLayouter::RedistributeFreeSpace(LUnits uAvailable, bool fLastSystem)
-//{
-//    //Step 3: Justify bars (distribute remainnig space across all bars in system)
-//    //-------------------------------------------------------------------------------
-//    //Redistributes the space to try to have all columns with equal witdh.
-//    //
-//    //on entering in this function:
-//    // - object SystemLayouter stores the minimum size for each column for
-//    //   the current system.
-//    // - uAvailable stores the free space remaining at the end of this system
-//    //
-//    //on exit:
-//    // - the values stored in SystemLayouter are modified to reflect the new size
-//    //   for the bar columns, so that the line get justified.
-//    //
-//    //-------------------------------------------------------------------------------------
-//
-//    if (uAvailable <= 0.0f) return;       //no space to distribute
-//
-//    //The system must not be justified if this is the last system and there is no barline
-//    //in the last bar. Check this.
-//    SystemLayouter* pSysFmt = m_sysLayouters[m_nCurSystem-1];
-//    if (fLastSystem && !pSysFmt->ColumnHasBarline(m_nColumnsInSystem-1))
-//            return;     //no need to justify
-//
-//   //compute average column size and total occupied
-//    LUnits uTotal = 0.0f;
-//    for (int i = 0; i < m_nColumnsInSystem; i++)
-//    {
-//         uTotal += pSysFmt->GetMinimumSize(i);
-//    }
-//    LUnits uAverage = (uTotal + uAvailable) / m_nColumnsInSystem;
-//
-//    //for each column, compute the diference between its size and the average target size
-//    //sum up all the diferences in uDifTotal
-//    std::vector<LUnits> uDif(m_nColumnsInSystem, 0.0f);
-//    LUnits uDifTotal = 0;
-//    int nNumSmallerColumns = 0;      //num of columns smaller than average
-//    for (int i = 0; i < m_nColumnsInSystem; i++)
-//    {
-//        uDif[i] = uAverage - pSysFmt->GetMinimumSize(i);
-//        if (uDif[i] > 0.0f)
-//        {
-//            uDifTotal += uDif[i];
-//            nNumSmallerColumns++;
-//        }
-//    }
-//
-//    //distribute space
-//    if (uDifTotal > uAvailable)
-//    {
-//        //not enough space to make all equal
-//        LUnits uReduce = (uDifTotal - uAvailable) / nNumSmallerColumns;
-//        for (int i = 0; i < m_nColumnsInSystem; i++)
-//        {
-//            if (uDif[i] > 0.0f)
-//            {
-//                uDif[i] -= uReduce;
-//                pSysFmt->IncrementColumnSize(i, uDif[i]);
-//            }
-//        }
-//    }
-//    else
-//    {
-//        //enough space to make all columns equal size
-//        for (int i = 0; i < m_nColumnsInSystem; i++)
-//        {
-//            if (uDif[i] > 0.0f)
-//            {
-//                pSysFmt->IncrementColumnSize(i, uDif[i]);
-//            }
-//        }
-//    }
-//
 //}
 //
 //

@@ -151,7 +151,7 @@ public:
     void set_origin(LUnits xLeft, LUnits yTop);
     void set_left(LUnits xLeft);
     void set_top(LUnits yTop);
-    virtual void shift_origin(USize& shift) = 0;
+    virtual void shift_origin(USize& shift);
 
     //bounds
     bool bounds_contains_point(UPoint& p);
@@ -263,7 +263,6 @@ public:
  //   inline long GetOrder() { return m_nOrder; }
  //   inline void SetLayer(long nLayer) { m_nLayer = nLayer; }
  //   inline long GetLayer() { return m_nLayer; }
-    void shift_origin(USize& shift);
 
 protected:
     GmoShape(int objtype, int idx, Color color);
@@ -323,6 +322,7 @@ public:
     inline LUnits get_content_height() { return get_height() - m_uTopMargin - m_uBottomMargin; }
     inline LUnits get_content_top() { return get_top() + m_uTopMargin; }
     inline LUnits get_content_left() { return get_left() + m_uLeftMargin; }
+    void shift_origin(USize& shift);
 
     //drawing
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
@@ -332,7 +332,6 @@ public:
 
 protected:
     GmoBox(int objtype);
-    void shift_origin(USize& shift);
     void delete_boxes();
     void delete_shapes();
     GmoBoxDocPage* get_parent_box_page();
