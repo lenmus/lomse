@@ -75,6 +75,8 @@ SUITE(NoteEngraverTest)
         std::vector<GmoShape*>& components = pShape->get_components();
         CHECK( components.size() == 1 );
         CHECK( components[0]->is_shape_notehead() );
+
+        delete pShape;
     }
 
     TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_HeadAndStem)
@@ -96,6 +98,8 @@ SUITE(NoteEngraverTest)
         CHECK( components.size() == 2 );
         CHECK( components[0]->is_shape_notehead() );
         CHECK( components[1]->is_shape_stem() );
+
+        delete pShape;
     }
 
     TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_HeadStemAndFlag)
@@ -118,6 +122,8 @@ SUITE(NoteEngraverTest)
         CHECK( components[0]->is_shape_notehead() );
         CHECK( components[1]->is_shape_stem() );
         CHECK( components[2]->is_shape_flag() );
+
+        delete pShape;
     }
 
     TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ShapeInBlockWithDot)
@@ -140,6 +146,8 @@ SUITE(NoteEngraverTest)
         CHECK( components.size() == 2 );
         CHECK( components[0]->is_shape_notehead() );
         CHECK( components[1]->is_shape_dot() );
+
+        delete pShape;
     }
 
     TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_HeadStemFlagTwoDots)
@@ -165,6 +173,8 @@ SUITE(NoteEngraverTest)
         CHECK( components[2]->is_shape_dot() );
         CHECK( components[3]->is_shape_stem() );
         CHECK( components[4]->is_shape_flag() );
+
+        delete pShape;
     }
 
 //    TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_MeasureWidthDefaultStyle)

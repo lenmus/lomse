@@ -107,9 +107,10 @@ public:
                 k_box_document=0, k_box_doc_page, k_box_doc_page_content,
                 k_box_score_page, k_box_slice, k_box_slice_instr, k_box_system,
            k_shape,
-                k_shape_brace, k_shape_bracket, k_shape_clef, k_shape_dot,
-                k_shape_flag, k_shape_note, k_shape_notehead, k_shape_stem,
-                k_shape_staff, k_shape_text,
+                k_shape_barline, k_shape_brace, k_shape_bracket, k_shape_clef,
+                k_shape_dot, k_shape_flag, k_shape_invisible, k_shape_key_signature,
+                k_shape_note, k_shape_notehead, k_shape_stem, k_shape_staff,
+                k_shape_text,
 
            k_stub,
                 k_stub_score,
@@ -124,11 +125,14 @@ public:
     inline bool is_box_slice() { return m_objtype == k_box_slice; }
     inline bool is_box_slice_instr() { return m_objtype == k_box_slice_instr; }
     inline bool is_box_system() { return m_objtype == k_box_system; }
+    inline bool is_shape_barline() { return m_objtype == k_shape_barline; }
     inline bool is_shape_brace() { return m_objtype == k_shape_brace; }
     inline bool is_shape_bracket() { return m_objtype == k_shape_bracket; }
     inline bool is_shape_clef() { return m_objtype == k_shape_clef; }
     inline bool is_shape_dot() { return m_objtype == k_shape_dot; }
     inline bool is_shape_flag() { return m_objtype == k_shape_flag; }
+    inline bool is_shape_invisible() { return m_objtype == k_shape_invisible; }
+    inline bool is_shape_key_signature() { return m_objtype == k_shape_key_signature; }
     inline bool is_shape_note() { return m_objtype == k_shape_note; }
     inline bool is_shape_notehead() { return m_objtype == k_shape_notehead; }
     inline bool is_shape_stem() { return m_objtype == k_shape_stem; }
@@ -161,7 +165,7 @@ public:
 
     //selection
     inline bool is_selected() { return m_fSelected; }
-    inline void set_selected(bool value) { m_fSelected = value; }
+    virtual void set_selected(bool value) { m_fSelected = value; }
 
 protected:
     GmoObj(int objtype);
@@ -224,7 +228,6 @@ public:
  //   void OnDetached(GmoShape* pShape);
 
  //   //Debug related methods
- //   virtual wxString Dump(int nIndent);
  //   wxString DumpSelRect();
 
 	////visibility
@@ -476,7 +479,6 @@ public:
 //    inline void SetRenderWindowOffset(wxPoint& vOffset) { m_vOffset = vOffset; }
 //
 //    //implementation of virtual methods from base class
-//    wxString Dump(int nIndent);
 //	inline int GetPageNumber() const { return m_nNumPage; }
 //
 //	//owners and related
@@ -535,9 +537,6 @@ public:
 //    void RemoveFromSelection(lmGMObject* pGMO);
 //    inline int GetNumObjectsSelected() { return m_Selection.NumObjects(); }
 //    void ClearSelection();
-//
-//    //implementation of virtual methods from base class
-//    wxString Dump(int nIndent);
 //
 //	//owners and related
 //	GmoBoxSystem* GetOwnerSystem() { return (GmoBoxSystem*)NULL; }

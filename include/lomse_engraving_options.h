@@ -28,6 +28,19 @@ namespace lomse
 //Engraving options (all measures in Tenths, unless otherwise stated)
 //---------------------------------------------------------------------------------------
 
+//Barlines
+#define LOMSE_THIN_LINE_WIDTH       1.5f        // thin line width
+#define LOMSE_THICK_LINE_WIDTH      6.0f        // thick line width
+#define LOMSE_LINES_SPACING         4.0f        // space between lines: 4 tenths
+#define LOMSE_BARLINE_RADIOUS       2.0f        // dots radius: 2 tenths
+
+//Beams
+#define LOMSE_BEAM_THICKNESS        5.0f    //"Beam/Thickness of beam line/"
+#define LOMSE_BEAM_SPACING          3.0f    //"Beam/Space between beam lines/"
+
+//Instruments
+#define LOMSE_INSTR_SPACE_AFTER_NAME 10.0f  //"Instr/Space after name/"
+
 //Instruments / Groups
 #define LOMSE_GRP_SPACE_AFTER_NAME  10.0f   //"InstrGroup/Space after name/"
 #define LOMSE_GRP_BRACKET_WIDTH     12.5f   //"InstrGroup/Width of bracket/"
@@ -35,12 +48,9 @@ namespace lomse
 #define LOMSE_GRP_BRACE_WIDTH       6.0f    //"InstrGroup/Width of brace/"
 #define LOMSE_GRP_BRACE_GAP         5.0f    //"InstrGroup/Space after brace bar/"
 
-//Instruments
-#define LOMSE_INSTR_SPACE_AFTER_NAME 10.0f  //"Instr/Space after name/"
-
-//Beams
-#define LOMSE_BEAM_THICKNESS        5.0f    //"Beam/Thickness of beam line/"
-#define LOMSE_BEAM_SPACING          3.0f    //"Beam/Space between beam lines/"
+//Notes
+#define LOMSE_STEM_THICKNESS        1.2f
+#define LOMSE_SPACE_BEFORE_DOT      5.0f
 
 //System layouter
 //    //spacing function parameters
@@ -52,10 +62,6 @@ namespace lomse
 #define LOMSE_MIN_SPACE_BETWEEN_NOTE_AND_CLEF   10.0f
 #define LOMSE_EXCEPTIONAL_MIN_SPACE   2.5f
 #define LOMSE_SPACE_AFTER_BARLINE   20.0f
-
-//Notes
-#define LOMSE_STEM_THICKNESS        1.2f
-#define LOMSE_SPACE_BEFORE_DOT      5.0f
 
 
 

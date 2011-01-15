@@ -162,7 +162,6 @@ public:
     virtual ~GmoSimpleShape();
 
  //   //implementation of virtual methods from base class
- //   virtual wxString Dump(int nIndent) = 0;
  //   virtual void Shift(LUnits xIncr, LUnits yIncr);
 
  //   //dragging
@@ -196,7 +195,6 @@ public:
 	//virtual void RecomputeBounds();
 
  //   //virtual methods from base class
- //   virtual wxString Dump(int nIndent);
     virtual void shift_origin(USize& shift);
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 //   virtual void RenderHighlighted(wxDC* pDC, wxColour colorC);
@@ -206,6 +204,7 @@ public:
  //   bool BoundsContainsPoint(UPoint& uPoint);
  //   bool Collision(GmoShape* pShape);
  //   virtual void SetSelected(bool fValue);
+    void set_selected(bool value);
 
  //   //dragging
  //   virtual wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);

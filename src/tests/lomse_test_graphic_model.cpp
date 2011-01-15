@@ -224,7 +224,7 @@ SUITE(GraphicModelTest)
         GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>(pBSP->get_child_box(0));   //System
         GmoShapeStaff* pShape = pBSys->get_staff_shape(0);   //Staff
-        LUnits x = pShape->get_left() + 1.0f;
+        LUnits x = pShape->get_left() + 100.0f;
         LUnits y = pShape->get_top() + 1.0f;
 
         //cout << "DocPage: " << pPage->get_left() << ", " << pPage->get_top() << endl;

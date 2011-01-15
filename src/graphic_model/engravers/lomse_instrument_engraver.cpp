@@ -173,7 +173,7 @@ void InstrumentEngraver::add_staff_lines(GmoBoxSystem* pBox, LUnits x, LUnits y,
 {
  //   bool fVisible = !HideStaffLines();
     m_stavesLeft = x + indent;
-    LUnits width = pBox->get_content_width() - indent;
+    m_stavesWidth = pBox->get_content_width() - indent;
 
     m_stavesTop = y;
     for (int iStaff=0; iStaff < m_pInstr->get_num_staves(); iStaff++)
@@ -183,7 +183,7 @@ void InstrumentEngraver::add_staff_lines(GmoBoxSystem* pBox, LUnits x, LUnits y,
             y += pStaff->get_staff_margin();
         m_staffTop[iStaff] = y;
         GmoShapeStaff* pShape
-            = new GmoShapeStaff(iStaff, pStaff, iStaff, width, Color(0,0,0));
+            = new GmoShapeStaff(iStaff, pStaff, iStaff, m_stavesWidth, Color(0,0,0));
         pShape->set_origin(m_stavesLeft, y);
         pBox->add_staff_shape(pShape);
  //       pShape->SetVisible(fVisible);

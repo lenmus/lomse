@@ -27,6 +27,7 @@
 #include "agg_color_rgba.h"     //rgba & rgba8
 #include "agg_math_stroke.h"    //line_cap_e & line_join_e
 #include "agg_trans_affine.h"   //trans_affine
+#include "lomse_shape_base.h"   //enums ELineEdge, ...
 
 #include <string>
 using namespace std;
@@ -158,12 +159,13 @@ public:
     //curve?: elliptical_arc (A and a)
 
     // SVG basic shapes commands
-    //virtual void rect() = 0;                                      //SVG: <rect>
-    //virtual void circle() = 0;                                    //SVG: <circle>
-    //virtual void ellipse() = 0;                                   //SVG: <ellipse>
-    //virtual void line() = 0;                                      //SVG: <line>
-    //virtual void polyline() = 0;                                  //SVG: <polyline>
-    //virtual void polygon() = 0;                                   //SVG: <polygon>
+    //virtual void rect() = 0;                                                 //SVG: <rect>
+    virtual void circle(LUnits xCenter, LUnits yCenter, LUnits radius) = 0;  //SVG: <circle>
+    //virtual void ellipse() = 0;                                              //SVG: <ellipse>
+    virtual void line(LUnits x1, LUnits y1, LUnits x2, LUnits y2,
+                      LUnits width, ELineEdge nEdge=k_edge_normal) = 0;        //SVG: <line>
+    //virtual void polyline() = 0;                                             //SVG: <polyline>
+    virtual void polygon(int n, UPoint points[]) = 0;                        //SVG: <polygon>
 
     // not the same but similar to SVG path command
     virtual void add_path(VertexSource& vs, unsigned path_id = 0, bool solid_path = true) = 0;

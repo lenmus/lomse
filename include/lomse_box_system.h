@@ -92,7 +92,6 @@ public:
 //	GmoBoxSlice* FindBoxSliceAt(LUnits uxPos);
 //
 //    //implementation of virtual methods from base class
-//    wxString Dump(int nIndent);
 //	int GetPageNumber() const;
 //
 //	//overrides

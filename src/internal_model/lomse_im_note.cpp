@@ -102,7 +102,7 @@ ImoRest::ImoRest(long id, int nNoteType, float rDuration, int nDots, int nStaff,
 
 ImoNote::ImoNote()
     : ImoNoteRest(ImoObj::k_note)
-    , m_step(ImoNote::k_no_pitch)
+    , m_step(k_no_pitch)
     , m_octave(4)
     , m_accidentals(ImoNote::k_no_accidentals)
     , m_stemDirection(ImoNote::k_default)
@@ -128,7 +128,7 @@ ImoNote::ImoNote(long id, int nNoteType, float rDuration, int nDots, int nStaff,
                bool fVisible, bool fBeamed, ImoBeamInfo* pBeamInfo)
     : ImoNoteRest(id, ImoObj::k_note, nNoteType, rDuration, nDots, nStaff, nVoice,
                  fVisible, pBeamInfo)
-    , m_step(ImoNote::C)
+    , m_step(k_step_C)
     , m_octave(4)
     , m_accidentals(ImoNote::k_no_accidentals)
     , m_stemDirection(ImoNote::k_default)

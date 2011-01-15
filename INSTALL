@@ -162,7 +162,11 @@ Alternatively, build step-by-step, checking results:
 		...
 		[100%] Built target example_1
 
-	cd bin				# run example app.
+    cp ../lomse/examples/*.ttf ./bin     #copy fonts
+        IMPORTANT: Until this is fixed, you need to copy font files to /bin 
+        directory. Otherwise, music symbols will not be rendered
+
+ 	cd bin				# run example app.
 	./example_1
 	
 

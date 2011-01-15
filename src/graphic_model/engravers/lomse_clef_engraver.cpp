@@ -47,23 +47,13 @@ GmoShape* ClefEngraver::create_shape(ImoClef* pClef, GmoBoxSliceInstr* pBox,
     m_fSmallClef = fSmallClef;
     m_iGlyph = find_glyph();
 
-//    int nIdx = 0;     //NewShapeIndex();      //TODO
-    GmoShape* pShape = NULL;
-//    if (!m_fVisible)
-//    {
-//        pShape = new GmoShapeInvisible(pBox, nIdx, uPos, lmUSize(0.0, 0.0) );
-//    }
-//    else
-    {
-        // get the shift to the staff on which the clef must be drawn
-	    LUnits y = uPos.y + tenths_to_logical(get_glyph_offset(), lineSpacing);
+    // get the shift to the staff on which the clef must be drawn
+    LUnits y = uPos.y + tenths_to_logical(get_glyph_offset(), lineSpacing);
 
-        //create the shape object
-        int nIdx = 0;   //single-shape
-        pShape = new GmoShapeClef(nIdx, m_iGlyph, UPoint(uPos.x, y),
-                                  m_fSmallClef, Color(0,0,0), m_libraryScope);
-    }
-
+    //create the shape object
+    int nIdx = 0;   //single-shape
+    GmoShape* pShape = new GmoShapeClef(nIdx, m_iGlyph, UPoint(uPos.x, y),
+                                        m_fSmallClef, Color(0,0,0), m_libraryScope);
     return pShape;
 }
 

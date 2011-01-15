@@ -102,22 +102,6 @@ void GmoShapeText::select_font()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//std::string GmoShapeText::Dump(int nIndent)
-//{
-//	std::string sDump = _T("");
-//	sDump.append(nIndent * lmINDENT_STEP, _T(' '));
-//    sDump += std::string::Format(_T("TextShape: pos=(%.2f,%.2f), text=%s, "),
-//        m_uPos.x, m_uPos.y, m_text.c_str() );
-//    sDump += DumpBounds();
-//    sDump += _T("\n");
-//
-//    //base class
-//    sDump += GmoShape::Dump(nIndent);
-//
-//	return sDump;
-//}
-//
-////---------------------------------------------------------------------------------------
 //void GmoShapeText::Shift(LUnits xIncr, LUnits yIncr)
 //{
 //    m_uPos.x += xIncr;
@@ -421,22 +405,6 @@ void GmoShapeText::select_font()
 //void GmoShapeTitle::SetFont(wxFont *pFont)
 //{
 //    m_pFont = pFont;
-//}
-//
-////---------------------------------------------------------------------------------------
-//std::string GmoShapeTitle::Dump(int nIndent)
-//{
-//	std::string sDump = _T("");
-//	sDump.append(nIndent * lmINDENT_STEP, _T(' '));
-//    sDump += std::string::Format(_T("TextBlock: pos=(%.2f,%.2f), text=%s, "),
-//        m_uTextPos.x, m_uTextPos.y, m_text.c_str() );
-//    sDump += DumpBounds();
-//    sDump += _T("\n");
-//
-//    //base class
-//    sDump += GmoShape::Dump(nIndent);
-//
-//	return sDump;
 //}
 //
 ////---------------------------------------------------------------------------------------
@@ -760,22 +728,6 @@ void GmoShapeText::select_font()
 //void GmoShapeTextbox::SetFont(wxFont *pFont)
 //{
 //    m_pFont = pFont;
-//}
-//
-////---------------------------------------------------------------------------------------
-//std::string GmoShapeTextbox::Dump(int nIndent)
-//{
-//	std::string sDump = _T("");
-//	sDump.append(nIndent * lmINDENT_STEP, _T(' '));
-//    //sDump += std::string::Format(_T("Textbox: pos=(%.2f,%.2f), text=%s, "),
-//    //    m_uTextPos.x, m_uTextPos.y, m_text.c_str() );
-//    sDump += DumpBounds();
-//    sDump += _T("\n");
-//
-//    //base class
-//    sDump += GmoShape::Dump(nIndent);
-//
-//	return sDump;
 //}
 //
 ////---------------------------------------------------------------------------------------

@@ -99,6 +99,7 @@ void Document::clear()
 {
     delete m_pIModel;
     m_pIModel = NULL;
+    m_pImoDoc = NULL;
 }
 
 std::string Document::to_string()

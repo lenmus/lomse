@@ -31,8 +31,6 @@ namespace lomse
 class ImoClef;
 class GmoBoxSliceInstr;
 class GmoShape;
-class GmoBox;
-class FontStorage;
 
 //---------------------------------------------------------------------------------------
 class ClefEngraver

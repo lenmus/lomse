@@ -28,6 +28,7 @@
 #include "lomse_box_slice_instr.h"
 #include "lomse_font_storage.h"
 #include "lomse_shapes.h"
+#include "lomse_pitch.h"
 
 
 namespace lomse
@@ -61,6 +62,8 @@ GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, UPoint uPos,
     m_uyTop = uyStaffTopLine - get_pitch_shift();
     m_uxLeft = uPos.x;
 
+    determine_stem_direction();
+
 //	// create the shape for the stem because it must be measured even if it must not be
 //	// drawn. This is necessary, for example, to have information for positioning
 //	// tuplets' bracket. Or to align notes in a chord.
@@ -68,10 +71,9 @@ GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, UPoint uPos,
 //	// the shape will be deleted. Otherwise, it will be added to the note shape.
 //    //-----------------------------------------------------------------------------------
     m_uStemThickness = tenths_to_logical(LOMSE_STEM_THICKNESS);
-    bool fStemDown = m_pNote->is_stem_down();
 	bool fStemAdded = false;
 	m_pStemShape = new GmoShapeStem(0.0f, 0.0f, 0.0f, 0.0f,
-                                    fStemDown, m_uStemThickness, m_color);
+                                    m_fStemDown, m_uStemThickness, m_color);
 
 
 //    //if this is the first note of a chord, give lmChordLayout the responsibility for
@@ -186,8 +188,35 @@ GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, UPoint uPos,
 }
 
 //---------------------------------------------------------------------------------------
+void NoteEngraver::determine_stem_direction()
+{
+	switch (m_pNote->get_stem_direction())
+	{
+        case ImoNote::k_default:
+            m_fStemDown = (m_nPosOnStaff >= 6);
+            break;
+        case ImoNote::k_double:
+//            TODO
+//            I understand that "STEM_DOUBLE" means two stems: one up and one down.
+//            This is not yet implemented and is treated as stem default.
+            m_fStemDown = (m_nPosOnStaff >= 6);
+            break;
+        case ImoNote::k_up:
+            m_fStemDown = false;
+            break;
+        case ImoNote::k_down:
+            m_fStemDown = true;
+            break;
+        case ImoNote::k_none:
+            m_fStemDown = false;       //false or true. The value doesn't matter.
+            break;
+    }
+}
+
+//---------------------------------------------------------------------------------------
 void NoteEngraver::add_space_before_note()
 {
+    //TODO
     //m_uxLeft += m_uSpacePrev;
 }
 
@@ -202,7 +231,7 @@ void NoteEngraver::add_shapes_for_dots_if_required()
         if (m_nPosOnStaff % 2 == 0)
         {
             // notehead is placed on a line. Shift up/down the dots by half line
-            if (m_pNote->is_stem_down())
+            if (m_fStemDown)
                 uyPos -= tenths_to_logical(5.0f);
             else
                 uyPos += tenths_to_logical(5.0f);
@@ -230,7 +259,7 @@ void NoteEngraver::determine_stem_x_pos()
 {
     //TODO: stem position for reversed noteheads
 
-    if (m_pNote->is_stem_down())
+    if (m_fStemDown)
     {
         //stem down: line down on the left of the notehead unless notehead reversed
         //line is centered on stem x position, so we must add half stem thickness
@@ -251,7 +280,7 @@ void NoteEngraver::determine_stem_x_pos()
 //---------------------------------------------------------------------------------------
 void NoteEngraver::determine_stem_y_start()
 {
-    if (m_pNote->is_stem_down())
+    if (m_fStemDown)
         m_uyTop += tenths_to_logical(51.0f);    //on the left of the notehead
     else
         m_uyTop += tenths_to_logical(49.0f);    //on the right of the notehead
@@ -266,7 +295,6 @@ void NoteEngraver::set_position_and_size_of_stem()
     determine_stem_x_pos();
     determine_stem_y_start();
 
-	bool fStemDown = m_pNote->is_stem_down();
     if (!is_beamed() && has_stem())
     {
         m_uStemLength = get_standard_stem_length();
@@ -275,34 +303,34 @@ void NoteEngraver::set_position_and_size_of_stem()
             int iGlyph = get_glyph_for_flag();
             // Glyph data is in FUnits. As 512 FU are 1 line (10 tenths), to convert
             // FUnits into tenths just divide FU by 51.2
-            float rFlag, rMinStem;
-            if (fStemDown)
+            Tenths rFlag, rMinStem;
+            if (m_fStemDown)
             {
-                rFlag = fabs((2048.0 - (float)glyphs_lmbasic2[iGlyph].Bottom) / 51.2 );
-                rMinStem = ((float)glyphs_lmbasic2[iGlyph].Top - 2048.0 + 128.0) / 51.2 ;
+                rFlag = fabs((2048.0f - glyphs_lmbasic2[iGlyph].Bottom) / 51.2f );
+                rMinStem = (glyphs_lmbasic2[iGlyph].Top - 2048.0f + 128.0f) / 51.2f ;
             }
             else
             {
                 if (m_pNote->get_note_type() == ImoNoteRest::k_eighth)
-                    rFlag = ((float)glyphs_lmbasic2[iGlyph].Top) / 51.2 ;
+                    rFlag = (glyphs_lmbasic2[iGlyph].Top) / 51.2f ;
                 else if (m_pNote->get_note_type() == ImoNoteRest::k_16th)
-                    rFlag = ((float)glyphs_lmbasic2[iGlyph].Top + 128.0) / 51.2 ;
+                    rFlag = (glyphs_lmbasic2[iGlyph].Top + 128.0f) / 51.2f;
                 else
-                    rFlag = ((float)glyphs_lmbasic2[iGlyph].Top + 512.0) / 51.2 ;
+                    rFlag = (glyphs_lmbasic2[iGlyph].Top + 512.0f) / 51.2f;
 
-                rMinStem = fabs( (float)glyphs_lmbasic2[iGlyph].Bottom / 51.2 );
+                rMinStem = fabs(glyphs_lmbasic2[iGlyph].Bottom / 51.2f);
             }
             LUnits uFlag = tenths_to_logical(rFlag);
             LUnits uMinStem = tenths_to_logical(rMinStem);
             m_uStemLength = max((m_uStemLength > uFlag ? m_uStemLength-uFlag : 0), uMinStem);
-            m_uyFlag = m_uyStemStart + (fStemDown ? m_uStemLength : -m_uStemLength);
+            m_uyFlag = m_uyStemStart + (m_fStemDown ? m_uStemLength : -m_uStemLength);
 //            SetStemLength(uStemLength + uFlag);
         }
     }
 
     //adjust the position and size of the stem shape
-    m_uyStemEnd = m_uyStemStart + (fStemDown ? m_uStemLength : -m_uStemLength);
-    m_pStemShape->adjust(m_uxStem, m_uyStemStart, m_uyStemEnd, fStemDown);
+    m_uyStemEnd = m_uyStemStart + (m_fStemDown ? m_uStemLength : -m_uStemLength);
+    m_pStemShape->adjust(m_uxStem, m_uyStemStart, m_uyStemEnd, m_fStemDown);
 }
 
 //---------------------------------------------------------------------------------------
@@ -310,7 +338,7 @@ void NoteEngraver::add_shape_for_flag_if_required()
 {
     if (!is_beamed() && has_flag() && !is_in_chord())
     {
-        LUnits x = (m_pNote->is_stem_down() ? get_stem_x_left() : get_stem_x_right());
+        LUnits x = (m_fStemDown ? get_stem_x_left() : get_stem_x_right());
         add_flag_shape(UPoint(x, m_uyFlag), m_color);
     }
 }
@@ -403,21 +431,20 @@ int NoteEngraver::get_glyph_for_notehead(int noteheadType)
 //---------------------------------------------------------------------------------------
 int NoteEngraver::get_glyph_for_flag()
 {
-    bool fStemDown = m_pNote->is_stem_down();
     switch (m_pNote->get_note_type())
 	{
         case ImoNoteRest::k_eighth :
-            return (fStemDown ? k_glyph_eighth_flag_down : k_glyph_eighth_flag_up);
+            return (m_fStemDown ? k_glyph_eighth_flag_down : k_glyph_eighth_flag_up);
         case ImoNoteRest::k_16th :
-            return  (fStemDown ? k_glyph_16th_flag_down : k_glyph_16th_flag_up);
+            return  (m_fStemDown ? k_glyph_16th_flag_down : k_glyph_16th_flag_up);
         case ImoNoteRest::k_32th :
-            return  (fStemDown ? k_glyph_32nd_flag_down : k_glyph_32nd_flag_up);
+            return  (m_fStemDown ? k_glyph_32nd_flag_down : k_glyph_32nd_flag_up);
         case ImoNoteRest::k_64th :
-            return  (fStemDown ? k_glyph_64th_flag_down : k_glyph_64th_flag_up);
+            return  (m_fStemDown ? k_glyph_64th_flag_down : k_glyph_64th_flag_up);
         case ImoNoteRest::k_128th :
-            return  (fStemDown ? k_glyph_128th_flag_down : k_glyph_128th_flag_up);
+            return  (m_fStemDown ? k_glyph_128th_flag_down : k_glyph_128th_flag_up);
         case ImoNoteRest::k_256th :
-            return  (fStemDown ? k_glyph_256th_flag_down : k_glyph_256th_flag_up);
+            return  (m_fStemDown ? k_glyph_256th_flag_down : k_glyph_256th_flag_up);
         default:
             //LogMessage("NoteEngraver::get_glyph_for_flag", "Error: invalid note type %d.", m_pNote->get_note_type());
             return  k_glyph_eighth_flag_down;
@@ -443,9 +470,6 @@ Tenths NoteEngraver::get_glyph_offset(int iGlyph)
 //---------------------------------------------------------------------------------------
 int NoteEngraver::get_pos_on_staff()
 {
-    //TODO
-    return 2;
-
     // Returns the position on the staff (line/space) referred to the first ledger
     // line of the staff. Depends on clef:
     //        0 - on first ledger line (C note in G clef)
@@ -456,55 +480,68 @@ int NoteEngraver::get_pos_on_staff()
     //        5 - on second space
     //        etc.
 
-//    if (pitch == ImoNote::k_no_pitch)
-//        // if pitch is not yet defined, return line 0 (first bottom ledger line)
-//        return 0;
-//    else
-//    {
-//        if (clefType == lmE_Undefined)
-//            clefType = m_pVStaff->GetStaff(m_nStaffNum)->GetDefaultClef();
-//        return PitchToPosOnStaff(clefType, m_anPitch);
-//    }
+    if (!m_pNote->is_pitch_defined())
+        return 0;   //first bottom ledger line
+    else
+        return pitch_to_pos_on_staff(m_clefType);
 }
 
-//int NoteEngraver::PitchToPosOnStaff(lmEClefType nClef, lmAPitch aPitch)
-//{
-//    // Returns the position on the staff (line/space) referred to the first ledger line of
-//    // the staff. Depends on clef:
-//    //        0 - on first ledger line (C note in G clef)
-//    //        1 - on next space (D in G clef)
-//    //        2 - on first line (E not in G clef)
-//    //        3 - on first space
-//    //        4 - on second line
-//    //        5 - on second space
-//    //        etc.
-//
-//	// pitch is defined. Position will depend on key
-//    switch (nClef) {
-//        case lmE_Sol :
-//            return aPitch.ToDPitch() - lmC4_DPITCH;
-//        case lmE_Fa4 :
-//            return aPitch.ToDPitch() - lmC4_DPITCH + 12;
-//        case lmE_Fa3 :
-//            return aPitch.ToDPitch() - lmC4_DPITCH + 10;
-//        case lmE_Fa5 :
-//            return aPitch.ToDPitch() - lmC4_DPITCH + 14;
-//        case lmE_Do1 :
-//            return aPitch.ToDPitch() - lmC4_DPITCH + 2;
-//        case lmE_Do2 :
-//            return aPitch.ToDPitch() - lmC4_DPITCH + 4;
-//        case lmE_Do3 :
-//            return aPitch.ToDPitch() - lmC4_DPITCH + 6;
-//        case lmE_Do4 :
-//            return aPitch.ToDPitch() - lmC4_DPITCH + 8;
-//        case lmE_Do5 :
-//            return aPitch.ToDPitch() - lmC4_DPITCH + 10;
-//        default:
-//            wxLogMessage(_T("[lmPitchToPosOnStaff] Case %d not treated in switch statement"), nClef);
-//            wxASSERT(false);
-//            return aPitch.ToDPitch() - lmC4_DPITCH;     //assume G clef
-//    }
-//}
+//---------------------------------------------------------------------------------------
+int NoteEngraver::pitch_to_pos_on_staff(int clefType)
+{
+    // Returns the position on the staff (line/space) referred to the first ledger line of
+    // the staff. Depends on clef:
+    //        0 - on first ledger line (C note in G clef)
+    //        1 - on next space (D in G clef)
+    //        2 - on first line (E not in G clef)
+    //        3 - on first space
+    //        4 - on second line
+    //        5 - on second space
+    //        etc.
+
+    DiatonicPitch dpitch(m_pNote->get_step(), m_pNote->get_octave());
+
+	// pitch is defined. Position will depend on key
+    switch (clefType)
+    {
+        case ImoClef::k_undefined:
+        case ImoClef::k_G2:
+            return dpitch - LOMSE_C4_DPITCH;
+        case ImoClef::k_F4:
+            return dpitch - LOMSE_C4_DPITCH + 12;
+        case ImoClef::k_F3:
+            return dpitch - LOMSE_C4_DPITCH + 10;
+        case ImoClef::k_C1:
+            return dpitch - LOMSE_C4_DPITCH + 2;
+        case ImoClef::k_C2:
+            return dpitch - LOMSE_C4_DPITCH + 4;
+        case ImoClef::k_C3:
+            return dpitch - LOMSE_C4_DPITCH + 6;
+        case ImoClef::k_C4:
+            return dpitch - LOMSE_C4_DPITCH + 8;
+        case ImoClef::k_Percussion:
+            return 5;       //on 2nd space
+        case ImoClef::k_C5:
+            return dpitch - LOMSE_C4_DPITCH + 10;
+        case ImoClef::k_F5:
+            return dpitch - LOMSE_C4_DPITCH + 14;
+        case ImoClef::k_G1:
+            return dpitch - LOMSE_C4_DPITCH - 2;
+        case ImoClef::k_8_G2:        //8 above
+        case ImoClef::k_G2_8:        //8 below
+        case ImoClef::k_8_F4:        //8 above
+        case ImoClef::k_F4_8:        //8 below
+        case ImoClef::k_15_G2:       //15 above
+        case ImoClef::k_G2_15:       //15 below
+        case ImoClef::k_15_F4:       //15 above
+        case ImoClef::k_F4_15:       //15 below
+            //TODO
+            return 2;
+        default:
+            //LogMessage("NoteEngraver::pitch_to_pos_on_staff", "Case %d not treated in switch statement", nClef);
+            return dpitch - LOMSE_C4_DPITCH;     //assume G clef
+    }
+}
 
 //---------------------------------------------------------------------------------------
 LUnits NoteEngraver::get_stem_x_left()
@@ -591,28 +628,27 @@ LUnits NoteEngraver::get_standard_stem_length()
 
 
     Tenths length;
-    bool fStemDown = m_pNote->is_stem_down();
 
     // rule a3
-    if (m_nPosOnStaff >= 14 && fStemDown)
+    if (m_nPosOnStaff >= 14 && m_fStemDown)
     {
-        length = 5 * (m_nPosOnStaff-6);     // touch middle line
+        length = Tenths(5 * (m_nPosOnStaff-6));     // touch middle line
     }
-    else if (m_nPosOnStaff <= -2 && !fStemDown)
+    else if (m_nPosOnStaff <= -2 && !m_fStemDown)
     {
-        length = 5 *(6-m_nPosOnStaff);     // touch middle line
+        length = Tenths(5 *(6-m_nPosOnStaff));     // touch middle line
     }
 
     // rule a2
-    else if ((m_nPosOnStaff >= 7 && !fStemDown) || (m_nPosOnStaff <= 4 && fStemDown))
+    else if ((m_nPosOnStaff >= 7 && !m_fStemDown) || (m_nPosOnStaff <= 4 && m_fStemDown))
     {
-        length = 25;     // 2.5 spaces
+        length = 25.0f;     // 2.5 spaces
     }
 
     // rule a1 and any other case not covered (I did not analyze completness)
     else
     {
-        length = 35;     // 3.5 spaces
+        length = 35.0f;     // 3.5 spaces
     }
 
     return tenths_to_logical(length);

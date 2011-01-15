@@ -124,25 +124,6 @@ GmoShapeStaff* GmoBoxSystem::add_staff_shape(GmoShapeStaff* pShape)
 //    }
 //}
 //
-//---------------------------------------------------------------------------------------
-//wxString GmoBoxSystem::Dump(int nIndent)
-//{
-//    //override to dump also the staff
-//
-//	wxString sDump = _T("\n");
-//	sDump.append(nIndent * lmINDENT_STEP, _T(' '));
-//	sDump += wxString::Format(_T("GmoBoxSystem. %d measures starting at %d, "),
-//						GetNumMeasures(), m_nFirstMeasure);
-//	nIndent++;
-//
-//	// dump the staff
-//    for (int i=0; i < (int)m_staffShapes.size(); i++)
-//        sDump += m_staffShapes[i]->pShape->Dump(nIndent);
-//
-//	//base class
-//    sDump += GmoBox::Dump(nIndent);
-//	return sDump;
-//}
 //
 //---------------------------------------------------------------------------------------
 //int GmoBoxSystem::GetPageNumber() const

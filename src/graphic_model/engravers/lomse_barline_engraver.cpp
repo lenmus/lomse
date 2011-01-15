@@ -18,40 +18,44 @@
 //
 //---------------------------------------------------------------------------------------
 
+#include "lomse_barline_engraver.h"
 
-#include "lomse_score_iterator.h"
+#include "lomse_internal_model.h"
+#include "lomse_engraving_options.h"
+#include "lomse_shape_barline.h"
+#include "lomse_box_slice_instr.h"
 
-using namespace std;
 
 namespace lomse
 {
 
-
 //---------------------------------------------------------------------------------------
-// ScoreIterator implementation
+// BarlineEngraver implementation
 //---------------------------------------------------------------------------------------
-ScoreIterator::ScoreIterator(ColStaffObjs* pColStaffObjs)
-    : m_pColStaffObjs(pColStaffObjs)
-{
-    first();
-}
-
-//---------------------------------------------------------------------------------------
-ScoreIterator::ScoreIterator(const ScoreIterator& it)
-{
-    m_pColStaffObjs = it.m_pColStaffObjs;
-    m_it = it.m_it;;
-}
-
-//---------------------------------------------------------------------------------------
-ScoreIterator::~ScoreIterator()
+BarlineEngraver::BarlineEngraver(LibraryScope& libraryScope)
+    : m_libraryScope(libraryScope)
 {
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreIterator::first()
+GmoShape* BarlineEngraver::create_shape(ImoBarline* pBarline, LUnits xPos, LUnits yTop,
+                                        LUnits yBottom, LUnits lineSpacing)
 {
-    m_it = m_pColStaffObjs->begin();
+    m_nBarlineType = pBarline->get_type();
+    m_lineSpacing = lineSpacing;
+    LUnits thinLineWidth = tenths_to_logical(LOMSE_THIN_LINE_WIDTH);    // thin line width
+    LUnits thickLineWidth = tenths_to_logical(LOMSE_THICK_LINE_WIDTH);  // thick line width
+    LUnits spacing = tenths_to_logical(LOMSE_LINES_SPACING);            // space between lines: 4 tenths
+    LUnits radius = tenths_to_logical(LOMSE_BARLINE_RADIOUS);           // dots radius: 2 tenths
+
+    //force selection rectangle to have at least a width of half line (5 tenths)
+    LUnits uMinWidth = tenths_to_logical(5.0f);
+
+    GmoShape* pShape = new GmoShapeBarline(0, m_nBarlineType, xPos, yTop, yBottom,
+                                           thinLineWidth, thickLineWidth, spacing,
+                                           radius, Color(0,0,0), uMinWidth);
+
+    return pShape;
 }
 
 

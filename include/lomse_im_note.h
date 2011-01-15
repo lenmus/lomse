@@ -22,6 +22,7 @@
 #define __LOMSE_IM_NOTE_H__
 
 #include "lomse_internal_model.h"
+#include "lomse_pitch.h"
 
 using namespace std;
 
@@ -123,10 +124,9 @@ public:
            bool fVisible, bool fBeamed, ImoBeamInfo* pBeamInfo);
     ~ImoNote();
 
-    enum    { C=0, D=1, E=2, F=3, G=4, A=5, B=6, last=B, k_no_pitch=-1, };     //steps
     enum    { k_no_accidentals=0, k_sharp, k_sharp_sharp, k_double_sharp, k_natural_sharp,
               k_flap, k_flat_flat, k_natural_flat, k_natural, };
-    enum    { k_default=0, k_up, k_down, };
+    enum    { k_default=0, k_up, k_down, k_double, k_none };
 
     //pitch
     inline int get_step() { return m_step; }

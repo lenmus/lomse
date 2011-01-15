@@ -77,22 +77,6 @@ void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt)
 }
 
 ////---------------------------------------------------------------------------------------
-//wxString GmoShapeStaff::Dump(int nIndent)
-//{
-//	//TODO
-//	wxString sDump = _T("");
-//	sDump.append(nIndent * lmINDENT_STEP, _T(' '));
-//	sDump += wxString::Format(_T("Idx: %d %s: "), m_nOwnerIdx, m_sGMOName.c_str());
-//    sDump += DumpBounds();
-//    sDump += _T("\n");
-//
-//    //base class
-//    sDump += GmoShape::Dump(nIndent);
-//
-//	return sDump;
-//}
-//
-////---------------------------------------------------------------------------------------
 //void GmoShapeStaff::Shift(LUnits xIncr, LUnits yIncr)
 //{
 //	//TODO

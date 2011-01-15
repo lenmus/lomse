@@ -168,23 +168,6 @@ GmoShapeBracketBrace::~GmoShapeBracketBrace()
 }
 
 ////---------------------------------------------------------------------------------------
-//wxString GmoShapeBracketBrace::Dump(int nIndent)
-//{
-//	//TODO
-//	wxString sDump = _T("");
-//	sDump.append(nIndent * lmINDENT_STEP, _T(' '));
-//	sDump += wxString::Format(_T("Idx: %d %s: "),
-//		m_nOwnerIdx, m_sGMOName.c_str() );
-//    sDump += DumpBounds();
-//    sDump += _T("\n");
-//
-//    //base class
-//    sDump += lmShape::Dump(nIndent);
-//
-//	return sDump;
-//}
-//
-////---------------------------------------------------------------------------------------
 //void GmoShapeBracketBrace::Shift(LUnits xIncr, LUnits yIncr)
 //{
 //    get_left() += xIncr;

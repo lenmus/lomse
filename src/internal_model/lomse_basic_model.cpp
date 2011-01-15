@@ -38,8 +38,7 @@ InternalModel::InternalModel()
 
 InternalModel::~InternalModel()
 {
-    if (m_pRoot)
-        delete m_pRoot;
+    delete m_pRoot;
     delete_beams();
     delete_tuplets();
 }

@@ -44,7 +44,9 @@ protected:
 
 public:
     ScoreIterator(ColStaffObjs* pColStaffObjs);
+    ScoreIterator(const ScoreIterator& it);
     ~ScoreIterator();
+
 
     inline bool is_first() { return m_it == m_pColStaffObjs->begin(); }
  //   inline bool LastOfCollection() {

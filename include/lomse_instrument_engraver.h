@@ -54,6 +54,7 @@ protected:
     LUnits m_stavesTop;
     LUnits m_stavesBottom;
     LUnits m_stavesLeft;
+    LUnits m_stavesWidth;
 
     std::vector<LUnits> m_staffTop;
 
@@ -71,7 +72,10 @@ public:
     void add_name_abbrev(GmoBox* pBox, int nSystem);
     void add_brace_bracket(GmoBox* pBox);
     LUnits get_staves_bottom() { return m_stavesBottom; }
+    LUnits get_staves_top() { return m_stavesTop; }
     LUnits get_top_of_staff(int iStaff);
+    LUnits get_staves_width() { return m_stavesWidth; }
+    LUnits get_staves_left() { return m_stavesLeft; }
 
     //helper
     LUnits tenths_to_logical(Tenths value, int iStaff=0);

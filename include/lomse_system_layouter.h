@@ -38,20 +38,13 @@ class ImoStaffObj;
 class ImoStaff;
 class GmoShape;
 class GmoBoxSliceInstr;
-//class GraphicModel;
-//class ImoDocObj;
-//class GmoBoxScorePage;
-//class GmoStubScore;
-//class GmoShape;
-//class lmVStaff;
-//class GmoBoxSlice;
-//
+class GmoBoxSlice;
+
 class SystemLayouter;
 class ColumnLayouter;
 class ColumnStorage;
 class LineTable;
 class LineEntry;
-
 class BreaksTable;
 class BreakPoints;
 class ColumnSplitter;
@@ -64,6 +57,54 @@ class TimeGridLineExplorer;
 #define LineEntryIterator		  std::vector<LineEntry*>::iterator
 #define LinesIterator             std::vector<LineTable*>::iterator
 #define LineSpacersIterator       std::vector<LineSpacer*>::iterator
+
+
+
+//---------------------------------------------------------------------------------------
+//ScoreMeter: encapsulates the methods and values for options that are needed in many
+//places for score measurements during layouting and engraving
+//---------------------------------------------------------------------------------------
+class ScoreMeter
+{
+protected:
+    //layout options
+    float m_rSpacingFactor;             //for proportional spacing of notes
+    ESpacingMethod m_nSpacingMethod;    //fixed, proportional, etc.
+    Tenths m_rSpacingValue;             //space for 'fixed' method
+    bool m_fDrawLeftBarline;            //draw left barline joining all system staves
+
+	std::vector<LUnits> m_lineSpace;    //spacing for each staff
+    std::vector<int> m_staffIndex;
+
+    //info about the score
+    int m_numInstruments;
+
+public:
+    ScoreMeter(ImoScore* pScore);
+
+    //options
+    inline float get_spacing_factor() { return m_rSpacingFactor; }
+    inline ESpacingMethod get_spacing_method() { return m_nSpacingMethod; }
+    inline Tenths get_spacing_value() { return m_rSpacingValue; }
+    inline bool is_proportional_spacing() {
+        return m_nSpacingMethod == k_spacing_proportional;
+    }
+    inline bool must_draw_left_barline() { return m_fDrawLeftBarline; }
+
+    //spacing
+    LUnits tenths_to_logical(Tenths value, int iInstr, int iStaff);
+    LUnits line_spacing_for_instr_staff(int iInstr, int iStaff);
+
+    //info about the score
+    inline int num_instruments() { return m_numInstruments; }
+
+
+protected:
+    void get_options(ImoScore* pScore);
+    void get_staff_spacing(ImoScore* pScore);
+
+};
+
 
 
 //----------------------------------------------------------------------------------------
@@ -122,41 +163,38 @@ public:
 	void assign_fixed_and_variable_space(ColumnLayouter* pTT, float rFactor);
     void move_shape();
 
-    //setters and getters
-    inline LUnits get_total_size() { return m_uSize + m_uFixedSpace + m_uVariableSpace; }
-    inline LUnits get_variable_space() { return m_uVariableSpace; }
-    inline void set_variable_space(LUnits uSpace) { m_uVariableSpace = uSpace; }
-    inline float get_duration() { return 0.0f; } //TODO m_pSO->GetTimePosIncrement(); }
+    //access to entry data
+    inline bool is_barline_entry() { return m_fIsBarlineEntry; }
+    inline ImoStaffObj* get_staffobj() { return m_pSO; }
+    inline GmoShape*  get_shape() { return m_pShape; }
+	inline bool is_prolog_object() { return m_fProlog; }
     inline float get_timepos() { return m_rTimePos; }
     inline LUnits get_position() { return m_xLeft; }
-    inline void set_position(LUnits uPos) { m_xLeft = uPos; }
-    inline LUnits get_shape_size() { return m_uSize; }
-    inline GmoShape*  get_shape() { return m_pShape; }
-    inline void mark_as_barline_entry() { m_fIsBarlineEntry = true; }
     inline LUnits get_anchor() { return m_uxAnchor; }
+    inline LUnits get_x_final() { return m_xFinal; }
+    inline LUnits get_shape_size() { return m_uSize; }
+    LUnits get_fixed_space() { return m_uFixedSpace; }
+    inline LUnits get_variable_space() { return m_uVariableSpace; }
+
+    //setters and getters
+    inline LUnits get_total_size() { return m_uSize + m_uFixedSpace + m_uVariableSpace; }
+    inline void set_variable_space(LUnits space) { m_uVariableSpace = space; }
+    inline void set_fixed_space(LUnits space) { m_uFixedSpace = space; }
+    inline void set_size(LUnits width) { m_uSize = width; }
+    inline float get_duration() { return 0.0f; } //TODO m_pSO->GetTimePosIncrement(); }
+    inline void set_position(LUnits uPos) { m_xLeft = uPos; }
+    inline void mark_as_barline_entry() { m_fIsBarlineEntry = true; }
     LUnits get_shift_to_noterest_center();
     bool is_note_rest();
     bool has_barline();
-
-    //other
-    inline bool is_barline_entry() { return m_fIsBarlineEntry; }
+    void update_x_final() { m_xFinal = m_xLeft + get_total_size(); };
 
     //debug
     void dump(int iEntry);
     static void dump_header();
 
+
 protected:
-    void set_note_rest_space(ColumnLayouter* pTT, float rFactor);
-    void assign_minimum_fixed_space(ColumnLayouter* pColFmt);
-    void assign_variable_space(LUnits uIdeal);
-    void assign_no_space();
-    LUnits compute_ideal_distance(ColumnLayouter* pColFmt, float rFactor);
-    LUnits compute_ideal_distance_fixed(ColumnLayouter* pColFmt);
-    LUnits compute_ideal_distance_proportional(ColumnLayouter* pColFmt, float rFactor);
-
-
-public:
-//protected:
     //member variables (one entry of the table)
     //----------------------------------------------------------------------------
     bool            m_fIsBarlineEntry;  //is last entry. Contains barline or nothing
@@ -224,7 +262,7 @@ public:
 
     //other
 //    void ClearDirtyFlags();
-    void add_shapes(std::vector<GmoBoxSliceInstr*>& sliceInstrBoxes);
+    void add_shapes(GmoBoxSliceInstr* pSliceInstrBox);
 
     //Debug and Unit Tests
     inline int get_num_objects_in_line() { return (int)m_LineEntries.size(); }
@@ -252,7 +290,6 @@ class ColumnStorage
 {
 protected:
 	std::vector<LineTable*> m_Lines;	    //lines that form this column
-	std::vector<LUnits> m_lineSpace;	    //spacing for each staff
 
 public:
     ColumnStorage();
@@ -276,7 +313,6 @@ public:
     //storage manipulation
     LineTable* open_new_line(int line, int instr, LUnits uxStart, LUnits uSpace);
     //inline void save_staff_pointer(int iStaff, ImoStaff* pStaff) { m_pStaff[iStaff] = pStaff; }
-   void set_staff_spacing(int iStaff, LUnits space);
 
     //properties
     inline size_t size() { return m_Lines.size(); }
@@ -286,11 +322,11 @@ public:
     LUnits get_column_width();
     LUnits get_start_of_bar_position();
 
-    //units conversion
-    LUnits tenths_to_logical(Tenths value, int staff=0);
+    ////units conversion
+    //LUnits tenths_to_logical(Tenths value, int staff=0);
 
     //adding shapes to graphic model
-    void add_shapes(std::vector<GmoBoxSliceInstr*>& sliceInstrBoxes);
+    void add_shapes(GmoBoxSliceInstr* pSliceInstrBox, int iInstr);
 
     //debug
     void dump_column_storage();
@@ -359,22 +395,20 @@ protected:
 class ColumnLayouter
 {
 protected:
-    ColumnStorage*            m_pColStorage;  //music lines for this column
-    std::vector<LineSpacer*>  m_LineSpacers;  //one spacer for each line
+    ColumnStorage*              m_pColStorage;          //music lines for this column
+    ScoreMeter*                 m_pScoreMeter;
+    std::vector<LineSpacer*>    m_LineSpacers;          //one spacer for each line
+    std::vector<GmoBoxSliceInstr*> m_sliceInstrBoxes;   //instr.boxes for this column
+    GmoBoxSlice*                m_pBoxSlice;            //box for this column
 
     LUnits            m_uMinColumnSize;     //minimum size for this column
 
-    //formatter parameters
-    float             m_rSpacingFactor;     //for proportional spacing of notes
-    ESpacingMethod    m_nSpacingMethod;     //fixed, proportional, etc.
-    Tenths            m_rSpacingValue;      //spacing for 'fixed' method
-
 public:
-    ColumnLayouter(ColumnStorage* pStorage, float rSpacingFactor,
-                   ESpacingMethod nSpacingMethod, Tenths nSpacingValue);
+    ColumnLayouter(ColumnStorage* pStorage, ScoreMeter* pScoreMeter);
     ~ColumnLayouter();
 
     inline void initialize() {}
+    void set_slice_box(GmoBoxSlice* pBoxSlice) { m_pBoxSlice = pBoxSlice; };
 
     //methods to compute results
     void do_spacing(bool fTrace = false);
@@ -385,9 +419,17 @@ public:
     inline LUnits get_minimum_size() { return m_uMinColumnSize; }
 
     //methods for spacing
-	LUnits tenths_to_logical(Tenths value, int staff);
-    inline bool is_proportional_spacing() { return m_nSpacingMethod == k_spacing_proportional; }
-    inline Tenths get_fixed_spacing_value() const { return m_rSpacingValue; }
+	LUnits tenths_to_logical(Tenths value, int iInstr, int staff);
+    inline bool is_proportional_spacing() {
+        return m_pScoreMeter->is_proportional_spacing();
+    }
+    inline Tenths get_fixed_spacing_value() const {
+        return m_pScoreMeter->get_spacing_value();
+    }
+
+    //boxes and shapes
+    void add_shapes_to_boxes();
+    GmoBoxSliceInstr* create_slice_instr(ImoInstrument* pInstr, LUnits yTop);
 
     //public methods coded only for Unit Tests
     inline int get_num_lines() { return int(m_pColStorage->size()); }
@@ -445,22 +487,23 @@ protected:
 class SystemLayouter
 {
 protected:
+    ScoreMeter* m_pScoreMeter;
     std::vector<ColumnLayouter*> m_ColLayouters;    //layouter for each column
     std::vector<ColumnStorage*> m_ColStorage;       //data for each column
     std::vector<LinesBuilder*> m_LinesBuilder;      //lines builder for each column
-
-    //layout options
-    float m_rSpacingFactor;             //for proportional spacing of notes
-    ESpacingMethod m_nSpacingMethod;    //fixed, proportional, etc.
-    Tenths m_rSpacingValue;             //space for 'fixed' method
-
+    LUnits m_uPrologWidth;
 
 public:
-    SystemLayouter(float rSpacingFactor, ESpacingMethod nSpacingMethod,
-                   Tenths rSpacingValue);
+    SystemLayouter(ScoreMeter* pScoreMeter);
     ~SystemLayouter();
 
+    GmoBoxSliceInstr* create_slice_instr(int iCol, ImoInstrument* pInstr, LUnits yTop);
+
+
         //Collecting measurements
+
+    //caller informs that a new collumn is going to be layouted
+    void prepare_for_new_column(GmoBoxSlice* pBoxSlice);
 
     //caller informs that all data for this system has been suplied
     void end_of_system_measurements();
@@ -491,11 +534,13 @@ public:
 
         //Operations
     void increment_column_size(int iCol, LUnits uIncr);
-    void add_shapes(std::vector<GmoBoxSliceInstr*>& sliceInstrBoxes);
+    void add_shapes_to_column(int iCol);
 
         //Access to information
     LUnits get_start_position_for_column(int iCol);
     inline bool has_content() { return m_ColStorage[0]->size() > 0; }
+    inline void set_prolog_width(LUnits width) { m_uPrologWidth = width; }
+    inline LUnits get_prolog_width() { return m_uPrologWidth; }
 
     LUnits get_minimum_size(int iCol);
     bool get_optimum_break_point(int iCol, LUnits uAvailable, float* prTime,
@@ -570,7 +615,7 @@ class LineSpacer
 private:
     LineTable*          m_pTable;           //the line to assign space
     float               m_rFactor;          //spacing factor
-    ColumnLayouter*     m_pColFmt;          //for tenths/logical conversion
+    ColumnLayouter*     m_pColLyt;          //for tenths/logical conversion
     LineEntryIterator   m_itCur;            //current entry
     float               m_rCurTime;         //current time
 	LUnits              m_uxCurPos;         //current xPos at start of current time
@@ -579,7 +624,7 @@ private:
     LUnits              m_uxNotTimedFinalPos;
 
 public:
-    LineSpacer(LineTable* pLineTable, ColumnLayouter* pColFmt, float rFactor);
+    LineSpacer(LineTable* pLineTable, ColumnLayouter* pColLyt, float rFactor);
 
     void process_non_timed_at_prolog(LUnits uSpaceAfterProlog);
     void process_non_timed_at_current_timepos(LUnits uxPos);
@@ -606,6 +651,15 @@ protected:
     }
     inline bool is_current_object_non_timed() { return is_non_timed_object(m_itCur); }
 
+    void assign_fixed_and_variable_space(LineEntry* pEntry);
+    void set_note_rest_space(LineEntry* pEntry);
+    LUnits compute_ideal_distance(LineEntry* pEntry);
+    LUnits compute_ideal_distance_fixed(LineEntry* pEntry);
+    LUnits compute_ideal_distance_proportional(LineEntry* pEntry);
+    void assign_variable_space(LineEntry* pEntry, LUnits uIdeal);
+    void assign_no_space(LineEntry* pEntry);
+    void assign_minimum_fixed_space(LineEntry* pEntry);
+
 
     //variables and methods used only to position non-timed objects ------
     // create helper object?
@@ -618,7 +672,6 @@ protected:
 
     void position_using_max_space_with_shift(LUnits uShift);
     void position_using_min_space_with_shift(LUnits uShift);
-    //--------------------------------------------------------------------
 
 };
 

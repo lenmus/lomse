@@ -31,6 +31,7 @@
 #include "lomse_im_figured_bass.h"
 #include "lomse_basic_model.h"
 #include "lomse_basic_objects.h"
+#include "lomse_pitch.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -516,7 +517,7 @@ SUITE(AnalyserTest)
         CHECK( pNote->get_dots() == 1 );
         CHECK( pNote->get_note_type() == ImoNote::k_eighth );
         CHECK( pNote->get_octave() == 3 );
-        CHECK( pNote->get_step() == ImoNote::D );
+        CHECK( pNote->get_step() == k_step_D );
         CHECK( pNote->get_duration() == 48.0f );
         delete tree->get_root();
         delete pIModel;
@@ -540,7 +541,7 @@ SUITE(AnalyserTest)
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == ImoNote::k_quarter );
         CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == ImoNote::C );
+        CHECK( pNote->get_step() == k_step_C );
         delete tree->get_root();
         delete pIModel;
     }
@@ -563,7 +564,7 @@ SUITE(AnalyserTest)
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == ImoNote::k_quarter );
         CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == ImoNote::C );
+        CHECK( pNote->get_step() == k_step_C );
         delete tree->get_root();
         delete pIModel;
     }
@@ -586,7 +587,7 @@ SUITE(AnalyserTest)
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == ImoNote::k_quarter );
         CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == ImoNote::C );
+        CHECK( pNote->get_step() == k_step_C );
         delete tree->get_root();
         delete pIModel;
     }
@@ -610,7 +611,7 @@ SUITE(AnalyserTest)
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == ImoNote::k_eighth );
         CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == ImoNote::C );
+        CHECK( pNote->get_step() == k_step_C );
         CHECK( pNote->get_staff() == 6 );
         CHECK( tree->get_root()->to_string() == "(n c4 e p7)" );
         delete tree->get_root();
@@ -635,7 +636,7 @@ SUITE(AnalyserTest)
         CHECK( pNote->get_staff() == 0 );
         CHECK( pNote->get_note_type() == ImoNote::k_eighth );
         CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == ImoNote::C );
+        CHECK( pNote->get_step() == k_step_C );
         delete tree->get_root();
         delete pIModel;
     }
@@ -659,7 +660,7 @@ SUITE(AnalyserTest)
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == ImoNote::k_eighth );
         CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == ImoNote::C );
+        CHECK( pNote->get_step() == k_step_C );
         CHECK( pNote->get_voice() == 3 );
         CHECK( pNote->is_tied_next() == false );
         delete tree->get_root();
@@ -685,7 +686,7 @@ SUITE(AnalyserTest)
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == ImoNote::k_eighth );
         CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == ImoNote::C );
+        CHECK( pNote->get_step() == k_step_C );
         delete tree->get_root();
         delete pIModel;
     }
@@ -708,7 +709,7 @@ SUITE(AnalyserTest)
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == ImoNote::k_eighth );
         CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == ImoNote::C );
+        CHECK( pNote->get_step() == k_step_C );
         CHECK( pNote->get_voice() == 3 );
         CHECK( pNote->has_attachments() == true );
         delete tree->get_root();
@@ -898,7 +899,7 @@ SUITE(AnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         CHECK( pNote->get_note_type() == ImoNote::k_eighth );
         CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == ImoNote::C );
+        CHECK( pNote->get_step() == k_step_C );
         CHECK( pNote->get_stem_direction() == ImoNote::k_default );
         delete tree->get_root();
         delete pIModel;
@@ -967,7 +968,7 @@ SUITE(AnalyserTest)
         CHECK( pNote->get_dots() == 1 );
         CHECK( pNote->get_note_type() == ImoNote::k_eighth );
         CHECK( pNote->get_octave() == 3 );
-        CHECK( pNote->get_step() == ImoNote::D );
+        CHECK( pNote->get_step() == k_step_D );
         CHECK( pNote->get_duration() == 48.0f );
         CHECK( pNote->get_staff() == 1 );
         delete tree->get_root();
@@ -2920,7 +2921,7 @@ SUITE(AnalyserTest)
         CHECK( pNote != NULL );
         CHECK( pNote->get_note_type() == ImoNote::k_quarter );
         CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == ImoNote::C );
+        CHECK( pNote->get_step() == k_step_C );
         delete tree->get_root();
         delete pIModel;
     }
@@ -3622,7 +3623,7 @@ SUITE(AnalyserTest)
         CHECK( pNote != NULL );
         CHECK( pNote->get_note_type() == ImoNote::k_eighth );
         CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_step() == ImoNote::C );
+        CHECK( pNote->get_step() == k_step_C );
 
         delete tree->get_root();
         delete pIModel;

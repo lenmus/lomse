@@ -27,6 +27,7 @@
 #include "lomse_screen_drawer.h"
 
 #include "lomse_renderer.h"
+#include "agg_ellipse.h"
 
 using namespace std;
 
@@ -392,7 +393,7 @@ int ScreenDrawer::draw_text(double x, double y, const std::string& str)
 }
 
 ////---------------------------------------------------------------------------------------
-//void ScreenDrawer::FtSetTextPosition(lmLUnits uxPos, lmLUnits uyPos)
+//void ScreenDrawer::FtSetTextPosition(LUnits uxPos, LUnits uyPos)
 //{
 //    m_vCursorX = WorldToDeviceX(uxPos);
 //    m_vCursorY = WorldToDeviceY(uyPos);
@@ -429,7 +430,7 @@ int ScreenDrawer::draw_text(double x, double y, const std::string& str)
 ////---------------------------------------------------------------------------------------
 //URect ScreenDrawer::FtGetGlyphBounds(unsigned int nGlyph)
 //{
-//    //returns glyph bounding box. In lmLUnits
+//    //returns glyph bounding box. In LUnits
 //
 //    VRect vBox = FtGetGlyphBoundsInPixels(nGlyph);
 //    return lmURect(DeviceToLogicalX(vBox.x), DeviceToLogicalY(vBox.y),
@@ -438,8 +439,8 @@ int ScreenDrawer::draw_text(double x, double y, const std::string& str)
 
 ////---------------------------------------------------------------------------------------
 //void ScreenDrawer::FtGetTextExtent(const std::string& sText,
-//                                         lmLUnits* pWidth, lmLUnits* pHeight,
-//                                         lmLUnits* pDescender, lmLUnits* pAscender)
+//                                         LUnits* pWidth, LUnits* pHeight,
+//                                         LUnits* pDescender, LUnits* pAscender)
 //{
 //    //Gets the dimensions of the string using the currently selected font.
 //    //Parameters:
@@ -543,6 +544,82 @@ void ScreenDrawer::set_shift(LUnits x, LUnits y)
 void ScreenDrawer::remove_shift()
 {
     m_pRenderer->remove_shift();
+}
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::circle(LUnits xCenter, LUnits yCenter, LUnits radius)
+{
+    double x = double(xCenter);
+    double y = double(yCenter);
+    double r = double(radius);
+
+    agg::ellipse e1;
+    e1.init(x, y, r, r, 0);
+    m_path.concat_path<agg::ellipse>(e1);
+}
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::line(LUnits x1, LUnits y1, LUnits x2, LUnits y2,
+                        LUnits width, ELineEdge nEdge)
+{
+    double alpha = atan((y2 - y1) / (x2 - x1));
+
+    switch(nEdge)
+    {
+        case k_edge_normal:
+            // edge line is perpendicular to line
+            {
+            LUnits uIncrX = (LUnits)( (width * sin(alpha)) / 2.0 );
+            LUnits uIncrY = (LUnits)( (width * cos(alpha)) / 2.0 );
+            UPoint uPoints[] = {
+                UPoint(x1+uIncrX, y1-uIncrY),
+                UPoint(x1-uIncrX, y1+uIncrY),
+                UPoint(x2-uIncrX, y2+uIncrY),
+                UPoint(x2+uIncrX, y2-uIncrY)
+            };
+            polygon(4, uPoints);
+            break;
+            }
+
+        case k_edge_vertical:
+            // edge is always a vertical line
+            {
+            LUnits uIncrY = (LUnits)( (width / cos(alpha)) / 2.0 );
+            UPoint uPoints[] = {
+                UPoint(x1, y1-uIncrY),
+                UPoint(x1, y1+uIncrY),
+                UPoint(x2, y2+uIncrY),
+                UPoint(x2, y2-uIncrY)
+            };
+            polygon(4, uPoints);
+            break;
+            }
+
+        case k_edge_horizontal:
+            // edge is always a horizontal line
+            {
+            LUnits uIncrX = (LUnits)( (width / sin(alpha)) / 2.0 );
+            UPoint uPoints[] = {
+                UPoint(x1+uIncrX, y1),
+                UPoint(x1-uIncrX, y1),
+                UPoint(x2-uIncrX, y2),
+                UPoint(x2+uIncrX, y2)
+            };
+            polygon(4, uPoints);
+            break;
+            }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::polygon(int n, UPoint points[])
+{
+    move_to(points[0].x, points[0].y);
+    int i;
+    for (i=1; i < n; i++)
+    {
+        line_to(points[i].x, points[i].y);
+    }
 }
 
 

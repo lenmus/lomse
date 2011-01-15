@@ -49,15 +49,10 @@ Presenter* LomseDoorway::new_document(int viewType)
 }
 
 //---------------------------------------------------------------------------------------
-View* LomseDoorway::create_view(int viewType, Document* pDoc)
+Presenter* LomseDoorway::open_document(int viewType, const string& filename)
 {
-    return Injector::inject_View(*m_pLibraryScope, viewType, pDoc);
-}
-
-//---------------------------------------------------------------------------------------
-HorizontalBookView* LomseDoorway::create_horizontal_book_view(Document* pDoc)
-{
-    return Injector::inject_HorizontalBookView(*m_pLibraryScope, pDoc);
+    PresenterBuilder builder(*m_pLibraryScope);
+    return builder.open_document(viewType, filename);
 }
 
 //---------------------------------------------------------------------------------------

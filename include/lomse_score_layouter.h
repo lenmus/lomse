@@ -24,7 +24,6 @@
 #include "lomse_content_layouter.h"
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
-#include "lomse_score_iterator.h"
 #include "lomse_score_enums.h"
 #include <vector>
 using namespace std;
@@ -38,6 +37,7 @@ class FontStorage;
 class GraphicModel;
 class ImoDocObj;
 class ImoScore;
+class ImoStaffObj;
 class ImoInstrument;
 class GmoBoxScorePage;
 class GmoBoxSlice;
@@ -46,8 +46,9 @@ class GmoBoxSliceInstr;
 class GmoStubScore;
 class InstrumentEngraver;
 class SystemLayouter;
+class SystemCursor;
 class GmoShape;
-//class SystemCursor;
+class ScoreMeter;
 
 
 //---------------------------------------------------------------------------------------
@@ -56,7 +57,8 @@ class ScoreLayouter : public ContentLayouter
 protected:
     LibraryScope&   m_libraryScope;
     UPoint          m_pageCursor;
-    ScoreIterator   m_scoreIt;
+    SystemCursor*   m_pSysCursor;
+    ScoreMeter*     m_pScoreMeter;
 
     //auxiliary data for computing and justifying systems
     int m_nCurSystem;   //[0..n-1] Current system number
@@ -66,9 +68,6 @@ protected:
     //renderization options and parameters
     bool                m_fStopStaffLinesAtFinalBarline;
     bool                m_fJustifyFinalBarline;
-    float               m_rSpacingFactor;    //for proportional spacing of notes
-    ESpacingMethod      m_nSpacingMethod;    //fixed, proportional, etc.
-    Tenths              m_nSpacingValue;     //spacing for 'fixed' method
 
     //space values to use
     LUnits              m_uFirstSystemIndent;
@@ -101,6 +100,9 @@ protected:
         return (m_nCurSystem == 1 ? m_uFirstSystemIndent : m_uOtherSystemIndent);
     }
     InstrumentEngraver* get_instrument_engraver(int iInstr);
+    inline LUnits tenths_to_logical(Tenths tenths, LUnits lineSpacing) {
+        return (tenths * lineSpacing) / 10.0f;
+    }
 
 
     //level 1: invoked from public methods
@@ -113,10 +115,12 @@ protected:
     void add_titles_if_first_page();
     bool enough_space_in_page();
     void add_next_system();
-    void delete_instrument_layouters();
+    void delete_instrument_engravers();
     void delete_system_layouters();
     void get_score_renderization_options();
-    //void delete_system_cursor();
+    void create_system_cursor();
+    void delete_system_cursor();
+    void add_initial_line_joining_all_staves_in_system();
 
     std::vector<InstrumentEngraver*> m_instrEngravers;
     bool m_fFirstSystemInPage;
@@ -133,13 +137,13 @@ protected:
     void move_cursor_to_top_left_corner();
     void move_cursor_after_headers();
     LUnits remaining_height();
-    //void create_system_cursor();
     void create_system_layouter();
     void create_system_box();
     void set_system_height_and_advance_paper_cursor();
     void fill_current_system_with_columns();
     void justify_current_system();
     void truncate_current_system();
+    void update_box_slices_sizes();
 
     //SystemCursor* m_pSysCursor;
     std::vector<SystemLayouter*> m_sysLayouters;
@@ -176,12 +180,22 @@ protected:
     void start_slice_instr(ImoInstrument* pInstr, int iInstr, LUnits uTopMargin);
     void terminate_slice_instr(int iInstr, LUnits uBottomMargin);
     void add_staff_lines_name_and_bracket(int iInstr, LUnits uTopMargin);
-    void add_shapes_for_score_objs();
+    void add_shapes_for_score_objs(int iCol);
     LUnits determine_initial_space();
-    GmoShape* create_staffobj_shape(ImoStaffObj* pSO, LUnits lineSpacing);
+    LUnits space_used_by_prolog();
 
-    std::vector<GmoBoxSliceInstr*> m_sliceInstrBoxes;
     GmoBoxSliceInstr* m_pCurBSI;
+
+
+    //level 6: invoked from level 5 methods
+    //---------------------------------------------------------------
+    GmoShape* create_staffobj_shape(ImoStaffObj* pSO, LUnits lineSpacing, int iInstr);
+    void add_key_signature(ImoStaffObj* pSO, LUnits lineSpacing,
+                           int iInstr, bool fProlog);
+    void add_time_signature(ImoStaffObj* pSO, LUnits lineSpacing,
+                            int iInstr, bool fProlog);
+    void add_prolog(int iInstr);
+
 
 };
 

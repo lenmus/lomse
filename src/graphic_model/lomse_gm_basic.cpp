@@ -24,6 +24,11 @@
 #include "lomse_drawer.h"
 #include "lomse_selections.h"
 
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+using namespace std;
+
 //#include <sstream>
 //
 //using namespace std;
@@ -213,10 +218,16 @@ void GmoBox::delete_boxes()
 //---------------------------------------------------------------------------------------
 void GmoBox::delete_shapes()
 {
+    //ofstream m_debugFile;
+    //m_debugFile.open("dbg_tables.txt", fstream::out | fstream::app);
+    //m_debugFile << "deleting " << m_shapes.size() << " shapes" << endl;
+
     std::list<GmoShape*>::iterator it;
     for (it=m_shapes.begin(); it != m_shapes.end(); ++it)
         delete *it;
     m_shapes.clear();
+
+    //m_debugFile.close();
 }
 
 //---------------------------------------------------------------------------------------
@@ -238,6 +249,11 @@ GmoBox* GmoBox::get_child_box(int i)  //i = 0..n-1
 //---------------------------------------------------------------------------------------
 void GmoBox::add_shape(GmoShape* shape, int layer)
 {
+    //ofstream m_debugFile;
+    //m_debugFile.open("dbg_tables.txt", fstream::out | fstream::app);
+    //m_debugFile << "add shape " << std::hex << long(shape) << endl;
+    //m_debugFile.close();
+
     shape->set_layer(layer);
     //shape->set_owner_box(this);
     m_shapes.push_back(shape);
@@ -652,23 +668,6 @@ int GmoStubScore::get_num_pages()
 {
     return (int)m_pages.size();
 }
-
-//---------------------------------------------------------------------------------------
-//wxString GmoStubScore::Dump(int nIndent)
-//{
-//	wxString sDump = _T("");
-//	sDump.append(nIndent * lmINDENT_STEP, _T(' '));
-//	sDump += wxString::Format(_T("GmoStubScore. ID %d\n"), GetID());
-//
-//    //loop to dump the pages in this score
-//	nIndent++;
-//    for (int i=0; i < (int)m_pages.size(); i++)
-//    {
-//        sDump += m_pages[i]->Dump(nIndent);
-//    }
-//
-//	return sDump;
-//}
 
 //---------------------------------------------------------------------------------------
 int GmoStubScore::get_num_systems()

@@ -217,14 +217,10 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/lomse_box_slice.cpp
     ${SRC_DIR}/graphic_model/lomse_box_slice_instr.cpp
     ${SRC_DIR}/graphic_model/lomse_box_system.cpp
-    ${SRC_DIR}/graphic_model/lomse_clef_engraver.cpp
-    ${SRC_DIR}/graphic_model/lomse_document_layouter.cpp
     ${SRC_DIR}/graphic_model/lomse_glyphs.cpp
     ${SRC_DIR}/graphic_model/lomse_gm_basic.cpp
-    ${SRC_DIR}/graphic_model/lomse_instrument_engraver.cpp
-    ${SRC_DIR}/graphic_model/lomse_note_engraver.cpp
-    ${SRC_DIR}/graphic_model/lomse_score_layouter.cpp
     ${SRC_DIR}/graphic_model/lomse_selections.cpp
+    ${SRC_DIR}/graphic_model/lomse_shape_barline.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_base.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_brace_bracket.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_note.cpp
@@ -232,9 +228,17 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/lomse_shape_text.cpp
     ${SRC_DIR}/graphic_model/lomse_shapes.cpp
     ${SRC_DIR}/graphic_model/lomse_sizers.cpp
-    ${SRC_DIR}/graphic_model/lomse_system_cursor.cpp
-    ${SRC_DIR}/graphic_model/lomse_system_layouter.cpp
-    ${SRC_DIR}/graphic_model/lomse_text_engraver.cpp
+    
+    ${SRC_DIR}/graphic_model/engravers/lomse_barline_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_clef_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_instrument_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_note_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_text_engraver.cpp
+    
+    ${SRC_DIR}/graphic_model/layouters/lomse_document_layouter.cpp
+    ${SRC_DIR}/graphic_model/layouters/lomse_score_layouter.cpp
+    ${SRC_DIR}/graphic_model/layouters/lomse_system_cursor.cpp
+    ${SRC_DIR}/graphic_model/layouters/lomse_system_layouter.cpp
 )
 
 set(INTERNAL_MODEL_FILES
@@ -248,6 +252,7 @@ set(INTERNAL_MODEL_FILES
 set(MODULE_FILES
     ${SRC_DIR}/module/lomse_doorway.cpp
     ${SRC_DIR}/module/lomse_injectors.cpp
+    ${SRC_DIR}/module/lomse_pitch.cpp
     ${SRC_DIR}/module/lomse_time.cpp
 )
 
@@ -394,6 +399,7 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_model_builder.cpp
         ${SRC_DIR}/tests/lomse_test_note_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_parser.cpp
+        ${SRC_DIR}/tests/lomse_test_pitch.cpp
         ${SRC_DIR}/tests/lomse_test_presenter.cpp
         ${SRC_DIR}/tests/lomse_test_reader.cpp
         ${SRC_DIR}/tests/lomse_test_score_iterator.cpp
@@ -402,6 +408,8 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_shapes.cpp
         ${SRC_DIR}/tests/lomse_test_sizers.cpp
         ${SRC_DIR}/tests/lomse_test_stack.cpp
+        ${SRC_DIR}/tests/lomse_test_system_cursor.cpp
+        ${SRC_DIR}/tests/lomse_test_system_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_staffobjs_table.cpp
         ${SRC_DIR}/tests/lomse_test_tokenizer.cpp
         ${SRC_DIR}/tests/lomse_test_tree.cpp

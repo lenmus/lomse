@@ -181,7 +181,7 @@ void Interactor::select_objects_in_screen_rectangle(Pixels x1, Pixels y1,
     screen_point_to_model(&xRight, &yBottom);
 
     GraphicModel* pGM = get_graphic_model();
-    URect selRect(xLeft, yTop, xRight-xLeft, yBottom-yTop);
+    URect selRect(LUnits(xLeft), LUnits(yTop), LUnits(xRight-xLeft), LUnits(yBottom-yTop));
     pGM->select_objects_in_rectangle(iPage, m_selections, selRect, flags);
 }
 

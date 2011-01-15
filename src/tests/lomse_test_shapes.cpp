@@ -65,17 +65,18 @@ SUITE(GmoShapeTest)
         UPoint pos(200.0f, 500.0f);
         GmoShapeNotehead shape(0, k_glyph_notehead_quarter, pos, Color(0,0,0),
                                *m_pLibraryScope);
-        cout << "origin(" << shape.get_origin().x << ", " << shape.get_origin().y << ")" << endl;
-        cout << "width=" << shape.get_width() << ", height=" << shape.get_height() << endl;
-        CHECK( shape.get_origin() == UPoint(200.0f, 500.0f) );
+        //cout << "origin(" << shape.get_origin().x << ", " << shape.get_origin().y << ")" << endl;
+        //cout << "width=" << shape.get_width() << ", height=" << shape.get_height() << endl;
+        UPoint oldOrigin = shape.get_origin();
         CHECK( shape.get_width() > 0.0f );
         CHECK( shape.get_height() > 0.0f );
 
         USize shift(1800.0f, 2500.0f);
         shape.shift_origin(shift);
-        cout << "shifted origin(" << shape.get_origin().x << ", " << shape.get_origin().y << ")" << endl;
+        //cout << "shifted origin(" << shape.get_origin().x << ", " << shape.get_origin().y << ")" << endl;
 
-        CHECK( shape.get_origin() == UPoint(2000.0f, 3000.0f) );
+        UPoint newOrigin(oldOrigin.x + shift.width, oldOrigin.y + shift.height);
+        CHECK( shape.get_origin() == newOrigin );
     }
 
 //    TEST_FIXTURE(GmoShapeTestFixture, Shape_SetOrigin)

@@ -83,6 +83,16 @@ public:
     void quadratic_bezier_rel(double x2, double y2,     //SVG: s
                               double x, double y);
 
+
+    // SVG basic shapes commands
+    //virtual void rect() = 0;                                      //SVG: <rect>
+    void circle(LUnits xCenter, LUnits yCenter, LUnits radius);     //SVG: <circle>
+    //virtual void ellipse() = 0;                                   //SVG: <ellipse>
+    void line(LUnits x1, LUnits y1, LUnits x2, LUnits y2,
+              LUnits width, ELineEdge nEdge=k_edge_normal);         //SVG: <line>
+    //virtual void polyline() = 0;                                  //SVG: <polyline>
+    virtual void polygon(int n, UPoint points[]);                   //SVG: <polygon>
+
     // not the same but similar to SVG path command
     void add_path(VertexSource& vs, unsigned path_id = 0, bool solid_path = true);
 

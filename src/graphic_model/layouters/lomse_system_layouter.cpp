@@ -20,6 +20,7 @@
 
 #include "lomse_system_layouter.h"
 
+#include "lomse_box_slice.h"
 #include "lomse_box_slice_instr.h"
 #include "lomse_engraving_options.h"
 #include "lomse_internal_model.h"
@@ -136,12 +137,10 @@ BreaksTimeEntry* BreaksTable::get_first()
 //---------------------------------------------------------------------------------------
 BreaksTimeEntry* BreaksTable::get_next()
 {
-    //advance to next one
     ++m_it;
     if (m_it != m_BreaksTable.end())
         return *m_it;
 
-    //no more items
     return (BreaksTimeEntry*)NULL;
 }
 
@@ -175,111 +174,6 @@ bool LineEntry::is_note_rest()
 bool LineEntry::has_barline()
 {
     return m_pSO && m_pSO->is_barline();
-}
-
-//---------------------------------------------------------------------------------------
-void LineEntry::assign_fixed_and_variable_space(ColumnLayouter* pColLyt, float rFactor)
-{
-	//assign fixed and variable after spaces to this object and compute the xFinal pos
-
-    if (m_fIsBarlineEntry)
-    {
-		if (!m_pSO)
-            m_uSize = 0.0f;
-    }
-    else
-    {
-		if (!m_pSO->is_visible())
-            assign_no_space();
-		else
-		{
-			if (m_pSO->is_note_rest())
-			{
-				set_note_rest_space(pColLyt, rFactor);
-			}
-			else if (m_pSO->is_clef() || m_pSO->is_key_signature() || m_pSO->is_time_signature())
-			{
-                m_uFixedSpace = pColLyt->tenths_to_logical(LOMSE_EXCEPTIONAL_MIN_SPACE, 0);
-                m_uVariableSpace = pColLyt->tenths_to_logical(LOMSE_MIN_SPACE, 0) - m_uFixedSpace;
-			}
-			else if (m_pSO->is_spacer())    //TODO || m_pSO->is_score_anchor())
-			{
-                m_uFixedSpace = 0.0f;
-                m_uVariableSpace = m_uSize;
-			}
-			else
-                assign_no_space();
-		}
-    }
-
-    //compute final position
-    m_xFinal = m_xLeft + get_total_size();
-}
-
-//---------------------------------------------------------------------------------------
-void LineEntry::set_note_rest_space(ColumnLayouter* pColLyt, float rFactor)
-{
-    assign_minimum_fixed_space(pColLyt);
-    LUnits uIdeal = compute_ideal_distance(pColLyt, rFactor);
-    assign_variable_space(uIdeal);
-}
-
-//---------------------------------------------------------------------------------------
-void LineEntry::assign_minimum_fixed_space(ColumnLayouter* pColLyt)
-{
-    m_uFixedSpace = pColLyt->tenths_to_logical(LOMSE_EXCEPTIONAL_MIN_SPACE, 0);
-}
-
-//---------------------------------------------------------------------------------------
-void LineEntry::assign_variable_space(LUnits uIdeal)
-{
-    m_uVariableSpace = uIdeal - m_uSize - m_uFixedSpace - m_uxAnchor;
-    if (m_uVariableSpace < 0)
-        m_uVariableSpace = 0.0f;
-}
-
-//---------------------------------------------------------------------------------------
-void LineEntry::assign_no_space()
-{
-    //no after space requirements
-    m_uFixedSpace = 0.0f;
-    m_uVariableSpace = 0.0f;
-
-    //do not consume time-pos grid space.
-    m_uSize = 0.0f;
-}
-
-//---------------------------------------------------------------------------------------
-LUnits LineEntry::compute_ideal_distance(ColumnLayouter* pColLyt, float rFactor)
-{
-    if (pColLyt->is_proportional_spacing())
-        return compute_ideal_distance_proportional(pColLyt, rFactor);
-    else
-        return compute_ideal_distance_fixed(pColLyt);
-}
-
-//---------------------------------------------------------------------------------------
-LUnits LineEntry::compute_ideal_distance_fixed(ColumnLayouter* pColLyt)
-{
-	int iStaff = m_pSO->get_staff();
-    return pColLyt->tenths_to_logical(pColLyt->get_fixed_spacing_value(), iStaff);
-}
-
-//---------------------------------------------------------------------------------------
-LUnits LineEntry::compute_ideal_distance_proportional(ColumnLayouter* pColLyt,
-                                                       float rFactor)
-{
-	static const float rLog2 = 0.3010299956640f;		// log(2)
-	int iStaff = m_pSO->get_staff();
-
-	//spacing function:   Space(Di) = Smin*[1 + A*log2(Di/Dmin)]
-	LUnits uSmin = pColLyt->tenths_to_logical(LOMSE_MIN_SPACE, iStaff);
-    ImoNoteRest* pNR = static_cast<ImoNoteRest*>(m_pSO);
-    float rVar = log(pNR->get_duration() / LOMSE_DMIN) / rLog2;     //log2(Di/Dmin)
-    if (rVar > 0.0f)
-        return uSmin * (1.0f + rFactor * rVar);
-    else
-        return uSmin;
 }
 
 //---------------------------------------------------------------------------------------
@@ -428,7 +322,7 @@ void ColumnSplitter::compute_break_points(BreaksTable* pBT)
     LUnits uxWidth = (*it)->get_shape_size();
     LUnits uxBeam = 0.0f;
     bool fInBeam = false;
-    ImoStaffObj* pSO = (*it)->m_pSO;
+    ImoStaffObj* pSO = (*it)->get_staffobj();
     if (pSO && pSO->is_note_rest() && static_cast<ImoNoteRest*>(pSO)->is_beamed())
     {
         fInBeam = true;
@@ -466,7 +360,7 @@ void ColumnSplitter::compute_break_points(BreaksTable* pBT)
             rTime = (*it)->get_timepos();
             uxStart = (*it)->get_position();
             uxWidth = (*it)->get_shape_size();
-            ImoStaffObj* pSO = (*it)->m_pSO;
+            ImoStaffObj* pSO = (*it)->get_staffobj();
             if (pSO && pSO->is_note_rest() && static_cast<ImoNoteRest*>(pSO)->is_beamed())
             {
                 fInBeam = true;
@@ -531,13 +425,12 @@ LineEntry* LineTable::add_final_entry(ImoStaffObj* pSO, GmoShape* pShape, float 
 }
 
 //---------------------------------------------------------------------------------------
-void LineTable::add_shapes(std::vector<GmoBoxSliceInstr*>& sliceInstrBoxes)
+void LineTable::add_shapes(GmoBoxSliceInstr* pSliceInstrBox)
 {
     for (LineEntryIterator it = m_LineEntries.begin(); it != m_LineEntries.end(); ++it)
     {
         if ((*it)->get_shape())
-            sliceInstrBoxes[m_nInstr]->add_shape((*it)->get_shape(),
-                                                 GmoShape::k_layer_notes);
+            pSliceInstrBox->add_shape((*it)->get_shape(), GmoShape::k_layer_notes);
     }
 }
 
@@ -602,7 +495,7 @@ LUnits LineTable::get_line_width()
 	//Return the size of the measure represented by this line or zero if invalid line
 
 	if (m_LineEntries.size() > 0 && m_LineEntries.back()->is_barline_entry())
-        return m_LineEntries.back()->m_xFinal - get_line_start_position();
+        return m_LineEntries.back()->get_x_final() - get_line_start_position();
     else
         return 0.0f;
 }
@@ -611,12 +504,9 @@ LUnits LineTable::get_line_width()
 //=======================================================================================
 //ColumnLayouter
 //=======================================================================================
-ColumnLayouter::ColumnLayouter(ColumnStorage* pStorage, float rSpacingFactor,
-                                     ESpacingMethod nSpacingMethod, Tenths nSpacingValue)
+ColumnLayouter::ColumnLayouter(ColumnStorage* pStorage, ScoreMeter* pScoreMeter)
     : m_pColStorage(pStorage)
-    , m_rSpacingFactor(rSpacingFactor)
-    , m_nSpacingMethod(nSpacingMethod)
-    , m_rSpacingValue(nSpacingValue)
+    , m_pScoreMeter(pScoreMeter)
 {
 }
 
@@ -627,9 +517,9 @@ ColumnLayouter::~ColumnLayouter()
 }
 
 //---------------------------------------------------------------------------------------
-LUnits ColumnLayouter::tenths_to_logical(Tenths value, int staff)
+LUnits ColumnLayouter::tenths_to_logical(Tenths value, int iInstr, int iStaff)
 {
-    return m_pColStorage->tenths_to_logical(value, staff);
+    return m_pScoreMeter->tenths_to_logical(value, iInstr, iStaff);
 }
 
 //---------------------------------------------------------------------------------------
@@ -697,7 +587,8 @@ void ColumnLayouter::create_line_spacers()
     const LinesIterator itEnd = m_pColStorage->end();
     for (LinesIterator it=m_pColStorage->begin(); it != itEnd; ++it)
 	{
-        LineSpacer* pLinSpacer = new LineSpacer(*it, this, m_rSpacingFactor);
+        LineSpacer* pLinSpacer
+            = new LineSpacer(*it, this, m_pScoreMeter->get_spacing_factor());
         m_LineSpacers.push_back(pLinSpacer);
     }
 }
@@ -705,7 +596,7 @@ void ColumnLayouter::create_line_spacers()
 //---------------------------------------------------------------------------------------
 void ColumnLayouter::process_non_timed_at_prolog()
 {
-    LUnits uSpaceAfterProlog = tenths_to_logical(LOMSE_SPACE_AFTER_PROLOG, 0);
+    LUnits uSpaceAfterProlog = tenths_to_logical(LOMSE_SPACE_AFTER_PROLOG, 0, 0);
     m_rCurrentTime = LOMSE_NO_TIME;           //any impossible high value
     m_rCurrentPos = 0.0f;
     for (LineSpacersIterator it=m_LineSpacers.begin(); it != m_LineSpacers.end(); ++it)
@@ -756,20 +647,36 @@ void ColumnLayouter::process_non_timed_at_current_timepos()
     m_rCurrentPos = uxPosForNextTime;
 }
 
+//---------------------------------------------------------------------------------------
+GmoBoxSliceInstr* ColumnLayouter::create_slice_instr(ImoInstrument* pInstr, LUnits yTop)
+{
+    GmoBoxSliceInstr* pBSI = m_pBoxSlice->add_box_for_instrument(pInstr);
+	pBSI->set_top(yTop);
+	pBSI->set_left( m_pBoxSlice->get_left() );
+	pBSI->set_width( m_pBoxSlice->get_width() );
+    m_sliceInstrBoxes.push_back( pBSI );
+    return pBSI;
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnLayouter::add_shapes_to_boxes()
+{
+    for (int iInstr=0; iInstr < int(m_sliceInstrBoxes.size()); ++iInstr)
+        m_pColStorage->add_shapes( m_sliceInstrBoxes[iInstr], iInstr);
+}
+
 
 
 
 //=======================================================================================
 // SystemLayouter implementation
 //=======================================================================================
-SystemLayouter::SystemLayouter(float rSpacingFactor, ESpacingMethod nSpacingMethod,
-                               Tenths rSpacingValue)
-    : m_rSpacingFactor(rSpacingFactor)
-    , m_nSpacingMethod(nSpacingMethod)
-    , m_rSpacingValue(rSpacingValue)
+SystemLayouter::SystemLayouter(ScoreMeter* pScoreMeter)
+    : m_pScoreMeter(pScoreMeter)
+    , m_uPrologWidth(0.0f)
 {
 #if (LOMSE_DUMP_TABLES)
-    m_debugFile.open("dbg_tables.txt");
+    m_debugFile.open("dbg_tables.txt", fstream::out | fstream::app);
 #endif
 }
 
@@ -797,6 +704,23 @@ SystemLayouter::~SystemLayouter()
 }
 
 //---------------------------------------------------------------------------------------
+void SystemLayouter::prepare_for_new_column(GmoBoxSlice* pBoxSlice)
+{
+    //create storage for this column
+    ColumnStorage* pStorage = new ColumnStorage();
+    m_ColStorage.push_back(pStorage);
+
+    //create a lines builder object for this column
+    LinesBuilder* pLB = new LinesBuilder(pStorage);
+    m_LinesBuilder.push_back(pLB);
+
+    //create the column layouter object
+    ColumnLayouter* pColLyt = new ColumnLayouter(pStorage, m_pScoreMeter);
+    pColLyt->set_slice_box(pBoxSlice);
+    m_ColLayouters.push_back(pColLyt);
+}
+
+//---------------------------------------------------------------------------------------
 void SystemLayouter::end_of_system_measurements()
 {
     //caller informs that all data for this system has been suplied.
@@ -810,28 +734,7 @@ void SystemLayouter::start_bar_measurements(int iCol, LUnits uxStart, LUnits uSp
 {
     //prepare to receive data for a new bar in column iCol [0..n-1].
 
-    //If not yet created, create ColumnLayouter object to store measurements
-    LinesBuilder* pLB;
-    if (m_ColLayouters.size() == (size_t)iCol)
-    {
-        //create storage for this column
-        ColumnStorage* pStorage = new ColumnStorage();
-        m_ColStorage.push_back(pStorage);
-
-        //create a lines builder object for this column
-        pLB = new LinesBuilder(pStorage);
-        m_LinesBuilder.push_back(pLB);
-
-        //create the column formatter object
-        ColumnLayouter* pColLyt = new ColumnLayouter(pStorage, m_rSpacingFactor,
-                                                     m_nSpacingMethod, m_rSpacingValue);
-        m_ColLayouters.push_back(pColLyt);
-    }
-    else
-        pLB = m_LinesBuilder[iCol];
-
-    //save start position and initial space
-    //pLB->start_measurements_for_instrument(nInstr, uxStart, pInstr, uSpace);
+    LinesBuilder* pLB = m_LinesBuilder[iCol];
     pLB->set_start_position(uxStart);
     pLB->set_initial_space(uSpace);
 }
@@ -856,7 +759,7 @@ void SystemLayouter::include_barline_and_terminate_bar_measurements(int iCol,
 {
     //caller sends lasts object to store in current bar, for column iCol [0..n-1].
 
-    m_LinesBuilder[iCol]->close_line(pSO, NULL, xStart, rTime);
+    m_LinesBuilder[iCol]->close_line(pSO, pShape, xStart, rTime);
 }
 
 //---------------------------------------------------------------------------------------
@@ -909,11 +812,9 @@ void SystemLayouter::increment_column_size(int iCol, LUnits uIncr)
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::add_shapes(std::vector<GmoBoxSliceInstr*>& sliceInstrBoxes)
+void SystemLayouter::add_shapes_to_column(int iCol)
 {
-    std::vector<ColumnStorage*>::iterator itS;
-    for (itS=m_ColStorage.begin(); itS != m_ColStorage.end(); ++itS)
-        (*itS)->add_shapes(sliceInstrBoxes);
+    m_ColLayouters[iCol]->add_shapes_to_boxes();
 }
 
 //---------------------------------------------------------------------------------------
@@ -963,6 +864,15 @@ void SystemLayouter::dump_column_data(int iCol)
     m_ColStorage[iCol]->dump_column_storage();
 #endif
 }
+
+//---------------------------------------------------------------------------------------
+GmoBoxSliceInstr* SystemLayouter::create_slice_instr(int iCol,
+                                                     ImoInstrument* pInstr,
+                                                     LUnits yTop)
+{
+    return m_ColLayouters[iCol]->create_slice_instr(pInstr, yTop);
+}
+
 
 ////------------------------------------------------
 //// Debug build: methods coded only for Unit Tests
@@ -1017,19 +927,6 @@ LinesIterator ColumnStorage::find_line(int line)
             return it;
 	}
     return m_Lines.end();
-}
-
-//---------------------------------------------------------------------------------------
-void ColumnStorage::set_staff_spacing(int staff, LUnits space)
-{
-    m_lineSpace.reserve(staff+1);
-    m_lineSpace[staff] = space;
-}
-
-//---------------------------------------------------------------------------------------
-LUnits ColumnStorage::tenths_to_logical(Tenths value, int staff)
-{
-	return (value * m_lineSpace[staff]) / 10.0f;
 }
 
 ////---------------------------------------------------------------------------------------
@@ -1094,10 +991,13 @@ LUnits ColumnStorage::get_start_of_bar_position()
 }
 
 //---------------------------------------------------------------------------------------
-void ColumnStorage::add_shapes(std::vector<GmoBoxSliceInstr*>& sliceInstrBoxes)
+void ColumnStorage::add_shapes(GmoBoxSliceInstr* pSliceInstrBox, int iInstr)
 {
 	for (LinesIterator it=m_Lines.begin(); it != m_Lines.end(); ++it)
-        (*it)->add_shapes(sliceInstrBoxes);
+    {
+        if ((*it)->get_instrument() == iInstr)
+            (*it)->add_shapes(pSliceInstrBox);
+    }
 }
 
 
@@ -1208,8 +1108,6 @@ void LinesBuilder::include_object(int line, int instr, ImoInstrument* pInstr,
     if (m_pColStorage->is_end_of_table(m_itCurLine))
     {
         start_line(line, instr);
-        m_pColStorage->set_staff_spacing(nStaff,
-                                         pInstr->get_line_spacing_for_staff(nStaff));
     }
 
     //add new entry for this object
@@ -1277,9 +1175,9 @@ float LineResizer::move_prolog_shapes()
     LineEntryIterator it = m_pTable->begin();
     while (it != m_pTable->end() && (*it)->get_timepos() < 0.0f)
     {
-        if ((*it)->m_pShape)
+        if ((*it)->get_shape())
         {
-            if ((*it)->m_fProlog)
+            if ((*it)->is_prolog_object())
             {
                 LUnits uNewPos = uLineShift + (*it)->get_position();
                 (*it)->reposition_at(uNewPos);
@@ -1316,13 +1214,12 @@ LUnits LineResizer::get_time_line_position_for_time(float rFirstTime)
 //---------------------------------------------------------------------------------------
 void LineResizer::reasign_position_to_all_other_objects(LUnits uFizedSizeAtStart)
 {
-    if (m_itCurrent == m_pTable->end() || m_uNewBarSize == m_uOldBarSize)
+    if (m_itCurrent == m_pTable->end())
         return;
 
     //Compute proportion factor
     LUnits uLineStartPos = m_pTable->get_line_start_position();
-    //LUnits uLineShift = m_uNewStart - uLineStartPos;
-    LUnits uDiscount = 0.0f;    //TODO  uFizedSizeAtStart - uLineStartPos;
+    LUnits uDiscount = uFizedSizeAtStart - uLineStartPos;
     float rProp = (m_uNewBarSize-uDiscount) / (m_uOldBarSize-uDiscount);
 
 	//Reposition the remainder entries
@@ -1374,10 +1271,10 @@ void LineResizer::reasign_position_to_all_other_objects(LUnits uFizedSizeAtStart
 //  encapsulates the algorithm to assign spaces and positions to a single line
 //=======================================================================================
 LineSpacer::LineSpacer(LineTable* pLineTable, ColumnLayouter* pColLyt,
-                           float rFactor)
+                       float rFactor)
     : m_pTable(pLineTable)
     , m_rFactor(rFactor)
-    , m_pColFmt(pColLyt)
+    , m_pColLyt(pColLyt)
     , m_itCur(pLineTable->end())
     , m_rCurTime(0.0f)
 	, m_uxCurPos(0.0f)
@@ -1430,7 +1327,8 @@ void LineSpacer::compute_max_and_min_occupied_space()
     LineEntryIterator it = m_itCur;
 	while (is_non_timed_object(it))
     {
-        (*it)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
+        //(*it)->assign_fixed_and_variable_space(m_pColLyt, m_rFactor);
+        assign_fixed_and_variable_space(*it);
         LUnits uxMax = (*it)->get_total_size();
         m_uxMaxOcuppiedSpace += uxMax;
         m_uxMinOcuppiedSpace += uxMax - (*it)->get_variable_space();
@@ -1464,7 +1362,8 @@ void LineSpacer::position_using_max_space_with_shift(LUnits uShift)
     LUnits uxNextPos = m_uxCurPos - m_uxRemovable + uShift;
 	while (is_current_object_non_timed())
     {
-        (*m_itCur)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
+        //(*m_itCur)->assign_fixed_and_variable_space(m_pColLyt, m_rFactor);
+        assign_fixed_and_variable_space(*m_itCur);
         (*m_itCur)->reposition_at(uxNextPos);
 
         uxNextPos += (*m_itCur)->get_total_size();
@@ -1482,7 +1381,8 @@ void LineSpacer::position_using_min_space_with_shift(LUnits uShift)
     LUnits uxNextPos = m_uxCurPos - m_uxRemovable + uShift;
 	while (is_current_object_non_timed())
     {
-        (*m_itCur)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
+        //(*m_itCur)->assign_fixed_and_variable_space(m_pColLyt, m_rFactor);
+        assign_fixed_and_variable_space(*m_itCur);
         (*m_itCur)->set_variable_space(0.0f);
         (*m_itCur)->reposition_at(uxNextPos);
 
@@ -1503,7 +1403,8 @@ void LineSpacer::process_non_timed_at_prolog(LUnits uSpaceAfterProlog)
         LUnits uxNextPos = m_uxCurPos;
 	    while (is_current_object_non_timed())
         {
-            (*m_itCur)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
+            //(*m_itCur)->assign_fixed_and_variable_space(m_pColLyt, m_rFactor);
+            assign_fixed_and_variable_space(*m_itCur);
             (*m_itCur)->reposition_at(uxNextPos);
 
             uxNextPos += (*m_itCur)->get_total_size();
@@ -1541,17 +1442,18 @@ void LineSpacer::process_timed_at_current_timepos(LUnits uxPos)
 		(*m_itCur)->set_position( uxRequiredPos + (*m_itCur)->get_anchor() );
 
         //AssignFixedAndVariableSpacingToCurrentEntry();
-        (*m_itCur)->assign_fixed_and_variable_space(m_pColFmt, m_rFactor);
+        //(*m_itCur)->assign_fixed_and_variable_space(m_pColLyt, m_rFactor);
+        assign_fixed_and_variable_space(*m_itCur);
 
         //DetermineSpaceRequirementsForCurrentEntry();
         if ((*m_itCur)->is_note_rest())
-		    uxNextPos = max(uxNextPos, (*m_itCur)->m_xFinal);
+		    uxNextPos = max(uxNextPos, (*m_itCur)->get_x_final());
         else
-            uxMinNextPos = max(uxMinNextPos, (*m_itCur)->m_xFinal);
+            uxMinNextPos = max(uxMinNextPos, (*m_itCur)->get_x_final());
 
         uxMargin = (uxMargin==0.0f ?
-                        (*m_itCur)->m_uVariableSpace
-                        : min(uxMargin, (*m_itCur)->m_uVariableSpace) );
+                        (*m_itCur)->get_variable_space()
+                        : min(uxMargin, (*m_itCur)->get_variable_space()) );
 
         //AdvanceToNextEntry();
         itLast = m_itCur++;
@@ -1576,10 +1478,9 @@ LUnits LineSpacer::compute_shift_to_avoid_overlap_with_previous()
     //'removable' space.
 
     LineEntryIterator it = m_itCur;
-    //LUnits uxNextPos = m_uxCurPos;
     LUnits uxShift = 0.0f;
     const LineEntryIterator itEnd = m_pTable->end();
-	while (it != itEnd && is_equal_time((*it)->m_rTimePos, m_rCurTime))
+	while (it != itEnd && is_equal_time((*it)->get_timepos(), m_rCurTime))
     {
         LUnits uAnchor = - (*it)->get_anchor();     // > 0 if need to shift left
         if (uAnchor > 0.0f && m_uxRemovable < uAnchor)
@@ -1628,6 +1529,124 @@ void LineSpacer::drag_any_previous_clef_to_place_it_near_this_one()
         shift_non_timed(m_uxCurPos - m_uxNotTimedFinalPos);
     }
     m_itNonTimedAtCurPos = m_pTable->end();     //no longer needed. Discart value now to avoid problmes at next timepos
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::assign_fixed_and_variable_space(LineEntry* pEntry)
+{
+	//assign fixed and variable after spaces to this entry and compute the xFinal pos
+
+    if (pEntry->is_barline_entry())
+    {
+		if (!pEntry->get_staffobj())
+            pEntry->set_size(0.0f);
+    }
+    else
+    {
+        ImoStaffObj* pSO = pEntry->get_staffobj();
+		if (!pSO->is_visible())
+            assign_no_space(pEntry);
+		else
+		{
+			if (pSO->is_note_rest())
+			{
+				set_note_rest_space(pEntry);
+			}
+			else if (pSO->is_clef()
+                    || pSO->is_key_signature()
+                    || pSO->is_time_signature() )
+			{
+			    int iInstr = m_pTable->get_instrument();
+			    int iStaff = pSO->get_staff();
+			    LUnits fixed = m_pColLyt->tenths_to_logical(LOMSE_EXCEPTIONAL_MIN_SPACE,
+                                                            iInstr, iStaff);
+                pEntry->set_fixed_space(fixed);
+                pEntry->set_variable_space(
+                    m_pColLyt->tenths_to_logical(LOMSE_MIN_SPACE, iInstr, iStaff) - fixed );
+			}
+			else if (pSO->is_spacer())    //TODO || pSO->is_score_anchor())
+			{
+                pEntry->set_fixed_space(0.0f);
+                pEntry->set_variable_space( pEntry->get_shape_size() );
+			}
+			else
+                assign_no_space(pEntry);
+		}
+    }
+    pEntry->update_x_final();
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::set_note_rest_space(LineEntry* pEntry)
+{
+    assign_minimum_fixed_space(pEntry);
+    LUnits uIdeal = compute_ideal_distance(pEntry);
+    assign_variable_space(pEntry, uIdeal);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits LineSpacer::compute_ideal_distance(LineEntry* pEntry)
+{
+    if (m_pColLyt->is_proportional_spacing())
+        return compute_ideal_distance_proportional(pEntry);
+    else
+        return compute_ideal_distance_fixed(pEntry);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits LineSpacer::compute_ideal_distance_fixed(LineEntry* pEntry)
+{
+    int iInstr = m_pTable->get_instrument();
+    ImoStaffObj* pSO = pEntry->get_staffobj();
+	int iStaff = pSO->get_staff();
+    return m_pColLyt->tenths_to_logical(m_pColLyt->get_fixed_spacing_value(),
+                                        iInstr, iStaff);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits LineSpacer::compute_ideal_distance_proportional(LineEntry* pEntry)
+{
+	static const float rLog2 = 0.3010299956640f;		// log(2)
+    ImoStaffObj* pSO = pEntry->get_staffobj();
+	int iStaff = pSO->get_staff();
+    int iInstr = m_pTable->get_instrument();
+
+	//spacing function:   Space(Di) = Smin*[1 + A*log2(Di/Dmin)]
+	LUnits uSmin = m_pColLyt->tenths_to_logical(LOMSE_MIN_SPACE, iInstr, iStaff);
+    ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
+    float rVar = log(pNR->get_duration() / LOMSE_DMIN) / rLog2;     //log2(Di/Dmin)
+    if (rVar > 0.0f)
+        return uSmin * (1.0f + m_rFactor * rVar);
+    else
+        return uSmin;
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::assign_variable_space(LineEntry* pEntry, LUnits uIdeal)
+{
+    LUnits space = max(0.0f, uIdeal - pEntry->get_shape_size()
+                                    - pEntry->get_fixed_space()
+                                    - pEntry->get_anchor());
+
+   pEntry->set_variable_space( space );
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::assign_no_space(LineEntry* pEntry)
+{
+    pEntry->set_fixed_space(0.0f);
+    pEntry->set_variable_space(0.0f);
+    pEntry->set_size(0.0f);
+}
+
+//---------------------------------------------------------------------------------------
+void LineSpacer::assign_minimum_fixed_space(LineEntry* pEntry)
+{
+    int iInstr = m_pTable->get_instrument();
+    ImoStaffObj* pSO = pEntry->get_staffobj();
+	int iStaff = pSO->get_staff();
+    pEntry->set_fixed_space( m_pColLyt->tenths_to_logical(LOMSE_EXCEPTIONAL_MIN_SPACE,
+                                                          iInstr, iStaff) );
 }
 
 
@@ -2183,6 +2202,65 @@ void ColumnResizer::delete_line_resizers()
 	for (itR = m_LineResizers.begin(); itR != m_LineResizers.end(); ++itR)
 		delete *itR;
     m_LineResizers.clear();
+}
+
+
+
+//=======================================================================================
+//ScoreMeter implementation
+//=======================================================================================
+ScoreMeter::ScoreMeter(ImoScore* pScore)
+    : m_numInstruments( pScore->get_num_instruments() )
+{
+    get_options(pScore);
+    get_staff_spacing(pScore);
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreMeter::get_options(ImoScore* pScore)
+{
+    ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
+    m_rSpacingFactor = pOpt->get_float_value();
+
+    pOpt = pScore->get_option("Render.SpacingMethod");
+    m_nSpacingMethod = static_cast<ESpacingMethod>( pOpt->get_long_value() );
+
+    pOpt = pScore->get_option("Render.SpacingValue");
+    m_rSpacingValue = static_cast<Tenths>( pOpt->get_long_value() );
+
+    pOpt = pScore->get_option("Staff.DrawLeftBarline");
+    m_fDrawLeftBarline = pOpt->get_bool_value();
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreMeter::get_staff_spacing(ImoScore* pScore)
+{
+    int instruments = pScore->get_num_instruments();
+    m_staffIndex.reserve(instruments);
+    int staves = 0;
+    for (int iInstr=0; iInstr < instruments; ++iInstr)
+    {
+        m_staffIndex[iInstr] = staves;
+        ImoInstrument* pInstr = pScore->get_instrument(iInstr);
+        int numStaves = pInstr->get_num_staves();
+        staves += numStaves;
+        for (int iStaff=0; iStaff < numStaves; ++iStaff)
+            m_lineSpace.push_back( pInstr->get_line_spacing_for_staff(iStaff) );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+LUnits ScoreMeter::tenths_to_logical(Tenths value, int iInstr, int iStaff)
+{
+    int idx = m_staffIndex[iInstr] + iStaff;
+	return (value * m_lineSpace[idx]) / 10.0f;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits ScoreMeter::line_spacing_for_instr_staff(int iInstr, int iStaff)
+{
+    int idx = m_staffIndex[iInstr] + iStaff;
+	return m_lineSpace[idx];
 }
 
 

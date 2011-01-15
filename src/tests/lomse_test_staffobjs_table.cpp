@@ -673,7 +673,10 @@ SUITE(ColStaffObjsTest)
     TEST_FIXTURE(ColStaffObjsTestFixture, CSOIteratorAtEnd)
     {
         LdpParser parser(cout, m_pLdpFactory);
-        SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (staves 2)(musicData (clef G p1)(clef F4 p2)(key D)(n c4 q v2 p1)(n d4 e.)(n d4 s v3 p2)(n e4 h)))) ))" );
+        SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 1.6) (instrument (staves 2)"
+            "(musicData (clef G p1)(clef F4 p2)(key D)(n c4 q v2 p1)(n d4 e.)"
+            "(n d4 s v3 p2)(n e4 h)))) ))" );
         Analyser a(cout, m_pLdpFactory);
         InternalModel* pIModel = a.analyse_tree(tree);
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );

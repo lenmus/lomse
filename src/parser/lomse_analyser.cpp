@@ -2395,7 +2395,7 @@ protected:
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Unknown note pitch '" + pitch + "'. Replaced by 'c4'.");
-            dto.set_pitch(ImoNote::C, 4, ImoNote::k_no_accidentals);
+            dto.set_pitch(k_step_C, 4, ImoNote::k_no_accidentals);
         }
         else
             dto.set_pitch(step, octave, accidentals);

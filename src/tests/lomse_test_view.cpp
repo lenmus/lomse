@@ -171,8 +171,8 @@ SUITE(GraphicViewTest)
         double vy = 0.0;
         int iPage = 0;
         pIntor->model_point_to_screen(&vx, &vy, iPage);
-        Pixels x(vx);
-        Pixels y(vy);
+        Pixels x = Pixels(vx);
+        Pixels y = Pixels(vy);
 
         //cout << "x=" << x << ", y=" << y << endl;
         CHECK( x == 18 );

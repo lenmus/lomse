@@ -1201,11 +1201,11 @@ protected:
     int m_keyType;
 
 public:
-//    ImoKeySignature() : ImoStaffObj(ImoObj::k_key_signature) , m_keyType(ImoKeySignature::Undefined) {}
+//    ImoKeySignature() : ImoStaffObj(ImoObj::k_key_signature) , m_keyType(ImoKeySignature::k_undefined) {}
     ImoKeySignature(DtoKeySignature& dto);
     ~ImoKeySignature() {}
 
-	enum { Undefined=-1, C=0, G, D, A, E, B, Fs, Cs, Cf, Gf, Df, Af, Ef, Bf, F,
+	enum { k_undefined=-1, C=0, G, D, A, E, B, Fs, Cs, Cf, Gf, Df, Af, Ef, Bf, F,
            a, e, b, fs, cs, gs, ds, as, af, ef, bf, f, c, g, d };
 
     //getters and setters

@@ -166,11 +166,22 @@ void open_document()
 
         //"(instrument (musicData )) )))" );
 
-        //"(instrument (staves 2) (musicData )) )))" );
-        //"(instrument (musicData )) (instrument (musicData )) )))" );
+//        "(instrument (staves 2) (musicData (clef G p1)(clef C1 p2)(n b4 q p1)(goBack q)(n e4 q p2)(barline))) )))" );
 
-        "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData (clef G)(n c4 e.)) )"
-        "(instrument (name \"pilano\")(abbrev \"P\")(staves 2)(musicData (clef G p1)(clef F4 p2))) )))" );
+//        "(instrument (musicData )) (instrument (musicData )) )))" );
+
+        "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData (clef F4)(n c3 e.)(barline)"
+        "(n e2 q)(n e3 q)(barline)"
+        "(n f2 q)(n f3 q)(barline)"
+        "(n g2 q)(n g3 q)(barline)"
+        "(n a2 q)(n a3 q)(barline)"
+        "(n b2 q)(n b3 q)(barline)"
+        "(n c3 q)(n c4 q)(barline)"
+        "(n d3 q)(n d4 q)(barline)"
+        "(n e3 q)(n e4 q)(barline)"
+        "(n f3 q)(n f4 q)(barline end) ))"
+        "(instrument (name \"pilano\")(abbrev \"P\")(staves 2)(musicData (clef G p1)(clef F4 p2)))"
+        ")))" );
 
     m_pView->set_rendering_buffer(&m_rbuf_window);
 }
@@ -664,8 +675,8 @@ bool init_x()
     if (!determine_bitmap_format())
         return false;
 
-    create_main_window(600, 400);       //600 x 400 pixels
-    create_rendering_buffer(600, 400, 0);
+    create_main_window(850, 600);       //850 x 600 pixels
+    create_rendering_buffer(850, 600, 0);
 
     XMapWindow(m_pDisplay, m_window);
 
@@ -715,9 +726,7 @@ int main ()
 
     //delete the view and the rendering buffer
     delete_rendering_buffer();
-    delete m_pPresenter;    //this will also delete the Document, the Views and all other stuff
-
-    //delete m_pView;             //this will also delete the Document
+    delete m_pPresenter;    //this will also delete the Doc, the Views and all other stuff
 
     //close X connection
     close_x();

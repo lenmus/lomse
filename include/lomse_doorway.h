@@ -254,8 +254,7 @@ public:
 
     //common operations
     Presenter* new_document(int viewType);
-    View* create_view(int viewType, Document* pDoc);
-    HorizontalBookView* create_horizontal_book_view(Document* pDoc);
+    Presenter* open_document(int viewType, const string& filename);
 
     //providing platform services to lomse
     virtual void update_window() { if (m_pFunc_update_window) m_pFunc_update_window(); }

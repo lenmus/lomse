@@ -50,7 +50,6 @@ public:
     virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
 //    void RenderHighlighted(wxDC* pDC, Color colorC);
 
-//    wxString Dump(int nIndent);
 //    void Shift(LUnits xIncr, LUnits yIncr);
 //	virtual wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
 //    virtual UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos);
@@ -98,8 +97,7 @@ public:
 
     //implementation of virtual methods from base class
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
-//    wxString Dump(int nIndent);
-//    void Shift(LUnits xIncr, LUnits yIncr);
+    void shift_origin(USize& shift);
 
 protected:
     GmoShapeSimpleLine(int type, LUnits xStart, LUnits yStart, LUnits xEnd, LUnits yEnd,
@@ -141,7 +139,6 @@ protected:
 //    void on_draw(Drawer* pDrawer, RenderOptions& opt);
 //    void RenderNormal(lmPaper* pPaper, Color color);
 //    void RenderWithHandlers(lmPaper* pPaper);
-//    wxString Dump(int nIndent);
 //    void Shift(LUnits uxIncr, LUnits uyIncr);
 //
 //    //Handler IDs. AWARE: Used also as array indexes
@@ -201,21 +198,17 @@ protected:
 //    lmHandlerSquare*    m_pHandler[lmID_NUM_HANDLERS];     //handlers
 //
 //};
-//
-////---------------------------------------------------------------------------------------
-//class GmoShapeInvisible : public GmoSimpleShape
-//{
-//public:
-//    GmoShapeInvisible(GmoBox* owner, int nShapeIdx, UPoint uPos, lmUSize uSize,
-//                     wxString sName=_T("Invisible"));
-//    ~GmoShapeInvisible() {}
-//
+
+//---------------------------------------------------------------------------------------
+class GmoShapeInvisible : public GmoSimpleShape
+{
+public:
+    GmoShapeInvisible(int idx, UPoint uPos, USize uSize);
+    ~GmoShapeInvisible() {}
+
 //	//overrides
-//    wxString Dump(int nIndent);
-//	void Render(lmPaper* pPaper, Color color);
-//
-//
-//};
+//	void on_draw(Drawer* pDrawer, RenderOptions& opt);
+};
 
 //---------------------------------------------------------------------------------------
 class GmoShapeStem : public GmoShapeSimpleLine
@@ -292,6 +285,21 @@ public:
 //extern wxBitmap* GetBitmapForGlyph(double rScale, int nGlyph, double rPointSize,
 //                                   Color colorF, Color colorB);
 //
+
+//---------------------------------------------------------------------------------------
+class GmoShapeKeySignature : public GmoShapeGlyph
+{
+public:
+    GmoShapeKeySignature(int idx, unsigned int iGlyph, UPoint pos, Color color,
+                         LibraryScope& libraryScope)
+        : GmoShapeGlyph(GmoObj::k_shape_key_signature, idx, iGlyph, pos, color,
+                        libraryScope)
+    {
+    }
+
+//	//overrides
+//	void on_draw(Drawer* pDrawer, RenderOptions& opt);
+};
 
 
 }   //namespace lomse

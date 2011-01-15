@@ -1352,13 +1352,13 @@ int to_step(const char& letter)
 {
 	switch (letter)
     {
-		case 'a':	return ImoNote::A;
-		case 'b':	return ImoNote::B;
-		case 'c':	return ImoNote::C;
-		case 'd':	return ImoNote::D;
-		case 'e':	return ImoNote::E;
-		case 'f':	return ImoNote::F;
-		case 'g':	return ImoNote::G;
+		case 'a':	return k_step_A;
+		case 'b':	return k_step_B;
+		case 'c':	return k_step_C;
+		case 'd':	return k_step_D;
+		case 'e':	return k_step_E;
+		case 'f':	return k_step_F;
+		case 'g':	return k_step_G;
 	}
 	return -1;
 }

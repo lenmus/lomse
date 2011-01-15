@@ -74,22 +74,6 @@ void GmoShapeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //}
 //
 ////---------------------------------------------------------------------------------------
-//wxString GmoShapeGlyph::Dump(int nIndent)
-//{
-//	wxString sDump = _T("");
-//	sDump.append(nIndent * lmINDENT_STEP, _T(' '));
-//	sDump += wxString::Format(_T("Idx: %d %s: pos=(%.2f,%.2f), "),
-//        m_nOwnerIdx, m_sGMOName.c_str(), m_uGlyphPos.x, m_uGlyphPos.y);
-//    sDump += DumpBounds();
-//    sDump += _T("\n");
-//
-//    //base class
-//    sDump += GmoShape::Dump(nIndent);
-//
-//	return sDump;
-//}
-//
-////---------------------------------------------------------------------------------------
 //void GmoShapeGlyph::Shift(LUnits xIncr, LUnits yIncr)
 //{
 //    m_uGlyphPos.x += xIncr;
@@ -379,66 +363,31 @@ void GmoShapeSimpleLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
     GmoSimpleShape::on_draw(pDrawer, opt);
 }
 
+//---------------------------------------------------------------------------------------
+void GmoShapeSimpleLine::shift_origin(USize& shift)
+{
+    GmoShape::shift_origin(shift);
+
+    m_xStart += shift.width;
+    m_yStart += shift.height;
+    m_xEnd += shift.width;
+    m_yEnd += shift.height;
+}
+
+
+
+//---------------------------------------------------------------------------------------
+// GmoShapeInvisible
+//---------------------------------------------------------------------------------------
+GmoShapeInvisible::GmoShapeInvisible(int idx, UPoint uPos, USize uSize)
+	: GmoSimpleShape(GmoObj::k_shape_invisible, idx, Color(0,0,0))
+{
+    m_origin = uPos;
+    m_size = uSize;
+}
+
 ////---------------------------------------------------------------------------------------
-//wxString GmoShapeSimpleLine::Dump(int nIndent)
-//{
-//	wxString sDump = _T("");
-//	sDump.append(nIndent * lmINDENT_STEP, _T(' '));
-//	sDump += wxString::Format(_T("Idx: %d %s: start=(%.2f, %.2f), end=(%.2f, %.2f), line width=%.2f, "),
-//                m_nOwnerIdx, m_sGMOName.c_str(), m_xStart, m_yStart, m_xEnd, m_yEnd, m_uWidth );
-//    sDump += DumpBounds();
-//    sDump += _T("\n");
-//
-//    //base class
-//    sDump += GmoShape::Dump(nIndent);
-//
-//	return sDump;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeSimpleLine::Shift(LUnits xIncr, LUnits yIncr)
-//{
-//    m_xStart += xIncr;
-//    m_yStart += yIncr;
-//    m_xEnd += xIncr;
-//    m_yEnd += yIncr;
-//
-//    ShiftBoundsAndSelRec(xIncr, yIncr);
-//
-//	//if included in a composite shape update parent bounding and selection rectangles
-//	if (this->IsChildShape())
-//		((lmCompositeShape*)GetParentShape())->RecomputeBounds();
-//}
-//
-//
-//
-////---------------------------------------------------------------------------------------
-//// GmoShapeInvisible
-////---------------------------------------------------------------------------------------
-//GmoShapeInvisible::GmoShapeInvisible(GmoBox* owner, int nShapeIdx, UPoint uPos, lmUSize uSize,
-//                                   wxString sName)
-//	: GmoSimpleShape(GmoObj::k_shape_Invisible, pOwner, nShapeIdx, sName, lmNO_DRAGGABLE, lmNO_SELECTABLE)
-//{
-//    m_uBoundsTop.x = uPos.x;
-//    m_uBoundsTop.y = uPos.y;
-//    m_uBoundsBottom.x = uPos.x + uSize.x;
-//    m_uBoundsBottom.y = uPos.y + uSize.y;
-//}
-//
-////---------------------------------------------------------------------------------------
-//wxString GmoShapeInvisible::Dump(int nIndent)
-//{
-//	//TODO
-//    wxString sDump = _T("GmoShapeInvisible\n");
-//
-//    //base class
-//    sDump += GmoShape::Dump(nIndent);
-//
-//	return sDump;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeInvisible::Render(lmPaper* pPaper, Color color)
+//void GmoShapeInvisible::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //{
 //    //if (g_fDrawInvisible)       //TODO
 //    {
@@ -551,7 +500,7 @@ void GmoShapeSimpleLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::Render(lmPaper* pPaper, Color color)
+//void GmoShapeRectangle::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //{
 //    //if selected, book to be rendered with handlers when posible
 //    if (IsSelected())
@@ -632,25 +581,6 @@ void GmoShapeSimpleLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //void GmoShapeRectangle::SetCornerRadius(LUnits uRadius)
 //{
 //    m_uCornerRadius = uRadius;
-//}
-//
-////---------------------------------------------------------------------------------------
-//wxString GmoShapeRectangle::Dump(int nIndent)
-//{
-//	wxString sDump = _T("");
-//	sDump.append(nIndent * lmINDENT_STEP, _T(' '));
-//	sDump += wxString::Format(_T("Idx: %d %s: left-top=(%.2f, %.2f), right-bottom=(%.2f, %.2f), line width=%.2f, "),
-//                m_nOwnerIdx, m_sGMOName.c_str(),
-//                m_uPoint[lmID_TOP_LEFT].x, m_uPoint[lmID_TOP_LEFT].y,
-//                m_uPoint[lmID_BOTTOM_RIGHT].x, m_uPoint[lmID_BOTTOM_RIGHT].y,
-//                m_uBorderWidth );
-//    sDump += DumpBounds();
-//    sDump += _T("\n");
-//
-//    //base class
-//    sDump += GmoShape::Dump(nIndent);
-//
-//	return sDump;
 //}
 //
 ////---------------------------------------------------------------------------------------
@@ -1076,7 +1006,7 @@ void GmoShapeStem::adjust(LUnits xPos, LUnits yStart, LUnits yEnd, bool fStemDow
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void GmoShapeWindow::Render(lmPaper* pPaper, Color color)
+//void GmoShapeWindow::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //{
 //    lmBoxPage* pBPage = this->GetOwnerBoxPage();
 //    wxWindow* pWindow = pBPage->GetRenderWindow();

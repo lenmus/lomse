@@ -248,7 +248,7 @@ SUITE(InteractorTest)
         pIntor->model_point_to_screen(&vx, &vy, 0);
 
         CHECK( pClef->is_selected() == false );
-        pIntor->select_object_at_screen_point(vx, vy);
+        pIntor->select_object_at_screen_point(Pixels(vx), Pixels(vy));
 
         CHECK( pIntor->is_in_selection(pClef) == true );
         CHECK( pClef->is_selected() == true );

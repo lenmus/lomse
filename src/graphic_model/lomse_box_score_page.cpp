@@ -324,17 +324,6 @@ GmoBoxSystem* GmoBoxScorePage::get_system(int iSystem)
 //    m_GMObjsWithHandlers.push_back(pGMO);
 //}
 //
-//wxString GmoBoxScorePage::Dump(int nIndent)
-//{
-//	wxString sDump = _T("");
-//	sDump.append(nIndent * lmINDENT_STEP, _T(' '));
-//	sDump += wxString::Format(_T("GmoBoxScorePage %d (systems %d to %d), "),
-//						m_nNumPage, m_nFirstSystem, m_nLastSystem);
-//
-//    sDump += lmBox::Dump(nIndent);
-//	return sDump;
-//}
-//
 //int GmoBoxScorePage::GetSystemNumber(GmoBoxSystem* pSystem)
 //{
 //	//returns the number of the system (1..n) received as parameter

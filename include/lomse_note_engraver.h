@@ -50,6 +50,7 @@ protected:
     LUnits m_lineSpacing;
     Color m_color;
     bool m_fNoteEngraved;
+    bool m_fStemDown;
     int m_nPosOnStaff;
     LUnits m_uxLeft, m_uyTop;       //current position
     LUnits m_uyFlag;
@@ -78,6 +79,7 @@ protected:
     int decide_notehead_type();
     void add_shapes_for_dots_if_required();
     LUnits add_dot_shape(LUnits x, LUnits y, Color color);
+    void determine_stem_direction();
     void determine_stem_x_pos();
     void determine_stem_y_start();
     void set_position_and_size_of_stem();
@@ -89,6 +91,7 @@ protected:
     LUnits get_stem_x_left();
     LUnits get_stem_x_right();
     LUnits get_pitch_shift();
+    int pitch_to_pos_on_staff(int clefType);
     int get_pos_on_staff();
     LUnits get_standard_stem_length();
 

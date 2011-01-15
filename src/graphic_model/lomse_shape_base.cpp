@@ -166,14 +166,6 @@ Color GmoShape::determine_color_to_use(RenderOptions& opt)
 //}
 //
 ////---------------------------------------------------------------------------------------
-//wxString GmoShape::Dump(int nIndent)
-//{
-//    //Dump info about owner ScoreObj
-//
-//    return GetScoreOwner()->Dump();
-//}
-//
-////---------------------------------------------------------------------------------------
 //int GmoShape::Attach(GmoShape* pShape, lmEAttachType nTag)
 //{
 //	lmAttachPoint* pData = new lmAttachPoint(pShape, nTag);
@@ -355,6 +347,11 @@ int GmoCompositeShape::add(GmoShape* pShape)
 	}
 	else
 	{
+	    //TODO: Note from LenMus:
+//        lmCompositeShape: the selection rectangle should not be the boundling rectangle
+//        but each rectangle of each component shape. This will save the need to define
+//        specific shapes just to override selection rectangle. i.i. metronome marks
+
 		//compute new selection rectangle by union of individual selection rectangles
 		URect bbox = get_bounds();
 		bbox.Union(pShape->get_bounds());
@@ -373,8 +370,8 @@ int GmoCompositeShape::add(GmoShape* pShape)
 //---------------------------------------------------------------------------------------
 void GmoCompositeShape::shift_origin(USize& shift)
 {
-//    m_origin.x += shift.width;
-//    m_origin.y += shift.height;
+    m_origin.x += shift.width;
+    m_origin.y += shift.height;
 
     //shift components
     for (int i=0; i < (int)m_Components.size(); i++)
@@ -382,26 +379,6 @@ void GmoCompositeShape::shift_origin(USize& shift)
         m_Components[i]->shift_origin(shift);
     }
 }
-
-////---------------------------------------------------------------------------------------
-//wxString GmoCompositeShape::Dump(int nIndent)
-//{
-//	//TODO
-//	wxString sDump = _T("");
-//	sDump.append(nIndent * lmINDENT_STEP, _T(' '));
-//	sDump += wxString::Format(_T("Idx: %d %s: grouped=%s, "), m_nOwnerIdx, m_sGMOName.c_str(),
-//        (m_fGrouped ? _T("yes") : _T("no")) );
-//    sDump += DumpBounds();
-//    sDump += _T("\n");
-//
-//    //dump all its components
-//    nIndent++;
-//    for (int i=0; i < (int)m_Components.size(); i++)
-//    {
-//        sDump += m_Components[i]->Dump(nIndent);
-//    }
-//	return sDump;
-//}
 
 //---------------------------------------------------------------------------------------
 void GmoCompositeShape::on_draw(Drawer* pDrawer, RenderOptions& opt)
@@ -412,6 +389,17 @@ void GmoCompositeShape::on_draw(Drawer* pDrawer, RenderOptions& opt)
     for (int i=0; i < (int)m_Components.size(); i++)
     {
         m_Components[i]->on_draw(pDrawer, opt);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void GmoCompositeShape::set_selected(bool value)
+{
+    GmoShape::set_selected(value);
+
+    for (int i=0; i < (int)m_Components.size(); i++)
+    {
+        m_Components[i]->set_selected(value);
     }
 }
 

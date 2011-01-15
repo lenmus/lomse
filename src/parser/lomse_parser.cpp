@@ -54,11 +54,8 @@ LdpParser::~LdpParser()
 
 void LdpParser::clear_all()
 {
-    if (m_pTokenizer)
-    {
-        delete m_pTokenizer;
-        m_pTokenizer = NULL;
-    }
+    delete m_pTokenizer;
+    m_pTokenizer = NULL;
 
     while (!m_stack.empty())
     {
