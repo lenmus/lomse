@@ -491,10 +491,10 @@ if( WIN32 )
         ${EXAMPLE1_SRC}/win32/example_1/example_1_win32.cpp
         ${EXAMPLE1_SRC}/win32/example_1/example_1.ico
         ${EXAMPLE1_SRC}/win32/example_1/example_1.rc
-        ${EXAMPLE1_SRC}/win32/stdafx.cpp
-        ${EXAMPLE1_SRC}/win32/resource.h
-        ${EXAMPLE1_SRC}/win32/stdafx.h
-        ${EXAMPLE1_SRC}/win32/small.ico
+        ${EXAMPLE1_SRC}/win32/example_1/stdafx.cpp
+        ${EXAMPLE1_SRC}/win32/example_1/resource.h
+        ${EXAMPLE1_SRC}/win32/example_1/stdafx.h
+        ${EXAMPLE1_SRC}/win32/example_1/small.ico
         ${SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp 
     )
 
