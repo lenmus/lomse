@@ -28,10 +28,10 @@
 
 
 //---------------------------------------------------------------------------------------
-// paths, for test scores and for music font
+// paths, for test scores and for fonts
 //---------------------------------------------------------------------------------------
 #define LOMSE_TEST_SCORES_PATH      @LOMSE_TEST_SCORES_PATH@
-#define LOMSE_MUSIC_FONT            @LOMSE_MUSIC_FONT@
+#define LOMSE_FONTS_PATH            @LOMSE_FONTS_PATH@
 
 
 //---------------------------------------------------------------------------------------
