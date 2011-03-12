@@ -363,7 +363,7 @@ set_target_properties(${LOMSE}  PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY  ${ROOT_DIR}/bin )
     
 get_target_property(VAR ${LOMSE} LINK_FLAGS)
-message("library target properties=" ${VAR})
+#message("library target properties=" ${VAR})
 
 
 # library makefile generation. Dynamic library
@@ -488,13 +488,13 @@ if( WIN32 )
     )
 
     add_executable( ${EXAMPLE1} WIN32
-        ${EXAMPLE1_SRC}/win32/example_1_win32.cpp
+        ${EXAMPLE1_SRC}/win32/example_1/example_1_win32.cpp
+        ${EXAMPLE1_SRC}/win32/example_1/example_1.ico
+        ${EXAMPLE1_SRC}/win32/example_1/example_1.rc
         ${EXAMPLE1_SRC}/win32/stdafx.cpp
         ${EXAMPLE1_SRC}/win32/resource.h
         ${EXAMPLE1_SRC}/win32/stdafx.h
         ${EXAMPLE1_SRC}/win32/small.ico
-        ${EXAMPLE1_SRC}/win32/example_1.ico
-        ${EXAMPLE1_SRC}/win32/example_1.rc
         ${SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp 
     )
 
