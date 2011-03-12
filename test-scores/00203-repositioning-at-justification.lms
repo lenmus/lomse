@@ -1,0 +1,90 @@
+(score
+   (vers 1.6)(language en iso-8859-1)
+   (instrument 
+      (musicData 
+        (clef G p1)
+        (key c)
+        (time 4 4)
+        (clef F4 p1)
+        (chord (n g3 q p1)(n c4 q)(n e4 q)(n g4 q))
+        (chord (n a3 q)(n c4 q)(n e4 q)(n a4 q))
+        (chord (n g3 q)(n =b3 q))
+        (chord (n e3 q)(n g3 q)(n c4 q)(n e4 q))
+        
+        //second voice
+        (goBack 128)
+        (chord (n e4 e. (stem up) g+)(n g4 e.))(chord (n d4 s g- (stem up))(n f4 s))
+        (goFwd end)
+        (barline)
+
+        //2
+        (chord (n e3 q p1)(n a3 q)(n c4 q)(n e4 q))
+        (chord (n f3 q)(n a3 q)(n -d4 q)(n f4 q))
+        (chord (n -d3 q)(n e3 q)(n g3 q))
+        (chord (n c3 q)(n e3 q)(n a3 q)(n c4 q))
+
+        (goBack 128)    //second voice
+        (chord (n c4 e. (stem up) g+)(n e4 e.))
+        (chord (n -b3 s g- (stem up))(n d4 s))
+        (goFwd end)
+        (barline)
+        
+        //3
+        (chord (n =d3 q p1)(n f3 q)(n =b3 q)(n =d4 q))
+        (chord (n =e3 q)(n g3 q)(n -b3 q)(n c4 q)(n =e4 q))
+        (chord (n a3 q)(n c4 q))
+        (chord (n g3 q)(n c4 q)(n -e4 q))
+
+        (goBack 2q)    //second voice
+        (n g4 e. (stem up) g+)(n f4 s g- (stem up))
+        (goFwd end)
+        (barline)
+        
+        //4
+        (chord (n +f3 q p1)(n c4 q)(n d4 q))
+        (chord (n g3 q)(n =b3 q)(n d4 q)(n g4 q))
+        (clef G p1)
+        (chord (n c4 q (stem down))(n d4 q)(n +f4 q))
+        (chord (n =b3 q)(n d4 q)(n g4 q))
+
+        (goBack 2q)    //second voice
+        (n =b4 e. (stem up) g+)(n =a4 s (stem up) g-)
+        (goFwd end)
+        (barline)
+       
+        //5
+        (chord (n -e4 q p1)(n g4 q)(n -e5 q))
+        (chord (n e4 q)(n -a4 q)(n e5 q))
+        (chord (n d4 q)(n d5 q))
+        (chord (n d4 q)(n g4 q)(n d5 q))
+
+        (goBack 2q)    //second voice
+        (n a4 e. (stem down) g+)(n +f4 s (stem down) g-)
+        (goFwd end)
+        (barline)
+
+        //6
+        (chord (n c4 q p1)(n g4 q)(n c5 q))
+        (chord (n c4 q)(n d4 q)(n +f4 q)(n d5 q))
+        (chord (n d4 e. g+)(n g4 e.)(n =b4 e.))(chord (n c4 s g-)(n =a4 s))
+        (chord (n =b3 q)(n d4 q)(n g4 q))
+        (barline)
+
+        //7
+        (chord (n c4 q p1)(n g4 q)(n c5 q))
+        (chord (n -a3 q)(n c4 q)(n -a4 q))
+        (chord (n g3 q (stem down))(n d4 q))
+        (chord (n g3 q)(n c4 q)(n e4 q))
+
+        (goBack 128)    //second voice
+        (n g4 e. g+)(n f4 s g-)
+        (goFwd end)
+        (barline)
+
+        //13
+        (chord (n c4 w p1)(n e4 w)(n g4 w)(n c5 w))
+        (barline end)
+      )
+   )
+)
+

@@ -45,7 +45,8 @@ protected:
     LibraryScope& m_libraryScope;
 
 public:
-    GmoShapeText(int idx, const std::string& text, ImoTextStyleInfo* pStyle,
+    GmoShapeText(ImoObj* pCreatorImo, int idx, const std::string& text,
+                 ImoTextStyleInfo* pStyle,
                  LUnits x, LUnits y, LibraryScope& libraryScope);
     virtual ~GmoShapeText() {}
 

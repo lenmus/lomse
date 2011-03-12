@@ -43,6 +43,7 @@ class ImoStaffObj;
 class ImoSystemInfo;
 class ImoScoreText;
 class ImoScoreTitle;
+class ImoStaffInfo;
 class ImoTextStyleInfo;
 
 
@@ -69,6 +70,7 @@ protected:
     ImoObj* add_bezier(ImoBezierInfo* pBezier);
     ImoObj* add_cursor(ImoCursorInfo* pCursor);
     ImoObj* add_midi_info(ImoMidiInfo* pInfo);
+    ImoObj* add_staff_info(ImoStaffInfo* pInfo);
     ImoObj* add_instrument(ImoInstrument* pInstrument);
     ImoObj* add_text(ImoScoreText* pText);
     ImoObj* add_title(ImoScoreTitle* pTitle);

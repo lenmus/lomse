@@ -72,6 +72,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_border] = "border";
     m_TypeToName[k_brace] = "brace";
     m_TypeToName[k_bracket] = "bracket";
+    m_TypeToName[k_bracketType] = "bracketType";
     m_TypeToName[k_center] = "center";
     m_TypeToName[k_chord] = "chord";
     m_TypeToName[k_clef] = "clef";
@@ -85,6 +86,8 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_cursor] = "cursor";
     m_TypeToName[k_defineStyle] = "defineStyle";
     m_TypeToName[k_down] = "down";
+    m_TypeToName[k_displayBracket] = "displayBracket";
+    m_TypeToName[k_displayNormalNum] = "displayNormalNum";
     m_TypeToName[k_duration] = "duration";
     m_TypeToName[k_dx] = "dx";
     m_TypeToName[k_dy] = "dy";
@@ -151,6 +154,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_stem] = "stem";
     m_TypeToName[k_style] = "style";
     m_TypeToName[k_symbol] = "symbol";
+    m_TypeToName[k_symbolSize] = "symbolSize";
     m_TypeToName[k_style] = "style";
     m_TypeToName[k_systemLayout] = "systemLayout";
     m_TypeToName[k_systemMargins] = "systemMargins";
@@ -187,6 +191,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["border"] = new LdpElementFunctor<k_border>;
     m_NameToFunctor["brace"] = new LdpElementFunctor<k_brace>;
     m_NameToFunctor["bracket"] = new LdpElementFunctor<k_bracket>;
+    m_NameToFunctor["bracketType"] = new LdpElementFunctor<k_bracketType>;
     m_NameToFunctor["center"] = new LdpElementFunctor<k_center>;
     m_NameToFunctor["chord"] = new LdpElementFunctor<k_chord>;
     m_NameToFunctor["clef"] = new LdpElementFunctor<k_clef>;
@@ -201,6 +206,8 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["defineStyle"] = new LdpElementFunctor<k_defineStyle>;
     m_NameToFunctor["down"] = new LdpElementFunctor<k_down>;
     m_NameToFunctor["duration"] = new LdpElementFunctor<k_duration>;
+    m_NameToFunctor["displayBracket"] = new LdpElementFunctor<k_displayBracket>;
+    m_NameToFunctor["displayNormalNum"] = new LdpElementFunctor<k_displayNormalNum>;
     m_NameToFunctor["dx"] = new LdpElementFunctor<k_dx>;
     m_NameToFunctor["dy"] = new LdpElementFunctor<k_dy>;
     m_NameToFunctor["end"] = new LdpElementFunctor<k_end>;
@@ -266,6 +273,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["stem"] = new LdpElementFunctor<k_stem>;
     m_NameToFunctor["style"] = new LdpElementFunctor<k_style>;
     m_NameToFunctor["symbol"] = new LdpElementFunctor<k_symbol>;
+    m_NameToFunctor["symbolSize"] = new LdpElementFunctor<k_symbolSize>;
     m_NameToFunctor["systemLayout"] = new LdpElementFunctor<k_systemLayout>;
     m_NameToFunctor["systemMargins"] = new LdpElementFunctor<k_systemMargins>;
     m_NameToFunctor["t"] = new LdpElementFunctor<k_tuplet>;

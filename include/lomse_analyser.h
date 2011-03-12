@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_ANALYSER_H__
 #define __LOMSE_ANALYSER_H__
@@ -46,12 +46,14 @@ class ImoBeamInfo;
 class ImoBeam;
 class ImoTupletDto;
 class ImoTuplet;
+class ImoChord;
 class InternalModel;
+class ImoScore;
 
 
 // helper class to save start of tie info, match it against stop info and
 // build the tie
-//--------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class TiesBuilder
 {
 protected:
@@ -91,7 +93,7 @@ protected:
 
 
 // helper class to save beam info items, match them and build the beams
-//--------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class BeamsBuilder
 {
 protected:
@@ -127,7 +129,7 @@ protected:
 
 // helper class to save beam info items, match them and build the beams
 // For old g+/g- syntax
-//--------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class OldBeamsBuilder
 {
 protected:
@@ -155,7 +157,7 @@ protected:
 
 
 // helper class to save tuplet info items, match them and build the tuplets
-//--------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class TupletsBuilder
 {
 protected:
@@ -185,7 +187,7 @@ protected:
 //Analyser: responsible for phase II of LDP language compiler (syntax validation
 //and semantic analysis). The result of the analysis is a 'decorated' parse tree,
 //that is, the parse tree with an ImoObj added to certain nodes.
-//--------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class Analyser
 {
 protected:
@@ -197,6 +199,7 @@ protected:
     OldBeamsBuilder* m_pOldBeamsBuilder;
     TupletsBuilder* m_pTupletsBuilder;
     InternalModel* m_IModel;
+    ImoScore* m_pScore;
 
     //analysis input
     LdpTree* m_pTree;
@@ -204,8 +207,12 @@ protected:
     //inherited values
     int m_curStaff;
     int m_curVoice;
-    bool m_fShowTupletBracket;
-    bool m_fShowTupletNumber;
+    int m_nShowTupletBracket;
+    int m_nShowTupletNormalNum;
+
+    //saved values
+    ImoNote* m_pLastNote;
+
 
 public:
     Analyser(ostream& reporter, LdpFactory* pFactory);
@@ -222,19 +229,21 @@ public:
     void remove_tie_element(ImoTieDto* pInfo);
     void remove_old_tie_element(LdpElement* pOldTieParam);
 
-    //inherited values setters & getters
+    //inherited and saved values setters & getters
     inline void set_current_staff(int nStaff) { m_curStaff = nStaff; }
     inline int get_current_staff() { return m_curStaff; }
 
     inline void set_current_voice(int nVoice) { m_curVoice = nVoice; }
     inline int get_current_voice() { return m_curVoice; }
 
-    inline void set_current_show_tuplet_bracket(bool value) { m_fShowTupletBracket = value; }
-    inline bool get_current_show_tuplet_bracket() { return m_fShowTupletBracket; }
+    inline void set_current_show_tuplet_bracket(int value) { m_nShowTupletBracket = value; }
+    inline int get_current_show_tuplet_bracket() { return m_nShowTupletBracket; }
 
-    inline void set_current_show_tuplet_number(bool value) { m_fShowTupletNumber = value; }
-    inline bool get_current_show_tuplet_number() { return m_fShowTupletNumber; }
+    inline void set_current_show_tuplet_normal_num(int value) { m_nShowTupletNormalNum = value; }
+    inline int get_current_show_tuplet_normal_num() { return m_nShowTupletNormalNum; }
 
+    inline void save_last_note(ImoNote* pNote) { m_pLastNote = pNote; }
+    inline ImoNote* get_last_note() { return m_pLastNote; }
 
     //interface for TiesBuilder
     inline void start_tie(ImoTieDto* pInfo) {
@@ -278,6 +287,13 @@ public:
     }
     inline bool is_tuplet_open() { return m_pTupletsBuilder->is_tuplet_open(); }
 
+    //interface for ChordBuilder
+    void add_chord(ImoChord* pChord);
+
+    //access to score being analysed
+    inline void set_score_being_analysed(ImoScore* pScore) { m_pScore = pScore; }
+    inline ImoScore* get_score_being_analysed() { return m_pScore; }
+
 protected:
     ElementAnalyser* new_analyser(ELdpElement type, ImoObj* pAnchor=NULL);
 
@@ -285,7 +301,7 @@ protected:
 
 
 //Auxiliary, to determine beam types automatically
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class AutoBeamer
 {
 protected:

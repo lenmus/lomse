@@ -22,6 +22,7 @@
 #define __LOMSE_GM_BASIC_H__
 
 #include "lomse_basic.h"
+#include "lomse_observable.h"
 #include <vector>
 #include <list>
 
@@ -107,10 +108,14 @@ public:
                 k_box_document=0, k_box_doc_page, k_box_doc_page_content,
                 k_box_score_page, k_box_slice, k_box_slice_instr, k_box_system,
            k_shape,
-                k_shape_barline, k_shape_brace, k_shape_bracket, k_shape_clef,
-                k_shape_dot, k_shape_flag, k_shape_invisible, k_shape_key_signature,
-                k_shape_note, k_shape_notehead, k_shape_stem, k_shape_staff,
-                k_shape_text,
+                k_shape_accidentals, k_shape_accidental_sign, k_shape_arch,
+                k_shape_barline,
+                k_shape_beam, k_shape_brace,
+                k_shape_bracket, k_shape_clef, k_shape_dot, k_shape_fermata, k_shape_flag,
+                k_shape_invisible, k_shape_key_signature, k_shape_note, k_shape_notehead,
+                k_shape_rest, k_shape_rest_glyph, k_shape_stem, k_shape_staff,
+                k_shape_text, k_shape_time_signature, k_shape_tie,
+                k_shape_time_signature_digit, k_shape_tuplet,
 
            k_stub,
                 k_stub_score,
@@ -125,19 +130,30 @@ public:
     inline bool is_box_slice() { return m_objtype == k_box_slice; }
     inline bool is_box_slice_instr() { return m_objtype == k_box_slice_instr; }
     inline bool is_box_system() { return m_objtype == k_box_system; }
+    inline bool is_shape_accidentals() { return m_objtype == k_shape_accidentals; }
+    inline bool is_shape_accidental_sign() { return m_objtype == k_shape_accidental_sign; }
+    inline bool is_shape_arch() { return m_objtype == k_shape_arch; }
     inline bool is_shape_barline() { return m_objtype == k_shape_barline; }
+    inline bool is_shape_beam() { return m_objtype == k_shape_beam; }
     inline bool is_shape_brace() { return m_objtype == k_shape_brace; }
     inline bool is_shape_bracket() { return m_objtype == k_shape_bracket; }
     inline bool is_shape_clef() { return m_objtype == k_shape_clef; }
     inline bool is_shape_dot() { return m_objtype == k_shape_dot; }
+    inline bool is_shape_fermata() { return m_objtype == k_shape_fermata; }
     inline bool is_shape_flag() { return m_objtype == k_shape_flag; }
     inline bool is_shape_invisible() { return m_objtype == k_shape_invisible; }
     inline bool is_shape_key_signature() { return m_objtype == k_shape_key_signature; }
     inline bool is_shape_note() { return m_objtype == k_shape_note; }
     inline bool is_shape_notehead() { return m_objtype == k_shape_notehead; }
+    inline bool is_shape_rest() { return m_objtype == k_shape_rest; }
+    inline bool is_shape_rest_glyph() { return m_objtype == k_shape_rest_glyph; }
     inline bool is_shape_stem() { return m_objtype == k_shape_stem; }
     inline bool is_shape_staff() { return m_objtype == k_shape_staff; }
     inline bool is_shape_text() { return m_objtype == k_shape_text; }
+    inline bool is_shape_tie() { return m_objtype == k_shape_tie; }
+    inline bool is_shape_time_signature() { return m_objtype == k_shape_time_signature; }
+    inline bool is_shape_time_signature_digit() { return m_objtype == k_shape_time_signature_digit; }
+    inline bool is_shape_tuplet() { return m_objtype == k_shape_tuplet; }
     inline bool is_stub_score() { return m_objtype == k_stub_score; }
 
     //size
@@ -155,7 +171,8 @@ public:
     void set_origin(LUnits xLeft, LUnits yTop);
     void set_left(LUnits xLeft);
     void set_top(LUnits yTop);
-    virtual void shift_origin(USize& shift);
+    virtual void shift_origin(const USize& shift);
+    void shift_origin(LUnits x, LUnits y);
 
     //bounds
     bool bounds_contains_point(UPoint& p);
@@ -173,22 +190,17 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-class GmoShape : public GmoObj
+class GmoShape : public GmoObj, public Linkable<USize>
 {
 protected:
     int m_idx;
     int m_layer;
 	Color m_color;
-	//GmoBox* m_pOwnerBox;	//box in which this shape is included
+    ImoObj* m_pCreatorImo;
+    //GmoBox* m_pOwnerBox;	//box in which this shape is included
 
 	//bool		m_fVisible;
  //   wxWindow*   m_pMouseCursorWindow;      //to optimize mouse cursor changes
-
-	////list of shapes attached to this one
-	//std::list<lmAttachPoint*>	m_cAttachments;
-
-	////list of shapes to which this one is attached
-	//std::list<GmoShape*>	        m_cAttachedTo;
 
  //   long        m_nOrder;
  //   long        m_nLayer;
@@ -201,7 +213,6 @@ public:
 
     virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
-    //-------------------------------------------------------------------------
     // layer identifiers. Shapes are placed in layers. The first layer to
     // render is layer 0 (background). Then, layer 1 (staves), and so on.
     enum { k_layer_background = 0, k_layer_staff, k_layer_barlines, k_layer_notes,
@@ -211,24 +222,19 @@ public:
     //layer
     inline int get_layer() { return m_layer; }
     inline void set_layer(int layer) { m_layer = layer; }
-  //void Render(lmPaper* pPaper);
- //   virtual void Render(lmPaper* pPaper, wxColour color) { GmoObj::Render(pPaper, color); }
- //   virtual void RenderWithHandlers(lmPaper* pPaper) {}
+
+    //overrides required by Linkable
+	virtual void handle_link_event(Linkable<USize>* pShape, int type, USize shift);
+    virtual void on_linked_to(Linkable<USize>* pShape, int type);
+
+    virtual LUnits get_anchor_offset() { return 0.0f; }
 
  //   virtual bool Collision(GmoShape* pShape);
 
- //   //methods related to position
+    //methods related to position
+    void set_left_and_notify_observers(LUnits xLeft);
 	//virtual void OnAttachmentPointMoved(GmoShape* pShape, lmEAttachType nTag,
 	//									lmLUnits ux, lmLUnits uy, lmEParentEvent nEvent) {}
-
-	////shapes can be attached to other shapes
-	//int Attach(GmoShape* pShape, lmEAttachType nType = lm_eGMA_Simple);
-	//void Detach(GmoShape* pShape, bool fInform=true);
- //   void OnAttached(GmoShape* pShape);
- //   void OnDetached(GmoShape* pShape);
-
- //   //Debug related methods
- //   wxString DumpSelRect();
 
 	////visibility
 	//inline bool IsVisible() const { return m_fVisible; }
@@ -264,19 +270,11 @@ public:
  //   virtual void SetColour(wxColour color) { m_color = color; }
  //   inline void SetOrder(long nOrder) { m_nOrder = nOrder; }
  //   inline long GetOrder() { return m_nOrder; }
- //   inline void SetLayer(long nLayer) { m_nLayer = nLayer; }
- //   inline long GetLayer() { return m_nLayer; }
 
 protected:
-    GmoShape(int objtype, int idx, Color color);
+    GmoShape(ImoObj* pCreatorImo, int objtype, int idx, Color color);
     Color determine_color_to_use(RenderOptions& opt);
     virtual Color get_normal_color() { return m_color; }
-
-   // GmoShape(lmEGMOType m_nType, lmScoreObj* pOwner, int nOwnerIdx, wxString sName=_T("Shape"),
-			//bool fDraggable = false, bool fSelectable = false, wxColour color = *wxBLACK,
-			//bool fVisible = true);
-	//void InformAttachedShapes(lmLUnits ux, lmLUnits uy, lmEParentEvent nEvent);
-
 };
 
 //---------------------------------------------------------------------------------------
@@ -309,6 +307,7 @@ public:
     inline int get_num_shapes() { return static_cast<int>( m_shapes.size() ); }
     virtual void add_shape(GmoShape* shape, int layer);
     GmoShape* get_shape(int i);  //i = 0..n-1
+    void store_shapes_in_page(GmoBoxDocPage* pPage);
 
     //margins
     inline LUnits get_top_margin() { return m_uTopMargin; }
@@ -325,7 +324,7 @@ public:
     inline LUnits get_content_height() { return get_height() - m_uTopMargin - m_uBottomMargin; }
     inline LUnits get_content_top() { return get_top() + m_uTopMargin; }
     inline LUnits get_content_left() { return get_left() + m_uLeftMargin; }
-    void shift_origin(USize& shift);
+    void shift_origin(const USize& shift);
 
     //drawing
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
@@ -398,7 +397,7 @@ public:
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
     //shapes
-    void store_shape(GmoShape* pShape, int layer);
+    void store_shape(GmoShape* pShape);
     GmoShape* get_first_shape_for_layer(int order);
 
     //hit testing
@@ -453,7 +452,7 @@ public:
     virtual ~GmoBoxScorePage();
 
 	//systems
-    GmoBoxSystem* add_system(int iSystem);  //, LUnits uxPos, LUnits uyPos);
+    void add_system(GmoBoxSystem* pSystem, int iSystem);
 //    inline int get_num_first_system() const { return m_nFirstSystem; }
     inline int get_num_last_system() const { return m_nLastSystem; }
     inline int get_num_systems() {

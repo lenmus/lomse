@@ -1,0 +1,56 @@
+(score
+   (vers 1.6)(language en iso-8859-1)
+   (opt Render.SpacingFactor 0.4)
+   (instrument (staves 2)
+      (musicData 
+        (clef G p1)
+        (clef F4 p2)  
+        (key E)
+        (time 4 4)
+
+        (n g3 e t3  g+)(n c4 e)(n e4 e t- g-)
+        (n g3 e t3  g+)(n c4 e)(n e4 e t- g-)
+        (n g3 e t3  g+)(n c4 e)(n e4 e t- g-)
+        (n g3 e t3  g+)(n c4 e)(n e4 e t- g-)
+        
+        (goBack start)     //for left hand
+        (chord (n c3 w p2)(n c2 w))
+        (barline)
+
+        //2
+        (n g3 e (t + 3 numNone noBracket)  g+ p1)(n c4 e)(n e4 e t- g-)
+        (n g3 e t3  g+)(n c4 e)(n e4 e t- g-)
+        (n g3 e t3  g+)(n c4 e)(n e4 e t- g-)
+        (n g3 e t3  g+)(n c4 e)(n e4 e t- g-)
+
+        (goBack start)     //for left hand
+        (chord (n b2 w p2)(n b1 w))
+        (barline)
+
+        //3
+        (n a3 e t3  g+ p1)(n c4 e)(n e4 e t- g-)
+        (n a3 e t3  g+)(n c4 e)(n e4 e t- g-)
+        (n a3 e t3  g+)(n =d4 e)(n f4 e t- g-)
+        (n a3 e t3  g+)(n d4 e)(n f4 e t- g-)
+
+        (goBack start)     //for left hand
+        (chord (n a2 h p2 (stem down))(n a1 h))
+        (chord (n f2 h p2 (stem down))(n f1 h))
+        (barline)
+
+        //4
+        (n g3 e t3  g+ p1)(n +d4 e)(n f4 e t- g-)
+        (n g3 e t3  g+)(n c4 e)(n e4 e t- g-)
+        (n g3 e t3  g+)(n c4 e)(n d4 e t- g-)
+        (n f3 e t3  g+)(n +b3 e)(n d4 e t- g-)
+
+        (goBack start)     //for left hand
+        (chord (n g2 h p2 (stem down))(n g1 h))
+        (chord (n g2 h p2 (stem down))(n g1 h))
+        (barline end)
+        
+     )
+     
+   )
+)
+

@@ -23,9 +23,8 @@
 
 #include "lomse_gm_basic.h"
 //#include <vector>
-//#include <list>
-//#include <sstream>
-//using namespace std;
+#include <list>
+using namespace std;
 
 namespace lomse
 {
@@ -81,15 +80,6 @@ namespace lomse
 //#define lmNO_SELECTABLE      false
 
 
-//---------------------------------------------------------------------------------------
-//enum lmEAttachType
-//{
-//	lm_eGMA_Simple,
-//    lm_eGMA_StartObj,
-//	lm_eGMA_MiddleObj,
-//	lm_eGMA_EndObj,
-//};
-//
 //enum lmEParentEvent
 //{
 //	lmSHIFT_EVENT = 0,
@@ -143,13 +133,12 @@ enum EHAlign
 };
 
 //---------------------------------------------------------------------------------------
-// EPlacement indicates whether something is above or below another element,
-// such as a note or a notation.
-enum EPlacement
+enum ELinkType
 {
-    k_placement_default = 0,
-    k_placement_above,
-    k_placement_below
+	k_link_simple = 0,
+    k_link_start,
+	k_link_middle,
+	k_link_end,
 };
 
 
@@ -169,11 +158,7 @@ public:
  //   virtual UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos) { return uPos; };
 
 protected:
-    GmoSimpleShape(int objtype, int idx, Color color);
-    //GmoSimpleShape(lmEGMOType m_nType, lmScoreObj* pOwner, int nOwnerIdx,
-    //              wxString sName=_T("SimpleShape"),
-				//  bool fDraggable = true, bool fSelectable = true,
-    //              wxColour color = *wxBLACK, bool fVisible = true);
+    GmoSimpleShape(ImoObj* pCreatorImo, int objtype, int idx, Color color);
 
 };
 
@@ -182,20 +167,20 @@ protected:
 class GmoCompositeShape : public GmoShape
 {
 protected:
-	//bool					m_fDoingShift;	//semaphore to avoid recomputing constantly the bounds
- //   bool					m_fGrouped;		//its component shapes must be rendered as a single object
-	std::vector<GmoShape*>	m_Components;	//list of its constituent shapes
+	std::list<GmoShape*> m_components;	//constituent shapes
+    bool m_fLocked;                     //constituent shapes cannot be moved
 
 public:
     virtual ~GmoCompositeShape();
 
- //   //dealing with components
     virtual int add(GmoShape* pShape);
-	//inline int GetNumComponents() const { return (int)m_Components.size(); }
-	//virtual void RecomputeBounds();
+    inline bool is_locked() { return m_fLocked; }
+    inline void unlock() { m_fLocked = false; }
+    void lock();
+	//inline int GetNumComponents() const { return (int)m_components.size(); }
 
  //   //virtual methods from base class
-    virtual void shift_origin(USize& shift);
+    virtual void shift_origin(const USize& shift);
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 //   virtual void RenderHighlighted(wxDC* pDC, wxColour colorC);
  //   virtual void RenderWithHandlers(lmPaper* pPaper);
@@ -211,14 +196,13 @@ public:
  //   virtual UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos);
 
     //for unit tests
-    inline std::vector<GmoShape*>& get_components() { return m_Components; }
+    inline std::list<GmoShape*>& get_components() { return m_components; }
 
 
 protected:
-    GmoCompositeShape(int objtype, int idx, Color color);
-    //GmoCompositeShape(lmScoreObj* pOwner, int nOwnerIdx, wxColour color = *wxBLACK,
-    //                 wxString sName = _T("CompositeShape"), bool fDraggable = false,
-    //                 lmEGMOType nType = eGMO_ShapeComposite, bool fVisible = true);
+    GmoCompositeShape(ImoObj* pCreatorImo, int objtype, int idx, Color color);
+	void recompute_bounds();
+
 	//GmoShape* GetShape(int nShape);
 
 };

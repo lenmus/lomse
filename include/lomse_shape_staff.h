@@ -22,22 +22,12 @@
 #define __LOMSE_SHAPE_STAFF_H__
 
 #include "lomse_shape_base.h"
-//#include <sstream>
-//using namespace std;
 
 namespace lomse
 {
 
 //forward declarations
 class ImoStaffInfo;
-//class GraphicModel;
-//class ImoDocObj;
-//class ImoScore;
-//class GmoBoxScorePage;
-//class GmoBoxSlice;
-//class GmoBoxSystem;
-//class GmoStubScore;
-//class lmStaff;
 
 
 //---------------------------------------------------------------------------------------
@@ -45,11 +35,12 @@ class GmoShapeStaff : public GmoSimpleShape
 {
 protected:
     ImoStaffInfo* m_pStaff;
-    //ImoInstrument* m_pInstr;    //owner instrument
 	int m_iStaff;			    //num of staff in the instrument (0..n-1)
+    LUnits m_lineThickness;
 
 public:
-    GmoShapeStaff(int idx, ImoStaffInfo* m_pStaff, int iStaff, LUnits width, Color color);
+    GmoShapeStaff(ImoObj* pCreatorImo, int idx, ImoStaffInfo* m_pStaff, int iStaff,
+                  LUnits width, Color color);
 	~GmoShapeStaff();
 
 //	//implementation of pure virtual methods in base class
@@ -58,7 +49,10 @@ public:
 
 	//ownership and related info
 	inline int get_num_staff() { return m_iStaff; }
-//
+
+    //info
+    inline LUnits get_line_thickness() { return m_lineThickness; }
+
 //    //adding notes/rest with mouse
 //    UPoint OnMouseStartMoving(lmPaper* pPaper, const UPoint& uPos);
 //    UPoint OnMouseMoving(lmPaper* pPaper, const UPoint& uPos);

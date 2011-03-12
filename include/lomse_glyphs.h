@@ -37,18 +37,18 @@ struct GlyphData
     // all measurements in tenths
     unsigned int GlyphChar;
     Tenths GlyphOffset;
-    Tenths SelRectShift;
-    Tenths SelRectHeight;
-    Tenths Top;
-    Tenths Bottom;
-	Tenths thxPos;
-	Tenths thyPos;
-	Tenths thWidth;
-	Tenths thHeight;
+    Tenths SelRectShift;        //NU
+    Tenths SelRectHeight;       //NU
+    Tenths Top;                 //for rests flags. In NoteEngraver
+    Tenths Bottom;              //for rests flags. In NoteEngraver
+	Tenths thxPos;      //NU
+	Tenths thyPos;      //NU
+	Tenths thWidth;     //NU
+	Tenths thHeight;    //NU
 	Tenths txDrag;
 	Tenths tyDrag;
 
-    GlyphData(const unsigned int glyph, int yOffset, int yShift, int selHeight,
+    GlyphData(const unsigned int glyph, Tenths yOffset, int yShift, int selHeight,
               int top, int bottom, int xPos, int yPos, int width, int height,
               int xDrag, int yDrag);
 
@@ -61,14 +61,14 @@ enum EGlyphIndex
     k_glyph_none = -1,            //special value meaning 'No glyph'
 
     //noteheads
-    k_glyph_notehead_half = 0,    //half, blanca
+    k_glyph_longa_note = 0,       //longa
+    k_glyph_breve_note,           //breve, cuadrada
+    k_glyph_whole_note,           //whole, redonda
+    k_glyph_notehead_half,        //half, blanca
     k_glyph_notehead_quarter,     //quarter, negra
     k_glyph_notehead_cross,       //cross, aspa
 
     //notes with stem and flag, in single char
-    k_glyph_longa_note,           //longa
-    k_glyph_breve_note,           //breve, cuadrada
-    k_glyph_whole_note,
     k_glyph_half_note_down,       //half, blanca
     k_glyph_half_note_up,
     k_glyph_quarter_note_down,    //quarter, negra
@@ -119,14 +119,22 @@ enum EGlyphIndex
     k_glyph_flat_accidental,
     k_glyph_double_sharp_accidental,
     k_glyph_double_flat_accidental,
+    k_glyph_open_cautionary_accidental,
+    k_glyph_close_cautionary_accidental,
 
     //clefs
     k_glyph_g_clef,
     k_glyph_f_clef,
-    k_glyph_f_clef_ottava_alta,
-    k_glyph_f_clef_ottava_bassa,
     k_glyph_c_clef,
     k_glyph_percussion_clef_block,
+    k_glyph_g_clef_ottava_bassa,
+    k_glyph_g_clef_ottava_alta,
+    k_glyph_g_clef_quindicesima_bassa,
+    k_glyph_g_clef_quindicesima_alta,
+    k_glyph_f_clef_ottava_bassa,
+    k_glyph_f_clef_ottava_alta,
+    k_glyph_f_clef_quindicesima_bassa,
+    k_glyph_f_clef_quindicesima_alta,
 
     //numbers for time signatures
     k_glyph_number_0,
@@ -158,8 +166,8 @@ enum EGlyphIndex
     k_glyph_coda,
     k_glyph_segno,
     k_glyph_octava,
-    k_glyph_fermata_over,
-    k_glyph_fermata_under,
+    k_glyph_fermata_above,
+    k_glyph_fermata_below,
 
     //figured bass. Numbers and other symbols
     k_glyph_figured_bass_0,                   //number 0

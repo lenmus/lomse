@@ -43,7 +43,6 @@ using namespace lomse;
 //
 LomseDoorway    m_lomse;        //the Lomse library doorway
 Presenter*      m_pPresenter;
-GraphicView*    m_pView;        //the View for displaying a score
 Interactor*     m_pInteractor;  //to interact with the View
 Document*       m_pDoc;         //the score to display
 
@@ -58,11 +57,10 @@ XImage*             m_ximg_window;
 int                 m_depth;
 Visual*             m_visual;
 
-
 //Lomse can manage a lot of bitmap formats and pixel formats. You must
 //define the format that you are going to use
 int              m_byte_order;
-pix_format_e     m_format;      //bitmap format
+EPixelFormat     m_format;      //bitmap format
 unsigned         m_bpp;         //bits per pixel
 bool             m_flip_y;      //true if y axis is reversed
 
@@ -118,7 +116,7 @@ void display_view_content(const rendering_buffer* rbuf)
 }
 
 //---------------------------------------------------------------------------------------
-void force_redraw()
+void force_redraw(void* pThis)
 {
     // Callback method for Lomse. It can be used also by your application.
     // force_redraw() is an analog of the Win32 InvalidateRect() function.
@@ -130,7 +128,7 @@ void force_redraw()
 }
 
 //---------------------------------------------------------------------------------------
-void update_window()
+void update_window(void* pThis)
 {
     // Callback method for Lomse. It can be used also by your application.
     // Invoking update_window() results in just putting immediately the content
@@ -141,6 +139,98 @@ void update_window()
     XSync(m_pDisplay, false);
 }
 
+//---------------------------------------------------------------------------------------
+void start_timer(void* pThis)
+{
+    gettimeofday(&m_start_tv, NULL);
+}
+
+//---------------------------------------------------------------------------------------
+double elapsed_time(void* pThis)
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+
+    double ms = (tv.tv_usec - m_start_tv.tv_usec) / 1000.0;
+    if (tv.tv_sec > m_start_tv.tv_sec)
+    {
+         double seconds = double(tv.tv_sec - m_start_tv.tv_sec);
+         ms += seconds * 1000000.0;
+   }
+   m_start_tv = tv;
+   return ms;
+}
+
+//---------------------------------------------------------------------------------------
+string get_font_filename(const string& fontname, bool bold, bool italic)
+{
+    //This is just a trivial example. In real applications you should
+    //use operating system services to find a suitable font
+
+    //notes on parameters received:
+    // - fontname can be either the face name (i.e. "Book Antiqua") or
+    //   the familly name (i.e. "sans-serif")
+
+
+    string path = "/usr/share/fonts/truetype/";
+
+    //if family name, choose a font name
+    string name = fontname;
+    if (name == "serif")
+        name = "Times New Roman";
+    else if (name == "sans-serif")
+        name = "Tahoma";
+    else if (name == "handwritten" || name == "cursive")
+        name = "Monotype Corsiva";
+    else if (name == "monospaced")
+        name = "Courier New";
+
+    //choose a suitable font file
+    string fontfile;
+    if (name == "Times New Roman")
+    {
+        if (italic && bold)
+            fontfile = "freefont/FreeSerifBoldItalic.ttf";
+        else if (italic)
+            fontfile = "freefont/FreeSerifItalic.ttf";
+        else if (bold)
+            fontfile = "freefont/FreeSerifBold.ttf";
+        else
+            fontfile = "freefont/FreeSerif.ttf";
+    }
+
+    else if (name == "Tahoma")
+    {
+        if (bold)
+            fontfile = "freefont/FreeSansOblique.ttf";
+        else
+            fontfile = "freefont/FreeSans.ttf";
+    }
+
+    else if (name == "Monotype Corsiva")
+    {
+        fontfile = "ttf-dejavu/DejaVuSans-Oblique.ttf";
+    }
+
+    else if (name == "Courier New")
+    {
+        if (italic && bold)
+            fontfile = "freefont/FreeMonoBoldOblique.ttf";
+        else if (italic)
+            fontfile = "freefont/FreeMonoOblique.ttf";
+        else if (bold)
+            fontfile = "freefont/FreeMonoBold.ttf";
+        else
+            fontfile = "freefont/FreeMono.ttf";
+    }
+
+    else
+        fontfile = "freefont/FreeSerif.ttf";
+
+
+   return path + fontfile;
+}
+
 //-------------------------------------------------------------------------
 void open_document()
 {
@@ -148,42 +238,203 @@ void open_document()
     //simple example we wiil crete an empty document and define its content
     //from a text string
 
-    //first, we will create a 'presenter'. It takes care of cretaing and maintaining
+    //first, we will create a 'presenter'. It takes care of creating and maintaining
     //all objects and relationships between the document, its views and the interactors
-    //to interct with the view
+    //to interact with the view
     m_pPresenter = m_lomse.new_document(ViewFactory::k_view_horizontal_book);
 
-    //now, get the pointers to the relevant components
+    //next, get the pointers to the relevant components
     m_pDoc = m_pPresenter->get_document();
     m_pInteractor = m_pPresenter->get_interactor(0);
-    m_pView = dynamic_cast<HorizontalBookView*>( m_pInteractor->get_view() );
+
+    //connect the View with the window buffer and set required callbacks
+    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
+    m_pInteractor->set_force_redraw_callbak(NULL, force_redraw);
+    m_pInteractor->set_update_window_callbak(NULL, update_window);
+    m_pInteractor->set_start_timer_callbak(NULL, start_timer);
+    m_pInteractor->set_elapsed_time_callbak(NULL, elapsed_time);
 
     //Now let's place content on the created document
+    //TODO: Next instruction creates a new document without deleting the previous content
+    //thus creating memory leaks.
     m_pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-        //"(instrument (musicData (clef G)(clef F3)(clef C1)(clef F4)) )))" );
+        //"(instrument (musicData (clef G)(clef F3)(clef C1)(clef F4) )) )))" );
 
-        //"(instrument (name \"Violin\")(musicData (clef G)(clef F4)(clef C1)) )))" );
+//        "(instrument (name \"Violin\")(musicData (clef G)(clef F4)(clef C1) )) )))" );
 
-        //"(instrument (musicData )) )))" );
+//        //empty score
+//        "(instrument (musicData )) )))" );
 
-//        "(instrument (staves 2) (musicData (clef G p1)(clef C1 p2)(n b4 q p1)(goBack q)(n e4 q p2)(barline))) )))" );
-
+//        //two instruments
 //        "(instrument (musicData )) (instrument (musicData )) )))" );
 
-        "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData (clef F4)(n c3 e.)(barline)"
-        "(n e2 q)(n e3 q)(barline)"
-        "(n f2 q)(n f3 q)(barline)"
-        "(n g2 q)(n g3 q)(barline)"
-        "(n a2 q)(n a3 q)(barline)"
-        "(n b2 q)(n b3 q)(barline)"
-        "(n c3 q)(n c4 q)(barline)"
-        "(n d3 q)(n d4 q)(barline)"
-        "(n e3 q)(n e4 q)(barline)"
-        "(n f3 q)(n f4 q)(barline end) ))"
-        "(instrument (name \"pilano\")(abbrev \"P\")(staves 2)(musicData (clef G p1)(clef F4 p2)))"
+//        //piano: stems and flags
+//        "(instrument (staves 2) (musicData (clef G p1)(clef C1 p2)"
+//        "(n d5 q p1)(n e5 e p1)(goBack start)"
+//        "(n c4 q p2)(n b3 e p2)(barline)"
+//        ")) )))" );
+
+//        //note with two accidentals
+//        "(instrument (musicData (clef G)"
+//        "(n --g4 q)"
+//        ")) )))" );
+
+//        //beams
+//        "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData "
+//        "(clef F4)(key E)(time 2 4)(n +c3 e.)(barline)"
+//        "(n e2 q)(n e3 q)(barline)"
+//        "(n f2 e (beam 1 +))(n g2 e (beam 1 -))"
+//            "(n f3 e (beam 3 +))(n g3 e (beam 3 -))(barline)"
+//        "(n f2 e. (beam 4 +))(n g2 s (beam 4 -b))"
+//            "(n f3 s (beam 5 +f))(n g3 e. (beam 5 -))(barline)"
+//        "(n g2 e. (beam 2 +))(n e3 s (beam 2 -b))(n g3 q)(barline)"
+//        "(n a2 e (beam 6 +))(n g2 e (beam 6 -))(n a3 q)(barline)"
+//        "(n -b2 q)(n =b3 q)(barline)"
+//        "(n xc3 q)(n ++c4 q)(barline)"
+//        "(n d3 q)(n --d4 q)(barline)"
+//        "(n e3 q)(n e4 q)(barline)"
+//        "(n f3 q)(n f4 q)(barline -)"
+//        "))"
+//        "(instrument (name \"pilano\")(abbrev \"P\")(staves 2)(musicData "
+//        "(clef G p1)(clef F4 p2)(key F)(time 12 8)"
+//        "(n c5 e. p1)(barline)"
+//        "(n e4 e p1 (beam 10 +))(n g3 e p2 (beam 10 -))"
+//        "(n e4 e p1 (stem up)(beam 11 +))(n e5 e p1 (stem down)(beam 11 -))(barline)"
+//        "(n e4 s p1 (beam 12 ++))(n f4 s p1 (beam 12 ==))"
+//            "(n g4 s p1 (beam 12 ==))(n a4 s p1 (beam 12 --))"
+//        "(n c5 q p1)(barline)"
+////        "(chord (n c4 q p1)(n e4 q p1)(n g4 q p1))"
+////        "(chord (n c4 q p1)(n d4 q p1)(n g4 q p1))"
+//        "))"
+//        ")))" );
+
+//        //anchor / chord
+//        "(instrument (staves 2)(musicData "
+//        "(clef G p1)(clef F4 p2)(key F)(time 2 4)"
+//        "(chord (n c4 h p1)(n d4 h p1)(n g4 h p1))"
+//        "(goBack start)(n c3 h p2)(barline)"
+//        "(chord (n c4 q p1)(n d4 q p1)(n g4 q p1))"
+//        "(chord (n a4 e p1)(n b4 e p1)(n d5 e p1))"
+//        "(chord (n a4 e p1)(n b4 e p1)(n c5 e p1))"
+//        "(goBack start)(n c3 q p2)(n c3 e p2)(n c3 e p2)(barline)"
+//        "(chord (n f4 e p1)(n g4 e p1)(n b4 e p1))"
+//        "(chord (n f4 e p1)(n g4 e p1)(n a4 e p1))"
+//        "(goBack start)(n c3 e p2)(n c3 e p2)(barline)"
+//
+//        "(chord (n c4 h p1)(n -d4 h p1)(n +g4 h p1))"
+//        "(goBack start)(n c3 h p2)(barline)"
+//        "(chord (n +c4 q p1)(n +d4 q p1)(n g4 q p1))"
+//        "(chord (n +a4 e p1)(n b4 e p1)(n d5 e p1))"
+//        "(chord (n a4 e p1)(n b4 e p1)(n +c5 e p1))"
+//        "(goBack start)(n c3 q p2)(n c3 e p2)(n c3 e p2)(barline)"
+//        "(chord (n f4 e p1)(n g4 e p1)(n b4 e p1))"
+//        "(chord (n f4 e p1)(n g4 e p1)(n a4 e p1))"
+//        "(goBack start)(n c3 e p2)(n c3 e p2)"
+//        "))"
+//        ")))" );
+
+//        //chord with accidentals
+//        "(instrument (staves 2)(musicData "
+//        "(clef G p1)(clef 8_F4 p2)(key F)(time 2 4)"
+//            //no displaced notes, no accidentals
+//        "(chord (n c4 q p1)(n e4 q p1)(n g4 q p1))"
+//        "(chord (n g5 q p1)(n e5 q p1)(n g4 q p1))"
+//        "(goBack start)(n g3 q p2)(n g3 q p2)(barline)"
+//            //no displaced notes, accidentals
+//        "(chord (n c4 q p1)(n -e4 q p1)(n +g4 q p1))"
+//        "(chord (n +g5 q p1)(n -e5 q p1)(n g4 q p1))"
+//        "(goBack start)(n g3 q p2)(n g3 q p2)(barline)"
+//            //displaced notes, no accidentals
+//        "(chord (n c4 q p1)(n d4 q p1)(n g4 q p1))"
+//        "(chord (n g5 q p1)(n f5 q p1)(n g4 q p1))"
+//        "(goBack start)(n g3 q p2)(n g3 q p2)(barline)"
+//            //displaced notes, accidentals
+//        "(chord (n c4 q p1)(n -d4 q p1)(n +g4 q p1))"
+//        "(chord (n +g5 q p1)(n -f5 q p1)(n =g4 q p1))"
+//        "(goBack start)(n g3 q p2)(n g3 q p2)(barline)"
+//            //chords from ref.paper
+//        "(chord (n -e5 q p1)(n c5 q p1)(n =a4 q p1))"
+//        "(chord (n +a5 q p1)(n +e5 q p1)(n +c5 q p1)(n +a4 q p1)(n +f4 q p1))"
+//        "(goBack start)(n g3 q p2)(n g3 q p2)(barline)"
+//        "))"
+//        ")))" );
+
+//        //note with accidentals. Anchor alignment
+//        "(instrument (staves 2)(musicData "
+//        "(clef G p1)(clef F4 p2)(key F)(time 2 4)"
+//        "(n c4 q p1)(barline)"
+//        "(n +c4 q p1)"
+//        "(n +g5 q p1)"
+//        "(goBack start)(n g3 q p2)(n g3 q p2)(barline)"
+//        ")) )))" );
+
+//        //all clefs
+//        "(instrument (musicData "
+//        "(clef G)(clef G1)(clef F3)(clef F4)(clef F5)(clef C1)(clef C2)"
+//        "(clef C3)(clef C4)(clef C5)(clef percussion)(clef 8_G)(clef G_8)"
+//        "(clef 15_G)(clef G_15)(clef 8_F4)(clef F4_8)(clef 15_F4)(clef F4_15)"
+//        "))"
+//        ")))" );
+
+//        //all notes
+//        "(opt Render.SpacingMethod 1)(opt Render.SpacingValue 40)"
+//        "(instrument (musicData "
+//        "(clef G)"
+//        "(n f4 l)(n f4 b)(n f4 w)(n f4 h)(n f4 q)(n f4 e)(n f4 s)(n f4 t)"
+//        "(n f4 i)(n f4 o)(n f4 f)(barline)"
+//        "(n c5 l)(n c5 b)(n c5 w)(n c5 h)(n c5 q)(n c5 e)(n c5 s)(n c5 t)"
+//        "(n c5 i)(n c5 o)(n c5 f)(barline -)"
+//        "))"
+//        ")))" );
+
+//        //beamed chord
+//        "(instrument (musicData "
+//        "(clef G)(time 2 4)"
+//        "(chord (n a4 e (beam 1 +))(n b4 e)(n d5 e))"
+//        "(chord (n a4 e (beam 1 -))(n b4 e)(n c5 e))"
+//        "))"
+//        ")))" );
+
+//        //tuplet
+//        "(instrument (musicData "
+//        "(clef G)(key A)(time 2 4)"
+//        "(n c4 e g+ t3/2)(n e4 e)(n d4 e g- t-)"
+//        "))"
+//        ")))" );
+
+//        //tuplets-engraving-rule-a-1
+//        "(instrument (musicData "
+//        "(time 2 4)"
+//        "(n a4 e g+ t3)(n a4 e)(n a4 e g- t-)"
+//        "(n a4 e g+)(n a4 e g-)"
+//        "(barline)"
+//        "(time 3 8)"
+//        "(n a4 e g+ t4)(n a4 e)(n a4 e)(n a4 e g- t-)"
+//        "(barline)"
+//        "))"
+//        ")))" );
+
+        ////tie
+        //"(instrument (musicData "
+        //"(clef G)(key C)(time 4 4)"
+        //"(n e4 q l)(n e4 q)"
+        //"))"
+        //")))" );
+
+        //system break
+        "(instrument (musicData "
+        "(clef G)(key C)(time 2 4)"
+        "(n c4 q l)(n c4 q)"
+        "(barline)"
+        "(n e4 q v1 (tie 3 start (bezier (start-x 30))) )"
+        "(newSystem)"
+        "(barline)"
+        "(n e4 q v1 (tie 3 stop (bezier (start-y 30))) )"
+        "(barline end)"
+        "))"
         ")))" );
 
-    m_pView->set_rendering_buffer(&m_rbuf_window);
+
 }
 
 //-------------------------------------------------------------------------
@@ -191,8 +442,8 @@ void update_view_content()
 {
     //request the view to re-draw the bitmap
 
-    if (!m_pView) return;
-    m_pView->on_paint();
+    if (!m_pInteractor) return;
+    m_pInteractor->on_paint();
 }
 
 //-------------------------------------------------------------------------
@@ -219,24 +470,24 @@ void on_mouse_button_up(int x, int y, unsigned flags)
 //-------------------------------------------------------------------------
 void on_key(int x, int y, unsigned key, unsigned flags)
 {
-    if (!m_pView) return;
+    if (!m_pInteractor) return;
 
     switch (key)
     {
         case '1':
-            m_pView->set_option_draw_box_doc_page_content(true);
+            m_pInteractor->set_rendering_option(k_option_draw_box_doc_page_content, true);
             break;
         case '2':
-            m_pView->set_option_draw_box_score_page(true);
+            m_pInteractor->set_rendering_option(k_option_draw_box_score_page, true);
             break;
         case '3':
-            m_pView->set_option_draw_box_system(true);
+            m_pInteractor->set_rendering_option(k_option_draw_box_system, true);
             break;
         case '4':
-            m_pView->set_option_draw_box_slice(true);
+            m_pInteractor->set_rendering_option(k_option_draw_box_slice, true);
             break;
         case '5':
-            m_pView->set_option_draw_box_slice_instr(true);
+            m_pInteractor->set_rendering_option(k_option_draw_box_slice_instr, true);
             break;
         case '8':
             m_pInteractor->switch_task(TaskFactory::k_task_drag_view);
@@ -245,45 +496,23 @@ void on_key(int x, int y, unsigned key, unsigned flags)
             m_pInteractor->switch_task(TaskFactory::k_task_selection);
             break;
         case '0':
-            m_pView->set_option_draw_box_doc_page_content(false);
-            m_pView->set_option_draw_box_score_page(false);
-            m_pView->set_option_draw_box_system(false);
-            m_pView->set_option_draw_box_slice(false);
-            m_pView->set_option_draw_box_slice_instr(false);
+            m_pInteractor->set_rendering_option(k_option_draw_box_doc_page_content, false);
+            m_pInteractor->set_rendering_option(k_option_draw_box_score_page, false);
+            m_pInteractor->set_rendering_option(k_option_draw_box_system, false);
+            m_pInteractor->set_rendering_option(k_option_draw_box_slice, false);
+            m_pInteractor->set_rendering_option(k_option_draw_box_slice_instr, false);
             break;
         case '+':
-            m_pView->zoom_in(x, y);
+            m_pInteractor->zoom_in(x, y);
             break;
         case '-':
-            m_pView->zoom_out(x, y);
+            m_pInteractor->zoom_out(x, y);
             break;
         default:
             ;
     }
 
-    force_redraw();
-}
-
-//---------------------------------------------------------------------------------------
-void start_timer()
-{
-    gettimeofday(&m_start_tv, NULL);
-}
-
-//---------------------------------------------------------------------------------------
-double elapsed_time()
-{
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-
-    double ms = (tv.tv_usec - m_start_tv.tv_usec) / 1000.0;
-    if (tv.tv_sec > m_start_tv.tv_sec)
-    {
-         double seconds = double(tv.tv_sec - m_start_tv.tv_sec);
-         ms += seconds * 1000000.0;
-   }
-   m_start_tv = tv;
-   return ms;
+    force_redraw(NULL);
 }
 
 //---------------------------------------------------------------------------------------
@@ -354,7 +583,7 @@ bool determine_bitmap_format()
             m_bpp = 16;
             if(r_mask == 0x7C00 && g_mask == 0x3E0 && b_mask == 0x1F)
             {
-                m_format = pix_format_rgb555;
+                m_format = k_pix_format_rgb555;
                 m_byte_order = hw_byte_order;
             }
             break;
@@ -363,7 +592,7 @@ bool determine_bitmap_format()
             m_bpp = 16;
             if(r_mask == 0xF800 && g_mask == 0x7E0 && b_mask == 0x1F)
             {
-                m_format = pix_format_rgb565;
+                m_format = k_pix_format_rgb565;
                 m_byte_order = hw_byte_order;
             }
             break;
@@ -377,13 +606,13 @@ bool determine_bitmap_format()
                 {
                     switch(m_format)
                     {
-                        case pix_format_rgba32:
-                            m_format = pix_format_rgba32;
+                        case k_pix_format_rgba32:
+                            m_format = k_pix_format_rgba32;
                             m_byte_order = LSBFirst;
                             break;
 
-                        case pix_format_abgr32:
-                            m_format = pix_format_abgr32;
+                        case k_pix_format_abgr32:
+                            m_format = k_pix_format_abgr32;
                             m_byte_order = MSBFirst;
                             break;
 
@@ -391,8 +620,8 @@ bool determine_bitmap_format()
                             m_byte_order = hw_byte_order;
                             m_format =
                                 (hw_byte_order == LSBFirst) ?
-                                pix_format_rgba32 :
-                                pix_format_abgr32;
+                                k_pix_format_rgba32 :
+                                k_pix_format_abgr32;
                             break;
                     }
                 }
@@ -401,13 +630,13 @@ bool determine_bitmap_format()
                 {
                     switch(m_format)
                     {
-                        case pix_format_argb32:
-                            m_format = pix_format_argb32;
+                        case k_pix_format_argb32:
+                            m_format = k_pix_format_argb32;
                             m_byte_order = MSBFirst;
                             break;
 
-                        case pix_format_bgra32:
-                            m_format = pix_format_bgra32;
+                        case k_pix_format_bgra32:
+                            m_format = k_pix_format_bgra32;
                             m_byte_order = LSBFirst;
                             break;
 
@@ -415,8 +644,8 @@ bool determine_bitmap_format()
                             m_byte_order = hw_byte_order;
                             m_format =
                                 (hw_byte_order == MSBFirst) ?
-                                pix_format_argb32 :
-                                pix_format_bgra32;
+                                k_pix_format_argb32 :
+                                k_pix_format_bgra32;
                             break;
                     }
                 }
@@ -425,7 +654,7 @@ bool determine_bitmap_format()
     }
 
     //if no suitable format found, terminate
-    if(m_format == pix_format_undefined)
+    if(m_format == k_pix_format_undefined)
     {
         fprintf(stderr,
                "RGB masks are not compatible with Lomse pixel formats:\n"
@@ -490,19 +719,14 @@ int handle_events()
         if(m_view_needs_redraw)
         {
             update_view_content();
-            update_window();
+            update_window(NULL);
             m_view_needs_redraw = false;
         }
 
-//        if(XPending(m_pDisplay) == 0)
-//        {
-//            on_idle();
-//            continue;
-//        }
-
         XEvent event;
+        XNextEvent(m_pDisplay, &event);
 
-        // In the Idle mode discard all intermediate MotionNotify events
+        //discard all intermediate MotionNotify events
         if(event.type == MotionNotify)
         {
             XEvent te = event;
@@ -514,8 +738,6 @@ int handle_events()
             }
             event = te;
         }
-        else
-            XNextEvent(m_pDisplay, &event);
 
         switch(event.type)
         {
@@ -529,7 +751,7 @@ int handle_events()
                     int height = event.xconfigure.height;
                     delete_rendering_buffer();
                     create_rendering_buffer(width, height, 0);
-                    update_window();
+                    update_window(NULL);
                 }
                 break;
             }
@@ -703,17 +925,15 @@ int main ()
 
     //initialize lomse related variables
     m_flip_y = false;               //y axis is not reversed
-    m_pView = NULL;
     m_pInteractor = NULL;
     m_pDoc = NULL;
     m_view_needs_redraw = true;
 
-    //initialize the library and set the required callbacks
-    m_lomse.init_library(LomseDoorway::k_platform_x11);
-    m_lomse.set_start_timer_callbak(start_timer);
-    m_lomse.set_elapsed_time_callbak(elapsed_time);
-    m_lomse.set_force_redraw_callbak(force_redraw);
-    m_lomse.set_update_window_callbak(update_window);
+    //initialize the Lomse library
+    m_lomse.init_library(k_pix_format_rgba32, 96, false);
+
+    //set required callbacks
+    m_lomse.set_get_font_callback(get_font_filename);
 
     //create a music score and a View. The view will display the score
     //when the paint event is sent to lomse, once the main windows is

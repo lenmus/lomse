@@ -84,6 +84,16 @@ public:
     virtual void screen_point_to_model(double* x, double* y);
     virtual void model_point_to_screen(double* x, double* y, int iPage);
     virtual int page_at_screen_point(double x, double y);
+    virtual void zoom_in(Pixels x=0, Pixels y=0);
+    virtual void zoom_out(Pixels x=0, Pixels y=0);
+    virtual void set_rendering_option(int option, bool value);
+
+    //setting callbacks
+    void set_update_window_callbak(void* pThis, void (*pt2Func)(void* pObj));
+    void set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj));
+    void set_start_timer_callbak(void* pThis, void (*pt2Func)(void* pObj));
+    void set_elapsed_time_callbak(void* pThis, double (*pt2Func)(void* pObj));
+
 
     //interface to SelectionSet
     virtual void select_object(GmoObj* pGmo, unsigned flags=0);

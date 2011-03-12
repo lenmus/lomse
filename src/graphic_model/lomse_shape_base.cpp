@@ -25,29 +25,17 @@
 namespace lomse
 {
 
-////=======================================================================================
-////helper class to represent an attached shape
-////=======================================================================================
-//class lmAttachPoint
-//{
-//public:
-//    lmAttachPoint(GmoShape* shape, lmEAttachType tag) : pShape(shape), nType(tag) {}
-//    ~lmAttachPoint() {}
-//
-//	GmoShape*		pShape;
-//	lmEAttachType	nType;
-//};
-
-
 //---------------------------------------------------------------------------------------
 // Implementation of class GmoShape: any renderizable object, such as a line,
 // a glyph, a note head, an arch, etc.
 //---------------------------------------------------------------------------------------
-GmoShape::GmoShape(int objtype, int idx, Color color)
+GmoShape::GmoShape(ImoObj* pCreatorImo, int objtype, int idx, Color color)
     : GmoObj(objtype)
+    , Linkable<USize>()
     , m_idx(idx)
     , m_layer(GmoShape::k_layer_background)
     , m_color(color)
+    , m_pCreatorImo(pCreatorImo)
     //, m_pOwnerBox(NULL)
 {
 }
@@ -66,22 +54,6 @@ GmoShape::GmoShape(int objtype, int idx, Color color)
 //---------------------------------------------------------------------------------------
 GmoShape::~GmoShape()
 {
-//	//delete attachment data
-//	std::list<lmAttachPoint*>::iterator pItem;
-//	for (pItem = m_cAttachments.begin(); pItem != m_cAttachments.end(); ++pItem)
-//	{
-//		(*pItem)->pShape->OnDetached(this);     //inform: this attachment removed
-//		delete *pItem;
-//    }
-//    m_cAttachments.clear();
-//
-//    //if this shape is attached to others, ask for removal
-//	std::list<GmoShape*>::iterator it;
-//	for (it = m_cAttachedTo.begin(); it != m_cAttachedTo.end(); ++it)
-//	{
-//		(*it)->Detach(this, false);     //false: do not inform back this shape
-//    }
-//
 //    //restore mouse cursor if necessary
 //    if (m_pMouseCursorWindow)
 //    {
@@ -89,23 +61,6 @@ GmoShape::~GmoShape()
 //        OnMouseOut(m_pMouseCursorWindow, anyPoint);
 //    }
 }
-
-////---------------------------------------------------------------------------------------
-//bool GmoShape::Collision(GmoShape* pShape)
-//{
-//    lmURect rect1 = GetBounds();
-//    return rect1.Intersects( pShape->GetBounds() );
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool GmoShape::IsInRectangle(lmURect& rect)
-//{
-//    lmURect rect1 = GetBounds();
-//    //wxLogMessage(_T("[GmoShape::IsInRectangle] Bounds(x=%.2f, y=%.2f, w=%.2f, h=%.2f), sel=(x=%.2f, y=%.2f, w=%.2f, h=%.2f)"),
-//    //    rect1.x, rect1.y, rect1.width, rect1.height,
-//    //    rect.x, rect.y, rect.width, rect.height );
-//    return rect.Contains(rect1);
-//}
 
 //---------------------------------------------------------------------------------------
 void GmoShape::on_draw(Drawer* pDrawer, RenderOptions& opt)
@@ -136,6 +91,44 @@ Color GmoShape::determine_color_to_use(RenderOptions& opt)
     //return (is_selected() ? g_pColors->ScoreSelected() : get_normal_color());
     return (is_selected() ? Color(255,0,0) : get_normal_color());
 }
+
+//---------------------------------------------------------------------------------------
+void GmoShape::handle_link_event(Linkable<USize>* pShape, int type, USize shift)
+{
+    shift_origin(shift);
+    notify_linked_observers(shift);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShape::on_linked_to(Linkable<USize>* pShape, int type)
+{
+
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShape::set_left_and_notify_observers(LUnits xLeft)
+{
+    USize shift(xLeft - m_origin.x, 0.0f);
+    shift_origin(shift);
+    notify_linked_observers(shift);
+}
+
+////---------------------------------------------------------------------------------------
+//bool GmoShape::Collision(GmoShape* pShape)
+//{
+//    lmURect rect1 = GetBounds();
+//    return rect1.Intersects( pShape->GetBounds() );
+//}
+//
+////---------------------------------------------------------------------------------------
+//bool GmoShape::IsInRectangle(lmURect& rect)
+//{
+//    lmURect rect1 = GetBounds();
+//    //wxLogMessage(_T("[GmoShape::IsInRectangle] Bounds(x=%.2f, y=%.2f, w=%.2f, h=%.2f), sel=(x=%.2f, y=%.2f, w=%.2f, h=%.2f)"),
+//    //    rect1.x, rect1.y, rect1.width, rect1.height,
+//    //    rect.x, rect.y, rect.width, rect.height );
+//    return rect.Contains(rect1);
+//}
 
 ////---------------------------------------------------------------------------------------
 //void GmoShape::OnMouseIn(wxWindow* pWindow, UPoint& uPoint)
@@ -272,16 +265,10 @@ Color GmoShape::determine_color_to_use(RenderOptions& opt)
 // Implementation of class GmoSimpleShape
 //=======================================================================================
 
-GmoSimpleShape::GmoSimpleShape(int objtype, int idx, Color color)
-    : GmoShape(objtype, idx, color)
+GmoSimpleShape::GmoSimpleShape(ImoObj* pCreatorImo, int objtype, int idx, Color color)
+    : GmoShape(pCreatorImo, objtype, idx, color)
 {
 }
-//GmoSimpleShape::GmoSimpleShape(lmEGMOType nType, lmScoreObj* pOwner, int nOwnerIdx,
-//                             wxString sName, bool fDraggable, bool fSelectable,
-//                             wxColour color, bool fVisible)
-//	: GmoShape(nType, pOwner, nOwnerIdx, sName, fDraggable, fSelectable, color, fVisible)
-//{
-//}
 
 //---------------------------------------------------------------------------------------
 GmoSimpleShape::~GmoSimpleShape()
@@ -312,34 +299,30 @@ GmoSimpleShape::~GmoSimpleShape()
 // Implementation of class GmoCompositeShape
 //=======================================================================================
 
-GmoCompositeShape::GmoCompositeShape(int objtype, int idx, Color color)
-    : GmoShape(objtype, idx, color)
+GmoCompositeShape::GmoCompositeShape(ImoObj* pCreatorImo, int objtype, int idx,
+                                     Color color)
+    : GmoShape(pCreatorImo, objtype, idx, color)
+    , m_fLocked(true)
 {
 }
-//GmoCompositeShape::GmoCompositeShape(lmScoreObj* pOwner, int nOwnerIdx, wxColour color,
-//                                   wxString sName, bool fDraggable, lmEGMOType nType, bool fVisible)
-//	: GmoShape(nType, pOwner, nOwnerIdx, sName, fDraggable, lmSELECTABLE, color, fVisible)
-//{
-//    m_fGrouped = true;	//by default all constituent shapes are grouped
-//	m_fDoingShift = false;
-//}
 
 //---------------------------------------------------------------------------------------
 GmoCompositeShape::~GmoCompositeShape()
 {
-    for (int i=0; i < (int)m_Components.size(); i++)
+    std::list<GmoShape*>::iterator it;
+    for (it = m_components.begin(); it != m_components.end(); ++it)
     {
-        delete m_Components[i];
+        delete *it;
     }
-    m_Components.clear();
+    m_components.clear();
 }
 
 //---------------------------------------------------------------------------------------
 int GmoCompositeShape::add(GmoShape* pShape)
 {
-    m_Components.push_back(pShape);
+    m_components.push_back(pShape);
 
-	if (m_Components.size() == 1)
+	if (m_components.size() == 1)
 	{
 		//copy bounds
 		m_origin = pShape->get_origin();
@@ -364,20 +347,19 @@ int GmoCompositeShape::add(GmoShape* pShape)
 //	pShape->SetParentShape(this);
 
 	//return index to added shape
-	return (int)m_Components.size() - 1;
+	return (int)m_components.size() - 1;
 }
 
 //---------------------------------------------------------------------------------------
-void GmoCompositeShape::shift_origin(USize& shift)
+void GmoCompositeShape::shift_origin(const USize& shift)
 {
     m_origin.x += shift.width;
     m_origin.y += shift.height;
 
     //shift components
-    for (int i=0; i < (int)m_Components.size(); i++)
-    {
-        m_Components[i]->shift_origin(shift);
-    }
+    std::list<GmoShape*>::iterator it;
+    for (it = m_components.begin(); it != m_components.end(); ++it)
+        (*it)->shift_origin(shift);
 }
 
 //---------------------------------------------------------------------------------------
@@ -386,10 +368,9 @@ void GmoCompositeShape::on_draw(Drawer* pDrawer, RenderOptions& opt)
     GmoShape::on_draw(pDrawer, opt);
 
 	//Default behaviour: render all components
-    for (int i=0; i < (int)m_Components.size(); i++)
-    {
-        m_Components[i]->on_draw(pDrawer, opt);
-    }
+    std::list<GmoShape*>::iterator it;
+    for (it = m_components.begin(); it != m_components.end(); ++it)
+        (*it)->on_draw(pDrawer, opt);
 }
 
 //---------------------------------------------------------------------------------------
@@ -397,10 +378,29 @@ void GmoCompositeShape::set_selected(bool value)
 {
     GmoShape::set_selected(value);
 
-    for (int i=0; i < (int)m_Components.size(); i++)
-    {
-        m_Components[i]->set_selected(value);
-    }
+    std::list<GmoShape*>::iterator it;
+    for (it = m_components.begin(); it != m_components.end(); ++it)
+        (*it)->set_selected(value);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoCompositeShape::lock()
+{
+    m_fLocked = true;
+    recompute_bounds();
+}
+
+//---------------------------------------------------------------------------------------
+void GmoCompositeShape::recompute_bounds()
+{
+ 	URect bbox;
+    std::list<GmoShape*>::iterator it;
+    for (it = m_components.begin(); it != m_components.end(); ++it)
+		bbox.Union((*it)->get_bounds());
+
+	m_origin = bbox.get_top_left();
+	m_size.width = bbox.get_width();
+	m_size.height = bbox.get_height();
 }
 
 ////---------------------------------------------------------------------------------------
@@ -409,9 +409,9 @@ void GmoCompositeShape::set_selected(bool value)
 //    GmoShape::RenderHighlighted(pDC, color);
 //
 //	//Default behaviour: render all components
-//    for (int i=0; i < (int)m_Components.size(); i++)
+//    for (int i=0; i < (int)m_components.size(); i++)
 //    {
-//        m_Components[i]->RenderHighlighted(pDC, color);
+//        m_components[i]->RenderHighlighted(pDC, color);
 //    }
 //}
 //
@@ -421,9 +421,9 @@ void GmoCompositeShape::set_selected(bool value)
 //    GmoShape::RenderWithHandlers(pPaper);
 //
 //	//Default behaviour: render all components
-//    for (int i=0; i < (int)m_Components.size(); i++)
+//    for (int i=0; i < (int)m_components.size(); i++)
 //    {
-//        m_Components[i]->RenderWithHandlers(pPaper);
+//        m_components[i]->RenderWithHandlers(pPaper);
 //    }
 //}
 //
@@ -434,9 +434,9 @@ void GmoCompositeShape::set_selected(bool value)
 //
 //    //change selection status
 //    m_fSelected = fValue;
-//    for (int i=0; i < (int)m_Components.size(); i++)
+//    for (int i=0; i < (int)m_components.size(); i++)
 //    {
-//        m_Components[i]->Restricted_SetSelected(fValue);
+//        m_components[i]->Restricted_SetSelected(fValue);
 //    }
 //
 //    //add/remove object from global list
@@ -451,9 +451,9 @@ void GmoCompositeShape::set_selected(bool value)
 ////---------------------------------------------------------------------------------------
 //bool GmoCompositeShape::BoundsContainsPoint(UPoint& uPoint)
 //{
-//    for (int i=0; i < (int)m_Components.size(); i++)
+//    for (int i=0; i < (int)m_components.size(); i++)
 //    {
-//        if (m_Components[i]->BoundsContainsPoint(uPoint))
+//        if (m_components[i]->BoundsContainsPoint(uPoint))
 //			return true;
 //    }
 //	return false;
@@ -463,9 +463,9 @@ void GmoCompositeShape::set_selected(bool value)
 ////---------------------------------------------------------------------------------------
 //bool GmoCompositeShape::Collision(GmoShape* pShape)
 //{
-//    for (int i=0; i < (int)m_Components.size(); i++)
+//    for (int i=0; i < (int)m_components.size(); i++)
 //    {
-//        if (m_Components[i]->Collision(pShape))
+//        if (m_components[i]->Collision(pShape))
 //			return true;
 //    }
 //	return false;
@@ -474,43 +474,8 @@ void GmoCompositeShape::set_selected(bool value)
 ////---------------------------------------------------------------------------------------
 //GmoShape* GmoCompositeShape::GetShape(int nShape)
 //{
-//	wxASSERT(nShape < (int)m_Components.size());
-//	return m_Components[nShape];
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoCompositeShape::RecomputeBounds()
-//{
-//	if (m_fDoingShift) return;
-//
-//	if (m_Components.size() > 0)
-//	{
-//		GmoShape* pShape = m_Components[0];
-//
-//		//initilaize selection rectangle
-//		m_uSelRect = pShape->GetSelRectangle();
-//
-//		// initialize bounds
-//		m_uBoundsTop.x = pShape->GetXLeft();
-//		m_uBoundsTop.y = pShape->GetYTop();
-//		m_uBoundsBottom.x = pShape->GetXRight();
-//		m_uBoundsBottom.y = pShape->GetYBottom();
-//	}
-//
-//    for (int i=1; i < (int)m_Components.size(); i++)
-//    {
-//		GmoShape* pShape = m_Components[i];
-//
-//		//compute new selection rectangle by union of individual selection rectangles
-//		m_uSelRect.Union(pShape->GetSelRectangle());
-//
-//		// compute outer rectangle for bounds
-//		m_uBoundsTop.x = wxMin(m_uBoundsTop.x, pShape->GetXLeft());
-//		m_uBoundsTop.y = wxMin(m_uBoundsTop.y, pShape->GetYTop());
-//		m_uBoundsBottom.x = wxMax(m_uBoundsBottom.x, pShape->GetXRight());
-//		m_uBoundsBottom.y = wxMax(m_uBoundsBottom.y, pShape->GetYBottom());
-//	}
-//
+//	wxASSERT(nShape < (int)m_components.size());
+//	return m_components[nShape];
 //}
 //
 ////---------------------------------------------------------------------------------------
@@ -541,10 +506,10 @@ void GmoCompositeShape::set_selected(bool value)
 //    dc2.SetBackgroundMode(wxTRANSPARENT);
 //
 //    //loop to get each shape bitmap and to merge it
-//    for (int i=0; i < (int)m_Components.size(); i++)
+//    for (int i=0; i < (int)m_components.size(); i++)
 //    {
 //        //get shape bitmap
-//        GmoShape* pShape = m_Components[i];
+//        GmoShape* pShape = m_components[i];
 //		wxBitmap* pBMS = pShape->OnBeginDrag(rScale, pDC);
 //
 //        //merge it

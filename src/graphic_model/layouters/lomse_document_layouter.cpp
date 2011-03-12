@@ -45,13 +45,15 @@ DocLayouter::DocLayouter(InternalModel* pIModel, LibraryScope& libraryScope)
     , m_libraryScope(libraryScope)
     //, m_pMainSizer( new FlowSizer(FlowSizer::k_vertical) )
     , m_pCurrentBox(NULL)
+    , m_pCurLayouter(NULL)
 {
 }
 
 //---------------------------------------------------------------------------------------
 DocLayouter::~DocLayouter()
 {
-    //delete m_pMainSizer;
+    //for unit tests last layouter has been saved. Delete it when the document is deleted
+    delete m_pCurLayouter;
 }
 
 //---------------------------------------------------------------------------------------
@@ -179,15 +181,16 @@ void DocLayouter::layout_content()
 //---------------------------------------------------------------------------------------
 void DocLayouter::layout_item(GmoBox* pParentBox, ImoDocObj* pItem)
 {
-    ContentLayouter* pLayouter = new_item_layouter(pItem);
-    pLayouter->prepare_to_start_layout();
-    while (!pLayouter->is_item_layouted())
+    //for unit tests I need to save last used layouter. 
+    delete m_pCurLayouter;
+    m_pCurLayouter = new_item_layouter(pItem);
+    m_pCurLayouter->prepare_to_start_layout();
+    while (!m_pCurLayouter->is_item_layouted())
     {
-        GmoBox* pPageBox = create_item_pagebox(pParentBox, pLayouter);
-        pLayouter->layout_in_page(pPageBox);
+        GmoBox* pPageBox = create_item_pagebox(pParentBox, m_pCurLayouter);
+        m_pCurLayouter->layout_in_page(pPageBox);
         //prepare_next_document_page_if_needed();
     }
-    delete pLayouter;
 }
 
 //---------------------------------------------------------------------------------------

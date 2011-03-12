@@ -26,6 +26,7 @@
 #include "lomse_shapes.h"
 #include "lomse_box_slice_instr.h"
 #include "lomse_font_storage.h"
+#include "lomse_score_meter.h"
 
 
 namespace lomse
@@ -34,26 +35,30 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // ClefEngraver implementation
 //---------------------------------------------------------------------------------------
-ClefEngraver::ClefEngraver(LibraryScope& libraryScope)
-    : m_libraryScope(libraryScope)
+ClefEngraver::ClefEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
+    : Engraver(libraryScope, pScoreMeter)
 {
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* ClefEngraver::create_shape(ImoClef* pClef, GmoBoxSliceInstr* pBox,
-                                     UPoint uPos, LUnits lineSpacing, bool fSmallClef)
+GmoShape* ClefEngraver::create_shape(ImoObj* pCreatorImo, int iInstr, int iStaff,
+                                     UPoint uPos, int clefType, int symbolSize)
 {
-    m_nClefType = pClef->get_clef_type();
-    m_fSmallClef = fSmallClef;
+    m_iInstr = iInstr;
+    m_iStaff = iStaff;
+    m_nClefType = clefType;
+    m_symbolSize = symbolSize;
     m_iGlyph = find_glyph();
 
     // get the shift to the staff on which the clef must be drawn
-    LUnits y = uPos.y + tenths_to_logical(get_glyph_offset(), lineSpacing);
+    LUnits y = uPos.y + m_pMeter->tenths_to_logical(get_glyph_offset(), iInstr, iStaff);
+
+    double fontSize = determine_font_size();
 
     //create the shape object
     int nIdx = 0;   //single-shape
-    GmoShape* pShape = new GmoShapeClef(nIdx, m_iGlyph, UPoint(uPos.x, y),
-                                        m_fSmallClef, Color(0,0,0), m_libraryScope);
+    GmoShape* pShape = new GmoShapeClef(pCreatorImo, nIdx, m_iGlyph, UPoint(uPos.x, y),
+                                        Color(0,0,0), m_libraryScope, fontSize);
     return pShape;
 }
 
@@ -72,21 +77,33 @@ int ClefEngraver::find_glyph()
         case ImoClef::k_C2: return k_glyph_c_clef;
         case ImoClef::k_C3: return k_glyph_c_clef;
         case ImoClef::k_C4: return k_glyph_c_clef;
-        // other clefs not available for exercises
         case ImoClef::k_C5: return k_glyph_c_clef;
         case ImoClef::k_F5: return k_glyph_f_clef;
         case ImoClef::k_G1: return k_glyph_g_clef;
-        case ImoClef::k_8_G2: return k_glyph_g_clef;        //8 above
-        case ImoClef::k_G2_8: return k_glyph_g_clef;        //8 below
-        case ImoClef::k_8_F4: return k_glyph_f_clef;        //8 above
-        case ImoClef::k_F4_8: return k_glyph_f_clef;        //8 below
-        case ImoClef::k_15_G2: return k_glyph_g_clef;       //15 above
-        case ImoClef::k_G2_15: return k_glyph_g_clef;       //15 below
-        case ImoClef::k_15_F4: return k_glyph_f_clef;       //15 above
-        case ImoClef::k_F4_15: return k_glyph_f_clef;       //15 below
-        case ImoClef::k_Percussion: return k_glyph_percussion_clef_block;
+        case ImoClef::k_8_G2: return k_glyph_g_clef_ottava_alta;
+        case ImoClef::k_G2_8: return k_glyph_g_clef_ottava_bassa;
+        case ImoClef::k_8_F4: return k_glyph_f_clef_ottava_alta;
+        case ImoClef::k_F4_8: return k_glyph_f_clef_ottava_bassa;
+        case ImoClef::k_15_G2: return k_glyph_g_clef_quindicesima_alta;
+        case ImoClef::k_G2_15: return k_glyph_g_clef_quindicesima_bassa;
+        case ImoClef::k_15_F4: return k_glyph_f_clef_quindicesima_alta;
+        case ImoClef::k_F4_15: return k_glyph_f_clef_quindicesima_bassa;
+        case ImoClef::k_percussion: return k_glyph_percussion_clef_block;
         default:
             return k_glyph_g_clef;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+double ClefEngraver::determine_font_size()
+{
+    double fontSize = 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff)
+                     / 180.0;
+    switch (m_symbolSize)
+    {
+        case k_size_cue:        return fontSize * 0.72;     //15.0
+        case k_size_large:      return fontSize * 1.34;     //28.0
+        default:                return fontSize;            //21.0
     }
 }
 
@@ -99,7 +116,7 @@ Tenths ClefEngraver::get_glyph_offset()
     Tenths yOffset = glyphs_lmbasic2[m_iGlyph].GlyphOffset;
 
     //add offset to move the clef up/down the required lines
-    if (m_fSmallClef)
+    if (m_symbolSize == k_size_cue)
     {
         switch(m_nClefType)
         {
@@ -121,7 +138,7 @@ Tenths ClefEngraver::get_glyph_offset()
             case ImoClef::k_G2_15:  return yOffset;         //15 below
             case ImoClef::k_15_F4:  return yOffset - 7.0f;  //15 above
             case ImoClef::k_F4_15:  return yOffset - 7.0f;  //15 below
-            case ImoClef::k_Percussion:     return yOffset - 6.0f;
+            case ImoClef::k_percussion:     return yOffset - 6.0f;
             default:
                 return yOffset;
         }
@@ -139,7 +156,7 @@ Tenths ClefEngraver::get_glyph_offset()
             case ImoClef::k_C4:     return yOffset - 10.0f;
             case ImoClef::k_C5:     return yOffset - 20.0f;
             case ImoClef::k_F5:     return yOffset - 10.0f;
-            case ImoClef::k_G1:     return yOffset;
+            case ImoClef::k_G1:     return yOffset + 10.0f;
             case ImoClef::k_8_G2:   return yOffset;     //8 above
             case ImoClef::k_G2_8:   return yOffset;     //8 below
             case ImoClef::k_8_F4:   return yOffset;     //8 above
@@ -148,7 +165,7 @@ Tenths ClefEngraver::get_glyph_offset()
             case ImoClef::k_G2_15:  return yOffset;     //15 below
             case ImoClef::k_15_F4:  return yOffset;     //15 above
             case ImoClef::k_F4_15:  return yOffset;     //15 below
-            case ImoClef::k_Percussion:     return yOffset - 1.0f;
+            case ImoClef::k_percussion:     return yOffset - 1.0f;
             default:
                 return yOffset;
         }

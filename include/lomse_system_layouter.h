@@ -24,6 +24,7 @@
 #include "lomse_basic.h"
 #include "lomse_time.h"
 #include "lomse_score_enums.h"
+#include "lomse_logger.h"
 #include <list>
 #include <vector>
 using namespace std;
@@ -39,6 +40,8 @@ class ImoStaff;
 class GmoShape;
 class GmoBoxSliceInstr;
 class GmoBoxSlice;
+class ScoreMeter;
+class ShapesStorage;
 
 class SystemLayouter;
 class ColumnLayouter;
@@ -57,53 +60,6 @@ class TimeGridLineExplorer;
 #define LineEntryIterator		  std::vector<LineEntry*>::iterator
 #define LinesIterator             std::vector<LineTable*>::iterator
 #define LineSpacersIterator       std::vector<LineSpacer*>::iterator
-
-
-
-//---------------------------------------------------------------------------------------
-//ScoreMeter: encapsulates the methods and values for options that are needed in many
-//places for score measurements during layouting and engraving
-//---------------------------------------------------------------------------------------
-class ScoreMeter
-{
-protected:
-    //layout options
-    float m_rSpacingFactor;             //for proportional spacing of notes
-    ESpacingMethod m_nSpacingMethod;    //fixed, proportional, etc.
-    Tenths m_rSpacingValue;             //space for 'fixed' method
-    bool m_fDrawLeftBarline;            //draw left barline joining all system staves
-
-	std::vector<LUnits> m_lineSpace;    //spacing for each staff
-    std::vector<int> m_staffIndex;
-
-    //info about the score
-    int m_numInstruments;
-
-public:
-    ScoreMeter(ImoScore* pScore);
-
-    //options
-    inline float get_spacing_factor() { return m_rSpacingFactor; }
-    inline ESpacingMethod get_spacing_method() { return m_nSpacingMethod; }
-    inline Tenths get_spacing_value() { return m_rSpacingValue; }
-    inline bool is_proportional_spacing() {
-        return m_nSpacingMethod == k_spacing_proportional;
-    }
-    inline bool must_draw_left_barline() { return m_fDrawLeftBarline; }
-
-    //spacing
-    LUnits tenths_to_logical(Tenths value, int iInstr, int iStaff);
-    LUnits line_spacing_for_instr_staff(int iInstr, int iStaff);
-
-    //info about the score
-    inline int num_instruments() { return m_numInstruments; }
-
-
-protected:
-    void get_options(ImoScore* pScore);
-    void get_staff_spacing(ImoScore* pScore);
-
-};
 
 
 
@@ -162,6 +118,7 @@ public:
     void reposition_at(LUnits uxNewXLeft);
 	void assign_fixed_and_variable_space(ColumnLayouter* pTT, float rFactor);
     void move_shape();
+    void add_shape_info();
 
     //access to entry data
     inline bool is_barline_entry() { return m_fIsBarlineEntry; }
@@ -190,8 +147,8 @@ public:
     void update_x_final() { m_xFinal = m_xLeft + get_total_size(); };
 
     //debug
-    void dump(int iEntry);
-    static void dump_header();
+    void dump(int iEntry, ostream& outStream);
+    static void dump_header(ostream& outStream);
 
 
 protected:
@@ -203,12 +160,15 @@ protected:
 	bool			m_fProlog;          //this shape is a prolog object (clef, KS, TS at start of system)
     float           m_rTimePos;         //timepos for this pSO or -1 if not anchored in time
     LUnits          m_xLeft;            //current position of the left border of the object
-    LUnits          m_uxAnchor;         //position of the anchor line
+    LUnits          m_uxAnchor;         //offset to anchor line
     LUnits          m_xFinal;           //next position (right border position + trailing space)
     //to redistribute objects we need to know:
     LUnits          m_uSize;            //size of the shape (notehead, etc.)
     LUnits          m_uFixedSpace;      //fixed space added after shape
     LUnits          m_uVariableSpace;   //any variable added space we can adjust
+
+    //debug
+    bool m_fShapeInfoLoaded;
 
 };
 
@@ -245,6 +205,7 @@ public:
     inline void push_back(LineEntry* pEntry) { m_LineEntries.push_back(pEntry); }
 	LineEntry* add_entry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, float rTime);
 	LineEntry* add_final_entry(ImoStaffObj* pSO, GmoShape* pShape, float rTime);
+    LineEntry* add_final_entry_without_barline();
 
     //properties
     inline LUnits get_line_start_position() { return m_uxLineStart; }
@@ -259,14 +220,16 @@ public:
     inline int get_instrument() { return m_nInstr; }
     inline int get_voice() { return m_nVoice; }
     bool contains_barline();
+    bool is_closed();
 
     //other
 //    void ClearDirtyFlags();
     void add_shapes(GmoBoxSliceInstr* pSliceInstrBox);
+    void delete_shapes();
 
     //Debug and Unit Tests
     inline int get_num_objects_in_line() { return (int)m_LineEntries.size(); }
-    void dump_main_table();
+    void dump_main_table(ostream& outStream);
 
 };
 
@@ -284,7 +247,7 @@ public:
 
 
 //----------------------------------------------------------------------------------------
-//ColumnStorage: encapsulates the lines for a column
+//ColumnStorage: encapsulates the lines for a column and stores the auxiliary shapes
 //----------------------------------------------------------------------------------------
 class ColumnStorage
 {
@@ -313,6 +276,7 @@ public:
     //storage manipulation
     LineTable* open_new_line(int line, int instr, LUnits uxStart, LUnits uSpace);
     //inline void save_staff_pointer(int iStaff, ImoStaff* pStaff) { m_pStaff[iStaff] = pStaff; }
+    void close_all_open_lines(LUnits xStart);
 
     //properties
     inline size_t size() { return m_Lines.size(); }
@@ -327,9 +291,10 @@ public:
 
     //adding shapes to graphic model
     void add_shapes(GmoBoxSliceInstr* pSliceInstrBox, int iInstr);
+    void delete_shapes();
 
     //debug
-    void dump_column_storage();
+    void dump_column_storage(ostream& outStream);
 
     //Public methods coded only for Unit Tests
     inline int get_num_objects_in_line(int iLine) { return (int)m_Lines[iLine]->size(); }
@@ -351,7 +316,7 @@ class LinesBuilder
 {
 protected:
     ColumnStorage* m_pColStorage;       //music lines for this column
-    std::vector<int> m_nStaffVoice;     //voice assigned to each staff
+    //std::vector<int> m_nStaffVoice;     //voice assigned to each staff
 	LineEntry* m_pCurEntry;				//ptr to last added entry
 	LinesIterator m_itCurLine;          //point to the pos table for current line
 
@@ -369,10 +334,12 @@ public:
     //methods to build the lines
     //void start_measurements_for_instrument(int iInstr, LUnits uxStart,
     //                                       ImoInstrument* pInstr, LUnits uSpace);
-    void close_line(ImoStaffObj* pSO, GmoShape* pShape, LUnits xStart, float rTime);
+    void close_line(int iInstr, ImoStaffObj* pSO, GmoShape* pShape, LUnits xStart,
+                    float rTime);
     void include_object(int iLine, int iInstr, ImoInstrument* pInstr, ImoStaffObj* pSO,
                         float rTime, bool fProlog, int nStaff, GmoShape* pShape);
     void end_of_data();        //inform that all data has been suplied
+    void finish_bar_measurements(LUnits xStart);
 
 protected:
     //void reset_default_voices();
@@ -420,16 +387,14 @@ public:
 
     //methods for spacing
 	LUnits tenths_to_logical(Tenths value, int iInstr, int staff);
-    inline bool is_proportional_spacing() {
-        return m_pScoreMeter->is_proportional_spacing();
-    }
-    inline Tenths get_fixed_spacing_value() const {
-        return m_pScoreMeter->get_spacing_value();
-    }
+    bool is_proportional_spacing();
+    Tenths get_fixed_spacing_value() const;
 
     //boxes and shapes
-    void add_shapes_to_boxes();
+    void add_shapes_to_boxes(ShapesStorage* pStorage);
     GmoBoxSliceInstr* create_slice_instr(ImoInstrument* pInstr, LUnits yTop);
+    void delete_shapes(ShapesStorage* pStorage);
+    inline GmoBoxSliceInstr* get_slice_instr(int iInstr) { return m_sliceInstrBoxes[iInstr]; }
 
     //public methods coded only for Unit Tests
     inline int get_num_lines() { return int(m_pColStorage->size()); }
@@ -497,16 +462,12 @@ public:
     SystemLayouter(ScoreMeter* pScoreMeter);
     ~SystemLayouter();
 
+    //column creation --------------------------------------------------------------
+
     GmoBoxSliceInstr* create_slice_instr(int iCol, ImoInstrument* pInstr, LUnits yTop);
-
-
-        //Collecting measurements
 
     //caller informs that a new collumn is going to be layouted
     void prepare_for_new_column(GmoBoxSlice* pBoxSlice);
-
-    //caller informs that all data for this system has been suplied
-    void end_of_system_measurements();
 
     //caller ask to prepare for receiving data about column iCol [0..n-1] for
     //the given instrument
@@ -517,45 +478,52 @@ public:
                         ImoStaffObj* pSO, float rTime, bool fProlog, int nStaff,
                         GmoShape* pShape);
     //caller sends lasts object to store in column iCol [0..n-1].
-    void include_barline_and_terminate_bar_measurements(int iCol, ImoStaffObj* pSO,
-                                                        GmoShape* pShape, LUnits xStart,
-                                                        float rTime);
+    void include_barline_and_finish_bar_measurements(int iCol, int iLine,
+                                                     ImoStaffObj* pSO, GmoShape* pShape,
+                                                     LUnits xStart, float rTime);
 
     //caller informs that there are no barline and no more objects in column iCol [0..n-1].
-    void terminate_bar_measurements_without_barline(int iCol, LUnits xStart, float rTime);
-
-    //caller request to ignore measurements for column iCol [0..n-1]
-    void discard_measurements_for_column(int iCol);
+    //void finish_bar_measurements_without_barline(int iCol, LUnits xStart, float rTime);
+    void finish_bar_measurements(int iCol, LUnits xStart);
 
         // Processing
     void do_column_spacing(int iCol, bool fTrace = false);
     LUnits redistribute_space(int iCol, LUnits uNewStart);
-//    void AddTimeGridToBoxSlice(int iCol, GmoBoxSlice* pBSlice);
 
         //Operations
     void increment_column_size(int iCol, LUnits uIncr);
-    void add_shapes_to_column(int iCol);
+    void add_shapes_to_column(int iCol, ShapesStorage* pStorage);
 
         //Access to information
     LUnits get_start_position_for_column(int iCol);
     inline bool has_content() { return m_ColStorage[0]->size() > 0; }
-    inline void set_prolog_width(LUnits width) { m_uPrologWidth = width; }
-    inline LUnits get_prolog_width() { return m_uPrologWidth; }
-
     LUnits get_minimum_size(int iCol);
     bool get_optimum_break_point(int iCol, LUnits uAvailable, float* prTime,
                               LUnits* puWidth);
     bool column_has_barline(int iCol);
+    GmoBoxSliceInstr* get_slice_box_for(int iCol, int iInstr);
+
+    //------------------------------------------------------------------------------
+
+    //caller informs that all data for this system has been suplied
+    void end_of_system_measurements();
+
+    //caller request to ignore measurements for last column
+    void discard_data_for_current_column(ShapesStorage* pStorage);
+
+    //    void AddTimeGridToBoxSlice(int iCol, GmoBoxSlice* pBSlice);
+
+        //Access to information
+    inline void set_prolog_width(LUnits width) { m_uPrologWidth = width; }
+    inline LUnits get_prolog_width() { return m_uPrologWidth; }
 
 //    //other methods
 //    void ClearDirtyFlags(int iCol);
 
-
-    //Public methods coded for Unit Tests and debugging
-    void dump_column_data(int iCol);
-//    inline int GetNumColumns() { return (int)m_ColLayouters.size(); }
-//    inline int GetNumLinesInColumn(int iCol) { return m_ColLayouters[iCol]->get_num_lines(); }
-//    int GetNumObjectsInColumnLine(int iCol, int iLine);     //iCol, iLine = [0..n-1]
+    //public methods only for unit tests and debugging
+    void dump_column_data(int iCol, ostream& outStream=dbgLogger);
+    inline int get_num_columns() { return int(m_ColLayouters.size()); }
+    inline int get_num_lines_in_column(int iCol) { return m_ColLayouters[iCol]->get_num_lines(); }
 //    inline ColumnStorage* GetColumnData(int iCol) { return m_ColStorage[iCol]; }
 
 };
@@ -639,6 +607,7 @@ public:
     LUnits get_next_position();
 
 protected:
+    void add_shapes_info_to_table();
     void prepare_for_traversing();
     LUnits compute_shift_to_avoid_overlap_with_previous();
     void drag_any_previous_clef_to_place_it_near_this_one();

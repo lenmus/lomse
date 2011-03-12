@@ -42,6 +42,7 @@ protected:
     USize m_shiftToDraw;
     FontStorage* m_pFontStorage;
     LibraryScope& m_libraryScope;
+    double m_fontHeight;
 
 public:
     virtual ~GmoShapeGlyph() {}
@@ -57,8 +58,9 @@ public:
 //	UPoint GetObjectOrigin();
 
 protected:
-    GmoShapeGlyph(int type, int nShapeIdx, unsigned int nGlyph, UPoint pos,
-                  Color color, LibraryScope& libraryScope);
+    GmoShapeGlyph(ImoObj* pCreatorImo, int type, int nShapeIdx, unsigned int nGlyph,
+                  UPoint pos, Color color, LibraryScope& libraryScope,
+                  double fontHeight);
 
 //    wxBitmap* GetBitmapFromShape(double rScale, Color colorF, Color colorB = *wxWHITE);
 //    virtual double GetPointSize();
@@ -69,8 +71,8 @@ protected:
 class GmoShapeClef : public GmoShapeGlyph
 {
 public:
-    GmoShapeClef(int nShapeIdx, int nGlyph, UPoint pos, bool fSmallClef, Color color,
-                 LibraryScope& libraryScope);
+    GmoShapeClef(ImoObj* pCreatorImo, int nShapeIdx, int nGlyph, UPoint pos, Color color,
+                 LibraryScope& libraryScope, double fontSize);
     ~GmoShapeClef() {}
 
 //	//overrides
@@ -78,16 +80,21 @@ public:
 //    void OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos);
 //    double GetPointSize();
 //
-//protected:
-//    bool        m_fSmallClef;
+};
+
+//---------------------------------------------------------------------------------------
+class GmoShapeFermata : public GmoShapeGlyph
+{
+public:
+    GmoShapeFermata(ImoObj* pCreatorImo, int nShapeIdx, int nGlyph, UPoint pos,
+                    Color color, LibraryScope& libraryScope, double fontSize);
+    ~GmoShapeFermata() {}
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeSimpleLine : public GmoSimpleShape
 {
 protected:
-    LUnits		m_xStart, m_yStart;
-    LUnits		m_xEnd, m_yEnd;
     LUnits		m_uWidth;
 	LUnits		m_uBoundsExtraWidth;
 	ELineEdge	m_nEdge;
@@ -97,12 +104,11 @@ public:
 
     //implementation of virtual methods from base class
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
-    void shift_origin(USize& shift);
 
 protected:
-    GmoShapeSimpleLine(int type, LUnits xStart, LUnits yStart, LUnits xEnd, LUnits yEnd,
-                       LUnits uWidth, LUnits uBoundsExtraWidth, Color color,
-                       ELineEdge nEdge = k_edge_normal);
+    GmoShapeSimpleLine(ImoObj* pCreatorImo, int type, LUnits xStart, LUnits yStart,
+                       LUnits xEnd, LUnits yEnd, LUnits uWidth, LUnits uBoundsExtraWidth,
+                       Color color, ELineEdge nEdge = k_edge_normal);
     void set_new_values(LUnits xStart, LUnits yStart, LUnits xEnd, LUnits yEnd,
                         LUnits uWidth, LUnits uBoundsExtraWidth,
                         Color color, ELineEdge nEdge);
@@ -203,7 +209,7 @@ protected:
 class GmoShapeInvisible : public GmoSimpleShape
 {
 public:
-    GmoShapeInvisible(int idx, UPoint uPos, USize uSize);
+    GmoShapeInvisible(ImoObj* pCreatorImo, int idx, UPoint uPos, USize uSize);
     ~GmoShapeInvisible() {}
 
 //	//overrides
@@ -218,18 +224,18 @@ private:
     LUnits m_uExtraLength;
 
 public:
-    GmoShapeStem(LUnits xPos, LUnits yStart, LUnits uExtraLength,
+    GmoShapeStem(ImoObj* pCreatorImo, LUnits xPos, LUnits yStart, LUnits uExtraLength,
                  LUnits yEnd, bool fStemDown, LUnits uWidth, Color color);
     ~GmoShapeStem() {}
 
-//	//specific methods
-//	void SetLength(LUnits uLenght, bool fModifyTop);
-//	inline bool StemDown() const { return m_fStemDown; }
-	void adjust(LUnits xPos, LUnits yStart, LUnits yEnd, bool fStemDown);
-//	LUnits GetYStartStem();
-//	LUnits GetYEndStem();
-//	LUnits GetXCenterStem();
-//    inline LUnits GetExtraLenght() { return m_uExtraLength; }
+    void change_length(LUnits length);
+	inline bool is_stem_down() const { return m_fStemDown; }
+    void set_stem_up(LUnits xRight, LUnits yNote);
+    void set_stem_down(LUnits xLeft, LUnits yNote);
+	void adjust(LUnits xLeft, LUnits yTop, LUnits height, bool fStemDown);
+    inline LUnits get_extra_length() { return m_uExtraLength; }
+    LUnits get_y_note();
+    LUnits get_y_flag();
 
 };
 
@@ -287,18 +293,69 @@ public:
 //
 
 //---------------------------------------------------------------------------------------
-class GmoShapeKeySignature : public GmoShapeGlyph
+class GmoShapeAccidentals : public GmoCompositeShape
 {
 public:
-    GmoShapeKeySignature(int idx, unsigned int iGlyph, UPoint pos, Color color,
-                         LibraryScope& libraryScope)
-        : GmoShapeGlyph(GmoObj::k_shape_key_signature, idx, iGlyph, pos, color,
-                        libraryScope)
+    GmoShapeAccidentals(ImoObj* pCreatorImo, int idx, UPoint pos, Color color)
+        : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_accidentals, idx, color)
+    {
+    }
+};
+
+//---------------------------------------------------------------------------------------
+class GmoShapeAccidental : public GmoShapeGlyph
+{
+public:
+    GmoShapeAccidental(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
+                       Color color, LibraryScope& libraryScope, double fontSize)
+        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_accidental_sign, idx, iGlyph,
+                        pos, color, libraryScope, fontSize)
     {
     }
 
-//	//overrides
-//	void on_draw(Drawer* pDrawer, RenderOptions& opt);
+};
+
+//---------------------------------------------------------------------------------------
+class GmoShapeDigit : public GmoShapeGlyph
+{
+public:
+    GmoShapeDigit(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
+                  Color color, LibraryScope& libraryScope, double fontSize)
+        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_time_signature_digit, idx, iGlyph,
+                        pos, color, libraryScope, fontSize)
+    {
+    }
+
+};
+
+//---------------------------------------------------------------------------------------
+class GmoShapeKeySignature : public GmoCompositeShape
+{
+protected:
+    LibraryScope& m_libraryScope;
+
+public:
+    GmoShapeKeySignature(ImoObj* pCreatorImo, int idx, UPoint pos, Color color,
+                         LibraryScope& libraryScope)
+        : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_key_signature, idx, color)
+        , m_libraryScope(libraryScope)
+    {
+    }
+};
+
+//---------------------------------------------------------------------------------------
+class GmoShapeTimeSignature : public GmoCompositeShape
+{
+protected:
+    LibraryScope& m_libraryScope;
+
+public:
+    GmoShapeTimeSignature(ImoObj* pCreatorImo, int idx, UPoint pos, Color color, 
+                          LibraryScope& libraryScope)
+        : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_time_signature, idx, color)
+        , m_libraryScope(libraryScope)
+    {
+    }
 };
 
 

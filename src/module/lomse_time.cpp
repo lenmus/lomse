@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,27 +16,29 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
-#include <lomse_time.h>
+#include "lomse_time.h"
 
 #include <cmath>
 
 namespace lomse
 {
 
-//helper functions to compare times (two floating point numbers)
-
+//global helper functions to compare times (two floating point numbers)
+//---------------------------------------------------------------------------------------
 bool is_equal_time(float t1, float t2)
 {
     return (fabs(t1 - t2) < 0.1f);
 }
 
+//---------------------------------------------------------------------------------------
 bool is_lower_time(float t1, float t2)
 {
     return (t1 < t2) && (fabs(t2 - t1) >= 0.1f);
 }
 
+//---------------------------------------------------------------------------------------
 bool is_greater_time(float t1, float t2)
 {
     return (t1 > t2) && (fabs(t1 - t2) >= 0.1f);

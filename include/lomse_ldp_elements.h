@@ -87,6 +87,7 @@ enum ELdpElement
     k_border,
     k_brace,
     k_bracket,
+    k_bracketType,
     k_chord,
     k_color,
     k_content,
@@ -97,6 +98,8 @@ enum ELdpElement
     k_creationMode,
     k_cursor,
     k_defineStyle,
+    k_displayBracket,
+    k_displayNormalNum,
     k_duration,
     k_dx,
     k_dy,
@@ -143,6 +146,7 @@ enum ELdpElement
     k_stem,
     k_style,
     k_symbol,
+    k_symbolSize,
     k_systemLayout,
     k_systemMargins,
     k_title,
@@ -395,6 +399,7 @@ typedef SmartPtr<LdpObject<k_stem> >         SpLdpStem;
 typedef SmartPtr<LdpObject<k_style> >        SpLdpStyle;
 typedef SmartPtr<LdpObject<k_string> >       SpLdpString;
 typedef SmartPtr<LdpObject<k_symbol> >       SpLdpSymbol;
+typedef SmartPtr<LdpObject<k_symbolSize> >   SpLdpSymbolSize;
 typedef SmartPtr<LdpObject<k_tuplet> >       SpLdpTuplet;
 typedef SmartPtr<LdpObject<k_text> >         SpLdpText;
 typedef SmartPtr<LdpObject<k_textbox> >      SpLdpTextbox;
@@ -495,6 +500,7 @@ typedef LdpObject<k_stem>         LdpStem;
 typedef LdpObject<k_style>        LdpStyle;
 typedef LdpObject<k_string>       LdpString;
 typedef LdpObject<k_symbol>       LdpSymbol;
+typedef LdpObject<k_symbolSize>   LdpSymbolSize;
 typedef LdpObject<k_tuplet>       LdpTuplet;
 typedef LdpObject<k_text>         LdpText;
 typedef LdpObject<k_textbox>      LdpTextbox;

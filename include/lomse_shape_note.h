@@ -35,8 +35,11 @@ namespace lomse
 class GmoBox;
 class GmoShapeNotehead;
 class GmoShapeStem;
+class GmoShapeAccidentals;
 class GmoShapeFlag;
 class FontStorage;
+class GmoShapeBeam;
+
 
 //---------------------------------------------------------------------------------------
 class GmoShapeNote : public GmoCompositeShape
@@ -46,25 +49,45 @@ protected:
     LibraryScope& m_libraryScope;
     GmoShapeNotehead* m_pNoteheadShape;
 	GmoShapeStem* m_pStemShape;
+    GmoShapeAccidentals* m_pAccidentalsShape;
+    GmoShapeFlag* m_pFlagShape;
+    LUnits m_uAnchorOffset;
+    bool m_fUpOriented;     //explicit info. about note orientation: up (stem up) or down
+
+    //for leger lines
+    int m_nPosOnStaff;
+    LUnits m_uyStaffTopLine;
+    LUnits m_uLineOutgoing;
+    LUnits m_uLineThickness;
+    LUnits m_lineSpacing;
+
+    //required by the beam engraver
+    int m_beamType[6];
+    int m_posOnStaff;
 
 public:
 //    GmoShapeNote(lmNoteRest* pOwner, LUnits xPos, LUnits yTop, Color color);
-    GmoShapeNote(LUnits x, LUnits y, Color color, LibraryScope& libraryScope);
+    GmoShapeNote(ImoObj* pCreatorImo, LUnits x, LUnits y, Color color,
+                 LibraryScope& libraryScope);
     ~GmoShapeNote();
 
 
-//	//overrides of virtual methods in base class
+	//overrides
 //	void Shift(LUnits xIncr, LUnits yIncr);
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
+    LUnits get_anchor_offset() { return m_uAnchorOffset; }
 
 //	//specific methods
 	void add_stem(GmoShapeStem* pShape);
 	void add_notehead(GmoShapeNotehead* pShape);
 	void add_flag(GmoShapeFlag* pShape);
-//	void AddAccidental(GmoShape* pShape);
+	void add_accidentals(GmoShapeAccidentals* pShape);
 	void add_note_in_block(GmoShape* pShape);
-//	void AddLegerLinesInfo(int nPosOnStaff, LUnits uyStaffTopLine);
+    void add_leger_lines_info(int posOnStaff, LUnits yStaffTopLine, LUnits lineLength,
+                              LUnits lineThickness, LUnits lineSpacing);
 //    void ApplyUserShiftsToTieShape();
+    inline void set_anchor_offset(LUnits offset) { m_uAnchorOffset = offset; }
+
 //
 //	//info about related shapes
 //	inline void SetBeamShape(GmoShapeBeam* pBeamShape) { m_pBeamShape = pBeamShape; }
@@ -73,17 +96,37 @@ public:
 //    inline void OnTieAttached(int nTie, GmoShapeTie* pShapeTie) { m_pTieShape[nTie] = pShapeTie; }
 
 	//access to constituent shapes
-	//GmoShape* get_notehead();
-	LUnits get_notehead_width();
-//	inline GmoShapeStem* GetStem() const { return m_pStemShape; }
-//
-//	//access to info
-//	inline LUnits GetXEnd() const { return m_uxLeft + m_uWidth; }
-//	LUnits GetStemThickness();
-//	bool StemGoesDown();
-//
+    inline GmoShapeNotehead* get_notehead_shape() const { return m_pNoteheadShape; }
+	inline GmoShapeStem* get_stem_shape() const { return m_pStemShape; }
+    inline GmoShapeAccidentals* get_accidentals_shape() const { return m_pAccidentalsShape; }
+    LUnits get_notehead_width() const;
+	LUnits get_notehead_left() const;
+	LUnits get_notehead_right() const;
+	LUnits get_notehead_height() const;
+	LUnits get_notehead_top() const;
+	LUnits get_notehead_bottom() const;
+    LUnits get_stem_height() const;
+    LUnits get_stem_width() const;
+    LUnits get_stem_left() const;
+    LUnits get_stem_y_flag() const;
+    LUnits get_stem_y_note() const;
+    LUnits get_stem_extra_length() const;
+
+    //re-shaping
+    void set_stem_down(bool down);
+    void set_stem_length(LUnits length);
+
+    //required by beam engraver
+    inline int get_beam_type(int level) { return m_beamType[level]; }
+    inline void set_beam_type(int level, int type) { m_beamType[level] = type; }
+    inline void set_pos_on_staff(int posOnStaff) { m_posOnStaff = posOnStaff; }
+    inline int get_pos_on_staff() { return m_posOnStaff; }
+
+    //info
+    inline bool is_up() { return m_fUpOriented; }
+    inline void set_up_oriented(bool value) { m_fUpOriented = value; }
+
 //	//layout related
-//	void SetStemLength(LUnits uLength);
 //	void DrawLegerLines(int nPosOnStaff, LUnits uxLine, lmPaper* pPaper, Color color);
 //
 //	//dragging
@@ -92,14 +135,10 @@ public:
 //	void OnEndDrag(lmPaper* pPaper, lmController* pCanvas, const UPoint& uPos);
 //
 //
-//
-//protected:
-//    //position
-//    LUnits		m_uxLeft;
-//    LUnits		m_uyTop;
-//
-//	LUnits		m_uWidth;
-//
+
+protected:
+    void draw_leger_lines(Drawer* pDrawer);
+
 //	//related shapes
 //	GmoShapeBeam*	m_pBeamShape;
 //    GmoShapeTie*     m_pTieShape[2];     //The two archs of a tie. This is the end note of the tie
@@ -118,10 +157,10 @@ public:
 class GmoShapeNotehead : public GmoShapeGlyph
 {
 public:
-    GmoShapeNotehead(int idx, unsigned int iGlyph, UPoint pos, Color color,
-                     LibraryScope& libraryScope)
-        : GmoShapeGlyph(GmoObj::k_shape_notehead, idx, iGlyph,
-                        pos, color, libraryScope)
+    GmoShapeNotehead(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
+                     Color color, LibraryScope& libraryScope, double fontSize)
+        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_notehead, idx, iGlyph,
+                        pos, color, libraryScope, fontSize)
     {
     }
 
@@ -133,10 +172,10 @@ public:
 class GmoShapeFlag : public GmoShapeGlyph
 {
 public:
-    GmoShapeFlag(int idx, unsigned int iGlyph, UPoint pos, Color color,
-                     LibraryScope& libraryScope)
-        : GmoShapeGlyph(GmoObj::k_shape_flag, idx, iGlyph,
-                        pos, color, libraryScope)
+    GmoShapeFlag(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
+                 Color color, LibraryScope& libraryScope, double fontSize)
+        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_flag, idx, iGlyph,
+                        pos, color, libraryScope, fontSize)
     {
     }
 
@@ -148,10 +187,10 @@ public:
 class GmoShapeDot : public GmoShapeGlyph
 {
 public:
-    GmoShapeDot(int idx, unsigned int iGlyph, UPoint pos, Color color,
-                     LibraryScope& libraryScope)
-        : GmoShapeGlyph(GmoObj::k_shape_dot, idx, iGlyph,
-                        pos, color, libraryScope)
+    GmoShapeDot(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
+                Color color, LibraryScope& libraryScope, double fontSize)
+        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_dot, idx, iGlyph,
+                        pos, color, libraryScope, fontSize)
     {
     }
 
@@ -167,6 +206,43 @@ public:
 //                             LUnits uLineLength, LUnits uyStaffTopLine, lmPaper* pPaper,
 //                             Color color);
 //
+
+
+//---------------------------------------------------------------------------------------
+class GmoShapeRest : public GmoCompositeShape
+{
+protected:
+    LibraryScope& m_libraryScope;
+	GmoShapeBeam* m_pBeamShape;
+
+public:
+    GmoShapeRest(ImoObj* pCreatorImo, int idx, LUnits x, LUnits y, Color color,
+                 LibraryScope& libraryScope);
+	virtual ~GmoShapeRest();
+
+	//overrides of virtual methods in base class
+    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
+
+//	//info about related shapes
+//	inline void SetBeamShape(GmoShapeBeam* pBeamShape) { m_pBeamShape = pBeamShape; }
+//	inline GmoShapeBeam* GetBeamShape() const { return m_pBeamShape; }
+
+};
+
+//---------------------------------------------------------------------------------------
+class GmoShapeRestGlyph : public GmoShapeGlyph
+{
+public:
+    GmoShapeRestGlyph(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
+                      Color color, LibraryScope& libraryScope, double fontSize)
+        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_rest_glyph, idx, iGlyph,
+                        pos, color, libraryScope, fontSize)
+    {
+    }
+
+    ~GmoShapeRestGlyph() {}
+
+};
 
 
 }   //namespace lomse

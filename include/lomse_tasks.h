@@ -38,8 +38,10 @@ enum EInputFlag
 {
     k_mouse_left  = 1,
     k_mouse_right = 2,
-    k_kbd_shift   = 4,
-    k_kbd_ctrl    = 8
+    k_mouse_middle = 4,
+    k_kbd_shift   = 8,
+    k_kbd_ctrl    = 16,
+    k_kbd_alt     = 32,
 };
 
 

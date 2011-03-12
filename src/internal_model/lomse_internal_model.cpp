@@ -247,10 +247,9 @@ ImoBarline::ImoBarline(DtoBarline& dto, long id)
 
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ImoBeamInfo implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 ImoBeamInfo::ImoBeamInfo()
     : ImoSimpleObj(ImoObj::k_beam_info)
     , m_beamNum(0)
@@ -326,13 +325,27 @@ bool ImoBeamInfo::get_repeat(int level)
 }
 
 
-//---------------------------------------------------------------------------------------
-// ImoClef implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
+// ImoBeamInfo implementation
+//=======================================================================================
+ImoBezierInfo::ImoBezierInfo(ImoBezierInfo* pBezier)
+    : ImoSimpleObj(ImoObj::k_bezier_info)
+{
+    if (pBezier)
+    {
+        for (int i=0; i < 4; ++i)
+            m_tPoints[i] = pBezier->get_point(i);
+    }
+}
 
+
+//=======================================================================================
+// ImoClef implementation
+//=======================================================================================
 ImoClef::ImoClef(DtoClef& dto)
     : ImoStaffObj(ImoObj::k_clef, dto)
     , m_clefType( dto.get_clef_type() )
+    , m_symbolSize( dto.get_symbol_size() )
 {
 }
 
@@ -340,6 +353,7 @@ ImoClef::ImoClef(DtoClef& dto)
 ImoClef::ImoClef(int clefType)
     : ImoStaffObj(ImoObj::k_clef)
     , m_clefType(clefType)
+    , m_symbolSize(k_size_default)
 {
 }
 
@@ -469,8 +483,32 @@ Color& ImoColorDto::get_from_string(const std::string& hex)
 
 
 //---------------------------------------------------------------------------------------
-// ImoContent implementation
+// ImoAttachments implementation
 //---------------------------------------------------------------------------------------
+ImoAttachments::~ImoAttachments()
+{
+    std::list<ImoAuxObj*>::iterator it;
+    for(it = m_attachments.begin(); it != m_attachments.end(); ++it)
+        delete *it;
+    m_attachments.clear();
+}
+
+//---------------------------------------------------------------------------------------
+ImoAuxObj* ImoAttachments::get_item(int iItem)
+{
+    std::list<ImoAuxObj*>::iterator it;
+    for(it = m_attachments.begin(); it != m_attachments.end() && iItem > 0; ++it, --iItem);
+    if (it != m_attachments.end())
+        return *it;
+    else
+        return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoAttachments::remove(ImoAuxObj* pAO)
+{
+    m_attachments.remove(pAO);
+}
 
 
 //---------------------------------------------------------------------------------------
@@ -514,15 +552,14 @@ void ImoDocObj::attach(ImoAuxObj* pAO)
         pAttachments = new ImoAttachments();
         append_child(pAttachments);
     }
-    pAttachments->append_child(pAO);
+    pAttachments->add(pAO);
 }
 
 //---------------------------------------------------------------------------------------
 ImoAuxObj* ImoDocObj::get_attachment(int i)
 {
     ImoAttachments* pAttachments = get_attachments();
-    ImoObj* pImo = pAttachments->get_child(i);
-    return dynamic_cast<ImoAuxObj*>( pImo );
+    return pAttachments->get_item(i);
 }
 
 //---------------------------------------------------------------------------------------
@@ -550,6 +587,14 @@ ImoAttachments* ImoDocObj::get_attachments()
 {
     return dynamic_cast<ImoAttachments*>( get_child_of_type(ImoObj::k_attachments) );
 }
+
+//---------------------------------------------------------------------------------------
+void ImoDocObj::remove_attachment(ImoAuxObj* pAO)
+{
+    ImoAttachments* pAttachments = get_attachments();
+    pAttachments->remove(pAO);
+}
+
 
 //---------------------------------------------------------------------------------------
 // ImoDocument implementation
@@ -657,6 +702,23 @@ void ImoInstrument::add_staff()
 {
     ImoStaffInfo* pStaff = new ImoStaffInfo();
     m_staves.push_back(pStaff);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrument::replace_staff_info(ImoStaffInfo* pInfo)
+{
+    int iStaff = pInfo->get_staff_number();
+    std::list<ImoStaffInfo*>::iterator it = m_staves.begin();
+    for (; it != m_staves.end() && iStaff > 0; ++it, --iStaff);
+
+    if (it != m_staves.end())
+    {
+        ImoStaffInfo* pOld = *it;
+        it = m_staves.erase(it);
+        delete pOld;
+        m_staves.insert(it, new ImoStaffInfo(*pInfo));
+    }
+    delete pInfo;
 }
 
 //---------------------------------------------------------------------------------------
@@ -888,8 +950,8 @@ ImoScore::ImoScore()
     , m_systemInfoOther()
     , m_pageInfo()
 {
-    append_child( new ImoInstruments() );
     append_child( new ImoOptions() );
+    append_child( new ImoInstruments() );
     set_defaults_for_system_info();
     set_defaults_for_options();
 }
@@ -1067,6 +1129,17 @@ void ImoScore::add_option(ImoOptionInfo* pOpt)
 }
 
 //---------------------------------------------------------------------------------------
+void ImoScore::set_option(ImoOptionInfo* pOpt)
+{
+    if (pOpt->is_bool_option())
+        set_bool_option(pOpt->get_name(), pOpt->get_bool_value());
+    else if (pOpt->is_long_option())
+        set_long_option(pOpt->get_name(), pOpt->get_long_value());
+    else if (pOpt->is_float_option())
+        set_float_option(pOpt->get_name(), pOpt->get_float_value());
+}
+
+//---------------------------------------------------------------------------------------
 bool ImoScore::has_options()
 {
     ImoOptions* pColOpts = get_options();
@@ -1134,6 +1207,16 @@ ImoTextStyleInfo* ImoScore::get_style_info(const std::string& name)
 }
 
 //---------------------------------------------------------------------------------------
+ImoTextStyleInfo* ImoScore::get_style_info_or_defaults(const std::string& name)
+{
+    ImoTextStyleInfo* pStyle = get_style_info(name);
+	if (pStyle)
+		return pStyle;
+    else
+        return get_default_style_info();
+}
+
+//---------------------------------------------------------------------------------------
 ImoTextStyleInfo* ImoScore::get_default_style_info()
 {
     ImoTextStyleInfo* pStyle = get_style_info("Default style");
@@ -1148,8 +1231,7 @@ ImoTextStyleInfo* ImoScore::create_default_style()
 {
 	ImoTextStyleInfo* pStyle = new ImoTextStyleInfo();
 	pStyle->set_name("Default style");
-    pStyle->set_color( Color(0,0,0,255) );
-    pStyle->set_font_name("Times New Roman");
+    pStyle->set_font_name("Liberation serif");
     pStyle->set_font_size(10.0f);
     pStyle->set_font_style(ImoFontInfo::k_normal);
     pStyle->set_font_weight(ImoFontInfo::k_normal);
@@ -1157,6 +1239,35 @@ ImoTextStyleInfo* ImoScore::create_default_style()
     return pStyle;
 }
 
+//---------------------------------------------------------------------------------------
+void ImoScore::add_required_text_styles()
+{
+    //For tuplets numbers
+    if (get_style_info("Tuplet numbers") == NULL)
+    {
+	    ImoTextStyleInfo* pStyle = new ImoTextStyleInfo();
+        pStyle->set_name("Tuplet numbers");
+        pStyle->set_font_name("Liberation serif");
+        pStyle->set_font_size(11.0f);
+        pStyle->set_font_style(ImoFontInfo::k_italic);
+        pStyle->set_font_weight(ImoFontInfo::k_normal);
+        add_style_info(pStyle);
+    }
+
+    //For instrument and group names and abbreviations
+    if (get_style_info("Instrument names") == NULL)
+    {
+	    ImoTextStyleInfo* pStyle = new ImoTextStyleInfo();
+        pStyle->set_name("Instrument names");
+        pStyle->set_font_name("Liberation serif");
+        pStyle->set_font_size(14.0f);
+        pStyle->set_font_style(ImoFontInfo::k_normal);
+        pStyle->set_font_weight(ImoFontInfo::k_normal);
+        add_style_info(pStyle);
+    }
+
+    //"Lyrics" - for lyrics
+}
 
 //---------------------------------------------------------------------------------------
 // ImoPageInfo implementation
@@ -1258,10 +1369,9 @@ Color ImoTextInfo::get_color()
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ImoTie implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 ImoTie::~ImoTie()
 {
     if (m_pStartBezier)
@@ -1270,11 +1380,34 @@ ImoTie::~ImoTie()
         delete m_pEndBezier;
 }
 
+//---------------------------------------------------------------------------------------
+ImoNote* ImoTie::get_start_note() 
+{ 
+    return static_cast<ImoNote*>(m_pStartSO);
+}
 
 //---------------------------------------------------------------------------------------
+ImoNote* ImoTie::get_end_note() 
+{ 
+    return static_cast<ImoNote*>(m_pEndSO); 
+}
+
+//---------------------------------------------------------------------------------------
+void ImoTie::set_start_note(ImoNote* pNote) 
+{ 
+    m_pStartSO = pNote; 
+}
+
+//---------------------------------------------------------------------------------------
+void ImoTie::set_end_note(ImoNote* pNote) 
+{ 
+    m_pEndSO = pNote; 
+}
+
+
+//=======================================================================================
 // ImoTieDto implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 ImoTieDto::~ImoTieDto()
 {
     if (m_pBezier)
@@ -1312,9 +1445,9 @@ ImoTupletDto::ImoTupletDto()
     , m_fStartOfTuplet(true)
     , m_nActualNum(0)
     , m_nNormalNum(0)
-    , m_fShowBracket(true)
-    , m_fShowNumber(true)
-    , m_nPlacement(k_default)
+    , m_nShowBracket(k_yesno_default)
+    , m_nPlacement(k_placement_default)
+    , m_nShowNormalNum(k_yesno_default)
     , m_pTupletElm(NULL)
     , m_pNR(NULL)
 {
@@ -1326,9 +1459,9 @@ ImoTupletDto::ImoTupletDto(LdpElement* pTupletElm)
     , m_fStartOfTuplet(true)
     , m_nActualNum(0)
     , m_nNormalNum(0)
-    , m_fShowBracket(true)
-    , m_fShowNumber(true)
-    , m_nPlacement(k_default)
+    , m_nShowBracket(k_yesno_default)
+    , m_nPlacement(k_placement_default)
+    , m_nShowNormalNum(k_yesno_default)
     , m_pTupletElm(pTupletElm)
     , m_pNR(NULL)
 {
@@ -1341,6 +1474,20 @@ int ImoTupletDto::get_line_number()
         return m_pTupletElm->get_line_number();
     else
         return 0;
+}
+
+
+//=======================================================================================
+// ImoTuplet implementation
+//=======================================================================================
+ImoTuplet::ImoTuplet(ImoTupletDto* dto)
+    : ImoMultiRelObj(ImoObj::k_tuplet)
+    , m_nActualNum(dto->get_actual_number())
+    , m_nNormalNum(dto->get_normal_number())
+    , m_nShowBracket(dto->get_show_bracket())
+    , m_nShowNormalNum(dto->get_show_normal_num())
+    , m_nPlacement(dto->get_placement())
+{
 }
 
 
@@ -1395,7 +1542,7 @@ int to_accidentals(const std::string& accidentals)
             if (accidentals[0] == '+')
                 return ImoNote::k_sharp;
             else if (accidentals[0] == '-')
-                return ImoNote::k_flap;
+                return ImoNote::k_flat;
             else if (accidentals[0] == '=')
                 return ImoNote::k_natural;
             else if (accidentals[0] == 'x')
@@ -1405,11 +1552,11 @@ int to_accidentals(const std::string& accidentals)
             break;
 
         case 2:
-            if (accidentals.compare(0, 2, "++"))
+            if (accidentals.compare(0, 2, "++") == 0)
                 return ImoNote::k_sharp_sharp;
-            else if (accidentals.compare(0, 2, "--"))
+            else if (accidentals.compare(0, 2, "--") == 0)
                 return ImoNote::k_flat_flat;
-            else if (accidentals.compare(0, 2, "=-"))
+            else if (accidentals.compare(0, 2, "=-") == 0)
                 return ImoNote::k_natural_flat;
             else
                 return -1;

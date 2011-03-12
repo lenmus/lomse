@@ -23,6 +23,7 @@
 
 #include "lomse_ldp_factory.h"
 #include "lomse_id_assigner.h"
+
 #include <iostream>
 using namespace std;
 
@@ -50,7 +51,6 @@ class Drawer;
 class ScreenDrawer;
 class Task;
 
-
 //---------------------------------------------------------------------------------------
 class LOMSE_EXPORT LibraryScope
 {
@@ -72,6 +72,7 @@ public:
     FontStorage* font_storage();
 
     double get_screen_ppi() const;
+    int get_pixel_format() const;
     //MusicGlyphs* music_glyphs();
 
 };

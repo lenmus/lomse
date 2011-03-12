@@ -28,6 +28,7 @@
 #include "lomse_calligrapher.h"
 #include "lomse_text_engraver.h"
 #include "lomse_document.h"
+#include "lomse_score_meter.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -59,10 +60,9 @@ SUITE(TextEngraverTest)
         style.set_name("titles");
         style.set_font_name("Times New Roman");
         style.set_font_size(18.0f);
-        ImoScoreText text("This is a test");
-        text.set_style(&style);
-        ImoScore* pScore = NULL;
-        TextEngraver engraver(m_libraryScope, text, pScore);
+        string text("This is a test");
+        ScoreMeter meter(1, 1, 180.0f);
+        TextEngraver engraver(m_libraryScope, &meter, text, &style);
 
         LUnits width = engraver.measure_width();
         CHECK( width > 0.0f );
@@ -76,7 +76,9 @@ SUITE(TextEngraverTest)
         ImoScore* pScore = doc.get_score();
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoScoreText& text = pInstr->get_name();
-        TextEngraver engraver(m_libraryScope, text, pScore);
+        ImoTextStyleInfo* pStyle = pScore->get_default_style_info();
+        ScoreMeter meter(1, 1, 180.0f);
+        TextEngraver engraver(m_libraryScope, &meter, text.get_text(), pStyle);
 
         LUnits width = engraver.measure_width();
         CHECK( width > 0.0f );

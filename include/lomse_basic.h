@@ -145,8 +145,33 @@ struct Rectangle
     Point<T> get_bottom_right() const { return Point<T>(right(), bottom()); }
     void set_bottom_right(const Point<T> &p) { right(p.x); bottom(p.y); }
 
-    Rectangle& intersect(const Rectangle& rect);
-    Rectangle intersect(const Rectangle& rect) const
+    Rectangle& intersection(const Rectangle& rect)
+    {
+        T x2 = right();
+        T y2 = bottom();
+
+        if (x < rect.x)
+            x = rect.x;
+        if (y < rect.y)
+            y = rect.y;
+        if (x2 > rect.right())
+            x2 = rect.right();
+        if (y2 > rect.bottom())
+            y2 = rect.bottom();
+
+        width = x2 - x;
+        height = y2 - y;
+
+        if (width <= 0 || height <= 0)
+        {
+            width = 0;
+            height = 0;
+        }
+
+        return *this;
+    }
+
+    Rectangle intersection(const Rectangle& rect) const
     {
         Rectangle r = *this;
         r.intersect(rect);
@@ -163,10 +188,10 @@ struct Rectangle
         }
         else if ( rect.width && rect.height )
         {
-            float x1 = min(x, rect.x);
-            float y1 = min(y, rect.y);
-            float y2 = max(y + height, rect.height + rect.y);
-            float x2 = max(x + width, rect.width + rect.x);
+            T x1 = min(x, rect.x);
+            T y1 = min(y, rect.y);
+            T y2 = max(y + height, rect.height + rect.y);
+            T x2 = max(x + width, rect.width + rect.x);
 
             x = x1;
             y = y1;

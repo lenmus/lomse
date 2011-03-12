@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include "lomse_basic_model.h"
 
@@ -27,22 +27,24 @@ namespace lomse
 {
 
 
-//-------------------------------------------------------------------------------------
+//=======================================================================================
 // InternalModel implementation
-//-------------------------------------------------------------------------------------
-
+//=======================================================================================
 InternalModel::InternalModel()
     : m_pRoot(NULL)
 {
 }
 
+//---------------------------------------------------------------------------------------
 InternalModel::~InternalModel()
 {
     delete m_pRoot;
     delete_beams();
     delete_tuplets();
+    delete_chords();
 }
 
+//---------------------------------------------------------------------------------------
 void InternalModel::delete_beams()
 {
     std::list<ImoBeam*>::iterator it;
@@ -51,10 +53,20 @@ void InternalModel::delete_beams()
     m_beams.clear();
 }
 
+//---------------------------------------------------------------------------------------
 void InternalModel::delete_tuplets()
 {
     std::list<ImoTuplet*>::iterator it;
     for (it = m_tuplets.begin(); it != m_tuplets.end(); ++it)
+        delete *it;
+    m_tuplets.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void InternalModel::delete_chords()
+{
+    std::list<ImoChord*>::iterator it;
+    for (it = m_chords.begin(); it != m_chords.end(); ++it)
         delete *it;
     m_tuplets.clear();
 }

@@ -65,6 +65,8 @@ public:
     void layout_document();
     inline GraphicModel* get_gm_model() { return m_pGModel; }
 
+    //only for unit tests
+    ContentLayouter* get_last_layouter() { return m_pCurLayouter; }
 
 protected:
     void initializations();
@@ -82,6 +84,10 @@ protected:
     void add_footers_to_page(GmoBoxDocPage* pPage);
     void add_contents_wrapper_box_to_page(GmoBoxDocPage* pPage);
     GmoBox* create_item_pagebox(GmoBox* pParentBox, ContentLayouter* pLayouter);
+
+    //for unit tests we need to access ScoreLayouter. Therefore I will save here the
+    //last used layouter.
+    ContentLayouter* m_pCurLayouter;
 
 };
 

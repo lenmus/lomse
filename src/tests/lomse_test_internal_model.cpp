@@ -151,6 +151,33 @@ SUITE(InternalModelTest)
         //pMD->append_child(pClef);
     }
 
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_Instrument_ReplaceStaffInfo)
+    {
+        ImoInstrument instr;
+        instr.add_staff();
+        instr.add_staff();
+        ImoStaffInfo* pInfo = new ImoStaffInfo();
+        pInfo->set_staff_number(2);
+        pInfo->set_line_spacing(400.0f);
+        instr.replace_staff_info(pInfo);
+
+        CHECK( instr.get_num_staves() == 3 );
+        ImoStaffInfo* pStaff = instr.get_staff(2);
+        CHECK( pStaff != NULL );
+        CHECK( pStaff->get_num_lines() == 5 );
+        CHECK( pStaff->get_staff_margin() == 1000.0f );
+        CHECK( pStaff->get_line_spacing() == 400.0f );
+        CHECK( pStaff->get_line_thickness() == 15.0f );
+        CHECK( pStaff->get_height() == 1615.0f );
+        pStaff = instr.get_staff(1);
+        CHECK( pStaff != NULL );
+        CHECK( pStaff->get_num_lines() == 5 );
+        CHECK( pStaff->get_staff_margin() == 1000.0f );
+        CHECK( pStaff->get_line_spacing() == 180.0f );
+        CHECK( pStaff->get_line_thickness() == 15.0f );
+        CHECK( pStaff->get_height() == 735.0f );
+    }
+
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_EmptyScore)
     {
         ImoScore* pScore = new ImoScore();
@@ -198,15 +225,47 @@ SUITE(InternalModelTest)
         CHECK( score.get_option("StaffLines.Hide")->get_bool_value() == true );
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithOption)
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithBoolOption)
     {
         ImoScore* pScore = new ImoScore();
         ImoOptionInfo* pOpt = new ImoOptionInfo("Staff.Green");
         pOpt->set_bool_value(true);
         CHECK( pOpt->get_bool_value() == true );
-        pScore->add_option(pOpt);
+        pScore->set_option(pOpt);
         CHECK( pScore->has_options() == true );
-        CHECK( pScore->get_option("Staff.Green") == pOpt );
+        ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Green");
+        CHECK( pOpt2 != NULL );
+        CHECK( pOpt2->get_bool_value() == true );
+        CHECK( pScore->get_num_instruments() == 0 );
+        delete pScore;
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithLongOption)
+    {
+        ImoScore* pScore = new ImoScore();
+        ImoOptionInfo* pOpt = new ImoOptionInfo("Staff.Dots");
+        pOpt->set_long_value(27L);
+        CHECK( pOpt->get_long_value() == 27L );
+        pScore->set_option(pOpt);
+        CHECK( pScore->has_options() == true );
+        ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Dots");
+        CHECK( pOpt2 != NULL );
+        CHECK( pOpt2->get_long_value() == 27L );
+        CHECK( pScore->get_num_instruments() == 0 );
+        delete pScore;
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithFloatOption)
+    {
+        ImoScore* pScore = new ImoScore();
+        ImoOptionInfo* pOpt = new ImoOptionInfo("Staff.Pi");
+        pOpt->set_float_value(3.1416f);
+        CHECK( pOpt->get_float_value() == 3.1416f );
+        pScore->set_option(pOpt);
+        CHECK( pScore->has_options() == true );
+        ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Pi");
+        CHECK( pOpt2 != NULL );
+        CHECK( pOpt2->get_float_value() == 3.1416f );
         CHECK( pScore->get_num_instruments() == 0 );
         delete pScore;
     }
@@ -243,7 +302,7 @@ SUITE(InternalModelTest)
         ImoScore* pScore = new ImoScore();
         ImoOptionInfo* pOpt = new ImoOptionInfo("Staff.Green");
         pOpt->set_bool_value(true);
-        pScore->add_option(pOpt);
+        pScore->set_option(pOpt);
 
         ImoInstrument* pInstr = new ImoInstrument();
         ImoMusicData* pMD = new ImoMusicData();
@@ -255,7 +314,9 @@ SUITE(InternalModelTest)
         pScore->add_instrument(pInstr);
 
         CHECK( pScore->has_options() == true );
-        CHECK( pScore->get_option("Staff.Green") == pOpt );
+        ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Green");
+        CHECK( pOpt2 != NULL );
+        CHECK( pOpt2->get_bool_value() == true );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_instrument(0) == pInstr );
 
@@ -322,7 +383,7 @@ SUITE(InternalModelTest)
         ImoScore* pScore = new ImoScore();
         ImoOptionInfo* pOpt = new ImoOptionInfo("Staff.Green");
         pOpt->set_bool_value(true);
-        pScore->add_option(pOpt);
+        pScore->set_option(pOpt);
         ImoInstrument* pInstr = new ImoInstrument();
         ImoMusicData* pMD = new ImoMusicData();
         pInstr->append_child(pMD);
@@ -341,7 +402,7 @@ SUITE(InternalModelTest)
         delete pDoc;
     }
 
-    // ImoPageInfo ---------------------------------------------------------------
+    // ImoPageInfo ----------------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_PageInfoDefaults)
     {
@@ -355,7 +416,7 @@ SUITE(InternalModelTest)
         CHECK( info.is_portrait() == true );
     }
 
-    // ImoTextStyleInfo ---------------------------------------------------------
+    // ImoTextStyleInfo -----------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_Score_GetDefaultStyle)
     {
@@ -364,7 +425,7 @@ SUITE(InternalModelTest)
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Default style" );
         CHECK( pStyle->get_color() == Color(0,0,0,255) );
-        CHECK( pStyle->get_font_name() == "Times New Roman" );
+        CHECK( pStyle->get_font_name() == "Liberation serif" );
         CHECK( pStyle->get_font_style() == ImoFontInfo::k_normal );
         CHECK( pStyle->get_font_weight() == ImoFontInfo::k_normal );
         CHECK( pStyle->get_font_size() == 10 );
@@ -386,7 +447,7 @@ SUITE(InternalModelTest)
         CHECK( pStyle == pStyle2 );
     }
 
-    // ImoBoxInfo -------------------------------------------------------------
+    // ImoBoxInfo -----------------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_BoxInfoDefaults)
     {
@@ -401,7 +462,7 @@ SUITE(InternalModelTest)
         CHECK( info.get_border_style() == k_line_solid );
     }
 
-    // ImoCursorInfo -------------------------------------------------------------
+    // ImoCursorInfo --------------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_CursorInfoDefaults)
     {
@@ -413,7 +474,7 @@ SUITE(InternalModelTest)
         CHECK( info.get_id() == -1L );
     }
 
-    // ImoFiguredBassInfo ---------------------------------------------------------
+    // ImoFiguredBassInfo ---------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_63)
     {

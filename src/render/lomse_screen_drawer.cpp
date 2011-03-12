@@ -57,8 +57,16 @@ void Drawer::set_text_color(Color color)
 
 ScreenDrawer::ScreenDrawer(LibraryScope& libraryScope)
     : Drawer(libraryScope)
-    , m_pRenderer( new Renderer(libraryScope.get_screen_ppi(), m_attr_storage,
-                                m_attr_stack, m_path) )
+//    , m_pRenderer( new RendererTemplate<PixFormat_rgba32>(libraryScope.get_screen_ppi(),
+//                                                          m_attr_storage,
+//                                                          m_attr_stack,
+//                                                          m_path) )
+//    , m_pRenderer( new Renderer(libraryScope.get_screen_ppi(), m_attr_storage,
+//                                m_attr_stack, m_path) )
+//    , m_pRenderer( Injector::inject_Renderer(libraryScope, m_attr_storage,
+//                                             m_attr_stack, m_path)
+    , m_pRenderer( RendererFactory::create_renderer(libraryScope, m_attr_storage,
+                                                    m_attr_stack, m_path) )
     , m_pCalligrapher( new Calligrapher(m_pFonts, m_pRenderer) )
 {
 }
@@ -86,8 +94,8 @@ void ScreenDrawer::end_path()
         throw "end_path : The path was not begun";
     }
     PathAttributes attr = cur_attr();
-    unsigned idx = m_attr_storage[m_attr_storage.size() - 1].index;
-    attr.index = idx;
+    unsigned idx = m_attr_storage[m_attr_storage.size() - 1].path_index;
+    attr.path_index = idx;
     m_attr_storage[m_attr_storage.size() - 1] = attr;
     pop_attr();
 }

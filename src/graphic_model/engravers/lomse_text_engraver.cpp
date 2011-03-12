@@ -32,13 +32,25 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // TextEngraver implementation
 //---------------------------------------------------------------------------------------
-TextEngraver::TextEngraver(LibraryScope& libraryScope, ImoScoreText& text,
-                           ImoScore* pScore)
-    : m_text(text)
-    , m_pScore(pScore)
+TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                           const string& text, ImoTextStyleInfo* pStyle)
+    : Engraver(libraryScope, pScoreMeter)
+    , m_text(text)
+    , m_pStyle(pStyle)
     , m_pFontStorage( libraryScope.font_storage() )
-    , m_libraryScope(libraryScope)
 {
+}
+
+//---------------------------------------------------------------------------------------
+TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                           ImoScoreText* pText, ImoScore* pScore)
+    : Engraver(libraryScope, pScoreMeter)
+    , m_text(pText->get_text())
+    , m_pFontStorage( libraryScope.font_storage() )
+{
+    m_pStyle = pText->get_style();
+    if (!m_pStyle)
+        m_pStyle = pScore->get_default_style_info();
 }
 
 //---------------------------------------------------------------------------------------
@@ -49,17 +61,14 @@ TextEngraver::~TextEngraver()
 //---------------------------------------------------------------------------------------
 LUnits TextEngraver::measure_width()
 {
-    ImoTextStyleInfo* pStyle = m_text.get_style();
-    if (!pStyle)
-        pStyle = m_pScore->get_default_style_info();
-
     TextMeter meter(m_libraryScope);
-    meter.select_font( pStyle->get_font_name(), pStyle->get_font_size() );
-    return meter.measure_width(m_text.get_text());
+    meter.select_font( m_pStyle->get_font_name(), m_pStyle->get_font_size() );
+    return meter.measure_width(m_text);
 }
 
 //---------------------------------------------------------------------------------------
-void TextEngraver::add_shape(GmoBox* pBox, LUnits xLeft, LUnits yTop, int valign)
+GmoShapeText* TextEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft,
+                                         LUnits yTop, int valign)
 {
     //TODO-LOG
     //if (valign == k_center)
@@ -68,14 +77,9 @@ void TextEngraver::add_shape(GmoBox* pBox, LUnits xLeft, LUnits yTop, int valign
         yTop -= meter.get_descender();
     }
 
-    ImoTextStyleInfo* pStyle = m_text.get_style();
-    if (!pStyle)
-        pStyle = m_pScore->get_default_style_info();
-
     int idx = 0;
-    GmoShape* pShape = new GmoShapeText(idx, m_text.get_text(), pStyle,
-                                        xLeft, yTop, m_libraryScope);
-    pBox->add_shape(pShape, GmoShape::k_layer_staff);
+    return new GmoShapeText(pCreatorImo, idx, m_text, m_pStyle, xLeft, yTop,
+                            m_libraryScope);
 }
 
 

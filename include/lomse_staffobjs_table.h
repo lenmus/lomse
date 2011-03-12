@@ -189,7 +189,7 @@ private:
     void update_segment(ImoStaffObj* pSO);
     void update_time_counter(ImoGoBackFwd* pGBF);
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
-    void add_entries_for_key_signature(ImoObj* pImo, int nInstr);
+    void add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr);
     ImoSpacer* anchor_object(ImoAuxObj* pImo);
 
 };

@@ -1,4 +1,4 @@
-//-------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_SCORE_ENUMS_H__        //to avoid nested includes
 #define __LOMSE_SCORE_ENUMS_H__
@@ -47,6 +47,26 @@ enum ESpacingMethod
 {
     k_spacing_fixed = 1,
     k_spacing_proportional,
+};
+
+//---------------------------------------------------------------------------------------
+// The symbol-size entity, taken from MusicXML, is used to indicate full vs. cue-sized
+// vs. oversized symbols, when necessary. For instance, in clefs.
+enum ESymbolSize
+{
+    k_size_default=0,   //no information. Do your best to decide the right size.
+    k_size_full,        //normal size
+    k_size_cue,         //cue size
+    k_size_large,       //oversized symbols
+};
+
+//---------------------------------------------------------------------------------------
+// Yes/No/Default values for several propperties
+enum EYesNo
+{
+    k_yesno_default=0,  //no information. Use most suitable default value.
+    k_yesno_yes,        //yes
+    k_yesno_no,         //no
 };
 
 

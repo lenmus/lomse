@@ -22,7 +22,11 @@
 #define __LOMSE_AGG_TYPES_H__
 
 #include "lomse_doorway.h"
-#include "agg_color_rgba.h"     //rgba & rgba8
+#include "agg_color_rgba.h"     //rgba & rgba8 formats
+#include "agg_pixfmt_rgb.h"     //rgb pixel formats
+#include "agg_pixfmt_gray.h"    //gray pixel formats
+#include "agg_pixfmt_rgb_packed.h"
+
 #include "agg_math_stroke.h"    //line_cap_e & line_join_e
 #include "agg_trans_affine.h"   //trans_affine
 #include "agg_path_storage.h"
@@ -47,10 +51,6 @@ namespace lomse
 
 //---------------------------------------------------------------------------------------
 typedef agg::trans_affine       TransAffine;
-
-typedef agg::pixfmt_bgra32                              PixFormat;
-typedef agg::renderer_base<PixFormat>                   RendererBase;
-typedef agg::renderer_scanline_aa_solid<RendererBase>   RendererSolid;
 
 //typdefs for the conversion pipeline
 

@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,12 +16,13 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include "lomse_linker.h"
 
 #include "lomse_internal_model.h"
 #include "lomse_ldp_elements.h"        //for node type
+#include "lomse_im_note.h"
 
 
 using namespace std;
@@ -29,6 +30,8 @@ using namespace std;
 namespace lomse
 {
 
+
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChildType)
 {
     //returns the object for set_imo() method (can be NULL)
@@ -58,6 +61,9 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
 
         case ImoObj::k_midi_info:
             return add_midi_info(dynamic_cast<ImoMidiInfo*>(pChild));
+
+        case ImoObj::k_staff_info:
+            return add_staff_info(dynamic_cast<ImoStaffInfo*>(pChild));
 
         case ImoObj::k_font_info:
             return add_font_info(dynamic_cast<ImoFontInfo*>(pChild));
@@ -93,6 +99,7 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
     }
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_instruments_group(ImoInstrGroup* pGrp)
 {
     if (m_pParent && m_pParent->is_score())
@@ -103,16 +110,18 @@ ImoObj* Linker::add_instruments_group(ImoInstrGroup* pGrp)
     return pGrp;
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_option(ImoOptionInfo* pOpt)
 {
     if (m_pParent && m_pParent->is_score())
     {
         ImoScore* pScore = dynamic_cast<ImoScore*>( m_pParent );
-        pScore->add_option(pOpt);
+        pScore->set_option(pOpt);
     }
     return pOpt;
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_page_info(ImoPageInfo* pPI)
 {
     if (m_pParent && m_pParent->is_score())
@@ -132,6 +141,7 @@ ImoObj* Linker::add_page_info(ImoPageInfo* pPI)
     return pPI;
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_cursor(ImoCursorInfo* pCursor)
 {
     if (m_pParent && m_pParent->is_document())
@@ -144,6 +154,7 @@ ImoObj* Linker::add_cursor(ImoCursorInfo* pCursor)
     return pCursor;
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_system_info(ImoSystemInfo* pSI)
 {
     if (m_pParent && m_pParent->is_score())
@@ -156,6 +167,7 @@ ImoObj* Linker::add_system_info(ImoSystemInfo* pSI)
     return pSI;
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_text_style_info(ImoTextStyleInfo* pStyle)
 {
     if (m_pParent && m_pParent->is_score())
@@ -167,6 +179,7 @@ ImoObj* Linker::add_text_style_info(ImoTextStyleInfo* pStyle)
     return pStyle;
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_font_info(ImoFontInfo* pFont)
 {
     if (m_pParent && m_pParent->is_text_style_info())
@@ -182,6 +195,7 @@ ImoObj* Linker::add_font_info(ImoFontInfo* pFont)
     return pFont;
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_bezier(ImoBezierInfo* pBezier)
 {
     if (m_pParent && m_pParent->is_tie_info())
@@ -193,6 +207,7 @@ ImoObj* Linker::add_bezier(ImoBezierInfo* pBezier)
     return pBezier;
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_midi_info(ImoMidiInfo* pInfo)
 {
     if (m_pParent && m_pParent->is_instrument())
@@ -204,6 +219,19 @@ ImoObj* Linker::add_midi_info(ImoMidiInfo* pInfo)
     return pInfo;
 }
 
+//---------------------------------------------------------------------------------------
+ImoObj* Linker::add_staff_info(ImoStaffInfo* pInfo)
+{
+    if (m_pParent && m_pParent->is_instrument())
+    {
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pParent);
+        pInstr->replace_staff_info(pInfo);
+        return NULL;
+    }
+    return pInfo;
+}
+
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_instrument(ImoInstrument* pInstrument)
 {
     if (m_pParent)
@@ -222,6 +250,7 @@ ImoObj* Linker::add_instrument(ImoInstrument* pInstrument)
     return pInstrument;
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_text(ImoScoreText* pText)
 {
     if (m_pParent)
@@ -270,6 +299,7 @@ ImoObj* Linker::add_text(ImoScoreText* pText)
     return pText;
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_title(ImoScoreTitle* pTitle)
 {
     if (m_pParent && m_pParent->is_score())
@@ -280,6 +310,7 @@ ImoObj* Linker::add_title(ImoScoreTitle* pTitle)
     return pTitle;
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_child(int parentType, ImoObj* pImo)
 {
     if (m_pParent && m_pParent->get_obj_type() == parentType)
@@ -287,13 +318,26 @@ ImoObj* Linker::add_child(int parentType, ImoObj* pImo)
     return pImo;
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_staffobj(ImoStaffObj* pSO)
 {
-    if (m_pParent && m_pParent->is_music_data())
-        m_pParent->append_child(pSO);
+    if (m_pParent)
+    {
+        if (m_pParent->is_music_data())
+            m_pParent->append_child(pSO);
+        else if (m_pParent->is_chord() && pSO->is_note())
+        {
+            ImoChord* pChord = dynamic_cast<ImoChord*>(m_pParent);
+            ImoNote* pNote = dynamic_cast<ImoNote*>(pSO);
+            pChord->push_back(pNote);
+            pNote->set_in_chord(pChord);
+            return NULL;
+        }
+    }
     return pSO;
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Linker::add_auxobj(ImoAuxObj* pAuxObj)
 {
     if (m_pParent && m_pParent->is_docobj())

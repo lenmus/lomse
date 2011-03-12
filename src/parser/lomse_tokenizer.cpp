@@ -169,7 +169,6 @@ LdpToken* LdpTokenizer::parse_new_token()
         k_STR04,
         k_S01,
         k_S02,
-        k_S03,
         k_Error
     };
 
@@ -366,7 +365,7 @@ LdpToken* LdpTokenizer::parse_new_token()
                     state = k_NUM01;
                 } else if (curChar == chDot) {
                     state = k_NUM02;
-                } else if (is_letter(curChar)) {
+                } else if (is_letter(curChar) || curChar == chUnderscore) {
                     state = k_ETQ01;
                 } else {
                     m_reader.repeat_last_char();
@@ -398,13 +397,7 @@ LdpToken* LdpTokenizer::parse_new_token()
             case k_S01:
                 tokendata << curChar;
                 curChar = get_next_char();
-                if (is_letter(curChar)) {
-                    state = k_ETQ01;
-                } else if (is_number(curChar)) {
-                    state = k_NUM01;
-                } else if (curChar == chPlusSign || curChar == chMinusSign) {
-                    state = k_S03;
-                } else if (curChar == chSpace || curChar == chTab) {
+                if (curChar == chSpace || curChar == chTab) {
                     return new LdpToken(tkLabel, tokendata.str(), numLine);
                 }
                 else if (curChar == chCloseParenthesis)
@@ -412,35 +405,23 @@ LdpToken* LdpTokenizer::parse_new_token()
                     m_reader.repeat_last_char();
                     return new LdpToken(tkLabel, tokendata.str(), numLine);
                 }
-                else {
-                    state = k_Error;
+                else if (is_number(curChar)) {
+                    state = k_NUM01;
                 }
+                else 
+                    state = k_ETQ01;
                 break;
 
             case k_S02:
                 tokendata << curChar;
                 curChar = get_next_char();
-                if (is_letter(curChar)) {
-                    state = k_ETQ01;
-                } else if (is_number(curChar)) {
-                    state = k_NUM01;
-                } else if (curChar == chPlusSign || curChar == chMinusSign) {
-                    state = k_S03;
-                } else {
-                    state = k_Error;
+                if (curChar == chSpace || curChar == chTab) {
+                    return new LdpToken(tkLabel, tokendata.str(), numLine);
                 }
-                break;
-
-            case k_S03:
-                tokendata << curChar;
-                curChar = get_next_char();
-                if (is_letter(curChar)) {
-                    state = k_ETQ01;
-                } else if (is_number(curChar)) {
+                else if (is_number(curChar))
                     state = k_NUM01;
-                } else {
-                    state = k_Error;
-                }
+                else
+                    state = k_ETQ01;
                 break;
 
             case k_Error:
@@ -449,7 +430,7 @@ LdpToken* LdpTokenizer::parse_new_token()
                 } else {
                     m_reporter << "[LdpTokenizer::parse_new_token]: Bad character '"
                                << curChar << "' found" << endl;
-                throw "Invalid char";
+                    throw "Invalid char";
                 }
                 state = k_Start;
                 break;

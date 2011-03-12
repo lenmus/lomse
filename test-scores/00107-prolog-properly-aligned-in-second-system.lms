@@ -1,0 +1,40 @@
+(score
+   (vers 1.6)(language en iso-8859-1)
+   (instrument
+      (musicData 
+        (clef G)
+        (key E)
+        (time 4 4)
+
+        (n g3 s g+)(n c4 s)(n e4 s)(n g4 s g-)
+        (n g3 s g+)(n c4 s)(n e4 s)(n g4 s g-)
+        (n g3 s g+)(n c4 s)(n e4 s)(n g4 s g-)
+        (n g3 s g+)(n c4 s)(n e4 s)(n g4 s g-)     
+        (barline)
+
+        //2
+        (n g3 s g+)(n c4 s)(n e4 s)(n g4 s g-)
+        (n g3 s g+)(n c4 s)(n e4 s)(n g4 s g-)
+        (n g3 s g+)(n c4 s)(n e4 s)(n g4 s g-)
+        (n g3 s g+)(n c4 s)(n e4 s)(n g4 s g-)     
+        (barline)
+
+        //3
+        (n c5 q)
+        (n c5 q)
+        (n c5 q)
+        (n c5 q)
+        (barline)
+
+        //4
+        (n g3 s g+)(n c4 s)(n e4 s)(n g4 s g-)
+        (n g3 s g+)(n c4 s)(n e4 s)(n g4 s g-)
+        (n g3 s g+)(n c4 s)(n e4 s)(n g4 s g-)
+        (n g3 s g+)(n c4 s)(n e4 s)(n g4 s g-)     
+        (barline)
+        
+     )
+     
+   )
+)
+

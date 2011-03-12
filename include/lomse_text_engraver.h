@@ -23,31 +23,39 @@
 
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
+#include "lomse_engraver.h"
+#include <string>
+using namespace std;
 
 namespace lomse
 {
 
 //forward declarations
-class ImoScoreText;
 class FontStorage;
 class ImoScore;
 class GmoBox;
+class GmoShapeText;
+class ImoTextStyleInfo;
+class ImoScoreText;
 
 //---------------------------------------------------------------------------------------
-class TextEngraver
+class TextEngraver : public Engraver
 {
 protected:
-    ImoScoreText& m_text;
-    ImoScore* m_pScore;
+    const string& m_text;
+    ImoTextStyleInfo* m_pStyle;
     FontStorage* m_pFontStorage;
-    LibraryScope& m_libraryScope;
 
 public:
-    TextEngraver(LibraryScope& libraryScope, ImoScoreText& text, ImoScore* pScore);
+    TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                 const string& text, ImoTextStyleInfo* pStyle);
+    TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                 ImoScoreText* pText, ImoScore* pScore);
     ~TextEngraver();
 
+    GmoShapeText* create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUnits yTop,
+                               int valign);
     LUnits measure_width();
-    void add_shape(GmoBox* pBox, LUnits xLeft, LUnits yTop, int valign);
 
 };
 

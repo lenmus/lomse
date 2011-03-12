@@ -48,7 +48,7 @@ public:
     MyDoorway()
         : LomseDoorway()
     {
-        init_library(k_platform_win32);
+        init_library(k_pix_format_rgba32, 96, false);
     }
     virtual ~MyDoorway() {}
 

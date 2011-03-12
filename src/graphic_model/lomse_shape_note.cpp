@@ -29,42 +29,23 @@
 namespace lomse
 {
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // GmoShapeNote implementation
-//---------------------------------------------------------------------------------------
-GmoShapeNote::GmoShapeNote(LUnits x, LUnits y, Color color, LibraryScope& libraryScope)
-    : GmoCompositeShape(GmoObj::k_shape_note, 0, color)
+//=======================================================================================
+GmoShapeNote::GmoShapeNote(ImoObj* pCreatorImo, LUnits x, LUnits y, Color color,
+                           LibraryScope& libraryScope)
+    : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_note, 0, color)
     , m_pFontStorage( libraryScope.font_storage() )
     , m_libraryScope(libraryScope)
     , m_pNoteheadShape(NULL)
 	, m_pStemShape(NULL)
+    , m_pAccidentalsShape(NULL)
+    , m_pFlagShape(NULL)
+    , m_uAnchorOffset(0.0f)
 {
-//    m_uxLeft = xLeft;
-//    m_uyTop = yTop;
-//	m_color = color;
-//
-//	//initializations
-//	m_nNoteHead = -1;		// -1 = no shape
 //	m_pBeamShape = (GmoShapeBeam*)NULL;
-//	m_pStemShape = (GmoShapeStem*)NULL;
 //    m_pTieShape[0] = (GmoShapeTie*)NULL;
 //    m_pTieShape[1] = (GmoShapeTie*)NULL;
-
-
-
-//    //bounds
-//    select_font();
-//    TextMeter meter(m_libraryScope);
-//    m_size.width = meter.measure_width(text);
-//    m_size.height = meter.get_font_height();
-//
-//    //position
-//    m_origin.x = x;
-//    m_origin.y = y - m_size.height;     //reference is at text bottom
-//
-//    //color
-//    if (m_pStyle)
-//        m_color = m_pStyle->get_color();
 }
 
 //---------------------------------------------------------------------------------------
@@ -99,43 +80,207 @@ GmoShapeNote::~GmoShapeNote()
 //---------------------------------------------------------------------------------------
 void GmoShapeNote::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-//    //set selection rectangle as the notehead rectangle
-//	if (m_nNoteHead >= 0)
-//        m_uSelRect = GetNoteHead()->GetBounds();
+    ////DBG: Draw anchor line
+    //pDrawer->begin_path();
+    //pDrawer->fill(Color(0, 0, 0, 0));
+    //pDrawer->stroke(Color(255, 0, 255));
+    //pDrawer->stroke_width(15.0);
+    //pDrawer->move_to(m_origin.x - get_anchor_offset(), m_origin.y);
+    //pDrawer->vline_to(m_origin.y + m_size.height);
+    //pDrawer->end_path();
 
+    draw_leger_lines(pDrawer);
     GmoCompositeShape::on_draw(pDrawer, opt);
-
-//    LUnits uxPos = GetNoteHead()->GetXLeft();
-//	DrawLegerLines(m_nPosOnStaff, uxPos, pPaper, color);
 }
 
+//---------------------------------------------------------------------------------------
+void GmoShapeNote::draw_leger_lines(Drawer* pDrawer)
+{
+    //if note is on staff, nothing to draw
+    if (m_nPosOnStaff > 0 && m_nPosOnStaff < 12)
+        return;
+
+    pDrawer->begin_path();
+    pDrawer->fill(Color(0, 0, 0, 0));
+    pDrawer->stroke(Color(0, 0, 0));
+    pDrawer->stroke_width(m_uLineThickness);
+
+    LUnits xPos = get_notehead_left() - m_uLineOutgoing;
+    LUnits lineLength = get_notehead_width() + 2.0f * m_uLineOutgoing;
+
+    if (m_nPosOnStaff > 11)     //lines at top
+	{
+        LUnits yPos = m_uyStaffTopLine - m_lineSpacing;
+        for (int i=12; i <= m_nPosOnStaff; i+=2)
+        {
+            pDrawer->move_to(xPos, yPos);
+            pDrawer->hline_to(xPos + lineLength);
+            yPos -= m_lineSpacing;
+        }
+    }
+	else    //lines at bottom
+	{
+        LUnits yPos = m_uyStaffTopLine + m_lineSpacing * 5.0f;
+        for (int i=0; i >= m_nPosOnStaff; i-=2)
+        {
+            pDrawer->move_to(xPos, yPos);
+            pDrawer->hline_to(xPos + lineLength);
+            yPos += m_lineSpacing;
+        }
+    }
+
+    pDrawer->end_path();
+}
+
+//---------------------------------------------------------------------------------------
 void GmoShapeNote::add_stem(GmoShapeStem* pShape)
 {
 	add(pShape);
 	m_pStemShape = pShape;
 }
 
+//---------------------------------------------------------------------------------------
 void GmoShapeNote::add_notehead(GmoShapeNotehead* pShape)
 {
 	add(pShape);
 	m_pNoteheadShape = pShape;
 }
 
+//---------------------------------------------------------------------------------------
 void GmoShapeNote::add_flag(GmoShapeFlag* pShape)
 {
 	add(pShape);
+    m_pFlagShape = pShape;
 }
 
-//void GmoShapeNote::AddAccidental(GmoShape* pShape)
-//{
-//	Add(pShape);
-//}
+//---------------------------------------------------------------------------------------
+void GmoShapeNote::add_accidentals(GmoShapeAccidentals* pShape)
+{
+	add(pShape);
+    m_pAccidentalsShape = pShape;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeNote::add_leger_lines_info(int posOnStaff, LUnits yStaffTopLine,
+                                        LUnits lineOutgoing, LUnits lineThickness,
+                                        LUnits lineSpacing)
+{
+	m_nPosOnStaff = posOnStaff;
+	m_uyStaffTopLine = yStaffTopLine;
+    m_uLineOutgoing = lineOutgoing;
+    m_uLineThickness = lineThickness;
+    m_lineSpacing = lineSpacing;
+}
 
 //---------------------------------------------------------------------------------------
 void GmoShapeNote::add_note_in_block(GmoShape* pShape)
 {
 	add(pShape);
 }
+
+//---------------------------------------------------------------------------------------
+void GmoShapeNote::set_stem_down(bool down)
+{
+    set_up_oriented(!down);
+
+    if (!m_pStemShape)
+        return;
+
+    if (down && !m_pStemShape->is_stem_down())
+    {
+        LUnits xLeft = get_notehead_left();
+        LUnits yNote = get_notehead_bottom() - m_pStemShape->get_y_note()
+                       + get_notehead_top();
+        m_pStemShape->set_stem_down(xLeft, yNote);
+    }
+    else if (!down && m_pStemShape->is_stem_down())
+    {
+        LUnits xRight = get_notehead_right();
+        LUnits yNote = get_notehead_bottom() - m_pStemShape->get_y_note()
+                       + get_notehead_top();
+        m_pStemShape->set_stem_up(xRight, yNote);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeNote::set_stem_length(LUnits length)
+{
+    if (m_pStemShape)
+        m_pStemShape->change_length(length);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeNote::get_notehead_width() const
+{
+    return m_pNoteheadShape->get_width();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeNote::get_notehead_left() const
+{
+    return m_pNoteheadShape->get_left();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeNote::get_notehead_right() const
+{
+    return m_pNoteheadShape->get_right();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeNote::get_notehead_height() const
+{
+    return m_pNoteheadShape->get_height();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeNote::get_notehead_top() const
+{
+    return m_pNoteheadShape->get_top();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeNote::get_notehead_bottom() const
+{
+    return m_pNoteheadShape->get_bottom();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeNote::get_stem_width() const
+{
+    return (m_pStemShape ? m_pStemShape->get_width() : 0.0f);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeNote::get_stem_height() const
+{
+    return (m_pStemShape ? m_pStemShape->get_height() : 0.0f);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeNote::get_stem_left() const
+{
+    return (m_pStemShape ? m_pStemShape->get_left() : 0.0f);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeNote::get_stem_y_flag() const
+{
+    return (m_pStemShape ? m_pStemShape->get_y_flag() : 0.0f);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeNote::get_stem_y_note() const
+{
+    return (m_pStemShape ? m_pStemShape->get_y_note() : 0.0f);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoShapeNote::get_stem_extra_length() const
+{
+    return (m_pStemShape ? m_pStemShape->get_extra_length() : 0.0f);
+}
+
 
 //void GmoShapeNote::Shift(LUnits uxIncr, LUnits uyIncr)
 //{
@@ -159,36 +304,6 @@ void GmoShapeNote::add_note_in_block(GmoShape* pShape)
 //	return GetShape(m_nNoteHead);
 //}
 
-//---------------------------------------------------------------------------------------
-LUnits GmoShapeNote::get_notehead_width()
-{
-	if (m_pNoteheadShape)
-		return m_pNoteheadShape->get_width();
-
-	return 0.0f;
-}
-
-//void GmoShapeNote::SetStemLength(LUnits uLength)
-//{
-//	GmoShapeStem* pStem = GetStem();
-//	if (!pStem) return;
-//
-//
-//	if (StemGoesDown())
-//	{
-//		//adjust bottom point
-//		pStem->SetLength(uLength, false);
-//	}
-//	else
-//	{
-//		//adjust top point
-//		pStem->SetLength(uLength, true);
-//	}
-//
-//	RecomputeBounds();
-//
-//}
-//
 //LUnits GmoShapeNote::GetStemThickness()
 //{
 //	GmoShapeStem* pStem = GetStem();
@@ -289,88 +404,45 @@ LUnits GmoShapeNote::get_notehead_width()
 //	pCanvas->MoveNote(this, uFinalPos, nSteps);
 //}
 //
-//void GmoShapeNote::AddLegerLinesInfo(int nPosOnStaff, LUnits uyStaffTopLine)
-//{
-//	m_nPosOnStaff = nPosOnStaff;
-//	m_uyStaffTopLine = uyStaffTopLine;
-//}
 //
-//void GmoShapeNote::DrawLegerLines(int nPosOnStaff, LUnits uxLine, lmPaper* pPaper, Color color)
-//{
-//	lmVStaff* pVStaff = ((lmNote*)m_pOwner)->GetVStaff();
-//	int nStaff = ((lmNote*)m_pOwner)->GetStaffNum();
-//    GmoShape* pNoteHead = GetNoteHead();
-//    LUnits uLineLength = pNoteHead->GetWidth() + pVStaff->TenthsToLogical(8, nStaff);
+
+
+
+//=======================================================================================
+// GmoShapeNote implementation
+//=======================================================================================
+GmoShapeRest::GmoShapeRest(ImoObj* pCreatorImo, int idx, LUnits x, LUnits y, Color color,
+                           LibraryScope& libraryScope)
+    : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_rest, idx, color)
+    , m_libraryScope(libraryScope)
+	, m_pBeamShape(NULL)
+{
+}
+
+//---------------------------------------------------------------------------------------
+GmoShapeRest::~GmoShapeRest()
+{
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeRest::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+//    //base class method is overrided to deal with rests inside a beamed group.
+//    //The beam and the stems are rendered *after* noteheads and rests are rendered.
+//    //Therefore, when rendering the beam there is no option to adjust rests positions
+//    //to fit gracefuly inside the beamed group.
+//    //By overriding this method, if the rest is inside a beamed group and it is
+//    //the first rest in that beamed group, will force the beam shape to compute stems,
+//    //and, therefore, to adjust all rests' positions.
 //
-//    lmDrawLegerLines(nPosOnStaff, uxLine, pVStaff, nStaff, uLineLength, m_uyStaffTopLine,
-//                     pPaper, color);
-//}
 //
+//    //if the rest is inside of a beamed group ensure that beam is layouted
+//    if (m_pBeamShape)
+//        m_pBeamShape->AdjustStemsIfNeeded();
 //
-//
-////-----------------------------------------------------------------------------------------------
-//// global functions
-////-----------------------------------------------------------------------------------------------
-//
-//void lmDrawLegerLines(int nPosOnStaff, LUnits uxLine, lmVStaff* pVStaff, int nStaff,
-//                      LUnits uLineLength, LUnits uyStaffTopLine, lmPaper* pPaper,
-//                      Color color)
-//{
-//	//During note drag or while entering notes with mouse, it is necessary to display new leger
-//    //lines overlayed on the drag or mouse cursor image. This methos does it.
-//    //Parameters:
-//    //  nPosOnStaff - notehead position on staff (line/space: 0-first ledger line below staff)
-//    //  uLineLength - lenght of ledger lines
-//    //  uyStaffTopLine - y position of staff top line (5th line)
-//
-//    //if note is on staff, nothing to draw
-//    if (nPosOnStaff > 0 && nPosOnStaff < 12)
-//        return;
-//
-//    LUnits uThick = pVStaff->GetStaffLineThick(nStaff);
-//    uxLine -= pVStaff->TenthsToLogical(4, nStaff);
-//
-//	//wxLogMessage(_T("[GmoShapeNot/lmDrawLegerLines] uxLine=%.2f"), uxLine );
-//
-//	//force to paint lines of at least 1 px
-//	LUnits uOnePixel = pPaper->DeviceToLogicalY(1);
-//	uThick = uOnePixel;
-//
-//    if (nPosOnStaff > 11)
-//	{
-//        // pos on staff > 11  ==> lines at top
-//        LUnits uDsplz = pVStaff->GetOptionLong(_T("Staff.UpperLegerLines.Displacement"));
-//        LUnits uyStart = uyStaffTopLine - pVStaff->TenthsToLogical(uDsplz, nStaff);
-//        for (int i=12; i <= nPosOnStaff; i++)
-//        {
-//            if (i % 2 == 0) {
-//                int nTenths = 5 * (i - 10);
-//                LUnits uyPos = uyStart - pVStaff->TenthsToLogical(nTenths, nStaff);
-//				//draw the line
-//				pPaper->SolidLine(uxLine, uyPos, uxLine + uLineLength, uyPos,
-//								  uThick, lm_eEdgeNormal, color);
-//           }
-//        }
-//
-//    }
-//	else
-//	{
-//        // nPosOnStaff < 1  ==>  lines at bottom
-//        for (int i=nPosOnStaff; i <= 0; i++)
-//        {
-//            if (i % 2 == 0)
-//			{
-//                int nTenths = 5 * (10 - i);
-//                LUnits uyPos = uyStaffTopLine + pVStaff->TenthsToLogical(nTenths, nStaff);
-//				//draw the line
-//				pPaper->SolidLine(uxLine, uyPos, uxLine + uLineLength, uyPos,
-//								  uThick, lm_eEdgeNormal, color);
-//				//wxLogMessage(_T("[lmDrawLegerLines] Line from (%.2f, %.2f) to (%.2f, %.2f)"),
-//				//	uxLine, uyPos, uxLine + uLineLength, uyPos);
-//            }
-//        }
-//    }
-//
-//}
+//    //now, we can safely render the rest
+    GmoCompositeShape::on_draw(pDrawer, opt);
+}
+
 
 }  //namespace lomse

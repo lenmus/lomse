@@ -1,0 +1,13 @@
+(score
+   (vers 1.6)(language en iso-8859-1)
+   (instrument
+      (musicData
+         (clef G)
+         (key C)
+         (n e4 q)
+         (chord (n g4 o)(n a4 o)(n c5 o))
+         (chord (n f4 o (stem down))(n a4 o (stem down))(n b4 o (stem down)))       
+      )
+   )
+)
+

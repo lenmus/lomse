@@ -1,0 +1,15 @@
+(score
+   (vers 1.6)(language en iso-8859-1)
+   //(opt Render.SpacingFactor 1.5)
+   (instrument (staves 2)
+      (musicData
+         (clef G p1)
+         (clef G p2)
+         (n a4 t g+ p1)(n a4 t)(n a4 t)(n a4 t)(n a4 e)(n a4 e)(n a4 e g-)
+         (goBack start)
+         (n a4 e g+ p2)(n a4 e)(n a4 e)(n a4 e g-)
+         (barline end)
+      )
+   )
+)
+

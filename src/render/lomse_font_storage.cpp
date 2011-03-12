@@ -26,17 +26,20 @@
 
 #include "lomse_font_storage.h"
 
+#include "lomse_config.h"
+
 using namespace agg;
 
 namespace lomse
 {
 
+//=======================================================================================
 // FontStorage implementation
-//---------------------------------------------------------------------------------------
-
-FontStorage::FontStorage()
+//=======================================================================================
+FontStorage::FontStorage(pt2GetFontFunction ptr)
     : m_fontEngine()
     , m_fontCacheManager(m_fontEngine)
+    , m_pGetFontFunction(ptr)
     , m_fontHeight(14.0)
     , m_fontWidth(14.0)
     , m_fHinting(false)
@@ -129,7 +132,7 @@ bool FontStorage::select_raster_font(const std::string& fontName, double height,
                                       bool fBold, bool fItalic)
 {
     //Returns true if any error
-    FontSelector fs;
+    FontSelector fs(m_pGetFontFunction);
     string fontFile = fs.find_font(fontName, fBold, fItalic);
     return set_font(fontFile, height, k_raster_font_cache);
 }
@@ -139,7 +142,7 @@ bool FontStorage::select_vector_font(const std::string& fontName, double height,
                                       bool fBold, bool fItalic)
 {
     //Returns true if any error
-    FontSelector fs;
+    FontSelector fs(m_pGetFontFunction);
     string fontFile = fs.find_font(fontName, fBold, fItalic);
     return set_font(fontFile, height, k_vector_font_cache);
 }
@@ -189,35 +192,52 @@ bool FontStorage::select_vector_font(const std::string& fontName, double height,
 
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // FontSelector implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 std::string FontSelector::find_font(const std::string& name, bool fBold, bool fItalic)
 {
-    //TODO: this is platform specific. Should be moved there, as it MUST return
-    //not only font filename but also its full path.
+    //Returns the font filename, including its full path.
+    //As this is platform specific, it has been implemented by invoking a
+    //platform service (via callback).
+    //For default fonts, hardcoded path is returned
 
-    //Code just for being able to continue development
-    if (name == "Times New Roman")
+    string fullpath = LOMSE_FONTS_PATH;
+
+    if (name == "LenMus basic")
     {
-        if (fItalic && fBold)
-            return "timesbi.ttf";
-        else if (fItalic)
-            return "timesi.ttf";
-        else if (fBold)
-            return "timesbd.ttf";
-        else
-            return "times.ttf";
+        fullpath += "lmbasic2.ttf";
+        return fullpath;
     }
 
-    else if (name == "LenMus basic")
-        return "lmbasic2.ttf";
+    else if (name == "Liberation serif")
+    {
+        if (fBold && fItalic)
+            fullpath += "LiberationSerif-BoldItalic.ttf";
+        else if (fBold)
+            fullpath += "LiberationSerif-Bold.ttf";
+        else if (fItalic)
+            fullpath += "LiberationSerif-Italic.ttf";
+        else
+            fullpath += "LiberationSerif-Regular.ttf";
+        return fullpath;
+    }
 
-    else if (name == "Arial")
-        return "arial.ttf";
+    else if (name == "Liberation sans")
+    {
+        if (fBold && fItalic)
+            fullpath += "LiberationSans-BoldItalic.ttf";
+        else if (fBold)
+            fullpath += "LiberationSans-Bold.ttf";
+        else if (fItalic)
+            fullpath += "LiberationSans-Italic.ttf";
+        else
+            fullpath += "LiberationSans-Regular.ttf";
+        return fullpath;
+    }
 
     else
-        return "times.ttf";
+        return m_pGetFontFunction(name, fBold, fItalic);
 }
 
 

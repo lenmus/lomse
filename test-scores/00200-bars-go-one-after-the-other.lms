@@ -1,0 +1,13 @@
+(score
+   (vers 1.6)(language en iso-8859-1)
+   (instrument
+      (musicData
+         (clef treble)
+         (n f4 q)
+         (barline)
+         (n c5 q)
+         (barline end)
+      )
+   )
+)
+

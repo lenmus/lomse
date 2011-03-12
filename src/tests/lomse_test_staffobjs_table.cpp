@@ -437,6 +437,39 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsAssigLineToTime)
+    {
+        LdpParser parser(cout, m_pLdpFactory);
+        SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 1.6) (instrument (staves 2)(musicData "
+            "(clef G p1)(clef F4 p2)(key D)(time 2 4)(n c4 q v2 p1)(n d4 e.)(n d4 s v3 p2)(n e4 h)))) ))" );
+        Analyser a(cout, m_pLdpFactory);
+        InternalModel* pIModel = a.analyse_tree(tree);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        //pColStaffObjs->dump();
+        CHECK( pColStaffObjs->num_entries() == 10 );
+                    //(clef G p1)
+        ++it;       //(clef F4 p2)
+        ++it;       //(key D)
+        ++it;       //(key D)
+        ++it;       //(time 2 4)
+        CHECK( (*it)->imo_object()->is_time_signature() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;       //(time 2 4)
+        CHECK( (*it)->imo_object()->is_time_signature() == true );
+        CHECK( (*it)->line() == 1 );
+        ++it;       //(n c4 q v2 p1)
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 0 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsFullExample)
     {
         LdpParser parser(cout, m_pLdpFactory);
@@ -456,7 +489,7 @@ SUITE(ColStaffObjsTest)
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
         ColStaffObjs::iterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
-        CHECK( pColStaffObjs->num_entries() == 24 );
+        CHECK( pColStaffObjs->num_entries() == 26 );
         //CHECK( (*it)->to_string() == "(clef G p1)" );
         CHECK( (*it)->imo_object()->is_clef() == true );
         CHECK( (*it)->num_instrument() == 0 );
@@ -494,6 +527,13 @@ SUITE(ColStaffObjsTest)
         ++it;
         //CHECK( (*it)->to_string() == "(key D)" );
         CHECK( (*it)->imo_object()->is_key_signature() == true );
+        CHECK( (*it)->num_instrument() == 0 );
+        CHECK( (*it)->time() == 0.0f );
+        CHECK( (*it)->line() == 1 );
+        CHECK( (*it)->staff() == 1 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(time 2 4)" );
+        CHECK( (*it)->imo_object()->is_time_signature() == true );
         CHECK( (*it)->num_instrument() == 0 );
         CHECK( (*it)->time() == 0.0f );
         CHECK( (*it)->line() == 1 );
@@ -542,6 +582,13 @@ SUITE(ColStaffObjsTest)
         ++it;
         //CHECK( (*it)->to_string() == "(key D)" );
         CHECK( (*it)->imo_object()->is_key_signature() == true );
+        CHECK( (*it)->num_instrument() == 1 );
+        CHECK( (*it)->time() == 0.0f );
+        CHECK( (*it)->line() == 3 );
+        CHECK( (*it)->staff() == 1 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(time 2 4)" );
+        CHECK( (*it)->imo_object()->is_time_signature() == true );
         CHECK( (*it)->num_instrument() == 1 );
         CHECK( (*it)->time() == 0.0f );
         CHECK( (*it)->line() == 3 );
@@ -719,6 +766,76 @@ SUITE(ColStaffObjsTest)
         CHECK( (*it)->line() == 1 );
         ++it;
         CHECK( it == pColStaffObjs->end() );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjs_Chord)
+    {
+        LdpParser parser(cout, m_pLdpFactory);
+        SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 1.6) (instrument (musicData "
+            "(clef G)(chord (n c4 q)(n e4 q)(n g4 q))"
+            "))) ))" );
+        Analyser a(cout, m_pLdpFactory);
+        InternalModel* pIModel = a.analyse_tree(tree);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs::iterator it = pColStaffObjs->begin();
+
+        //pColStaffObjs->dump();
+        CHECK( pColStaffObjs->num_entries() == 4 );
+
+        //(clef G)
+        CHECK( (*it)->imo_object()->is_clef() == true );
+        CHECK( (*it)->segment() == 0 );
+        CHECK( (*it)->time() == 0.0f );
+        ++it;
+
+        //(n c4 q)
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->segment() == 0 );
+        CHECK( (*it)->time() == 0.0f );
+        ++it;
+
+        //(n e4 q)
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->segment() == 0 );
+        CHECK( (*it)->time() == 0.0f );
+        ++it;
+
+        //(n g4 q)
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->segment() == 0 );
+        CHECK( (*it)->time() == 0.0f );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjs_NoMusicData)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLdpFactory);
+        stringstream expected;
+        expected << "Line 0. instrument: missing mandatory element 'musicData'." << endl;
+        SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content (score "
+            "(vers 1.6) (instrument )) ))" );
+        Analyser a(errormsg, m_pLdpFactory);
+        InternalModel* pIModel = a.analyse_tree(tree);
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pColStaffObjs != NULL );
+        CHECK( pColStaffObjs->num_entries() == 0 );
 
         delete tree->get_root();
         delete pIModel;

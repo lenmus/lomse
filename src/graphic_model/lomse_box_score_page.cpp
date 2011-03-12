@@ -218,18 +218,14 @@ GmoBoxScorePage::~GmoBoxScorePage()
 //	AddShapesToLayers(this);
 //}
 
-GmoBoxSystem* GmoBoxScorePage::add_system(int iSystem)  //, LUnits uxPos, LUnits uyPos)
+void GmoBoxScorePage::add_system(GmoBoxSystem* pSystem, int iSystem)
 {
     //Update references
     if (m_nFirstSystem == -1)
         m_nFirstSystem = iSystem;
     m_nLastSystem = iSystem;
 
-    //create the system
-    GmoBoxSystem* pSystem = new GmoBoxSystem();  //TODO, m_nNumPage, iSystem, uxPos, uyPos, fFirstOfPage);
     add_child_box(pSystem);
-
-    return pSystem;
 }
 
 GmoBoxSystem* GmoBoxScorePage::get_system(int iSystem)

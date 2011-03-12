@@ -85,14 +85,14 @@ public:
     int get_num_instruments();
     ImoClef* get_clef_for_instr_staff(int iInstr, int iStaff);
     ImoClef* get_applicable_clef();
-    ImoKeySignature* get_key_for_instrument(int iInstr);
+    ImoKeySignature* get_key_for_instr_staff(int iInstr, int iStaff);
     ImoKeySignature* get_applicable_key();
     int get_applicable_clef_type();
     int get_clef_type_for_instr_staff(int iInstr, int iStaff);
     int get_applicable_key_type();
-    int get_key_type_for_instrument(int iInstr);
+    int get_key_type_for_instr_staff(int iInstr, int iStaff);
     ColStaffObjsEntry* get_clef_entry_for_instr_staff(int iInstr, int iStaff);
-    ColStaffObjsEntry* get_key_entry_for_instrument(int iInstr);
+    ColStaffObjsEntry* get_key_entry_for_instr_staff(int iInstr, int iStaff);
 
 //    int get_time_signature_for_instrument(int iInstr);
 

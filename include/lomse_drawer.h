@@ -40,6 +40,17 @@ namespace lomse
 //forward declarations
 class FontStorage;
 
+//---------------------------------------------------------------------------------------
+//rendering options. Mainly for debugging
+enum ERenderOptions
+{
+    k_option_draw_box_doc_page_content=0,
+    k_option_draw_box_score_page,
+    k_option_draw_box_system,
+    k_option_draw_box_slice,
+    k_option_draw_box_slice_instr,
+};
+
 
 //---------------------------------------------------------------------------------------
 // RenderOptions: struct to contain renderization options for a document

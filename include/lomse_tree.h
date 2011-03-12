@@ -200,6 +200,7 @@ public:
 	virtual void append_child(T* child);
     virtual int get_num_children();
     virtual T* get_child(int i);
+    virtual void remove_child(T* child);
 
 
     class children_iterator
@@ -317,6 +318,31 @@ T* NodeInTree<T>::get_child(int i)
     }
     else
         throw std::runtime_error( "[NodeInTree<T>::get_child]. Num child greater than available children" );
+}
+
+//---------------------------------------------------------------------------------------
+template <class T>
+void NodeInTree<T>::remove_child(T* nodeToErase)
+{
+    //links in previous sibling
+    if (nodeToErase->get_prev_sibling())
+    {
+        T* prevSibling = nodeToErase->get_prev_sibling();
+        prevSibling->set_next_sibling( nodeToErase->get_next_sibling() );
+    }
+
+    //links in next sibling
+    if (nodeToErase->get_next_sibling())
+    {
+        T* nextSibling = nodeToErase->get_next_sibling();
+        nextSibling->set_prev_sibling( nodeToErase->get_prev_sibling() );
+    }
+
+    //links in parent
+    if (get_first_child() == nodeToErase)
+        set_first_child( nodeToErase->get_next_sibling() );
+    if (get_last_child() == nodeToErase)
+        set_last_child( nodeToErase->get_prev_sibling() );
 }
 
 //---------------------------------------------------------------------------------------

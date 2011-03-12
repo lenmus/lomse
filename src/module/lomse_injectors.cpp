@@ -54,7 +54,7 @@ LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
     if (!m_pDoorway)
     {
         m_pNullDoorway = new LomseDoorway();
-        m_pNullDoorway->init_library(LomseDoorway::k_platform_win32);
+        m_pNullDoorway->init_library(k_pix_format_rgba32, 96, false);
         m_pDoorway = m_pNullDoorway;
     }
 }
@@ -80,7 +80,7 @@ LdpFactory* LibraryScope::ldp_factory()
 FontStorage* LibraryScope::font_storage()
 {
     if (!m_pFontStorage)
-        m_pFontStorage = new FontStorage();
+        m_pFontStorage = new FontStorage( m_pDoorway->get_font_callback() );
     return m_pFontStorage;
 }
 
@@ -88,6 +88,12 @@ FontStorage* LibraryScope::font_storage()
 double LibraryScope::get_screen_ppi() const
 {
     return m_pDoorway->get_screen_ppi();
+}
+
+//---------------------------------------------------------------------------------------
+int LibraryScope::get_pixel_format() const
+{
+    return m_pDoorway->get_pixel_format();
 }
 
 ////---------------------------------------------------------------------------------------
@@ -216,6 +222,7 @@ Task* Injector::inject_Task(int taskType, Interactor* pIntor)
 {
     return TaskFactory::create_task(taskType, pIntor);
 }
+
 
 
 }  //namespace lomse

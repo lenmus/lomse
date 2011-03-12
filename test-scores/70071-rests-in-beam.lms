@@ -1,0 +1,12 @@
+(score
+    (vers 1.6)
+    (instrument 
+        (musicData 
+            (clef G)
+            (n g3 e g+)(r e)(n b3 e g-)
+            (n c6 e g+)(r e)(n e5 e g-)
+            (barline end)
+        )
+    )
+)
+

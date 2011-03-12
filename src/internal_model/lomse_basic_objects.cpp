@@ -55,7 +55,7 @@ DtoBarline::DtoBarline(int barlineType)
 
 DtoFermata::DtoFermata()
     : DtoAuxObj()
-    , m_placement(ImoFermata::k_above)
+    , m_placement(k_placement_default)
     , m_symbol(ImoFermata::k_normal)
 {
 }

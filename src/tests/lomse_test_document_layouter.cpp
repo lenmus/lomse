@@ -32,6 +32,7 @@
 #include "lomse_instrument_engraver.h"
 #include "lomse_internal_model.h"
 #include "lomse_calligrapher.h"
+#include "lomse_score_meter.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -499,7 +500,8 @@ SUITE(InstrEngraverTest)
     TEST_FIXTURE(InstrEngraverTestFixture, InstrEngraver_MeasureIndents_NoBracket)
     {
         ImoInstrument instr;
-        InstrumentEngraver engraver(&instr, NULL, m_libraryScope);
+        ScoreMeter meter(1, 1, 180.0f);
+        InstrumentEngraver engraver(m_libraryScope, &meter, &instr, NULL);
         engraver.measure_indents();
         CHECK( engraver.get_indent_first() == 0.0f );
         CHECK( engraver.get_indent_other() == 0.0f );
@@ -509,7 +511,8 @@ SUITE(InstrEngraverTest)
     {
         ImoInstrument instr;
         instr.add_staff();
-        InstrumentEngraver engraver(&instr, NULL, m_libraryScope);
+        ScoreMeter meter(1, 1, 180.0f);
+        InstrumentEngraver engraver(m_libraryScope, &meter, &instr, NULL);
         engraver.measure_indents();
         CHECK( engraver.get_indent_first() > 0.0f );
         CHECK( engraver.get_indent_other() > 0.0f );

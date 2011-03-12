@@ -24,6 +24,7 @@
 #include "lomse_engraving_options.h"
 #include "lomse_shape_barline.h"
 #include "lomse_box_slice_instr.h"
+#include "lomse_score_meter.h"
 
 
 namespace lomse
@@ -32,26 +33,26 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // BarlineEngraver implementation
 //---------------------------------------------------------------------------------------
-BarlineEngraver::BarlineEngraver(LibraryScope& libraryScope)
-    : m_libraryScope(libraryScope)
+BarlineEngraver::BarlineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
+    : Engraver(libraryScope, pScoreMeter)
 {
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* BarlineEngraver::create_shape(ImoBarline* pBarline, LUnits xPos, LUnits yTop,
-                                        LUnits yBottom, LUnits lineSpacing)
+GmoShape* BarlineEngraver::create_shape(ImoBarline* pBarline, int iInstr, LUnits xPos,
+                                        LUnits yTop, LUnits yBottom)
 {
     m_nBarlineType = pBarline->get_type();
-    m_lineSpacing = lineSpacing;
-    LUnits thinLineWidth = tenths_to_logical(LOMSE_THIN_LINE_WIDTH);    // thin line width
-    LUnits thickLineWidth = tenths_to_logical(LOMSE_THICK_LINE_WIDTH);  // thick line width
-    LUnits spacing = tenths_to_logical(LOMSE_LINES_SPACING);            // space between lines: 4 tenths
-    LUnits radius = tenths_to_logical(LOMSE_BARLINE_RADIOUS);           // dots radius: 2 tenths
+    LUnits thinLineWidth = m_pMeter->tenths_to_logical(LOMSE_THIN_LINE_WIDTH, iInstr, 0);
+    LUnits thickLineWidth = m_pMeter->tenths_to_logical(LOMSE_THICK_LINE_WIDTH, iInstr, 0);
+    LUnits spacing = m_pMeter->tenths_to_logical(LOMSE_LINES_SPACING, iInstr, 0);
+    LUnits radius = m_pMeter->tenths_to_logical(LOMSE_BARLINE_RADIOUS, iInstr, 0);
 
     //force selection rectangle to have at least a width of half line (5 tenths)
-    LUnits uMinWidth = tenths_to_logical(5.0f);
+    LUnits uMinWidth = m_pMeter->tenths_to_logical(5.0f, iInstr, 0);
 
-    GmoShape* pShape = new GmoShapeBarline(0, m_nBarlineType, xPos, yTop, yBottom,
+    GmoShape* pShape = new GmoShapeBarline(pBarline, 0, m_nBarlineType, xPos, yTop,
+                                           yBottom,
                                            thinLineWidth, thickLineWidth, spacing,
                                            radius, Color(0,0,0), uMinWidth);
 

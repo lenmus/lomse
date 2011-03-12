@@ -811,4 +811,76 @@ SUITE(TreeTest)
         DeleteTestData();
     }
 
+    TEST_FIXTURE(TreeTestFixture, RemomeChildAtMiddle)
+    {
+        CreateTree();
+        Tree<Element>::depth_first_iterator it = m_tree.begin();
+        ++it;   //B
+        ++it;   //C
+        ++it;   //D
+        ++it;   //E
+        ++it;   //F
+        ++it;   //G
+        ++it;   //H
+        ++it;   //I
+        Element* curNode = *it;
+        curNode->remove_child(o);
+
+        stringstream path;
+        for (it=m_tree.begin(); it != m_tree.end(); ++it)
+            path << (*it)->m_value;
+        //cout << path.str() << endl;
+        CHECK( path.str() == "ABCDEFGHIJKLMNPQRST" );
+
+        DeleteTestData();
+    }
+
+    TEST_FIXTURE(TreeTestFixture, RemomeChildAtStart)
+    {
+        CreateTree();
+        Tree<Element>::depth_first_iterator it = m_tree.begin();
+        ++it;   //B
+        ++it;   //C
+        ++it;   //D
+        ++it;   //E
+        ++it;   //F
+        ++it;   //G
+        ++it;   //H
+        ++it;   //I
+        Element* curNode = *it;
+        curNode->remove_child(j);
+
+        stringstream path;
+        for (it=m_tree.begin(); it != m_tree.end(); ++it)
+            path << (*it)->m_value;
+        //cout << path.str() << endl;
+        CHECK( path.str() == "ABCDEFGHIOPQRST" );
+
+        DeleteTestData();
+    }
+
+    TEST_FIXTURE(TreeTestFixture, RemoveChildAtEnd)
+    {
+        CreateTree();
+        Tree<Element>::depth_first_iterator it = m_tree.begin();
+        ++it;   //B
+        ++it;   //C
+        ++it;   //D
+        ++it;   //E
+        ++it;   //F
+        ++it;   //G
+        ++it;   //H
+        ++it;   //I
+        Element* curNode = *it;
+        curNode->remove_child(p);
+
+        stringstream path;
+        for (it=m_tree.begin(); it != m_tree.end(); ++it)
+            path << (*it)->m_value;
+        //cout << path.str() << endl;
+        CHECK( path.str() == "ABCDEFGHIJKLMNO" );
+
+        DeleteTestData();
+    }
+
 }

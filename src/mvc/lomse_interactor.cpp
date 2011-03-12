@@ -274,6 +274,63 @@ int Interactor::page_at_screen_point(double x, double y)
     return 0;
 }
 
+//---------------------------------------------------------------------------------------
+void Interactor::zoom_in(Pixels x, Pixels y)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->zoom_in(x, y);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::zoom_out(Pixels x, Pixels y)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->zoom_out(x, y);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_rendering_option(int option, bool value)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->set_rendering_option(option, value);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_update_window_callbak(void* pThis, void (*pt2Func)(void* pObj)) 
+{ 
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->set_update_window_callbak(pThis, pt2Func);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj)) 
+{ 
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->set_force_redraw_callbak(pThis, pt2Func);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_start_timer_callbak(void* pThis, void (*pt2Func)(void* pObj))
+{ 
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->set_start_timer_callbak(pThis, pt2Func);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_elapsed_time_callbak(void* pThis, double (*pt2Func)(void* pObj))
+{ 
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->set_elapsed_time_callbak(pThis, pt2Func);
+}
+
+
 
 //=======================================================================================
 // EditInteractor implementation

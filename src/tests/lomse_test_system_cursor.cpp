@@ -68,7 +68,7 @@ SUITE(SystemCursorTest)
 
         CHECK( cursor.get_num_instruments() == 1 );
         CHECK( cursor.get_clef_for_instr_staff(0, 0) == NULL );
-        CHECK( cursor.get_key_type_for_instrument(0) == ImoKeySignature::k_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 0) == ImoKeySignature::k_undefined );
     }
 
     TEST_FIXTURE(SystemCursorTestFixture, SystemCursor_InitiallyNoPrologTwoInstr)
@@ -89,8 +89,10 @@ SUITE(SystemCursorTest)
         CHECK( cursor.get_clef_for_instr_staff(0, 1) == NULL );
         CHECK( cursor.get_clef_for_instr_staff(1, 0) == NULL );
         CHECK( cursor.get_clef_for_instr_staff(1, 1) == NULL );
-        CHECK( cursor.get_key_type_for_instrument(0) == ImoKeySignature::k_undefined );
-        CHECK( cursor.get_key_type_for_instrument(1) == ImoKeySignature::k_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 0) == ImoKeySignature::k_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 1) == ImoKeySignature::k_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(1, 0) == ImoKeySignature::k_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(1, 1) == ImoKeySignature::k_undefined );
     }
 
     TEST_FIXTURE(SystemCursorTestFixture, SystemCursor_PrologUpdateClef)
@@ -104,7 +106,7 @@ SUITE(SystemCursorTest)
         cursor.move_next();     //points to key
 
         CHECK( cursor.get_applicable_clef_type() == ImoClef::k_G2 );
-        CHECK( cursor.get_key_type_for_instrument(0) == ImoKeySignature::k_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 0) == ImoKeySignature::k_undefined );
     }
 
     TEST_FIXTURE(SystemCursorTestFixture, SystemCursor_PrologUpdateKey)
@@ -119,7 +121,7 @@ SUITE(SystemCursorTest)
         cursor.move_next();     //points to first note
 
         CHECK( cursor.get_applicable_clef_type() == ImoClef::k_G2 );
-        CHECK( cursor.get_key_type_for_instrument(0) == ImoKeySignature::a );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 0) == ImoKeySignature::k_a );
     }
 
     TEST_FIXTURE(SystemCursorTestFixture, SystemCursor_PrologUpdateClefKey)
@@ -147,8 +149,10 @@ SUITE(SystemCursorTest)
         CHECK( cursor.get_clef_type_for_instr_staff(0, 1) == ImoClef::k_undefined );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 0) == ImoClef::k_undefined );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 1) == ImoClef::k_undefined );
-        CHECK( cursor.get_key_type_for_instrument(0) == ImoKeySignature::D );
-        CHECK( cursor.get_key_type_for_instrument(1) == ImoKeySignature::k_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 0) == ImoKeySignature::k_D );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 1) == ImoKeySignature::k_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(1, 0) == ImoKeySignature::k_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(1, 1) == ImoKeySignature::k_undefined );
 
         cursor.move_next();     //points to instr0 staff0   (n f4 w p1)
         cursor.move_next();     //points to instr0 staff1   (clef F4 p2)
@@ -158,10 +162,14 @@ SUITE(SystemCursorTest)
         CHECK( cursor.get_clef_type_for_instr_staff(0, 1) == ImoClef::k_F4 );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 0) == ImoClef::k_undefined );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 1) == ImoClef::k_undefined );
-        CHECK( cursor.get_key_type_for_instrument(0) == ImoKeySignature::D );
-        CHECK( cursor.get_key_type_for_instrument(1) == ImoKeySignature::k_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 0) == ImoKeySignature::k_D );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 1) == ImoKeySignature::k_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(1, 0) == ImoKeySignature::k_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(1, 1) == ImoKeySignature::k_undefined );
 
+        cursor.move_next();     //points to instr0 staff1   [(time 2 4)]
         cursor.move_next();     //points to instr0 staff1   (n c3 e g+ p2)
+        CHECK( cursor.get_key_type_for_instr_staff(0, 1) == ImoKeySignature::k_D );
         cursor.move_next();     //points to instr1 staff0   (clef G p1)
         cursor.move_next();     //points to instr1 staff0   (key D)
         cursor.move_next();     //points to instr1 staff0   (time 2 4)
@@ -173,10 +181,14 @@ SUITE(SystemCursorTest)
         CHECK( cursor.get_clef_type_for_instr_staff(0, 1) == ImoClef::k_F4 );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 0) == ImoClef::k_G2 );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 1) == ImoClef::k_F4 );
-        CHECK( cursor.get_key_type_for_instrument(0) == ImoKeySignature::D );
-        CHECK( cursor.get_key_type_for_instrument(1) == ImoKeySignature::D );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 0) == ImoKeySignature::k_D );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 1) == ImoKeySignature::k_D );
+        CHECK( cursor.get_key_type_for_instr_staff(1, 0) == ImoKeySignature::k_D );
+        CHECK( cursor.get_key_type_for_instr_staff(1, 1) == ImoKeySignature::k_undefined );
 
+        cursor.move_next();     //points to instr1 staff1   [(time 2 4)]
         cursor.move_next();     //points to instr1 staff1   (n c3 q p2)
+        CHECK( cursor.get_key_type_for_instr_staff(1, 1) == ImoKeySignature::k_D );
         cursor.move_next();     //points to instr0 staff1   (n c3 e g-)
         cursor.move_next();     //points to instr0 staff1   (n d3 q)
         cursor.move_next();     //points to instr1 staff1   (n c3 e)
@@ -187,8 +199,10 @@ SUITE(SystemCursorTest)
         CHECK( cursor.get_clef_type_for_instr_staff(0, 1) == ImoClef::k_F4 );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 0) == ImoClef::k_F4 );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 1) == ImoClef::k_F4 );
-        CHECK( cursor.get_key_type_for_instrument(0) == ImoKeySignature::D );
-        CHECK( cursor.get_key_type_for_instrument(1) == ImoKeySignature::D );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 0) == ImoKeySignature::k_D );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 1) == ImoKeySignature::k_D );
+        CHECK( cursor.get_key_type_for_instr_staff(1, 0) == ImoKeySignature::k_D );
+        CHECK( cursor.get_key_type_for_instr_staff(1, 1) == ImoKeySignature::k_D );
 
         cursor.move_next();     //points to instr1 staff1   (clef G p2)
         cursor.move_next();     //points to instr1 staff1   (clef F p2)
@@ -198,8 +212,10 @@ SUITE(SystemCursorTest)
         CHECK( cursor.get_clef_type_for_instr_staff(0, 1) == ImoClef::k_F4 );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 0) == ImoClef::k_F4 );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 1) == ImoClef::k_F4 );
-        CHECK( cursor.get_key_type_for_instrument(0) == ImoKeySignature::D );
-        CHECK( cursor.get_key_type_for_instrument(1) == ImoKeySignature::D );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 0) == ImoKeySignature::k_D );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 1) == ImoKeySignature::k_D );
+        CHECK( cursor.get_key_type_for_instr_staff(1, 0) == ImoKeySignature::k_D );
+        CHECK( cursor.get_key_type_for_instr_staff(1, 1) == ImoKeySignature::k_D );
     }
 
     TEST_FIXTURE(SystemCursorTestFixture, SystemCursor_GetApplicableClef)
@@ -229,6 +245,7 @@ SUITE(SystemCursorTest)
 
         CHECK( cursor.get_applicable_clef_type() == ImoClef::k_F4 );
 
+        cursor.move_next();     //points to instr0 staff1   [(time 2 4)]
         cursor.move_next();     //points to instr0 staff1   (n c3 e g+ p2)
         cursor.move_next();     //points to instr1 staff0   (clef G p1)
         cursor.move_next();     //points to instr1 staff0   (key D)
@@ -239,6 +256,7 @@ SUITE(SystemCursorTest)
         cursor.move_next();     //points to instr1 staff0   (n f4 q. p1)
         cursor.move_next();     //points to instr1 staff1   (clef F4 p2)
         cursor.move_next();     //points to instr1 staff1   [(key D)]
+        cursor.move_next();     //points to instr0 staff1   [(time 2 4)]
         cursor.move_next();     //points to instr1 staff1   (n c3 q p2)
         cursor.move_next();     //points to instr0 staff1   (n c3 e g-)
         cursor.move_next();     //points to instr0 staff1   (n d3 q)

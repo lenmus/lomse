@@ -31,11 +31,12 @@ namespace lomse
 //#define lmNO_LEDGER_LINES   -100000.0f
 
 //---------------------------------------------------------------------------------------
-GmoShapeStaff::GmoShapeStaff(int idx, ImoStaffInfo* pStaff, int iStaff,
-                             LUnits width, Color color)
-    : GmoSimpleShape(GmoObj::k_shape_staff, idx, color)
+GmoShapeStaff::GmoShapeStaff(ImoObj* pCreatorImo, int idx, ImoStaffInfo* pStaff,
+                             int iStaff, LUnits width, Color color)
+    : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_staff, idx, color)
     , m_pStaff(pStaff)
 	, m_iStaff(iStaff)
+    , m_lineThickness( m_pStaff->get_line_thickness() )
 {
     //bounding box
     set_width(width);
@@ -64,7 +65,7 @@ void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt)
     Color color = determine_color_to_use(opt);
     pDrawer->begin_path();
     pDrawer->stroke(color);
-    pDrawer->stroke_width( m_pStaff->get_line_thickness() );
+    pDrawer->stroke_width(m_lineThickness);
     for (int iL=0; iL < m_pStaff->get_num_lines(); iL++ )
 	{
         pDrawer->move_to(xStart, yPos);

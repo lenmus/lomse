@@ -1,0 +1,23 @@
+(score
+   (vers 1.6)
+   (instrument
+      (musicData 
+        (clef F4)
+        (key c)
+        (time 4 4)
+        (chord (n d3 q p1)(n f3 q)(n g3 q)(n b3 q))
+        (chord (n d2 q p1)(n f2 q)(n g2 q)(n b2 q))
+        (chord (n g3 q p1)(n c4 q)(n e4 q)(n g4 q))
+        (chord (n d3 q)(n g3 q)(n =b3 q))
+        (barline)
+        
+        (chord (n =d3 q)(n f3 q)(n =b3 q)(n =d4 q))
+        (chord (n =e3 q)(n g3 q)(n -b3 q)(n c4 q)(n =e4 q))
+        (chord (n f3 q)(n a3 q)(n -d4 q)(n f4 q))
+        (chord (n +f3 q)(n c4 q)(n d4 q))
+        (chord (n d2 q)(n =a2 q)(n d3 q))
+        (barline)
+      )
+   )
+)
+

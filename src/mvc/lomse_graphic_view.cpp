@@ -83,8 +83,16 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_vxOrg(0)
     , m_vyOrg(0)
     , m_fSelRectVisible(false)
+
+    , m_pFunc_update_window(NULL)
+    , m_pFunc_force_redraw(NULL)
+    , m_pFunc_start_timer(NULL)
+    , m_pFunc_elapsed_time(NULL)
+    , m_pObj_update_window(NULL)
+    , m_pObj_force_redraw(NULL)
+    , m_pObj_start_timer(NULL)
+    , m_pObj_elapsed_time(NULL)
 {
-    m_pDoorway = libraryScope.platform_interface();
 }
 
 //---------------------------------------------------------------------------------------
@@ -101,7 +109,7 @@ void GraphicView::new_viewport(Pixels x, Pixels y)
     m_transform.tx = double(x);
     m_transform.ty = double(y);
 
-    m_pDoorway->force_redraw();
+    do_force_redraw();
 }
 
 //---------------------------------------------------------------------------------------
@@ -119,7 +127,7 @@ void GraphicView::on_resize(Pixels vx, Pixels vy)
 //---------------------------------------------------------------------------------------
 void GraphicView::update_window()
 {
-    m_pDoorway->update_window();
+    do_update_window();
 }
 
 //---------------------------------------------------------------------------------------
@@ -136,7 +144,7 @@ void GraphicView::on_paint() //, RepaintOptions& opt)
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_graphic_model()
 {
-    m_pDoorway->start_timer();
+    start_timer();
 
     m_pDrawer->reset(*m_pRenderBuf);
     m_pDrawer->set_viewport(m_vxOrg, m_vyOrg);
@@ -146,12 +154,12 @@ void GraphicView::draw_graphic_model()
     m_pDrawer->render(true);
 
     //render statistics
-    double tm = m_pDoorway->elapsed_time();
+    double tm = get_elapsed_time();
     char buf[256];
     sprintf(buf, "Time=%.3f ms, scale=%.3f\n\n"
                 "+/- : ZoomIn / ZoomOut (zoom center at mouse point)\n\n"
-                "1-5 : draw boxes  |  0- remove boxes  |  "
-                "Click and drag: move score",
+                "1-5 : draw boxes  |  0- remove boxes  |  Click and drag: move score\n\n"
+                "8-drag mode, 9-selection mode",
                 tm, m_transform.scale() );
     m_pDrawer->gsv_text(10.0, 20.0, buf);
 }
@@ -347,6 +355,89 @@ int GraphicView::find_page_at_point(LUnits x, LUnits y)
     }
     return -1;
 }
+
+//---------------------------------------------------------------------------------------
+void GraphicView::set_rendering_option(int option, bool value)
+{
+    switch(option)
+    {
+        case k_option_draw_box_doc_page_content:
+            m_options.draw_box_doc_page_content_flag = value;
+            break;
+
+        case k_option_draw_box_score_page:
+            m_options.draw_box_score_page_flag = value;
+            break;
+
+        case k_option_draw_box_system:
+            m_options.draw_box_system_flag = value;
+            break;
+
+        case k_option_draw_box_slice:
+            m_options.draw_box_slice_flag = value;
+            break;
+
+        case k_option_draw_box_slice_instr:
+            m_options.draw_box_slice_instr_flag = value;
+            break;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::set_update_window_callbak(void* pThis, void (*pt2Func)(void* pObj)) 
+{ 
+    m_pFunc_update_window = pt2Func;
+    m_pObj_update_window = pThis;
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj)) 
+{ 
+    m_pFunc_force_redraw = pt2Func; 
+    m_pObj_force_redraw = pThis;
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::set_start_timer_callbak(void* pThis, void (*pt2Func)(void* pObj)) 
+{ 
+    m_pFunc_start_timer = pt2Func;
+    m_pObj_start_timer = pThis;
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::set_elapsed_time_callbak(void* pThis, double (*pt2Func)(void* pObj)) 
+{ 
+    m_pFunc_elapsed_time = pt2Func;
+    m_pObj_elapsed_time = pThis;
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::do_update_window() 
+{
+    if (m_pFunc_update_window)
+        m_pFunc_update_window(m_pObj_update_window);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::do_force_redraw() 
+{ 
+    if (m_pFunc_force_redraw)
+        m_pFunc_force_redraw(m_pObj_force_redraw);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::start_timer() 
+{ if (m_pFunc_start_timer)
+    m_pFunc_start_timer(m_pObj_start_timer); 
+}
+
+//---------------------------------------------------------------------------------------
+double GraphicView::get_elapsed_time() const 
+{   
+    //millisecods since last start_timer() invocation
+    return (m_pFunc_elapsed_time ? m_pFunc_elapsed_time(m_pObj_elapsed_time) : 0.0); 
+}
+
 
 ////---------------------------------------------------------------------------------------
 //void GraphicView::caret_right()

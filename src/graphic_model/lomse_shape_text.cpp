@@ -33,10 +33,10 @@ namespace lomse
 // GmoShapeText implementation
 //---------------------------------------------------------------------------------------
 
-GmoShapeText::GmoShapeText(int idx, const std::string& text,
+GmoShapeText::GmoShapeText(ImoObj* pCreatorImo, int idx, const std::string& text,
                            ImoTextStyleInfo* pStyle, LUnits x, LUnits y,
                            LibraryScope& libraryScope)
-    : GmoSimpleShape(GmoObj::k_shape_text, idx, Color(0,0,0))
+    : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_text, idx, Color(0,0,0))
     , m_text(text)
     , m_pStyle(pStyle)
     , m_pFontStorage( libraryScope.font_storage() )

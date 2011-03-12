@@ -72,8 +72,9 @@ set( OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/bin )
 set( EXECUTABLE_OUTPUT_PATH ${OUTDIR})
 set( LIBRARY_OUTPUT_PATH ${OUTDIR})
 
-# path to scores for tests
+# path to scores for tests and for fonts
 set(LOMSE_TEST_SCORES_PATH "\"${ROOT_DIR}/test-scores/\"" )
+set(LOMSE_FONTS_PATH "\"${ROOT_DIR}/fonts/\"" )
 
 # directories to search for CMake modules
 set( CMAKE_MODULE_PATH "${ROOT_DIR}/cmake-modules" )
@@ -222,21 +223,36 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/lomse_selections.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_barline.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_base.cpp
+    ${SRC_DIR}/graphic_model/lomse_shape_beam.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_brace_bracket.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_note.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_staff.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_text.cpp
+    ${SRC_DIR}/graphic_model/lomse_shape_tie.cpp
+    ${SRC_DIR}/graphic_model/lomse_shape_tuplet.cpp
     ${SRC_DIR}/graphic_model/lomse_shapes.cpp
+    ${SRC_DIR}/graphic_model/lomse_shapes_storage.cpp
     ${SRC_DIR}/graphic_model/lomse_sizers.cpp
     
+    ${SRC_DIR}/graphic_model/engravers/lomse_accidentals_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_beam_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_barline_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_chord_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_clef_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_fermata_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_instrument_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_key_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_note_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_noterest_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_rest_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_text_engraver.cpp
-    
+    ${SRC_DIR}/graphic_model/engravers/lomse_tie_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_time_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_tuplet_engraver.cpp
+
     ${SRC_DIR}/graphic_model/layouters/lomse_document_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_score_layouter.cpp
+    ${SRC_DIR}/graphic_model/layouters/lomse_score_meter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_system_cursor.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_system_layouter.cpp
 )
@@ -402,8 +418,10 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_pitch.cpp
         ${SRC_DIR}/tests/lomse_test_presenter.cpp
         ${SRC_DIR}/tests/lomse_test_reader.cpp
+        ${SRC_DIR}/tests/lomse_test_rest_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_score_iterator.cpp
         ${SRC_DIR}/tests/lomse_test_score_layouter.cpp
+        ${SRC_DIR}/tests/lomse_test_score_meter.cpp
         ${SRC_DIR}/tests/lomse_test_selections.cpp
         ${SRC_DIR}/tests/lomse_test_shapes.cpp
         ${SRC_DIR}/tests/lomse_test_sizers.cpp

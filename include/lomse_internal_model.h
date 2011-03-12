@@ -70,6 +70,32 @@ class DtoTimeSignature;
 
 
 //---------------------------------------------------------------------------------------
+// enums for common values
+
+    //-----------------------------------------------------------------------------
+	//The placement attribute indicates whether something is above or below another
+    //element, such as a note or a notation.
+    enum EPlacement
+    {
+        k_placement_default = 0,
+	    k_placement_above,
+        k_placement_below,
+    };
+
+    //-----------------------------------------------------------------------------
+	//The orientation attribute indicates whether slurs and ties are overhand (tips
+    //down) or underhand (tips up). This is distinct from the placement attribute:
+    //placement is relative, one object with respect to another object. But
+    //orientation is referred to the object itself: turned up or down.
+	enum EOrientation
+    {
+        k_orientation_default = 0,
+        k_orientation_over,
+        k_orientation_under,
+    };
+
+
+//---------------------------------------------------------------------------------------
 // a struct to contain note/rest figure and dots
 struct NoteTypeAndDots
 {
@@ -141,7 +167,7 @@ public:
                             // BinaryRelObj (A)
                             k_binary_relobj, k_tie,
                             // MultiRelObj (A)
-                            k_multi_relobj, k_beam, k_tuplet,
+                            k_multi_relobj, k_beam, k_chord, k_tuplet,
     };
 
 
@@ -226,7 +252,7 @@ public:
     inline bool is_score_title() { return m_objtype == k_score_title; }
 
     // rel objs
-    inline bool is_relobj() { return m_objtype >= k_relobj && m_objtype < k_binary_relobj; }
+    inline bool is_relobj() { return m_objtype >= k_relobj; }
 
     // binary rel objs
     inline bool is_binary_relobj() { return m_objtype >= k_binary_relobj
@@ -236,6 +262,7 @@ public:
     // multi rel objs
     inline bool is_multi_relobj() { return m_objtype >= k_multi_relobj; }
     inline bool is_beam() { return m_objtype == k_beam; }
+    inline bool is_chord() { return m_objtype == k_chord; }
     inline bool is_tuplet() { return m_objtype == k_tuplet; }
 
 };
@@ -282,6 +309,7 @@ public:
     int get_num_attachments();
     ImoAuxObj* get_attachment(int i);
     void attach(ImoAuxObj* pAO);
+    void remove_attachment(ImoAuxObj* pAO);
 
 };
 
@@ -299,7 +327,7 @@ public:
         return dynamic_cast<ImoDocObj*>( get_child(iItem) );
     }
     inline int get_num_items() { return get_num_children(); }
-
+    inline void remove_item(ImoDocObj* pItem) { remove_child(pItem); }
 };
 
 // ContainerObj: A collection of containers and contained objs.
@@ -413,9 +441,10 @@ protected:
     ImoStaffObj* m_pStartSO;     //StaffObjs related by this ImoRelObj
     ImoStaffObj* m_pEndSO;
 
-    ImoBinaryRelObj(int objtype) : ImoRelObj(objtype) {}
-    //ImoBinaryRelObj(ImoDocObj* pOwner, long id, int objtype,
-    //               ImoStaffObj* pStartSO, ImoStaffObj* pEndSO);
+    ImoBinaryRelObj(int objtype) 
+        : ImoRelObj(objtype), m_pStartSO(NULL), m_pEndSO(NULL) {}
+    ImoBinaryRelObj(int objtype, ImoStaffObj* pStartSO, ImoStaffObj* pEndSO)
+        : ImoRelObj(objtype), m_pStartSO(pStartSO), m_pEndSO(pEndSO) {}
 
 public:
     virtual ~ImoBinaryRelObj();
@@ -507,9 +536,11 @@ protected:
 
 public:
     ImoBezierInfo() : ImoSimpleObj(ImoObj::k_bezier_info) {}
+    ImoBezierInfo(ImoBezierInfo* pBezier);
+
     ~ImoBezierInfo() {}
 
-	enum { k_start=0, k_end, k_ctrol1, k_ctrol2, };     // point number
+	enum { k_start=0, k_end, k_ctrol1, k_ctrol2, k_max};     // point number
 
     //points
     inline void set_point(int i, TPoint& value) { m_tPoints[i] = value; }
@@ -539,6 +570,14 @@ public:
     inline void set_width(Tenths value) { m_width = value; }
     inline void set_style(ELineStyle value) { m_style = value; }
 
+};
+
+//---------------------------------------------------------------------------------------
+class ImoChord : public ImoMultiRelObj
+{
+public:
+    ImoChord() : ImoMultiRelObj(ImoObj::k_chord) {}
+    ~ImoChord() {}
 };
 
 //---------------------------------------------------------------------------------------
@@ -830,12 +869,20 @@ public:
 //===================================================
 
 //---------------------------------------------------------------------------------------
-class ImoAttachments : public ImoCollection
+class ImoAttachments : public ImoSimpleObj
 {
-public:
-    ImoAttachments() : ImoCollection(ImoObj::k_attachments) {}
-    ~ImoAttachments() {}
+protected:
+    std::list<ImoAuxObj*> m_attachments;
 
+public:
+    ImoAttachments() : ImoSimpleObj(ImoObj::k_attachments) {}
+    ~ImoAttachments();
+
+    //contents
+    ImoAuxObj* get_item(int iItem);   //iItem = 0..n-1
+    inline int get_num_items() { return int(m_attachments.size()); }
+    void remove(ImoAuxObj* pAO);
+    inline void add(ImoAuxObj* pAO) { m_attachments.push_back(pAO); }
 };
 
 //---------------------------------------------------------------------------------------
@@ -916,6 +963,7 @@ class ImoClef : public ImoStaffObj
 {
 protected:
     int m_clefType;
+    int m_symbolSize;
 
 public:
     ImoClef(DtoClef& dto);
@@ -931,7 +979,7 @@ public:
         k_C2,
         k_C3,
         k_C4,
-        k_Percussion,
+        k_percussion,
         // other clefs not available for exercises
         k_C5,
         k_F5,
@@ -949,6 +997,7 @@ public:
     //getters and setters
     inline int get_clef_type() { return m_clefType; }
     inline void set_clef_type(int type) { m_clefType = type; }
+    inline int get_symbol_size() { return m_symbolSize; }
 
 };
 
@@ -1013,11 +1062,9 @@ protected:
     int m_symbol;
 
 public:
-    //ImoFermata() : ImoAuxObj(ImoObj::k_fermata), m_placement(k_above), m_symbol(k_normal) {}
     ImoFermata(DtoFermata& dto);
     ~ImoFermata() {}
 
-	enum { k_above=0, k_below, };               //placement
     enum { k_normal, k_angled, k_square, };     //symbol
 
     //getters
@@ -1166,6 +1213,7 @@ public:
     void set_abbrev(ImoScoreText* pText);
     void set_midi_info(ImoMidiInfo* pInfo);
     inline void set_in_group(ImoInstrGroup* pGroup) { m_pGroup = pGroup; }
+    void replace_staff_info(ImoStaffInfo* pInfo);
 
     //info
     inline bool has_name() { return m_name.get_text() != ""; }
@@ -1205,8 +1253,9 @@ public:
     ImoKeySignature(DtoKeySignature& dto);
     ~ImoKeySignature() {}
 
-	enum { k_undefined=-1, C=0, G, D, A, E, B, Fs, Cs, Cf, Gf, Df, Af, Ef, Bf, F,
-           a, e, b, fs, cs, gs, ds, as, af, ef, bf, f, c, g, d };
+	enum { k_undefined=-1, k_C=0, k_G, k_D, k_A, k_E, k_B, k_Fs, k_Cs, k_Cf, k_Gf,
+           k_Df, k_Af, k_Ef, k_Bf, k_F, k_a, k_e, k_b, k_fs, k_cs, k_gs, k_ds, k_as,
+           k_af, k_ef, k_bf, k_f, k_c, k_g, k_d };
 
     //getters and setters
     inline int get_key_type() { return m_keyType; }
@@ -1318,12 +1367,15 @@ public:
     inline long get_long_value() { return m_nValue; }
     inline float get_float_value() { return m_rValue; }
     inline string& get_string_value() { return m_sValue; }
+    inline bool is_bool_option() { return m_type == k_boolean; }
+    inline bool is_long_option() { return m_type == k_number_long; }
+    inline bool is_float_option() { return m_type == k_number_float; }
 
     //setters
     inline void set_type(int type) { m_type = type; }
-    inline void set_bool_value(bool value) { m_fValue = value; }
-    inline void set_long_value(long value) { m_nValue = value; }
-    inline void set_float_value(float value) { m_rValue = value; }
+    inline void set_bool_value(bool value) { m_fValue = value; m_type = k_boolean; }
+    inline void set_long_value(long value) { m_nValue = value; m_type = k_number_long; }
+    inline void set_float_value(float value) { m_rValue = value; m_type = k_number_float; }
     inline void set_string_value(const string& value) { m_sValue = value; }
 
 };
@@ -1488,7 +1540,7 @@ public:
 
     //options
     ImoOptions* get_options();
-    void add_option(ImoOptionInfo* pOpt);
+    void set_option(ImoOptionInfo* pOpt);
     bool has_options();
     ImoOptionInfo* get_option(const std::string& name);
     void set_float_option(const std::string& name, float value);
@@ -1508,8 +1560,10 @@ public:
 
     //styles
     void add_style_info(ImoTextStyleInfo* pStyle);
+    void add_required_text_styles();
     ImoTextStyleInfo* get_style_info(const std::string& name);
     ImoTextStyleInfo* get_default_style_info();
+    ImoTextStyleInfo* get_style_info_or_defaults(const std::string& name);
 
 protected:
     void delete_staffobjs_collection();
@@ -1517,6 +1571,7 @@ protected:
     ImoTextStyleInfo* create_default_style();
     void set_defaults_for_system_info();
     void set_defaults_for_options();
+    void add_option(ImoOptionInfo* pOpt);
 
 };
 
@@ -1524,7 +1579,9 @@ protected:
 class ImoStaffInfo : public ImoSimpleObj
 {
 protected:
+    int m_numStaff;
     int m_nNumLines;
+    int m_staffType;
     LUnits m_uSpacing;      //between line centers
     LUnits m_uLineThickness;
     LUnits m_uMarging;      //distance from the bottom line of the previous staff
@@ -1532,16 +1589,29 @@ protected:
 public:
     //Default values for staff. Line spacing: 1.8 mm (staff height = 7.2 mm),
     //line thickness: 0.15 millimeters, top margin: 10 millimeters
-    ImoStaffInfo(int lines=5, LUnits spacing=180.0f, LUnits thickness=15.0f,
-                 LUnits margin=1000.0f)
+    ImoStaffInfo(int numStaff=0, int lines=5, int type=k_staff_regular,
+                 LUnits spacing=180.0f, LUnits thickness=15.0f, LUnits margin=1000.0f)
         : ImoSimpleObj(ImoObj::k_staff_info)
+        , m_numStaff(numStaff)
         , m_nNumLines(lines)
+        , m_staffType(type)
         , m_uSpacing(spacing)
         , m_uLineThickness(thickness)
         , m_uMarging(margin)
     {
     }
     ~ImoStaffInfo() {}
+
+    enum { k_staff_ossia=0, k_staff_cue, k_staff_editorial, k_staff_regular,
+        k_staff_alternate, };
+
+    //staff number
+    inline int get_staff_number() { return m_numStaff; }
+    inline void set_staff_number(int num) { m_numStaff = num; }
+
+    //staff type
+    inline int get_staff_type() { return m_staffType; }
+    inline void set_staff_type(int type) { m_staffType = type; }
 
 	//margins
     inline LUnits get_staff_margin() { return m_uMarging; }
@@ -1566,34 +1636,32 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoTie : public ImoAuxObj
+class ImoTie : public ImoBinaryRelObj
 {
 protected:
     bool        m_fStart;
     int         m_tieNum;
-    ImoNote*     m_pStartNote;
-    ImoNote*     m_pEndNote;
     ImoBezierInfo*   m_pStartBezier;
     ImoBezierInfo*   m_pEndBezier;
 
 public:
-    ImoTie() : ImoAuxObj(ImoObj::k_tie), m_fStart(true), m_tieNum(0), m_pStartNote(NULL)
-            , m_pEndNote(NULL), m_pStartBezier(NULL), m_pEndBezier(NULL) {}
+    ImoTie() : ImoBinaryRelObj(ImoObj::k_tie), m_fStart(true), m_tieNum(0)
+             , m_pStartBezier(NULL), m_pEndBezier(NULL) {}
     ~ImoTie();
 
     //getters
     inline bool is_start() { return m_fStart; }
     inline int get_tie_number() { return m_tieNum; }
-    inline ImoNote* get_start_note() { return m_pStartNote; }
-    inline ImoNote* get_end_note() { return m_pEndNote; }
+    ImoNote* get_start_note();
+    ImoNote* get_end_note();
     inline ImoBezierInfo* get_start_bezier() { return m_pStartBezier; }
     inline ImoBezierInfo* get_stop_bezier() { return m_pEndBezier; }
 
     //setters
     inline void set_start(bool value) { m_fStart = value; }
     inline void set_tie_number(int num) { m_tieNum = num; }
-    inline void set_start_note(ImoNote* pNote) { m_pStartNote = pNote; }
-    inline void set_end_note(ImoNote* pNote) { m_pEndNote = pNote; }
+    void set_start_note(ImoNote* pNote);
+    void set_end_note(ImoNote* pNote);
     inline void set_start_bezier(ImoBezierInfo* pBezier) { m_pStartBezier = pBezier; }
     inline void set_stop_bezier(ImoBezierInfo* pBezier) { m_pEndBezier = pBezier; }
 
@@ -1643,7 +1711,6 @@ protected:
     int     m_beatType;
 
 public:
-//    ImoTimeSignature() : ImoStaffObj(ImoObj::k_time_signature) , m_beats(2) , m_beatType(4) {}
     ImoTimeSignature(DtoTimeSignature& dto);
     ~ImoTimeSignature() {}
 
@@ -1659,38 +1726,16 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoTuplet : public ImoMultiRelObj
-{
-protected:
-    int m_nActualNum;
-    int m_nNormalNum;
-    bool m_fShowBracket;
-    bool m_fShowNumber;
-    int m_nPlacement;
-
-public:
-    ImoTuplet() : ImoMultiRelObj(ImoObj::k_tuplet) {}
-    ~ImoTuplet() {}
-
-    //getters
-    inline int get_actual_number() { return m_nActualNum; }
-    inline int get_normal_number() { return m_nNormalNum; }
-    inline bool get_show_bracket() { return m_fShowBracket; }
-    inline bool get_show_number() { return m_fShowNumber; }
-    inline int get_placement() { return m_nPlacement; }
-};
-
 // raw info about a tuplet
-//---------------------------------------------------------------------------------------
 class ImoTupletDto : public ImoSimpleObj
 {
 protected:
     bool m_fStartOfTuplet;
     int m_nActualNum;
     int m_nNormalNum;
-    bool m_fShowBracket;
-    bool m_fShowNumber;
+    int m_nShowBracket;
     int m_nPlacement;
+    int m_nShowNormalNum;
     LdpElement* m_pTupletElm;
     ImoNoteRest* m_pNR;
 
@@ -1699,8 +1744,6 @@ public:
     ImoTupletDto(LdpElement* pBeamElm);
     ~ImoTupletDto() {}
 
-    enum { k_default=0, };
-
     //getters
     inline LdpElement* get_tuplet_element() { return m_pTupletElm; }
     inline ImoNoteRest* get_note_rest() { return m_pNR; }
@@ -1708,8 +1751,8 @@ public:
     inline bool is_end_of_tuplet() { return !m_fStartOfTuplet; }
     inline int get_actual_number() { return m_nActualNum; }
     inline int get_normal_number() { return m_nNormalNum; }
-    inline bool get_show_bracket() { return m_fShowBracket; }
-    inline bool get_show_number() { return m_fShowNumber; }
+    inline int get_show_bracket() { return m_nShowBracket; }
+    inline int get_show_normal_num() { return m_nShowNormalNum; }
     inline int get_placement() { return m_nPlacement; }
     int get_line_number();
 
@@ -1719,10 +1762,34 @@ public:
     inline void set_start_of_tuplet(bool value) { m_fStartOfTuplet = value; }
     inline void set_actual_number(int value) { m_nActualNum = value; }
     inline void set_normal_number(int value) { m_nNormalNum = value; }
-    inline void set_show_bracket(bool value) { m_fShowBracket = value; }
-    inline void set_show_number(bool value) { m_fShowNumber = value; }
+    inline void set_show_bracket(int value) { m_nShowBracket = value; }
+    inline void set_show_normal_num(int value) { m_nShowNormalNum = value; }
     inline void set_placement(int value) { m_nPlacement = value; }
+};
 
+//---------------------------------------------------------------------------------------
+class ImoTuplet : public ImoMultiRelObj
+{
+protected:
+    int m_nActualNum;
+    int m_nNormalNum;
+    int m_nShowBracket;
+    int m_nShowNormalNum;
+    int m_nPlacement;
+
+public:
+    ImoTuplet() : ImoMultiRelObj(ImoObj::k_tuplet) {}
+    ImoTuplet(ImoTupletDto* dto);
+    ~ImoTuplet() {}
+
+    enum { k_straight = 0, k_curved, k_slurred, };
+
+    //getters
+    inline int get_actual_number() { return m_nActualNum; }
+    inline int get_normal_number() { return m_nNormalNum; }
+    inline int get_show_bracket() { return m_nShowBracket; }
+    inline int get_show_normal_num() { return m_nShowNormalNum; }
+    inline int get_placement() { return m_nPlacement; }
 };
 
 

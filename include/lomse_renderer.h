@@ -33,20 +33,61 @@ namespace lomse
 class GraphicModel;
 
 
-//---------------------------------------------------------------------------------------
-// Renderer: Helper class to render paths and texts
-//---------------------------------------------------------------------------------------
+typedef agg::pixfmt_gray8       PixFormat_gray8;
+typedef agg::pixfmt_gray16      PixFormat_gray16;
+typedef agg::pixfmt_rgb555      PixFormat_rgb555;
+typedef agg::pixfmt_rgb565      PixFormat_rgb565;
+typedef agg::pixfmt_rgbAAA      PixFormat_rgbAAA;
+typedef agg::pixfmt_rgbBBA      PixFormat_rgbBBA;
+typedef agg::pixfmt_bgrAAA      PixFormat_bgrAAA;
+typedef agg::pixfmt_bgrABB      PixFormat_bgrABB;
+typedef agg::pixfmt_rgb24       PixFormat_rgb24;
+typedef agg::pixfmt_bgr24       PixFormat_bgr24;
+typedef agg::pixfmt_rgba32      PixFormat_rgba32;
+typedef agg::pixfmt_argb32      PixFormat_argb32;
+typedef agg::pixfmt_abgr32      PixFormat_abgr32;
+typedef agg::pixfmt_bgra32      PixFormat_bgra32;
+typedef agg::pixfmt_rgb48       PixFormat_rgb48;
+typedef agg::pixfmt_bgr48       PixFormat_bgr48;
+typedef agg::pixfmt_rgba64      PixFormat_rgba64;
+typedef agg::pixfmt_argb64      PixFormat_argb64;
+typedef agg::pixfmt_abgr64      PixFormat_abgr64;
+typedef agg::pixfmt_bgra64      PixFormat_bgra64;
+
+
 class Renderer
 {
+protected:
+    double m_lunitsToPixels;
+
+    //renderization parameters
+    double m_expand;
+    double m_gamma;
+
+    //affine transformation parameters
+    double m_userScale;         //not including LUnits to pixels conversion factor
+    double m_rotation;          //degrees: -180.0 to 180.0
+    double m_uxShift;           //additional translation (LUnits)
+    double m_uyShift;           //additional translation (LUnits)
+    double m_vxOrg;             //current viewport origin (pixels)
+    double m_vyOrg;
+
+    TransAffine m_transform;    //specific transform for paths
+    TransAffine m_mtx;          //global transform
+
+    AttrStorage& m_attr_storage;
+    AttrStorage& m_attr_stack;
+    PathStorage& m_path;
+
+
 public:
     Renderer(double ppi, AttrStorage& attr_storage, AttrStorage& attr_stack,
              PathStorage& path);
     virtual ~Renderer() {}
-
-    void initialize(RenderingBuffer& buf);
-    void render(bool fillColor);
-    void render(FontRasterizer& ras, FontScanline& sl, Color color);
-    void render_gsv_text(double x, double y, const char* str);
+    virtual void initialize(RenderingBuffer& buf) = 0;
+    virtual void render(bool fillColor) = 0;
+    virtual void render(FontRasterizer& ras, FontScanline& sl, Color color) = 0;
+    virtual void render_gsv_text(double x, double y, const char* str) = 0;
 
 
     // Make all polygons CCW-oriented
@@ -55,19 +96,15 @@ public:
     }
 
     // Expand all polygons
-    inline void expand(double value) { m_curved_trans_contour.width(value); }
+    virtual void expand(double value) = 0;
 
     unsigned operator [](unsigned idx)
     {
         m_transform = m_attr_storage[idx].transform;
-        return m_attr_storage[idx].index;
+        return m_attr_storage[idx].path_index;
     }
 
-    void get_bounding_rect(double* x1, double* y1, double* x2, double* y2)
-    {
-        agg::conv_transform<agg::path_storage> trans(m_path, m_transform);
-        agg::bounding_rect(trans, *this, 0, m_attr_storage.size(), x1, y1, x2, y2);
-    }
+    virtual void get_bounding_rect(double* x1, double* y1, double* x2, double* y2) = 0;
 
     inline void set_viewport(Pixels x, Pixels y)
     {
@@ -86,8 +123,6 @@ public:
     inline TransAffine& get_transform() { return m_mtx; }
     void set_transform(TransAffine& transform);
 
-
-
 protected:
     void push_attr();
     void pop_attr();
@@ -99,6 +134,123 @@ protected:
     agg::rgba to_rgba(Color c);
     agg::rgba8 to_rgba8(Color c);
 
+};
+
+
+//---------------------------------------------------------------------------------------
+// RendererTemplate: Helper class to render paths and texts
+// Knows how to render bitmaps and paths created by Calligrapher and Drawer objects
+//---------------------------------------------------------------------------------------
+template <typename PixFormat>
+class RendererTemplate : public Renderer
+{
+public:
+    RendererTemplate(double ppi, AttrStorage& attr_storage, AttrStorage& attr_stack,
+             PathStorage& path)
+        : Renderer(ppi, attr_storage, attr_stack, path)
+        , m_rbuf()
+        , m_pixFormat(m_rbuf)
+        , m_renBase(m_pixFormat)
+        , m_renSolid(m_renBase)
+
+        , m_curved(m_path)
+        , m_curved_stroked(m_curved)
+        , m_curved_stroked_trans(m_curved_stroked, m_transform)
+        , m_curved_trans(m_curved, m_transform)
+        , m_curved_trans_contour(m_curved_trans)
+    {
+    }
+
+    //-----------------------------------------------------------------------------------
+    ~RendererTemplate() {}
+
+    //-----------------------------------------------------------------------------------
+    void initialize(RenderingBuffer& buf)
+    {
+        m_rbuf.attach(buf.buf(), buf.width(), buf.height(), buf.stride());
+        m_renBase.reset_clipping(true);
+
+        //////set backgound color
+        ////Color bgcolor = m_options.background_color;
+        ////m_renBase.clear(agg::rgba(bgcolor.r, bgcolor.b, bgcolor.g, bgcolor.a));
+        m_renBase.clear(agg::rgba(0.5, 0.5, 0.5));
+
+        reset();
+        set_transformation();
+    }
+
+    //-----------------------------------------------------------------------------------
+    void render(bool fillColor)
+    {
+        agg::rasterizer_scanline_aa<> ras;
+        agg::scanline_p8 sl;
+
+        //set gamma
+        ras.gamma(agg::gamma_power(m_gamma));
+
+        //set affine transformation (rotation, scale, translation, skew)
+        set_transformation();
+
+        //set expand value for strokes
+        expand(m_expand);
+
+        //do renderization
+        render(ras, sl, m_renSolid, m_mtx, m_renBase.clip_box(), 1.0);
+
+        ////////render controls
+        //////ras.gamma(agg::gamma_none());
+        //////agg::render_ctrl(ras, sl, m_renBase, m_expand);
+        //////agg::render_ctrl(ras, sl, m_renBase, m_gamma);
+        //////agg::render_ctrl(ras, sl, m_renBase, m_rotate);
+
+        //clear paths
+        reset();
+    }
+
+    //-----------------------------------------------------------------------------------
+    void render_gsv_text(double x, double y, const char* str)
+    {
+        agg::gsv_text t;
+        t.size(10.0);
+        t.flip(true);
+
+        agg::conv_stroke<agg::gsv_text> pt(t);
+        pt.width(1.5);
+
+        t.start_point(x, y);
+        t.text(str);
+
+        agg::rasterizer_scanline_aa<> ras;
+        agg::scanline_p8 sl;
+
+        ras.gamma(agg::gamma_power(m_gamma));
+        ras.add_path(pt);
+        m_renSolid.color(agg::rgba(0,0,0));
+        agg::render_scanlines(ras, sl, m_renSolid);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void render(FontRasterizer& ras, FontScanline& sl, Color color)
+    {
+        m_renSolid.color( to_rgba(color) );
+        agg::render_scanlines(ras, sl, m_renSolid);
+    }
+
+    //-----------------------------------------------------------------------------------
+    // Expand all polygons
+    void expand(double value) { m_curved_trans_contour.width(value); }
+
+    //-----------------------------------------------------------------------------------
+    void get_bounding_rect(double* x1, double* y1, double* x2, double* y2)
+    {
+        agg::conv_transform<agg::path_storage> trans(m_path, m_transform);
+        agg::bounding_rect(trans, *this, 0, m_attr_storage.size(), x1, y1, x2, y2);
+    }
+
+
+protected:
+
+    //-----------------------------------------------------------------------------------
     // Rendering. One can specify two additional parameters:
     // trans_affine and opacity. They can be used to transform the whole
     // image and/or to make it translucent.
@@ -132,12 +284,12 @@ protected:
                 ras.filling_rule(attr.even_odd_flag ? fill_even_odd : fill_non_zero);
                 if(fabs(m_curved_trans_contour.width()) < 0.0001)
                 {
-                    ras.add_path(m_curved_trans, attr.index);
+                    ras.add_path(m_curved_trans, attr.path_index);
                 }
                 else
                 {
                     m_curved_trans_contour.miter_limit(attr.miter_limit);
-                    ras.add_path(m_curved_trans_contour, attr.index);
+                    ras.add_path(m_curved_trans_contour, attr.path_index);
                 }
 
                 color = to_rgba8( attr.fill_color );
@@ -165,7 +317,7 @@ protected:
                 }
                 ras.reset();
                 ras.filling_rule(fill_non_zero);
-                ras.add_path(m_curved_stroked_trans, attr.index);
+                ras.add_path(m_curved_stroked_trans, attr.path_index);
                 color = to_rgba8( attr.stroke_color );
                 color.opacity(color.opacity() * opacity);
                 ren.color(color);
@@ -174,32 +326,13 @@ protected:
         }
     }
 
-private:
-    double m_lunitsToPixels;
-
-    //renderization parameters
-    double m_expand;
-    double m_gamma;
-
-    //affine transformation parameters
-    double m_userScale;         //not including LUnits to pixels conversion factor
-    double m_rotation;          //degrees: -180.0 to 180.0
-    double m_uxShift;           //additional translation (LUnits)
-    double m_uyShift;           //additional translation (LUnits)
-    double m_vxOrg;             //current viewport origin (pixels)
-    double m_vyOrg;
-
-    TransAffine m_transform;    //specific transform for paths
-    TransAffine m_mtx;          //global transform
+    typedef agg::renderer_base<PixFormat>                   RendererBase;
+    typedef agg::renderer_scanline_aa_solid<RendererBase>   RendererSolid;
 
     RenderingBuffer         m_rbuf;
     PixFormat               m_pixFormat;
     RendererBase            m_renBase;
     RendererSolid           m_renSolid;
-
-    AttrStorage&            m_attr_storage;
-    AttrStorage&            m_attr_stack;
-    PathStorage&            m_path;
 
     CurvedConverter         m_curved;
     CurvedStroked           m_curved_stroked;
@@ -208,6 +341,21 @@ private:
     CurvedTransContour      m_curved_trans_contour;
 
 };
+
+
+//---------------------------------------------------------------------------------------
+// factory class to create Renderers
+class RendererFactory
+{
+public:
+    RendererFactory();
+
+    static Renderer* create_renderer(LibraryScope& libraryScope,
+                                     AttrStorage& attr_storage,
+                                     AttrStorage& attr_stack,
+                                     PathStorage& path);
+};
+
 
 
 }   //namespace lomse

@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_BASIC_MODEL_H__        //to avoid nested includes
 #define __LOMSE_BASIC_MODEL_H__
@@ -33,10 +33,11 @@ class ImoObj;
 class ImoBeam;
 class ImoTuplet;
 class ImoTie;
+class ImoChord;
 
 
+//---------------------------------------------------------------------------------------
 // InternalModel: A container for the objects composing the internal model
-//----------------------------------------------------------------------------------
 class InternalModel
 {
 protected:
@@ -44,6 +45,7 @@ protected:
     std::list<ImoBeam*> m_beams;
     std::list<ImoTuplet*> m_tuplets;
     std::list<ImoTie*> m_ties;
+    std::list<ImoChord*> m_chords;
 
 public:
     InternalModel();
@@ -54,6 +56,7 @@ public:
     inline void add_beam(ImoBeam* pBeam) { m_beams.push_back(pBeam); }
     inline void add_tuplet(ImoTuplet* pTuplet) { m_tuplets.push_back(pTuplet); }
     inline void add_tie(ImoTie* pTie) { m_ties.push_back(pTie); }
+    inline void add_chord(ImoChord* pChord) { m_chords.push_back(pChord); }
 
     //getters
     inline ImoObj* get_root() { return m_pRoot; }
@@ -64,6 +67,7 @@ public:
 protected:
     void delete_beams();
     void delete_tuplets();
+    void delete_chords();
 
 };
 

@@ -28,6 +28,7 @@
 #include "lomse_shape_staff.h"
 #include "lomse_box_system.h"
 #include "lomse_text_engraver.h"
+#include "lomse_shape_text.h"
 
 
 namespace lomse
@@ -37,12 +38,13 @@ namespace lomse
 // InstrumentEngraver implementation
 //---------------------------------------------------------------------------------------
 
-InstrumentEngraver::InstrumentEngraver(ImoInstrument* pInstr, ImoScore* pScore,
-                                       LibraryScope& libraryScope)
-    : m_pInstr(pInstr)
+InstrumentEngraver::InstrumentEngraver(LibraryScope& libraryScope,
+                                       ScoreMeter* pScoreMeter,
+                                       ImoInstrument* pInstr, ImoScore* pScore)
+    : Engraver(libraryScope, pScoreMeter)
+    , m_pInstr(pInstr)
     , m_pScore(pScore)
     , m_pFontStorage( libraryScope.font_storage() )
-    , m_libraryScope(libraryScope)
 {
     m_staffTop.reserve( m_pInstr->get_num_staves() );
 }
@@ -50,6 +52,7 @@ InstrumentEngraver::InstrumentEngraver(ImoInstrument* pInstr, ImoScore* pScore,
 //---------------------------------------------------------------------------------------
 InstrumentEngraver::~InstrumentEngraver()
 {
+    m_staffShapes.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -84,12 +87,20 @@ void InstrumentEngraver::measure_name_abbrev()
     LUnits uSpaceAfterName = tenths_to_logical(LOMSE_INSTR_SPACE_AFTER_NAME);
     if (m_pInstr->has_name())
     {
-        TextEngraver engr(m_libraryScope, m_pInstr->get_name(), m_pScore);
+        ImoScoreText& text = m_pInstr->get_name();
+        ImoTextStyleInfo* pStyle = text.get_style();
+        if (!pStyle)
+            pStyle = m_pScore->get_default_style_info();
+        TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
         m_uIndentFirst += engr.measure_width() + uSpaceAfterName;
     }
     if (m_pInstr->has_abbrev())
     {
-        TextEngraver engr(m_libraryScope, m_pInstr->get_abbrev(), m_pScore);
+        ImoScoreText& text = m_pInstr->get_abbrev();
+        ImoTextStyleInfo* pStyle = text.get_style();
+        if (!pStyle)
+            pStyle = m_pScore->get_default_style_info();
+        TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
         m_uIndentOther += engr.measure_width() + uSpaceAfterName;
     }
 }
@@ -127,16 +138,26 @@ void InstrumentEngraver::add_name_abbrev(GmoBox* pBox, int nSystem)
     {
         if (m_pInstr->has_name())
         {
-            TextEngraver engr(m_libraryScope, m_pInstr->get_name(), m_pScore);
-            engr.add_shape(pBox, xLeft, yTop, 0);   //TODO-LOG k_center);
+            ImoScoreText& text = m_pInstr->get_name();
+            ImoTextStyleInfo* pStyle = text.get_style();
+            if (!pStyle)
+                pStyle = m_pScore->get_default_style_info();
+            TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
+            GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop, 0);   //TODO-LOG k_center);
+            pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
     }
     else
     {
         if (m_pInstr->has_abbrev())
         {
-            TextEngraver engr(m_libraryScope, m_pInstr->get_abbrev(), m_pScore);
-            engr.add_shape(pBox, xLeft, yTop, 0);   //TODO-LOG k_center);
+            ImoScoreText& text = m_pInstr->get_abbrev();
+            ImoTextStyleInfo* pStyle = text.get_style();
+            if (!pStyle)
+                pStyle = m_pScore->get_default_style_info();
+            TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
+            GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop, 0);   //TODO-LOG k_center);
+            pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
     }
 }
@@ -156,7 +177,8 @@ void InstrumentEngraver::add_brace_bracket(GmoBox* pBox)
 
         GmoShape* pShape;
 //        if (nSymbol == lm_eBracket)
-            pShape = new GmoShapeBracket(0, xLeft, yTop, xRight, yBottom, Color(0,0,0));
+            pShape = new GmoShapeBracket(m_pInstr, 0, xLeft, yTop, xRight, yBottom,
+                                         Color(0,0,0));
 //        else
 //        {
 //            LUnits dyHook = tenths_to_logical(6.0f);
@@ -171,6 +193,8 @@ void InstrumentEngraver::add_brace_bracket(GmoBox* pBox)
 void InstrumentEngraver::add_staff_lines(GmoBoxSystem* pBox, LUnits x, LUnits y,
                                          LUnits indent)
 {
+    m_staffShapes.clear();      //remove previous system shapes
+
  //   bool fVisible = !HideStaffLines();
     m_stavesLeft = x + indent;
     m_stavesWidth = pBox->get_content_width() - indent;
@@ -183,19 +207,39 @@ void InstrumentEngraver::add_staff_lines(GmoBoxSystem* pBox, LUnits x, LUnits y,
             y += pStaff->get_staff_margin();
         m_staffTop[iStaff] = y;
         GmoShapeStaff* pShape
-            = new GmoShapeStaff(iStaff, pStaff, iStaff, m_stavesWidth, Color(0,0,0));
+            = new GmoShapeStaff(m_pInstr, iStaff, pStaff, iStaff, m_stavesWidth,
+                                Color(0,0,0));
         pShape->set_origin(m_stavesLeft, y);
         pBox->add_staff_shape(pShape);
  //       pShape->SetVisible(fVisible);
         y = pShape->get_bottom();
+        m_staffShapes.push_back(pShape);
     }
     m_stavesBottom = y;
 }
 
 //---------------------------------------------------------------------------------------
-LUnits InstrumentEngraver::get_top_of_staff(int iStaff)
+LUnits InstrumentEngraver::get_top_line_of_staff(int iStaff)
 {
-    return m_staffTop[iStaff];
+    std::list<GmoShapeStaff*>::iterator it;
+    for (it=m_staffShapes.begin(); it != m_staffShapes.end() && iStaff != 0; ++it, --iStaff);
+
+    GmoShapeStaff* pShape = *it;
+    return pShape->get_top() + pShape->get_line_thickness() / 2.0f;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits InstrumentEngraver::get_staves_top_line()
+{
+    GmoShapeStaff* pShape = m_staffShapes.front();
+    return pShape->get_top() + pShape->get_line_thickness() / 2.0f;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits InstrumentEngraver::get_staves_bottom_line()
+{
+    GmoShapeStaff* pShape = m_staffShapes.back();
+    return pShape->get_bottom() - pShape->get_line_thickness() / 2.0f;
 }
 
 ////---------------------------------------------------------------------------------------

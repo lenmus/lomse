@@ -32,7 +32,7 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 struct PathAttributes
 {
-    unsigned     index;
+    unsigned     path_index;
     Color        fill_color;
     Color        stroke_color;
     bool         fill_flag;
@@ -46,7 +46,7 @@ struct PathAttributes
 
     // Empty constructor
     PathAttributes()
-        : index(0)
+        : path_index(0)
         , fill_color(Color(0,0,0))
         , stroke_color(Color(0,0,0))
         , fill_flag(true)
@@ -62,7 +62,7 @@ struct PathAttributes
 
     // Copy constructor
     PathAttributes(const PathAttributes& attr)
-        : index(attr.index)
+        : path_index(attr.path_index)
         , fill_color(attr.fill_color)
         , stroke_color(attr.stroke_color)
         , fill_flag(attr.fill_flag)
@@ -78,7 +78,7 @@ struct PathAttributes
 
     // Copy constructor with new index value
     PathAttributes(const PathAttributes& attr, unsigned idx)
-        : index(idx)
+        : path_index(idx)
         , fill_color(attr.fill_color)
         , stroke_color(attr.stroke_color)
         , fill_flag(attr.fill_flag)

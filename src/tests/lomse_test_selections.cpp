@@ -55,8 +55,8 @@ SUITE(SelectionsTest)
     TEST_FIXTURE(SelectionsTestFixture, SelectionsTest_Add)
     {
         SelectionSet set;
-        GmoShapeClef clef(1, 1, UPoint(0.0f, 0.0f), false,
-                          Color(0,0,0), m_libraryScope);
+        GmoShapeClef clef(NULL, 1, 1, UPoint(0.0f, 0.0f), Color(0,0,0), 
+                          m_libraryScope, 21.0);
 
         CHECK( set.contains(&clef) == false );
         CHECK( clef.is_selected() == false );
@@ -70,8 +70,8 @@ SUITE(SelectionsTest)
     TEST_FIXTURE(SelectionsTestFixture, SelectionsTest_Clear)
     {
         SelectionSet set;
-        GmoShapeClef clef(1, 1, UPoint(0.0f, 0.0f), false,
-                          Color(0,0,0), m_libraryScope);
+        GmoShapeClef clef(NULL, 1, 1, UPoint(0.0f, 0.0f), Color(0,0,0), 
+                          m_libraryScope, 21.0);
         set.add(&clef);
         set.clear();
 

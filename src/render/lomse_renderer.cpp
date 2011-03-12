@@ -31,10 +31,88 @@ using namespace std;
 namespace lomse
 {
 
+//---------------------------------------------------------------------------------------
+// RendererFactory
+//---------------------------------------------------------------------------------------
+Renderer* RendererFactory::create_renderer(LibraryScope& libraryScope,
+                                           AttrStorage& attr_storage,
+                                           AttrStorage& attr_stack,
+                                           PathStorage& path)
+{
+    int pixelFmt = libraryScope.get_pixel_format();
+    switch(pixelFmt)
+    {
+//        case k_pix_format_bw:
+//            return new RendererTemplate<PixFormat_bw>(libraryScope.get_screen_ppi(),
+//                                                         attr_storage, attr_stack, path);
+        case k_pix_format_gray8:
+            return new RendererTemplate<PixFormat_gray8>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_gray16:
+            return new RendererTemplate<PixFormat_gray16>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_rgb555:
+            return new RendererTemplate<PixFormat_rgb555>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_rgb565:
+            return new RendererTemplate<PixFormat_rgb565>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_rgbAAA:
+            return new RendererTemplate<PixFormat_rgbAAA>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_rgbBBA:
+            return new RendererTemplate<PixFormat_rgbBBA>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_bgrAAA:
+            return new RendererTemplate<PixFormat_bgrAAA>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_bgrABB:
+            return new RendererTemplate<PixFormat_bgrABB>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_rgb24:
+            return new RendererTemplate<PixFormat_rgb24>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_bgr24:
+            return new RendererTemplate<PixFormat_bgr24>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_rgba32:
+            return new RendererTemplate<PixFormat_rgba32>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_argb32:
+            return new RendererTemplate<PixFormat_argb32>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_abgr32:
+            return new RendererTemplate<PixFormat_abgr32>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_bgra32:
+            return new RendererTemplate<PixFormat_bgra32>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_rgb48:
+            return new RendererTemplate<PixFormat_rgb48>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_bgr48:
+            return new RendererTemplate<PixFormat_bgr48>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_rgba64:
+            return new RendererTemplate<PixFormat_rgba64>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_argb64:
+            return new RendererTemplate<PixFormat_argb64>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_abgr64:
+            return new RendererTemplate<PixFormat_abgr64>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        case k_pix_format_bgra64:
+            return new RendererTemplate<PixFormat_bgra64>(libraryScope.get_screen_ppi(),
+                                                         attr_storage, attr_stack, path);
+        default:
+            return NULL;
+    }
+}
+
 
 //---------------------------------------------------------------------------------------
-// Renderer:
-// Knows how to render bitmaps and paths created by Calligrapher and Drawer objects
+// Renderer
 //---------------------------------------------------------------------------------------
 Renderer::Renderer(double ppi, AttrStorage& attr_storage, AttrStorage& attr_stack,
                    PathStorage& path)
@@ -50,19 +128,9 @@ Renderer::Renderer(double ppi, AttrStorage& attr_storage, AttrStorage& attr_stac
     , m_transform()
     , m_mtx()
 
-    , m_rbuf()
-    , m_pixFormat(m_rbuf)
-    , m_renBase(m_pixFormat)
-    , m_renSolid(m_renBase)
-
     , m_attr_storage(attr_storage)
     , m_attr_stack(attr_stack)
     , m_path(path)
-    , m_curved(m_path)
-    , m_curved_stroked(m_curved)
-    , m_curved_stroked_trans(m_curved_stroked, m_transform)
-    , m_curved_trans(m_curved, m_transform)
-    , m_curved_trans_contour(m_curved_trans)
 {
     //LUnits to pixels conversion factor
     // device units are pixels. Therefore we must convert from LUnits to pixels:
@@ -73,83 +141,19 @@ Renderer::Renderer(double ppi, AttrStorage& attr_storage, AttrStorage& attr_stac
     set_transformation();
 }
 
-void Renderer::initialize(RenderingBuffer& buf)
+//---------------------------------------------------------------------------------------
+void Renderer::remove_shift()
 {
-    m_rbuf.attach(buf.buf(), buf.width(), buf.height(), buf.stride());
-    m_renBase.reset_clipping(true);
-
-    //////set backgound color
-    ////Color bgcolor = m_options.background_color;
-    ////m_renBase.clear(agg::rgba(bgcolor.r, bgcolor.b, bgcolor.g, bgcolor.a));
-    m_renBase.clear(agg::rgba(0.5, 0.5, 0.5));
-
-    reset();
+    set_shift(0.0f, 0.0f);
     set_transformation();
 }
 
 //---------------------------------------------------------------------------------------
-void Renderer::render(bool fillColor)
+void Renderer::set_transform(TransAffine& transform)
 {
-    agg::rasterizer_scanline_aa<> ras;
-    agg::scanline_p8 sl;
-
-    //set gamma
-    ras.gamma(agg::gamma_power(m_gamma));
-
-    //set affine transformation (rotation, scale, translation, skew)
-    set_transformation();
-
-    //set expand value for strokes
-    expand(m_expand);
-
-    //do renderization
-    render(ras, sl, m_renSolid, m_mtx, m_renBase.clip_box(), 1.0);
-
-    ////////render controls
-    //////ras.gamma(agg::gamma_none());
-    //////agg::render_ctrl(ras, sl, m_renBase, m_expand);
-    //////agg::render_ctrl(ras, sl, m_renBase, m_gamma);
-    //////agg::render_ctrl(ras, sl, m_renBase, m_rotate);
-
-    //clear paths
-    reset();
-}
-
-//---------------------------------------------------------------------------------------
-void Renderer::render_gsv_text(double x, double y, const char* str)
-{
-    agg::gsv_text t;
-    t.size(10.0);
-    t.flip(true);
-
-    agg::conv_stroke<agg::gsv_text> pt(t);
-    pt.width(1.5);
-
-    t.start_point(x, y);
-    t.text(str);
-
-    agg::rasterizer_scanline_aa<> ras;
-    agg::scanline_p8 sl;
-
-    ras.gamma(agg::gamma_power(m_gamma));
-    ras.add_path(pt);
-    m_renSolid.color(agg::rgba(0,0,0));
-    agg::render_scanlines(ras, sl, m_renSolid);
-}
-
-//---------------------------------------------------------------------------------------
-void Renderer::render(FontRasterizer& ras, FontScanline& sl, Color color)
-{
-    m_renSolid.color( to_rgba(color) );
-    agg::render_scanlines(ras, sl, m_renSolid);
-}
-
-//---------------------------------------------------------------------------------------
-void Renderer::reset()
-{
-    m_path.remove_all();
-    m_attr_storage.remove_all();
-    m_attr_stack.remove_all();
+    m_uxShift = (transform.tx - m_vxOrg) / m_lunitsToPixels;
+    m_uyShift = (transform.ty - m_vyOrg) / m_lunitsToPixels;
+    m_userScale = transform.scale();
 }
 
 //---------------------------------------------------------------------------------------
@@ -170,21 +174,6 @@ TransAffine& Renderer::set_transformation()
 }
 
 //---------------------------------------------------------------------------------------
-void Renderer::remove_shift()
-{
-    set_shift(0.0f, 0.0f);
-    set_transformation();
-}
-
-//---------------------------------------------------------------------------------------
-void Renderer::set_transform(TransAffine& transform)
-{
-    m_uxShift = (transform.tx - m_vxOrg) / m_lunitsToPixels;
-    m_uyShift = (transform.ty - m_vyOrg) / m_lunitsToPixels;
-    m_userScale = transform.scale();
-}
-
-//---------------------------------------------------------------------------------------
 agg::rgba Renderer::to_rgba(Color c)
 {
     double red = double(c.r)/255.0;
@@ -199,6 +188,17 @@ agg::rgba8 Renderer::to_rgba8(Color c)
 {
     return agg::rgba8(c.r, c.g, c.b, c.a);
 }
+
+//---------------------------------------------------------------------------------------
+void Renderer::reset()
+{
+    m_path.remove_all();
+    m_attr_storage.remove_all();
+    m_attr_stack.remove_all();
+}
+
+
+
 
 
 }  //namespace lomse

@@ -31,12 +31,12 @@ namespace lomse
 //=======================================================================================
 // GmoShapeBarline implementation
 //=======================================================================================
-GmoShapeBarline::GmoShapeBarline(int idx, int nBarlineType,
+GmoShapeBarline::GmoShapeBarline(ImoObj* pCreatorImo, int idx, int nBarlineType,
                                  LUnits xPos, LUnits yTop,
 						         LUnits yBottom, LUnits uThinLineWidth,
                                  LUnits uThickLineWidth, LUnits uSpacing,
                                  LUnits uRadius, Color color, LUnits uMinWidth)
-    : GmoSimpleShape(GmoObj::k_shape_barline, idx, color)
+    : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_barline, idx, color)
     , m_nBarlineType(nBarlineType)
     , m_uxTop(xPos)
     , m_uThinLineWidth(uThinLineWidth)
@@ -101,7 +101,7 @@ void GmoShapeBarline::compute_width()
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShapeBarline::shift_origin(USize& shift)
+void GmoShapeBarline::shift_origin(const USize& shift)
 {
     GmoObj::shift_origin(shift);
     m_uxTop += shift.width;

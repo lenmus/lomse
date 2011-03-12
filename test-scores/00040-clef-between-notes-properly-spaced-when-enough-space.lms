@@ -1,0 +1,16 @@
+(score
+   (vers 1.6)(language en iso-8859-1)
+   (opt Render.SpacingMethod 2)
+   (opt Render.SpacingFactor 1.1)
+   (instrument
+      (musicData
+         (clef G)
+         (n d5 w)
+         (n c5 w)
+         (clef F4)
+         (n d3 w)
+         (n c3 w)
+      )
+   )
+)
+

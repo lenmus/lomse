@@ -26,6 +26,7 @@
 #include <vector>
 #include "lomse_visitor.h"
 #include "lomse_basic.h"
+#include "lomse_score_enums.h"
 
 using namespace std;
 
@@ -144,14 +145,18 @@ class DtoClef : public DtoStaffObj
 {
 protected:
     int m_clefType;
+    int m_symbolSize;
 
 public:
-    DtoClef(int type) : DtoStaffObj(), m_clefType(type) {}
+    DtoClef(int type) : DtoStaffObj(), m_clefType(type)
+                      , m_symbolSize(k_size_default) {}
     ~DtoClef() {}
 
     //getters and setters
     inline int get_clef_type() { return m_clefType; }
     inline void set_clef_type(int type) { m_clefType = type; }
+    inline int get_symbol_size() { return m_symbolSize; }
+    inline void set_symbol_size(int size) { m_symbolSize = size; }
 
 };
 

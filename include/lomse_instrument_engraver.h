@@ -23,7 +23,10 @@
 
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
+#include "lomse_engraver.h"
+
 #include <vector>
+#include <list>
 #include <string>
 using namespace std;
 
@@ -36,15 +39,15 @@ class ImoScore;
 class FontStorage;
 class GmoBox;
 class GmoBoxSystem;
+class GmoShapeStaff;
 
 //---------------------------------------------------------------------------------------
-class InstrumentEngraver
+class InstrumentEngraver : public Engraver
 {
 protected:
     ImoInstrument* m_pInstr;
     ImoScore* m_pScore;
     FontStorage* m_pFontStorage;
-    LibraryScope& m_libraryScope;
     LUnits m_uIndentFirst;
     LUnits m_uIndentOther;
     LUnits m_uBracketWidth;
@@ -57,9 +60,11 @@ protected:
     LUnits m_stavesWidth;
 
     std::vector<LUnits> m_staffTop;
+    std::list<GmoShapeStaff*> m_staffShapes;      //for current system
 
 public:
-    InstrumentEngraver(ImoInstrument* pInstr, ImoScore* pScore, LibraryScope& libraryScope);
+    InstrumentEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                       ImoInstrument* pInstr, ImoScore* pScore);
     ~InstrumentEngraver();
 
     //indents
@@ -71,11 +76,13 @@ public:
     void add_staff_lines(GmoBoxSystem* pBox, LUnits x, LUnits y, LUnits indent);
     void add_name_abbrev(GmoBox* pBox, int nSystem);
     void add_brace_bracket(GmoBox* pBox);
-    LUnits get_staves_bottom() { return m_stavesBottom; }
-    LUnits get_staves_top() { return m_stavesTop; }
-    LUnits get_top_of_staff(int iStaff);
-    LUnits get_staves_width() { return m_stavesWidth; }
-    LUnits get_staves_left() { return m_stavesLeft; }
+    inline LUnits get_staves_bottom() { return m_stavesBottom; }
+    LUnits get_staves_top_line();
+    LUnits get_staves_bottom_line();
+    LUnits get_top_line_of_staff(int iStaff);
+    inline LUnits get_staves_width() { return m_stavesWidth; }
+    inline LUnits get_staves_left() { return m_stavesLeft; }
+    inline LUnits get_staves_right() { return m_stavesLeft + m_stavesWidth; }
 
     //helper
     LUnits tenths_to_logical(Tenths value, int iStaff=0);

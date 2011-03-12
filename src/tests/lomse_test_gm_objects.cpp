@@ -129,7 +129,8 @@ SUITE(GmoTest)
     {
         GmoStubScore stub(NULL);
         GmoBoxScorePage box(&stub);
-        GmoBoxSystem* pSys = box.add_system(0);
+        GmoBoxSystem* pSys = new GmoBoxSystem();
+        box.add_system(pSys, 0);
         CHECK( box.get_num_systems() == 1 );
         CHECK( pSys = box.get_system(0) );
     }
@@ -142,14 +143,6 @@ SUITE(GmoTest)
         CHECK( box.get_num_slices() == 0 );
     }
 
-    TEST_FIXTURE(GmoTestFixture, BoxSystem_AddSlice)
-    {
-        GmoBoxSystem box;
-        GmoBoxSlice* pSlice = box.add_slice(0);
-        CHECK( box.get_num_slices() == 1 );
-        CHECK( box.get_slice(0) == pSlice );
-    }
-
     TEST_FIXTURE(GmoTestFixture, BoxSystem_AddShapeUpdatesLayerPointers)
     {
         GmoBoxDocPage page;
@@ -159,11 +152,15 @@ SUITE(GmoTest)
         GmoBoxScorePage* pScorePage = new GmoBoxScorePage(&stub);
         pDPC->add_child_box(pScorePage);
         GmoBoxSystem* pBox = new GmoBoxSystem();
-        pScorePage->add_child_box(pBox);
-        CHECK( page.get_first_shape_for_layer(GmoShape::k_layer_staff) == NULL );
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(0, &staff, 0, 20.0f, Color(0,0,0));
+        GmoShapeStaff* pShape = new GmoShapeStaff(&staff, 0, &staff, 0, 20.0f, Color(0,0,0));
         pBox->add_staff_shape(pShape);
+
+        CHECK( page.get_first_shape_for_layer(GmoShape::k_layer_staff) == NULL );
+
+        pScorePage->add_system(pBox, 0);
+        pBox->store_shapes_in_page();
+
         CHECK( page.get_first_shape_for_layer(GmoShape::k_layer_staff) == pShape );
     }
 
@@ -180,7 +177,7 @@ SUITE(GmoTest)
         GmoBoxSystem* pBox = new GmoBoxSystem();
         pScorePage->add_child_box(pBox);
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(0, &staff, 0, 20.0f, Color(0,0,0));
+        GmoShapeStaff* pShape = new GmoShapeStaff(&staff, 0, &staff, 0, 20.0f, Color(0,0,0));
         pBox->add_staff_shape(pShape);
         CHECK( pBox->get_staff_shape(0) == pShape );
     }
@@ -196,7 +193,7 @@ SUITE(GmoTest)
         GmoBoxSystem* pBox = new GmoBoxSystem();
         pScorePage->add_child_box(pBox);
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(0, &staff, 0, 20.0f, Color(0,0,0));
+        GmoShapeStaff* pShape = new GmoShapeStaff(&staff, 0, &staff, 0, 20.0f, Color(0,0,0));
         pBox->add_shape(pShape, GmoShape::k_layer_staff);
         CHECK( pBox->get_shape(0) == pShape );
     }
@@ -212,7 +209,7 @@ SUITE(GmoTest)
         GmoBoxSystem* pBox = new GmoBoxSystem();
         pScorePage->add_child_box(pBox);
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(0, &staff, 0, 20.0f, Color(0,0,0));
+        GmoShapeStaff* pShape = new GmoShapeStaff(&staff, 0, &staff, 0, 20.0f, Color(0,0,0));
         pBox->add_staff_shape(pShape);
         CHECK( pShape->get_layer() == GmoShape::k_layer_staff );
     }
@@ -226,20 +223,22 @@ SUITE(GmoTest)
         GmoBoxScorePage* pScorePage = new GmoBoxScorePage(&stub);
         pDPC->add_child_box(pScorePage);
         GmoBoxSystem* pBox = new GmoBoxSystem();
-        pScorePage->add_child_box(pBox);
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape0 = new GmoShapeStaff(0, &staff, 0, 20.0f, Color(0,0,0));
+        GmoShapeStaff* pShape0 = new GmoShapeStaff(&staff, 0, &staff, 0, 20.0f, Color(0,0,0));
         pBox->add_shape(pShape0, 2);
-        GmoShapeStaff* pShape1 = new GmoShapeStaff(1, &staff, 0, 20.0f, Color(0,0,0));
+        GmoShapeStaff* pShape1 = new GmoShapeStaff(&staff, 1, &staff, 0, 20.0f, Color(0,0,0));
         pBox->add_shape(pShape1, 1);
-        GmoShapeStaff* pShape2 = new GmoShapeStaff(2, &staff, 0, 20.0f, Color(0,0,0));
+        GmoShapeStaff* pShape2 = new GmoShapeStaff(&staff, 2, &staff, 0, 20.0f, Color(0,0,0));
         pBox->add_shape(pShape2, 3);
-        GmoShapeStaff* pShape3 = new GmoShapeStaff(3, &staff, 0, 20.0f, Color(0,0,0));
+        GmoShapeStaff* pShape3 = new GmoShapeStaff(&staff, 3, &staff, 0, 20.0f, Color(0,0,0));
         pBox->add_shape(pShape3, 1);
-        GmoShapeStaff* pShape4 = new GmoShapeStaff(4, &staff, 0, 20.0f, Color(0,0,0));
+        GmoShapeStaff* pShape4 = new GmoShapeStaff(&staff, 4, &staff, 0, 20.0f, Color(0,0,0));
         pBox->add_shape(pShape4, 0);
-        GmoShapeStaff* pShape5 = new GmoShapeStaff(5, &staff, 0, 20.0f, Color(0,0,0));
+        GmoShapeStaff* pShape5 = new GmoShapeStaff(&staff, 5, &staff, 0, 20.0f, Color(0,0,0));
         pBox->add_shape(pShape5, 1);
+
+        pScorePage->add_system(pBox, 0);
+        pBox->store_shapes_in_page();
 
         std::list<GmoShape*>& shapes = page.get_all_shapes();
         std::list<GmoShape*>::iterator it = shapes.begin();
@@ -283,7 +282,7 @@ SUITE(GmoTest)
         GmoBoxSystem* pBox = new GmoBoxSystem();
         pScorePage->add_child_box(pBox);
         ImoStaffInfo staff;
-        GmoShapeStaff* pShape = new GmoShapeStaff(0, &staff, 0, 0.0f, Color(0,0,0));
+        GmoShapeStaff* pShape = new GmoShapeStaff(&staff, 0, &staff, 0, 0.0f, Color(0,0,0));
         pBox->add_shape(pShape, 0);
         pShape->set_origin(2000.0f, 3000.0f);
         CHECK( pShape->get_left() == 2000.0f );

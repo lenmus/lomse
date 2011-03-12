@@ -1,0 +1,15 @@
+(score
+   (vers 1.6)
+   (opt Render.SpacingMethod fixed)
+   (opt Render.SpacingValue 40)
+   (instrument
+      (musicData
+         (clef G)
+         (n f4 w..)(n f4 h..)(n f4 q..)(n f4 e..)(n f4 s..)(n f4 t..)(n f4 i..)(n f4 o..)(n f4 f..)
+         (barline)
+         (n c5 w..)(n c5 h..)(n c5 q..)(n c5 e..)(n c5 s..)(n c5 t..)(n c5 i..)(n c5 o..)(n c5 f..)
+         (barline end)
+      )
+   )
+)
+

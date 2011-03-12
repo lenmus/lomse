@@ -32,6 +32,7 @@ namespace lomse
 //=======================================================================================
 LomseDoorway::LomseDoorway()
     : m_pLibraryScope(NULL)
+    , m_pFunc_get_font(null_get_font_filename)
 {
 }
 
@@ -56,28 +57,38 @@ Presenter* LomseDoorway::open_document(int viewType, const string& filename)
 }
 
 //---------------------------------------------------------------------------------------
-int LomseDoorway::init_library(EPlatformType type, ostream& reporter)
+void LomseDoorway::init_library(int pixel_format, int ppi, bool reverse_y_axis,
+                               ostream& reporter)
 {
-    switch(type)
-    {
-        case k_platform_win32:
-            m_platform.format = pix_format_bgra32;
-            m_platform.flip_y = false;
-            m_platform.screen_ppi = 96.0;
-            break;
-
-        case k_platform_x11:
-            m_platform.format = pix_format_bgra32;
-            m_platform.flip_y = false;
-            m_platform.screen_ppi = 96.0;
-            break;
-
-        default:
-            return 1;   //error
-    }
+    m_platform.pixel_format = EPixelFormat(pixel_format);
+    m_platform.flip_y = reverse_y_axis;
+    m_platform.screen_ppi = float(ppi);
 
     m_pLibraryScope = new LibraryScope(reporter, this);
-    return 0;   //no error
+}
+
+//---------------------------------------------------------------------------------------
+void LomseDoorway::set_get_font_callback(string (*pt2Func)(const string&, bool, bool))
+{
+    m_pFunc_get_font = pt2Func;
+}
+
+//---------------------------------------------------------------------------------------
+string LomseDoorway::null_get_font_filename(const string& fontname, bool bold,
+                                            bool italic)
+{
+    //This is just a mock method to avoid crashes when using the libary without
+    //initializing it
+
+    string fullpath = LOMSE_FONTS_PATH;
+
+    if (fontname == "LenMus basic")
+    {
+        fullpath += "lmbasic2.ttf";
+        return fullpath;
+    }
+    fullpath += "LiberationSerif-Regular.ttf";
+    return fullpath;
 }
 
 

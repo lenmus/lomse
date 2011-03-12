@@ -177,28 +177,27 @@ void ColStaffObjsBuilder::create_entries(int nInstr)
 {
     ImoInstrument* pInstr = m_pImScore->get_instrument(nInstr);
     ImoMusicData* pMusicData = pInstr->get_musicdata();
+    if (!pMusicData)
+        return;
+
     ImoObj::children_iterator it = pMusicData->begin();
     reset_counters();
     while(it != pMusicData->end())
     {
-        ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>(*it);
-        if (pGBF)
+        if ((*it)->is_go_back_fwd())
         {
+            ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>(*it);
             update_time_counter(pGBF);
+        }
+        else if ((*it)->is_key_signature() || (*it)->is_time_signature())
+        {
+            add_entries_for_key_or_time_signature(*it, nInstr);
         }
         else
         {
-            ImoKeySignature* pKey = dynamic_cast<ImoKeySignature*>(*it);
-            if (pKey)
-            {
-                add_entries_for_key_signature(pKey, nInstr);
-            }
-            else
-            {
-                ImoStaffObj* pSO = dynamic_cast<ImoStaffObj*>(*it);
-                add_entry_for_staffobj(pSO, nInstr);
-                update_segment(pSO);
-            }
+            ImoStaffObj* pSO = dynamic_cast<ImoStaffObj*>(*it);
+            add_entry_for_staffobj(pSO, nInstr);
+            update_segment(pSO);
         }
         ++it;
     }
@@ -219,7 +218,7 @@ void ColStaffObjsBuilder::add_entry_for_staffobj(ImoObj* pImo, int nInstr)
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::add_entries_for_key_signature(ImoObj* pImo, int nInstr)
+void ColStaffObjsBuilder::add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr)
 {
     ImoInstrument* pInstr = m_pImScore->get_instrument(nInstr);
     int numStaves = pInstr->get_num_staves();
@@ -265,7 +264,14 @@ int ColStaffObjsBuilder::get_line_for(int nVoice, int nStaff)
 float ColStaffObjsBuilder::determine_timepos(ImoStaffObj* pSO)
 {
     float rTime = m_rCurTime;
-    m_rCurTime += pSO->get_duration();
+    if (pSO->is_note())
+    {
+        ImoNote* pNote = dynamic_cast<ImoNote*>(pSO);
+        if (!pNote->is_in_chord() || pNote->is_end_of_chord())
+            m_rCurTime += pSO->get_duration();
+    }
+    else
+        m_rCurTime += pSO->get_duration();
     m_rMaxTime = max(m_rMaxTime, m_rCurTime);
     return rTime;
 }

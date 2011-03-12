@@ -311,24 +311,31 @@ protected:
 
     //building the model
     void add_to_model(ImoObj* pImo);
+    void add_chord_to_model(ImoChord* pChord) {
+        m_pAnalyser->add_chord(pChord);
+    }
 
     //auxiliary
     inline long get_node_id() { return m_pAnalysedNode->get_id(); }
     bool contains(ELdpElement type, ELdpElement* pValid, int nValid);
 
+    //-----------------------------------------------------------------------------------
     inline bool more_params_to_analyse() {
         return m_pNextParam != NULL;
     }
 
+    //-----------------------------------------------------------------------------------
     inline LdpElement* get_param_to_analyse() {
         return m_pNextParam;
     }
 
+    //-----------------------------------------------------------------------------------
     inline void move_to_next_param() {
         m_pNextParam = m_pNextNextParam;
         prepare_next_one();
     }
 
+    //-----------------------------------------------------------------------------------
     inline void prepare_next_one() {
         if (m_pNextParam)
             m_pNextNextParam = m_pNextParam->get_next_sibling();
@@ -336,11 +343,13 @@ protected:
             m_pNextNextParam = NULL;
     }
 
+    //-----------------------------------------------------------------------------------
     inline void move_to_first_param() {
         m_pNextParam = m_pAnalysedNode->get_first_child();
         prepare_next_one();
     }
 
+    //-----------------------------------------------------------------------------------
     void get_num_staff()
     {
         string staff = m_pParamToAnalyse->get_value().substr(1);
@@ -357,6 +366,7 @@ protected:
             m_pAnalyser->set_current_staff(--nStaff);
     }
 
+    //-----------------------------------------------------------------------------------
     bool is_long_value()
     {
         string number = m_pParamToAnalyse->get_value();
@@ -365,6 +375,7 @@ protected:
         return !((iss >> std::dec >> nNumber).fail());
     }
 
+    //-----------------------------------------------------------------------------------
     long get_long_value(long nDefault=0L)
     {
         string number = m_pParamToAnalyse->get_value();
@@ -383,11 +394,13 @@ protected:
             return nNumber;
     }
 
+    //-----------------------------------------------------------------------------------
     int get_integer_value(int nDefault)
     {
         return static_cast<int>( get_long_value(static_cast<int>(nDefault)) );
     }
 
+    //-----------------------------------------------------------------------------------
     bool is_float_value()
     {
         string number = m_pParamToAnalyse->get_value();
@@ -396,6 +409,7 @@ protected:
         return !((iss >> std::dec >> rNumber).fail());
     }
 
+    //-----------------------------------------------------------------------------------
     float get_float_value(float rDefault=0.0f)
     {
         string number = m_pParamToAnalyse->get_value();
@@ -414,6 +428,7 @@ protected:
             return rNumber;
     }
 
+    //-----------------------------------------------------------------------------------
     bool is_bool_value()
     {
         string value = m_pParamToAnalyse->get_value();
@@ -421,6 +436,7 @@ protected:
              || value == "false" || value == "no" ;
     }
 
+    //-----------------------------------------------------------------------------------
     bool get_bool_value(bool fDefault=false)
     {
         string value = m_pParamToAnalyse->get_value();
@@ -439,11 +455,29 @@ protected:
         }
     }
 
+    //-----------------------------------------------------------------------------------
+    int get_yes_no_value(int nDefault)
+    {
+        string value = m_pParamToAnalyse->get_value();
+        if (value == "yes")
+            return k_yesno_yes;
+        else if (value == "no")
+            return k_yesno_no;
+        else
+        {
+            report_msg(m_pParamToAnalyse->get_line_number(),
+                "Invalid yes/no value '" + value + "'. Replaced by default.");
+            return nDefault;
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
     string get_string_value()
     {
         return m_pParamToAnalyse->get_value();
     }
 
+    //-----------------------------------------------------------------------------------
     Color get_color_value()
     {
         ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
@@ -455,6 +489,7 @@ protected:
         return color;
     }
 
+    //-----------------------------------------------------------------------------------
     TPoint get_point_value()
     {
         ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
@@ -466,6 +501,7 @@ protected:
         return point;
     }
 
+    //-----------------------------------------------------------------------------------
     TSize get_size_value()
     {
         ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
@@ -477,24 +513,28 @@ protected:
         return size;
     }
 
+    //-----------------------------------------------------------------------------------
     float get_location_value()
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
         return get_float_value(0.0f);
     }
 
+    //-----------------------------------------------------------------------------------
     float get_width_value(float rDefault=1.0f)
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
         return get_float_value(rDefault);
     }
 
+    //-----------------------------------------------------------------------------------
     float get_height_value(float rDefault=1.0f)
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
         return get_float_value(rDefault);
     }
 
+    //-----------------------------------------------------------------------------------
     EHAlign get_alignment_value(EHAlign defaultValue)
     {
         const std::string& value = m_pParamToAnalyse->get_value();
@@ -512,27 +552,29 @@ protected:
         }
     }
 
-    ImoTextStyleInfo* get_text_style_value()
+    //-----------------------------------------------------------------------------------
+    ImoTextStyleInfo* get_text_style_value(const string& defaulName="Default style")
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
         string styleName = get_string_value();
         ImoTextStyleInfo* pStyle = NULL;
 
-        if (m_pAnchor && m_pAnchor->is_score())
+        ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
+        if (pScore)
         {
-            ImoScore* pScore = dynamic_cast<ImoScore*>(m_pAnchor);
             pStyle = pScore->get_style_info(styleName);
             if (!pStyle)
             {
                 report_msg(m_pParamToAnalyse->get_line_number(),
                         "Style '" + styleName + "' is not defined. Default style will be used.");
-                pStyle = pScore->get_default_style_info();
+                pStyle = pScore->get_style_info_or_defaults(defaulName);
             }
         }
 
         return pStyle;
     }
 
+    //-----------------------------------------------------------------------------------
     ELineStyle get_line_style_value()
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
@@ -558,6 +600,7 @@ protected:
         }
     }
 
+    //-----------------------------------------------------------------------------------
     ELineCap get_line_cap_value()
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
@@ -583,6 +626,7 @@ protected:
         }
     }
 
+    //-----------------------------------------------------------------------------------
     void check_visible(ImoComponentObj* pCO)
     {
         string value = m_pParamToAnalyse->get_value();
@@ -597,6 +641,7 @@ protected:
         }
     }
 
+    //-----------------------------------------------------------------------------------
     NoteTypeAndDots get_note_type_and_dots()
     {
         string duration = m_pParamToAnalyse->get_value();
@@ -610,6 +655,7 @@ protected:
         return figdots;
     }
 
+    //-----------------------------------------------------------------------------------
     void analyse_attachments(ImoStaffObj* pAnchor)
     {
         while( more_params_to_analyse() )
@@ -755,14 +801,20 @@ protected:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ <beam> = (beam num <beamtype>+)
-//@ <beamtype> = label: { begin | continue | end | forward | backward }
-//@
-//@ Examples:
-//@     (beam 17 begin)
-//@     (beam 17 continue begin forward)
-//@     (beam 17 continue continue)
-//@     (beam 17 end end backward)
+//@ <beam> = (beam num <beamtype>)
+//@ <beamtype> = label. Concatenation of 1 to 6 chars from set { + | - | = | f | b }
+//@     meaning:
+//@         +  begin
+//@         =  continue
+//@         -  end
+//@         f  forward
+//@         b  backward
+//@                                 +     =+f   ==     --b
+//@ Examples:                       ====================
+//@     (beam 17 +)                 |     ==============
+//@     (beam 17 =+f)               |     ===   |    ===
+//@     (beam 17 ==)                |     |     |      |
+//@     (beam 17 --b)              **    **    **     **
 
 
 class BeamAnalyser : public ElementAnalyser
@@ -786,16 +838,12 @@ public:
             return;
         }
 
-        // <beamtype>+ (label)
-        int level = 0;
-        while (more_params_to_analyse())
+        // <beamtype> (label)
+        if (!get_optional(k_label) || !set_beam_type(pInfo))
         {
-            if (!get_optional(k_label) || !set_beam_type(level++, pInfo))
-            {
-                error_msg("Missing or invalid beam type. Beam ignored.");
-                delete pInfo;
-                return;
-            }
+            error_msg("Missing or invalid beam type. Beam ignored.");
+            delete pInfo;
+            return;
         }
 
         m_pAnalysedNode->set_imo(pInfo);
@@ -803,22 +851,30 @@ public:
 
 protected:
 
-    bool set_beam_type(int level, ImoBeamInfo* pInfo)
+    bool set_beam_type(ImoBeamInfo* pInfo)
     {
         const std::string& value = m_pParamToAnalyse->get_value();
-        if (value == "begin")
-            pInfo->set_beam_type(level, ImoBeam::k_begin);
-        else if (value == "continue")
-            pInfo->set_beam_type(level, ImoBeam::k_continue);
-        else if (value == "end")
-            pInfo->set_beam_type(level, ImoBeam::k_end);
-        else if (value == "forward")
-            pInfo->set_beam_type(level, ImoBeam::k_forward);
-        else if (value == "backward")
-            pInfo->set_beam_type(level, ImoBeam::k_backward);
+        if (value.size() < 7)
+        {
+            for (int i=0; i < int(value.size()); ++i)
+            {
+                if (value[i] == '+')
+                    pInfo->set_beam_type(i, ImoBeam::k_begin);
+                else if (value[i] == '=')
+                    pInfo->set_beam_type(i, ImoBeam::k_continue);
+                else if (value[i] == '-')
+                    pInfo->set_beam_type(i, ImoBeam::k_end);
+                else if (value[i] == 'f')
+                    pInfo->set_beam_type(i, ImoBeam::k_forward);
+                else if (value[i] == 'b')
+                    pInfo->set_beam_type(i, ImoBeam::k_backward);
+                else
+                    return false;   //error
+            }
+            return true;   //ok
+        }
         else
             return false;   //error
-        return true;    //ok
     }
 
 };
@@ -934,7 +990,6 @@ protected:
 
 //@-------------------------------------------------------------------------------------
 // <chord> = (chord <note>+ )
-// deprecated since 1.6
 
 class ChordAnalyser : public ElementAnalyser
 {
@@ -945,66 +1000,53 @@ public:
 
     void do_analysis()
     {
-        ImoMusicData* pAuxMD = new ImoMusicData();
-        m_pAnalysedNode->set_imo(pAuxMD);
+        ImoChord* pChord = new ImoChord();
 
         // <note>*
         while (more_params_to_analyse())
         {
-            if (!analyse_optional(k_note, pAuxMD))
+            if (!analyse_optional(k_note, pChord))
             {
                 error_invalid_param();
                 move_to_next_param();
             }
         }
 
-        add_notes_to_chord(pAuxMD);
-        add_to_music_data(pAuxMD);
+        add_notes_to_music_data(pChord);
     }
 
 protected:
 
-    void add_notes_to_chord(ImoMusicData* pChordNotes)
-    {
-        ImoObj::children_iterator it;
-        int i = 0;
-        for (it = pChordNotes->begin(); it != pChordNotes->end(); ++it, ++i)
-        {
-            ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
-            pNote->set_in_chord(i > 0);
-        }
-    }
-
-    void add_to_music_data(ImoMusicData* pChordNotes)
+    void add_notes_to_music_data(ImoChord* pChord)
     {
         //get anchor musicData
-        ImoMusicData* pMD;
         if (m_pAnchor)
         {
-            pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
+            ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
             if (!pMD)
                 return;
 
-            //transfer notes
-            ImoObj::children_iterator it;
-            int i = 0;
-            for (it = pChordNotes->begin(); it != pChordNotes->end(); ++it, ++i)
+            //add notes to musicData
+            std::list<ImoStaffObj*>& m_notes = pChord->get_related_objects();
+            std::list<ImoStaffObj*>::iterator it;
+            for (it = m_notes.begin(); it != m_notes.end(); ++it)
             {
                 ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
-                ImoNote* pClone = new ImoNote();
-                *pClone = *pNote;
-                pMD->append_child(pClone);
+                pMD->append_child(pNote);
             }
+
+            add_to_model(pChord);
         }
     }
 
 };
 
 //@-------------------------------------------------------------------------------------
-//@ <clef> = (clef <type>[<staffNum>][<visible>][<location>] )
+//@ <clef> = (clef <type> [<symbolSize>] [<staffNum>] [<visible>] [<location>] )
 //@ <type> = label: { G | F4 | F3 | C1 | C2 | C3 | C4 | percussion |
-//@                   C3 | C5 | F5 | G1 | 8_G | G_8 | 8_F4 | F4_8 |
+//@                   C5 | F5 | G1 | 8_G | G_8 | 8_F4 | F4_8 |
 //@                   15_G | G_15 | 15_F4 | F4_15 }
+//@ <symbolSize> = (symbolSize { full | cue | large } )
 
 class ClefAnalyser : public ElementAnalyser
 {
@@ -1021,6 +1063,10 @@ public:
         if (get_optional(k_label))
             dto.set_clef_type( get_clef_type() );
 
+        // [<symbolSize>]
+        if (get_optional(k_symbolSize))
+            set_symbol_size(dto);
+
         // [<staffNum>][visible][<location>]
         analyse_staffobjs_options(dto);
 
@@ -1031,6 +1077,8 @@ public:
 
         add_to_model( new ImoClef(dto) );
     }
+
+ protected:
 
     int get_clef_type()
     {
@@ -1051,7 +1099,7 @@ public:
         else if (value == "C4")
             type = ImoClef::k_C4;
         else if (value == "percussion")
-            type = ImoClef::k_Percussion;
+            type = ImoClef::k_percussion;
         else if (value == "C3")
             type = ImoClef::k_C3;
         else if (value == "C5")
@@ -1083,6 +1131,22 @@ public:
         }
 
         return type;
+    }
+
+    void set_symbol_size(DtoClef& dto)
+    {
+        const std::string& value = m_pParamToAnalyse->get_parameter(1)->get_value();
+        if (value == "cue")
+            dto.set_symbol_size(k_size_cue);
+        else if (value == "full")
+            dto.set_symbol_size(k_size_full);
+        else if (value == "large")
+            dto.set_symbol_size(k_size_large);
+        else
+        {
+            dto.set_symbol_size(k_size_full);
+            error_msg("Invalid symbol size '" + value + "'. 'full' size assumed.");
+        }
     }
 
 };
@@ -1208,7 +1272,7 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ <defineStyle> = (defineStyle <name><font><color>)
+//@ <defineStyle> = (defineStyle <syle_name><font><color>)
 //@
 //@ Examples:
 //@     (defineStyle "Composer" (font "Times New Roman" 12pt normal) (color #000000))
@@ -1225,7 +1289,7 @@ public:
     {
         ImoTextStyleInfo dto;
 
-        //<name>
+        //<style_name>
         if (get_mandatory(k_string))
             dto.set_name( get_string_value() );
         else
@@ -1276,14 +1340,14 @@ public:
     {
         string value = m_pParamToAnalyse->get_value();
         if (value == "above")
-            dto.set_placement(ImoFermata::k_above);
+            dto.set_placement(k_placement_above);
         else if (value == "below")
-            dto.set_placement(ImoFermata::k_below);
+            dto.set_placement(k_placement_below);
         else
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Unknown fermata placement '" + value + "'. Replaced by 'above'.");
-            dto.set_placement(ImoFermata::k_above);
+            dto.set_placement(k_placement_above);
         }
     }
 
@@ -1430,10 +1494,10 @@ public:
 ////}
 
 //@-------------------------------------------------------------------------------------
-//@ <font> = (font <name> <size> <font-style>)
-//@ <name> = string   i.e. "Times New Roman", "Trebuchet"
-//@ <size> = num      in points
-//@ <font-style> = { "bold" | "normal" | "italic" | "bold-italic" }
+//@ <font> = (font <font_name> <font_size> <font_style>)
+//@ <font_name> = string   i.e. "Times New Roman", "Trebuchet"
+//@ <font_size> = num      in points
+//@ <font_style> = { "bold" | "normal" | "italic" | "bold-italic" }
 //@
 //@ Compatibility 1.5
 //@     size is a number followed by 'pt'. i.e.: 12pt
@@ -1450,18 +1514,18 @@ public:
     {
         ImoFontInfo font;
 
-        //<name> = string
+        //<font_name> = string
         if (get_mandatory(k_string))
             font.name = get_string_value();
 
-        //<size> = num
+        //<font_size> = num
         if (get_optional(k_number))
             font.size = get_float_value(8.0f);
-        //<size>. Compatibility 1.5
+        //<font_size>. Compatibility 1.5
         else if (get_mandatory(k_label))
             font.size = get_font_size();
 
-        //<font-style>
+        //<font_style>
         if (get_mandatory(k_label))
             set_font_style_weight(font);
 
@@ -1754,8 +1818,8 @@ protected:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ <instrument> = (instrument [<instrName>][<instrAbbrev>][<infoMIDI>]
-//@                            [<staves>] <musicData> )
+//@ <instrument> = (instrument [<instrName>][<instrAbbrev>][<staves>][<staff>]*
+//@                            [<infoMIDI>] <musicData> )
 //@ <instrName> = <textString>
 //@ <instrAbbrev> = <textString>
 
@@ -1780,12 +1844,15 @@ public:
         // [<abbrev>]
         analyse_optional(k_abbrev, pInstrument);
 
-        // [<infoMIDI>]
-        analyse_optional(k_infoMIDI, pInstrument);
-
         // [<staves>]
         if (get_optional(k_staves))
             set_staves(pInstrument);
+
+        // [<staff>]*
+        while (analyse_optional(k_staff, pInstrument));
+
+        // [<infoMIDI>]
+        analyse_optional(k_infoMIDI, pInstrument);
 
         // <musicData>
         analyse_mandatory(k_musicData, pInstrument);
@@ -1839,7 +1906,7 @@ public:
 
     void do_analysis()
     {
-        DtoKeySignature dto(ImoKeySignature::C);
+        DtoKeySignature dto(ImoKeySignature::k_C);
 
         // <type> (label)
         if (get_optional(k_label))
@@ -1856,67 +1923,67 @@ public:
     int get_key_type()
     {
         string value = m_pParamToAnalyse->get_value();
-        int type = ImoKeySignature::C;
+        int type = ImoKeySignature::k_C;
         if (value == "C")
-            type = ImoKeySignature::C;
+            type = ImoKeySignature::k_C;
         else if (value == "G")
-            type = ImoKeySignature::G;
+            type = ImoKeySignature::k_G;
         else if (value == "D")
-            type = ImoKeySignature::D;
+            type = ImoKeySignature::k_D;
         else if (value == "A")
-            type = ImoKeySignature::A;
+            type = ImoKeySignature::k_A;
         else if (value == "E")
-            type = ImoKeySignature::E;
+            type = ImoKeySignature::k_E;
         else if (value == "B")
-            type = ImoKeySignature::B;
+            type = ImoKeySignature::k_B;
         else if (value == "F+")
-            type = ImoKeySignature::Fs;
+            type = ImoKeySignature::k_Fs;
         else if (value == "C+")
-            type = ImoKeySignature::Cs;
+            type = ImoKeySignature::k_Cs;
         else if (value == "C-")
-            type = ImoKeySignature::Cf;
+            type = ImoKeySignature::k_Cf;
         else if (value == "G-")
-            type = ImoKeySignature::Gf;
+            type = ImoKeySignature::k_Gf;
         else if (value == "D-")
-            type = ImoKeySignature::Df;
+            type = ImoKeySignature::k_Df;
         else if (value == "A-")
-            type = ImoKeySignature::Af;
+            type = ImoKeySignature::k_Af;
         else if (value == "E-")
-            type = ImoKeySignature::Ef;
+            type = ImoKeySignature::k_Ef;
         else if (value == "B-")
-            type = ImoKeySignature::Bf;
+            type = ImoKeySignature::k_Bf;
         else if (value == "F")
-            type = ImoKeySignature::F;
+            type = ImoKeySignature::k_F;
         else if (value == "a")
-            type = ImoKeySignature::a;
+            type = ImoKeySignature::k_a;
         else if (value == "e")
-            type = ImoKeySignature::e;
+            type = ImoKeySignature::k_e;
         else if (value == "b")
-            type = ImoKeySignature::b;
+            type = ImoKeySignature::k_b;
         else if (value == "f+")
-            type = ImoKeySignature::fs;
+            type = ImoKeySignature::k_fs;
         else if (value == "c+")
-            type = ImoKeySignature::cs;
+            type = ImoKeySignature::k_cs;
         else if (value == "g+")
-            type = ImoKeySignature::gs;
+            type = ImoKeySignature::k_gs;
         else if (value == "d+")
-            type = ImoKeySignature::ds;
+            type = ImoKeySignature::k_ds;
         else if (value == "a+")
-            type = ImoKeySignature::as;
+            type = ImoKeySignature::k_as;
         else if (value == "a-")
-            type = ImoKeySignature::af;
+            type = ImoKeySignature::k_af;
         else if (value == "e-")
-            type = ImoKeySignature::ef;
+            type = ImoKeySignature::k_ef;
         else if (value == "b-")
-            type = ImoKeySignature::bf;
+            type = ImoKeySignature::k_bf;
         else if (value == "f")
-            type = ImoKeySignature::f;
+            type = ImoKeySignature::k_f;
         else if (value == "c")
-            type = ImoKeySignature::c;
+            type = ImoKeySignature::k_c;
         else if (value == "g")
-            type = ImoKeySignature::g;
+            type = ImoKeySignature::k_g;
         else if (value == "d")
-            type = ImoKeySignature::d;
+            type = ImoKeySignature::k_d;
        else
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
@@ -2185,7 +2252,7 @@ public:
 
 //@-------------------------------------------------------------------------------------
 //@ ImoNote, ImoRest StaffObj
-//@ <note> = (n <pitch><duration> [<noteOptions>*][<noteRestOptions>*]
+//@ <note> = ({n | na} <pitch><duration> [<noteOptions>*][<noteRestOptions>*]
 //@             [<componentOptions>*][<attachments>*])
 //@ <rest> = (r <duration> [<noteRestOptions>*][<componentOptions>*][<attachments>*])
 //@ <noteOptions> = { <tie> | <stem> }
@@ -2215,7 +2282,9 @@ public:
         , m_pBeamInfo(NULL)
         , m_pFermata(NULL)
         , m_srcOldBeam("")
-        , m_srcOldTuplet("") {}
+        , m_srcOldTuplet("")
+    {
+    }
 
     void do_analysis()
     {
@@ -2240,18 +2309,6 @@ public:
         // <duration> (label)
         if (get_mandatory(k_label))
             set_duration(pDto);
-
-        if (!fIsRest)
-            dtoNote.set_in_chord(fInChord);
-        //TODO: check if note in chord has the same duration than base note
-      //  if (fInChord && m_pLastNoteRest && m_pLastNoteRest->IsNote()
-      //      && !IsEqualTime(m_pLastNoteRest->GetDuration(), rDuration) )
-      //  {
-      //      report_msg("Error: note in chord has different duration than base note. Duration changed.");
-		    //rDuration = m_pLastNoteRest->GetDuration();
-      //      nNoteType = m_pLastNoteRest->GetNoteType();
-      //      nDots = m_pLastNoteRest->GetNumDots();
-      //  }
 
         //compatibility 1.5
         //after duration we can find old abbreviated items (l, g, p, v) in any order
@@ -2345,6 +2402,42 @@ public:
 
         add_beam_info(pNR);
 
+        if (!fIsRest && fInChord)
+        {
+            ImoNote* pStartOfChordNote = m_pAnalyser->get_last_note();
+            ImoChord* pChord;
+            if (pStartOfChordNote->is_in_chord())
+            {
+                //chord already created. just add note to it
+                pChord = pStartOfChordNote->get_chord();
+            }
+            else
+            {
+                //previous note is the base note. Create the chord
+                pChord = new ImoChord();
+                pChord->push_back(pStartOfChordNote);
+                pStartOfChordNote->set_in_chord(pChord);
+                add_chord_to_model(pChord);
+            }
+
+            //add current note to chord
+            pChord->push_back(pNote);
+            pNote->set_in_chord(pChord);
+
+        //TODO: check if note in chord has the same duration than base note
+      //  if (fInChord && m_pLastNote
+      //      && !IsEqualTime(m_pLastNote->GetDuration(), rDuration) )
+      //  {
+      //      report_msg("Error: note in chord has different duration than base note. Duration changed.");
+		    //rDuration = m_pLastNote->GetDuration();
+      //      nNoteType = m_pLastNote->GetNoteType();
+      //      nDots = m_pLastNote->GetNumDots();
+      //  }
+        }
+
+        //save this note as last note
+        if (!fIsRest)
+            m_pAnalyser->save_last_note(pNote);
     }
 
 protected:
@@ -2442,12 +2535,12 @@ protected:
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
         string value = get_string_value();
         if (value == "up")
-            dto.set_stem_direction(ImoNote::k_up);
+            dto.set_stem_direction(ImoNote::k_stem_up);
         else if (value == "down")
-            dto.set_stem_direction(ImoNote::k_down);
+            dto.set_stem_direction(ImoNote::k_stem_down);
         else
         {
-            dto.set_stem_direction(ImoNote::k_default);
+            dto.set_stem_direction(ImoNote::k_stem_default);
             report_msg(m_pParamToAnalyse->get_line_number(),
                             "Invalid value '" + value
                             + "' for stem type. Default stem asigned.");
@@ -2538,8 +2631,8 @@ protected:
     {
         string value = m_srcOldTuplet;
         bool fError = false;
-        char numActual;
-        char numNormal = '0';
+        string sActual;
+        string sNormal = "0";
         if (value.length() > 1)
         {
             if (value.length() == 2)
@@ -2550,12 +2643,12 @@ protected:
                     return;
                 }
                 else
-                    numActual = value[1];
+                    sActual = value.substr(1);
             }
             else if (value.length() == 4 && value[2] == '/')
             {
-                numActual = value[1];
-                numNormal = value[3];
+                sActual = value.substr(1, 1);
+                sNormal = value.substr(3, 1);
             }
             else
                 fError = true;
@@ -2564,7 +2657,7 @@ protected:
             fError = true;
 
         locale loc;
-        if (!fError && (!isdigit(numActual,loc) || !isdigit(numNormal,loc)))
+        if (!fError && (!isdigit(sActual[0],loc) || !isdigit(sNormal[0],loc)))
             fError = true;
 
         if (fError)
@@ -2585,10 +2678,8 @@ protected:
             {
                 int actual;
                 int normal;
-                std::string sa(&numActual);
-                std::string sn(&numNormal);
-                stringstream(sa) >> actual;
-                stringstream(sn) >> normal;
+                stringstream(sActual) >> actual;
+                stringstream(sNormal) >> normal;
                 start_old_tuplet(pNR, actual, normal);
             }
         }
@@ -2980,6 +3071,7 @@ public:
     void do_analysis()
     {
         ImoScore* pScore = new ImoScore();
+        m_pAnalyser->set_score_being_analysed(pScore);
 
         // <vers>
         if (get_mandatory(k_vers))
@@ -2997,6 +3089,7 @@ public:
 
         // [<defineStyle>*]
         while (analyse_optional(k_defineStyle, pScore));
+        pScore->add_required_text_styles();
 
         // [<title>*]
         while (analyse_optional(k_title, pScore));
@@ -3035,6 +3128,7 @@ public:
         error_if_more_elements();
 
         add_to_model(pScore);
+        m_pAnalyser->set_score_being_analysed(NULL);
     }
 
 protected:
@@ -3140,6 +3234,116 @@ public:
        // [<attachments>*]
         analyse_attachments(pSpacer);
     }
+
+};
+
+//@-------------------------------------------------------------------------------------
+//@ ImoStaffInfo SimpleObj
+//@ <staff> = (staff <num> [<staffType>][<staffLines>][<staffSpacing>]
+//@                        [<staffDistance>][<lineThickness>] )
+//@
+//@ <staffType> = (staffType { ossia | cue | editorial | regular | alternate } )
+//@ <staffLines> = (staffLines <integer_num>)
+//@ <staffSpacing> = (staffSpacing <real_num>)      LUnits (cents of millimeter)
+//@ <staffDistance> = (staffDistance <real_num>)    LUnits (cents of millimeter)
+//@ <lineThickness> = (lineThickness <real_num>)    LUnits (cents of millimeter)
+//@
+//@ Example:
+//@     (staff 1 (staffType regular)(staffLines 5)(staffSpacing 180.00)
+//@              (staffDistance 2000.00)(lineThickness 15.00))
+//@
+
+class StaffAnalyser : public ElementAnalyser
+{
+public:
+    StaffAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                  ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoStaffInfo dto;
+
+        // num_instr
+        if (!get_optional(k_number) || !set_staff_number(dto))
+        {
+            error_msg("Missing or invalid staff number. Staff info ignored.");
+            return;
+        }
+
+        // [<staffType>]
+        if (get_optional(k_staffType))
+            set_staff_type(dto);
+
+        // [<staffLines>]
+        if (get_optional(k_staffLines))
+            set_staff_lines(dto);
+
+        // [<staffSpacing>]
+        if (get_optional(k_staffSpacing))
+        {
+            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+            dto.set_line_spacing( get_float_value(180.0f));
+        }
+
+        //[<staffDistance>]
+        if (get_optional(k_staffDistance))
+        {
+            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+            dto.set_staff_margin( get_float_value(1000.0f));
+        }
+
+        //[<lineThickness>]
+        if (get_optional(k_lineThickness))
+        {
+            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+            dto.set_line_thickness( get_float_value(15.0f));
+        }
+
+        error_if_more_elements();
+
+        add_to_model( new ImoStaffInfo(dto) );
+    }
+
+protected:
+
+    bool set_staff_number(ImoStaffInfo& dto)
+    {
+        int value = get_integer_value(0);
+        if (value < 1)
+            return false;   //error
+        dto.set_staff_number(value-1);
+        return true;
+    }
+
+    void set_staff_type(ImoStaffInfo& dto)
+    {
+        const std::string& value = m_pParamToAnalyse->get_parameter(1)->get_value();
+        if (value == "ossia")
+            dto.set_staff_type(ImoStaffInfo::k_staff_ossia);
+        else if (value == "cue")
+            dto.set_staff_type(ImoStaffInfo::k_staff_cue);
+        else if (value == "editorial")
+            dto.set_staff_type(ImoStaffInfo::k_staff_editorial);
+        else if (value == "regular")
+            dto.set_staff_type(ImoStaffInfo::k_staff_regular);
+        else if (value == "alternate")
+            dto.set_staff_type(ImoStaffInfo::k_staff_alternate);
+        else
+            error_msg("Invalid staff type '" + value + "'. 'regular' staff assumed.");
+    }
+
+    void set_staff_lines(ImoStaffInfo& dto)
+    {
+        m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+
+        int value = get_integer_value(0);
+        if (value < 1)
+            error_msg("Invalid staff. Num lines must be greater than zero. Five assumed.");
+        else
+            dto.set_num_lines(value);
+    }
+
 
 };
 
@@ -3349,10 +3553,16 @@ protected:
 //@
 class TextStringAnalyser : public ElementAnalyser
 {
+protected:
+    string m_styleName;
+
 public:
     TextStringAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
-                 ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+                       ImoObj* pAnchor, const string& styleName="Default style")
+        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor)
+        , m_styleName(styleName)
+    {
+    }
 
     void do_analysis()
     {
@@ -3360,6 +3570,7 @@ public:
         if (get_mandatory(k_string))
         {
             ImoScoreText* pText = new ImoScoreText(get_string_value());
+            set_default_style(pText);
 
             // [<alingment>]
             if (get_optional(k_label))
@@ -3367,7 +3578,7 @@ public:
 
             // [<style>]
             if (get_optional(k_style))
-                pText->set_style( get_text_style_value() );
+                pText->set_style( get_text_style_value(m_styleName) );
 
             // [<location>]
             while (more_params_to_analyse())
@@ -3385,7 +3596,25 @@ public:
         }
     }
 
+protected:
+    void set_default_style(ImoScoreText* pText)
+    {
+        ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
+        if (pScore)
+            pText->set_style( pScore->get_style_info_or_defaults(m_styleName) );
+    }
+
 };
+
+class InstrNameAnalyser : public TextStringAnalyser
+{
+public:
+    InstrNameAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+                      ImoObj* pAnchor)
+        : TextStringAnalyser(pAnalyser, reporter, pFactory, pAnchor,
+                             "Instrument names") {}
+};
+
 
 //@-------------------------------------------------------------------------------------
 //@ <tie> = (tie num <tieType>[<bezier>][color] )   ;num = tie number. integer
@@ -3514,6 +3743,8 @@ public:
                     pTitle->set_user_location_y( get_location_value() );
                 else
                     error_invalid_param();
+
+                move_to_next_param();
             }
             error_if_more_elements();
 
@@ -3538,13 +3769,14 @@ public:
 //@      (t + n m) --> tn/m
 //@
 //@ New syntax: v1.6
-//@ <tuplet> = (t num { - | + <actualNotes>[<normalNotes>][<tupletOptions>] } )
-//@ <actualNotes> = num
-//@ <normalNotes> = num
-//@ <tupletOptions> = noBracket
-//@    future options: squaredBracket | curvedBracket |
-//@                    numNone | numActual | numBoth
-//@
+//@ <tuplet> = (t <tupletID> { - | + <actualNotes>[<normalNotes>][<tupletOptions>] } )
+//@ <tupletID> = integer number
+//@ <actualNotes> = integer number
+//@ <normalNotes> = integer number
+//@ <tupletOptions> =  [<bracketType>] [<displayBracket>] [<displayNormalNum>]
+//@ <bracketType> = (bracketType { squaredBracket | curvedBracket })
+//@ <displayBracket> = (displayBracket { yes | no })
+//@ <displayNormalNum> = (displayNormalNum { yes | no })
 
 class TupletAnalyser : public ElementAnalyser
 {
@@ -3557,6 +3789,10 @@ public:
     {
         ImoTupletDto* pInfo = new ImoTupletDto();
         set_default_values(pInfo);
+
+        // [<tupletID>]     //optional for 1.5 compatibility. TO BE REMOVED
+        if (get_optional(k_number))
+            set_tuplet_id(pInfo);
 
         // { + | - }
         if (!get_mandatory(k_label) || !set_tuplet_type(pInfo))
@@ -3598,7 +3834,14 @@ protected:
     void set_default_values(ImoTupletDto* pInfo)
     {
         pInfo->set_show_bracket( m_pAnalyser->get_current_show_tuplet_bracket() );
-        pInfo->set_show_number( m_pAnalyser->get_current_show_tuplet_number() );
+        pInfo->set_placement(k_placement_default);
+    }
+
+    void set_tuplet_id(ImoTupletDto* pInfo)
+    {
+        //TODO. For now tuplet id is not needed. Perhaps when implementing nested
+        //      tuplets it will have any use.
+        get_integer_value(0);
     }
 
     bool set_tuplet_type(ImoTupletDto* pInfo)
@@ -3638,27 +3881,54 @@ protected:
 
     void analyse_tuplet_options(ImoTupletDto* pInfo)
     {
-        bool fShowBracket = m_pAnalyser->get_current_show_tuplet_bracket();
+        //@ <tupletOptions> =  [<bracketType>] [<displayBracket>] [<displayNormalNum>]
+        //@ <bracketType> = (bracketType { squaredBracket | curvedBracket })
+        //@ <displayBracket> = (displayBracket { yes | no })
+        //@ <displayNormalNum> = (displayNormalNum { yes | no })
+
+        int nShowBracket = m_pAnalyser->get_current_show_tuplet_bracket();
+        int nShowNormalNum = m_pAnalyser->get_current_show_tuplet_normal_num();
         while( more_params_to_analyse() )
         {
             m_pParamToAnalyse = get_param_to_analyse();
             ELdpElement type = m_pParamToAnalyse->get_type();
-            if (type == k_label)
+            switch (type)
             {
-                const std::string& value = m_pParamToAnalyse->get_value();
-                if (value == "noBracket")
-                    fShowBracket = false;
-                else
+                case k_label:
+                {
+                    const std::string& value = m_pParamToAnalyse->get_value();
+                    if (value == "noBracket")
+                        nShowBracket = k_yesno_no;
+                    else
+                        error_invalid_param();
+                    break;
+                }
+
+                case k_displayBracket:
+                {
+                    m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+                    nShowBracket = get_yes_no_value(k_yesno_default);
+                    break;
+                }
+
+                case k_displayNormalNum:
+                {
+                    m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+                    nShowNormalNum = get_yes_no_value(k_yesno_default);
+                    break;
+                }
+
+                default:
                     error_invalid_param();
             }
-            else
-                error_invalid_param();
 
             move_to_next_param();
         }
 
-        pInfo->set_show_bracket(fShowBracket);
-        m_pAnalyser->set_current_show_tuplet_bracket(fShowBracket);
+        pInfo->set_show_bracket(nShowBracket);
+        pInfo->set_show_normal_num(nShowNormalNum);
+        m_pAnalyser->set_current_show_tuplet_bracket(nShowBracket);
+        m_pAnalyser->set_current_show_tuplet_normal_num(nShowNormalNum);
     }
 
 };
@@ -3896,9 +4166,11 @@ Analyser::Analyser(ostream& reporter, LdpFactory* pFactory)
     , m_pOldBeamsBuilder(NULL)
     , m_pTupletsBuilder(NULL)
     , m_IModel(NULL)
+    , m_pScore(NULL)
     , m_pTree(NULL)
-    , m_fShowTupletBracket(true)
-    , m_fShowTupletNumber(true)
+    , m_nShowTupletBracket(k_yesno_default)
+    , m_nShowTupletNormalNum(k_yesno_default)
+    , m_pLastNote(NULL)
 {
 }
 
@@ -3967,13 +4239,18 @@ void Analyser::remove_old_tie_element(LdpElement* pOldTieParam)
 {
 }
 
+void Analyser::add_chord(ImoChord* pChord)
+{
+    m_IModel->add_chord(pChord);
+}
+
 ElementAnalyser* Analyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
 {
     //Factory method to create analysers
 
     switch (type)
     {
-        case k_abbrev:          return new TextStringAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
+        case k_abbrev:          return new InstrNameAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_anchorLine:      return new AnchorLineAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_barline:         return new BarlineAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_beam:            return new BeamAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
@@ -4003,7 +4280,7 @@ ElementAnalyser* Analyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_metronome:       return new MetronomeAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_musicData:       return new MusicDataAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_na:              return new NoteRestAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_name:            return new TextStringAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
+        case k_name:            return new InstrNameAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_newSystem:       return new ControlAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_note:            return new NoteRestAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_opt:             return new OptAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
@@ -4014,8 +4291,9 @@ ElementAnalyser* Analyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_score:           return new ScoreAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_size:            return new SizeAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_spacer:          return new SpacerAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_staff:           return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
+        case k_staff:           return new StaffAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
 //        case k_symbol:          return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
+//        case k_symbolSize:      return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
         case k_startPoint:      return new PointAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_systemLayout:    return new SystemLayoutAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
         case k_systemMargins:   return new SystemMarginsAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
@@ -4124,16 +4402,20 @@ void TiesBuilder::tie_notes(ImoTieDto* pStartInfo, ImoTieDto* pEndInfo)
     ImoNote* pEndNote = pEndInfo->get_note();
 
     ImoTie* pTie = new ImoTie();
+    ImoBezierInfo* pStartBezier = new ImoBezierInfo(pStartInfo->get_bezier());
+    ImoBezierInfo* pEndBezier = new ImoBezierInfo(pEndInfo->get_bezier());
     pTie->set_tie_number( pStartInfo->get_tie_number() );
     pTie->set_start_note( pStartNote );
     pTie->set_end_note( pEndNote );
-    pTie->set_start_bezier( pStartInfo->get_bezier() );
-    pTie->set_stop_bezier( pEndInfo->get_bezier() );
+    pTie->set_start_bezier( pStartBezier );
+    pTie->set_stop_bezier( pEndBezier );
 
     pStartNote->set_tie_next(pTie);
     pEndNote->set_tie_prev(pTie);
 
     m_IModel->add_tie(pTie);
+    pStartNote->attach(pTie);
+    pEndNote->attach(pTie);
 }
 
 void TiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNewInfo)
@@ -4230,6 +4512,8 @@ void TiesBuilder::tie_notes(ImoNote* pStartNote, ImoNote* pEndNote)
     pEndNote->set_tie_prev(pTie);
 
     m_IModel->add_tie(pTie);
+    pStartNote->attach(pTie);
+    pEndNote->attach(pTie);
 }
 
 
@@ -4299,13 +4583,15 @@ void BeamsBuilder::do_beam_notes_rests(ImoBeamInfo* pEndInfo)
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
+        pNR->set_beam(pBeam);
         for (int level=0; level < 6; level++)
-        {
-            pNR->set_beam(pBeam);
             pNR->set_beam_type(level, (*it)->get_beam_type(level) );
-        }
         pBeam->push_back(pNR);
     }
+
+    //AWARE: LDP v1.6 requires full beam description, Autobeamer is not needed
+    //AutoBeamer autobeamer(pBeam);
+    //autobeamer.do_autobeam();
 
     m_IModel->add_beam(pBeam);
 }
@@ -4468,10 +4754,13 @@ void TupletsBuilder::create_tuplet(ImoTupletDto* pEndInfo)
 {
     save_tuplet_info(pEndInfo);
 
-    ImoTuplet* pTuplet = new ImoTuplet();
+    ImoTuplet* pTuplet = NULL;
     std::list<ImoTupletDto*>::iterator it;
     for (it = m_pendingTuplets.begin(); it != m_pendingTuplets.end(); ++it)
     {
+        if (it == m_pendingTuplets.begin())
+            pTuplet = new ImoTuplet(*it);
+
         ImoNoteRest* pNR = (*it)->get_note_rest();
         pNR->set_tuplet(pTuplet);
         pTuplet->push_back(pNR);

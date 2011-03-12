@@ -23,6 +23,8 @@
 
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
+#include "lomse_engraver.h"
+#include "lomse_score_enums.h"
 
 namespace lomse
 {
@@ -31,30 +33,29 @@ namespace lomse
 class ImoClef;
 class GmoBoxSliceInstr;
 class GmoShape;
+class ScoreMeter;
 
 //---------------------------------------------------------------------------------------
-class ClefEngraver
+class ClefEngraver : public Engraver
 {
 protected:
+    int m_iInstr;
+    int m_iStaff;
     int m_nClefType;
-    bool m_fSmallClef;
+    int m_symbolSize;
     int m_iGlyph;
-    LibraryScope& m_libraryScope;
 
 public:
-    ClefEngraver(LibraryScope& libraryScope);
+    ClefEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     ~ClefEngraver() {}
 
-    GmoShape* create_shape(ImoClef* pClef, GmoBoxSliceInstr* pBox,
-                           UPoint uPos, LUnits lineSpacing,
-                           bool fSmallClef=false);
+    GmoShape* create_shape(ImoObj* pCreatorImo, int iInstr, int iStaff, UPoint uPos,
+                           int clefType, int m_symbolSize=k_size_full);
 
 protected:
     int find_glyph();
+    double determine_font_size();
     Tenths get_glyph_offset();
-    inline LUnits tenths_to_logical(Tenths tenths, LUnits lineSpacing) {
-        return (tenths * lineSpacing) / 10.0f;
-    }
 };
 
 

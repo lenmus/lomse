@@ -82,8 +82,8 @@ void SystemCursor::initialize_clefs_keys(ImoScore* pScore)
     m_clefs.reserve(staves);
     m_clefs.assign(staves, (ColStaffObjsEntry*)NULL);     //GCC complais if NULL not casted
 
-    m_keys.reserve(m_numInstruments);
-    m_keys.assign(m_numInstruments, (ColStaffObjsEntry*)NULL);
+    m_keys.reserve(staves);
+    m_keys.assign(staves, (ColStaffObjsEntry*)NULL);
 }
 
 //---------------------------------------------------------------------------------------
@@ -106,8 +106,7 @@ void SystemCursor::move_next()
 void SystemCursor::save_clef()
 {
     int iInstr = num_instrument();
-    int iStaff = staff();
-    int idx = m_staffIndex[iInstr] + iStaff;
+    int idx = m_staffIndex[iInstr] + staff();
     m_clefs[idx] = *m_scoreIt;
 }
 
@@ -115,7 +114,8 @@ void SystemCursor::save_clef()
 void SystemCursor::save_key_signature()
 {
     int iInstr = num_instrument();
-    m_keys[iInstr] = *m_scoreIt;
+    int idx = m_staffIndex[iInstr] + staff();
+    m_keys[idx] = *m_scoreIt;
 }
 
 //---------------------------------------------------------------------------------------
@@ -188,15 +188,16 @@ int SystemCursor::get_applicable_clef_type()
 }
 
 //---------------------------------------------------------------------------------------
-ColStaffObjsEntry* SystemCursor::get_key_entry_for_instrument(int iInstr)
+ColStaffObjsEntry* SystemCursor::get_key_entry_for_instr_staff(int iInstr, int iStaff)
 {
-    return m_keys[iInstr];
+    int idx = m_staffIndex[iInstr] + iStaff;
+    return m_keys[idx];
 }
 
 //---------------------------------------------------------------------------------------
-ImoKeySignature* SystemCursor::get_key_for_instrument(int iInstr)
+ImoKeySignature* SystemCursor::get_key_for_instr_staff(int iInstr, int iStaff)
 {
-    ColStaffObjsEntry* pEntry = get_key_entry_for_instrument(iInstr);
+    ColStaffObjsEntry* pEntry = get_key_entry_for_instr_staff(iInstr, iStaff);
     if (pEntry)
         return dynamic_cast<ImoKeySignature*>( pEntry->imo_object() );
     else
@@ -209,7 +210,7 @@ ImoKeySignature* SystemCursor::get_applicable_key()
     if (m_fScoreIsEmpty)
         return NULL;
     else
-        return get_key_for_instrument( num_instrument() );
+        return get_key_for_instr_staff( num_instrument(), staff() );
 }
 
 //---------------------------------------------------------------------------------------
@@ -218,13 +219,13 @@ int SystemCursor::get_applicable_key_type()
     if (m_fScoreIsEmpty)
         return ImoKeySignature::k_undefined;
     else
-        return get_key_type_for_instrument( num_instrument() );
+        return get_key_type_for_instr_staff( num_instrument(), staff() );
 }
 
 //---------------------------------------------------------------------------------------
-int SystemCursor::get_key_type_for_instrument(int iInstr)
+int SystemCursor::get_key_type_for_instr_staff(int iInstr, int iStaff)
 {
-    ImoKeySignature* pKey = get_key_for_instrument(iInstr);
+    ImoKeySignature* pKey = get_key_for_instr_staff(iInstr, iStaff);
     if (pKey)
         return pKey->get_key_type();
     else

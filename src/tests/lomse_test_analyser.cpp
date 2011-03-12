@@ -131,7 +131,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // barline -------------------------------------------------------------------
+    // barline --------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Barline_OptionalElementMissing)
     {
@@ -367,7 +367,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    //----------------------------------------------------------------------
+    //-----------------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, AnalyserOneOrMoreMissingFirst)
     {
@@ -427,7 +427,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // musicData -----------------------------------------------------------------
+    // musicData ------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, AnalyserOneOrMoreOptionalAlternativesError)
     {
@@ -496,7 +496,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // note ---------------------------------------------------------------------
+    // note -----------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Note)
     {
@@ -519,6 +519,10 @@ SUITE(AnalyserTest)
         CHECK( pNote->get_octave() == 3 );
         CHECK( pNote->get_step() == k_step_D );
         CHECK( pNote->get_duration() == 48.0f );
+        CHECK( pNote->is_in_chord() == false );
+        CHECK( pNote->is_start_of_chord() == false );
+        CHECK( pNote->is_end_of_chord() == false );
+
         delete tree->get_root();
         delete pIModel;
     }
@@ -900,7 +904,7 @@ SUITE(AnalyserTest)
         CHECK( pNote->get_note_type() == ImoNote::k_eighth );
         CHECK( pNote->get_octave() == 4 );
         CHECK( pNote->get_step() == k_step_C );
-        CHECK( pNote->get_stem_direction() == ImoNote::k_default );
+        CHECK( pNote->get_stem_direction() == ImoNote::k_stem_default );
         delete tree->get_root();
         delete pIModel;
     }
@@ -975,7 +979,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // tie (old syntax) --------------------------------------------------------
+    // tie (old syntax) -----------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_TieOld)
     {
@@ -1006,6 +1010,9 @@ SUITE(AnalyserTest)
         CHECK( pNote1->is_tied_next() == true );
         CHECK( pNote1->is_tied_prev() == false );
         CHECK( pTie->get_start_note() == pNote1 );
+        ImoAttachments* pAuxObjs = pNote1->get_attachments();
+        CHECK( pAuxObjs != NULL );
+        CHECK( pAuxObjs->get_item(0) == pTie );
 
         ++it;
         ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
@@ -1013,6 +1020,9 @@ SUITE(AnalyserTest)
         CHECK( pNote2->is_tied_next() == false );
         CHECK( pNote2->is_tied_prev() == true );
         CHECK( pTie->get_end_note() == pNote2 );
+        pAuxObjs = pNote2->get_attachments();
+        CHECK( pAuxObjs != NULL );
+        CHECK( pAuxObjs->get_item(0) == pTie );
 
         delete tree->get_root();
         delete pIModel;
@@ -1145,7 +1155,7 @@ SUITE(AnalyserTest)
         stringstream errormsg;
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
         stringstream expected;
-        //expected << "Line 0. No 'start' element for tie number 12. Tie ignored." << endl;
+        //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q l)(n c4 e l)(n c4 e))");
         Analyser a(errormsg, m_pLibraryScope->ldp_factory());
         InternalModel* pIModel = a.analyse_tree(tree);
@@ -1161,7 +1171,6 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         //cout << tree->get_root()->to_string() << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( tree->get_root()->to_string() == "(musicData (n c4 q l) (n c4 e l) (n c4 e))" );
 
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -1170,6 +1179,9 @@ SUITE(AnalyserTest)
         CHECK( pNote1->is_tied_next() == true );
         CHECK( pNote1->is_tied_prev() == false );
         CHECK( pTie1->get_start_note() == pNote1 );
+        ImoAttachments* pAuxObjs = pNote1->get_attachments();
+        CHECK( pAuxObjs != NULL );
+        CHECK( pAuxObjs->get_item(0) == pTie1 );
 
         ++it;
         ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
@@ -1178,6 +1190,10 @@ SUITE(AnalyserTest)
         CHECK( pNote2->is_tied_prev() == true );
         CHECK( pTie1->get_end_note() == pNote2 );
         CHECK( pTie2->get_start_note() == pNote2 );
+        pAuxObjs = pNote2->get_attachments();
+        CHECK( pAuxObjs != NULL );
+        CHECK( pAuxObjs->get_item(0) == pTie1 );
+        CHECK( pAuxObjs->get_item(1) == pTie2 );
 
         ++it;
         ImoNote* pNote3 = dynamic_cast<ImoNote*>( *it );
@@ -1185,12 +1201,15 @@ SUITE(AnalyserTest)
         CHECK( pNote3->is_tied_next() == false );
         CHECK( pNote3->is_tied_prev() == true );
         CHECK( pTie2->get_end_note() == pNote3 );
+        pAuxObjs = pNote3->get_attachments();
+        CHECK( pAuxObjs != NULL );
+        CHECK( pAuxObjs->get_item(0) == pTie2 );
 
         delete tree->get_root();
         delete pIModel;
     }
 
-    // tie --------------------------------------------------------------------------
+    // tie ------------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Tie_ParsedStop)
     {
@@ -1312,7 +1331,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // bezier ----------------------------------------------------------------------
+    // bezier ---------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Bezier_Ok)
     {
@@ -1386,7 +1405,43 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // rest ------------------------------------------------------------------------
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Bezier_MissingValues)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
+        SpLdpTree tree = parser.parse_text("(bezier (start-x 36.765))");
+        //cout << tree->get_root()->to_string() << endl;
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_bezier_info() == true );
+        ImoBezierInfo* pBezier = dynamic_cast<ImoBezierInfo*>( pIModel->get_root() );
+        CHECK( pBezier != NULL );
+        //cout << "start.x = " << pBezier->get_point(ImoBezierInfo::k_start).x << endl;
+        //cout << "start.y = " << pBezier->get_point(ImoBezierInfo::k_start).y << endl;
+        //cout << "end.x = " << pBezier->get_point(ImoBezierInfo::k_end).x << endl;
+        //cout << "end.y = " << pBezier->get_point(ImoBezierInfo::k_end).y << endl;
+        //cout << "ctrol1.x = " << pBezier->get_point(ImoBezierInfo::k_ctrol1).x << endl;
+        //cout << "ctrol1.y = " << pBezier->get_point(ImoBezierInfo::k_ctrol1).y << endl;
+        //cout << "ctrol2.x = " << pBezier->get_point(ImoBezierInfo::k_ctrol2).x << endl;
+        //cout << "ctrol2.y = " << pBezier->get_point(ImoBezierInfo::k_ctrol2).y << endl;
+        CHECK( pBezier->get_point(ImoBezierInfo::k_start).x == 36.765f );
+        CHECK( pBezier->get_point(ImoBezierInfo::k_start).y == 0.0f );
+        CHECK( pBezier->get_point(ImoBezierInfo::k_end).x == 0.0f );
+        CHECK( pBezier->get_point(ImoBezierInfo::k_end).y == 0.0f );
+        CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol1).x == 0.0f );
+        CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol1).y == 0.0f );
+        CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol2).x == 0.0f );
+        CHECK( pBezier->get_point(ImoBezierInfo::k_ctrol2).y == 0.0f );
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // rest -----------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Rest)
     {
@@ -1513,7 +1568,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // fermata ---------------------------------------------------------------
+    // fermata --------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Fermata)
     {
@@ -1530,7 +1585,7 @@ SUITE(AnalyserTest)
         CHECK( pIModel->get_root()->is_fermata() == true );
         ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
         CHECK( pFerm != NULL );
-        CHECK( pFerm->get_placement() == ImoFermata::k_below );
+        CHECK( pFerm->get_placement() == k_placement_below );
         delete tree->get_root();
         delete pIModel;
     }
@@ -1549,7 +1604,7 @@ SUITE(AnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
         CHECK( pFerm != NULL );
-        CHECK( pFerm->get_placement() == ImoFermata::k_above );
+        CHECK( pFerm->get_placement() == k_placement_above );
         delete tree->get_root();
         delete pIModel;
     }
@@ -1568,7 +1623,7 @@ SUITE(AnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
         CHECK( pFerm != NULL );
-        CHECK( pFerm->get_placement() == ImoFermata::k_above );
+        CHECK( pFerm->get_placement() == k_placement_above );
         CHECK( pFerm->get_user_location_x() == 70.0f );
         CHECK( pFerm->get_user_location_y() == 0.0f );
         delete tree->get_root();
@@ -1589,7 +1644,7 @@ SUITE(AnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
         CHECK( pFerm != NULL );
-        CHECK( pFerm->get_placement() == ImoFermata::k_above );
+        CHECK( pFerm->get_placement() == k_placement_above );
         CHECK( pFerm->get_user_location_x() == 70.0f );
         CHECK( pFerm->get_user_location_y() == 0.0f );
         delete tree->get_root();
@@ -1611,7 +1666,7 @@ SUITE(AnalyserTest)
         CHECK( pNote->get_num_attachments() == 1 );
         ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pNote->get_attachment(0) );
         CHECK( pFerm != NULL );
-        CHECK( pFerm->get_placement() == ImoFermata::k_above );
+        CHECK( pFerm->get_placement() == k_placement_above );
         CHECK( pFerm->get_user_location_x() == 70.0f );
         CHECK( pFerm->get_user_location_y() == 0.0f );
         //cout << "[" << errormsg.str() << "]" << endl;
@@ -1623,8 +1678,8 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // goFwd -----------------------------------------------------------------
-    // goBack ----------------------------------------------------------------
+    // goFwd ----------------------------------------------------------------------------
+    // goBack ---------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, AnalyserGoBackStart)
     {
@@ -1805,7 +1860,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // clef ----------------------------------------------------------------------
+    // clef -----------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Clef)
     {
@@ -1892,11 +1947,56 @@ SUITE(AnalyserTest)
         CHECK( pClef->get_user_location_y() == 0.0f );
         CHECK( pClef->is_visible() == false );
         CHECK( pClef->get_staff() == 1 );
+        CHECK( pClef->get_symbol_size() == k_size_default );
         delete tree->get_root();
         delete pIModel;
     }
 
-    // key -----------------------------------------------------------------------
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Clef_SymbolSizeOk)
+    {
+        LdpParser parser(cout, m_pLibraryScope->ldp_factory());
+        SpLdpTree tree = parser.parse_text("(clef C2 (symbolSize cue))");
+        Analyser a(cout, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        CHECK( pClef != NULL );
+        CHECK( pClef->get_clef_type() == ImoClef::k_C2 );
+        CHECK( pClef->get_user_location_x() == 0.0f );
+        CHECK( pClef->get_user_location_y() == 0.0f );
+        CHECK( pClef->is_visible() == true );
+        CHECK( pClef->get_staff() == 0 );
+        CHECK( pClef->get_symbol_size() == k_size_cue );
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Clef_SymbolSizeError)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Invalid symbol size 'small'. 'full' size assumed." << endl;
+        SpLdpTree tree = parser.parse_text("(clef C2 (symbolSize small))");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pClef != NULL );
+        CHECK( pClef->get_clef_type() == ImoClef::k_C2 );
+        CHECK( pClef->get_user_location_x() == 0.0f );
+        CHECK( pClef->get_user_location_y() == 0.0f );
+        CHECK( pClef->is_visible() == true );
+        CHECK( pClef->get_staff() == 0 );
+        CHECK( pClef->get_symbol_size() == k_size_full );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // key ------------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, AnalyserKey)
     {
@@ -1913,7 +2013,7 @@ SUITE(AnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
         CHECK( pKeySignature != NULL );
-        CHECK( pKeySignature->get_key_type() == ImoKeySignature::G );
+        CHECK( pKeySignature->get_key_type() == ImoKeySignature::k_G );
         CHECK( pKeySignature->get_staff() == 0 );
         delete tree->get_root();
         delete pIModel;
@@ -1933,7 +2033,7 @@ SUITE(AnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
         CHECK( pKeySignature != NULL );
-        CHECK( pKeySignature->get_key_type() == ImoKeySignature::C );
+        CHECK( pKeySignature->get_key_type() == ImoKeySignature::k_C );
         delete tree->get_root();
         delete pIModel;
     }
@@ -1946,7 +2046,7 @@ SUITE(AnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree);
         ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
         CHECK( pKeySignature != NULL );
-        CHECK( pKeySignature->get_key_type() == ImoKeySignature::d );
+        CHECK( pKeySignature->get_key_type() == ImoKeySignature::k_d );
         CHECK( pKeySignature->get_staff() == 0 );
         CHECK( pKeySignature->is_visible() );
         CHECK( pKeySignature->get_user_location_x() == 70.0f );
@@ -1963,7 +2063,7 @@ SUITE(AnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree);
         ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
         CHECK( pKeySignature != NULL );
-        CHECK( pKeySignature->get_key_type() == ImoKeySignature::Ef );
+        CHECK( pKeySignature->get_key_type() == ImoKeySignature::k_Ef );
         CHECK( pKeySignature->get_user_location_x() == 0.0f );
         CHECK( pKeySignature->get_user_location_y() == 0.0f );
         CHECK( pKeySignature->is_visible() == false );
@@ -1971,7 +2071,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // instrument --------------------------------------------------------------------
+    // instrument -----------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Instrument_Staves)
     {
@@ -2248,7 +2348,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // time signature -------------------------------------------------------------
+    // time signature -------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_TimeSignature)
     {
@@ -2325,7 +2425,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // systemInfo -------------------------------------------------------------
+    // systemInfo -----------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, AnalyserSystemInfoBadType)
     {
@@ -2417,7 +2517,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // text ---------------------------------------------------------------------
+    // text -----------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, AnalyserText)
     {
@@ -2509,7 +2609,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // metronome ------------------------------------------------------------------
+    // metronome ------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Metronome_Value)
     {
@@ -2732,7 +2832,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // opt ----------------------------------------------------------------------
+    // opt ------------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Opt_BoolTrue)
     {
@@ -2903,7 +3003,7 @@ SUITE(AnalyserTest)
     }
 
 
-    // nodes ----------------------------------------------------------------------
+    // nodes ----------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_DeleteParameter)
     {
@@ -2940,7 +3040,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // spacer --------------------------------------------------------------------
+    // spacer ---------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Spacer_Ok)
     {
@@ -3102,7 +3202,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // lenmusdoc --------------------------------------------------------------------
+    // lenmusdoc ------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Lenmusdoc_ReturnsImobj)
     {
@@ -3176,7 +3276,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // TiesBuilder ---------------------------------------------------------------
+    // TiesBuilder ----------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_TiesBuilder_EndTieOk)
     {
@@ -3387,7 +3487,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // beam -----------------------------------------------------------------------
+    // beam -----------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Beam_Start)
     {
@@ -3395,7 +3495,7 @@ SUITE(AnalyserTest)
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
         stringstream expected;
         //expected << "Line 0. " << endl;
-        SpLdpTree tree = parser.parse_text("(beam 12 begin)");
+        SpLdpTree tree = parser.parse_text("(beam 12 +)");
         Analyser a(errormsg, m_pLibraryScope->ldp_factory());
         InternalModel* pIModel = a.analyse_tree(tree);
         CHECK( pIModel->get_root()->is_beam_info() == true );
@@ -3403,12 +3503,10 @@ SUITE(AnalyserTest)
         CHECK( pInfo != NULL );
         CHECK( pInfo->get_beam_number() == 12 );
         CHECK( pInfo->get_beam_type(0) == ImoBeam::k_begin );
-//        CHECK( pInfo->get_beam_element() == tree->get_root() );
+        CHECK( pInfo->get_beam_type(1) == ImoBeam::k_none );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
-        //cout << tree->get_root()->to_string() << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( tree->get_root()->to_string() == "(beam 12 begin)" );
         delete tree->get_root();
         delete pIModel;
     }
@@ -3419,7 +3517,7 @@ SUITE(AnalyserTest)
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
         stringstream expected;
         //expected << "Line 0. " << endl;
-        SpLdpTree tree = parser.parse_text("(beam 12 begin begin forward)");
+        SpLdpTree tree = parser.parse_text("(beam 12 ++f)");
         Analyser a(errormsg, m_pLibraryScope->ldp_factory());
         InternalModel* pIModel = a.analyse_tree(tree);
         ImoBeamInfo* pInfo = dynamic_cast<ImoBeamInfo*>( pIModel->get_root() );
@@ -3431,12 +3529,9 @@ SUITE(AnalyserTest)
         CHECK( pInfo->get_beam_type(3) == ImoBeam::k_none );
         CHECK( pInfo->get_beam_type(4) == ImoBeam::k_none );
         CHECK( pInfo->get_beam_type(5) == ImoBeam::k_none );
-//        CHECK( pInfo->get_beam_element() == tree->get_root() );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
-        //cout << tree->get_root()->to_string() << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( tree->get_root()->to_string() == "(beam 12 begin begin forward)" );
         delete tree->get_root();
         delete pIModel;
     }
@@ -3447,7 +3542,7 @@ SUITE(AnalyserTest)
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
         stringstream expected;
         expected << "Line 0. Missing or invalid beam number. Beam ignored." << endl;
-        SpLdpTree tree = parser.parse_text("(beam begin)");
+        SpLdpTree tree = parser.parse_text("(beam +)");
         Analyser a(errormsg, m_pLibraryScope->ldp_factory());
         InternalModel* pIModel = a.analyse_tree(tree);
         CHECK( pIModel->get_root() == NULL );
@@ -3481,7 +3576,7 @@ SUITE(AnalyserTest)
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
         stringstream expected;
         expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
-        SpLdpTree tree = parser.parse_text("(n c4 e (beam 14 begin))");
+        SpLdpTree tree = parser.parse_text("(n c4 e (beam 14 +))");
         Analyser* pA = new Analyser(errormsg, m_pLibraryScope->ldp_factory());
         InternalModel* pIModel = pA->analyse_tree(tree);
         delete pA;
@@ -3489,7 +3584,6 @@ SUITE(AnalyserTest)
         CHECK( pNote != NULL );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
-        //cout << tree->get_root()->to_string() << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pNote != NULL );
         CHECK( pNote->is_beamed() == false );
@@ -3506,7 +3600,7 @@ SUITE(AnalyserTest)
         stringstream expected;
         expected << "Line 0. No 'begin/continue' elements for beam number 13. Beam ignored." << endl
                  << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
-        SpLdpTree tree = parser.parse_text("(musicData (n c4 q. (beam 14 begin)) (n d4 s (beam 13 end)))");
+        SpLdpTree tree = parser.parse_text("(musicData (n c4 q. (beam 14 +)) (n d4 s (beam 13 -)))");
         Analyser* pA = new Analyser(errormsg, m_pLibraryScope->ldp_factory());
         InternalModel* pIModel = pA->analyse_tree(tree);
         delete pA;
@@ -3514,7 +3608,6 @@ SUITE(AnalyserTest)
         CHECK( pMusic != NULL );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
-        //cout << tree->get_root()->to_string() << endl;
         CHECK( errormsg.str() == expected.str() );
 
         ImoObj::children_iterator it = pMusic->begin();
@@ -3540,7 +3633,7 @@ SUITE(AnalyserTest)
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
         stringstream expected;
         //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
-        SpLdpTree tree = parser.parse_text("(musicData (n c4 q. (beam 14 begin)) (n d4 s (beam 14 end backward)))");
+        SpLdpTree tree = parser.parse_text("(musicData (n c4 q. (beam 14 +)) (n d4 s (beam 14 -b)))");
         Analyser* pA = new Analyser(errormsg, m_pLibraryScope->ldp_factory());
         InternalModel* pIModel = pA->analyse_tree(tree);
         delete pA;
@@ -3548,9 +3641,7 @@ SUITE(AnalyserTest)
         CHECK( pMusic != NULL );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
-        //cout << tree->get_root()->to_string() << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( tree->get_root()->to_string() == "(musicData (n c4 q. (beam 14 begin)) (n d4 s (beam 14 end backward)))" );
 
         ImoObj::children_iterator it = pMusic->begin();
 
@@ -3579,12 +3670,11 @@ SUITE(AnalyserTest)
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
         stringstream expected;
         expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
-        SpLdpTree tree = parser.parse_text("(score (vers 1.6) (instrument (musicData (n c4 q. (beam 14 begin)))) (instrument (musicData (n c4 e))))" );
+        SpLdpTree tree = parser.parse_text("(score (vers 1.6) (instrument (musicData (n c4 q. (beam 14 +)))) (instrument (musicData (n c4 e))))" );
         Analyser a(errormsg, m_pLibraryScope->ldp_factory());
         InternalModel* pIModel = a.analyse_tree(tree);
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
-        //cout << tree->get_root()->to_string() << endl;
         CHECK( errormsg.str() == expected.str() );
 
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
@@ -3603,7 +3693,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // beam (old syntax) --------------------------------------------------------
+    // beam (old syntax) ----------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_BeamOld_ErrorInvalidG)
     {
@@ -3739,7 +3829,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // AutoBeamer ----------------------------------------------------------------
+    // AutoBeamer -----------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_AutoBeamer_SE)
     {
@@ -3810,7 +3900,7 @@ SUITE(AnalyserTest)
         delete pNote2;
     }
 
-    // tuplet ------------------------------------------------------------------
+    // tuplet new syntax ----------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Tuplet_TypeError)
     {
@@ -3818,7 +3908,7 @@ SUITE(AnalyserTest)
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
         stringstream expected;
         expected << "Line 0. Missing or invalid tuplet type. Tuplet ignored." << endl;
-        SpLdpTree tree = parser.parse_text("(t start 3)");
+        SpLdpTree tree = parser.parse_text("(t 5 start 3)");
         Analyser a(errormsg, m_pLibraryScope->ldp_factory());
         InternalModel* pIModel = a.analyse_tree(tree);
 
@@ -3842,6 +3932,168 @@ SUITE(AnalyserTest)
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_tuplet_info() == true );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo->get_actual_number() == 3 );
+        CHECK( pInfo->get_normal_number() == 2 );
+        CHECK( pInfo->get_show_bracket() == k_yesno_default );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Tuplet_ErrorNormalNumRequired)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Tuplet: Missing or invalid normal notes number. Tuplet ignored." << endl;
+        SpLdpTree tree = parser.parse_text("(t 4 + 7)");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() == NULL );
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_TupletNormalNotes)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text("(t 2 + 7 4)");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo->get_actual_number() == 7 );
+        CHECK( pInfo->get_normal_number() == 4 );
+        CHECK( pInfo->get_show_bracket() == k_yesno_default );
+        CHECK( pInfo->get_show_normal_num() == k_yesno_default );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Tuplet_NoBracket)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text("(t 2 + 3 2 (displayBracket no))");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo->get_actual_number() == 3 );
+        CHECK( pInfo->get_normal_number() == 2 );
+        CHECK( pInfo->get_show_bracket() == k_yesno_no );
+        CHECK( pInfo->get_show_normal_num() == k_yesno_default );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Tuplet_DisplayNormalNum)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text("(t 1 + 3 2 (displayNormalNum yes))");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo->get_actual_number() == 3 );
+        CHECK( pInfo->get_normal_number() == 2 );
+        CHECK( pInfo->get_show_bracket() == k_yesno_default );
+        CHECK( pInfo->get_show_normal_num() == k_yesno_yes );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Tuplet_ErrorLabelParameter)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Invalid yes/no value 'false'. Replaced by default." << endl;
+        SpLdpTree tree = parser.parse_text("(t 1 + 3 2 (displayBracket false))");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoTupletDto* pInfo = dynamic_cast<ImoTupletDto*>( pIModel->get_root() );
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->is_start_of_tuplet() == true );
+        CHECK( pInfo->get_actual_number() == 3 );
+        CHECK( pInfo->get_normal_number() == 2 );
+        CHECK( pInfo->get_show_bracket() == k_yesno_default );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // tuplet old full syntax -----------------------------------------------------------
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_TupletOld_TypeError)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Missing or invalid tuplet type. Tuplet ignored." << endl;
+        SpLdpTree tree = parser.parse_text("(t start 3)");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() == NULL );
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_TupletOld_ActualNotes)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text("(t + 3)");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
         //cout << tree->get_root()->to_string() << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( tree->get_root()->to_string() == "(t + 3)" );
@@ -3851,14 +4103,13 @@ SUITE(AnalyserTest)
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 3 );
         CHECK( pInfo->get_normal_number() == 2 );
-        CHECK( pInfo->get_show_bracket() == true );
-        CHECK( pInfo->get_show_number() == true );
+        CHECK( pInfo->get_show_bracket() == k_yesno_default );
 
         delete tree->get_root();
         delete pIModel;
     }
 
-    TEST_FIXTURE(AnalyserTestFixture, Analyser_Tuplet_ErrorNormalNumRequired)
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_TupletOld_ErrorNormalNumRequired)
     {
         stringstream errormsg;
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
@@ -3876,7 +4127,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(AnalyserTestFixture, Analyser_Tuplet_NormalNotes)
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_TupletOld_NormalNotes)
     {
         stringstream errormsg;
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
@@ -3896,14 +4147,13 @@ SUITE(AnalyserTest)
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 7 );
         CHECK( pInfo->get_normal_number() == 4 );
-        CHECK( pInfo->get_show_bracket() == true );
-        CHECK( pInfo->get_show_number() == true );
+        CHECK( pInfo->get_show_bracket() == k_yesno_default );
 
         delete tree->get_root();
         delete pIModel;
     }
 
-    TEST_FIXTURE(AnalyserTestFixture, Analyser_Tuplet_NoBracket)
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_TupletOld_NoBracket)
     {
         stringstream errormsg;
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
@@ -3923,14 +4173,13 @@ SUITE(AnalyserTest)
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 3 );
         CHECK( pInfo->get_normal_number() == 2 );
-        CHECK( pInfo->get_show_bracket() == false );
-        CHECK( pInfo->get_show_number() == true );
+        CHECK( pInfo->get_show_bracket() == k_yesno_no );
 
         delete tree->get_root();
         delete pIModel;
     }
 
-    TEST_FIXTURE(AnalyserTestFixture, Analyser_Tuplet_ErrorLabelParameter)
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_TupletOld_ErrorLabelParameter)
     {
         stringstream errormsg;
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
@@ -3949,14 +4198,13 @@ SUITE(AnalyserTest)
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 3 );
         CHECK( pInfo->get_normal_number() == 2 );
-        CHECK( pInfo->get_show_bracket() == false );
-        CHECK( pInfo->get_show_number() == true );
+        CHECK( pInfo->get_show_bracket() == k_yesno_no );
 
         delete tree->get_root();
         delete pIModel;
     }
 
-    TEST_FIXTURE(AnalyserTestFixture, Analyser_Tuplet_ErrorCompoundParameter)
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_TupletOld_ErrorCompoundParameter)
     {
         stringstream errormsg;
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
@@ -3975,8 +4223,7 @@ SUITE(AnalyserTest)
         CHECK( pInfo->is_start_of_tuplet() == true );
         CHECK( pInfo->get_actual_number() == 3 );
         CHECK( pInfo->get_normal_number() == 2 );
-        CHECK( pInfo->get_show_bracket() == false );
-        CHECK( pInfo->get_show_number() == true );
+        CHECK( pInfo->get_show_bracket() == k_yesno_no );
 
         delete tree->get_root();
         delete pIModel;
@@ -4025,6 +4272,8 @@ SUITE(AnalyserTest)
         CHECK( pTuplet->is_tuplet() == true );
         std::list<ImoStaffObj*>& notes = pTuplet->get_related_objects();
         CHECK( notes.size() == 3 );
+        CHECK( pTuplet->get_actual_number() == 3 );
+        CHECK( pTuplet->get_normal_number() == 2 );
 
         delete pA;
 
@@ -4081,7 +4330,7 @@ SUITE(AnalyserTest)
     }
 
 
-    // tuplet (old tn/t- syntax) -----------------------------------------------
+    // tuplet (old tn/t- syntax) --------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_TupletOld_ErrorInvalidParameter)
     {
@@ -4119,7 +4368,6 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         //cout << tree->get_root()->to_string() << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( tree->get_root()->to_string() == "(n c4 e t3)" );
 
         delete pA;
         delete tree->get_root();
@@ -4139,7 +4387,6 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         //cout << tree->get_root()->to_string() << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( tree->get_root()->to_string() == "(n c4 e t7/6)" );
 
         delete pA;
         delete tree->get_root();
@@ -4185,13 +4432,14 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         //cout << tree->get_root()->to_string() << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( tree->get_root()->to_string() == "(musicData (n c4 e t3) (n e4 e) (n d4 e t-))" );
 
         std::list<ImoTuplet*>& tuplets = pIModel->get_tuplets();
         CHECK( tuplets.size() == 1 );
         ImoTuplet* pTuplet = tuplets.front();
         std::list<ImoStaffObj*>& notes = pTuplet->get_related_objects();
         CHECK( notes.size() == 3 );
+        CHECK( pTuplet->get_actual_number() == 3 );
+        CHECK( pTuplet->get_normal_number() == 2 );
 
         delete pA;
 
@@ -4218,7 +4466,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // voice (element) ----------------------------------------------------------
+    // voice (element) ------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Note_Voice_Ok)
     {
@@ -4261,7 +4509,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // staffNum (element) -------------------------------------------------------
+    // staffNum (element) ---------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Note_StaffNum_Ok)
     {
@@ -4304,7 +4552,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // rest (full) -------------------------------------------------------------
+    // rest (full) ----------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Rest_Full)
     {
@@ -4361,7 +4609,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // color -------------------------------------------------------------------
+    // color ----------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, ImoColorDto)
     {
@@ -4491,7 +4739,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // group ----------------------------------------------------------------------
+    // group ----------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Group_All)
     {
@@ -4748,7 +4996,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // chord ----------------------------------------------------------------------
+    // chord ----------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Chord_Ok)
     {
@@ -4756,7 +5004,7 @@ SUITE(AnalyserTest)
         LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        SpLdpTree tree = parser.parse_text("(chord (n c4 q)(n e4 q)(n g4 q))");
+        SpLdpTree tree = parser.parse_text("(musicData (chord (n c4 q)(n e4 q)(n g4 q)))");
         Analyser a(errormsg, m_pLibraryScope->ldp_factory());
         InternalModel* pIModel = a.analyse_tree(tree);
 
@@ -4772,17 +5020,23 @@ SUITE(AnalyserTest)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != NULL );
-        CHECK( pNote->is_in_chord() == false );
+        CHECK( pNote->is_in_chord() == true );
+        CHECK( pNote->is_start_of_chord() == true );
+        CHECK( pNote->is_end_of_chord() == false );
 
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != NULL );
         CHECK( pNote->is_in_chord() == true );
+        CHECK( pNote->is_start_of_chord() == false );
+        CHECK( pNote->is_end_of_chord() == false );
 
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != NULL );
         CHECK( pNote->is_in_chord() == true );
+        CHECK( pNote->is_start_of_chord() == false );
+        CHECK( pNote->is_end_of_chord() == true );
 
         delete tree->get_root();
         delete pIModel;
@@ -4810,23 +5064,86 @@ SUITE(AnalyserTest)
 
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != NULL );
-        CHECK( pNote->is_in_chord() == false );
+        CHECK( pNote->is_in_chord() == true );
+        CHECK( pNote->is_start_of_chord() == true );
+        CHECK( pNote->is_end_of_chord() == false );
 
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != NULL );
         CHECK( pNote->is_in_chord() == true );
+        CHECK( pNote->is_start_of_chord() == false );
+        CHECK( pNote->is_end_of_chord() == false );
 
         ++it;
         pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != NULL );
         CHECK( pNote->is_in_chord() == true );
+        CHECK( pNote->is_start_of_chord() == false );
+        CHECK( pNote->is_end_of_chord() == true );
 
         delete tree->get_root();
         delete pIModel;
     }
 
-    // pageLayout
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Chord_Beamed)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        SpLdpTree tree = parser.parse_text("(musicData "
+            "(chord (n a3 e (beam 1 +)) (n d3 e))"
+            "(chord (n a3 e (beam 1 -))(n d3 e)) )");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        CHECK( pMusic != NULL );
+
+        ImoObj::children_iterator it = pMusic->begin();
+        CHECK( pMusic->get_num_children() == 4 );
+
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != NULL );
+        CHECK( pNote->is_in_chord() == true );
+        CHECK( pNote->is_start_of_chord() == true );
+        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote->is_beamed() == true );
+
+        ++it;
+        pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != NULL );
+        CHECK( pNote->is_in_chord() == true );
+        CHECK( pNote->is_start_of_chord() == false );
+        CHECK( pNote->is_end_of_chord() == true );
+        CHECK( pNote->is_beamed() == false );
+
+        ++it;
+        pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != NULL );
+        CHECK( pNote->is_in_chord() == true );
+        CHECK( pNote->is_start_of_chord() == true );
+        CHECK( pNote->is_end_of_chord() == false );
+        CHECK( pNote->is_beamed() == true );
+
+        ++it;
+        pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != NULL );
+        CHECK( pNote->is_in_chord() == true );
+        CHECK( pNote->is_start_of_chord() == false );
+        CHECK( pNote->is_end_of_chord() == true );
+        CHECK( pNote->is_beamed() == false );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // pageLayout -----------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_PageLayout_Ok)
     {
@@ -4922,7 +5239,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // font --------------------------------------------------------------
+    // font -----------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Font)
     {
@@ -5025,7 +5342,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // defineStyle --------------------------------------------------------------
+    // defineStyle ----------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_DefineStyle)
     {
@@ -5083,7 +5400,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // title --------------------------------------------------------------------
+    // title ----------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Title_MissingAll)
     {
@@ -5264,7 +5581,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // line ----------------------------------------------------------------------
+    // line -----------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Line_Ok)
     {
@@ -5426,7 +5743,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // textBox -----------------------------------------------------------------
+    // textBox --------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_TextBox_Minimum)
     {
@@ -5558,7 +5875,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // cursor --------------------------------------------------------------------
+    // cursor ---------------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Cursor_Ok)
     {
@@ -5635,7 +5952,7 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // figuredBass -------------------------------------------------------------
+    // figuredBass ----------------------------------------------------------------------
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_FiguredBass_Ok)
     {
@@ -5655,6 +5972,208 @@ SUITE(AnalyserTest)
         CHECK( pFB->is_figured_bass() == true );
         //cout << "FB ='" << pFB->get_figured_bass_string() << "'" << endl;
         CHECK( pFB->get_figured_bass_string() == "7 5 2" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // staff ----------------------------------------------------------------------------
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Staff_NoNumber)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Missing or invalid staff number. Staff info ignored." << endl;
+        SpLdpTree tree = parser.parse_text("(staff (staffType ossia))");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() == NULL );
+        //ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
+        //CHECK( pMM != NULL );
+        //CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
+        //CHECK( pMM->get_ticks_per_minute() == 88 );
+        //CHECK( pMM->is_visible() == true );
+        //CHECK( pMM->has_parenthesis() == false );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Staff_InvalidType)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Invalid staff type 'bonito'. 'regular' staff assumed." << endl;
+        SpLdpTree tree = parser.parse_text("(staff 2 (staffType bonito))");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL );
+        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pIModel->get_root() );
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_staff_number() == 1 );
+        CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_regular );
+        CHECK( pInfo->get_staff_margin() == 1000.0f );
+        CHECK( pInfo->get_line_spacing() == 180.0f );
+        CHECK( pInfo->get_height() == 735.0f );
+        CHECK( pInfo->get_line_thickness() == 15.0f );
+        CHECK( pInfo->get_num_lines() == 5 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Staff_InvalidLines)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Invalid staff. Num lines must be greater than zero. Five assumed." << endl;
+        SpLdpTree tree = parser.parse_text("(staff 2 (staffType ossia)(staffLines 0))");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL );
+        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pIModel->get_root() );
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_staff_number() == 1 );
+        CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
+        CHECK( pInfo->get_staff_margin() == 1000.0f );
+        CHECK( pInfo->get_line_spacing() == 180.0f );
+        CHECK( pInfo->get_height() == 735.0f );
+        CHECK( pInfo->get_line_thickness() == 15.0f );
+        CHECK( pInfo->get_num_lines() == 5 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Staff_InvalidLinesSpacing)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Invalid real number 'five'. Replaced by '180'." << endl;
+        SpLdpTree tree = parser.parse_text("(staff 2 (staffType ossia)(staffLines 5)"
+            "(staffSpacing five) )");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL );
+        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pIModel->get_root() );
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_staff_number() == 1 );
+        CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
+        CHECK( pInfo->get_staff_margin() == 1000.0f );
+        CHECK( pInfo->get_line_spacing() == 180.0f );
+        CHECK( pInfo->get_height() == 735.0f );
+        CHECK( pInfo->get_line_thickness() == 15.0f );
+        CHECK( pInfo->get_num_lines() == 5 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Staff_LinesSpacing)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        SpLdpTree tree = parser.parse_text("(staff 2 (staffType ossia)(staffLines 5)"
+            "(staffSpacing 200.0) )");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL );
+        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pIModel->get_root() );
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_staff_number() == 1 );
+        CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
+        CHECK( pInfo->get_staff_margin() == 1000.0f );
+        CHECK( pInfo->get_line_spacing() == 200.0f );
+        CHECK( pInfo->get_height() == 815.0f );
+        CHECK( pInfo->get_line_thickness() == 15.0f );
+        CHECK( pInfo->get_num_lines() == 5 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Staff_Ok)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        SpLdpTree tree = parser.parse_text("(staff 2 (staffType ossia)(staffLines 4)"
+            "(staffSpacing 200.0)(staffDistance 800)(lineThickness 20.5) )");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL );
+        ImoStaffInfo* pInfo = dynamic_cast<ImoStaffInfo*>( pIModel->get_root() );
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_staff_number() == 1 );
+        CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
+        CHECK( pInfo->get_staff_margin() == 800.0f );
+        CHECK( pInfo->get_line_spacing() == 200.0f );
+        CHECK( pInfo->get_height() == 620.5f );
+        CHECK( pInfo->get_line_thickness() == 20.5f );
+        CHECK( pInfo->get_num_lines() == 4 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Staff_AddedToInstrument)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        SpLdpTree tree = parser.parse_text("(instrument (staves 2)(staff 2 (staffType ossia)"
+            "(staffLines 4)(staffSpacing 200.0)(staffDistance 800)(lineThickness 20.5))"
+            "(musicData ))");
+        Analyser a(errormsg, m_pLibraryScope->ldp_factory());
+        InternalModel* pIModel = a.analyse_tree(tree);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL );
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
+        CHECK( pInstr != NULL );
+        ImoStaffInfo* pInfo = pInstr->get_staff(1);
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_staff_number() == 1 );
+        CHECK( pInfo->get_staff_type() == ImoStaffInfo::k_staff_ossia );
+        CHECK( pInfo->get_staff_margin() == 800.0f );
+        CHECK( pInfo->get_line_spacing() == 200.0f );
+        CHECK( pInfo->get_height() == 620.5f );
+        CHECK( pInfo->get_line_thickness() == 20.5f );
+        CHECK( pInfo->get_num_lines() == 4 );
 
         delete tree->get_root();
         delete pIModel;

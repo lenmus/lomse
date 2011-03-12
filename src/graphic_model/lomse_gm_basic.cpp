@@ -24,14 +24,8 @@
 #include "lomse_drawer.h"
 #include "lomse_selections.h"
 
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-using namespace std;
+#include <cstdlib>      //abs
 
-//#include <sstream>
-//
-//using namespace std;
 
 namespace lomse
 {
@@ -178,7 +172,7 @@ bool GmoObj::bounds_contains_point(UPoint& p)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoObj::shift_origin(USize& shift)
+void GmoObj::shift_origin(const USize& shift)
 {
     m_origin.x += shift.width;
     m_origin.y += shift.height;
@@ -218,16 +212,10 @@ void GmoBox::delete_boxes()
 //---------------------------------------------------------------------------------------
 void GmoBox::delete_shapes()
 {
-    //ofstream m_debugFile;
-    //m_debugFile.open("dbg_tables.txt", fstream::out | fstream::app);
-    //m_debugFile << "deleting " << m_shapes.size() << " shapes" << endl;
-
     std::list<GmoShape*>::iterator it;
     for (it=m_shapes.begin(); it != m_shapes.end(); ++it)
         delete *it;
     m_shapes.clear();
-
-    //m_debugFile.close();
 }
 
 //---------------------------------------------------------------------------------------
@@ -249,17 +237,24 @@ GmoBox* GmoBox::get_child_box(int i)  //i = 0..n-1
 //---------------------------------------------------------------------------------------
 void GmoBox::add_shape(GmoShape* shape, int layer)
 {
-    //ofstream m_debugFile;
-    //m_debugFile.open("dbg_tables.txt", fstream::out | fstream::app);
-    //m_debugFile << "add shape " << std::hex << long(shape) << endl;
-    //m_debugFile.close();
-
     shape->set_layer(layer);
     //shape->set_owner_box(this);
     m_shapes.push_back(shape);
 
-    GmoBoxDocPage* pPage = get_parent_box_page();
-    pPage->store_shape(shape, layer);
+//    GmoBoxDocPage* pPage = get_parent_box_page();
+//    pPage->store_shape(shape, layer);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBox::store_shapes_in_page(GmoBoxDocPage* pPage)
+{
+    std::list<GmoShape*>::iterator itS;
+    for (itS=m_shapes.begin(); itS != m_shapes.end(); ++itS)
+        pPage->store_shape(*itS);
+
+    std::vector<GmoBox*>::iterator itB;
+    for (itB=m_childBoxes.begin(); itB != m_childBoxes.end(); ++itB)
+        (*itB)->store_shapes_in_page(pPage);
 }
 
 //---------------------------------------------------------------------------------------
@@ -370,7 +365,7 @@ GmoBox* GmoBox::find_inner_box_at(LUnits x, LUnits y)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoBox::shift_origin(USize& shift)
+void GmoBox::shift_origin(const USize& shift)
 {
     m_origin.x += shift.width;
     m_origin.y += shift.height;
@@ -516,8 +511,9 @@ void GmoBoxDocPage::draw_page_background(Drawer* pDrawer, RenderOptions& opt)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoBoxDocPage::store_shape(GmoShape* pShape, int layer)
+void GmoBoxDocPage::store_shape(GmoShape* pShape)
 {
+    int layer = pShape->get_layer();
     std::list<GmoShape*>::iterator it = m_allShapes.begin();
     for (; it != m_allShapes.end() && (*it)->get_layer() <= layer; ++it);
 

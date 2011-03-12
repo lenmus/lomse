@@ -66,7 +66,6 @@ protected:
     LibraryScope& m_libraryScope;
     ScreenDrawer* m_pDrawer;
     std::vector<RenderingBuffer*> m_pPages;
-    LomseDoorway* m_pDoorway;
     RenderOptions m_options;
     RenderingBuffer* m_pRenderBuf;
     //DocCursor       m_cursor;
@@ -86,6 +85,16 @@ protected:
 
     //bounds for each displayed page
     std::list< Rectangle<LUnits> > m_pageBounds;
+
+    //call backs for application provided methods
+    void (*m_pFunc_update_window)(void* pThis);
+    void (*m_pFunc_force_redraw)(void* pThis);
+    void (*m_pFunc_start_timer)(void* pThis);
+    double (*m_pFunc_elapsed_time)(void* pThis);
+    void* m_pObj_update_window;
+    void* m_pObj_force_redraw;
+    void* m_pObj_start_timer;
+    void* m_pObj_elapsed_time;
 
 
 public:
@@ -136,21 +145,14 @@ public:
     double get_scale();
 
     //rendering options
-    inline void set_option_draw_box_doc_page_content(bool value) {
-        m_options.draw_box_doc_page_content_flag = value;
-    }
-    inline void set_option_draw_box_score_page(bool value) {
-        m_options.draw_box_score_page_flag = value;
-    }
-    inline void set_option_draw_box_system(bool value) {
-        m_options.draw_box_system_flag = value;
-    }
-    inline void set_option_draw_box_slice(bool value) {
-        m_options.draw_box_slice_flag = value;
-    }
-    inline void set_option_draw_box_slice_instr(bool value) {
-        m_options.draw_box_slice_instr_flag = value;
-    }
+    void set_rendering_option(int option, bool value);
+
+    //setting callbacks to communicate with user application
+    void set_update_window_callbak(void* pThis, void (*pt2Func)(void* pObj));
+    void set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj));
+    void set_elapsed_time_callbak(void* pThis, double (*pt2Func)(void* pObj)) ;
+    void set_start_timer_callbak(void* pThis, void (*pt2Func)(void* pObj)) ;
+
 
 protected:
     //GraphicModel* create_graphic_model();
@@ -160,8 +162,10 @@ protected:
     virtual void generate_paths() = 0;
     URect get_page_bounds(int iPage);
     int find_page_at_point(LUnits x, LUnits y);
-
-
+    void do_update_window();
+    void do_force_redraw();
+    void start_timer();
+    double get_elapsed_time() const;
 
 };
 

@@ -77,6 +77,7 @@ public:
 
     //beam
     inline void set_beam(ImoBeam* pBeam) { m_pBeam = pBeam; }
+    inline ImoBeam* get_beam() { return m_pBeam; }
     inline bool is_beamed() { return m_pBeam != NULL; }
     void set_beam_type(int level, int type);
     inline ImoBeamInfo* get_beam_info() { return &m_beamInfo; }
@@ -85,6 +86,7 @@ public:
     //tuplet
     inline void set_tuplet(ImoTuplet* pTuplet) { m_pTuplet = pTuplet; }
     inline bool is_in_tuplet() { return m_pTuplet != NULL; }
+    inline ImoTuplet* get_tuplet() { return m_pTuplet; }
 
 };
 
@@ -112,9 +114,9 @@ protected:
     int     m_octave;
     int     m_accidentals;
     int     m_stemDirection;
-    bool    m_inChord;
     ImoTie* m_pTieNext;
     ImoTie* m_pTiePrev;
+    ImoChord* m_pChord;
 
 
 public:
@@ -125,14 +127,15 @@ public:
     ~ImoNote();
 
     enum    { k_no_accidentals=0, k_sharp, k_sharp_sharp, k_double_sharp, k_natural_sharp,
-              k_flap, k_flat_flat, k_natural_flat, k_natural, };
-    enum    { k_default=0, k_up, k_down, k_double, k_none };
+              k_flat, k_flat_flat, k_natural_flat, k_natural, };
+    enum    { k_stem_default=0, k_stem_up, k_stem_down, k_stem_double, k_stem_none };
 
     //pitch
     inline int get_step() { return m_step; }
     inline int get_octave() { return m_octave; }
     inline int get_accidentals() { return m_accidentals; }
     inline bool is_pitch_defined() { return m_step != k_no_pitch; }
+    inline bool accidentals_are_cautionary() { return false; }  //TODO
 
     //ties
     inline bool is_tied_next() { return m_pTieNext != NULL; }
@@ -143,13 +146,16 @@ public:
 
     //stem
     inline int get_stem_direction() { return m_stemDirection; }
-    inline bool is_stem_up() { return m_stemDirection == k_up; }
-    inline bool is_stem_down() { return m_stemDirection == k_down; }
-    inline bool is_stem_default() { return m_stemDirection == k_default; }
+    inline bool is_stem_up() { return m_stemDirection == k_stem_up; }
+    inline bool is_stem_down() { return m_stemDirection == k_stem_down; }
+    inline bool is_stem_default() { return m_stemDirection == k_stem_default; }
 
     //in chord
-    inline void set_in_chord(bool value) { m_inChord = value; }
-    inline bool is_in_chord() { return m_inChord; }
+    inline void set_in_chord(ImoChord* pChord) { m_pChord = pChord; }
+    inline bool is_in_chord() { return m_pChord != NULL; }
+    inline ImoChord* get_chord() { return m_pChord; }
+    bool is_start_of_chord();
+    bool is_end_of_chord();
 
 
 };

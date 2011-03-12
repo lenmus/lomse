@@ -1,0 +1,11 @@
+(score
+   (vers 1.6)
+   (instrument
+      (musicData
+         (clef G)
+         (key C)
+         (r l..)(r b..)(r w..)(r h..)(r q..)(r e..)(r s..)(r t..)(r i..)(r o..)(r f..)
+      )
+   )
+)
+

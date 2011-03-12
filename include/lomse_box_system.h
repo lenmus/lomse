@@ -62,7 +62,6 @@ public:
 //
     //slices
 	inline int get_num_slices() const { return (int)m_childBoxes.size(); }
-    GmoBoxSlice* add_slice(int nAbsMeasure); //, LUnits uxStart=0.0f, LUnits uxEnd=0.0f);
     inline GmoBoxSlice* get_slice(int i) const { return (GmoBoxSlice*)m_childBoxes[i]; }
 //    void DeleteLastSlice();
 //    int GetNumMeasures();
@@ -106,6 +105,8 @@ public:
 
     //Staff shapes
     GmoShapeStaff* add_staff_shape(GmoShapeStaff* pShape);
+    void store_shapes_in_page();
+
 
 //private:
 //    void ClearStaffShapesTable();

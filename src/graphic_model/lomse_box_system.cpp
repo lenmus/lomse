@@ -46,19 +46,19 @@ GmoBoxSystem::~GmoBoxSystem()
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxSlice* GmoBoxSystem::add_slice(int nAbsMeasure)   //, LUnits xStart, LUnits xEnd)
-{
-    GmoBoxSlice* pBSlice = new GmoBoxSlice(nAbsMeasure); //, (int)m_childBoxes.size(), xStart, xEnd);
-    add_child_box(pBSlice);
-    return pBSlice;
-}
-
-//---------------------------------------------------------------------------------------
 GmoShapeStaff* GmoBoxSystem::add_staff_shape(GmoShapeStaff* pShape)
 {
 	m_staffShapes.push_back(pShape);
     GmoBox::add_shape(pShape, GmoShape::k_layer_staff);
     return pShape;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBoxSystem::store_shapes_in_page()
+{
+    GmoBoxDocPage* pPage = get_parent_box_page();
+    GmoBox* pBox = this;        //gcc complains if I invoke directly to next method
+    pBox->store_shapes_in_page(pPage);
 }
 
 //---------------------------------------------------------------------------------------

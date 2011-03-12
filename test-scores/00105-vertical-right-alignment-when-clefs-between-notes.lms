@@ -1,0 +1,22 @@
+(score
+   (vers 1.6)
+   (instrument (staves 2)
+      (musicData 
+            (clef G p1)
+            (clef F4 p2)
+            (key D)
+            (time 2 4)
+            (n f4 q. p1)
+            (n c4 e)
+            
+            (goBack h)
+            (n c3 q p2)(n c3 e)
+            (clef G p2)
+            (clef F4 p2)
+            (n a3 e)
+            (barline)
+      )
+   )
+   
+)
+
