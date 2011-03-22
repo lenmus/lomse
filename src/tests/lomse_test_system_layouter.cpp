@@ -118,13 +118,12 @@ SUITE(LinesBuilderTest)
         ImoClef* pClef = new ImoClef(ImoClef::k_G2);
         pMD->append_child(pClef);
         GmoShape* pShape = NULL;
-        bool fProlog = false;
         int iStaff = 0;
         int iLine = 0;
         int iInstr = 0;
         float rTime = 0.0f;
 
-        builder.include_object(iLine, iInstr, &instr, pClef, rTime, fProlog, iStaff, pShape);
+        builder.include_object(iLine, iInstr, &instr, pClef, rTime, iStaff, pShape);
 
         CHECK( builder.ut_is_there_current_line() == true );
     }

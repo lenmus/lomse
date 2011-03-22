@@ -110,7 +110,7 @@ void GmoShapeNote::draw_leger_lines(Drawer* pDrawer)
 
     if (m_nPosOnStaff > 11)     //lines at top
 	{
-        LUnits yPos = m_uyStaffTopLine - m_lineSpacing;
+        LUnits yPos = m_uyStaffTopLine + get_notehead_top() - m_lineSpacing;
         for (int i=12; i <= m_nPosOnStaff; i+=2)
         {
             pDrawer->move_to(xPos, yPos);
@@ -120,7 +120,7 @@ void GmoShapeNote::draw_leger_lines(Drawer* pDrawer)
     }
 	else    //lines at bottom
 	{
-        LUnits yPos = m_uyStaffTopLine + m_lineSpacing * 5.0f;
+        LUnits yPos = m_uyStaffTopLine + get_notehead_top() + m_lineSpacing * 5.0f;
         for (int i=0; i >= m_nPosOnStaff; i-=2)
         {
             pDrawer->move_to(xPos, yPos);
@@ -166,7 +166,7 @@ void GmoShapeNote::add_leger_lines_info(int posOnStaff, LUnits yStaffTopLine,
                                         LUnits lineSpacing)
 {
 	m_nPosOnStaff = posOnStaff;
-	m_uyStaffTopLine = yStaffTopLine;
+	m_uyStaffTopLine = yStaffTopLine;   //relative to notehead top
     m_uLineOutgoing = lineOutgoing;
     m_uLineThickness = lineThickness;
     m_lineSpacing = lineSpacing;

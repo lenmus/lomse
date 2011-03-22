@@ -310,11 +310,7 @@ SUITE(DocLayouterTest)
         CHECK( pShape->is_shape_staff() == true );
         GmoShapeStaff* pSS = dynamic_cast<GmoShapeStaff*>(pShape);
         CHECK( pSS->get_num_staff() == 0 );
-        CHECK( pBSys->get_num_boxes() == 1 );
-        GmoBox* pBSlice = pBSys->get_child_box(0);     //Slice
-        CHECK( pBSlice->get_num_boxes() == 1 );
-        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);     //SliceInsr
-        CHECK( pBSliceInstr->get_num_boxes() == 0 );
+        CHECK( pBSys->get_num_boxes() == 0 );
 
         delete pGModel;
     }
@@ -324,7 +320,7 @@ SUITE(DocLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
-            "(instrument (musicData )))))" );
+            "(instrument (musicData (clef G) )) )))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
@@ -364,7 +360,7 @@ SUITE(DocLayouterTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
-            "(instrument (musicData )))))" );
+            "(instrument (musicData )) )))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
@@ -404,7 +400,7 @@ SUITE(DocLayouterTest)
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         CHECK( pBSP->get_num_boxes() == 1 );
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
-        CHECK( pBSys->get_num_shapes() == 2 );
+        CHECK( pBSys->get_num_shapes() == 3 );  // two staves + bracket
         GmoShape* pShape = pBSys->get_staff_shape(0);
         CHECK( pShape != NULL );
         CHECK( pShape->is_shape_staff() == true );
@@ -415,11 +411,7 @@ SUITE(DocLayouterTest)
         CHECK( pShape->is_shape_staff() == true );
         pSS = dynamic_cast<GmoShapeStaff*>(pShape);
         CHECK( pSS->get_num_staff() == 1 );
-        CHECK( pBSys->get_num_boxes() == 1 );
-        GmoBox* pBSlice = pBSys->get_child_box(0);     //Slice
-        CHECK( pBSlice->get_num_boxes() == 1 );
-        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);     //SliceInsr
-        CHECK( pBSliceInstr->get_num_boxes() == 0 );
+        CHECK( pBSys->get_num_boxes() == 0 );
 
         delete pGModel;
     }
@@ -451,14 +443,7 @@ SUITE(DocLayouterTest)
         CHECK( pShape->is_shape_staff() == true );
         pSS = dynamic_cast<GmoShapeStaff*>(pShape);
         CHECK( pSS->get_num_staff() == 0 );
-        CHECK( pBSys->get_num_boxes() == 1 );
-        GmoBox* pBSlice = pBSys->get_child_box(0);     //Slice
-        CHECK( pBSlice->get_num_boxes() == 2 );
-        GmoBox* pBSliceInstr1 = pBSlice->get_child_box(0);     //SliceInsr 1
-        CHECK( pBSliceInstr1->get_num_boxes() == 0 );
-        GmoBox* pBSliceInstr2 = pBSlice->get_child_box(1);     //SliceInsr 2
-        CHECK( pBSliceInstr2->get_num_boxes() == 0 );
-        CHECK( pBSliceInstr1->get_top() < pBSliceInstr2->get_top() );
+        CHECK( pBSys->get_num_boxes() == 0 );
 
         delete pGModel;
     }

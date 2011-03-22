@@ -20,6 +20,7 @@
 
 #include "lomse_system_layouter.h"
 
+#include "lomse_box_system.h"
 #include "lomse_box_slice.h"
 #include "lomse_box_slice_instr.h"
 #include "lomse_engraving_options.h"
@@ -198,14 +199,14 @@ void LineEntry::reposition_at(LUnits uxNewXLeft)
 }
 
 //---------------------------------------------------------------------------------------
-void LineEntry::move_shape()
+void LineEntry::move_shape(UPoint sliceOrg)
 {
     if (m_pSO && m_pShape)
     {
         //TODO
         //LUnits uShift = m_xLeft - m_pShape->get_left();
 //        m_pSO->StoreOriginAndShiftShapes( uShift, m_pShape->GetOwnerIDX() );
-        m_pShape->set_left_and_notify_observers(m_xLeft);
+        m_pShape->set_origin_and_notify_observers(m_xLeft, sliceOrg.y);
     }
 }
 
@@ -422,10 +423,17 @@ LineTable::~LineTable()
 }
 
 //---------------------------------------------------------------------------------------
-LineEntry* LineTable::add_entry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog,
-                                float rTime)
+LineEntry* LineTable::add_entry(ImoStaffObj* pSO, GmoShape* pShape, float rTime)
 {
-    LineEntry* pEntry = new LineEntry(pSO, pShape, fProlog, rTime);
+    //determine if new object is in prolog
+    bool fIsProlog = false;
+    if (pSO->is_clef() || pSO->is_key_signature() || pSO->is_time_signature())
+    {
+        if (get_num_objects_in_line() > 0 && get_last_entry()->get_timepos() == -1)
+            fIsProlog = true;
+    }
+
+    LineEntry* pEntry = new LineEntry(pSO, pShape, fIsProlog, rTime);
     push_back(pEntry);
 	return pEntry;
 }
@@ -541,6 +549,7 @@ LUnits LineTable::get_line_width()
 ColumnLayouter::ColumnLayouter(ColumnStorage* pStorage, ScoreMeter* pScoreMeter)
     : m_pColStorage(pStorage)
     , m_pScoreMeter(pScoreMeter)
+    , m_fHasSystemBreak(false)
 {
 }
 
@@ -722,14 +731,42 @@ Tenths ColumnLayouter::get_fixed_spacing_value() const
     return m_pScoreMeter->get_spacing_value();
 }
 
+//---------------------------------------------------------------------------------------
+void ColumnLayouter::set_slice_width(LUnits width)
+{
+    m_pBoxSlice->set_width(width);
 
+    //set instrument slices width
+    std::vector<GmoBoxSliceInstr*>::iterator it;
+    for (it=m_sliceInstrBoxes.begin(); it != m_sliceInstrBoxes.end(); ++it)
+    {
+        (*it)->set_width(width);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnLayouter::set_slice_final_position(LUnits left, LUnits top)
+{
+    m_pBoxSlice->new_left(left);
+    m_pBoxSlice->new_top(top);
+
+    //Re-position instrument slices
+    std::vector<GmoBoxSliceInstr*>::iterator it;
+    for (it=m_sliceInstrBoxes.begin(); it != m_sliceInstrBoxes.end(); ++it)
+    {
+        (*it)->new_left(left);
+        (*it)->new_top(top);
+        top += (*it)->get_height();
+    }
+}
 
 
 //=======================================================================================
 // SystemLayouter implementation
 //=======================================================================================
-SystemLayouter::SystemLayouter(ScoreMeter* pScoreMeter)
-    : m_pScoreMeter(pScoreMeter)
+SystemLayouter::SystemLayouter(ScoreLayouter* pScoreLyt, ScoreMeter* pScoreMeter)
+    : m_pScoreLyt(pScoreLyt)
+    , m_pScoreMeter(pScoreMeter)
     , m_uPrologWidth(0.0f)
 {
 }
@@ -737,37 +774,19 @@ SystemLayouter::SystemLayouter(ScoreMeter* pScoreMeter)
 //---------------------------------------------------------------------------------------
 SystemLayouter::~SystemLayouter()
 {
-    std::vector<ColumnLayouter*>::iterator itF;
-    for (itF=m_ColLayouters.begin(); itF != m_ColLayouters.end(); ++itF)
-        delete *itF;
-    m_ColLayouters.clear();
-
-    std::vector<ColumnStorage*>::iterator itS;
-    for (itS=m_ColStorage.begin(); itS != m_ColStorage.end(); ++itS)
-        delete *itS;
-    m_ColStorage.clear();
-
-    std::vector<LinesBuilder*>::iterator itLB;
-    for (itLB=m_LinesBuilder.begin(); itLB != m_LinesBuilder.end(); ++itLB)
-        delete *itLB;
-    m_LinesBuilder.clear();
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::prepare_for_new_column(GmoBoxSlice* pBoxSlice)
+GmoBoxSystem* SystemLayouter::create_system_box(LUnits left, LUnits top, LUnits width)
 {
-    //create storage for this column
-    ColumnStorage* pStorage = new ColumnStorage();
-    m_ColStorage.push_back(pStorage);
+    m_pBoxSystem = new GmoBoxSystem();
+    m_pBoxSystem->set_origin(left, top);
 
-    //create a lines builder object for this column
-    LinesBuilder* pLB = new LinesBuilder(pStorage);
-    m_LinesBuilder.push_back(pLB);
+    LUnits leftMargin = 0.0f; //TODO-LOG: m_pScoreLyt->get_system_left_space(iSystem);
+    m_pBoxSystem->set_left_margin(leftMargin);
 
-    //create the column layouter object
-    ColumnLayouter* pColLyt = new ColumnLayouter(pStorage, m_pScoreMeter);
-    pColLyt->set_slice_box(pBoxSlice);
-    m_ColLayouters.push_back(pColLyt);
+    m_pBoxSystem->set_width(width);
+    return m_pBoxSystem;
 }
 
 //---------------------------------------------------------------------------------------
@@ -779,158 +798,20 @@ void SystemLayouter::end_of_system_measurements()
     //Nothing to do for current implementation
 }
 
-//---------------------------------------------------------------------------------------
-void SystemLayouter::start_bar_measurements(int iCol, LUnits uxStart, LUnits uSpace)
-{
-    //prepare to receive data for a new bar in column iCol [0..n-1].
+//////---------------------------------------------------------------------------------------
+////void SystemLayouter::AddTimeGridToBoxSlice(int iCol, GmoBoxSlice* pBSlice)
+////{
+////    //create the time-grid table and transfer it (and its ownership) to GmoBoxSlice
+////    pBSlice->SetTimeGridTable( new TimeGridTable(m_ColStorage[iCol]) );
+////}
+//
+//////---------------------------------------------------------------------------------------
+////void SystemLayouter::ClearDirtyFlags(int iCol)
+////{
+////    m_ColStorage[iCol]->ClearDirtyFlags();
+////}
+//
 
-    LinesBuilder* pLB = m_LinesBuilder[iCol];
-    pLB->set_start_position(uxStart);
-    pLB->set_initial_space(uSpace);
-}
-
-//---------------------------------------------------------------------------------------
-void SystemLayouter::include_object(int iCol, int iLine, int iInstr, ImoInstrument* pInstr,
-                                    ImoStaffObj* pSO, float rTime, bool fProlog,
-                                    int nStaff, GmoShape* pShape)
-{
-    //caller sends data about one staffobj in current bar, for column iCol [0..n-1]
-
-    m_LinesBuilder[iCol]->include_object(iLine, iInstr, pInstr, pSO, rTime,
-                                         fProlog, nStaff, pShape);
-}
-
-//---------------------------------------------------------------------------------------
-void SystemLayouter::include_barline_and_finish_bar_measurements(int iCol, int iLine,
-                        ImoStaffObj* pSO, GmoShape* pShape, LUnits xStart, float rTime)
-{
-    //caller sends lasts object to store in current bar, for column iCol [0..n-1].
-
-    m_LinesBuilder[iCol]->close_line(iLine, pSO, pShape, xStart, rTime);
-}
-
-//---------------------------------------------------------------------------------------
-void SystemLayouter::finish_bar_measurements(int iCol, LUnits xStart)
-{
-    m_LinesBuilder[iCol]->finish_bar_measurements(xStart);
-}
-
-//---------------------------------------------------------------------------------------
-void SystemLayouter::discard_data_for_current_column(ShapesStorage* pStorage)
-{
-    //caller request to ignore measurements for column iCol [0..n-1]
-
-    //m_ColStorage[iCol]->initialize();
-    //m_ColLayouters[iCol]->initialize();
-    ////m_LinesBuilder[iCol]->initialize();
-
-    //delete shapes
-    ColumnLayouter* pColLayouter = m_ColLayouters.back();
-    pColLayouter->delete_shapes(pStorage);
-
-    //delete helper objects
-    m_ColStorage.pop_back();
-    m_LinesBuilder.pop_back();
-    m_ColLayouters.pop_back();
-
-
-}
-
-//---------------------------------------------------------------------------------------
-void SystemLayouter::do_column_spacing(int iCol, bool fTrace)
-{
-    m_ColLayouters[iCol]->do_spacing(fTrace);
-}
-
-//---------------------------------------------------------------------------------------
-LUnits SystemLayouter::redistribute_space(int iCol, LUnits uNewStart)
-{
-    LUnits uNewBarSize = m_ColLayouters[iCol]->get_minimum_size();
-    ColumnResizer oResizer(m_ColStorage[iCol], uNewBarSize);
-	oResizer.reposition_shapes(uNewStart);
-
-    LUnits uBarFinalPosition = uNewStart + uNewBarSize;
-    return uBarFinalPosition;
-}
-
-////---------------------------------------------------------------------------------------
-//void SystemLayouter::AddTimeGridToBoxSlice(int iCol, GmoBoxSlice* pBSlice)
-//{
-//    //create the time-grid table and transfer it (and its ownership) to GmoBoxSlice
-//    pBSlice->SetTimeGridTable( new TimeGridTable(m_ColStorage[iCol]) );
-//}
-
-//---------------------------------------------------------------------------------------
-void SystemLayouter::increment_column_size(int iCol, LUnits uIncr)
-{
-    m_ColLayouters[iCol]->increment_column_size(uIncr);
-}
-
-//---------------------------------------------------------------------------------------
-void SystemLayouter::add_shapes_to_column(int iCol, ShapesStorage* pStorage)
-{
-    m_ColLayouters[iCol]->add_shapes_to_boxes(pStorage);
-}
-
-//---------------------------------------------------------------------------------------
-LUnits SystemLayouter::get_start_position_for_column(int iCol)
-{
-    return m_ColStorage[iCol]->get_start_of_bar_position();
-}
-
-//---------------------------------------------------------------------------------------
-LUnits SystemLayouter::get_minimum_size(int iCol)
-{
-    return m_ColLayouters[iCol]->get_minimum_size();
-}
-
-//---------------------------------------------------------------------------------------
-bool SystemLayouter::get_optimum_break_point(int iCol, LUnits uAvailable,
-                                        float* prTime, LUnits* puWidth)
-{
-    //return m_ColLayouters[iCol]->get_optimum_break_point(uAvailable, prTime, puWidth);
-    BreakPoints oBreakPoints(m_ColStorage[iCol]);
-    if (oBreakPoints.find_optimum_break_point_for_space(uAvailable))
-    {
-        *prTime = oBreakPoints.get_optimum_time_for_found_break_point();
-        *puWidth = oBreakPoints.get_optimum_position_for_break_point();
-        return false;
-    }
-    else
-        return true;
-}
-
-//---------------------------------------------------------------------------------------
-bool SystemLayouter::column_has_barline(int iCol)
-{
-    return m_ColLayouters[iCol]->is_there_barline();
-}
-
-////---------------------------------------------------------------------------------------
-//void SystemLayouter::ClearDirtyFlags(int iCol)
-//{
-//    m_ColStorage[iCol]->ClearDirtyFlags();
-//}
-
-//---------------------------------------------------------------------------------------
-void SystemLayouter::dump_column_data(int iCol, ostream& outStream)
-{
-    m_ColStorage[iCol]->dump_column_storage(outStream);
-}
-
-//---------------------------------------------------------------------------------------
-GmoBoxSliceInstr* SystemLayouter::create_slice_instr(int iCol,
-                                                     ImoInstrument* pInstr,
-                                                     LUnits yTop)
-{
-    return m_ColLayouters[iCol]->create_slice_instr(pInstr, yTop);
-}
-
-//---------------------------------------------------------------------------------------
-GmoBoxSliceInstr* SystemLayouter::get_slice_box_for(int iCol, int iInstr)
-{
-    return m_ColLayouters[iCol]->get_slice_instr(iInstr);
-}
 
 ////------------------------------------------------
 //// Debug build: methods coded only for Unit Tests
@@ -1181,7 +1062,7 @@ void LinesBuilder::finish_bar_measurements(LUnits xStart)
 
 //---------------------------------------------------------------------------------------
 void LinesBuilder::include_object(int line, int instr, ImoInstrument* pInstr,
-                                  ImoStaffObj* pSO, float rTime, bool fProlog,
+                                  ImoStaffObj* pSO, float rTime, 
                                   int nStaff, GmoShape* pShape)
 {
     //int voice = decide_voice_to_use(pSO, nStaff);
@@ -1194,7 +1075,7 @@ void LinesBuilder::include_object(int line, int instr, ImoInstrument* pInstr,
     }
 
     //add new entry for this object
-	m_pCurEntry = (*m_itCurLine)->add_entry(pSO, pShape, fProlog, rTime);
+	m_pCurEntry = (*m_itCurLine)->add_entry(pSO, pShape, rTime);
 
 	////if line found was the default one for the staff, assigne voice to this line and to
  //   //the staff if not yet assigned
@@ -1239,11 +1120,12 @@ void LinesBuilder::end_of_data()
 //      will have the desired width, and to move the shapes to those positions
 //=======================================================================================
 LineResizer::LineResizer(LineTable* pTable, LUnits uOldBarSize,
-                             LUnits uNewBarSize, LUnits uNewStart)
+                             LUnits uNewBarSize, LUnits uNewStart, UPoint sliceOrg)
     : m_pTable(pTable)
     , m_uOldBarSize(uOldBarSize)
     , m_uNewBarSize(uNewBarSize)
     , m_uNewStart(uNewStart)
+    , m_sliceOrg(sliceOrg)
 {
 }
 
@@ -1264,7 +1146,7 @@ float LineResizer::move_prolog_shapes()
             {
                 LUnits uNewPos = uLineShift + (*it)->get_position();
                 (*it)->reposition_at(uNewPos);
-                (*it)->move_shape();
+                (*it)->move_shape(m_sliceOrg);
             }
             else
 			    break;
@@ -1312,7 +1194,7 @@ void LineResizer::reasign_position_to_all_other_objects(LUnits uFizedSizeAtStart
         {
             LUnits uNewPos = m_uNewStart + m_uNewBarSize - (*it)->get_shape_size();
             (*it)->reposition_at(uNewPos);
-            (*it)->move_shape();
+            (*it)->move_shape(m_sliceOrg);
         }
         else
         {
@@ -1320,7 +1202,7 @@ void LineResizer::reasign_position_to_all_other_objects(LUnits uFizedSizeAtStart
             LUnits uShift = uDiscount + (m_uNewStart + (uOldPos - uFizedSizeAtStart) * rProp) - uOldPos;
             LUnits uNewPos = uOldPos + uShift + (*it)->get_anchor();;
             (*it)->reposition_at(uNewPos);
-            (*it)->move_shape();
+            (*it)->move_shape(m_sliceOrg);
         }
     }
 }
@@ -2226,9 +2108,10 @@ ColumnResizer::ColumnResizer(ColumnStorage* pColStorage, LUnits uNewBarSize)
 }
 
 //-------------------------------------------------------------------------------------
-void ColumnResizer::reposition_shapes(LUnits uNewStart)
+LUnits ColumnResizer::reposition_shapes(LUnits uNewStart, LUnits uNewWidth, UPoint org)
 {
-    m_uNewStart = uNewStart;
+    m_sliceOrg = org;
+    m_uNewStart = uNewStart + org.x;
     m_uOldBarSize = m_pColStorage->get_column_width();
 
     create_line_resizers();
@@ -2236,6 +2119,8 @@ void ColumnResizer::reposition_shapes(LUnits uNewStart)
     determine_fixed_size_at_start_of_column();
     reposition_all_other_shapes();
     delete_line_resizers();
+
+    return uNewStart + uNewWidth;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2244,7 +2129,7 @@ void ColumnResizer::create_line_resizers()
 	for (LinesIterator it=m_pColStorage->begin(); it != m_pColStorage->end(); ++it)
 	{
         LineResizer* pResizer = new LineResizer(*it, m_uOldBarSize, m_uNewBarSize,
-                                                    m_uNewStart);
+                                                m_uNewStart, m_sliceOrg);
         m_LineResizers.push_back(pResizer);
     }
 }

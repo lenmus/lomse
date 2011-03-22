@@ -514,8 +514,12 @@ void GmoBoxDocPage::draw_page_background(Drawer* pDrawer, RenderOptions& opt)
 void GmoBoxDocPage::store_shape(GmoShape* pShape)
 {
     int layer = pShape->get_layer();
-    std::list<GmoShape*>::iterator it = m_allShapes.begin();
-    for (; it != m_allShapes.end() && (*it)->get_layer() <= layer; ++it);
+    std::list<GmoShape*>::iterator it;
+    for (it = m_allShapes.begin(); it != m_allShapes.end(); ++it)
+    {
+        if ((*it)->get_layer() > layer)
+            break;
+    }
 
     if (it == m_allShapes.end())
         m_allShapes.push_back(pShape);

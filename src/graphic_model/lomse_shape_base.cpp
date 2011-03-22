@@ -106,9 +106,9 @@ void GmoShape::on_linked_to(Linkable<USize>* pShape, int type)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoShape::set_left_and_notify_observers(LUnits xLeft)
+void GmoShape::set_origin_and_notify_observers(LUnits xLeft, LUnits yTop)
 {
-    USize shift(xLeft - m_origin.x, 0.0f);
+    USize shift(xLeft - m_origin.x, yTop);  // + m_origin.y);
     shift_origin(shift);
     notify_linked_observers(shift);
 }

@@ -48,24 +48,31 @@ protected:
     ImoInstrument* m_pInstr;
     ImoScore* m_pScore;
     FontStorage* m_pFontStorage;
+    UPoint m_org;
     LUnits m_uIndentFirst;
     LUnits m_uIndentOther;
     LUnits m_uBracketWidth;
     LUnits m_uBracketGap;
     //int m_bracketSymbol;
 
+    //vertical positions are relative to SystemBox origin
     LUnits m_stavesTop;
     LUnits m_stavesBottom;
     LUnits m_stavesLeft;
     LUnits m_stavesWidth;
 
     std::vector<LUnits> m_staffTop;
-    std::list<GmoShapeStaff*> m_staffShapes;      //for current system
+    std::vector<LUnits> m_staffTopLine;
+    std::vector<LUnits> m_lineThickness;
 
 public:
     InstrumentEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                        ImoInstrument* pInstr, ImoScore* pScore);
     ~InstrumentEngraver();
+
+    void set_staves_horizontal_position(LUnits x, LUnits width, LUnits indent);
+    void set_staves_vertical_position(LUnits y);
+    inline void set_slice_instr_origin(UPoint org) { m_org = org; }
 
     //indents
     void measure_indents();
@@ -73,10 +80,10 @@ public:
     LUnits get_indent_other() { return m_uIndentOther; }
 
     //shapes
-    void add_staff_lines(GmoBoxSystem* pBox, LUnits x, LUnits y, LUnits indent);
-    void add_name_abbrev(GmoBox* pBox, int nSystem);
-    void add_brace_bracket(GmoBox* pBox);
-    inline LUnits get_staves_bottom() { return m_stavesBottom; }
+    void add_staff_lines(GmoBoxSystem* pBox);
+    void add_name_abbrev(GmoBoxSystem* pBox, int iSystem);
+    void add_brace_bracket(GmoBoxSystem* pBox);
+    inline LUnits get_staves_bottom() { return m_stavesBottom + m_org.y; }
     LUnits get_staves_top_line();
     LUnits get_staves_bottom_line();
     LUnits get_top_line_of_staff(int iStaff);

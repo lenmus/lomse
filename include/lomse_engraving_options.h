@@ -64,11 +64,15 @@ namespace lomse
 #define LOMSE_DMIN                       8.0f   //TODO: float(e32thDuration)        //Dmin: min. duration to consider
 #define LOMSE_MIN_SPACE                 10.0f   //Smin: space for Dmin
     //space
-#define LOMSE_SPACE_BEFORE_PROLOG        7.5f
-#define LOMSE_SPACE_AFTER_PROLOG        25.0f   //The first note in each bar should be about one note-head's width away from the barline.
 #define LOMSE_MIN_SPACE_BETWEEN_NOTE_AND_CLEF   10.0f
 #define LOMSE_EXCEPTIONAL_MIN_SPACE      2.5f
 #define LOMSE_SPACE_AFTER_BARLINE       20.0f
+    //prolog (opening measures) [Stone80, p.44]
+#define LOMSE_SPACE_BEFORE_PROLOG        7.5f
+#define LOMSE_PROLOG_GAP_BEORE_KEY      10.0f
+#define LOMSE_PROLOG_GAP_BEFORE_TIME    10.0f
+#define LOMSE_SPACE_AFTER_PROLOG        15.0f
+
 
 //tuplets
 #define LOMSE_TUPLET_BORDER_LENGHT      10.0f

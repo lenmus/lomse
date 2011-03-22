@@ -967,12 +967,12 @@ ImoScore::~ImoScore()
 void ImoScore::set_defaults_for_system_info()
 {
     m_systemInfoFirst.set_first(true);
-    m_systemInfoFirst.set_system_distance(0.0f);
-    m_systemInfoFirst.set_top_system_distance(0.0f);
+    m_systemInfoFirst.set_top_system_distance(1000.0f);     //half system distance
+    m_systemInfoFirst.set_system_distance(2000.0f);         //2 cm
 
     m_systemInfoOther.set_first(true);
-    m_systemInfoOther.set_system_distance(3000.0f);         //3 cm
-    m_systemInfoOther.set_top_system_distance(2000.0f);     //2 cm
+    m_systemInfoOther.set_top_system_distance(1500.0f);     //1.5 cm
+    m_systemInfoOther.set_system_distance(2000.0f);         //2 cm
 }
 
 //---------------------------------------------------------------------------------------

@@ -232,7 +232,7 @@ public:
  //   virtual bool Collision(GmoShape* pShape);
 
     //methods related to position
-    void set_left_and_notify_observers(LUnits xLeft);
+    void set_origin_and_notify_observers(LUnits xLeft, LUnits yTop);
 	//virtual void OnAttachmentPointMoved(GmoShape* pShape, lmEAttachType nTag,
 	//									lmLUnits ux, lmLUnits uy, lmEParentEvent nEvent) {}
 
@@ -325,6 +325,9 @@ public:
     inline LUnits get_content_top() { return get_top() + m_uTopMargin; }
     inline LUnits get_content_left() { return get_left() + m_uLeftMargin; }
     void shift_origin(const USize& shift);
+    inline void new_left(LUnits xLeft) { m_origin.x = xLeft; }
+    inline void new_top(LUnits yTop) { m_origin.y = yTop; }
+    inline void new_origin(UPoint& pos) { m_origin = pos; }
 
     //drawing
     void on_draw(Drawer* pDrawer, RenderOptions& opt);

@@ -279,34 +279,34 @@ void open_document()
 //        "(n --g4 q)"
 //        ")) )))" );
 
-//        //beams
-//        "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData "
-//        "(clef F4)(key E)(time 2 4)(n +c3 e.)(barline)"
-//        "(n e2 q)(n e3 q)(barline)"
-//        "(n f2 e (beam 1 +))(n g2 e (beam 1 -))"
-//            "(n f3 e (beam 3 +))(n g3 e (beam 3 -))(barline)"
-//        "(n f2 e. (beam 4 +))(n g2 s (beam 4 -b))"
-//            "(n f3 s (beam 5 +f))(n g3 e. (beam 5 -))(barline)"
-//        "(n g2 e. (beam 2 +))(n e3 s (beam 2 -b))(n g3 q)(barline)"
-//        "(n a2 e (beam 6 +))(n g2 e (beam 6 -))(n a3 q)(barline)"
-//        "(n -b2 q)(n =b3 q)(barline)"
-//        "(n xc3 q)(n ++c4 q)(barline)"
-//        "(n d3 q)(n --d4 q)(barline)"
-//        "(n e3 q)(n e4 q)(barline)"
-//        "(n f3 q)(n f4 q)(barline -)"
-//        "))"
-//        "(instrument (name \"pilano\")(abbrev \"P\")(staves 2)(musicData "
-//        "(clef G p1)(clef F4 p2)(key F)(time 12 8)"
-//        "(n c5 e. p1)(barline)"
-//        "(n e4 e p1 (beam 10 +))(n g3 e p2 (beam 10 -))"
-//        "(n e4 e p1 (stem up)(beam 11 +))(n e5 e p1 (stem down)(beam 11 -))(barline)"
-//        "(n e4 s p1 (beam 12 ++))(n f4 s p1 (beam 12 ==))"
-//            "(n g4 s p1 (beam 12 ==))(n a4 s p1 (beam 12 --))"
-//        "(n c5 q p1)(barline)"
-////        "(chord (n c4 q p1)(n e4 q p1)(n g4 q p1))"
-////        "(chord (n c4 q p1)(n d4 q p1)(n g4 q p1))"
-//        "))"
-//        ")))" );
+        //beams
+        "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData "
+        "(clef F4)(key E)(time 2 4)(n +c3 e.)(barline)"
+        "(n e2 q)(n e3 q)(barline)"
+        "(n f2 e (beam 1 +))(n g2 e (beam 1 -))"
+            "(n f3 e (beam 3 +))(n g3 e (beam 3 -))(barline)"
+        "(n f2 e. (beam 4 +))(n g2 s (beam 4 -b))"
+            "(n f3 s (beam 5 +f))(n g3 e. (beam 5 -))(barline)"
+        "(n g2 e. (beam 2 +))(n e3 s (beam 2 -b))(n g3 q)(barline)"
+        "(n a2 e (beam 6 +))(n g2 e (beam 6 -))(n a3 q)(barline)"
+        "(n -b2 q)(n =b3 q)(barline)"
+        "(n xc3 q)(n ++c4 q)(barline)"
+        "(n d3 q)(n --d4 q)(barline)"
+        "(n e3 q)(n e4 q)(barline)"
+        "(n f3 q)(n f4 q)(barline end)"
+        "))"
+        "(instrument (name \"pilano\")(abbrev \"P\")(staves 2)(musicData "
+        "(clef G p1)(clef F4 p2)(key F)(time 12 8)"
+        "(n c5 e. p1)(barline)"
+        "(n e4 e p1 (beam 10 +))(n g3 e p2 (beam 10 -))"
+        "(n e4 e p1 (stem up)(beam 11 +))(n e5 e p1 (stem down)(beam 11 -))(barline)"
+        "(n e4 s p1 (beam 12 ++))(n f4 s p1 (beam 12 ==))"
+            "(n g4 s p1 (beam 12 ==))(n a4 s p1 (beam 12 --))"
+        "(n c5 q p1)(barline)"
+//        "(chord (n c4 q p1)(n e4 q p1)(n g4 q p1))"
+//        "(chord (n c4 q p1)(n d4 q p1)(n g4 q p1))"
+        "))"
+        ")))" );
 
 //        //anchor / chord
 //        "(instrument (staves 2)(musicData "
@@ -421,18 +421,18 @@ void open_document()
         //"))"
         //")))" );
 
-        //system break
-        "(instrument (musicData "
-        "(clef G)(key C)(time 2 4)"
-        "(n c4 q l)(n c4 q)"
-        "(barline)"
-        "(n e4 q v1 (tie 3 start (bezier (start-x 30))) )"
-        "(newSystem)"
-        "(barline)"
-        "(n e4 q v1 (tie 3 stop (bezier (start-y 30))) )"
-        "(barline end)"
-        "))"
-        ")))" );
+//        //system break
+//        "(instrument (musicData "
+//        "(clef G)(key C)(time 2 4)"
+//        "(n c4 q l)(n c4 q)"
+//        "(barline)"
+//        "(n e4 q v1 (tie 3 start) )"
+//        "(newSystem)"
+//        "(barline)"
+//        "(n e4 q v1 (tie 3 stop) )"
+//        "(barline end)"
+//        "))"
+//        ")))" );
 
 
 }
@@ -468,6 +468,16 @@ void on_mouse_button_up(int x, int y, unsigned flags)
 }
 
 //-------------------------------------------------------------------------
+void reset_boxes_to_draw()
+{
+    m_pInteractor->set_rendering_option(k_option_draw_box_doc_page_content, false);
+    m_pInteractor->set_rendering_option(k_option_draw_box_score_page, false);
+    m_pInteractor->set_rendering_option(k_option_draw_box_system, false);
+    m_pInteractor->set_rendering_option(k_option_draw_box_slice, false);
+    m_pInteractor->set_rendering_option(k_option_draw_box_slice_instr, false);
+}
+
+//-------------------------------------------------------------------------
 void on_key(int x, int y, unsigned key, unsigned flags)
 {
     if (!m_pInteractor) return;
@@ -475,18 +485,23 @@ void on_key(int x, int y, unsigned key, unsigned flags)
     switch (key)
     {
         case '1':
+            reset_boxes_to_draw();
             m_pInteractor->set_rendering_option(k_option_draw_box_doc_page_content, true);
             break;
         case '2':
+            reset_boxes_to_draw();
             m_pInteractor->set_rendering_option(k_option_draw_box_score_page, true);
             break;
         case '3':
+            reset_boxes_to_draw();
             m_pInteractor->set_rendering_option(k_option_draw_box_system, true);
             break;
         case '4':
+            reset_boxes_to_draw();
             m_pInteractor->set_rendering_option(k_option_draw_box_slice, true);
             break;
         case '5':
+            reset_boxes_to_draw();
             m_pInteractor->set_rendering_option(k_option_draw_box_slice_instr, true);
             break;
         case '8':
@@ -496,11 +511,7 @@ void on_key(int x, int y, unsigned key, unsigned flags)
             m_pInteractor->switch_task(TaskFactory::k_task_selection);
             break;
         case '0':
-            m_pInteractor->set_rendering_option(k_option_draw_box_doc_page_content, false);
-            m_pInteractor->set_rendering_option(k_option_draw_box_score_page, false);
-            m_pInteractor->set_rendering_option(k_option_draw_box_system, false);
-            m_pInteractor->set_rendering_option(k_option_draw_box_slice, false);
-            m_pInteractor->set_rendering_option(k_option_draw_box_slice_instr, false);
+            reset_boxes_to_draw();
             break;
         case '+':
             m_pInteractor->zoom_in(x, y);

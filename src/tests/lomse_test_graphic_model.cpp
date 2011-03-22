@@ -110,11 +110,8 @@ SUITE(GraphicModelTest)
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
         Document doc(libraryScope);
-        //doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-        //    "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        doc.from_string("(lenmusdoc (vers 0.0) "
-            "(content (score (vers 1.6) "
-            "(instrument (staves 2)(musicData )))))" );
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
@@ -261,23 +258,19 @@ SUITE(GraphicModelTest)
         GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
         GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
         GmoBox* pBSys = pBSP->get_child_box(0);         //System
-        GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
-        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
-        LUnits x = pBSliceInstr->get_left() + 800.0f;
-        LUnits y = pBSliceInstr->get_top() + 800.0f;
+        LUnits x = pBSys->get_left() + 800.0f;
+        LUnits y = pBSys->get_top() + 800.0f;
 
         //cout << "DocPage: " << pPage->get_left() << ", " << pPage->get_top() << endl;
         //cout << "DocPageContent: " << pBDPC->get_left() << ", " << pBDPC->get_top() << endl;
         //cout << "ScorePage: " << pBSP->get_left() << ", " << pBSP->get_top() << endl;
         //cout << "System: " << pBSys->get_left() << ", " << pBSys->get_top() << endl;
-        //cout << "Slice: " << pBSlice->get_left() << ", " << pBSlice->get_top() << endl;
-        //cout << "SliceInsr: " << pBSliceInstr->get_left() << ", " << pBSliceInstr->get_top() << endl;
         //cout << "Finding: " << x << ", " << y << endl;
 
         GmoObj* pHit = pPage->hit_test(x, y);
 
         CHECK ( pHit != NULL );
-        CHECK ( pHit == pBSliceInstr );
+        CHECK ( pHit == pBSys );
 
         delete pIntor;
     }

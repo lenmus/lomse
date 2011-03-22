@@ -168,13 +168,13 @@ LdpToken* LdpTokenizer::parse_new_token()
         k_STR03,
         k_STR04,
         k_S01,
-        k_S02,
         k_Error
     };
 
     EAutomataState state = k_Start;
     stringstream tokendata;
     char curChar = 0;
+    char prevChar = 0;
     int numLine = 0;
 
     while (true)
@@ -217,10 +217,8 @@ LdpToken* LdpTokenizer::parse_new_token()
                             break;
                         case chPlusSign:
                         case chMinusSign:
-                            state = k_S01;
-                            break;
                         case chEqualSign:
-                            state = k_S02;
+                            state = k_S01;
                             break;
                         case chQuotes:
                             state = k_STR00;
@@ -408,20 +406,9 @@ LdpToken* LdpTokenizer::parse_new_token()
                 else if (is_number(curChar)) {
                     state = k_NUM01;
                 }
-                else 
+                else {
                     state = k_ETQ01;
-                break;
-
-            case k_S02:
-                tokendata << curChar;
-                curChar = get_next_char();
-                if (curChar == chSpace || curChar == chTab) {
-                    return new LdpToken(tkLabel, tokendata.str(), numLine);
                 }
-                else if (is_number(curChar))
-                    state = k_NUM01;
-                else
-                    state = k_ETQ01;
                 break;
 
             case k_Error:

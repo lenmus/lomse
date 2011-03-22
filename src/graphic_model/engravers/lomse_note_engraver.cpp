@@ -599,7 +599,9 @@ void NoteEngraver::add_leger_lines_if_necessary()
     //TODO
     //ImoOptionInfo* pOpt = get_score()->get_option("Staff.UpperLegerLines.Displacement");
     //Tenths dsplz = Tenths( pOpt->get_long_value() );
-    LUnits yStart = m_uyStaffTopLine;   // - tenths_to_logical(dsplz);
+
+    //AWARE: yStart is relative to notehead top
+    LUnits yStart =  m_uyStaffTopLine - m_pNoteShape->get_notehead_top();   // - tenths_to_logical(dsplz);
 
     m_pNoteShape->add_leger_lines_info(m_nPosOnStaff, yStart, lineOutgoing,
                                        lineThickness, lineSpacing);

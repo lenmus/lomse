@@ -38,11 +38,13 @@ class ImoScore;
 class ImoStaffObj;
 class ImoStaff;
 class GmoShape;
+class GmoBoxSystem;
 class GmoBoxSliceInstr;
 class GmoBoxSlice;
 class ScoreMeter;
 class ShapesStorage;
 
+class ScoreLayouter;
 class SystemLayouter;
 class ColumnLayouter;
 class ColumnStorage;
@@ -117,7 +119,7 @@ public:
 
     void reposition_at(LUnits uxNewXLeft);
 	void assign_fixed_and_variable_space(ColumnLayouter* pTT, float rFactor);
-    void move_shape();
+    void move_shape(UPoint sliceOrg);
     void add_shape_info();
 
     //access to entry data
@@ -203,7 +205,7 @@ public:
     //table manipulation
     inline void clear() { m_LineEntries.clear(); }
     inline void push_back(LineEntry* pEntry) { m_LineEntries.push_back(pEntry); }
-	LineEntry* add_entry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, float rTime);
+	LineEntry* add_entry(ImoStaffObj* pSO, GmoShape* pShape, float rTime);
 	LineEntry* add_final_entry(ImoStaffObj* pSO, GmoShape* pShape, float rTime);
     LineEntry* add_final_entry_without_barline();
 
@@ -337,7 +339,7 @@ public:
     void close_line(int iInstr, ImoStaffObj* pSO, GmoShape* pShape, LUnits xStart,
                     float rTime);
     void include_object(int iLine, int iInstr, ImoInstrument* pInstr, ImoStaffObj* pSO,
-                        float rTime, bool fProlog, int nStaff, GmoShape* pShape);
+                        float rTime, int nStaff, GmoShape* pShape);
     void end_of_data();        //inform that all data has been suplied
     void finish_bar_measurements(LUnits xStart);
 
@@ -362,20 +364,21 @@ protected:
 class ColumnLayouter
 {
 protected:
-    ColumnStorage*              m_pColStorage;          //music lines for this column
-    ScoreMeter*                 m_pScoreMeter;
-    std::vector<LineSpacer*>    m_LineSpacers;          //one spacer for each line
+    ColumnStorage* m_pColStorage;               //music lines for this column
+    ScoreMeter* m_pScoreMeter;
+    bool m_fHasSystemBreak;
+    std::vector<LineSpacer*> m_LineSpacers;     //one spacer for each line
     std::vector<GmoBoxSliceInstr*> m_sliceInstrBoxes;   //instr.boxes for this column
-    GmoBoxSlice*                m_pBoxSlice;            //box for this column
-
-    LUnits            m_uMinColumnSize;     //minimum size for this column
+    GmoBoxSlice* m_pBoxSlice;       //box for this column
+    LUnits  m_uMinColumnSize;       //minimum size for this column
 
 public:
     ColumnLayouter(ColumnStorage* pStorage, ScoreMeter* pScoreMeter);
     ~ColumnLayouter();
 
     inline void initialize() {}
-    void set_slice_box(GmoBoxSlice* pBoxSlice) { m_pBoxSlice = pBoxSlice; };
+    inline void set_slice_box(GmoBoxSlice* pBoxSlice) { m_pBoxSlice = pBoxSlice; };
+    inline GmoBoxSlice* get_slice_box() { return m_pBoxSlice; };
 
     //methods to compute results
     void do_spacing(bool fTrace = false);
@@ -384,6 +387,8 @@ public:
     //access to info
     bool is_there_barline();
     inline LUnits get_minimum_size() { return m_uMinColumnSize; }
+    inline bool has_system_break() { return m_fHasSystemBreak; }
+    inline void set_system_break(bool value) { m_fHasSystemBreak = value; }
 
     //methods for spacing
 	LUnits tenths_to_logical(Tenths value, int iInstr, int staff);
@@ -395,6 +400,8 @@ public:
     GmoBoxSliceInstr* create_slice_instr(ImoInstrument* pInstr, LUnits yTop);
     void delete_shapes(ShapesStorage* pStorage);
     inline GmoBoxSliceInstr* get_slice_instr(int iInstr) { return m_sliceInstrBoxes[iInstr]; }
+    void set_slice_width(LUnits width);
+    void set_slice_final_position(LUnits left, LUnits top);
 
     //public methods coded only for Unit Tests
     inline int get_num_lines() { return int(m_pColStorage->size()); }
@@ -452,80 +459,29 @@ protected:
 class SystemLayouter
 {
 protected:
+    ScoreLayouter* m_pScoreLyt;
     ScoreMeter* m_pScoreMeter;
-    std::vector<ColumnLayouter*> m_ColLayouters;    //layouter for each column
-    std::vector<ColumnStorage*> m_ColStorage;       //data for each column
-    std::vector<LinesBuilder*> m_LinesBuilder;      //lines builder for each column
     LUnits m_uPrologWidth;
+    GmoBoxSystem* m_pBoxSystem;     //box for this system
 
 public:
-    SystemLayouter(ScoreMeter* pScoreMeter);
+    SystemLayouter(ScoreLayouter* pScoreLyt, ScoreMeter* pScoreMeter);
     ~SystemLayouter();
 
-    //column creation --------------------------------------------------------------
-
-    GmoBoxSliceInstr* create_slice_instr(int iCol, ImoInstrument* pInstr, LUnits yTop);
-
-    //caller informs that a new collumn is going to be layouted
-    void prepare_for_new_column(GmoBoxSlice* pBoxSlice);
-
-    //caller ask to prepare for receiving data about column iCol [0..n-1] for
-    //the given instrument
-    void start_bar_measurements(int iCol, LUnits uxStart, LUnits uSpace);
-
-    //caller sends data about one staffobj in column iCol [0..n-1]
-    void include_object(int iCol, int iLine, int iInstr, ImoInstrument* pInstr,
-                        ImoStaffObj* pSO, float rTime, bool fProlog, int nStaff,
-                        GmoShape* pShape);
-    //caller sends lasts object to store in column iCol [0..n-1].
-    void include_barline_and_finish_bar_measurements(int iCol, int iLine,
-                                                     ImoStaffObj* pSO, GmoShape* pShape,
-                                                     LUnits xStart, float rTime);
-
-    //caller informs that there are no barline and no more objects in column iCol [0..n-1].
-    //void finish_bar_measurements_without_barline(int iCol, LUnits xStart, float rTime);
-    void finish_bar_measurements(int iCol, LUnits xStart);
-
-        // Processing
-    void do_column_spacing(int iCol, bool fTrace = false);
-    LUnits redistribute_space(int iCol, LUnits uNewStart);
-
-        //Operations
-    void increment_column_size(int iCol, LUnits uIncr);
-    void add_shapes_to_column(int iCol, ShapesStorage* pStorage);
-
-        //Access to information
-    LUnits get_start_position_for_column(int iCol);
-    inline bool has_content() { return m_ColStorage[0]->size() > 0; }
-    LUnits get_minimum_size(int iCol);
-    bool get_optimum_break_point(int iCol, LUnits uAvailable, float* prTime,
-                              LUnits* puWidth);
-    bool column_has_barline(int iCol);
-    GmoBoxSliceInstr* get_slice_box_for(int iCol, int iInstr);
-
-    //------------------------------------------------------------------------------
+    GmoBoxSystem* create_system_box(LUnits left, LUnits top, LUnits width);
 
     //caller informs that all data for this system has been suplied
     void end_of_system_measurements();
-
-    //caller request to ignore measurements for last column
-    void discard_data_for_current_column(ShapesStorage* pStorage);
 
     //    void AddTimeGridToBoxSlice(int iCol, GmoBoxSlice* pBSlice);
 
         //Access to information
     inline void set_prolog_width(LUnits width) { m_uPrologWidth = width; }
     inline LUnits get_prolog_width() { return m_uPrologWidth; }
+    inline GmoBoxSystem* get_box_system() { return m_pBoxSystem; }
 
 //    //other methods
 //    void ClearDirtyFlags(int iCol);
-
-    //public methods only for unit tests and debugging
-    void dump_column_data(int iCol, ostream& outStream=dbgLogger);
-    inline int get_num_columns() { return int(m_ColLayouters.size()); }
-    inline int get_num_lines_in_column(int iCol) { return m_ColLayouters[iCol]->get_num_lines(); }
-//    inline ColumnStorage* GetColumnData(int iCol) { return m_ColStorage[iCol]; }
-
 };
 
 
@@ -554,15 +510,16 @@ public:
 class LineResizer
 {
 protected:
-    LineTable*    m_pTable;           //table for the line to resize
-    LUnits        m_uOldBarSize;
-    LUnits        m_uNewBarSize;
-    LUnits        m_uNewStart;
+    LineTable*  m_pTable;           //table for the line to resize
+    LUnits      m_uOldBarSize;
+    LUnits      m_uNewBarSize;
+    LUnits      m_uNewStart;
+    UPoint      m_sliceOrg;
     LineEntryIterator m_itCurrent;
 
 public:
     LineResizer(LineTable* pTable, LUnits uOldBarSize, LUnits uNewBarSize,
-                LUnits uNewStart);
+                LUnits uNewStart, UPoint sliceOrg);
 
     float move_prolog_shapes();
     void reasign_position_to_all_other_objects(LUnits uFizedSizeAtStart);
@@ -775,13 +732,14 @@ protected:
     LUnits m_uNewBarSize;
     LUnits m_uOldBarSize;
     LUnits m_uNewStart;
+    UPoint m_sliceOrg;
     float m_rFirstTime;
     LUnits m_uFixedPart;
     std::vector<LineResizer*> m_LineResizers;
 
 public:
     ColumnResizer(ColumnStorage* pColStorage, LUnits uNewBarSize);
-    void reposition_shapes(LUnits uNewStart);
+    LUnits reposition_shapes(LUnits uNewStart, LUnits uNewWidth, UPoint org);
 
 protected:
     void create_line_resizers();

@@ -102,7 +102,7 @@ protected:
     void on_key(int x, int y, unsigned key, unsigned flags);
     unsigned get_keyboard_flags(wxKeyEvent& event);
     unsigned get_mouse_flags(wxMouseEvent& event);
-
+    void reset_boxes_to_draw();
 
     // In this first example we are just going to display an score on the main frame.
     // Let's define the necessary variables:
@@ -745,23 +745,38 @@ void MyFrame::OnKeyDown(wxKeyEvent& event)
 }
 
 //-------------------------------------------------------------------------
+void MyFrame::reset_boxes_to_draw()
+{
+    m_pInteractor->set_rendering_option(k_option_draw_box_doc_page_content, false);
+    m_pInteractor->set_rendering_option(k_option_draw_box_score_page, false);
+    m_pInteractor->set_rendering_option(k_option_draw_box_system, false);
+    m_pInteractor->set_rendering_option(k_option_draw_box_slice, false);
+    m_pInteractor->set_rendering_option(k_option_draw_box_slice_instr, false);
+}
+
+//-------------------------------------------------------------------------
 void MyFrame::on_key(int x, int y, unsigned key, unsigned flags)
 {
     switch (key)
     {
         case '1':
+            reset_boxes_to_draw();
             m_pInteractor->set_rendering_option(k_option_draw_box_doc_page_content, true);
             break;
         case '2':
+            reset_boxes_to_draw();
             m_pInteractor->set_rendering_option(k_option_draw_box_score_page, true);
             break;
         case '3':
+            reset_boxes_to_draw();
             m_pInteractor->set_rendering_option(k_option_draw_box_system, true);
             break;
         case '4':
+            reset_boxes_to_draw();
             m_pInteractor->set_rendering_option(k_option_draw_box_slice, true);
             break;
         case '5':
+            reset_boxes_to_draw();
             m_pInteractor->set_rendering_option(k_option_draw_box_slice_instr, true);
             break;
         case '8':
@@ -771,11 +786,7 @@ void MyFrame::on_key(int x, int y, unsigned key, unsigned flags)
             m_pInteractor->switch_task(TaskFactory::k_task_selection);
             break;
         case '0':
-            m_pInteractor->set_rendering_option(k_option_draw_box_doc_page_content, false);
-            m_pInteractor->set_rendering_option(k_option_draw_box_score_page, false);
-            m_pInteractor->set_rendering_option(k_option_draw_box_system, false);
-            m_pInteractor->set_rendering_option(k_option_draw_box_slice, false);
-            m_pInteractor->set_rendering_option(k_option_draw_box_slice_instr, false);
+            reset_boxes_to_draw();
             break;
         case '+':
             m_pInteractor->zoom_in(x, y);
