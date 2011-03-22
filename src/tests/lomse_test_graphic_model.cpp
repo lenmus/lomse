@@ -210,7 +210,7 @@ SUITE(GraphicModelTest)
         LibraryScope libraryScope(cout, &doorway);
         Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+            "(instrument (musicData (clef G))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
@@ -221,8 +221,8 @@ SUITE(GraphicModelTest)
         GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>(pBSP->get_child_box(0));   //System
         GmoShapeStaff* pShape = pBSys->get_staff_shape(0);   //Staff
-        LUnits x = pShape->get_left() + 100.0f;
-        LUnits y = pShape->get_top() + 1.0f;
+        LUnits x = pShape->get_left() + 10000.0f;
+        LUnits y = pShape->get_top() + 300.0f;
 
         //cout << "DocPage: " << pPage->get_left() << ", " << pPage->get_top() << endl;
         //cout << "DocPageContent: " << pBDPC->get_left() << ", " << pBDPC->get_top() << endl;

@@ -659,7 +659,7 @@ SUITE(ScoreLayouterTest)
         CHECK( scoreLyt.get_num_columns() == 11 );
         CHECK( breaks.size() == 2 );
         CHECK( breaks[0] == 0 );
-        CHECK( breaks[1] == 6 );
+        CHECK( breaks[1] == 5 );
     }
 
     TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_DistanceToTopOfSystem_1stInScore)
@@ -946,12 +946,12 @@ SUITE(ScoreLayouterTest)
 
     //spacing a single line -------------------------------------------------------------
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00020_SpaceBeforeClef)
-    {
-        load_score_for_test("00020", "space-before-clef");
-        LOMSE_ASSERT_LINE_DATA_EQUAL(0, 0);
-        delete_test_data();
-    }
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00020_SpaceBeforeClef)
+//    {
+//        load_score_for_test("00020", "space-before-clef");
+//        LOMSE_ASSERT_LINE_DATA_EQUAL(0, 0);
+//        delete_test_data();
+//    }
 
 //    TEST_FIXTURE(ScoreLayouterTestFixture, T00021_SpacingInProlog)
 //    {

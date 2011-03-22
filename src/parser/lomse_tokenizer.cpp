@@ -174,7 +174,6 @@ LdpToken* LdpTokenizer::parse_new_token()
     EAutomataState state = k_Start;
     stringstream tokendata;
     char curChar = 0;
-    char prevChar = 0;
     int numLine = 0;
 
     while (true)
