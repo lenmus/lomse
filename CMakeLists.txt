@@ -269,6 +269,7 @@ set(INTERNAL_MODEL_FILES
 set(MODULE_FILES
     ${SRC_DIR}/module/lomse_doorway.cpp
     ${SRC_DIR}/module/lomse_injectors.cpp
+    ${SRC_DIR}/module/lomse_logger.cpp
     ${SRC_DIR}/module/lomse_pitch.cpp
     ${SRC_DIR}/module/lomse_time.cpp
 )
