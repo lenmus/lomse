@@ -1,9 +1,9 @@
 (score
-   (vers 1.5)(language en iso-8859-1)
+   (vers 1.6)
    (instrument (staves 2)
       (musicData
-         (clef treble p1)
-         (clef treble p2)
+         (clef G p1)
+         (clef G p2)
 
          (n a4 e g+ t3 p1)(n a4 e)(n a4 e g- t-)
          (n a4 q)

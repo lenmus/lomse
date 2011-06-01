@@ -1,0 +1,13 @@
+(score
+   (vers 1.6)
+   (opt Score.FillPageWithEmptyStaves true)
+   (opt StaffLines.StopAtFinalBarline false)
+   (instrument
+      (musicData
+        (clef G)(key C)(time 2 4)
+        (n c4 q)(n e4 q)
+        (barline)
+      )
+   )
+)
+

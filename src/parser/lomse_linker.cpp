@@ -41,38 +41,35 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
 
     switch(pChild->get_obj_type())
     {
-        case ImoObj::k_instr_group:
-            return add_instruments_group(dynamic_cast<ImoInstrGroup*>(pChild));
-
-        case ImoObj::k_option:
-            return add_option(dynamic_cast<ImoOptionInfo*>(pChild));
-
-        case ImoObj::k_system_info:
-            return add_system_info(dynamic_cast<ImoSystemInfo*>(pChild));
-
-        case ImoObj::k_page_info:
-            return add_page_info(dynamic_cast<ImoPageInfo*>(pChild));
-
         case ImoObj::k_bezier_info:
             return add_bezier(dynamic_cast<ImoBezierInfo*>(pChild));
+
+        case ImoObj::k_content:
+            return add_child(ImoObj::k_document, pChild);
 
         case ImoObj::k_cursor_info:
             return add_cursor(dynamic_cast<ImoCursorInfo*>(pChild));
 
-        case ImoObj::k_midi_info:
-            return add_midi_info(dynamic_cast<ImoMidiInfo*>(pChild));
-
-        case ImoObj::k_staff_info:
-            return add_staff_info(dynamic_cast<ImoStaffInfo*>(pChild));
-
         case ImoObj::k_font_info:
             return add_font_info(dynamic_cast<ImoFontInfo*>(pChild));
 
-        case ImoObj::k_text_style_info:
-            return add_text_style_info(dynamic_cast<ImoTextStyleInfo*>(pChild));
-
         case ImoObj::k_instrument:
             return add_instrument(dynamic_cast<ImoInstrument*>(pChild));
+
+        case ImoObj::k_instr_group:
+            return add_instruments_group(dynamic_cast<ImoInstrGroup*>(pChild));
+
+        case ImoObj::k_midi_info:
+            return add_midi_info(dynamic_cast<ImoMidiInfo*>(pChild));
+
+        case ImoObj::k_music_data:
+            return add_child(ImoObj::k_instrument, pChild);
+
+        case ImoObj::k_option:
+            return add_option(dynamic_cast<ImoOptionInfo*>(pChild));
+
+        case ImoObj::k_page_info:
+            return add_page_info(dynamic_cast<ImoPageInfo*>(pChild));
 
         case ImoObj::k_score_text:
             return add_text(dynamic_cast<ImoScoreText*>(pChild));
@@ -80,20 +77,28 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
         case ImoObj::k_score_title:
             return add_title(dynamic_cast<ImoScoreTitle*>(pChild));
 
-        case ImoObj::k_score:
-            return add_child(ImoObj::k_content, pChild);
+        case ImoObj::k_staff_info:
+            return add_staff_info(dynamic_cast<ImoStaffInfo*>(pChild));
 
-        case ImoObj::k_content:
+        case ImoObj::k_styles:
             return add_child(ImoObj::k_document, pChild);
 
-        case ImoObj::k_music_data:
-            return add_child(ImoObj::k_instrument, pChild);
+        case ImoObj::k_system_info:
+            return add_system_info(dynamic_cast<ImoSystemInfo*>(pChild));
+
+        case ImoObj::k_text_item:
+            return add_text_item(dynamic_cast<ImoTextItem*>(pChild));
+
+        case ImoObj::k_text_style_info:
+            return add_text_style_info(dynamic_cast<ImoTextStyleInfo*>(pChild));
 
         default:
-            if (pChild->is_staffobj())
+            if (pChild->is_boxobj())
+                return add_child(ImoObj::k_content, pChild);
+            else if (pChild->is_staffobj())
                 return add_staffobj(dynamic_cast<ImoStaffObj*>(pChild));
             else if (pChild->is_auxobj())
-                return add_auxobj(dynamic_cast<ImoAuxObj*>(pChild));
+                return add_attachment(dynamic_cast<ImoAuxObj*>(pChild));
             else
                 return pChild;
     }
@@ -117,6 +122,8 @@ ImoObj* Linker::add_option(ImoOptionInfo* pOpt)
     {
         ImoScore* pScore = dynamic_cast<ImoScore*>( m_pParent );
         pScore->set_option(pOpt);
+        delete pOpt;
+        return NULL;
     }
     return pOpt;
 }
@@ -176,6 +183,12 @@ ImoObj* Linker::add_text_style_info(ImoTextStyleInfo* pStyle)
         pScore->add_style_info(pStyle);
         return NULL;
     }
+    else if (m_pParent && m_pParent->is_styles())
+    {
+        ImoStyles* pStyles = dynamic_cast<ImoStyles*>(m_pParent);
+        pStyles->add_style_info(pStyle);
+        return NULL;
+    }
     return pStyle;
 }
 
@@ -198,9 +211,15 @@ ImoObj* Linker::add_font_info(ImoFontInfo* pFont)
 //---------------------------------------------------------------------------------------
 ImoObj* Linker::add_bezier(ImoBezierInfo* pBezier)
 {
-    if (m_pParent && m_pParent->is_tie_info())
+    if (m_pParent && m_pParent->is_tie_dto())
     {
         ImoTieDto* pInfo = dynamic_cast<ImoTieDto*>(m_pParent);
+        pInfo->set_bezier(pBezier);
+        return NULL;
+    }
+    else if (m_pParent && m_pParent->is_slur_dto())
+    {
+        ImoSlurDto* pInfo = dynamic_cast<ImoSlurDto*>(m_pParent);
         pInfo->set_bezier(pBezier);
         return NULL;
     }
@@ -261,7 +280,7 @@ ImoObj* Linker::add_text(ImoScoreText* pText)
         {
             //musicData: create anchor (ImoSpacer) and attach to it
             ImoSpacer* pSpacer = new ImoSpacer();
-            pSpacer->attach(pText);
+            pSpacer->add_attachment(pText);
             add_staffobj(pSpacer);
             return pText;
         }
@@ -294,7 +313,28 @@ ImoObj* Linker::add_text(ImoScoreText* pText)
             return pText;
         }
 
-        return add_auxobj(pText);
+        return add_attachment(pText);
+    }
+    return pText;
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj* Linker::add_text_item(ImoTextItem* pText)
+{
+    if (m_pParent)
+    {
+        if (m_pParent->is_textblock())
+        {
+            ImoTextBlock* pBox = dynamic_cast<ImoTextBlock*>(m_pParent);
+            pBox->add_item(pText);
+            return NULL;
+        }
+
+        if (m_pParent->is_content())
+        {
+            add_child(ImoObj::k_content, pText);
+            return NULL;
+        }
     }
     return pText;
 }
@@ -329,8 +369,7 @@ ImoObj* Linker::add_staffobj(ImoStaffObj* pSO)
         {
             ImoChord* pChord = dynamic_cast<ImoChord*>(m_pParent);
             ImoNote* pNote = dynamic_cast<ImoNote*>(pSO);
-            pChord->push_back(pNote);
-            pNote->set_in_chord(pChord);
+            pNote->include_in_relation(pChord);
             return NULL;
         }
     }
@@ -338,12 +377,12 @@ ImoObj* Linker::add_staffobj(ImoStaffObj* pSO)
 }
 
 //---------------------------------------------------------------------------------------
-ImoObj* Linker::add_auxobj(ImoAuxObj* pAuxObj)
+ImoObj* Linker::add_attachment(ImoAuxObj* pAuxObj)
 {
-    if (m_pParent && m_pParent->is_docobj())
+    if (m_pParent && m_pParent->is_contentobj())
     {
-        ImoDocObj* pDocObj = dynamic_cast<ImoDocObj*>(m_pParent);
-        pDocObj->attach(pAuxObj);
+        ImoContentObj* pContentObj = dynamic_cast<ImoContentObj*>(m_pParent);
+        pContentObj->add_attachment(pAuxObj);
     }
     return pAuxObj;
 }

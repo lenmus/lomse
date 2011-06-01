@@ -89,7 +89,7 @@ SUITE(LdpTokenizerTest)
             //cout << token->get_value() << endl;
         }
         CHECK( reader.end_of_data() );
-        CHECK( numTokens == 50 );
+        CHECK( numTokens == 45 );
     }
 
     TEST_FIXTURE(LdpTokenizerTestFixture, TokenizerCanReadUnicodeString)

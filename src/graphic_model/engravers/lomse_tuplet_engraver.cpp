@@ -41,7 +41,7 @@ namespace lomse
 // TupletEngraver implementation
 //---------------------------------------------------------------------------------------
 TupletEngraver::TupletEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
-    : Engraver(libraryScope, pScoreMeter)
+    : RelAuxObjEngraver(libraryScope, pScoreMeter)
     , m_pTupletShape(NULL)
     , m_pTuplet(NULL)
 {
@@ -53,90 +53,143 @@ TupletEngraver::~TupletEngraver()
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeTuplet* TupletEngraver::create_shape(ImoObj* pCreatorImo, int iInstr, int iStaff,
-                                             const string& label,
-                                             ImoTextStyleInfo* pStyle)
+void TupletEngraver::set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                                        GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                                        int iSystem, int iCol, UPoint pos)
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
-    m_label = label;
-    m_pStyle = pStyle;
+    m_pos = pos;
+    m_pTuplet = dynamic_cast<ImoTuplet*>( pAO );
 
-    return do_create_shape(pCreatorImo);
+    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
+    m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
+
+    m_shapesInfo[0].iCol = iCol;
+    m_shapesInfo[0].iInstr = iInstr;
+    m_shapesInfo[0].iSystem = iSystem;
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeTuplet* TupletEngraver::create_shape(ImoTuplet* pTuplet, int iInstr, int iStaff)
+void TupletEngraver::set_middle_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                                         GmoShape* pStaffObjShape, int iInstr,
+                                         int iStaff, int iSystem, int iCol)
 {
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
+    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
+    m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
+}
 
-    stringstream label;
-    label << pTuplet->get_actual_number();
-    m_label = label.str();
+//---------------------------------------------------------------------------------------
+void TupletEngraver::set_end_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                                      GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                                      int iSystem, int iCol)
+{
+    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
+    m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
+}
 
+//---------------------------------------------------------------------------------------
+int TupletEngraver::create_shapes()
+{
+    decide_if_show_bracket();
+    determine_tuplet_text();
+
+    if (m_fDrawNumber || m_fDrawBracket)
+    {
+        compute_y_coordinates();
+        create_shape();
+        set_shape_details();
+        m_numShapes = 1;
+    }
+    else
+        m_numShapes = 0;
+
+    return m_numShapes;
+}
+
+//---------------------------------------------------------------------------------------
+void TupletEngraver::create_shape()
+{
     m_pStyle = m_pMeter->get_tuplets_style_info();
 
-    return do_create_shape(pTuplet);
-}
-
-//---------------------------------------------------------------------------------------
-GmoShapeTuplet* TupletEngraver::do_create_shape(ImoObj* pCreatorImo)
-{
-    m_pTupletShape = new GmoShapeTuplet(pCreatorImo, Color(0,0,0));
+    m_pTupletShape = new GmoShapeTuplet(m_pTuplet, Color(0,0,0));
     m_pShape = m_pTupletShape;
-    add_text_shape(pCreatorImo);
+    m_shapesInfo[0].pShape = m_pTupletShape;
 
-    return m_pTupletShape;
+    if (m_fDrawNumber)
+        add_text_shape();
 }
 
 //---------------------------------------------------------------------------------------
-void TupletEngraver::add_text_shape(ImoObj* pCreatorImo)
+void TupletEngraver::set_shape_details()
 {
-    TextEngraver engr(m_libraryScope, m_pMeter, m_label, m_pStyle);
-    GmoShapeText* pShape = engr.create_shape(pCreatorImo, 0.0f, 0.0f, 0);   //TODO-LOG k_center);
-    m_pTupletShape->add_label(pShape);
-}
-
-//---------------------------------------------------------------------------------------
-void TupletEngraver::add_note_rest(ImoNoteRest* pNoteRest, GmoShape* pShape)
-{
-	m_noteRests.push_back( make_pair(pNoteRest, pShape) );
-    if (!m_pTuplet)
-        m_pTuplet = pNoteRest->get_tuplet();
-}
-
-//---------------------------------------------------------------------------------------
-void TupletEngraver::layout_tuplet(GmoShapeBeam* pBeamShape)
-{
-    //get standard engraving distances
 	LUnits uBorderLength = tenths_to_logical(LOMSE_TUPLET_BORDER_LENGHT);
     LUnits uBracketDistance = tenths_to_logical(LOMSE_TUPLET_BRACKET_DISTANCE);
     LUnits uLineThick = tenths_to_logical(LOMSE_TUPLET_BRACKET_THICKNESS);
     LUnits uNumberDistance = tenths_to_logical(LOMSE_TUPLET_NUMBER_DISTANCE);
     LUnits uSpaceToNumber = tenths_to_logical(LOMSE_TUPLET_SPACE_TO_NUMBER);
 
-    //determine tuplet appearance
-    bool fDrawBracket = decide_if_show_bracket();
     bool fAbove = decide_if_tuplet_placement_above();
-    compute_y_coordinates(pBeamShape);
 
-    m_pTupletShape->set_layout_data(fAbove, fDrawBracket, m_yStart, m_yEnd,
+    m_pTupletShape->set_layout_data(fAbove, m_fDrawBracket, m_yStart, m_yEnd,
                                     uBorderLength, uBracketDistance,
-                                    uLineThick, uNumberDistance, uSpaceToNumber);
+                                    uLineThick, uNumberDistance, uSpaceToNumber,
+                                    get_start_noterest_shape(),
+                                    get_end_noterest_shape());
 }
 
 //---------------------------------------------------------------------------------------
-void TupletEngraver::compute_y_coordinates(GmoShapeBeam* pBeamShape)
+void TupletEngraver::decide_if_show_bracket()
+{
+    bool fIsBeamedGroup = check_if_single_beamed_group();
+    m_fDrawBracket = m_pTuplet->get_show_bracket() == k_yesno_yes
+           || (m_pTuplet->get_show_bracket() == k_yesno_default && !fIsBeamedGroup);
+}
+
+//---------------------------------------------------------------------------------------
+void TupletEngraver::determine_tuplet_text()
+{
+    if (m_pTuplet->get_show_number() != ImoTuplet::k_number_none)
+    {
+        m_fDrawNumber = true;
+        stringstream label;
+        label << m_pTuplet->get_actual_number();
+        m_label = label.str();
+    }
+    else
+        m_fDrawNumber = false;
+}
+
+
+//---------------------------------------------------------------------------------------
+bool TupletEngraver::decide_if_tuplet_placement_above()
+{
+    GmoShapeNote* pStart = get_first_note();
+    bool fNotesUp = (pStart ? pStart->is_up() : true);
+    int placement = m_pTuplet->get_placement();
+	return placement == k_placement_above
+           || (placement == k_placement_default && fNotesUp);
+}
+
+//---------------------------------------------------------------------------------------
+void TupletEngraver::add_text_shape()
+{
+    TextEngraver engr(m_libraryScope, m_pMeter, m_label, m_pStyle);
+    GmoShapeText* pShape = engr.create_shape(m_pTuplet, 0.0f, 0.0f, 0);   //TODO-LOG k_center);
+    m_pTupletShape->add_label(pShape);
+}
+
+//---------------------------------------------------------------------------------------
+void TupletEngraver::compute_y_coordinates()
 {
     GmoShapeNote* pStart = get_first_note();
     GmoShapeNote* pEnd = get_last_note();
 
     //determine y start/end coordinates
+    GmoShapeBeam* pBeamShape = dynamic_cast<GmoShapeBeam*>(
+                                    pStart->find_related_shape(GmoObj::k_shape_beam) );
     if (pBeamShape)
     {
-        //PROBLEM: Beam is not layouted. Its exact position is not computed until 
-        //method beam::on_draw() is invoked!
         //case a): tuplet encloses a whole beamed group
         UPoint pos = pBeamShape->get_outer_left_reference_point();
         m_yStart = pos.y;
@@ -188,24 +241,6 @@ GmoShapeNote* TupletEngraver::get_last_note()
 LUnits TupletEngraver::tenths_to_logical(Tenths value)
 {
     return m_pMeter->tenths_to_logical(value, m_iInstr, m_iStaff);
-}
-
-//---------------------------------------------------------------------------------------
-bool TupletEngraver::decide_if_show_bracket()
-{
-    bool fIsBeamedGroup = check_if_single_beamed_group();
-    return m_pTuplet->get_show_bracket() == k_yesno_yes
-           || (m_pTuplet->get_show_bracket() == k_yesno_default && !fIsBeamedGroup);
-}
-
-//---------------------------------------------------------------------------------------
-bool TupletEngraver::decide_if_tuplet_placement_above()
-{
-    GmoShapeNote* pStart = get_first_note();
-    bool fNotesUp = (pStart ? pStart->is_up() : true);
-    int placement = m_pTuplet->get_placement();
-	return placement == k_placement_above
-           || (placement == k_placement_default && fNotesUp);
 }
 
 //---------------------------------------------------------------------------------------

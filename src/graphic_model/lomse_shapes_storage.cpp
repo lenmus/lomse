@@ -31,6 +31,11 @@ namespace lomse
 //=======================================================================================
 // ShapesStorage implementation
 //=======================================================================================
+ShapesStorage::~ShapesStorage()
+{
+	delete_ready_shapes();
+}
+
 void ShapesStorage::add_ready_shapes_to_model(GmoBox* pBox)
 {
 	std::list< pair<GmoShape*, int> >::iterator it;
@@ -69,6 +74,14 @@ void ShapesStorage::shape_ready_for_gmodel(ImoObj* pImo, int layer)
     Engraver* pEngrv = get_engraver(pImo);
     m_readyShapes.push_back( make_pair(pEngrv->get_shape(), layer) );
     remove_engraver(pImo);
+}
+
+//---------------------------------------------------------------------------------------
+void ShapesStorage::delete_engravers()
+{
+	std::map<ImoObj*, Engraver*>::const_iterator it;
+    for (it = m_engravers.begin(); it != m_engravers.end(); ++it)
+        delete it->second;
 }
 
 

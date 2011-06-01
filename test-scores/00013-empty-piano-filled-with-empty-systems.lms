@@ -1,0 +1,9 @@
+(score
+   (vers 1.6)
+   (opt StaffLines.StopAtFinalBarline false)
+   (opt Score.FillPageWithEmptyStaves true)
+   (instrument (name "Piano")(abbrev "P")(staves 2)
+      (musicData )
+   )
+)
+

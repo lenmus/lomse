@@ -1,0 +1,11 @@
+(score
+   (vers 1.6)
+   (instrument
+      (musicData
+         (clef G)
+         (chord (n c4 w)(n e4 w)(n g4 w))
+         (barline end)
+      )
+   )
+)
+

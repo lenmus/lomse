@@ -67,35 +67,37 @@ SUITE(LdpParserTest)
         LdpParser parser(cout, m_pLibraryScope->ldp_factory());
         SpLdpTree score = parser.parse_file(m_scores_path + "00011-empty-fill-page.lms");
         //cout << score->get_root()->to_string() << endl;
-        CHECK( score->get_root()->to_string() == "(score (vers 1.6) (language en iso-8859-1) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData )))" );
+
+        CHECK( score->get_root()->to_string() ==
+            "(score (vers 1.6) (systemLayout first (systemMargins 0 0 1500 1500)) "
+            "(systemLayout other (systemMargins 0 0 1500 1000)) "
+            "(opt Score.FillPageWithEmptyStaves true) "
+            "(opt StaffLines.StopAtFinalBarline false) "
+            "(instrument (musicData )))" );
+
         delete score->get_root();
     }
 
     TEST_FIXTURE(LdpParserTestFixture, ParserFileHasLineNumbers)
     {
         LdpParser parser(cout, m_pLibraryScope->ldp_factory());
+
         SpLdpTree score = parser.parse_file(m_scores_path + "00011-empty-fill-page.lms");
-        if (score->get_root()->to_string() == "(score (vers 1.6) (language en iso-8859-1) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData )))" )
-        {
-            LdpElement* elm = score->get_root();
-            //cout << elm->get_name() << " in line " << elm->get_line_number() << endl;
-            CHECK( elm->get_name() == "score" && elm->get_line_number() == 1 );
-            elm = elm->get_first_child();
-            CHECK( elm->get_name() == "vers" && elm->get_line_number() == 2 );
-            elm = elm->get_next_sibling();
-            elm = elm->get_next_sibling();
-            CHECK( elm->get_name() == "systemLayout" && elm->get_line_number() == 3 );
-            elm = elm->get_next_sibling();
-            CHECK( elm->get_name() == "systemLayout" && elm->get_line_number() == 4 );
-            elm = elm->get_next_sibling();
-            CHECK( elm->get_name() == "opt" && elm->get_line_number() == 5 );
-            elm = elm->get_next_sibling();
-            CHECK( elm->get_name() == "opt" && elm->get_line_number() == 6 );
-            elm = elm->get_next_sibling();
-            CHECK( elm->get_name() == "instrument" && elm->get_line_number() == 7 );
-        }
-        else
-            CHECK( false );
+        LdpElement* elm = score->get_root();
+        //cout << elm->get_name() << " in line " << elm->get_line_number() << endl;
+        CHECK( elm->get_name() == "score" && elm->get_line_number() == 1 );
+        elm = elm->get_first_child();
+        CHECK( elm->get_name() == "vers" && elm->get_line_number() == 2 );
+        elm = elm->get_next_sibling();
+        CHECK( elm->get_name() == "systemLayout" && elm->get_line_number() == 3 );
+        elm = elm->get_next_sibling();
+        CHECK( elm->get_name() == "systemLayout" && elm->get_line_number() == 4 );
+        elm = elm->get_next_sibling();
+        CHECK( elm->get_name() == "opt" && elm->get_line_number() == 5 );
+        elm = elm->get_next_sibling();
+        CHECK( elm->get_name() == "opt" && elm->get_line_number() == 6 );
+        elm = elm->get_next_sibling();
+        CHECK( elm->get_name() == "instrument" && elm->get_line_number() == 7 );
 
         delete score->get_root();
     }
@@ -141,18 +143,16 @@ SUITE(LdpParserTest)
         CHECK( elm->get_id() == 0L );
         elm = elm->get_first_child();   //vers
         CHECK( elm->get_id() == 1L );
-        elm = elm->get_next_sibling();  //language
+        elm = elm->get_next_sibling();  //systemLayout + systemMargins
         CHECK( elm->get_id() == 2L );
         elm = elm->get_next_sibling();  //systemLayout + systemMargins
-        CHECK( elm->get_id() == 3L );
-        elm = elm->get_next_sibling();  //systemLayout + systemMargins
-        CHECK( elm->get_id() == 5L );
+        CHECK( elm->get_id() == 4L );
+        elm = elm->get_next_sibling();  //opt
+        CHECK( elm->get_id() == 6L );
         elm = elm->get_next_sibling();  //opt
         CHECK( elm->get_id() == 7L );
-        elm = elm->get_next_sibling();  //opt
-        CHECK( elm->get_id() == 8L );
         elm = elm->get_next_sibling();  //instrument
-        CHECK( elm->get_id() == 9L );
+        CHECK( elm->get_id() == 8L );
         delete score->get_root();
     }
 

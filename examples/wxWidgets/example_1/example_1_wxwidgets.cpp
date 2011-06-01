@@ -37,6 +37,8 @@
     #include <wx/event.h>
 #endif
 
+#include <iostream>
+#include <UnitTest++.h>
 
 //lomse headers
 #include "lomse_doorway.h"
@@ -44,6 +46,8 @@
 #include "lomse_graphic_view.h"
 #include "lomse_interactor.h"
 #include "lomse_presenter.h"
+
+#include "lomse_test_runner_class.h"
 
 using namespace lomse;
 
@@ -85,6 +89,7 @@ protected:
     void OnZoomOut(wxCommandEvent& WXUNUSED(event));
     void OnMouseEvent(wxMouseEvent& event);
     void OnKeyDown(wxKeyEvent& event);
+    void OnDoTests(wxCommandEvent& WXUNUSED(event));
 
     void start_timer();
     double elapsed_time();
@@ -151,6 +156,7 @@ enum
     Menu_Help_About = wxID_ABOUT,
 
     Menu_File_Open = 300,
+    Menu_Do_Tests,
 
     Menu_Max
 };
@@ -185,6 +191,7 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Menu_File_Open, MyFrame::OnOpen)
     EVT_MENU(wxID_ZOOM_IN, MyFrame::OnZoomIn)
     EVT_MENU(wxID_ZOOM_OUT, MyFrame::OnZoomOut)
+    EVT_MENU(Menu_Do_Tests, MyFrame::OnDoTests)
     EVT_SIZE(MyFrame::OnSize)
     EVT_PAINT(MyFrame::OnPaint)
 END_EVENT_TABLE()
@@ -229,12 +236,16 @@ void MyFrame::create_menu()
     zoomMenu->Append(wxID_ZOOM_IN);
     zoomMenu->Append(wxID_ZOOM_OUT);
 
+    wxMenu* debugMenu = new wxMenu;
+    debugMenu->Append(Menu_Do_Tests, _T("Run unit tests"));
+
     wxMenu *helpMenu = new wxMenu;
     helpMenu->Append(Menu_Help_About, _T("&About"));
 
     wxMenuBar* menuBar = new wxMenuBar;
     menuBar->Append(fileMenu, _T("&File"));
     menuBar->Append(zoomMenu, _T("&Zoom"));
+    menuBar->Append(debugMenu, _T("&Debug"));
     menuBar->Append(helpMenu, _T("&Help"));
 
     SetMenuBar(menuBar);
@@ -298,7 +309,9 @@ void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 //---------------------------------------------------------------------------------------
 void MyFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
 {
-    wxString p = wxFileSelector(_("Open score"), wxEmptyString,
+    wxString defaultPath = wxT("../../../test-scores/");
+
+    wxString p = wxFileSelector(_("Open score"), defaultPath,
         wxEmptyString, wxEmptyString, wxT("LenMus files|*.lms;*.lmd"));
 
     if (p.empty())
@@ -809,6 +822,7 @@ void MyFrame::OnZoomIn(wxCommandEvent& WXUNUSED(event))
     //do zoom in centered on window center
     wxSize size = this->GetClientSize();
     m_pInteractor->zoom_in(size.GetWidth()/2, size.GetHeight()/2);
+    m_pInteractor->set_rendering_option(k_option_draw_box_slice, true);
     force_redraw();
 }
 
@@ -821,6 +835,15 @@ void MyFrame::OnZoomOut(wxCommandEvent& WXUNUSED(event))
     wxSize size = this->GetClientSize();
     m_pInteractor->zoom_out(size.GetWidth()/2, size.GetHeight()/2);
     force_redraw();
+}
+
+//-------------------------------------------------------------------------
+void MyFrame::OnDoTests(wxCommandEvent& WXUNUSED(event))
+{
+//    cout << "Lomse library tests runner" << endl << endl;
+//    UnitTest::RunAllTests();
+    MyTestRunner oTR(this);
+    oTR.RunTests();
 }
 
 //---------------------------------------------------------------------------------------

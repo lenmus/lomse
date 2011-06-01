@@ -1,16 +1,16 @@
 (score
-   (vers 1.5)(language en iso-8859-1)
+   (vers 1.6)
    (instrument (staves 2)
       (musicData
-         (clef treble p1)
-         (clef treble p2)
+         (clef G p1)
+         (clef G p2)
 
          (n a4 e g+ t3 p1)(n a4 e)(n a4 e g- t-)
-         (n a4 q)
+         (n a4 q p1)
          
-         (goBack 128)
-         (n a4 s g+ (t + 5 4) p2)(n a4 s)(n a4 e)(n a4 s g- t-)
-         (n a4 q)
+         (goBack start)
+         (n a4 s p2 g+ (t + 5 4))(n a4 s p2)(n a4 e p2)(n a4 s g- t- p2)
+         (n a4 q p2)
          
          (barline)
       )

@@ -29,23 +29,23 @@ namespace lomse
 {
 
 //forward declarations
-class ImoDocObj;
+class ImoContentObj;
 class GraphicModel;
 class GmoBox;
 
 
+//----------------------------------------------------------------------------------
 // ContentLayouter
 // Abstract class to implement the layout algorithm for any document content item.
-//----------------------------------------------------------------------------------
 class ContentLayouter
 {
 protected:
-    ImoDocObj* m_pImo;
+    ImoContentObj* m_pImo;
     bool m_fIsLayouted;
     GraphicModel* m_pGModel;
 
 public:
-    ContentLayouter(ImoDocObj* pImo, GraphicModel* pGModel)
+    ContentLayouter(ImoContentObj* pImo, GraphicModel* pGModel)
         : m_pImo(pImo)
         , m_fIsLayouted(false)
         , m_pGModel(pGModel)
@@ -58,7 +58,7 @@ public:
     virtual void prepare_to_start_layout() { m_fIsLayouted = false; }
     virtual bool is_item_layouted() { return m_fIsLayouted; }
     virtual void set_layout_is_finished(bool value) { m_fIsLayouted = value; }
-    virtual GmoBox* create_pagebox(GmoBox* pParentBox) = 0;
+    virtual GmoBox* create_main_box() = 0;
 };
 
 
@@ -68,13 +68,13 @@ class NullLayouter : public ContentLayouter
 protected:
 
 public:
-    NullLayouter(ImoDocObj* pImo, GraphicModel* pGModel)
+    NullLayouter(ImoContentObj* pImo, GraphicModel* pGModel)
         : ContentLayouter(pImo, pGModel) {}
     ~NullLayouter() {}
 
     void layout_in_page(GmoBox* pContainerBox) {}
     bool is_item_layouted() { return true; }
-    GmoBox* create_pagebox(GmoBox* pParentBox) { return 0; }
+    GmoBox* create_main_box() { return 0; }
 };
 
 

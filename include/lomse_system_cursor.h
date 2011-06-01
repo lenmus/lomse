@@ -32,13 +32,14 @@ class ImoScore;
 class ImoBarline;
 class ImoClef;
 class ImoKeySignature;
+class ImoTimeSignature;
 class ColStaffObjsEntry;
 
 //-----------------------------------------------------------------------------------------
 // SystemCursor
-// To determine possible "break points" (points to finish current system and start a new
-// one) we have to traverse all instruments in parallel. Class SystemCursor keeps information
-// about the current traversing position.
+// A cursor for traversing the score by tiempos, all instruments in parallel. As the score
+// is traversed, SystemCursor provides information about context (current clef, key and
+// time signature)
 //-----------------------------------------------------------------------------------------
 
 //#define _LOMSE_NO_BREAK_TIME  100000000000000.0f         //any too big value
@@ -49,11 +50,13 @@ private:
     ScoreIterator m_scoreIt;
     ScoreIterator m_savedPos;
     int m_numInstruments;
+    int m_numLines;
     bool m_fScoreIsEmpty;
     ImoBarline* m_pLastBarline;
     std::vector<int> m_staffIndex;
     std::vector<ColStaffObjsEntry*> m_clefs;
     std::vector<ColStaffObjsEntry*> m_keys;
+    std::vector<ColStaffObjsEntry*> m_times;
 
     //std::vector<ScoreIterator*> m_iterators;
     //std::vector<ScoreIterator*> m_savedIterators;
@@ -82,19 +85,21 @@ public:
     inline bool is_empty_score() { return m_fScoreIsEmpty; }
 
     //context
-    int get_num_instruments();
+    inline int get_num_instruments() { return m_numInstruments; }
+    inline int get_num_lines() { return m_numLines; }
     ImoClef* get_clef_for_instr_staff(int iInstr, int iStaff);
     ImoClef* get_applicable_clef();
     ImoKeySignature* get_key_for_instr_staff(int iInstr, int iStaff);
     ImoKeySignature* get_applicable_key();
+    ImoTimeSignature* get_applicable_time_signature();
+    ImoTimeSignature* get_time_signature_for_instrument(int iInstr);
     int get_applicable_clef_type();
     int get_clef_type_for_instr_staff(int iInstr, int iStaff);
     int get_applicable_key_type();
     int get_key_type_for_instr_staff(int iInstr, int iStaff);
     ColStaffObjsEntry* get_clef_entry_for_instr_staff(int iInstr, int iStaff);
     ColStaffObjsEntry* get_key_entry_for_instr_staff(int iInstr, int iStaff);
-
-//    int get_time_signature_for_instrument(int iInstr);
+    ColStaffObjsEntry* get_time_entry_for_instrument(int iInstr);
 
     inline ImoBarline* get_previous_barline() { return m_pLastBarline; }
 
@@ -112,7 +117,7 @@ public:
 //    void AdvanceAfterTimepos(float rTimepos);
 
 protected:
-    void initialize_clefs_keys(ImoScore* pScore);
+    void initialize_clefs_keys_times(ImoScore* pScore);
     void save_clef();
     void save_key_signature();
     void save_time_signature();

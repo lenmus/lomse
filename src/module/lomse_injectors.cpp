@@ -35,6 +35,7 @@
 #include "lomse_doorway.h"
 #include "lomse_screen_drawer.h"
 #include "lomse_tasks.h"
+#include "lomse_events.h"
 
 using namespace std;
 
@@ -50,6 +51,8 @@ LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
     , m_pNullDoorway(NULL)
     , m_pLdpFactory(NULL)       //lazzy instantiation. Singleton scope.
     , m_pFontStorage(NULL)      //lazzy instantiation. Singleton scope.
+    , m_fJustifySystems(true)
+    , m_fDumpColumnTables(false)
 {
     if (!m_pDoorway)
     {
@@ -96,6 +99,13 @@ int LibraryScope::get_pixel_format() const
     return m_pDoorway->get_pixel_format();
 }
 
+
+//---------------------------------------------------------------------------------------
+void LibraryScope::notify_user_about(EventInfo& event)
+{
+    m_pDoorway->notify_callback()(event);
+}
+
 ////---------------------------------------------------------------------------------------
 //MusicGlyphs* LibraryScope::music_glyphs()
 //{
@@ -120,7 +130,7 @@ LdpParser* Injector::inject_LdpParser(LibraryScope& libraryScope,
 Analyser* Injector::inject_Analyser(LibraryScope& libraryScope,
                                     DocumentScope& documentScope)
 {
-    return new Analyser(documentScope.default_reporter(), libraryScope.ldp_factory());
+    return new Analyser(documentScope.default_reporter(), libraryScope);
 }
 
 //---------------------------------------------------------------------------------------

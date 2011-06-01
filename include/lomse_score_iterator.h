@@ -71,7 +71,7 @@ public:
  //   void MoveLast();
  //   void MoveTo(lmStaffObj* pSO);
 
-    inline int segment() const { return (*m_it)->segment(); }
+    inline int measure() const { return (*m_it)->measure(); }
 
     ColStaffObjsEntry* operator *() const { return *m_it; }
 

@@ -29,10 +29,9 @@
 namespace lomse
 {
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // GmoShapeText implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 GmoShapeText::GmoShapeText(ImoObj* pCreatorImo, int idx, const std::string& text,
                            ImoTextStyleInfo* pStyle, LUnits x, LUnits y,
                            LibraryScope& libraryScope)
@@ -84,7 +83,7 @@ void GmoShapeText::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //---------------------------------------------------------------------------------------
 void GmoShapeText::select_font()
 {
-    //FIXME: is no style, must use score default style
+    //FIXME: if no style, must use score default style
     TextMeter meter(m_libraryScope);
     if (!m_pStyle)
         meter.select_font("Times New Roman", 18.0);
@@ -95,103 +94,119 @@ void GmoShapeText::select_font()
                           m_pStyle->is_italic() );
 }
 
-////---------------------------------------------------------------------------------------
-//void GmoShapeText::SetFont(wxFont *pFont)
-//{
-//    m_pFont = pFont;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeText::Shift(LUnits xIncr, LUnits yIncr)
-//{
-//    m_uPos.x += xIncr;
-//    m_uPos.y += yIncr;
-//
-//    ShiftBoundsAndSelRec(xIncr, yIncr);
-//
-//	//if included in a composite shape update parent bounding and selection rectangles
-//	if (this->IsChildShape())
-//		((lmCompositeShape*)GetParentShape())->RecomputeBounds();
-//}
-//
-////---------------------------------------------------------------------------------------
-//wxBitmap* GmoShapeText::OnBeginDrag(double rScale, wxDC* pDC)
-//{
-//	// A dragging operation is started. The view invokes this method to request the
-//	// bitmap to be used as drag image. No other action is required.
-//	// If no bitmap is returned drag is cancelled.
-//	//
-//	// So this method returns the bitmap to use with the drag image.
-//
-//
-//	// Get size of text, in logical units
-//    wxCoord wText, hText;
-////    wxScreenDC dc;
-////    dc.SetMapMode(lmDC_MODE);
-////    dc.SetUserScale(rScale, rScale);
-//    pDC->SetFont(*m_pFont);
-//    pDC->GetTextExtent(m_text, &wText, &hText);
-////    dc.SetFont(wxNullFont);
-//
-//    // allocate the bitmap
-//    // convert size to pixels
-//    int wD = (int)pDC->LogicalToDeviceXRel(wText);
-//    int hD = (int)pDC->LogicalToDeviceYRel(hText);
-//    wxBitmap bitmap(wD+2, hD+2);
-//
-//    // allocate a memory DC for drawing into a bitmap
-//    wxMemoryDC dc2;
-//    dc2.SelectObject(bitmap);
-//    dc2.SetMapMode(lmDC_MODE);
-//    dc2.SetUserScale(rScale, rScale);
-//    dc2.SetFont(*m_pFont);
-//
-//    // draw onto the bitmap
-//    dc2.SetBackground(* wxWHITE_BRUSH);
-//    dc2.Clear();
-//    dc2.SetBackgroundMode(wxTRANSPARENT);
-//    dc2.SetTextForeground(g_pColors->ScoreSelected());
-//    dc2.DrawText(m_text, 0, 0);
-//
-//
-//    dc2.SelectObject(wxNullBitmap);
-//
-// //   //cut out the image, to discard the outside out of the bounding box
-// //   lmPixels vxLeft = dc2.LogicalToDeviceYRel(GetXLeft() - m_uGlyphPos.x);
-// //   lmPixels vyTop = dc2.LogicalToDeviceYRel(GetYTop() - m_uGlyphPos.y);
-// //   lmPixels vWidth = wxMin(bitmap.GetWidth() - vxLeft,
-// //                           dc2.LogicalToDeviceXRel(GetWidth()) );
-// //   lmPixels vHeight = wxMin(bitmap.GetHeight() - vyTop,
-// //                            dc2.LogicalToDeviceYRel(GetHeight()) );
-// //   const wxRect rect(vxLeft, vyTop, vWidth, vHeight);
-// //   //wxLogMessage(_T("[GmoShapeGlyph::OnBeginDrag] bitmap size w=%d, h=%d. Cut x=%d, y=%d, w=%d, h=%d"),
-// //   //    bitmap.GetWidth(), bitmap.GetHeight(), vxLeft, vyTop, vWidth, vHeight);
-// //   wxBitmap oShapeBitmap = bitmap.GetSubBitmap(rect);
-// //   wxASSERT(oShapeBitmap.IsOk());
-//
-//    // Make the bitmap masked
-//    //wxImage image = oShapeBitmap.ConvertToImage();
-//    wxImage image = bitmap.ConvertToImage();
-//    image.SetMaskColour(255, 255, 255);
-//    wxBitmap* pBitmap = new wxBitmap(image);
-//
-// //   ////DBG -----------
-// //   //std::string sFileName = _T("ShapeGlyp2.bmp");
-// //   //pBitmap->SaveFile(sFileName, wxBITMAP_TYPE_BMP);
-// //   ////END DBG -------
-//
-//    return pBitmap;
-//
-//}
-//
-//
-//
+
+
+
+//=======================================================================================
+// GmoShapeWord implementation
+//=======================================================================================
+GmoShapeWord::GmoShapeWord(ImoObj* pCreatorImo, int idx, const std::string& text,
+                           ImoTextStyleInfo* pStyle, LUnits x, LUnits y,
+                           LibraryScope& libraryScope)
+    : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_word, idx, Color(0,0,0))
+    , m_text(text)
+    , m_pStyle(pStyle)
+    , m_pFontStorage( libraryScope.font_storage() )
+    , m_libraryScope(libraryScope)
+{
+    //bounds
+    TextMeter meter(m_libraryScope);
+    select_font();
+    m_size.width = meter.measure_width(text);
+    m_size.height = meter.get_ascender() - meter.get_descender();
+
+    //position
+    m_origin.x = x;
+    m_origin.y = y - m_size.height;     //move reference at baseline
+
+    //color
+    m_color = m_pStyle->get_color();
+}
+
+//---------------------------------------------------------------------------------------
+Color GmoShapeWord::get_normal_color()
+{
+    return m_color;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    select_font();
+    pDrawer->set_text_color( determine_color_to_use(opt) );
+    LUnits x = m_origin.x;
+    LUnits y = m_origin.y + m_size.height;     //reference is at text bottom
+    pDrawer->draw_text(x, y, m_text);
+
+    //draw reference lines
+    if (false)
+    {
+        TextMeter meter(m_libraryScope);
+        LUnits xStart = m_origin.x;
+        LUnits xEnd = m_origin.x + m_size.width;
+        pDrawer->begin_path();
+        pDrawer->fill(Color(0, 0, 0, 0));
+        pDrawer->stroke_width(10.0);
+
+        float factor = 1.500f;
+        //org
+        LUnits yOrg = m_origin.y;
+        pDrawer->begin_path();
+        pDrawer->stroke(Color(255, 0, 0));
+        pDrawer->stroke_width(10.0);
+        pDrawer->move_to(xStart, yOrg);
+        pDrawer->hline_to(xEnd);
+        pDrawer->end_path();
+
+        //baseline
+        LUnits yBase = m_origin.y + m_size.height;
+        pDrawer->stroke(Color(0, 0, 255));
+        pDrawer->stroke_width(10.0);
+        pDrawer->move_to(xStart, yBase);
+        pDrawer->hline_to(xEnd);
+        pDrawer->end_path();
+
+        //bottom
+        LUnits yBottom = yBase - meter.get_descender() * factor;
+        pDrawer->begin_path();
+        pDrawer->stroke(Color(0, 255, 0));
+        pDrawer->stroke_width(10.0);
+        pDrawer->move_to(xStart, yBottom);
+        pDrawer->hline_to(xEnd);
+        pDrawer->end_path();
+
+        //ascender
+        LUnits yAsc = yBase - meter.get_ascender() * factor ;
+        pDrawer->begin_path();
+        pDrawer->stroke(Color(0, 255, 255));
+        pDrawer->stroke_width(10.0);
+        pDrawer->move_to(xStart, yAsc);
+        pDrawer->hline_to(xEnd);
+
+//        pDrawer->vline_to(m_origin.y + m_size.height);
+//        pDrawer->hline_to(m_origin.x);
+//        pDrawer->vline_to(m_origin.y);
+        pDrawer->end_path();
+    }
+
+    GmoSimpleShape::on_draw(pDrawer, opt);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeWord::select_font()
+{
+    TextMeter meter(m_libraryScope);
+    meter.select_font(m_pStyle->get_font_name(),
+                      m_pStyle->get_font_size(),
+                      m_pStyle->is_bold(),
+                      m_pStyle->is_italic() );
+}
+
+
+
 ////========================================================================================
 //// GmoShapeTitle object implementation
 ////========================================================================================
-//
-//
-////---------------------------------------------------------------------------------------
 //////Simple text constructor
 ////GmoShapeTitle::GmoShapeTitle(lmScoreObj* pOwner, const std::string& sText, wxFont* pFont,
 ////                         lmPaper* pPaper, UPoint offset, std::string sName,

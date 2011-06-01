@@ -60,7 +60,7 @@ struct RenderOptions
     //-------------------------------------------------------------------------
     //for debug: draw a border around boxes
     bool draw_box_doc_page_content_flag;    //draw bounds for page content box
-    bool draw_box_score_page_flag;          //draw bounds for scaore pages
+    bool draw_item_main_box_flag;          //draw bounds for scaore pages
     bool draw_box_system_flag;              //draw bounds for systems
     bool draw_box_slice_flag;               //draw bounds for slices
     bool draw_box_slice_instr_flag;         //draw bounds for SliceInstr
@@ -85,7 +85,7 @@ struct RenderOptions
     // Empty constructor
     RenderOptions()
         : draw_box_doc_page_content_flag(false)
-        , draw_box_score_page_flag(false)
+        , draw_item_main_box_flag(false)
         , draw_box_system_flag(false)
         , draw_box_slice_flag(false)
         , draw_box_slice_instr_flag(false)

@@ -279,34 +279,34 @@ void open_document()
 //        "(n --g4 q)"
 //        ")) )))" );
 
-        //beams
-        "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData "
-        "(clef F4)(key E)(time 2 4)(n +c3 e.)(barline)"
-        "(n e2 q)(n e3 q)(barline)"
-        "(n f2 e (beam 1 +))(n g2 e (beam 1 -))"
-            "(n f3 e (beam 3 +))(n g3 e (beam 3 -))(barline)"
-        "(n f2 e. (beam 4 +))(n g2 s (beam 4 -b))"
-            "(n f3 s (beam 5 +f))(n g3 e. (beam 5 -))(barline)"
-        "(n g2 e. (beam 2 +))(n e3 s (beam 2 -b))(n g3 q)(barline)"
-        "(n a2 e (beam 6 +))(n g2 e (beam 6 -))(n a3 q)(barline)"
-        "(n -b2 q)(n =b3 q)(barline)"
-        "(n xc3 q)(n ++c4 q)(barline)"
-        "(n d3 q)(n --d4 q)(barline)"
-        "(n e3 q)(n e4 q)(barline)"
-        "(n f3 q)(n f4 q)(barline end)"
-        "))"
-        "(instrument (name \"pilano\")(abbrev \"P\")(staves 2)(musicData "
-        "(clef G p1)(clef F4 p2)(key F)(time 12 8)"
-        "(n c5 e. p1)(barline)"
-        "(n e4 e p1 (beam 10 +))(n g3 e p2 (beam 10 -))"
-        "(n e4 e p1 (stem up)(beam 11 +))(n e5 e p1 (stem down)(beam 11 -))(barline)"
-        "(n e4 s p1 (beam 12 ++))(n f4 s p1 (beam 12 ==))"
-            "(n g4 s p1 (beam 12 ==))(n a4 s p1 (beam 12 --))"
-        "(n c5 q p1)(barline)"
-//        "(chord (n c4 q p1)(n e4 q p1)(n g4 q p1))"
-//        "(chord (n c4 q p1)(n d4 q p1)(n g4 q p1))"
-        "))"
-        ")))" );
+//        //beams
+//        "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData "
+//        "(clef F4)(key E)(time 2 4)(n +c3 e.)(barline)"
+//        "(n e2 q)(n e3 q)(barline)"
+//        "(n f2 e (beam 1 +))(n g2 e (beam 1 -))"
+//            "(n f3 e (beam 3 +))(n g3 e (beam 3 -))(barline)"
+//        "(n f2 e. (beam 4 +))(n g2 s (beam 4 -b))"
+//            "(n f3 s (beam 5 +f))(n g3 e. (beam 5 -))(barline)"
+//        "(n g2 e. (beam 2 +))(n e3 s (beam 2 -b))(n g3 q)(barline)"
+//        "(n a2 e (beam 6 +))(n g2 e (beam 6 -))(n a3 q)(barline)"
+//        "(n -b2 q)(n =b3 q)(barline)"
+//        "(n xc3 q)(n ++c4 q)(barline)"
+//        "(n d3 q)(n --d4 q)(barline)"
+//        "(n e3 q)(n e4 q)(barline)"
+//        "(n f3 q)(n f4 q)(barline end)"
+//        "))"
+//        "(instrument (name \"pilano\")(abbrev \"P\")(staves 2)(musicData "
+//        "(clef G p1)(clef F4 p2)(key F)(time 12 8)"
+//        "(n c5 e. p1)(barline)"
+//        "(n e4 e p1 (beam 10 +))(n g3 e p2 (beam 10 -))"
+//        "(n e4 e p1 (stem up)(beam 11 +))(n e5 e p1 (stem down)(beam 11 -))(barline)"
+//        "(n e4 s p1 (beam 12 ++))(n f4 s p1 (beam 12 ==))"
+//            "(n g4 s p1 (beam 12 ==))(n a4 s p1 (beam 12 --))"
+//        "(n c5 q p1)(barline)"
+////        "(chord (n c4 q p1)(n e4 q p1)(n g4 q p1))"
+////        "(chord (n c4 q p1)(n d4 q p1)(n g4 q p1))"
+//        "))"
+//        ")))" );
 
 //        //anchor / chord
 //        "(instrument (staves 2)(musicData "
@@ -399,6 +399,7 @@ void open_document()
 //        "(instrument (musicData "
 //        "(clef G)(key A)(time 2 4)"
 //        "(n c4 e g+ t3/2)(n e4 e)(n d4 e g- t-)"
+//        "(n c4 e t3/2)(n e4 e)(n d4 e t-)"
 //        "))"
 //        ")))" );
 
@@ -414,12 +415,26 @@ void open_document()
 //        "))"
 //        ")))" );
 
-        ////tie
-        //"(instrument (musicData "
-        //"(clef G)(key C)(time 4 4)"
-        //"(n e4 q l)(n e4 q)"
-        //"))"
-        //")))" );
+//        //tie. old syntax
+//        "(instrument (musicData "
+//        "(clef G)(key C)(time 4 4)"
+//        "(n e4 q l)(n e4 q)"
+//        "))"
+//        ")))" );
+
+//        //tie
+//        "(instrument (musicData "
+//        "(clef G)(key C)(time 4 4)"
+//        "(n e4 q (tie 1 start))(n e4 q (tie 1 stop))"
+//        "))"
+//        ")))" );
+
+//        //tie bezier
+//        "(instrument (musicData "
+//        "(clef G)(key C)(time 4 4)"
+//        "(n e4 q (tie 1 start (bezier (start-x 30)(start-y 40))))(n e4 q (tie 1 stop))"
+//        "))"
+//        ")))" );
 
 //        //system break
 //        "(instrument (musicData "
@@ -434,6 +449,82 @@ void open_document()
 //        "))"
 //        ")))" );
 
+//        //context change
+//        "(instrument (musicData "
+//        "(clef G)(key A)(time 2 4)"
+//        "(n c4 q l)(n c4 q)(barline)"
+//        "(clef F4)(n c3 h)(barline)"
+//        "(clef G)(n g4 h)(barline)"
+//        "(newSystem)(n c5 h)(barline)"
+//        "(clef F4)(n c3 h)(barline end)"
+//        "))"
+//        ")))" );
+
+//        //one slur
+//        "(instrument (musicData "
+//        "(clef G)(key C)(time 2 4)"
+//        "(n c4 q (slur 1 start))(n e4 q)"
+//        "(barline)"
+//        "(n g4 q )(n c5 q (slur 1 stop))"
+//        "(barline end)"
+//        "))"
+//        ")))" );
+
+//        //slur placement
+//        "(instrument (musicData "
+//        "(clef G)(key C)(time 2 4)"
+//        "(n c4 q (slur 1 start))(n e4 q)"
+//        "(barline)"
+//        "(n g4 q )(n c5 q (slur 1 stop))"
+//        "(barline)"
+//        "(n c5 q (slur 2 start))(n b4 q)"
+//        "(barline)"
+//        "(n e5 q )(n a5 q (slur 2 stop))"
+//        "(barline)"
+//        "(n c4 q (slur 3 start))(n b3 q)"
+//        "(barline)"
+//        "(n e4 q )(n f4 q (slur 3 stop))"
+//        "(barline end)"
+//        "))"
+//        ")))" );
+
+        //full
+        "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData "
+        "(clef F4)(key E)(time 2 4)(n +c3 e.)(barline)"
+        "(n e2 q)(n e3 q)(barline)"
+        "(n f2 e (beam 1 +))(n g2 e (beam 1 -))"
+            "(n f3 e (beam 3 +))(n g3 e (beam 3 -))(barline)"
+        "(n f2 e. (beam 4 +))(n g2 s (beam 4 -b))"
+            "(n f3 s (beam 5 +f))(n g3 e. (beam 5 -))(barline)"
+        "(n g2 e. (beam 2 +))(n e3 s (beam 2 -b))(n g3 q)(barline)"
+        "(n a2 e (beam 6 +))(n g2 e (beam 6 -))(n a3 q)(barline)"
+        "(n -b2 q)(n =b3 q)(barline)"
+        "(n xc3 q)(n ++c4 q)(barline)"
+        "(n d3 q)(n --d4 q)(barline)"
+        "(chord (n e3 q)(n c3 q)(n g3 q))"
+        "(n e4 q)(barline)"
+        "(n f3 q)(n f4 q)(barline end)"
+        "))"
+        "(instrument (name \"pilano\")(abbrev \"P\")(staves 2)(musicData "
+        "(clef G p1)(clef F4 p2)(key F)(time 12 8)"
+        "(n c5 e. p1)(barline)"
+        "(n e4 e p1 (beam 10 +))(n g3 e p2 (beam 10 -))"
+        "(n e4 e p1 (stem up)(beam 11 +))(n e5 e p1 (stem down)(beam 11 -))(barline)"
+        "(n e4 s p1 (beam 12 ++))(n f4 s p1 (beam 12 ==))"
+            "(n g4 s p1 (beam 12 ==))(n a4 s p1 (beam 12 --))"
+        "(n c5 q p1)(barline)"
+        "(n c4 q (slur 1 start))(n e4 q)"
+        "(barline)"
+        "(n g4 q )(n c5 q (slur 1 stop))"
+        "(barline)"
+        "(n e4 q (tie 1 start))(n e4 q (tie 1 stop))"
+        "(barline)"
+        "(n c4 e g+ t3/2)(n e4 e)(n d4 e g- t-)(n g4 q)"
+        "(barline)"
+        "(n c4 e t3/2)(n e4 e)(n d4 e t-)(n g4 q)"
+        "(barline)"
+        "))"
+        ")))" );
 
 }
 

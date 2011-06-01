@@ -91,10 +91,12 @@ protected:
     void (*m_pFunc_force_redraw)(void* pThis);
     void (*m_pFunc_start_timer)(void* pThis);
     double (*m_pFunc_elapsed_time)(void* pThis);
+    void (*m_pFunc_notify)(void* pThis, EventInfo& event);
     void* m_pObj_update_window;
     void* m_pObj_force_redraw;
     void* m_pObj_start_timer;
     void* m_pObj_elapsed_time;
+    void* m_pObj_notify;
 
 
 public:
@@ -150,12 +152,13 @@ public:
     //setting callbacks to communicate with user application
     void set_update_window_callbak(void* pThis, void (*pt2Func)(void* pObj));
     void set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj));
-    void set_elapsed_time_callbak(void* pThis, double (*pt2Func)(void* pObj)) ;
-    void set_start_timer_callbak(void* pThis, void (*pt2Func)(void* pObj)) ;
+    void set_elapsed_time_callbak(void* pThis, double (*pt2Func)(void* pObj));
+    void set_start_timer_callbak(void* pThis, void (*pt2Func)(void* pObj));
+    void set_notify_callback(void* pThis, void (*pt2Func)(void* pObj, EventInfo& event));
 
+    void notify_user(EventInfo& event);
 
 protected:
-    //GraphicModel* create_graphic_model();
     void draw_graphic_model();
     void draw_sel_rectangle();
     void add_controls();

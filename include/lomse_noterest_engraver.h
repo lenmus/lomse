@@ -60,32 +60,14 @@ protected:
     NoterestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                  ShapesStorage* pShapesStorage);
 
-    //void add_to_beam_if_beamed();
-    void add_to_tuplet_if_in_tuplet(GmoShapeBeam* pBeamShape);
-    //void layout_beam();
     void layout_tuplet();
     double determine_font_size();
 
-    //void create_beam_shape_and_link();
-    //void get_beam_shape_and_link();
-
-    //inline bool is_beamed() { return m_pNoteRest->is_beamed(); }
-    virtual ImoBeam* get_beam() = 0;
-    //bool is_first_note_of_beam();
-    //bool is_last_note_of_beam();
-    //void link_note_and_beam(BeamEngraver* pEngrv, int linkType);
-
-    inline bool is_in_tuplet() { return m_pNoteRest->is_in_tuplet(); }
-    bool is_first_noterest_of_tuplet();
-    bool is_last_noterest_of_tuplet();
-    void create_tuplet(GmoShapeBeam* pBeamShape);
-    void add_to_tuplet(GmoShapeBeam* pBeamShape);
-    void finish_tuplet();
-    virtual ImoTuplet* get_tuplet() = 0;
+    inline bool is_beamed() { return m_pNoteRest->is_beamed(); }
 
     //helper
-    inline bool has_stem() { return m_pNoteRest->get_note_type() >= ImoNoteRest::k_half; }
-    inline bool has_flag() { return m_pNoteRest->get_note_type() >= ImoNoteRest::k_eighth; }
+    inline bool has_stem() { return m_pNoteRest->get_note_type() >= k_half; }
+    inline bool has_flag() { return m_pNoteRest->get_note_type() >= k_eighth; }
     Tenths get_glyph_offset(int iGlyph);
     LUnits tenths_to_logical(Tenths tenths);
 

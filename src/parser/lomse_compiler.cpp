@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include "lomse_compiler.h"
 
@@ -25,7 +25,6 @@
 #include "lomse_analyser.h"
 #include "lomse_model_builder.h"
 #include "lomse_injectors.h"
-#include "lomse_basic_model.h"
 #include "lomse_internal_model.h"
 
 
@@ -34,10 +33,9 @@ using namespace std;
 namespace lomse
 {
 
-//------------------------------------------------------------------
+//=======================================================================================
 // LdpCompiler implementation
-//------------------------------------------------------------------
-
+//=======================================================================================
 LdpCompiler::LdpCompiler(LdpParser* p, Analyser* a, ModelBuilder* mb, IdAssigner* ida)
     : m_pParser(p)
     , m_pAnalyser(a)
@@ -47,6 +45,7 @@ LdpCompiler::LdpCompiler(LdpParser* p, Analyser* a, ModelBuilder* mb, IdAssigner
 {
 }
 
+//---------------------------------------------------------------------------------------
 LdpCompiler::LdpCompiler(LibraryScope& libraryScope, DocumentScope& documentScope)
     : m_pParser( Injector::inject_LdpParser(libraryScope, documentScope) )
     , m_pAnalyser( Injector::inject_Analyser(libraryScope, documentScope) )
@@ -56,6 +55,7 @@ LdpCompiler::LdpCompiler(LibraryScope& libraryScope, DocumentScope& documentScop
 {
 }
 
+//---------------------------------------------------------------------------------------
 LdpCompiler::~LdpCompiler()
 {
     delete m_pParser;
@@ -68,6 +68,7 @@ LdpCompiler::~LdpCompiler()
     }
 }
 
+//---------------------------------------------------------------------------------------
 InternalModel* LdpCompiler::compile_file(const std::string& filename)
 {
     m_pFinalTree = m_pParser->parse_file(filename);
@@ -75,6 +76,7 @@ InternalModel* LdpCompiler::compile_file(const std::string& filename)
     return compile(m_pFinalTree);
 }
 
+//---------------------------------------------------------------------------------------
 InternalModel* LdpCompiler::compile_string(const std::string& source)
 {
     m_pFinalTree = m_pParser->parse_text(source);
@@ -82,6 +84,7 @@ InternalModel* LdpCompiler::compile_string(const std::string& source)
     return compile(m_pFinalTree);
 }
 
+//---------------------------------------------------------------------------------------
 InternalModel* LdpCompiler::create_empty()
 {
     m_pFinalTree = parse_empty_doc();
@@ -89,6 +92,7 @@ InternalModel* LdpCompiler::create_empty()
     return compile(m_pFinalTree);
 }
 
+//---------------------------------------------------------------------------------------
 InternalModel* LdpCompiler::create_with_empty_score()
 {
     m_pFinalTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6)(instrument (musicData)))))");
@@ -96,6 +100,7 @@ InternalModel* LdpCompiler::create_with_empty_score()
     return compile(m_pFinalTree);
 }
 
+//---------------------------------------------------------------------------------------
 InternalModel* LdpCompiler::compile(LdpTree* pParseTree)
 {
     if (pParseTree->get_root()->is_type(k_score))
@@ -111,6 +116,7 @@ InternalModel* LdpCompiler::compile(LdpTree* pParseTree)
     return IModel;
 }
 
+//---------------------------------------------------------------------------------------
 LdpTree* LdpCompiler::wrap_score_in_lenmusdoc(LdpTree* pParseTree)
 {
     LdpTree* pFinalTree = parse_empty_doc();
@@ -124,6 +130,7 @@ LdpTree* LdpCompiler::wrap_score_in_lenmusdoc(LdpTree* pParseTree)
     return pFinalTree;
 }
 
+//---------------------------------------------------------------------------------------
 LdpTree* LdpCompiler::parse_empty_doc()
 {
     LdpTree* pTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content ))");
@@ -131,6 +138,7 @@ LdpTree* LdpCompiler::parse_empty_doc()
     return pTree;
 }
 
+////---------------------------------------------------------------------------------------
 //LdpElement* LdpCompiler::create_element(const std::string& source)
 //{
 //    SpLdpTree tree = m_pParser->parse_text(source);
@@ -140,18 +148,20 @@ LdpTree* LdpCompiler::parse_empty_doc()
 //    return tree->get_root();
 //}
 //
+////---------------------------------------------------------------------------------------
 //InternalModel* LdpCompiler::create_basic_model(const std::string& source)
 //{
 //    SpLdpTree tree = m_pParser->parse_text(source);
 //    m_IModel = m_pAnalyser->analyse_tree(tree);
-//    delete tree->get_root();
 //    return m_IModel;
 //}
 
+//---------------------------------------------------------------------------------------
 int LdpCompiler::get_num_errors()
 {
     return m_pParser->get_num_errors();
 }
+
 
 
 }  //namespace lomse

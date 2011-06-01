@@ -43,38 +43,11 @@ GmoShapeNote::GmoShapeNote(ImoObj* pCreatorImo, LUnits x, LUnits y, Color color,
     , m_pFlagShape(NULL)
     , m_uAnchorOffset(0.0f)
 {
-//	m_pBeamShape = (GmoShapeBeam*)NULL;
-//    m_pTieShape[0] = (GmoShapeTie*)NULL;
-//    m_pTieShape[1] = (GmoShapeTie*)NULL;
 }
 
 //---------------------------------------------------------------------------------------
 GmoShapeNote::~GmoShapeNote()
 {
-//    //TODO. If this note is deleted and it has attachements to any other note,
-//    //the common attached shapes must also be deleted. This problem was detected
-//    //with ties, when the next note is in the next system. [000.00.error6]. But
-//    //it will happen with beams [000.00.error7] and possibly with other objects.
-//    //BUG_BYPASS. Specific code to deal with ties
-// //   lmNote* pNote = (lmNote*)m_pOwner;
-// //   if (pNote->IsTiedToPrev())
-// //   {
-// //       //Delete the tie,
-// //       //When this note is re-layouted, the tie will be created again.
-//	//    std::list<lmAttachPoint*>::iterator pItem;
-//	//    for (pItem = m_cAttachments.begin(); pItem != m_cAttachments.end(); pItem++)
-//	//    {
-//	//	    if ( (*pItem)->pShape->IsShapeTie() )
-// //           {
-// //               //get
-// //           }
-// //       }
-//	//if (pItem != m_cAttachments.end())
-//	//	m_cAttachments.erase(pItem);
-// //       void GmoShape::Detach(GmoShape* pShape)
-//
-// //   }
-//
 }
 
 //---------------------------------------------------------------------------------------
@@ -282,131 +255,6 @@ LUnits GmoShapeNote::get_stem_extra_length() const
 }
 
 
-//void GmoShapeNote::Shift(LUnits uxIncr, LUnits uyIncr)
-//{
-//	GmoCompositeShape::Shift(uxIncr, uyIncr);
-//
-//	m_uxLeft += uxIncr;
-//    m_uyTop += uyIncr;
-//
-//	InformAttachedShapes(uxIncr, uyIncr, lmSHIFT_EVENT);
-//
-//	//if included in a composite shape update parent bounding and selection rectangles
-//	if (this->IsChildShape())
-//		((GmoCompositeShape*)GetParentShape())->RecomputeBounds();
-//}
-//
-//GmoShape* GmoShapeNote::GetNoteHead()
-//{
-//	if (m_nNoteHead < 0)
-//		return (GmoShape*)NULL;
-//
-//	return GetShape(m_nNoteHead);
-//}
-
-//LUnits GmoShapeNote::GetStemThickness()
-//{
-//	GmoShapeStem* pStem = GetStem();
-//	if (!pStem) return 0.0;
-//
-//	return pStem->GetXRight() - pStem->GetXLeft();
-//}
-//
-//bool GmoShapeNote::StemGoesDown()
-//{
-//	return ((lmNote*)m_pOwner)->StemGoesDown();
-//}
-//
-//void GmoShapeNote::ApplyUserShiftsToTieShape()
-//{
-//    //This note is the end note of a tie. And the note has been moved, during layout,
-//    //to its final position. Then, this method is invoked to inform the tie, so that
-//    //it can to apply user shifts to bezier points
-//
-//    if (m_pTieShape[0])
-//        m_pTieShape[0]->ApplyUserShifts();
-//
-//    if (m_pTieShape[1])
-//        m_pTieShape[1]->ApplyUserShifts();
-//}
-//
-//wxBitmap* GmoShapeNote::OnBeginDrag(double rScale, wxDC* pDC)
-//{
-//	m_nOldSteps = 0;
-//	m_uxOldPos = -100000.0f;		//any absurd value
-//	return GmoCompositeShape::OnBeginDrag(rScale, pDC);
-//}
-//
-//UPoint GmoShapeNote::OnDrag(lmPaper* pPaper, const UPoint& uPos)
-//{
-//	// The view informs that the user continues dragging. We receive the new desired
-//	// shape position and we must return the new allowed shape position.
-//	//
-//	// The default behaviour is to return the received position, so the view redraws
-//	// the drag image at that position. No action must be performed by the shape on
-//	// the score and score objects.
-//	//
-//	// The received new desired shape position is in logical units and referred to page
-//	// origin. The returned new allowed shape position must also be in in logical units
-//	// and referred to page origin.
-//
-//	if (g_fFreeMove)
-//        return uPos;
-//
-//    // A note only can be moved in discrete vertical steps (staff lines/spaces)
-//    //return UPoint(uPos.x, GetYTop());	//only horizontal movement
-//    //return UPoint(uPos.x, uPos.y);		//free movement
-//    UPoint pos = uPos;
-//	int nSteps;
-//    pos.y = lmCheckNoteNewPosition(((lmNote*)m_pOwner)->GetStaff(), GetYTop(), uPos.y, &nSteps);
-//
-//		//draw leger lines
-//
-//	//as painting uses XOR we need the complementary color
-//	Color color = *wxBLUE;
-//	Color colorC(255 - (int)color.Red(), 255 - (int)color.Green(), 255 - (int)color.Blue() );
-//	pPaper->SetLogicalFunction(wxXOR);
-//
-//	//wxLogMessage(_T("[GmoShapeNote::OnDrag] OldSteps=%d, oldPos=%.2f, newSteps=%d, newPos=%.2f"),
-//	//	m_nOldSteps, m_uxOldPos, nSteps, uPos.x );
-//	//remove old ledger lines
-//	if (m_uxOldPos != -100000.0f)
-//		DrawLegerLines(m_nPosOnStaff + m_nOldSteps, m_uxOldPos, pPaper, colorC);
-//
-//	//draw new ledger lines
-//	DrawLegerLines(m_nPosOnStaff + nSteps, uPos.x, pPaper, colorC);
-//
-//	//save data for next time
-//	m_nOldSteps = nSteps;
-//	m_uxOldPos = uPos.x;
-//
-//	return pos;
-//}
-//
-//void GmoShapeNote::OnEndDrag(lmPaper* pPaper, lmController* pCanvas, const UPoint& uPos)
-//{
-//	// End drag. Receives the command processor associated to the view and the
-//	// final position of the object (logical units referred to page origin).
-//	// This method must validate/adjust final position and, if ok, it must
-//	// send a move object command to the controller.
-//
-//	UPoint uFinalPos(uPos.x, uPos.y);
-//	int nSteps = 0;
-//	if (!g_fFreeMove)
-//	{
-//		//free movement not allowed. The note must be moved in discrete
-//		//vertical steps (half lines)
-//		uFinalPos.y = lmCheckNoteNewPosition(((lmNote*)m_pOwner)->GetStaff(), GetYTop(), uPos.y,
-//                                             &nSteps);
-//	}
-//
-//	//send a move note command to the controller
-//	pCanvas->MoveNote(this, uFinalPos, nSteps);
-//}
-//
-//
-
-
 
 //=======================================================================================
 // GmoShapeNote implementation
@@ -427,20 +275,6 @@ GmoShapeRest::~GmoShapeRest()
 //---------------------------------------------------------------------------------------
 void GmoShapeRest::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-//    //base class method is overrided to deal with rests inside a beamed group.
-//    //The beam and the stems are rendered *after* noteheads and rests are rendered.
-//    //Therefore, when rendering the beam there is no option to adjust rests positions
-//    //to fit gracefuly inside the beamed group.
-//    //By overriding this method, if the rest is inside a beamed group and it is
-//    //the first rest in that beamed group, will force the beam shape to compute stems,
-//    //and, therefore, to adjust all rests' positions.
-//
-//
-//    //if the rest is inside of a beamed group ensure that beam is layouted
-//    if (m_pBeamShape)
-//        m_pBeamShape->AdjustStemsIfNeeded();
-//
-//    //now, we can safely render the rest
     GmoCompositeShape::on_draw(pDrawer, opt);
 }
 

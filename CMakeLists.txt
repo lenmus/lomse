@@ -245,12 +245,14 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/engravers/lomse_note_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_noterest_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_rest_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_slur_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_text_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_tie_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_time_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_tuplet_engraver.cpp
 
     ${SRC_DIR}/graphic_model/layouters/lomse_document_layouter.cpp
+    ${SRC_DIR}/graphic_model/layouters/lomse_paragraph_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_score_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_score_meter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_system_cursor.cpp
@@ -258,7 +260,6 @@ set(GRAPHIC_MODEL_FILES
 )
 
 set(INTERNAL_MODEL_FILES
-    ${SRC_DIR}/internal_model/lomse_basic_model.cpp
     ${SRC_DIR}/internal_model/lomse_basic_objects.cpp
     ${SRC_DIR}/internal_model/lomse_im_figured_bass.cpp
     ${SRC_DIR}/internal_model/lomse_im_note.cpp
@@ -403,6 +404,10 @@ endif()
 # source files to compile
 add_executable( ${TESTLIB} 
         ${SRC_DIR}/tests/lomse_test_analyser.cpp
+        ${SRC_DIR}/tests/lomse_test_beam_engraver.cpp
+        ${SRC_DIR}/tests/lomse_test_chord_engraver.cpp
+        ${SRC_DIR}/tests/lomse_test_column_breaker.cpp
+        ${SRC_DIR}/tests/lomse_test_column_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_compiler.cpp
         ${SRC_DIR}/tests/lomse_test_document.cpp
         ${SRC_DIR}/tests/lomse_test_document_iterator.cpp
@@ -412,8 +417,12 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_graphic_model.cpp
         ${SRC_DIR}/tests/lomse_test_interactor.cpp
         ${SRC_DIR}/tests/lomse_test_internal_model.cpp
+        ${SRC_DIR}/tests/lomse_test_ldpexporter.cpp
+        ${SRC_DIR}/tests/lomse_test_lines_breaker.cpp
+        ${SRC_DIR}/tests/lomse_test_linkable.cpp
         ${SRC_DIR}/tests/lomse_test_model_builder.cpp
         ${SRC_DIR}/tests/lomse_test_note_engraver.cpp
+        ${SRC_DIR}/tests/lomse_test_paragraph_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_parser.cpp
         ${SRC_DIR}/tests/lomse_test_pitch.cpp
         ${SRC_DIR}/tests/lomse_test_presenter.cpp
@@ -431,6 +440,7 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_staffobjs_table.cpp
         ${SRC_DIR}/tests/lomse_test_tokenizer.cpp
         ${SRC_DIR}/tests/lomse_test_tree.cpp
+        ${SRC_DIR}/tests/lomse_test_tuplet_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_view.cpp
         ${SRC_DIR}/tests/lomse_the_test_runner.cpp
 )

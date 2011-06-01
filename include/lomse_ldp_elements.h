@@ -46,7 +46,9 @@ enum ELdpElement
     //container objs
     k_instrument,
     k_lenmusdoc,
+    k_meta,
     k_score,
+    k_settings,
 
     //staffobjs
     k_staffobj_start,
@@ -79,6 +81,13 @@ enum ELdpElement
     k_tuplet,
     k_auxobj_end,
 
+    //doc_only objs
+    k_dynamic,
+    k_heading,
+    k_para,
+    k_styles,
+    k_txt,
+
     //properties
 
     k_abbrev,
@@ -99,7 +108,7 @@ enum ELdpElement
     k_cursor,
     k_defineStyle,
     k_displayBracket,
-    k_displayNormalNum,
+    k_displayNumber,
     k_duration,
     k_dx,
     k_dy,
@@ -131,6 +140,7 @@ enum ELdpElement
     k_parenthesis,
     k_pitch,
     k_size,
+    k_slur,
     k_split,
     k_staff,
     k_staffDistance,

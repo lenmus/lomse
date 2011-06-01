@@ -33,22 +33,34 @@
 #include "lomse_internal_model.h"
 #include "lomse_calligrapher.h"
 #include "lomse_score_meter.h"
+#include "lomse_internal_model.h"
+#include "lomse_paragraph_layouter.h"
 
 using namespace UnitTest;
 using namespace std;
 using namespace lomse;
 
 
-////derived classes, for accessing protected members
-//class MyDocLayouter : public DocLayouter
-//{
-//public:
-//    MyDocLayouter(InternalModel* pIModel) : DocLayouter(pIModel) {}
-//    ~MyDocLayouter() {}
-//
-//    //access to protected members
-//    FlowSizer* get_main_sizer() { return m_pMainSizer; }
-//};
+//---------------------------------------------------------------------------------------
+//helper, to access protected members
+class MyDocLayouter : public DocLayouter
+{
+public:
+    MyDocLayouter(InternalModel* pIModel, LibraryScope& libraryScope) 
+        : DocLayouter(pIModel, libraryScope) {}
+    ~MyDocLayouter() {}
+
+    ////access to protected members
+    //FlowSizer* get_main_sizer() { return m_pMainSizer; }
+    void my_initializations() { initializations(); }
+    void my_layout_content() { layout_content(); }
+    void my_layout_item(GmoBox* pParentBox, ImoContentObj* pItem) { layout_item(pParentBox, pItem); }
+    ContentLayouter* my_new_item_layouter(ImoContentObj* pImo, ImoStyles* pStyles) {
+        return new_item_layouter(pImo, pStyles);
+    }
+
+    GmoBox* my_get_current_box() { return m_pCurrentBox; }
+};
 
 
 //---------------------------------------------------------------------------------------
@@ -166,7 +178,8 @@ SUITE(DocLayouterTest)
         CHECK( pBox != NULL );
         CHECK( pBox->is_box_score_page() == true );
         CHECK( pBox->get_width() == 16000.0f );
-        CHECK( pBox->get_height() == 31700.0f );
+        //cout << pBox->get_height() << endl;
+        CHECK( pBox->get_height() == 2735.0f );     //system height
         CHECK( pBox->get_left() == 1000.0f );
         CHECK( pBox->get_top() == 1500.0f );
         delete pGModel;
@@ -456,6 +469,21 @@ SUITE(DocLayouterTest)
     //    MyDocLayouter dl( doc.get_im_model() );
     //    CHECK( dl.get_main_sizer() != NULL );
     //}
+
+    // para -----------------------------------------------------------------------------
+
+    TEST_FIXTURE(DocLayouterTestFixture, Paragraph_CreateLayouter)
+    {
+        ImoParagraph para;
+        ImoStyles styles;
+        MyDocLayouter dl(NULL, m_libraryScope);
+        ParagraphLayouter* pLyt 
+            = dynamic_cast<ParagraphLayouter*>( dl.my_new_item_layouter(&para, &styles) );
+
+        CHECK( pLyt != NULL );
+
+        delete pLyt;
+    }
 
 };
 

@@ -50,7 +50,7 @@ protected:
 
 public:
     ShapesStorage() {}
-    ~ShapesStorage() {}
+    ~ShapesStorage();
 
 //    //beam engravers
 //    inline void save_beam_engraver(BeamEngraver* pEngrv, ImoBeam* pImo) {
@@ -68,10 +68,12 @@ public:
     inline void remove_engraver(ImoObj* pImo) { m_engravers.erase(pImo); }
     void shape_ready_for_gmodel(ImoObj* pImo, int layer);
 
-
     //final shapes
     void add_ready_shapes_to_model(GmoBox* pBox);
     void delete_ready_shapes();
+
+    //suppor for debug and unit tests
+    void delete_engravers();
 
 };
 

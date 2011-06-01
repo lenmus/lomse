@@ -1,0 +1,22 @@
+(score 
+   (vers 1.6) 
+   (opt StaffLines.StopAtFinalBarline true) 
+   (instrument
+      (musicData
+        (clef G p1)
+        (clef F4 p1)
+        (key c)
+        (time 4 4)
+        (chord (n g3 q p1)(n c4 q)(n e4 q)(n g4 q))
+        (chord (n a3 q)(n c4 q)(n e4 q)(n a4 q))
+        (chord (n g3 q)(n =b3 q))
+        (chord (n e3 q)(n g3 q)(n c4 q)(n e4 q))
+        
+        //second voice
+        (goBack 128)
+        (chord (n e4 e. g+ (stem up))(n g4 e.))(chord (n d4 s g- (stem up))(n f4 s))
+        (goFwd end)
+        (barline)
+      )
+   )
+)

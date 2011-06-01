@@ -159,7 +159,7 @@ SUITE(GmoTest)
         CHECK( page.get_first_shape_for_layer(GmoShape::k_layer_staff) == NULL );
 
         pScorePage->add_system(pBox, 0);
-        pBox->store_shapes_in_page();
+        pBox->store_shapes_in_doc_page();
 
         CHECK( page.get_first_shape_for_layer(GmoShape::k_layer_staff) == pShape );
     }
@@ -238,7 +238,7 @@ SUITE(GmoTest)
         pBox->add_shape(pShape5, 1);
 
         pScorePage->add_system(pBox, 0);
-        pBox->store_shapes_in_page();
+        pBox->store_shapes_in_doc_page();
 
         std::list<GmoShape*>& shapes = page.get_all_shapes();
         std::list<GmoShape*>::iterator it = shapes.begin();

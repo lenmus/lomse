@@ -38,22 +38,9 @@ GmoShapeGlyph::GmoShapeGlyph(ImoObj* pCreatorImo, int type, int idx, unsigned in
     : GmoSimpleShape(pCreatorImo, type, idx, color)
     , m_pFontStorage( libraryScope.font_storage() )
     , m_libraryScope(libraryScope)
-    , m_fontHeight(fontHeight)
 {
     m_glyph = glyphs_lmbasic2[nGlyph].GlyphChar;
-
-    //glyph bounds
-    TextMeter meter(m_libraryScope);
-    meter.select_font("LenMus basic", m_fontHeight);
-    URect bbox = meter.bounding_rectangle(m_glyph);
-
-    m_origin.x = pos.x + bbox.x;
-    m_origin.y = pos.y + bbox.y;
-    m_size.width = bbox.width;
-    m_size.height = bbox.height;
-
-    m_shiftToDraw.width = -bbox.x;
-    m_shiftToDraw.height = -bbox.y;
+    compute_size_origin(fontHeight, pos);
 }
 
 //---------------------------------------------------------------------------------------
@@ -68,118 +55,23 @@ void GmoShapeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
     GmoSimpleShape::on_draw(pDrawer, opt);
 }
 
-////---------------------------------------------------------------------------------------
-//double GmoShapeGlyph::GetPointSize()
-//{
-//    lmComponentObj* pSO = ((lmComponentObj*)m_pOwner);
-//    return pSO->GetStaff()->GetMusicFontSize();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeGlyph::Shift(LUnits xIncr, LUnits yIncr)
-//{
-//    m_uGlyphPos.x += xIncr;
-//    m_uGlyphPos.y += yIncr;
-//
-//    ShiftBoundsAndSelRec(xIncr, yIncr);
-//
-//	//if included in a composite shape update parent bounding and selection rectangles
-//	if (this->IsChildShape())
-//		((lmCompositeShape*)GetParentShape())->RecomputeBounds();
-//}
-//
-////---------------------------------------------------------------------------------------
-//wxBitmap* GmoShapeGlyph::OnBeginDrag(double rScale, wxDC* pDC)
-//{
-//	// A dragging operation is started. The view invokes this method to request the
-//	// bitmap to be used as drag image. No other action is required.
-//
-//    return GetBitmapFromShape(rScale, g_pColors->ScoreSelected());
-//}
-//
-////---------------------------------------------------------------------------------------
-//UPoint GmoShapeGlyph::OnDrag(lmPaper* pPaper, const UPoint& uPos)
-//{
-//	// The view informs that the user continues dragging. We receive the new desired
-//	// shape position and we must return the new allowed shape position.
-//	//
-//	// The default behaviour is to return the received position, so the view redraws
-//	// the drag image at that position. No action must be performed by the shape on
-//	// the score and score objects.
-//	//
-//	// The received new desired shape position is in logical units and referred to page
-//	// origin. The returned new allowed shape position must also be in in logical units
-//	// and referred to page origin.
-//
-//	return uPos;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeGlyph::OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos)
-//{
-//	// End drag. Receives the command processor associated to the view and the
-//	// final position of the object (logical units referred to page origin).
-//	// This method must validate/adjust final position and, if ok, it must
-//	// send a move object command to the Interactor.
-//
-//	//send a move object command to the Interactor
-//	pCanvas->MoveObject(this, uPos);
-//}
-//
-////---------------------------------------------------------------------------------------
-//UPoint GmoShapeGlyph::GetObjectOrigin()
-//{
-//	//returns the origin of this shape
-//	return m_uBoundsTop;    //m_uGlyphPos;
-//}
-//
-////---------------------------------------------------------------------------------------
-//wxBitmap* GmoShapeGlyph::GetBitmapFromShape(double rScale, Color colorF, Color colorB)
-//{
-//    //Returns a bitmap with the glyph. The bitmap is only the bounding box.
-//    //Ownership of bitmap is transferred to caller method. It must delete it.
-//
-//    return GetBitmapForGlyph(rScale, m_nGlyph, GetPointSize(), colorF, colorB);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeGlyph::RenderHighlighted(wxDC* pDC, Color colorC)
-//{
-//    //The DC is scaled and its origin is positioned according current scrolling and
-//    //page origin in the view
-//
-//    //get the bitmap
-//    double rScaleX, rScaleY;
-//    pDC->GetUserScale(&rScaleX, &rScaleY);
-//    wxBitmap* pBitmap = GetBitmapFromShape(rScaleX, colorC, *wxBLACK);
-//
-//    //blend it with current displayed page
-//    lmPixels vxDest = pDC->LogicalToDeviceX(m_uBoundsTop.x),
-//             vyDest = pDC->LogicalToDeviceY(m_uBoundsTop.y);
-//    const wxBitmap& bitmap = *pBitmap;
-//
-//    ////DBG -----------
-//    //wxString sFileName = _T("draw.bmp");
-//    //pBitmap->SaveFile(sFileName, wxBITMAP_TYPE_BMP);
-//    ////END DBG -------
-//
-//    pDC->SetUserScale(1.0, 1.0);
-//    pDC->SetMapMode(wxMM_TEXT);
-//	pDC->SetDeviceOrigin(0, 0);
-//    //pDC->SetLogicalFunction(wxINVERT);
-//    //pDC->DrawBitmap(bitmap, vxDest, vyDest, true);     //true -> transparent
-//
-//    wxMemoryDC dc;
-//    dc.SetMapMode(wxMM_TEXT);
-//    dc.SelectObject(*pBitmap);
-//    pDC->Blit(vxDest, vyDest, pBitmap->GetWidth(), pBitmap->GetHeight(), &dc, 0, 0, wxXOR, true);
-//
-//
-//    //TODO: During playback the bitmap for the black notehead is constantly used. It could save
-//    //a lot of processing time if this particular bitmap is cached.
-//
-//    delete pBitmap;
-//}
+//---------------------------------------------------------------------------------------
+void GmoShapeGlyph::compute_size_origin(double fontHeight, UPoint pos)
+{
+    m_fontHeight = fontHeight;
+
+    TextMeter meter(m_libraryScope);
+    meter.select_font("LenMus basic", m_fontHeight);
+    URect bbox = meter.bounding_rectangle(m_glyph);
+
+    m_origin.x = pos.x + bbox.x;
+    m_origin.y = pos.y + bbox.y;
+    m_size.width = bbox.width;
+    m_size.height = bbox.height;
+
+    m_shiftToDraw.width = -bbox.x;
+    m_shiftToDraw.height = -bbox.y;
+}
 
 
 
@@ -192,55 +84,6 @@ GmoShapeClef::GmoShapeClef(ImoObj* pCreatorImo, int idx, int nGlyph, UPoint pos,
                     libraryScope, fontSize )
 {
 }
-
-////---------------------------------------------------------------------------------------
-//double GmoShapeClef::GetPointSize()
-//{
-//    lmStaffObj* pSO = ((lmStaffObj*)m_pOwner);
-//    lmStaff* pStaff = pSO->GetVStaff()->GetStaff(pSO->GetStaffNum());
-//    return (m_fSmallClef ? pStaff->GetMusicFontSize() * 0.8 : pStaff->GetMusicFontSize());
-//}
-//
-////---------------------------------------------------------------------------------------
-//UPoint GmoShapeClef::OnDrag(lmPaper* pPaper, const UPoint& uPos)
-//{
-//	// The view informs that the user continues dragging. We receive the new desired
-//	// shape position and we must return the new allowed shape position.
-//	//
-//	// The default behaviour is to return the received position, so the view redraws
-//	// the drag image at that position. No action must be performed by the shape on
-//	// the score and score objects.
-//	//
-//	// The received new desired shape position is in logical units and referred to page
-//	// origin. The returned new allowed shape position must also be in in logical units
-//	// and referred to page origin.
-//
-//	if (g_fFreeMove) return uPos;
-//
-//    // A clef only can be moved horizonatlly
-//    return UPoint(uPos.x, GetYTop());
-//
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeClef::OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos)
-//{
-//	// End drag. Receives the command processor associated to the view and the
-//	// final position of the object (logical units referred to page origin).
-//	// This method must validate/adjust final position and, if ok, it must
-//	// send a move object command to the Interactor.
-//
-//	UPoint uFinalPos(uPos.x, uPos.y);
-//	if (!g_fFreeMove)
-//	{
-//		//free movement not allowed. Only x position can be changed
-//		uFinalPos.y = GetYTop();
-//	}
-//
-//	//send a move object command to the Interactor
-//	pCanvas->MoveObject(this, uFinalPos);
-//
-//}
 
 
 
@@ -358,15 +201,8 @@ GmoShapeInvisible::GmoShapeInvisible(ImoObj* pCreatorImo, int idx, UPoint uPos,
     m_size = uSize;
 }
 
-////---------------------------------------------------------------------------------------
-//void GmoShapeInvisible::on_draw(Drawer* pDrawer, RenderOptions& opt)
-//{
-//    //if (g_fDrawInvisible)       //TODO
-//    {
-//    }
-//}
-//
-//
+
+
 ////=======================================================================================
 //// GmoShapeRectangle: a rectangle with optional rounded corners
 ////=======================================================================================
@@ -942,31 +778,8 @@ void GmoShapeStem::set_stem_down(LUnits xLeft, LUnits yNote)
     m_origin.y = yNote;
 }
 
-////---------------------------------------------------------------------------------------
-//LUnits GmoShapeStem::GetYStartStem()
-//{
-//	//Start of stem is the nearest position to the notehead
-//
-//	return (m_fStemDown ? GetYTop() : GetYBottom());
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits GmoShapeStem::GetYEndStem()
-//{
-//	//End of stem is the farthest position from the notehead
-//
-//	return (m_fStemDown ? GetYBottom() : GetYTop());
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits GmoShapeStem::GetXCenterStem()
-//{
-//	//returns the stem x position. This position is in the middle of the line width
-//	return m_xStart;
-//}
-//
-//
-//
+
+
 ////---------------------------------------------------------------------------------------
 //// GmoShapeFiguredBass object implementation: a composite shape that can have
 //// attached shapes.
@@ -1017,58 +830,6 @@ void GmoShapeStem::set_stem_down(LUnits xLeft, LUnits yNote)
 //                       _T("This is a text using a wxTextCtrl window!"),
 //                       pos, size );
 //}
-//
-//
-////---------------------------------------------------------------------------------------
-////global functions defined in this module
-////---------------------------------------------------------------------------------------
-//wxBitmap* GetBitmapForGlyph(double rScale, int nGlyph, double rPointSize, Color colorF, Color colorB)
-//{
-//    //Returns the bitmap for the glyph. The bitmap size is the bounding box.
-//    //Ownership of bitmap is transferred to caller. It must delete it.
-//
-//
-//    //allocate an empty drawer for measurements
-//    wxBitmap dummyBitmap(1, 1);
-//    lmAggDrawer* pDrawer = new lmAggDrawer(&dummyBitmap, rScale);
-//
-//    // Get size of glyph, in logical units
-//    wxString sGlyph( glyphs_lmbasic2[nGlyph].GlyphChar );
-//    //wxLogMessage(_T("[Shapes/GetBitmapForGlyph] rPointSize=%.2f, rScale=%.2f, sGlyph='%s'"),
-//    //             rPointSize, rScale, sGlyph.c_str());
-//    pDrawer->FtSetFontSize(rPointSize);
-//    wxRect vBox = pDrawer->FtGetGlyphBoundsInPixels( (unsigned int)sGlyph.GetChar(0) );
-//
-//    //allocate a bitmap for the glyph
-//    wxBitmap bitmap(vBox.width + 1, vBox.height + 1);
-//
-//     //use this bitmap as rendering buffer
-//    delete pDrawer;
-//    pDrawer = new lmAggDrawer(&bitmap, rScale);
-//    pDrawer->FtSetFontSize(rPointSize);
-//
-//    //render the glyph
-//    pDrawer->SetTextForeground(colorF);
-//    pDrawer->SetTextBackground(colorB);
-//    pDrawer->Clear();
-//    pDrawer->FtSetTextPositionPixels(- vBox.x, - vBox.y);
-//    pDrawer->FtDrawChar( (unsigned int)sGlyph.GetChar(0) );
-//
-//    //get the image buffer and create a bitmap from it
-//    wxImage& image = pDrawer->GetImageBuffer();
-//
-//    // Make the bitmap masked
-//    image.SetMaskColour(colorB.Red(), colorB.Green(), colorB.Blue());
-//    wxBitmap* pBitmap = new wxBitmap(image);
-//    delete pDrawer;
-//
-//    ////DBG -----------
-//    //wxLogMessage(_T("[Shapes: GetBitmapForGlyph] Bitmap saved as BitmapGlyp.bmp"));
-//    //wxString sFileName = _T("BitmapGlyp.bmp");
-//    //pBitmap->SaveFile(sFileName, wxBITMAP_TYPE_BMP);
-//    ////END DBG -------
-//
-//    return pBitmap;
-//}
+
 
 }  //namespace lomse

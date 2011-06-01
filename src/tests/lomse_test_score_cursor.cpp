@@ -18,10 +18,9 @@
 //
 //---------------------------------------------------------------------------------------
 
-#ifdef _LM_DEBUG_
-
 #include <UnitTest++.h>
 #include <sstream>
+#include "lomse_config.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
@@ -916,6 +915,3 @@ SUITE(ScoreCursorTest)
     //  pointing empty timepos (occupied in other staff)
 
 }
-
-#endif  // _LM_DEBUG_
-

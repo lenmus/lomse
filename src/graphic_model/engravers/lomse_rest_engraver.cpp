@@ -63,16 +63,6 @@ GmoShapeRest* RestEngraver::create_shape(ImoObj* pCreatorImo, int iInstr, int iS
     create_main_shape();
     add_shapes_for_dots_if_required();
 
-    //add the rest to relation objects
-    add_to_beam_if_beamed();
-    add_to_tuplet_if_in_tuplet(NULL);
-
-    //if this is the last rest of a relation, finish relation
-
-    // tuplet bracket
-    if (is_last_noterest_of_tuplet())
-        layout_tuplet();
-
     return m_pRestShape;
 }
 
@@ -103,17 +93,17 @@ int RestEngraver::find_glyph()
 {
     switch (m_restType)
     {
-        case ImoNoteRest::k_longa:        return k_glyph_longa_rest;
-        case ImoNoteRest::k_breve:        return k_glyph_breve_rest;
-        case ImoNoteRest::k_whole:        return k_glyph_whole_rest;
-        case ImoNoteRest::k_half:         return k_glyph_half_rest;
-        case ImoNoteRest::k_quarter:      return k_glyph_quarter_rest;
-        case ImoNoteRest::k_eighth:       return k_glyph_eighth_rest;
-        case ImoNoteRest::k_16th:         return k_glyph_16th_rest;
-        case ImoNoteRest::k_32th:         return k_glyph_32nd_rest;
-        case ImoNoteRest::k_64th:         return k_glyph_64th_rest;
-        case ImoNoteRest::k_128th:        return k_glyph_128th_rest;
-        case ImoNoteRest::k_256th:        return k_glyph_256th_rest;
+        case k_longa:        return k_glyph_longa_rest;
+        case k_breve:        return k_glyph_breve_rest;
+        case k_whole:        return k_glyph_whole_rest;
+        case k_half:         return k_glyph_half_rest;
+        case k_quarter:      return k_glyph_quarter_rest;
+        case k_eighth:       return k_glyph_eighth_rest;
+        case k_16th:         return k_glyph_16th_rest;
+        case k_32th:         return k_glyph_32nd_rest;
+        case k_64th:         return k_glyph_64th_rest;
+        case k_128th:        return k_glyph_128th_rest;
+        case k_256th:        return k_glyph_256th_rest;
         default:
             //LogMessage(_T("[RestEngraver::find_glyph] Invalid value (%d) for rest type"), nNoteType);
             return k_glyph_quarter_rest;
@@ -149,20 +139,6 @@ LUnits RestEngraver::add_dot_shape(LUnits x, LUnits y, Color color)
                                           color, m_libraryScope, m_fontSize);
 	m_pRestShape->add(pShape);
     return pShape->get_width();
-}
-
-//---------------------------------------------------------------------------------------
-void RestEngraver::add_to_beam_if_beamed()
-{
-    if (m_pRest && m_pRest->is_beamed())
-    {
-        ImoBeam* pBeam = m_pRest->get_beam();
-        BeamEngraver* pEngrv
-            = dynamic_cast<BeamEngraver*>(m_pShapesStorage->get_engraver(pBeam));
-        GmoShapeBeam* pBeamShape = pEngrv->get_beam_shape();
-        m_pRestShape->accept_link_from(pBeamShape, k_link_middle);
-        pEngrv->add_note_rest(m_pRest, m_pRestShape);
-    }
 }
 
 //---------------------------------------------------------------------------------------

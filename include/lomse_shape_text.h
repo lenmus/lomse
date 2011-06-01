@@ -39,7 +39,7 @@ class FontStorage;
 class GmoShapeText : public GmoSimpleShape
 {
 protected:
-    const std::string& m_text;
+    const std::string m_text;
     ImoTextStyleInfo* m_pStyle;
     FontStorage* m_pFontStorage;
     LibraryScope& m_libraryScope;
@@ -52,13 +52,28 @@ public:
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
- //   std::string Dump(int nIndent);
- //   void Shift(LUnits xIncr, LUnits yIncr);
-	//virtual wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
+protected:
+    void select_font();
+    Color get_normal_color();
 
- //   //specific methods
- //   void SetFont(wxFont *pFont);
- //   std::string* GetText() { return &m_text; }
+};
+
+//---------------------------------------------------------------------------------------
+class GmoShapeWord : public GmoSimpleShape
+{
+protected:
+    const std::string m_text;
+    ImoTextStyleInfo* m_pStyle;
+    FontStorage* m_pFontStorage;
+    LibraryScope& m_libraryScope;
+
+public:
+    GmoShapeWord(ImoObj* pCreatorImo, int idx, const std::string& text,
+                 ImoTextStyleInfo* pStyle,
+                 LUnits x, LUnits y, LibraryScope& libraryScope);
+    virtual ~GmoShapeWord() {}
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
 protected:
     void select_font();

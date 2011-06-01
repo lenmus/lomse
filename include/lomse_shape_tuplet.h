@@ -35,6 +35,7 @@ namespace lomse
 class ImoNoteRest;
 class ImoObj;
 class GmoShapeText;
+class GmoShape;
 
 
 //---------------------------------------------------------------------------------------
@@ -42,8 +43,9 @@ class GmoShapeTuplet : public GmoCompositeShape
 {
 protected:
     int m_design;
-    bool m_fNeedsLayout;
     GmoShapeText* m_pShapeText;
+    GmoShape* m_pStartNR;
+    GmoShape* m_pEndNR;
 
     //geometry
 	bool m_fAbove;
@@ -62,14 +64,15 @@ public:
     void set_layout_data(bool fAbove, bool fDrawBracket, LUnits yStart, LUnits yEnd,
                          LUnits uBorderLength,
                          LUnits uBracketDistance, LUnits uLineThick,
-                         LUnits uNumberDistance, LUnits uSpaceToNumber);
+                         LUnits uNumberDistance, LUnits uSpaceToNumber,
+                         GmoShape* pStart, GmoShape* pEnd);
 
     void add_label(GmoShapeText* pShape);
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
 protected:
-    void get_noterests_positions();
+    void compute_horizontal_position();
     void compute_position();
     void draw_horizontal_line(Drawer* pDrawer);
     void draw_vertical_borders(Drawer* pDrawer);

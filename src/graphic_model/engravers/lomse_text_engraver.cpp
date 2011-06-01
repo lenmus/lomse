@@ -29,9 +29,9 @@
 namespace lomse
 {
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // TextEngraver implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            const string& text, ImoTextStyleInfo* pStyle)
     : Engraver(libraryScope, pScoreMeter)
@@ -64,6 +64,14 @@ LUnits TextEngraver::measure_width()
     TextMeter meter(m_libraryScope);
     meter.select_font( m_pStyle->get_font_name(), m_pStyle->get_font_size() );
     return meter.measure_width(m_text);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits TextEngraver::measure_height()
+{
+    TextMeter meter(m_libraryScope);
+    meter.select_font( m_pStyle->get_font_name(), m_pStyle->get_font_size() );
+    return meter.get_font_height();
 }
 
 //---------------------------------------------------------------------------------------

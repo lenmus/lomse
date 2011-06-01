@@ -33,11 +33,12 @@ namespace lomse
 
 //forward declarations
 class ImoNote;
+class ImoChord;
 class GmoShapeNote;
 class GmoShapeAccidentals;
 
 //---------------------------------------------------------------------------------------
-class ChordEngraver : public Engraver
+class ChordEngraver : public RelAuxObjEngraver
 {
 public:
     //public for unit tests
@@ -56,28 +57,43 @@ public:
 
 
 protected:
+    int m_iInstr;
+    int m_iStaff;
+    ImoChord* m_pChord;
+
     std::list<ChordNoteData*> m_notes;
     ChordNoteData* m_pBaseNoteData;
     bool m_fStemDown;
+
+    bool m_fHasStem;
+    bool m_fHasFlag;
+    bool m_fSomeNoteReversed;
+    int m_noteType;
+    LUnits m_stemWidth;
+
 
 public:
     ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     virtual ~ChordEngraver();
 
-    void add_note(ImoNote* pNote, GmoShapeNote* pNoteShape, int posOnStaff, int iInstr);
-    void layout_chord();
+    //implementation of virtual methods from RelAuxObjEngraver
+    void set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                            GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                            int iSystem, int iCol, UPoint pos);
+    void set_middle_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                             int iSystem, int iCol);
+    void set_end_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                          GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                          int iSystem, int iCol);
+    int create_shapes();
+    int get_num_shapes() { return 0; }
+    ShapeBoxInfo* get_shape_box_info(int i) { return NULL; }
 
-    //should be protected but made public fot unit tests
-    inline ImoNote* get_min_note() { return m_notes.front()->pNote; }
-    inline ImoNote* get_max_note() { return m_notes.back()->pNote; }
-	inline ImoNote* get_base_note() { return m_pBaseNoteData->pNote; }
-    inline bool is_stem_up() { return !m_fStemDown; }
 
-    //Only for unit tests
-    inline std::list<ChordNoteData*>& get_notes() { return m_notes; }
+protected:
+    void add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape);
 
-
-private:
     void decide_on_stem_direction();
     void layout_noteheads();
     void layout_accidentals();
@@ -97,19 +113,16 @@ private:
                                         GmoShapeAccidentals* pCurAcc);
     LUnits tenths_to_logical(Tenths value);
 
-
+    //helpers
     inline bool has_stem() { return m_fHasStem; }
     inline bool is_stem_down() { return m_fStemDown; }
     inline bool has_flag() { return m_fHasFlag; }
     bool is_chord_beamed();
+    inline ImoNote* get_min_note() { return m_notes.front()->pNote; }
+    inline ImoNote* get_max_note() { return m_notes.back()->pNote; }
+	inline ImoNote* get_base_note() { return m_pBaseNoteData->pNote; }
+    inline bool is_stem_up() { return !m_fStemDown; }
 
-    bool m_fHasStem;
-    bool m_fHasFlag;
-    bool m_fSomeNoteReversed;
-    int m_noteType;
-    int m_iInstr;
-    int m_iStaff;
-    LUnits m_stemWidth;
 };
 
 

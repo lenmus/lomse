@@ -37,19 +37,18 @@ class GmoShapeBeam : public GmoSimpleShape
 {
 protected:
     LUnits m_uBeamThickness;
-    LUnits m_uBeamSpacing;
-    LUnits m_uBeamHookLength;
-    bool m_fNeedsLayout;
-	bool m_fBeamAbove;
+    std::list<LUnits> m_segments;
+	UPoint m_outerLeftPoint;
+    UPoint m_outerRightPoint;
 
 public:
-    GmoShapeBeam(ImoObj* pCreatorImo, LUnits uBeamThickness, LUnits uBeamSpacing,
-                 LUnits uBeamHookLength, bool fBeamAbove=true,
+    GmoShapeBeam(ImoObj* pCreatorImo, LUnits uBeamThickness,
                  Color color = Color(0,0,0));
 	~GmoShapeBeam();
 
+    void set_layout_data(std::list<LUnits>& segments, UPoint origin, USize size,
+                         UPoint outerLeft, UPoint outerRight);
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
-    void set_beam_above(bool value);
 
     //provide geometry reference info, for other related shapes
     UPoint get_outer_left_reference_point() { return m_outerLeftPoint; }
@@ -57,14 +56,9 @@ public:
 
 
 protected:
-    void adjust_stems_length_if_needed();
 	void draw_beam_segment(Drawer* pDrawer, LUnits uxStart, LUnits uyStart,
                            LUnits uxEnd, LUnits uyEnd, Color color);
-    void trim_stems();
-    void update_bounds(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
 
-	UPoint m_outerLeftPoint;
-    UPoint m_outerRightPoint;
 
 };
 

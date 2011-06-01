@@ -56,6 +56,7 @@ public:
     GmoShapeText* create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUnits yTop,
                                int valign);
     LUnits measure_width();
+    LUnits measure_height();
 
 };
 

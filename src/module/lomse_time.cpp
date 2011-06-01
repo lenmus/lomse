@@ -25,8 +25,8 @@
 namespace lomse
 {
 
-//global helper functions to compare times (two floating point numbers)
 //---------------------------------------------------------------------------------------
+//global helper functions to compare times (two floating point numbers)
 bool is_equal_time(float t1, float t2)
 {
     return (fabs(t1 - t2) < 0.1f);
@@ -43,6 +43,14 @@ bool is_greater_time(float t1, float t2)
 {
     return (t1 > t2) && (fabs(t1 - t2) >= 0.1f);
 }
+
+//---------------------------------------------------------------------------------------
+//global function for implementing round-half-up rounding algorithm
+float round_half_up(float num)
+{ 
+    return floor(num * 100.0f + 0.5f) / 100.0f; 
+}
+
 
 
 }   //namespace lomse

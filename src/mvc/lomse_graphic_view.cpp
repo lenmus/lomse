@@ -88,10 +88,12 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_pFunc_force_redraw(NULL)
     , m_pFunc_start_timer(NULL)
     , m_pFunc_elapsed_time(NULL)
+    , m_pFunc_notify(NULL)
     , m_pObj_update_window(NULL)
     , m_pObj_force_redraw(NULL)
     , m_pObj_start_timer(NULL)
     , m_pObj_elapsed_time(NULL)
+    , m_pObj_notify(NULL)
 {
 }
 
@@ -366,7 +368,7 @@ void GraphicView::set_rendering_option(int option, bool value)
             break;
 
         case k_option_draw_box_score_page:
-            m_options.draw_box_score_page_flag = value;
+            m_options.draw_item_main_box_flag = value;
             break;
 
         case k_option_draw_box_system:
@@ -412,6 +414,14 @@ void GraphicView::set_elapsed_time_callbak(void* pThis, double (*pt2Func)(void* 
 }
 
 //---------------------------------------------------------------------------------------
+void GraphicView::set_notify_callback(void* pThis,
+                                      void (*pt2Func)(void* pObj, EventInfo& event))
+{ 
+    m_pFunc_notify = pt2Func;
+    m_pObj_notify = pThis;
+}
+
+//---------------------------------------------------------------------------------------
 void GraphicView::do_update_window() 
 {
     if (m_pFunc_update_window)
@@ -427,8 +437,9 @@ void GraphicView::do_force_redraw()
 
 //---------------------------------------------------------------------------------------
 void GraphicView::start_timer() 
-{ if (m_pFunc_start_timer)
-    m_pFunc_start_timer(m_pObj_start_timer); 
+{ 
+    if (m_pFunc_start_timer)
+        m_pFunc_start_timer(m_pObj_start_timer); 
 }
 
 //---------------------------------------------------------------------------------------
@@ -436,6 +447,13 @@ double GraphicView::get_elapsed_time() const
 {   
     //millisecods since last start_timer() invocation
     return (m_pFunc_elapsed_time ? m_pFunc_elapsed_time(m_pObj_elapsed_time) : 0.0); 
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::notify_user(EventInfo& event) 
+{   
+    if (m_pFunc_notify)
+        m_pFunc_notify(m_pObj_notify, event); 
 }
 
 

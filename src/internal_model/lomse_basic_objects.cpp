@@ -30,10 +30,10 @@ namespace lomse
 
 
 //-------------------------------------------------------------------------------------
-// DtoComponentObj implementation
+// DtoScoreObj implementation
 //-------------------------------------------------------------------------------------
 
-void DtoComponentObj::set_color(Color color)
+void DtoScoreObj::set_color(Color color)
 {
     m_color = color;
 }
@@ -101,7 +101,7 @@ void DtoNoteRest::set_note_type_and_dots(int noteType, int dots)
 
 DtoNote::DtoNote()
     : DtoNoteRest()
-    , m_step(-1)        //-1 == ImoNote::k_no_pitch
+    , m_step(-1)        //-1 == k_no_pitch
     , m_octave(4)
     , m_accidentals(0)
     , m_stemDirection(0)

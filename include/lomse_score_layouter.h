@@ -25,8 +25,8 @@
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
 #include "lomse_score_enums.h"
-#include "lomse_shapes_storage.h"
 #include "lomse_logger.h"
+#include "lomse_shapes_storage.h"
 #include <vector>
 using namespace std;
 
@@ -37,11 +37,13 @@ namespace lomse
 class InternalModel;
 class FontStorage;
 class GraphicModel;
-class ImoDocObj;
+class ImoContentObj;
 class ImoScore;
 class ImoStaffObj;
 class ImoAuxObj;
 class ImoInstrument;
+class ImoRelObj;
+class ImoTimeSignature;
 class GmoBoxScorePage;
 class GmoBoxSlice;
 class GmoBoxSystem;
@@ -54,8 +56,8 @@ class GmoShape;
 class ScoreMeter;
 class ColumnLayouter;
 class ColumnStorage;
-class LinesBuilder;
-//class ColumnsBuilder;
+class ColumnsBuilder;
+class ShapesCreator;
 
 
 //---------------------------------------------------------------------------------------
@@ -92,16 +94,25 @@ class ScoreLayouter : public ContentLayouter
 protected:
     LibraryScope&   m_libraryScope;
     UPoint          m_pageCursor;
-    SystemCursor*   m_pSysCursor;
+    ImoScore*       m_pScore;
     ScoreMeter*     m_pScoreMeter;
-//    ColumnsBuilder* m_pColsBuilder;
+    ColumnsBuilder* m_pColsBuilder;
+    ShapesStorage   m_shapesStorage;
+    ShapesCreator*  m_pShapesCreator;
 
-    //auxiliary data for computing and justifying systems
-    int m_iCurSystem;   //[0..n-1] Current system (-1 if no system yet created!)
-    int m_iCurColumn;   //[0..n-1] current column. (-1 if no column yet created!)
+    std::vector<InstrumentEngraver*> m_instrEngravers;
+    std::vector<ColumnLayouter*> m_ColLayouters;
+    std::vector<SystemLayouter*> m_sysLayouters;
+    std::vector<int> m_breaks;
+
+    //temposry data about current page being layouted
     int m_iCurPage;     //[0..n-1] current page. (-1 if no page yet created!)
-    bool m_fFirstColumnInSystem;
 
+    //temporary data about current syustem being layouted
+    int m_iCurSystem;   //[0..n-1] Current system (-1 if no system yet created!)
+    SystemLayouter* m_pCurSysLyt;
+
+    int m_iCurColumn;   //[0..n-1] current column. (-1 if no column yet created!)
 
     //renderization options and parameters
     bool                m_fStopStaffLinesAtFinalBarline;
@@ -115,44 +126,48 @@ protected:
     GmoStubScore*       m_pStubScore;
     GmoBoxScorePage*    m_pCurBoxPage;
     GmoBoxSystem*       m_pCurBoxSystem;
-    GmoBoxSlice*        m_pCurSlice;
 
-    std::vector<InstrumentEngraver*> m_instrEngravers;
+    //support for debug and unit test
+    int                 m_iColumnToTrace;
 
 public:
-    ScoreLayouter(ImoDocObj* pImo, GraphicModel* pGModel, LibraryScope& libraryScope);
+    ScoreLayouter(ImoContentObj* pImo, GraphicModel* pGModel, LibraryScope& libraryScope);
     virtual ~ScoreLayouter();
 
     void prepare_to_start_layout();
     void layout_in_page(GmoBox* pContainerBox);
-    GmoBox* create_pagebox(GmoBox* pParentBox);
+    GmoBox* create_main_box();
 
-    //only for unit tests
+    //info
+    virtual int get_num_columns();
     SystemLayouter* get_system_layouter(int iSys) { return m_sysLayouters[iSys]; }
-    void dump_column_data(int iCol, ostream& outStream=dbgLogger);
-    int get_num_columns();
-    int get_num_lines_in_column(int iCol);
-    inline std::vector<int>& get_line_breaks() { return m_breaks; }
 
+    //support for helper classes
+    virtual LUnits get_target_size_for_system(int iSystem);
+    virtual LUnits get_main_width(int iCol);
+    virtual LUnits get_trimmed_width(int iCol);
+    virtual bool column_has_system_break(int iCol);
+    virtual float get_column_penalty(int iCol);
+
+    //support for debuggin and unit tests
+    void dump_column_data(int iCol, ostream& outStream=dbgLogger);
+    void delete_not_used_objects();
+    inline void trace_column(int iCol) { m_iColumnToTrace = iCol; }
 
 protected:
+    friend class ColumnsBuilder;
+    friend class SystemLayouter;
 
     //helpers
-    ImoScore* get_imo_score();
-    inline bool is_first_column_in_system() { return m_fFirstColumnInSystem; }
     inline bool is_first_page() { return m_iCurPage == 0; }
     inline LUnits get_system_indent() {
         return (m_iCurSystem == 0 ? m_uFirstSystemIndent : m_uOtherSystemIndent);
     }
-    InstrumentEngraver* get_instrument_engraver(int iInstr);
     inline int get_num_systems() { return int(m_breaks.size()); }
     inline bool is_last_system() { return m_iCurSystem == get_num_systems() - 1; }
     inline bool is_first_system_in_score() { return m_iCurSystem == 0; }
 
-
-    //level 1: invoked from public methods
     //---------------------------------------------------------------
-    void initialize();
     void create_stub_for_score();
     void create_instrument_engravers();
     void decide_systems_indentation();
@@ -161,268 +176,252 @@ protected:
     void create_system();
     void add_system_to_page();
     void decide_line_breaks();
-    void create_columns();
     void page_initializations(GmoBox* pContainerBox);
     void decide_line_sizes();
+    void fill_page_with_empty_systems_if_required();
 
     void delete_instrument_engravers();
     void delete_system_layouters();
     void get_score_renderization_options();
-    void create_system_cursor();
-    void delete_system_cursor();
-    void add_initial_line_joining_all_staves_in_system();
 
     bool m_fFirstSystemInPage;
     inline void is_first_system_in_page(bool value) { m_fFirstSystemInPage = value; }
     inline bool is_first_system_in_page() { return m_fFirstSystemInPage; }
 
-    //level 2: invoked from level 1 methods
     //---------------------------------------------------------------
     void move_cursor_to_top_left_corner();
     void move_cursor_after_headers();
     LUnits remaining_height();
-    void create_system_box(SystemLayouter* pSysLyt);
-    void determine_staves_vertical_position();
+    void create_system_layouter();
+    void create_system_box();
+    void engrave_system();
+    void create_empty_system();
+    void engrave_empty_system();
+
     void advance_paper_cursor_to_bottom_of_added_system();
-    void fill_current_system_with_columns();
-    void justify_current_system();
-    void truncate_current_system();
-    void engrave_instrument_details();
     LUnits get_first_system_staves_size();
     LUnits get_other_systems_staves_size();
-    SystemLayouter* create_system_layouter();
 
-    //SystemCursor* m_pSysCursor;
-    std::vector<SystemLayouter*> m_sysLayouters;
-    int m_nColumnsInSystem;     //the number of columns in current system
-    LUnits m_stavesHeight;      //system height without top and bottom margins
-
-    //level 3: invoked from level 2 methods
     //---------------------------------------------------------------
-    void create_column();
-    bool enough_space_in_system();
-    inline bool must_finish_system() { return m_fTerminateSystem; }
-    inline void must_finish_system(bool value) { m_fTerminateSystem = value; }
-    bool system_must_be_justified();
-    void redistribute_free_space();
+    LUnits determine_system_top_margin();
+    LUnits determine_top_space(int nInstr, bool fFirstSystemInScore=false,
+                               bool fFirstSystemInPage=false);
 
-    bool m_fTerminateSystem;
-
-
-    //level 4: invoked from level 3 methods
-    //---------------------------------------------------------------
-    void create_column_boxes();
-    void collect_content_for_this_column();
-    void measure_this_column();
-    void add_column_to_system();
-    LUnits get_available_space_in_system(int iSystem);
-    void engrave_system_details();
-    void set_slice_box_size(int iCol, LUnits width);
-    void reposition_slices_and_staffobjs();
-
-    LUnits m_uFreeSpace;    //free space available on current system
-
-
-    //level 5: invoked from level 4 methods
-    //---------------------------------------------------------------
-    void add_system_prolog();
-    void create_slice_box();
-    LUnits determine_top_space(int nInstr);
     void determine_staff_lines_horizontal_position(int iInstr);
-    void add_shapes_for_column(int iCol, ShapesStorage* pStorage);
-    LUnits determine_initial_space();
     LUnits space_used_by_prolog(int iSystem);
     LUnits distance_to_top_of_system(int iSystem, bool fFirstInPage);
 
-    GmoBoxSliceInstr* m_pCurBSI;
-
-
-    //level 6: invoked from level 5 methods
-    //---------------------------------------------------------------
-    GmoShape* create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,
-                                    unsigned flags=0);
-    GmoShape* create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
-                                  GmoShape* pParentShape);
-    void store_info_about_attached_objects(ImoStaffObj* pSO, GmoShape* pShape,
-                                  int iInstr, int iStaff, int iCol, int iLine,
-                                  ImoInstrument* pInstr);
-    void engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pShape,
-                                  int iInstr, int iStaff, int iSystem,
-                                  int iCol, int iLine,
-                                  ImoInstrument* pInstr);
-    LUnits engrave_prolog(int iInstr);
-
-    enum {k_flag_small_clef=1, };
-    ShapesStorage m_shapesStorage;
     std::list<PendingAuxObjs*> m_pendingAuxObjs;
 
 
-    //level 7: invoked from level 6 methods
     //---------------------------------------------------------------
-    void start_engraving_auxobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
-                                GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                int iSystem, int iCol, int iLine, ImoInstrument* pInstr);
-    void continue_engraving_auxobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
-                                   GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                   int iSystem, int iCol, int iLine,
-                                   ImoInstrument* pInstr);
-   void finish_engraving_auxobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
-                                GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                int iSystem, int iCol, int iLine,
-                                ImoInstrument* pInstr);
-    void add_auxobjs_shapes_to_model(ImoAuxObj* pAO, GmoShape* pStaffObjShape, int layer);
-    void add_auxobj_shape_to_model(GmoShape* pShape, int layer, int iSystem, int iCol,
-                                   int iInstr);
-    int get_system_including_col(int iCol);
+    int get_system_containing_column(int iCol);
 
-    //column creation --------------------------------------------------------------
     void delete_column_layouters();
 
-    //caller informs that a new collumn is going to be layouted
-    void prepare_for_new_column(GmoBoxSlice* pBoxSlice);
-
-    //caller ask to prepare for receiving data about column iCol [0..n-1] for
-    //the given instrument
-    void start_bar_measurements(int iCol, LUnits uxStart, LUnits uSpace);
-
-    //caller sends data about one staffobj in column iCol [0..n-1]
-    void include_object(int iCol, int iLine, int iInstr, ImoInstrument* pInstr,
-                        ImoStaffObj* pSO, float rTime, int nStaff, GmoShape* pShape);
-
-    //caller sends lasts object to store in column iCol [0..n-1].
-    void include_barline_and_finish_bar_measurements(int iCol, int iLine,
-                                                     ImoStaffObj* pSO, GmoShape* pShape,
-                                                     LUnits xStart, float rTime);
-
-    //caller informs that there are no barline and no more objects in column iCol [0..n-1].
-    //void finish_bar_measurements_without_barline(int iCol, LUnits xStart, float rTime);
-    void finish_bar_measurements(int iCol, LUnits xStart);
-
-    //caller request to ignore measurements for last column
-    void discard_data_for_current_column(ShapesStorage* pStorage);
-
-        // Processing
-    void do_column_spacing(int iCol, bool fTrace = false);
-    LUnits redistribute_space(int iCol, LUnits uNewStart);
-
-        //Operations
-    void increment_column_size(int iCol, LUnits uIncr);
-    void add_shapes_to_column(int iCol, ShapesStorage* pStorage);
-
-        //Access to information
-    LUnits get_start_position_for_column(int iCol);
     bool is_system_empty(int iSystem);
-    LUnits get_minimum_size(int iCol);
-//    //bool get_optimum_break_point(int iCol, LUnits uAvailable, float* prTime,
-//    //                          LUnits* puWidth);
-    bool column_has_barline(int iCol);
-    GmoBoxSliceInstr* get_slice_instr_box_for(int iCol, int iInstr);
-    GmoBoxSlice* get_slice_box_for_column(int iCol);
-
-    //columns for this score
-    std::vector<ColumnLayouter*> m_ColLayouters;    //layouter for each column
-    std::vector<ColumnStorage*> m_ColStorage;       //data for each column
-    std::vector<LinesBuilder*> m_LinesBuilder;      //lines builder for each column
-    std::vector<int> m_breaks;                      //abs. column (1..m) for system start
-    std::vector<LUnits> m_SliceInstrHeights;
-
-
-    //------------------------------------------------------------------------------
 
 };
 
 
-////---------------------------------------------------------------------------------------
-//// ColumnsBuilder: algorithm to build the columns for one score
-//class ColumnsBuilder
-//{
-//protected:
-//    ScoreLayouter* m_pScoreLyt;
-//    std::vector<ColumnLayouter*>& m_ColLayouters;    //layouter for each column
-//    std::vector<ColumnStorage*>& m_ColStorage;       //data for each column
-//    std::vector<LinesBuilder*>& m_LinesBuilder;      //lines builder for each column
-//    std::vector<InstrumentEngraver*>& m_instrEngravers;
-//    SystemCursor* m_pSysCursor;                     //cursor for traversing the score
-//
-//
-//    //std::vector<int> m_breaks;                      //abs. column (1..m) for system start
-//
-//public:
-//    ColumnsBuilder(ScoreLayouter* pScoreLyt, std::vector<ColumnLayouter*>& colLayouters,
-//                   std::vector<ColumnStorage*>& colStorage,
-//                   std::vector<LinesBuilder*>& linesBuilder,
-//                   std::vector<InstrumentEngraver*>& instrEngravers)
-//        : m_pScoreLyt(pScoreLyt)
-//        , m_ColLayouters(colLayouters)
-//        , m_ColStorage(colStorage)
-//        , m_LinesBuilder(linesBuilder)
-//        , m_instrEngravers(instrEngravers)
-//        , m_pSysCursor(NULL)
-//    {
-//    }
-//    ~ColumnsBuilder() {
-//        delete_system_cursor();
-//    }
-//
-//    void create_columns();
-//
-//protected:
-//	//determine_staves_vertical_position();
-// //       create_column();
-//    //delete_system_cursor();
-//    //create_system_cursor();
-//
-//    //create_column_boxes();
-//    //collect_content_for_this_column();
-//    //measure_this_column();
-//
-////    //column creation --------------------------------------------------------------
-////
-////    GmoBoxSliceInstr* create_slice_instr(int iCol, ImoInstrument* pInstr, LUnits yTop);
-////
-////    //caller informs that a new collumn is going to be layouted
-////    void prepare_for_new_column(GmoBoxSlice* pBoxSlice);
-////
-////    //caller ask to prepare for receiving data about column iCol [0..n-1] for
-////    //the given instrument
-////    void start_bar_measurements(int iCol, LUnits uxStart, LUnits uSpace);
-////
-////    //caller sends data about one staffobj in column iCol [0..n-1]
-////    void include_object(int iCol, int iLine, int iInstr, ImoInstrument* pInstr,
-////                        ImoStaffObj* pSO, float rTime, bool fProlog, int nStaff,
-////                        GmoShape* pShape);
-////
-////    //caller sends lasts object to store in column iCol [0..n-1].
-////    void include_barline_and_finish_bar_measurements(int iCol, int iLine,
-////                                                     ImoStaffObj* pSO, GmoShape* pShape,
-////                                                     LUnits xStart, float rTime);
-////
-////    //caller informs that there are no barline and no more objects in column iCol [0..n-1].
-////    //void finish_bar_measurements_without_barline(int iCol, LUnits xStart, float rTime);
-////    void finish_bar_measurements(int iCol, LUnits xStart);
-////
-////    //caller request to ignore measurements for last column
-////    void discard_data_for_current_column(ShapesStorage* pStorage);
-////
-////        // Processing
-////    void do_column_spacing(int iCol, bool fTrace = false);
-////    LUnits redistribute_space(int iCol, LUnits uNewStart);
-////
-////        //Operations
-////    void increment_column_size(int iCol, LUnits uIncr);
-////    void add_shapes_to_column(int iCol, ShapesStorage* pStorage);
-////
-////        //Access to information
-////    LUnits get_start_position_for_column(int iCol);
-////    bool is_system_empty(int iSystem);
-////    LUnits get_minimum_size(int iCol);
-//////    //bool get_optimum_break_point(int iCol, LUnits uAvailable, float* prTime,
-//////    //                          LUnits* puWidth);
-////    bool column_has_barline(int iCol);
-////    GmoBoxSliceInstr* get_slice_instr_box_for(int iCol, int iInstr);
-////    GmoBoxSlice* get_slice_box_for_column(int iCol);
-//
-//};
+//---------------------------------------------------------------------------------------
+// ColumnsBuilder: algorithm to build the columns for one score
+class ColumnsBuilder
+{
+protected:
+    LibraryScope&   m_libraryScope;
+    ScoreMeter*     m_pScoreMeter;
+    ScoreLayouter*  m_pScoreLyt;
+    ImoScore*       m_pScore;
+    ShapesStorage&  m_shapesStorage;
+    ShapesCreator*  m_pShapesCreator;
+    std::vector<ColumnLayouter*>& m_ColLayouters;    //layouter for each column
+    std::vector<InstrumentEngraver*>& m_instrEngravers;
+    SystemCursor* m_pSysCursor;                     //cursor for traversing the score
+    std::vector<LUnits> m_SliceInstrHeights;
+    LUnits m_stavesHeight;      //system height without top and bottom margins
+    UPoint m_pagePos;           //to track current position
+
+    int m_iColumn;   //[0..n-1] current column. (-1 if no column yet created!)
+
+    int m_iColumnToTrace;   //support for debug and unit test
+
+public:
+    ColumnsBuilder(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                   ScoreLayouter* pScoreLyt, ImoScore* pScore,
+                   ShapesStorage& shapesStorage,
+                   ShapesCreator* pShapesCreator,
+                   std::vector<ColumnLayouter*>& colLayouters,
+                   std::vector<InstrumentEngraver*>& instrEngravers);
+    ~ColumnsBuilder();
+
+
+    void create_columns();
+    inline LUnits get_staves_height() { return m_stavesHeight; }
+
+    //support for debuggin and unit tests
+    inline void trace_column(int iCol) { m_iColumnToTrace = iCol; }
+
+protected:
+    void determine_staves_vertical_position();
+    void create_column();
+
+    void create_column_layouter();
+    void create_column_boxes();
+    void collect_content_for_this_column();
+    void layout_column();
+    void assign_width_to_column();
+
+    GmoBoxSlice* create_slice_box();
+    void find_and_save_context_info_for_this_column();
+
+    void delete_column_storage();
+    LUnits determine_initial_fixed_space();
+
+    void store_info_about_attached_objects(ImoStaffObj* pSO, GmoShape* pShape,
+                                  int iInstr, int iStaff, int iCol, int iLine,
+                                  ImoInstrument* pInstr);
+
+    //column creation
+    void start_column_measurements(int iCol, LUnits uxStart, LUnits fixedSpace);
+    void include_object(int iCol, int iLine, int iInstr, ImoStaffObj* pSO,
+                        float rTime, int nStaff, GmoShape* pShape, bool fInProlog=false);
+    void finish_column_measurements(int iCol, LUnits xStart);
+    bool determine_if_is_in_prolog(float rTime);
+
+    //helpers
+    inline bool is_first_column() { return m_iColumn == 0; }
+
+};
+
+
+//---------------------------------------------------------------------------------------
+// ColumnBreaker: algorithm to decide when to finish a column
+class ColumnBreaker
+{
+protected:
+    int m_numInstruments;
+    bool m_fBarlineFound;
+    float m_targetBreakTime;
+    int m_numLines;
+    std::vector<ImoStaffObj*> m_staffObjs;
+    std::vector<bool> m_beamed;
+
+public:
+    ColumnBreaker(int numInstruments, SystemCursor* pSysCursor);
+    ~ColumnBreaker() {}
+
+    bool column_should_be_finished(ImoStaffObj* pSO, float rTime, int iLine);
+};
+
+
+//---------------------------------------------------------------------------------------
+// ShapesCreator: helper fcatory to create staffobjs shapes
+class ShapesCreator
+{
+protected:
+    LibraryScope& m_libraryScope;
+    ScoreMeter* m_pScoreMeter;
+    ShapesStorage& m_shapesStorage;
+    std::vector<InstrumentEngraver*>& m_instrEngravers;
+
+public:
+    ShapesCreator(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                  ShapesStorage& shapesStorage,
+                  std::vector<InstrumentEngraver*>& instrEngravers);
+    ~ShapesCreator() {}
+
+    enum {k_flag_small_clef=1, };
+
+    GmoShape* create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,
+                                    UPoint pos, int clefType=0, unsigned flags=0);
+    GmoShape* create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
+                                  GmoShape* pParentShape, UPoint pos);
+
+
+    void start_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO, ImoStaffObj* pSO,
+                                GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                                int iSystem, int iCol, int iLine, ImoInstrument* pInstr,
+                                UPoint pos);
+    void continue_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO, ImoStaffObj* pSO,
+                                   GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                                   int iSystem, int iCol, int iLine,
+                                   ImoInstrument* pInstr);
+    void finish_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO, ImoStaffObj* pSO,
+                                 GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                                 int iSystem, int iCol, int iLine, LUnits prologWidth,
+                                 ImoInstrument* pInstr);
+
+protected:
+
+};
+
+
+//---------------------------------------------------------------------------------------
+// LinesBreaker: base class for any lines break algorithm
+class LinesBreaker
+{
+protected:
+    ScoreLayouter* m_pScoreLyt;
+    std::vector<int>& m_breaks;
+
+public:
+    LinesBreaker(ScoreLayouter* pScoreLyt, std::vector<int>& breaks)
+        : m_pScoreLyt(pScoreLyt)
+        , m_breaks(breaks)
+    {
+    }
+    virtual ~LinesBreaker() {}
+
+    virtual void decide_line_breaks() = 0;
+};
+
+
+//---------------------------------------------------------------------------------------
+// Simple lines break algorithm: just fill systems with columns
+class LinesBreakerSimple : public LinesBreaker
+{
+public:
+    LinesBreakerSimple(ScoreLayouter* pScoreLyt, std::vector<int>& breaks);
+    virtual ~LinesBreakerSimple() {}
+
+    void decide_line_breaks();
+};
+
+
+//---------------------------------------------------------------------------------------
+// Optimal lines break algorithm, based on Knuths' algorithm for text processors
+class LinesBreakerOptimal : public LinesBreaker
+{
+public:
+    LinesBreakerOptimal(ScoreLayouter* pScoreLyt, std::vector<int>& breaks);
+    virtual ~LinesBreakerOptimal() {}
+
+    void decide_line_breaks();
+
+    //support for debug and tests
+    void dump_entries(ostream& outStream=dbgLogger);
+
+protected:
+    struct Entry
+    {
+        float penalty;          //total penalty for the score
+        int predecessor;        //previous break point
+        int system;             //system [0..n] started by this entry
+        float product;          //total product of not used space
+    };
+    std::vector<Entry> m_entries;
+    int m_numCols;
+    bool m_fJustifyLastLine;
+
+    void initialize_entries_table();
+    void compute_optimal_break_sequence();
+    void retrieve_breaks_sequence();
+    float determine_penalty_for_line(int iSystem, int i, int j);
+    bool is_better_option(float totalPenalty, float curPenalty, int i, int j);
+
+};
+
 
 
 }   //namespace lomse

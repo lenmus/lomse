@@ -1,0 +1,17 @@
+(score
+   (vers 1.6)
+   (instrument  
+      (musicData 
+        (clef G)
+        (key A)
+        (time 6 8)
+        (n c4 e g+ t2)(n e4 e g- t-)
+        (n c4 e g+ t2)(n e4 e g- t-)
+        (barline)
+        
+        (n e4 e g+)(n f4 e)(n g4 e g-)
+        (n g4 q.)
+        (barline end)
+      )
+   )
+)

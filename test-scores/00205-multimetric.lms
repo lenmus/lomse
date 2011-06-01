@@ -1,0 +1,73 @@
+(score
+    (vers 1.6)
+    (instrument (name "Viol.")
+        (musicData    
+            (clef G)
+            (key G)
+            (time 3 4)
+            (chord (n g3 q)(n d4 q))
+            (r e)(n g5 e)
+            (n g5 s g+)(n f5 s)(n g5 e g-)
+            (barline)
+
+            //measure 2
+            (r h.)
+            (barline)
+
+            //measure 3
+            (chord (n g3 h)(n d4 h))
+            (chord (n g3 q)(n d4 q))
+            (barline)
+
+            //measure 4
+            (chord (n a4 q)(n e5 q))
+            (r q)
+            (chord (n d4 q)(n g4 q)(n f5 q))
+            (barline)
+        )
+    )
+
+    (instrument (name "Viol.")
+       (musicData    
+            (clef G)
+            (key G)
+            (time 2 4)
+
+            (n g4 q)
+            (n d5 e g+)(n d5 e g-)
+            (barline)
+
+            //measure 2
+            (n b5 e g+)(n a5 s)(n g5 s g-)
+            (n g5 e g+)(n g5 e g-)
+            (barline)
+
+            //measure 3
+            (n e5 e g+)(n d5 s)(n c5 s g-)
+            (n e5 e g+)(n e5 e g-)
+            (barline)
+
+            //measure 4
+            (n d5 e g+)(n g5 e)
+            (n g5 e)(n g5 e g-)
+            (barline)
+
+            //measure 5
+            (n b5 e g+)(n g5 e g-)
+            (n e5 s g+)(n c5 s)(n e5 s)(n c5 s g-)
+            (barline)
+
+            //measure 6
+            (n b4 s g+)(n d5 s)(n b4 s)(n d5 s g-)
+            (n c5 e g+)(n b4 s)(n a4 s g-)
+            (barline)
+        )
+    )
+)
+
+
+
+
+
+
+

@@ -62,22 +62,19 @@ protected:
     LUnits m_lineSpacing;
 
     //required by the beam engraver
-    int m_beamType[6];
     int m_posOnStaff;
 
 public:
-//    GmoShapeNote(lmNoteRest* pOwner, LUnits xPos, LUnits yTop, Color color);
     GmoShapeNote(ImoObj* pCreatorImo, LUnits x, LUnits y, Color color,
                  LibraryScope& libraryScope);
     ~GmoShapeNote();
 
 
 	//overrides
-//	void Shift(LUnits xIncr, LUnits yIncr);
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
     LUnits get_anchor_offset() { return m_uAnchorOffset; }
 
-//	//specific methods
+	//specific methods
 	void add_stem(GmoShapeStem* pShape);
 	void add_notehead(GmoShapeNotehead* pShape);
 	void add_flag(GmoShapeFlag* pShape);
@@ -85,15 +82,7 @@ public:
 	void add_note_in_block(GmoShape* pShape);
     void add_leger_lines_info(int posOnStaff, LUnits yStaffTopLine, LUnits lineLength,
                               LUnits lineThickness, LUnits lineSpacing);
-//    void ApplyUserShiftsToTieShape();
     inline void set_anchor_offset(LUnits offset) { m_uAnchorOffset = offset; }
-
-//
-//	//info about related shapes
-//	inline void SetBeamShape(GmoShapeBeam* pBeamShape) { m_pBeamShape = pBeamShape; }
-//	inline GmoShapeBeam* GetBeamShape() const { return m_pBeamShape; }
-//	inline void SetStemShape(GmoShapeStem* pStemShape) { m_pStemShape = pStemShape; }
-//    inline void OnTieAttached(int nTie, GmoShapeTie* pShapeTie) { m_pTieShape[nTie] = pShapeTie; }
 
 	//access to constituent shapes
     inline GmoShapeNotehead* get_notehead_shape() const { return m_pNoteheadShape; }
@@ -117,8 +106,6 @@ public:
     void set_stem_length(LUnits length);
 
     //required by beam engraver
-    inline int get_beam_type(int level) { return m_beamType[level]; }
-    inline void set_beam_type(int level, int type) { m_beamType[level] = type; }
     inline void set_pos_on_staff(int posOnStaff) { m_posOnStaff = posOnStaff; }
     inline int get_pos_on_staff() { return m_posOnStaff; }
 
@@ -126,30 +113,8 @@ public:
     inline bool is_up() { return m_fUpOriented; }
     inline void set_up_oriented(bool value) { m_fUpOriented = value; }
 
-//	//layout related
-//	void DrawLegerLines(int nPosOnStaff, LUnits uxLine, lmPaper* pPaper, Color color);
-//
-//	//dragging
-//    wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
-//	UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos);
-//	void OnEndDrag(lmPaper* pPaper, lmController* pCanvas, const UPoint& uPos);
-//
-//
-
 protected:
     void draw_leger_lines(Drawer* pDrawer);
-
-//	//related shapes
-//	GmoShapeBeam*	m_pBeamShape;
-//    GmoShapeTie*     m_pTieShape[2];     //The two archs of a tie. This is the end note of the tie
-//
-//	//info to render leger lines
-//	int				m_nPosOnStaff;		//line/space on staff on which this note is placed
-//	LUnits		m_uyStaffTopLine;	//y pos. of top staff line (5th line)
-//
-//    //temporary data to be used during dragging
-//    int             m_nOldSteps;		//to clear leger lines while dragging
-//    LUnits        m_uxOldPos;
 
 };
 
@@ -222,11 +187,6 @@ public:
 
 	//overrides of virtual methods in base class
     virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
-
-//	//info about related shapes
-//	inline void SetBeamShape(GmoShapeBeam* pBeamShape) { m_pBeamShape = pBeamShape; }
-//	inline GmoShapeBeam* GetBeamShape() const { return m_pBeamShape; }
-
 };
 
 //---------------------------------------------------------------------------------------

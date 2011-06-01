@@ -67,6 +67,7 @@ namespace lomse
 #define LOMSE_MIN_SPACE_BETWEEN_NOTE_AND_CLEF   10.0f
 #define LOMSE_EXCEPTIONAL_MIN_SPACE      2.5f
 #define LOMSE_SPACE_AFTER_BARLINE       20.0f
+#define LOMSE_SPACE_AFTER_SMALL_CLEF    10.0f
     //prolog (opening measures) [Stone80, p.44]
 #define LOMSE_SPACE_BEFORE_PROLOG        7.5f
 #define LOMSE_PROLOG_GAP_BEORE_KEY      10.0f

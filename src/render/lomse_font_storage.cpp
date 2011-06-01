@@ -65,7 +65,9 @@ FontStorage::FontStorage(pt2GetFontFunction ptr)
     m_fontEngine.flip_y(m_fFlip_y);
 
     //load music font
-    set_font("lmbasic2.ttf", 24.0);
+    string fullname = LOMSE_FONTS_PATH;
+    fullname += "lmbasic2.ttf";
+    set_font(fullname, 24.0);
 }
 
 //---------------------------------------------------------------------------------------

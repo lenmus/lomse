@@ -23,12 +23,15 @@
 #include "lomse_internal_model.h"
 #include "lomse_drawer.h"
 #include "lomse_selections.h"
+#include "lomse_time.h"
 
 #include <cstdlib>      //abs
+#include <iomanip>
 
 
 namespace lomse
 {
+
 
 //=======================================================================================
 // Graphic model implementation
@@ -42,8 +45,7 @@ GraphicModel::GraphicModel()
 //---------------------------------------------------------------------------------------
 GraphicModel::~GraphicModel()
 {
-    if (m_root)
-        delete m_root;
+    delete m_root;
     delete_stubs();
 }
 
@@ -88,6 +90,14 @@ void GraphicModel::draw_page(int iPage, UPoint& origin, Drawer* pDrawer,
 }
 
 //---------------------------------------------------------------------------------------
+void GraphicModel::dump_page(int iPage, ostream& outStream)
+{
+    outStream << "                    org.x        org.y     size.x      size.y" << endl;
+    outStream << "-------------------------------------------------------------" << endl;
+    get_page(iPage)->dump_boxes_shapes(outStream);
+}
+
+//---------------------------------------------------------------------------------------
 GmoObj* GraphicModel::hit_test(int iPage, LUnits x, LUnits y)
 {
     return get_page(iPage)->hit_test(x, y);
@@ -118,6 +128,12 @@ void GraphicModel::select_objects_in_rectangle(int iPage, SelectionSet& selectio
 //=======================================================================================
 // GmoObj implementation
 //=======================================================================================
+
+//association object-type <-> object-name
+static std::map<int, std::string> m_typeToName;
+static bool m_fNamesLoaded = false;
+
+//---------------------------------------------------------------------------------------
 GmoObj::GmoObj(int objtype)
     : m_objtype(objtype)
     , m_origin(0.0f, 0.0f)
@@ -141,6 +157,8 @@ void GmoObj::set_origin(UPoint& pos)
 //---------------------------------------------------------------------------------------
 void GmoObj::set_origin(LUnits xLeft, LUnits yTop)
 {
+    if (xLeft == 0.0f && yTop == 0.0f) return;
+
     USize shift(xLeft - m_origin.x, yTop - m_origin.y);
     shift_origin(shift);
 }
@@ -148,6 +166,8 @@ void GmoObj::set_origin(LUnits xLeft, LUnits yTop)
 //---------------------------------------------------------------------------------------
 void GmoObj::set_left(LUnits xLeft)
 {
+    if (xLeft == 0.0f) return;
+
     USize shift(xLeft - m_origin.x, 0.0f);
     shift_origin(shift);
 }
@@ -155,6 +175,8 @@ void GmoObj::set_left(LUnits xLeft)
 //---------------------------------------------------------------------------------------
 void GmoObj::set_top(LUnits yTop)
 {
+    if (yTop == 0.0f) return;
+
     USize shift(0.0f, yTop - m_origin.y);
     shift_origin(shift);
 }
@@ -176,6 +198,64 @@ void GmoObj::shift_origin(const USize& shift)
 {
     m_origin.x += shift.width;
     m_origin.y += shift.height;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoObj::dump(ostream& outStream)
+{
+    outStream << get_name(m_objtype)
+              << fixed << setprecision(2) << setfill(' ')
+              << setw(10) << round_half_up(m_origin.x) << ", "
+              << setw(10) << round_half_up(m_origin.y) << ", "
+              << setw(10) << round_half_up(m_size.width) << ", "
+              << setw(10) << round_half_up(m_size.height) << endl;
+}
+
+//---------------------------------------------------------------------------------------
+string& GmoObj::get_name(int objtype)
+{
+    if (!m_fNamesLoaded)
+    {
+        m_typeToName[k_box_document]            = "box-document   ";
+        m_typeToName[k_box_doc_page]            = "box-doc-page   ";
+        m_typeToName[k_box_doc_page_content]    = "box-docpg-cont.";
+        m_typeToName[k_box_score_page]          = "box-score-page ";
+        m_typeToName[k_box_slice]               = "box-slice      ";
+        m_typeToName[k_box_slice_instr]         = "box-slice-intr ";
+        m_typeToName[k_box_system]              = "box-system     ";
+        // shapes
+        m_typeToName[k_shape_accidentals]       = "accidentals    ";
+        m_typeToName[k_shape_accidental_sign]   = "accidental-sign";
+        m_typeToName[k_shape_arch]              = "arch           ";
+        m_typeToName[k_shape_barline]           = "barline        ";
+        m_typeToName[k_shape_beam]              = "beam           ";
+        m_typeToName[k_shape_brace]             = "brace          ";
+        m_typeToName[k_shape_bracket]           = "bracket        ";
+        m_typeToName[k_shape_clef]              = "clef           ";
+        m_typeToName[k_shape_dot]               = "dot            ";
+        m_typeToName[k_shape_fermata]           = "fermata        ";
+        m_typeToName[k_shape_flag]              = "flag           ";
+        m_typeToName[k_shape_invisible]         = "invisible      ";
+        m_typeToName[k_shape_key_signature]     = "key            ";
+        m_typeToName[k_shape_note]              = "note           ";
+        m_typeToName[k_shape_notehead]          = "notehead       ";
+        m_typeToName[k_shape_rest]              = "rest           ";
+        m_typeToName[k_shape_rest_glyph]        = "rest-glyph     ";
+        m_typeToName[k_shape_stem]              = "stem           ";
+        m_typeToName[k_shape_staff]             = "staff          ";
+        m_typeToName[k_shape_text]              = "text           ";
+        m_typeToName[k_shape_time_signature]    = "time           ";
+        m_typeToName[k_shape_tie]               = "tie            ";
+        m_typeToName[k_shape_time_signature_digit]
+                                                = "time-digit     ";
+        m_typeToName[k_shape_tuplet]            = "tuplet         ";
+        // stub
+        m_typeToName[k_stub_score]              = "stub-score     ";
+
+        m_fNamesLoaded = true;
+    }
+
+    return m_typeToName[objtype];
 }
 
 
@@ -258,6 +338,14 @@ void GmoBox::store_shapes_in_page(GmoBoxDocPage* pPage)
 }
 
 //---------------------------------------------------------------------------------------
+void GmoBox::store_shapes_in_doc_page()
+{
+    GmoBoxDocPage* pPage = get_parent_box_page();
+    GmoBox* pBox = this;        //gcc complains if next method is invoked directly
+    pBox->store_shapes_in_page(pPage);
+}
+
+//---------------------------------------------------------------------------------------
 GmoBoxDocPage* GmoBox::get_parent_box_page()
 {
     if (this->is_box_doc_page())
@@ -309,7 +397,7 @@ void GmoBox::draw_shapes(Drawer* pDrawer, RenderOptions& opt)
 bool GmoBox::must_draw_bounds(RenderOptions& opt)
 {
     return (this->is_box_doc_page_content() && opt.draw_box_doc_page_content_flag)
-        || (this->is_box_score_page() && opt.draw_box_score_page_flag)
+        || (this->is_item_main_box() && opt.draw_item_main_box_flag)
         || (this->is_box_system() && opt.draw_box_system_flag)
         || (this->is_box_slice() && opt.draw_box_slice_flag)
         || (this->is_box_slice_instr() && opt.draw_box_slice_instr_flag);
@@ -320,7 +408,7 @@ Color GmoBox::get_box_color()
 {
     if (this->is_box_doc_page_content())
         return Color(255,255,0);    //yellow
-    if (this->is_box_score_page())
+    if (this->is_item_main_box())
         return Color(255,128,0);    //orange
     if (this->is_box_system())
         return Color(255,0,0);      //red
@@ -367,6 +455,8 @@ GmoBox* GmoBox::find_inner_box_at(LUnits x, LUnits y)
 //---------------------------------------------------------------------------------------
 void GmoBox::shift_origin(const USize& shift)
 {
+    if (shift.width == 0.0f && shift.height == 0.0f) return;
+
     m_origin.x += shift.width;
     m_origin.y += shift.height;
 
@@ -379,6 +469,27 @@ void GmoBox::shift_origin(const USize& shift)
     std::list<GmoShape*>::iterator itS;
     for (itS=m_shapes.begin(); itS != m_shapes.end(); ++itS)
         (*itS)->shift_origin(shift);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBox::dump_boxes_shapes(ostream& outStream)
+{
+    GmoObj::dump(outStream);
+
+    dump_shapes(outStream);
+
+    //dump contained boxes
+    std::vector<GmoBox*>::iterator it;
+    for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
+        (*it)->dump_boxes_shapes(outStream);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBox::dump_shapes(ostream& outStream)
+{
+    std::list<GmoShape*>::iterator itS;
+    for (itS=m_shapes.begin(); itS != m_shapes.end(); ++itS)
+        (*itS)->dump(outStream);
 }
 
 
@@ -571,13 +682,26 @@ void GmoBoxDocPage::select_objects_in_rectangle(SelectionSet& selection,
                                                 const URect& selRect,
                                                 unsigned flags)
 {
+    bool fSomethingSelected = false;
     std::list<GmoShape*>::reverse_iterator it;
     for (it = m_allShapes.rbegin(); it != m_allShapes.rend(); ++it)
     {
         URect bbox = (*it)->get_bounds();
         if (selRect.contains(bbox))
+        {
             selection.add(*it);
+            fSomethingSelected = true;
+        }
     }
+
+    //if no objects in rectangle try to select clicked object
+    if (!fSomethingSelected)
+    {
+        GmoShape* pShape = find_shape_at(selRect.get_x(), selRect.get_y());
+        if (pShape)
+            selection.add(pShape);
+    }
+
 }
 
 

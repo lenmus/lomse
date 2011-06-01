@@ -33,7 +33,9 @@ extern bool is_greater_time(float t1, float t2);
 
 #define is_higher_time  is_greater_time
 
+//helper function to implement round-half-up algorithm
 
+float round_half_up(float num);
 
 
 }   //namespace lomse

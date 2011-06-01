@@ -76,7 +76,7 @@ SUITE(ScoreIteratorTest)
 
         CHECK( (*sit)->imo_object()->is_note() == true );
         CHECK( (*sit)->line() == 0 );
-        CHECK( (*sit)->segment() == 0 );
+        CHECK( (*sit)->measure() == 0 );
         CHECK( (*sit)->time() == 0.0f );
         CHECK( (*sit)->num_instrument() == 0 );
         CHECK( (*sit)->staff() == 0 );
@@ -117,7 +117,7 @@ SUITE(ScoreIteratorTest)
 
         CHECK( (*sit)->imo_object()->is_rest() == true );
         CHECK( (*sit)->line() == 0 );
-        CHECK( (*sit)->segment() == 0 );
+        CHECK( (*sit)->measure() == 0 );
         CHECK( (*sit)->time() == 64.0f );
         CHECK( (*sit)->num_instrument() == 0 );
         CHECK( (*sit)->staff() == 0 );

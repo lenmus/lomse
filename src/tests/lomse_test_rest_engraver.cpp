@@ -62,7 +62,7 @@ SUITE(RestEngraverTest)
     TEST_FIXTURE(RestEngraverTestFixture, RestEngraver_OnlyGlyph)
     {
         DtoRest dtoRest;
-        dtoRest.set_note_type(ImoRest::k_whole);
+        dtoRest.set_note_type(k_whole);
         dtoRest.set_dots(0);
         ImoRest rest(dtoRest);
 
@@ -70,7 +70,7 @@ SUITE(RestEngraverTest)
         ShapesStorage storage;
         RestEngraver engraver(m_libraryScope, &meter, &storage);
         GmoShapeRest* pShape =
-            dynamic_cast<GmoShapeRest*>(engraver.create_shape(&rest, 0, 0, 
+            dynamic_cast<GmoShapeRest*>(engraver.create_shape(&rest, 0, 0,
                                         UPoint(10.0f, 15.0f), rest.get_note_type(),
                                         rest.get_dots(), &rest));
         CHECK( pShape != NULL );
@@ -86,7 +86,7 @@ SUITE(RestEngraverTest)
     TEST_FIXTURE(RestEngraverTestFixture, RestEngraver_GlyphAndDot)
     {
         DtoRest dtoRest;
-        dtoRest.set_note_type(ImoRest::k_whole);
+        dtoRest.set_note_type(k_whole);
         dtoRest.set_dots(1);
         ImoRest rest(dtoRest);
 
@@ -94,7 +94,7 @@ SUITE(RestEngraverTest)
         ShapesStorage storage;
         RestEngraver engraver(m_libraryScope, &meter, &storage);
         GmoShapeRest* pShape =
-            dynamic_cast<GmoShapeRest*>(engraver.create_shape(&rest, 0, 0, 
+            dynamic_cast<GmoShapeRest*>(engraver.create_shape(&rest, 0, 0,
                                         UPoint(10.0f, 15.0f), rest.get_note_type(),
                                         rest.get_dots(), &rest));
         CHECK( pShape != NULL );

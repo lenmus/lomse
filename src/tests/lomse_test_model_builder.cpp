@@ -30,7 +30,6 @@
 #include "lomse_internal_model.h"
 #include "lomse_compiler.h"
 #include "lomse_model_builder.h"
-#include "lomse_basic_model.h"
 
 using namespace UnitTest;
 using namespace std;

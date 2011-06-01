@@ -23,6 +23,7 @@
 
 #include "lomse_ldp_factory.h"
 #include "lomse_id_assigner.h"
+#include "lomse_injectors.h"
 
 #include <iostream>
 using namespace std;
@@ -50,6 +51,7 @@ class LomseDoorway;
 class Drawer;
 class ScreenDrawer;
 class Task;
+class EventInfo;
 
 //---------------------------------------------------------------------------------------
 class LOMSE_EXPORT LibraryScope
@@ -62,6 +64,11 @@ protected:
     FontStorage* m_pFontStorage;
     //MusicGlyphs* m_pMusicGlyphs;
 
+    //options
+    bool m_fJustifySystems;
+    bool m_fDumpColumnTables;
+
+
 public:
     LibraryScope(ostream& reporter=cout, LomseDoorway* pDoorway=NULL);
     ~LibraryScope();
@@ -71,10 +78,17 @@ public:
     LdpFactory* ldp_factory();
     FontStorage* font_storage();
 
+    void notify_user_about(EventInfo& event);
+
     double get_screen_ppi() const;
     int get_pixel_format() const;
     //MusicGlyphs* music_glyphs();
 
+    //global options, mainly for debug
+    inline void set_justify_systems(bool value) { m_fJustifySystems = value; }
+    inline bool justify_systems() { return m_fJustifySystems; }
+    inline void set_dump_column_tables(bool value) { m_fDumpColumnTables = value; }
+    inline bool dump_column_tables() { return m_fDumpColumnTables; }
 };
 
 //---------------------------------------------------------------------------------------

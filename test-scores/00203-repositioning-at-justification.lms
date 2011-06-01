@@ -13,7 +13,7 @@
         
         //second voice
         (goBack 128)
-        (chord (n e4 e. (stem up) g+)(n g4 e.))(chord (n d4 s g- (stem up))(n f4 s))
+        (chord (n e4 e. g+ (stem up))(n g4 e.))(chord (n d4 s g- (stem up))(n f4 s))
         (goFwd end)
         (barline)
 
@@ -24,7 +24,7 @@
         (chord (n c3 q)(n e3 q)(n a3 q)(n c4 q))
 
         (goBack 128)    //second voice
-        (chord (n c4 e. (stem up) g+)(n e4 e.))
+        (chord (n c4 e. g+ (stem up))(n e4 e.))
         (chord (n -b3 s g- (stem up))(n d4 s))
         (goFwd end)
         (barline)
@@ -35,8 +35,8 @@
         (chord (n a3 q)(n c4 q))
         (chord (n g3 q)(n c4 q)(n -e4 q))
 
-        (goBack 2q)    //second voice
-        (n g4 e. (stem up) g+)(n f4 s g- (stem up))
+        (goBack start)    //second voice
+        (n g4 e. g+ (stem up))(n f4 s g- (stem up))
         (goFwd end)
         (barline)
         
@@ -47,8 +47,8 @@
         (chord (n c4 q (stem down))(n d4 q)(n +f4 q))
         (chord (n =b3 q)(n d4 q)(n g4 q))
 
-        (goBack 2q)    //second voice
-        (n =b4 e. (stem up) g+)(n =a4 s (stem up) g-)
+        (goBack start)    //second voice
+        (n =b4 e. g+ (stem up))(n =a4 s g- (stem up))
         (goFwd end)
         (barline)
        
@@ -58,8 +58,8 @@
         (chord (n d4 q)(n d5 q))
         (chord (n d4 q)(n g4 q)(n d5 q))
 
-        (goBack 2q)    //second voice
-        (n a4 e. (stem down) g+)(n +f4 s (stem down) g-)
+        (goBack start)    //second voice
+        (n a4 e. g+ (stem down))(n +f4 s g- (stem down))
         (goFwd end)
         (barline)
 
@@ -76,7 +76,7 @@
         (chord (n g3 q (stem down))(n d4 q))
         (chord (n g3 q)(n c4 q)(n e4 q))
 
-        (goBack 128)    //second voice
+        (goBack start)    //second voice
         (n g4 e. g+)(n f4 s g-)
         (goFwd end)
         (barline)

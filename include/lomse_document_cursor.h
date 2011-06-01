@@ -59,20 +59,20 @@ protected:
     int     m_instr;    //instrument (0..n-1)
     int     m_staff;    //staff (0..n-1)
 	float   m_time;     //timepos
-    int     m_segment;  //segment number (0..n-1)
+    int     m_measure;  //measure number (0..n-1)
     long    m_id;       //id of pointed object or -1 if none
 
 public:
-    ScoreCursorState(int instr, int segment, int staff, float time, long id)
+    ScoreCursorState(int instr, int measure, int staff, float time, long id)
         : ElementCursorState(), m_instr(instr), m_staff(staff), m_time(time)
-        , m_segment(segment), m_id(id)
+        , m_measure(measure), m_id(id)
     {
     }
     ~ScoreCursorState() {}
 
     //getters
     inline int instrument() { return m_instr; }
-    inline int segment() { return m_segment; }
+    inline int measure() { return m_measure; }
     inline int staff() { return m_staff; }
     inline float time() { return m_time; }
     inline long get_id() { return m_id; }
@@ -111,9 +111,9 @@ public:
         return (pState ? pState->instrument() : 0);
     }
 
-    inline int segment() {
+    inline int measure() {
         ScoreCursorState* pState = dynamic_cast<ScoreCursorState*>(m_pState);
-        return (pState ? pState->segment() : 0);
+        return (pState ? pState->measure() : 0);
     }
 
     inline int staff() {
@@ -153,14 +153,14 @@ public:
     //virtual void move_prev_new_time()=0;
     ////to first obj in instr nInstr
     //virtual void to_start_of_instrument(int nInstr)=0;
-    ////to first obj in specified segment and staff
-    //virtual void to_start_of_segment(int nSegment, int nStaff)=0;
+    ////to first obj in specified measure and staff
+    //virtual void to_start_of_measure(int nSegment, int nStaff)=0;
     //while pointing clef, key or time, move next
     virtual void skip_clef_key_time()=0;
 
     //access to pointed position/object
     virtual int instrument()=0;
-    virtual int segment()=0;
+    virtual int measure()=0;
     virtual int staff()=0;
     virtual float time()=0;
     virtual bool is_pointing_object()=0;
@@ -223,7 +223,7 @@ protected:
     int                     m_nInstr;       //instrument (0..n-1)
     int				        m_nStaff;       //staff (0..n-1)
 	float			        m_rTime;        //timepos
-    int                     m_nSegment;     //segment number (0..n-1)
+    int                     m_nSegment;     //measure number (0..n-1)
     ColStaffObjs::iterator  m_it;           //iterator pointing to ref.object
 
 public:
@@ -253,13 +253,13 @@ public:
 
     //ScoreCursorInterface: access to pointed position/object
     inline int instrument() { return m_nInstr; }
-    inline int segment() { return m_nSegment; }
+    inline int measure() { return m_nSegment; }
     inline int staff() { return m_nStaff; }
     inline float time() { return m_rTime; }
     inline bool is_pointing_object() {
         return there_is_ref_object()
                && ref_object_is_on_instrument(m_nInstr)
-               && ref_object_is_on_segment(m_nSegment)
+               && ref_object_is_on_measure(m_nSegment)
                && ref_object_is_on_time(m_rTime)
                && ref_object_is_on_staff(m_nStaff);
     }
@@ -268,7 +268,7 @@ public:
     //void move_next_new_time();
     //void move_prev_new_time();
     //void to_start_of_instrument(int nInstr);
-    //void to_start_of_segment(int nSegment, int nStaff);
+    //void to_start_of_measure(int nSegment, int nStaff);
     void skip_clef_key_time();
 
     //ScoreCursorInterface: direct positioning
@@ -294,13 +294,13 @@ protected:
     //helper: dealing with ref.object
     inline int ref_object_id() { return (*m_it)->element_id(); }
     inline float ref_object_time() { return (*m_it)->time(); }
-    inline int ref_object_segment() { return (*m_it)->segment(); }
+    inline int ref_object_measure() { return (*m_it)->measure(); }
     inline int ref_object_staff() { return (*m_it)->staff(); }
     inline int ref_object_instrument() { return (*m_it)->num_instrument(); }
     inline bool there_is_ref_object() { return m_it != m_pColStaffObjs->end() && (*m_it != NULL); }
     inline bool there_is_not_ref_object() { return m_it != m_pColStaffObjs->end() || (*m_it == NULL); }
-    inline bool ref_object_is_on_segment(int segment) {
-        return ref_object_segment() == segment;
+    inline bool ref_object_is_on_measure(int measure) {
+        return ref_object_measure() == measure;
     }
     inline bool ref_object_is_on_staff(int staff) {
         return ref_object_staff() == staff
@@ -324,8 +324,8 @@ protected:
     //helper: for move_next
     void forward_to_next_time();
     float determine_next_target_time();
-    int determine_next_target_segment();
-    void forward_to_instr_segment_with_time_not_lower_than(float rTargetTime);
+    int determine_next_target_measure();
+    void forward_to_instr_measure_with_time_not_lower_than(float rTargetTime);
     void forward_to_current_staff();
     bool find_current_staff_at_current_ref_object_time();
     void forward_to_state(int nInstr, int nSegment, int nStaff, float rTime);
@@ -388,9 +388,9 @@ public:
         ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pCursor);
         return (pCursor ? pCursor->instrument() : 0);
     }
-    int segment() {
+    int measure() {
         ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pCursor);
-        return (pCursor ? pCursor->segment() : 0);
+        return (pCursor ? pCursor->measure() : 0);
     }
     int staff() {
         ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pCursor);
@@ -429,10 +429,10 @@ public:
     //    if (pCursor)
     //        pCursor->to_start_of_instrument(nInstr);
     //}
-    //void to_start_of_segment(int nSegment, int nStaff) {
+    //void to_start_of_measure(int nSegment, int nStaff) {
     //    ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pCursor);
     //    if (pCursor)
-    //        pCursor->to_start_of_segment(nSegment, nStaff);
+    //        pCursor->to_start_of_measure(nSegment, nStaff);
     //}
     void skip_clef_key_time() {
         ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pCursor);

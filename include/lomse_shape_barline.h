@@ -37,7 +37,7 @@ protected:
     int  m_nBarlineType;
 
     //geometry
-    LUnits  m_uxTop;
+    LUnits  m_uxLeft;
     LUnits  m_uThinLineWidth;
     LUnits  m_uThickLineWidth;
     LUnits  m_uSpacing;            // between lines and lines-dots

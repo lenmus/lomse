@@ -69,30 +69,30 @@ void AccidentalsEngraver::find_glyphs()
 
     switch(m_accidentals)
     {
-        case ImoNote::k_natural:
+        case k_natural:
             m_glyphs[i++] = k_glyph_natural_accidental;
             break;
-        case ImoNote::k_sharp:
+        case k_sharp:
             m_glyphs[i++] = k_glyph_sharp_accidental;
             break;
-        case ImoNote::k_flat:
+        case k_flat:
             m_glyphs[i++] = k_glyph_flat_accidental;
             break;
-        case ImoNote::k_flat_flat:
+        case k_flat_flat:
             m_glyphs[i++] = k_glyph_double_flat_accidental;
             break;
-        case ImoNote::k_double_sharp:
+        case k_double_sharp:
             m_glyphs[i++] = k_glyph_double_sharp_accidental;
             break;
-        case ImoNote::k_natural_flat:
+        case k_natural_flat:
             m_glyphs[i++] = k_glyph_natural_accidental;
             m_glyphs[i++] = k_glyph_flat_accidental;
             break;
-        case ImoNote::k_natural_sharp:
+        case k_natural_sharp:
             m_glyphs[i++] = k_glyph_natural_accidental;
             m_glyphs[i++] = k_glyph_sharp_accidental;
             break;
-        case ImoNote::k_sharp_sharp:
+        case k_sharp_sharp:
             m_glyphs[i++] = k_glyph_sharp_accidental;
             m_glyphs[i++] = k_glyph_sharp_accidental;
             break;

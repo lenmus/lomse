@@ -18,10 +18,9 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifdef _LM_DEBUG_
-
 #include <UnitTest++.h>
 #include <sstream>
+#include "lomse_config.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
@@ -104,7 +103,3 @@ public:
     LibraryScope* m_pLibraryScope;
     LdpFactory* m_pLdpFactory;
 };
-
-
-#endif  // _LM_DEBUG_
-

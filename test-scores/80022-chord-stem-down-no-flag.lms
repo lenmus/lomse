@@ -1,0 +1,11 @@
+(score
+   (vers 1.6)
+   (instrument
+      (musicData
+         (clef G)
+         (key C)
+         (chord (n c5 q)(n e5 q)(n g5 q))
+      )
+   )
+)
+

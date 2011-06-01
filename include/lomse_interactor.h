@@ -93,7 +93,7 @@ public:
     void set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj));
     void set_start_timer_callbak(void* pThis, void (*pt2Func)(void* pObj));
     void set_elapsed_time_callbak(void* pThis, double (*pt2Func)(void* pObj));
-
+    void set_notify_callback(void* pThis, void (*pt2Func)(void* pObj, EventInfo& event));
 
     //interface to SelectionSet
     virtual void select_object(GmoObj* pGmo, unsigned flags=0);
@@ -125,7 +125,7 @@ public:
                                                     unsigned flags=0);
 
 protected:
-    GraphicModel* create_graphic_model();
+    void create_graphic_model();
 
 };
 

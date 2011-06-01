@@ -20,16 +20,13 @@
 
 #include "lomse_document_layouter.h"
 
-#include "lomse_basic_model.h"
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
 #include "lomse_content_layouter.h"
 #include "lomse_score_layouter.h"
+#include "lomse_paragraph_layouter.h"
 #include "lomse_sizers.h"
 #include "lomse_calligrapher.h"
-//#include <iostream>
-//#include <iomanip>
-//#include "lomse_im_note.h"
 
 
 namespace lomse
@@ -45,6 +42,7 @@ DocLayouter::DocLayouter(InternalModel* pIModel, LibraryScope& libraryScope)
     , m_libraryScope(libraryScope)
     //, m_pMainSizer( new FlowSizer(FlowSizer::k_vertical) )
     , m_pCurrentBox(NULL)
+    , m_pBoxDocPage(NULL)
     , m_pCurLayouter(NULL)
 {
 }
@@ -76,11 +74,11 @@ void DocLayouter::initializations()
 //---------------------------------------------------------------------------------------
 void DocLayouter::start_new_document_page()
 {
-    GmoBoxDocPage* pPage = create_document_page();
-    add_margins_to_page(pPage);
-    add_headers_to_page(pPage);
-    add_footers_to_page(pPage);
-    add_contents_wrapper_box_to_page(pPage);
+    m_pBoxDocPage = create_document_page();
+    add_margins_to_page(m_pBoxDocPage);
+    add_headers_to_page(m_pBoxDocPage);
+    add_footers_to_page(m_pBoxDocPage);
+    add_contents_wrapper_box_to_page(m_pBoxDocPage);
 }
 
 //---------------------------------------------------------------------------------------
@@ -152,7 +150,7 @@ void DocLayouter::add_contents_wrapper_box_to_page(GmoBoxDocPage* pPage)
 //////    int numItems = pContent->get_num_items();
 //////    for (int i=0; i < numItems; i++)
 //////    {
-//////        ImoDocObj* pItem = pContent->get_item(i);
+//////        ImoContentObj* pItem = pContent->get_item(i);
 //////        GmoBox* pBox = m_pGModel->create_main_box_for(pItem);
 //////        m_pMainSizer->add_child( new SizerChild(pBox) );
 //////    }
@@ -173,46 +171,61 @@ void DocLayouter::layout_content()
     int numItems = pContent->get_num_items();
     for (int i=0; i < numItems; i++)
     {
-        ImoDocObj* pItem = pContent->get_item(i);
+        ImoContentObj* pItem = pContent->get_item(i);
         layout_item(m_pCurrentBox, pItem);
     }
 }
 
 //---------------------------------------------------------------------------------------
-void DocLayouter::layout_item(GmoBox* pParentBox, ImoDocObj* pItem)
+void DocLayouter::layout_item(GmoBox* pParentBox, ImoContentObj* pItem)
 {
-    //for unit tests I need to save last used layouter. 
-    delete m_pCurLayouter;
-    m_pCurLayouter = new_item_layouter(pItem);
+    delete m_pCurLayouter;  //for unit tests I need to save last used layouter.
+    ImoDocument* pDoc = get_document();
+    ImoStyles* pStyles = pDoc->get_styles();
+    m_pCurLayouter = new_item_layouter(pItem, pStyles);
     m_pCurLayouter->prepare_to_start_layout();
+    GmoBox* pItemMainBox = NULL;
     while (!m_pCurLayouter->is_item_layouted())
     {
-        GmoBox* pPageBox = create_item_pagebox(pParentBox, m_pCurLayouter);
-        m_pCurLayouter->layout_in_page(pPageBox);
+        pItemMainBox = create_item_main_box(pParentBox, m_pCurLayouter);
+        m_pCurLayouter->layout_in_page(pItemMainBox);
         //prepare_next_document_page_if_needed();
+    }
+    //advance cursor
+    if (pItemMainBox)
+    {
+        m_pageCursor.y = pItemMainBox->get_bottom();
+        m_availableHeight -= pItemMainBox->get_height();
     }
 }
 
 //---------------------------------------------------------------------------------------
-GmoBox* DocLayouter::create_item_pagebox(GmoBox* pParentBox, ContentLayouter* pLayouter)
+GmoBox* DocLayouter::create_item_main_box(GmoBox* pParentBox, ContentLayouter* pLayouter)
 {
-     //add new page box for item and assign space to it:
-     //   width: as required by sizer policy
-     //   height: all remaining height in current page.
+    //add the main box for item and assign it space and position:
+    //  org: current cursor pos
+    //  width: as required by sizer policy
+    //  height: all remaining height in current page.
 
-    GmoBox* pPageBox = pLayouter->create_pagebox(pParentBox);
-    pPageBox->set_width( pParentBox->get_width() );
-    pPageBox->set_height( pParentBox->get_height() );
-    return pPageBox;
+    GmoBox* pBox = pLayouter->create_main_box();
+    pParentBox->add_child_box(pBox);
+    pBox->set_origin(m_pageCursor);
+    pBox->set_width(m_availableWidth);
+    pBox->set_height(m_availableHeight);
+    return pBox;
 }
 
 //---------------------------------------------------------------------------------------
-ContentLayouter* DocLayouter::new_item_layouter(ImoDocObj* pImo)
+ContentLayouter* DocLayouter::new_item_layouter(ImoContentObj* pImo, ImoStyles* pStyles)
 {
     //factory method
 
     switch (pImo->get_obj_type())
     {
+        case ImoObj::k_heading: return new ParagraphLayouter(pImo, m_pGModel, m_libraryScope,
+                                                             pStyles);
+        case ImoObj::k_para:    return new ParagraphLayouter(pImo, m_pGModel, m_libraryScope,
+                                                             pStyles);
         case ImoObj::k_score:   return new ScoreLayouter(pImo, m_pGModel, m_libraryScope);
         default:
             return new NullLayouter(pImo, m_pGModel);

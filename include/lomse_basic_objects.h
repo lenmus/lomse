@@ -56,15 +56,15 @@ public:
 };
 
 //----------------------------------------------------------------------------------
-class DtoDocObj : public DtoObj
+class DtoContentObj : public DtoObj
 {
 protected:
     Tenths m_txUserLocation;
     Tenths m_tyUserLocation;
 
 public:
-    DtoDocObj() : DtoObj(), m_txUserLocation(0.0f), m_tyUserLocation(0.0f) {}
-    virtual ~DtoDocObj() {}
+    DtoContentObj() : DtoObj(), m_txUserLocation(0.0f), m_tyUserLocation(0.0f) {}
+    virtual ~DtoContentObj() {}
 
     //getters
     inline Tenths get_user_location_x() { return m_txUserLocation; }
@@ -76,15 +76,15 @@ public:
 };
 
 //----------------------------------------------------------------------------------
-class DtoComponentObj : public DtoDocObj
+class DtoScoreObj : public DtoContentObj
 {
 protected:
     bool m_fVisible;
     Color m_color;
 
 public:
-    DtoComponentObj() : DtoDocObj(), m_fVisible(true), m_color(0,0,0,255) {}
-    virtual ~DtoComponentObj() {}
+    DtoScoreObj() : DtoContentObj(), m_fVisible(true), m_color(0,0,0,255) {}
+    virtual ~DtoScoreObj() {}
 
     //getters
     inline bool is_visible() { return m_fVisible; }
@@ -96,13 +96,13 @@ public:
 };
 
 //----------------------------------------------------------------------------------
-class DtoStaffObj : public DtoComponentObj
+class DtoStaffObj : public DtoScoreObj
 {
 protected:
     int m_staff;
 
 public:
-    DtoStaffObj() : DtoComponentObj(), m_staff(0) {}
+    DtoStaffObj() : DtoScoreObj(), m_staff(0) {}
     virtual ~DtoStaffObj() {}
 
     //getters
@@ -113,10 +113,10 @@ public:
 };
 
 //----------------------------------------------------------------------------------
-class DtoAuxObj : public DtoComponentObj
+class DtoAuxObj : public DtoScoreObj
 {
 public:
-    DtoAuxObj() : DtoComponentObj() {}
+    DtoAuxObj() : DtoScoreObj() {}
     virtual ~DtoAuxObj() {}
 
 };

@@ -53,6 +53,7 @@ class HorizontalBookView;
 class SimpleView;
 class Document;
 class Presenter;
+class EventInfo;
 
 
 //---------------------------------------------------------------------------------------
@@ -110,6 +111,7 @@ struct PlatformInfo
 // For the user application it is the way to set up lomse and access basic methods
 //
 typedef std::string (*pt2GetFontFunction)(const string&, bool, bool);
+typedef void (*pt2NotifyFunction)(EventInfo&);
 
 class LomseDoorway
 {
@@ -117,6 +119,7 @@ protected:
     LibraryScope*       m_pLibraryScope;
     PlatformInfo        m_platform;
     pt2GetFontFunction  m_pFunc_get_font;
+    pt2NotifyFunction   m_pFunc_notify;
 
 public:
     LomseDoorway();
@@ -127,9 +130,11 @@ public:
     void init_library(int pixel_format, int ppi, bool reverse_y_axis,
                       ostream& reporter=cout);
     void set_get_font_callback(std::string (*pt2Func)(const string&, bool, bool));
+    void set_notify_callback(void (*pt2Func)(EventInfo&));
 
     inline LibraryScope* get_library_scope() { return m_pLibraryScope; }
     inline pt2GetFontFunction get_font_callback() { return m_pFunc_get_font; }
+    inline pt2NotifyFunction notify_callback() { return m_pFunc_notify; }
 
     //access to platform info
     inline double get_screen_ppi() { return m_platform.screen_ppi; }
@@ -140,6 +145,7 @@ public:
     Presenter* open_document(int viewType, const string& filename);
 
     static string null_get_font_filename(const string& fontname, bool bold, bool italic);
+    static void null_notify_function(EventInfo& event);
 };
 
 

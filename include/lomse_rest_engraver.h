@@ -57,7 +57,6 @@ protected:
     void determine_position();
     void create_main_shape();
     void add_shapes_for_dots_if_required();
-    void add_to_beam_if_beamed();
 
     LUnits tenths_to_logical(Tenths tenths);
     int find_glyph();
@@ -65,7 +64,6 @@ protected:
     LUnits add_dot_shape(LUnits x, LUnits y, Color color);
 
     ImoBeam* get_beam() { return m_pRest->get_beam(); }
-    ImoTuplet* get_tuplet() { return m_pRest->get_tuplet(); }
 
     LUnits m_uxLeft, m_uyTop;       //current position
     int m_iGlyph;

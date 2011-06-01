@@ -18,10 +18,9 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifdef _LM_DEBUG_
-
 #include <UnitTest++.h>
 #include <sstream>
+#include "lomse_config.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
@@ -29,7 +28,6 @@
 #include "lomse_analyser.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
-#include "lomse_basic_model.h"
 #include "lomse_model_builder.h"
 
 using namespace UnitTest;
@@ -60,22 +58,19 @@ public:
 SUITE(ImObjsBuilderTest)
 {
 
-    TEST_FIXTURE(ImObjsBuilderTestFixture, ImObjsBuilder_Empty)
-    {
-        LdpParser parser(cout, m_pLdpFactory);
-        SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 2.0) (content))" );
-        Analyser a(cout, m_pLdpFactory);
-        BasicModel* pBasicModel = a.analyse_tree(tree);
-        ImObjectsBuilder imb(cout);
-        ImoDocument* pDoc = imb.create_objects(pBasicModel);
-
-        CHECK( pDoc != NULL );
-        CHECK( pDoc->get_version() == "2.0" );
-        CHECK( pDoc->get_num_content_items() == 0 );
-    }
+//    TEST_FIXTURE(ImObjsBuilderTestFixture, ImObjsBuilder_Empty)
+//    {
+//        LdpParser parser(cout, m_pLdpFactory);
+//        SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 2.0) (content))" );
+//        Analyser a(cout, m_pLdpFactory);
+//        BasicModel* pBasicModel = a.analyse_tree(tree);
+//        ImObjectsBuilder imb(cout);
+//        ImoDocument* pDoc = imb.create_objects(pBasicModel);
+//
+//        CHECK( pDoc != NULL );
+//        CHECK( pDoc->get_version() == "2.0" );
+//        CHECK( pDoc->get_num_content_items() == 0 );
+//    }
 
 }
-
-
-#endif  // _LM_DEBUG_
 

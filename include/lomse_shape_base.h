@@ -31,43 +31,9 @@ namespace lomse
 
 ////forward declarations
 //class InternalModel;
-//class GraphicModel;
-//class ImoDocObj;
-//class ImoScore;
-//class GmoBoxScorePage;
-//class GmoBoxSlice;
-//class GmoBoxSystem;
-//class GmoStubScore;
-//class lmStaff;
 
 
-//---------------------------------------------------------------------------------------
-
-
-//// global variables
-//extern bool g_fDrawSelRect;     //draw selection rectangles around staff objects
-//extern bool g_fDrawAnchors;     //draw anchors, to see them in the score
-//extern bool g_fDrawBounds;      //draw bounds rectangle
-//extern bool g_fShowMargins;     //draw margins in scores, so user can change them
-//extern bool g_fFreeMove;		//the shapes can be dragged without restrictions
-//extern bool g_fDrawBoundsBoxSystem;         //draw bound rectangles for systems
-//extern bool g_fDrawBoundsBoxSlice;          //draw bound rectangles for slices
-//extern bool g_fDrawBoundsBoxSliceInstr;     //draw bound rectangles for SliceInstr
-//extern bool g_fDrawBoundsShapes;            //draw bound rectangles for non boxes
-//
-//class lmPaper;
-//class lmScoreObj;
-//class lmStaffObj;
-//class lmInteractor;
-//class lmBoxScore;
-//class lmBoxPage;
-//class lmGMSelection;
-//class lmHandler;
-//
-//class GmoShape;
-//class lmBoxSystem;
-
-
+////---------------------------------------------------------------------------------------
 ////level of shape
 //enum lmEShapeLevel
 //{
@@ -80,18 +46,11 @@ namespace lomse
 //#define lmNO_SELECTABLE      false
 
 
-//enum lmEParentEvent
-//{
-//	lmSHIFT_EVENT = 0,
-//	lmMOVE_EVENT,
-//};
-//
-//class lmAttachPoint;
 
 
 
-// enums for common values: aligment, justification, placement, etc.
 //---------------------------------------------------------------------------------------
+// enums for common values: aligment, justification, placement, etc.
 
 //line styles
 enum ELineStyle { k_line_none=0, k_line_solid, k_line_long_dash,
@@ -150,18 +109,9 @@ class GmoSimpleShape : public GmoShape
 public:
     virtual ~GmoSimpleShape();
 
- //   //implementation of virtual methods from base class
- //   virtual void Shift(LUnits xIncr, LUnits yIncr);
-
- //   //dragging
-	//virtual wxBitmap* OnBeginDrag(double rScale, wxDC* pDC) { return (wxBitmap*)NULL; }
- //   virtual UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos) { return uPos; };
-
 protected:
     GmoSimpleShape(ImoObj* pCreatorImo, int objtype, int idx, Color color);
-
 };
-
 
 //---------------------------------------------------------------------------------------
 class GmoCompositeShape : public GmoShape
@@ -177,23 +127,13 @@ public:
     inline bool is_locked() { return m_fLocked; }
     inline void unlock() { m_fLocked = false; }
     void lock();
-	//inline int GetNumComponents() const { return (int)m_components.size(); }
 
- //   //virtual methods from base class
+    //virtual methods from base class
     virtual void shift_origin(const USize& shift);
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
-//   virtual void RenderHighlighted(wxDC* pDC, wxColour colorC);
- //   virtual void RenderWithHandlers(lmPaper* pPaper);
 
-	////overrides
- //   bool BoundsContainsPoint(UPoint& uPoint);
- //   bool Collision(GmoShape* pShape);
- //   virtual void SetSelected(bool fValue);
+	//overrides
     void set_selected(bool value);
-
- //   //dragging
- //   virtual wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
- //   virtual UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos);
 
     //for unit tests
     inline std::list<GmoShape*>& get_components() { return m_components; }
@@ -202,9 +142,6 @@ public:
 protected:
     GmoCompositeShape(ImoObj* pCreatorImo, int objtype, int idx, Color color);
 	void recompute_bounds();
-
-	//GmoShape* GetShape(int nShape);
-
 };
 
 

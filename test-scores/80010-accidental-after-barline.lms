@@ -1,0 +1,16 @@
+(score
+   (vers 1.5)(language en utf-8)
+   (instrument
+      (musicData
+         (clef G)
+         (n d4 w)
+         (barline simple)
+
+         (chord
+            (n e4 w)
+            (n +g4 w)
+         )
+         (barline end)
+      )
+   )
+)

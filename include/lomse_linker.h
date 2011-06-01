@@ -44,6 +44,7 @@ class ImoSystemInfo;
 class ImoScoreText;
 class ImoScoreTitle;
 class ImoStaffInfo;
+class ImoTextItem;
 class ImoTextStyleInfo;
 
 
@@ -73,11 +74,12 @@ protected:
     ImoObj* add_staff_info(ImoStaffInfo* pInfo);
     ImoObj* add_instrument(ImoInstrument* pInstrument);
     ImoObj* add_text(ImoScoreText* pText);
+    ImoObj* add_text_item(ImoTextItem* pText);
     ImoObj* add_title(ImoScoreTitle* pTitle);
     ImoObj* add_font_info(ImoFontInfo* pFont);
     ImoObj* add_text_style_info(ImoTextStyleInfo* pStyle);
     ImoObj* add_staffobj(ImoStaffObj* pSO);
-    ImoObj* add_auxobj(ImoAuxObj* pAuxObj);
+    ImoObj* add_attachment(ImoAuxObj* pAuxObj);
     ImoObj* add_child(int parentType, ImoObj* pImo);
 
 };

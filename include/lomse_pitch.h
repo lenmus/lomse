@@ -29,10 +29,10 @@ namespace lomse
 
 
 //typedef int FIntval;      // Intervals, in FPitch mode.
-//
-//
-//
-//
+
+
+
+
 //---------------------------------------------------------------------------------------
 // Note steps: 'step' refers to the diatonic note name in the octave
 enum ESteps
@@ -47,24 +47,44 @@ enum ESteps
     k_step_B,
 };
 
-////---------------------------------------------------------------------------------------
-//// Octaves
-//// The octave is represented by a number in the range 0..9.
-//// Same meaning as in MIDI. The lowest MIDI octave (-1) is not defined
-//enum EOctave
-//{
-//    k_octave_0 = 0,
-//    k_octave_1,
-//    k_octave_2,
-//    k_octave_3,
-//    k_octave_4,
-//    k_octave_5,
-//    k_octave_6,
-//    k_octave_7,
-//    k_octave_8,
-//    k_octave_9,
-//}
-//
+//---------------------------------------------------------------------------------------
+// Octaves
+// The octave is represented by a number in the range 0..9.
+// Same meaning as in MIDI. The lowest MIDI octave (-1) is not defined
+enum EOctave
+{
+    k_octave_0 = 0,
+    k_octave_1,
+    k_octave_2,
+    k_octave_3,
+    k_octave_4,
+    k_octave_5,
+    k_octave_6,
+    k_octave_7,
+    k_octave_8,
+    k_octave_9,
+};
+
+//---------------------------------------------------------------------------------------
+// Accidentals
+// No microtonal accidentals. Only traditional ones.
+// sharp_sharp is two consecutive sharp signs.
+// double_sharp is the 'x' duoble shrp symbol
+
+enum EAccidentals
+{
+    k_no_accidentals = 0,
+    k_sharp,
+    k_sharp_sharp,
+    k_double_sharp,
+    k_natural_sharp,
+    k_flat,
+    k_flat_flat,
+    k_natural_flat,
+    k_natural,
+};
+
+
 ////---------------------------------------------------------------------------------------
 //// Accidentals
 //// No microtonal accidentals. Only traditional ones.

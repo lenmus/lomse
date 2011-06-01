@@ -20,12 +20,7 @@
 
 #include "lomse_system_cursor.h"
 
-//#include "lomse_basic_model.h"
-//#include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
-//#include <iostream>
-//#include <iomanip>
-//#include "lomse_im_note.h"
 
 
 namespace lomse
@@ -37,10 +32,11 @@ SystemCursor::SystemCursor(ImoScore* pScore)
     : m_scoreIt( pScore->get_staffobjs_table() )
     , m_savedPos(m_scoreIt)
     , m_numInstruments( pScore->get_num_instruments() )
+    , m_numLines( pScore->get_staffobjs_table()->num_lines() )
     , m_fScoreIsEmpty( m_scoreIt.is_end() )
     , m_pLastBarline(NULL)
 {
-    initialize_clefs_keys(pScore);
+    initialize_clefs_keys_times(pScore);
 
 //    //create iterators and point to start of each instrument
 //    lmInstrument* pInstr = pScore->GetFirstInstrument();
@@ -69,7 +65,7 @@ SystemCursor::~SystemCursor()
 }
 
 //---------------------------------------------------------------------------------------
-void SystemCursor::initialize_clefs_keys(ImoScore* pScore)
+void SystemCursor::initialize_clefs_keys_times(ImoScore* pScore)
 {
     m_staffIndex.reserve(m_numInstruments);
     int staves = 0;
@@ -84,6 +80,9 @@ void SystemCursor::initialize_clefs_keys(ImoScore* pScore)
 
     m_keys.reserve(staves);
     m_keys.assign(staves, (ColStaffObjsEntry*)NULL);
+
+    m_times.reserve(m_numInstruments);
+    m_times.assign(m_numInstruments, (ColStaffObjsEntry*)NULL);
 }
 
 //---------------------------------------------------------------------------------------
@@ -94,8 +93,8 @@ void SystemCursor::move_next()
         save_clef();
     else if (pSO->is_key_signature())
         save_key_signature();
-//    else if (pSO->is_time_signature())
-//        save_time_signature();
+    else if (pSO->is_time_signature())
+        save_time_signature();
     else if (pSO->is_barline())
         save_barline();
 
@@ -124,22 +123,17 @@ void SystemCursor::save_barline()
     m_pLastBarline = dynamic_cast<ImoBarline*>( imo_object() );
 }
 
-////---------------------------------------------------------------------------------------
-//void SystemCursor::save_time_signature()
-//{
-//    //TODO
-//}
+//---------------------------------------------------------------------------------------
+void SystemCursor::save_time_signature()
+{
+    int iInstr = num_instrument();
+    m_times[iInstr] = *m_scoreIt;
+}
 
 //---------------------------------------------------------------------------------------
 ImoStaffObj* SystemCursor::get_staffobj()
 {
     return dynamic_cast<ImoStaffObj*>( imo_object() );
-}
-
-//---------------------------------------------------------------------------------------
-int SystemCursor::get_num_instruments()
-{
-    return m_numInstruments;
 }
 
 //---------------------------------------------------------------------------------------
@@ -232,79 +226,30 @@ int SystemCursor::get_key_type_for_instr_staff(int iInstr, int iStaff)
         return ImoKeySignature::k_undefined;
 }
 
-////---------------------------------------------------------------------------------------
-//int SystemCursor::get_time_signature_for_instrument(int iInstr)
-//{
-//    return 0;
-//}
-
-////---------------------------------------------------------------------------------------
-//int SystemCursor::num_instrument()
-//{
-//    return (m_scoreIt.is_end() ? LOMSE_NO_OBJECT : (*m_scoreIt)->num_instrument());
-//}
-//
-////---------------------------------------------------------------------------------------
-//int SystemCursor::staff()
-//{
-//    return (m_scoreIt.is_end() ? -1 : (*m_scoreIt)->staff();
-//}
-//
-////---------------------------------------------------------------------------------------
-//int SystemCursor::line()
-//{
-//    return (*m_scoreIt)->line();
-//}
-//
-////---------------------------------------------------------------------------------------
-//float SystemCursor::time()
-//{
-//    return (*m_scoreIt)->time();
-//}
-//
-////---------------------------------------------------------------------------------------
-//ImoObj* SystemCursor::imo_object()
-//{
-//    return (*m_scoreIt)->imo_object();
-//}
+//---------------------------------------------------------------------------------------
+ImoTimeSignature* SystemCursor::get_applicable_time_signature()
+{
+    if (m_fScoreIsEmpty)
+        return NULL;
+    else
+        return get_time_signature_for_instrument( num_instrument() );
+}
 
 //---------------------------------------------------------------------------------------
-//bool SystemCursor::ThereAreObjects()
-//{
-//    //Returns true if there are any object not yet processed in any staff
-//
-//    for (int i=0; i < (int)m_iterators.size(); i++)
-//    {
-//        if (!m_iterators[i]->EndOfCollection())
-//            return true;
-//    }
-//    return false;
-//}
-//
+ImoTimeSignature* SystemCursor::get_time_signature_for_instrument(int iInstr)
+{
+    ColStaffObjsEntry* pEntry = get_time_entry_for_instrument(iInstr);
+    if (pEntry)
+        return dynamic_cast<ImoTimeSignature*>( pEntry->imo_object() );
+    else
+        return NULL;
+}
+
 //---------------------------------------------------------------------------------------
-//lmContext* SystemCursor::GetStartOfColumnContext(int iInstr, int nStaff)
-//{
-//    //locate context for first note in this staff, in current segment
-//
-//    ScoreIterator* pIT = new ScoreIterator( GetIterator(iInstr) );
-//    lmStaffObj* pSO = (lmStaffObj*)NULL;
-//    //AWARE: if we are in an empty segment (last segment) and we move back to previous
-//    //segment, it doesn't matter. In any case the context applying to found SO is the
-//    //right context!
-//    while(!pIT->EndOfCollection())
-//    {
-//        pSO = pIT->GetCurrent();
-//        if (pSO->IsOnStaff(nStaff))
-//            break;
-//        pIT->MovePrev();
-//    }
-//    delete pIT;
-//
-//    if (pSO)
-//        return pSO->GetCurrentContext(nStaff);
-//    else
-//        return (lmContext*)NULL;
-//}
+ColStaffObjsEntry* SystemCursor::get_time_entry_for_instrument(int iInstr)
+{
+    return m_times[iInstr];
+}
 
 //---------------------------------------------------------------------------------------
 void SystemCursor::save_position()

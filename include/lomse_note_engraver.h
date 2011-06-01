@@ -35,12 +35,10 @@ class FontStorage;
 class GmoShapeNotehead;
 class GmoShapeNote;
 class GmoShapeStem;
-class GmoShapeBeam;
 class GmoShapeAccidentals;
 class GmoShapeFlag;
 class ScoreMeter;
 class ShapesStorage;
-class BeamEngraver;
 
 //---------------------------------------------------------------------------------------
 class NoteEngraver : public NoterestEngraver
@@ -58,14 +56,13 @@ public:
                            UPoint uPos);
 
     static Tenths get_standard_stem_length(int nPosOnStaff, bool fStemDown);
+    void add_to_chord_if_in_chord();
 
 protected:
     void add_notehead_shape();
     void add_stem_and_flag_if_required();
     void add_leger_lines_if_necessary();
     void add_shapes_for_dots_if_required();
-    void add_to_chord_if_in_chord();
-    void layout_chord();
 
     void determine_stem_direction();
     int decide_notehead_type();
@@ -80,25 +77,13 @@ protected:
 
     void create_chord();
     void add_to_chord();
+    void layout_chord();
     inline bool is_in_chord() { return m_pNote->is_in_chord(); }
     inline bool is_last_note_of_chord() { return m_pNote->is_end_of_chord(); }
-    bool is_chord_beamed();
-
-    ImoBeam* get_beam();
-    void add_to_beam_if_beamed();
-    void layout_beam();
-    inline bool is_beamed() { return m_pNote->is_beamed(); }
-    void create_beam_shape_and_link();
-    void get_beam_shape_and_link();
-    bool is_first_note_of_beam();
-    bool is_last_note_of_beam();
-    void link_note_and_beam(BeamEngraver* pEngrv, int linkType);
-
-    ImoTuplet* get_tuplet();
 
     //helper
-    inline bool has_stem() { return m_pNote->get_note_type() >= ImoNoteRest::k_half; }
-    inline bool has_flag() { return m_pNote->get_note_type() >= ImoNoteRest::k_eighth; }
+    inline bool has_stem() { return m_pNote->get_note_type() >= k_half; }
+    inline bool has_flag() { return m_pNote->get_note_type() >= k_eighth; }
     Tenths get_glyph_offset(int iGlyph);
     LUnits tenths_to_logical(Tenths tenths);
 
@@ -110,7 +95,6 @@ protected:
     GmoShapeNote* m_pNoteShape;
     GmoShapeNotehead* m_pNoteheadShape;
     GmoShapeAccidentals* m_pAccidentalsShape;
-    GmoShapeBeam* m_pBeamShape;
 };
 
 //---------------------------------------------------------------------------------------

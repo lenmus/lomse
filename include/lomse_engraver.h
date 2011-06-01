@@ -97,7 +97,7 @@ public:
     virtual int create_shapes() = 0;
     virtual int get_num_shapes() = 0;
     virtual ShapeBoxInfo* get_shape_box_info(int i) = 0;
-    virtual void set_prolog_width(LUnits width) = 0;
+    virtual void set_prolog_width(LUnits width) {}
 
 };
 

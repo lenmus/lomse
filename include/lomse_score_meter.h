@@ -54,6 +54,7 @@ protected:
     //info about the score
     int m_numInstruments;
     int m_numStaves;
+    bool m_fScoreIsEmpty;
 
     //info about text styles
     ImoTextStyleInfo* m_tupletsStyle;
@@ -86,6 +87,7 @@ public:
     inline int staff_index(int iInstr, int iStaff) { 
         return m_staffIndex[iInstr] + iStaff; 
     }
+    inline bool is_empty_score() { return m_fScoreIsEmpty; }
 
     //info about text styles
     inline ImoTextStyleInfo* get_tuplets_style_info() { return m_tupletsStyle; }

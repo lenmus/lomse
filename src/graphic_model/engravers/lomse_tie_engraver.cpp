@@ -54,7 +54,8 @@ void TieEngraver::set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
                                      GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                      int iSystem, int iCol, UPoint pos)
 {
-    m_pTie = dynamic_cast<ImoTie*>(pAO);
+    m_pTie = dynamic_cast<ImoTie*>( pAO );
+
     m_pStartNote = dynamic_cast<ImoNote*>(pSO);
     m_pStartNoteShape = dynamic_cast<GmoShapeNote*>(pStaffObjShape);
     m_iInstr = iInstr;
@@ -185,7 +186,7 @@ void TieEngraver::compute_end_of_staff_point()
 //---------------------------------------------------------------------------------------
 void TieEngraver::decide_placement()
 {
-    m_fTieBelowNote = true; //TODO   !((lmNote*)m_pStartNR)->StemGoesDown();
+    m_fTieBelowNote = m_pStartNoteShape->is_up();
 }
 
 //---------------------------------------------------------------------------------------

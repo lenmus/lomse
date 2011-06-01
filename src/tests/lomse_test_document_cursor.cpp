@@ -18,8 +18,6 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifdef _LM_DEBUG_
-
 #include <UnitTest++.h>
 #include <sstream>
 
@@ -453,6 +451,4 @@ SUITE(DocCursorTest)
 
 
 }
-
-#endif  // _LM_DEBUG_
 

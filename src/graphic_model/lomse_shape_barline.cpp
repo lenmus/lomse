@@ -38,7 +38,7 @@ GmoShapeBarline::GmoShapeBarline(ImoObj* pCreatorImo, int idx, int nBarlineType,
                                  LUnits uRadius, Color color, LUnits uMinWidth)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_barline, idx, color)
     , m_nBarlineType(nBarlineType)
-    , m_uxTop(xPos)
+    , m_uxLeft(xPos)
     , m_uThinLineWidth(uThinLineWidth)
     , m_uThickLineWidth(uThickLineWidth)
     , m_uSpacing(uSpacing)
@@ -104,14 +104,14 @@ void GmoShapeBarline::compute_width()
 void GmoShapeBarline::shift_origin(const USize& shift)
 {
     GmoObj::shift_origin(shift);
-    m_uxTop += shift.width;
+    m_uxLeft += shift.width;
 }
 
 //---------------------------------------------------------------------------------------
 void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     Color color =  determine_color_to_use(opt) ;
-    LUnits uxPos = m_uxTop;
+    LUnits uxPos = m_uxLeft;
     LUnits uyTop = m_origin.y;
     LUnits uyBottom = m_origin.y + m_size.height;
 

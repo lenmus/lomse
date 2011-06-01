@@ -1,0 +1,15 @@
+(score
+   (vers 1.6)
+   (instrument  
+      (musicData 
+         (clef G)
+         (time 2 4)
+         (n c4 e (t + 3 2 (displayNumber none)))
+         (n e4 e)
+         (n g4 e t-)
+         (n c5 e (t + 3 2 (displayNumber none)))
+         (n e5 e)
+         (n g5 e t-)
+      )
+   )
+)

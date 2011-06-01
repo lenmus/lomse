@@ -26,7 +26,6 @@
 #include "lomse_injectors.h"
 #include "lomse_compiler.h"
 #include "lomse_internal_model.h"
-#include "lomse_basic_model.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -112,7 +111,7 @@ SUITE(LdpCompilerTest)
         CHECK( pScore->get_id() == 3L );
         CHECK( pScore->get_num_instruments() == 1 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
-        CHECK( pInstr->get_id() == 12L );
+        CHECK( pInstr->get_id() == 11L );
         delete pIModel;
     }
 

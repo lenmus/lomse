@@ -653,6 +653,7 @@ void font_engine_freetype_base::load_font_file(const std::string& font_name,
                                     &m_faces[m_num_faces]);
     }
 
+    //For error codes have a look into file include/freetype/fterrdef.h; 
     if(m_last_error == 0)
     {
         m_face_names[m_num_faces] = new char [font_name.size() + 1];

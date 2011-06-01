@@ -32,10 +32,18 @@ namespace lomse
 {
 
 
-//---------------------------------------------------------------------------------------
-// ImoObj implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
+// InternalModel implementation
+//=======================================================================================
+InternalModel::~InternalModel()
+{
+    delete m_pRoot;
+}
 
+
+//=======================================================================================
+// ImoObj implementation
+//=======================================================================================
 ImoObj::ImoObj(int objtype, DtoObj& dto)
     : m_id( dto.get_id() )
     , m_objtype( objtype )
@@ -88,170 +96,292 @@ ImoObj* ImoObj::get_child_of_type(int objtype)
 }
 
 
-//---------------------------------------------------------------------------------------
-// ImoBinaryRelObj implementation
-//---------------------------------------------------------------------------------------
-
-//ImoBinaryRelObj::ImoBinaryRelObj(ImoDocObj* pOwner, long id, int type,
-//                               ImoStaffObj* pStartSO, ImoStaffObj* pEndSO)
-//    : ImoRelObj(pOwner, id, type)
-//    , m_pStartSO(pStartSO)
-//    , m_pEndSO(pEndSO)
-//{
-//}
-//
-ImoBinaryRelObj::~ImoBinaryRelObj()
+//=======================================================================================
+// ImoRelObj implementation
+//=======================================================================================
+ImoRelObj::~ImoRelObj()
 {
-}
-
-//---------------------------------------------------------------------------------------
-//void ImoBinaryRelObj::remove(ImoStaffObj* pSO)
-//{
-//    if (m_pStartSO == pSO)
-//        m_pStartSO = (ImoStaffObj*)NULL;
-//    else if (m_pEndSO == pSO)
-//        m_pEndSO = (ImoStaffObj*)NULL;
-//}
-
-
-
-//---------------------------------------------------------------------------------------
-// ImoMultiRelObj implementation
-//---------------------------------------------------------------------------------------
-
-//ImoMultiRelObj::ImoMultiRelObj(ImoDocObj* pOwner, long id, int type)
-//    : ImoRelObj(pOwner, id, type)
-//{
-//}
-
-//---------------------------------------------------------------------------------------
-ImoMultiRelObj::~ImoMultiRelObj()
-{
+    //should be empty. Unit test
     m_relatedObjects.clear();
 }
 
 //---------------------------------------------------------------------------------------
-//void ImoMultiRelObj::remove(ImoStaffObj* pSO)
-//{
-//    //remove StaffObj.
-//	//AWARE: This method is always invoked by a SO. Therefore it will
-//	//not inform back the SO, as this is unnecessary and causes problems when
-//	//deleting the relationship object
-//
-//    std::list<ImoStaffObj*>::iterator it;
-//    it = find(m_relatedObjects.begin(), m_relatedObjects.end(), pSO);
-//    m_relatedObjects.erase(it);
-//    on_relationship_modified();
-//}
-
-//---------------------------------------------------------------------------------------
-void ImoMultiRelObj::push_back(ImoStaffObj* pSO)
+void ImoRelObj::push_back(ImoStaffObj* pSO, ImoRelDataObj* pData)
 {
-    m_relatedObjects.push_back(pSO);
-    //on_relationship_modified();
+    m_relatedObjects.push_back( make_pair(pSO, pData));
 }
 
 //---------------------------------------------------------------------------------------
-//void ImoMultiRelObj::include(ImoStaffObj* pSO, int index)
-//{
-//    // Add a note to the relation. index is the position that the added StaffObj
-//    // must occupy (0..n). If index == -1, StaffObj will be added at the end.
-//
-//	//add the StaffObj
-//	if (index == -1 || index == get_num_objects())
-//		m_relatedObjects.push_back(pSO);
-//	else
-//	{
-//		int iN;
-//		std::list<ImoStaffObj*>::iterator it;
-//		for(iN=0, it=m_relatedObjects.begin(); it != m_relatedObjects.end(); ++it, iN++)
-//		{
-//			if (iN == index)
-//			{
-//				//insert before current item
-//				m_relatedObjects.insert(it, pSO);
-//				break;
-//			}
-//		}
-//	}
-//
-//    on_relationship_modified();
-//}
-//
-//---------------------------------------------------------------------------------------
-//int ImoMultiRelObj::get_object_index(ImoStaffObj* pSO)
-//{
-//	//returns the position in the StaffObjs list (0..n)
-//
-//	int iN;
-//    std::list<ImoStaffObj*>::iterator it;
-//    for(iN=0, it=m_relatedObjects.begin(); it != m_relatedObjects.end(); ++it, iN++)
-//	{
-//		if (pSO == *it)
-//            return iN;
-//	}
-//	return 0;			//compiler happy
-//}
-
-
+void ImoRelObj::remove(ImoStaffObj* pSO)
+{
+    std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
+    for (it = m_relatedObjects.begin(); it != m_relatedObjects.end(); ++it)
+    {
+        if ((*it).first == pSO)
+        {
+            //delete (*it).second;
+            m_relatedObjects.erase(it);
+            return;
+        }
+    }
+}
 
 //---------------------------------------------------------------------------------------
-// ImoComponentObj implementation
-//---------------------------------------------------------------------------------------
+void ImoRelObj::remove_all()
+{
+    //This is recursive. If there are objects, we delete the first one by
+    //invoking "pSO->remove_but_not_delete_relation(this);" . And it, in turn,
+    //invokes this method, until all items get deleted!
+    while (m_relatedObjects.size() > 0)
+    {
+        ImoStaffObj* pSO = m_relatedObjects.front().first;
+        pSO->remove_but_not_delete_relation(this);
+    }
+}
 
-ImoComponentObj::ImoComponentObj(int objtype, DtoComponentObj& dto)
-    : ImoDocObj(objtype, dto)
-    , m_fVisible( dto.is_visible() )
+//---------------------------------------------------------------------------------------
+ImoRelDataObj* ImoRelObj::get_data_for(ImoStaffObj* pSO)
+{
+    std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
+    for (it = m_relatedObjects.begin(); it != m_relatedObjects.end(); ++it)
+    {
+        if ((*it).first == pSO)
+            return (*it).second;
+    }
+    return NULL;
+}
+
+
+//=======================================================================================
+// ImoScoreObj implementation
+//=======================================================================================
+ImoScoreObj::ImoScoreObj(int objtype, DtoScoreObj& dto)
+    : ImoContentObj(objtype, dto)
     , m_color( dto.get_color() )
 {
-}
-
-//---------------------------------------------------------------------------------------
-void ImoComponentObj::set_color(Color color)
-{
-    m_color = color;
+    m_fVisible = dto.is_visible();
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ImoStaffObj implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 ImoStaffObj::ImoStaffObj(int objtype, DtoStaffObj& dto)
-    : ImoComponentObj(objtype, dto)
+    : ImoScoreObj(objtype, dto)
     , m_staff( dto.get_staff() )
 {
 }
 
+//---------------------------------------------------------------------------------------
+ImoStaffObj::~ImoStaffObj()
+{
+    ImoAttachments* pAuxObjs = get_attachments();
+    if (pAuxObjs)
+    {
+        pAuxObjs->remove_from_all_relations(this);
+        //next code not needed. Tree nodes are deleted in ImoObj destructor
+        //if (pAuxObjs->get_num_items() == 0)
+        //{
+            this->remove_child(pAuxObjs);
+            delete pAuxObjs;
+        //}
+    }
+}
 
 //---------------------------------------------------------------------------------------
+void ImoStaffObj::include_in_relation(ImoRelObj* pRelObj, ImoRelDataObj* pData)
+{
+    add_attachment(pRelObj);
+    pRelObj->push_back(this, pData);
+    if (pData)
+        add_reldataobj(pData);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStaffObj::remove_from_relation(ImoRelObj* pRelObj)
+{
+    remove_but_not_delete_relation(pRelObj);
+
+    if (pRelObj->get_num_objects() < pRelObj->get_min_number_for_autodelete())
+        pRelObj->remove_all();
+
+    if (pRelObj->get_num_objects() == 0)
+        delete pRelObj;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStaffObj::remove_but_not_delete_relation(ImoRelObj* pRelObj)
+{
+    ImoSimpleObj* pData = pRelObj->get_data_for(this);
+    if (pData)
+        this->remove_reldataobj(pData);
+
+    pRelObj->remove(this);
+
+    ImoAttachments* pAuxObjs = get_attachments();
+    pAuxObjs->remove(pRelObj);
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoStaffObj::has_reldataobjs()
+{
+    return get_num_reldataobjs() > 0;
+}
+
+//---------------------------------------------------------------------------------------
+ImoReldataobjs* ImoStaffObj::get_reldataobjs()
+{
+    return dynamic_cast<ImoReldataobjs*>( get_child_of_type(ImoObj::k_reldataobjs) );
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStaffObj::add_reldataobj(ImoSimpleObj* pSO)
+{
+    ImoReldataobjs* pRDOs = get_reldataobjs();
+    if (!pRDOs)
+    {
+        pRDOs = new ImoReldataobjs();
+        append_child(pRDOs);
+    }
+
+    pRDOs->append_child(pSO);
+}
+
+//---------------------------------------------------------------------------------------
+int ImoStaffObj::get_num_reldataobjs()
+{
+    ImoReldataobjs* pRDOs = get_reldataobjs();
+    if (pRDOs)
+        return pRDOs->get_num_children();
+    else
+        return 0;
+}
+
+//---------------------------------------------------------------------------------------
+ImoSimpleObj* ImoStaffObj::get_reldataobj(int i)
+{
+    ImoReldataobjs* pRDOs = get_reldataobjs();
+    if (pRDOs)
+        return dynamic_cast<ImoSimpleObj*>( pRDOs->get_child(i) );
+    else
+        return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStaffObj::remove_reldataobj(ImoSimpleObj* pData)
+{
+    ImoReldataobjs* pRDOs = get_reldataobjs();
+    if (pRDOs)
+    {
+        pRDOs->remove_child(pData);
+        delete pData;
+        if (pRDOs->get_num_children() == 0)
+        {
+            this->remove_child(pRDOs);
+            delete pRDOs;
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+ImoSimpleObj* ImoStaffObj::find_reldataobj(int type)
+{
+    ImoReldataobjs* pRDOs = get_reldataobjs();
+    if (pRDOs)
+    {
+        ImoReldataobjs::children_iterator it;
+        for (it = pRDOs->begin(); it != pRDOs->end(); ++it)
+        {
+            if ((*it)->get_obj_type() == type)
+                return dynamic_cast<ImoSimpleObj*>( *it );
+        }
+        return NULL;
+    }
+    else
+        return NULL;
+}
+
+
+
+//=======================================================================================
 // ImoAuxObj implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 ImoAuxObj::ImoAuxObj(int objtype, DtoAuxObj& dto)
-    : ImoComponentObj(objtype, dto)
+    : ImoScoreObj(objtype, dto)
 {
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ImoBarline implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 ImoBarline::ImoBarline(DtoBarline& dto, long id)
     : ImoStaffObj(ImoObj::k_barline, dto)
-    , m_type( dto.get_barline_type() )
+    , m_barlineType( dto.get_barline_type() )
 {
     set_id(id);
 }
 
+//---------------------------------------------------------------------------------------
+ImoBarline::ImoBarline(int barlineType)
+    : ImoStaffObj(ImoObj::k_barline)
+    , m_barlineType(barlineType)
+{
+}
 
 
 //=======================================================================================
-// ImoBeamInfo implementation
+// ImoBeamData implementation
 //=======================================================================================
-ImoBeamInfo::ImoBeamInfo()
-    : ImoSimpleObj(ImoObj::k_beam_info)
+ImoBeamData::ImoBeamData(ImoBeamDto* pDto)
+    : ImoRelDataObj(ImoObj::k_beam_data)
+    , m_beamNum( pDto->get_beam_number() )
+{
+    for (int i=0; i < 6; ++i)
+    {
+        m_beamType[i] = pDto->get_beam_type(i);
+        m_repeat[i] = pDto->get_repeat(i);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoBeamData::is_start_of_beam()
+{
+    //at least one is begin, forward or backward.
+
+    bool fStart = false;
+    for (int level=0; level < 6; level++)
+    {
+        if (m_beamType[level] == ImoBeam::k_end
+            || m_beamType[level] == ImoBeam::k_continue
+            )
+            return false;
+        if (m_beamType[level] != ImoBeam::k_none)
+            fStart = true;
+    }
+    return fStart;
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoBeamData::is_end_of_beam()
+{
+    for (int level=0; level < 6; level++)
+    {
+        if (m_beamType[level] == ImoBeam::k_begin
+            || m_beamType[level] == ImoBeam::k_forward
+            || m_beamType[level] == ImoBeam::k_continue
+            )
+            return false;
+    }
+    return true;
+}
+
+
+//=======================================================================================
+// ImoBeamDto implementation
+//=======================================================================================
+ImoBeamDto::ImoBeamDto()
+    : ImoSimpleObj(ImoObj::k_beam_dto)
     , m_beamNum(0)
     , m_pBeamElm(NULL)
     , m_pNR(NULL)
@@ -264,8 +394,8 @@ ImoBeamInfo::ImoBeamInfo()
 }
 
 //---------------------------------------------------------------------------------------
-ImoBeamInfo::ImoBeamInfo(LdpElement* pBeamElm)
-    : ImoSimpleObj(ImoObj::k_beam_info)
+ImoBeamDto::ImoBeamDto(LdpElement* pBeamElm)
+    : ImoSimpleObj(ImoObj::k_beam_dto)
     , m_beamNum(0)
     , m_pBeamElm(pBeamElm)
     , m_pNR(NULL)
@@ -278,7 +408,7 @@ ImoBeamInfo::ImoBeamInfo(LdpElement* pBeamElm)
 }
 
 //---------------------------------------------------------------------------------------
-int ImoBeamInfo::get_line_number()
+int ImoBeamDto::get_line_number()
 {
     if (m_pBeamElm)
         return m_pBeamElm->get_line_number();
@@ -287,19 +417,60 @@ int ImoBeamInfo::get_line_number()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoBeamInfo::set_beam_type(int level, int type)
+void ImoBeamDto::set_beam_type(int level, int type)
 {
     m_beamType[level] = type;
 }
 
 //---------------------------------------------------------------------------------------
-int ImoBeamInfo::get_beam_type(int level)
+void ImoBeamDto::set_beam_type(string& segments)
+{
+    if (segments.size() < 7)
+    {
+        for (int i=0; i < int(segments.size()); ++i)
+        {
+            if (segments[i] == '+')
+                set_beam_type(i, ImoBeam::k_begin);
+            else if (segments[i] == '=')
+                set_beam_type(i, ImoBeam::k_continue);
+            else if (segments[i] == '-')
+                set_beam_type(i, ImoBeam::k_end);
+            else if (segments[i] == 'f')
+                set_beam_type(i, ImoBeam::k_forward);
+            else if (segments[i] == 'b')
+                set_beam_type(i, ImoBeam::k_backward);
+            else
+                return;   //error
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int ImoBeamDto::get_beam_type(int level)
 {
     return m_beamType[level];
 }
 
 //---------------------------------------------------------------------------------------
-bool ImoBeamInfo::is_end_of_beam()
+bool ImoBeamDto::is_start_of_beam()
+{
+    //at least one is begin, forward or backward.
+
+    bool fStart = false;
+    for (int level=0; level < 6; level++)
+    {
+        if (m_beamType[level] == ImoBeam::k_end
+            || m_beamType[level] == ImoBeam::k_continue
+            )
+            return false;
+        if (m_beamType[level] != ImoBeam::k_none)
+            fStart = true;
+    }
+    return fStart;
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoBeamDto::is_end_of_beam()
 {
     for (int level=0; level < 6; level++)
     {
@@ -313,20 +484,20 @@ bool ImoBeamInfo::is_end_of_beam()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoBeamInfo::set_repeat(int level, bool value)
+void ImoBeamDto::set_repeat(int level, bool value)
 {
     m_repeat[level] = value;
 }
 
 //---------------------------------------------------------------------------------------
-bool ImoBeamInfo::get_repeat(int level)
+bool ImoBeamDto::get_repeat(int level)
 {
     return m_repeat[level];
 }
 
 
 //=======================================================================================
-// ImoBeamInfo implementation
+// ImoBezierInfo implementation
 //=======================================================================================
 ImoBezierInfo::ImoBezierInfo(ImoBezierInfo* pBezier)
     : ImoSimpleObj(ImoObj::k_bezier_info)
@@ -359,12 +530,11 @@ ImoClef::ImoClef(int clefType)
 
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ImoColorDto implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 ImoColorDto::ImoColorDto(Int8u r, Int8u g, Int8u b, Int8u a)
-    : ImoSimpleObj(ImoObj::k_color_info)
+    : ImoSimpleObj(ImoObj::k_color_dto)
     , m_color(r, g, b, a)
     , m_ok(true)
 {
@@ -482,9 +652,9 @@ Color& ImoColorDto::get_from_string(const std::string& hex)
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ImoAttachments implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 ImoAttachments::~ImoAttachments()
 {
     std::list<ImoAuxObj*>::iterator it;
@@ -510,96 +680,242 @@ void ImoAttachments::remove(ImoAuxObj* pAO)
     m_attachments.remove(pAO);
 }
 
+//---------------------------------------------------------------------------------------
+void ImoAttachments::add(ImoAuxObj* pAO)
+{
+    //attachments must be ordered by renderization priority
+
+    int priority = get_priority( pAO->get_obj_type() );
+    if (priority > 1000)
+        m_attachments.push_back(pAO);
+    else
+    {
+        std::list<ImoAuxObj*>::iterator it;
+        for(it = m_attachments.begin(); it != m_attachments.end(); ++it)
+        {
+            if (get_priority((*it)->get_obj_type()) > priority)
+                break;
+        }
+
+        if (it == m_attachments.end())
+            m_attachments.push_back(pAO);
+        else
+            m_attachments.insert(it, pAO);
+    }
+}
 
 //---------------------------------------------------------------------------------------
-// ImoDocObj implementation
-//---------------------------------------------------------------------------------------
+int ImoAttachments::get_priority(int type)
+{
+    //not listed objects are low priority (order not important, added at end)
+    static bool fMapInitialized = false;
+    static map<int, int> priority;
 
-ImoDocObj::ImoDocObj(int objtype)
+    if (!fMapInitialized)
+    {
+        priority[k_tie] = 0;
+        priority[k_beam] = 1;
+        priority[k_chord] = 2;
+        priority[k_tuplet] = 3;
+        priority[k_slur] = 4;
+        priority[k_fermata] = 5;
+
+        fMapInitialized = true;
+    };
+
+	map<int, int>::const_iterator it = priority.find( type );
+	if (it !=  priority.end())
+		return it->second;
+
+    return 5000;
+}
+
+//---------------------------------------------------------------------------------------
+ImoAuxObj* ImoAttachments::find_item_of_type(int type)
+{
+    std::list<ImoAuxObj*>::iterator it;
+    for(it = m_attachments.begin(); it != m_attachments.end(); ++it)
+    {
+        if ((*it)->get_obj_type() == type)
+            return *it;
+    }
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoAttachments::remove_from_all_relations(ImoStaffObj* pSO)
+{
+    std::list<ImoAuxObj*>::iterator it = m_attachments.begin();
+    while (it != m_attachments.end())
+    {
+        if ((*it)->is_relobj())
+        {
+            ImoRelObj* pRO = static_cast<ImoRelObj*>( *it );
+            ++it;
+            pSO->remove_from_relation(pRO);
+            //m_attachments.erase(it++);
+        }
+        else
+        {
+            ImoAuxObj* pAO = *it;
+            ++it;
+            delete pAO;
+        }
+    }
+    m_attachments.clear();
+}
+
+////---------------------------------------------------------------------------------------
+//void ImoAttachments::remove_all_attachments()
+//{
+//    std::list<ImoAuxObj*>::iterator it = m_attachments.begin();
+//    while (it != m_attachments.end())
+//    {
+//        ImoAuxObj* pAO = *it;
+//        ++it;
+//        delete pAO;
+//    }
+//    m_attachments.clear();
+//}
+
+
+
+//=======================================================================================
+// ImoContentObj implementation
+//=======================================================================================
+ImoContentObj::ImoContentObj(int objtype)
     : ImoObj(objtype)
     , m_txUserLocation(0.0f)
     , m_tyUserLocation(0.0f)
+    , m_fVisible(true)
 {
 }
 
 //---------------------------------------------------------------------------------------
-ImoDocObj::ImoDocObj(long id, int objtype)
+ImoContentObj::ImoContentObj(long id, int objtype)
     : ImoObj(id, objtype)
     , m_txUserLocation(0.0f)
     , m_tyUserLocation(0.0f)
+    , m_fVisible(true)
 {
 }
 
 //---------------------------------------------------------------------------------------
-ImoDocObj::ImoDocObj(int objtype, DtoDocObj& dto)
+ImoContentObj::ImoContentObj(int objtype, DtoContentObj& dto)
     : ImoObj(objtype, dto)
     , m_txUserLocation( dto.get_user_location_x() )
     , m_tyUserLocation( dto.get_user_location_y() )
+    , m_fVisible(true)
 {
 }
 
 //---------------------------------------------------------------------------------------
-ImoDocObj::~ImoDocObj()
+ImoContentObj::~ImoContentObj()
 {
+    //delete attachments
+    //NOT NECESSARY: ImoAttachments is deleted in ImoObj destructor. and the AUxOubjs
+    //are deleted in ImoAttachments destructor
+    //ImoAttachments* pAuxObjs = get_attachments();
+    //if (pAuxObjs)
+    //{
+    //    pAuxObjs->remove_all_attachments();
+    //    remove_child(pAuxObjs);
+    //    delete pAuxObjs;
+    //}
+
+    ////delete properties
+    //NOT NECESSARY: ImoReldataobjs is deleted in ImoObj destructor, and the SimpleObjs
+    //are deleted in turn in ImoObj desctructor, when deleting ImoReldataobjs
+    //ImoReldataobjs* pProps = get_reldataobjs();
+    //if (pProps)
+    //{
+    //    remove_child(pProps);
+    //    delete pProps;
+    //}
 }
 
 //---------------------------------------------------------------------------------------
-void ImoDocObj::attach(ImoAuxObj* pAO)
+void ImoContentObj::add_attachment(ImoAuxObj* pAO)
 {
-    ImoAttachments* pAttachments = get_attachments();
-    if (!pAttachments)
+    ImoAttachments* pAuxObjs = get_attachments();
+    if (!pAuxObjs)
     {
-        pAttachments = new ImoAttachments();
-        append_child(pAttachments);
+        pAuxObjs = new ImoAttachments();
+        append_child(pAuxObjs);
     }
-    pAttachments->add(pAO);
+    pAuxObjs->add(pAO);
 }
 
 //---------------------------------------------------------------------------------------
-ImoAuxObj* ImoDocObj::get_attachment(int i)
+ImoAuxObj* ImoContentObj::get_attachment(int i)
 {
-    ImoAttachments* pAttachments = get_attachments();
-    return pAttachments->get_item(i);
+    ImoAttachments* pAuxObjs = get_attachments();
+    return pAuxObjs->get_item(i);
 }
 
 //---------------------------------------------------------------------------------------
-bool ImoDocObj::has_attachments()
+bool ImoContentObj::has_attachments()
 {
-    ImoAttachments* pAttachments = get_attachments();
-    if (pAttachments)
-        return pAttachments->get_num_items() > 0;
+    ImoAttachments* pAuxObjs = get_attachments();
+    if (pAuxObjs)
+        return pAuxObjs->get_num_items() > 0;
     else
         return false;
 }
 
 //---------------------------------------------------------------------------------------
-int ImoDocObj::get_num_attachments()
+int ImoContentObj::get_num_attachments()
 {
-    ImoAttachments* pAttachments = get_attachments();
-    if (pAttachments)
-        return pAttachments->get_num_items();
+    ImoAttachments* pAuxObjs = get_attachments();
+    if (pAuxObjs)
+        return pAuxObjs->get_num_items();
     else
         return 0;
 }
 
 //---------------------------------------------------------------------------------------
-ImoAttachments* ImoDocObj::get_attachments()
+ImoAttachments* ImoContentObj::get_attachments()
 {
     return dynamic_cast<ImoAttachments*>( get_child_of_type(ImoObj::k_attachments) );
 }
 
 //---------------------------------------------------------------------------------------
-void ImoDocObj::remove_attachment(ImoAuxObj* pAO)
+void ImoContentObj::remove_attachment(ImoAuxObj* pAO)
 {
-    ImoAttachments* pAttachments = get_attachments();
-    pAttachments->remove(pAO);
+    ImoAttachments* pAuxObjs = get_attachments();
+    pAuxObjs->remove(pAO);
+    //if (pAO->is_relobj())
+    //{
+    //    ImoRelObj* pRO = static_cast<ImoRelObj*>(pAO);
+    //    if (pRO->get_num_objects() < pRO->get_min_number_for_autodelete())
+    //    {
+    //        pRO->remove_all();
+    //        delete pRO;
+    //    }
+    //}
+    //else
+        delete pAO;
+    //if (pAuxObjs->get_num_items() == 0)
+    //{
+    //    this->remove_child(pAuxObjs);
+    //    delete pAuxObjs;
+    //}
+}
+
+//---------------------------------------------------------------------------------------
+ImoAuxObj* ImoContentObj::find_attachment(int type)
+{
+    ImoAttachments* pAuxObjs = get_attachments();
+    if (!pAuxObjs)
+        return NULL;
+    else
+        return pAuxObjs->find_item_of_type(type);
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ImoDocument implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 ImoDocument::ImoDocument(const std::string& version)
     : ImoContainerObj(ImoObj::k_document)
     , m_version(version)
@@ -615,22 +931,19 @@ ImoDocument::~ImoDocument()
 //---------------------------------------------------------------------------------------
 int ImoDocument::get_num_content_items()
 {
-    if (has_children())
-    {
-        ImoObj* pChild = get_first_child();
-        int num = pChild->get_num_children();
-        return num;
-    }
+    ImoContent* pContent = get_content();
+    if (pContent)
+        return pContent->get_num_children();
     else
         return 0;
 }
 
 //---------------------------------------------------------------------------------------
-ImoDocObj* ImoDocument::get_content_item(int iItem)
+ImoContentObj* ImoDocument::get_content_item(int iItem)
 {
     ImoContent* pContent = get_content();
     if (iItem < pContent->get_num_children())
-        return dynamic_cast<ImoDocObj*>( pContent->get_child(iItem) );
+        return dynamic_cast<ImoContentObj*>( pContent->get_child(iItem) );
     else
         return NULL;
 }
@@ -638,7 +951,7 @@ ImoDocObj* ImoDocument::get_content_item(int iItem)
 //---------------------------------------------------------------------------------------
 ImoContent* ImoDocument::get_content()
 {
-    return dynamic_cast<ImoContent*>( get_first_child() );
+    return dynamic_cast<ImoContent*>( get_child_of_type(k_content) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -647,11 +960,41 @@ void ImoDocument::add_page_info(ImoPageInfo* pPI)
     m_pageInfo = *pPI;
 }
 
+//---------------------------------------------------------------------------------------
+ImoStyles* ImoDocument::get_styles()
+{
+    return dynamic_cast<ImoStyles*>( this->get_child_of_type(k_styles) );
+}
 
 //---------------------------------------------------------------------------------------
+void ImoDocument::add_style_info(ImoTextStyleInfo* pStyle)
+{
+    get_styles()->add_style_info(pStyle);
+}
+
+//---------------------------------------------------------------------------------------
+ImoTextStyleInfo* ImoDocument::get_style_info(const std::string& name)
+{
+    return get_styles()->get_style_info(name);
+}
+
+//---------------------------------------------------------------------------------------
+ImoTextStyleInfo* ImoDocument::get_default_style_info()
+{
+    return get_styles()->get_default_style_info();
+}
+
+//---------------------------------------------------------------------------------------
+ImoTextStyleInfo* ImoDocument::get_style_info_or_defaults(const std::string& name)
+{
+    return get_styles()->get_style_info_or_defaults(name);
+}
+
+
+
+//=======================================================================================
 // ImoFermata implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 ImoFermata::ImoFermata(DtoFermata& dto)
     : ImoAuxObj(ImoObj::k_fermata, dto)
     , m_placement( dto.get_placement() )
@@ -660,10 +1003,9 @@ ImoFermata::ImoFermata(DtoFermata& dto)
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ImoGoBackFwd implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 ImoGoBackFwd::ImoGoBackFwd(DtoGoBackFwd& dto)
     : ImoStaffObj(ImoObj::k_go_back_fwd, dto)
     , m_fFwd( dto.is_forward() )
@@ -673,9 +1015,9 @@ ImoGoBackFwd::ImoGoBackFwd(DtoGoBackFwd& dto)
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ImoInstrument implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 ImoInstrument::ImoInstrument()
     : ImoContainerObj(ImoObj::k_instrument)
     , m_name("")
@@ -762,10 +1104,10 @@ LUnits ImoInstrument::get_line_spacing_for_staff(int iStaff)
     return get_staff(iStaff)->get_line_spacing();
 }
 
-//---------------------------------------------------------------------------------------
-// ImoInstrGroup implementation
-//---------------------------------------------------------------------------------------
 
+//=======================================================================================
+// ImoInstrGroup implementation
+//=======================================================================================
 ImoInstrGroup::ImoInstrGroup()
     : ImoSimpleObj(ImoObj::k_instr_group)
     , m_fJoinBarlines(true)
@@ -825,31 +1167,29 @@ int ImoInstrGroup::get_num_instruments()
 }
 
 
-
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ImoKeySignature implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 ImoKeySignature::ImoKeySignature(DtoKeySignature& dto)
     : ImoStaffObj(ImoObj::k_key_signature, dto)
     , m_keyType( dto.get_key_type() )
 {
 }
 
-//---------------------------------------------------------------------------------------
-// ImoLine implementation
-//---------------------------------------------------------------------------------------
 
-ImoLine::ImoLine(ImoLineInfo& info)
+//=======================================================================================
+// ImoLine implementation
+//=======================================================================================
+ImoLine::ImoLine(ImoLineStyle& info)
     : ImoAuxObj(ImoObj::k_line)
     , m_lineInfo(info)
 {
 }
 
-//---------------------------------------------------------------------------------------
-// ImoMetronomeMark implementation
-//---------------------------------------------------------------------------------------
 
+//=======================================================================================
+// ImoMetronomeMark implementation
+//=======================================================================================
 ImoMetronomeMark::ImoMetronomeMark(DtoMetronomeMark& dto)
     : ImoStaffObj(ImoObj::k_metronome_mark, dto)
     , m_markType( dto.get_mark_type() )
@@ -862,10 +1202,10 @@ ImoMetronomeMark::ImoMetronomeMark(DtoMetronomeMark& dto)
 {
 }
 
-//---------------------------------------------------------------------------------------
-// ImoMidiInfo implementation
-//---------------------------------------------------------------------------------------
 
+//=======================================================================================
+// ImoMidiInfo implementation
+//=======================================================================================
 ImoMidiInfo::ImoMidiInfo()
     : ImoSimpleObj(ImoObj::k_midi_info)
     , m_instr(0)
@@ -881,9 +1221,10 @@ ImoMidiInfo::ImoMidiInfo(ImoMidiInfo& dto)
 {
 }
 
-//---------------------------------------------------------------------------------------
+
+//=======================================================================================
 // ImoScore implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 
 //tables with default values for options
 typedef struct
@@ -914,7 +1255,7 @@ typedef struct
 }
 LongOption;
 
-static BoolOption m_BoolOptions[] =
+static const BoolOption m_BoolOptions[] =
 {
     {"Score.FillPageWithEmptyStaves", false },
     {"StaffLines.StopAtFinalBarline", true },
@@ -925,7 +1266,7 @@ static BoolOption m_BoolOptions[] =
 
 //static StringOption m_StringOptions[] = {};
 
-static FloatOption m_FloatOptions[] =
+static const FloatOption m_FloatOptions[] =
 {
     {"Render.SpacingFactor", 0.547f },
         // Note spacing is proportional to duration.
@@ -934,7 +1275,7 @@ static FloatOption m_FloatOptions[] =
         // of 35/64 = 0.547
 };
 
-static LongOption m_LongOptions[] =
+static const LongOption m_LongOptions[] =
 {
     {"Staff.UpperLegerLines.Displacement", 0L },
     {"Render.SpacingMethod", long(k_spacing_proportional) },
@@ -943,7 +1284,7 @@ static LongOption m_LongOptions[] =
 
 
 ImoScore::ImoScore()
-    : ImoContainerObj(ImoObj::k_score)
+    : ImoBoxObj(ImoObj::k_score)
     , m_version("")
     , m_pColStaffObjs(NULL)
     , m_systemInfoFirst()
@@ -1009,8 +1350,7 @@ void ImoScore::set_defaults_for_options()
 //---------------------------------------------------------------------------------------
 void ImoScore::delete_staffobjs_collection()
 {
-    if (m_pColStaffObjs)
-        delete m_pColStaffObjs;
+    delete m_pColStaffObjs;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1230,12 +1570,7 @@ ImoTextStyleInfo* ImoScore::get_default_style_info()
 ImoTextStyleInfo* ImoScore::create_default_style()
 {
 	ImoTextStyleInfo* pStyle = new ImoTextStyleInfo();
-	pStyle->set_name("Default style");
-    pStyle->set_font_name("Liberation serif");
-    pStyle->set_font_size(10.0f);
-    pStyle->set_font_style(ImoFontInfo::k_normal);
-    pStyle->set_font_weight(ImoFontInfo::k_normal);
-    m_nameToStyle["Default style"] = pStyle;
+    m_nameToStyle[pStyle->get_name()] = pStyle;
     return pStyle;
 }
 
@@ -1245,34 +1580,101 @@ void ImoScore::add_required_text_styles()
     //For tuplets numbers
     if (get_style_info("Tuplet numbers") == NULL)
     {
-	    ImoTextStyleInfo* pStyle = new ImoTextStyleInfo();
-        pStyle->set_name("Tuplet numbers");
-        pStyle->set_font_name("Liberation serif");
-        pStyle->set_font_size(11.0f);
-        pStyle->set_font_style(ImoFontInfo::k_italic);
-        pStyle->set_font_weight(ImoFontInfo::k_normal);
+	    ImoTextStyleInfo* pStyle =
+            new ImoTextStyleInfo("Tuplet numbers", "Liberation serif", 11.0f,
+                                 ImoFontInfo::k_italic, ImoFontInfo::k_normal);
         add_style_info(pStyle);
     }
 
     //For instrument and group names and abbreviations
     if (get_style_info("Instrument names") == NULL)
     {
-	    ImoTextStyleInfo* pStyle = new ImoTextStyleInfo();
-        pStyle->set_name("Instrument names");
-        pStyle->set_font_name("Liberation serif");
-        pStyle->set_font_size(14.0f);
-        pStyle->set_font_style(ImoFontInfo::k_normal);
-        pStyle->set_font_weight(ImoFontInfo::k_normal);
+	    ImoTextStyleInfo* pStyle =
+            new ImoTextStyleInfo("Instrument names", "Liberation serif", 14.0f);
         add_style_info(pStyle);
     }
 
     //"Lyrics" - for lyrics
 }
 
-//---------------------------------------------------------------------------------------
-// ImoPageInfo implementation
-//---------------------------------------------------------------------------------------
 
+
+//=======================================================================================
+// ImoStyles implementation
+//=======================================================================================
+ImoStyles::ImoStyles()
+    : ImoCollection(ImoObj::k_styles)
+{
+    create_default_style();
+}
+
+//---------------------------------------------------------------------------------------
+ImoStyles::~ImoStyles()
+{
+    delete_text_styles();
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStyles::add_style_info(ImoTextStyleInfo* pStyle)
+{
+    m_nameToStyle[pStyle->get_name()] = pStyle;
+}
+
+//---------------------------------------------------------------------------------------
+ImoTextStyleInfo* ImoStyles::get_style_info(const std::string& name)
+{
+	map<std::string, ImoTextStyleInfo*>::const_iterator it
+        = m_nameToStyle.find(name);
+	if (it != m_nameToStyle.end())
+		return it->second;
+    else
+        return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+ImoTextStyleInfo* ImoStyles::get_style_info_or_defaults(const std::string& name)
+{
+    ImoTextStyleInfo* pStyle = get_style_info(name);
+	if (pStyle)
+		return pStyle;
+    else
+        return get_default_style_info();
+}
+
+//---------------------------------------------------------------------------------------
+ImoTextStyleInfo* ImoStyles::get_default_style_info()
+{
+    ImoTextStyleInfo* pStyle = get_style_info("Default style");
+    if (pStyle)
+		return pStyle;
+    else
+        return create_default_style();
+}
+
+//---------------------------------------------------------------------------------------
+ImoTextStyleInfo* ImoStyles::create_default_style()
+{
+	ImoTextStyleInfo* pStyle = new ImoTextStyleInfo();
+	pStyle->set_font_size(12.0f);
+    m_nameToStyle[pStyle->get_name()] = pStyle;
+    return pStyle;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStyles::delete_text_styles()
+{
+    map<std::string, ImoTextStyleInfo*>::const_iterator it;
+    for (it = m_nameToStyle.begin(); it != m_nameToStyle.end(); ++it)
+        delete it->second;
+
+    m_nameToStyle.clear();
+}
+
+
+
+//=======================================================================================
+// ImoPageInfo implementation
+//=======================================================================================
 ImoPageInfo::ImoPageInfo()
     : ImoSimpleObj(ImoObj::k_page_info)
     , m_uLeftMargin(1500.0f)
@@ -1299,10 +1701,23 @@ ImoPageInfo::ImoPageInfo(ImoPageInfo& dto)
 {
 }
 
-//---------------------------------------------------------------------------------------
-// ImoSpacer implementation
-//---------------------------------------------------------------------------------------
 
+//=======================================================================================
+// ImoTextBlock implementation
+//=======================================================================================
+ImoTextBlock::~ImoTextBlock()
+{
+    std::list<ImoContentObj*>::iterator it;
+    for (it = m_items.begin(); it != m_items.end(); ++it)
+        delete *it;
+    m_items.clear();
+
+}
+
+
+//=======================================================================================
+// ImoSpacer implementation
+//=======================================================================================
 ImoSpacer::ImoSpacer(DtoSpacer& dto)
     : ImoStaffObj(ImoObj::k_spacer, dto)
     , m_space( dto.get_width() )
@@ -1310,10 +1725,61 @@ ImoSpacer::ImoSpacer(DtoSpacer& dto)
 }
 
 
-//---------------------------------------------------------------------------------------
-// ImoSystemInfo implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
+// ImoSlur implementation
+//=======================================================================================
+ImoSlur::~ImoSlur()
+{
+}
 
+//---------------------------------------------------------------------------------------
+ImoNote* ImoSlur::get_start_note()
+{
+    return static_cast<ImoNote*>( get_start_object() );
+}
+
+//---------------------------------------------------------------------------------------
+ImoNote* ImoSlur::get_end_note()
+{
+    return static_cast<ImoNote*>( get_end_object() );
+}
+
+
+//=======================================================================================
+// ImoSlurData implementation
+//=======================================================================================
+ImoSlurData::ImoSlurData(ImoSlurDto* pDto)
+    : ImoRelDataObj(ImoObj::k_slur_data)
+    , m_slurType( pDto->get_slur_type() )
+    , m_slurNum( pDto->get_slur_number() )
+    , m_pBezier( pDto->get_bezier() )
+    , m_color( pDto->get_color() )
+{
+}
+
+
+
+//=======================================================================================
+// ImoSlurDto implementation
+//=======================================================================================
+ImoSlurDto::~ImoSlurDto()
+{
+    delete m_pBezier;
+}
+
+//---------------------------------------------------------------------------------------
+int ImoSlurDto::get_line_number()
+{
+    if (m_pSlurElm)
+        return m_pSlurElm->get_line_number();
+    else
+        return 0;
+}
+
+
+//=======================================================================================
+// ImoSystemInfo implementation
+//=======================================================================================
 ImoSystemInfo::ImoSystemInfo()
     : ImoSimpleObj(ImoObj::k_system_info)
     , m_fFirst(true)
@@ -1335,10 +1801,9 @@ ImoSystemInfo::ImoSystemInfo(ImoSystemInfo& dto)
 {
 }
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ImoTextInfo implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 const std::string& ImoTextInfo::get_font_name()
 {
     return m_pStyle->get_font_name();
@@ -1372,36 +1837,50 @@ Color ImoTextInfo::get_color()
 //=======================================================================================
 // ImoTie implementation
 //=======================================================================================
-ImoTie::~ImoTie()
+ImoNote* ImoTie::get_start_note()
 {
-    if (m_pStartBezier)
-        delete m_pStartBezier;
-    if (m_pEndBezier)
-        delete m_pEndBezier;
+    return static_cast<ImoNote*>( get_start_object() );
 }
 
 //---------------------------------------------------------------------------------------
-ImoNote* ImoTie::get_start_note() 
-{ 
-    return static_cast<ImoNote*>(m_pStartSO);
+ImoNote* ImoTie::get_end_note()
+{
+    return static_cast<ImoNote*>( get_end_object() );
 }
 
 //---------------------------------------------------------------------------------------
-ImoNote* ImoTie::get_end_note() 
-{ 
-    return static_cast<ImoNote*>(m_pEndSO); 
+ImoBezierInfo* ImoTie::get_start_bezier()
+{
+    ImoTieData* pData = static_cast<ImoTieData*>( get_start_data() );
+    return pData->get_bezier();
 }
 
 //---------------------------------------------------------------------------------------
-void ImoTie::set_start_note(ImoNote* pNote) 
-{ 
-    m_pStartSO = pNote; 
+ImoBezierInfo* ImoTie::get_stop_bezier()
+{
+    ImoTieData* pData = static_cast<ImoTieData*>( get_end_data() );
+    return pData->get_bezier();
+}
+
+
+
+//=======================================================================================
+// ImoTieData implementation
+//=======================================================================================
+ImoTieData::ImoTieData(ImoTieDto* pDto)
+    : ImoRelDataObj(ImoObj::k_tie_data)
+    , m_fStart( pDto->is_start() )
+    , m_tieNum( pDto->get_tie_number() )
+    , m_pBezier(NULL)
+{
+    if (pDto->get_bezier())
+        m_pBezier = new ImoBezierInfo( pDto->get_bezier() );
 }
 
 //---------------------------------------------------------------------------------------
-void ImoTie::set_end_note(ImoNote* pNote) 
-{ 
-    m_pEndSO = pNote; 
+ImoTieData::~ImoTieData()
+{
+    delete m_pBezier;
 }
 
 
@@ -1410,8 +1889,7 @@ void ImoTie::set_end_note(ImoNote* pNote)
 //=======================================================================================
 ImoTieDto::~ImoTieDto()
 {
-    if (m_pBezier)
-        delete m_pBezier;
+    delete m_pBezier;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1424,10 +1902,9 @@ int ImoTieDto::get_line_number()
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ImoTimeSignature implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 ImoTimeSignature::ImoTimeSignature(DtoTimeSignature& dto)
     : ImoStaffObj(ImoObj::k_time_signature, dto)
     , m_beats( dto.get_beats() )
@@ -1436,18 +1913,26 @@ ImoTimeSignature::ImoTimeSignature(DtoTimeSignature& dto)
 }
 
 
-//---------------------------------------------------------------------------------------
-// ImoTupletDto implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
+// ImoTupletData implementation
+//=======================================================================================
+ImoTupletData::ImoTupletData(ImoTupletDto* pDto)
+    : ImoRelDataObj(ImoObj::k_tuplet_data)
+{
+}
 
+
+//=======================================================================================
+// ImoTupletDto implementation
+//=======================================================================================
 ImoTupletDto::ImoTupletDto()
-    : ImoSimpleObj(ImoObj::k_tuplet_info)
-    , m_fStartOfTuplet(true)
+    : ImoSimpleObj(ImoObj::k_tuplet_dto)
+    , m_tupletType(ImoTupletDto::k_unknown)
     , m_nActualNum(0)
     , m_nNormalNum(0)
     , m_nShowBracket(k_yesno_default)
     , m_nPlacement(k_placement_default)
-    , m_nShowNormalNum(k_yesno_default)
+    , m_nShowNumber(ImoTuplet::k_number_actual)
     , m_pTupletElm(NULL)
     , m_pNR(NULL)
 {
@@ -1455,13 +1940,13 @@ ImoTupletDto::ImoTupletDto()
 
 //---------------------------------------------------------------------------------------
 ImoTupletDto::ImoTupletDto(LdpElement* pTupletElm)
-    : ImoSimpleObj(ImoObj::k_tuplet_info)
-    , m_fStartOfTuplet(true)
+    : ImoSimpleObj(ImoObj::k_tuplet_dto)
+    , m_tupletType(ImoTupletDto::k_unknown)
     , m_nActualNum(0)
     , m_nNormalNum(0)
     , m_nShowBracket(k_yesno_default)
     , m_nPlacement(k_placement_default)
-    , m_nShowNormalNum(k_yesno_default)
+    , m_nShowNumber(ImoTuplet::k_number_actual)
     , m_pTupletElm(pTupletElm)
     , m_pNR(NULL)
 {
@@ -1481,20 +1966,19 @@ int ImoTupletDto::get_line_number()
 // ImoTuplet implementation
 //=======================================================================================
 ImoTuplet::ImoTuplet(ImoTupletDto* dto)
-    : ImoMultiRelObj(ImoObj::k_tuplet)
+    : ImoRelObj(ImoObj::k_tuplet)
     , m_nActualNum(dto->get_actual_number())
     , m_nNormalNum(dto->get_normal_number())
     , m_nShowBracket(dto->get_show_bracket())
-    , m_nShowNormalNum(dto->get_show_normal_num())
+    , m_nShowNumber(dto->get_show_number())
     , m_nPlacement(dto->get_placement())
 {
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // global functions related to notes
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 int to_step(const char& letter)
 {
 	switch (letter)
@@ -1535,29 +2019,29 @@ int to_accidentals(const std::string& accidentals)
     switch (accidentals.length())
     {
         case 0:
-            return ImoNote::k_no_accidentals;
+            return k_no_accidentals;
             break;
 
         case 1:
             if (accidentals[0] == '+')
-                return ImoNote::k_sharp;
+                return k_sharp;
             else if (accidentals[0] == '-')
-                return ImoNote::k_flat;
+                return k_flat;
             else if (accidentals[0] == '=')
-                return ImoNote::k_natural;
+                return k_natural;
             else if (accidentals[0] == 'x')
-                return ImoNote::k_double_sharp;
+                return k_double_sharp;
             else
                 return -1;
             break;
 
         case 2:
             if (accidentals.compare(0, 2, "++") == 0)
-                return ImoNote::k_sharp_sharp;
+                return k_sharp_sharp;
             else if (accidentals.compare(0, 2, "--") == 0)
-                return ImoNote::k_flat_flat;
+                return k_flat_flat;
             else if (accidentals.compare(0, 2, "=-") == 0)
-                return ImoNote::k_natural_flat;
+                return k_natural_flat;
             else
                 return -1;
             break;
@@ -1586,17 +2070,17 @@ int to_note_type(const char& letter)
 
     switch (letter)
     {
-        case 'l':     return ImoNote::k_longa;
-        case 'b':     return ImoNote::k_breve;
-        case 'w':     return ImoNote::k_whole;
-        case 'h':     return ImoNote::k_half;
-        case 'q':     return ImoNote::k_quarter;
-        case 'e':     return ImoNote::k_eighth;
-        case 's':     return ImoNote::k_16th;
-        case 't':     return ImoNote::k_32th;
-        case 'i':     return ImoNote::k_64th;
-        case 'o':     return ImoNote::k_128th;
-        case 'f':     return ImoNote::k_256th;
+        case 'l':     return k_longa;
+        case 'b':     return k_breve;
+        case 'w':     return k_whole;
+        case 'h':     return k_half;
+        case 'q':     return k_quarter;
+        case 'e':     return k_eighth;
+        case 's':     return k_16th;
+        case 't':     return k_32th;
+        case 'i':     return k_64th;
+        case 'o':     return k_128th;
+        case 'f':     return k_256th;
         default:
             return -1;
     }
@@ -1632,7 +2116,7 @@ bool ldp_pitch_to_components(const string& pitch, int *step, int* octave, int* a
 
     if (++i == 0)
     {
-        *accidentals = ImoNote::k_no_accidentals;
+        *accidentals = k_no_accidentals;
         return false;   //no error
     }
     else
@@ -1651,12 +2135,12 @@ NoteTypeAndDots ldp_duration_to_components(const string& duration)
 
     size_t size = duration.length();
     if (size == 0)
-        return NoteTypeAndDots(ImoNoteRest::k_unknown, 0);   //error
+        return NoteTypeAndDots(k_unknown_notetype, 0);   //error
 
     //duration
     int noteType = to_note_type(duration[0]);
     if (noteType == -1)
-        return NoteTypeAndDots(ImoNoteRest::k_unknown, 0);   //error
+        return NoteTypeAndDots(k_unknown_notetype, 0);   //error
 
     //dots
     int dots = 0;
@@ -1665,7 +2149,7 @@ NoteTypeAndDots ldp_duration_to_components(const string& duration)
         if (duration[i] == '.')
             dots++;
         else
-            return NoteTypeAndDots(ImoNoteRest::k_unknown, 0);   //error
+            return NoteTypeAndDots(k_unknown_notetype, 0);   //error
     }
 
     return NoteTypeAndDots(noteType, dots);   //no error
@@ -1682,17 +2166,17 @@ float to_duration(int nNoteType, int nDots)
     float rDuration = 1;
     switch (nNoteType)
     {
-        case ImoNote::k_longa:   rDuration=1024; break;    //  0
-        case ImoNote::k_breve:   rDuration=512;  break;    //  1
-        case ImoNote::k_whole:   rDuration=256;  break;    //  2
-        case ImoNote::k_half:    rDuration=128;  break;    //  3
-        case ImoNote::k_quarter: rDuration=64;   break;    //  4
-        case ImoNote::k_eighth:  rDuration=32;   break;    //  5
-        case ImoNote::k_16th:    rDuration=16;   break;    //  6
-        case ImoNote::k_32th:    rDuration=8;    break;    //  7
-        case ImoNote::k_64th:    rDuration=4;    break;    //  8
-        case ImoNote::k_128th:   rDuration=2;    break;    //  9
-        case ImoNote::k_256th:   rDuration=1;    break;    //  10
+        case k_longa:   rDuration=1024; break;    //  0
+        case k_breve:   rDuration=512;  break;    //  1
+        case k_whole:   rDuration=256;  break;    //  2
+        case k_half:    rDuration=128;  break;    //  3
+        case k_quarter: rDuration=64;   break;    //  4
+        case k_eighth:  rDuration=32;   break;    //  5
+        case k_16th:    rDuration=16;   break;    //  6
+        case k_32th:    rDuration=8;    break;    //  7
+        case k_64th:    rDuration=4;    break;    //  8
+        case k_128th:   rDuration=2;    break;    //  9
+        case k_256th:   rDuration=1;    break;    //  10
         default:
             rDuration=64;
     }

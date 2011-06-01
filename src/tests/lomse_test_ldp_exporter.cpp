@@ -18,19 +18,16 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifdef _LM_DEBUG_
-
 #include <UnitTest++.h>
 #include <sstream>
+#include "lomse_config.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_ldp_exporter.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
-
 #include "lomse_compiler.h"
-#include "lomse_basic_model.h"
 
 
 using namespace UnitTest;
@@ -91,18 +88,18 @@ SUITE(LdpExporterTest)
         CHECK( source == "(TODO: Add this element to LdpExporter::new_generator)" );
     }
 
-    // color ------------------------------------------------------------------------------------
-
-    TEST_FIXTURE(LdpExporterTestFixture, ExportLdp_color)
-    {
-        ImoClef obj(ImoClef::k_G2);
-        obj.set_color( rgba16(127, 40, 12, 128) );
-        LdpExporter exporter;
-        string source = exporter.get_source(&obj);
-        //cout << "\"" << source << "\"" << endl;
-        CHECK( source == "(clef G p1 (color #7f280c80))" );
-    }
-
+//    // color ------------------------------------------------------------------------------------
+//
+//    TEST_FIXTURE(LdpExporterTestFixture, ExportLdp_color)
+//    {
+//        ImoClef obj(ImoClef::k_G2);
+//        obj.set_color( rgba16(127, 40, 12, 128) );
+//        LdpExporter exporter;
+//        string source = exporter.get_source(&obj);
+//        //cout << "\"" << source << "\"" << endl;
+//        CHECK( source == "(clef G p1 (color #7f280c80))" );
+//    }
+//
 //    // user location ----------------------------------------------------------------------------
 //
 //    TEST_FIXTURE(LdpExporterTestFixture, ExportLdp_user_location)
@@ -124,7 +121,7 @@ SUITE(LdpExporterTest)
 //        ImoNote obj;
 //        obj.set_octave(4);
 //        obj.set_step(ImoNote::D);
-//        obj.set_duration(ImoNote::k_eighth);
+//        obj.set_duration(k_eighth);
 //        //obj.set_dots(1);
 //        LdpExporter exporter;
 //        string source = exporter.get_source(&obj);
@@ -149,6 +146,3 @@ SUITE(LdpExporterTest)
 //        delete pBasicModel;
 //    }
 };
-
-#endif  // _LM_DEBUG_
-

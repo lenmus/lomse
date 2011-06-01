@@ -313,7 +313,7 @@ SUITE(SystemCursorTest)
         CHECK( pNote != NULL );
         CHECK( pNote->get_step() == k_step_D );
         CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_note_type() == ImoNote::k_eighth );
+        CHECK( pNote->get_note_type() == k_eighth );
         CHECK( pNote->get_dots() == 1 );
     }
 
@@ -341,9 +341,63 @@ SUITE(SystemCursorTest)
         CHECK( pNote != NULL );
         CHECK( pNote->get_step() == k_step_D );
         CHECK( pNote->get_octave() == 4 );
-        CHECK( pNote->get_note_type() == ImoNote::k_eighth );
+        CHECK( pNote->get_note_type() == k_eighth );
         CHECK( pNote->get_dots() == 1 );
     }
+
+
+    // time signature -------------------------------------------------------------------
+
+    TEST_FIXTURE(SystemCursorTestFixture, InitiallyNoTimeSignature)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(n c4 q v2)(n d4 e.)(n d4 s v3)(n e4 h) ))) "
+            "))" );
+        ImoScore* pScore = doc.get_score();
+        SystemCursor cursor(pScore);
+
+        CHECK( cursor.get_time_signature_for_instrument(0) == NULL );
+    }
+
+    TEST_FIXTURE(SystemCursorTestFixture, InitiallyTimeSignatureTwoInstr)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
+                        "(instrument (staves 2)(musicData (clef G p1)(clef F4 p2)"
+                        "(key D)(time 2 4)(n f4 w p1)(goBack w)(n c3 e g+ p2)"
+                        "(n c3 e g-)(n d3 q)(barline)))"
+                        "(instrument (staves 2)(musicData (clef G p1)(clef F4 p2)"
+                        "(key D)(time 2 4)(n f4 q. p1)(clef F4 p1)(n a3 e)"
+                        "(goBack h)(n c3 q p2)(n c3 e)(clef G p2)(clef F4 p2)"
+                        "(n c3 e)(barline)))  )))" );
+        ImoScore* pScore = doc.get_score();
+        SystemCursor cursor(pScore);
+        CHECK( cursor.get_num_instruments() == 2 );
+        CHECK( cursor.get_time_signature_for_instrument(0) == NULL );
+        CHECK( cursor.get_time_signature_for_instrument(1) == NULL );
+    }
+
+    TEST_FIXTURE(SystemCursorTestFixture, PrologUpdateTimeSignature)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key a)(time 2 4)(n c4 q v2)(n d4 e.)"
+            "(n d4 s v3)(n e4 h) ))) ))" );
+        ImoScore* pScore = doc.get_score();
+        SystemCursor cursor(pScore);
+        cursor.move_next();     //points to (clef G)
+        cursor.move_next();     //points to (key a)
+        cursor.move_next();     //points to (time 2 4)
+        cursor.move_next();     //points to (n c4 q v2)
+        cursor.move_next();     //points to (n d4 e.)
+
+        ImoTimeSignature* pTS = cursor.get_time_signature_for_instrument(0);
+        CHECK( pTS != NULL );
+        CHECK( pTS->get_beats() == 2 );
+        CHECK( pTS->get_beat_type() == 4 );
+    }
+
 
 }
 

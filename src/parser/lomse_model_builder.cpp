@@ -23,7 +23,6 @@
 #include "lomse_document.h"
 #include "lomse_internal_model.h"
 #include "lomse_staffobjs_table.h"
-#include "lomse_basic_model.h"
 
 using namespace std;
 

@@ -38,7 +38,7 @@ namespace lomse
 // ClefEngraver implementation
 //=======================================================================================
 ChordEngraver::ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
-    : Engraver(libraryScope, pScoreMeter)
+    : RelAuxObjEngraver(libraryScope, pScoreMeter)
     , m_pBaseNoteData(NULL)
 {
 }
@@ -53,16 +53,56 @@ ChordEngraver::~ChordEngraver()
 }
 
 //---------------------------------------------------------------------------------------
-void ChordEngraver::add_note(ImoNote* pNote, GmoShapeNote* pNoteShape,
-                             int posOnStaff, int iInstr)
+void ChordEngraver::set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                                       int iSystem, int iCol, UPoint pos)
 {
+    m_iInstr = iInstr;
+    m_iStaff = iStaff;
+    m_pChord = dynamic_cast<ImoChord*>(pAO);
+
+    add_note(pSO, pStaffObjShape);
+}
+
+//---------------------------------------------------------------------------------------
+void ChordEngraver::set_middle_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                                         GmoShape* pStaffObjShape, int iInstr,
+                                         int iStaff, int iSystem, int iCol)
+{
+    add_note(pSO, pStaffObjShape);
+}
+
+//---------------------------------------------------------------------------------------
+void ChordEngraver::set_end_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                                      GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                                      int iSystem, int iCol)
+{
+    add_note(pSO, pStaffObjShape);
+}
+
+//---------------------------------------------------------------------------------------
+int ChordEngraver::create_shapes()
+{
+    decide_on_stem_direction();
+    layout_noteheads();
+    layout_accidentals();
+    add_stem_and_flag();
+    set_anchor_offset();
+    return 0;
+}
+
+//---------------------------------------------------------------------------------------
+void ChordEngraver::add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape)
+{
+    ImoNote* pNote = dynamic_cast<ImoNote*>(pSO);
+    GmoShapeNote* pNoteShape = dynamic_cast<GmoShapeNote*>(pStaffObjShape);
+    int posOnStaff = pNoteShape->get_pos_on_staff();
+
     if (m_notes.size() == 0)
     {
-        ChordNoteData* pData = new ChordNoteData(pNote, pNoteShape, posOnStaff, iInstr);
+        ChordNoteData* pData = new ChordNoteData(pNote, pNoteShape, posOnStaff, m_iInstr);
 	    m_notes.push_back(pData);
         m_pBaseNoteData = pData;
-        m_iInstr = iInstr;
-        m_iStaff = m_pBaseNoteData->pNote->get_staff();
         m_stemWidth = tenths_to_logical(LOMSE_STEM_THICKNESS);
     }
     else
@@ -76,24 +116,14 @@ void ChordEngraver::add_note(ImoNote* pNote, GmoShapeNote* pNoteShape,
             if (newPitch < curPitch)
             {
                 ChordNoteData* pData =
-                    new ChordNoteData(pNote, pNoteShape, posOnStaff, iInstr);
+                    new ChordNoteData(pNote, pNoteShape, posOnStaff, m_iInstr);
 	            m_notes.insert(it, 1, pData);
                 return;
             }
         }
-        ChordNoteData* pData = new ChordNoteData(pNote, pNoteShape, posOnStaff, iInstr);
+        ChordNoteData* pData = new ChordNoteData(pNote, pNoteShape, posOnStaff, m_iInstr);
 	    m_notes.push_back(pData);
     }
-}
-
-//---------------------------------------------------------------------------------------
-void ChordEngraver::layout_chord()
-{
-    decide_on_stem_direction();
-    layout_noteheads();
-    layout_accidentals();
-    add_stem_and_flag();
-    set_anchor_offset();
 }
 
 //---------------------------------------------------------------------------------------
@@ -137,25 +167,25 @@ void ChordEngraver::decide_on_stem_direction()
     m_noteType = pBaseNote->get_note_type();
     int stemType = pBaseNote->get_stem_direction();
 
-    m_fHasStem = m_noteType >= ImoNote::k_half
-                 && stemType != ImoNote::k_stem_none;
-    m_fHasFlag = m_fHasStem && m_noteType > ImoNote::k_quarter
+    m_fHasStem = m_noteType >= k_half
+                 && stemType != k_stem_none;
+    m_fHasFlag = m_fHasStem && m_noteType > k_quarter
                  && !is_chord_beamed();
 
 
-    if (m_noteType < ImoNote::k_half)
+    if (m_noteType < k_half)
         m_fStemDown = false;                    //c1. layout as if stem up
 
-    else if (stemType == ImoNote::k_stem_up)
+    else if (stemType == k_stem_up)
         m_fStemDown = false;                    //force stem up
 
-    else if (stemType == ImoNote::k_stem_down)
+    else if (stemType == k_stem_down)
         m_fStemDown = true;                     //force stem down
 
-    else if (stemType == ImoNote::k_stem_none)
+    else if (stemType == k_stem_none)
         m_fStemDown = false;                    //c1. layout as if stem up
 
-    else if (stemType == ImoNote::k_stem_default)     //as decided by program
+    else if (stemType == k_stem_default)     //as decided by program
     {
         //majority rule
         int weight = 0;

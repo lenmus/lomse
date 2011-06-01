@@ -101,9 +101,9 @@ double ClefEngraver::determine_font_size()
                      / 180.0;
     switch (m_symbolSize)
     {
-        case k_size_cue:        return fontSize * 0.72;     //15.0
-        case k_size_large:      return fontSize * 1.34;     //28.0
-        default:                return fontSize;            //21.0
+        case k_size_cue:        return fontSize * 0.80;
+        case k_size_large:      return fontSize * 1.34;
+        default:                return fontSize;
     }
 }
 

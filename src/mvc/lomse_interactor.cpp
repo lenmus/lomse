@@ -31,6 +31,7 @@
 #include "lomse_document_layouter.h"
 #include "lomse_view.h"
 #include "lomse_graphic_view.h"
+#include "lomse_events.h"
 #include <sstream>
 using namespace std;
 //#define TRT(a) (a)
@@ -75,21 +76,23 @@ void Interactor::switch_task(int taskType)
 GraphicModel* Interactor::get_graphic_model()
 {
     if (!m_pGraphicModel)
-        m_pGraphicModel = create_graphic_model();
+        create_graphic_model();
     return m_pGraphicModel;
 }
 
 //---------------------------------------------------------------------------------------
-GraphicModel* Interactor::create_graphic_model()
+void Interactor::create_graphic_model()
 {
     DocLayouter layouter( m_pDoc->get_im_model(), m_libScope);
     layouter.layout_document();
-    return layouter.get_gm_model();
+    m_pGraphicModel = layouter.get_gm_model();
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::on_document_reloaded()
 {
+    delete m_pGraphicModel;
+    create_graphic_model();
     //TODO
     //DocCursor cursor(m_pDoc);
     //m_cursor = cursor;
@@ -146,6 +149,13 @@ void Interactor::on_mouse_button_up(Pixels x, Pixels y, unsigned flags)
 void Interactor::select_object(GmoObj* pGmo, unsigned flags)
 {
     m_selections.add(pGmo, flags);
+
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        EventView event(k_weblink_event, pGView);
+        pGView->notify_user(event);
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -299,16 +309,16 @@ void Interactor::set_rendering_option(int option, bool value)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::set_update_window_callbak(void* pThis, void (*pt2Func)(void* pObj)) 
-{ 
+void Interactor::set_update_window_callbak(void* pThis, void (*pt2Func)(void* pObj))
+{
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->set_update_window_callbak(pThis, pt2Func);
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj)) 
-{ 
+void Interactor::set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj))
+{
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->set_force_redraw_callbak(pThis, pt2Func);
@@ -316,7 +326,7 @@ void Interactor::set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pOb
 
 //---------------------------------------------------------------------------------------
 void Interactor::set_start_timer_callbak(void* pThis, void (*pt2Func)(void* pObj))
-{ 
+{
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->set_start_timer_callbak(pThis, pt2Func);
@@ -324,10 +334,19 @@ void Interactor::set_start_timer_callbak(void* pThis, void (*pt2Func)(void* pObj
 
 //---------------------------------------------------------------------------------------
 void Interactor::set_elapsed_time_callbak(void* pThis, double (*pt2Func)(void* pObj))
-{ 
+{
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->set_elapsed_time_callbak(pThis, pt2Func);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_notify_callback(void* pThis,
+                                     void (*pt2Func)(void* pObj, EventInfo& event))
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->set_notify_callback(pThis, pt2Func);
 }
 
 

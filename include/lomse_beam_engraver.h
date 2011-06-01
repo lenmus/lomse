@@ -42,7 +42,7 @@ class GmoShape;
 
 
 //---------------------------------------------------------------------------------------
-class BeamEngraver : public Engraver
+class BeamEngraver : public RelAuxObjEngraver
 {
 protected:
     int m_iInstr;
@@ -51,19 +51,45 @@ protected:
     ImoBeam* m_pBeam;
     std::list< pair<ImoNoteRest*, GmoShape*> > m_noteRests;
 
+    ShapeBoxInfo m_shapesInfo[2];
+    std::list<LUnits> m_segments;
+    UPoint m_origin;
+    USize m_size;
+    LUnits m_uBeamThickness;
+    bool m_fBeamAbove;
+	UPoint m_outerLeftPoint;
+    UPoint m_outerRightPoint;
+
 public:
     BeamEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     ~BeamEngraver();
 
-    GmoShapeBeam* create_shape(ImoObj* pCreatorImo, int iInstr, int iStaff);
-    void fix_stems_and_reposition_rests();
-    inline GmoShapeBeam* get_beam_shape() { return m_pBeamShape; }
-    void add_note_rest(ImoNoteRest* pNoteRest, GmoShape* pShape);
+    //implementation of virtual methods from RelAuxObjEngraver
+    void set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                            GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                            int iSystem, int iCol, UPoint pos);
+    void set_middle_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                             int iSystem, int iCol);
+    void set_end_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                          GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                          int iSystem, int iCol);
+    int create_shapes();
+    int get_num_shapes() { return 1; }
+    ShapeBoxInfo* get_shape_box_info(int i) { return &m_shapesInfo[0]; }
+
 
 protected:
+    void create_shape();
+    void add_shape_to_noterests();
     void reposition_rests();
     void decide_on_stems_direction();
+    void decide_beam_position();
     void change_stems_direction();
+    void adjust_stems_lengths();
+    void compute_beam_segments();
+	void add_segment(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
+    void update_bounds(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
 
     bool m_fStemForced;     //at least one stem forced
     bool m_fStemMixed;      //not all stems in the same direction

@@ -46,7 +46,7 @@ class ImoScore;
 class ColStaffObjsEntry
 {
 protected:
-    int                 m_segment;
+    int                 m_measure;
     float               m_time;
     int                 m_instr;
     int                 m_line;
@@ -55,12 +55,12 @@ protected:
     LdpElement*         m_pElm;
 
 public:
-    ColStaffObjsEntry(int segment, float time, int instr, int line, int staff,
+    ColStaffObjsEntry(int measure, float time, int instr, int line, int staff,
                       ImoObj* pImo, LdpElement* pElm)
-            : m_segment(segment), m_time(time), m_instr(instr), m_line(line)
+            : m_measure(measure), m_time(time), m_instr(instr), m_line(line)
             , m_staff(staff), m_pImo(pImo), m_pElm(pElm) {}
 
-    inline int segment() const { return m_segment; }
+    inline int measure() const { return m_measure; }
     inline float time() const { return m_time; }
     inline int num_instrument() const { return m_instr; }
     inline int line() const { return m_line; }
@@ -87,17 +87,21 @@ class ColStaffObjs
 {
 protected:
     std::vector<ColStaffObjsEntry*> m_table;
+    int m_numLines;
 
 public:
     ColStaffObjs();
     ~ColStaffObjs();
 
     //void build();
-    int num_entries() { return static_cast<int>(m_table.size()); }
+    //table info
+    inline int num_entries() { return static_cast<int>(m_table.size()); }
+    inline int num_lines() { return m_numLines; }
 
     //table management
     void sort();
-    void AddEntry(int segment, float time, int instr, int voice, int staff, ImoObj* pImo);
+    void AddEntry(int measure, float time, int instr, int voice, int staff, ImoObj* pImo);
+    inline void set_total_lines(int number) { m_numLines = number; }
 
     class iterator
     {
@@ -143,6 +147,7 @@ public:
 
     int get_line_assigned_to(int nVoice, int nStaff);
     void new_instrument();
+    inline int get_number_of_lines() { return m_lastAssignedLine; }
 
 private:
     int assign_line_to(int nVoice, int nStaff);
@@ -171,14 +176,16 @@ public:
     void update(ImoScore* pScore);
 
 private:
-    //global counters to assign segment, timepos and staff
+    //global counters to assign measure, timepos and staff
     int     m_nCurSegment;
     float   m_rCurTime;
-    float   m_rMaxTime;
+    float   m_rMaxSegmentTime;
+    float   m_rStartSegmentTime;
     int     m_nCurStaff;
     StaffVoiceLineTable m_lines;
 
     void create_table();
+    void set_num_lines();
     void find_voices_per_staff(int nInstr);
     void create_entries(int nInstr);
     void sort_table(bool fSort);
@@ -186,7 +193,7 @@ private:
     void prepare_for_next_instrument();
     int get_line_for(int nVoice, int nStaff);
     float determine_timepos(ImoStaffObj* pSO);
-    void update_segment(ImoStaffObj* pSO);
+    void update_measure(ImoStaffObj* pSO);
     void update_time_counter(ImoGoBackFwd* pGBF);
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
     void add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr);

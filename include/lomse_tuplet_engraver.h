@@ -44,43 +44,49 @@ class ImoTextStyleInfo;
 
 
 //---------------------------------------------------------------------------------------
-class TupletEngraver : public Engraver
+class TupletEngraver : public RelAuxObjEngraver
 {
 protected:
     int m_iInstr;
     int m_iStaff;
+    int m_numShapes;
+    UPoint m_pos;
     GmoShapeTuplet* m_pTupletShape;
     string m_label;
     ImoTextStyleInfo* m_pStyle;
     ImoTuplet* m_pTuplet;
     std::list< pair<ImoNoteRest*, GmoShape*> > m_noteRests;
+    ShapeBoxInfo m_shapesInfo[1];
+    bool m_fDrawBracket;
+    bool m_fDrawNumber;
 
 public:
     TupletEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
     ~TupletEngraver();
 
-    GmoShapeTuplet* create_shape(ImoObj* pCreatorImo, int iInstr, int iStaff,
-                                 const string& label, ImoTextStyleInfo* pStyle);
-    GmoShapeTuplet* create_shape(ImoTuplet* pTuplet, int iInstr, int iStaff);
+    //implementation of virtual methods from RelAuxObjEngraver
+    void set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                            GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                            int iSystem, int iCol, UPoint pos);
+    void set_middle_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                             int iSystem, int iCol);
+    void set_end_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+                          GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                          int iSystem, int iCol);
+    int create_shapes();
+    int get_num_shapes() { return m_numShapes; }
+    ShapeBoxInfo* get_shape_box_info(int i) { return &m_shapesInfo[0]; }
 
-    void layout_tuplet(GmoShapeBeam* pBeamShape);
-    inline GmoShapeTuplet* get_tuplet_shape() { return m_pTupletShape; }
-
-    void add_note_rest(ImoNoteRest* pNoteRest, GmoShape* pShape);
+protected:
+    void add_text_shape();
+    LUnits tenths_to_logical(Tenths tenths);
+    bool check_if_single_beamed_group();
 
     ImoNoteRest* get_start_noterest() { return m_noteRests.front().first; }
     ImoNoteRest* get_end_noterest() { return m_noteRests.back().first; }
 
-
-protected:
-    GmoShapeTuplet* do_create_shape(ImoObj* pCreatorImo);
-    void add_text_shape(ImoObj* pCreatorImo);
-    LUnits tenths_to_logical(Tenths tenths);
-    bool decide_if_show_bracket();
-    bool decide_if_tuplet_placement_above();
-    bool check_if_single_beamed_group();
-
-    void compute_y_coordinates(GmoShapeBeam* pBeamShape);
+    void compute_y_coordinates();
     GmoShapeNote* get_first_note();
     GmoShapeNote* get_last_note();
 
@@ -88,6 +94,12 @@ protected:
     GmoShape* get_end_noterest_shape() { return m_noteRests.back().second; }
 
     LUnits m_yStart, m_yEnd;
+
+    void decide_if_show_bracket();
+    bool decide_if_tuplet_placement_above();
+    void determine_tuplet_text();
+    void create_shape();
+    void set_shape_details();
 
 };
 

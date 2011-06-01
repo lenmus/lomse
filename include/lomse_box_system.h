@@ -105,7 +105,6 @@ public:
 
     //Staff shapes
     GmoShapeStaff* add_staff_shape(GmoShapeStaff* pShape);
-    void store_shapes_in_page();
 
 
 //private:

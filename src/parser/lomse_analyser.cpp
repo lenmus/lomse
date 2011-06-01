@@ -22,7 +22,10 @@
 
 #include <iostream>
 #include <sstream>
-#include <locale>
+//BUG: In my Ubuntu box next line causes problems since approx. 20/march/2011
+#if (LOMSE_PLATFORM_WIN32 == 1)
+    #include <locale>
+#endif
 #include <vector>
 #include <algorithm>   // for find
 #include "lomse_ldp_factory.h"
@@ -32,9 +35,10 @@
 #include "lomse_im_note.h"
 #include "lomse_im_figured_bass.h"
 #include "lomse_ldp_elements.h"
-#include "lomse_basic_model.h"
 #include "lomse_basic_objects.h"
 #include "lomse_linker.h"
+#include "lomse_injectors.h"
+#include "lomse_events.h"
 
 using namespace std;
 
@@ -54,15 +58,16 @@ void AutoBeamer::do_autobeam()
 void AutoBeamer::extract_notes()
 {
     m_notes.clear();
-    std::list<ImoStaffObj*>& m_notesRestsInBeam = m_pBeam->get_related_objects();
-    std::list<ImoStaffObj*>::iterator it;
-    for (it = m_notesRestsInBeam.begin(); it != m_notesRestsInBeam.end(); ++it)
+    std::list< pair<ImoStaffObj*, ImoRelDataObj*> >& noteRests
+        = m_pBeam->get_related_objects();
+    std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
+    for (it = noteRests.begin(); it != noteRests.end(); ++it)
     {
-        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( (*it).first );
         if (pNote)
             m_notes.push_back(pNote);
     }
-    //cout << "Num. note/rests in beam: " << m_notesRestsInBeam.size() << endl;
+    //cout << "Num. note/rests in beam: " << noteRests.size() << endl;
     //cout << "NUm. notes in beam: " << m_notes.size() << endl;
 }
 
@@ -223,17 +228,17 @@ int AutoBeamer::get_beaming_level(ImoNote* pNote)
 {
     switch(pNote->get_note_type())
     {
-        case ImoNoteRest::k_eighth:
+        case k_eighth:
             return 0;
-        case ImoNoteRest::k_16th:
+        case k_16th:
             return 1;
-        case ImoNoteRest::k_32th:
+        case k_32th:
             return 2;
-        case ImoNoteRest::k_64th:
+        case k_64th:
             return 3;
-        case ImoNoteRest::k_128th:
+        case k_128th:
             return 4;
-        case ImoNoteRest::k_256th:
+        case k_256th:
             return 5;
         default:
             return -1; //Error: Requesting beaming a note longer than eight
@@ -266,15 +271,17 @@ class ElementAnalyser
 protected:
     ostream& m_reporter;
     Analyser* m_pAnalyser;
+    LibraryScope& m_libraryScope;
     LdpFactory* m_pLdpFactory;
     ImoObj* m_pAnchor;
 
 public:
-    ElementAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    ElementAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor=NULL)
         : m_reporter(reporter)
         , m_pAnalyser(pAnalyser)
-        , m_pLdpFactory(pFactory)
+        , m_libraryScope(libraryScope)
+        , m_pLdpFactory(libraryScope.ldp_factory())
         , m_pAnchor(pAnchor) {}
     virtual ~ElementAnalyser() {}
     void analyse_node(LdpElement* pNode);
@@ -304,20 +311,26 @@ protected:
     bool analyse_optional(ELdpElement type, ImoObj* pAnchor=NULL);
     void analyse_one_or_more(ELdpElement* pValid, int nValid);
     void analyse_staffobjs_options(DtoStaffObj& dto);
-    void analyse_component_options(DtoComponentObj& dto);
+    void analyse_scoreobj_options(DtoScoreObj& dto);
     inline ImoObj* proceed(ELdpElement type, ImoObj* pAnchor) {
         return m_pAnalyser->analyse_node(m_pParamToAnalyse, pAnchor);
     }
 
     //building the model
     void add_to_model(ImoObj* pImo);
-    void add_chord_to_model(ImoChord* pChord) {
-        m_pAnalyser->add_chord(pChord);
-    }
+//    void add_chord_to_model(ImoChord* pChord) {
+//        m_pAnalyser->add_chord(pChord);
+//    }
 
     //auxiliary
     inline long get_node_id() { return m_pAnalysedNode->get_id(); }
     bool contains(ELdpElement type, ELdpElement* pValid, int nValid);
+
+    //-----------------------------------------------------------------------------------
+    inline void notify_user_about(EventInfo& event)
+    {
+        m_libraryScope.notify_user_about(event);
+    }
 
     //-----------------------------------------------------------------------------------
     inline bool more_params_to_analyse() {
@@ -575,6 +588,26 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
+    ImoTextStyleInfo* get_doc_text_style(const string& styleName)
+    {
+        ImoTextStyleInfo* pStyle = NULL;
+
+        ImoDocument* pDoc = m_pAnalyser->get_document_being_analysed();
+        if (pDoc)
+        {
+            pStyle = pDoc->get_style_info(styleName);
+            if (!pStyle)
+            {
+                report_msg(m_pParamToAnalyse->get_line_number(),
+                        "Style '" + styleName + "' is not defined. Default style will be used.");
+                pStyle = pDoc->get_style_info_or_defaults(styleName);
+            }
+        }
+
+        return pStyle;
+    }
+
+    //-----------------------------------------------------------------------------------
     ELineStyle get_line_style_value()
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
@@ -627,7 +660,7 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    void check_visible(ImoComponentObj* pCO)
+    void check_visible(ImoBoxObj* pCO)
     {
         string value = m_pParamToAnalyse->get_value();
         if (value == "visible")
@@ -646,11 +679,11 @@ protected:
     {
         string duration = m_pParamToAnalyse->get_value();
         NoteTypeAndDots figdots = ldp_duration_to_components(duration);
-        if (figdots.noteType == ImoNoteRest::k_unknown)
+        if (figdots.noteType == k_unknown_notetype)
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Unknown note/rest duration '" + duration + "'. Replaced by 'q'.");
-            figdots.noteType = ImoNoteRest::k_quarter;
+            figdots.noteType = k_quarter;
         }
         return figdots;
     }
@@ -679,8 +712,8 @@ protected:
 class NullAnalyser : public ElementAnalyser
 {
 public:
-    NullAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory)
-        : ElementAnalyser(pAnalyser, reporter, pFactory) {}
+    NullAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope) {}
 
     void do_analysis()
     {
@@ -699,13 +732,13 @@ public:
 class AnchorLineAnalyser : public ElementAnalyser
 {
 public:
-    AnchorLineAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    AnchorLineAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                        ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
-        ImoLineInfo line;
+        ImoLineStyle line;
         line.set_start_point( TPoint(0.0f, 0.0f) );
         line.set_start_edge(k_edge_normal);
         line.set_start_style(k_cap_none);
@@ -735,7 +768,7 @@ public:
         if (get_optional(k_lineCapEnd))
             line.set_end_style( get_line_cap_value() );
 
-        add_to_model( new ImoLineInfo(line) );
+        add_to_model( new ImoLineStyle(line) );
     }
 
 };
@@ -749,9 +782,9 @@ public:
 class BarlineAnalyser : public ElementAnalyser
 {
 public:
-    BarlineAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    BarlineAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -820,13 +853,13 @@ protected:
 class BeamAnalyser : public ElementAnalyser
 {
 public:
-    BeamAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    BeamAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
-        ImoBeamInfo* pInfo = new ImoBeamInfo( m_pAnalysedNode );
+        ImoBeamDto* pInfo = new ImoBeamDto( m_pAnalysedNode );
 
         // num
         if (get_optional(k_number))
@@ -851,7 +884,7 @@ public:
 
 protected:
 
-    bool set_beam_type(ImoBeamInfo* pInfo)
+    bool set_beam_type(ImoBeamDto* pInfo)
     {
         const std::string& value = m_pParamToAnalyse->get_value();
         if (value.size() < 7)
@@ -889,9 +922,9 @@ protected:
 class BezierAnalyser : public ElementAnalyser
 {
 public:
-    BezierAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    BezierAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                    ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -949,9 +982,9 @@ public:
 class BorderAnalyser : public ElementAnalyser
 {
 public:
-    BorderAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    BorderAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                    ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -974,7 +1007,7 @@ public:
 
 protected:
 
-        void set_box_border(ImoBoxInfo& box)
+        void set_box_border(ImoTextBlockInfo& box)
         {
             ImoObj* pImo = proceed(k_border, NULL);
             if (pImo)
@@ -994,9 +1027,9 @@ protected:
 class ChordAnalyser : public ElementAnalyser
 {
 public:
-    ChordAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    ChordAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -1027,11 +1060,12 @@ protected:
                 return;
 
             //add notes to musicData
-            std::list<ImoStaffObj*>& m_notes = pChord->get_related_objects();
-            std::list<ImoStaffObj*>::iterator it;
-            for (it = m_notes.begin(); it != m_notes.end(); ++it)
+            std::list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes
+                = pChord->get_related_objects();
+            std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
+            for (it = notes.begin(); it != notes.end(); ++it)
             {
-                ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+                ImoNote* pNote = dynamic_cast<ImoNote*>( (*it).first );
                 pMD->append_child(pNote);
             }
 
@@ -1051,9 +1085,9 @@ protected:
 class ClefAnalyser : public ElementAnalyser
 {
 public:
-    ClefAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    ClefAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                  ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -1158,8 +1192,8 @@ public:
 class ColorAnalyser : public ElementAnalyser
 {
 public:
-    ColorAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory)
-        : ElementAnalyser(pAnalyser, reporter, pFactory) {}
+    ColorAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope) {}
 
     void do_analysis()
     {
@@ -1187,14 +1221,14 @@ protected:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ <content> = (content [<score>|<text>]*)
+//@ <content> = (content { <score> | <text> | <para> | <heading> }
 
 class ContentAnalyser : public ElementAnalyser
 {
 public:
-    ContentAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    ContentAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -1203,7 +1237,11 @@ public:
         while (more_params_to_analyse())
         {
             if (! (analyse_optional(k_score, pContent)
-                 || analyse_optional(k_text, pContent) ))
+                 || analyse_optional(k_dynamic, pContent)
+                 || analyse_optional(k_heading, pContent)
+                 || analyse_optional(k_para, pContent)
+                 || analyse_optional(k_text, pContent)
+               ))
             {
                 error_invalid_param();
                 move_to_next_param();
@@ -1222,9 +1260,9 @@ public:
 class ControlAnalyser : public ElementAnalyser
 {
 public:
-    ControlAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    ControlAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -1243,9 +1281,9 @@ public:
 class CursorAnalyser : public ElementAnalyser
 {
 public:
-    CursorAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    CursorAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                    ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -1281,9 +1319,9 @@ public:
 class DefineStyleAnalyser : public ElementAnalyser
 {
 public:
-    DefineStyleAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    DefineStyleAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                         ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -1310,15 +1348,40 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
+// <dynamic> = (dynamic ... )
+
+class DynamicAnalyser : public ElementAnalyser
+{
+public:
+    DynamicAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                     ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoObj* pDyn = new ImoDynamic();
+
+        ImoDocument* pDoc = m_pAnalyser->get_document_being_analysed();
+        EventDynamic event(k_dynamic_content_event, pDoc, pDyn);   //, k_analyser
+        m_libraryScope.notify_user_about(event);
+
+        pDyn = event.get_object();
+        add_to_model(pDyn);
+    }
+
+protected:
+};
+
+//@-------------------------------------------------------------------------------------
 //@ <fermata> = (fermata <placement>[<componentOptions>*])
 //@ <placement> = { above | below }
 
 class FermataAnalyser : public ElementAnalyser
 {
 public:
-    FermataAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    FermataAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -1329,7 +1392,7 @@ public:
             set_placement(dto);
 
         // [<componentOptions>*]
-        analyse_component_options(dto);
+        analyse_scoreobj_options(dto);
 
         error_if_more_elements();
 
@@ -1387,9 +1450,9 @@ public:
 class FiguredBassAnalyser : public ElementAnalyser
 {
 public:
-    FiguredBassAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    FiguredBassAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                         ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -1410,7 +1473,7 @@ public:
             {}
 
             // [<componentOptions>*]
-            //analyse_component_options(dto);
+            //analyse_scoreobj_options(dto);
 
             error_if_more_elements();
 
@@ -1506,9 +1569,9 @@ public:
 class FontAnalyser : public ElementAnalyser
 {
 public:
-    FontAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    FontAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                  ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -1597,9 +1660,9 @@ public:
 class GoBackFwdAnalyser : public ElementAnalyser
 {
 public:
-    GoBackFwdAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    GoBackFwdAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                       ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -1635,7 +1698,7 @@ public:
             else
             {
                 NoteTypeAndDots figdots = ldp_duration_to_components(duration);
-                if (figdots.noteType == ImoNoteRest::k_unknown)
+                if (figdots.noteType == k_unknown_notetype)
                 {
                     report_msg(m_pParamToAnalyse->get_line_number(),
                         "Unknown duration '" + duration + "'. Element ignored.");
@@ -1685,9 +1748,9 @@ public:
 class GroupAnalyser : public ElementAnalyser
 {
 public:
-    GroupAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    GroupAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -1759,6 +1822,42 @@ protected:
 
 };
 
+//@-------------------------------------------------------------------------------------
+//@ <heading> = (heading <level> [<style>] <textItem>*)
+
+class HeadingAnalyser : public ElementAnalyser
+{
+public:
+    HeadingAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                    ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        // <level> (num)
+        if (get_mandatory(k_number))
+        {
+            ImoHeading* pHeading = new ImoHeading( get_integer_value(1) );
+
+            //// [<style>]
+            //if (get_optional(k_style))
+            //    pText->set_style( get_text_style_value(m_styleName) );
+
+            //<textItem>*
+            while (more_params_to_analyse())
+            {
+                if (!analyse_optional(k_txt, pHeading))
+                {
+                    error_invalid_param();
+                    move_to_next_param();
+                }
+            }
+
+            add_to_model(pHeading);
+        }
+
+    }
+};
 
 //@-------------------------------------------------------------------------------------
 //@ <infoMIDI> = (infoMIDI num_instr [num_channel])
@@ -1768,9 +1867,9 @@ protected:
 class InfoMidiAnalyser : public ElementAnalyser
 {
 public:
-    InfoMidiAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    InfoMidiAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                        ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -1826,15 +1925,13 @@ protected:
 class InstrumentAnalyser : public ElementAnalyser
 {
 public:
-    InstrumentAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    InstrumentAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                        ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
-        m_pAnalyser->clear_pending_ties();
-        m_pAnalyser->clear_pending_beams();
-        m_pAnalyser->clear_pending_tuplets();
+        m_pAnalyser->clear_pending_relations();
 
         ImoInstrument* pInstrument = new ImoInstrument();
 
@@ -1900,9 +1997,9 @@ protected:
 class KeySignatureAnalyser : public ElementAnalyser
 {
 public:
-    KeySignatureAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    KeySignatureAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                          ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -2002,8 +2099,8 @@ public:
 class LanguageAnalyser : public ElementAnalyser
 {
 public:
-    LanguageAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory)
-        : ElementAnalyser(pAnalyser, reporter, pFactory) {}
+    LanguageAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope) {}
 
     void do_analysis()
     {
@@ -2011,13 +2108,14 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ <lenmusdoc> = (lenmusdoc <vers>[<cursor>][<pageLayout>*]<content>)
+//@ <lenmusdoc> = (lenmusdoc <vers>[<settings>][<meta>][<styles>]<content>)
+//@ <styles> = (styles [<defineStyle>*][<pageLayout>*])
 
 class LenmusdocAnalyser : public ElementAnalyser
 {
 public:
-    LenmusdocAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory)
-        : ElementAnalyser(pAnalyser, reporter, pFactory) {}
+    LenmusdocAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope) {}
 
     void do_analysis()
     {
@@ -2028,10 +2126,18 @@ public:
         {
             string version = get_version();
             pDoc = new ImoDocument(version);
+            m_pAnalyser->set_document_being_analysed(pDoc);
         }
 
-        // [<cursor>]
-        analyse_optional(k_cursor, pDoc);
+        // [<settings>]
+        analyse_optional(k_settings, pDoc);
+
+        // [<meta>]
+        analyse_optional(k_meta, pDoc);
+
+        // [<styles>]
+        if (!analyse_optional(k_styles, pDoc))
+            add_default(pDoc);
 
         // [<pageLayout>*]
         while (analyse_optional(k_pageLayout, pDoc));
@@ -2050,6 +2156,13 @@ protected:
     {
         return m_pParamToAnalyse->get_parameter(1)->get_value();
     }
+
+    void add_default(ImoDocument* pDoc)
+    {
+        Linker linker;
+        linker.add_child_to_model(pDoc, new ImoStyles, k_styles);
+    }
+
 };
 
 //@-------------------------------------------------------------------------------------
@@ -2071,13 +2184,13 @@ protected:
 class LineAnalyser : public ElementAnalyser
 {
 public:
-    LineAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    LineAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                  ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
-        ImoLineInfo line;
+        ImoLineStyle line;
 
         // <startPoint>
         if (get_mandatory(k_startPoint))
@@ -2127,9 +2240,9 @@ public:
 class MetronomeAnalyser : public ElementAnalyser
 {
 public:
-    MetronomeAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    MetronomeAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                       ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -2192,7 +2305,7 @@ public:
         }
 
         // [<componentOptions>*]
-        analyse_component_options(dto);
+        analyse_scoreobj_options(dto);
 
         error_if_more_elements();
 
@@ -2212,9 +2325,9 @@ public:
 class MusicDataAnalyser : public ElementAnalyser
 {
 public:
-    MusicDataAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    MusicDataAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                       ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -2255,7 +2368,7 @@ public:
 //@ <note> = ({n | na} <pitch><duration> [<noteOptions>*][<noteRestOptions>*]
 //@             [<componentOptions>*][<attachments>*])
 //@ <rest> = (r <duration> [<noteRestOptions>*][<componentOptions>*][<attachments>*])
-//@ <noteOptions> = { <tie> | <stem> }
+//@ <noteOptions> = { <tie> | <stem> | <slur> }
 //@ <noteRestOptions> = { <beam> | <tuplet> | <voice> | <staffNum> | <fermata> }
 //@ <pitch> = label
 //@ <duration> = label
@@ -2266,20 +2379,22 @@ public:
 class NoteRestAnalyser : public ElementAnalyser
 {
 protected:
-    ImoTieDto* m_pTieInfo;
+    ImoTieDto* m_pTieDto;
     ImoTupletDto* m_pTupletInfo;
-    ImoBeamInfo* m_pBeamInfo;
+    ImoBeamDto* m_pBeamInfo;
+    ImoSlurDto* m_pSlurDto;
     ImoFermata* m_pFermata;
     std::string m_srcOldBeam;
     std::string m_srcOldTuplet;
 
 public:
-    NoteRestAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    NoteRestAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                      ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor)
-        , m_pTieInfo(NULL)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        , m_pTieDto(NULL)
         , m_pTupletInfo(NULL)
         , m_pBeamInfo(NULL)
+        , m_pSlurDto(NULL)
         , m_pFermata(NULL)
         , m_srcOldBeam("")
         , m_srcOldTuplet("")
@@ -2343,13 +2458,15 @@ public:
 
         if (!fIsRest)
         {
-            // [<noteOptions>*] = [{ <tie> | <stem> }*]
+            // [<noteOptions>*] = [{ <tie> | <stem> | <slur> }*]
             while (more_params_to_analyse())
             {
                 if (get_optional(k_tie))
-                    m_pTieInfo = dynamic_cast<ImoTieDto*>( proceed(k_tie, NULL) );
+                    m_pTieDto = dynamic_cast<ImoTieDto*>( proceed(k_tie, NULL) );
                 else if (get_optional(k_stem))
                     set_stem(dtoNote);
+                else if (get_optional(k_slur))
+                    m_pSlurDto = dynamic_cast<ImoSlurDto*>( proceed(k_slur, NULL) );
                 else
                     break;
             }
@@ -2359,7 +2476,7 @@ public:
         analyse_note_rest_options(pDto);
 
         // [<componentOptions>*]
-        analyse_component_options(*pDto);
+        analyse_scoreobj_options(*pDto);
 
         // create object and add it to the model
         ImoNoteRest* pNR = NULL;
@@ -2374,10 +2491,11 @@ public:
 
         // add fermata
         if (m_pFermata)
-            pNR->attach(m_pFermata);
+            pNR->add_attachment(m_pFermata);
 
         //create relations
         ImoNote* pNote = dynamic_cast<ImoNote*>(pNR);
+
         //tie
         if (fStartOldTie)
             m_pAnalyser->start_old_tie(pNote, m_pParamToAnalyse);
@@ -2402,6 +2520,10 @@ public:
 
         add_beam_info(pNR);
 
+        //slur
+        add_slur_info(pNote);
+
+        //chord
         if (!fIsRest && fInChord)
         {
             ImoNote* pStartOfChordNote = m_pAnalyser->get_last_note();
@@ -2415,14 +2537,12 @@ public:
             {
                 //previous note is the base note. Create the chord
                 pChord = new ImoChord();
-                pChord->push_back(pStartOfChordNote);
-                pStartOfChordNote->set_in_chord(pChord);
-                add_chord_to_model(pChord);
+                pStartOfChordNote->include_in_relation(pChord);
+//                add_chord_to_model(pChord);
             }
 
             //add current note to chord
-            pChord->push_back(pNote);
-            pNote->set_in_chord(pChord);
+            pNote->include_in_relation(pChord);
 
         //TODO: check if note in chord has the same duration than base note
       //  if (fInChord && m_pLastNote
@@ -2463,7 +2583,7 @@ protected:
             else if (type == k_beam)
             {
                 ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
-                m_pBeamInfo = dynamic_cast<ImoBeamInfo*>( pImo );
+                m_pBeamInfo = dynamic_cast<ImoBeamDto*>( pImo );
             }
             else if (type == k_voice)
             {
@@ -2488,7 +2608,7 @@ protected:
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Unknown note pitch '" + pitch + "'. Replaced by 'c4'.");
-            dto.set_pitch(k_step_C, 4, ImoNote::k_no_accidentals);
+            dto.set_pitch(k_step_C, 4, k_no_accidentals);
         }
         else
             dto.set_pitch(step, octave, accidentals);
@@ -2535,12 +2655,12 @@ protected:
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
         string value = get_string_value();
         if (value == "up")
-            dto.set_stem_direction(ImoNote::k_stem_up);
+            dto.set_stem_direction(k_stem_up);
         else if (value == "down")
-            dto.set_stem_direction(ImoNote::k_stem_down);
+            dto.set_stem_direction(k_stem_down);
         else
         {
-            dto.set_stem_direction(ImoNote::k_stem_default);
+            dto.set_stem_direction(k_stem_default);
             report_msg(m_pParamToAnalyse->get_line_number(),
                             "Invalid value '" + value
                             + "' for stem type. Default stem asigned.");
@@ -2563,7 +2683,7 @@ protected:
 
     void add_to_old_beam(ImoNoteRest* pNR)
     {
-        ImoBeamInfo* pInfo = new ImoBeamInfo();
+        ImoBeamDto* pInfo = new ImoBeamDto();
         pInfo->set_note_rest(pNR);
         m_pAnalyser->add_old_beam(pInfo);
     }
@@ -2594,7 +2714,7 @@ protected:
         }
         else
         {
-            ImoBeamInfo* pInfo = new ImoBeamInfo();
+            ImoBeamDto* pInfo = new ImoBeamDto();
             pInfo->set_note_rest(pNR);
             m_pAnalyser->close_old_beam(pInfo);
         }
@@ -2603,17 +2723,17 @@ protected:
     int get_beaming_level(int nNoteType)
     {
         switch(nNoteType) {
-            case ImoNoteRest::k_eighth:
+            case k_eighth:
                 return 0;
-            case ImoNoteRest::k_16th:
+            case k_16th:
                 return 1;
-            case ImoNoteRest::k_32th:
+            case k_32th:
                 return 2;
-            case ImoNoteRest::k_64th:
+            case k_64th:
                 return 3;
-            case ImoNoteRest::k_128th:
+            case k_128th:
                 return 4;
-            case ImoNoteRest::k_256th:
+            case k_256th:
                 return 5;
             default:
                 return -1; //Error: Requesting beaming a note longer than eight
@@ -2624,7 +2744,8 @@ protected:
     {
         ImoTupletDto* pInfo = new ImoTupletDto();
         pInfo->set_note_rest(pNR);
-        m_pAnalyser->add_tuplet_info(pInfo);
+        pInfo->set_tuplet_type(ImoTupletDto::k_continue);
+        m_pAnalyser->add_relation_info(pInfo);
     }
 
     void set_old_tuplet(ImoNoteRest* pNR)
@@ -2689,8 +2810,8 @@ protected:
     {
         ImoTupletDto* pInfo = new ImoTupletDto();
         pInfo->set_note_rest(pNR);
-        pInfo->set_start_of_tuplet(false);
-        m_pAnalyser->add_tuplet_info(pInfo);
+        pInfo->set_tuplet_type(ImoTupletDto::k_stop);
+        m_pAnalyser->add_relation_info(pInfo);
     }
 
     void start_old_tuplet(ImoNoteRest* pNR, int actual, int normal)
@@ -2712,7 +2833,7 @@ protected:
         pInfo->set_note_rest(pNR);
         pInfo->set_actual_number(actual);
         pInfo->set_normal_number(normal);
-        m_pAnalyser->add_tuplet_info(pInfo);
+        m_pAnalyser->add_relation_info(pInfo);
     }
 
     void set_voice_element(DtoNoteRest* pDto)
@@ -2734,13 +2855,10 @@ protected:
 
     void add_tie_info(ImoNote* pNote)
     {
-        if (m_pTieInfo)
+        if (m_pTieDto)
         {
-            m_pTieInfo->set_note(pNote);
-            if (m_pTieInfo->is_start())
-                m_pAnalyser->start_tie(m_pTieInfo);
-            else
-                m_pAnalyser->end_tie(m_pTieInfo);
+            m_pTieDto->set_note(pNote);
+            m_pAnalyser->add_relation_info(m_pTieDto);
         }
     }
 
@@ -2749,7 +2867,7 @@ protected:
         if (m_pTupletInfo)
         {
             m_pTupletInfo->set_note_rest(pNR);
-            m_pAnalyser->add_tuplet_info(m_pTupletInfo);
+            m_pAnalyser->add_relation_info(m_pTupletInfo);
         }
     }
 
@@ -2758,10 +2876,18 @@ protected:
         if (m_pBeamInfo)
         {
             m_pBeamInfo->set_note_rest(pNR);
-            m_pAnalyser->add_beam_info(m_pBeamInfo);
+            m_pAnalyser->add_relation_info(m_pBeamInfo);
         }
     }
 
+    void add_slur_info(ImoNote* pNR)
+    {
+        if (m_pSlurDto)
+        {
+            m_pSlurDto->set_note(pNR);
+            m_pAnalyser->add_relation_info(m_pSlurDto);
+        }
+    }
 
 };
 
@@ -2773,9 +2899,9 @@ protected:
 class OptAnalyser : public ElementAnalyser
 {
 public:
-    OptAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    OptAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                 ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -2906,9 +3032,9 @@ public:
 class PageLayoutAnalyser : public ElementAnalyser
 {
 public:
-    PageLayoutAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    PageLayoutAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                        ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -2961,9 +3087,9 @@ protected:
 class PageMarginsAnalyser : public ElementAnalyser
 {
 public:
-    PageMarginsAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    PageMarginsAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                         ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -3004,9 +3130,9 @@ public:
 class PageSizeAnalyser : public ElementAnalyser
 {
 public:
-    PageSizeAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    PageSizeAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                      ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -3028,14 +3154,46 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
+//@ <paragraph> = (para [<style>] <textItem>*)
+
+class ParagraphAnalyser : public ElementAnalyser
+{
+public:
+    ParagraphAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                    ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoParagraph* pPara = new ImoParagraph();
+
+        //// [<style>]
+        //if (get_optional(k_style))
+        //    pText->set_style( get_text_style_value(m_styleName) );
+
+        //<textItem>*
+        while (more_params_to_analyse())
+        {
+            if (!analyse_optional(k_txt, pPara))
+            {
+                error_invalid_param();
+                move_to_next_param();
+            }
+        }
+
+        add_to_model(pPara);
+    }
+};
+
+//@-------------------------------------------------------------------------------------
 //@ <point> = (tag (dx value)(dy value))
 
 class PointAnalyser : public ElementAnalyser
 {
 public:
-    PointAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    PointAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -3051,8 +3209,29 @@ public:
 
         error_if_more_elements();
 
-        //m_pAnalysedNode->set_imo( new ImoPointDto(point) );
         add_to_model( new ImoPointDto(point) );
+    }
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <settings> = (settings [<cursor>][<undoData>])
+
+class SettingsAnalyser : public ElementAnalyser
+{
+public:
+    SettingsAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                     ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        // [<cursor>]
+        analyse_optional(k_cursor, m_pAnchor);
+
+        // [<undoData>]
+        analyse_optional(k_undoData, m_pAnchor);
+
+        error_if_more_elements();
     }
 };
 
@@ -3064,9 +3243,9 @@ public:
 class ScoreAnalyser : public ElementAnalyser
 {
 public:
-    ScoreAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    ScoreAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -3176,9 +3355,9 @@ protected:
 class SizeAnalyser : public ElementAnalyser
 {
 public:
-    SizeAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    SizeAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                  ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -3199,6 +3378,65 @@ public:
     }
 };
 
+
+//@-------------------------------------------------------------------------------------
+//@ <slur> = (slur num <slurType>[<bezier>][color] )   ;num = slur number. integer
+//@ <slurType> = { start | continue | stop }
+//@
+//@ Example:
+//@     (slur 27 start (bezier (ctrol2-x -25)(start-y 36.765)) )
+//@
+
+class SlurAnalyser : public ElementAnalyser
+{
+public:
+    SlurAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoSlurDto* pInfo = new ImoSlurDto();
+
+        // num
+        if (get_mandatory(k_number))
+            pInfo->set_slur_number( get_integer_value(0) );
+
+        // <slurType> (label)
+        if (!get_mandatory(k_label) || !set_slur_type(pInfo))
+        {
+            error_msg("Missing or invalid slur type. Slur ignored.");
+            delete pInfo;
+            return;
+        }
+
+        // [<bezier>]
+        analyse_optional(k_bezier, pInfo);
+
+        // [<color>]
+        if (get_optional(k_color))
+            pInfo->set_color( get_color_value() );
+
+        m_pAnalysedNode->set_imo(pInfo);
+    }
+
+protected:
+
+    bool set_slur_type(ImoSlurDto* pInfo)
+    {
+        const std::string& value = m_pParamToAnalyse->get_value();
+        if (value == "start")
+            pInfo->set_slur_type(ImoSlurData::k_start);
+        else if (value == "stop")
+            pInfo->set_slur_type(ImoSlurData::k_stop);
+        else if (value == "continue")
+            pInfo->set_slur_type(ImoSlurData::k_continue);
+        else
+            return false;   //error
+        return true;    //ok
+    }
+};
+
 //@-------------------------------------------------------------------------------------
 //@ ImoSpacer StaffObj
 //@ <spacer> = (spacer <width>[<staffobjOptions>*][<attachments>*])     width in Tenths
@@ -3206,9 +3444,9 @@ public:
 class SpacerAnalyser : public ElementAnalyser
 {
 public:
-    SpacerAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    SpacerAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                    ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -3256,9 +3494,9 @@ public:
 class StaffAnalyser : public ElementAnalyser
 {
 public:
-    StaffAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    StaffAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -3348,14 +3586,38 @@ protected:
 };
 
 //@-------------------------------------------------------------------------------------
+//@ <styles> = (styles <defineStyle>*)
+
+class StylesAnalyser : public ElementAnalyser
+{
+public:
+    StylesAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                   ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoStyles* pStyles = new ImoStyles;
+
+        // [<defineStyle>*]
+        while (analyse_optional(k_defineStyle, pStyles));
+
+        error_if_more_elements();
+
+        add_to_model(pStyles);
+    }
+
+};
+
+//@-------------------------------------------------------------------------------------
 //@ <systemLayout> = (systemLayout {first | other} <systemMargins>)
 
 class SystemLayoutAnalyser : public ElementAnalyser
 {
 public:
-    SystemLayoutAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    SystemLayoutAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                          ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -3396,9 +3658,9 @@ public:
 class SystemMarginsAnalyser : public ElementAnalyser
 {
 public:
-    SystemMarginsAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    SystemMarginsAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                           ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -3455,13 +3717,13 @@ public:
 class TextBoxAnalyser : public ElementAnalyser
 {
 public:
-    TextBoxAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    TextBoxAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
-        ImoBoxInfo box;
+        ImoTextBlockInfo box;
 
         // <location>
         if (get_mandatory(k_dx))
@@ -3498,7 +3760,7 @@ public:
 
 protected:
 
-    void set_box_border(ImoBoxInfo& box)
+    void set_box_border(ImoTextBlockInfo& box)
     {
         ImoObj* pImo = proceed(k_border, NULL);
         if (pImo)
@@ -3527,12 +3789,78 @@ protected:
         ImoObj* pImo = proceed(k_anchorLine, NULL);
         if (pImo)
         {
-            ImoLineInfo* pLine = dynamic_cast<ImoLineInfo*>(pImo);
+            ImoLineStyle* pLine = dynamic_cast<ImoLineStyle*>(pImo);
             if (pLine)
                 pTB->set_anchor_line(pLine);
             delete pImo;
         }
     }
+
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <textItem> = (txt [<style>] [<location>] string)
+//@ <style> = (style <name>)
+//@     if no style is specified default style is assigned.
+//@
+class TextItemAnalyser : public ElementAnalyser
+{
+protected:
+    string m_styleName;
+
+public:
+    TextItemAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                       ImoObj* pAnchor, const string& styleName="Default txt")
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        , m_styleName(styleName)
+    {
+    }
+
+    void do_analysis()
+    {
+
+        // [<style>]
+        if (get_optional(k_style))
+        {
+            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+            m_styleName = get_string_value();
+        }
+        else
+            m_styleName = "Default style";
+
+
+        //// [<location>]
+        //while (more_params_to_analyse())
+        //{
+        //    if (get_optional(k_dx))
+        //        pText->set_user_location_x( get_location_value() );
+        //    else if (get_optional(k_dy))
+        //        pText->set_user_location_y( get_location_value() );
+        //    else if (get_optional(k_string)
+        //        break;
+        //    else
+        //        error_invalid_param();
+        //}
+
+        // <string>
+        if (get_mandatory(k_string))
+        {
+            ImoTextStyleInfo* pStyle = get_doc_text_style(m_styleName);
+            ImoTextItem* pText = new ImoTextItem(get_string_value(), pStyle);
+
+            error_if_more_elements();
+
+            add_to_model(pText);
+        }
+    }
+
+protected:
+    //void set_default_style(ImoScoreText* pText)
+    //{
+    //    ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
+    //    if (pScore)
+    //        pText->set_style( pScore->get_style_info_or_defaults(m_styleName) );
+    //}
 
 };
 
@@ -3557,9 +3885,9 @@ protected:
     string m_styleName;
 
 public:
-    TextStringAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    TextStringAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                        ImoObj* pAnchor, const string& styleName="Default style")
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
         , m_styleName(styleName)
     {
     }
@@ -3609,9 +3937,9 @@ protected:
 class InstrNameAnalyser : public TextStringAnalyser
 {
 public:
-    InstrNameAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    InstrNameAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                       ImoObj* pAnchor)
-        : TextStringAnalyser(pAnalyser, reporter, pFactory, pAnchor,
+        : TextStringAnalyser(pAnalyser, reporter, libraryScope, pAnchor,
                              "Instrument names") {}
 };
 
@@ -3623,9 +3951,9 @@ public:
 class TieAnalyser : public ElementAnalyser
 {
 public:
-    TieAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    TieAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                 ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -3676,9 +4004,9 @@ protected:
 class TimeSignatureAnalyser : public ElementAnalyser
 {
 public:
-    TimeSignatureAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    TimeSignatureAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                           ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -3714,9 +4042,9 @@ public:
 class TitleAnalyser : public ElementAnalyser
 {
 public:
-    TitleAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    TitleAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -3773,17 +4101,17 @@ public:
 //@ <tupletID> = integer number
 //@ <actualNotes> = integer number
 //@ <normalNotes> = integer number
-//@ <tupletOptions> =  [<bracketType>] [<displayBracket>] [<displayNormalNum>]
+//@ <tupletOptions> =  [<bracketType>] [<displayBracket>] [<displayNumber>]
 //@ <bracketType> = (bracketType { squaredBracket | curvedBracket })
 //@ <displayBracket> = (displayBracket { yes | no })
-//@ <displayNormalNum> = (displayNormalNum { yes | no })
+//@ <displayNumber> = (displayNumber { none | actual | both })
 
 class TupletAnalyser : public ElementAnalyser
 {
 public:
-    TupletAnalyser(Analyser* pAnalyser, ostream& reporter, LdpFactory* pFactory,
+    TupletAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                    ImoObj* pAnchor)
-        : ElementAnalyser(pAnalyser, reporter, pFactory, pAnchor) {}
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
     {
@@ -3848,9 +4176,9 @@ protected:
     {
         const std::string& value = m_pParamToAnalyse->get_value();
         if (value == "+")
-            pInfo->set_start_of_tuplet(true);
+            pInfo->set_tuplet_type(ImoTupletDto::k_start);
         else if (value == "-")
-            pInfo->set_start_of_tuplet(false);
+            pInfo->set_tuplet_type(ImoTupletDto::k_stop);
         else
             return false;   //error
         return true;    //ok
@@ -3881,13 +4209,13 @@ protected:
 
     void analyse_tuplet_options(ImoTupletDto* pInfo)
     {
-        //@ <tupletOptions> =  [<bracketType>] [<displayBracket>] [<displayNormalNum>]
+        //@ <tupletOptions> =  [<bracketType>] [<displayBracket>] [<displayNumber>]
         //@ <bracketType> = (bracketType { squaredBracket | curvedBracket })
         //@ <displayBracket> = (displayBracket { yes | no })
-        //@ <displayNormalNum> = (displayNormalNum { yes | no })
+        //@ <displayNumber> = (displayNumber { none | actual | both })
 
         int nShowBracket = m_pAnalyser->get_current_show_tuplet_bracket();
-        int nShowNormalNum = m_pAnalyser->get_current_show_tuplet_normal_num();
+        int nShowNumber = m_pAnalyser->get_current_show_tuplet_number();
         while( more_params_to_analyse() )
         {
             m_pParamToAnalyse = get_param_to_analyse();
@@ -3911,10 +4239,21 @@ protected:
                     break;
                 }
 
-                case k_displayNormalNum:
+                case k_displayNumber:
                 {
                     m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-                    nShowNormalNum = get_yes_no_value(k_yesno_default);
+                    const std::string& value = m_pParamToAnalyse->get_value();
+                    if (value == "none")
+                        nShowNumber = ImoTuplet::k_number_none;
+                    else if (value == "actual")
+                        nShowNumber = ImoTuplet::k_number_actual;
+                    else if (value == "both")
+                        nShowNumber = ImoTuplet::k_number_both;
+                    else
+                    {
+                        error_invalid_param();
+                        nShowNumber = ImoTuplet::k_number_actual;
+                    }
                     break;
                 }
 
@@ -3926,9 +4265,9 @@ protected:
         }
 
         pInfo->set_show_bracket(nShowBracket);
-        pInfo->set_show_normal_num(nShowNormalNum);
+        pInfo->set_show_number(nShowNumber);
         m_pAnalyser->set_current_show_tuplet_bracket(nShowBracket);
-        m_pAnalyser->set_current_show_tuplet_normal_num(nShowNormalNum);
+        m_pAnalyser->set_current_show_tuplet_number(nShowNumber);
     }
 
 };
@@ -4091,10 +4430,10 @@ void ElementAnalyser::analyse_staffobjs_options(DtoStaffObj& dto)
     //set staff: either found value or inherited one
     dto.set_staff( m_pAnalyser->get_current_staff() );
 
-    analyse_component_options(dto);
+    analyse_scoreobj_options(dto);
 }
 
-void ElementAnalyser::analyse_component_options(DtoComponentObj& dto)
+void ElementAnalyser::analyse_scoreobj_options(DtoScoreObj& dto)
 {
     //@----------------------------------------------------------------------------
     //@ <componentOptions> = { <visible> | <location> | <color> }
@@ -4154,74 +4493,81 @@ void ElementAnalyser::add_to_model(ImoObj* pImo)
 
 
 
-//--------------------------------------------------------------------------------
+//=======================================================================================
 // Analyser implementation
-//--------------------------------------------------------------------------------
-
-Analyser::Analyser(ostream& reporter, LdpFactory* pFactory)
+//=======================================================================================
+//Analyser::Analyser(ostream& reporter, LibraryScope& libraryScope)
+//    , m_pLdpFactory(pFactory)
+Analyser::Analyser(ostream& reporter, LibraryScope& libraryScope)
     : m_reporter(reporter)
-    , m_pLdpFactory(pFactory)
+    , m_libraryScope(libraryScope)
+    , m_pLdpFactory(libraryScope.ldp_factory())
     , m_pTiesBuilder(NULL)
+    , m_pOldTiesBuilder(NULL)
     , m_pBeamsBuilder(NULL)
     , m_pOldBeamsBuilder(NULL)
     , m_pTupletsBuilder(NULL)
-    , m_IModel(NULL)
+    , m_pSlursBuilder(NULL)
     , m_pScore(NULL)
+    , m_pDoc(NULL)
     , m_pTree(NULL)
     , m_nShowTupletBracket(k_yesno_default)
-    , m_nShowTupletNormalNum(k_yesno_default)
+    , m_nShowTupletNumber(k_yesno_default)
     , m_pLastNote(NULL)
 {
 }
 
+//---------------------------------------------------------------------------------------
 Analyser::~Analyser()
 {
-    if (m_pTiesBuilder)
-        delete m_pTiesBuilder;
-    if (m_pBeamsBuilder)
-        delete m_pBeamsBuilder;
-    if (m_pOldBeamsBuilder)
-        delete m_pOldBeamsBuilder;
-    if (m_pTupletsBuilder)
-        delete m_pTupletsBuilder;
+    delete_relation_builders();
 }
 
-InternalModel* Analyser::analyse_tree(LdpTree* tree)
+//---------------------------------------------------------------------------------------
+void Analyser::delete_relation_builders()
 {
-    m_IModel = new InternalModel();
-    if (m_pTiesBuilder)
-        delete m_pTiesBuilder;
-    if (m_pBeamsBuilder)
-        delete m_pBeamsBuilder;
-    if (m_pOldBeamsBuilder)
-        delete m_pOldBeamsBuilder;
-    if (m_pTupletsBuilder)
-        delete m_pTupletsBuilder;
-    m_pTiesBuilder = new TiesBuilder(m_reporter, m_IModel, this);
-    m_pBeamsBuilder = new BeamsBuilder(m_reporter, m_IModel, this);
-    m_pOldBeamsBuilder = new OldBeamsBuilder(m_reporter, m_IModel, this);
-    m_pTupletsBuilder = new TupletsBuilder(m_reporter, m_IModel, this);
+    delete m_pTiesBuilder;
+    delete m_pOldTiesBuilder;
+    delete m_pBeamsBuilder;
+    delete m_pOldBeamsBuilder;
+    delete m_pTupletsBuilder;
+    delete m_pSlursBuilder;
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj* Analyser::analyse_tree_and_get_object(LdpTree* tree)
+{
+    delete_relation_builders();
+    m_pTiesBuilder = new TiesBuilder(m_reporter, this);
+    m_pOldTiesBuilder = new OldTiesBuilder(m_reporter, this);
+    m_pBeamsBuilder = new BeamsBuilder(m_reporter, this);
+    m_pOldBeamsBuilder = new OldBeamsBuilder(m_reporter, this);
+    m_pTupletsBuilder = new TupletsBuilder(m_reporter, this);
+    m_pSlursBuilder = new SlursBuilder(m_reporter, this);
 
     m_pTree = tree;
     m_curStaff = 0;
     m_curVoice = 1;
     analyse_node(tree->get_root());
-    m_pTiesBuilder->clear_pending_ties();
 
     LdpElement* pRoot = tree->get_root();
-    if (pRoot)
-        m_IModel->set_root( pRoot->get_imo() );
-
-    InternalModel* pIModel = m_IModel;
-    m_IModel = NULL;
-    return pIModel;
+    return pRoot->get_imo();
 }
 
+//---------------------------------------------------------------------------------------
+InternalModel* Analyser::analyse_tree(LdpTree* tree)
+{
+    ImoObj* pRoot = analyse_tree_and_get_object(tree);
+    return new InternalModel( pRoot );
+}
+
+//---------------------------------------------------------------------------------------
 void Analyser::analyse_node(LdpTree::iterator itNode)
 {
     analyse_node(*itNode);
 }
 
+//---------------------------------------------------------------------------------------
 ImoObj* Analyser::analyse_node(LdpElement* pNode, ImoObj* pAnchor)
 {
     ElementAnalyser* a = new_analyser( pNode->get_type(), pAnchor );
@@ -4230,163 +4576,122 @@ ImoObj* Analyser::analyse_node(LdpElement* pNode, ImoObj* pAnchor)
     return pNode->get_imo();
 }
 
-void Analyser::remove_tie_element(ImoTieDto* pInfo)
+//---------------------------------------------------------------------------------------
+void Analyser::add_relation_info(ImoObj* pDto)
 {
-    delete pInfo;
+    // factory method to deal withh all relations
+
+    if (pDto->is_tie_dto())
+        m_pTiesBuilder->add_item_info(dynamic_cast<ImoTieDto*>(pDto));
+    else if (pDto->is_slur_dto())
+        m_pSlursBuilder->add_item_info(dynamic_cast<ImoSlurDto*>(pDto));
+    else if (pDto->is_beam_dto())
+        m_pBeamsBuilder->add_item_info(dynamic_cast<ImoBeamDto*>(pDto));
+    else if (pDto->is_tuplet_dto())
+        m_pTupletsBuilder->add_item_info(dynamic_cast<ImoTupletDto*>(pDto));
 }
 
-void Analyser::remove_old_tie_element(LdpElement* pOldTieParam)
+//---------------------------------------------------------------------------------------
+void Analyser::clear_pending_relations()
 {
+    m_pTiesBuilder->clear_pending_items();
+    m_pSlursBuilder->clear_pending_items();
+    m_pBeamsBuilder->clear_pending_items();
+    m_pOldBeamsBuilder->clear_pending_old_beams();
+    m_pTupletsBuilder->clear_pending_items();
 }
 
-void Analyser::add_chord(ImoChord* pChord)
-{
-    m_IModel->add_chord(pChord);
-}
-
+//---------------------------------------------------------------------------------------
 ElementAnalyser* Analyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
 {
     //Factory method to create analysers
 
     switch (type)
     {
-        case k_abbrev:          return new InstrNameAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_anchorLine:      return new AnchorLineAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_barline:         return new BarlineAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_beam:            return new BeamAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_bezier:          return new BezierAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_border:          return new BorderAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_chord:           return new ChordAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_clef:            return new ClefAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_content:         return new ContentAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_creationMode:    return new ContentAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_color:           return new ColorAnalyser(this, m_reporter, m_pLdpFactory);
-        case k_cursor:          return new CursorAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_defineStyle:     return new DefineStyleAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_endPoint:        return new PointAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_fermata:         return new FermataAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_figuredBass:     return new FiguredBassAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_font:            return new FontAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_goBack:          return new GoBackFwdAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_goFwd:           return new GoBackFwdAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_graphic:         return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_group:           return new GroupAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_infoMIDI:        return new InfoMidiAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_instrument:      return new InstrumentAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_key_signature:   return new KeySignatureAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_language:        return new LanguageAnalyser(this, m_reporter, m_pLdpFactory);
-        case k_lenmusdoc:       return new LenmusdocAnalyser(this, m_reporter, m_pLdpFactory);
-        case k_line:            return new LineAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_metronome:       return new MetronomeAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_musicData:       return new MusicDataAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_na:              return new NoteRestAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_name:            return new InstrNameAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_newSystem:       return new ControlAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_note:            return new NoteRestAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_opt:             return new OptAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_pageLayout:      return new PageLayoutAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_pageMargins:     return new PageMarginsAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_pageSize:        return new PageSizeAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_rest:            return new NoteRestAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_score:           return new ScoreAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_size:            return new SizeAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_spacer:          return new SpacerAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_staff:           return new StaffAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_symbol:          return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
-//        case k_symbolSize:      return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory);
-        case k_startPoint:      return new PointAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_systemLayout:    return new SystemLayoutAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_systemMargins:   return new SystemMarginsAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_text:            return new TextStringAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_textbox:         return new TextBoxAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_time_signature:  return new TimeSignatureAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_tie:             return new TieAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_title:           return new TitleAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-        case k_tuplet:          return new TupletAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
-//        case k_undoData:        return new XxxxxxxAnalyser(this, m_reporter, m_pLdpFactory, pAnchor);
+        case k_abbrev:          return new InstrNameAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_anchorLine:      return new AnchorLineAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_barline:         return new BarlineAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_beam:            return new BeamAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_bezier:          return new BezierAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_border:          return new BorderAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_chord:           return new ChordAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_clef:            return new ClefAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_content:         return new ContentAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_creationMode:    return new ContentAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_color:           return new ColorAnalyser(this, m_reporter, m_libraryScope);
+        case k_cursor:          return new CursorAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_defineStyle:     return new DefineStyleAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_endPoint:        return new PointAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_dynamic:         return new DynamicAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_fermata:         return new FermataAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_figuredBass:     return new FiguredBassAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_font:            return new FontAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_goBack:          return new GoBackFwdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_goFwd:           return new GoBackFwdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_graphic:         return new XxxxxxxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_group:           return new GroupAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_heading:         return new HeadingAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_infoMIDI:        return new InfoMidiAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_instrument:      return new InstrumentAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_key_signature:   return new KeySignatureAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_language:        return new LanguageAnalyser(this, m_reporter, m_libraryScope);
+        case k_lenmusdoc:       return new LenmusdocAnalyser(this, m_reporter, m_libraryScope);
+        case k_line:            return new LineAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_metronome:       return new MetronomeAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_musicData:       return new MusicDataAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_na:              return new NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_name:            return new InstrNameAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_newSystem:       return new ControlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_note:            return new NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_opt:             return new OptAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_pageLayout:      return new PageLayoutAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_pageMargins:     return new PageMarginsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_pageSize:        return new PageSizeAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_rest:            return new NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_settings:        return new SettingsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_score:           return new ScoreAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_size:            return new SizeAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_slur:            return new SlurAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_spacer:          return new SpacerAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_staff:           return new StaffAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_symbol:          return new XxxxxxxAnalyser(this, m_reporter, m_libraryScope);
+//        case k_symbolSize:      return new XxxxxxxAnalyser(this, m_reporter, m_libraryScope);
+        case k_para:            return new ParagraphAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_startPoint:      return new PointAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_styles:          return new StylesAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_systemLayout:    return new SystemLayoutAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_systemMargins:   return new SystemMarginsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_txt:             return new TextItemAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_text:            return new TextStringAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_textbox:         return new TextBoxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_time_signature:  return new TimeSignatureAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_tie:             return new TieAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_title:           return new TitleAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_tuplet:          return new TupletAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_undoData:        return new XxxxxxxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 
         default:
-            return new NullAnalyser(this, m_reporter, m_pLdpFactory);
+            return new NullAnalyser(this, m_reporter, m_libraryScope);
     }
 }
 
 
-//-------------------------------------------------------------------------------
+
+//=======================================================================================
 // TiesBuilder implementation
-//-------------------------------------------------------------------------------
-
-TiesBuilder::TiesBuilder(ostream& reporter, InternalModel* pIModel, Analyser* pAnalyser)
-    : m_reporter(reporter)
-    , m_pAnalyser(pAnalyser)
-    , m_IModel(pIModel)
-    , m_pStartNoteTieOld(NULL)
+//=======================================================================================
+void TiesBuilder::add_relation_to_notes_rests(ImoTieDto* pEndDto)
 {
-}
-
-TiesBuilder::~TiesBuilder()
-{
-    clear_pending_ties();
-}
-
-void TiesBuilder::start_tie(ImoTieDto* pNewInfo)
-{
-    ImoTieDto* pExistingInfo = find_matching_tie_info(pNewInfo);
-    if (pExistingInfo)
-    {
-        error_duplicated_tie(pExistingInfo, pNewInfo);
-        m_pAnalyser->remove_tie_element(pNewInfo);
-    }
+    ImoTieDto* pStartDto = m_matches.front();
+    ImoNote* pStartNote = pStartDto->get_note();
+    ImoNote* pEndNote = pEndDto->get_note();
+    if (notes_can_be_tied(pStartNote, pEndNote))
+        tie_notes(pStartDto, pEndDto);
     else
-    {
-        m_pendingTies.push_back(pNewInfo);
-    }
+        error_notes_can_not_be_tied(pEndDto);
 }
 
-void TiesBuilder::end_tie(ImoTieDto* pEndInfo)
-{
-    ImoTieDto* pStartInfo = find_matching_tie_info(pEndInfo);
-    if (pStartInfo)
-    {
-        if (notes_can_be_tied(pStartInfo, pEndInfo))
-        {
-            tie_notes(pStartInfo, pEndInfo);
-            remove_from_pending(pStartInfo);
-            delete pStartInfo;
-            delete pEndInfo;
-        }
-        else
-        {
-            error_notes_can_not_be_tied(pEndInfo);
-            remove_from_pending(pStartInfo);
-            m_pAnalyser->remove_tie_element(pStartInfo);
-            m_pAnalyser->remove_tie_element(pEndInfo);
-        }
-    }
-    else
-    {
-        error_no_start_tie(pEndInfo);
-        m_pAnalyser->remove_tie_element(pEndInfo);
-    }
-}
-
-ImoTieDto* TiesBuilder::find_matching_tie_info(ImoTieDto* pEndInfo)
-{
-    std::list<ImoTieDto*>::iterator it;
-    for(it=m_pendingTies.begin(); it != m_pendingTies.end(); ++it)
-    {
-         if ((*it)->get_tie_number() == pEndInfo->get_tie_number())
-             return *it;
-    }
-    return NULL;
-}
-
-bool TiesBuilder::notes_can_be_tied(ImoTieDto* pStartInfo, ImoTieDto* pEndInfo)
-{
-    ImoNote* pStartNote = pStartInfo->get_note();
-    ImoNote* pEndNote = pEndInfo->get_note();
-    return notes_can_be_tied(pStartNote, pEndNote);
-}
-
+//---------------------------------------------------------------------------------------
 bool TiesBuilder::notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote)
 {
     return (pStartNote->get_voice() == pEndNote->get_voice())
@@ -4396,36 +4701,27 @@ bool TiesBuilder::notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote)
             && (pStartNote->get_octave() == pEndNote->get_octave()) ;
 }
 
-void TiesBuilder::tie_notes(ImoTieDto* pStartInfo, ImoTieDto* pEndInfo)
+//---------------------------------------------------------------------------------------
+void TiesBuilder::tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto)
 {
-    ImoNote* pStartNote = pStartInfo->get_note();
-    ImoNote* pEndNote = pEndInfo->get_note();
+    ImoNote* pStartNote = pStartDto->get_note();
+    ImoNote* pEndNote = pEndDto->get_note();
 
     ImoTie* pTie = new ImoTie();
-    ImoBezierInfo* pStartBezier = new ImoBezierInfo(pStartInfo->get_bezier());
-    ImoBezierInfo* pEndBezier = new ImoBezierInfo(pEndInfo->get_bezier());
-    pTie->set_tie_number( pStartInfo->get_tie_number() );
-    pTie->set_start_note( pStartNote );
-    pTie->set_end_note( pEndNote );
-    pTie->set_start_bezier( pStartBezier );
-    pTie->set_stop_bezier( pEndBezier );
+    pTie->set_tie_number( pStartDto->get_tie_number() );
+    pTie->set_color( pStartDto->get_color() );
+
+    ImoTieData* pStartData = new ImoTieData(pStartDto);
+    pStartNote->include_in_relation(pTie, pStartData);
+
+    ImoTieData* pEndData = new ImoTieData(pEndDto);
+    pEndNote->include_in_relation(pTie, pEndData);
 
     pStartNote->set_tie_next(pTie);
     pEndNote->set_tie_prev(pTie);
-
-    m_IModel->add_tie(pTie);
-    pStartNote->attach(pTie);
-    pEndNote->attach(pTie);
 }
 
-void TiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNewInfo)
-{
-    m_reporter << "Line " << pNewInfo->get_line_number()
-               << ". This tie has the same number than that defined in line "
-               << pExistingInfo->get_line_number()
-               << ". This tie will be ignored." << endl;
-}
-
+//---------------------------------------------------------------------------------------
 void TiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
 {
     m_reporter << "Line " << pEndInfo->get_line_number()
@@ -4434,45 +4730,54 @@ void TiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
                << " will be ignored." << endl;
 }
 
-void TiesBuilder::error_no_start_tie(ImoTieDto* pEndInfo)
+//---------------------------------------------------------------------------------------
+void TiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNewInfo)
+{
+    m_reporter << "Line " << pNewInfo->get_line_number()
+               << ". This tie has the same number than that defined in line "
+               << pExistingInfo->get_line_number()
+               << ". This tie will be ignored." << endl;
+}
+
+
+//=======================================================================================
+// OldTiesBuilder implementation
+//=======================================================================================
+OldTiesBuilder::OldTiesBuilder(ostream& reporter, Analyser* pAnalyser)
+    : m_reporter(reporter)
+    , m_pAnalyser(pAnalyser)
+    , m_pStartNoteTieOld(NULL)
+{
+}
+
+//---------------------------------------------------------------------------------------
+bool OldTiesBuilder::notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote)
+{
+    return (pStartNote->get_voice() == pEndNote->get_voice())
+            && (pStartNote->get_staff() == pEndNote->get_staff())
+            && (pStartNote->get_accidentals() == pEndNote->get_accidentals())
+            && (pStartNote->get_step() == pEndNote->get_step())
+            && (pStartNote->get_octave() == pEndNote->get_octave()) ;
+}
+
+//---------------------------------------------------------------------------------------
+void OldTiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
 {
     m_reporter << "Line " << pEndInfo->get_line_number()
-               << ". No 'start' element for tie number "
+               << ". Requesting to tie notes of different voice or pitch. Tie number "
                << pEndInfo->get_tie_number()
-               << ". Tie ignored." << endl;
+               << " will be ignored." << endl;
 }
 
-void TiesBuilder::error_no_end_tie(ImoTieDto* pStartInfo)
-{
-    m_reporter << "Line " << pStartInfo->get_line_number()
-               << ". No 'stop' element for tie number "
-               << pStartInfo->get_tie_number()
-               << ". Tie ignored." << endl;
-}
-
-void TiesBuilder::error_invalid_tie_old_syntax(int line)
+//---------------------------------------------------------------------------------------
+void OldTiesBuilder::error_invalid_tie_old_syntax(int line)
 {
     m_reporter << "Line " << line
                << ". No note found to match old syntax tie. Tie ignored." << endl;
 }
 
-void TiesBuilder::remove_from_pending(ImoTieDto* pTieInfo)
-{
-    m_pendingTies.remove(pTieInfo);
-}
-
-void TiesBuilder::clear_pending_ties()
-{
-    std::list<ImoTieDto*>::iterator it;
-    for (it = m_pendingTies.begin(); it != m_pendingTies.end(); ++it)
-    {
-        error_no_end_tie(*it);
-        m_pAnalyser->remove_tie_element(*it);
-    }
-    m_pendingTies.clear();
-}
-
-void TiesBuilder::start_old_tie(ImoNote* pNote, LdpElement* pOldTie)
+//---------------------------------------------------------------------------------------
+void OldTiesBuilder::start_old_tie(ImoNote* pNote, LdpElement* pOldTie)
 {
     if (m_pStartNoteTieOld)
         create_tie_if_old_syntax_tie_pending(pNote);
@@ -4481,7 +4786,8 @@ void TiesBuilder::start_old_tie(ImoNote* pNote, LdpElement* pOldTie)
     m_pOldTieParam = pOldTie;
 }
 
-void TiesBuilder::create_tie_if_old_syntax_tie_pending(ImoNote* pEndNote)
+//---------------------------------------------------------------------------------------
+void OldTiesBuilder::create_tie_if_old_syntax_tie_pending(ImoNote* pEndNote)
 {
     if (!m_pStartNoteTieOld)
         return;
@@ -4494,183 +4800,99 @@ void TiesBuilder::create_tie_if_old_syntax_tie_pending(ImoNote* pEndNote)
     else if (m_pStartNoteTieOld->get_voice() == pEndNote->get_voice())
     {
         error_invalid_tie_old_syntax( m_pOldTieParam->get_line_number() );
-        m_pAnalyser->remove_old_tie_element(m_pOldTieParam);
         m_pStartNoteTieOld = NULL;
     }
+    //else
+    //  wait to see if it is possible to tie with next note
 }
 
-void TiesBuilder::tie_notes(ImoNote* pStartNote, ImoNote* pEndNote)
+//---------------------------------------------------------------------------------------
+void OldTiesBuilder::tie_notes(ImoNote* pStartNote, ImoNote* pEndNote)
 {
-    ImoTie* pTie = new ImoTie();
-    pTie->set_tie_number(0);
-    pTie->set_start_note( pStartNote );
-    pTie->set_end_note( pEndNote );
-    pTie->set_start_bezier(NULL);
-    pTie->set_stop_bezier(NULL);
+    ImoTie* pTie = new ImoTie();    //( pEndInfo->get_tie_number() );
+
+    ImoTieDto startDto;
+    startDto.set_start(true);
+    ImoTieData* pStartData = new ImoTieData(&startDto);
+    pStartNote->include_in_relation(pTie, pStartData);
+
+    ImoTieDto endDto;
+    endDto.set_start(false);
+    ImoTieData* pEndData = new ImoTieData(&endDto);
+    pEndNote->include_in_relation(pTie, pEndData);
 
     pStartNote->set_tie_next(pTie);
     pEndNote->set_tie_prev(pTie);
-
-    m_IModel->add_tie(pTie);
-    pStartNote->attach(pTie);
-    pEndNote->attach(pTie);
 }
 
 
 
-//-------------------------------------------------------------------------------
+//=======================================================================================
+// SlursBuilder implementation
+//=======================================================================================
+void SlursBuilder::add_relation_to_notes_rests(ImoSlurDto* pEndInfo)
+{
+    m_matches.push_back(pEndInfo);
+
+    ImoSlur* pSlur = new ImoSlur( pEndInfo->get_slur_number() );
+    std::list<ImoSlurDto*>::iterator it;
+    for (it = m_matches.begin(); it != m_matches.end(); ++it)
+    {
+        ImoNote* pNote = (*it)->get_note();
+        ImoSlurData* pData = new ImoSlurData(*it);
+        pNote->include_in_relation(pSlur, pData);
+    }
+}
+
+
+
+//=======================================================================================
 // BeamsBuilder implementation
-//-------------------------------------------------------------------------------
-
-BeamsBuilder::BeamsBuilder(ostream& reporter, InternalModel* IModel, Analyser* pAnalyser)
-    : m_reporter(reporter)
-    , m_pAnalyser(pAnalyser)
-    , m_IModel(IModel)
-{
-}
-
-BeamsBuilder::~BeamsBuilder()
-{
-    clear_pending_beams();
-}
-
-void BeamsBuilder::add_beam_info(ImoBeamInfo* pNewInfo)
-{
-    if (pNewInfo->is_end_of_beam())
-        create_beam(pNewInfo);
-    else
-        save_beam_info(pNewInfo);
-}
-
-void BeamsBuilder::save_beam_info(ImoBeamInfo* pNewInfo)
-{
-    m_pendingBeams.push_back(pNewInfo);
-}
-
-void BeamsBuilder::create_beam(ImoBeamInfo* pEndInfo)
-{
-    int beamNum = pEndInfo->get_beam_number();
-    if ( find_matching_info_items(beamNum) )
-    {
-        do_beam_notes_rests(pEndInfo);
-        delete_consumed_info_items(pEndInfo);
-    }
-    else
-    {
-        error_no_matching_items(pEndInfo);
-        delete_beam_element(pEndInfo);
-    }
-}
-
-bool BeamsBuilder::find_matching_info_items(int beamNum)
-{
-    m_matches.clear();
-    std::list<ImoBeamInfo*>::iterator it;
-    for(it=m_pendingBeams.begin(); it != m_pendingBeams.end(); ++it)
-    {
-        if ((*it)->get_beam_number() == beamNum)
-            m_matches.push_back(*it);
-    }
-    return !m_matches.empty();
-}
-
-void BeamsBuilder::do_beam_notes_rests(ImoBeamInfo* pEndInfo)
+//=======================================================================================
+void BeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
 {
     m_matches.push_back(pEndInfo);
 
     ImoBeam* pBeam = new ImoBeam();
-    std::list<ImoBeamInfo*>::iterator it;
+    std::list<ImoBeamDto*>::iterator it;
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
-        pNR->set_beam(pBeam);
-        for (int level=0; level < 6; level++)
-            pNR->set_beam_type(level, (*it)->get_beam_type(level) );
-        pBeam->push_back(pNR);
+        ImoBeamData* pData = new ImoBeamData(*it);
+        pNR->include_in_relation(pBeam, pData);
     }
 
-    //AWARE: LDP v1.6 requires full beam description, Autobeamer is not needed
+    //AWARE: LDP v1.6 requires full item description, Autobeamer is not needed
     //AutoBeamer autobeamer(pBeam);
     //autobeamer.do_autobeam();
-
-    m_IModel->add_beam(pBeam);
-}
-
-void BeamsBuilder::delete_consumed_info_items(ImoBeamInfo* pEndInfo)
-{
-    m_matches.clear();
-    int beamNum = pEndInfo->get_beam_number();
-    std::list<ImoBeamInfo*>::iterator it;
-    for(it=m_pendingBeams.begin(); it != m_pendingBeams.end(); )
-    {
-        if ((*it)->get_beam_number() == beamNum)
-        {
-            delete *it;
-            it = m_pendingBeams.erase(it);
-        }
-        else
-            ++it;
-    }
-    delete pEndInfo;
-}
-
-void BeamsBuilder::delete_beam_element(ImoBeamInfo* pInfo)
-{
-    //Nothing to do: pInfo is deleted automatically when erasing node
-}
-
-void BeamsBuilder::clear_pending_beams()
-{
-    std::list<ImoBeamInfo*>::iterator it;
-    for (it = m_pendingBeams.begin(); it != m_pendingBeams.end(); ++it)
-        error_no_end_beam(*it);
-    m_pendingBeams.clear();
-}
-
-void BeamsBuilder::error_no_matching_items(ImoBeamInfo* pInfo)
-{
-    m_reporter << "Line " << pInfo->get_line_number()
-               << ". No 'begin/continue' elements for beam number "
-               << pInfo->get_beam_number()
-               << ". Beam ignored." << endl;
-    delete pInfo;
-}
-
-void BeamsBuilder::error_no_end_beam(ImoBeamInfo* pInfo)
-{
-    m_reporter << "Line " << pInfo->get_line_number()
-               << ". No 'end' element for beam number "
-               << pInfo->get_beam_number()
-               << ". Beam ignored." << endl;
-    delete pInfo;
 }
 
 
-
-//-------------------------------------------------------------------------------
+//=======================================================================================
 // OldBeamsBuilder implementation
-//-------------------------------------------------------------------------------
-
-OldBeamsBuilder::OldBeamsBuilder(ostream& reporter, InternalModel* IModel, Analyser* pAnalyser)
+//=======================================================================================
+OldBeamsBuilder::OldBeamsBuilder(ostream& reporter, Analyser* pAnalyser)
     : m_reporter(reporter)
     , m_pAnalyser(pAnalyser)
-    , m_IModel(IModel)
 {
 }
 
+//---------------------------------------------------------------------------------------
 OldBeamsBuilder::~OldBeamsBuilder()
 {
     clear_pending_old_beams();
 }
 
-void OldBeamsBuilder::add_old_beam(ImoBeamInfo* pInfo)
+//---------------------------------------------------------------------------------------
+void OldBeamsBuilder::add_old_beam(ImoBeamDto* pInfo)
 {
     m_pendingOldBeams.push_back(pInfo);
 }
 
+//---------------------------------------------------------------------------------------
 void OldBeamsBuilder::clear_pending_old_beams()
 {
-    std::list<ImoBeamInfo*>::iterator it;
+    std::list<ImoBeamDto*>::iterator it;
     for (it = m_pendingOldBeams.begin(); it != m_pendingOldBeams.end(); ++it)
     {
         error_no_end_old_beam(*it);
@@ -4679,116 +4901,94 @@ void OldBeamsBuilder::clear_pending_old_beams()
     m_pendingOldBeams.clear();
 }
 
+//---------------------------------------------------------------------------------------
 bool OldBeamsBuilder::is_old_beam_open()
 {
     return m_pendingOldBeams.size() > 0;
 }
 
-void OldBeamsBuilder::error_no_end_old_beam(ImoBeamInfo* pInfo)
+//---------------------------------------------------------------------------------------
+void OldBeamsBuilder::error_no_end_old_beam(ImoBeamDto* pInfo)
 {
     m_reporter << "Line " << pInfo->get_line_number()
                << ". No matching 'g-' element for 'g+'. Beam ignored." << endl;
 }
 
-void OldBeamsBuilder::close_old_beam(ImoBeamInfo* pInfo)
+//---------------------------------------------------------------------------------------
+void OldBeamsBuilder::close_old_beam(ImoBeamDto* pInfo)
 {
     add_old_beam(pInfo);
     do_create_old_beam();
 }
 
+//---------------------------------------------------------------------------------------
 void OldBeamsBuilder::do_create_old_beam()
 {
     ImoBeam* pBeam = new ImoBeam();
-    std::list<ImoBeamInfo*>::iterator it;
+    std::list<ImoBeamDto*>::iterator it;
     for (it = m_pendingOldBeams.begin(); it != m_pendingOldBeams.end(); ++it)
     {
         ImoNoteRest* pNR = (*it)->get_note_rest();
-        for (int level=0; level < 6; level++)
-        {
-            pNR->set_beam(pBeam);
-            pNR->set_beam_type(level, (*it)->get_beam_type(level) );
-        }
-        pBeam->push_back(pNR);
+        ImoBeamData* pData = new ImoBeamData(*it);
+        pNR->include_in_relation(pBeam, pData);
         delete *it;
     }
     m_pendingOldBeams.clear();
 
     AutoBeamer autobeamer(pBeam);
     autobeamer.do_autobeam();
-
-    m_IModel->add_beam(pBeam);
 }
 
 
 
-//-------------------------------------------------------------------------------
+//=======================================================================================
 // TupletsBuilder implementation
-//-------------------------------------------------------------------------------
-
-TupletsBuilder::TupletsBuilder(ostream& reporter, InternalModel* IModel, Analyser* pAnalyser)
-    : m_reporter(reporter)
-    , m_pAnalyser(pAnalyser)
-    , m_IModel(IModel)
+//=======================================================================================
+void TupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
 {
-}
+    m_matches.push_back(pEndDto);
 
-TupletsBuilder::~TupletsBuilder()
-{
-    clear_pending_tuplets();
-}
+    ImoTupletDto* pStartDto = m_matches.front();
+    ImoTuplet* pTuplet = new ImoTuplet( pStartDto );
 
-void TupletsBuilder::add_tuplet_info(ImoTupletDto* pNewInfo)
-{
-    if (pNewInfo->is_end_of_tuplet())
-        create_tuplet(pNewInfo);
-    else
-        save_tuplet_info(pNewInfo);
-}
-
-void TupletsBuilder::save_tuplet_info(ImoTupletDto* pNewInfo)
-{
-    m_pendingTuplets.push_back(pNewInfo);
-}
-
-void TupletsBuilder::create_tuplet(ImoTupletDto* pEndInfo)
-{
-    save_tuplet_info(pEndInfo);
-
-    ImoTuplet* pTuplet = NULL;
     std::list<ImoTupletDto*>::iterator it;
-    for (it = m_pendingTuplets.begin(); it != m_pendingTuplets.end(); ++it)
+    for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {
-        if (it == m_pendingTuplets.begin())
-            pTuplet = new ImoTuplet(*it);
-
         ImoNoteRest* pNR = (*it)->get_note_rest();
-        pNR->set_tuplet(pTuplet);
-        pTuplet->push_back(pNR);
-        delete *it;
+        ImoTupletData* pData = new ImoTupletData(*it);
+        pNR->include_in_relation(pTuplet, pData);
     }
-    m_pendingTuplets.clear();
-
-    m_IModel->add_tuplet(pTuplet);
 }
 
-void TupletsBuilder::clear_pending_tuplets()
+
+
+//=======================================================================================
+// ImoObjFactory implementation
+//=======================================================================================
+ImoObjFactory::ImoObjFactory(LibraryScope& libraryScope, ostream& reporter)
+    : m_libraryScope(libraryScope)
+    , m_reporter(reporter)
 {
-    std::list<ImoTupletDto*>::iterator it;
-    for (it = m_pendingTuplets.begin(); it != m_pendingTuplets.end(); ++it)
-    {
-        error_no_end_tuplet(*it);
-        LdpElement* pElm = (*it)->get_tuplet_element();
-        if (!pElm || pElm->get_imo() == NULL)
-            delete *it;
-    }
-    m_pendingTuplets.clear();
 }
 
-void TupletsBuilder::error_no_end_tuplet(ImoTupletDto* pInfo)
+//---------------------------------------------------------------------------------------
+ImoObj* ImoObjFactory::create_object(const std::string& ldpSource)
 {
-    m_reporter << "Line " << pInfo->get_line_number()
-               << ". No 'end' element for tuplet. Tuplet ignored." << endl;
+    LdpParser parser(m_reporter, m_libraryScope.ldp_factory());
+    SpLdpTree tree = parser.parse_text(ldpSource);
+    Analyser a(m_reporter, m_libraryScope);
+    return a.analyse_tree_and_get_object(tree);
 }
+
+//---------------------------------------------------------------------------------------
+ImoTextItem* ImoObjFactory::create_text_item(const std::string& ldpSource,
+                                             ImoTextStyleInfo* pStyle)
+{
+    ImoTextItem* pText = dynamic_cast<ImoTextItem*>( create_object(ldpSource) );
+    pText->set_style(pStyle);
+    return pText;
+}
+
 
 
 }   //namespace lomse

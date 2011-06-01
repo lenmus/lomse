@@ -26,18 +26,14 @@
 #include "lomse_engraving_options.h"
 #include "lomse_glyphs.h"
 #include "lomse_shape_note.h"
-#include "lomse_shape_beam.h"
-#include "lomse_shape_tuplet.h"
-#include "lomse_box_slice_instr.h"
 #include "lomse_font_storage.h"
 #include "lomse_shapes.h"
 #include "lomse_pitch.h"
 #include "lomse_score_meter.h"
-#include "lomse_beam_engraver.h"
-#include "lomse_chord_engraver.h"
-#include "lomse_tuplet_engraver.h"
 #include "lomse_shapes_storage.h"
 #include "lomse_accidentals_engraver.h"
+#include "lomse_chord_engraver.h"
+#include "lomse_internal_model.h"
 
 using namespace std;
 
@@ -68,7 +64,6 @@ GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int iInstr, int iStaff,
     m_color = m_pNote->get_color();
     m_pNoteShape = NULL;
     m_pNoteheadShape = NULL;
-    m_pBeamShape = NULL;
     m_fontSize = determine_font_size();
 
     //compute y pos for note pitch
@@ -90,25 +85,6 @@ GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int iInstr, int iStaff,
     add_stem_and_flag_if_required();
     add_leger_lines_if_necessary();
 
-    //add the note to relation objects
-    add_to_chord_if_in_chord();
-    add_to_beam_if_beamed();
-    add_to_tuplet_if_in_tuplet(m_pBeamShape);
-
-    //if this is the last note of a relation, finish relation
-
-    //chord
-    if (is_last_note_of_chord())
-        layout_chord();
-
-    // beam
-    if (is_last_note_of_beam())
-        layout_beam();
-
-    // tuplet bracket
-    if (is_last_noterest_of_tuplet())
-        layout_tuplet();
-
     return m_pNoteShape;
 }
 
@@ -117,22 +93,22 @@ void NoteEngraver::determine_stem_direction()
 {
 	switch (m_pNote->get_stem_direction())
 	{
-        case ImoNote::k_stem_default:
+        case k_stem_default:
             m_fStemDown = (m_nPosOnStaff >= 6);
             break;
-        case ImoNote::k_stem_double:
+        case k_stem_double:
 //            TODO
 //            I understand that "STEM_double" means two stems: one up and one down.
 //            This is not yet implemented and is treated as stem default.
             m_fStemDown = (m_nPosOnStaff >= 6);
             break;
-        case ImoNote::k_stem_up:
+        case k_stem_up:
             m_fStemDown = false;
             break;
-        case ImoNote::k_stem_down:
+        case k_stem_down:
             m_fStemDown = true;
             break;
-        case ImoNote::k_stem_none:
+        case k_stem_none:
             m_fStemDown = false;       //false or true. The value doesn't matter.
             break;
     }
@@ -197,7 +173,7 @@ void NoteEngraver::add_stem_and_flag_if_required()
 void NoteEngraver::add_shapes_for_accidentals_if_required()
 {
     int acc = m_pNote->get_accidentals();
-    if (acc != ImoNote::k_no_accidentals)
+    if (acc != k_no_accidentals)
     {
         AccidentalsEngraver engrv(m_libraryScope, m_pMeter);
         m_pAccidentalsShape = engrv.create_shape(m_pNote, m_iInstr, m_iStaff,
@@ -230,15 +206,15 @@ int NoteEngraver::decide_notehead_type()
     int noteType = m_pNote->get_note_type();
     //if (! m_fCabezaX)
     {
-        if (noteType > ImoNoteRest::k_half) {
+        if (noteType > k_half) {
             return k_notehead_quarter;
-        } else if (noteType == ImoNoteRest::k_half) {
+        } else if (noteType == k_half) {
             return k_notehead_half;
-        } else if (noteType == ImoNoteRest::k_whole) {
+        } else if (noteType == k_whole) {
             return k_notehead_whole;
-        } else if (noteType == ImoNoteRest::k_breve) {
+        } else if (noteType == k_breve) {
             return k_notehead_breve;
-        } else if (noteType == ImoNoteRest::k_longa) {
+        } else if (noteType == k_longa) {
             return k_notehead_longa;
         } else {
             //LogMessage("NoteEngraver::decide_notehead_type", "Unknown note type.");
@@ -421,163 +397,6 @@ Tenths NoteEngraver::get_standard_stem_length(int nPosOnStaff, bool fStemDown)
 }
 
 //---------------------------------------------------------------------------------------
-bool NoteEngraver::is_chord_beamed()
-{
-    ImoChord* pChord = m_pNote->get_chord();
-    ImoNote* pBase = dynamic_cast<ImoNote*>(pChord->get_start_object());
-    if(pBase->is_beamed())
-    {
-        ImoBeam* pBeam = pBase->get_beam();
-        return (pBase == dynamic_cast<ImoNote*>(pBeam->get_end_object()) );
-    }
-    return false;
-}
-
-//---------------------------------------------------------------------------------------
-ImoBeam* NoteEngraver::get_beam()
-{
-    if (is_in_chord())
-    {
-        ImoChord* pChord = m_pNote->get_chord();
-        ImoNote* pBase = dynamic_cast<ImoNote*>(pChord->get_start_object());
-        if(pBase->is_beamed())
-            return pBase->get_beam();
-        else
-            return NULL;
-    }
-    else
-        return m_pNote->get_beam();
-}
-
-//*********************************
-
-//---------------------------------------------------------------------------------------
-bool NoteEngraver::is_first_note_of_beam()
-{
-    if (is_beamed())
-    {
-        ImoBeam* pBeam = get_beam();
-        return (m_pNote == dynamic_cast<ImoNote*>(pBeam->get_start_object()) );
-    }
-    return false;
-}
-
-//---------------------------------------------------------------------------------------
-bool NoteEngraver::is_last_note_of_beam()
-{
-    if (is_beamed())
-    {
-        ImoBeam* pBeam = m_pNote->get_beam();
-        return (m_pNote == dynamic_cast<ImoNote*>(pBeam->get_end_object()) );
-    }
-    return false;
-}
-
-//---------------------------------------------------------------------------------------
-void NoteEngraver::create_beam_shape_and_link()
-{
-    ImoBeam* pBeam = get_beam();
-    BeamEngraver* pEngrv = new BeamEngraver(m_libraryScope, m_pMeter);
-    m_pBeamShape = pEngrv->create_shape(pBeam, m_iInstr, m_iStaff);
-    m_pShapesStorage->save_engraver(pEngrv, pBeam);
-
-    link_note_and_beam(pEngrv, k_link_start);
-}
-
-//---------------------------------------------------------------------------------------
-void NoteEngraver::get_beam_shape_and_link()
-{
-    ImoBeam* pBeam = get_beam();
-    BeamEngraver* pEngrv
-        = dynamic_cast<BeamEngraver*>(m_pShapesStorage->get_engraver(pBeam));
-    m_pBeamShape = pEngrv->get_beam_shape();
-
-    if (is_last_note_of_beam())
-        link_note_and_beam(pEngrv, k_link_end);
-    else
-        link_note_and_beam(pEngrv, k_link_middle);
-}
-
-//---------------------------------------------------------------------------------------
-void NoteEngraver::link_note_and_beam(BeamEngraver* pEngrv, int linkType)
-{
-    m_pNoteShape->accept_link_from(m_pBeamShape, linkType);
-    pEngrv->add_note_rest(m_pNote, m_pNoteShape);
-
-    //transfer beam info to note shape
-    for (int iLevel=0; iLevel < 6; ++iLevel)
-        m_pNoteShape->set_beam_type(iLevel, m_pNote->get_beam_type(iLevel));
-}
-
-//---------------------------------------------------------------------------------------
-void NoteEngraver::layout_beam()
-{
-    ImoBeam* pBeam = get_beam();
-    BeamEngraver* pEngrv
-        = dynamic_cast<BeamEngraver*>(m_pShapesStorage->get_engraver(pBeam));
-    pEngrv->fix_stems_and_reposition_rests();
-    m_pShapesStorage->shape_ready_for_gmodel(pBeam, GmoShape::k_layer_notes);
-}
-
-//---------------------------------------------------------------------------------------
-void NoteEngraver::add_to_beam_if_beamed()
-{
-    if ( is_beamed())
-    {
-        if (is_first_note_of_beam())
-            create_beam_shape_and_link();
-        else
-            get_beam_shape_and_link();
-    }
-    else
-        m_pBeamShape = NULL;
-}
-
-//*********************************
-
-
-//---------------------------------------------------------------------------------------
-void NoteEngraver::create_chord()
-{
-    ImoChord* pChord = m_pNote->get_chord();
-    ChordEngraver* pEngrv = new ChordEngraver(m_libraryScope, m_pMeter);
-    m_pShapesStorage->save_engraver(pEngrv, pChord);
-
-    pEngrv->add_note(m_pNote, m_pNoteShape, m_nPosOnStaff, m_iInstr);
-}
-
-//---------------------------------------------------------------------------------------
-void NoteEngraver::add_to_chord()
-{
-    ImoChord* pChord = m_pNote->get_chord();
-    ChordEngraver* pEngrv
-        = dynamic_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
-
-    pEngrv->add_note(m_pNote, m_pNoteShape, m_nPosOnStaff, m_iInstr);
-}
-
-//---------------------------------------------------------------------------------------
-void NoteEngraver::add_to_chord_if_in_chord()
-{
-    if (is_in_chord())
-    {
-        if (m_pNote->is_start_of_chord())
-            create_chord();
-        else
-            add_to_chord();
-    }
-}
-
-//---------------------------------------------------------------------------------------
-void NoteEngraver::layout_chord()
-{
-    ImoChord* pChord = m_pNote->get_chord();
-    ChordEngraver* pEngrv
-        = dynamic_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
-    pEngrv->layout_chord();
-}
-
-//---------------------------------------------------------------------------------------
 Tenths NoteEngraver::get_glyph_offset(int iGlyph)
 {
     return glyphs_lmbasic2[iGlyph].GlyphOffset;
@@ -615,20 +434,55 @@ double NoteEngraver::determine_font_size()
 }
 
 //---------------------------------------------------------------------------------------
-ImoTuplet* NoteEngraver::get_tuplet()
+void NoteEngraver::add_to_chord_if_in_chord()
 {
     if (is_in_chord())
     {
-        ImoChord* pChord = m_pNote->get_chord();
-        ImoNote* pBase = dynamic_cast<ImoNote*>(pChord->get_start_object());
-        if(pBase->is_in_tuplet())
-            return pBase->get_tuplet();
+        if (m_pNote->is_start_of_chord())
+            create_chord();
+        else if (is_last_note_of_chord())
+            layout_chord();
         else
-            return NULL;
+            add_to_chord();
     }
-    else
-        return m_pNote->get_tuplet();
 }
+
+//---------------------------------------------------------------------------------------
+void NoteEngraver::create_chord()
+{
+    ImoChord* pChord = m_pNote->get_chord();
+    ChordEngraver* pEngrv = new ChordEngraver(m_libraryScope, m_pMeter);
+    m_pShapesStorage->save_engraver(pEngrv, pChord);
+
+    pEngrv->set_start_staffobj(pChord, m_pNote, m_pNoteShape, m_iInstr, m_iStaff,
+                               0, 0, UPoint(0.0f, 0.0f));
+}
+
+//---------------------------------------------------------------------------------------
+void NoteEngraver::add_to_chord()
+{
+    ImoChord* pChord = m_pNote->get_chord();
+    ChordEngraver* pEngrv
+        = dynamic_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
+
+    //pEngrv->add_note(m_pNote, m_pNoteShape, m_nPosOnStaff, m_iInstr);
+    pEngrv->set_middle_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0);
+}
+
+//---------------------------------------------------------------------------------------
+void NoteEngraver::layout_chord()
+{
+    ImoChord* pChord = m_pNote->get_chord();
+    ChordEngraver* pEngrv
+        = dynamic_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
+    //pEngrv->layout_chord();
+//    pEngrv->set_end_staffobj(pAO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol);
+    pEngrv->set_end_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0);
+//    pEngrv->set_prolog_width( prologWidth );
+//
+    pEngrv->create_shapes();
+}
+
 
 
 //=======================================================================================
@@ -711,9 +565,9 @@ void StemFlagEngraver::cut_stem_size_to_add_flag()
     }
     else
     {
-        if (m_noteType == ImoNoteRest::k_eighth)
+        if (m_noteType == k_eighth)
             rFlag = (glyphs_lmbasic2[iGlyph].Top) / 51.2f ;
-        else if (m_noteType == ImoNoteRest::k_16th)
+        else if (m_noteType == k_16th)
             rFlag = (glyphs_lmbasic2[iGlyph].Top + 128.0f) / 51.2f;
         else
             rFlag = (glyphs_lmbasic2[iGlyph].Top + 512.0f) / 51.2f;
@@ -752,17 +606,17 @@ int StemFlagEngraver::get_glyph_for_flag()
 {
     switch (m_noteType)
 	{
-        case ImoNoteRest::k_eighth :
+        case k_eighth :
             return (m_fStemDown ? k_glyph_eighth_flag_down : k_glyph_eighth_flag_up);
-        case ImoNoteRest::k_16th :
+        case k_16th :
             return  (m_fStemDown ? k_glyph_16th_flag_down : k_glyph_16th_flag_up);
-        case ImoNoteRest::k_32th :
+        case k_32th :
             return  (m_fStemDown ? k_glyph_32nd_flag_down : k_glyph_32nd_flag_up);
-        case ImoNoteRest::k_64th :
+        case k_64th :
             return  (m_fStemDown ? k_glyph_64th_flag_down : k_glyph_64th_flag_up);
-        case ImoNoteRest::k_128th :
+        case k_128th :
             return  (m_fStemDown ? k_glyph_128th_flag_down : k_glyph_128th_flag_up);
-        case ImoNoteRest::k_256th :
+        case k_256th :
             return  (m_fStemDown ? k_glyph_256th_flag_down : k_glyph_256th_flag_up);
         default:
             //LogMessage("StemFlagEngraver::get_glyph_for_flag", "Error: invalid note type %d.", m_pNote->get_note_type());

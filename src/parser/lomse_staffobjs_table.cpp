@@ -24,21 +24,22 @@
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_ldp_exporter.h"
+#include "lomse_time.h"
 
 using namespace std;
 
 namespace lomse
 {
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ColStaffObjsEntry implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 void ColStaffObjsEntry::dump()
 {
     //cout << to_string() << ", time=" << m_time << ", staff=" << m_staff
     //     << ", line=" << m_line << endl;
-    //segment     time       instr     line     staff     object
-    cout << m_segment << "\t" << m_time << "\t" << m_instr << "\t"
+    //measure     time       instr     line     staff     object
+    cout << m_measure << "\t" << m_time << "\t" << m_instr << "\t"
          << m_line << "\t" << m_staff << "\t" << to_string_with_ids() << endl;
 
 }
@@ -60,23 +61,33 @@ std::string ColStaffObjsEntry::to_string_with_ids()
 
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ColStaffObjs implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 
-//auxiliary, for sort: by segment, time, line and staff
+//auxiliary, for sort: by time, object type (barlines before objects in other lines), line and staff
 bool is_lower_entry(ColStaffObjsEntry* a, ColStaffObjsEntry* b)
 {
-    return a->segment() < b->segment()
-        || (a->segment() == b->segment() && a->time() < b->time())
-        || (a->segment() == b->segment() && a->time() == b->time()
-            && a->line() < b->line())
-        || (a->segment() == b->segment() && a->time() == b->time()
-            && a->line() == b->line() && a->staff() < b->staff()) ;
+    if ( is_lower_time(a->time(), b->time()) )
+        return true;
+    else if ( is_equal_time(a->time(), b->time()) )
+    {
+        ImoObj* pA = a->imo_object();
+        ImoObj* pB = b->imo_object();
+        if (pA->is_barline() && !pB->is_barline() && a->line() != b->line())
+            return true;
+        else if (pB->is_barline() && !pA->is_barline() && a->line() != b->line())
+            return false;
+        //else continue
+    }
+    return (is_equal_time(a->time(), b->time()) && a->line() < b->line())
+            || (is_equal_time(a->time(), b->time())
+                && a->line() == b->line() && a->staff() < b->staff()) ;
 }
 
 //---------------------------------------------------------------------------------------
 ColStaffObjs::ColStaffObjs()
+    : m_numLines(0)
 {
 }
 
@@ -90,11 +101,11 @@ ColStaffObjs::~ColStaffObjs()
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjs::AddEntry(int segment, float time, int instr, int voice, int staff,
+void ColStaffObjs::AddEntry(int measure, float time, int instr, int voice, int staff,
                             ImoObj* pImo)
 {
     ColStaffObjsEntry* pEntry =
-        new ColStaffObjsEntry(segment, time, instr, voice, staff, pImo, NULL);
+        new ColStaffObjsEntry(measure, time, instr, voice, staff, pImo, NULL);
     m_table.push_back(pEntry);
 }
 
@@ -120,9 +131,9 @@ void ColStaffObjs::sort()
 
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ColStaffObjsBuilder implementation: algorithm to create a ColStaffObjs
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 ColStaffObjsBuilder::ColStaffObjsBuilder()
 {
 }
@@ -150,6 +161,7 @@ ColStaffObjs* ColStaffObjsBuilder::build(ImoScore* pScore, bool fSort)
     m_pScore = NULL;
     m_pImScore = pScore;
     create_table();
+    set_num_lines();
     sort_table(fSort);
     m_pImScore->set_staffobjs_table(m_pColStaffObjs);
     return m_pColStaffObjs;
@@ -165,6 +177,12 @@ void ColStaffObjsBuilder::create_table()
         create_entries(nInstr);
         prepare_for_next_instrument();
     }
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilder::set_num_lines()
+{
+    m_pColStaffObjs->set_total_lines( m_lines.get_number_of_lines() );
 }
 
 //---------------------------------------------------------------------------------------
@@ -197,7 +215,7 @@ void ColStaffObjsBuilder::create_entries(int nInstr)
         {
             ImoStaffObj* pSO = dynamic_cast<ImoStaffObj*>(*it);
             add_entry_for_staffobj(pSO, nInstr);
-            update_segment(pSO);
+            update_measure(pSO);
         }
         ++it;
     }
@@ -251,7 +269,8 @@ void ColStaffObjsBuilder::reset_counters()
     m_nCurSegment = 0;
     m_rCurTime = 0.0f;
     m_nCurStaff = 0;
-    m_rMaxTime = 0.0f;
+    m_rMaxSegmentTime = 0.0f;
+    m_rStartSegmentTime = 0.0f;
 }
 
 //---------------------------------------------------------------------------------------
@@ -272,19 +291,19 @@ float ColStaffObjsBuilder::determine_timepos(ImoStaffObj* pSO)
     }
     else
         m_rCurTime += pSO->get_duration();
-    m_rMaxTime = max(m_rMaxTime, m_rCurTime);
+    m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_rCurTime);
     return rTime;
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::update_segment(ImoStaffObj* pSO)
+void ColStaffObjsBuilder::update_measure(ImoStaffObj* pSO)
 {
     ImoBarline* pBL = dynamic_cast<ImoBarline*>(pSO);
     if (pBL)
     {
         ++m_nCurSegment;
-        m_rMaxTime = 0.0f;
-        m_rCurTime = 0.0f;
+        m_rMaxSegmentTime = 0.0f;
+        m_rStartSegmentTime = m_rCurTime;
     }
 }
 
@@ -292,13 +311,13 @@ void ColStaffObjsBuilder::update_segment(ImoStaffObj* pSO)
 void ColStaffObjsBuilder::update_time_counter(ImoGoBackFwd* pGBF)
 {
     if (pGBF->is_to_start())
-        m_rCurTime = 0.0f;
+        m_rCurTime = m_rStartSegmentTime;
     else if (pGBF->is_to_end())
-        m_rCurTime = m_rMaxTime;
+        m_rCurTime = m_rMaxSegmentTime;
     else
     {
         m_rCurTime += pGBF->get_time_shift();
-        m_rMaxTime = max(m_rMaxTime, m_rCurTime);
+        m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_rCurTime);
     }
 }
 
@@ -328,7 +347,7 @@ void ColStaffObjsBuilder::update(ImoScore* pScore)
 ImoSpacer* ColStaffObjsBuilder::anchor_object(ImoAuxObj* pAux)
 {
     ImoSpacer* pAnchor = new ImoSpacer();
-    pAnchor->attach(pAux);
+    pAnchor->add_attachment(pAux);
     return pAnchor;
 }
 
@@ -365,16 +384,25 @@ int StaffVoiceLineTable::assign_line_to(int nVoice, int nStaff)
     {
         if (m_firstVoiceForStaff[nStaff] == 0)
         {
-            //first voice found in this staff. Same line as voice 0 (nStaff)
+            //No voice yet assigned to this staff. Save voice nVoice as
+            //first voice in this staff and assign it the sSame line than
+            //voice 0 (nStaff)
             m_firstVoiceForStaff[nStaff] = nVoice;
             int line = get_line_assigned_to(0, nStaff);
             m_lineForStaffVoice[key] = line;
             return line;
         }
         else if (m_firstVoiceForStaff[nStaff] == nVoice)
-            //first voice found in this staff. Same line as voice 0 (nStaff)
+        {
+            //voice nVoice is the first voice found in this staff.
+            //Assign it the sSame line than voice 0 (nStaff)
             return get_line_assigned_to(0, nStaff);
+        }
+        //else, assig it a line
     }
+
+    //voice == 0 or voice is not first voice for this staff.
+    //assign it the next available line number
     int line = ++m_lastAssignedLine;
     m_lineForStaffVoice[key] = line;
     return line;

@@ -1,12 +1,11 @@
-(score
-   (vers 1.6)(language en iso-8859-1)
-   (systemLayout first (systemMargins 0 0 0 2000))
-   (systemLayout other (systemMargins 0 0 1200 2000))
-   (opt Score.FillPageWithEmptyStaves true)
-   (opt StaffLines.StopAtFinalBarline false)
+(score 
+   (vers 1.6) 
+   (systemLayout first (systemMargins 0 0 1500 1500)) 
+   (systemLayout other (systemMargins 0 0 1500 1000)) 
+   (opt Score.FillPageWithEmptyStaves true) 
+   (opt StaffLines.StopAtFinalBarline false) 
    (instrument
       (musicData
       )
    )
 )
-

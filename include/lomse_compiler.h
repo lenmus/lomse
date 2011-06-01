@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_COMPILER_H__
 #define __LOMSE_COMPILER_H__
@@ -40,10 +40,8 @@ class InternalModel;
 class ImoDocument;
 
 
-//------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 // LdpCompiler: builds the tree for a document
-//------------------------------------------------------------------------------------
-
 class LdpCompiler
 {
 protected:
@@ -64,6 +62,7 @@ public:
     InternalModel* create_with_empty_score();
 
     int get_num_errors();
+
 //    LdpElement* create_element(const std::string& source);
 //    InternalModel* create_basic_model(const std::string& source);
 //    inline InternalModel* get_outcome() { return m_IModel; }

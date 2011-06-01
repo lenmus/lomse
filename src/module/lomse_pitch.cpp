@@ -614,7 +614,7 @@ DiatonicPitch::DiatonicPitch(int step, int octave)
 ////---------------------------------------------------------------------------------------
 //MidiPitch::MidiPitch(int step, int octave, int acc)
 //{
-//    if (step != ImoNote::k_unpitched)
+//    if (step != k_unpitched)
 //    {
 //			int stepToPitch [] = { 0, 2, 4, 5, 7, 9, 11 };
 //			m_pitch = (octave * 12) + stepToPitch[step] + acc;

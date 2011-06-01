@@ -33,11 +33,12 @@ namespace lomse
 
 //forward declarations
 class InternalModel;
-class GraphicModel;
-class ImoDocObj;
-class ContentLayouter;
-class FlowSizer;
+class ImoContentObj;
 class ImoDocument;
+class ImoStyles;
+class ContentLayouter;
+//class FlowSizer;
+class GraphicModel;
 class GmoBox;
 class GmoBoxDocPage;
 class FontStorage;
@@ -53,6 +54,7 @@ protected:
     LibraryScope& m_libraryScope;
     //FlowSizer* m_pMainSizer;
     GmoBox* m_pCurrentBox;
+    GmoBoxDocPage* m_pBoxDocPage;   //current page
     LUnits m_availableWidth;
     LUnits m_availableHeight;
     UPoint m_pageCursor;            //to point to current position. Relative to BoxDocPage
@@ -71,11 +73,11 @@ public:
 protected:
     void initializations();
     void layout_content();
-    void layout_item(GmoBox* pParentBox, ImoDocObj* pItem);
+    void layout_item(GmoBox* pParentBox, ImoContentObj* pItem);
     //void add_content_to_main_sizer();
     //void assign_space_to_content_items();
     ImoDocument* get_document();
-    ContentLayouter* new_item_layouter(ImoDocObj* pImo);
+    ContentLayouter* new_item_layouter(ImoContentObj* pImo, ImoStyles* pStyles);
     void start_new_document_page();
     GmoBoxDocPage* create_document_page();
     void assign_paper_size_to(GmoBox* pBox);
@@ -83,7 +85,7 @@ protected:
     void add_headers_to_page(GmoBoxDocPage* pPage);
     void add_footers_to_page(GmoBoxDocPage* pPage);
     void add_contents_wrapper_box_to_page(GmoBoxDocPage* pPage);
-    GmoBox* create_item_pagebox(GmoBox* pParentBox, ContentLayouter* pLayouter);
+    GmoBox* create_item_main_box(GmoBox* pParentBox, ContentLayouter* pLayouter);
 
     //for unit tests we need to access ScoreLayouter. Therefore I will save here the
     //last used layouter.

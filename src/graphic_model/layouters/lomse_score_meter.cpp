@@ -22,6 +22,7 @@
 
 #include "lomse_internal_model.h"
 #include "lomse_engraving_options.h"
+#include "lomse_staffobjs_table.h"
 using namespace std;
 
 
@@ -34,10 +35,13 @@ namespace lomse
 //=======================================================================================
 ScoreMeter::ScoreMeter(ImoScore* pScore)
     : m_numInstruments( pScore->get_num_instruments() )
+    , m_tupletsStyle(NULL)
 {
     get_options(pScore);
     get_staff_spacing(pScore);
     get_styles(pScore);
+
+    m_fScoreIsEmpty = pScore->get_staffobjs_table()->num_entries() == 0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -48,6 +52,7 @@ ScoreMeter::ScoreMeter(int numInstruments, int numStaves, LUnits lineSpacing,
     , m_nSpacingMethod(nSpacingMethod)
     , m_rSpacingValue(rSpacingValue)
     , m_fDrawLeftBarline(fDrawLeftBarline)
+    , m_tupletsStyle(NULL)
 {
     //constructor for using in unit tests. numStaves is for each instrument
     m_staffIndex.reserve(numInstruments);

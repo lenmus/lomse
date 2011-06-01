@@ -49,6 +49,19 @@ public:
 
     NoteEngraverTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
+        , m_pMeter(NULL)
+        , m_pEngrv(NULL)
+        , m_pTuplet(NULL)
+        , m_pTupletData1(NULL)
+        , m_pTupletData2(NULL)
+        , m_pTupletData3(NULL)
+        , m_pNote1(NULL)
+        , m_pNote2(NULL)
+        , m_pNote3(NULL)
+        , m_pShape1(NULL)
+        , m_pShape2(NULL)
+        , m_pShape3(NULL)
+        , m_pStorage(NULL)
     {
     }
 
@@ -56,92 +69,35 @@ public:
     {
     }
 
-    void create_chord(int step1, int step2, int step3=-1)
-    {
-        create_chord(step1, 4, step2, 4, step3, 4);
-    }
-
-    void create_chord(int step1, int octave1, int step2, int octave2,
-                     int step3=-1, int octave3=-1)
-    {
-        m_pChord = new ImoChord();
-        DtoNote dtoNote;
-        dtoNote.set_step( step1 );
-        dtoNote.set_octave( octave1 );
-        dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(ImoNote::k_eighth);
-        dtoNote.set_dots(0);
-        m_pNote1 = new ImoNote(dtoNote);
-        m_pNote1->set_in_chord(m_pChord);
-        m_pChord->push_back(m_pNote1);
-
-        dtoNote.set_step( step2 );
-        dtoNote.set_octave( octave2 );
-        m_pNote2 = new ImoNote(dtoNote);
-        m_pNote2->set_in_chord(m_pChord);
-        m_pChord->push_back(m_pNote2);
-
-        if (step3 >= 0)
-        {
-            dtoNote.set_step( step3 );
-            dtoNote.set_octave( octave3 );
-            m_pNote3 = new ImoNote(dtoNote);
-            m_pNote3->set_in_chord(m_pChord);
-            m_pChord->push_back(m_pNote3);
-        }
-        else
-            m_pNote3 = NULL;
-
-        m_pMeter = new ScoreMeter(1, 1, 180.0f);
-        m_pStorage = new ShapesStorage();
-        m_pEngrv = new NoteEngraver(m_libraryScope, m_pMeter, m_pStorage);
-        m_pShape1 =
-            dynamic_cast<GmoShapeNote*>(m_pEngrv->create_shape(m_pNote1, 0, 0, ImoClef::k_G2, UPoint(10.0f, 15.0f)) );
-        m_pShape2 =
-            dynamic_cast<GmoShapeNote*>(m_pEngrv->create_shape(m_pNote2, 0, 0, ImoClef::k_G2, UPoint(10.0f, 15.0f)) );
-        if (step3 >= 0)
-            m_pShape3 =
-                dynamic_cast<GmoShapeNote*>(m_pEngrv->create_shape(m_pNote3, 0, 0, ImoClef::k_G2, UPoint(10.0f, 15.0f)) );
-        else
-            m_pShape3 = NULL;
-    }
-
-    void delete_chord()
-    {
-        delete m_pMeter;
-        delete m_pEngrv;
-        delete m_pChord;
-        delete m_pNote1;
-        delete m_pNote2;
-        delete m_pNote3;
-        delete m_pShape1;
-        delete m_pShape2;
-        delete m_pShape3;
-        delete m_pStorage;
-    }
-
     void create_tuplet()
     {
+        delete_tuplet();
         m_pTuplet = new ImoTuplet();
         DtoNote dtoNote;
         dtoNote.set_step(0);
         dtoNote.set_octave(4);
         dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(ImoNote::k_eighth);
+        dtoNote.set_note_type(k_eighth);
         dtoNote.set_dots(0);
         m_pNote1 = new ImoNote(dtoNote);
-        m_pNote1->set_tuplet(m_pTuplet);
-        m_pTuplet->push_back(m_pNote1);
+        ImoTupletDto dto1;
+        dto1.set_tuplet_type(ImoTupletDto::k_start);
+        m_pTupletData1 = new ImoTupletData(&dto1);
+        m_pNote1->include_in_relation(m_pTuplet, m_pTupletData1);
 
         dtoNote.set_step(2);
         m_pNote2 = new ImoNote(dtoNote);
-        m_pNote2->set_tuplet(m_pTuplet);
-        m_pTuplet->push_back(m_pNote2);
+        ImoTupletDto dto2;
+        dto2.set_tuplet_type(ImoTupletDto::k_continue);
+        m_pTupletData2 = new ImoTupletData(&dto2);
+        m_pNote2->include_in_relation(m_pTuplet, m_pTupletData2);
 
         dtoNote.set_step(4);
         m_pNote3 = new ImoNote(dtoNote);
-        m_pNote3->set_tuplet(m_pTuplet);
-        m_pTuplet->push_back(m_pNote3);
+        ImoTupletDto dto3;
+        dto3.set_tuplet_type(ImoTupletDto::k_stop);
+        m_pTupletData3 = new ImoTupletData(&dto3);
+        m_pNote3->include_in_relation(m_pTuplet, m_pTupletData3);
 
         m_pMeter = new ScoreMeter(1, 1, 180.0f);
         m_pStorage = new ShapesStorage();
@@ -158,7 +114,10 @@ public:
     {
         delete m_pMeter;
         delete m_pEngrv;
-        delete m_pTuplet;
+//        delete m_pTuplet;
+//        delete m_pTupletData1;
+//        delete m_pTupletData2;
+//        delete m_pTupletData3;
         delete m_pNote1;
         delete m_pNote2;
         delete m_pNote3;
@@ -170,15 +129,17 @@ public:
 
     ScoreMeter* m_pMeter;
     NoteEngraver* m_pEngrv;
-    ShapesStorage* m_pStorage;
     ImoTuplet* m_pTuplet;
-    ImoChord* m_pChord;
+    ImoTupletData* m_pTupletData1;
+    ImoTupletData* m_pTupletData2;
+    ImoTupletData* m_pTupletData3;
     ImoNote* m_pNote1;
     ImoNote* m_pNote2;
     ImoNote* m_pNote3;
     GmoShapeNote* m_pShape1;
     GmoShapeNote* m_pShape2;
     GmoShapeNote* m_pShape3;
+    ShapesStorage* m_pStorage;
 
 };
 
@@ -191,7 +152,7 @@ SUITE(NoteEngraverTest)
         dtoNote.set_step(0);
         dtoNote.set_octave(4);
         dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(ImoNote::k_whole);
+        dtoNote.set_note_type(k_whole);
         ImoNote note(dtoNote);
 
         ScoreMeter meter(1, 1, 180.0f);
@@ -215,7 +176,7 @@ SUITE(NoteEngraverTest)
         dtoNote.set_step(0);
         dtoNote.set_octave(4);
         dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(ImoNote::k_quarter);
+        dtoNote.set_note_type(k_quarter);
         ImoNote note(dtoNote);
 
         ScoreMeter meter(1, 1, 180.0f);
@@ -241,7 +202,7 @@ SUITE(NoteEngraverTest)
         dtoNote.set_step(0);
         dtoNote.set_octave(4);
         dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(ImoNote::k_eighth);
+        dtoNote.set_note_type(k_eighth);
         ImoNote note(dtoNote);
 
         ScoreMeter meter(1, 1, 180.0f);
@@ -269,7 +230,7 @@ SUITE(NoteEngraverTest)
         dtoNote.set_step(0);
         dtoNote.set_octave(4);
         dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(ImoNote::k_whole);
+        dtoNote.set_note_type(k_whole);
         dtoNote.set_dots(1);
         ImoNote note(dtoNote);
 
@@ -296,7 +257,7 @@ SUITE(NoteEngraverTest)
         dtoNote.set_step(0);
         dtoNote.set_octave(4);
         dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(ImoNote::k_eighth);
+        dtoNote.set_note_type(k_eighth);
         dtoNote.set_dots(2);
         ImoNote note(dtoNote);
 
@@ -323,154 +284,6 @@ SUITE(NoteEngraverTest)
         delete pShape;
     }
 
-    // chord ----------------------------------------------------------------------------
-
-    TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ChordEngraverCreated)
-    {
-        create_chord(0, 2, 4);
-        ChordEngraver* pEngrv = dynamic_cast<ChordEngraver*>(m_pStorage->get_engraver(m_pChord));
-
-        CHECK( pEngrv != NULL );
-        CHECK( pEngrv->get_notes().size() == 3 );
-        CHECK( pEngrv->get_base_note() == m_pNote1 );
-
-        delete_chord();
-    }
-
-    TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ChordNotesSortedByPitch)
-    {
-        create_chord(4, 0, 2);
-        ChordEngraver* pEngrv = dynamic_cast<ChordEngraver*>(m_pStorage->get_engraver(m_pChord));
-
-        CHECK( pEngrv->get_base_note() == m_pNote1 );
-        std::list<ChordEngraver::ChordNoteData*>& notes = pEngrv->get_notes();
-        std::list<ChordEngraver::ChordNoteData*>::iterator it = notes.begin();
-        CHECK( (*it)->pNote == m_pNote2 );
-        ++it;
-        CHECK( (*it)->pNote == m_pNote3 );
-        ++it;
-        CHECK( (*it)->pNote == m_pNote1 );
-
-        delete_chord();
-    }
-
-    TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ChordStemDirectionRuleA1)
-    {
-        create_chord(5,4,  1,5);     //(a4,d5)
-        ChordEngraver* pEngrv = dynamic_cast<ChordEngraver*>(m_pStorage->get_engraver(m_pChord));
-
-        CHECK( pEngrv->is_stem_up() == false );
-
-        delete_chord();
-    }
-
-    TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ChordStemDirectionRuleA2)
-    {
-        create_chord(2,4,  0,5);     //(e4,c5)
-        ChordEngraver* pEngrv = dynamic_cast<ChordEngraver*>(m_pStorage->get_engraver(m_pChord));
-
-        CHECK( pEngrv->is_stem_up() == true );
-
-        delete_chord();
-    }
-
-    TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ChordStemDirectionRuleA3)
-    {
-        create_chord(4,4,  1,5);     //(g4.d5)
-        ChordEngraver* pEngrv = dynamic_cast<ChordEngraver*>(m_pStorage->get_engraver(m_pChord));
-
-        CHECK( pEngrv->is_stem_up() == false );
-
-        delete_chord();
-    }
-
-    TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ChordStemDirectionRuleB3Up)
-    {
-        create_chord(2,4,  4,4,  3,5);     //(e4, g4, f5)
-        ChordEngraver* pEngrv = dynamic_cast<ChordEngraver*>(m_pStorage->get_engraver(m_pChord));
-
-        CHECK( pEngrv->is_stem_up() == true );
-
-        delete_chord();
-    }
-
-    TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ChordStemDirectionRuleB3Down)
-    {
-        create_chord(2,4,  1,5,  3,5);     //(e4, d5, f5)
-        ChordEngraver* pEngrv = dynamic_cast<ChordEngraver*>(m_pStorage->get_engraver(m_pChord));
-
-        CHECK( pEngrv->is_stem_up() == false );
-
-        delete_chord();
-    }
-
-    TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ChordNoteheadReversedStemDown)
-    {
-        create_chord(5,4,  6,4,  1,5);     //(a4, b4, d5)
-        ChordEngraver* pEngrv = dynamic_cast<ChordEngraver*>(m_pStorage->get_engraver(m_pChord));
-
-        CHECK( pEngrv->is_stem_up() == false );
-        std::list<ChordEngraver::ChordNoteData*>& notes = pEngrv->get_notes();
-        std::list<ChordEngraver::ChordNoteData*>::iterator it = notes.begin();
-        CHECK( (*it)->fNoteheadReversed == true );
-        ++it;
-        CHECK( (*it)->fNoteheadReversed == false );
-        ++it;
-        CHECK( (*it)->fNoteheadReversed == false );
-
-        delete_chord();
-    }
-
-    TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ChordNoteheadReversedStemDown2)
-    {
-        create_chord(5,4,  6,4,  0,5);     //(a4, b4, c5)
-        ChordEngraver* pEngrv = dynamic_cast<ChordEngraver*>(m_pStorage->get_engraver(m_pChord));
-
-        CHECK( pEngrv->is_stem_up() == false );
-        std::list<ChordEngraver::ChordNoteData*>& notes = pEngrv->get_notes();
-        std::list<ChordEngraver::ChordNoteData*>::iterator it = notes.begin();
-        CHECK( (*it)->fNoteheadReversed == false );
-        ++it;
-        CHECK( (*it)->fNoteheadReversed == true );
-        ++it;
-        CHECK( (*it)->fNoteheadReversed == false );
-
-        delete_chord();
-    }
-
-    TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ChordNoteheadReversedStemUp)
-    {
-        create_chord(3,4,  4,4,  6,4);     //(f4, g4, b4)
-        ChordEngraver* pEngrv = dynamic_cast<ChordEngraver*>(m_pStorage->get_engraver(m_pChord));
-
-        CHECK( pEngrv->is_stem_up() == true );
-        std::list<ChordEngraver::ChordNoteData*>& notes = pEngrv->get_notes();
-        std::list<ChordEngraver::ChordNoteData*>::iterator it = notes.begin();
-        CHECK( (*it)->fNoteheadReversed == false );
-        ++it;
-        CHECK( (*it)->fNoteheadReversed == true );
-        ++it;
-        CHECK( (*it)->fNoteheadReversed == false );
-
-        delete_chord();
-    }
-
-    TEST_FIXTURE(NoteEngraverTestFixture, NoteEngraver_ChordNoteheadReversedStemUp2)
-    {
-        create_chord(3,4,  4,4,  5,4);     //(f4, g4, a4)
-        ChordEngraver* pEngrv = dynamic_cast<ChordEngraver*>(m_pStorage->get_engraver(m_pChord));
-
-        CHECK( pEngrv->is_stem_up() == true );
-        std::list<ChordEngraver::ChordNoteData*>& notes = pEngrv->get_notes();
-        std::list<ChordEngraver::ChordNoteData*>::iterator it = notes.begin();
-        CHECK( (*it)->fNoteheadReversed == false );
-        ++it;
-        CHECK( (*it)->fNoteheadReversed == true );
-        ++it;
-        CHECK( (*it)->fNoteheadReversed == false );
-
-        delete_chord();
-    }
 
     // tuplet ----------------------------------------------------------------------------
 

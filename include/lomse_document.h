@@ -26,7 +26,6 @@
 #include "lomse_observable.h"
 #include "lomse_ldp_elements.h"
 #include "lomse_stack.h"
-#include "lomse_basic_model.h"
 
 using namespace std;
 
@@ -105,10 +104,10 @@ public:
 //    void add_content(DocIterator& it, ImoObj* pObj);     //before it
 //    void add_staffobj(DocCursor& cursor, ImoStaffObj* pObj);     //before cursor
 //    ImoStaffObj* remove_staffobj()
-//    void add_auxobj()
-//    ImoAuxObj* remove_auxobj()
-//    void add_property()
-//    void remove_property()
+//    void add_attachment()
+//    ImoAuxObj* remove_attachment()
+//    void add_reldataobj()
+//    void remove_reldataobj()
 //    void change_property()
 
 //    //inserts param before the element at position referred by iterator 'it'.

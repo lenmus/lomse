@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include <UnitTest++.h>
 #include <sstream>
@@ -26,13 +26,16 @@
 #include "lomse_injectors.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_figured_bass.h"
-#include "lomse_basic_model.h"
+#include "lomse_basic_objects.h"
+#include "lomse_im_note.h"
+#include "lomse_time.h"
 
 using namespace UnitTest;
 using namespace std;
 using namespace lomse;
 
 
+//---------------------------------------------------------------------------------------
 class InternalModelTestFixture
 {
 public:
@@ -52,36 +55,15 @@ public:
     std::string m_scores_path;
 };
 
+//---------------------------------------------------------------------------------------
 SUITE(InternalModelTest)
 {
-
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_Clef)
-    {
-        ImoClef* pClef = new ImoClef(ImoClef::k_G2);
-        CHECK( pClef->has_attachments() == false );
-        delete pClef;
-    }
-
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ClefWithAttachments)
-    {
-        ImoClef* pClef = new ImoClef(ImoClef::k_G2);
-        CHECK( pClef->has_attachments() == false );
-        ImoScoreText* pText = new ImoScoreText("Hello world");
-        pClef->attach(pText);
-        CHECK( pClef->has_attachments() == true );
-        ImoObj* pImo = pClef->get_attachment(0);
-        CHECK( pImo->is_score_text() );
-        ImoScoreText* pTS = dynamic_cast<ImoScoreText*>( pImo );
-        CHECK( pTS->get_text() == "Hello world" );
-        delete pClef;
-    }
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_EmptyDocument)
     {
         ImoDocument* pDoc = new ImoDocument("3.7");
         CHECK( pDoc->get_content() == NULL );
         CHECK( pDoc->get_num_content_items() == 0 );
-        CHECK( pDoc->has_attachments() == false );
         CHECK( pDoc->get_version() == "3.7" );
         delete pDoc;
     }
@@ -95,7 +77,6 @@ SUITE(InternalModelTest)
         pContent->append_child(pText);
         CHECK( pDoc->get_num_content_items() == 1 );
         CHECK( pDoc->get_content_item(0) == pText );
-        CHECK( pDoc->has_attachments() == false );
         CHECK( pDoc->get_version() == "" );
         delete pDoc;
     }
@@ -104,7 +85,6 @@ SUITE(InternalModelTest)
     {
         ImoInstrument instr;
         CHECK( instr.get_musicdata() == NULL );
-        CHECK( instr.has_attachments() == false );
         CHECK( instr.get_num_staves() == 1 );
         CHECK( instr.is_in_group() == false );
     }
@@ -114,7 +94,6 @@ SUITE(InternalModelTest)
         ImoInstrument instr;
         instr.add_staff();
         CHECK( instr.get_musicdata() == NULL );
-        CHECK( instr.has_attachments() == false );
         CHECK( instr.get_num_staves() == 2 );
         CHECK( instr.is_in_group() == false );
     }
@@ -199,6 +178,8 @@ SUITE(InternalModelTest)
         delete pScore;
     }
 
+    // score options --------------------------------------------------------------------
+
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_ChangeFloatOption)
     {
         ImoScore score;
@@ -228,10 +209,10 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithBoolOption)
     {
         ImoScore* pScore = new ImoScore();
-        ImoOptionInfo* pOpt = new ImoOptionInfo("Staff.Green");
-        pOpt->set_bool_value(true);
-        CHECK( pOpt->get_bool_value() == true );
-        pScore->set_option(pOpt);
+        ImoOptionInfo opt("Staff.Green");
+        opt.set_bool_value(true);
+        CHECK( opt.get_bool_value() == true );
+        pScore->set_option(&opt);
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Green");
         CHECK( pOpt2 != NULL );
@@ -243,10 +224,10 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithLongOption)
     {
         ImoScore* pScore = new ImoScore();
-        ImoOptionInfo* pOpt = new ImoOptionInfo("Staff.Dots");
-        pOpt->set_long_value(27L);
-        CHECK( pOpt->get_long_value() == 27L );
-        pScore->set_option(pOpt);
+        ImoOptionInfo opt("Staff.Dots");
+        opt.set_long_value(27L);
+        CHECK( opt.get_long_value() == 27L );
+        pScore->set_option(&opt);
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Dots");
         CHECK( pOpt2 != NULL );
@@ -258,10 +239,10 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithFloatOption)
     {
         ImoScore* pScore = new ImoScore();
-        ImoOptionInfo* pOpt = new ImoOptionInfo("Staff.Pi");
-        pOpt->set_float_value(3.1416f);
-        CHECK( pOpt->get_float_value() == 3.1416f );
-        pScore->set_option(pOpt);
+        ImoOptionInfo opt("Staff.Pi");
+        opt.set_float_value(3.1416f);
+        CHECK( opt.get_float_value() == 3.1416f );
+        pScore->set_option(&opt);
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Pi");
         CHECK( pOpt2 != NULL );
@@ -300,16 +281,16 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithInstrument)
     {
         ImoScore* pScore = new ImoScore();
-        ImoOptionInfo* pOpt = new ImoOptionInfo("Staff.Green");
-        pOpt->set_bool_value(true);
-        pScore->set_option(pOpt);
+        ImoOptionInfo opt("Staff.Green");
+        opt.set_bool_value(true);
+        pScore->set_option(&opt);
 
         ImoInstrument* pInstr = new ImoInstrument();
         ImoMusicData* pMD = new ImoMusicData();
         pInstr->append_child(pMD);
         ImoClef* pClef = new ImoClef(ImoClef::k_G2);
         ImoScoreText* pText = new ImoScoreText("Hello world");
-        pClef->attach(pText);
+        pClef->add_attachment(pText);
         pMD->append_child(pClef);
         pScore->add_instrument(pInstr);
 
@@ -322,6 +303,9 @@ SUITE(InternalModelTest)
 
         delete pScore;
     }
+
+
+    // instruments group ----------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_GroupTwoInstruments)
     {
@@ -381,22 +365,21 @@ SUITE(InternalModelTest)
         pDoc->append_child(pContent);
 
         ImoScore* pScore = new ImoScore();
-        ImoOptionInfo* pOpt = new ImoOptionInfo("Staff.Green");
-        pOpt->set_bool_value(true);
-        pScore->set_option(pOpt);
+        ImoOptionInfo opt("Staff.Green");
+        opt.set_bool_value(true);
+        pScore->set_option(&opt);
         ImoInstrument* pInstr = new ImoInstrument();
         ImoMusicData* pMD = new ImoMusicData();
         pInstr->append_child(pMD);
         ImoClef* pClef = new ImoClef(ImoClef::k_G2);
         ImoScoreText* pText = new ImoScoreText("Hello world");
-        pClef->attach(pText);
+        pClef->add_attachment(pText);
         pMD->append_child(pClef);
         pScore->add_instrument(pInstr);
 
         pContent->append_child(pScore);
         CHECK( pDoc->get_num_content_items() == 1 );
         CHECK( pDoc->get_content_item(0) == pScore );
-        CHECK( pDoc->has_attachments() == false );
         CHECK( pDoc->get_version() == "" );
 
         delete pDoc;
@@ -434,24 +417,19 @@ SUITE(InternalModelTest)
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_Score_GetStyle)
     {
         ImoScore score;
-	    ImoTextStyleInfo* pStyle = new ImoTextStyleInfo();
-	    pStyle->set_name("Test style");
-        pStyle->set_color( Color(15,16,27,132) );
-        pStyle->set_font_name("Callamet");
-        pStyle->set_font_size(12);
-        pStyle->set_font_style(ImoFontInfo::k_normal);
-        pStyle->set_font_weight(ImoFontInfo::k_bold);
+	    ImoTextStyleInfo* pStyle = new ImoTextStyleInfo("Test style", "Callamet",
+            12.0f, ImoFontInfo::k_normal, ImoFontInfo::k_bold, Color(15,16,27,132) );
         score.add_style_info(pStyle);
 
         ImoTextStyleInfo* pStyle2 = score.get_style_info("Test style");
         CHECK( pStyle == pStyle2 );
     }
 
-    // ImoBoxInfo -----------------------------------------------------------------------
+    // ImoTextBlockInfo -----------------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelTestFixture, InternalModel_BoxInfoDefaults)
     {
-        ImoBoxInfo info;
+        ImoTextBlockInfo info;
         CHECK( info.is_box_info() == true );
         CHECK( info.get_height() == 100.0f );
         CHECK( info.get_width() == 160.0f );
@@ -560,6 +538,344 @@ SUITE(InternalModelTest)
         //CHECK( info.get_over(3) == "" );
         CHECK( info.get_figured_bass_string() == "9" );
     }
+
+    // RelDataObjs ----------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ClefNoReldataobjs)
+    {
+        ImoClef clef(ImoClef::k_G2);
+        CHECK( clef.has_reldataobjs() == false );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_AddReldataobj)
+    {
+        ImoClef clef(ImoClef::k_G2);
+        ImoMidiInfo* pMidi = new ImoMidiInfo();
+        clef.add_reldataobj(pMidi);
+
+        CHECK( clef.has_reldataobjs() == true );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_GetNumReldataobjs)
+    {
+        ImoClef clef(ImoClef::k_G2);
+        ImoMidiInfo* pMidi = new ImoMidiInfo();
+        clef.add_reldataobj(pMidi);
+        ImoFontInfo* pFont = new ImoFontInfo();
+        clef.add_reldataobj(pFont);
+
+        CHECK( clef.get_num_reldataobjs() == 2 );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_GetReldataobj)
+    {
+        ImoClef clef(ImoClef::k_G2);
+        ImoMidiInfo* pMidi = new ImoMidiInfo();
+        clef.add_reldataobj(pMidi);
+        ImoFontInfo* pFont = new ImoFontInfo();
+        clef.add_reldataobj(pFont);
+
+        CHECK( clef.get_reldataobj(0) == pMidi );
+        CHECK( clef.get_reldataobj(1) == pFont );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, RemoveReldataobj)
+    {
+        ImoClef clef(ImoClef::k_G2);
+        ImoMidiInfo* pMidi = new ImoMidiInfo();
+        clef.add_reldataobj(pMidi);
+        ImoFontInfo* pFont = new ImoFontInfo();
+        clef.add_reldataobj(pFont);
+
+        clef.remove_reldataobj(pMidi);
+
+        CHECK( clef.get_num_reldataobjs() == 1 );
+        CHECK( clef.get_reldataobj(0) == pFont );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, RemoveAllReldataobjs)
+    {
+        ImoClef clef(ImoClef::k_G2);
+        ImoMidiInfo* pMidi = new ImoMidiInfo();
+        clef.add_reldataobj(pMidi);
+        ImoFontInfo* pFont = new ImoFontInfo();
+        clef.add_reldataobj(pFont);
+
+        clef.remove_reldataobj(pMidi);
+        clef.remove_reldataobj(pFont);
+
+        CHECK( clef.get_num_reldataobjs() == 0 );
+        CHECK( clef.get_reldataobjs() == NULL );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, FindReldataobj)
+    {
+        ImoClef clef(ImoClef::k_G2);
+        ImoMidiInfo* pMidi = new ImoMidiInfo();
+        clef.add_reldataobj(pMidi);
+        ImoFontInfo* pFont = new ImoFontInfo();
+        clef.add_reldataobj(pFont);
+
+        CHECK( clef.find_reldataobj(ImoObj::k_font_info) == pFont );
+        CHECK( clef.find_reldataobj(ImoObj::k_midi_info) == pMidi );
+    }
+
+
+    // attachments ----------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ClefNoAttachments)
+    {
+        ImoClef clef(ImoClef::k_G2);
+        CHECK( clef.has_attachments() == false );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_AddAttachment)
+    {
+        ImoClef clef(ImoClef::k_G2);
+        ImoScoreText* pText = new ImoScoreText("Hello world");
+        clef.add_attachment(pText);
+
+        CHECK( clef.has_attachments() == true );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_GetNumAttachments)
+    {
+        ImoClef clef(ImoClef::k_G2);
+        ImoScoreText* pText = new ImoScoreText("Hello world");
+        clef.add_attachment(pText);
+        DtoFermata fmt;
+        ImoFermata* pFmt = new ImoFermata(fmt);
+        clef.add_attachment(pFmt);
+
+        CHECK( clef.get_num_attachments() == 2 );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_GetAttachment)
+    {
+        ImoClef clef(ImoClef::k_G2);
+
+        DtoFermata fmt;
+        ImoFermata* pFmt = new ImoFermata(fmt);
+        clef.add_attachment(pFmt);
+
+        ImoScoreText* pText = new ImoScoreText("Hello world");
+        clef.add_attachment(pText);
+
+        CHECK( clef.get_attachment(0) == pFmt );
+        CHECK( clef.get_attachment(1) == pText );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, RemoveAttachment)
+    {
+        ImoClef clef(ImoClef::k_G2);
+        ImoScoreText* pText = new ImoScoreText("Hello world");
+        clef.add_attachment(pText);
+        DtoFermata fmt;
+        ImoFermata* pFmt = new ImoFermata(fmt);
+        clef.add_attachment(pFmt);
+
+        clef.remove_attachment(pText);
+
+        CHECK( clef.get_num_attachments() == 1 );
+        CHECK( clef.get_attachment(0) == pFmt );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, RemoveAllAttachments)
+    {
+        ImoClef clef(ImoClef::k_G2);
+        ImoScoreText* pText = new ImoScoreText("Hello world");
+        clef.add_attachment(pText);
+        DtoFermata fmt;
+        ImoFermata* pFmt = new ImoFermata(fmt);
+        clef.add_attachment(pFmt);
+
+        clef.remove_attachment(pText);
+        clef.remove_attachment(pFmt);
+
+        CHECK( clef.get_num_attachments() == 0 );
+        CHECK( clef.get_attachments() != NULL );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, IncludeInRelation)
+    {
+        DtoNote dtoNote;
+        dtoNote.set_step(1);
+        dtoNote.set_octave(4);
+        dtoNote.set_accidentals(0);
+        dtoNote.set_note_type(k_eighth);
+        dtoNote.set_dots(0);
+        ImoNote note(dtoNote);
+
+        ImoTieDto dto;
+        ImoTieData* pData = new ImoTieData(&dto);
+        ImoTie* pTie = new ImoTie();
+        note.include_in_relation(pTie, pData);
+
+        CHECK( note.get_num_attachments() == 1 );
+        CHECK( note.get_attachment(0) == pTie );
+        CHECK( note.get_num_reldataobjs() == 1 );
+        CHECK( note.get_reldataobj(0) == pData );
+        CHECK( pTie->get_data_for(&note) == pData );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, RemoveFromRelation)
+    {
+        DtoNote dtoNote;
+        dtoNote.set_step(1);
+        dtoNote.set_octave(4);
+        dtoNote.set_accidentals(0);
+        dtoNote.set_note_type(k_eighth);
+        dtoNote.set_dots(0);
+        ImoNote note(dtoNote);
+
+        ImoTieDto dto;
+        ImoTieData* pData = new ImoTieData(&dto);
+        ImoTie* pTie = new ImoTie();
+        note.include_in_relation(pTie, pData);
+
+        note.remove_from_relation(pTie);
+
+        CHECK( note.get_num_attachments() == 0 );
+        CHECK( note.get_attachments() != NULL );
+        CHECK( note.get_num_reldataobjs() == 0 );
+        CHECK( note.get_reldataobjs() == NULL );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, RemoveFromAllRelations)
+    {
+        DtoNote dtoNote;
+        dtoNote.set_step(1);
+        dtoNote.set_octave(4);
+        dtoNote.set_accidentals(0);
+        dtoNote.set_note_type(k_eighth);
+        dtoNote.set_dots(0);
+        ImoNote note(dtoNote);
+
+        ImoTieDto dto;
+        ImoTieData* pData = new ImoTieData(&dto);
+        ImoTie* pTie = new ImoTie();
+        note.include_in_relation(pTie, pData);
+
+        ImoScoreText* pText = new ImoScoreText("Hello world");
+        note.add_attachment(pText);
+
+        CHECK( note.get_num_attachments() == 2 );
+        CHECK( note.get_num_reldataobjs() == 1 );
+
+        ImoAttachments* pAttachments = note.get_attachments();
+        pAttachments->remove_from_all_relations(&note);
+
+        CHECK( note.get_num_attachments() == 0 );
+        CHECK( note.get_num_reldataobjs() == 0 );
+        CHECK( note.get_reldataobjs() == NULL );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, AutoDelete)
+    {
+        ImoNote note(k_step_D, 4, k_eighth);
+
+        ImoTieDto dto;
+        ImoTieData* pData = new ImoTieData(&dto);
+        ImoTie* pTie = new ImoTie();
+        note.include_in_relation(pTie, pData);
+
+        pTie->remove_all();
+        delete pTie;
+
+        CHECK( note.get_num_attachments() == 0 );
+        CHECK( note.get_num_reldataobjs() == 0 );
+        CHECK( note.get_reldataobjs() == NULL );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, InternalModel_AttachmentsOrdered)
+    {
+        //@ Attachments must be rendered in a predefined order, i.e. beams before
+        //@ tuplets. For this, they must be stored in renderization order.
+
+        ImoNote note(k_step_A, 4, k_eighth);
+
+        ImoScoreText* pText = new ImoScoreText("Hello world");
+        note.add_attachment(pText);
+
+        DtoFermata fermata;
+        ImoFermata* pFermata = new ImoFermata(fermata);
+        note.add_attachment(pFermata);
+
+        ImoTieDto dtoTie;
+        ImoTieData* pTieData = new ImoTieData(&dtoTie);
+        ImoTie* pTie = new ImoTie();
+        note.include_in_relation(pTie, pTieData);
+
+        ImoBeamDto dtoBeam;
+        ImoBeamData* pBeamData = new ImoBeamData(&dtoBeam);
+        ImoBeam* pBeam = new ImoBeam();
+        note.include_in_relation(pBeam, pBeamData);
+
+        CHECK( note.get_attachment(0) == pTie );
+        CHECK( note.get_attachment(1) == pBeam );
+        CHECK( note.get_attachment(2) == pFermata );
+        CHECK( note.get_attachment(3) == pText );
+//        cout << "order = " << note.get_attachment(0)->get_obj_type() << ", "
+//             << note.get_attachment(1)->get_obj_type() << ", "
+//             << note.get_attachment(2)->get_obj_type() << ", "
+//             << note.get_attachment(3)->get_obj_type() << endl;
+    }
+
+
+    // ImoNote --------------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, Note_ConstructorDefaults)
+    {
+        ImoNote note(k_step_A, 4, k_eighth);
+
+        CHECK( note.get_step() == k_step_A );
+        CHECK( note.get_octave() == 4 );
+        CHECK( note.get_note_type() == k_eighth );
+        CHECK( note.get_dots() == 0 );
+        CHECK( note.get_voice() == 0 );
+        CHECK( note.get_staff() == 0 );
+        CHECK( note.get_duration() == 32.0f );
+        CHECK( note.get_accidentals() == k_no_accidentals );
+        CHECK( note.get_stem_direction() == k_stem_default );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, Note_ConstructorFull)
+    {
+        ImoNote note(k_step_A, 4, k_eighth, k_flat, 1, 2, 3, k_stem_up);
+
+        CHECK( note.get_step() == k_step_A );
+        CHECK( note.get_octave() == 4 );
+        CHECK( note.get_note_type() == k_eighth );
+        CHECK( note.get_dots() == 1 );
+        CHECK( note.get_voice() == 3 );
+        CHECK( note.get_staff() == 2 );
+        CHECK( note.get_duration() == 48.0f );
+        CHECK( note.get_accidentals() == k_flat );
+        CHECK( note.get_stem_direction() == k_stem_up );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, Note_TupletModifiesDuration)
+    {
+        //@ Note duration is modified by tuplet
+
+        ImoNote note(k_step_A, 4, k_eighth);
+        CHECK( is_equal_time(note.get_duration(), 32.0f) );
+
+        ImoTupletDto dto;
+        dto.set_tuplet_type(ImoTupletDto::k_start);
+        dto.set_note_rest(&note);
+        dto.set_actual_number(3);
+        dto.set_normal_number(2);
+        ImoTupletData* pTupletData = new ImoTupletData(&dto);
+        ImoTuplet* pTuplet = new ImoTuplet(&dto);
+        note.include_in_relation(pTuplet, pTupletData);
+
+        //cout << "note duration = " << note.get_duration() << endl;
+        CHECK( note.is_in_tuplet() == true );
+        CHECK( is_equal_time(note.get_duration(), 21.3333f) );
+    }
+
+
 
 }
 

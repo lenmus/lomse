@@ -44,6 +44,34 @@ enum ENoteHeads
     k_notehead_cross,              //Cross (for percussion)
 };
 
+//note/rest type
+enum ENoteType
+{
+    k_unknown_notetype = -1,
+    k_longa = 0,
+    k_breve = 1,
+    k_whole = 2,
+    k_half = 3,
+    k_quarter = 4,
+    k_eighth = 5,
+    k_16th = 6,
+    k_32th = 7,
+    k_64th = 8,
+    k_128th = 9,
+    k_256th = 10,
+};
+
+//stemp
+enum ENoteStem
+{
+    k_stem_default = 0,
+    k_stem_up,
+    k_stem_down,
+    k_stem_double,
+    k_stem_none,
+};
+
+
 
 
 
@@ -53,40 +81,29 @@ class ImoNoteRest : public ImoStaffObj
 protected:
     int     m_nNoteType;
     int     m_nDots;
-    float   m_rDuration;
     int     m_nVoice;
-    ImoBeamInfo m_beamInfo;
-    ImoBeam* m_pBeam;
-    ImoTuplet* m_pTuplet;
 
 public:
     ImoNoteRest(int objtype) : ImoStaffObj(objtype) {}
     ImoNoteRest(int objtype, DtoNoteRest& dto);
-    ImoNoteRest(long id, int objtype, int nNoteType, float rDuration, int nDots, int nStaff,
-               int nVoice, bool fVisible, ImoBeamInfo* pBeamInfo);
     virtual ~ImoNoteRest() {}
-
-    enum    { k_unknown=-1, k_longa=0, k_breve=1, k_whole=2, k_half=3, k_quarter=4,
-              k_eighth=5, k_16th=6, k_32th=7, k_64th=8, k_128th=9, k_256th=10, };
 
     //getters
     inline int get_note_type() { return m_nNoteType; }
-    inline float get_duration() { return m_rDuration; }
+    float get_duration();
     inline int get_dots() { return m_nDots; }
     inline int get_voice() { return m_nVoice; }
 
     //beam
-    inline void set_beam(ImoBeam* pBeam) { m_pBeam = pBeam; }
-    inline ImoBeam* get_beam() { return m_pBeam; }
-    inline bool is_beamed() { return m_pBeam != NULL; }
+    ImoBeam* get_beam();
+    inline bool is_beamed() { return find_attachment(ImoObj::k_beam) != NULL; }
     void set_beam_type(int level, int type);
-    inline ImoBeamInfo* get_beam_info() { return &m_beamInfo; }
     int get_beam_type(int level);
+    bool is_end_of_beam();
 
-    //tuplet
-    inline void set_tuplet(ImoTuplet* pTuplet) { m_pTuplet = pTuplet; }
-    inline bool is_in_tuplet() { return m_pTuplet != NULL; }
-    inline ImoTuplet* get_tuplet() { return m_pTuplet; }
+    //tuplets
+    bool is_in_tuplet();
+    ImoTuplet* get_tuplet();
 
 };
 
@@ -98,9 +115,6 @@ protected:
 public:
     ImoRest();
     ImoRest(DtoRest& dto);
-    ImoRest(long id, int nNoteType, float rDuration, int nDots, int nStaff,
-           int nVoice, bool fVisible = true, bool fBeamed = false,
-           ImoBeamInfo* pBeamInfo = NULL);
 
     virtual ~ImoRest() {}
 
@@ -121,14 +135,10 @@ protected:
 
 public:
     ImoNote();
+    ImoNote(int step, int octave, int noteType, int accidentals=0,
+            int dots=0, int staff=0, int voice=0, int stem=k_stem_default);
     ImoNote(DtoNote& dto);
-    ImoNote(long id, int nNoteType, float rDuration, int nDots, int nStaff, int nVoice,
-           bool fVisible, bool fBeamed, ImoBeamInfo* pBeamInfo);
     ~ImoNote();
-
-    enum    { k_no_accidentals=0, k_sharp, k_sharp_sharp, k_double_sharp, k_natural_sharp,
-              k_flat, k_flat_flat, k_natural_flat, k_natural, };
-    enum    { k_stem_default=0, k_stem_up, k_stem_down, k_stem_double, k_stem_none };
 
     //pitch
     inline int get_step() { return m_step; }
@@ -138,11 +148,12 @@ public:
     inline bool accidentals_are_cautionary() { return false; }  //TODO
 
     //ties
+    inline ImoTie* get_tie_next() { return m_pTieNext; }
+    inline ImoTie* get_tie_prev() { return m_pTiePrev; }
     inline bool is_tied_next() { return m_pTieNext != NULL; }
     inline bool is_tied_prev() { return m_pTiePrev != NULL; }
     inline void set_tie_next(ImoTie* pStartTie) { m_pTieNext = pStartTie; }
     inline void set_tie_prev(ImoTie* pEndTie) { m_pTiePrev = pEndTie; }
-    void remove_tie(ImoTie* pTie);
 
     //stem
     inline int get_stem_direction() { return m_stemDirection; }
@@ -151,9 +162,8 @@ public:
     inline bool is_stem_default() { return m_stemDirection == k_stem_default; }
 
     //in chord
-    inline void set_in_chord(ImoChord* pChord) { m_pChord = pChord; }
-    inline bool is_in_chord() { return m_pChord != NULL; }
-    inline ImoChord* get_chord() { return m_pChord; }
+    bool is_in_chord();
+    ImoChord* get_chord();
     bool is_start_of_chord();
     bool is_end_of_chord();
 

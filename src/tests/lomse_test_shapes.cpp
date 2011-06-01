@@ -29,6 +29,7 @@
 #include "lomse_internal_model.h"
 #include "lomse_basic_objects.h"
 #include "lomse_shape_note.h"
+#include "lomse_shape_staff.h"
 #include "lomse_glyphs.h"
 #include "lomse_im_note.h"
 #include "lomse_note_engraver.h"
@@ -88,7 +89,7 @@ SUITE(GmoShapeTest)
         dtoNote.set_step(0);
         dtoNote.set_octave(4);
         dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(ImoNote::k_whole);
+        dtoNote.set_note_type(k_whole);
         ImoNote note(dtoNote);
 
         ScoreMeter meter(1, 1, 180.0f);
@@ -109,7 +110,7 @@ SUITE(GmoShapeTest)
         dtoNote.set_step(0);
         dtoNote.set_octave(4);
         dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(ImoNote::k_whole);
+        dtoNote.set_note_type(k_whole);
         ImoNote note(dtoNote);
 
         ScoreMeter meter(1, 1, 180.0f);
@@ -141,8 +142,8 @@ SUITE(GmoShapeTest)
         DtoNote dtoNote;
         dtoNote.set_step(0);
         dtoNote.set_octave(4);
-        dtoNote.set_accidentals(ImoNote::k_flat);
-        dtoNote.set_note_type(ImoNote::k_whole);
+        dtoNote.set_accidentals(k_flat);
+        dtoNote.set_note_type(k_whole);
         ImoNote note(dtoNote);
 
         ScoreMeter meter(1, 1, 180.0f);
@@ -170,23 +171,55 @@ SUITE(GmoShapeTest)
         delete pShape;
     }
 
-//    TEST_FIXTURE(GmoShapeTestFixture, Shape_SetOrigin)
-//    {
-//        GmoBoxDocPage page;
-//        GmoBoxDocPageContent* pDPC = new GmoBoxDocPageContent();
-//        page.add_child_box(pDPC);
-//        GmoStubScore stub(NULL);
-//        GmoBoxScorePage* pScorePage = new GmoBoxScorePage(&stub);
-//        pDPC->add_child_box(pScorePage);
-//        GmoBoxSystem* pBox = new GmoBoxSystem();
-//        pScorePage->add_child_box(pBox);
-//        ImoStaffInfo staff;
-//        GmoShapeStaff* pShape = new GmoShapeStaff(0, &staff, 0, 0.0f, Color(0,0,0));
-//        pBox->add_shape(pShape, 0);
-//        pShape->set_origin(2000.0f, 3000.0f);
-//        CHECK( pShape->get_left() == 2000.0f );
-//        CHECK( pShape->get_top() == 3000.0f );
-//    }
+    TEST_FIXTURE(GmoShapeTestFixture, Shape_SetOrigin)
+    {
+        ImoStaffInfo staff;
+        GmoShapeStaff shape(NULL, 0, &staff, 0, 0.0f, Color(0,0,0));
+        shape.set_origin(2000.0f, 3000.0f);
+
+        CHECK( shape.get_left() == 2000.0f );
+        CHECK( shape.get_top() == 3000.0f );
+    }
+
+
+    // related shapes -------------------------------------------------------------------
+
+    TEST_FIXTURE(GmoShapeTestFixture, GetRelatedShapes_Empty)
+    {
+        ImoStaffInfo staffInfo;
+        GmoShapeStaff staff(NULL, 0, &staffInfo, 0, 0.0f, Color(0,0,0));
+
+        CHECK( staff.get_related_shapes() == NULL );
+    }
+
+    TEST_FIXTURE(GmoShapeTestFixture, AddRelatedShape)
+    {
+        ImoStaffInfo staffInfo;
+        GmoShapeStaff staff(NULL, 0, &staffInfo, 0, 0.0f, Color(0,0,0));
+        GmoShapeNote note(NULL, 150.0f, 200.0f, Color(0,0,0), m_libraryScope);
+
+        staff.add_related_shape(&note);
+
+        std::list<GmoShape*>* m_pRelated = staff.get_related_shapes();
+        CHECK( m_pRelated != NULL );
+        CHECK( m_pRelated->front() == &note );
+    }
+
+    TEST_FIXTURE(GmoShapeTestFixture, GetRelatedShapeOfType)
+    {
+        ImoStaffInfo staffInfo;
+        GmoShapeStaff staff(NULL, 0, &staffInfo, 0, 0.0f, Color(0,0,0));
+        GmoShapeNote note(NULL, 150.0f, 200.0f, Color(0,0,0), m_libraryScope);
+        GmoShapeRest rest(NULL, 0, 150.0f, 200.0f, Color(0,0,0), m_libraryScope);
+
+        staff.add_related_shape(&note);
+        staff.add_related_shape(&rest);
+
+        CHECK( staff.find_related_shape(GmoObj::k_shape_note) == &note );
+        CHECK( staff.find_related_shape(GmoObj::k_shape_rest) == &rest );
+        CHECK( staff.find_related_shape(GmoObj::k_shape_beam) == NULL );
+    }
+
 
 }
 

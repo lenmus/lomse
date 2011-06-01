@@ -23,6 +23,7 @@
 #include "lomse_injectors.h"
 #include "lomse_agg_types.h"
 #include "lomse_presenter.h"
+#include "lomse_events.h"
 
 namespace lomse
 {
@@ -33,6 +34,7 @@ namespace lomse
 LomseDoorway::LomseDoorway()
     : m_pLibraryScope(NULL)
     , m_pFunc_get_font(null_get_font_filename)
+    , m_pFunc_notify(null_notify_function)
 {
 }
 
@@ -74,6 +76,12 @@ void LomseDoorway::set_get_font_callback(string (*pt2Func)(const string&, bool, 
 }
 
 //---------------------------------------------------------------------------------------
+void LomseDoorway::set_notify_callback(void (*pt2Func)(EventInfo&))
+{
+    m_pFunc_notify = pt2Func;
+}
+
+//---------------------------------------------------------------------------------------
 string LomseDoorway::null_get_font_filename(const string& fontname, bool bold,
                                             bool italic)
 {
@@ -89,6 +97,13 @@ string LomseDoorway::null_get_font_filename(const string& fontname, bool bold,
     }
     fullpath += "LiberationSerif-Regular.ttf";
     return fullpath;
+}
+
+//---------------------------------------------------------------------------------------
+void LomseDoorway::null_notify_function(EventInfo& event)
+{
+    //This is just a mock method to avoid crashes when using the libary without
+    //initializing it
 }
 
 

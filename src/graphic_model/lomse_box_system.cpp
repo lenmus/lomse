@@ -54,14 +54,6 @@ GmoShapeStaff* GmoBoxSystem::add_staff_shape(GmoShapeStaff* pShape)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoBoxSystem::store_shapes_in_page()
-{
-    GmoBoxDocPage* pPage = get_parent_box_page();
-    GmoBox* pBox = this;        //gcc complains if I invoke directly to next method
-    pBox->store_shapes_in_page(pPage);
-}
-
-//---------------------------------------------------------------------------------------
 //void GmoBoxSystem::set_origin(LUnits xPos, LUnits yPos)
 //{
 //	m_xPos = xPos;

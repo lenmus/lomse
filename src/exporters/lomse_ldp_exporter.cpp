@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include "lomse_ldp_exporter.h"
 
@@ -31,9 +31,9 @@ namespace lomse
 
 #define lml_LDP_INDENT_STEP  3
 
-//-------------------------------------------------------------------------------------
+//=======================================================================================
 // LdpGenerator
-//-------------------------------------------------------------------------------------
+//=======================================================================================
 class LdpGenerator
 {
 protected:
@@ -52,8 +52,8 @@ protected:
     void add_element_name(const std::string& name, ImoObj* pImo);
     void add_source_for(ImoObj* pImo);
     void source_for_base_staffobj(ImoObj* pImo);
-    void source_for_base_componentobj(ImoObj* pImo);
-    void source_for_base_docobj(ImoObj* pImo);
+    void source_for_base_scoreobj(ImoObj* pImo);
+    void source_for_base_contentobj(ImoObj* pImo);
     void source_for_base_imobj(ImoObj* pImo);
     void source_for_auxobj(ImoObj* pImo);
     void increment_indent();
@@ -63,29 +63,36 @@ protected:
 
 
 
-//-------------------------------------------------------------------------------------
+//=======================================================================================
 // generators for specific elements
-//-------------------------------------------------------------------------------------
+//=======================================================================================
 
 
-// Error generator
-//-------------------------------------------------------------------------------------
-class ErrorLdpGenerator : public LdpGenerator
+//---------------------------------------------------------------------------------------
+class BarlineLdpGenerator : public LdpGenerator
 {
+protected:
+    ImoBarline* m_pObj;
+
 public:
-    ErrorLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter) {}
+    BarlineLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = dynamic_cast<ImoBarline*>(pImo);
+    }
 
     std::string generate_source()
     {
-        m_source.clear();
-        m_source << "(TODO: Add this element to LdpExporter::new_generator)";
+        start_element();
+        add_element_name("barline", m_pObj);
+//        add_barline_type();
+        source_for_base_staffobj(m_pObj);
+        end_element();
         return m_source.str();
     }
 };
 
 
-// clef generator
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ClefLdpGenerator : public LdpGenerator
 {
 protected:
@@ -117,144 +124,24 @@ protected:
 };
 
 
-// lenmusdoc generator
-//-------------------------------------------------------------------------------------
-class LenmusdocLdpGenerator : public LdpGenerator
+//---------------------------------------------------------------------------------------
+class ScoreObjLdpGenerator : public LdpGenerator
 {
 protected:
-    ImoDocument* m_pObj;
+    ImoScoreObj* m_pObj;
 
 public:
-    LenmusdocLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    ScoreObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
     {
-        m_pObj = dynamic_cast<ImoDocument*>(pImo);
-    }
-
-    std::string generate_source()
-    {
-        start_element();
-        add_element_name("lenmusdoc", m_pObj);
-        add_version();
-        add_content();
-        end_element();
-        return m_source.str();
-    }
-
-protected:
-
-    void add_version()
-    {
-        m_source << "(vers ";
-        m_source << m_pObj->get_version();
-        m_source << ") ";
-    }
-
-    void add_content()
-    {
-        m_source << "(content";
-        int numItems = m_pObj->get_num_content_items();
-        for (int i=0; i < numItems; i++)
-        {
-            m_source << " ";
-            add_source_for( m_pObj->get_content_item(i) );
-        }
-        m_source << ")";
-    }
-
-};
-
-
-// note generator
-//-------------------------------------------------------------------------------------
-class NoteLdpGenerator : public LdpGenerator
-{
-protected:
-    ImoNote* m_pObj;
-
-public:
-    NoteLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
-    {
-        m_pObj = dynamic_cast<ImoNote*>(pImo);
-    }
-
-    std::string generate_source()
-    {
-        start_element();
-        add_element_name("n", m_pObj);
-        add_pitch();
-        add_duration();
-        source_for_base_staffobj(m_pObj);
-        end_element();
-        return m_source.str();
-    }
-
-protected:
-
-    void add_pitch()
-    {
-        m_source << " (TODO: pitch)";
-    }
-
-    void add_duration()
-    {
-        m_source << " (TODO: duration)";
-    }
-
-};
-
-
-// staffobj generator
-//-------------------------------------------------------------------------------------
-class StaffObjLdpGenerator : public LdpGenerator
-{
-protected:
-    ImoStaffObj* m_pObj;
-
-public:
-    StaffObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
-    {
-        m_pObj = dynamic_cast<ImoStaffObj*>(pImo);
-    }
-
-    std::string generate_source()
-    {
-        add_staff_num();
-        source_for_base_componentobj(m_pObj);
-        return m_source.str();
-    }
-
-protected:
-
-    void add_staff_num()
-    {
-        if (!m_pObj->is_key_signature()            //KS, TS & barlines are common to all staves.
-            && !m_pObj->is_time_signature()
-            && !m_pObj->is_barline() )
-        {
-            m_source << " p" << (m_pObj->get_staff() + 1);
-        }
-    }
-
-};
-
-// componentobj generator
-//-------------------------------------------------------------------------------------
-class ComponentObjLdpGenerator : public LdpGenerator
-{
-protected:
-    ImoComponentObj* m_pObj;
-
-public:
-    ComponentObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
-    {
-        m_pObj = dynamic_cast<ImoComponentObj*>(pImo);
+        m_pObj = dynamic_cast<ImoScoreObj*>(pImo);
     }
 
     std::string generate_source()
     {
         add_visible();
         add_color();
-        source_for_base_docobj(m_pObj);
+        source_for_base_contentobj(m_pObj);
         return m_source.str();
     }
 
@@ -276,17 +163,16 @@ protected:
 };
 
 
-// docobj generator
-//-------------------------------------------------------------------------------------
-class DocObjLdpGenerator : public LdpGenerator
+//---------------------------------------------------------------------------------------
+class ContentObjLdpGenerator : public LdpGenerator
 {
 protected:
-    ImoDocObj* m_pObj;
+    ImoContentObj* m_pObj;
 
 public:
-    DocObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    ContentObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
     {
-        m_pObj = dynamic_cast<ImoDocObj*>(pImo);
+        m_pObj = dynamic_cast<ImoContentObj*>(pImo);
     }
 
     std::string generate_source()
@@ -367,8 +253,22 @@ protected:
 };
 
 
-// imobj generator
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+class ErrorLdpGenerator : public LdpGenerator
+{
+public:
+    ErrorLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter) {}
+
+    std::string generate_source()
+    {
+        m_source.clear();
+        m_source << "(TODO: Add this element to LdpExporter::new_generator)";
+        return m_source.str();
+    }
+};
+
+
+//---------------------------------------------------------------------------------------
 class ImObjLdpGenerator : public LdpGenerator
 {
 protected:
@@ -387,16 +287,166 @@ public:
 };
 
 
+//---------------------------------------------------------------------------------------
+class LenmusdocLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoDocument* m_pObj;
 
-//-------------------------------------------------------------------------------------
+public:
+    LenmusdocLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = dynamic_cast<ImoDocument*>(pImo);
+    }
+
+    std::string generate_source()
+    {
+        start_element();
+        add_element_name("lenmusdoc", m_pObj);
+        add_version();
+        add_content();
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_version()
+    {
+        m_source << "(vers ";
+        m_source << m_pObj->get_version();
+        m_source << ") ";
+    }
+
+    void add_content()
+    {
+        m_source << "(content";
+        int numItems = m_pObj->get_num_content_items();
+        for (int i=0; i < numItems; i++)
+        {
+            m_source << " ";
+            add_source_for( m_pObj->get_content_item(i) );
+        }
+        m_source << ")";
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
+class NoteLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoNote* m_pObj;
+
+public:
+    NoteLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = dynamic_cast<ImoNote*>(pImo);
+    }
+
+    std::string generate_source()
+    {
+        start_element();
+        add_element_name("n", m_pObj);
+        add_pitch();
+        add_duration();
+        source_for_base_staffobj(m_pObj);
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_pitch()
+    {
+        m_source << " (TODO: pitch)";
+    }
+
+    void add_duration()
+    {
+        m_source << " (TODO: duration)";
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
+class RestLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoRest* m_pObj;
+
+public:
+    RestLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = dynamic_cast<ImoRest*>(pImo);
+    }
+
+    std::string generate_source()
+    {
+        start_element();
+        add_element_name("r", m_pObj);
+        add_duration();
+        source_for_base_staffobj(m_pObj);
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_duration()
+    {
+        m_source << " (TODO: duration)";
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
+class StaffObjLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoStaffObj* m_pObj;
+
+public:
+    StaffObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = dynamic_cast<ImoStaffObj*>(pImo);
+    }
+
+    std::string generate_source()
+    {
+        add_staff_num();
+        source_for_base_scoreobj(m_pObj);
+        return m_source.str();
+    }
+
+protected:
+
+    void add_staff_num()
+    {
+        if (!m_pObj->is_key_signature()            //KS, TS & barlines are common to all staves.
+            && !m_pObj->is_time_signature()
+            && !m_pObj->is_barline() )
+        {
+            m_source << " p" << (m_pObj->get_staff() + 1);
+        }
+    }
+
+};
+
+
+
+//=======================================================================================
 // LdpGenerator implementation
-//-------------------------------------------------------------------------------------
-
+//=======================================================================================
 void LdpGenerator::start_element()
 {
     add_indent_spaces();
 }
 
+//---------------------------------------------------------------------------------------
 void LdpGenerator::end_element()
 {
     m_source << ")";
@@ -404,6 +454,7 @@ void LdpGenerator::end_element()
         m_source << endl;
 }
 
+//---------------------------------------------------------------------------------------
 void LdpGenerator::add_indent_spaces()
 {
     m_source.clear();
@@ -415,6 +466,7 @@ void LdpGenerator::add_indent_spaces()
     }
 }
 
+//---------------------------------------------------------------------------------------
 void LdpGenerator::add_element_name(const std::string& name, ImoObj* pImo)
 {
     m_source << "(" << name;
@@ -423,45 +475,53 @@ void LdpGenerator::add_element_name(const std::string& name, ImoObj* pImo)
     m_source << " ";
 }
 
+//---------------------------------------------------------------------------------------
 void LdpGenerator::add_source_for(ImoObj* pImo)
 {
     m_source << m_pExporter->get_source(pImo);
 }
 
+//---------------------------------------------------------------------------------------
 void LdpGenerator::source_for_base_staffobj(ImoObj* pImo)
 {
-    LdpGenerator* pGen = new StaffObjLdpGenerator(pImo, m_pExporter);
-    m_source << pGen->generate_source();
+    StaffObjLdpGenerator gen(pImo, m_pExporter);
+    m_source << gen.generate_source();
 }
 
-void LdpGenerator::source_for_base_componentobj(ImoObj* pImo)
+//---------------------------------------------------------------------------------------
+void LdpGenerator::source_for_base_scoreobj(ImoObj* pImo)
 {
-    LdpGenerator* pGen = new ComponentObjLdpGenerator(pImo, m_pExporter);
-    m_source << pGen->generate_source();
+    ScoreObjLdpGenerator gen(pImo, m_pExporter);
+    m_source << gen.generate_source();
 }
 
-void LdpGenerator::source_for_base_docobj(ImoObj* pImo)
+//---------------------------------------------------------------------------------------
+void LdpGenerator::source_for_base_contentobj(ImoObj* pImo)
 {
-    LdpGenerator* pGen = new DocObjLdpGenerator(pImo, m_pExporter);
-    m_source << pGen->generate_source();
+    ContentObjLdpGenerator gen(pImo, m_pExporter);
+    m_source << gen.generate_source();
 }
 
+//---------------------------------------------------------------------------------------
 void LdpGenerator::source_for_base_imobj(ImoObj* pImo)
 {
-    LdpGenerator* pGen = new ImObjLdpGenerator(pImo, m_pExporter);
-    m_source << pGen->generate_source();
+    ImObjLdpGenerator gen(pImo, m_pExporter);
+    m_source << gen.generate_source();
 }
 
+//---------------------------------------------------------------------------------------
 void LdpGenerator::source_for_auxobj(ImoObj* pImo)
 {
     m_source <<  m_pExporter->get_source(pImo);
 }
 
+//---------------------------------------------------------------------------------------
 void LdpGenerator::increment_indent()
 {
     //TODO
 }
 
+//---------------------------------------------------------------------------------------
 void LdpGenerator::decrement_indent()
 {
     //TODO
@@ -469,20 +529,21 @@ void LdpGenerator::decrement_indent()
 
 
 
-//-------------------------------------------------------------------------------------
+//=======================================================================================
 // LdpExporter implementation
-//-------------------------------------------------------------------------------------
-
+//=======================================================================================
 LdpExporter::LdpExporter()
     : m_nIndent(0)
     , m_fAddId(false)
 {
 }
 
+//---------------------------------------------------------------------------------------
 LdpExporter::~LdpExporter()
 {
 }
 
+//---------------------------------------------------------------------------------------
 std::string LdpExporter::get_source(ImoObj* pImo)
 {
     LdpGenerator* pGen = new_generator(pImo);
@@ -491,32 +552,33 @@ std::string LdpExporter::get_source(ImoObj* pImo)
     return source;
 }
 
+//---------------------------------------------------------------------------------------
 LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
 {
     //factory method
 
     switch(pImo->get_obj_type())
     {
-//        case ImoObj::k_beam_info:         return new XxxxxxxLdpGenerator(pImo, this);
+        case ImoObj::k_barline:         return new BarlineLdpGenerator(pImo, this);
+//        case ImoObj::k_beam_dto:         return new XxxxxxxLdpGenerator(pImo, this);
 //        case ImoObj::k_bezier_info:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_color_info:         return new XxxxxxxLdpGenerator(pImo, this);
+        case ImoObj::k_clef:            return new ClefLdpGenerator(pImo, this);
+//        case ImoObj::k_color_dto:         return new XxxxxxxLdpGenerator(pImo, this);
 //        case ImoObj::k_instr_group:         return new XxxxxxxLdpGenerator(pImo, this);
 //        case ImoObj::k_midi_info:         return new XxxxxxxLdpGenerator(pImo, this);
 //        case ImoObj::k_option:         return new XxxxxxxLdpGenerator(pImo, this);
 //        case ImoObj::k_system_info:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_tie_info:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_tuplet_info:         return new XxxxxxxLdpGenerator(pImo, this);
-        case ImoObj::k_document:         return new LenmusdocLdpGenerator(pImo, this);
+//        case ImoObj::k_tie_dto:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case ImoObj::k_tuplet_dto:         return new XxxxxxxLdpGenerator(pImo, this);
+        case ImoObj::k_document:        return new LenmusdocLdpGenerator(pImo, this);
 //        case ImoObj::k_content:         return new XxxxxxxLdpGenerator(pImo, this);
 //        case ImoObj::k_music_data:         return new XxxxxxxLdpGenerator(pImo, this);
 //        case ImoObj::k_instrument:         return new XxxxxxxLdpGenerator(pImo, this);
 //        case ImoObj::k_score:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_barline:         return new XxxxxxxLdpGenerator(pImo, this);
-        case ImoObj::k_clef:             return new ClefLdpGenerator(pImo, this);
 //        case ImoObj::k_key_signature:         return new XxxxxxxLdpGenerator(pImo, this);
 //        case ImoObj::k_time_signature:         return new XxxxxxxLdpGenerator(pImo, this);
-        case ImoObj::k_note:             return new NoteLdpGenerator(pImo, this);
-//        case ImoObj::k_rest:         return new XxxxxxxLdpGenerator(pImo, this);
+        case ImoObj::k_note:            return new NoteLdpGenerator(pImo, this);
+        case ImoObj::k_rest:            return new RestLdpGenerator(pImo, this);
 //        case ImoObj::k_go_back_fwd:         return new XxxxxxxLdpGenerator(pImo, this);
 //        case ImoObj::k_metronome_mark:         return new XxxxxxxLdpGenerator(pImo, this);
 //        case ImoObj::k_control:         return new XxxxxxxLdpGenerator(pImo, this);
@@ -536,6 +598,7 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
 
 // static methods
 
+//---------------------------------------------------------------------------------------
 std::string LdpExporter::clef_type_to_ldp(int clefType)
 {
     //AWARE: indexes in correspondence with enum ImoClef::k__type
@@ -569,6 +632,7 @@ std::string LdpExporter::clef_type_to_ldp(int clefType)
         return name[clefType];
 }
 
+//---------------------------------------------------------------------------------------
 std::string LdpExporter::color_to_ldp(Color& color)
 {
     stringstream source;
@@ -580,6 +644,7 @@ std::string LdpExporter::color_to_ldp(Color& color)
     return source.str();
 }
 
+//---------------------------------------------------------------------------------------
 std::string LdpExporter::float_to_string(float num)
 {
     return "(TODO: float_to_string)";

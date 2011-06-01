@@ -23,8 +23,6 @@
 
 #include "lomse_shape_base.h"
 #include "lomse_injectors.h"
-//#include <sstream>
-//using namespace std;
 
 namespace lomse
 {
@@ -47,23 +45,14 @@ protected:
 public:
     virtual ~GmoShapeGlyph() {}
 
-    //implementation of virtual methods from base class
     virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
-//    void RenderHighlighted(wxDC* pDC, Color colorC);
-
-//    void Shift(LUnits xIncr, LUnits yIncr);
-//	virtual wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
-//    virtual UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos);
-//	virtual void OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos);
-//	UPoint GetObjectOrigin();
 
 protected:
     GmoShapeGlyph(ImoObj* pCreatorImo, int type, int nShapeIdx, unsigned int nGlyph,
                   UPoint pos, Color color, LibraryScope& libraryScope,
                   double fontHeight);
 
-//    wxBitmap* GetBitmapFromShape(double rScale, Color colorF, Color colorB = *wxWHITE);
-//    virtual double GetPointSize();
+    void compute_size_origin(double fontHeight, UPoint pos);
 
 };
 
@@ -74,12 +63,6 @@ public:
     GmoShapeClef(ImoObj* pCreatorImo, int nShapeIdx, int nGlyph, UPoint pos, Color color,
                  LibraryScope& libraryScope, double fontSize);
     ~GmoShapeClef() {}
-
-//	//overrides
-//    UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos);
-//    void OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos);
-//    double GetPointSize();
-//
 };
 
 //---------------------------------------------------------------------------------------
@@ -211,9 +194,6 @@ class GmoShapeInvisible : public GmoSimpleShape
 public:
     GmoShapeInvisible(ImoObj* pCreatorImo, int idx, UPoint uPos, USize uSize);
     ~GmoShapeInvisible() {}
-
-//	//overrides
-//	void on_draw(Drawer* pDrawer, RenderOptions& opt);
 };
 
 //---------------------------------------------------------------------------------------
@@ -350,7 +330,7 @@ protected:
     LibraryScope& m_libraryScope;
 
 public:
-    GmoShapeTimeSignature(ImoObj* pCreatorImo, int idx, UPoint pos, Color color, 
+    GmoShapeTimeSignature(ImoObj* pCreatorImo, int idx, UPoint pos, Color color,
                           LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_time_signature, idx, color)
         , m_libraryScope(libraryScope)
