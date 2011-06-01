@@ -417,7 +417,7 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_graphic_model.cpp
         ${SRC_DIR}/tests/lomse_test_interactor.cpp
         ${SRC_DIR}/tests/lomse_test_internal_model.cpp
-        ${SRC_DIR}/tests/lomse_test_ldpexporter.cpp
+        ${SRC_DIR}/tests/lomse_test_ldp_exporter.cpp
         ${SRC_DIR}/tests/lomse_test_lines_breaker.cpp
         ${SRC_DIR}/tests/lomse_test_linkable.cpp
         ${SRC_DIR}/tests/lomse_test_model_builder.cpp
