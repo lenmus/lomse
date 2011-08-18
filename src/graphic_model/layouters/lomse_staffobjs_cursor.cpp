@@ -18,7 +18,7 @@
 //
 //---------------------------------------------------------------------------------------
 
-#include "lomse_system_cursor.h"
+#include "lomse_staffobjs_cursor.h"
 
 #include "lomse_internal_model.h"
 

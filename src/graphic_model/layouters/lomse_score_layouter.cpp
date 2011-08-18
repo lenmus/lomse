@@ -34,7 +34,7 @@
 #include "lomse_shape_note.h"
 #include "lomse_engraving_options.h"
 #include "lomse_system_layouter.h"
-#include "lomse_system_cursor.h"
+#include "lomse_staffobjs_cursor.h"
 #include "lomse_shape_barline.h"
 #include "lomse_barline_engraver.h"
 #include "lomse_beam_engraver.h"

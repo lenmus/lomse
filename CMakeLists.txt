@@ -292,7 +292,7 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/layouters/lomse_paragraph_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_score_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_score_meter.cpp
-    ${SRC_DIR}/graphic_model/layouters/lomse_system_cursor.cpp
+    ${SRC_DIR}/graphic_model/layouters/lomse_staffobjs_cursor.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_system_layouter.cpp
 )
 
