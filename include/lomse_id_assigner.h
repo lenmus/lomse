@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_ID_ASSIGNER_H__
 #define __LOMSE_ID_ASSIGNER_H__
@@ -26,7 +26,11 @@
 namespace lomse
 {
 
-//IdAssigner definition
+//forward declarations
+class ImoObj;
+
+//---------------------------------------------------------------------------------------
+//IdAssigner: responsible for assigning/re-assingning ids to ImoObj objects
 class IdAssigner
 {
 protected:
@@ -40,6 +44,8 @@ public:
     void reassign_ids(LdpTree* pTree);
     inline void set_last_id(long id) { m_idCounter = id + 1L; }
     inline long get_last_id() { return m_idCounter - 1L; }
+
+    void assign_id(ImoObj* pImo);
 
 protected:
     long find_min_id(LdpTree* pTree);

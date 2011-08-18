@@ -25,6 +25,7 @@
 #include "lomse_im_note.h"
 #include "lomse_ldp_exporter.h"
 #include "lomse_time.h"
+#include "lomse_im_factory.h"
 
 using namespace std;
 
@@ -88,6 +89,7 @@ bool is_lower_entry(ColStaffObjsEntry* a, ColStaffObjsEntry* b)
 //---------------------------------------------------------------------------------------
 ColStaffObjs::ColStaffObjs()
     : m_numLines(0)
+    , m_rMissingTime(0.0f)
 {
 }
 
@@ -138,20 +140,6 @@ ColStaffObjsBuilder::ColStaffObjsBuilder()
 {
 }
 
-////---------------------------------------------------------------------------------------
-//ColStaffObjs* ColStaffObjsBuilder::build(LdpElement* pScore, bool fSort)
-//{
-//    //param fSort is to prevent sorting the table for unit tests
-//
-//    m_pColStaffObjs = new ColStaffObjs();
-//    m_pScore = pScore;
-//    m_pImScore = dynamic_cast<ImoScore*>( m_pScore->get_imobj() );
-//    create_table();
-//    sort_table(fSort);
-//    m_pImScore->set_staffobjs_table(m_pColStaffObjs);
-//    return m_pColStaffObjs;
-//}
-
 //---------------------------------------------------------------------------------------
 ColStaffObjs* ColStaffObjsBuilder::build(ImoScore* pScore, bool fSort)
 {
@@ -177,6 +165,7 @@ void ColStaffObjsBuilder::create_table()
         create_entries(nInstr);
         prepare_for_next_instrument();
     }
+    collect_anacrusis_info();
 }
 
 //---------------------------------------------------------------------------------------
@@ -346,9 +335,53 @@ void ColStaffObjsBuilder::update(ImoScore* pScore)
 //---------------------------------------------------------------------------------------
 ImoSpacer* ColStaffObjsBuilder::anchor_object(ImoAuxObj* pAux)
 {
-    ImoSpacer* pAnchor = new ImoSpacer();
-    pAnchor->add_attachment(pAux);
+    Document* pDoc = m_pImScore->get_the_document();
+    ImoSpacer* pAnchor = static_cast<ImoSpacer*>(ImFactory::inject(k_imo_spacer, pDoc));
+    pAnchor->add_attachment(pDoc, pAux);
     return pAnchor;
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilder::collect_anacrusis_info()
+{
+    ColStaffObjs::iterator it = m_pColStaffObjs->begin();
+    ImoTimeSignature* pTS = NULL;
+    float rTime = -1.0f;
+
+    //find time signature
+    while(it != m_pColStaffObjs->end())
+    {
+        ImoObj* pSO = (*it)->imo_object();
+        if (pSO->is_time_signature())
+        {
+            pTS = dynamic_cast<ImoTimeSignature*>( pSO );
+            break;
+        }
+        else if (pSO->is_note_rest())
+            return;
+        ++it;
+    }
+    if (pTS == NULL)
+        return;
+
+    // find first barline
+    ++it;
+    while(it != m_pColStaffObjs->end())
+    {
+        ImoObj* pSO = (*it)->imo_object();
+        if (pSO->is_barline())
+        {
+            rTime = (*it)->time();
+            break;
+        }
+        ++it;
+    }
+    if (rTime <= 0.0f)
+        return;
+
+    //determine if anacrusis
+    float measureDuration = pTS->get_measure_duration();
+    m_pColStaffObjs->set_anacrusis_missing_time(measureDuration - rTime);
 }
 
 

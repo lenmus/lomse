@@ -607,21 +607,37 @@ DiatonicPitch::DiatonicPitch(int step, int octave)
 //    int nStep = step();
 //    return FPitch(nStep, octave(), nAccidentals[nStep]);
 //}
-//
-//
+
+
+//=======================================================================================
+// MidiPitch implementation
+//=======================================================================================
+MidiPitch::MidiPitch(int step, int octave, int acc)
+{
+    if (step != k_no_pitch)
+    {
+		int stepToPitch[] = { 0, 2, 4, 5, 7, 9, 11 };
+		m_pitch = (octave+1) * 12 + stepToPitch[step] + acc;
+	}
+    else
+        m_pitch = -1;
+}
+
 ////---------------------------------------------------------------------------------------
-//// MidiPitch implementation
-////---------------------------------------------------------------------------------------
-//MidiPitch::MidiPitch(int step, int octave, int acc)
+//std::string MidiPitch::to_ldp_name()
 //{
-//    if (step != k_unpitched)
-//    {
-//			int stepToPitch [] = { 0, 2, 4, 5, 7, 9, 11 };
-//			m_pitch = (octave * 12) + stepToPitch[step] + acc;
-//	}
-//    m_pitch = -1;
-//}
+//    // Returns the LDP diatonic pitch that corresponds to the received MIDI pitch.
+//    // AWARE: It is assumed C major key signature.
 //
+//    int nOctave = (m_pitch - 12) / 12;
+//    int nRemainder = m_pitch % 12;
+//    std::string sNote[] = {"c", "+c", "d", "+d", "e", "f", "+f",
+//                        "g", "+g", "a", "+a", "b") };
+//    return sNote[nRemainder] + std::string::Format("%d", nOctave);
+//
+//}
+
+////---------------------------------------------------------------------------------------
 //bool MidiPitch::is_natural_note(lmEKeySignatures nKey)
 //{
 //    // Returns true if the Midi note is natural for the key signature scale
@@ -699,19 +715,6 @@ DiatonicPitch::DiatonicPitch(int step, int octave)
 //
 //    int nRemainder = m_pitch % 12;      //nRemainder goes from 0 (Do) to 11 (Si)
 //    return (sScale.substr(nRemainder, 1) == "1"));
-//
-//}
-//
-//std::string MidiPitch::to_ldp_name()
-//{
-//    // Returns the LDP diatonic pitch that corresponds to the received MIDI pitch.
-//    // AWARE: It is assumed C major key signature.
-//
-//    int nOctave = (m_pitch - 12) / 12;
-//    int nRemainder = m_pitch % 12;
-//    std::string sNote[] = {"c", "+c", "d", "+d", "e", "f", "+f",
-//                        "g", "+g", "a", "+a", "b") };
-//    return sNote[nRemainder] + std::string::Format("%d", nOctave);
 //
 //}
 

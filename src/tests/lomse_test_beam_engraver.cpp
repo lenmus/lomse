@@ -20,12 +20,11 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_internal_model.h"
-#include "lomse_basic_objects.h"
 #include "lomse_im_note.h"
 #include "lomse_beam_engraver.h"
 #include "lomse_note_engraver.h"
@@ -36,6 +35,7 @@
 #include "lomse_score_meter.h"
 #include "lomse_shapes_storage.h"
 #include "lomse_analyser.h"
+#include "lomse_im_factory.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -92,11 +92,13 @@ public:
 
     ImoBeam* create_beam(int numNotes, ImoNote* notes[], string beams[], int beamNum)
     {
-        Analyser a(cout, m_libraryScope);
+        Document doc(m_libraryScope);
+        Analyser a(cout, m_libraryScope, &doc);
         BeamsBuilder builder(cout, &a);
         for (int i=0; i < numNotes; ++i)
         {
-            ImoBeamDto* pDto = new ImoBeamDto();
+            ImoBeamDto* pDto = static_cast<ImoBeamDto*>(
+                                        ImFactory::inject(k_imo_beam_dto, &doc));
             pDto->set_beam_number(beamNum);
             pDto->set_note_rest(notes[i]);
             pDto->set_beam_type(beams[i]);
@@ -123,7 +125,7 @@ public:
         for (int i=0; i < numNotes; ++i)
         {
             GmoShapeNote* pShape = dynamic_cast<GmoShapeNote*>(
-                m_pNoteEngrv->create_shape(notes[i], 0, 0, ImoClef::k_G2,
+                m_pNoteEngrv->create_shape(notes[i], 0, 0, k_clef_G2,
                                            UPoint(10.0f, 15.0f)) );
             m_shapes.push_back(pShape);
         }
@@ -183,9 +185,10 @@ SUITE(BeamEngraverTest)
 
     TEST_FIXTURE(BeamEngraverTestFixture, CreateBeam)
     {
-        ImoNote note1(k_step_C, 4, k_eighth);
-        ImoNote note2(k_step_F, 4, k_eighth);
-        ImoNote* notes[] = { &note1, &note2 };
+        Document doc(m_libraryScope);
+        ImoNote* pNote1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth);
+        ImoNote* pNote2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth);
+        ImoNote* notes[] = { pNote1, pNote2 };
         string beams[] = { "+", "-" };
 
         ImoBeam* pBeam = create_beam(2, notes, beams, 12);
@@ -200,13 +203,17 @@ SUITE(BeamEngraverTest)
         CHECK( notes[1]->is_beamed() == true );
         CHECK( notes[1]->get_beam_type(0) == ImoBeam::k_end );
         CHECK( notes[1]->get_beam_type(1) == ImoBeam::k_none );
+
+        delete pNote1;
+        delete pNote2;
     }
 
     TEST_FIXTURE(BeamEngraverTestFixture, FeedEngraver)
     {
-        ImoNote note1(k_step_C, 4, k_eighth);
-        ImoNote note2(k_step_F, 4, k_eighth);
-        ImoNote* notes[] = { &note1, &note2 };
+        Document doc(m_libraryScope);
+        ImoNote* pNote1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth);
+        ImoNote* pNote2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth);
+        ImoNote* notes[] = { pNote1, pNote2 };
         string beams[] = { "+", "-" };
 
         ImoBeam* pBeam = create_beam(2, notes, beams, 12);
@@ -218,13 +225,16 @@ SUITE(BeamEngraverTest)
         CHECK( pEngrv == m_pBeamEngrv );
 
         delete_test_data();
+        delete pNote1;
+        delete pNote2;
     }
 
     TEST_FIXTURE(BeamEngraverTestFixture, CreateBeamShape)
     {
-        ImoNote note1(k_step_C, 4, k_eighth);
-        ImoNote note2(k_step_F, 4, k_eighth);
-        ImoNote* notes[] = { &note1, &note2 };
+        Document doc(m_libraryScope);
+        ImoNote* pNote1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth);
+        ImoNote* pNote2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth);
+        ImoNote* notes[] = { pNote1, pNote2 };
         string beams[] = { "+", "-" };
 
         ImoBeam* pBeam = create_beam(2, notes, beams, 12);
@@ -235,13 +245,16 @@ SUITE(BeamEngraverTest)
         CHECK( m_pBeamShape != NULL );
 
         delete_test_data();
+        delete pNote1;
+        delete pNote2;
     }
 
     TEST_FIXTURE(BeamEngraverTestFixture, BeamShapeAddedToNoteShape)
     {
-        ImoNote note1(k_step_C, 4, k_eighth);
-        ImoNote note2(k_step_F, 4, k_eighth);
-        ImoNote* notes[] = { &note1, &note2 };
+        Document doc(m_libraryScope);
+        ImoNote* pNote1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth);
+        ImoNote* pNote2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth);
+        ImoNote* notes[] = { pNote1, pNote2 };
         string beams[] = { "+", "-" };
 
         ImoBeam* pBeam = create_beam(2, notes, beams, 12);
@@ -256,6 +269,8 @@ SUITE(BeamEngraverTest)
             CHECK( (*it)->find_related_shape(GmoObj::k_shape_beam) == m_pBeamShape );
 
         delete_test_data();
+        delete pNote1;
+        delete pNote2;
     }
 
 
@@ -263,9 +278,10 @@ SUITE(BeamEngraverTest)
 
     TEST_FIXTURE(BeamEngraverTestFixture, DecideStemsDirection)
     {
-        ImoNote note1(k_step_C, 4, k_eighth);
-        ImoNote note2(k_step_F, 4, k_eighth);
-        ImoNote* notes[] = { &note1, &note2 };
+        Document doc(m_libraryScope);
+        ImoNote* pNote1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth);
+        ImoNote* pNote2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth);
+        ImoNote* notes[] = { pNote1, pNote2 };
         string beams[] = { "+", "-" };
 
         ImoBeam* pBeam = create_beam(2, notes, beams, 12);
@@ -278,13 +294,16 @@ SUITE(BeamEngraverTest)
         CHECK( m_pBeamEngrv->my_stems_down() == false );
 
         delete_test_data();
+        delete pNote1;
+        delete pNote2;
     }
 
     TEST_FIXTURE(BeamEngraverTestFixture, StemsForced)
     {
-        ImoNote note1(k_step_C, 4, k_eighth, k_no_accidentals, 0, 0, 0, k_stem_up);
-        ImoNote note2(k_step_F, 4, k_eighth, k_no_accidentals, 0, 0, 0, k_stem_up);
-        ImoNote* notes[] = { &note1, &note2 };
+        Document doc(m_libraryScope);
+        ImoNote* pNote1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth, k_no_accidentals, 0, 0, 0, k_stem_up);
+        ImoNote* pNote2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth, k_no_accidentals, 0, 0, 0, k_stem_up);
+        ImoNote* notes[] = { pNote1, pNote2 };
         string beams[] = { "+", "-" };
 
         ImoBeam* pBeam = create_beam(2, notes, beams, 12);
@@ -297,13 +316,16 @@ SUITE(BeamEngraverTest)
         CHECK( m_pBeamEngrv->my_stems_down() == false );
 
         delete_test_data();
+        delete pNote1;
+        delete pNote2;
     }
 
     TEST_FIXTURE(BeamEngraverTestFixture, StemsMixedButNotAllowed)
     {
-        ImoNote note1(k_step_C, 5, k_eighth);
-        ImoNote note2(k_step_F, 4, k_eighth);
-        ImoNote* notes[] = { &note1, &note2 };
+        Document doc(m_libraryScope);
+        ImoNote* pNote1 = ImFactory::inject_note(&doc, k_step_C, 5, k_eighth);
+        ImoNote* pNote2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth);
+        ImoNote* notes[] = { pNote1, pNote2 };
         string beams[] = { "+", "-" };
 
         ImoBeam* pBeam = create_beam(2, notes, beams, 12);
@@ -319,13 +341,16 @@ SUITE(BeamEngraverTest)
 //        cout << "average pos = " << m_pBeamEngrv->my_get_average_pos_on_staff() << endl;
 
         delete_test_data();
+        delete pNote1;
+        delete pNote2;
     }
 
     TEST_FIXTURE(BeamEngraverTestFixture, StemsMixed)
     {
-        ImoNote note1(k_step_C, 4, k_eighth, k_no_accidentals, 0, 0, 0, k_stem_down);
-        ImoNote note2(k_step_F, 4, k_eighth, k_no_accidentals, 0, 0, 0, k_stem_up);
-        ImoNote* notes[] = { &note1, &note2 };
+        Document doc(m_libraryScope);
+        ImoNote* pNote1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth, k_no_accidentals, 0, 0, 0, k_stem_down);
+        ImoNote* pNote2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth, k_no_accidentals, 0, 0, 0, k_stem_up);
+        ImoNote* notes[] = { pNote1, pNote2 };
         string beams[] = { "+", "-" };
 
         ImoBeam* pBeam = create_beam(2, notes, beams, 12);
@@ -338,6 +363,8 @@ SUITE(BeamEngraverTest)
         CHECK( m_pBeamEngrv->my_stems_down() == false );    //stem forced by last forced stem
 
         delete_test_data();
+        delete pNote1;
+        delete pNote2;
     }
 
 
@@ -345,9 +372,9 @@ SUITE(BeamEngraverTest)
 //
 //    TEST_FIXTURE(BeamEngraverTestFixture, DecideStemsDirection)
 //    {
-//        ImoNote note1(k_step_C, 4, k_eighth);
-//        ImoNote note2(k_step_F, 4, k_eighth);
-//        ImoNote* notes[] = { &note1, &note2 };
+//        ImoNote* pNote1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth);
+//        ImoNote* pNote2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth);
+//        ImoNote* notes[] = { pNote1, pNote2 };
 //        string beams[] = { "+", "-" };
 //
 //        ImoBeam* pBeam = create_beam(2, notes, beams, 12);

@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2011 Lomse project
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -31,6 +31,7 @@ Requirements
 - CMake version 2.8 or higher
 - UnitTest++ 1.3.0 or higher (for running the test program)
 - FreeType 2.3.5-1
+- Boost Threads 1.42 or higher
 
 
 Table Of Content
@@ -70,7 +71,6 @@ A. General notes and requirements
 3. I have only generated and tested on following platforms:
 
     - Windows XP, using Visual Studio .NET 2003 (VS7) (generator "Visual Studio 7 .NET")
-    - Windows XP, using Visual Studio 2008 (VS8) (generator "Visual Studio ????")
     - Linux Ubuntu 10.4, Using CodeBlocs with linux makefiles (generator "CodeBlocks - Unix Makefiles")
     - Linux Ubuntu 10.4, Using linux makefiles  (generator "Unix Makefiles")
 
@@ -112,11 +112,16 @@ You need CMake 2.8.0 or later.
 1) Building on Linux
 --------------------
 
-First, you will also need to install package libunittest++-dev which could not
-be included in your Linux distro. Installing it should be as simple as typing
-in the following command in your terminal (on Debian-like systems):
+First, you need to install the required packages. Usually the Boost libraries
+(http://www.boost.org/) and the FreeType library (http://www.freetype.org/) are
+already included in your Linux distro. So, usually, the only package you need 
+to install is UnitTest++. Installing it should be as simple as typing the 
+following commands in your terminal (on Debian-like systems):
 
     sudo apt-get install libunittest++-dev
+
+
+Now you can procedd to build Lomse.
 
 In following instructions it is assumed you want to generate Makefiles. Open a
 terminal window, move to the folder in which you have unpackaged the lomse
@@ -180,14 +185,18 @@ Alternatively, build step-by-step, checking results:
 	./example_1
 	
 
+Now you can install lomse:
 
+    sudo make install
 
-That builds and installs Lomse on Linux. By default, Lomse is installed in ${CMAKE_INSTALL_PREFIX}/bin, with CMAKE_INSTALL_PREFIX defaulting to usr/local.
+That installs Lomse on your system. By default, Lomse library is installed 
+in <prefix>/lib and header files in <prefix>/include/lomse, with <prefix>
+defaulting to usr/local.
 
 You can change the install location by running cmake like this:
 
     cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/new/install/prefix  \
-        -DCMAKE_BUILD_TYPE=Release ./
+        -DCMAKE_BUILD_TYPE=Release ../lomse
 
 Building from source in the repository is recommended, since code in the
 repository should always be stable. If it's not, that's a bug to report.

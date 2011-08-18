@@ -30,8 +30,8 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-GmoBoxSystem::GmoBoxSystem()    //, int nNumPage, int iSystem,
-    : GmoBox(GmoObj::k_box_system)
+GmoBoxSystem::GmoBoxSystem(ImoObj* pCreatorImo)    //, int nNumPage, int iSystem,
+    : GmoBox(GmoObj::k_box_system, pCreatorImo)
 //    , m_nNumPage(nNumPage)
 //    , m_pBPage(pParent)
 //	, m_pTopSpacer(NULL)

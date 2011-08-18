@@ -32,7 +32,7 @@ namespace lomse
 
 //forward declarations
 class ImoScore;
-class ImoTextStyleInfo;
+class ImoStyle;
 
 
 //---------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ protected:
     bool m_fScoreIsEmpty;
 
     //info about text styles
-    ImoTextStyleInfo* m_tupletsStyle;
+    ImoStyle* m_tupletsStyle;
 
 public:
     ScoreMeter(ImoScore* pScore);
@@ -90,7 +90,7 @@ public:
     inline bool is_empty_score() { return m_fScoreIsEmpty; }
 
     //info about text styles
-    inline ImoTextStyleInfo* get_tuplets_style_info() { return m_tupletsStyle; }
+    inline ImoStyle* get_tuplets_style_info() { return m_tupletsStyle; }
 
 
 protected:

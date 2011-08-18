@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_LINKER_H__
 #define __LOMSE_LINKER_H__
@@ -29,41 +29,47 @@ namespace lomse
 {
 
 //forward declarations
+class Document;
 class ImoAuxObj;
 class ImoBezierInfo;
+class ImoContent;
 class ImoCursorInfo;
-class ImoFontInfo;
+class ImoFontStyleDto;
 class ImoInstrGroup;
 class ImoInstrument;
 class ImoMidiInfo;
 class ImoObj;
 class ImoOptionInfo;
 class ImoPageInfo;
+class ImoParamInfo;
 class ImoStaffObj;
 class ImoSystemInfo;
 class ImoScoreText;
 class ImoScoreTitle;
 class ImoStaffInfo;
 class ImoTextItem;
-class ImoTextStyleInfo;
+class ImoStyle;
 
 
+//---------------------------------------------------------------------------------------
 //Linker: responsible for code generation phase, step 1: links ImObjs in the
 //parse tree to create the tree of ImObjs. After this step the parse tree could
 //be discarded, as all structure and info is captured by the ImObj tree.
-//--------------------------------------------------------------------------------
 class Linker
 {
+protected:
+    Document* m_pDoc;
+    ImoObj* m_pParent;
+    int m_ldpChildType;
+
 public:
-    Linker() {}
+    Linker(Document* pDoc) : m_pDoc(pDoc) {}
     ~Linker() {}
 
     ImoObj* add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChildType);
 
 protected:
-    ImoObj* m_pParent;
-    int m_ldpChildType;
-
+    ImoObj* add_content(ImoContent* pContent);
     ImoObj* add_instruments_group(ImoInstrGroup* pGrp);
     ImoObj* add_option(ImoOptionInfo* pOpt);
     ImoObj* add_page_info(ImoPageInfo* pPI);
@@ -71,16 +77,17 @@ protected:
     ImoObj* add_bezier(ImoBezierInfo* pBezier);
     ImoObj* add_cursor(ImoCursorInfo* pCursor);
     ImoObj* add_midi_info(ImoMidiInfo* pInfo);
+    ImoObj* add_param_info(ImoParamInfo* pParam);
     ImoObj* add_staff_info(ImoStaffInfo* pInfo);
     ImoObj* add_instrument(ImoInstrument* pInstrument);
     ImoObj* add_text(ImoScoreText* pText);
     ImoObj* add_text_item(ImoTextItem* pText);
     ImoObj* add_title(ImoScoreTitle* pTitle);
-    ImoObj* add_font_info(ImoFontInfo* pFont);
-    ImoObj* add_text_style_info(ImoTextStyleInfo* pStyle);
+    ImoObj* add_style(ImoStyle* pStyle);
     ImoObj* add_staffobj(ImoStaffObj* pSO);
     ImoObj* add_attachment(ImoAuxObj* pAuxObj);
     ImoObj* add_child(int parentType, ImoObj* pImo);
+    ImoObj* add_font_style(ImoFontStyleDto* pDto);
 
 };
 

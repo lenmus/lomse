@@ -20,7 +20,7 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_document_layouter.h"
@@ -35,6 +35,7 @@
 #include "lomse_score_meter.h"
 #include "lomse_internal_model.h"
 #include "lomse_paragraph_layouter.h"
+#include "lomse_im_factory.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -46,20 +47,12 @@ using namespace lomse;
 class MyDocLayouter : public DocLayouter
 {
 public:
-    MyDocLayouter(InternalModel* pIModel, LibraryScope& libraryScope) 
+    MyDocLayouter(InternalModel* pIModel, LibraryScope& libraryScope)
         : DocLayouter(pIModel, libraryScope) {}
     ~MyDocLayouter() {}
 
-    ////access to protected members
-    //FlowSizer* get_main_sizer() { return m_pMainSizer; }
-    void my_initializations() { initializations(); }
     void my_layout_content() { layout_content(); }
-    void my_layout_item(GmoBox* pParentBox, ImoContentObj* pItem) { layout_item(pParentBox, pItem); }
-    ContentLayouter* my_new_item_layouter(ImoContentObj* pImo, ImoStyles* pStyles) {
-        return new_item_layouter(pImo, pStyles);
-    }
-
-    GmoBox* my_get_current_box() { return m_pCurrentBox; }
+    GmoBox* my_get_current_box() { return m_pItemMainBox; }
 };
 
 
@@ -95,6 +88,7 @@ SUITE(DocLayouterTest)
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
+        //pGModel->dump_page(0, cout);
         CHECK( pGModel != NULL );
         delete pGModel;
     }
@@ -143,7 +137,7 @@ SUITE(DocLayouterTest)
         GmoBox* pBox = pPage->get_child_box(0);
         CHECK( pBox->is_box_doc_page_content() == true );
         CHECK( pBox->get_width() == 16000.0f );
-        CHECK( pBox->get_height() == 31700.0f );
+        CHECK( pBox->get_height() == 2735.0f );
         CHECK( pBox->get_left() == 1000.0f );
         CHECK( pBox->get_top() == 1500.0f );
         delete pGModel;
@@ -172,6 +166,7 @@ SUITE(DocLayouterTest)
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
+//        pGModel->dump_page(0, cout);
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         GmoBox* pBDPC = pPage->get_child_box(0);     //DocPageContent
         GmoBox* pBox = pBDPC->get_child_box(0);      //ScorePage
@@ -195,6 +190,7 @@ SUITE(DocLayouterTest)
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
         GraphicModel* pGModel = dl.get_gm_model();
+//        pGModel->dump_page(0, cout);
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         GmoBox* pBDPC = pPage->get_child_box(0);     //DocPageContent
         GmoBox* pBSP = pBDPC->get_child_box(0);      //ScorePage
@@ -470,20 +466,6 @@ SUITE(DocLayouterTest)
     //    CHECK( dl.get_main_sizer() != NULL );
     //}
 
-    // para -----------------------------------------------------------------------------
-
-    TEST_FIXTURE(DocLayouterTestFixture, Paragraph_CreateLayouter)
-    {
-        ImoParagraph para;
-        ImoStyles styles;
-        MyDocLayouter dl(NULL, m_libraryScope);
-        ParagraphLayouter* pLyt 
-            = dynamic_cast<ParagraphLayouter*>( dl.my_new_item_layouter(&para, &styles) );
-
-        CHECK( pLyt != NULL );
-
-        delete pLyt;
-    }
 
 };
 
@@ -512,23 +494,31 @@ SUITE(InstrEngraverTest)
 
     TEST_FIXTURE(InstrEngraverTestFixture, InstrEngraver_MeasureIndents_NoBracket)
     {
-        ImoInstrument instr;
+        Document doc(m_libraryScope);
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
         ScoreMeter meter(1, 1, 180.0f);
-        InstrumentEngraver engraver(m_libraryScope, &meter, &instr, NULL);
+        InstrumentEngraver engraver(m_libraryScope, &meter, pInstr, NULL);
         engraver.measure_indents();
         CHECK( engraver.get_indent_first() == 0.0f );
         CHECK( engraver.get_indent_other() == 0.0f );
+
+        delete pInstr;
     }
 
     TEST_FIXTURE(InstrEngraverTestFixture, InstrEngraver_MeasureIndents_Bracket)
     {
-        ImoInstrument instr;
-        instr.add_staff();
+        Document doc(m_libraryScope);
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        pInstr->add_staff();
         ScoreMeter meter(1, 1, 180.0f);
-        InstrumentEngraver engraver(m_libraryScope, &meter, &instr, NULL);
+        InstrumentEngraver engraver(m_libraryScope, &meter, pInstr, NULL);
         engraver.measure_indents();
         CHECK( engraver.get_indent_first() > 0.0f );
         CHECK( engraver.get_indent_other() > 0.0f );
+
+        delete pInstr;
     }
 
 };

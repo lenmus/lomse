@@ -23,9 +23,9 @@
 
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
-#include "lomse_drawer.h"
-#include <sstream>
+#include "lomse_layouter.h"
 
+#include <sstream>
 using namespace std;
 
 namespace lomse
@@ -36,60 +36,47 @@ class InternalModel;
 class ImoContentObj;
 class ImoDocument;
 class ImoStyles;
-class ContentLayouter;
-//class FlowSizer;
+class Layouter;
 class GraphicModel;
 class GmoBox;
 class GmoBoxDocPage;
-class FontStorage;
+class ScoreLayouter;
 
-
-// DocLayouter: layouts a document
 //---------------------------------------------------------------------------------------
-class DocLayouter
+// DocLayouter: layouts a document
+class DocLayouter : public Layouter
 {
 protected:
-    InternalModel* m_pIModel;
-    GraphicModel* m_pGModel;
-    LibraryScope& m_libraryScope;
-    //FlowSizer* m_pMainSizer;
-    GmoBox* m_pCurrentBox;
-    GmoBoxDocPage* m_pBoxDocPage;   //current page
-    LUnits m_availableWidth;
-    LUnits m_availableHeight;
-    UPoint m_pageCursor;            //to point to current position. Relative to BoxDocPage
+    ImoDocument* m_pDoc;
 
+    //for unit tests: need to access ScoreLayouter.
+    Layouter* m_pScoreLayouter;
 
 public:
     DocLayouter(InternalModel* pIModel, LibraryScope& libraryScope);
     virtual ~DocLayouter();
 
     void layout_document();
-    inline GraphicModel* get_gm_model() { return m_pGModel; }
+
+    //implementation of virtual methods in Layouter base class
+    void layout_in_box() {}
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
+                         LUnits height) {}
+    GmoBox* start_new_page();
 
     //only for unit tests
-    ContentLayouter* get_last_layouter() { return m_pCurLayouter; }
+    ScoreLayouter* get_score_layouter();
+    void save_score_layouter(Layouter* pLayouter);
+    inline GraphicModel* get_gm_model() { return m_pGModel; }
 
 protected:
-    void initializations();
     void layout_content();
-    void layout_item(GmoBox* pParentBox, ImoContentObj* pItem);
-    //void add_content_to_main_sizer();
-    //void assign_space_to_content_items();
-    ImoDocument* get_document();
-    ContentLayouter* new_item_layouter(ImoContentObj* pImo, ImoStyles* pStyles);
-    void start_new_document_page();
+
     GmoBoxDocPage* create_document_page();
     void assign_paper_size_to(GmoBox* pBox);
     void add_margins_to_page(GmoBoxDocPage* pPage);
     void add_headers_to_page(GmoBoxDocPage* pPage);
     void add_footers_to_page(GmoBoxDocPage* pPage);
-    void add_contents_wrapper_box_to_page(GmoBoxDocPage* pPage);
-    GmoBox* create_item_main_box(GmoBox* pParentBox, ContentLayouter* pLayouter);
-
-    //for unit tests we need to access ScoreLayouter. Therefore I will save here the
-    //last used layouter.
-    ContentLayouter* m_pCurLayouter;
 
 };
 

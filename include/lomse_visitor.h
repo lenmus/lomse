@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_VISITOR_H__
 #define __LOMSE_VISITOR_H__
@@ -24,9 +24,8 @@
 namespace lomse
 {
 
+//---------------------------------------------------------------------------------------
 // The root base class for all visitors
-//-------------------------------------------------------------------------------------
-
 class BaseVisitor
 {
 public:
@@ -38,18 +37,15 @@ protected:
 };
 
 
+//---------------------------------------------------------------------------------------
 // Base class for visitors
-//-------------------------------------------------------------------------------------
-
 template<class T>
-class Visitor : public BaseVisitor
+class Visitor : virtual public BaseVisitor
 {
 public:
 	virtual ~Visitor() {}
-	virtual void start_visit(T& element) {};
-	virtual void end_visit(T& element) {};
-	virtual void start_visit(T* pElement) {};
-	virtual void end_visit(T* pElement) {};
+	virtual void start_visit(T* pElement) {}
+	virtual void end_visit(T* pElement) {}
 
 protected:
     Visitor() : BaseVisitor() {}
@@ -57,16 +53,15 @@ protected:
 };
 
 
+//---------------------------------------------------------------------------------------
 // Base class for objects accepting visitors
-//-------------------------------------------------------------------------------------
-
 class Visitable
 {
 public:
 	virtual ~Visitable() {}
-	virtual void accept_in(BaseVisitor& v) {}
-	virtual void accept_out(BaseVisitor& v) {}
+	virtual void accept_visitor(BaseVisitor& v)=0;
 };
+
 
 } //namespace lomse
 

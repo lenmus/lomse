@@ -18,16 +18,14 @@
 //
 //-------------------------------------------------------------------------------------
 
-#ifdef VC6
-# pragma warning (disable : 4786)
-#endif
+//#ifdef VC6
+//# pragma warning (disable : 4786)
+//#endif
 
 #include "lomse_ldp_factory.h"
 
 #include <sstream>
 #include <iostream>
-#include "lomse_exceptions.h"
-
 using namespace std;
 
 namespace lomse
@@ -63,6 +61,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_abbrev] = "abbrev";
     m_TypeToName[k_above] = "above";
     m_TypeToName[k_anchorLine] = "anchorLine";
+    m_TypeToName[k_background_color] = "background-color";
     m_TypeToName[k_barline] = "barline";
     m_TypeToName[k_beam] = "beam";
     m_TypeToName[k_below] = "below";
@@ -70,11 +69,17 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_bold] = "bold";
     m_TypeToName[k_bold_italic] = "bold-italic";
     m_TypeToName[k_border] = "border";
+    m_TypeToName[k_border_width] = "border-width";
+    m_TypeToName[k_border_width_top] = "border-width-top";
+    m_TypeToName[k_border_width_right] = "border-width-right";
+    m_TypeToName[k_border_width_bottom] = "border-width-bottom";
+    m_TypeToName[k_border_width_left] = "border-width-left";
     m_TypeToName[k_brace] = "brace";
     m_TypeToName[k_bracket] = "bracket";
     m_TypeToName[k_bracketType] = "bracketType";
     m_TypeToName[k_center] = "center";
     m_TypeToName[k_chord] = "chord";
+    m_TypeToName[k_classid] = "classid";
     m_TypeToName[k_clef] = "clef";
     m_TypeToName[k_color] = "color";
     m_TypeToName[k_content] = "content";
@@ -100,6 +105,10 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_fermata] = "fermata";
     m_TypeToName[k_figuredBass] = "figuredBass";
     m_TypeToName[k_font] = "font";
+    m_TypeToName[k_font_name] = "font-name";
+    m_TypeToName[k_font_size] = "font-size";
+    m_TypeToName[k_font_style] = "font-style";
+    m_TypeToName[k_font_weight] = "font-weight";
     m_TypeToName[k_goBack] = "goBack";
     m_TypeToName[k_goFwd] = "goFwd";
     m_TypeToName[k_graphic] = "graphic";
@@ -116,11 +125,17 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_language] = "language";
     m_TypeToName[k_left] = "left";
     m_TypeToName[k_lenmusdoc] = "lenmusdoc";
+    m_TypeToName[k_link] = "link";
     m_TypeToName[k_line] = "line";
     m_TypeToName[k_lineCapEnd] = "lineCapEnd";
     m_TypeToName[k_lineCapStart] = "lineCapStart";
     m_TypeToName[k_lineStyle] = "lineStyle";
     m_TypeToName[k_lineThickness] = "lineThickness";
+    m_TypeToName[k_margin] = "margin";
+    m_TypeToName[k_margin_top] = "margin-top";
+    m_TypeToName[k_margin_right] = "margin-right";
+    m_TypeToName[k_margin_bottom] = "margin-bottom";
+    m_TypeToName[k_margin_left] = "margin-left";
     m_TypeToName[k_meta] = "meta";
     m_TypeToName[k_metronome] = "metronome";
     m_TypeToName[k_musicData] = "musicData";
@@ -131,10 +146,16 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_normal] = "normal";
     m_TypeToName[k_note] = "n";   //note
     m_TypeToName[k_opt] = "opt";
+    m_TypeToName[k_padding] = "padding";
+    m_TypeToName[k_padding_top] = "padding-top";
+    m_TypeToName[k_padding_right] = "padding-right";
+    m_TypeToName[k_padding_bottom] = "padding-bottom";
+    m_TypeToName[k_padding_left] = "padding-left";
     m_TypeToName[k_pageLayout] = "pageLayout";
     m_TypeToName[k_pageMargins] = "pageMargins";
     m_TypeToName[k_pageSize] = "pageSize";
     m_TypeToName[k_para] = "para";
+    m_TypeToName[k_parameter] = "param";
     m_TypeToName[k_parenthesis] = "parenthesis";
     m_TypeToName[k_pitch] = "pitch";
     m_TypeToName[k_portrait] = "portrait";
@@ -170,6 +191,8 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_tuplet] = "t";
     m_TypeToName[k_text] = "text";
     m_TypeToName[k_textbox] = "textbox";
+    m_TypeToName[k_text_align] = "text-align";
+    m_TypeToName[k_text_decoration] = "text-decoration";
     m_TypeToName[k_tie] = "tie";
     m_TypeToName[k_time_signature] = "time";
     m_TypeToName[k_title] = "title";
@@ -178,6 +201,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_undoData] = "undoData";
     m_TypeToName[k_up] = "up";
     m_TypeToName[k_vers] = "vers";
+    m_TypeToName[k_vertical_align] = "vertical-align";
     m_TypeToName[k_visible] = "visible";
     m_TypeToName[k_voice] = "voice";
     m_TypeToName[k_width] = "width";
@@ -192,6 +216,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["abbrev"] = new LdpElementFunctor<k_abbrev>;
     m_NameToFunctor["above"] = new LdpElementFunctor<k_above>;
     m_NameToFunctor["anchorLine"] = new LdpElementFunctor<k_anchorLine>;
+    m_NameToFunctor["background-color"] = new LdpElementFunctor<k_background_color>;
     m_NameToFunctor["barline"] = new LdpElementFunctor<k_barline>;
     m_NameToFunctor["beam"] = new LdpElementFunctor<k_beam>;
     m_NameToFunctor["below"] = new LdpElementFunctor<k_below>;
@@ -199,11 +224,17 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["bold"] = new LdpElementFunctor<k_bold>;
     m_NameToFunctor["bold_italic"] = new LdpElementFunctor<k_bold_italic>;
     m_NameToFunctor["border"] = new LdpElementFunctor<k_border>;
+    m_NameToFunctor["border-width"] = new LdpElementFunctor<k_border_width>;
+    m_NameToFunctor["border-width-top"] = new LdpElementFunctor<k_border_width_top>;
+    m_NameToFunctor["border-width-right"] = new LdpElementFunctor<k_border_width_right>;
+    m_NameToFunctor["border-width-bottom"] = new LdpElementFunctor<k_border_width_bottom>;
+    m_NameToFunctor["border-width-left"] = new LdpElementFunctor<k_border_width_left>;
     m_NameToFunctor["brace"] = new LdpElementFunctor<k_brace>;
     m_NameToFunctor["bracket"] = new LdpElementFunctor<k_bracket>;
     m_NameToFunctor["bracketType"] = new LdpElementFunctor<k_bracketType>;
     m_NameToFunctor["center"] = new LdpElementFunctor<k_center>;
     m_NameToFunctor["chord"] = new LdpElementFunctor<k_chord>;
+    m_NameToFunctor["classid"] = new LdpElementFunctor<k_classid>;
     m_NameToFunctor["clef"] = new LdpElementFunctor<k_clef>;
     m_NameToFunctor["color"] = new LdpElementFunctor<k_color>;
     m_NameToFunctor["content"] = new LdpElementFunctor<k_content>;
@@ -229,6 +260,10 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["fermata"] = new LdpElementFunctor<k_fermata>;
     m_NameToFunctor["figuredBass"] = new LdpElementFunctor<k_figuredBass>;
     m_NameToFunctor["font"] = new LdpElementFunctor<k_font>;
+    m_NameToFunctor["font-name"] = new LdpElementFunctor<k_font_name>;
+    m_NameToFunctor["font-size"] = new LdpElementFunctor<k_font_size>;
+    m_NameToFunctor["font-style"] = new LdpElementFunctor<k_font_style>;
+    m_NameToFunctor["font-weight"] = new LdpElementFunctor<k_font_weight>;
     m_NameToFunctor["goBack"] = new LdpElementFunctor<k_goBack>;
     m_NameToFunctor["goFwd"] = new LdpElementFunctor<k_goFwd>;
     m_NameToFunctor["graphic"] = new LdpElementFunctor<k_graphic>;
@@ -245,11 +280,17 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["language"] = new LdpElementFunctor<k_language>;
     m_NameToFunctor["left"] = new LdpElementFunctor<k_left>;
     m_NameToFunctor["lenmusdoc"] = new LdpElementFunctor<k_lenmusdoc>;
+    m_NameToFunctor["link"] = new LdpElementFunctor<k_link>;
     m_NameToFunctor["line"] = new LdpElementFunctor<k_line>;
     m_NameToFunctor["lineCapEnd"] = new LdpElementFunctor<k_lineCapEnd>;
     m_NameToFunctor["lineCapStart"] = new LdpElementFunctor<k_lineCapStart>;
     m_NameToFunctor["lineStyle"] = new LdpElementFunctor<k_lineStyle>;
     m_NameToFunctor["lineThickness"] = new LdpElementFunctor<k_lineThickness>;
+    m_NameToFunctor["margin"] = new LdpElementFunctor<k_margin>;
+    m_NameToFunctor["margin-top"] = new LdpElementFunctor<k_margin_top>;
+    m_NameToFunctor["margin-right"] = new LdpElementFunctor<k_margin_right>;
+    m_NameToFunctor["margin-bottom"] = new LdpElementFunctor<k_margin_bottom>;
+    m_NameToFunctor["margin-left"] = new LdpElementFunctor<k_margin_left>;
     m_NameToFunctor["meta"] = new LdpElementFunctor<k_meta>;
     m_NameToFunctor["metronome"] = new LdpElementFunctor<k_metronome>;
     m_NameToFunctor["musicData"] = new LdpElementFunctor<k_musicData>;
@@ -260,10 +301,16 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["no"] = new LdpElementFunctor<k_no>;
     m_NameToFunctor["normal"] = new LdpElementFunctor<k_normal>;
     m_NameToFunctor["opt"] = new LdpElementFunctor<k_opt>;
+    m_NameToFunctor["padding"] = new LdpElementFunctor<k_padding>;
+    m_NameToFunctor["padding-top"] = new LdpElementFunctor<k_padding_top>;
+    m_NameToFunctor["padding-right"] = new LdpElementFunctor<k_padding_right>;
+    m_NameToFunctor["padding-bottom"] = new LdpElementFunctor<k_padding_bottom>;
+    m_NameToFunctor["padding-left"] = new LdpElementFunctor<k_padding_left>;
     m_NameToFunctor["pageLayout"] = new LdpElementFunctor<k_pageLayout>;
     m_NameToFunctor["pageMargins"] = new LdpElementFunctor<k_pageMargins>;
     m_NameToFunctor["pageSize"] = new LdpElementFunctor<k_pageSize>;
     m_NameToFunctor["para"] = new LdpElementFunctor<k_para>;
+    m_NameToFunctor["param"] = new LdpElementFunctor<k_parameter>;
     m_NameToFunctor["parenthesis"] = new LdpElementFunctor<k_parenthesis>;
     m_NameToFunctor["pitch"] = new LdpElementFunctor<k_pitch>;
     m_NameToFunctor["portrait"] = new LdpElementFunctor<k_portrait>;
@@ -285,7 +332,6 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["start-x"] = new LdpElementFunctor<k_start_x>;
     m_NameToFunctor["start-y"] = new LdpElementFunctor<k_start_y>;
     m_NameToFunctor["startPoint"] = new LdpElementFunctor<k_startPoint>;
-    m_NameToFunctor["styles"] = new LdpElementFunctor<k_styles>;
     m_NameToFunctor["staves"] = new LdpElementFunctor<k_staves>;
     m_NameToFunctor["stem"] = new LdpElementFunctor<k_stem>;
     m_NameToFunctor["style"] = new LdpElementFunctor<k_style>;
@@ -297,6 +343,8 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["t"] = new LdpElementFunctor<k_tuplet>;
     m_NameToFunctor["text"] = new LdpElementFunctor<k_text>;
     m_NameToFunctor["textbox"] = new LdpElementFunctor<k_textbox>;
+    m_NameToFunctor["text-align"] = new LdpElementFunctor<k_text_align>;
+    m_NameToFunctor["text-decoration"] = new LdpElementFunctor<k_text_decoration>;
     m_NameToFunctor["tie"] = new LdpElementFunctor<k_tie>;
     m_NameToFunctor["time"] = new LdpElementFunctor<k_time_signature>;
     m_NameToFunctor["title"] = new LdpElementFunctor<k_title>;
@@ -305,6 +353,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["undoData"] = new LdpElementFunctor<k_undoData>;
     m_NameToFunctor["up"] = new LdpElementFunctor<k_up>;
     m_NameToFunctor["vers"] = new LdpElementFunctor<k_vers>;
+    m_NameToFunctor["vertical-align"] = new LdpElementFunctor<k_vertical_align>;
     m_NameToFunctor["visible"] = new LdpElementFunctor<k_visible>;
     m_NameToFunctor["voice"] = new LdpElementFunctor<k_voice>;
     m_NameToFunctor["width"] = new LdpElementFunctor<k_width>;

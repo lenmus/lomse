@@ -22,6 +22,7 @@
 
 #include "lomse_reader.h"
 
+#include <stdexcept>
 using namespace std;
 
 namespace lomse
@@ -416,13 +417,13 @@ LdpToken* LdpTokenizer::parse_new_token()
                 } else {
                     m_reporter << "[LdpTokenizer::parse_new_token]: Bad character '"
                                << curChar << "' found" << endl;
-                    throw "Invalid char";
+                    throw std::runtime_error("[LdpTokenizer::parse_new_token] Invalid char");
                 }
                 state = k_Start;
                 break;
 
             default:
-                throw "Invalid state";
+                throw std::runtime_error("[LdpTokenizer::parse_new_token] Invalid state");
 
         }
     }

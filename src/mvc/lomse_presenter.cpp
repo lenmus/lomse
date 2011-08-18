@@ -72,7 +72,7 @@ Presenter* PresentersCollection::get_presenter(int iDoc)
     if (i == iDoc)
         return *it;
     else
-        throw "invalid index";
+        throw std::runtime_error("[PresentersCollection::get_presenter] invalid index");
 }
 
 //---------------------------------------------------------------------------------------
@@ -84,7 +84,7 @@ Presenter* PresentersCollection::get_presenter(Document* pDoc)
         if (pDoc == (*it)->get_document())
             return *it;
     }
-    throw "invalid pointer";
+    throw std::runtime_error("[PresentersCollection::get_presenter] invalid pointer");
 }
 
 //---------------------------------------------------------------------------------------
@@ -105,7 +105,7 @@ void PresentersCollection::close_document(int iDoc)
         m_presenters.erase(it);
     }
     else
-        throw "invalid index";
+        throw std::runtime_error("[PresentersCollection::close_document] invalid index");
 }
 
 //---------------------------------------------------------------------------------------
@@ -187,6 +187,15 @@ Presenter* PresenterBuilder::open_document(int viewType, const std::string& file
     return Injector::inject_Presenter(m_libScope, viewType, pDoc);
 }
 
+//---------------------------------------------------------------------------------------
+Presenter* PresenterBuilder::open_document(int viewType, LdpReader& reader)
+{
+    Document* pDoc = Injector::inject_Document(m_libScope);
+    pDoc->from_input(reader);
+
+    return Injector::inject_Presenter(m_libScope, viewType, pDoc);
+}
+
 
 //=======================================================================================
 //Presenter implementation
@@ -198,8 +207,7 @@ Presenter::Presenter(Document* pDoc, Interactor* pIntor)   //, UserCommandExecut
     , m_callback(NULL)
 {
     m_interactors.push_back(pIntor);
-    m_pDoc->add_observer(pIntor);
-    //pIntor->set_owner(this);
+    m_pDoc->add_event_handler(NULL, k_doc_modified_event, pIntor);
 }
 
 //---------------------------------------------------------------------------------------
@@ -228,7 +236,7 @@ Interactor* Presenter::get_interactor(int iIntor)
     if (i == iIntor)
         return *it;
     else
-        throw "invalid index";
+        throw std::runtime_error("[Presenter::get_interactor] invalid index");
 }
 
 //---------------------------------------------------------------------------------------

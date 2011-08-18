@@ -285,37 +285,37 @@ int NoteEngraver::pitch_to_pos_on_staff(int clefType)
 	// pitch is defined. Position will depend on key
     switch (clefType)
     {
-        case ImoClef::k_undefined:
-        case ImoClef::k_G2:
+        case k_clef_undefined:
+        case k_clef_G2:
             return dpitch - LOMSE_C4_DPITCH;
-        case ImoClef::k_F4:
+        case k_clef_F4:
             return dpitch - LOMSE_C4_DPITCH + 12;
-        case ImoClef::k_F3:
+        case k_clef_F3:
             return dpitch - LOMSE_C4_DPITCH + 10;
-        case ImoClef::k_C1:
+        case k_clef_C1:
             return dpitch - LOMSE_C4_DPITCH + 2;
-        case ImoClef::k_C2:
+        case k_clef_C2:
             return dpitch - LOMSE_C4_DPITCH + 4;
-        case ImoClef::k_C3:
+        case k_clef_C3:
             return dpitch - LOMSE_C4_DPITCH + 6;
-        case ImoClef::k_C4:
+        case k_clef_C4:
             return dpitch - LOMSE_C4_DPITCH + 8;
-        case ImoClef::k_percussion:
+        case k_clef_percussion:
             return 5;       //on 2nd space
-        case ImoClef::k_C5:
+        case k_clef_C5:
             return dpitch - LOMSE_C4_DPITCH + 10;
-        case ImoClef::k_F5:
+        case k_clef_F5:
             return dpitch - LOMSE_C4_DPITCH + 14;
-        case ImoClef::k_G1:
+        case k_clef_G1:
             return dpitch - LOMSE_C4_DPITCH - 2;
-        case ImoClef::k_8_G2:        //8 above
-        case ImoClef::k_G2_8:        //8 below
-        case ImoClef::k_8_F4:        //8 above
-        case ImoClef::k_F4_8:        //8 below
-        case ImoClef::k_15_G2:       //15 above
-        case ImoClef::k_G2_15:       //15 below
-        case ImoClef::k_15_F4:       //15 above
-        case ImoClef::k_F4_15:       //15 below
+        case k_clef_8_G2:        //8 above
+        case k_clef_G2_8:        //8 below
+        case k_clef_8_F4:        //8 above
+        case k_clef_F4_8:        //8 below
+        case k_clef_15_G2:       //15 above
+        case k_clef_G2_15:       //15 below
+        case k_clef_15_F4:       //15 above
+        case k_clef_F4_15:       //15 below
             //TODO
             return 2;
         default:

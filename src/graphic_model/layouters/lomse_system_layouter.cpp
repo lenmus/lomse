@@ -761,7 +761,7 @@ SystemLayouter::~SystemLayouter()
 GmoBoxSystem* SystemLayouter::create_system_box(LUnits left, LUnits top, LUnits width,
                                                 LUnits height)
 {
-    m_pBoxSystem = new GmoBoxSystem();
+    m_pBoxSystem = new GmoBoxSystem(m_pScore);
     m_pBoxSystem->set_origin(left, top);
 
     LUnits leftMargin = 0.0f; //TODO-LOG: m_pScoreLyt->get_system_left_space(iSystem);
@@ -806,7 +806,7 @@ void SystemLayouter::reposition_staves(LUnits indent)
     org.y += m_pScoreLyt->determine_top_space(0);
     org.x = 0.0f;
 
-    LUnits width = m_pBoxSystem->get_content_width();
+    LUnits width = m_pBoxSystem->get_content_width_old();
     LUnits left = m_pBoxSystem->get_left();
     int maxInstr = m_pScore->get_num_instruments() - 1;
     for (int iInstr = 0; iInstr <= maxInstr; iInstr++)
@@ -952,7 +952,7 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
             m_ColLayouters[m_iFirstCol]->get_prolog_key(iStaffIndex);
         ImoClef* pClef = pClefEntry ? dynamic_cast<ImoClef*>(pClefEntry->imo_object())
                                     : NULL;
-        int clefType = pClef ? pClef->get_clef_type() : ImoClef::k_undefined;
+        int clefType = pClef ? pClef->get_clef_type() : k_clef_undefined;
 
         //add clef shape
         if (pClefEntry)

@@ -154,6 +154,7 @@ void Renderer::set_transform(TransAffine& transform)
     m_uxShift = (transform.tx - m_vxOrg) / m_lunitsToPixels;
     m_uyShift = (transform.ty - m_vyOrg) / m_lunitsToPixels;
     m_userScale = transform.scale();
+    set_transformation();
 }
 
 //---------------------------------------------------------------------------------------

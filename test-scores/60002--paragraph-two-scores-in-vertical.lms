@@ -1,0 +1,45 @@
+(lenmusdoc (vers 0.0) 
+    (styles (defineStyle "red" (font "Liberation serif" 14pt bold-italic)
+                               (color #ff0000))
+    )
+    
+    (content
+
+        (para
+            (txt "Hello gfyp World!")
+            (txt (style "red") " This is a test. WMtyqgpixmn")
+        )
+
+        (score
+           (vers 1.6)
+           (opt Render.SpacingMethod 1)
+           (opt Render.SpacingValue 30)
+           (instrument (staves 1)
+              (musicData
+                 (clef G)
+                 (n a4 w v1)
+                 (n a4 h v1)
+                 (n a4 h v1)
+                 (n a4 q v1)
+                 (n a4 q v1)
+                 (n a4 e g+ v1)
+                 (n a4 e g- v1)
+                 (n a4 s g+ v1)
+                 (n a4 s g- v1)
+                 (n a4 t g+ v1)
+                 (n a4 t g- v1)
+              )
+           )
+        )
+
+        (score
+           (vers 1.6)
+           (instrument
+              (musicData
+                 (clef G)
+                 (chord (n c4 w)(n e4 w)(n g4 w))
+                 (barline end)
+              )
+           )
+        )
+))

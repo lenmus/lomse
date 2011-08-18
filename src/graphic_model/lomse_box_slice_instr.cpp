@@ -28,10 +28,8 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-GmoBoxSliceInstr::GmoBoxSliceInstr()  //, ImoInstrument* pInstr)
-    : GmoBox(GmoObj::k_box_slice_instr)
-    //, m_pSlice(pParent)
-    //, m_pInstr(pInstr)
+GmoBoxSliceInstr::GmoBoxSliceInstr(ImoInstrument* pInstr)
+    : GmoBox(GmoObj::k_box_slice_instr, pInstr)
 {
 }
 

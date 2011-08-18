@@ -34,6 +34,7 @@
 #include "agg_trans_viewport.h"
 #include "lomse_tasks.h"
 #include "lomse_agg_types.h"
+#include "lomse_reader.h"
 using namespace agg;
 
 #include <string>
@@ -110,16 +111,18 @@ struct PlatformInfo
 // For the lomse library, it is the way to access platform dependent methods
 // For the user application it is the way to set up lomse and access basic methods
 //
-typedef std::string (*pt2GetFontFunction)(const string&, bool, bool);
-typedef void (*pt2NotifyFunction)(EventInfo&);
+typedef void (*pt2NotifyFunction)(void*, EventInfo*);
+typedef void (*pt2RequestFunction)(void*, Request*);
 
 class LomseDoorway
 {
 protected:
     LibraryScope*       m_pLibraryScope;
     PlatformInfo        m_platform;
-    pt2GetFontFunction  m_pFunc_get_font;
     pt2NotifyFunction   m_pFunc_notify;
+    pt2RequestFunction  m_pFunc_request;
+    void*               m_pObj_notify;
+    void*               m_pObj_request;
 
 public:
     LomseDoorway();
@@ -129,12 +132,12 @@ public:
 
     void init_library(int pixel_format, int ppi, bool reverse_y_axis,
                       ostream& reporter=cout);
-    void set_get_font_callback(std::string (*pt2Func)(const string&, bool, bool));
-    void set_notify_callback(void (*pt2Func)(EventInfo&));
+    void set_notify_callback(void* pThis, void (*pt2Func)(void*, EventInfo*));
+    void set_request_callback(void* pThis, void (*pt2Func)(void*, Request*));
 
     inline LibraryScope* get_library_scope() { return m_pLibraryScope; }
-    inline pt2GetFontFunction get_font_callback() { return m_pFunc_get_font; }
-    inline pt2NotifyFunction notify_callback() { return m_pFunc_notify; }
+    inline void post_event(EventInfo* pEvent) { m_pFunc_notify(m_pObj_notify, pEvent); }
+    inline void post_request(Request* pRequest) { m_pFunc_request(m_pObj_request, pRequest); }
 
     //access to platform info
     inline double get_screen_ppi() { return m_platform.screen_ppi; }
@@ -142,10 +145,12 @@ public:
 
     //common operations
     Presenter* new_document(int viewType);
+    Presenter* new_document(int viewType, const string& ldpSource);
     Presenter* open_document(int viewType, const string& filename);
+    Presenter* open_document(int viewType, LdpReader& reader);
 
-    static string null_get_font_filename(const string& fontname, bool bold, bool italic);
-    static void null_notify_function(EventInfo& event);
+    static void null_notify_function(void* pObj, EventInfo* event);
+    static void null_request_function(void* pObj, Request* event);
 };
 
 

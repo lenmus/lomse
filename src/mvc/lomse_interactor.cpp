@@ -43,7 +43,7 @@ namespace lomse
 // Interactor implementation
 //=======================================================================================
 Interactor::Interactor(LibraryScope& libraryScope, Document* pDoc, View* pView)      //UserCommandExecuter* pExec)
-    : Observer()
+    : EventHandler()
     , m_libScope(libraryScope)
     , m_pDoc(pDoc)
     , m_pView(pView)
@@ -99,14 +99,16 @@ void Interactor::on_document_reloaded()
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::handle_event(Observable* ref)
+void Interactor::handle_event(EventInfo* pEvent)
 {
-    //TODO: This method is required by base class Observer
-    //if (m_pOwner)
-    //{
-    //    Notification event(m_pOwner, m_pOwner->get_document(), this);
-    //    m_pOwner->notify_user_application(&event);
-    //}
+    //for now the only event received is when the documen has been modified
+    //Therefore, action to do is to update associated view
+    delete m_pGraphicModel;
+    m_pGraphicModel = NULL;
+    force_redraw();
+
+    //EventView* pEvent = new EventView(k_update_window_event, this);
+    //m_libScope.post_event(pEvent);
 }
 
 ////---------------------------------------------------------------------------------------
@@ -149,13 +151,11 @@ void Interactor::on_mouse_button_up(Pixels x, Pixels y, unsigned flags)
 void Interactor::select_object(GmoObj* pGmo, unsigned flags)
 {
     m_selections.add(pGmo, flags);
-
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-    {
-        EventView event(k_weblink_event, pGView);
-        pGView->notify_user(event);
-    }
+    EventOnClick* pEvent = new EventOnClick(this, pGmo);
+    m_pDoc->notify_observers(pEvent, pEvent->get_originator_imo() );
+//    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+//    if (pGView)
+//        pGView->notify_user( new EventOnClick(this, pGmo) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -212,11 +212,38 @@ void Interactor::update_window()
 }
 
 //---------------------------------------------------------------------------------------
+void Interactor::force_redraw()
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        pGView->on_paint();
+        pGView->update_window();
+    }
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::new_viewport(Pixels x, Pixels y)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->new_viewport(x, y);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::get_view_size(Pixels* xWidth, Pixels* yHeight)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->get_view_size(xWidth, yHeight);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_viewport_at_page_center(Pixels screenWidth)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->set_viewport_at_page_center(screenWidth);
 }
 
 //---------------------------------------------------------------------------------------
@@ -257,6 +284,54 @@ void Interactor::update_selection_rectangle(Pixels x2, Pixels y2)
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->update_selection_rectangle(x2, y2);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::show_tempo_line(Pixels x1, Pixels y1, Pixels x2, Pixels y2)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->show_tempo_line(x1, y1, x2, y2);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::hide_tempo_line()
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->hide_tempo_line();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::remove_all_highlight()
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->remove_all_highlight();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::update_tempo_line(Pixels x2, Pixels y2)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->update_tempo_line(x2, y2);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::highlight_object(ImoStaffObj* pSO)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->highlight_object(pSO);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::remove_highlight_from_object(ImoStaffObj* pSO)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->remove_highlight_from_object(pSO);
 }
 
 //---------------------------------------------------------------------------------------
@@ -301,6 +376,40 @@ void Interactor::zoom_out(Pixels x, Pixels y)
 }
 
 //---------------------------------------------------------------------------------------
+void Interactor::zoom_fit_full(Pixels width, Pixels height)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->zoom_fit_full(width, height);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::zoom_fit_width(Pixels width)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->zoom_fit_width(width);
+}
+
+//---------------------------------------------------------------------------------------
+double Interactor::get_scale()
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        return pGView->get_scale();
+    else
+        return 1.0;
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_scale(double scale, Pixels x, Pixels y)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->set_scale(scale, x, y);
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::set_rendering_option(int option, bool value)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
@@ -325,29 +434,47 @@ void Interactor::set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pOb
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::set_start_timer_callbak(void* pThis, void (*pt2Func)(void* pObj))
-{
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->set_start_timer_callbak(pThis, pt2Func);
-}
-
-//---------------------------------------------------------------------------------------
-void Interactor::set_elapsed_time_callbak(void* pThis, double (*pt2Func)(void* pObj))
-{
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->set_elapsed_time_callbak(pThis, pt2Func);
-}
-
-//---------------------------------------------------------------------------------------
 void Interactor::set_notify_callback(void* pThis,
-                                     void (*pt2Func)(void* pObj, EventInfo& event))
+                                     void (*pt2Func)(void* pObj, EventInfo* pEvent))
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->set_notify_callback(pThis, pt2Func);
 }
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_printing_buffer(RenderingBuffer* rbuf)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->set_printing_buffer(rbuf);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::on_print_page(int page, double scale, VPoint viewport)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->on_print_page(page, scale, viewport);
+}
+
+//---------------------------------------------------------------------------------------
+VSize Interactor::get_page_size_in_pixels(int nPage)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        return pGView->get_page_size_in_pixels(nPage);
+    else
+        return VSize(0, 0);
+}
+
+////---------------------------------------------------------------------------------------
+//void Interactor::on_resize(Pixels x, Pixels y)
+//{
+//    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+//    if (pGView)
+//        pGView->on_resize(x, y);
+//}
 
 
 

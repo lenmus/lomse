@@ -20,7 +20,7 @@
 
 #include <iostream>
 #include <UnitTest++.h>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_tree.h"
@@ -31,7 +31,7 @@ using namespace std;
 using namespace lomse;
 
 
-class Element : virtual public NodeInTree<Element>
+class Element : virtual public TreeNode<Element>
 {
 public:
     Element(const std::string& v) : m_value(v) {}
@@ -191,7 +191,7 @@ SUITE(TreeTest)
         Tree<Element> tree(&root);
         Element two("mammal");
         root.append_child(&two);
-        NodeInTree<Element>::children_iterator it = root.begin();
+        TreeNode<Element>::children_iterator it = root.begin();
         CHECK( (*it)->m_value == "mammal" );
     }
 
@@ -216,7 +216,7 @@ SUITE(TreeTest)
         Element two2("bird");
         root.append_child(&two2);
         Element two3("fish");
-        NodeInTree<Element>::children_iterator it(&two2);
+        TreeNode<Element>::children_iterator it(&two2);
         CHECK( (*it)->m_value == "bird" );
     }
 

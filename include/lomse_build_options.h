@@ -32,7 +32,7 @@
 // - If using lomse as a shared library (DLL) define LOMSE_USE_DLL. This is
 //   not mandatory but you will get a little performance increase.
 // - If building or using lomse as a static library do not define any of them
-//
+
 #if (LOMSE_PLATFORM_WIN32 == 1)
     // for windows with VC++ or gcc
 
@@ -61,7 +61,7 @@
 
 //---------------------------------------------------------------------------------------
 // stdcall is used for all functions called by Windows under Windows
-//
+
 #if (LOMSE_PLATFORM_WIN32 == 1)
     #if defined(__GNUWIN32__)
         #define LOMSE_STDCALL    __attribute__((stdcall))
@@ -78,7 +78,7 @@
 
 //---------------------------------------------------------------------------------------
 // LOMSE_CALLBACK used for the functions which are called back by Windows
-//
+
 #if (LOMSE_PLATFORM_WIN32 == 1)
     #define LOMSE_CALLBACK LOMSE_STDCALL
 
@@ -90,7 +90,7 @@
 
 //---------------------------------------------------------------------------------------
 // generic calling convention for the extern "C" functions
-//
+
 #if (LOMSE_PLATFORM_WIN32 == 1)
     #define   LOMSE_C_EXTERN    _cdecl
 
@@ -100,6 +100,25 @@
 
 #endif
 
+//---------------------------------------------------------------------------------------
+// for detecting and isolating memory leaks with Visual C++
+
+#if (LOMSE_COMPILER_MSVC == 1)
+    #ifndef _DEBUG
+        #define _DEBUG
+    #endif
+    #define _CRTDBG_MAP_ALLOC
+    #include <stdlib.h>
+    #include <crtdbg.h>
+    //#ifndef DBG_NEW
+    //   #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+    //   #define new DBG_NEW
+    //#endif
+    //#ifndef DBG_NEW
+    //    #define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+    //    #define new DEBUG_NEW
+    //#endif
+#endif
 
 
 

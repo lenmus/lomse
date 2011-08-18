@@ -26,6 +26,7 @@
 #include "lomse_model_builder.h"
 #include "lomse_injectors.h"
 #include "lomse_internal_model.h"
+#include "lomse_document.h"
 
 
 using namespace std;
@@ -36,21 +37,25 @@ namespace lomse
 //=======================================================================================
 // LdpCompiler implementation
 //=======================================================================================
-LdpCompiler::LdpCompiler(LdpParser* p, Analyser* a, ModelBuilder* mb, IdAssigner* ida)
+LdpCompiler::LdpCompiler(LdpParser* p, Analyser* a, ModelBuilder* mb, IdAssigner* ida,
+                         Document* pDoc)
     : m_pParser(p)
     , m_pAnalyser(a)
     , m_pModelBuilder(mb)
     , m_pIdAssigner(ida)
+    , m_pDoc(pDoc)
     , m_pFinalTree(NULL)
 {
 }
 
 //---------------------------------------------------------------------------------------
-LdpCompiler::LdpCompiler(LibraryScope& libraryScope, DocumentScope& documentScope)
-    : m_pParser( Injector::inject_LdpParser(libraryScope, documentScope) )
-    , m_pAnalyser( Injector::inject_Analyser(libraryScope, documentScope) )
-    , m_pModelBuilder( Injector::inject_ModelBuilder(documentScope) )
-    , m_pIdAssigner( documentScope.id_assigner() )
+// for testing: direct construction
+LdpCompiler::LdpCompiler(LibraryScope& libraryScope, Document* pDoc)
+    : m_pParser( Injector::inject_LdpParser(libraryScope, pDoc->get_scope()) )
+    , m_pAnalyser( Injector::inject_Analyser(libraryScope, pDoc) )
+    , m_pModelBuilder( Injector::inject_ModelBuilder(pDoc->get_scope()) )
+    , m_pIdAssigner( pDoc->get_scope().id_assigner() )
+    , m_pDoc(pDoc)
     , m_pFinalTree(NULL)
 {
 }
@@ -80,6 +85,14 @@ InternalModel* LdpCompiler::compile_file(const std::string& filename)
 InternalModel* LdpCompiler::compile_string(const std::string& source)
 {
     m_pFinalTree = m_pParser->parse_text(source);
+    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
+    return compile(m_pFinalTree);
+}
+
+//---------------------------------------------------------------------------------------
+InternalModel* LdpCompiler::compile_input(LdpReader& reader)
+{
+    m_pFinalTree = m_pParser->parse_input(reader);
     m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile(m_pFinalTree);
 }
@@ -137,24 +150,6 @@ LdpTree* LdpCompiler::parse_empty_doc()
     m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return pTree;
 }
-
-////---------------------------------------------------------------------------------------
-//LdpElement* LdpCompiler::create_element(const std::string& source)
-//{
-//    SpLdpTree tree = m_pParser->parse_text(source);
-//    m_IModel = m_pAnalyser->analyse_tree(tree);
-//    delete m_IModel;
-//    m_IModel = NULL;
-//    return tree->get_root();
-//}
-//
-////---------------------------------------------------------------------------------------
-//InternalModel* LdpCompiler::create_basic_model(const std::string& source)
-//{
-//    SpLdpTree tree = m_pParser->parse_text(source);
-//    m_IModel = m_pAnalyser->analyse_tree(tree);
-//    return m_IModel;
-//}
 
 //---------------------------------------------------------------------------------------
 int LdpCompiler::get_num_errors()

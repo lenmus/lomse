@@ -104,7 +104,7 @@ void ScoreMeter::get_staff_spacing(ImoScore* pScore)
 //---------------------------------------------------------------------------------------
 void ScoreMeter::get_styles(ImoScore* pScore)
 {
-    m_tupletsStyle = pScore->get_style_info_or_defaults("Tuplet numbers");
+    m_tupletsStyle = pScore->get_style_or_default("Tuplet numbers");
 }
 
 //---------------------------------------------------------------------------------------

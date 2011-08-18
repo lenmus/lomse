@@ -21,7 +21,6 @@
 #include "lomse_im_note.h"
 
 #include <math.h>               //pow
-#include "lomse_basic_objects.h"
 
 namespace lomse
 {
@@ -30,18 +29,18 @@ namespace lomse
 //=======================================================================================
 // ImoNoteRest implementation
 //=======================================================================================
-ImoNoteRest::ImoNoteRest(int objtype, DtoNoteRest& dto)
-    : ImoStaffObj(objtype, dto)
-    , m_nNoteType( dto.get_note_type() )
-    , m_nDots( dto.get_dots() )
-    , m_nVoice( dto.get_voice() )
+ImoNoteRest::ImoNoteRest(int objtype)
+    : ImoStaffObj(objtype)
+    , m_nNoteType(k_quarter)
+    , m_nDots(0)
+    , m_nVoice(1)
 {
 }
 
 //---------------------------------------------------------------------------------------
 int ImoNoteRest::get_beam_type(int level)
 {
-    ImoBeam* pBeam = static_cast<ImoBeam*>( find_attachment(ImoObj::k_beam) );
+    ImoBeam* pBeam = static_cast<ImoBeam*>( find_attachment(k_imo_beam) );
     if (pBeam)
     {
         ImoBeamData* pData = dynamic_cast<ImoBeamData*>( pBeam->get_data_for(this) );
@@ -54,20 +53,20 @@ int ImoNoteRest::get_beam_type(int level)
 //---------------------------------------------------------------------------------------
 void ImoNoteRest::set_beam_type(int level, int type)
 {
-    ImoBeamData* pData = static_cast<ImoBeamData*>( find_reldataobj(ImoObj::k_beam_data) );
+    ImoBeamData* pData = static_cast<ImoBeamData*>( find_reldataobj(k_imo_beam_data) );
     pData->set_beam_type(level, type);
 }
 
 //---------------------------------------------------------------------------------------
 ImoBeam* ImoNoteRest::get_beam()
 {
-    return static_cast<ImoBeam*>( find_attachment(ImoObj::k_beam) );
+    return static_cast<ImoBeam*>( find_attachment(k_imo_beam) );
 }
 
 //---------------------------------------------------------------------------------------
 bool ImoNoteRest::is_end_of_beam()
 {
-    ImoBeam* pBeam = static_cast<ImoBeam*>( find_attachment(ImoObj::k_beam) );
+    ImoBeam* pBeam = static_cast<ImoBeam*>( find_attachment(k_imo_beam) );
     if (pBeam)
     {
         ImoBeamData* pData = dynamic_cast<ImoBeamData*>( pBeam->get_data_for(this) );
@@ -80,13 +79,13 @@ bool ImoNoteRest::is_end_of_beam()
 //---------------------------------------------------------------------------------------
 bool ImoNoteRest::is_in_tuplet()
 {
-    return find_attachment(ImoObj::k_tuplet) != NULL;
+    return find_attachment(k_imo_tuplet) != NULL;
 }
 
 //---------------------------------------------------------------------------------------
 ImoTuplet* ImoNoteRest::get_tuplet()
 {
-    return static_cast<ImoTuplet*>( find_attachment(ImoObj::k_tuplet) );
+    return static_cast<ImoTuplet*>( find_attachment(k_imo_tuplet) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -102,19 +101,11 @@ float ImoNoteRest::get_duration()
     return rTime;
 }
 
-
-//=======================================================================================
-// ImoRest implementation
-//=======================================================================================
-ImoRest::ImoRest()
-    : ImoNoteRest(ImoObj::k_rest)
-{
-}
-
 //---------------------------------------------------------------------------------------
-ImoRest::ImoRest(DtoRest& dto)
-    : ImoNoteRest(ImoObj::k_rest, dto)
+void ImoNoteRest::set_note_type_and_dots(int noteType, int dots)
 {
+    m_nNoteType = noteType;
+    m_nDots = dots;
 }
 
 
@@ -122,7 +113,7 @@ ImoRest::ImoRest(DtoRest& dto)
 // ImoNote implementation
 //=======================================================================================
 ImoNote::ImoNote()
-    : ImoNoteRest(ImoObj::k_note)
+    : ImoNoteRest(k_imo_note)
     , m_step(k_no_pitch)
     , m_octave(4)
     , m_accidentals(k_no_accidentals)
@@ -134,22 +125,9 @@ ImoNote::ImoNote()
 }
 
 //---------------------------------------------------------------------------------------
-ImoNote::ImoNote(DtoNote& dto)
-    : ImoNoteRest(ImoObj::k_note, dto)
-    , m_step( dto.get_step() )
-    , m_octave( dto.get_octave() )
-    , m_accidentals( dto.get_accidentals() )
-    , m_stemDirection( dto.get_stem_direction() )
-    , m_pTieNext(NULL)
-    , m_pTiePrev(NULL)
-    , m_pChord(NULL)
-{
-}
-
-//---------------------------------------------------------------------------------------
 ImoNote::ImoNote(int step, int octave, int noteType, int accidentals, int dots,
                  int staff, int voice, int stem)
-    : ImoNoteRest(ImoObj::k_note)
+    : ImoNoteRest(k_imo_note)
     , m_step(step)
     , m_octave(octave)
     , m_accidentals(accidentals)
@@ -178,7 +156,7 @@ bool ImoNote::is_in_chord()
 //---------------------------------------------------------------------------------------
 ImoChord* ImoNote::get_chord()
 {
-    return static_cast<ImoChord*>( find_attachment(ImoObj::k_chord) );
+    return static_cast<ImoChord*>( find_attachment(k_imo_chord) );
 }
 
 //---------------------------------------------------------------------------------------

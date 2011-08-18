@@ -26,7 +26,7 @@
 
 #include "lomse_font_storage.h"
 
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 using namespace agg;
 
@@ -36,10 +36,10 @@ namespace lomse
 //=======================================================================================
 // FontStorage implementation
 //=======================================================================================
-FontStorage::FontStorage(pt2GetFontFunction ptr)
+FontStorage::FontStorage(LibraryScope* pLibScope)
     : m_fontEngine()
     , m_fontCacheManager(m_fontEngine)
-    , m_pGetFontFunction(ptr)
+    , m_pLibScope(pLibScope)
     , m_fontHeight(14.0)
     , m_fontWidth(14.0)
     , m_fHinting(false)
@@ -134,7 +134,7 @@ bool FontStorage::select_raster_font(const std::string& fontName, double height,
                                       bool fBold, bool fItalic)
 {
     //Returns true if any error
-    FontSelector fs(m_pGetFontFunction);
+    FontSelector fs(m_pLibScope);
     string fontFile = fs.find_font(fontName, fBold, fItalic);
     return set_font(fontFile, height, k_raster_font_cache);
 }
@@ -144,7 +144,7 @@ bool FontStorage::select_vector_font(const std::string& fontName, double height,
                                       bool fBold, bool fItalic)
 {
     //Returns true if any error
-    FontSelector fs(m_pGetFontFunction);
+    FontSelector fs(m_pLibScope);
     string fontFile = fs.find_font(fontName, fBold, fItalic);
     return set_font(fontFile, height, k_vector_font_cache);
 }
@@ -239,7 +239,7 @@ std::string FontSelector::find_font(const std::string& name, bool fBold, bool fI
     }
 
     else
-        return m_pGetFontFunction(name, fBold, fItalic);
+        return m_pLibScope->get_font(name, fBold, fItalic);
 }
 
 

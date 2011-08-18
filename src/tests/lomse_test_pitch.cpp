@@ -20,7 +20,7 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
@@ -60,40 +60,56 @@ SUITE(PitchTest)
     TEST_FIXTURE(PitchTestFixture, DPitch_C4)
     {
         DiatonicPitch dp(0, 4);
-        CHECK( (int)dp == LOMSE_C4_DPITCH );
+        CHECK( int(dp) == LOMSE_C4_DPITCH );
     }
 
     TEST_FIXTURE(PitchTestFixture, DPitch_D4)
     {
         DiatonicPitch dp(1, 4);
-        CHECK( (int)dp == LOMSE_C4_DPITCH + 1 );
+        CHECK( int(dp) == LOMSE_C4_DPITCH + 1 );
     }
 
     TEST_FIXTURE(PitchTestFixture, DPitch_C5)
     {
         DiatonicPitch dp(0, 5);
-        CHECK( (int)dp == LOMSE_C4_DPITCH + 7 );
+        CHECK( int(dp) == LOMSE_C4_DPITCH + 7 );
     }
 
     TEST_FIXTURE(PitchTestFixture, DPitch_No)
     {
         DiatonicPitch dp(k_no_pitch, 5);
-        CHECK( (int)dp == LOMSE_NO_DPITCH );
+        CHECK( int(dp) == LOMSE_NO_DPITCH );
     }
 
     TEST_FIXTURE(PitchTestFixture, DPitch_Plus)
     {
         DiatonicPitch dp(0, 4);
         dp = dp + 5;
-        CHECK( (int)dp == LOMSE_C4_DPITCH + 5 );
+        CHECK( int(dp) == LOMSE_C4_DPITCH + 5 );
     }
 
     TEST_FIXTURE(PitchTestFixture, DPitch_Minus)
     {
         DiatonicPitch dp(0, 4);
         dp = dp - 5;
-        CHECK( (int)dp == LOMSE_C4_DPITCH - 5 );
+        CHECK( int(dp) == LOMSE_C4_DPITCH - 5 );
     }
+
+    // MidiPitch ------------------------------------------------------------------------
+
+    TEST_FIXTURE(PitchTestFixture, MidiPitch_C4)
+    {
+        MidiPitch mp(0, 4);
+        CHECK( int(mp) == LOMSE_C4_MPITCH );
+    }
+
+    TEST_FIXTURE(PitchTestFixture, MidiPitch_A0)
+    {
+        MidiPitch mp(k_step_A, 0);
+        //cout << "midi a0 =" << int(mp) << endl;
+        CHECK( int(mp) == 21 );
+    }
+
 
 }
 

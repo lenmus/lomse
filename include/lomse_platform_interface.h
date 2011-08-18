@@ -2,8 +2,8 @@
 // Anti-Grain Geometry - Version 2.4
 // Copyright (C) 2002-2005 Maxim Shemanarev (http://www.antigrain.com)
 //
-// Permission to copy, use, modify, sell and distribute this software 
-// is granted provided this copyright notice appears in all copies. 
+// Permission to copy, use, modify, sell and distribute this software
+// is granted provided this copyright notice appears in all copies.
 // This software is provided "as is" without express or implied
 // warranty, and with no claim as to its suitability for any purpose.
 //
@@ -15,23 +15,23 @@
 //
 // class platform_support
 //
-// It's not a part of the AGG library, it's just a helper class to create 
+// It's not a part of the AGG library, it's just a helper class to create
 // interactive demo examples. Since the examples should not be too complex
 // this class is provided to support some very basic interactive graphical
-// funtionality, such as putting the rendered image to the window, simple 
+// funtionality, such as putting the rendered image to the window, simple
 // keyboard and mouse input, window resizing, setting the window title,
 // and catching the "idle" events.
-// 
-// The idea is to have a single header file that does not depend on any 
+//
+// The idea is to have a single header file that does not depend on any
 // platform (I hate these endless #ifdef/#elif/#elif.../#endif) and a number
-// of different implementations depending on the concrete platform. 
+// of different implementations depending on the concrete platform.
 // The most popular platforms are:
 //
 // Windows-32 API
 // X-Window API
 // SDL library (see http://www.libsdl.org/)
 // MacOS C/C++ API
-// 
+//
 // This file does not include any system dependent .h files such as
 // windows.h or X11.h, so, your demo applications do not depend on the
 // platform. The only file that can #include system dependend headers
@@ -42,11 +42,11 @@
 // ~/agg/src/platform/X11
 // and so on.
 //
-// All the system dependent stuff sits in the platform_specific 
-// class which is forward-declared here but not defined. 
-// The platform_support class has just a pointer to it and it's 
+// All the system dependent stuff sits in the platform_specific
+// class which is forward-declared here but not defined.
+// The platform_support class has just a pointer to it and it's
 // the responsibility of the implementation to create/delete it.
-// This class being defined in the implementation file can have 
+// This class being defined in the implementation file can have
 // any platform dependent stuff such as HWND, X11 Window and so on.
 //
 //----------------------------------------------------------------------------
@@ -79,30 +79,30 @@ namespace agg
 
     //-----------------------------------------------------------pix_format_e
     // Possible formats of the rendering buffer. Initially I thought that it's
-    // reasonable to create the buffer and the rendering functions in 
-    // accordance with the native pixel format of the system because it 
-    // would have no overhead for pixel format conersion. 
-    // But eventually I came to a conclusion that having a possibility to 
-    // convert pixel formats on demand is a good idea. First, it was X11 where 
-    // there lots of different formats and visuals and it would be great to 
+    // reasonable to create the buffer and the rendering functions in
+    // accordance with the native pixel format of the system because it
+    // would have no overhead for pixel format conersion.
+    // But eventually I came to a conclusion that having a possibility to
+    // convert pixel formats on demand is a good idea. First, it was X11 where
+    // there lots of different formats and visuals and it would be great to
     // render everything in, say, RGB-24 and display it automatically without
-    // any additional efforts. The second reason is to have a possibility to 
-    // debug renderers for different pixel formats and colorspaces having only 
+    // any additional efforts. The second reason is to have a possibility to
+    // debug renderers for different pixel formats and colorspaces having only
     // one computer and one system.
     //
-    // This stuff is not included into the basic AGG functionality because the 
-    // number of supported pixel formats (and/or colorspaces) can be great and 
-    // if one needs to add new format it would be good only to add new 
-    // rendering files without having to modify any existing ones (a general 
+    // This stuff is not included into the basic AGG functionality because the
+    // number of supported pixel formats (and/or colorspaces) can be great and
+    // if one needs to add new format it would be good only to add new
+    // rendering files without having to modify any existing ones (a general
     // principle of incapsulation and isolation).
     //
     // Using a particular pixel format doesn't obligatory mean the necessity
-    // of software conversion. For example, win32 API can natively display 
-    // gray8, 15-bit RGB, 24-bit BGR, and 32-bit BGRA formats. 
+    // of software conversion. For example, win32 API can natively display
+    // gray8, 15-bit RGB, 24-bit BGR, and 32-bit BGRA formats.
     // This list can be (and will be!) extended in future.
     enum pix_format_e
     {
-        pix_format_undefined = 0,  // By default. No conversions are applied 
+        pix_format_undefined = 0,  // By default. No conversions are applied
         pix_format_bw,             // 1 bit per color B/W
         pix_format_gray8,          // Simple 256 level grayscale
         pix_format_gray16,         // Simple 65535 level grayscale
@@ -124,7 +124,7 @@ namespace agg
         pix_format_argb64,         // A-R-G-B, native MAC format
         pix_format_abgr64,         // A-B-G-R, one byte per color component
         pix_format_bgra64,         // B-G-R-A, native win32 BMP format
-  
+
         end_of_pix_formats
     };
 
@@ -132,10 +132,10 @@ namespace agg
     // Mouse and keyboard flags. They can be different on different platforms
     // and the ways they are obtained are also different. But in any case
     // the system dependent flags should be mapped into these ones. The meaning
-    // of that is as follows. For example, if kbd_ctrl is set it means that the 
-    // ctrl key is pressed and being held at the moment. They are also used in 
+    // of that is as follows. For example, if kbd_ctrl is set it means that the
+    // ctrl key is pressed and being held at the moment. They are also used in
     // the overridden methods such as on_mouse_move(), on_mouse_button_down(),
-    // on_mouse_button_dbl_click(), on_mouse_button_up(), on_key(). 
+    // on_mouse_button_dbl_click(), on_mouse_button_up(), on_key().
     // In the method on_mouse_button_up() the mouse flags have different
     // meaning. They mean that the respective button is being released, but
     // the meaning of the keyboard flags remains the same.
@@ -152,14 +152,14 @@ namespace agg
     };
 
     //--------------------------------------------------------------key_code_e
-    // Keyboard codes. There's also a restricted set of codes that are most 
+    // Keyboard codes. There's also a restricted set of codes that are most
     // probably supported on different platforms. Any platform dependent codes
     // should be converted into these ones. There're only those codes are
-    // defined that cannot be represented as printable ASCII-characters. 
-    // All printable ASCII-set can be used in a regular C/C++ manner: 
+    // defined that cannot be represented as printable ASCII-characters.
+    // All printable ASCII-set can be used in a regular C/C++ manner:
     // ' ', 'A', '0' '+' and so on.
     // Since the class is used for creating very simple demo-applications
-    // we don't need very rich possibilities here, just basic ones. 
+    // we don't need very rich possibilities here, just basic ones.
     // Actually the numeric key codes are taken from the SDL library, so,
     // the implementation of the SDL support does not require any mapping.
     enum key_code_e
@@ -172,7 +172,7 @@ namespace agg
         key_pause          = 19,
         key_escape         = 27,
 
-        // Keypad 
+        // Keypad
         key_delete         = 127,
         key_kp0            = 256,
         key_kp1            = 257,
@@ -204,7 +204,7 @@ namespace agg
         key_page_down      = 281,
 
         // Functional keys. You'd better avoid using
-        // f11...f15 in your applications if you want 
+        // f11...f15 in your applications if you want
         // the applications to be portable
         key_f1             = 282,
         key_f2             = 283,
@@ -222,8 +222,8 @@ namespace agg
         key_f14            = 295,
         key_f15            = 296,
 
-        // The possibility of using these keys is 
-        // very restricted. Actually it's guaranteed 
+        // The possibility of using these keys is
+        // very restricted. Actually it's guaranteed
         // only in win32_api and win32_sdl implementations
         key_numlock        = 300,
         key_capslock       = 301,
@@ -238,13 +238,13 @@ namespace agg
     // A predeclaration of the platform dependent class. Since we do not
     // know anything here the only we can have is just a pointer to this
     // class as a data member. It should be created and destroyed explicitly
-    // in the constructor/destructor of the platform_support class. 
-    // Although the pointer to platform_specific is public the application 
+    // in the constructor/destructor of the platform_support class.
+    // Although the pointer to platform_specific is public the application
     // cannot have access to its members or methods since it does not know
     // anything about them and it's a perfect incapsulation :-)
     class platform_specific;
 
-    
+
     //----------------------------------------------------------ctrl_container
     // A helper class that contains pointers to a number of controls.
     // This class is used to ease the event handling with controls.
@@ -328,7 +328,7 @@ namespace agg
             unsigned i;
             for(i = 0; i < m_num_ctrl; i++)
             {
-                if(m_ctrl[i]->in_rect(x, y)) 
+                if(m_ctrl[i]->in_rect(x, y))
                 {
                     if(m_cur_ctrl != int(i))
                     {
@@ -355,14 +355,14 @@ namespace agg
 
 
     //---------------------------------------------------------platform_support
-    // This class is a base one to the apllication classes. It can be used 
+    // This class is a base one to the apllication classes. It can be used
     // as follows:
     //
     //  class the_application : public agg::platform_support
     //  {
     //  public:
     //      the_application(unsigned bpp, bool flip_y) :
-    //          platform_support(bpp, flip_y) 
+    //          platform_support(bpp, flip_y)
     //      . . .
     //
     //      //override stuff . . .
@@ -403,9 +403,9 @@ namespace agg
     // for Windows requires including SDL.h if you define main(). Since
     // the demo applications cannot rely on any platform/library specific
     // stuff it's impossible to include SDL.h into the application files.
-    // The demo applications are simple and their use is restricted, so, 
+    // The demo applications are simple and their use is restricted, so,
     // this approach is quite reasonable.
-    // 
+    //
     class platform_support
     {
     public:
@@ -417,19 +417,19 @@ namespace agg
         virtual ~platform_support();
 
         // Setting the windows caption (title). Should be able
-        // to be called at least before calling init(). 
+        // to be called at least before calling init().
         // It's perfect if they can be called anytime.
         void        caption(const char* cap);
         const char* caption() const { return m_caption; }
 
         //--------------------------------------------------------------------
         // These 3 methods handle working with images. The image
-        // formats are the simplest ones, such as .BMP in Windows or 
+        // formats are the simplest ones, such as .BMP in Windows or
         // .ppm in Linux. In the applications the names of the files
         // should not have any file extensions. Method load_img() can
-        // be called before init(), so, the application could be able 
-        // to determine the initial size of the window depending on 
-        // the size of the loaded image. 
+        // be called before init(), so, the application could be able
+        // to determine the initial size of the window depending on
+        // the size of the loaded image.
         // The argument "idx" is the number of the image 0...max_images-1
         bool load_img(unsigned idx, const char* file);
         bool save_img(unsigned idx, const char* file);
@@ -437,11 +437,11 @@ namespace agg
 
         //--------------------------------------------------------------------
         // init() and run(). See description before the class for details.
-        // The necessity of calling init() after creation is that it's 
-        // impossible to call the overridden virtual function (on_init()) 
+        // The necessity of calling init() after creation is that it's
+        // impossible to call the overridden virtual function (on_init())
         // from the constructor. On the other hand it's very useful to have
-        // some on_init() event handler when the window is created but 
-        // not yet displayed. The rbuf_window() method (see below) is 
+        // some on_init() event handler when the window is created but
+        // not yet displayed. The rbuf_window() method (see below) is
         // accessible from on_init().
         bool init(unsigned width, unsigned height, unsigned flags);
         int  run();
@@ -463,12 +463,12 @@ namespace agg
         void wait_mode(bool wait_mode) { m_wait_mode = wait_mode; }
 
         //--------------------------------------------------------------------
-        // These two functions control updating of the window. 
+        // These two functions control updating of the window.
         // force_redraw() is an analog of the Win32 InvalidateRect() function.
         // Being called it sets a flag (or sends a message) which results
-        // in calling on_draw() and updating the content of the window 
+        // in calling on_draw() and updating the content of the window
         // when the next event cycle comes.
-        // update_window() results in just putting immediately the content 
+        // update_window() results in just putting immediately the content
         // of the currently rendered buffer to the window without calling
         // on_draw().
         void force_redraw();
@@ -476,16 +476,16 @@ namespace agg
 
         //--------------------------------------------------------------------
         // So, finally, how to draw anythig with AGG? Very simple.
-        // rbuf_window() returns a reference to the main rendering 
+        // rbuf_window() returns a reference to the main rendering
         // buffer which can be attached to any rendering class.
         // rbuf_img() returns a reference to the previously created
-        // or loaded image buffer (see load_img()). The image buffers 
-        // are not displayed directly, they should be copied to or 
+        // or loaded image buffer (see load_img()). The image buffers
+        // are not displayed directly, they should be copied to or
         // combined somehow with the rbuf_window(). rbuf_window() is
         // the only buffer that can be actually displayed.
-        rendering_buffer& rbuf_window()          { return m_rbuf_window; } 
-        rendering_buffer& rbuf_img(unsigned idx) { return m_rbuf_img[idx]; } 
-        
+        rendering_buffer& rbuf_window()          { return m_rbuf_window; }
+        rendering_buffer& rbuf_img(unsigned idx) { return m_rbuf_img[idx]; }
+
 
         //--------------------------------------------------------------------
         // Returns file extension used in the implementation for the particular
@@ -500,7 +500,7 @@ namespace agg
                 rbuf_window().copy_from(rbuf_img(idx));
             }
         }
-        
+
         //--------------------------------------------------------------------
         void copy_window_to_img(unsigned idx)
         {
@@ -510,16 +510,16 @@ namespace agg
                 rbuf_img(idx).copy_from(rbuf_window());
             }
         }
-       
+
         //--------------------------------------------------------------------
         void copy_img_to_img(unsigned idx_to, unsigned idx_from)
         {
-            if(idx_from < max_images && 
-               idx_to < max_images && 
+            if(idx_from < max_images &&
+               idx_to < max_images &&
                rbuf_img(idx_from).buf())
             {
-                create_img(idx_to, 
-                           rbuf_img(idx_from).width(), 
+                create_img(idx_to,
+                           rbuf_img(idx_from).width(),
                            rbuf_img(idx_from).height());
                 rbuf_img(idx_to).copy_from(rbuf_img(idx_from));
             }
@@ -529,11 +529,11 @@ namespace agg
         // Event handlers. They are not pure functions, so you don't have
         // to override them all.
         // In my demo applications these functions are defined inside
-        // the the_application class (implicit inlining) which is in general 
+        // the the_application class (implicit inlining) which is in general
         // very bad practice, I mean vitual inline methods. At least it does
-        // not make sense. 
+        // not make sense.
         // But in this case it's quite appropriate bacause we have the only
-        // instance of the the_application class and it is in the same file 
+        // instance of the the_application class and it is in the same file
         // where this class is defined.
         virtual void on_init();
         virtual void on_resize(int sx, int sy);
@@ -547,27 +547,27 @@ namespace agg
         virtual void on_post_draw(void* raw_handler);
 
         //--------------------------------------------------------------------
-        // Adding control elements. A control element once added will be 
+        // Adding control elements. A control element once added will be
         // working and reacting to the mouse and keyboard events. Still, you
-        // will have to render them in the on_draw() using function 
-        // render_ctrl() because platform_support doesn't know anything about 
-        // renderers you use. The controls will be also scaled automatically 
-        // if they provide a proper scaling mechanism (all the controls 
+        // will have to render them in the on_draw() using function
+        // render_ctrl() because platform_support doesn't know anything about
+        // renderers you use. The controls will be also scaled automatically
+        // if they provide a proper scaling mechanism (all the controls
         // included into the basic AGG package do).
-        // If you don't need a particular control to be scaled automatically 
+        // If you don't need a particular control to be scaled automatically
         // call ctrl::no_transform() after adding.
         void add_ctrl(ctrl& c) { m_ctrls.add(c); c.transform(m_resize_mtx); }
 
         //--------------------------------------------------------------------
-        // Auxiliary functions. trans_affine_resizing() modifier sets up the resizing 
+        // Auxiliary functions. trans_affine_resizing() modifier sets up the resizing
         // matrix on the basis of the given width and height and the initial
-        // width and height of the window. The implementation should simply 
+        // width and height of the window. The implementation should simply
         // call this function every time when it catches the resizing event
         // passing in the new values of width and height of the window.
         // Nothing prevents you from "cheating" the scaling matrix if you
-        // call this function from somewhere with wrong arguments. 
-        // trans_affine_resizing() accessor simply returns current resizing matrix 
-        // which can be used to apply additional scaling of any of your 
+        // call this function from somewhere with wrong arguments.
+        // trans_affine_resizing() accessor simply returns current resizing matrix
+        // which can be used to apply additional scaling of any of your
         // stuff when the window is being resized.
         // width(), height(), initial_width(), and initial_height() must be
         // clear to understand with no comments :-)
@@ -600,49 +600,41 @@ namespace agg
         unsigned window_flags() const { return m_window_flags; }
 
         //--------------------------------------------------------------------
-        // Get raw display handler depending on the system. 
+        // Get raw display handler depending on the system.
         // For win32 its an HDC, for other systems it can be a pointer to some
         // structure. See the implementation files for detals.
         // It's provided "as is", so, first you should check if it's not null.
-        // If it's null the raw_display_handler is not supported. Also, there's 
-        // no guarantee that this function is implemented, so, in some 
+        // If it's null the raw_display_handler is not supported. Also, there's
+        // no guarantee that this function is implemented, so, in some
         // implementations you may have simply an unresolved symbol when linking.
         void* raw_display_handler();
 
         //--------------------------------------------------------------------
-        // display message box or print the message to the console 
+        // display message box or print the message to the console
         // (depending on implementation)
         void message(const char* msg);
 
         //--------------------------------------------------------------------
-        // Stopwatch functions. Function elapsed_time() returns time elapsed 
-        // since the latest start_timer() invocation in millisecods. 
-        // The resolutoin depends on the implementation. 
-        // In Win32 it uses QueryPerformanceFrequency() / QueryPerformanceCounter().
-        void   start_timer();
-        double elapsed_time() const;
-
-        //--------------------------------------------------------------------
         // Get the full file name. In most cases it simply returns
         // file_name. As it's appropriate in many systems if you open
-        // a file by its name without specifying the path, it tries to 
-        // open it in the current directory. The demos usually expect 
-        // all the supplementary files to be placed in the current 
+        // a file by its name without specifying the path, it tries to
+        // open it in the current directory. The demos usually expect
+        // all the supplementary files to be placed in the current
         // directory, that is usually coincides with the directory where
-        // the the executable is. However, in some systems (BeOS) it's not so. 
-        // For those kinds of systems full_file_name() can help access files 
+        // the the executable is. However, in some systems (BeOS) it's not so.
+        // For those kinds of systems full_file_name() can help access files
         // preserving commonly used policy.
         // So, it's a good idea to use in the demos the following:
-        // FILE* fd = fopen(full_file_name("some.file"), "r"); 
+        // FILE* fd = fopen(full_file_name("some.file"), "r");
         // instead of
-        // FILE* fd = fopen("some.file", "r"); 
+        // FILE* fd = fopen("some.file", "r");
         const char* full_file_name(const char* file_name);
 
     public:
         platform_specific* m_specific;
         ctrl_container m_ctrls;
 
-        // Sorry, I'm too tired to describe the private 
+        // Sorry, I'm too tired to describe the private
         // data membders. See the implementations for different
         // platforms for details.
     private:

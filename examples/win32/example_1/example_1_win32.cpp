@@ -43,7 +43,6 @@ using namespace lomse;
 LomseDoorway    m_lomse;        //the Lomse library doorway
 Presenter*      m_pPresenter;
 Interactor*     m_pInteractor;  //to interact with the View
-Document*       m_pDoc;         //the score to display
 
 //the Lomse View renders its content on a bitmap. To manage it, Lomse
 //associates the bitmap to a RenderingBuffer object.
@@ -59,10 +58,6 @@ unsigned         m_bpp;         //bits per pixel
 
 //some additinal variables
 bool    m_view_needs_redraw;      //to control when the View must be re-drawed
-
-//to measure ellapsed time (for performance measurements)
-LARGE_INTEGER m_sw_freq;
-LARGE_INTEGER m_sw_start;
 
 //for keyboard support
 unsigned      m_last_key;    //last pressed key
@@ -148,23 +143,7 @@ void update_window(void* pThis)
 }
 
 //---------------------------------------------------------------------------------------
-void start_timer(void* pThis)
-{
-    ::QueryPerformanceCounter(&(m_sw_start));
-}
-
-//---------------------------------------------------------------------------------------
-double elapsed_time(void* pThis)
-{
-    LARGE_INTEGER stop;
-    ::QueryPerformanceCounter(&stop);
-    return double(stop.QuadPart - 
-                    m_sw_start.QuadPart) * 1000.0 / 
-                    double(m_sw_freq.QuadPart);
-}
-
-//---------------------------------------------------------------------------------------
-string get_font_filename(const string& fontname, bool bold, bool italic)
+string get_font_filename(void* pThis, const string& fontname, bool bold, bool italic)
 {
     //This is just a trivial example. In real applications you should 
     //use operating system services to find a suitable font
@@ -288,15 +267,12 @@ void on_open_file()
                                          filename);
 
     //now, get the pointers to the relevant components
-    m_pDoc = m_pPresenter->get_document();
     m_pInteractor = m_pPresenter->get_interactor(0);
 
     //connect the View with the window buffer and set required callbacks
     m_pInteractor->set_rendering_buffer(&m_rbuf_window);
     m_pInteractor->set_force_redraw_callbak(NULL, force_redraw);
     m_pInteractor->set_update_window_callbak(NULL, update_window);
-    m_pInteractor->set_start_timer_callbak(NULL, start_timer);
-    m_pInteractor->set_elapsed_time_callbak(NULL, elapsed_time);
 
     force_redraw(NULL);
 }
@@ -308,25 +284,13 @@ void open_document()
     //simple example we wiil crete an empty document and define its content
     //from a text string
 
-    //first, we will create a 'presenter'. It takes care of cretaing and maintaining
-    //all objects and relationships between the document, its views and the interactors
+    //create a document and get the 'presenter'.
+    //The Presenter takes care of creating and maintaining all objects
+    //and relationships between the document, its views and the interactors
     //to interct with the view
     delete m_pPresenter;
-    m_pPresenter = m_lomse.new_document(ViewFactory::k_view_horizontal_book);
-
-    //now, get the pointers to the relevant components
-    m_pDoc = m_pPresenter->get_document();
-    m_pInteractor = m_pPresenter->get_interactor(0);
-
-    //connect the View with the window buffer and set required callbacks
-    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
-    m_pInteractor->set_force_redraw_callbak(NULL, force_redraw);
-    m_pInteractor->set_update_window_callbak(NULL, update_window);
-    m_pInteractor->set_start_timer_callbak(NULL, start_timer);
-    m_pInteractor->set_elapsed_time_callbak(NULL, elapsed_time);
-
-    //Now let's place content on the created document
-    m_pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+    m_pPresenter = m_lomse.new_document(ViewFactory::k_view_horizontal_book,
+        "(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
 
     ////instrument name
         //"(instrument (name \"Violin\")(musicData (clef G)(clef F4)(clef C1)) )))" );
@@ -820,7 +784,13 @@ void open_document()
         //"(n g4 q)(barline)"
         //")) )))" );
 
+    //now, get the pointers to the relevant components
+    m_pInteractor = m_pPresenter->get_interactor(0);
 
+    //connect the View with the window buffer and set required callbacks
+    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
+    m_pInteractor->set_force_redraw_callbak(NULL, force_redraw);
+    m_pInteractor->set_update_window_callbak(NULL, update_window);
 }
 
 //---------------------------------------------------------------------------------------
@@ -973,10 +943,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
 	LoadString(hInstance, IDC_EXAMPLE_1, szWindowClass, MAX_LOADSTRING);
 	MyRegisterClass(hInstance);
 
-    //define a stopwatch for performance meassurements
-    ::QueryPerformanceFrequency(&m_sw_freq);
-    ::QueryPerformanceCounter(&m_sw_start);
-
     // Lomse knows nothing about windows. It renders everything on a bitmap and the
     // user application uses this bitmap. For instance, to display it on a window.
     // Lomse supports a lot of bitmap formats and pixel formats. Therefore, before
@@ -1002,7 +968,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     m_lomse.init_library(pixel_format, resolution, reverse_y_axis);
 
     //set required callbacks
-    m_lomse.set_get_font_callback(get_font_filename);
+    m_lomse.set_get_font_callback(NULL, get_font_filename);
 
     //create a music score and a View. The view will display the score 
     //when the paint event is sent to lomse, once the main windows is

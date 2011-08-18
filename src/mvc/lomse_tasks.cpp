@@ -52,7 +52,7 @@ Task* TaskFactory::create_task(int taskType, Interactor* pIntor)
             return new TaskSelection(dynamic_cast<Interactor*>(pIntor));
 
         default:
-            throw "TaskFactory::create_task: invalid task type";
+            throw std::runtime_error("[TaskFactory::create_task] invalid task type");
     }
 }
 
@@ -135,6 +135,7 @@ void TaskDragView::end_drag(Event& event)
 void TaskDragView::repaint_view()
 {
     m_pIntor->new_viewport(m_vxOrg, m_vyOrg);
+    m_pIntor->force_redraw();
 }
 
 

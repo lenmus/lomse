@@ -23,10 +23,11 @@
 
 #include "lomse_basic.h"
 #include "lomse_observable.h"
+
 #include <vector>
 #include <list>
 #include <ostream>
-
+#include <map>
 using namespace std;
 
 namespace lomse
@@ -47,6 +48,8 @@ class GmoStubScore;
 class ImoContentObj;
 class ImoObj;
 class ImoScore;
+class ImoStaffObj;
+class ImoNoteRest;
 class Drawer;
 struct RenderOptions;
 class GmoLayer;
@@ -62,11 +65,13 @@ protected:
     GmoBoxDocument* m_root;
     std::vector<GmoStub*> m_stubs;
     bool m_fCanBeDrawn;
+    std::map<ImoNoteRest*, GmoShape*> m_noterestToShape;
 
 public:
     GraphicModel();
     ~GraphicModel();
 
+    //accessors
     inline GmoBoxDocument* get_root() { return m_root; }
     int get_num_pages();
     GmoBoxDocPage* get_page(int i);
@@ -76,6 +81,7 @@ public:
     //drawing
     inline void set_ready(bool value) { m_fCanBeDrawn = value; }
     void draw_page(int iPage, UPoint& origin, Drawer* pDrawer, RenderOptions& opt);
+    void highlight_object(ImoStaffObj* pSO, bool value);
 
     //hit testing
     GmoObj* hit_test(int iPage, LUnits x, LUnits y);
@@ -85,6 +91,11 @@ public:
     //selection
     void select_objects_in_rectangle(int iPage, SelectionSet& selection,
                                      const URect& selRect, unsigned flags=0);
+    GmoShape* find_shape_for_object(ImoStaffObj* pSO);
+    GmoShape* get_shape_for_noterest(ImoNoteRest* pNR);
+
+    //creation
+    void store_in_map_imo_shape(ImoNoteRest* pNR, GmoShape* pShape);
 
     //tests
     void dump_page(int iPage, ostream& outStream);
@@ -104,20 +115,24 @@ protected:
     UPoint m_origin;        //Relative to DocPage, for boxes. Relative to owner box, for shapes
     USize m_size;
     bool m_fSelected;
+    ImoObj* m_pCreatorImo;
 
 public:
     virtual ~GmoObj();
 
     enum { k_box = 0,
-                k_box_document=0, k_box_doc_page, k_box_doc_page_content, k_box_paragraph,
+                k_box_document=0, k_box_doc_page, k_box_doc_page_content,
+                k_box_inline, k_box_paragraph,
                 k_box_score_page, k_box_slice, k_box_slice_instr, k_box_system,
            k_shape,
                 k_shape_accidentals, k_shape_accidental_sign, k_shape_arch,
                 k_shape_barline,
                 k_shape_beam, k_shape_brace,
-                k_shape_bracket, k_shape_clef, k_shape_dot, k_shape_fermata, k_shape_flag,
+                k_shape_bracket, k_shape_button,
+                k_shape_clef, k_shape_dot, k_shape_fermata, k_shape_flag,
                 k_shape_invisible, k_shape_key_signature, k_shape_note, k_shape_notehead,
-                k_shape_rest, k_shape_rest_glyph, k_shape_stem, k_shape_staff,
+                k_shape_rectangle, k_shape_rest, k_shape_rest_glyph,
+                k_shape_stem, k_shape_staff,
                 k_shape_text, k_shape_time_signature, k_shape_tie,
                 k_shape_time_signature_digit, k_shape_tuplet, k_shape_word,
 
@@ -131,6 +146,8 @@ public:
                                          || m_objtype == k_box_paragraph
                                          ;
     }
+    inline bool is_box() { return m_objtype >= k_box && m_objtype < k_shape; }
+    inline bool is_shape() { return m_objtype >= k_shape && m_objtype < k_stub; }
 
     //item main boxes
     inline bool is_box_score_page() { return m_objtype == k_box_score_page; }
@@ -140,9 +157,11 @@ public:
     inline bool is_box_document() { return m_objtype == k_box_document; }
     inline bool is_box_doc_page() { return m_objtype == k_box_doc_page; }
     inline bool is_box_doc_page_content() { return m_objtype == k_box_doc_page_content; }
+    inline bool is_box_inline() { return m_objtype == k_box_inline; }
     inline bool is_box_slice() { return m_objtype == k_box_slice; }
     inline bool is_box_slice_instr() { return m_objtype == k_box_slice_instr; }
     inline bool is_box_system() { return m_objtype == k_box_system; }
+
     inline bool is_shape_accidentals() { return m_objtype == k_shape_accidentals; }
     inline bool is_shape_accidental_sign() { return m_objtype == k_shape_accidental_sign; }
     inline bool is_shape_arch() { return m_objtype == k_shape_arch; }
@@ -150,6 +169,7 @@ public:
     inline bool is_shape_beam() { return m_objtype == k_shape_beam; }
     inline bool is_shape_brace() { return m_objtype == k_shape_brace; }
     inline bool is_shape_bracket() { return m_objtype == k_shape_bracket; }
+    inline bool is_shape_button() { return m_objtype == k_shape_button; }
     inline bool is_shape_clef() { return m_objtype == k_shape_clef; }
     inline bool is_shape_dot() { return m_objtype == k_shape_dot; }
     inline bool is_shape_fermata() { return m_objtype == k_shape_fermata; }
@@ -158,6 +178,7 @@ public:
     inline bool is_shape_key_signature() { return m_objtype == k_shape_key_signature; }
     inline bool is_shape_note() { return m_objtype == k_shape_note; }
     inline bool is_shape_notehead() { return m_objtype == k_shape_notehead; }
+    inline bool is_shape_rectangle() { return m_objtype == k_shape_rectangle; }
     inline bool is_shape_rest() { return m_objtype == k_shape_rest; }
     inline bool is_shape_rest_glyph() { return m_objtype == k_shape_rest_glyph; }
     inline bool is_shape_stem() { return m_objtype == k_shape_stem; }
@@ -198,12 +219,16 @@ public:
     inline bool is_selected() { return m_fSelected; }
     virtual void set_selected(bool value) { m_fSelected = value; }
 
+    //creator
+    inline bool was_created_by(ImoObj* pImo) { return m_pCreatorImo == pImo; }
+    inline ImoObj* get_creator_imo() { return m_pCreatorImo; }
+
     //tests
     void dump(ostream& outStream);
     static string& get_name(int objtype);
 
 protected:
-    GmoObj(int objtype);
+    GmoObj(int objtype, ImoObj* pCreatorImo);
 
 };
 
@@ -214,8 +239,8 @@ protected:
     int m_idx;
     int m_layer;
 	Color m_color;
-    ImoObj* m_pCreatorImo;
     std::list<GmoShape*>* m_pRelatedShapes;
+    bool m_fHighlighted;
 
 public:
     virtual ~GmoShape();
@@ -246,10 +271,18 @@ public:
     void add_related_shape(GmoShape* pShape);
     GmoShape* find_related_shape(int type);
 
+    //highlight
+    void highlight_off() { set_highlighted(false); };
+    void highlight_on() { set_highlighted(true); };
+    virtual	void set_highlighted(bool value) { m_fHighlighted = value; }
+    inline bool is_highlighted() { return m_fHighlighted; }
+
+
 protected:
     GmoShape(ImoObj* pCreatorImo, int objtype, int idx, Color color);
     Color determine_color_to_use(RenderOptions& opt);
     virtual Color get_normal_color() { return m_color; }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -277,6 +310,7 @@ public:
     void add_child_box(GmoBox* child);
     GmoBox* get_child_box(int i);  //i = 0..n-1
     void set_owner_box(GmoBox* pBox) { m_pParentBox = pBox; };
+    void add_child_box_and_its_shapes(GmoBox* child);
 
     //contained shapes
     inline int get_num_shapes() { return static_cast<int>( m_shapes.size() ); }
@@ -284,6 +318,7 @@ public:
     GmoShape* get_shape(int i);  //i = 0..n-1
     void store_shapes_in_page(GmoBoxDocPage* pPage);
     void store_shapes_in_doc_page();
+    void store_shapes_in(GmoBox* pBox);
 
     //margins
     inline LUnits get_top_margin() { return m_uTopMargin; }
@@ -295,11 +330,16 @@ public:
     inline void set_left_margin(LUnits space) { m_uLeftMargin = space; }
     inline void set_right_margin(LUnits space) { m_uRightMargin = space; }
 
-    //content size & position
-    inline LUnits get_content_width() { return get_width() - m_uLeftMargin - m_uRightMargin; }
-    inline LUnits get_content_height() { return get_height() - m_uTopMargin - m_uBottomMargin; }
-    inline LUnits get_content_top() { return get_top() + m_uTopMargin; }
-    inline LUnits get_content_left() { return get_left() + m_uLeftMargin; }
+    //content size
+    //old semantic, based on score margins
+    inline LUnits get_content_width_old() { return get_width() - m_uLeftMargin - m_uRightMargin; }
+    //new semantic, based on style
+    LUnits get_content_top();
+    LUnits get_content_left();
+    LUnits get_content_width();
+    LUnits get_content_height();
+
+    //position
     void shift_origin(const USize& shift);
     inline void new_left(LUnits xLeft) { m_origin.x = xLeft; }
     inline void new_top(LUnits yTop) { m_origin.y = yTop; }
@@ -311,16 +351,20 @@ public:
     //hit testing
     GmoBox* find_inner_box_at(LUnits x, LUnits y);
 
+    //model
+    virtual GraphicModel* get_graphic_model();
+
     //tests
     void dump_boxes_shapes(ostream& outStream);
     void dump_shapes(ostream& outStream);
 
 protected:
-    GmoBox(int objtype);
+    GmoBox(int objtype, ImoObj* pCreatorImo);
     void delete_boxes();
     void delete_shapes();
     GmoBoxDocPage* get_parent_box_page();
     GmoBox* get_parent_box() { return m_pParentBox; }
+    void draw_border(Drawer* pDrawer, RenderOptions& opt);
     bool must_draw_bounds(RenderOptions& opt);
     Color get_box_color();
     void draw_box_bounds(Drawer* pDrawer, double xorg, double yorg, Color& color);
@@ -329,16 +373,13 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-class GmoStub //: public GmoObj
+class GmoStub : public GmoObj
 {
-protected:
-    ImoObj* m_pImoOwner;
-
 public:
     virtual ~GmoStub() {}
 
 protected:
-    GmoStub(int objtype, ImoObj* pImo) : /*GmoObj(NULL, objtype),*/ m_pImoOwner(pImo) {}
+    GmoStub(int objtype, ImoObj* pCreatorImo) : GmoObj(objtype, pCreatorImo) {}
 
 };
 
@@ -347,9 +388,10 @@ class GmoBoxDocument : public GmoBox
 {
 protected:
     GmoBoxDocPage* m_pLastPage;
+    GraphicModel* m_pGModel;
 
 public:
-    GmoBoxDocument();
+    GmoBoxDocument(GraphicModel* pGModel, ImoObj* pCreatorImo);
     virtual ~GmoBoxDocument() {}
 
     //doc pages
@@ -357,6 +399,9 @@ public:
     GmoBoxDocPage* get_page(int i);     //i = 0..n-1
     inline int get_num_pages() { return get_num_boxes(); }
     inline GmoBoxDocPage* get_last_page() { return m_pLastPage; }
+
+    //overrides
+    GraphicModel* get_graphic_model() { return m_pGModel; }
 
 };
 
@@ -369,7 +414,7 @@ protected:
     std::list<GmoShape*> m_allShapes;		//contained shapes, ordered by creation order
 
 public:
-    GmoBoxDocPage();
+    GmoBoxDocPage(ImoObj* pCreatorImo);
     virtual ~GmoBoxDocPage() {}
 
     //page number
@@ -382,6 +427,8 @@ public:
     //shapes
     void store_shape(GmoShape* pShape);
     GmoShape* get_first_shape_for_layer(int order);
+    GmoShape* find_shape_for_object(ImoStaffObj* pSO);
+    void store_in_map_imo_shape(GmoShape* pShape);
 
     //hit testing
     GmoObj* hit_test(LUnits x, LUnits y);
@@ -401,7 +448,7 @@ class GmoBoxDocPageContent : public GmoBox
 protected:
 
 public:
-    GmoBoxDocPageContent();
+    GmoBoxDocPageContent(ImoObj* pCreatorImo);
     virtual ~GmoBoxDocPageContent() {}
 
 };
@@ -433,7 +480,8 @@ class GmoBoxParagraph : public GmoBox
 protected:
 
 public:
-    GmoBoxParagraph() : GmoBox(GmoObj::k_box_paragraph) {}
+    GmoBoxParagraph(ImoObj* pCreatorImo)
+        : GmoBox(GmoObj::k_box_paragraph, pCreatorImo) {}
     virtual ~GmoBoxParagraph() {}
 };
 
@@ -482,6 +530,17 @@ public:
 //
 
 
+};
+
+//---------------------------------------------------------------------------------------
+class GmoBoxInline : public GmoBox
+{
+protected:
+
+public:
+    GmoBoxInline(ImoObj* pCreatorImo)
+        : GmoBox(GmoObj::k_box_inline, pCreatorImo) {}
+    virtual ~GmoBoxInline() {}
 };
 
 

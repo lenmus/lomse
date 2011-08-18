@@ -29,7 +29,8 @@ namespace lomse
 
 //forward declarations
 class FontStorage;
-
+class ImoButton;
+class ImoStyle;
 
 //---------------------------------------------------------------------------------------
 // a shape drawn by using a single glyph from LenMus font
@@ -66,6 +67,30 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+class GmoShapeButton : public GmoSimpleShape
+{
+protected:
+    FontStorage* m_pFontStorage;
+    LibraryScope& m_libraryScope;
+    ImoButton* m_pButton;
+    LUnits m_xLabel;
+    LUnits m_yLabel;
+
+public:
+    GmoShapeButton(ImoObj* pCreatorImo, UPoint pos, USize size,
+                   LibraryScope& libraryScope);
+    ~GmoShapeButton() {}
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+
+protected:
+    void select_font();
+    void center_text();
+
+    //Color get_normal_color();
+};
+
+//---------------------------------------------------------------------------------------
 class GmoShapeFermata : public GmoShapeGlyph
 {
 public:
@@ -98,95 +123,31 @@ protected:
 
 };
 
-////---------------------------------------------------------------------------------------
-//class GmoShapeRectangle : public GmoSimpleShape
-//{
-//public:
-//    //TODO: remove this backwards compatibility constructor
-//    GmoShapeRectangle(GmoBox* owner, LUnits xLeft, LUnits yTop,
-//                     LUnits xRight, LUnits yBottom, LUnits uWidth,
-//                     Color color = *wxBLACK, wxString sName = _T("Rectangle"),
-//				     bool fDraggable = true, bool fSelectable = true,
-//                     bool fVisible = true);
-//
-//    //new rectangle constructor
-//    GmoShapeRectangle(GmoBox* owner,
-//                     //position and size
-//                     LUnits uxLeft, LUnits uyTop, LUnits uxRight, LUnits uyBottom,
-//                     //border
-//                     LUnits uBorderWidth, Color nBorderColor,
-//                     //content
-//                     Color nBgColor = *wxWHITE,
-//                     //other
-//                     int nShapeIdx = 0, wxString sName = _T("Rectangle"),
-//				     bool fDraggable = true, bool fSelectable = true,
-//                     bool fVisible = true);
-//
-//    virtual ~GmoShapeRectangle();
-//
-//    //implementation of virtual methods from base class
-//    void on_draw(Drawer* pDrawer, RenderOptions& opt);
-//    void RenderNormal(lmPaper* pPaper, Color color);
-//    void RenderWithHandlers(lmPaper* pPaper);
-//    void Shift(LUnits uxIncr, LUnits uyIncr);
-//
-//    //Handler IDs. AWARE: Used also as array indexes
-//    enum
-//    {
-//        lmID_TOP_LEFT = 0,
-//        lmID_TOP_RIGHT,
-//        lmID_BOTTOM_RIGHT,
-//        lmID_BOTTOM_LEFT,
-//        //
-//        lmID_LEFT_CENTER,
-//        lmID_TOP_CENTER,
-//        lmID_RIGHT_CENTER,
-//        lmID_BOTTOM_CENTER,
-//        //
-//        lmID_NUM_HANDLERS
-//    };
-//
-//    //settings
-//    void SetCornerRadius(LUnits uRadius);
-//    inline void SetBorderStyle(ELineStyle nBorderStyle) { m_nBorderStyle = nBorderStyle; }
-//
-//    //shape dragging
-//    wxBitmap* OnBeginDrag(double rScale, wxDC* pDC);
-//	UPoint OnDrag(lmPaper* pPaper, const UPoint& uPos);
-//	void OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos);
-//
-//    //handlers dragging
-//    UPoint OnHandlerDrag(lmPaper* pPaper, const UPoint& uPos, long nHandlerID);
-//    void OnHandlerEndDrag(lmInteractor* pCanvas, const UPoint& uPos, long nHandlerID);
-//
-//    //call backs
-//    void MovePoints(int nNumPoints, int nShapeIdx, UPoint* pShifts, bool fAddShifts);
-//
-//
-//protected:
-//    void Create(LUnits xLeft, LUnits yTop, LUnits xRight, LUnits yBottom,
-//                LUnits uBorderWidth, Color nBorderColor, Color nBgColor);
-//    void DrawRectangle(lmPaper* pPaper, Color colorC, bool fSketch);
-//    void ComputeNewPointsAndHandlersPositions(const UPoint& uPos, long nHandlerID);
-//    void ComputeCenterPoints();
-//    void UpdateBounds();
-//    void SavePoints();
-//
-//    //rectangle
-//    Color        m_nBgColor;
-//    LUnits        m_uCornerRadius;
-//
-//    //border
-//    LUnits        m_uBorderWidth;
-//    Color        m_nBorderColor;
-//    ELineStyle    m_nBorderStyle;
-//
-//    //rectangle points and handlers
-//    UPoint            m_uPoint[lmID_NUM_HANDLERS];       //four corners + anchor point + centers of rectangle sides
-//    UPoint            m_uSavePoint[lmID_NUM_HANDLERS];   //to save start and end points when dragging/moving
-//    lmHandlerSquare*    m_pHandler[lmID_NUM_HANDLERS];     //handlers
-//
-//};
+//---------------------------------------------------------------------------------------
+class GmoShapeRectangle : public GmoSimpleShape
+{
+protected:
+    LUnits m_radius;
+
+public:
+    GmoShapeRectangle(ImoObj* pCreatorImo
+                      , int type = GmoObj::k_shape_rectangle
+                      , int idx = 0
+                      , const UPoint& pos = UPoint(0.0f, 0.0f)    //top-left corner
+                      , const USize& size = USize(0.0f, 0.0f)     //rectangle size
+                      , LUnits radius = 0.0f                      //for rounded corners
+                      , ImoStyle* pStyle = NULL       //for line style & background color
+                     );
+    virtual ~GmoShapeRectangle() {}
+
+
+    //implementation of virtual methods from base class
+    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
+
+    //settings
+    inline void set_radius(LUnits radius) { m_radius = radius; }
+
+};
 
 //---------------------------------------------------------------------------------------
 class GmoShapeInvisible : public GmoSimpleShape

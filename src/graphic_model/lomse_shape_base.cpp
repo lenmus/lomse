@@ -30,13 +30,13 @@ namespace lomse
 // a glyph, a note head, an arch, etc.
 //=======================================================================================
 GmoShape::GmoShape(ImoObj* pCreatorImo, int objtype, int idx, Color color)
-    : GmoObj(objtype)
+    : GmoObj(objtype, pCreatorImo)
     , Linkable<USize>()
     , m_idx(idx)
     , m_layer(GmoShape::k_layer_background)
     , m_color(color)
-    , m_pCreatorImo(pCreatorImo)
     , m_pRelatedShapes(NULL)
+    , m_fHighlighted(false)
 {
 }
 
@@ -71,9 +71,12 @@ void GmoShape::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //---------------------------------------------------------------------------------------
 Color GmoShape::determine_color_to_use(RenderOptions& opt)
 {
-    //TODO
-    //return (is_selected() ? g_pColors->ScoreSelected() : get_normal_color());
-    return (is_selected() ? Color(255,0,0) : get_normal_color());
+    if (is_highlighted())
+        return opt.highlighted_color;
+    else if (is_selected())
+        return opt.selected_color;
+    else
+        return get_normal_color();
 }
 
 //---------------------------------------------------------------------------------------
@@ -220,6 +223,16 @@ void GmoCompositeShape::set_selected(bool value)
     std::list<GmoShape*>::iterator it;
     for (it = m_components.begin(); it != m_components.end(); ++it)
         (*it)->set_selected(value);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoCompositeShape::set_highlighted(bool value)
+{
+    GmoShape::set_highlighted(value);
+
+    std::list<GmoShape*>::iterator it;
+    for (it = m_components.begin(); it != m_components.end(); ++it)
+        (*it)->set_highlighted(value);
 }
 
 //---------------------------------------------------------------------------------------

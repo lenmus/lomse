@@ -1,0 +1,23 @@
+(lenmusdoc (vers 0.0) 
+    (styles 
+        (defineStyle "red" (font "Liberation serif" 14pt bold-italic)
+                           (color #ff0000))
+        (defineStyle "big bold" (font "Liberation serif" 18pt bold)
+                           (color #0000ff))
+    )
+    
+    (content
+
+        (para
+            (txt (style "red") "Sphinx ")
+            (txt "Sphinx ")
+            (txt (style "big bold") "Sphinx ")
+            (txt "Australia's largest bank, the ")
+            (txt (style "big bold") "Commonwealth Bank (pues eso)")
+            (txt ", has cancelled 8,000 credit cards after it detected a data breach at a merchant. Mastercard and Visa may issue penalties including fines to the acquiring ")
+            (txt (style "red") "Sphinx ")
+            (txt "Sphinx ")
+            (txt (style "big bold") "Sphinx ")
+            (txt "bank under the payment industry's PCI-DSS compliance rules. News of breaches is uncommon in Australia because the nation does not have data breach disclosure laws.")
+        )
+))

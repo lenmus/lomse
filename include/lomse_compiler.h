@@ -23,6 +23,7 @@
 
 
 #include "lomse_ldp_elements.h"
+#include "lomse_reader.h"
 
 using namespace std;
 
@@ -38,6 +39,7 @@ class LibraryScope;
 class IdAssigner;
 class InternalModel;
 class ImoDocument;
+class Document;
 
 
 //---------------------------------------------------------------------------------------
@@ -49,26 +51,25 @@ protected:
     Analyser*       m_pAnalyser;
     ModelBuilder*   m_pModelBuilder;
     IdAssigner*     m_pIdAssigner;
+    Document*       m_pDoc;
     LdpTree*        m_pFinalTree;
 
 public:
-    LdpCompiler(LibraryScope& libraryScope, DocumentScope& documentScope);
-    LdpCompiler(LdpParser* p, Analyser* a, ModelBuilder* mb, IdAssigner* ida);   //for testing: direct inyection of dependencies
+    LdpCompiler(LdpParser* p, Analyser* a, ModelBuilder* mb, IdAssigner* ida,
+                Document* pDoc);
     ~LdpCompiler();
 
+    //constructor for testing: direct construction
+    LdpCompiler(LibraryScope& libraryScope, Document* pDoc);
+
+    //compilation
     InternalModel* compile_file(const std::string& filename);
     InternalModel* compile_string(const std::string& source);
+    InternalModel* compile_input(LdpReader& reader);
     InternalModel* create_empty();
     InternalModel* create_with_empty_score();
 
     int get_num_errors();
-
-//    LdpElement* create_element(const std::string& source);
-//    InternalModel* create_basic_model(const std::string& source);
-//    inline InternalModel* get_outcome() { return m_IModel; }
-//
-//    //access to Ldp tree result
-//    LdpTree* get_final_tree() { return m_pFinalTree; }
 
 
 protected:

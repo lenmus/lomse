@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,11 +16,11 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
@@ -29,6 +29,7 @@
 #include "lomse_compiler.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
+#include "lomse_events.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -41,8 +42,6 @@ class TestDocument : public Document
 public:
     TestDocument(LibraryScope& libraryScope, ostream& reporter=cout)
         : Document(libraryScope, reporter) {}
-    TestDocument(LdpCompiler* pCompiler, IdAssigner* pIdAssigner)
-        : Document(pCompiler, pIdAssigner) {}
 
         long test_last_id() { return m_pIdAssigner->get_last_id(); }
 };
@@ -53,21 +52,20 @@ class DocumentTestFixture
 {
 public:
 
+    LibraryScope m_libraryScope;
+    LdpFactory* m_pLdpFactory;
+    std::string m_scores_path;
+
     DocumentTestFixture()     //SetUp fixture
+        : m_libraryScope(cout)
     {
-        m_pLibraryScope = new LibraryScope(cout);
-        m_pLdpFactory = m_pLibraryScope->ldp_factory();
+        m_pLdpFactory = m_libraryScope.ldp_factory();
         m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
 
     ~DocumentTestFixture()    //TearDown fixture
     {
-        delete m_pLibraryScope;
     }
-
-    LibraryScope* m_pLibraryScope;
-    LdpFactory* m_pLdpFactory;
-    std::string m_scores_path;
 };
 
 SUITE(DocumentTest)
@@ -75,10 +73,11 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, DocumentEmpty)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.create_empty();
         ImoDocument* pImoDoc = doc.get_imodoc();
         CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc->get_owner() == &doc );
         CHECK( doc.is_modified() == false );
         //cout << doc.to_string() << endl;
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content))" );
@@ -86,10 +85,11 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, DocumentFromFile)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "00011-empty-fill-page.lms");
         ImoDocument* pImoDoc = doc.get_imodoc();
         CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc->get_owner() == &doc );
         CHECK( doc.is_modified() == false );
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData)))))" );
@@ -97,20 +97,107 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, DocumentFromString)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (n c4 q))))))");
         ImoDocument* pImoDoc = doc.get_imodoc();
         CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc->get_owner() == &doc );
         CHECK( doc.is_modified() == false );
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
 //            "(instrument (musicData (n c4 q))))))" );
     }
 
+    TEST_FIXTURE(DocumentTestFixture, DocumentFromInput)
+    {
+        Document doc(m_libraryScope);
+        LdpFileReader reader(m_scores_path + "00011-empty-fill-page.lms");
+        doc.from_input(reader);
+        ImoDocument* pImoDoc = doc.get_imodoc();
+        CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( doc.is_modified() == false );
+//        cout << doc.to_string() << endl;
+//        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData)))))" );
+    }
+
+    TEST_FIXTURE(DocumentTestFixture, DoubleCreationThrows_Empty)
+    {
+        bool fOk = false;
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        try
+        {
+            doc.create_empty();
+        }
+        catch(exception& e)
+        {
+            //cout << e.what() << endl;
+            e.what();
+            fOk = true;
+        }
+        CHECK( fOk );
+    }
+
+    TEST_FIXTURE(DocumentTestFixture, DoubleCreationThrows_FromString)
+    {
+        bool fOk = false;
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        try
+        {
+            doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+                "(instrument (musicData (n c4 q))))))");
+        }
+        catch(exception& e)
+        {
+            //cout << e.what() << endl;
+            e.what();
+            fOk = true;
+        }
+        CHECK( fOk );
+    }
+
+    TEST_FIXTURE(DocumentTestFixture, DoubleCreationThrows_FromFile)
+    {
+        bool fOk = false;
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        try
+        {
+            doc.from_file(m_scores_path + "00011-empty-fill-page.lms");
+        }
+        catch(exception& e)
+        {
+            //cout << e.what() << endl;
+            e.what();
+            fOk = true;
+        }
+        CHECK( fOk );
+    }
+
+    TEST_FIXTURE(DocumentTestFixture, DoubleCreationThrows_WithEmptyScore)
+    {
+        bool fOk = false;
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        try
+        {
+            doc.create_with_empty_score();
+        }
+        catch(exception& e)
+        {
+            //cout << e.what() << endl;
+            e.what();
+            fOk = true;
+        }
+        CHECK( fOk );
+    }
+
     TEST_FIXTURE(DocumentTestFixture, DocumentGetScoreInEmptyDoc)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.create_empty();
         ImoScore* pScore = doc.get_score();
         CHECK( pScore == NULL );
@@ -118,7 +205,7 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, DocumentGetScoreFromFile)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "00011-empty-fill-page.lms");
         ImoScore* pScore = doc.get_score();
         CHECK( pScore != NULL );
@@ -127,10 +214,11 @@ SUITE(DocumentTest)
 
     TEST_FIXTURE(DocumentTestFixture, Document_CreateWithEmptyScore)
     {
-        Document doc(*m_pLibraryScope);
+        Document doc(m_libraryScope);
         doc.create_with_empty_score();
         ImoDocument* pImoDoc = doc.get_imodoc();
         CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc->get_owner() == &doc );
         CHECK( doc.is_modified() == false );
         ImoScore* pScore = doc.get_score();
         CHECK( pScore != NULL );
@@ -140,7 +228,7 @@ SUITE(DocumentTest)
 
 //    TEST_FIXTURE(DocumentTestFixture, DocumentIteratorAdvance)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.begin();
 //        ++it;
@@ -155,7 +243,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentIteratorGoBack)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.begin();
 //        ++it;
@@ -170,7 +258,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentGetContent)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.content();
 //        CHECK( doc.to_string(it) == "(content )" );
@@ -180,7 +268,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentPushBack)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.content();
 //        LdpParser parser(cout, m_pLdpFactory);
@@ -193,7 +281,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentRemoveParam)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.begin();
 //        ++it;   //vers
@@ -206,7 +294,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentInsertParam)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        LdpParser parser(cout, m_pLdpFactory);
 //        SpLdpTree tree = parser.parse_text("(dx 20)");
@@ -221,7 +309,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentHasImObjs)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q)(n b3 e.)(n c4 s)))) ))" );
 //        Document::iterator it = doc.get_score();
 //        //cout << doc.to_string() << endl;
@@ -260,7 +348,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentPushBackCommandIsStored)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.begin();
 //        LdpParser parser(cout, m_pLdpFactory);
@@ -275,7 +363,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoPushBackCommand)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.begin();
 //        LdpParser parser(cout, m_pLdpFactory);
@@ -291,7 +379,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRedoPushBackCommand)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.begin();
 //        LdpParser parser(cout, m_pLdpFactory);
@@ -308,7 +396,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRedoUndoPushBackCommand)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.begin();
 //        LdpParser parser(cout, m_pLdpFactory);
@@ -327,7 +415,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentRemoveCommandIsStored)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.begin();
 //        ++it;   //vers
@@ -340,7 +428,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRemoveCommand)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.begin();
 //        ++it;   //vers
@@ -355,7 +443,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentRedoRemoveCommand)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.begin();
 //        ++it;   //vers
@@ -370,7 +458,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRedoUndoRemoveCommand)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.begin();
 //        ++it;   //vers
@@ -386,7 +474,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentInsertCommandIsStored)
 //    {
-//        TestDocument doc(*m_pLibraryScope);
+//        TestDocument doc(m_libraryScope);
 //        doc.create_empty();
 //        LdpParser parser(cout, m_pLdpFactory);
 //        SpLdpTree tree = parser.parse_text("(dx 20)");
@@ -403,7 +491,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoInsertCommandIsStored)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        LdpParser parser(cout, m_pLdpFactory);
 //        SpLdpTree tree = parser.parse_text("(dx 20)");
@@ -421,7 +509,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRedoInsertCommandIsStored)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        LdpParser parser(cout, m_pLdpFactory);
 //        SpLdpTree tree = parser.parse_text("(dx 20)");
@@ -440,7 +528,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRedoUndoInsertCommandIsStored)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        LdpParser parser(cout, m_pLdpFactory);
 //        SpLdpTree tree = parser.parse_text("(dx 20)");
@@ -460,7 +548,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentRemoveNotLast)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        LdpParser parser(cout, m_pLdpFactory);
 //        SpLdpTree tree = parser.parse_text("(musicData (n c4 q)(r e)(n b3 e)(dx 20))");
@@ -486,7 +574,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRemoveNotLast)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        LdpParser parser(cout, m_pLdpFactory);
 //        SpLdpTree tree = parser.parse_text("(dx 20)");
@@ -504,7 +592,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRedoRemoveNotLast)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        LdpParser parser(cout, m_pLdpFactory);
 //        SpLdpTree tree = parser.parse_text("(dx 20)");
@@ -524,7 +612,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRedoUndoRemoveNotLast)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        LdpParser parser(cout, m_pLdpFactory);
 //        SpLdpTree tree = parser.parse_text("(dx 20)");
@@ -544,7 +632,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentRemoveFirst)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        LdpParser parser(cout, m_pLdpFactory);
 //        SpLdpTree tree = parser.parse_text("(musicData (n c4 q)(r e)(n b3 e)(dx 20))");
@@ -566,7 +654,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentNodesMarkedAsModified)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))");
 //        Document::iterator it = doc.begin();
 //        ++it;   //vers
@@ -611,7 +699,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoNodesMarkedAsModified)
 //    {
-//        Document doc(*m_pLibraryScope);
+//        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))");
 //        Document::iterator it = doc.begin();
 //        ++it;   //vers
@@ -656,7 +744,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentKnowsLastId_FromString)
 //    {
-//        TestDocument doc(*m_pLibraryScope);
+//        TestDocument doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc#0 (vers#1 0.0) (content#2 (score#3 (vers#4 1.6) (instrument#5 (musicData#6 (n#7 c4 q) (r#8 q)))) (text#9 \"this is text\")))" );
 //        //cout << "Last Id = " << doc.test_last_id() << endl;
 //        CHECK( doc.test_last_id() == 9L );
@@ -664,7 +752,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentKnowsLastId_Empty)
 //    {
-//        TestDocument doc(*m_pLibraryScope);
+//        TestDocument doc(m_libraryScope);
 //        doc.create_empty();
 //        //cout << "Last Id = " << doc.test_last_id() << endl;
 //        CHECK( doc.test_last_id() == 2L );
@@ -672,7 +760,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentKnowsLastId_FromFile)
 //    {
-//        TestDocument doc(*m_pLibraryScope);
+//        TestDocument doc(m_libraryScope);
 //        doc.from_file(m_scores_path + "90013-two-instruments-four-staves.lms");
 //        //cout << "Last Id = " << doc.test_last_id() << endl;
 //        CHECK( doc.test_last_id() == 48L );
@@ -680,7 +768,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentInsertCommandUpdatesId)
 //    {
-//        TestDocument doc(*m_pLibraryScope);
+//        TestDocument doc(m_libraryScope);
 //        doc.create_empty();
 //        LdpParser parser(cout, m_pLdpFactory);
 //        SpLdpTree tree = parser.parse_text("(dx 20)");
@@ -695,7 +783,7 @@ SUITE(DocumentTest)
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentPushBackCommandUpdatesId)
 //    {
-//        TestDocument doc(*m_pLibraryScope);
+//        TestDocument doc(m_libraryScope);
 //        doc.create_empty();
 //        Document::iterator it = doc.begin();
 //        LdpParser parser(cout, m_pLdpFactory);

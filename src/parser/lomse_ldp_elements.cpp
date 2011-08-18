@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,19 +16,19 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include "lomse_ldp_elements.h"
 
 #include <sstream>
 #include "lomse_internal_model.h"
-#include "lomse_basic_objects.h"
 
 using namespace std;
 
 namespace lomse
 {
 
+//---------------------------------------------------------------------------------------
 LdpElement::LdpElement()
     : m_type(k_undefined)
     , m_name("")
@@ -36,13 +36,14 @@ LdpElement::LdpElement()
     , m_numLine(0)
     , m_id(0L)
     , m_pImo(NULL)
-    , m_fProcessed(false)
+    //, m_fProcessed(false)
 {
 }
 
+//---------------------------------------------------------------------------------------
 LdpElement::~LdpElement()
 {
-    NodeInTree<LdpElement>::children_iterator it(this);
+    TreeNode<LdpElement>::children_iterator it(this);
     it = begin();
     while (it != end())
     {
@@ -52,24 +53,15 @@ LdpElement::~LdpElement()
     }
 }
 
-void LdpElement::accept_in(BaseVisitor& v)
+//---------------------------------------------------------------------------------------
+void LdpElement::accept_visitor(BaseVisitor& v)
 {
 	Visitor<LdpElement>* p = dynamic_cast<Visitor<LdpElement>*>(&v);
 	if (p)
-    {
-		p->start_visit(*this);
-	}
+		p->start_visit(this);
 }
 
-void LdpElement::accept_out(BaseVisitor& v)
-{
-	Visitor<LdpElement>* p = dynamic_cast<Visitor<LdpElement>*>(&v);
-	if (p)
-    {
-		p->end_visit(*this);
-	}
-}
-
+//---------------------------------------------------------------------------------------
 bool LdpElement::operator ==(LdpElement& element)
 {
 	if (get_type() != element.get_type())
@@ -88,6 +80,7 @@ bool LdpElement::operator ==(LdpElement& element)
 	return true;
 }
 
+//---------------------------------------------------------------------------------------
 std::string LdpElement::get_ldp_value()
 {
     if (m_type == k_string)
@@ -100,6 +93,7 @@ std::string LdpElement::get_ldp_value()
         return m_value;
 }
 
+//---------------------------------------------------------------------------------------
 std::string LdpElement::to_string()
 {
 	stringstream s;
@@ -110,7 +104,7 @@ std::string LdpElement::to_string()
 	    s << "(" << m_name;
         if (has_children())
         {
-            NodeInTree<LdpElement>::children_iterator it(this);
+            TreeNode<LdpElement>::children_iterator it(this);
             for (it = begin(); it != end(); ++it)
 	            s << " " << (*it)->to_string();
         }
@@ -122,6 +116,7 @@ std::string LdpElement::to_string()
     return s.str();
 }
 
+//---------------------------------------------------------------------------------------
 std::string LdpElement::to_string_with_ids()
 {
 	stringstream s;
@@ -132,7 +127,7 @@ std::string LdpElement::to_string_with_ids()
         s << "(" << m_name << "#" << m_id;
         if (has_children())
         {
-            NodeInTree<LdpElement>::children_iterator it(this);
+            TreeNode<LdpElement>::children_iterator it(this);
             for (it = begin(); it != end(); ++it)
 	            s << " " << (*it)->to_string_with_ids();
         }
@@ -144,24 +139,27 @@ std::string LdpElement::to_string_with_ids()
     return s.str();
 }
 
+//---------------------------------------------------------------------------------------
 int LdpElement::get_num_parameters()
 {
     return get_num_children();
 }
 
+//---------------------------------------------------------------------------------------
 LdpElement* LdpElement::get_parameter(int i)
 {
     // i = 1..n
     //assert( i > 0 && i <= get_num_parameters());
-    NodeInTree<LdpElement>::children_iterator it(this);
+    TreeNode<LdpElement>::children_iterator it(this);
     int numChild = 1;
     for (it=this->begin(); it != this->end() && numChild < i; ++it, ++numChild);
     if (it != this->end() && i == numChild)
         return *it;
     else
-        throw std::runtime_error( "[LdpElement::get_parameter]. Num child greater than available children" );
+        throw std::runtime_error("[LdpElement::get_parameter]. Num child greater than available children" );
 }
 
+//---------------------------------------------------------------------------------------
 float LdpElement::get_value_as_float()
 {
     float rValue;
@@ -171,6 +169,7 @@ float LdpElement::get_value_as_float()
     return rValue;
 }
 
+//---------------------------------------------------------------------------------------
 void LdpElement::set_imo(ImoObj* pImo)
 {
     m_pImo = pImo;
@@ -180,72 +179,9 @@ void LdpElement::set_imo(ImoObj* pImo)
 
 
 
-//---------------------------------------------------------------------------
-//TO_REMOVE
-
-    //------------------------------------------------------------
-    // Compatibility with lmLDPNode
-    //------------------------------------------------------------
-
-LdpElement* LdpElement::GetParameter(int i)
-{
-    return get_parameter(i);
-}
-
-LdpElement* LdpElement::GetParameterFromName(const std::string& name)
-{
-    NodeInTree<LdpElement>::children_iterator it(this);
-    for (it = begin(); it != end(); ++it)
-    {
-        if ((*it)->get_name() == name)
-            return *it;
-    }
-    return NULL;
-}
-
-LdpElement* LdpElement::StartIterator(long iP, bool fOnlyNotProcessed)
-{
-    //Set initial position
-    m_iP = iP;
-    if (iP > get_num_parameters())
-        return NULL;
-
-    //return object
-    if (fOnlyNotProcessed && !get_parameter(m_iP)->IsProcessed())
-        return get_parameter(m_iP);
-    else
-        return GetNextParameter(fOnlyNotProcessed);
-}
-
-LdpElement* LdpElement::GetNextParameter(bool fOnlyNotProcessed)
-{
-    //advance to next one
-    ++m_iP;
-    while (m_iP <= get_num_parameters())
-    {
-        if (fOnlyNotProcessed)
-        {
-            if (!get_parameter(m_iP)->IsProcessed())
-                return get_parameter(m_iP);
-        }
-        else
-            return get_parameter(m_iP);
-
-        ++m_iP;
-    }
-
-    //no more items or all processed
-    if (m_iP > get_num_parameters())
-        return NULL;
-    return get_parameter(m_iP);
-}
-
-
-
-//END_TO_REMOVE
-//---------------------------------------------------------------------------
-
+//---------------------------------------------------------------------------------------
 // global functions related to elements
+//---------------------------------------------------------------------------------------
 
 bool is_auxobj(int type) { return type >= k_auxobj_start && type <= k_auxobj_end; }
 bool is_staffobj(int type) { return type >= k_staffobj_start && type <= k_staffobj_end; }

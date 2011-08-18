@@ -52,7 +52,7 @@ protected:
 //    lmTimeGridTable*            m_pGridTable;
 
 public:
-    GmoBoxSlice(int nAbsMeasure);    //, int nNumInSystem,
+    GmoBoxSlice(int nAbsMeasure, ImoObj* pCreatorImo);    //, int nNumInSystem,
 			    //LUnits xStart=0, LUnits xEnd=0);
     ~GmoBoxSlice();
 

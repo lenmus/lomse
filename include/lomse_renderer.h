@@ -84,7 +84,7 @@ public:
     Renderer(double ppi, AttrStorage& attr_storage, AttrStorage& attr_stack,
              PathStorage& path);
     virtual ~Renderer() {}
-    virtual void initialize(RenderingBuffer& buf) = 0;
+    virtual void initialize(RenderingBuffer& buf, Color bgcolor) = 0;
     virtual void render(bool fillColor) = 0;
     virtual void render(FontRasterizer& ras, FontScanline& sl, Color color) = 0;
     virtual void render_gsv_text(double x, double y, const char* str) = 0;
@@ -165,15 +165,12 @@ public:
     ~RendererTemplate() {}
 
     //-----------------------------------------------------------------------------------
-    void initialize(RenderingBuffer& buf)
+    void initialize(RenderingBuffer& buf, Color bgcolor)
     {
         m_rbuf.attach(buf.buf(), buf.width(), buf.height(), buf.stride());
         m_renBase.reset_clipping(true);
 
-        //////set backgound color
-        ////Color bgcolor = m_options.background_color;
-        ////m_renBase.clear(agg::rgba(bgcolor.r, bgcolor.b, bgcolor.g, bgcolor.a));
-        m_renBase.clear(agg::rgba(0.5, 0.5, 0.5));
+        m_renBase.clear( to_rgba(bgcolor) );
 
         reset();
         set_transformation();

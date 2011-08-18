@@ -20,14 +20,13 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include <list>
 #include "lomse_injectors.h"
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
-#include "lomse_basic_objects.h"
 #include "lomse_shape_note.h"
 #include "lomse_shape_staff.h"
 #include "lomse_glyphs.h"
@@ -35,6 +34,8 @@
 #include "lomse_note_engraver.h"
 #include "lomse_score_meter.h"
 #include "lomse_shapes_storage.h"
+#include "lomse_document.h"
+#include "lomse_im_factory.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -85,39 +86,40 @@ SUITE(GmoShapeTest)
 
     TEST_FIXTURE(GmoShapeTestFixture, Composite_IsLocked)
     {
-        DtoNote dtoNote;
-        dtoNote.set_step(0);
-        dtoNote.set_octave(4);
-        dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(k_whole);
-        ImoNote note(dtoNote);
+        Document doc(m_libraryScope);
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        pNote->set_step(0);
+        pNote->set_octave(4);
+        pNote->set_accidentals(0);
+        pNote->set_note_type(k_whole);
 
         ScoreMeter meter(1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(&note, 0, 0, ImoClef::k_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, 0, 0, k_clef_F4, UPoint(10.0f, 15.0f)) );
 
         CHECK( pShape != NULL );
         CHECK( pShape->is_locked() == true );
 
+        delete pNote;
         delete pShape;
     }
 
     TEST_FIXTURE(GmoShapeTestFixture, Composite_LockRecomputesBounds)
     {
-        DtoNote dtoNote;
-        dtoNote.set_step(0);
-        dtoNote.set_octave(4);
-        dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(k_whole);
-        ImoNote note(dtoNote);
+        Document doc(m_libraryScope);
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        pNote->set_step(0);
+        pNote->set_octave(4);
+        pNote->set_accidentals(0);
+        pNote->set_note_type(k_whole);
 
         ScoreMeter meter(1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(&note, 0, 0, ImoClef::k_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, 0, 0, k_clef_F4, UPoint(10.0f, 15.0f)) );
 
         pShape->unlock();
         CHECK( pShape->is_locked() == false );
@@ -134,23 +136,24 @@ SUITE(GmoShapeTest)
         CHECK( pShape->get_origin().x == org.x + shift.width );
         CHECK( pShape->get_origin().y == org.y + shift.height );
 
+        delete pNote;
         delete pShape;
     }
 
     TEST_FIXTURE(GmoShapeTestFixture, Composite_LockRecomputesBounds2)
     {
-        DtoNote dtoNote;
-        dtoNote.set_step(0);
-        dtoNote.set_octave(4);
-        dtoNote.set_accidentals(k_flat);
-        dtoNote.set_note_type(k_whole);
-        ImoNote note(dtoNote);
+        Document doc(m_libraryScope);
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        pNote->set_step(0);
+        pNote->set_octave(4);
+        pNote->set_accidentals(k_flat);
+        pNote->set_note_type(k_whole);
 
         ScoreMeter meter(1, 1, 180.0f);
         ShapesStorage storage;
         NoteEngraver engraver(m_libraryScope, &meter, &storage);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(&note, 0, 0, ImoClef::k_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, 0, 0, k_clef_F4, UPoint(10.0f, 15.0f)) );
 
         pShape->unlock();
         CHECK( pShape->is_locked() == false );
@@ -168,17 +171,21 @@ SUITE(GmoShapeTest)
         CHECK( pShape->get_origin().x == min(pAcc->get_origin().x, pNH->get_origin().x) );
         CHECK( pShape->get_origin().y == min(pAcc->get_origin().y, pNH->get_origin().y) );
 
+        delete pNote;
         delete pShape;
     }
 
     TEST_FIXTURE(GmoShapeTestFixture, Shape_SetOrigin)
     {
-        ImoStaffInfo staff;
-        GmoShapeStaff shape(NULL, 0, &staff, 0, 0.0f, Color(0,0,0));
+        Document doc(m_libraryScope);
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
+                                    ImFactory::inject(k_imo_staff_info, &doc));
+        GmoShapeStaff shape(NULL, 0, pInfo, 0, 0.0f, Color(0,0,0));
         shape.set_origin(2000.0f, 3000.0f);
 
         CHECK( shape.get_left() == 2000.0f );
         CHECK( shape.get_top() == 3000.0f );
+        delete pInfo;
     }
 
 
@@ -186,16 +193,21 @@ SUITE(GmoShapeTest)
 
     TEST_FIXTURE(GmoShapeTestFixture, GetRelatedShapes_Empty)
     {
-        ImoStaffInfo staffInfo;
-        GmoShapeStaff staff(NULL, 0, &staffInfo, 0, 0.0f, Color(0,0,0));
+        Document doc(m_libraryScope);
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
+                                    ImFactory::inject(k_imo_staff_info, &doc));
+        GmoShapeStaff staff(NULL, 0, pInfo, 0, 0.0f, Color(0,0,0));
 
         CHECK( staff.get_related_shapes() == NULL );
+        delete pInfo;
     }
 
     TEST_FIXTURE(GmoShapeTestFixture, AddRelatedShape)
     {
-        ImoStaffInfo staffInfo;
-        GmoShapeStaff staff(NULL, 0, &staffInfo, 0, 0.0f, Color(0,0,0));
+        Document doc(m_libraryScope);
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
+                                    ImFactory::inject(k_imo_staff_info, &doc));
+        GmoShapeStaff staff(NULL, 0, pInfo, 0, 0.0f, Color(0,0,0));
         GmoShapeNote note(NULL, 150.0f, 200.0f, Color(0,0,0), m_libraryScope);
 
         staff.add_related_shape(&note);
@@ -203,12 +215,15 @@ SUITE(GmoShapeTest)
         std::list<GmoShape*>* m_pRelated = staff.get_related_shapes();
         CHECK( m_pRelated != NULL );
         CHECK( m_pRelated->front() == &note );
+        delete pInfo;
     }
 
     TEST_FIXTURE(GmoShapeTestFixture, GetRelatedShapeOfType)
     {
-        ImoStaffInfo staffInfo;
-        GmoShapeStaff staff(NULL, 0, &staffInfo, 0, 0.0f, Color(0,0,0));
+        Document doc(m_libraryScope);
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
+                                    ImFactory::inject(k_imo_staff_info, &doc));
+        GmoShapeStaff staff(NULL, 0, pInfo, 0, 0.0f, Color(0,0,0));
         GmoShapeNote note(NULL, 150.0f, 200.0f, Color(0,0,0), m_libraryScope);
         GmoShapeRest rest(NULL, 0, 150.0f, 200.0f, Color(0,0,0), m_libraryScope);
 
@@ -218,6 +233,7 @@ SUITE(GmoShapeTest)
         CHECK( staff.find_related_shape(GmoObj::k_shape_note) == &note );
         CHECK( staff.find_related_shape(GmoObj::k_shape_rest) == &rest );
         CHECK( staff.find_related_shape(GmoObj::k_shape_beam) == NULL );
+        delete pInfo;
     }
 
 

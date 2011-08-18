@@ -90,18 +90,18 @@ void InstrumentEngraver::measure_name_abbrev()
     if (m_pInstr->has_name())
     {
         ImoScoreText& text = m_pInstr->get_name();
-        ImoTextStyleInfo* pStyle = text.get_style();
+        ImoStyle* pStyle = text.get_style();
         if (!pStyle)
-            pStyle = m_pScore->get_default_style_info();
+            pStyle = m_pScore->get_default_style();
         TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
         m_uIndentFirst += engr.measure_width() + uSpaceAfterName;
     }
     if (m_pInstr->has_abbrev())
     {
         ImoScoreText& text = m_pInstr->get_abbrev();
-        ImoTextStyleInfo* pStyle = text.get_style();
+        ImoStyle* pStyle = text.get_style();
         if (!pStyle)
-            pStyle = m_pScore->get_default_style_info();
+            pStyle = m_pScore->get_default_style();
         TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
         m_uIndentOther += engr.measure_width() + uSpaceAfterName;
     }
@@ -141,9 +141,9 @@ void InstrumentEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
         if (m_pInstr->has_name())
         {
             ImoScoreText& text = m_pInstr->get_name();
-            ImoTextStyleInfo* pStyle = text.get_style();
+            ImoStyle* pStyle = text.get_style();
             if (!pStyle)
-                pStyle = m_pScore->get_default_style_info();
+                pStyle = m_pScore->get_default_style();
             TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
             GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop, 0);   //TODO-LOG k_center);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
@@ -154,9 +154,9 @@ void InstrumentEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
         if (m_pInstr->has_abbrev())
         {
             ImoScoreText& text = m_pInstr->get_abbrev();
-            ImoTextStyleInfo* pStyle = text.get_style();
+            ImoStyle* pStyle = text.get_style();
             if (!pStyle)
-                pStyle = m_pScore->get_default_style_info();
+                pStyle = m_pScore->get_default_style();
             TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
             GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop, 0);   //TODO-LOG k_center);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);

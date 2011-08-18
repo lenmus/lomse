@@ -20,7 +20,7 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
@@ -56,13 +56,12 @@ SUITE(TextEngraverTest)
 
     TEST_FIXTURE(TextEngraverTestFixture, TextEngraver_MeasureWidth)
     {
-        ImoTextStyleInfo style;
-        style.set_name("titles");
-        style.set_font_name("Times New Roman");
-        style.set_font_size(18.0f);
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoStyle* pStyle = doc.get_default_style();
         string text("This is a test");
         ScoreMeter meter(1, 1, 180.0f);
-        TextEngraver engraver(m_libraryScope, &meter, text, &style);
+        TextEngraver engraver(m_libraryScope, &meter, text, pStyle);
 
         LUnits width = engraver.measure_width();
         CHECK( width > 0.0f );
@@ -76,7 +75,7 @@ SUITE(TextEngraverTest)
         ImoScore* pScore = doc.get_score();
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoScoreText& text = pInstr->get_name();
-        ImoTextStyleInfo* pStyle = pScore->get_default_style_info();
+        ImoStyle* pStyle = pScore->get_default_style();
         ScoreMeter meter(1, 1, 180.0f);
         TextEngraver engraver(m_libraryScope, &meter, text.get_text(), pStyle);
 

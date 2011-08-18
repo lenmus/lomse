@@ -33,8 +33,8 @@ namespace lomse
 //=======================================================================================
 LomseDoorway::LomseDoorway()
     : m_pLibraryScope(NULL)
-    , m_pFunc_get_font(null_get_font_filename)
     , m_pFunc_notify(null_notify_function)
+    , m_pFunc_request(null_request_function)
 {
 }
 
@@ -52,10 +52,24 @@ Presenter* LomseDoorway::new_document(int viewType)
 }
 
 //---------------------------------------------------------------------------------------
+Presenter* LomseDoorway::new_document(int viewType, const string& ldpSource)
+{
+    PresenterBuilder builder(*m_pLibraryScope);
+    return builder.new_document(viewType, ldpSource);
+}
+
+//---------------------------------------------------------------------------------------
 Presenter* LomseDoorway::open_document(int viewType, const string& filename)
 {
     PresenterBuilder builder(*m_pLibraryScope);
     return builder.open_document(viewType, filename);
+}
+
+//---------------------------------------------------------------------------------------
+Presenter* LomseDoorway::open_document(int viewType, LdpReader& reader)
+{
+    PresenterBuilder builder(*m_pLibraryScope);
+    return builder.open_document(viewType, reader);
 }
 
 //---------------------------------------------------------------------------------------
@@ -70,37 +84,31 @@ void LomseDoorway::init_library(int pixel_format, int ppi, bool reverse_y_axis,
 }
 
 //---------------------------------------------------------------------------------------
-void LomseDoorway::set_get_font_callback(string (*pt2Func)(const string&, bool, bool))
-{
-    m_pFunc_get_font = pt2Func;
-}
-
-//---------------------------------------------------------------------------------------
-void LomseDoorway::set_notify_callback(void (*pt2Func)(EventInfo&))
+void LomseDoorway::set_notify_callback(void* pThis,
+                                       void (*pt2Func)(void* pObj, EventInfo* event))
 {
     m_pFunc_notify = pt2Func;
+    m_pObj_notify = pThis;
 }
 
 //---------------------------------------------------------------------------------------
-string LomseDoorway::null_get_font_filename(const string& fontname, bool bold,
-                                            bool italic)
+void LomseDoorway::set_request_callback(void* pThis,
+                                        void (*pt2Func)(void* pObj, Request* event))
+{
+    m_pFunc_request = pt2Func;
+    m_pObj_request = pThis;
+}
+
+//---------------------------------------------------------------------------------------
+void LomseDoorway::null_notify_function(void* pObj, EventInfo* event)
 {
     //This is just a mock method to avoid crashes when using the libary without
     //initializing it
-
-    string fullpath = LOMSE_FONTS_PATH;
-
-    if (fontname == "LenMus basic")
-    {
-        fullpath += "lmbasic2.ttf";
-        return fullpath;
-    }
-    fullpath += "LiberationSerif-Regular.ttf";
-    return fullpath;
+    delete event;
 }
 
 //---------------------------------------------------------------------------------------
-void LomseDoorway::null_notify_function(EventInfo& event)
+void LomseDoorway::null_request_function(void* pObj, Request* pRequest)
 {
     //This is just a mock method to avoid crashes when using the libary without
     //initializing it

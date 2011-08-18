@@ -26,9 +26,9 @@ namespace lomse
 
 //internationalization
 //#include <libintl.h>
-#define TRT(String) (String)      //gettext(String)
-#define textdomain(Domain)
-#define bindtextdomain(Package, Directory)
+//#define TRT(String) (String)      //gettext(String)
+//#define textdomain(Domain)
+//#define bindtextdomain(Package, Directory)
 
 //---------------------------------------------------------------------------------------
 template<class T>

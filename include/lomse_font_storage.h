@@ -62,7 +62,7 @@ class FontStorage
 protected:
     FontEngine          m_fontEngine;
     FontCacheManager    m_fontCacheManager;
-    pt2GetFontFunction  m_pGetFontFunction;
+    LibraryScope*       m_pLibScope;
 
     double  m_fontHeight;
     double  m_fontWidth;
@@ -73,7 +73,7 @@ protected:
     EFontCacheType      m_fontCacheType;
 
 public:
-    FontStorage(pt2GetFontFunction ptr);
+    FontStorage(LibraryScope* pLibScope);
     ~FontStorage();
 
     inline bool is_font_valid() { return m_fValidFont; }
@@ -125,10 +125,10 @@ protected:
 class FontSelector
 {
 protected:
-    pt2GetFontFunction  m_pGetFontFunction;
+    LibraryScope* m_pLibScope;
 
 public:
-    FontSelector(pt2GetFontFunction ptr) : m_pGetFontFunction(ptr) {}
+    FontSelector(LibraryScope* pLibScope) : m_pLibScope(pLibScope) {}
     ~FontSelector() {}
 
     std::string find_font(const std::string& name, bool fBold=false, bool fItalic=false);

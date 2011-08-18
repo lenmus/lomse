@@ -42,14 +42,15 @@ protected:
     Interactor* m_pInteractor;
 
 public:
-    //View(Document* pDoc, Interactor* pInteractor);
-    View();
     virtual ~View();
 
     inline void set_interactor(Interactor* pIntor) { m_pInteractor = pIntor; }
 
     virtual void new_viewport(Pixels x, Pixels y) {}
     virtual void get_viewport(Pixels* x, Pixels* y) {}
+
+protected:
+    View();
 
 };
 

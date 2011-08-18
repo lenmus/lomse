@@ -151,7 +151,7 @@ public:
 /// It adds the links to place the node in the tree and provides iterators for traversing
 /// the tree.
 template<class T>
-class NodeInTree : public Tree<T>
+class TreeNode : public Tree<T>
 {
 protected:
     T* m_parent;
@@ -161,7 +161,7 @@ protected:
     T* m_nextSibling;
     int m_nModified;
 
-    NodeInTree() : m_parent(NULL), m_firstChild(NULL), m_lastChild(NULL),
+    TreeNode() : m_parent(NULL), m_firstChild(NULL), m_lastChild(NULL),
                    m_prevSibling(NULL), m_nextSibling(NULL), m_nModified(0) {};
 
 public:
@@ -180,11 +180,11 @@ public:
     virtual void set_prev_sibling(T* prevSibling) { m_prevSibling = prevSibling; }
     virtual void set_next_sibling(T* nextSibling) { m_nextSibling = nextSibling; }
 
-    virtual void set_parent(NodeInTree<T>* parent) { m_parent = dynamic_cast<T*>(parent); }
-    virtual void set_first_child(NodeInTree<T>* firstChild) { m_firstChild = dynamic_cast<T*>(firstChild); }
-    virtual void set_last_child(NodeInTree<T>* lastChild) { m_lastChild = dynamic_cast<T*>(lastChild); }
-    virtual void set_prev_sibling(NodeInTree<T>* prevSibling) { m_prevSibling = dynamic_cast<T*>(prevSibling); }
-    virtual void set_next_sibling(NodeInTree<T>* nextSibling) { m_nextSibling = dynamic_cast<T*>(nextSibling); }
+    virtual void set_parent(TreeNode<T>* parent) { m_parent = dynamic_cast<T*>(parent); }
+    virtual void set_first_child(TreeNode<T>* firstChild) { m_firstChild = dynamic_cast<T*>(firstChild); }
+    virtual void set_last_child(TreeNode<T>* lastChild) { m_lastChild = dynamic_cast<T*>(lastChild); }
+    virtual void set_prev_sibling(TreeNode<T>* prevSibling) { m_prevSibling = dynamic_cast<T*>(prevSibling); }
+    virtual void set_next_sibling(TreeNode<T>* nextSibling) { m_nextSibling = dynamic_cast<T*>(nextSibling); }
 
     void set_modified();
     void reset_modified();
@@ -211,7 +211,7 @@ public:
         public:
             children_iterator() : m_currentNode(NULL) {}
             children_iterator(T* n) : m_currentNode(n) {}
-            children_iterator(NodeInTree<T>* n) { m_currentNode =  dynamic_cast<T*>(n); }
+            children_iterator(TreeNode<T>* n) { m_currentNode =  dynamic_cast<T*>(n); }
             virtual ~children_iterator() {}
 
 	        T* operator *() const { return m_currentNode; }
@@ -255,7 +255,7 @@ public:
 
 //---------------------------------------------------------------------------------------
 template <class T>
-void NodeInTree<T>::append_child(T* child)
+void TreeNode<T>::append_child(T* child)
 {
     T* oldLastChild = m_lastChild;
 
@@ -291,9 +291,9 @@ void NodeInTree<T>::append_child(T* child)
 
 //---------------------------------------------------------------------------------------
 template <class T>
-int NodeInTree<T>::get_num_children()
+int TreeNode<T>::get_num_children()
 {
-    NodeInTree<T>::children_iterator it;
+    TreeNode<T>::children_iterator it;
 	int numChildren = 0;
     for (it=this->begin(); it != this->end(); ++it)
     {
@@ -306,7 +306,7 @@ int NodeInTree<T>::get_num_children()
 
 //---------------------------------------------------------------------------------------
 template <class T>
-T* NodeInTree<T>::get_child(int i)
+T* TreeNode<T>::get_child(int i)
 {
     // i = 0..n-1
     children_iterator it(this);
@@ -317,12 +317,12 @@ T* NodeInTree<T>::get_child(int i)
         return *it;
     }
     else
-        throw std::runtime_error( "[NodeInTree<T>::get_child]. Num child greater than available children" );
+        throw std::runtime_error("[TreeNode<T>::get_child]. Num child greater than available children" );
 }
 
 //---------------------------------------------------------------------------------------
 template <class T>
-void NodeInTree<T>::remove_child(T* nodeToErase)
+void TreeNode<T>::remove_child(T* nodeToErase)
 {
     //links in previous sibling
     if (nodeToErase->get_prev_sibling())
@@ -347,7 +347,7 @@ void NodeInTree<T>::remove_child(T* nodeToErase)
 
 //---------------------------------------------------------------------------------------
 template <class T>
-void NodeInTree<T>::set_modified()
+void TreeNode<T>::set_modified()
 {
     //set new value in all path nodes, from current node to root
 
@@ -358,7 +358,7 @@ void NodeInTree<T>::set_modified()
 
 //---------------------------------------------------------------------------------------
 template <class T>
-void NodeInTree<T>::reset_modified()
+void TreeNode<T>::reset_modified()
 {
     //set new value in all path nodes, from current node to root
 
@@ -369,7 +369,7 @@ void NodeInTree<T>::reset_modified()
 
 //---------------------------------------------------------------------------------------
 template <class T>
-void NodeInTree<T>::clear_modified()
+void TreeNode<T>::clear_modified()
 {
     //reset value in all path nodes, downwards from current node
 
@@ -386,11 +386,11 @@ void NodeInTree<T>::clear_modified()
 template <class T>
 T* Tree<T>::get_last_node()
 {
-    NodeInTree<T>* node = get_root();
+    TreeNode<T>* node = get_root();
     if (node == NULL)
         return NULL;
 
-    NodeInTree<T>* child = node->get_last_child();
+    TreeNode<T>* child = node->get_last_child();
     while (child != NULL)
     {
         node = child;

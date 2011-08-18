@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,28 +16,32 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include "lomse_id_assigner.h"
 
 #include <algorithm>        //for max, min
 #include "lomse_ldp_elements.h"
 #include "lomse_basic.h"
+#include "lomse_internal_model.h"
 
 namespace lomse
 {
 
+//---------------------------------------------------------------------------------------
 IdAssigner::IdAssigner()
     : m_idCounter(0L)
 {
 }
 
+//---------------------------------------------------------------------------------------
 void IdAssigner::reassign_ids(LdpElement* pElm)
 {
     LdpTree tree(pElm);
     reassign_ids(&tree);
 }
 
+//---------------------------------------------------------------------------------------
 void IdAssigner::reassign_ids(LdpTree* pTree)
 {
 
@@ -49,6 +53,7 @@ void IdAssigner::reassign_ids(LdpTree* pTree)
     }
 }
 
+//---------------------------------------------------------------------------------------
 void IdAssigner::shift_ids(LdpTree* pTree, long shift)
 {
     long maxId = 0L;
@@ -65,6 +70,7 @@ void IdAssigner::shift_ids(LdpTree* pTree, long shift)
     m_idCounter = ++maxId;
 }
 
+//---------------------------------------------------------------------------------------
 long IdAssigner::find_min_id(LdpTree* pTree)
 {
     long minId = -1L;
@@ -84,6 +90,31 @@ long IdAssigner::find_min_id(LdpTree* pTree)
         }
     }
     return minId;
+}
+
+//---------------------------------------------------------------------------------------
+void IdAssigner::assign_id(ImoObj* pImo)
+{
+    if (pImo->get_id() == -1L)
+        pImo->set_id(m_idCounter++);
+
+    //children
+    TreeNode<ImoObj>::children_iterator it;
+    for (it = pImo->begin(); it != pImo->end(); ++it)
+        assign_id(*it);
+
+    //TODO: refactor. IdAssigner has knowledge about ImoAttachmnets internals
+    //attachments
+    if (pImo->is_attachments())
+    {
+        ImoAttachments* pA = static_cast<ImoAttachments*>(pImo);
+        std::list<ImoAuxObj*>& attachments = pA->get_attachments();
+        std::list<ImoAuxObj*>::iterator it;
+        for(it = attachments.begin(); it != attachments.end(); ++it)
+            assign_id(*it);
+    }
+
+
 }
 
 

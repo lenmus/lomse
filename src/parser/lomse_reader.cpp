@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include "lomse_reader.h"
 
@@ -28,6 +28,10 @@ using namespace std;
 
 namespace lomse
 {
+
+//=======================================================================================
+// LdpFileReader implementation
+//=======================================================================================
 
 LdpFileReader::LdpFileReader(const std::string& fullFilename)
     : LdpReader()
@@ -44,6 +48,7 @@ LdpFileReader::LdpFileReader(const std::string& fullFilename)
     }
 }
 
+//---------------------------------------------------------------------------------------
 char LdpFileReader::get_next_char()
 {
     char ch = m_file.get();
@@ -53,17 +58,20 @@ char LdpFileReader::get_next_char()
     return ch;
 }
 
+//---------------------------------------------------------------------------------------
 void LdpFileReader::repeat_last_char()
 {
     m_repeating_last_char = true;
     m_file.unget();
 }
 
+//---------------------------------------------------------------------------------------
 bool LdpFileReader::is_ready()
 {
     return m_file.is_open();
 }
 
+//---------------------------------------------------------------------------------------
 bool LdpFileReader::end_of_data()
 {
     return m_file.eof();
@@ -71,7 +79,9 @@ bool LdpFileReader::end_of_data()
 
 
 
-//---------------------------------------------------------------------------------
+//=======================================================================================
+// LdpTextReader implementation
+//=======================================================================================
 
 LdpTextReader::LdpTextReader(const std::string& sourceText)
     : LdpReader()
@@ -79,21 +89,25 @@ LdpTextReader::LdpTextReader(const std::string& sourceText)
 {
 }
 
+//---------------------------------------------------------------------------------------
 char LdpTextReader::get_next_char()
 {
     return m_stream.get();
 }
 
+//---------------------------------------------------------------------------------------
 void LdpTextReader::repeat_last_char()
 {
     m_stream.unget();
 }
 
+//---------------------------------------------------------------------------------------
 bool LdpTextReader::is_ready()
 {
     return true;
 }
 
+//---------------------------------------------------------------------------------------
 bool LdpTextReader::end_of_data()
 {
     return m_stream.peek() == EOF;

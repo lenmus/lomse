@@ -85,7 +85,7 @@ public:
 
 
     // SVG basic shapes commands
-    //virtual void rect() = 0;                                      //SVG: <rect>
+    void rect(UPoint pos, USize size, LUnits radius);               //SVG: <rect>                                      //SVG: <rect>
     void circle(LUnits xCenter, LUnits yCenter, LUnits radius);     //SVG: <circle>
     //virtual void ellipse() = 0;                                   //SVG: <ellipse>
     void line(LUnits x1, LUnits y1, LUnits x2, LUnits y2,
@@ -156,11 +156,12 @@ public:
     void model_point_to_screen(double* x, double* y) const;
 
     //units conversion
-    double PixelsToLUnits(Pixels value);
+    double Pixels_to_LUnits(Pixels value);
+    Pixels LUnits_to_Pixels(double value);
 
     // settings
     //-----------------------
-    void reset(RenderingBuffer& buf);
+    void reset(RenderingBuffer& buf, Color bgcolor);
     void set_viewport(Pixels x, Pixels y);
     void set_transform(TransAffine& transform);
     void set_shift(LUnits x, LUnits y);

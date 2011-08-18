@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------------------
 #  This file is part of the Lomse library.
-#  Copyright (c) 2010 Lomse project
+#  Copyright (c) 2010-2011 Lomse project
 #
 #  Lomse is free software; you can redistribute it and/or modify it under the
 #  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -36,49 +36,62 @@
 
 cmake_minimum_required(VERSION 2.8)
 
+# project name
 project(lomse)
 
-# configuration
-set( LOMSE_VERSION_MAJOR "0")
-set( LOMSE_VERSION_MINOR "0")
-set( LOMSE_USE_DLL "0")
-set( LOMSE_CREATE_DLL "0")
-
-#set platform
-if(WIN32)
-    set( LOMSE_PLATFORM_WIN32 "1")
-    set( LOMSE_PLATFORM_UNIX "0")
-    
-elseif(UNIX)
-    set( LOMSE_PLATFORM_WIN32 "0")
-    set( LOMSE_PLATFORM_UNIX "1")
-endif()
-
-#set compiler
-if(MSVC)
-    set( LOMSE_COMPILER_MSVC "1")
-    set( LOMSE_COMPILER_GCC "0")
-    
-elseif(CMAKE_COMPILER_IS_GNUCC)
-    set( LOMSE_COMPILER_MSVC "0")
-    set( LOMSE_COMPILER_GCC "1")
-endif()
-
-
-# set directories 
+# main directories 
 set( ROOT_DIR  ${CMAKE_CURRENT_SOURCE_DIR} )
 set( SRC_DIR  ${ROOT_DIR}/src )
 set( OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/bin )
 set( EXECUTABLE_OUTPUT_PATH ${OUTDIR})
 set( LIBRARY_OUTPUT_PATH ${OUTDIR})
+message("ROOT_DIR: ${ROOT_DIR}")
+message("CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
+message("SRC_DIR: ${SRC_DIR}")
+message("EXECUTABLE_OUTPUT_PATH: ${EXECUTABLE_OUTPUT_PATH}")
+message("LIBRARY_OUTPUT_PATH: ${LIBRARY_OUTPUT_PATH}")
+message("OUTDIR: ${OUTDIR}")
 
-# path to scores for tests and for fonts
-set(LOMSE_TEST_SCORES_PATH "\"${ROOT_DIR}/test-scores/\"" )
-set(LOMSE_FONTS_PATH "\"${ROOT_DIR}/fonts/\"" )
 
 # directories to search for CMake modules
 set( CMAKE_MODULE_PATH "${ROOT_DIR}/cmake-modules" )
 
+
+
+# set up configuration variables for lomse_config.h
+#------------------------------------------------------
+
+# version
+set( LOMSE_VERSION_MAJOR "0")
+set( LOMSE_VERSION_MINOR "0")
+
+# build type
+set( LOMSE_USE_DLL "0")
+set( LOMSE_CREATE_DLL "0")
+
+# platform
+if(WIN32)
+    set( LOMSE_PLATFORM_WIN32  "1")
+    set( LOMSE_PLATFORM_UNIX   "0")
+elseif(UNIX)
+    set( LOMSE_PLATFORM_WIN32  "0")
+    set( LOMSE_PLATFORM_UNIX   "1")
+endif()
+
+# compiler
+if(MSVC)
+    set( LOMSE_COMPILER_MSVC  "1")
+    set( LOMSE_COMPILER_GCC   "0")
+elseif(CMAKE_COMPILER_IS_GNUCC)
+    set( LOMSE_COMPILER_MSVC  "0")
+    set( LOMSE_COMPILER_GCC   "1")
+endif()
+
+
+# path to scores for tests and for fonts
+set( LOMSE_TEST_SCORES_PATH    "\"${ROOT_DIR}/test-scores/\"" )
+set( LOMSE_FONTS_PATH          "\"${ROOT_DIR}/fonts/\"" )
+ 
 
 # check that compiler supports namespace sdt
 include(TestForSTDNamespace)
@@ -87,7 +100,12 @@ if(CMAKE_NO_STD_NAMESPACE)
 endif()
 
 
-# set path to include unittest++ header files
+
+# Check for needed libraries and set all related includes, flags, etc. 
+#-------------------------------------------------------------------------
+
+
+# Check for UnitTest++. Required for unit test
 if(WIN32)
     set( UNITTEST_LIBDIR  ${ROOT_DIR}/packages/UnitTest++/lib )
     set( UNITTEST_INCLUDE_DIRS  ${ROOT_DIR}/packages/UnitTest++/src )
@@ -95,29 +113,26 @@ else()
     include(FindPkgConfig)
     pkg_check_modules(UNITTEST REQUIRED unittest++)
 endif()
- 
-include_directories(
-    ${ROOT_DIR}/include
-    ${ROOT_DIR}/include/platform
-    ${ROOT_DIR}/packages/utfcpp
-    ${ROOT_DIR}/src/agg/include
-    ${ROOT_DIR}/src/agg/font_freetype
-    ${UNITTEST_INCLUDE_DIRS}
-)
-
-link_directories(
-    ${UNITTEST_LIBDIR}
-    ${LIBRARY_OUTPUT_PATH} 
-)
+link_directories( ${UNITTEST_LIBDIR} )
 
 
-# Define possible builds
-set(CMAKE_CONFIGURATION_TYPES Debug Release)
+# Check for Boost >= 1.42.0
+set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0")
+set(Boost_USE_STATIC_LIBS   OFF)
+set(Boost_USE_MULTITHREADED OFF)
+#set(Boost_DEBUG TRUE)
+find_package( Boost 1.42.0 COMPONENTS date_time thread )
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+    link_libraries( ${Boost_LIBRARIES} )
+    link_directories( ${Boost_LIBRARY_DIRS} )
+    message("Boost libraries: ${Boost_LIBRARIES}" )
+else()
+    message(SEND_ERROR "Boost package not found. Reason: ${Boost_ERROR_REASON}" )
+endif()
 
 
-# Set all includes, flags, libraries, related to freetype
-#-------------------------------------------------------------------------------------
-
+# Check for FreeType
 find_package( Freetype )                    
 if( FREETYPE_FOUND )
     include_directories( ${FREETYPE_INCLUDE_DIRS} )
@@ -128,6 +143,26 @@ else()
 endif()
 
 
+
+# include directories to be installed
+set( INCLUDES_LOMSE  ${ROOT_DIR}/include )
+set( INCLUDES_AGG  ${ROOT_DIR}/src/agg/include )
+include_directories(
+    ${INCLUDES_LOMSE}
+    ${INCLUDES_AGG}
+    ${ROOT_DIR}/src/agg/font_freetype
+    ${ROOT_DIR}/packages/utfcpp
+    ${UNITTEST_INCLUDE_DIRS}
+)
+
+
+link_directories( ${LIBRARY_OUTPUT_PATH} )
+
+
+# Define possible builds
+set(CMAKE_CONFIGURATION_TYPES Debug Release)
+
+
 # names for libraries and execs.
 #-------------------------------------------------------------------------------------
 if( WIN32 )
@@ -136,17 +171,15 @@ if( WIN32 )
     set( CMAKE_SHARED_LIBRARY_PREFIX "" )
     set( CMAKE_SHARED_LIBRARY_SUFFIX ".dll" )
     set( CMAKE_EXECUTABLE_SUFFIX ".exe" )
-
-endif( WIN32 )
-
-if( UNIX )
+    set( LOMSE_LIBNAME lomse.lib )
+elseif( UNIX )
     set( CMAKE_STATIC_LIBRARY_PREFIX "lib" )
     set( CMAKE_STATIC_LIBRARY_SUFFIX ".a" )
     set( CMAKE_SHARED_LIBRARY_PREFIX "lib" )
     set( CMAKE_SHARED_LIBRARY_SUFFIX ".so" )
     set( CMAKE_EXECUTABLE_SUFFIX "" )
-
-endif( UNIX )
+    set( LOMSE_LIBNAME liblomse.so )
+endif()
 
 
 # "Print all warnings", macros for GCC & __UNIX__
@@ -193,13 +226,15 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 # source files to compile
 
 set(AGG_FILES
-    ${SRC_DIR}/agg/src/agg_line_aa_basics.cpp
-    ${SRC_DIR}/agg/src/agg_trans_affine.cpp
-    ${SRC_DIR}/agg/src/agg_vcgen_contour.cpp
-    ${SRC_DIR}/agg/src/agg_vcgen_stroke.cpp
+    ${SRC_DIR}/agg/src/agg_arc.cpp
     ${SRC_DIR}/agg/src/agg_bezier_arc.cpp
     ${SRC_DIR}/agg/src/agg_curves.cpp
     ${SRC_DIR}/agg/src/agg_gsv_text.cpp
+    ${SRC_DIR}/agg/src/agg_line_aa_basics.cpp
+    ${SRC_DIR}/agg/src/agg_rounded_rect.cpp
+    ${SRC_DIR}/agg/src/agg_trans_affine.cpp
+    ${SRC_DIR}/agg/src/agg_vcgen_contour.cpp
+    ${SRC_DIR}/agg/src/agg_vcgen_stroke.cpp
     ${SRC_DIR}/agg/font_freetype/agg_font_freetype.cpp
 )
 
@@ -251,7 +286,9 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/engravers/lomse_time_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_tuplet_engraver.cpp
 
+    ${SRC_DIR}/graphic_model/layouters/lomse_content_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_document_layouter.cpp
+    ${SRC_DIR}/graphic_model/layouters/lomse_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_paragraph_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_score_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_score_meter.cpp
@@ -260,14 +297,15 @@ set(GRAPHIC_MODEL_FILES
 )
 
 set(INTERNAL_MODEL_FILES
-    ${SRC_DIR}/internal_model/lomse_basic_objects.cpp
+    ${SRC_DIR}/internal_model/lomse_im_factory.cpp
     ${SRC_DIR}/internal_model/lomse_im_figured_bass.cpp
     ${SRC_DIR}/internal_model/lomse_im_note.cpp
     ${SRC_DIR}/internal_model/lomse_internal_model.cpp
-)
+    ${SRC_DIR}/internal_model/lomse_score_utilities.cpp)
 
 set(MODULE_FILES
     ${SRC_DIR}/module/lomse_doorway.cpp
+    ${SRC_DIR}/module/lomse_events.cpp
     ${SRC_DIR}/module/lomse_injectors.cpp
     ${SRC_DIR}/module/lomse_logger.cpp
     ${SRC_DIR}/module/lomse_pitch.cpp
@@ -307,6 +345,11 @@ set(SCORE_FILES
     ${SRC_DIR}/score/lomse_score_iterator.cpp
 )
 
+set(SOUND_FILES
+    ${SRC_DIR}/sound/lomse_midi_table.cpp
+    ${SRC_DIR}/sound/lomse_score_player.cpp
+)
+
 if(WIN32)
     set(PLATFORM_FILES
         ${SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp
@@ -322,7 +365,7 @@ set(ALL_SOURCES
     ${GRAPHIC_MODEL_FILES} ${INTERNAL_MODEL_FILES} 
     ${MODULE_FILES} ${MVC_FILES}
     ${PARSER_FILES} ${RENDER_FILES} ${SCORE_FILES} 
-    ${PLATFORM_FILES}
+    ${SOUND_FILES} ${PLATFORM_FILES}
 )
 
 
@@ -337,15 +380,21 @@ source_group( "mvc"             FILES ${MVC_FILES} )
 source_group( "parser"          FILES ${PARSER_FILES} )
 source_group( "render"          FILES ${RENDER_FILES} )
 source_group( "score"           FILES ${SCORE_FILES} )
+source_group( "sound"           FILES ${SOUND_FILES} )
 
 
 
-# library makefile generation. Static library
-#-------------------------------------------------------------
+#////////////////////////////////////////////////////////////////////////
+# Target: static library
+#////////////////////////////////////////////////////////////////////////
 
 set(LOMSE  lomse)
 
+set(LOMSE_VERSION "${LOMSE_VERSION_MAJOR}.${LOMSE_VERSION_MINOR}" )
+
 add_library( ${LOMSE} STATIC ${ALL_SOURCES} )
+set_target_properties(${LOMSE} PROPERTIES VERSION ${LOMSE_VERSION}
+                                          SOVERSION ${LOMSE_VERSION_MAJOR} )
 
 
 # hack to remove 'Debug' subdirectory from output path. -------------
@@ -354,7 +403,6 @@ if(MSVC)
     set_target_properties(${LOMSE} PROPERTIES  PREFIX "../")
 endif()
 
-# properties
 # Force not to link with standard MSVC libraries: /NODEFAULTLIB
 if(MSVC)
     set_target_properties(${LOMSE} PROPERTIES  LINK_FLAGS "/NODEFAULTLIB")
@@ -362,30 +410,30 @@ endif()
 
 # once built, place library at lomse/bin
 set_target_properties(${LOMSE}  PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY  ${ROOT_DIR}/bin )
+                                RUNTIME_OUTPUT_DIRECTORY  ${ROOT_DIR}/bin )
     
 get_target_property(VAR ${LOMSE} LINK_FLAGS)
 #message("library target properties=" ${VAR})
 
 
-# library makefile generation. Dynamic library
-#-------------------------------------------------------------
-if(0)
 
-    set(LOMSE_SH  lomse_dll)
-    add_library( ${LOMSE_SH} SHARED ${ALL_SOURCES} )
+#////////////////////////////////////////////////////////////////////////
+# Target: dynamic library 
+#////////////////////////////////////////////////////////////////////////
 
-    # The library target LOMSE_SH has a default OUTPUT_NAME of "lomse_dll", so change it.
-    set_target_properties(${LOMSE_SH} PROPERTIES OUTPUT_NAME "liblomse")
+# Cannot have two targets with the same name so the dynamic version has
+# '-dyn' appended and then the name of the output file is changed
+
+set(LOMSE_DYN  lomse-dyn)
+
+add_library( ${LOMSE_DYN} SHARED ${ALL_SOURCES} )
+set_target_properties(${LOMSE_DYN} 
+                      PROPERTIES VERSION ${LOMSE_VERSION}
+                                 SOVERSION ${LOMSE_VERSION_MAJOR}
+                                 OUTPUT_NAME "lomse"
+                                 RUNTIME_OUTPUT_DIRECTORY  ${ROOT_DIR}/bin )
 
 
-    # hack to remove 'Debug' subdirectory from output path. --------------
-    # see: http://www.cmake.org/Bug/view.php?id=8243
-    if(MSVC)
-        set_target_properties(${LOMSE}  PROPERTIES  PREFIX "../")
-    endif()
-
-endif(0)
 
 #////////////////////////////////////////////////////////////////////////
 # Target: program for testing the library
@@ -416,11 +464,11 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_elements.cpp
         ${SRC_DIR}/tests/lomse_test_gm_objects.cpp
         ${SRC_DIR}/tests/lomse_test_graphic_model.cpp
-        ${SRC_DIR}/tests/lomse_test_interactor.cpp
         ${SRC_DIR}/tests/lomse_test_internal_model.cpp
         ${SRC_DIR}/tests/lomse_test_ldp_exporter.cpp
         ${SRC_DIR}/tests/lomse_test_lines_breaker.cpp
         ${SRC_DIR}/tests/lomse_test_linkable.cpp
+        ${SRC_DIR}/tests/lomse_test_midi_table.cpp
         ${SRC_DIR}/tests/lomse_test_model_builder.cpp
         ${SRC_DIR}/tests/lomse_test_note_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_paragraph_layouter.cpp
@@ -432,6 +480,7 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_score_iterator.cpp
         ${SRC_DIR}/tests/lomse_test_score_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_score_meter.cpp
+        ${SRC_DIR}/tests/lomse_test_score_player.cpp
         ${SRC_DIR}/tests/lomse_test_selections.cpp
         ${SRC_DIR}/tests/lomse_test_shapes.cpp
         ${SRC_DIR}/tests/lomse_test_sizers.cpp
@@ -475,6 +524,10 @@ if(WIN32)
 else()
     set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB} )
 endif()
+
+#copy test scores and fonts
+file(COPY ${ROOT_DIR}/test-scores DESTINATION ${OUTDIR})
+file(COPY ${ROOT_DIR}/fonts DESTINATION ${OUTDIR})
 
 add_custom_command(
     TARGET ${TESTLIB} POST_BUILD
@@ -533,18 +586,41 @@ endif()
 add_dependencies(example_1 lomse)
 
 
-#-----------------------------------------------------------------------------
+
+#///////////////////////////////////////////////////////////////////////////////
 # library installation
 # You can change the install location by running cmake like this:
 #
 #   cmake -DCMAKE_INSTALL_PREFIX=/new/install/prefix
 #
 # By default, the prefix is "/usr/local"
-#-----------------------------------------------------------------------------
-# 
-#if( UNIX AND NOT APPLE )
-#    install( TARGETS ${LOMSE} RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX} )
-#endif()
+#///////////////////////////////////////////////////////////////////////////////
+
+message("CMAKE_INSTALL_PREFIX = " ${CMAKE_INSTALL_PREFIX} )
+if( UNIX )
+
+    # copy generated libraries
+    install( TARGETS ${LOMSE} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
+    install( TARGETS ${LOMSE_DYN} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
+
+    # copy lomse includes
+    install(DIRECTORY ${INCLUDES_LOMSE}/
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse"
+            FILES_MATCHING PATTERN "*.h"
+            PATTERN ".svn" EXCLUDE
+            PATTERN "platform" EXCLUDE )
+
+    # copy agg includes
+    install(DIRECTORY "${INCLUDES_AGG}/"
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse/agg"
+            FILES_MATCHING PATTERN "*.h"
+            PATTERN ".svn" EXCLUDE )
+
+    # copy also lomse_config.h
+    install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse" )
+
+endif()
 
 ## Set the path of the application executable
 #if( MSVC )
@@ -552,4 +628,39 @@ add_dependencies(example_1 lomse)
 #else()
 #    set( EXE_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TESTLIB}${CMAKE_EXECUTABLE_SUFFIX} )
 #endif()
+
+if(0)
+########### install source files ###############
+install(FILES  AUTHORS ChangeLog COPYING NEWS README THANKS 
+        DESTINATION ${DATADIR}/doc/${CMAKE_PROJECT_NAME}
+)
+
+install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
+        DESTINATION ${INCLUDEDIR}/${CMAKE_PROJECT_NAME}
+)
+endif(0)
+
+if(0)
+#///////////////////////////////////////////////////////////////////////////////
+# CPack section: installers generation
+#///////////////////////////////////////////////////////////////////////////////
+
+set(CPACK_SOURCE_GENERATOR TGZ)
+set(CPACK_SOURCE_IGNORE_FILES
+    /[.]svn/ /.*[.]o$ /.*[.]o/ /autom4te[.]cache/ /[.].* /bootstrap 
+    /RELEASE /styles/ /papers/ /rpm.am /msi.am )
+set(CPACK_PACKAGE_VERSION ${PACKAGE_VERSION})
+set(CPACK_SOURCE_PACKAGE_FILE_NAME
+    ${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION})
+	
+set(CPACK_PACKAGE_VENDOR "LenMus")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Library to render music scores")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "lomse")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README")
+ 
+include(CPack)
+ 
+endif(0)
 

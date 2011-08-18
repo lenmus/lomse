@@ -32,7 +32,7 @@ namespace lomse
 
 //forward declarations
 class GmoBox;
-class ImoTextStyleInfo;
+class ImoStyle;
 class FontStorage;
 
 //---------------------------------------------------------------------------------------
@@ -40,13 +40,13 @@ class GmoShapeText : public GmoSimpleShape
 {
 protected:
     const std::string m_text;
-    ImoTextStyleInfo* m_pStyle;
+    ImoStyle* m_pStyle;
     FontStorage* m_pFontStorage;
     LibraryScope& m_libraryScope;
 
 public:
     GmoShapeText(ImoObj* pCreatorImo, int idx, const std::string& text,
-                 ImoTextStyleInfo* pStyle,
+                 ImoStyle* pStyle,
                  LUnits x, LUnits y, LibraryScope& libraryScope);
     virtual ~GmoShapeText() {}
 
@@ -63,14 +63,13 @@ class GmoShapeWord : public GmoSimpleShape
 {
 protected:
     const std::string m_text;
-    ImoTextStyleInfo* m_pStyle;
+    ImoStyle* m_pStyle;
     FontStorage* m_pFontStorage;
     LibraryScope& m_libraryScope;
 
 public:
     GmoShapeWord(ImoObj* pCreatorImo, int idx, const std::string& text,
-                 ImoTextStyleInfo* pStyle,
-                 LUnits x, LUnits y, LibraryScope& libraryScope);
+                 ImoStyle* pStyle, LUnits x, LUnits y, LibraryScope& libraryScope);
     virtual ~GmoShapeWord() {}
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
@@ -138,7 +137,7 @@ protected:
 //
 ////------------------------------------------------------------------------------------
 //
-//class lmTextLine;
+//class TextLine;
 //
 //class GmoShapeTextbox : public GmoShapeRectangle
 //{
@@ -197,7 +196,7 @@ protected:
 //    LUnits        m_uTextHeight;
 //
 //
-//    std::list<lmTextLine*>   m_TextLines;
+//    std::list<TextLine*>   m_TextLines;
 //};
 
 

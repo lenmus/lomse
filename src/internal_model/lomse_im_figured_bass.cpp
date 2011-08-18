@@ -21,7 +21,6 @@
 #include "lomse_im_figured_bass.h"
 
 #include <sstream>
-#include "lomse_basic_objects.h"
 
 namespace lomse
 {
@@ -129,7 +128,7 @@ namespace lomse
 //-----------------------------------------------------------------------------------------
 
 ImoFiguredBassInfo::ImoFiguredBassInfo()
-    : ImoSimpleObj(k_figured_bass_info)
+    : ImoSimpleObj(k_imo_figured_bass_info)
     , m_error("")
     , m_fAsPrevious(false)
 {
@@ -151,7 +150,7 @@ void ImoFiguredBassInfo::initialize_intervals()
 }
 
 ImoFiguredBassInfo::ImoFiguredBassInfo(const std::string& data)
-    : ImoSimpleObj(k_figured_bass_info)
+    : ImoSimpleObj(k_imo_figured_bass_info)
     , m_error("")
     , m_fAsPrevious(false)
 {
@@ -506,7 +505,7 @@ void ImoFiguredBassInfo::set_implicit_intervals(const std::string& fingerprint)
 //-----------------------------------------------------------------------------------------
 
 ImoFiguredBass::ImoFiguredBass(ImoFiguredBassInfo& info)
-    : ImoStaffObj(ImoObj::k_figured_bass)
+    : ImoStaffObj(k_imo_figured_bass)
     , m_info(info)
     //, m_fStartOfLine(false)
     //, m_fEndOfLine(false)

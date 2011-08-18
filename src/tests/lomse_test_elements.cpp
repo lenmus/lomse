@@ -20,7 +20,7 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
@@ -111,18 +111,6 @@ SUITE(LdpElementsTest)
         //cout << note->to_string() << endl;
         CHECK( note->to_string() == "(n c4 q (stem up) (text \"This is a text\" (dx 12) (dy 20.5)))" );
         delete note;
-    }
-
-    TEST_FIXTURE(LdpElementsTestFixture, LdpElementsAcceptImoObject)
-    {
-        SpLdpElement clef = m_pLdpFactory->create("clef");
-        CHECK( clef->get_type() == k_clef );
-        CHECK( clef->get_name() == "clef" );
-        CHECK( clef->get_imo() == NULL );
-        ImoScore* pImo = new ImoScore();
-        clef->set_imo(pImo);
-        CHECK( clef->get_imo() == pImo );
-        delete pImo;
     }
 
     TEST_FIXTURE(LdpElementsTestFixture, FactoryReturnsName)

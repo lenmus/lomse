@@ -28,6 +28,7 @@
 
 #include "lomse_renderer.h"
 #include "agg_ellipse.h"
+#include "agg_rounded_rect.h"
 
 using namespace std;
 
@@ -91,7 +92,7 @@ void ScreenDrawer::end_path()
 {
     if(m_attr_storage.size() == 0)
     {
-        throw "end_path : The path was not begun";
+        throw std::runtime_error("[ScreenDrawer::end_path] The path was not begun");
     }
     PathAttributes attr = cur_attr();
     unsigned idx = m_attr_storage[m_attr_storage.size() - 1].path_index;
@@ -241,7 +242,7 @@ PathAttributes& ScreenDrawer::cur_attr()
 {
     if(m_attr_stack.size() == 0)
     {
-        throw "cur_attr : Attribute stack is empty";
+        throw std::runtime_error("[ScreenDrawer::cur_attr] Attribute stack is empty");
     }
     return m_attr_stack[m_attr_stack.size() - 1];
 }
@@ -259,7 +260,7 @@ void ScreenDrawer::pop_attr()
 {
     if(m_attr_stack.size() == 0)
     {
-        throw "pop_attr : Attribute stack is empty";
+        throw std::runtime_error("[ScreenDrawer::pop_attr] Attribute stack is empty");
     }
     m_attr_stack.remove_last();
 }
@@ -511,16 +512,23 @@ void ScreenDrawer::model_point_to_screen(double* x, double* y) const
 }
 
 //---------------------------------------------------------------------------------------
-double ScreenDrawer::PixelsToLUnits(Pixels value)
+double ScreenDrawer::Pixels_to_LUnits(Pixels value)
 {
     TransAffine& mtx = m_pRenderer->get_transform();
     return double(value) / mtx.scale();
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::reset(RenderingBuffer& buf)
+Pixels ScreenDrawer::LUnits_to_Pixels(double value)
 {
-    m_pRenderer->initialize(buf);
+    TransAffine& mtx = m_pRenderer->get_transform();
+    return Pixels( value * mtx.scale() );
+}
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::reset(RenderingBuffer& buf, Color bgcolor)
+{
+    m_pRenderer->initialize(buf, bgcolor);
 }
 
 //---------------------------------------------------------------------------------------
@@ -628,6 +636,30 @@ void ScreenDrawer::polygon(int n, UPoint points[])
     {
         line_to(points[i].x, points[i].y);
     }
+}
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::rect(UPoint pos, USize size, LUnits radius)
+{
+    double x1 = double(pos.x);
+    double y1 = double(pos.y);
+    double x2 = x1 + double(size.width);
+    double y2 = y1 + double(size.height);
+    double r = double(radius);
+
+    agg::rounded_rect rr(x1, y1, x2, y2, r);
+    m_path.concat_path<agg::rounded_rect>(rr);
+
+//    begin_path();
+//    fill(Color(0, 0, 0, 0));
+//    stroke(Color(0, 0, 0));
+//    stroke_width(15.0);
+//    move_to(pos.x, pos.y);
+//    hline_to(pos.x + size.width);
+//    vline_to(pos.y + size.height);
+//    hline_to(pos.x);
+//    vline_to(pos.y);
+//    end_path();
 }
 
 

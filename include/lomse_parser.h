@@ -27,6 +27,7 @@
 #include "lomse_ldp_factory.h"
 #include "lomse_tokenizer.h"
 #include "lomse_ldp_elements.h"
+#include "lomse_reader.h"
 
 using namespace std;
 
@@ -48,6 +49,7 @@ public:
 //
     LdpTree* parse_file(const std::string& filename, bool fErrorMsg = true);
     LdpTree* parse_text(const std::string& sourceText);
+    LdpTree* parse_input(LdpReader& reader);
 
     inline int get_num_errors() { return m_numErrors; }
     inline long get_max_id() { return m_nMaxId; }

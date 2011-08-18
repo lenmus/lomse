@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,17 +16,21 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include "lomse_document.h"
 
 #include <sstream>
 #include "lomse_parser.h"
+#include "lomse_analyser.h"
 #include "lomse_compiler.h"
 #include "lomse_injectors.h"
 #include "lomse_id_assigner.h"
 #include "lomse_internal_model.h"
 #include "lomse_ldp_exporter.h"
+#include "lomse_model_builder.h"
+#include "lomse_im_factory.h"
+#include "lomse_events.h"
 
 using namespace std;
 
@@ -34,74 +38,107 @@ namespace lomse
 {
 
 
-//------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 // Document implementation
-//------------------------------------------------------------------
-
-Document::Document(LdpCompiler* pCompiler, IdAssigner* pIdAssigner)
-    : Observable()
-    , m_pDocScope(NULL)
-    , m_pCompiler(pCompiler)
-    , m_pIdAssigner(pIdAssigner)
-    , m_pIModel(NULL)
-    , m_pImoDoc(NULL)
-{
-}
-
+//---------------------------------------------------------------------------------------
 Document::Document(LibraryScope& libraryScope, ostream& reporter)
-    : Observable()
+    : BlockLevelCreatorApi()
+    , m_libraryScope(libraryScope)
+    , m_reporter(reporter)
+    , m_docScope(reporter)
+    , m_pCompiler(NULL)
+    , m_pIdAssigner(NULL)
     , m_pIModel(NULL)
     , m_pImoDoc(NULL)
+    , m_idCounter(-1L)
 {
-    m_pDocScope = new DocumentScope(reporter);
-    m_pCompiler  = Injector::inject_LdpCompiler(libraryScope, *m_pDocScope);
-    m_pIdAssigner = m_pDocScope->id_assigner();
 }
 
+//---------------------------------------------------------------------------------------
 Document::~Document()
 {
-    clear();
+    delete m_pIModel;
     delete m_pCompiler;
-    delete m_pDocScope;
+    delete_observers();
 }
 
+//---------------------------------------------------------------------------------------
+void Document::initialize()
+{
+    if (m_pImoDoc)
+        throw std::runtime_error(
+            "[Document::create] Attempting to create already created document");
+
+    m_pCompiler  = Injector::inject_LdpCompiler(m_libraryScope, this);
+    m_pIdAssigner = m_docScope.id_assigner();
+}
+
+//---------------------------------------------------------------------------------------
+void Document::set_imo_doc(ImoDocument* pImoDoc)
+{
+    m_pImoDoc = pImoDoc;
+    set_box_level_creator_api_parent( m_pImoDoc );
+}
+
+//---------------------------------------------------------------------------------------
 int Document::from_file(const std::string& filename)
 {
-    clear();
+    initialize();
     m_pIModel = m_pCompiler->compile_file(filename);
     m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
     return m_pCompiler->get_num_errors();
 }
 
+//---------------------------------------------------------------------------------------
 int Document::from_string(const std::string& source)
 {
-    clear();
+    initialize();
     m_pIModel = m_pCompiler->compile_string(source);
     m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
     return m_pCompiler->get_num_errors();
 }
 
+//---------------------------------------------------------------------------------------
+int Document::from_input(LdpReader& reader)
+{
+    initialize();
+    try
+    {
+        m_pIModel = m_pCompiler->compile_input(reader);
+        m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
+        return m_pCompiler->get_num_errors();
+    }
+    catch (...)
+    {
+        create_empty();
+        return 0;
+    }
+}
+
+//---------------------------------------------------------------------------------------
 void Document::create_empty()
 {
-    clear();
+    initialize();
     m_pIModel = m_pCompiler->create_empty();
     m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
 }
 
+//---------------------------------------------------------------------------------------
 void Document::create_with_empty_score()
 {
-    clear();
+    initialize();
     m_pIModel = m_pCompiler->create_with_empty_score();
     m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
 }
 
-void Document::clear()
+//---------------------------------------------------------------------------------------
+void Document::end_of_changes()
 {
-    delete m_pIModel;
-    m_pIModel = NULL;
-    m_pImoDoc = NULL;
+    ModelBuilder builder(m_docScope.default_reporter());
+    builder.build_model(m_pIModel);
 }
 
+//---------------------------------------------------------------------------------------
 std::string Document::to_string()
 {
     //for tests
@@ -159,20 +196,106 @@ std::string Document::to_string()
 //}
 
 
-//------------------------------------------------------------------
-// Transitional, while moving from score to lenmusdoc
-//------------------------------------------------------------------
-
 ImoScore* Document::get_score()
 {
+    //TODO: Item 0 is no longer the first score
     return dynamic_cast<ImoScore*>( m_pImoDoc->get_content_item(0) );
 }
 
-void Document::create_score(ostream& reporter)
+ImoObj* Document::create_object(const string& source)
 {
-    create_with_empty_score();
+    LdpParser parser(m_reporter, m_libraryScope.ldp_factory());
+    SpLdpTree tree = parser.parse_text(source);
+    Analyser a(m_reporter, m_libraryScope, this);
+    ImoObj* pImo = a.analyse_tree_and_get_object(tree);
+    delete tree->get_root();
+    return pImo;
 }
 
+//---------------------------------------------------------------------------------------
+ImoStyle* Document::create_style(const string& name, const string& parent)
+{
+    return m_pImoDoc->create_style(name, parent);
+}
+
+//---------------------------------------------------------------------------------------
+ImoStyle* Document::create_private_style(const string& parent)
+{
+    return m_pImoDoc->create_private_style(parent);
+}
+
+//---------------------------------------------------------------------------------------
+ImoStyle* Document::get_default_style()
+{
+    return m_pImoDoc->get_default_style();
+}
+
+//---------------------------------------------------------------------------------------
+ImoStyle* Document::find_style(const string& name)
+{
+    return m_pImoDoc->find_style(name);
+}
+
+//---------------------------------------------------------------------------------------
+void Document::notify_that_document_has_been_modified()
+{
+    EventDoc* pEvent = new EventDoc(k_doc_modified_event, this);
+    notify_observers(pEvent, NULL);
+}
+
+//---------------------------------------------------------------------------------------
+// Observable 
+//---------------------------------------------------------------------------------------
+void Document::notify_observers(EventInfo* pEvent, ImoObj* pImo)
+{
+    std::list<Observer*>::iterator it;
+    for (it = m_observers.begin(); it != m_observers.end(); ++it)
+    {
+        if ((*it)->target() == pImo)
+        {
+            (*it)->notify(pEvent);
+            return;
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+Observer* Document::add_observer(ImoObj* pImo)
+{
+    std::list<Observer*>::iterator it;
+    for (it = m_observers.begin(); it != m_observers.end(); ++it)
+    {
+        if ((*it)->target() == pImo)
+            return *it;
+    }
+
+    Observer* observer = new Observer(pImo);
+    m_observers.push_back(observer);
+    return observer;
+}
+
+//---------------------------------------------------------------------------------------
+void Document::remove_observer(Observer* observer)
+{
+    m_observers.remove(observer);
+    delete observer;
+}
+
+//---------------------------------------------------------------------------------------
+void Document::delete_observers()
+{
+    std::list<Observer*>::iterator it;
+    for (it = m_observers.begin(); it != m_observers.end(); ++it)
+        delete *it;
+    m_observers.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void Document::add_event_handler(ImoObj* pImo, int eventType, EventHandler* pHandler)
+{
+    Observer* observer = add_observer(pImo);
+    observer->add_handler(eventType, pHandler);
+}
 
 ////------------------------------------------------------------------
 //// DocCommandInsert

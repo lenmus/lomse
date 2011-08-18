@@ -53,9 +53,7 @@ protected:
 	std::vector<GmoShapeStaff*> m_staffShapes;
 
 public:
-    GmoBoxSystem();
-    //GmoBoxSystem(GmoBoxScorePage* pParent, int nNumPage, int iSystem,
-    //             LUnits uxPos, LUnits uyPos, bool fFirstOfPage);
+    GmoBoxSystem(ImoObj* pCreatorImo);
     ~GmoBoxSystem();
 
 //	int GetSystemNumber();

@@ -20,15 +20,16 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_figured_bass.h"
-#include "lomse_basic_objects.h"
 #include "lomse_im_note.h"
 #include "lomse_time.h"
+#include "lomse_document.h"
+#include "lomse_im_factory.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -39,127 +40,161 @@ using namespace lomse;
 class InternalModelTestFixture
 {
 public:
+    LibraryScope m_libraryScope;
+    std::string m_scores_path;
 
     InternalModelTestFixture()     //SetUp fixture
+        : m_libraryScope(cout)
     {
-        m_pLibraryScope = new LibraryScope(cout);
         m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
 
     ~InternalModelTestFixture()    //TearDown fixture
     {
-        delete m_pLibraryScope;
     }
 
-    LibraryScope* m_pLibraryScope;
-    std::string m_scores_path;
 };
 
 //---------------------------------------------------------------------------------------
 SUITE(InternalModelTest)
 {
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_EmptyDocument)
+    TEST_FIXTURE(InternalModelTestFixture, EmptyDocument)
     {
-        ImoDocument* pDoc = new ImoDocument("3.7");
+        Document doc(m_libraryScope);
+        ImoDocument* pDoc = static_cast<ImoDocument*>(ImFactory::inject(k_imo_document, &doc));
+        pDoc->set_version("3.7");
         CHECK( pDoc->get_content() == NULL );
         CHECK( pDoc->get_num_content_items() == 0 );
         CHECK( pDoc->get_version() == "3.7" );
         delete pDoc;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_DocumentWithText)
+    TEST_FIXTURE(InternalModelTestFixture, DocumentWithText)
     {
-        ImoDocument* pDoc = new ImoDocument();
-        ImoContent* pContent = new ImoContent();
-        pDoc->append_child(pContent);
-        ImoScoreText* pText = new ImoScoreText("Hello world");
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoContent* pContent = pDoc->get_content();
+        ImoScoreText* pText = static_cast<ImoScoreText*>(
+                                    ImFactory::inject(k_imo_score_text, &doc));
+        pText->set_text("Hello world");
         pContent->append_child(pText);
         CHECK( pDoc->get_num_content_items() == 1 );
         CHECK( pDoc->get_content_item(0) == pText );
-        CHECK( pDoc->get_version() == "" );
-        delete pDoc;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_EmptyInstrument_OneStaff)
+    TEST_FIXTURE(InternalModelTestFixture, EmptyInstrument_OneStaff)
     {
-        ImoInstrument instr;
-        CHECK( instr.get_musicdata() == NULL );
-        CHECK( instr.get_num_staves() == 1 );
-        CHECK( instr.is_in_group() == false );
+        Document doc(m_libraryScope);
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        CHECK( pInstr->get_musicdata() == NULL );
+        CHECK( pInstr->get_num_staves() == 1 );
+        CHECK( pInstr->is_in_group() == false );
+
+        delete pInstr;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_EmptyInstrument_AddStaff)
+    TEST_FIXTURE(InternalModelTestFixture, EmptyInstrument_AddStaff)
     {
-        ImoInstrument instr;
-        instr.add_staff();
-        CHECK( instr.get_musicdata() == NULL );
-        CHECK( instr.get_num_staves() == 2 );
-        CHECK( instr.is_in_group() == false );
+        Document doc(m_libraryScope);
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        pInstr->add_staff();
+        CHECK( pInstr->get_musicdata() == NULL );
+        CHECK( pInstr->get_num_staves() == 2 );
+        CHECK( pInstr->is_in_group() == false );
+        delete pInstr;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_Instrument_SetNumStaves)
+    TEST_FIXTURE(InternalModelTestFixture, NoreDefaults)
     {
-        ImoInstrument instr;
-        instr.add_staff();
-        instr.add_staff();
-        CHECK( instr.get_num_staves() == 3 );
-        ImoStaffInfo* pStaff = instr.get_staff(0);
+        Document doc(m_libraryScope);
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        CHECK( pNote->get_num_attachments() == 0 );
+        CHECK( pNote->get_num_reldataobjs() == 0 );
+        CHECK( pNote->get_reldataobjs() == NULL );
+        CHECK( pNote->get_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_dots() == 0 );
+        CHECK( pNote->get_note_type() == k_quarter );
+        CHECK( pNote->get_octave() == 4 );
+        CHECK( pNote->get_step() == k_no_pitch );
+
+        delete pNote;
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, Instrument_SetNumStaves)
+    {
+        Document doc(m_libraryScope);
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        pInstr->add_staff();
+        pInstr->add_staff();
+        CHECK( pInstr->get_num_staves() == 3 );
+        ImoStaffInfo* pStaff = pInstr->get_staff(0);
         CHECK( pStaff != NULL );
         CHECK( pStaff->get_num_lines() == 5 );
         CHECK( pStaff->get_staff_margin() == 1000.0f );
         CHECK( pStaff->get_line_spacing() == 180.0f );
         CHECK( pStaff->get_line_thickness() == 15.0f );
         CHECK( pStaff->get_height() == 735.0f );
-        pStaff = instr.get_staff(2);
+        pStaff = pInstr->get_staff(2);
         CHECK( pStaff != NULL );
         CHECK( pStaff->get_num_lines() == 5 );
         CHECK( pStaff->get_staff_margin() == 1000.0f );
         CHECK( pStaff->get_line_spacing() == 180.0f );
         CHECK( pStaff->get_line_thickness() == 15.0f );
         CHECK( pStaff->get_height() == 735.0f );
+        delete pInstr;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_InstrumentWithContent)
+    TEST_FIXTURE(InternalModelTestFixture, InstrumentWithContent)
     {
-        ImoInstrument instr;
-        ImoMusicData* pMD = new ImoMusicData();
-        instr.append_child(pMD);
-        CHECK( instr.get_musicdata() == pMD );
-        //ImoClef* pClef = new ImoClef(ImoClef::k_G2);
-        //pMD->append_child(pClef);
+        Document doc(m_libraryScope);
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        ImoMusicData* pMD = static_cast<ImoMusicData*>(
+                                ImFactory::inject(k_imo_music_data, &doc) );
+        pInstr->append_child(pMD);
+        CHECK( pInstr->get_musicdata() == pMD );
+        delete pInstr;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_Instrument_ReplaceStaffInfo)
+    TEST_FIXTURE(InternalModelTestFixture, Instrument_ReplaceStaffInfo)
     {
-        ImoInstrument instr;
-        instr.add_staff();
-        instr.add_staff();
-        ImoStaffInfo* pInfo = new ImoStaffInfo();
+        Document doc(m_libraryScope);
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        pInstr->add_staff();
+        pInstr->add_staff();
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(ImFactory::inject(k_imo_staff_info, &doc));
         pInfo->set_staff_number(2);
         pInfo->set_line_spacing(400.0f);
-        instr.replace_staff_info(pInfo);
+        pInstr->replace_staff_info(pInfo);
 
-        CHECK( instr.get_num_staves() == 3 );
-        ImoStaffInfo* pStaff = instr.get_staff(2);
+        CHECK( pInstr->get_num_staves() == 3 );
+        ImoStaffInfo* pStaff = pInstr->get_staff(2);
         CHECK( pStaff != NULL );
         CHECK( pStaff->get_num_lines() == 5 );
         CHECK( pStaff->get_staff_margin() == 1000.0f );
         CHECK( pStaff->get_line_spacing() == 400.0f );
         CHECK( pStaff->get_line_thickness() == 15.0f );
         CHECK( pStaff->get_height() == 1615.0f );
-        pStaff = instr.get_staff(1);
+        pStaff = pInstr->get_staff(1);
         CHECK( pStaff != NULL );
         CHECK( pStaff->get_num_lines() == 5 );
         CHECK( pStaff->get_staff_margin() == 1000.0f );
         CHECK( pStaff->get_line_spacing() == 180.0f );
         CHECK( pStaff->get_line_thickness() == 15.0f );
         CHECK( pStaff->get_height() == 735.0f );
+        delete pInstr;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_EmptyScore)
+    TEST_FIXTURE(InternalModelTestFixture, ScoreInitialize)
     {
-        ImoScore* pScore = new ImoScore();
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
         CHECK( pScore->has_options() == true );
         CHECK( pScore->get_options()->get_num_items() == 9 );
         CHECK( pScore->get_option("Render.SpacingFactor")->get_float_value() == 0.547f );
@@ -180,39 +215,48 @@ SUITE(InternalModelTest)
 
     // score options --------------------------------------------------------------------
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ChangeFloatOption)
+    TEST_FIXTURE(InternalModelTestFixture, ChangeFloatOption)
     {
-        ImoScore score;
-        CHECK( score.has_options() == true );
-        CHECK( score.get_options()->get_num_items() == 9 );
-        CHECK( score.get_option("Render.SpacingFactor")->get_float_value() == 0.547f );
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
+        CHECK( pScore->has_options() == true );
+        CHECK( pScore->get_options()->get_num_items() == 9 );
+        CHECK( pScore->get_option("Render.SpacingFactor")->get_float_value() == 0.547f );
 
-        score.set_float_option("Render.SpacingFactor", 0.600f);
+        pScore->set_float_option("Render.SpacingFactor", 0.600f);
 
-        CHECK( score.get_options()->get_num_items() == 9 );
-        CHECK( score.get_option("Render.SpacingFactor")->get_float_value() == 0.600f );
+        CHECK( pScore->get_options()->get_num_items() == 9 );
+        CHECK( pScore->get_option("Render.SpacingFactor")->get_float_value() == 0.600f );
+
+        delete pScore;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ChangeBoolOption)
+    TEST_FIXTURE(InternalModelTestFixture, ChangeBoolOption)
     {
-        ImoScore score;
-        CHECK( score.has_options() == true );
-        CHECK( score.get_options()->get_num_items() == 9 );
-        CHECK( score.get_option("StaffLines.Hide")->get_bool_value() == false );
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
+        CHECK( pScore->has_options() == true );
+        CHECK( pScore->get_options()->get_num_items() == 9 );
+        CHECK( pScore->get_option("StaffLines.Hide")->get_bool_value() == false );
 
-        score.set_bool_option("StaffLines.Hide", true);
+        pScore->set_bool_option("StaffLines.Hide", true);
 
-        CHECK( score.get_options()->get_num_items() == 9 );
-        CHECK( score.get_option("StaffLines.Hide")->get_bool_value() == true );
+        CHECK( pScore->get_options()->get_num_items() == 9 );
+        CHECK( pScore->get_option("StaffLines.Hide")->get_bool_value() == true );
+
+        delete pScore;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithBoolOption)
+    TEST_FIXTURE(InternalModelTestFixture, ScoreWithBoolOption)
     {
-        ImoScore* pScore = new ImoScore();
-        ImoOptionInfo opt("Staff.Green");
-        opt.set_bool_value(true);
-        CHECK( opt.get_bool_value() == true );
-        pScore->set_option(&opt);
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
+        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
+                                    ImFactory::inject(k_imo_option, &doc) );
+        pOpt->set_name("Staff.Green");
+        pOpt->set_bool_value(true);
+        CHECK( pOpt->get_bool_value() == true );
+        pScore->add_option(pOpt);
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Green");
         CHECK( pOpt2 != NULL );
@@ -221,13 +265,16 @@ SUITE(InternalModelTest)
         delete pScore;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithLongOption)
+    TEST_FIXTURE(InternalModelTestFixture, ScoreWithLongOption)
     {
-        ImoScore* pScore = new ImoScore();
-        ImoOptionInfo opt("Staff.Dots");
-        opt.set_long_value(27L);
-        CHECK( opt.get_long_value() == 27L );
-        pScore->set_option(&opt);
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
+        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
+                                    ImFactory::inject(k_imo_option, &doc) );
+        pOpt->set_name("Staff.Dots");
+        pOpt->set_long_value(27L);
+        CHECK( pOpt->get_long_value() == 27L );
+        pScore->add_option(pOpt);
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Dots");
         CHECK( pOpt2 != NULL );
@@ -236,13 +283,16 @@ SUITE(InternalModelTest)
         delete pScore;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithFloatOption)
+    TEST_FIXTURE(InternalModelTestFixture, ScoreWithFloatOption)
     {
-        ImoScore* pScore = new ImoScore();
-        ImoOptionInfo opt("Staff.Pi");
-        opt.set_float_value(3.1416f);
-        CHECK( opt.get_float_value() == 3.1416f );
-        pScore->set_option(&opt);
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
+        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
+                                    ImFactory::inject(k_imo_option, &doc) );
+        pOpt->set_name("Staff.Pi");
+        pOpt->set_float_value(3.1416f);
+        CHECK( pOpt->get_float_value() == 3.1416f );
+        pScore->add_option(pOpt);
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Pi");
         CHECK( pOpt2 != NULL );
@@ -251,46 +301,69 @@ SUITE(InternalModelTest)
         delete pScore;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreAddBoolOption)
+    TEST_FIXTURE(InternalModelTestFixture, ScoreAddBoolOption)
     {
-        ImoScore score;
-        score.set_bool_option("Staff.Green", true);
-        CHECK( score.has_options() == true );
-        CHECK( score.get_options()->get_num_items() == 10 );
-        CHECK( score.get_option("Staff.Green")->get_bool_value() == true );
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
+
+        pScore->set_bool_option("Staff.Green", true);
+
+        CHECK( pScore->has_options() == true );
+        CHECK( pScore->get_options()->get_num_items() == 10 );
+        CHECK( pScore->get_option("Staff.Green")->get_bool_value() == true );
+
+        delete pScore;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreAddLongOption)
+    TEST_FIXTURE(InternalModelTestFixture, ScoreAddLongOption)
     {
-        ImoScore score;
-        score.set_long_option("Staff.LongWidth", 700L);
-        CHECK( score.has_options() == true );
-        CHECK( score.get_options()->get_num_items() == 10 );
-        CHECK( score.get_option("Staff.LongWidth")->get_long_value() == 700L );
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
+
+        pScore->set_long_option("Staff.LongWidth", 700L);
+
+        CHECK( pScore->has_options() == true );
+        CHECK( pScore->get_options()->get_num_items() == 10 );
+        CHECK( pScore->get_option("Staff.LongWidth")->get_long_value() == 700L );
+
+        delete pScore;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreAddFloatOption)
+    TEST_FIXTURE(InternalModelTestFixture, ScoreAddFloatOption)
     {
-        ImoScore score;
-        score.set_float_option("Staff.Green", 0.66f);
-        CHECK( score.has_options() == true );
-        CHECK( score.get_options()->get_num_items() == 10 );
-        CHECK( score.get_option("Staff.Green")->get_float_value() == 0.66f );
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
+
+        pScore->set_float_option("Staff.Green", 0.66f);
+
+        CHECK( pScore->has_options() == true );
+        CHECK( pScore->get_options()->get_num_items() == 10 );
+        CHECK( pScore->get_option("Staff.Green")->get_float_value() == 0.66f );
+
+        delete pScore;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithInstrument)
+    TEST_FIXTURE(InternalModelTestFixture, ScoreWithInstrument)
     {
-        ImoScore* pScore = new ImoScore();
-        ImoOptionInfo opt("Staff.Green");
-        opt.set_bool_value(true);
-        pScore->set_option(&opt);
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
+        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
+                                    ImFactory::inject(k_imo_option, &doc) );
+        pOpt->set_name("Staff.Green");
+        pOpt->set_bool_value(true);
+        pScore->add_option(pOpt);
 
-        ImoInstrument* pInstr = new ImoInstrument();
-        ImoMusicData* pMD = new ImoMusicData();
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        ImoMusicData* pMD = static_cast<ImoMusicData*>(
+                                ImFactory::inject(k_imo_music_data, &doc) );
         pInstr->append_child(pMD);
-        ImoClef* pClef = new ImoClef(ImoClef::k_G2);
-        ImoScoreText* pText = new ImoScoreText("Hello world");
-        pClef->add_attachment(pText);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        ImoScoreText* pText = static_cast<ImoScoreText*>(
+                                    ImFactory::inject(k_imo_score_text, &doc));
+        pText->set_text("Hello world");
+        pClef->add_attachment(&doc, pText);
         pMD->append_child(pClef);
         pScore->add_instrument(pInstr);
 
@@ -307,11 +380,14 @@ SUITE(InternalModelTest)
 
     // instruments group ----------------------------------------------------------------
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_GroupTwoInstruments)
+    TEST_FIXTURE(InternalModelTestFixture, GroupTwoInstruments)
     {
-        ImoInstrGroup* pGroup = new ImoInstrGroup();
+        Document doc(m_libraryScope);
+        ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(
+                                    ImFactory::inject(k_imo_instr_group, &doc));
         CHECK( pGroup->get_num_instruments() == 0 );
-        ImoInstrument* pInstr1 = new ImoInstrument();
+        ImoInstrument* pInstr1 = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
         CHECK( pInstr1->is_in_group() == false );
         CHECK( pInstr1->get_group() == NULL );
 
@@ -321,7 +397,8 @@ SUITE(InternalModelTest)
         CHECK( pInstr1->is_in_group() == true );
         CHECK( pInstr1->get_group() == pGroup );
 
-        ImoInstrument* pInstr2 = new ImoInstrument();
+        ImoInstrument* pInstr2 = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
         pGroup->add_instrument(pInstr2);
         CHECK( pGroup->get_num_instruments() == 2 );
         CHECK( pGroup->get_instrument(0) == pInstr1 );
@@ -334,14 +411,18 @@ SUITE(InternalModelTest)
         delete pInstr2;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ScoreWithInstrGroup)
+    TEST_FIXTURE(InternalModelTestFixture, ScoreWithInstrGroup)
     {
-        ImoScore* pScore = new ImoScore();
-
-        ImoInstrGroup* pGroup = new ImoInstrGroup();
-        ImoInstrument* pInstr1 = new ImoInstrument();
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(
+                                    ImFactory::inject(k_imo_score, &doc));
+        ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(
+                                    ImFactory::inject(k_imo_instr_group, &doc));
+        ImoInstrument* pInstr1 = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
         pGroup->add_instrument(pInstr1);
-        ImoInstrument* pInstr2 = new ImoInstrument();
+        ImoInstrument* pInstr2 = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
         pGroup->add_instrument(pInstr2);
 
         pScore->add_instruments_group(pGroup);
@@ -349,7 +430,8 @@ SUITE(InternalModelTest)
         CHECK( pScore->get_instrument(0) == pInstr1 );
         CHECK( pScore->get_instrument(1) == pInstr2 );
 
-        ImoInstrument* pInstr3 = new ImoInstrument();
+        ImoInstrument* pInstr3 = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
         pScore->add_instrument(pInstr3);
 
         CHECK( pScore->get_num_instruments() == 3 );
@@ -358,79 +440,60 @@ SUITE(InternalModelTest)
         delete pScore;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_DocumentWithScore)
+    TEST_FIXTURE(InternalModelTestFixture, DocumentWithScore)
     {
-        ImoDocument* pDoc = new ImoDocument();
-        ImoContent* pContent = new ImoContent();
-        pDoc->append_child(pContent);
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoContent* pContent = pDoc->get_content();
 
-        ImoScore* pScore = new ImoScore();
-        ImoOptionInfo opt("Staff.Green");
-        opt.set_bool_value(true);
-        pScore->set_option(&opt);
-        ImoInstrument* pInstr = new ImoInstrument();
-        ImoMusicData* pMD = new ImoMusicData();
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
+        pContent->append_child(pScore);
+        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
+                                    ImFactory::inject(k_imo_option, &doc) );
+        pOpt->set_name("Staff.Green");
+        pOpt->set_bool_value(true);
+        pScore->add_option(pOpt);
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        ImoMusicData* pMD = static_cast<ImoMusicData*>(
+                                ImFactory::inject(k_imo_music_data, &doc) );
         pInstr->append_child(pMD);
-        ImoClef* pClef = new ImoClef(ImoClef::k_G2);
-        ImoScoreText* pText = new ImoScoreText("Hello world");
-        pClef->add_attachment(pText);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        ImoScoreText* pText = static_cast<ImoScoreText*>(
+                                    ImFactory::inject(k_imo_score_text, &doc));
+        pText->set_text("Hello world");
+        pClef->add_attachment(&doc, pText);
         pMD->append_child(pClef);
         pScore->add_instrument(pInstr);
 
-        pContent->append_child(pScore);
         CHECK( pDoc->get_num_content_items() == 1 );
         CHECK( pDoc->get_content_item(0) == pScore );
-        CHECK( pDoc->get_version() == "" );
-
-        delete pDoc;
     }
 
     // ImoPageInfo ----------------------------------------------------------------------
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_PageInfoDefaults)
+    TEST_FIXTURE(InternalModelTestFixture, PageInfoDefaults)
     {
-        ImoPageInfo info;
-        CHECK( info.is_page_info() == true );
-        CHECK( info.get_top_margin() == 2000.0f );
-        CHECK( info.get_bottom_margin() == 2000.0f );
-        CHECK( info.get_left_margin() == 1500.0f );
-        CHECK( info.get_right_margin() == 1500.0f );
-        CHECK( info.get_binding_margin() == 0.0f );
-        CHECK( info.is_portrait() == true );
+        Document doc(m_libraryScope);
+        ImoPageInfo* pInfo = static_cast<ImoPageInfo*>(
+                                    ImFactory::inject(k_imo_page_info, &doc));
+        CHECK( pInfo->is_page_info() == true );
+        CHECK( pInfo->get_top_margin() == 2000.0f );
+        CHECK( pInfo->get_bottom_margin() == 2000.0f );
+        CHECK( pInfo->get_left_margin() == 1500.0f );
+        CHECK( pInfo->get_right_margin() == 1500.0f );
+        CHECK( pInfo->get_binding_margin() == 0.0f );
+        CHECK( pInfo->is_portrait() == true );
+        delete pInfo;
     }
-
-    // ImoTextStyleInfo -----------------------------------------------------------------
-
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_Score_GetDefaultStyle)
-    {
-        ImoScore score;
-        ImoTextStyleInfo* pStyle = score.get_default_style_info();
-        CHECK( pStyle != NULL );
-        CHECK( pStyle->get_name() == "Default style" );
-        CHECK( pStyle->get_color() == Color(0,0,0,255) );
-        CHECK( pStyle->get_font_name() == "Liberation serif" );
-        CHECK( pStyle->get_font_style() == ImoFontInfo::k_normal );
-        CHECK( pStyle->get_font_weight() == ImoFontInfo::k_normal );
-        CHECK( pStyle->get_font_size() == 10 );
-    }
-
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_Score_GetStyle)
-    {
-        ImoScore score;
-	    ImoTextStyleInfo* pStyle = new ImoTextStyleInfo("Test style", "Callamet",
-            12.0f, ImoFontInfo::k_normal, ImoFontInfo::k_bold, Color(15,16,27,132) );
-        score.add_style_info(pStyle);
-
-        ImoTextStyleInfo* pStyle2 = score.get_style_info("Test style");
-        CHECK( pStyle == pStyle2 );
-    }
-
     // ImoTextBlockInfo -----------------------------------------------------------------------
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_BoxInfoDefaults)
+    TEST_FIXTURE(InternalModelTestFixture, BoxInfoDefaults)
     {
         ImoTextBlockInfo info;
-        CHECK( info.is_box_info() == true );
+        CHECK( info.is_textblock_info() == true );
         CHECK( info.get_height() == 100.0f );
         CHECK( info.get_width() == 160.0f );
         CHECK( info.get_position() == TPoint(0.0f, 0.0f) );
@@ -442,19 +505,22 @@ SUITE(InternalModelTest)
 
     // ImoCursorInfo --------------------------------------------------------------------
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_CursorInfoDefaults)
+    TEST_FIXTURE(InternalModelTestFixture, CursorInfoDefaults)
     {
-        ImoCursorInfo info;
-        CHECK( info.is_cursor_info() == true );
-        CHECK( info.get_instrument() == 0 );
-        CHECK( info.get_staff() == 0 );
-        CHECK( info.get_time() == 0.0f );
-        CHECK( info.get_id() == -1L );
+        Document doc(m_libraryScope);
+        ImoCursorInfo* info = static_cast<ImoCursorInfo*>(
+                                    ImFactory::inject(k_imo_cursor_info, &doc) );
+        CHECK( info->is_cursor_info() == true );
+        CHECK( info->get_instrument() == 0 );
+        CHECK( info->get_staff() == 0 );
+        CHECK( info->get_time() == 0.0f );
+        CHECK( info->get_id() == -1L );
+        delete info;
     }
 
     // ImoFiguredBassInfo ---------------------------------------------------------------
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_63)
+    TEST_FIXTURE(InternalModelTestFixture, FigBasInfoFromString_63)
     {
         ImoFiguredBassInfo info("6 3");
         CHECK( info.get_quality(3) == k_interval_as_implied );
@@ -465,7 +531,7 @@ SUITE(InternalModelTest)
         CHECK( info.get_figured_bass_string() == "6 3" );
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_5)
+    TEST_FIXTURE(InternalModelTestFixture, FigBasInfoFromString_5)
     {
         ImoFiguredBassInfo info("5");
         //CHECK( info.get_quality(3) == k_interval_as_implied );
@@ -476,7 +542,7 @@ SUITE(InternalModelTest)
         CHECK( info.get_figured_bass_string() == "5" );
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_6)
+    TEST_FIXTURE(InternalModelTestFixture, FigBasInfoFromString_6)
     {
         ImoFiguredBassInfo info("6");
         //CHECK( info.get_quality(3) == k_interval_as_implied );
@@ -487,7 +553,7 @@ SUITE(InternalModelTest)
         CHECK( info.get_figured_bass_string() == "6" );
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_64)
+    TEST_FIXTURE(InternalModelTestFixture, FigBasInfoFromString_64)
     {
         ImoFiguredBassInfo info("6 4");
         //CHECK( info.get_quality(3) == k_interval_as_implied );
@@ -498,7 +564,7 @@ SUITE(InternalModelTest)
         CHECK( info.get_figured_bass_string() == "6 4" );
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_7)
+    TEST_FIXTURE(InternalModelTestFixture, FigBasInfoFromString_7)
     {
         ImoFiguredBassInfo info("7");
         //CHECK( info.get_quality(3) == k_interval_as_implied );
@@ -509,7 +575,7 @@ SUITE(InternalModelTest)
         CHECK( info.get_figured_bass_string() == "7" );
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_7m)
+    TEST_FIXTURE(InternalModelTestFixture, FigBasInfoFromString_7m)
     {
         ImoFiguredBassInfo info("7/");
         //CHECK( info.get_quality(3) == k_interval_as_implied );
@@ -520,7 +586,7 @@ SUITE(InternalModelTest)
         CHECK( info.get_figured_bass_string() == "7/" );
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_4)
+    TEST_FIXTURE(InternalModelTestFixture, FigBasInfoFromString_4)
     {
         ImoFiguredBassInfo info("4");   //5 4
         CHECK( info.is_sounding(3) == false );
@@ -528,7 +594,7 @@ SUITE(InternalModelTest)
         CHECK( info.get_figured_bass_string() == "4" );
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_FigBasInfoFromString_9)
+    TEST_FIXTURE(InternalModelTestFixture, FigBasInfoFromString_9)
     {
         ImoFiguredBassInfo info("9");
         //CHECK( info.get_quality(3) == k_interval_as_implied );
@@ -541,284 +607,373 @@ SUITE(InternalModelTest)
 
     // RelDataObjs ----------------------------------------------------------------------
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ClefNoReldataobjs)
+    TEST_FIXTURE(InternalModelTestFixture, ClefNoReldataobjs)
     {
-        ImoClef clef(ImoClef::k_G2);
-        CHECK( clef.has_reldataobjs() == false );
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        CHECK( pClef->has_reldataobjs() == false );
+
+        delete pClef;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_AddReldataobj)
+    TEST_FIXTURE(InternalModelTestFixture, AddReldataobj)
     {
-        ImoClef clef(ImoClef::k_G2);
-        ImoMidiInfo* pMidi = new ImoMidiInfo();
-        clef.add_reldataobj(pMidi);
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
+                                    ImFactory::inject(k_imo_midi_info, &doc));
+        pClef->add_reldataobj(&doc, pMidi);
 
-        CHECK( clef.has_reldataobjs() == true );
+        CHECK( pClef->has_reldataobjs() == true );
+
+        delete pClef;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_GetNumReldataobjs)
+    TEST_FIXTURE(InternalModelTestFixture, GetNumReldataobjs)
     {
-        ImoClef clef(ImoClef::k_G2);
-        ImoMidiInfo* pMidi = new ImoMidiInfo();
-        clef.add_reldataobj(pMidi);
-        ImoFontInfo* pFont = new ImoFontInfo();
-        clef.add_reldataobj(pFont);
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
+                                    ImFactory::inject(k_imo_midi_info, &doc));
+        pClef->add_reldataobj(&doc, pMidi);
+        ImoParamInfo* pParam = static_cast<ImoParamInfo*>(
+                                    ImFactory::inject(k_imo_param_info, &doc));
+        pClef->add_reldataobj(&doc, pParam);
 
-        CHECK( clef.get_num_reldataobjs() == 2 );
+        CHECK( pClef->get_num_reldataobjs() == 2 );
+
+        delete pClef;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_GetReldataobj)
+    TEST_FIXTURE(InternalModelTestFixture, GetReldataobj)
     {
-        ImoClef clef(ImoClef::k_G2);
-        ImoMidiInfo* pMidi = new ImoMidiInfo();
-        clef.add_reldataobj(pMidi);
-        ImoFontInfo* pFont = new ImoFontInfo();
-        clef.add_reldataobj(pFont);
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
+                                    ImFactory::inject(k_imo_midi_info, &doc));
+        pClef->add_reldataobj(&doc, pMidi);
+        ImoParamInfo* pParam = static_cast<ImoParamInfo*>(
+                                    ImFactory::inject(k_imo_param_info, &doc));
+        pClef->add_reldataobj(&doc, pParam);
 
-        CHECK( clef.get_reldataobj(0) == pMidi );
-        CHECK( clef.get_reldataobj(1) == pFont );
+        CHECK( pClef->get_reldataobj(0) == pMidi );
+        CHECK( pClef->get_reldataobj(1) == pParam );
+
+        delete pClef;
     }
 
     TEST_FIXTURE(InternalModelTestFixture, RemoveReldataobj)
     {
-        ImoClef clef(ImoClef::k_G2);
-        ImoMidiInfo* pMidi = new ImoMidiInfo();
-        clef.add_reldataobj(pMidi);
-        ImoFontInfo* pFont = new ImoFontInfo();
-        clef.add_reldataobj(pFont);
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
+                                    ImFactory::inject(k_imo_midi_info, &doc));
+        pClef->add_reldataobj(&doc, pMidi);
+        ImoParamInfo* pParam = static_cast<ImoParamInfo*>(
+                                    ImFactory::inject(k_imo_param_info, &doc));
+        pClef->add_reldataobj(&doc, pParam);
 
-        clef.remove_reldataobj(pMidi);
+        pClef->remove_reldataobj(pMidi);
 
-        CHECK( clef.get_num_reldataobjs() == 1 );
-        CHECK( clef.get_reldataobj(0) == pFont );
+        CHECK( pClef->get_num_reldataobjs() == 1 );
+        CHECK( pClef->get_reldataobj(0) == pParam );
+
+        delete pClef;
     }
 
     TEST_FIXTURE(InternalModelTestFixture, RemoveAllReldataobjs)
     {
-        ImoClef clef(ImoClef::k_G2);
-        ImoMidiInfo* pMidi = new ImoMidiInfo();
-        clef.add_reldataobj(pMidi);
-        ImoFontInfo* pFont = new ImoFontInfo();
-        clef.add_reldataobj(pFont);
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
+                                    ImFactory::inject(k_imo_midi_info, &doc));
+        pClef->add_reldataobj(&doc, pMidi);
+        ImoParamInfo* pParam = static_cast<ImoParamInfo*>(
+                                    ImFactory::inject(k_imo_param_info, &doc));
+        pClef->add_reldataobj(&doc, pParam);
 
-        clef.remove_reldataobj(pMidi);
-        clef.remove_reldataobj(pFont);
+        pClef->remove_reldataobj(pMidi);
+        pClef->remove_reldataobj(pParam);
 
-        CHECK( clef.get_num_reldataobjs() == 0 );
-        CHECK( clef.get_reldataobjs() == NULL );
+        CHECK( pClef->get_num_reldataobjs() == 0 );
+        CHECK( pClef->get_reldataobjs() == NULL );
+
+        delete pClef;
     }
 
     TEST_FIXTURE(InternalModelTestFixture, FindReldataobj)
     {
-        ImoClef clef(ImoClef::k_G2);
-        ImoMidiInfo* pMidi = new ImoMidiInfo();
-        clef.add_reldataobj(pMidi);
-        ImoFontInfo* pFont = new ImoFontInfo();
-        clef.add_reldataobj(pFont);
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
+                                    ImFactory::inject(k_imo_midi_info, &doc));
+        pClef->add_reldataobj(&doc, pMidi);
+        ImoParamInfo* pParam = static_cast<ImoParamInfo*>(
+                                    ImFactory::inject(k_imo_param_info, &doc));
+        pClef->add_reldataobj(&doc, pParam);
 
-        CHECK( clef.find_reldataobj(ImoObj::k_font_info) == pFont );
-        CHECK( clef.find_reldataobj(ImoObj::k_midi_info) == pMidi );
+        CHECK( pClef->find_reldataobj(k_imo_param_info) == pParam );
+        CHECK( pClef->find_reldataobj(k_imo_midi_info) == pMidi );
+
+        delete pClef;
     }
 
 
     // attachments ----------------------------------------------------------------------
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_ClefNoAttachments)
+    TEST_FIXTURE(InternalModelTestFixture, ClefNoAttachments)
     {
-        ImoClef clef(ImoClef::k_G2);
-        CHECK( clef.has_attachments() == false );
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        CHECK( pClef->has_attachments() == false );
+
+        delete pClef;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_AddAttachment)
+    TEST_FIXTURE(InternalModelTestFixture, AddAttachment)
     {
-        ImoClef clef(ImoClef::k_G2);
-        ImoScoreText* pText = new ImoScoreText("Hello world");
-        clef.add_attachment(pText);
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        ImoScoreText* pText = static_cast<ImoScoreText*>(
+                                    ImFactory::inject(k_imo_score_text, &doc));
+        pText->set_text("Hello world");
+        pClef->add_attachment(&doc, pText);
 
-        CHECK( clef.has_attachments() == true );
+        CHECK( pClef->has_attachments() == true );
+
+        delete pClef;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_GetNumAttachments)
+    TEST_FIXTURE(InternalModelTestFixture, GetNumAttachments)
     {
-        ImoClef clef(ImoClef::k_G2);
-        ImoScoreText* pText = new ImoScoreText("Hello world");
-        clef.add_attachment(pText);
-        DtoFermata fmt;
-        ImoFermata* pFmt = new ImoFermata(fmt);
-        clef.add_attachment(pFmt);
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        ImoScoreText* pText = static_cast<ImoScoreText*>(
+                                    ImFactory::inject(k_imo_score_text, &doc));
+        pText->set_text("Hello world");
+        pClef->add_attachment(&doc, pText);
+        ImoFermata* pFmt = static_cast<ImoFermata*>(
+                                ImFactory::inject(k_imo_fermata, &doc) );
+        pClef->add_attachment(&doc, pFmt);
 
-        CHECK( clef.get_num_attachments() == 2 );
+        CHECK( pClef->get_num_attachments() == 2 );
+
+        delete pClef;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_GetAttachment)
+    TEST_FIXTURE(InternalModelTestFixture, GetAttachment)
     {
-        ImoClef clef(ImoClef::k_G2);
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
 
-        DtoFermata fmt;
-        ImoFermata* pFmt = new ImoFermata(fmt);
-        clef.add_attachment(pFmt);
+        ImoFermata* pFmt = static_cast<ImoFermata*>(
+                                ImFactory::inject(k_imo_fermata, &doc) );
+        pClef->add_attachment(&doc, pFmt);
 
-        ImoScoreText* pText = new ImoScoreText("Hello world");
-        clef.add_attachment(pText);
+        ImoScoreText* pText = static_cast<ImoScoreText*>(
+                                    ImFactory::inject(k_imo_score_text, &doc));
+        pText->set_text("Hello world");
+        pClef->add_attachment(&doc, pText);
 
-        CHECK( clef.get_attachment(0) == pFmt );
-        CHECK( clef.get_attachment(1) == pText );
+        CHECK( pClef->get_attachment(0) == pFmt );
+        CHECK( pClef->get_attachment(1) == pText );
+
+        delete pClef;
     }
 
     TEST_FIXTURE(InternalModelTestFixture, RemoveAttachment)
     {
-        ImoClef clef(ImoClef::k_G2);
-        ImoScoreText* pText = new ImoScoreText("Hello world");
-        clef.add_attachment(pText);
-        DtoFermata fmt;
-        ImoFermata* pFmt = new ImoFermata(fmt);
-        clef.add_attachment(pFmt);
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        ImoScoreText* pText = static_cast<ImoScoreText*>(
+                                    ImFactory::inject(k_imo_score_text, &doc));
+        pText->set_text("Hello world");
+        pClef->add_attachment(&doc, pText);
+        ImoFermata* pFmt = static_cast<ImoFermata*>(
+                                ImFactory::inject(k_imo_fermata, &doc) );
+        pClef->add_attachment(&doc, pFmt);
 
-        clef.remove_attachment(pText);
+        pClef->remove_attachment(pText);
 
-        CHECK( clef.get_num_attachments() == 1 );
-        CHECK( clef.get_attachment(0) == pFmt );
+        CHECK( pClef->get_num_attachments() == 1 );
+        CHECK( pClef->get_attachment(0) == pFmt );
+
+        delete pClef;
     }
 
     TEST_FIXTURE(InternalModelTestFixture, RemoveAllAttachments)
     {
-        ImoClef clef(ImoClef::k_G2);
-        ImoScoreText* pText = new ImoScoreText("Hello world");
-        clef.add_attachment(pText);
-        DtoFermata fmt;
-        ImoFermata* pFmt = new ImoFermata(fmt);
-        clef.add_attachment(pFmt);
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        ImoScoreText* pText = static_cast<ImoScoreText*>(
+                                    ImFactory::inject(k_imo_score_text, &doc));
+        pText->set_text("Hello world");
+        pClef->add_attachment(&doc, pText);
+        ImoFermata* pFmt = static_cast<ImoFermata*>(
+                                ImFactory::inject(k_imo_fermata, &doc) );
+        pClef->add_attachment(&doc, pFmt);
 
-        clef.remove_attachment(pText);
-        clef.remove_attachment(pFmt);
+        pClef->remove_attachment(pText);
+        pClef->remove_attachment(pFmt);
 
-        CHECK( clef.get_num_attachments() == 0 );
-        CHECK( clef.get_attachments() != NULL );
+        CHECK( pClef->get_num_attachments() == 0 );
+        CHECK( pClef->get_attachments() != NULL );
+
+        delete pClef;
     }
 
     TEST_FIXTURE(InternalModelTestFixture, IncludeInRelation)
     {
-        DtoNote dtoNote;
-        dtoNote.set_step(1);
-        dtoNote.set_octave(4);
-        dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(k_eighth);
-        dtoNote.set_dots(0);
-        ImoNote note(dtoNote);
+        Document doc(m_libraryScope);
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        pNote->set_step(1);
+        pNote->set_octave(4);
+        pNote->set_accidentals(0);
+        pNote->set_note_type(k_eighth);
+        pNote->set_dots(0);
 
         ImoTieDto dto;
-        ImoTieData* pData = new ImoTieData(&dto);
-        ImoTie* pTie = new ImoTie();
-        note.include_in_relation(pTie, pData);
+        ImoTieData* pData = ImFactory::inject_tie_data(&doc, &dto);
+        ImoTie* pTie = static_cast<ImoTie*>( ImFactory::inject(k_imo_tie, &doc) );
+        pNote->include_in_relation(&doc, pTie, pData);
 
-        CHECK( note.get_num_attachments() == 1 );
-        CHECK( note.get_attachment(0) == pTie );
-        CHECK( note.get_num_reldataobjs() == 1 );
-        CHECK( note.get_reldataobj(0) == pData );
-        CHECK( pTie->get_data_for(&note) == pData );
+        CHECK( pNote->get_num_attachments() == 1 );
+        CHECK( pNote->get_attachment(0) == pTie );
+        CHECK( pNote->get_num_reldataobjs() == 1 );
+        CHECK( pNote->get_reldataobj(0) == pData );
+        CHECK( pTie->get_data_for(pNote) == pData );
+
+        delete pNote;
     }
 
     TEST_FIXTURE(InternalModelTestFixture, RemoveFromRelation)
     {
-        DtoNote dtoNote;
-        dtoNote.set_step(1);
-        dtoNote.set_octave(4);
-        dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(k_eighth);
-        dtoNote.set_dots(0);
-        ImoNote note(dtoNote);
+        Document doc(m_libraryScope);
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        pNote->set_step(1);
+        pNote->set_octave(4);
+        pNote->set_accidentals(0);
+        pNote->set_note_type(k_eighth);
+        pNote->set_dots(0);
 
         ImoTieDto dto;
-        ImoTieData* pData = new ImoTieData(&dto);
-        ImoTie* pTie = new ImoTie();
-        note.include_in_relation(pTie, pData);
+        ImoTieData* pData = ImFactory::inject_tie_data(&doc, &dto);
+        ImoTie* pTie = static_cast<ImoTie*>( ImFactory::inject(k_imo_tie, &doc) );
+        pNote->include_in_relation(&doc, pTie, pData);
 
-        note.remove_from_relation(pTie);
+        pNote->remove_from_relation(pTie);
 
-        CHECK( note.get_num_attachments() == 0 );
-        CHECK( note.get_attachments() != NULL );
-        CHECK( note.get_num_reldataobjs() == 0 );
-        CHECK( note.get_reldataobjs() == NULL );
+        CHECK( pNote->get_num_attachments() == 0 );
+        CHECK( pNote->get_attachments() != NULL );
+        CHECK( pNote->get_num_reldataobjs() == 0 );
+        CHECK( pNote->get_reldataobjs() == NULL );
+
+        delete pNote;
     }
 
     TEST_FIXTURE(InternalModelTestFixture, RemoveFromAllRelations)
     {
-        DtoNote dtoNote;
-        dtoNote.set_step(1);
-        dtoNote.set_octave(4);
-        dtoNote.set_accidentals(0);
-        dtoNote.set_note_type(k_eighth);
-        dtoNote.set_dots(0);
-        ImoNote note(dtoNote);
+        Document doc(m_libraryScope);
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
+        pNote->set_step(1);
+        pNote->set_octave(4);
+        pNote->set_accidentals(0);
+        pNote->set_note_type(k_eighth);
+        pNote->set_dots(0);
 
         ImoTieDto dto;
-        ImoTieData* pData = new ImoTieData(&dto);
-        ImoTie* pTie = new ImoTie();
-        note.include_in_relation(pTie, pData);
+        ImoTieData* pData = ImFactory::inject_tie_data(&doc, &dto);
+        ImoTie* pTie = static_cast<ImoTie*>( ImFactory::inject(k_imo_tie, &doc) );
+        pNote->include_in_relation(&doc, pTie, pData);
 
-        ImoScoreText* pText = new ImoScoreText("Hello world");
-        note.add_attachment(pText);
+        ImoScoreText* pText = static_cast<ImoScoreText*>(
+                                    ImFactory::inject(k_imo_score_text, &doc));
+        pText->set_text("Hello world");
+        pNote->add_attachment(&doc, pText);
 
-        CHECK( note.get_num_attachments() == 2 );
-        CHECK( note.get_num_reldataobjs() == 1 );
+        CHECK( pNote->get_num_attachments() == 2 );
+        CHECK( pNote->get_num_reldataobjs() == 1 );
 
-        ImoAttachments* pAttachments = note.get_attachments();
-        pAttachments->remove_from_all_relations(&note);
+        ImoAttachments* pAttachments = pNote->get_attachments();
+        pAttachments->remove_from_all_relations(pNote);
 
-        CHECK( note.get_num_attachments() == 0 );
-        CHECK( note.get_num_reldataobjs() == 0 );
-        CHECK( note.get_reldataobjs() == NULL );
+        CHECK( pNote->get_num_attachments() == 0 );
+        CHECK( pNote->get_num_reldataobjs() == 0 );
+        CHECK( pNote->get_reldataobjs() == NULL );
+
+        delete pNote;
     }
 
     TEST_FIXTURE(InternalModelTestFixture, AutoDelete)
     {
-        ImoNote note(k_step_D, 4, k_eighth);
+        Document doc(m_libraryScope);
+        ImoNote* pNote = ImFactory::inject_note(&doc, k_step_D, 4, k_eighth);
 
         ImoTieDto dto;
-        ImoTieData* pData = new ImoTieData(&dto);
-        ImoTie* pTie = new ImoTie();
-        note.include_in_relation(pTie, pData);
+        ImoTieData* pData = ImFactory::inject_tie_data(&doc, &dto);
+        ImoTie* pTie = static_cast<ImoTie*>( ImFactory::inject(k_imo_tie, &doc) );
+        pNote->include_in_relation(&doc, pTie, pData);
 
         pTie->remove_all();
         delete pTie;
 
-        CHECK( note.get_num_attachments() == 0 );
-        CHECK( note.get_num_reldataobjs() == 0 );
-        CHECK( note.get_reldataobjs() == NULL );
+        CHECK( pNote->get_num_attachments() == 0 );
+        CHECK( pNote->get_num_reldataobjs() == 0 );
+        CHECK( pNote->get_reldataobjs() == NULL );
+
+        delete pNote;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, InternalModel_AttachmentsOrdered)
+    TEST_FIXTURE(InternalModelTestFixture, AttachmentsOrdered)
     {
         //@ Attachments must be rendered in a predefined order, i.e. beams before
         //@ tuplets. For this, they must be stored in renderization order.
 
-        ImoNote note(k_step_A, 4, k_eighth);
+        Document doc(m_libraryScope);
+        ImoNote* pNote = ImFactory::inject_note(&doc, k_step_A, 4, k_eighth);
 
-        ImoScoreText* pText = new ImoScoreText("Hello world");
-        note.add_attachment(pText);
+        ImoScoreText* pText = static_cast<ImoScoreText*>(
+                                    ImFactory::inject(k_imo_score_text, &doc));
+        pText->set_text("Hello world");
+        pNote->add_attachment(&doc, pText);
 
-        DtoFermata fermata;
-        ImoFermata* pFermata = new ImoFermata(fermata);
-        note.add_attachment(pFermata);
+        ImoFermata* pFermata = static_cast<ImoFermata*>(
+                                ImFactory::inject(k_imo_fermata, &doc) );
+        pNote->add_attachment(&doc, pFermata);
 
         ImoTieDto dtoTie;
-        ImoTieData* pTieData = new ImoTieData(&dtoTie);
-        ImoTie* pTie = new ImoTie();
-        note.include_in_relation(pTie, pTieData);
+        ImoTieData* pTieData = ImFactory::inject_tie_data(&doc, &dtoTie);
+        ImoTie* pTie = static_cast<ImoTie*>( ImFactory::inject(k_imo_tie, &doc) );
+        pNote->include_in_relation(&doc, pTie, pTieData);
 
         ImoBeamDto dtoBeam;
-        ImoBeamData* pBeamData = new ImoBeamData(&dtoBeam);
-        ImoBeam* pBeam = new ImoBeam();
-        note.include_in_relation(pBeam, pBeamData);
+        ImoBeamData* pBeamData = ImFactory::inject_beam_data(&doc, &dtoBeam);
+        ImoBeam* pBeam = static_cast<ImoBeam*>( ImFactory::inject(k_imo_beam, &doc) );
+        pNote->include_in_relation(&doc, pBeam, pBeamData);
 
-        CHECK( note.get_attachment(0) == pTie );
-        CHECK( note.get_attachment(1) == pBeam );
-        CHECK( note.get_attachment(2) == pFermata );
-        CHECK( note.get_attachment(3) == pText );
-//        cout << "order = " << note.get_attachment(0)->get_obj_type() << ", "
-//             << note.get_attachment(1)->get_obj_type() << ", "
-//             << note.get_attachment(2)->get_obj_type() << ", "
-//             << note.get_attachment(3)->get_obj_type() << endl;
+        CHECK( pNote->get_attachment(0) == pTie );
+        CHECK( pNote->get_attachment(1) == pBeam );
+        CHECK( pNote->get_attachment(2) == pFermata );
+        CHECK( pNote->get_attachment(3) == pText );
+//        cout << "order = " << pNote->get_attachment(0)->get_obj_type() << ", "
+//             << pNote->get_attachment(1)->get_obj_type() << ", "
+//             << pNote->get_attachment(2)->get_obj_type() << ", "
+//             << pNote->get_attachment(3)->get_obj_type() << endl;
+
+        delete pNote;
     }
 
 
@@ -826,55 +981,230 @@ SUITE(InternalModelTest)
 
     TEST_FIXTURE(InternalModelTestFixture, Note_ConstructorDefaults)
     {
-        ImoNote note(k_step_A, 4, k_eighth);
+        Document doc(m_libraryScope);
+        ImoNote* pNote = ImFactory::inject_note(&doc, k_step_A, 4, k_eighth);
 
-        CHECK( note.get_step() == k_step_A );
-        CHECK( note.get_octave() == 4 );
-        CHECK( note.get_note_type() == k_eighth );
-        CHECK( note.get_dots() == 0 );
-        CHECK( note.get_voice() == 0 );
-        CHECK( note.get_staff() == 0 );
-        CHECK( note.get_duration() == 32.0f );
-        CHECK( note.get_accidentals() == k_no_accidentals );
-        CHECK( note.get_stem_direction() == k_stem_default );
+        CHECK( pNote->get_step() == k_step_A );
+        CHECK( pNote->get_octave() == 4 );
+        CHECK( pNote->get_note_type() == k_eighth );
+        CHECK( pNote->get_dots() == 0 );
+        CHECK( pNote->get_voice() == 0 );
+        CHECK( pNote->get_staff() == 0 );
+        CHECK( pNote->get_duration() == 32.0f );
+        CHECK( pNote->get_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_stem_direction() == k_stem_default );
+
+        delete pNote;
     }
 
     TEST_FIXTURE(InternalModelTestFixture, Note_ConstructorFull)
     {
-        ImoNote note(k_step_A, 4, k_eighth, k_flat, 1, 2, 3, k_stem_up);
+        Document doc(m_libraryScope);
+        ImoNote* pNote = ImFactory::inject_note(&doc, k_step_A, 4, k_eighth, k_flat, 1, 2, 3, k_stem_up);
 
-        CHECK( note.get_step() == k_step_A );
-        CHECK( note.get_octave() == 4 );
-        CHECK( note.get_note_type() == k_eighth );
-        CHECK( note.get_dots() == 1 );
-        CHECK( note.get_voice() == 3 );
-        CHECK( note.get_staff() == 2 );
-        CHECK( note.get_duration() == 48.0f );
-        CHECK( note.get_accidentals() == k_flat );
-        CHECK( note.get_stem_direction() == k_stem_up );
+        CHECK( pNote->get_step() == k_step_A );
+        CHECK( pNote->get_octave() == 4 );
+        CHECK( pNote->get_note_type() == k_eighth );
+        CHECK( pNote->get_dots() == 1 );
+        CHECK( pNote->get_voice() == 3 );
+        CHECK( pNote->get_staff() == 2 );
+        CHECK( pNote->get_duration() == 48.0f );
+        CHECK( pNote->get_accidentals() == k_flat );
+        CHECK( pNote->get_stem_direction() == k_stem_up );
+
+        delete pNote;
     }
 
     TEST_FIXTURE(InternalModelTestFixture, Note_TupletModifiesDuration)
     {
         //@ Note duration is modified by tuplet
 
-        ImoNote note(k_step_A, 4, k_eighth);
-        CHECK( is_equal_time(note.get_duration(), 32.0f) );
+        Document doc(m_libraryScope);
+        ImoNote* pNote = ImFactory::inject_note(&doc, k_step_A, 4, k_eighth);
+        CHECK( is_equal_time(pNote->get_duration(), 32.0f) );
 
         ImoTupletDto dto;
         dto.set_tuplet_type(ImoTupletDto::k_start);
-        dto.set_note_rest(&note);
+        dto.set_note_rest(pNote);
         dto.set_actual_number(3);
         dto.set_normal_number(2);
-        ImoTupletData* pTupletData = new ImoTupletData(&dto);
-        ImoTuplet* pTuplet = new ImoTuplet(&dto);
-        note.include_in_relation(pTuplet, pTupletData);
+        ImoTupletData* pTupletData = ImFactory::inject_tuplet_data(&doc, &dto);
+        ImoTuplet* pTuplet = ImFactory::inject_tuplet(&doc, &dto);
+        pNote->include_in_relation(&doc, pTuplet, pTupletData);
 
-        //cout << "note duration = " << note.get_duration() << endl;
-        CHECK( note.is_in_tuplet() == true );
-        CHECK( is_equal_time(note.get_duration(), 21.3333f) );
+        //cout << "note duration = " << pNote->get_duration() << endl;
+        CHECK( pNote->is_in_tuplet() == true );
+        CHECK( is_equal_time(pNote->get_duration(), 21.3333f) );
+
+        delete pNote;
     }
 
+    // ImoStyle -----------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, Score_GetDefaultStyle)
+    {
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
+        ImoStyle* pStyle = pScore->get_default_style();
+
+        CHECK( pStyle != NULL );
+        CHECK( pStyle->get_name() == "Default style" );
+        CHECK( pStyle->get_color_property(ImoStyle::k_color) == Color(0,0,0,255) );
+        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Liberation serif" );
+        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_font_normal );
+        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_font_normal );
+        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 12.0f );
+
+        delete pScore;
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, Score_GetStyle)
+    {
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
+	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, &doc));
+        pStyle->set_name("Test style");
+	    pStyle->set_string_property(ImoStyle::k_font_name, "Callamet");
+        pStyle->set_float_property(ImoStyle::k_font_size, 12.0f);
+        pStyle->set_int_property(ImoStyle::k_font_style, ImoStyle::k_font_normal);
+        pStyle->set_int_property(ImoStyle::k_font_weight, ImoStyle::k_bold);
+        pStyle->set_color_property(ImoStyle::k_color, Color(15,16,27,132) );
+        pScore->add_style(pStyle);
+
+        ImoStyle* pStyle2 = pScore->find_style("Test style");
+        CHECK( pStyle == pStyle2 );
+        delete pScore;
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, DocumentHasDefaultStyle)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoStyle* pStyle = pDoc->get_style();
+
+        CHECK( pStyle != NULL );
+        CHECK( pStyle->get_name() == "Default style" );
+        CHECK( pStyle->get_color_property(ImoStyle::k_color) == Color(0,0,0,255) );
+        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Liberation serif" );
+        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_font_normal );
+        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_font_normal );
+        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 12.0f );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, ObjectInheritsParentStyle)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0)(content "
+            "(para (txt \"hello\")) ))" );
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoContent* pContent = pDoc->get_content();
+        TreeNode<ImoObj>::children_iterator it = pContent->begin();
+        CHECK( (*it)->is_paragraph() == true );
+        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(*it);
+        ImoStyle* pStyle = pImo->get_style();
+        CHECK( pStyle != NULL );
+        CHECK( pStyle->get_name() == "Default style" );
+        CHECK( pStyle->get_color_property(ImoStyle::k_color) == Color(0,0,0,255) );
+        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Liberation serif" );
+        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_font_normal );
+        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_font_normal );
+        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 12.0f );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, ObjectInheritsParentStyleAttributes)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0)"
+            "(styles "
+                "(defineStyle \"Default style\" (margin-bottom 300))"
+                "(defineStyle \"para\" (margin-top 400))"
+            ")"
+            "(content "
+                "(para (style \"para\")(txt \"hello\"))"
+            "))" );
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoContent* pContent = pDoc->get_content();
+        TreeNode<ImoObj>::children_iterator it = pContent->begin();
+        CHECK( (*it)->is_paragraph() == true );
+        ImoContentObj* pPara = dynamic_cast<ImoContentObj*>(*it);
+        CHECK( pPara->margin_top() == 400 );
+        CHECK( pPara->margin_bottom() == 300 );
+    }
+
+    // API ------------------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, API_AddParagraphToDocument)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+
+        doc.add_paragraph();
+
+        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoContent* pContent = pImoDoc->get_content();
+        TreeNode<ImoObj>::children_iterator it = pContent->begin();
+        CHECK( (*it)->is_paragraph() == true );
+        CHECK( pContent->get_num_children() == 1 );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, API_AddParagraphToContent)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoContent* pContent = pImoDoc->get_content();
+
+        pContent->add_paragraph();
+
+        TreeNode<ImoObj>::children_iterator it = pContent->begin();
+        CHECK( (*it)->is_paragraph() == true );
+        CHECK( pContent->get_num_children() == 1 );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, API_AddTextItemToParagraph)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+
+        pPara->add_text_item("hello world");
+
+        TreeNode<ImoObj>::children_iterator it = pPara->begin();
+        CHECK( (*it)->is_text_item() == true );
+        ++it;
+        CHECK( it == pPara->end() );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, API_AddScore)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+
+        doc.add_score();
+
+        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoContent* pContent = pImoDoc->get_content();
+        CHECK( pContent->get_num_children() == 1 );
+        TreeNode<ImoObj>::children_iterator it = pContent->begin();
+        CHECK( (*it)->is_score() == true );
+        ImoScore* pScore = static_cast<ImoScore*>(*it);
+        CHECK( pScore->get_num_instruments() == 0 );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, API_AddInstrument)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoScore* pScore = doc.add_score();
+
+        pScore->add_instrument();
+
+        ImoDocument* pImoDoc = doc.get_imodoc();
+        ImoContent* pContent = pImoDoc->get_content();
+        CHECK( pContent->get_num_children() == 1 );
+        CHECK( pScore->get_num_instruments() == 1 );
+    }
 
 
 }

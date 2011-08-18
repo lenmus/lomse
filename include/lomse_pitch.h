@@ -213,30 +213,38 @@ public:
 //    MidiPitch get_midi_pitch() const;
 //
 //};
-//
-//
-//
-////---------------------------------------------------------------------------------------
-//// MidiPitch
-////---------------------------------------------------------------------------------------
-//class MidiPitch
-//{
-//protected:
-//    int m_pitch;
-//
-//public:
-//    MidiPitch(int note) : m_pitch(note) {}
-//    MidiPitch(int step, int octave, int acc);
-//
-//    std::string to_ldp_name();
-//    bool is_natural_note(int nKey);
-//
-//};
-//
-//#define LOMSE_C4_MPITCH   60
-//
-//
-//
+
+
+
+//---------------------------------------------------------------------------------------
+// MidiPitch
+//---------------------------------------------------------------------------------------
+class MidiPitch
+{
+protected:
+    int m_pitch;
+
+public:
+    MidiPitch(int note) : m_pitch(note) {}
+    MidiPitch(int step, int octave, int acc=0);
+
+    //operations
+    //MidiPitch operator - (MidiPitch pitch) { return MidiPitch(m_pitch - pitch); }
+    MidiPitch operator -(int i) { return MidiPitch(m_pitch - i); }
+    MidiPitch operator +(int i) { return MidiPitch(m_pitch + i); }
+
+    // operator to cast to an int
+    operator const int() { return m_pitch; }
+
+    //std::string to_ldp_name();
+    //bool is_natural_note(int nKey);
+
+};
+
+#define LOMSE_C4_MPITCH   60
+
+
+
 ////---------------------------------------------------------------------------------------
 //// FPitch
 ////  Base-40 absolute pitch representation. Interval-invariant. Only 2 accidentals

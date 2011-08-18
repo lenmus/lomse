@@ -20,19 +20,23 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_gm_basic.h"
 #include "lomse_box_system.h"
 #include "lomse_shape_staff.h"
-
+#include "lomse_internal_model.h"
+#include "lomse_im_note.h"
 #include "lomse_document.h"
 #include "lomse_interactor.h"
 #include "lomse_graphic_view.h"
 #include "lomse_doorway.h"
 #include "lomse_screen_drawer.h"
+#include "lomse_analyser.h"
+#include "lomse_model_builder.h"
+#include "lomse_im_factory.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -72,8 +76,6 @@ public:
     bool update_window_invoked() { return m_fUpdateWindowInvoked; }
     const std::string& get_title() { return m_title; }
     double get_screen_ppi() const { return 96.0; }
-    void start_timer() {}
-    double elapsed_time() const { return 0.0; }
 
 };
 
@@ -376,6 +378,44 @@ SUITE(GraphicModelTest)
         delete pIntor;
     }
 
-}
+    TEST_FIXTURE(GraphicModelTestFixture, NoterestAddedToShapesMap)
+    {
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+
+        Document doc(libraryScope);
+        doc.create_empty();
+
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoScore* pScore = static_cast<ImoScore*>( 
+                                ImFactory::inject(k_imo_score, &doc) );
+        pDoc->append_content_item(pScore);
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        pScore->add_instrument(pInstr);
+        ImoMusicData* pMD = static_cast<ImoMusicData*>(
+                                ImFactory::inject(k_imo_music_data, &doc) );
+        pInstr->append_child(pMD);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
+        pMD->append_child(pClef);
+        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(&doc, "(n c4 q)"));
+        pMD->append_child(pNote);
+
+        doc.end_of_changes();
+
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        GraphicModel* pModel = pIntor->get_graphic_model();
+
+        GmoShape* pShape = pModel->get_shape_for_noterest(pNote);
+        CHECK ( pShape != NULL );
+        CHECK ( pShape->is_shape_note() == true );
+
+        delete pIntor;
+    }
+
+};
 
 

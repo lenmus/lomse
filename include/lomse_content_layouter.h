@@ -21,60 +21,43 @@
 #ifndef __LOMSE_CONTENT_LAYOUTER_H__        //to avoid nested includes
 #define __LOMSE_CONTENT_LAYOUTER_H__
 
-//#include <sstream>
-//
-//using namespace std;
+#include "lomse_layouter.h"
+#include "lomse_injectors.h"
+#include "lomse_basic.h"
+
 
 namespace lomse
 {
 
 //forward declarations
+class InternalModel;
+class ImoContent;
 class ImoContentObj;
+class ImoDocument;
+class ImoStyles;
 class GraphicModel;
 class GmoBox;
+class GmoBoxDocPage;
+class DocLayouter;
 
 
 //----------------------------------------------------------------------------------
 // ContentLayouter
-// Abstract class to implement the layout algorithm for any document content item.
-class ContentLayouter
+//  layout algorithm for a collection of content items.
+class ContentLayouter : public Layouter
 {
 protected:
-    ImoContentObj* m_pImo;
-    bool m_fIsLayouted;
-    GraphicModel* m_pGModel;
+    ImoContent* m_pContent;
 
 public:
-    ContentLayouter(ImoContentObj* pImo, GraphicModel* pGModel)
-        : m_pImo(pImo)
-        , m_fIsLayouted(false)
-        , m_pGModel(pGModel)
-    {
-    }
+    ContentLayouter(ImoContentObj* pItem, Layouter* pParent,
+                    GraphicModel* pGModel, LibraryScope& libraryScope, ImoStyles* pStyles);
+    virtual ~ContentLayouter();
 
-    virtual ~ContentLayouter() {}
+    //implementation of Layouter virtual methods
+    void layout_in_box();
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
 
-    virtual void layout_in_page(GmoBox* pContainerBox) = 0;
-    virtual void prepare_to_start_layout() { m_fIsLayouted = false; }
-    virtual bool is_item_layouted() { return m_fIsLayouted; }
-    virtual void set_layout_is_finished(bool value) { m_fIsLayouted = value; }
-    virtual GmoBox* create_main_box() = 0;
-};
-
-
-//----------------------------------------------------------------------------------
-class NullLayouter : public ContentLayouter
-{
-protected:
-
-public:
-    NullLayouter(ImoContentObj* pImo, GraphicModel* pGModel)
-        : ContentLayouter(pImo, pGModel) {}
-    ~NullLayouter() {}
-
-    void layout_in_page(GmoBox* pContainerBox) {}
-    bool is_item_layouted() { return true; }
-    GmoBox* create_main_box() { return 0; }
 };
 
 

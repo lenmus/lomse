@@ -29,9 +29,6 @@ using namespace std;
 namespace lomse
 {
 
-class DtoNoteRest;
-class DtoNote;
-class DtoRest;
 
 //noteheads
 enum ENoteHeads
@@ -84,8 +81,7 @@ protected:
     int     m_nVoice;
 
 public:
-    ImoNoteRest(int objtype) : ImoStaffObj(objtype) {}
-    ImoNoteRest(int objtype, DtoNoteRest& dto);
+    ImoNoteRest(int objtype);
     virtual ~ImoNoteRest() {}
 
     //getters
@@ -94,9 +90,15 @@ public:
     inline int get_dots() { return m_nDots; }
     inline int get_voice() { return m_nVoice; }
 
+    //setters
+    inline void set_note_type(int noteType) { m_nNoteType = noteType; }
+    inline void set_dots(int dots) { m_nDots = dots; }
+    inline void set_voice(int voice) { m_nVoice = voice; }
+    void set_note_type_and_dots(int noteType, int dots);
+
     //beam
     ImoBeam* get_beam();
-    inline bool is_beamed() { return find_attachment(ImoObj::k_beam) != NULL; }
+    inline bool is_beamed() { return find_attachment(k_imo_beam) != NULL; }
     void set_beam_type(int level, int type);
     int get_beam_type(int level);
     bool is_end_of_beam();
@@ -111,12 +113,11 @@ public:
 class ImoRest : public ImoNoteRest
 {
 protected:
+    friend class ImFactory;
+    ImoRest() : ImoNoteRest(k_imo_rest) {}
 
 public:
-    ImoRest();
-    ImoRest(DtoRest& dto);
-
-    virtual ~ImoRest() {}
+    ~ImoRest() {}
 
 };
 
@@ -132,12 +133,12 @@ protected:
     ImoTie* m_pTiePrev;
     ImoChord* m_pChord;
 
-
-public:
+    friend class ImFactory;
     ImoNote();
     ImoNote(int step, int octave, int noteType, int accidentals=0,
             int dots=0, int staff=0, int voice=0, int stem=k_stem_default);
-    ImoNote(DtoNote& dto);
+
+public:
     ~ImoNote();
 
     //pitch
@@ -146,6 +147,14 @@ public:
     inline int get_accidentals() { return m_accidentals; }
     inline bool is_pitch_defined() { return m_step != k_no_pitch; }
     inline bool accidentals_are_cautionary() { return false; }  //TODO
+    inline void set_step(int step) { m_step = step; }
+    inline void set_octave(int octave) { m_octave = octave; }
+    inline void set_accidentals(int accidentals) { m_accidentals = accidentals; }
+    inline void set_pitch(int step, int octave, int accidentals) {
+        m_step = step;
+        m_octave = octave;
+        m_accidentals = accidentals;
+    }
 
     //ties
     inline ImoTie* get_tie_next() { return m_pTieNext; }
@@ -157,6 +166,7 @@ public:
 
     //stem
     inline int get_stem_direction() { return m_stemDirection; }
+    inline void set_stem_direction(int value) { m_stemDirection = value; }
     inline bool is_stem_up() { return m_stemDirection == k_stem_up; }
     inline bool is_stem_down() { return m_stemDirection == k_stem_down; }
     inline bool is_stem_default() { return m_stemDirection == k_stem_default; }
@@ -166,6 +176,9 @@ public:
     ImoChord* get_chord();
     bool is_start_of_chord();
     bool is_end_of_chord();
+
+    ////in chord
+    //inline void set_in_chord(bool value) { m_inChord = value; }
 
 
 };

@@ -20,7 +20,7 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_system_layouter.h"
@@ -29,6 +29,8 @@
 #include "lomse_internal_model.h"
 #include "lomse_score_layouter.h"
 #include "lomse_score_meter.h"
+#include "lomse_document.h"
+#include "lomse_im_factory.h"
 
 #include <cmath>
 
@@ -140,31 +142,38 @@ SUITE(ColumnStorageTest)
 
     TEST_FIXTURE(ColumnStorageTestFixture, IncludeObjectCreatesLine)
     {
+        Document doc(m_libraryScope);
         MyColumnStorage storage(30.0f, 60.0f);
         CHECK( storage.my_are_there_lines() == false );
-        ImoClef clef(ImoClef::k_G2);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_G2);
         GmoShape* pShape = NULL;
         int iStaff = 0;
         int iLine = 0;
         int iInstr = 0;
         float rTime = 0.0f;
 
-        storage.include_object(iLine, iInstr, &clef, rTime, iStaff, pShape, true);
+        storage.include_object(iLine, iInstr, pClef, rTime, iStaff, pShape, true);
 
         CHECK( storage.get_fixed_space_at_start() == 60.0f );
         CHECK( storage.my_are_there_lines() == true );
+
+        delete pClef;
     }
 
     TEST_FIXTURE(ColumnStorageTestFixture, FixedSpaceForNext)
     {
+        Document doc(m_libraryScope);
         MyColumnStorage storage(30.0f, 60.0f);
-        ImoBarline barline(ImoBarline::k_end);
+        ImoBarline* pBar = static_cast<ImoBarline*>(
+                                ImFactory::inject(k_imo_barline, &doc) );
+        pBar->set_type(ImoBarline::k_end);
         GmoShape* pShape = NULL;
         int iStaff = 0;
         int iLine = 0;
         int iInstr = 0;
         float rTime = 64.0f;
-        storage.include_object(iLine, iInstr, &barline, rTime, iStaff, pShape, false);
+        storage.include_object(iLine, iInstr, pBar, rTime, iStaff, pShape, false);
 
         storage.determine_sizes();
 
@@ -172,6 +181,8 @@ SUITE(ColumnStorageTest)
         //cout << "fixed for next = " << storage.get_fixed_space_for_next_column() << endl;
         CHECK( is_equal(storage.get_end_hook_width(), 0.0f) );
         CHECK( is_equal(storage.get_fixed_space_for_next_column(), 0.0f) );
+
+        delete pBar;
     }
 
     TEST_FIXTURE(ColumnStorageTestFixture, Measurements_NoBarline)

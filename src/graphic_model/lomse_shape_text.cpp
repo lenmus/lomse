@@ -33,7 +33,7 @@ namespace lomse
 // GmoShapeText implementation
 //=======================================================================================
 GmoShapeText::GmoShapeText(ImoObj* pCreatorImo, int idx, const std::string& text,
-                           ImoTextStyleInfo* pStyle, LUnits x, LUnits y,
+                           ImoStyle* pStyle, LUnits x, LUnits y,
                            LibraryScope& libraryScope)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_text, idx, Color(0,0,0))
     , m_text(text)
@@ -53,14 +53,14 @@ GmoShapeText::GmoShapeText(ImoObj* pCreatorImo, int idx, const std::string& text
 
     //color
     if (m_pStyle)
-        m_color = m_pStyle->get_color();
+        m_color = m_pStyle->get_color_property(ImoStyle::k_color);
 }
 
 //---------------------------------------------------------------------------------------
 Color GmoShapeText::get_normal_color()
 {
     if (m_pStyle)
-        return m_pStyle->get_color();
+        return m_pStyle->get_color_property(ImoStyle::k_color);
     else
         return m_color;
 }
@@ -88,8 +88,8 @@ void GmoShapeText::select_font()
     if (!m_pStyle)
         meter.select_font("Times New Roman", 18.0);
     else
-        meter.select_font(m_pStyle->get_font_name(),
-                          m_pStyle->get_font_size(),
+        meter.select_font(m_pStyle->get_string_property(ImoStyle::k_font_name),
+                          m_pStyle->get_float_property(ImoStyle::k_font_size),
                           m_pStyle->is_bold(),
                           m_pStyle->is_italic() );
 }
@@ -101,7 +101,7 @@ void GmoShapeText::select_font()
 // GmoShapeWord implementation
 //=======================================================================================
 GmoShapeWord::GmoShapeWord(ImoObj* pCreatorImo, int idx, const std::string& text,
-                           ImoTextStyleInfo* pStyle, LUnits x, LUnits y,
+                           ImoStyle* pStyle, LUnits x, LUnits y,
                            LibraryScope& libraryScope)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_word, idx, Color(0,0,0))
     , m_text(text)
@@ -120,7 +120,7 @@ GmoShapeWord::GmoShapeWord(ImoObj* pCreatorImo, int idx, const std::string& text
     m_origin.y = y - m_size.height;     //move reference at baseline
 
     //color
-    m_color = m_pStyle->get_color();
+    m_color = m_pStyle->get_color_property(ImoStyle::k_color);
 }
 
 //---------------------------------------------------------------------------------------
@@ -132,11 +132,31 @@ Color GmoShapeWord::get_normal_color()
 //---------------------------------------------------------------------------------------
 void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
+    if (!dynamic_cast<ImoContentObj*>(m_pCreatorImo)->is_visible())
+        return;
+
     select_font();
-    pDrawer->set_text_color( determine_color_to_use(opt) );
+    Color color = determine_color_to_use(opt);
+    pDrawer->set_text_color(color);
     LUnits x = m_origin.x;
     LUnits y = m_origin.y + m_size.height;     //reference is at text bottom
     pDrawer->draw_text(x, y, m_text);
+
+    //text decoration
+    if (m_pStyle->get_int_property(ImoStyle::k_text_decoration) == ImoStyle::k_decoration_underline)
+    {
+        TextMeter meter(m_libraryScope);
+        LUnits xStart = m_origin.x;
+        LUnits xEnd = m_origin.x + m_size.width;
+        LUnits y = m_origin.y + m_size.height;
+        pDrawer->begin_path();
+        pDrawer->fill(color);
+        pDrawer->stroke(color);
+        pDrawer->stroke_width(15.0);
+        pDrawer->move_to(xStart, y);
+        pDrawer->hline_to(xEnd);
+        pDrawer->end_path();
+    }
 
     //draw reference lines
     if (false)
@@ -146,12 +166,10 @@ void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
         LUnits xEnd = m_origin.x + m_size.width;
         pDrawer->begin_path();
         pDrawer->fill(Color(0, 0, 0, 0));
-        pDrawer->stroke_width(10.0);
 
         float factor = 1.500f;
         //org
         LUnits yOrg = m_origin.y;
-        pDrawer->begin_path();
         pDrawer->stroke(Color(255, 0, 0));
         pDrawer->stroke_width(10.0);
         pDrawer->move_to(xStart, yOrg);
@@ -160,6 +178,7 @@ void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
 
         //baseline
         LUnits yBase = m_origin.y + m_size.height;
+        pDrawer->begin_path();
         pDrawer->stroke(Color(0, 0, 255));
         pDrawer->stroke_width(10.0);
         pDrawer->move_to(xStart, yBase);
@@ -196,8 +215,8 @@ void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
 void GmoShapeWord::select_font()
 {
     TextMeter meter(m_libraryScope);
-    meter.select_font(m_pStyle->get_font_name(),
-                      m_pStyle->get_font_size(),
+    meter.select_font(m_pStyle->get_string_property(ImoStyle::k_font_name),
+                      m_pStyle->get_float_property(ImoStyle::k_font_size),
                       m_pStyle->is_bold(),
                       m_pStyle->is_italic() );
 }
@@ -274,7 +293,7 @@ void GmoShapeWord::select_font()
 //{
 //    //compute rectangle bounds
 //    LUnits uxLeft, uxRight;
-//    lmScore* pScore = m_pOwner->GetScore();
+//    ImoScore* pScore = m_pOwner->GetScore();
 //    switch (m_nBlockAlign)
 //    {
 //        case lmBLOCK_ALIGN_DEFAULT:
@@ -541,12 +560,12 @@ void GmoShapeWord::select_font()
 //
 ////---------------------------------------------------------------------------------------
 ////helper class to contain a line of text (to distribute text inside the box)
-//class lmTextLine
+//class TextLine
 //{
 //public:
-//    lmTextLine(std::string text, LUnits width, LUnits height)
+//    TextLine(std::string text, LUnits width, LUnits height)
 //        : sText(text), uWidth(width), uHeight(height) {}
-//    ~lmTextLine() {}
+//    ~TextLine() {}
 //
 //	std::string		sText;
 //    LUnits        uWidth;
@@ -601,7 +620,7 @@ void GmoShapeWord::select_font()
 //void GmoShapeTextbox::DeleteTextLines()
 //{
 //    //delete text lines
-//    std::list<lmTextLine*>::iterator it;
+//    std::list<TextLine*>::iterator it;
 //    for (it = m_TextLines.begin(); it != m_TextLines.end(); ++it)
 //        delete *it;
 //    m_TextLines.clear();
@@ -624,19 +643,19 @@ void GmoShapeWord::select_font()
 //    LUnits uBoxAreaWidth = m_uBoundsBottom.x - m_uBoundsTop.x - uxMargin - uxMargin;
 //
 //	//split text in lines
-//    lmTextLine* pCurLine;
+//    TextLine* pCurLine;
 //    LUnits uxLine = uxMargin;
 //    LUnits uyLine = uyMargin;
 //	if (uBoxAreaWidth >= m_uTextWidth)
 //    {
 //        //the text fits in one line
-//        pCurLine = new lmTextLine(m_text, m_uTextWidth, m_uTextHeight);
+//        pCurLine = new TextLine(m_text, m_uTextWidth, m_uTextHeight);
 //    }
 //    else
 //	{
 //		//we have to split the text. Loop to add chars until line full
 //		LUnits uWidth, uHeight;
-//        pCurLine = new lmTextLine(_T(""), 0.0f, m_uTextHeight);
+//        pCurLine = new TextLine(_T(""), 0.0f, m_uTextHeight);
 //		int iC = 0;
 //		LUnits uAvailable = uBoxAreaWidth;
 //		while(iC < (int)m_text.Length())
@@ -651,7 +670,7 @@ void GmoShapeWord::select_font()
 //                pCurLine->uPos = UPoint(uxLine, uyLine);
 //                uyLine += pCurLine->uHeight;
 //
-//                pCurLine = new lmTextLine(_T(""), 0.0f, m_uTextHeight);
+//                pCurLine = new TextLine(_T(""), 0.0f, m_uTextHeight);
 //                uAvailable = uBoxAreaWidth;
 //            }
 //
@@ -729,7 +748,7 @@ void GmoShapeWord::select_font()
 //    pPaper->SetTextForeground(m_nTxtColor);
 //
 //    LUnits uySpace = m_uBoundsBottom.y - m_uBoundsTop.y;
-//    std::list<lmTextLine*>::iterator it;
+//    std::list<TextLine*>::iterator it;
 //    for (it = m_TextLines.begin(); it != m_TextLines.end(); ++it)
 //    {
 //        LUnits uySpaceLeft = uySpace - (*it)->uPos.y - (*it)->uHeight;
@@ -781,7 +800,7 @@ void GmoShapeWord::select_font()
 //    dc2.DrawRectangle(0, 0, GetBounds().GetWidth(), GetBounds().GetHeight() );
 //    dc2.SetTextForeground(g_pColors->ScoreSelected());
 //
-//    std::list<lmTextLine*>::iterator it;
+//    std::list<TextLine*>::iterator it;
 //    for (it = m_TextLines.begin(); it != m_TextLines.end(); ++it)
 //    {
 //        LUnits uySpaceLeft = uySpace - (*it)->uPos.y - (*it)->uHeight;

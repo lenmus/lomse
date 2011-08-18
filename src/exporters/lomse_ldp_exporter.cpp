@@ -559,36 +559,36 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
 
     switch(pImo->get_obj_type())
     {
-        case ImoObj::k_barline:         return new BarlineLdpGenerator(pImo, this);
-//        case ImoObj::k_beam_dto:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_bezier_info:         return new XxxxxxxLdpGenerator(pImo, this);
-        case ImoObj::k_clef:            return new ClefLdpGenerator(pImo, this);
-//        case ImoObj::k_color_dto:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_instr_group:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_midi_info:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_option:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_system_info:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_tie_dto:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_tuplet_dto:         return new XxxxxxxLdpGenerator(pImo, this);
-        case ImoObj::k_document:        return new LenmusdocLdpGenerator(pImo, this);
-//        case ImoObj::k_content:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_music_data:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_instrument:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_score:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_key_signature:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_time_signature:         return new XxxxxxxLdpGenerator(pImo, this);
-        case ImoObj::k_note:            return new NoteLdpGenerator(pImo, this);
-        case ImoObj::k_rest:            return new RestLdpGenerator(pImo, this);
-//        case ImoObj::k_go_back_fwd:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_metronome_mark:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_control:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_spacer:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_figured_bass:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_score_text:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_fermata:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_tie:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_beam:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case ImoObj::k_tuplet:         return new XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_barline:         return new BarlineLdpGenerator(pImo, this);
+//        case k_imo_beam_dto:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_bezier_info:         return new XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_clef:            return new ClefLdpGenerator(pImo, this);
+//        case k_imo_color_dto:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_instr_group:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_midi_info:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_option:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_system_info:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_tie_dto:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_tuplet_dto:         return new XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_document:        return new LenmusdocLdpGenerator(pImo, this);
+//        case k_imo_content:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_music_data:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_instrument:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_score:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_key_signature:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_time_signature:         return new XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_note:            return new NoteLdpGenerator(pImo, this);
+        case k_imo_rest:            return new RestLdpGenerator(pImo, this);
+//        case k_imo_go_back_fwd:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_metronome_mark:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_control:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_spacer:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_figured_bass:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_score_text:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_fermata:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_tie:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_beam:         return new XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_tuplet:         return new XxxxxxxLdpGenerator(pImo, this);
         default:
             return new ErrorLdpGenerator(pImo, this);
     }
@@ -601,7 +601,7 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
 //---------------------------------------------------------------------------------------
 std::string LdpExporter::clef_type_to_ldp(int clefType)
 {
-    //AWARE: indexes in correspondence with enum ImoClef::k__type
+    //AWARE: indexes in correspondence with enum k_clef__type
     static const std::string name[] = {
         "G",
         "F4",
@@ -626,7 +626,7 @@ std::string LdpExporter::clef_type_to_ldp(int clefType)
     static const std::string undefined = "undefined";
 
 
-    if (clefType == ImoClef::k_undefined)
+    if (clefType == k_clef_undefined)
         return undefined;
     else
         return name[clefType];

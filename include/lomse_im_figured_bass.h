@@ -153,7 +153,7 @@ protected:
 //    ImoFiguredBassLine*  m_pNextFBLine;
 
 public:
-    ImoFiguredBass() : ImoStaffObj(ImoObj::k_figured_bass) {}
+    ImoFiguredBass() : ImoStaffObj(k_imo_figured_bass) {}
     ImoFiguredBass(ImoFiguredBassInfo& info);
     ~ImoFiguredBass();
 

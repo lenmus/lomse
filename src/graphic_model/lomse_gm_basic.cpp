@@ -21,6 +21,7 @@
 #include "lomse_gm_basic.h"
 
 #include "lomse_internal_model.h"
+#include "lomse_im_note.h"
 #include "lomse_drawer.h"
 #include "lomse_selections.h"
 #include "lomse_time.h"
@@ -39,7 +40,7 @@ namespace lomse
 GraphicModel::GraphicModel()
     : m_fCanBeDrawn(false)
 {
-    m_root = new GmoBoxDocument();
+    m_root = new GmoBoxDocument(this, NULL);    //TODO: replace NULL by ImoDocument
 }
 
 //---------------------------------------------------------------------------------------
@@ -47,6 +48,7 @@ GraphicModel::~GraphicModel()
 {
     delete m_root;
     delete_stubs();
+    m_noterestToShape.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -123,6 +125,46 @@ void GraphicModel::select_objects_in_rectangle(int iPage, SelectionSet& selectio
     get_page(iPage)->select_objects_in_rectangle(selection, selRect, flags);
 }
 
+//---------------------------------------------------------------------------------------
+GmoShape* GraphicModel::find_shape_for_object(ImoStaffObj* pSO)
+{
+    int numPages = get_num_pages();
+    for (int i = 0; i < numPages; ++i)
+    {
+        GmoShape* pShape = get_page(i)->find_shape_for_object(pSO);
+        if (pShape)
+            return pShape;
+    }
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* GraphicModel::get_shape_for_noterest(ImoNoteRest* pNR)
+{
+    map<ImoNoteRest*, GmoShape*>::const_iterator it =  m_noterestToShape.find( pNR );
+	if (it != m_noterestToShape.end())
+		return it->second;
+    else
+        return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicModel::store_in_map_imo_shape(ImoNoteRest* pNR, GmoShape* pShape)
+{
+    if (pNR)
+        m_noterestToShape[pNR] = pShape;
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicModel::highlight_object(ImoStaffObj* pSO, bool value)
+{
+    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>( pSO );
+    if (pNR)
+    {
+        GmoShape* pShape = get_shape_for_noterest(pNR);
+        pShape->set_highlighted(value);
+    }
+}
 
 
 //=======================================================================================
@@ -134,11 +176,12 @@ static std::map<int, std::string> m_typeToName;
 static bool m_fNamesLoaded = false;
 
 //---------------------------------------------------------------------------------------
-GmoObj::GmoObj(int objtype)
+GmoObj::GmoObj(int objtype, ImoObj* pCreatorImo)
     : m_objtype(objtype)
     , m_origin(0.0f, 0.0f)
     , m_size(0.0f, 0.0f)
     , m_fSelected(false)
+    , m_pCreatorImo(pCreatorImo)
 {
 }
 
@@ -219,10 +262,13 @@ string& GmoObj::get_name(int objtype)
         m_typeToName[k_box_document]            = "box-document   ";
         m_typeToName[k_box_doc_page]            = "box-doc-page   ";
         m_typeToName[k_box_doc_page_content]    = "box-docpg-cont.";
+        m_typeToName[k_box_inline]              = "box-inline     ";
+        m_typeToName[k_box_paragraph]           = "box-paragraph  ";
         m_typeToName[k_box_score_page]          = "box-score-page ";
         m_typeToName[k_box_slice]               = "box-slice      ";
         m_typeToName[k_box_slice_instr]         = "box-slice-intr ";
         m_typeToName[k_box_system]              = "box-system     ";
+
         // shapes
         m_typeToName[k_shape_accidentals]       = "accidentals    ";
         m_typeToName[k_shape_accidental_sign]   = "accidental-sign";
@@ -231,6 +277,7 @@ string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_beam]              = "beam           ";
         m_typeToName[k_shape_brace]             = "brace          ";
         m_typeToName[k_shape_bracket]           = "bracket        ";
+        m_typeToName[k_shape_button]            = "button         ";
         m_typeToName[k_shape_clef]              = "clef           ";
         m_typeToName[k_shape_dot]               = "dot            ";
         m_typeToName[k_shape_fermata]           = "fermata        ";
@@ -239,6 +286,7 @@ string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_key_signature]     = "key            ";
         m_typeToName[k_shape_note]              = "note           ";
         m_typeToName[k_shape_notehead]          = "notehead       ";
+        m_typeToName[k_shape_rectangle]         = "rectangle      ";
         m_typeToName[k_shape_rest]              = "rest           ";
         m_typeToName[k_shape_rest_glyph]        = "rest-glyph     ";
         m_typeToName[k_shape_stem]              = "stem           ";
@@ -249,6 +297,8 @@ string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_time_signature_digit]
                                                 = "time-digit     ";
         m_typeToName[k_shape_tuplet]            = "tuplet         ";
+        m_typeToName[k_shape_word]              = "word           ";
+
         // stub
         m_typeToName[k_stub_score]              = "stub-score     ";
 
@@ -263,8 +313,8 @@ string& GmoObj::get_name(int objtype)
 //=======================================================================================
 // GmoBox
 //=======================================================================================
-GmoBox::GmoBox(int objtype)
-    : GmoObj(objtype)
+GmoBox::GmoBox(int objtype, ImoObj* pCreatorImo)
+    : GmoObj(objtype, pCreatorImo)
     , m_pParentBox(NULL)
     , m_uTopMargin(0.0f)
     , m_uBottomMargin(0.0f)
@@ -315,6 +365,13 @@ GmoBox* GmoBox::get_child_box(int i)  //i = 0..n-1
 }
 
 //---------------------------------------------------------------------------------------
+void GmoBox::add_child_box_and_its_shapes(GmoBox* child)
+{
+    add_child_box(child);
+    child->store_shapes_in(this);
+}
+
+//---------------------------------------------------------------------------------------
 void GmoBox::add_shape(GmoShape* shape, int layer)
 {
     shape->set_layer(layer);
@@ -323,6 +380,17 @@ void GmoBox::add_shape(GmoShape* shape, int layer)
 
 //    GmoBoxDocPage* pPage = get_parent_box_page();
 //    pPage->store_shape(shape, layer);
+}
+//---------------------------------------------------------------------------------------
+void GmoBox::store_shapes_in(GmoBox* pBox)
+{
+    std::list<GmoShape*>::iterator itS;
+    for (itS=m_shapes.begin(); itS != m_shapes.end(); ++itS)
+            pBox->add_shape(*itS, (*itS)->get_layer());
+
+    std::vector<GmoBox*>::iterator itB;
+    for (itB=m_childBoxes.begin(); itB != m_childBoxes.end(); ++itB)
+        (*itB)->store_shapes_in(pBox);
 }
 
 //---------------------------------------------------------------------------------------
@@ -355,6 +423,12 @@ GmoBoxDocPage* GmoBox::get_parent_box_page()
 }
 
 //---------------------------------------------------------------------------------------
+GraphicModel* GmoBox::get_graphic_model()
+{
+    return get_parent_box()->get_graphic_model();
+}
+
+//---------------------------------------------------------------------------------------
 GmoShape* GmoBox::get_shape(int i)  //i = 0..n-1
 {
     std::list<GmoShape*>::iterator it = m_shapes.begin();
@@ -368,15 +442,7 @@ GmoShape* GmoBox::get_shape(int i)  //i = 0..n-1
 //---------------------------------------------------------------------------------------
 void GmoBox::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    double xorg = m_origin.x;
-    double yorg = m_origin.y;
-
-    if (must_draw_bounds(opt))
-    {
-        Color color = get_box_color();
-        draw_box_bounds(pDrawer, xorg, yorg, color);
-    }
-
+    draw_border(pDrawer, opt);
     draw_shapes(pDrawer, opt);
 
     //draw contained boxes
@@ -394,13 +460,87 @@ void GmoBox::draw_shapes(Drawer* pDrawer, RenderOptions& opt)
 }
 
 //---------------------------------------------------------------------------------------
+void GmoBox::draw_border(Drawer* pDrawer, RenderOptions& opt)
+{
+    ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( m_pCreatorImo );
+    if (pImo)
+    {
+        ImoStyle* pStyle = pImo->get_style();
+        if (pStyle && (pStyle->get_lunits_property(ImoStyle::k_border_width_top) > 0.0f
+                       || pStyle->get_lunits_property(ImoStyle::k_border_width_bottom) > 0.0f
+                       || pStyle->get_lunits_property(ImoStyle::k_border_width_left) > 0.0f
+                       || pStyle->get_lunits_property(ImoStyle::k_border_width_right) > 0.0f) )
+        {
+            double xLeft = double(m_origin.x
+                           + pStyle->get_lunits_property(ImoStyle::k_margin_left));
+            double yTop = double(m_origin.y
+                          + pStyle->get_lunits_property(ImoStyle::k_margin_top));
+            double xRight = double(get_right()
+                            - pStyle->get_lunits_property(ImoStyle::k_margin_right));
+            double yBottom = double(get_bottom()
+                             - pStyle->get_lunits_property(ImoStyle::k_margin_bottom));
+
+            pDrawer->begin_path();
+            pDrawer->fill( Color(255, 255, 255, 0) );     //background white transparent
+            pDrawer->stroke( Color(0,0,0) );            //TODO: border color
+            pDrawer->move_to(xLeft, yTop);
+
+            //top border
+            if (pStyle->get_lunits_property(ImoStyle::k_border_width_top) > 0.0f)
+            {
+                pDrawer->stroke_width( pStyle->get_lunits_property(ImoStyle::k_border_width_top) );
+                pDrawer->hline_to(xRight);
+            }
+            else
+                pDrawer->move_to(xRight, yTop);
+
+            //right border
+            if (pStyle->get_lunits_property(ImoStyle::k_border_width_right) > 0.0f)
+            {
+                pDrawer->stroke_width( pStyle->get_lunits_property(ImoStyle::k_border_width_right) );
+                pDrawer->vline_to(yBottom);
+            }
+            else
+                pDrawer->move_to(xRight, yBottom);
+
+            //bottom border
+            if (pStyle->get_lunits_property(ImoStyle::k_border_width_bottom) > 0.0f)
+            {
+                pDrawer->stroke_width( pStyle->get_lunits_property(ImoStyle::k_border_width_bottom) );
+                pDrawer->hline_to(xLeft);
+            }
+            else
+                pDrawer->move_to(xLeft, yBottom);
+
+            //left border
+            if (pStyle->get_lunits_property(ImoStyle::k_border_width_left) > 0.0f)
+            {
+                pDrawer->stroke_width( pStyle->get_lunits_property(ImoStyle::k_border_width_left) );
+                pDrawer->vline_to(yTop);
+            }
+
+            pDrawer->end_path();
+        }
+    }
+
+    if (must_draw_bounds(opt))
+    {
+        double xorg = m_origin.x;
+        double yorg = m_origin.y;
+        Color color = get_box_color();
+        draw_box_bounds(pDrawer, xorg, yorg, color);
+    }
+}
+
+//---------------------------------------------------------------------------------------
 bool GmoBox::must_draw_bounds(RenderOptions& opt)
 {
     return (this->is_box_doc_page_content() && opt.draw_box_doc_page_content_flag)
-        || (this->is_item_main_box() && opt.draw_item_main_box_flag)
+        || (this->is_item_main_box() && opt.draw_box_container_flag)
         || (this->is_box_system() && opt.draw_box_system_flag)
         || (this->is_box_slice() && opt.draw_box_slice_flag)
-        || (this->is_box_slice_instr() && opt.draw_box_slice_instr_flag);
+        || (this->is_box_slice_instr() && opt.draw_box_slice_instr_flag)
+        || (this->is_box_inline() && opt.draw_box_inline_flag);
 }
 
 //---------------------------------------------------------------------------------------
@@ -491,7 +631,71 @@ void GmoBox::dump_shapes(ostream& outStream)
     for (itS=m_shapes.begin(); itS != m_shapes.end(); ++itS)
         (*itS)->dump(outStream);
 }
+//---------------------------------------------------------------------------------------
+LUnits GmoBox::get_content_top()
+{
+    if (m_pCreatorImo && m_pCreatorImo->is_contentobj())
+    {
+        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(m_pCreatorImo);
+        ImoStyle* pStyle = pImo->get_style();
+        if (pStyle)
+            return get_top() + pStyle->get_lunits_property(ImoStyle::k_margin_top)
+                   + pStyle->get_lunits_property(ImoStyle::k_border_width_top)
+                   + pStyle->get_lunits_property(ImoStyle::k_padding_top);
+    }
+    return get_top();
+}
 
+//---------------------------------------------------------------------------------------
+LUnits GmoBox::get_content_left()
+{
+    if (m_pCreatorImo && m_pCreatorImo->is_contentobj())
+    {
+        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(m_pCreatorImo);
+        ImoStyle* pStyle = pImo->get_style();
+        if (pStyle)
+            return get_left() + pStyle->get_lunits_property(ImoStyle::k_margin_left)
+                   + pStyle->get_lunits_property(ImoStyle::k_border_width_left)
+                   + pStyle->get_lunits_property(ImoStyle::k_padding_left);
+    }
+    return get_left();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoBox::get_content_width()
+{
+    if (m_pCreatorImo && m_pCreatorImo->is_contentobj())
+    {
+        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(m_pCreatorImo);
+        ImoStyle* pStyle = pImo->get_style();
+        if (pStyle)
+            return get_width() - pStyle->get_lunits_property(ImoStyle::k_margin_left)
+                   - pStyle->get_lunits_property(ImoStyle::k_border_width_left)
+                   - pStyle->get_lunits_property(ImoStyle::k_padding_left)
+                   - pStyle->get_lunits_property(ImoStyle::k_margin_right)
+                   - pStyle->get_lunits_property(ImoStyle::k_border_width_right)
+                   - pStyle->get_lunits_property(ImoStyle::k_padding_right);
+    }
+    return get_width();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GmoBox::get_content_height()
+{
+    if (m_pCreatorImo && m_pCreatorImo->is_contentobj())
+    {
+        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(m_pCreatorImo);
+        ImoStyle* pStyle = pImo->get_style();
+        if (pStyle)
+            return get_height() - pStyle->get_lunits_property(ImoStyle::k_margin_top)
+                   - pStyle->get_lunits_property(ImoStyle::k_border_width_top)
+                   - pStyle->get_lunits_property(ImoStyle::k_padding_top)
+                   - pStyle->get_lunits_property(ImoStyle::k_margin_bottom)
+                   - pStyle->get_lunits_property(ImoStyle::k_border_width_bottom)
+                   - pStyle->get_lunits_property(ImoStyle::k_padding_bottom);
+    }
+    return get_height();
+}
 
 
 //=======================================================================================
@@ -587,8 +791,8 @@ public:
 //=======================================================================================
 // GmoBoxDocPage
 //=======================================================================================
-GmoBoxDocPage::GmoBoxDocPage()
-    : GmoBox(GmoObj::k_box_doc_page)
+GmoBoxDocPage::GmoBoxDocPage(ImoObj* pCreatorImo)
+    : GmoBox(GmoObj::k_box_doc_page, pCreatorImo)
 {
 }
 
@@ -636,6 +840,23 @@ void GmoBoxDocPage::store_shape(GmoShape* pShape)
         m_allShapes.push_back(pShape);
     else
         m_allShapes.insert(it, pShape);
+
+    store_in_map_imo_shape(pShape);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBoxDocPage::store_in_map_imo_shape(GmoShape* pShape)
+{
+    if (pShape->is_shape_note() || pShape->is_shape_rest())
+    {
+        ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>( pShape->get_creator_imo() );
+        if (pNR)
+        {
+            GraphicModel* pModel = get_graphic_model();
+            if (pModel)
+                pModel->store_in_map_imo_shape(pNR, pShape);
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -658,6 +879,18 @@ GmoShape* GmoBoxDocPage::find_shape_at(LUnits x, LUnits y)
     {
         URect bbox = (*it)->get_bounds();
         if (bbox.contains(x, y))
+            return *it;
+    }
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* GmoBoxDocPage::find_shape_for_object(ImoStaffObj* pSO)
+{
+    std::list<GmoShape*>::iterator it;
+    for (it = m_allShapes.begin(); it != m_allShapes.end(); ++it)
+    {
+        if ((*it)->was_created_by(pSO))
             return *it;
     }
     return NULL;
@@ -709,16 +942,17 @@ void GmoBoxDocPage::select_objects_in_rectangle(SelectionSet& selection,
 //=======================================================================================
 // GmoBoxDocument
 //=======================================================================================
-GmoBoxDocument::GmoBoxDocument()
-    : GmoBox(GmoObj::k_box_document)
+GmoBoxDocument::GmoBoxDocument(GraphicModel* pGModel, ImoObj* pCreatorImo)
+    : GmoBox(GmoObj::k_box_document, pCreatorImo)
     , m_pLastPage(NULL)
+    , m_pGModel(pGModel)
 {
 }
 
 //---------------------------------------------------------------------------------------
 GmoBoxDocPage* GmoBoxDocument::add_new_page()
 {
-    m_pLastPage = new GmoBoxDocPage();
+    m_pLastPage = new GmoBoxDocPage(NULL);      //TODO creator imo?
     add_child_box(m_pLastPage);
     m_pLastPage->set_number(get_num_pages());
     return m_pLastPage;
@@ -734,8 +968,8 @@ GmoBoxDocPage* GmoBoxDocument::get_page(int i)
 //=======================================================================================
 // GmoBoxDocPageContent
 //=======================================================================================
-GmoBoxDocPageContent::GmoBoxDocPageContent()
-    : GmoBox(GmoObj::k_box_doc_page_content)
+GmoBoxDocPageContent::GmoBoxDocPageContent(ImoObj* pCreatorImo)
+    : GmoBox(GmoObj::k_box_doc_page_content, pCreatorImo)
 {
 }
 

@@ -1,0 +1,27 @@
+(lenmusdoc (vers 0.0) 
+    (styles 
+        (defineStyle "content" (font "Liberation serif" 12pt bold)(color #000000))
+        (defineStyle "heading-1" (font "Liberation serif" 16pt bold)(color #000000))
+        (defineStyle "heading-2" (font "Liberation serif" 14pt bold)(color #000000))
+        (defineStyle "para" (margin-bottom 1))
+        (defineStyle "normal" (font "Liberation serif" 12pt normal)(color #000000))
+        (defineStyle "normal emphasis" (font "Liberation serif" 12pt bold)(color #000000))
+        (defineStyle "normal italics" (font "Liberation serif" 12pt italic)(color #000000))
+    )
+    
+    (content
+        (heading 1 (txt (style "heading-1") "Scales"))
+ 
+        (dynamic (classid example))
+
+        (score
+           (vers 1.6)
+           (instrument
+              (musicData
+                 (clef G)
+                 (chord (n c4 w)(n e4 w)(n g4 w))
+                 (barline end)
+              )
+           )
+        )
+))

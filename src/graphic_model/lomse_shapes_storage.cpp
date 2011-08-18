@@ -63,7 +63,7 @@ Engraver* ShapesStorage::get_engraver(ImoObj* pImo)
         return it->second;
     else
     {
-        throw "ImoObj doesn't exists!";
+        throw std::runtime_error( "ImoObj doesn't exists!" );
         return NULL;
     }
 }

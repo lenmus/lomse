@@ -33,6 +33,7 @@
 #include "lomse_graphic_view.h"
 #include "lomse_interactor.h"
 #include "lomse_presenter.h"
+#include "lomse_events.h"
 
 using namespace lomse;
 
@@ -44,7 +45,6 @@ using namespace lomse;
 LomseDoorway    m_lomse;        //the Lomse library doorway
 Presenter*      m_pPresenter;
 Interactor*     m_pInteractor;  //to interact with the View
-Document*       m_pDoc;         //the score to display
 
 //the Lomse View renders its content on a bitmap. To manage it, Lomse
 //associates the bitmap to a RenderingBuffer object.
@@ -66,10 +66,6 @@ bool             m_flip_y;      //true if y axis is reversed
 
 //some additinal variables
 bool    m_view_needs_redraw;      //to control when the View must be re-drawed
-
-//to measure ellapsed time (for performance measurements)
-struct timeval m_start_tv;
-
 
 //for keyboard support
 unsigned      m_last_translated_key;    //last pressed key once translated
@@ -140,29 +136,7 @@ void update_window(void* pThis)
 }
 
 //---------------------------------------------------------------------------------------
-void start_timer(void* pThis)
-{
-    gettimeofday(&m_start_tv, NULL);
-}
-
-//---------------------------------------------------------------------------------------
-double elapsed_time(void* pThis)
-{
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-
-    double ms = (tv.tv_usec - m_start_tv.tv_usec) / 1000.0;
-    if (tv.tv_sec > m_start_tv.tv_sec)
-    {
-         double seconds = double(tv.tv_sec - m_start_tv.tv_sec);
-         ms += seconds * 1000000.0;
-   }
-   m_start_tv = tv;
-   return ms;
-}
-
-//---------------------------------------------------------------------------------------
-string get_font_filename(const string& fontname, bool bold, bool italic)
+string get_font_filename(RequestFont* pRequest)
 {
     //This is just a trivial example. In real applications you should
     //use operating system services to find a suitable font
@@ -171,6 +145,9 @@ string get_font_filename(const string& fontname, bool bold, bool italic)
     // - fontname can be either the face name (i.e. "Book Antiqua") or
     //   the familly name (i.e. "sans-serif")
 
+    const string& fontname = pRequest->get_fontname();
+    bool bold = pRequest->get_bold();
+    bool italic = pRequest->get_italic();
 
     string path = "/usr/share/fonts/truetype/";
 
@@ -231,6 +208,21 @@ string get_font_filename(const string& fontname, bool bold, bool italic)
    return path + fontfile;
 }
 
+//---------------------------------------------------------------------------------------
+void on_lomse_request(void* pThis, Request* pRequest)
+{
+    int type = pRequest->get_request_type();
+    switch (type)
+    {
+        case k_get_font_filename:
+            get_font_filename( dynamic_cast<RequestFont*>(pRequest) );
+            break;
+
+        default:
+            fprintf(stderr, "on_lomse_request] Unknown request\n");
+    }
+}
+
 //-------------------------------------------------------------------------
 void open_document()
 {
@@ -238,26 +230,13 @@ void open_document()
     //simple example we wiil crete an empty document and define its content
     //from a text string
 
-    //first, we will create a 'presenter'. It takes care of creating and maintaining
-    //all objects and relationships between the document, its views and the interactors
-    //to interact with the view
-    m_pPresenter = m_lomse.new_document(ViewFactory::k_view_horizontal_book);
-
-    //next, get the pointers to the relevant components
-    m_pDoc = m_pPresenter->get_document();
-    m_pInteractor = m_pPresenter->get_interactor(0);
-
-    //connect the View with the window buffer and set required callbacks
-    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
-    m_pInteractor->set_force_redraw_callbak(NULL, force_redraw);
-    m_pInteractor->set_update_window_callbak(NULL, update_window);
-    m_pInteractor->set_start_timer_callbak(NULL, start_timer);
-    m_pInteractor->set_elapsed_time_callbak(NULL, elapsed_time);
-
-    //Now let's place content on the created document
-    //TODO: Next instruction creates a new document without deleting the previous content
-    //thus creating memory leaks.
-    m_pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+    //create a document and get the 'presenter'.
+    //The Presenter takes care of creating and maintaining all objects
+    //and relationships between the document, its views and the interactors
+    //to interct with the view
+    delete m_pPresenter;
+    m_pPresenter = m_lomse.new_document(ViewFactory::k_view_horizontal_book,
+        "(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
         //"(instrument (musicData (clef G)(clef F3)(clef C1)(clef F4) )) )))" );
 
 //        "(instrument (name \"Violin\")(musicData (clef G)(clef F4)(clef C1) )) )))" );
@@ -526,6 +505,14 @@ void open_document()
         "))"
         ")))" );
 
+    //next, get the pointers to the relevant components
+    m_pInteractor = m_pPresenter->get_interactor(0);
+
+    //connect the View with the window buffer and set required callbacks
+    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
+    m_pInteractor->set_force_redraw_callbak(NULL, force_redraw);
+    m_pInteractor->set_update_window_callbak(NULL, update_window);
+
 }
 
 //-------------------------------------------------------------------------
@@ -562,7 +549,7 @@ void on_mouse_button_up(int x, int y, unsigned flags)
 void reset_boxes_to_draw()
 {
     m_pInteractor->set_rendering_option(k_option_draw_box_doc_page_content, false);
-    m_pInteractor->set_rendering_option(k_option_draw_box_score_page, false);
+    m_pInteractor->set_rendering_option(k_option_draw_box_container, false);
     m_pInteractor->set_rendering_option(k_option_draw_box_system, false);
     m_pInteractor->set_rendering_option(k_option_draw_box_slice, false);
     m_pInteractor->set_rendering_option(k_option_draw_box_slice_instr, false);
@@ -581,7 +568,7 @@ void on_key(int x, int y, unsigned key, unsigned flags)
             break;
         case '2':
             reset_boxes_to_draw();
-            m_pInteractor->set_rendering_option(k_option_draw_box_score_page, true);
+            m_pInteractor->set_rendering_option(k_option_draw_box_container, true);
             break;
         case '3':
             reset_boxes_to_draw();
@@ -1028,14 +1015,13 @@ int main ()
     //initialize lomse related variables
     m_flip_y = false;               //y axis is not reversed
     m_pInteractor = NULL;
-    m_pDoc = NULL;
     m_view_needs_redraw = true;
 
     //initialize the Lomse library
     m_lomse.init_library(k_pix_format_rgba32, 96, false);
 
     //set required callbacks
-    m_lomse.set_get_font_callback(get_font_filename);
+    m_lomse.set_request_callback(NULL, on_lomse_request);
 
     //create a music score and a View. The view will display the score
     //when the paint event is sent to lomse, once the main windows is

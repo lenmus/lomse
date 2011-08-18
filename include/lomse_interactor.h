@@ -22,10 +22,10 @@
 #define __LOMSE_INTERACTOR_H__
 
 #include "lomse_basic.h"
-#include "lomse_observable.h"
 #include "lomse_injectors.h"
 #include "lomse_agg_types.h"
 #include "lomse_selections.h"
+#include "lomse_events.h"
 #include <iostream>
 using namespace std;
 
@@ -38,13 +38,14 @@ class DocCursor;
 class Task;
 class GraphicModel;
 class GmoObj;
+class ImoStaffObj;
 //class UserCommandExecuter;
 //class LdpCompiler;
 
 
 //---------------------------------------------------------------------------------------
 //Abstract class from which all Interactors must derive
-class Interactor : public Observer
+class Interactor : public EventHandler
 {
 protected:
     LibraryScope&   m_libScope;
@@ -67,33 +68,55 @@ public:
     GraphicModel* get_graphic_model();
     inline View* get_view() { return m_pView; }
 
-    //observed object notificationson_paint
-	void handle_event(Observable* ref);
+    //mandatory override required by EventHandler
+	void handle_event(EventInfo* pEvent);
 
     //interface to View
     virtual void on_paint();
     virtual void update_window();
+    virtual void force_redraw();
 
     //interface to GraphicView
-    virtual void new_viewport(Pixels x, Pixels y);
+        //renderization
     virtual void set_rendering_buffer(RenderingBuffer* rbuf);
-    virtual void get_viewport(Pixels* x, Pixels* y);
-    virtual void show_selection_rectangle(Pixels x1, Pixels y1, Pixels x2, Pixels y2);
-    virtual void hide_selection_rectangle();
-    virtual void update_selection_rectangle(Pixels x2, Pixels y2);
+    virtual void set_rendering_option(int option, bool value);
+        //units conversion and related
     virtual void screen_point_to_model(double* x, double* y);
     virtual void model_point_to_screen(double* x, double* y, int iPage);
     virtual int page_at_screen_point(double x, double y);
+        //wiewport / scroll
+    virtual void new_viewport(Pixels x, Pixels y);
+    virtual void set_viewport_at_page_center(Pixels screenWidth);
+    virtual void get_viewport(Pixels* x, Pixels* y);
+    virtual void get_view_size(Pixels* xWidth, Pixels* yHeight);
+        //scale
+    virtual double get_scale();
+    virtual void set_scale(double scale, Pixels x=0, Pixels y=0);
     virtual void zoom_in(Pixels x=0, Pixels y=0);
     virtual void zoom_out(Pixels x=0, Pixels y=0);
-    virtual void set_rendering_option(int option, bool value);
+    virtual void zoom_fit_full(Pixels width, Pixels height);
+    virtual void zoom_fit_width(Pixels width);
+        //selection rectangle
+    virtual void show_selection_rectangle(Pixels x1, Pixels y1, Pixels x2, Pixels y2);
+    virtual void hide_selection_rectangle();
+    virtual void update_selection_rectangle(Pixels x2, Pixels y2);
+        //tempo line
+    virtual void show_tempo_line(Pixels x1, Pixels y1, Pixels x2, Pixels y2);
+    virtual void hide_tempo_line();
+    virtual void update_tempo_line(Pixels x2, Pixels y2);
+        //highlight
+    virtual void highlight_object(ImoStaffObj* pSO);
+    virtual void remove_highlight_from_object(ImoStaffObj* pSO);
+    virtual void remove_all_highlight();
+        //printing
+    virtual void set_printing_buffer(RenderingBuffer* rbuf);
+    virtual void on_print_page(int page, double scale, VPoint viewport);
+    virtual VSize get_page_size_in_pixels(int nPage);
 
     //setting callbacks
     void set_update_window_callbak(void* pThis, void (*pt2Func)(void* pObj));
     void set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj));
-    void set_start_timer_callbak(void* pThis, void (*pt2Func)(void* pObj));
-    void set_elapsed_time_callbak(void* pThis, double (*pt2Func)(void* pObj));
-    void set_notify_callback(void* pThis, void (*pt2Func)(void* pObj, EventInfo& event));
+    void set_notify_callback(void* pThis, void (*pt2Func)(void* pObj, EventInfo* pEvent));
 
     //interface to SelectionSet
     virtual void select_object(GmoObj* pGmo, unsigned flags=0);
@@ -110,7 +133,7 @@ public:
     virtual void on_mouse_button_down(Pixels x, Pixels y, unsigned flags);
     virtual void on_mouse_button_up(Pixels x, Pixels y, unsigned flags);
     //virtual void on_init();
-    //virtual void on_resize(Pixels x, Pixels y);
+//    virtual void on_resize(Pixels x, Pixels y);
     //virtual void on_idle();
     //virtual void on_key(Pixels x, Pixels y, unsigned key, unsigned flags);
     //virtual void on_ctrl_change();

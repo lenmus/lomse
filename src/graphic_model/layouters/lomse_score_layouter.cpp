@@ -58,11 +58,11 @@ namespace lomse
 //=======================================================================================
 // ScoreLayouter implementation
 //=======================================================================================
-ScoreLayouter::ScoreLayouter(ImoContentObj* pImo, GraphicModel* pGModel,
-                             LibraryScope& libraryScope)
-    : ContentLayouter(pImo, pGModel)
+ScoreLayouter::ScoreLayouter(ImoContentObj* pItem, Layouter* pParent,
+                             GraphicModel* pGModel, LibraryScope& libraryScope)
+    : Layouter(pItem, pParent, pGModel, libraryScope, NULL)
     , m_libraryScope(libraryScope)
-    , m_pScore( dynamic_cast<ImoScore*>(m_pImo) )
+    , m_pScore( dynamic_cast<ImoScore*>(pItem) )
     , m_pScoreMeter( new ScoreMeter(m_pScore) )
     , m_pColsBuilder(NULL)
     , m_pShapesCreator(NULL)
@@ -97,7 +97,7 @@ ScoreLayouter::~ScoreLayouter()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::prepare_to_start_layout()
 {
-    ContentLayouter::prepare_to_start_layout();
+    Layouter::prepare_to_start_layout();
 
     create_stub_for_score();
     create_instrument_engravers();
@@ -113,14 +113,14 @@ void ScoreLayouter::prepare_to_start_layout()
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreLayouter::layout_in_page(GmoBox* pContainerBox)
+void ScoreLayouter::layout_in_box()
 {
     //AWARE: This method is invoked to layout a page. If there are more pages to
     //layout, it will be invoked more times. Therefore, this method must not initialize
     //anything. All initializations must be done in 'prepare_to_start_layout()'.
-    //layout_in_page() method must always continue layouting from current state.
+    //layout_in_box() method must always continue layouting from current state.
 
-    page_initializations(pContainerBox);
+    page_initializations(m_pItemMainBox);
 
     move_cursor_to_top_left_corner();
     if (is_first_page())
@@ -148,6 +148,8 @@ void ScoreLayouter::layout_in_page(GmoBox* pContainerBox)
         LUnits yBottom = m_pCurBoxSystem->get_bottom();
         m_pCurBoxPage->set_height( yBottom - m_pCurBoxPage->get_top());
     }
+
+    m_pageCursor = m_cursor;
 }
 
 //---------------------------------------------------------------------------------------
@@ -174,14 +176,14 @@ void ScoreLayouter::engrave_system()
     if (get_num_columns() == 0)
     {
         //force to layout an empty system
-        m_pCurSysLyt->engrave_system(indent, 0, 0, m_pageCursor);
+        m_pCurSysLyt->engrave_system(indent, 0, 0, m_cursor);
     }
     else
     {
         int iFirstCol = m_breaks[m_iCurSystem];
         int iLastCol = (m_iCurSystem == get_num_systems() - 1 ?
                                         get_num_columns() : m_breaks[m_iCurSystem + 1] );
-        m_pCurSysLyt->engrave_system(indent, iFirstCol, iLastCol, m_pageCursor);
+        m_pCurSysLyt->engrave_system(indent, iFirstCol, iLastCol, m_cursor);
     }
 }
 
@@ -191,9 +193,9 @@ void ScoreLayouter::create_system_box()
     m_iCurSystem++;
 
     LUnits width = m_pCurBoxPage->get_width();
-    LUnits top = m_pageCursor.y
+    LUnits top = m_cursor.y
                  + distance_to_top_of_system(m_iCurSystem, m_fFirstSystemInPage);
-    LUnits left = m_pageCursor.x;
+    LUnits left = m_cursor.x;
 
     ImoSystemInfo* pInfo = m_pScore->get_other_system_info();
 
@@ -217,8 +219,8 @@ void ScoreLayouter::add_system_to_page()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::advance_paper_cursor_to_bottom_of_added_system()
 {
-    m_pageCursor.x = m_pCurBoxPage->get_left();
-    m_pageCursor.y = m_pCurBoxSystem->get_bottom();
+    m_cursor.x = m_pCurBoxPage->get_left();
+    m_cursor.y = m_pCurBoxSystem->get_bottom();
 }
 
 //---------------------------------------------------------------------------------------
@@ -241,6 +243,7 @@ void ScoreLayouter::page_initializations(GmoBox* pContainerBox)
     m_iCurPage++;
     m_pCurBoxPage = dynamic_cast<GmoBoxScorePage*>( pContainerBox );
     is_first_system_in_page(true);
+    m_startTop = m_pCurBoxPage->get_top();
 }
 
 //---------------------------------------------------------------------------------------
@@ -273,9 +276,15 @@ void ScoreLayouter::decide_line_breaks()
 }
 
 //---------------------------------------------------------------------------------------
-GmoBox* ScoreLayouter::create_main_box()
+void ScoreLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
+                                       LUnits height)
 {
-    return new GmoBoxScorePage(m_pStubScore);
+    m_pItemMainBox = new GmoBoxScorePage(m_pStubScore);
+    pParentBox->add_child_box(m_pItemMainBox);
+
+    m_pItemMainBox->set_origin(pos);
+    m_pItemMainBox->set_width(width);
+    m_pItemMainBox->set_height(height);
 }
 
 //---------------------------------------------------------------------------------------
@@ -295,14 +304,14 @@ bool ScoreLayouter::enough_space_in_page()
 //---------------------------------------------------------------------------------------
 LUnits ScoreLayouter::remaining_height()
 {
-    return m_pCurBoxPage->get_height() - m_pageCursor.y;
+    return m_pCurBoxPage->get_height() - (m_cursor.y - m_startTop);
 }
 
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::move_cursor_to_top_left_corner()
 {
-    m_pageCursor.x = m_pCurBoxPage->get_left();
-    m_pageCursor.y = m_pCurBoxPage->get_top();
+    m_cursor.x = m_pCurBoxPage->get_left();
+    m_cursor.y = m_pCurBoxPage->get_top();
 }
 
 //---------------------------------------------------------------------------------------
@@ -317,7 +326,7 @@ void ScoreLayouter::move_cursor_after_headers()
 {
     //TODO
     move_cursor_to_top_left_corner();
-    //m_pageCursor.y += m_pScore->GetHeadersHeight();
+    //m_cursor.y += m_pScore->GetHeadersHeight();
 }
 
 //---------------------------------------------------------------------------------------
@@ -359,10 +368,10 @@ LUnits ScoreLayouter::distance_to_top_of_system(int iSystem, bool fFirstInPage)
 void ScoreLayouter::determine_staff_lines_horizontal_position(int iInstr)
 {
     LUnits indent = get_system_indent();
-    LUnits width = m_pCurBoxSystem->get_content_width();
+    LUnits width = m_pCurBoxSystem->get_content_width_old();
     InstrumentEngraver* engrv = m_instrEngravers[iInstr];
-    engrv->set_staves_horizontal_position(m_pageCursor.x, width, indent);
-    m_pageCursor.x += indent;
+    engrv->set_staves_horizontal_position(m_cursor.x, width, indent);
+    m_cursor.x += indent;
 }
 
 //---------------------------------------------------------------------------------------
@@ -553,7 +562,7 @@ void ScoreLayouter::create_empty_system()
 void ScoreLayouter::engrave_empty_system()
 {
     LUnits indent = get_system_indent();
-    m_pCurSysLyt->engrave_system(indent, 0, 0, m_pageCursor);
+    m_pCurSysLyt->engrave_system(indent, 0, 0, m_cursor);
 }
 
 //---------------------------------------------------------------------------------------
@@ -614,7 +623,7 @@ ColumnsBuilder::ColumnsBuilder(LibraryScope& libraryScope, ScoreMeter* pScoreMet
     , m_pShapesCreator(pShapesCreator)
     , m_ColLayouters(colLayouters)
     , m_instrEngravers(instrEngravers)
-    , m_pSysCursor( new SystemCursor(m_pScore) )
+    , m_pSysCursor( new StaffObjsCursor(m_pScore) )
     , m_iColumnToTrace(-1)
 {
 }
@@ -875,7 +884,7 @@ void ColumnsBuilder::create_column_boxes()
 //---------------------------------------------------------------------------------------
 GmoBoxSlice* ColumnsBuilder::create_slice_box()
 {
-    GmoBoxSlice* pSlice = new GmoBoxSlice(m_iColumn);
+    GmoBoxSlice* pSlice = new GmoBoxSlice(m_iColumn, m_pScore);
 	pSlice->set_left(0.0f);
 	pSlice->set_top(0.0f);
 
@@ -940,7 +949,7 @@ bool ColumnsBuilder::determine_if_is_in_prolog(float rTime)
 //=======================================================================================
 // ColumnBreaker implementation
 //=======================================================================================
-ColumnBreaker::ColumnBreaker(int numInstruments, SystemCursor* pSysCursor)
+ColumnBreaker::ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor)
     : m_numInstruments(numInstruments)
     , m_fBarlineFound(false)
     , m_targetBreakTime(1.0f)
@@ -1013,7 +1022,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
 
     switch (pSO->get_obj_type())
     {
-        case ImoObj::k_barline:
+        case k_imo_barline:
         {
             ImoBarline* pImo = dynamic_cast<ImoBarline*>(pSO);
             InstrumentEngraver* pInstrEngrv = m_instrEngravers[iInstr];
@@ -1022,7 +1031,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             BarlineEngraver engrv(m_libraryScope, m_pScoreMeter);
             return engrv.create_shape(pImo, iInstr, pos.x, yTop, yBottom);
         }
-        case ImoObj::k_clef:
+        case k_imo_clef:
         {
             bool fSmallClef = flags && k_flag_small_clef;
             ImoClef* pClef = dynamic_cast<ImoClef*>(pSO);
@@ -1033,13 +1042,13 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             return engrv.create_shape(pClef, iInstr, iStaff, pos,
                                       clefType, clefSize);
         }
-        case ImoObj::k_key_signature:
+        case k_imo_key_signature:
         {
             ImoKeySignature* pImo = dynamic_cast<ImoKeySignature*>(pSO);
             KeyEngraver engrv(m_libraryScope, m_pScoreMeter);
             return engrv.create_shape(pImo, iInstr, iStaff, clefType, pos);
         }
-        case ImoObj::k_note:
+        case k_imo_note:
         {
             ImoNote* pImo = dynamic_cast<ImoNote*>(pSO);
             NoteEngraver engrv(m_libraryScope, m_pScoreMeter, &m_shapesStorage);
@@ -1053,7 +1062,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
 
             return pShape;
         }
-        case ImoObj::k_rest:
+        case k_imo_rest:
         {
             ImoRest* pImo = dynamic_cast<ImoRest*>(pSO);
             RestEngraver engrv(m_libraryScope, m_pScoreMeter, &m_shapesStorage);
@@ -1061,7 +1070,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             int dots = pImo->get_dots();
             return engrv.create_shape(pImo, iInstr, iStaff, pos, type, dots, pImo);
         }
-        case ImoObj::k_time_signature:
+        case k_imo_time_signature:
         {
             ImoTimeSignature* pImo = dynamic_cast<ImoTimeSignature*>(pSO);
             int beats = pImo->get_beats();
@@ -1083,7 +1092,7 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
 
     switch (pAO->get_obj_type())
     {
-        case ImoObj::k_fermata:
+        case k_imo_fermata:
         {
             ImoFermata* pImo = dynamic_cast<ImoFermata*>(pAO);
             FermataEngraver engrv(m_libraryScope, m_pScoreMeter);
@@ -1110,19 +1119,19 @@ void ShapesCreator::start_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO,
     RelAuxObjEngraver* pEngrv = NULL;
     switch (pAO->get_obj_type())
     {
-        case ImoObj::k_beam:
+        case k_imo_beam:
         {
             pEngrv = new BeamEngraver(m_libraryScope, m_pScoreMeter);
             break;
         }
 
-        //case ImoObj::k_chord:
+        //case k_imo_chord:
         //{
         //    pEngrv = new ChordEngraver(m_libraryScope, m_pScoreMeter);
         //    break;
         //}
 
-        case ImoObj::k_slur:
+        case k_imo_slur:
         {
             InstrumentEngraver* pInstrEngrv = m_instrEngravers[iInstr];
             LUnits xRight = pInstrEngrv->get_staves_right();
@@ -1131,7 +1140,7 @@ void ShapesCreator::start_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO,
             break;
         }
 
-        case ImoObj::k_tie:
+        case k_imo_tie:
         {
             InstrumentEngraver* pInstrEngrv = m_instrEngravers[iInstr];
             LUnits xRight = pInstrEngrv->get_staves_right();
@@ -1140,7 +1149,7 @@ void ShapesCreator::start_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO,
             break;
         }
 
-        case ImoObj::k_tuplet:
+        case k_imo_tuplet:
         {
             pEngrv = new TupletEngraver(m_libraryScope, m_pScoreMeter);
             break;
@@ -1235,6 +1244,7 @@ static const float INFINITE = 1000000.0f;
 LinesBreakerOptimal::LinesBreakerOptimal(ScoreLayouter* pScoreLyt,
                                          std::vector<int>& breaks)
     : LinesBreaker(pScoreLyt, breaks)
+    , m_numCols(0)
     , m_fJustifyLastLine(false)
 {
 }

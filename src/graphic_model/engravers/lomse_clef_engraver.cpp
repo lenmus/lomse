@@ -70,25 +70,25 @@ int ClefEngraver::find_glyph()
 
     switch (m_nClefType)
     {
-        case ImoClef::k_G2: return k_glyph_g_clef;
-        case ImoClef::k_F4: return k_glyph_f_clef;
-        case ImoClef::k_F3: return k_glyph_f_clef;
-        case ImoClef::k_C1: return k_glyph_c_clef;
-        case ImoClef::k_C2: return k_glyph_c_clef;
-        case ImoClef::k_C3: return k_glyph_c_clef;
-        case ImoClef::k_C4: return k_glyph_c_clef;
-        case ImoClef::k_C5: return k_glyph_c_clef;
-        case ImoClef::k_F5: return k_glyph_f_clef;
-        case ImoClef::k_G1: return k_glyph_g_clef;
-        case ImoClef::k_8_G2: return k_glyph_g_clef_ottava_alta;
-        case ImoClef::k_G2_8: return k_glyph_g_clef_ottava_bassa;
-        case ImoClef::k_8_F4: return k_glyph_f_clef_ottava_alta;
-        case ImoClef::k_F4_8: return k_glyph_f_clef_ottava_bassa;
-        case ImoClef::k_15_G2: return k_glyph_g_clef_quindicesima_alta;
-        case ImoClef::k_G2_15: return k_glyph_g_clef_quindicesima_bassa;
-        case ImoClef::k_15_F4: return k_glyph_f_clef_quindicesima_alta;
-        case ImoClef::k_F4_15: return k_glyph_f_clef_quindicesima_bassa;
-        case ImoClef::k_percussion: return k_glyph_percussion_clef_block;
+        case k_clef_G2: return k_glyph_g_clef;
+        case k_clef_F4: return k_glyph_f_clef;
+        case k_clef_F3: return k_glyph_f_clef;
+        case k_clef_C1: return k_glyph_c_clef;
+        case k_clef_C2: return k_glyph_c_clef;
+        case k_clef_C3: return k_glyph_c_clef;
+        case k_clef_C4: return k_glyph_c_clef;
+        case k_clef_C5: return k_glyph_c_clef;
+        case k_clef_F5: return k_glyph_f_clef;
+        case k_clef_G1: return k_glyph_g_clef;
+        case k_clef_8_G2: return k_glyph_g_clef_ottava_alta;
+        case k_clef_G2_8: return k_glyph_g_clef_ottava_bassa;
+        case k_clef_8_F4: return k_glyph_f_clef_ottava_alta;
+        case k_clef_F4_8: return k_glyph_f_clef_ottava_bassa;
+        case k_clef_15_G2: return k_glyph_g_clef_quindicesima_alta;
+        case k_clef_G2_15: return k_glyph_g_clef_quindicesima_bassa;
+        case k_clef_15_F4: return k_glyph_f_clef_quindicesima_alta;
+        case k_clef_F4_15: return k_glyph_f_clef_quindicesima_bassa;
+        case k_clef_percussion: return k_glyph_percussion_clef_block;
         default:
             return k_glyph_g_clef;
     }
@@ -120,25 +120,25 @@ Tenths ClefEngraver::get_glyph_offset()
     {
         switch(m_nClefType)
         {
-            case ImoClef::k_G2:     return yOffset;
-            case ImoClef::k_8_G2:   return yOffset;         //8 above
-            case ImoClef::k_G2_8:   return yOffset;         //8 below
-            case ImoClef::k_F4:     return yOffset - 7.0f;
-            case ImoClef::k_F3:     return yOffset + 3.0f;
-            case ImoClef::k_C1:     return yOffset + 16.0f;
-            case ImoClef::k_C2:     return yOffset + 6.0f;
-            case ImoClef::k_C3:     return yOffset - 4.0f;
-            case ImoClef::k_C4:     return yOffset - 14.0f;
-            case ImoClef::k_C5:     return yOffset - 24.0f;
-            case ImoClef::k_F5:     return yOffset - 17.0f;
-            case ImoClef::k_G1:     return yOffset;
-            case ImoClef::k_8_F4:   return yOffset - 7.0f;  //8 above
-            case ImoClef::k_F4_8:   return yOffset - 7.0f;  //8 below
-            case ImoClef::k_15_G2:  return yOffset;         //15 above
-            case ImoClef::k_G2_15:  return yOffset;         //15 below
-            case ImoClef::k_15_F4:  return yOffset - 7.0f;  //15 above
-            case ImoClef::k_F4_15:  return yOffset - 7.0f;  //15 below
-            case ImoClef::k_percussion:     return yOffset - 6.0f;
+            case k_clef_G2:     return yOffset;
+            case k_clef_8_G2:   return yOffset;         //8 above
+            case k_clef_G2_8:   return yOffset;         //8 below
+            case k_clef_F4:     return yOffset - 7.0f;
+            case k_clef_F3:     return yOffset + 3.0f;
+            case k_clef_C1:     return yOffset + 16.0f;
+            case k_clef_C2:     return yOffset + 6.0f;
+            case k_clef_C3:     return yOffset - 4.0f;
+            case k_clef_C4:     return yOffset - 14.0f;
+            case k_clef_C5:     return yOffset - 24.0f;
+            case k_clef_F5:     return yOffset - 17.0f;
+            case k_clef_G1:     return yOffset;
+            case k_clef_8_F4:   return yOffset - 7.0f;  //8 above
+            case k_clef_F4_8:   return yOffset - 7.0f;  //8 below
+            case k_clef_15_G2:  return yOffset;         //15 above
+            case k_clef_G2_15:  return yOffset;         //15 below
+            case k_clef_15_F4:  return yOffset - 7.0f;  //15 above
+            case k_clef_F4_15:  return yOffset - 7.0f;  //15 below
+            case k_clef_percussion:     return yOffset - 6.0f;
             default:
                 return yOffset;
         }
@@ -147,25 +147,25 @@ Tenths ClefEngraver::get_glyph_offset()
     {
         switch(m_nClefType)
         {
-            case ImoClef::k_G2:     return yOffset;
-            case ImoClef::k_F4:     return yOffset;
-            case ImoClef::k_F3:     return yOffset + 10.0f;
-            case ImoClef::k_C1:     return yOffset + 20.0f;
-            case ImoClef::k_C2:     return yOffset + 10.0f;
-            case ImoClef::k_C3:     return yOffset;
-            case ImoClef::k_C4:     return yOffset - 10.0f;
-            case ImoClef::k_C5:     return yOffset - 20.0f;
-            case ImoClef::k_F5:     return yOffset - 10.0f;
-            case ImoClef::k_G1:     return yOffset + 10.0f;
-            case ImoClef::k_8_G2:   return yOffset;     //8 above
-            case ImoClef::k_G2_8:   return yOffset;     //8 below
-            case ImoClef::k_8_F4:   return yOffset;     //8 above
-            case ImoClef::k_F4_8:   return yOffset;     //8 below
-            case ImoClef::k_15_G2:  return yOffset;     //15 above
-            case ImoClef::k_G2_15:  return yOffset;     //15 below
-            case ImoClef::k_15_F4:  return yOffset;     //15 above
-            case ImoClef::k_F4_15:  return yOffset;     //15 below
-            case ImoClef::k_percussion:     return yOffset - 1.0f;
+            case k_clef_G2:     return yOffset;
+            case k_clef_F4:     return yOffset;
+            case k_clef_F3:     return yOffset + 10.0f;
+            case k_clef_C1:     return yOffset + 20.0f;
+            case k_clef_C2:     return yOffset + 10.0f;
+            case k_clef_C3:     return yOffset;
+            case k_clef_C4:     return yOffset - 10.0f;
+            case k_clef_C5:     return yOffset - 20.0f;
+            case k_clef_F5:     return yOffset - 10.0f;
+            case k_clef_G1:     return yOffset + 10.0f;
+            case k_clef_8_G2:   return yOffset;     //8 above
+            case k_clef_G2_8:   return yOffset;     //8 below
+            case k_clef_8_F4:   return yOffset;     //8 above
+            case k_clef_F4_8:   return yOffset;     //8 below
+            case k_clef_15_G2:  return yOffset;     //15 above
+            case k_clef_G2_15:  return yOffset;     //15 below
+            case k_clef_15_F4:  return yOffset;     //15 above
+            case k_clef_F4_15:  return yOffset;     //15 below
+            case k_clef_percussion:     return yOffset - 1.0f;
             default:
                 return yOffset;
         }

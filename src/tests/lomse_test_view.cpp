@@ -20,7 +20,7 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
@@ -64,8 +64,6 @@ public:
     bool update_window_invoked() { return m_fUpdateWindowInvoked; }
     const std::string& get_title() { return m_title; }
     double get_screen_ppi() const { return 96.0; }
-    void start_timer() {}
-    double elapsed_time() const { return 0.0; }
 
 };
 
@@ -166,7 +164,7 @@ SUITE(GraphicViewTest)
         pView->set_rendering_buffer(&rbuf);
         pView->on_paint();
 
-        //page top-left corner is placed, in vertical book view, at (18+, 18+)
+        //page top-left corner is placed, in vertical book view, at (0+, 18+)
         double vx = 0.0;
         double vy = 0.0;
         int iPage = 0;
@@ -174,8 +172,8 @@ SUITE(GraphicViewTest)
         Pixels x = Pixels(vx);
         Pixels y = Pixels(vy);
 
-        //cout << "x=" << x << ", y=" << y << endl;
-        CHECK( x == 18 );
+//        cout << "x=" << x << ", y=" << y << endl;
+        CHECK( x == 0 );
         CHECK( y == 18 );
 
         delete pIntor;
@@ -195,13 +193,13 @@ SUITE(GraphicViewTest)
         pView->set_rendering_buffer(&rbuf);
         pView->on_paint();
 
-        //page top-left corner is placed, in vertical book view, at (18+, 18+)
-        double vx = 19.0;
+        //page top-left corner is placed, in vertical book view, at (0+, 18+)
+        double vx = 1.0;
         double vy = 19.0;
         pIntor->screen_point_to_model(&vx, &vy);
 
-        //cout << "vx=" << vx << ", vy=" << vy << endl;
-        CHECK( vx > -5.0  && vx < 5.0);       //tolerance: 10 LUnits
+//        cout << "vx=" << vx << ", vy=" << vy << endl;
+        CHECK( vx > 21.0  && vx < 31.0);       //tolerance: 10 LUnits
         CHECK( vy > -5.0  && vy < 5.0);
 
         delete pIntor;

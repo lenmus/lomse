@@ -26,6 +26,10 @@
 #include "lomse_observable.h"
 #include "lomse_ldp_elements.h"
 #include "lomse_stack.h"
+#include "lomse_basic.h"
+#include "lomse_internal_model.h"
+#include "lomse_events.h"
+#include "lomse_reader.h"
 
 using namespace std;
 
@@ -40,6 +44,14 @@ class IdAssigner;
 class InternalModel;
 class ImoDocument;
 class ImoScore;
+class ImoStyle;
+class ImoObj;
+class Observer;
+class EventInfo;
+
+class ImoButton;
+class ImoParagraph;
+class ImoTextItem;
 
 /// A class to manage the undo/redo stack
 typedef UndoableStack<DocCommand*>     UndoStack;
@@ -57,26 +69,36 @@ typedef UndoableStack<DocCommand*>     UndoStack;
 //        manage this flag, only reset when the document is created/loaded)
 //------------------------------------------------------------------------------------
 
-class LOMSE_EXPORT Document : public Observable
+class LOMSE_EXPORT Document : public BlockLevelCreatorApi
 {
 protected:
-    DocumentScope*  m_pDocScope;
+    LibraryScope&   m_libraryScope;
+    ostream&        m_reporter;
+    DocumentScope   m_docScope;
     LdpCompiler*    m_pCompiler;
     IdAssigner*     m_pIdAssigner;
     InternalModel*  m_pIModel;
     ImoDocument*    m_pImoDoc;
+    std::list<Observer*> m_observers;
+
+    //for assingning unique Id to this document ImoObj objects
+    long            m_idCounter;
+
+protected:
+    friend class LenmusdocAnalyser;
+    void set_imo_doc(ImoDocument* pImoDoc);
 
 public:
     Document(LibraryScope& libraryScope, ostream& reporter=cout);
-    Document(LdpCompiler* pCompiler, IdAssigner* pIdAssigner);  //for testing: direct inyection of dependencies
     virtual ~Document();
 
     //scope access
-    inline DocumentScope* get_scope() { return m_pDocScope; }
+    inline DocumentScope& get_scope() { return m_docScope; }
 
     //creation
     int from_file(const std::string& filename);
     int from_string(const std::string& source);
+    int from_input(LdpReader& reader);
     void create_empty();
     void create_with_empty_score();
 
@@ -129,19 +151,55 @@ public:
     //when the following method is invoked. Commands (atomic, DocCommands and
     //UserCommands)don't invoke it. Invoking this method is a responsibility
     //of the Interactor (or the user application if Interactor is not used)
-    void notify_that_document_has_been_modified() { notify_observers(); }
+    void notify_that_document_has_been_modified();
 
+    //API: objects creation/modification
+    void end_of_changes();
+
+    ImoObj* create_object(const string& source);
+//    ImoObj* create_object(int type);
+
+    //API: styles
+    ImoStyle* get_default_style();
+    ImoStyle* create_style(const string& name, const string& parent="Default style");
+    ImoStyle* create_private_style(const string& parent="Default style");
+    ImoStyle* find_style(const string& name);
+
+    ////API: traversing the document
+    //ImoContent* get_content();
+    //void append_content_item(ImoContentObj* pItem);
+
+    //API: adding first level onjects
+    //These violate the Open/Close principle as it would require to modify the API
+    //when a new first level item is created. Nevertheless it is an upwards
+    //compatible change. I will keep this t
+//    ImoParagraph* add_paragraph(ImoStyle* pStyle=NULL);
+//    ImoTextItem* create_text_item(const string& text, ImoStyle* pStyle=NULL);
+//    ImoButton* create_button(const string& label, const USize& size,
+//                             ImoStyle* pStyle=NULL);
+
+    //Event notification
+    void notify_observers(EventInfo* pEvent, ImoObj* pImo);
+    void remove_observer(Observer* observer);
+    Observer* add_observer(ImoObj* pImo);
+
+    //API
+    void add_event_handler(ImoObj* pImo, int eventType, EventHandler* pHandler);
 
 protected:
-    void clear();
+    void initialize();
+    void delete_observers();
 
+    friend class ImFactory;
+    inline long new_id() { return ++m_idCounter; }
 
     //------------------------------------------------------------------
     // Transitional, while moving from score to lenmusdoc
     //------------------------------------------------------------------
 public:
+    //TODO Replace by     DocIterator it = document.find_by_type(k_score, i)
+    //                    fint element number i [0..n-1] (breath first search)
     ImoScore* get_score();
-    void create_score(ostream& reporter=cout);
 
 };
 

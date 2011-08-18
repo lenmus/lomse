@@ -20,12 +20,11 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_internal_model.h"
-#include "lomse_basic_objects.h"
 #include "lomse_im_note.h"
 #include "lomse_rest_engraver.h"
 #include "lomse_document.h"
@@ -33,6 +32,7 @@
 #include "lomse_shape_note.h"
 #include "lomse_score_meter.h"
 #include "lomse_shapes_storage.h"
+#include "lomse_im_factory.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -61,18 +61,18 @@ SUITE(RestEngraverTest)
 
     TEST_FIXTURE(RestEngraverTestFixture, RestEngraver_OnlyGlyph)
     {
-        DtoRest dtoRest;
-        dtoRest.set_note_type(k_whole);
-        dtoRest.set_dots(0);
-        ImoRest rest(dtoRest);
+        Document doc(m_libraryScope);
+        ImoRest* pRest = static_cast<ImoRest*>(ImFactory::inject(k_imo_rest, &doc));
+        pRest->set_note_type(k_whole);
+        pRest->set_dots(0);
 
         ScoreMeter meter(1, 1, 180.0f);
         ShapesStorage storage;
         RestEngraver engraver(m_libraryScope, &meter, &storage);
         GmoShapeRest* pShape =
-            dynamic_cast<GmoShapeRest*>(engraver.create_shape(&rest, 0, 0,
-                                        UPoint(10.0f, 15.0f), rest.get_note_type(),
-                                        rest.get_dots(), &rest));
+            dynamic_cast<GmoShapeRest*>(engraver.create_shape(pRest, 0, 0,
+                                        UPoint(10.0f, 15.0f), pRest->get_note_type(),
+                                        pRest->get_dots(), pRest));
         CHECK( pShape != NULL );
         CHECK( pShape->is_shape_rest() == true );
         std::list<GmoShape*>& components = pShape->get_components();
@@ -81,22 +81,23 @@ SUITE(RestEngraverTest)
         CHECK( (*it)->is_shape_rest_glyph() );
 
         delete pShape;
+        delete pRest;
     }
 
     TEST_FIXTURE(RestEngraverTestFixture, RestEngraver_GlyphAndDot)
     {
-        DtoRest dtoRest;
-        dtoRest.set_note_type(k_whole);
-        dtoRest.set_dots(1);
-        ImoRest rest(dtoRest);
+        Document doc(m_libraryScope);
+        ImoRest* pRest = static_cast<ImoRest*>(ImFactory::inject(k_imo_rest, &doc));
+        pRest->set_note_type(k_whole);
+        pRest->set_dots(1);
 
         ScoreMeter meter(1, 1, 180.0f);
         ShapesStorage storage;
         RestEngraver engraver(m_libraryScope, &meter, &storage);
         GmoShapeRest* pShape =
-            dynamic_cast<GmoShapeRest*>(engraver.create_shape(&rest, 0, 0,
-                                        UPoint(10.0f, 15.0f), rest.get_note_type(),
-                                        rest.get_dots(), &rest));
+            dynamic_cast<GmoShapeRest*>(engraver.create_shape(pRest, 0, 0,
+                                        UPoint(10.0f, 15.0f), pRest->get_note_type(),
+                                        pRest->get_dots(), pRest));
         CHECK( pShape != NULL );
         CHECK( pShape->is_shape_rest() == true );
         std::list<GmoShape*>& components = pShape->get_components();
@@ -107,40 +108,8 @@ SUITE(RestEngraverTest)
         CHECK( (*it)->is_shape_dot() );
 
         delete pShape;
+        delete pRest;
     }
-
-    //TEST_FIXTURE(RestEngraverTestFixture, RestEngraver_HeadStemFlagTwoDots)
-    //{
-    //    DtoRest dtoRest;
-    //    dtoRest.set_step(0);
-    //    dtoRest.set_octave(4);
-    //    dtoRest.set_accidentals(0);
-    //    dtoRest.set_note_type(ImoRest::k_eighth);
-    //    dtoRest.set_dots(2);
-    //    ImoRest rest(dtoRest);
-
-    //    ScoreMeter meter(1, 1, 180.0f);
-    //    ShapesStorage storage;
-    //    RestEngraver engraver(m_libraryScope, &meter, &storage);
-    //    GmoShapeRest* pShape =
-    //        dynamic_cast<GmoShapeRest*>(engraver.create_shape(&rest, 0, 0, ImoClef::k_F4, UPoint(10.0f, 15.0f)) );
-    //    CHECK( pShape != NULL );
-    //    CHECK( pShape->is_shape_rest() == true );
-    //    std::list<GmoShape*>& components = pShape->get_components();
-    //    std::list<GmoShape*>::iterator it = components.begin();
-    //    CHECK( components.size() == 5 );
-    //    CHECK( (*it)->is_shape_notehead() );
-    //    ++it;
-    //    CHECK( (*it)->is_shape_dot() );
-    //    ++it;
-    //    CHECK( (*it)->is_shape_dot() );
-    //    ++it;
-    //    CHECK( (*it)->is_shape_stem() );
-    //    ++it;
-    //    CHECK( (*it)->is_shape_flag() );
-
-    //    delete pShape;
-    //}
 
 }
 

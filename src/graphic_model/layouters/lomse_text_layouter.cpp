@@ -31,7 +31,7 @@ namespace lomse
 // ParagraphLayouter implementation
 //---------------------------------------------------------------------------------------
 
-ParagraphLayouter::ParagraphLayouter(ImoDocObj* pImo, GraphicModel* pGModel,
+ParagraphLayouter::ParagraphLayouter(ImoContentObj* pImo, GraphicModel* pGModel,
                                      LibraryScope& libraryScope)
     : ContentLayouter(pImo, pGModel)
     , m_libraryScope(libraryScope)
@@ -101,7 +101,7 @@ void ParagraphLayouter::layout_in_page(GmoBox* pContainerBox)
 //---------------------------------------------------------------------------------------
 GmoBox* ParagraphLayouter::create_main_box()
 {
-    return new GmoBoxParagraph();
+    return new GmoBoxParagraph(m_pPara);
 }
 
 //---------------------------------------------------------------------------------------

@@ -20,7 +20,7 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
@@ -39,34 +39,34 @@ using namespace lomse;
 class ModelBuilderTestFixture
 {
 public:
+    LibraryScope m_libraryScope;
+    std::string m_scores_path;
 
     ModelBuilderTestFixture()     //SetUp fixture
+        : m_libraryScope(cout)
     {
-        m_pLibraryScope = new LibraryScope(cout);
         m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
 
     ~ModelBuilderTestFixture()    //TearDown fixture
     {
-        delete m_pLibraryScope;
     }
-
-    LibraryScope* m_pLibraryScope;
-    std::string m_scores_path;
 };
 
 SUITE(ModelBuilderTest)
 {
 
-    //This just checks that the score has an associated ColStaffObjs
     TEST_FIXTURE(ModelBuilderTestFixture, ModelBuilderScore)
     {
-        DocumentScope documentScope(cout);
-        LdpParser* parser = Injector::inject_LdpParser(*m_pLibraryScope, documentScope);
-        Analyser* analyser = Injector::inject_Analyser(*m_pLibraryScope, documentScope);
-        ModelBuilder* builder = Injector::inject_ModelBuilder(documentScope);
-        LdpCompiler compiler(parser, analyser, builder, documentScope.id_assigner());
-        InternalModel* pIModel = compiler.compile_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (barline simple))))))" );
+        //This just checks that compiler creates a model builder and it
+        //structurizes the score (creates the associated ColStaffObjs)
+
+        Document doc(m_libraryScope);
+        //ModelBuilder* builder = Injector::inject_ModelBuilder(doc.get_scope());
+        LdpCompiler compiler(m_libraryScope, &doc);
+        InternalModel* pIModel = compiler.compile_string(
+            "(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
+            "(instrument (musicData (n c4 q) (barline simple))))))" );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != NULL );

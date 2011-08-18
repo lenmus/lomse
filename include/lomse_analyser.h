@@ -38,6 +38,8 @@ class LdpFactory;
 class LdpElement;
 class Analyser;
 class InternalModel;
+class ImoNote;
+class ImoRest;
 
 
 //---------------------------------------------------------------------------------------
@@ -163,6 +165,7 @@ protected:
     //helpers and collaborators
     ostream&        m_reporter;
     LibraryScope&   m_libraryScope;
+    Document*       m_pDoc;
     LdpFactory*     m_pLdpFactory;
     TiesBuilder*    m_pTiesBuilder;
     OldTiesBuilder* m_pOldTiesBuilder;
@@ -171,7 +174,7 @@ protected:
     TupletsBuilder* m_pTupletsBuilder;
     SlursBuilder*   m_pSlursBuilder;
     ImoScore*       m_pScore;
-    ImoDocument*    m_pDoc;
+    ImoDocument*    m_pImoDoc;
 
     //analysis input
     LdpTree* m_pTree;
@@ -185,10 +188,8 @@ protected:
     //saved values
     ImoNote* m_pLastNote;
 
-
 public:
-    //Analyser(ostream& reporter, LdpFactory* pFactory);
-    Analyser(ostream& reporter, LibraryScope& libraryScope);
+    Analyser(ostream& reporter, LibraryScope& libraryScope, Document* pDoc);
     ~Analyser();
 
     //access to results
@@ -247,8 +248,11 @@ public:
     inline ImoScore* get_score_being_analysed() { return m_pScore; }
 
     //access to document being analysed
-    inline void set_document_being_analysed(ImoDocument* pDoc) { m_pDoc = pDoc; }
-    inline ImoDocument* get_document_being_analysed() { return m_pDoc; }
+    inline Document* get_document_being_analysed() { return m_pDoc; }
+
+    //access to root ImoDocument
+    inline void save_root_imo_document(ImoDocument* pDoc) { m_pImoDoc = pDoc; }
+    inline ImoDocument* get_root_imo_document() { return m_pImoDoc; }
 
 protected:
     ElementAnalyser* new_analyser(ELdpElement type, ImoObj* pAnchor=NULL);
@@ -298,29 +302,6 @@ protected:
     int m_nLevelNext;
 
 };
-
-
-
-//---------------------------------------------------------------------------------------
-// ImoObjFactory: helper to create ImoObj objects
-class ImoObjFactory
-{
-protected:
-    LibraryScope& m_libraryScope;
-    ostream& m_reporter;
-
-public:
-    ImoObjFactory(LibraryScope& libraryScope, ostream& reporter=cout);
-    virtual ~ImoObjFactory() {}
-
-    ImoObj* create_object(const std::string& ldpSource);
-
-    ImoTextItem* create_text_item(const std::string& ldpSource,
-                                  ImoTextStyleInfo* pStyle);
-
-
-};
-
 
 
 }   //namespace lomse

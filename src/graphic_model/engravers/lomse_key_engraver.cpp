@@ -93,11 +93,11 @@ void KeyEngraver::compute_positions_for_sharps(int clefType)
 {
     switch(clefType)
     {
-        case ImoClef::k_G2:
-        case ImoClef::k_8_G2:
-        case ImoClef::k_G2_8:
-        case ImoClef::k_15_G2:
-        case ImoClef::k_G2_15:
+        case k_clef_G2:
+        case k_clef_8_G2:
+        case k_clef_G2_8:
+        case k_clef_15_G2:
+        case k_clef_G2_15:
             m_tPos[1] = - 50.0f;        //line 5 (Fa)
             m_tPos[2] = - 35.0f;        //space between lines 3 & 4 (Do)
             m_tPos[3] = - 55.0f;        //space above line 5 (Sol)
@@ -107,11 +107,11 @@ void KeyEngraver::compute_positions_for_sharps(int clefType)
             m_tPos[7] = - 30.0f;        //line 3 (Si)
             break;
 
-        case ImoClef::k_F4:
-        case ImoClef::k_8_F4:
-        case ImoClef::k_F4_8:
-        case ImoClef::k_15_F4:
-        case ImoClef::k_F4_15:
+        case k_clef_F4:
+        case k_clef_8_F4:
+        case k_clef_F4_8:
+        case k_clef_15_F4:
+        case k_clef_F4_15:
             m_tPos[1] = - 40.0f;        //line 4 (Fa)
             m_tPos[2] = - 25.0f;        //space between lines 2 & 3 (Do)
             m_tPos[3] = - 45.0f;        //space between lines 4 & 5 (Sol)
@@ -121,7 +121,7 @@ void KeyEngraver::compute_positions_for_sharps(int clefType)
             m_tPos[7] = - 20.0f;        //space aboveline 5 (Si)
             break;
 
-        case ImoClef::k_F3:
+        case k_clef_F3:
             m_tPos[1] = - 30.0f;		//line 3 (Fa)
             m_tPos[2] = - 50.0f;      //line 5 (Do)
             m_tPos[3] = - 35.0f;      //space between lines 3 & 4 (Sol)
@@ -131,7 +131,7 @@ void KeyEngraver::compute_positions_for_sharps(int clefType)
             m_tPos[7] = - 45.0f;      //space between lines 4 & 5 (Si)
             break;
 
-        case ImoClef::k_C1:
+        case k_clef_C1:
             m_tPos[1] = - 25.0f;        //space between lines 2 & 3 (Fa)
             m_tPos[2] = - 10.0f;        //line 1 (Do)
             m_tPos[3] = - 30.0f;        //line 3 (Sol)
@@ -141,7 +141,7 @@ void KeyEngraver::compute_positions_for_sharps(int clefType)
             m_tPos[7] = - 40.0f;        //linea 4 (Si)
             break;
 
-        case ImoClef::k_C2:
+        case k_clef_C2:
             m_tPos[1] = - 35.0f;		//space between lines 3 & 4 (Fa)
             m_tPos[2] = - 20.0f;        //line 2 (Do)
             m_tPos[3] = - 40.0f;        //line 4 (Sol)
@@ -151,7 +151,7 @@ void KeyEngraver::compute_positions_for_sharps(int clefType)
             m_tPos[7] = - 15.0f;        //space between lines 1 & 2 (Si)
             break;
 
-        case ImoClef::k_C3:
+        case k_clef_C3:
             m_tPos[1] = - 45.0f;		//space between lines 4 & 5 (Fa)
             m_tPos[2] = - 30.0f;        //line 3 (Do)
             m_tPos[3] = - 50.0f;        //line 5 (Sol)
@@ -161,7 +161,7 @@ void KeyEngraver::compute_positions_for_sharps(int clefType)
             m_tPos[7] = - 25.0f;        //space between lines 2 & 3 (Si)
             break;
 
-        case ImoClef::k_C4:
+        case k_clef_C4:
             m_tPos[1] = - 20.0f;		//line 2 (Fa)
             m_tPos[2] = - 40.0f;      //line 4 (Do)
             m_tPos[3] = - 25.0f;      //space between lines 2 & 3 (Sol)
@@ -171,7 +171,7 @@ void KeyEngraver::compute_positions_for_sharps(int clefType)
             m_tPos[7] = - 35.0f;      //space between lines 3 & 4 (Si)
             break;
 
-        case ImoClef::k_C5:
+        case k_clef_C5:
             m_tPos[1] = - 30.0f;        //line 3 (Fa)
             m_tPos[2] = - 50.0f;        //line 5 (Do)
             m_tPos[3] = - 35.0f;        //space between lines 3 & 4 (Sol)
@@ -181,7 +181,7 @@ void KeyEngraver::compute_positions_for_sharps(int clefType)
             m_tPos[7] = - 45.0f;        //space between lines 4 & 5 (Si)
             break;
 
-        case ImoClef::k_F5:
+        case k_clef_F5:
             m_tPos[1] = - 50.0f;        //line 5 (Fa)
             m_tPos[2] = - 35.0f;        //space between lines 3 & 4 (Do)
             m_tPos[3] = - 20.0f;        //line 2 (Sol)
@@ -191,7 +191,7 @@ void KeyEngraver::compute_positions_for_sharps(int clefType)
             m_tPos[7] = - 30.0f;        //line 3 (Si)
             break;
 
-        case ImoClef::k_G1:
+        case k_clef_G1:
             m_tPos[1] = - 40.0f;        //line 4 (Fa)
             m_tPos[2] = - 25.0f;        //space between lines 2 & 3 (Do)
             m_tPos[3] = - 10.0f;        //line 1 (Sol)
@@ -201,14 +201,14 @@ void KeyEngraver::compute_positions_for_sharps(int clefType)
             m_tPos[7] = - 20.0f;        //line 2 (Si)
             break;
 
-        case ImoClef::k_percussion:
-        case ImoClef::k_undefined:
-            m_nKeyType = ImoKeySignature::k_C;    //force not to draw any accidentals
+        case k_clef_percussion:
+        case k_clef_undefined:
+            m_nKeyType = k_key_C;    //force not to draw any accidentals
             break;
 
         default:
             //LogMessage();
-            m_nKeyType = ImoKeySignature::k_C;    //force not to draw any accidentals
+            m_nKeyType = k_key_C;    //force not to draw any accidentals
     }
 }
 
@@ -217,11 +217,11 @@ void KeyEngraver::compute_positions_for_flats(int clefType)
 {
     switch(clefType)
     {
-        case ImoClef::k_G2:
-        case ImoClef::k_8_G2:
-        case ImoClef::k_G2_8:
-        case ImoClef::k_15_G2:
-        case ImoClef::k_G2_15:
+        case k_clef_G2:
+        case k_clef_8_G2:
+        case k_clef_G2_8:
+        case k_clef_15_G2:
+        case k_clef_G2_15:
             m_tPos[1] = - 30.0f;		//line 3 (Si)
             m_tPos[2] = - 45.0f;       //space between lines 4 & 5 (Mi)
             m_tPos[3] = - 25.0f;       //space between lines 2 & 3 (La)
@@ -231,11 +231,11 @@ void KeyEngraver::compute_positions_for_flats(int clefType)
             m_tPos[7] = - 15.0f;       //space between lines 1 & 2 (Fa)
             break;
 
-        case ImoClef::k_F4:
-        case ImoClef::k_8_F4:
-        case ImoClef::k_F4_8:
-        case ImoClef::k_15_F4:
-        case ImoClef::k_F4_15:
+        case k_clef_F4:
+        case k_clef_8_F4:
+        case k_clef_F4_8:
+        case k_clef_15_F4:
+        case k_clef_F4_15:
             m_tPos[1] = - 20.0f;		//line 2 (Si)
             m_tPos[2] = - 35.0f;       //space between lines 3 & 4 (Mi)
             m_tPos[3] = - 15.0f;       //space between lines 1 & 2 (La)
@@ -245,7 +245,7 @@ void KeyEngraver::compute_positions_for_flats(int clefType)
             m_tPos[7] = - 40.0f;       //linea 4 (Fa)
             break;
 
-        case ImoClef::k_F3:
+        case k_clef_F3:
             m_tPos[1] = - 45.0f;		//space between lines 4 & 5 (Si)
             m_tPos[2] = - 25.0f;       //space between lines 2 & 3 (Mi)
             m_tPos[3] = - 40.0f;       //line 4 (La)
@@ -255,7 +255,7 @@ void KeyEngraver::compute_positions_for_flats(int clefType)
             m_tPos[7] = - 30.0f;       //line 3 (Fa)
             break;
 
-        case ImoClef::k_C1:
+        case k_clef_C1:
             m_tPos[1] = - 40.0f;		//line 4 (Si)
             m_tPos[2] = - 20.0f;       //line 2 (Mi)
             m_tPos[3] = - 35.0f;       //space between lines 3 & 4 (La)
@@ -265,7 +265,7 @@ void KeyEngraver::compute_positions_for_flats(int clefType)
             m_tPos[7] = - 25.0f;       //space between lines 2 & 3 (Fa)
             break;
 
-        case ImoClef::k_C2:
+        case k_clef_C2:
             m_tPos[1] = - 15.0f;       //space between lines 1 & 2 (Si)
             m_tPos[2] = - 30.0f;       //line 3 (Mi)
             m_tPos[3] = - 10.0f;      //line 1 (La)
@@ -275,7 +275,7 @@ void KeyEngraver::compute_positions_for_flats(int clefType)
             m_tPos[7] = - 35.0f;       //space between lines 3 & 4 (Fa)
             break;
 
-        case ImoClef::k_C3:
+        case k_clef_C3:
             m_tPos[1] = - 25.0f;       //space between lines 2 & 3 (Si)
             m_tPos[2] = - 40.0f;       //line 4 (Mi)
             m_tPos[3] = - 20.0f;       //line 2 (La)
@@ -285,7 +285,7 @@ void KeyEngraver::compute_positions_for_flats(int clefType)
             m_tPos[7] = - 45.0f;       //space between lines 4 & 5 (Fa)
             break;
 
-        case ImoClef::k_C4:
+        case k_clef_C4:
             m_tPos[1] = - 35.0f;       //space between lines 3 & 4 (Si)
             m_tPos[2] = - 50.0f;       //line 5 (Mi)
             m_tPos[3] = - 30.0f;       //line 3 (La)
@@ -295,7 +295,7 @@ void KeyEngraver::compute_positions_for_flats(int clefType)
             m_tPos[7] = - 20.0f;       //line 2 (Fa)
             break;
 
-        case ImoClef::k_C5:
+        case k_clef_C5:
             m_tPos[1] = - 45.0f;        //space between lines 4 & 5 (Si)
             m_tPos[2] = - 25.0f;        //space between lines 2 & 3 (Mi)
             m_tPos[3] = - 40.0f;        //line 4 (La)
@@ -305,7 +305,7 @@ void KeyEngraver::compute_positions_for_flats(int clefType)
             m_tPos[7] = - 30.0f;        //line 3 (Fa)
             break;
 
-        case ImoClef::k_F5:
+        case k_clef_F5:
             m_tPos[1] = - 30.0f;        //line 3 (Si)
             m_tPos[2] = - 45.0f;        //space between lines 4 & 5 (Mi)
             m_tPos[3] = - 25.0f;        //space between lines 2 & 3 (La)
@@ -315,7 +315,7 @@ void KeyEngraver::compute_positions_for_flats(int clefType)
             m_tPos[7] = - 50.0f;        //linea 5 (Fa)
             break;
 
-        case ImoClef::k_G1:
+        case k_clef_G1:
             m_tPos[1] = - 20.0f;		//line 2 (Si)
             m_tPos[2] = - 35.0f;        //space between lines 3 & 4 (Mi)
             m_tPos[3] = - 15.0f;        //space between lines 1 & 2 (La)
@@ -325,14 +325,14 @@ void KeyEngraver::compute_positions_for_flats(int clefType)
             m_tPos[7] = - 40.0f;        //line 4 (Fa)
             break;
 
-        case ImoClef::k_percussion:
-        case ImoClef::k_undefined:
-            m_nKeyType = ImoKeySignature::k_C;    //force not to draw any accidentals
+        case k_clef_percussion:
+        case k_clef_undefined:
+            m_nKeyType = k_key_C;    //force not to draw any accidentals
             break;
 
         default:
             //LogMessage();
-            m_nKeyType = ImoKeySignature::k_C;    //force not to draw any accidentals
+            m_nKeyType = k_key_C;    //force not to draw any accidentals
     }
 }
 
@@ -341,67 +341,67 @@ int KeyEngraver::get_num_fifths(int keyType)
 {
     switch(keyType)
     {
-        case ImoKeySignature::k_C:
-        case ImoKeySignature::k_a:
+        case k_key_C:
+        case k_key_a:
             return 0;
 
         //Sharps ---------------------------------------
-        case ImoKeySignature::k_G:
-        case ImoKeySignature::k_e:
+        case k_key_G:
+        case k_key_e:
             return 1;
 
-        case ImoKeySignature::k_D:
-        case ImoKeySignature::k_b:
+        case k_key_D:
+        case k_key_b:
             return 2;
 
-        case ImoKeySignature::k_A:
-        case ImoKeySignature::k_fs:
+        case k_key_A:
+        case k_key_fs:
             return 3;
 
-        case ImoKeySignature::k_E:
-        case ImoKeySignature::k_cs:
+        case k_key_E:
+        case k_key_cs:
             return 4;
 
-        case ImoKeySignature::k_B:
-        case ImoKeySignature::k_gs:
+        case k_key_B:
+        case k_key_gs:
             return 5;
 
-        case ImoKeySignature::k_Fs:
-        case ImoKeySignature::k_ds:
+        case k_key_Fs:
+        case k_key_ds:
             return 6;
 
-        case ImoKeySignature::k_Cs:
-        case ImoKeySignature::k_as:
+        case k_key_Cs:
+        case k_key_as:
             return 7;
 
 
         //Flats -------------------------------------------
-        case ImoKeySignature::k_F:
-        case ImoKeySignature::k_d:
+        case k_key_F:
+        case k_key_d:
             return -1;
 
-        case ImoKeySignature::k_Bf:
-        case ImoKeySignature::k_g:
+        case k_key_Bf:
+        case k_key_g:
             return -2;
 
-        case ImoKeySignature::k_Ef:
-        case ImoKeySignature::k_c:
+        case k_key_Ef:
+        case k_key_c:
             return -3;
 
-        case ImoKeySignature::k_Af:
-        case ImoKeySignature::k_f:
+        case k_key_Af:
+        case k_key_f:
             return -4;
 
-        case ImoKeySignature::k_Df:
-        case ImoKeySignature::k_bf:
+        case k_key_Df:
+        case k_key_bf:
             return -5;
 
-        case ImoKeySignature::k_Gf:
-        case ImoKeySignature::k_ef:
+        case k_key_Gf:
+        case k_key_ef:
             return -6;
 
-        case ImoKeySignature::k_Cf:
-        case ImoKeySignature::k_af:
+        case k_key_Cf:
+        case k_key_af:
             return -7;
 
         default:

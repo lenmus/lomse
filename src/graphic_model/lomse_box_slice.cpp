@@ -33,9 +33,8 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-GmoBoxSlice::GmoBoxSlice(int nAbsMeasure)    //, int nNumInSystem,
-					     //LUnits xStart, LUnits xEnd)
-    : GmoBox(GmoBox::k_box_slice)
+GmoBoxSlice::GmoBoxSlice(int nAbsMeasure, ImoObj* pCreatorImo)
+    : GmoBox(GmoBox::k_box_slice, pCreatorImo)
 //    , m_nAbsMeasure(nAbsMeasure)
 //	, m_nNumInSystem(nNumInSystem)
 //    , m_xStart(xStart)
@@ -59,7 +58,7 @@ GmoBoxSystem* GmoBoxSlice::get_system_box()
 //--------------------------------------------------------------------------------------
 GmoBoxSliceInstr* GmoBoxSlice::add_box_for_instrument(ImoInstrument* pInstr)
 {
-    GmoBoxSliceInstr* pBox = new GmoBoxSliceInstr();    //, pInstr);
+    GmoBoxSliceInstr* pBox = new GmoBoxSliceInstr(pInstr);
     add_child_box(pBox);
     return pBox;
 }

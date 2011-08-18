@@ -20,7 +20,7 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
@@ -48,8 +48,9 @@ private:
     std::vector<bool> m_hasSystemBreak;
 
 public:
-    MyScoreLayouter2(ImoContentObj* pImo, GraphicModel* pGModel, LibraryScope& libraryScope)
-        : ScoreLayouter(pImo, pGModel, libraryScope)
+    MyScoreLayouter2(ImoContentObj* pImo, GraphicModel* pGModel,
+                     LibraryScope& libraryScope)
+        : ScoreLayouter(pImo, NULL, pGModel, libraryScope)
     {
     }
     virtual ~MyScoreLayouter2() {}

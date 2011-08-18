@@ -45,10 +45,11 @@ class FontStorage;
 enum ERenderOptions
 {
     k_option_draw_box_doc_page_content=0,
-    k_option_draw_box_score_page,
+    k_option_draw_box_container,
     k_option_draw_box_system,
     k_option_draw_box_slice,
     k_option_draw_box_slice_instr,
+    k_option_draw_box_inline_flag,
 };
 
 
@@ -57,13 +58,13 @@ enum ERenderOptions
 //---------------------------------------------------------------------------------------
 struct RenderOptions
 {
-    //-------------------------------------------------------------------------
     //for debug: draw a border around boxes
     bool draw_box_doc_page_content_flag;    //draw bounds for page content box
-    bool draw_item_main_box_flag;          //draw bounds for scaore pages
+    bool draw_box_container_flag;           //draw bounds for BoxContainer/BoxContent
     bool draw_box_system_flag;              //draw bounds for systems
     bool draw_box_slice_flag;               //draw bounds for slices
     bool draw_box_slice_instr_flag;         //draw bounds for SliceInstr
+    bool draw_box_inline_flag;              //draw bounds for InlineBox
 
     //bool g_fDrawBoundsShapes;           //draw bound rectangles for non boxes
     //bool g_fDrawSelRect;    //draw selection rectangles around staff objects
@@ -72,25 +73,32 @@ struct RenderOptions
     //bool g_fDrawAnchors;    //draw anchors, to see them in the score
     //bool g_fFreeMove;		//the shapes can be dragged without restrictions
 
+
     //-------------------------------------------------------------------------
     // scaling factor
     // To be transferred to the View
     double  scale;
 
+    //colors
     Color background_color;
+    Color highlighted_color;
+    Color selected_color;
+
+    //document page appearance
     bool page_border_flag;
     bool cast_shadow_flag;
 
-    //-------------------------------------------------------------------------
-    // Empty constructor
     RenderOptions()
         : draw_box_doc_page_content_flag(false)
-        , draw_item_main_box_flag(false)
+        , draw_box_container_flag(false)
         , draw_box_system_flag(false)
         , draw_box_slice_flag(false)
         , draw_box_slice_instr_flag(false)
+        , draw_box_inline_flag(false)
         , scale(1.0)
-        , background_color(127, 127, 127)
+        , background_color(127, 127, 127)   //grey
+        , highlighted_color(255,0,0)        //red
+        , selected_color(0,0,255)           //blue
         , page_border_flag(true)
         , cast_shadow_flag(true)
     {}
@@ -170,13 +178,13 @@ public:
     //curve?: elliptical_arc (A and a)
 
     // SVG basic shapes commands
-    //virtual void rect() = 0;                                                 //SVG: <rect>
-    virtual void circle(LUnits xCenter, LUnits yCenter, LUnits radius) = 0;  //SVG: <circle>
-    //virtual void ellipse() = 0;                                              //SVG: <ellipse>
+    virtual void rect(UPoint pos, USize size, LUnits radius) = 0;           //SVG: <rect>                                      //SVG: <rect>
+    virtual void circle(LUnits xCenter, LUnits yCenter, LUnits radius) = 0; //SVG: <circle>
+    //virtual void ellipse() = 0;                                           //SVG: <ellipse>
     virtual void line(LUnits x1, LUnits y1, LUnits x2, LUnits y2,
-                      LUnits width, ELineEdge nEdge=k_edge_normal) = 0;        //SVG: <line>
-    //virtual void polyline() = 0;                                             //SVG: <polyline>
-    virtual void polygon(int n, UPoint points[]) = 0;                        //SVG: <polygon>
+                      LUnits width, ELineEdge nEdge=k_edge_normal) = 0;     //SVG: <line>
+    //virtual void polyline() = 0;                                          //SVG: <polyline>
+    virtual void polygon(int n, UPoint points[]) = 0;                       //SVG: <polygon>
 
     // not the same but similar to SVG path command
     virtual void add_path(VertexSource& vs, unsigned path_id = 0, bool solid_path = true) = 0;

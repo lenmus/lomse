@@ -20,12 +20,11 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_internal_model.h"
-#include "lomse_basic_objects.h"
 #include "lomse_im_note.h"
 #include "lomse_tuplet_engraver.h"
 #include "lomse_note_engraver.h"
@@ -37,6 +36,7 @@
 #include "lomse_score_meter.h"
 #include "lomse_shapes_storage.h"
 #include "lomse_analyser.h"
+#include "lomse_im_factory.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -96,7 +96,8 @@ public:
     ImoTuplet* create_tuplet(int numNotes, ImoNoteRest* notes[], string tuplets[],
                              int tupletNum)
     {
-        Analyser a(cout, m_libraryScope);
+        Document doc(m_libraryScope);
+        Analyser a(cout, m_libraryScope, &doc);
         TupletsBuilder builder(cout, &a);
         for (int i=0; i < numNotes; ++i)
         {
@@ -141,14 +142,14 @@ public:
             if (notes[i]->is_note())
             {
                 ImoNote* pNote = dynamic_cast<ImoNote*>(notes[i]);
-                pShape = m_pNoteEngrv->create_shape(pNote, 0, 0, ImoClef::k_G2,
+                pShape = m_pNoteEngrv->create_shape(pNote, 0, 0, k_clef_G2,
                                                     UPoint(10.0f, 15.0f) );
             }
             else
             {
                 ImoRest* pRest = dynamic_cast<ImoRest*>(notes[i]);
                 pShape = m_pRestEngrv->create_shape(pRest, 0, 0, UPoint(10.0f, 15.0f),
-                                                    pRest->get_note_type(), 
+                                                    pRest->get_note_type(),
                                                     pRest->get_dots(),
                                                     pRest );
             }
@@ -212,9 +213,10 @@ SUITE(TupletEngraverTest)
 
     TEST_FIXTURE(TupletEngraverTestFixture, CreateTuplet)
     {
-        ImoNote note1(k_step_C, 4, k_eighth);
-        ImoNote note2(k_step_F, 4, k_eighth);
-        ImoNoteRest* notes[] = { &note1, &note2 };
+        Document doc(m_libraryScope);
+        ImoNote* note1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth);
+        ImoNote* note2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth);
+        ImoNoteRest* notes[] = { note1, note2 };
         string tuplets[] = { "+", "-" };
 
         ImoTuplet* pTuplet = create_tuplet(2, notes, tuplets, 12);
@@ -224,13 +226,17 @@ SUITE(TupletEngraverTest)
         CHECK( pTuplet->get_normal_number() == 3 );
         CHECK( notes[0]->is_in_tuplet() == true );
         CHECK( notes[1]->is_in_tuplet() == true );
+
+        delete note1;
+        delete note2;
     }
 
     TEST_FIXTURE(TupletEngraverTestFixture, FeedEngraver)
     {
-        ImoNote note1(k_step_C, 4, k_eighth);
-        ImoNote note2(k_step_F, 4, k_eighth);
-        ImoNoteRest* notes[] = { &note1, &note2 };
+        Document doc(m_libraryScope);
+        ImoNote* note1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth);
+        ImoNote* note2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth);
+        ImoNoteRest* notes[] = { note1, note2 };
         string tuplets[] = { "+", "-" };
 
         ImoTuplet* pTuplet = create_tuplet(2, notes, tuplets, 12);
@@ -241,14 +247,17 @@ SUITE(TupletEngraverTest)
         CHECK( pEngrv != NULL );
         CHECK( pEngrv == m_pTupletEngrv );
 
+        delete note1;
+        delete note2;
         delete_test_data();
     }
 
     TEST_FIXTURE(TupletEngraverTestFixture, CreateTupletShape)
     {
-        ImoNote note1(k_step_C, 4, k_eighth);
-        ImoNote note2(k_step_F, 4, k_eighth);
-        ImoNoteRest* notes[] = { &note1, &note2 };
+        Document doc(m_libraryScope);
+        ImoNote* note1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth);
+        ImoNote* note2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth);
+        ImoNoteRest* notes[] = { note1, note2 };
         string tuplets[] = { "+", "-" };
 
         ImoTuplet* pTuplet = create_tuplet(2, notes, tuplets, 12);
@@ -258,6 +267,8 @@ SUITE(TupletEngraverTest)
         m_pTupletShape = dynamic_cast<GmoShapeTuplet*>( m_pTupletEngrv->get_shape() );
         CHECK( m_pTupletShape != NULL );
 
+        delete note1;
+        delete note2;
         delete_test_data();
     }
 
@@ -265,7 +276,7 @@ SUITE(TupletEngraverTest)
     //{
     //    ImoNote note1(k_step_C, 4, k_eighth);
     //    ImoNote note2(k_step_F, 4, k_eighth);
-    //    ImoNoteRest* notes[] = { &note1, &note2 };
+    //    ImoNoteRest* notes[] = { note1, note2 };
     //    string tuplets[] = { "+", "-" };
 
     //    ImoTuplet* pTuplet = create_tuplet(2, notes, tuplets, 12);

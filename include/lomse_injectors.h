@@ -23,7 +23,7 @@
 
 #include "lomse_ldp_factory.h"
 #include "lomse_id_assigner.h"
-#include "lomse_injectors.h"
+#include "lomse_build_options.h"
 
 #include <iostream>
 using namespace std;
@@ -52,6 +52,7 @@ class Drawer;
 class ScreenDrawer;
 class Task;
 class EventInfo;
+class Request;
 
 //---------------------------------------------------------------------------------------
 class LOMSE_EXPORT LibraryScope
@@ -78,7 +79,10 @@ public:
     LdpFactory* ldp_factory();
     FontStorage* font_storage();
 
-    void notify_user_about(EventInfo& event);
+    //callbacks
+    void post_event(EventInfo* pEvent);
+    void post_request(Request* pRequest);
+    std::string get_font(const string& name, bool fBold, bool fItalic);
 
     double get_screen_ppi() const;
     int get_pixel_format() const;
@@ -116,11 +120,10 @@ public:
 
     static LdpParser* inject_LdpParser(LibraryScope& libraryScope,
                                        DocumentScope& documentScope);
-    static Analyser* inject_Analyser(LibraryScope& libraryScope,
-                                     DocumentScope& documentScope);
+    static Analyser* inject_Analyser(LibraryScope& libraryScope, Document* pDoc);
     static ModelBuilder* inject_ModelBuilder(DocumentScope& documentScope);
     static LdpCompiler* inject_LdpCompiler(LibraryScope& libraryScope,
-                                           DocumentScope& documentScope);
+                                           Document* pDoc);
     static Document* inject_Document(LibraryScope& libraryScope);
     static ScreenDrawer* inject_ScreenDrawer(LibraryScope& libraryScope);
 //    static UserCommandExecuter* inject_UserCommandExecuter(Document* pDoc);

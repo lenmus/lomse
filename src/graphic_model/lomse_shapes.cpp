@@ -88,6 +88,82 @@ GmoShapeClef::GmoShapeClef(ImoObj* pCreatorImo, int idx, int nGlyph, UPoint pos,
 
 
 //=======================================================================================
+// GmoShapeButton implementation: a clickable button
+//=======================================================================================
+GmoShapeButton::GmoShapeButton(ImoObj* pCreatorImo, UPoint pos, USize size,
+                               LibraryScope& libraryScope)
+	: GmoSimpleShape(pCreatorImo, GmoObj::k_shape_button, 0, Color(0,0,0))
+	, m_libraryScope(libraryScope)
+{
+    m_origin = pos;
+    m_size = size;
+    m_pButton = dynamic_cast<ImoButton*>( pCreatorImo );
+
+    center_text();
+}
+//---------------------------------------------------------------------------------------
+void GmoShapeButton::center_text()
+{
+    select_font();
+    TextMeter meter(m_libraryScope);
+    LUnits height = meter.get_font_height();
+    LUnits width = meter.measure_width(m_pButton->get_label());
+
+    m_xLabel = (m_size.width - width) / 2.0f;
+    m_yLabel = (m_size.height + height) / 2.0f;     //reference is at text bottom
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeButton::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    if (!m_pButton->is_visible())
+        return;
+
+    Color textColor = m_pButton->is_enabled() ? Color(0, 0, 0) : Color(128, 128, 128);
+    Color strokeColor = Color(128, 128, 128);
+    Color bgColor = m_pButton->get_bg_color();
+
+    //draw border
+    pDrawer->begin_path();
+    pDrawer->fill( bgColor );
+    pDrawer->stroke( strokeColor );
+    pDrawer->stroke_width(15.0);
+    pDrawer->rect(m_origin, m_size, 100.0f);
+
+    UPoint org2 = m_origin;
+    org2.x += 50.0f;
+    org2.y += 50.0f;
+    USize size2 = m_size;
+    size2.width -= 100.0f;
+    size2.height -= 100.0f;
+    pDrawer->rect(org2, size2, 90.0f);
+
+    pDrawer->end_path();
+
+    //draw text
+    select_font();
+    pDrawer->set_text_color( textColor );   //determine_color_to_use(opt) );
+    LUnits x = m_origin.x + m_xLabel;
+    LUnits y = m_origin.y + m_yLabel;
+    pDrawer->draw_text(x, y, m_pButton->get_label());
+
+    GmoSimpleShape::on_draw(pDrawer, opt);
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeButton::select_font()
+{
+    ImoStyle* pStyle = m_pButton->get_style();
+    TextMeter meter(m_libraryScope);
+    meter.select_font(pStyle->get_string_property(ImoStyle::k_font_name),
+                      pStyle->get_float_property(ImoStyle::k_font_size),
+                      pStyle->is_bold(),
+                      pStyle->is_italic() );
+}
+
+
+
+//=======================================================================================
 // GmoShapeFermata
 //=======================================================================================
 GmoShapeFermata::GmoShapeFermata(ImoObj* pCreatorImo, int idx, int nGlyph, UPoint pos,
@@ -203,510 +279,34 @@ GmoShapeInvisible::GmoShapeInvisible(ImoObj* pCreatorImo, int idx, UPoint uPos,
 
 
 
-////=======================================================================================
-//// GmoShapeRectangle: a rectangle with optional rounded corners
-////=======================================================================================
-////TODO: remove this backwards compatibility constructor
-//GmoShapeRectangle::GmoShapeRectangle(GmoBox* owner, LUnits uxLeft, LUnits uyTop,
-//                                   LUnits uxRight, LUnits uyBottom, LUnits uWidth,
-//                                   Color color, wxString sName,
-//				                   bool fDraggable, bool fSelectable,
-//                                   bool fVisible)
-//	: GmoSimpleShape(GmoObj::k_shape_Rectangle, pOwner, 0, sName, fDraggable, fSelectable,
-//                    fVisible)
-//{
-//    Create(uxLeft, uyTop, uxRight, uyBottom, uWidth, color, *wxWHITE);
-//}
-//
-////---------------------------------------------------------------------------------------
-//GmoShapeRectangle::GmoShapeRectangle(GmoBox* owner,
-//                     //position and size
-//                     LUnits uxLeft, LUnits uyTop, LUnits uxRight, LUnits uyBottom,
-//                     //border
-//                     LUnits uBorderWidth, Color nBorderColor,
-//                     //content
-//                     Color nBgColor,
-//                     //other
-//                     int nShapeIdx, wxString sName,
-//				     bool fDraggable, bool fSelectable, bool fVisible)
-//	: GmoSimpleShape(GmoObj::k_shape_Rectangle, pOwner, nShapeIdx, sName, fDraggable,
-//                    fSelectable, fVisible)
-//{
-//    Create(uxLeft, uyTop, uxRight, uyBottom, uBorderWidth, nBorderColor, nBgColor);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::Create(LUnits uxLeft, LUnits uyTop, LUnits uxRight,
-//                              LUnits uyBottom, LUnits uBorderWidth,
-//                              Color nBorderColor, Color nBgColor)
-//{
-//    m_uCornerRadius = 0.0f;
-//    m_uBorderWidth = uBorderWidth;
-//    m_nBorderColor = nBorderColor;
-//    m_nBorderStyle = lm_eLine_None;
-//    m_nBgColor = nBgColor;
-//
-//    //store rectangle points and compute centers of sides
-//    m_uPoint[lmID_TOP_LEFT].x = uxLeft;
-//    m_uPoint[lmID_TOP_LEFT].y = uyTop;
-//    m_uPoint[lmID_TOP_RIGHT].x = uxRight;
-//    m_uPoint[lmID_TOP_RIGHT].y = uyTop;
-//    m_uPoint[lmID_BOTTOM_RIGHT].x = uxRight;
-//    m_uPoint[lmID_BOTTOM_RIGHT].y = uyBottom;
-//    m_uPoint[lmID_BOTTOM_LEFT].x = uxLeft;
-//    m_uPoint[lmID_BOTTOM_LEFT].y = uyBottom;
-//    ComputeCenterPoints();
-//
-//    //Create the handlers
-//    m_pHandler[lmID_TOP_LEFT] = new lmHandlerSquare(m_pOwner, this, lmID_TOP_LEFT, wxCURSOR_SIZENWSE);
-//    m_pHandler[lmID_TOP_RIGHT] = new lmHandlerSquare(m_pOwner, this, lmID_TOP_RIGHT, wxCURSOR_SIZENESW);
-//    m_pHandler[lmID_BOTTOM_RIGHT] = new lmHandlerSquare(m_pOwner, this, lmID_BOTTOM_RIGHT, wxCURSOR_SIZENWSE);
-//    m_pHandler[lmID_BOTTOM_LEFT] = new lmHandlerSquare(m_pOwner, this, lmID_BOTTOM_LEFT, wxCURSOR_SIZENESW);
-//    m_pHandler[lmID_LEFT_CENTER] = new lmHandlerSquare(m_pOwner, this, lmID_LEFT_CENTER, wxCURSOR_SIZEWE);
-//    m_pHandler[lmID_TOP_CENTER] = new lmHandlerSquare(m_pOwner, this, lmID_TOP_CENTER, wxCURSOR_SIZENS);
-//    m_pHandler[lmID_RIGHT_CENTER] = new lmHandlerSquare(m_pOwner, this, lmID_RIGHT_CENTER, wxCURSOR_SIZEWE);
-//    m_pHandler[lmID_BOTTOM_CENTER] = new lmHandlerSquare(m_pOwner, this, lmID_BOTTOM_CENTER, wxCURSOR_SIZENS);
-//
-//    UpdateBounds();
-//}
-//
-////---------------------------------------------------------------------------------------
-//GmoShapeRectangle::~GmoShapeRectangle()
-//{
-//    //delete handlers
-//    for (int i=0; i < lmID_NUM_HANDLERS; i++)
-//    {
-//        if (m_pHandler[i])
-//            delete m_pHandler[i];
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::UpdateBounds()
-//{
-//    // store boundling rectangle position and size
-//    LUnits uWidthRect = m_uBorderWidth / 2.0;
-//
-//    m_uBoundsTop = m_uPoint[lmID_TOP_LEFT];
-//    m_uBoundsBottom = m_uPoint[lmID_BOTTOM_RIGHT];
-//
-//    NormaliceBoundsRectangle();
-//
-//    // store selection rectangle position and size
-//    m_uSelRect = GetBounds();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::SavePoints()
-//{
-//    for (int i=0; i < lmID_NUM_HANDLERS; i++)
-//    {
-//        //save points and update handlers position
-//        m_uSavePoint[i] = m_uPoint[i];
-//        m_pHandler[i]->SetHandlerCenterPoint(m_uPoint[i].x, m_uPoint[i].y);
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::on_draw(Drawer* pDrawer, RenderOptions& opt)
-//{
-//    //if selected, book to be rendered with handlers when posible
-//    if (IsSelected())
-//    {
-//        //book to be rendered with handlers
-//        GetOwnerBoxPage()->OnNeedToDrawHandlers(this);
-//        SavePoints();
-//    }
-//    else
-//    {
-//        //draw the rectangle
-//        DrawRectangle(pPaper, color, false);        //false -> anti-aliased
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::RenderNormal(lmPaper* pPaper, Color color)
-//{
-//        //draw the rectangle
-//        DrawRectangle(pPaper, color, false);        //false -> anti-aliased
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::RenderWithHandlers(lmPaper* pPaper)
-//{
-//    //render the textbox and its handlers
-//
-//    //as painting uses XOR we need the complementary color
-//    Color color = *wxBLUE;      //TODO User options
-//    Color colorC = Color(255 - (int)color.Red(),
-//                               255 - (int)color.Green(),
-//                               255 - (int)color.Blue() );
-//
-//    //prepare to render
-//    pPaper->SetLogicalFunction(wxXOR);
-//
-//    //draw the handlers
-//    for (int i=0; i < lmID_NUM_HANDLERS; i++)
-//    {
-//        m_pHandler[i]->Render(pPaper, colorC);
-//        GetOwnerBoxPage()->AddActiveHandler(m_pHandler[i]);
-//    }
-//
-//    //draw the rectangle
-//    DrawRectangle(pPaper, colorC, true);        //true -> Sketch
-//
-//    //terminate renderization
-//    pPaper->SetLogicalFunction(wxCOPY);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::DrawRectangle(lmPaper* pPaper, Color color, bool fSketch)
-//{
-//    //draw backgroung only if not selected
-//    if (!fSketch)
-//        pPaper->SolidPolygon(4, m_uPoint, m_nBgColor);
-//
-//    //draw borders
-//    ELineEdges nEdge = lm_eEdgeNormal;
-//    //m_nBorderStyle = lm_eLine_None;
-//    pPaper->SolidLine(m_uPoint[lmID_TOP_LEFT].x, m_uPoint[lmID_TOP_LEFT].y,
-//                      m_uPoint[lmID_TOP_RIGHT].x, m_uPoint[lmID_TOP_RIGHT].y,
-//                      m_uBorderWidth, nEdge, m_nBorderColor);
-//    pPaper->SolidLine(m_uPoint[lmID_TOP_RIGHT].x, m_uPoint[lmID_TOP_RIGHT].y,
-//                      m_uPoint[lmID_BOTTOM_RIGHT].x, m_uPoint[lmID_BOTTOM_RIGHT].y,
-//                      m_uBorderWidth, nEdge, m_nBorderColor);
-//    pPaper->SolidLine(m_uPoint[lmID_BOTTOM_RIGHT].x, m_uPoint[lmID_BOTTOM_RIGHT].y,
-//                      m_uPoint[lmID_BOTTOM_LEFT].x, m_uPoint[lmID_BOTTOM_LEFT].y,
-//                      m_uBorderWidth, nEdge, m_nBorderColor);
-//    pPaper->SolidLine(m_uPoint[lmID_BOTTOM_LEFT].x, m_uPoint[lmID_BOTTOM_LEFT].y,
-//                      m_uPoint[lmID_TOP_LEFT].x, m_uPoint[lmID_TOP_LEFT].y,
-//                      m_uBorderWidth, nEdge, m_nBorderColor);
-//
-//    GmoSimpleShape::Render(pPaper, color);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::SetCornerRadius(LUnits uRadius)
-//{
-//    m_uCornerRadius = uRadius;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::Shift(LUnits uxIncr, LUnits uyIncr)
-//{
-//    m_uPoint[lmID_TOP_LEFT].x += uxIncr;
-//    m_uPoint[lmID_TOP_LEFT].y += uyIncr;
-//    m_uPoint[lmID_TOP_RIGHT].x += uxIncr;
-//    m_uPoint[lmID_TOP_RIGHT].y += uyIncr;
-//    m_uPoint[lmID_BOTTOM_RIGHT].x += uxIncr;
-//    m_uPoint[lmID_BOTTOM_RIGHT].y += uyIncr;
-//    m_uPoint[lmID_BOTTOM_LEFT].x += uxIncr;
-//    m_uPoint[lmID_BOTTOM_LEFT].y += uyIncr;
-//
-//    ComputeCenterPoints();
-//
-//    ShiftBoundsAndSelRec(uxIncr, uyIncr);
-//
-//	//if included in a composite shape update parent bounding and selection rectangles
-//	if (this->IsChildShape())
-//		((lmCompositeShape*)GetParentShape())->RecomputeBounds();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::ComputeCenterPoints()
-//{
-//    m_uPoint[lmID_TOP_CENTER].x = (m_uPoint[lmID_TOP_LEFT].x + m_uPoint[lmID_TOP_RIGHT].x) / 2.0f;
-//    m_uPoint[lmID_TOP_CENTER].y = m_uPoint[lmID_TOP_LEFT].y;
-//
-//    m_uPoint[lmID_RIGHT_CENTER].x = m_uPoint[lmID_TOP_RIGHT].x;
-//    m_uPoint[lmID_RIGHT_CENTER].y = (m_uPoint[lmID_TOP_RIGHT].y + m_uPoint[lmID_BOTTOM_RIGHT].y) / 2.0f;
-//
-//    m_uPoint[lmID_BOTTOM_CENTER].x = m_uPoint[lmID_TOP_CENTER].x;
-//    m_uPoint[lmID_BOTTOM_CENTER].y = m_uPoint[lmID_BOTTOM_RIGHT].y;
-//
-//    m_uPoint[lmID_LEFT_CENTER].x = m_uPoint[lmID_TOP_LEFT].x;
-//    m_uPoint[lmID_LEFT_CENTER].y = m_uPoint[lmID_RIGHT_CENTER].y;
-//}
-//
-////---------------------------------------------------------------------------------------
-//wxBitmap* GmoShapeRectangle::OnBeginDrag(double rScale, wxDC* pDC)
-//{
-//	// A dragging operation is started. The view invokes this method to request the
-//	// bitmap to be used as drag image. No other action is required.
-//	// If no bitmap is returned drag is cancelled.
-//	//
-//	// So this method returns the bitmap to use with the drag image.
-//
-//    //as this is a shape defined by points: save all points position
-//    for (int i=0; i < lmID_NUM_HANDLERS; i++)
-//        m_uSavePoint[i] = m_uPoint[i];
-//
-//    // allocate a bitmap whose size is that of the box area
-//    // convert size to pixels
-//    int wD = (int)pDC->LogicalToDeviceXRel( m_uBoundsBottom.x - m_uBoundsTop.x );
-//    int hD = (int)pDC->LogicalToDeviceYRel( m_uBoundsBottom.y - m_uBoundsTop.y );
-//    wxBitmap bitmap(wD+2, hD+2);
-//
-//    // allocate a memory DC for drawing into a bitmap
-//    wxMemoryDC dc2;
-//    dc2.SelectObject(bitmap);
-//    dc2.SetMapMode(lmDC_MODE);
-//    dc2.SetUserScale(rScale, rScale);
-//    //dc2.SetFont(*m_pFont);
-//
-//    // draw onto the bitmap
-//    dc2.SetBackground(* wxWHITE_BRUSH);
-//    dc2.Clear();
-//    dc2.SetBackgroundMode(wxTRANSPARENT);
-//    dc2.SetPen(*wxBLACK_PEN);
-//    dc2.DrawRectangle(m_uBoundsTop.x, m_uBoundsTop.y, GetBounds().GetWidth(),
-//                      GetBounds().GetHeight() );
-//    //dc2.SetTextForeground(g_pColors->ScoreSelected());
-//    //dc2.DrawText(m_sClippedText, m_uTextPos.x - m_uBoundsTop.x, m_uTextPos.y - m_uBoundsTop.y);
-//    dc2.SelectObject(wxNullBitmap);
-//
-//    // Make the bitmap masked
-//    wxImage image = bitmap.ConvertToImage();
-//    image.SetMaskColour(255, 255, 255);
-//    wxBitmap* pBitmap = new wxBitmap(image);
-//
-//    ////DBG -----------
-//    //wxString sFileName = _T("GmoShapeTextbox.bmp");
-//    //pBitmap->SaveFile(sFileName, wxBITMAP_TYPE_BMP);
-//    ////END DBG -------
-//
-//    return pBitmap;
-//}
-//
-////---------------------------------------------------------------------------------------
-//UPoint GmoShapeRectangle::OnDrag(lmPaper* pPaper, const UPoint& uPos)
-//{
-//	// The view informs that the user continues dragging. We receive the new desired
-//	// shape position and we must return the new allowed shape position.
-//	//
-//	// The default behaviour is to return the received position, so the view redraws
-//	// the drag image at that position. No action must be performed by the shape on
-//	// the score and score objects.
-//	//
-//	// The received new desired shape position is in logical units and referred to page
-//	// origin. The returned new allowed shape position must also be in in logical units
-//	// and referred to page origin.
-//
-//    //this is a shape defined by points. Therefore it is necessary to
-//    //update all handler points and object points
-//    UPoint uShift(uPos - this->GetBounds().GetTopLeft());
-//    for (int i=0; i < lmID_NUM_HANDLERS; i++)
-//    {
-//        m_pHandler[i]->SetHandlerTopLeftPoint( uShift + m_pHandler[i]->GetBounds().GetLeftTop() );
-//        m_uPoint[i] = m_pHandler[i]->GetHandlerCenterPoint();
-//    }
-//    UpdateBounds();
-//
-//    return UPoint(uPos.x, uPos.y);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::OnEndDrag(lmPaper* pPaper, lmInteractor* pCanvas, const UPoint& uPos)
-//{
-//	// End drag. Receives the command processor associated to the view and the
-//	// final position of the object (logical units referred to page origin).
-//	// This method must validate/adjust final position and, if ok, it must
-//	// send a move object command to the Interactor.
-//
-//    //compute shift from start of drag point
-//    UPoint uShift = uPos - m_uSavePoint[0];
-//
-//    //restore shape position to that of start of drag start so that MoveObject() or
-//    //MoveObjectPoints() commands can apply shifts from original points.
-//    for (int i=0; i < lmID_NUM_HANDLERS; i++)
-//        m_uPoint[i] = m_uSavePoint[i];
-//    UpdateBounds();
-//
-//    //as this is an object defined by points, instead of MoveObject() command we have to issue
-//    //a MoveObjectPoints() command.
-//    UPoint uShifts[lmID_NUM_HANDLERS];
-//    for (int i=0; i < lmID_NUM_HANDLERS; i++)
-//        uShifts[i] = uShift;
-//    pCanvas->MoveObjectPoints(this, uShifts, 4, false);  //false-> do not update views
-//}
-//
-////---------------------------------------------------------------------------------------
-//UPoint GmoShapeRectangle::OnHandlerDrag(lmPaper* pPaper, const UPoint& uPos,
-//                                    long nHandlerID)
-//{
-//	// The view informs that the user continues dragging. We receive the new desired
-//	// shape position and we must return the new allowed shape position.
-//	//
-//	// The default behaviour is to return the received position, so the view redraws
-//	// the drag image at that position. No action must be performed by the shape on
-//	// the score and score objects.
-//	//
-//	// The received new desired shape position is in logical units and referred to page
-//	// origin. The returned new allowed shape position must also be in in logical units
-//	// and referred to page origin.
-//
-//    //erase previous draw
-//    RenderWithHandlers(pPaper);
-//
-//    //compute new rectangle and handlers positions
-//    ComputeNewPointsAndHandlersPositions(uPos, nHandlerID);
-//
-//    //draw at new position
-//    RenderWithHandlers(pPaper);
-//
-//    return uPos;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::ComputeNewPointsAndHandlersPositions(const UPoint& uPos,
-//                                                            long nHandlerID)
-//{
-//    //Common code to OnHandlerDrag and OnHandlerEndDrag to compute new coordinares
-//    //for rectangle and handlers points
-//
-//    //aux. to compute new rectangle coordinates
-//    LUnits xLeft = m_uPoint[lmID_TOP_LEFT].x;
-//    LUnits yTop = m_uPoint[lmID_TOP_LEFT].y;
-//    LUnits xRight = m_uPoint[lmID_BOTTOM_RIGHT].x;
-//    LUnits yBottom = m_uPoint[lmID_BOTTOM_RIGHT].y;
-//
-//    //maintain coherence in points, so that the shape continues being a rectangle
-//    UPoint point;
-//    switch(nHandlerID)
-//    {
-//        case lmID_TOP_LEFT:
-//            //free movement
-//            m_pHandler[lmID_TOP_LEFT]->SetHandlerTopLeftPoint(uPos);
-//            point = m_pHandler[lmID_TOP_LEFT]->GetHandlerCenterPoint();
-//            xLeft = point.x;
-//            yTop = point.y;
-//            break;
-//
-//        case lmID_TOP_RIGHT:
-//            //free movement
-//            m_pHandler[lmID_TOP_RIGHT]->SetHandlerTopLeftPoint(uPos);
-//            point = m_pHandler[lmID_TOP_RIGHT]->GetHandlerCenterPoint();
-//            xRight = point.x;
-//            yTop = point.y;
-//            break;
-//
-//        case lmID_BOTTOM_RIGHT:
-//            //free movement
-//            m_pHandler[lmID_BOTTOM_RIGHT]->SetHandlerTopLeftPoint(uPos);
-//            point = m_pHandler[lmID_BOTTOM_RIGHT]->GetHandlerCenterPoint();
-//            xRight = point.x;
-//            yBottom = point.y;
-//            break;
-//
-//        case lmID_BOTTOM_LEFT:
-//            //free movement
-//            m_pHandler[lmID_BOTTOM_LEFT]->SetHandlerTopLeftPoint(uPos);
-//            point = m_pHandler[lmID_BOTTOM_LEFT]->GetHandlerCenterPoint();
-//            xLeft = point.x;
-//            yBottom = point.y;
-//            break;
-//
-//        case lmID_LEFT_CENTER:
-//            //clip horizontally
-//            m_pHandler[lmID_LEFT_CENTER]->SetHandlerTopLeftPoint(uPos);
-//            xLeft = m_pHandler[lmID_LEFT_CENTER]->GetHandlerCenterPoint().x;
-//            break;
-//
-//        case lmID_TOP_CENTER:
-//            //clip vertically
-//            m_pHandler[lmID_TOP_CENTER]->SetHandlerTopLeftPoint(uPos);
-//            yTop = m_pHandler[lmID_TOP_CENTER]->GetHandlerCenterPoint().y;
-//            break;
-//
-//        case lmID_RIGHT_CENTER:
-//            //clip horizontally
-//            m_pHandler[lmID_RIGHT_CENTER]->SetHandlerTopLeftPoint(uPos);
-//            xRight = m_pHandler[lmID_RIGHT_CENTER]->GetHandlerCenterPoint().x;
-//            break;
-//
-//        case lmID_BOTTOM_CENTER:
-//            //clip vertically
-//            m_pHandler[lmID_BOTTOM_CENTER]->SetHandlerTopLeftPoint(uPos);
-//            yBottom = m_pHandler[lmID_BOTTOM_CENTER]->GetHandlerCenterPoint().y;
-//            break;
-//
-//        default:
-//            wxASSERT(false);
-//    }
-//
-//    //store rectangle points and compute centers of sides
-//    m_uPoint[lmID_TOP_LEFT].x = xLeft;
-//    m_uPoint[lmID_TOP_LEFT].y = yTop;
-//    m_uPoint[lmID_TOP_RIGHT].x = xRight;
-//    m_uPoint[lmID_TOP_RIGHT].y = yTop;
-//    m_uPoint[lmID_BOTTOM_RIGHT].x = xRight;
-//    m_uPoint[lmID_BOTTOM_RIGHT].y = yBottom;
-//    m_uPoint[lmID_BOTTOM_LEFT].x = xLeft;
-//    m_uPoint[lmID_BOTTOM_LEFT].y = yBottom;
-//    ComputeCenterPoints();
-//
-//    //set handlers
-//    for (int i=0; i < lmID_NUM_HANDLERS; i++)
-//    {
-//        m_pHandler[i]->SetHandlerCenterPoint(m_uPoint[i].x, m_uPoint[i].y);
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::OnHandlerEndDrag(lmInteractor* pCanvas, const UPoint& uPos,
-//                                   long nHandlerID)
-//{
-//	// End drag. Receives the command processor associated to the view and the
-//	// final position of the object (logical units referred to page origin).
-//	// This method must validate/adjust final position and, if ok, it must
-//	// send a move object command to the Interactor.
-//
-//    //compute new rectangle and handlers positions
-//    ComputeNewPointsAndHandlersPositions(uPos, nHandlerID);
-//
-//    //Compute shifts from start of drag points
-//    UPoint uShifts[lmID_NUM_HANDLERS];
-//    for (int i=0; i < lmID_NUM_HANDLERS; i++)
-//    {
-//        uShifts[i] = m_uPoint[i] - m_uSavePoint[i];
-//    }
-//
-//    //MoveObjectPoints() apply shifts computed from drag start points. As handlers and
-//    //shape points are already displaced, it is necesary to restore the original positions to
-//    //avoid double displacements.
-//    for (int i=0; i < lmID_NUM_HANDLERS; i++)
-//        m_uPoint[i] = m_uSavePoint[i];
-//
-//    UpdateBounds();
-//
-//    pCanvas->MoveObjectPoints(this, uShifts, 4, false);  //false-> do not update views
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeRectangle::MovePoints(int nNumPoints, int nShapeIdx, UPoint* pShifts,
-//                                  bool fAddShifts)
-//{
-//    //Each time a commnad is issued to change the rectangle, we will receive a call
-//    //back to update the shape
-//
-//    for (int i=0; i < nNumPoints; i++)
-//    {
-//        if (fAddShifts)
-//        {
-//            m_uPoint[i].x += (*(pShifts+i)).x;
-//            m_uPoint[i].y += (*(pShifts+i)).y;
-//        }
-//        else
-//        {
-//            m_uPoint[i].x -= (*(pShifts+i)).x;
-//            m_uPoint[i].y -= (*(pShifts+i)).y;
-//        }
-//
-//        m_pHandler[i]->SetHandlerCenterPoint(m_uPoint[i]);
-//    }
-//    ComputeCenterPoints();
-//    UpdateBounds();
-//}
+//=======================================================================================
+// GmoShapeRectangle: a rectangle with optional rounded corners
+//=======================================================================================
+GmoShapeRectangle::GmoShapeRectangle(
+                        ImoObj* pCreatorImo, int type, int idx,
+                        const UPoint& pos, const USize& size,     //position and size
+                        LUnits radius,              //for rounded corners
+                        ImoStyle* pStyle            //for line style & background color
+                     )
+	: GmoSimpleShape(pCreatorImo, type, idx, Color(0,0,0))
+	, m_radius(radius)
+{
+    m_origin = pos;
+    m_size = size;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeRectangle::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    pDrawer->begin_path();
+    pDrawer->fill(Color(0, 0, 0, 0));
+    pDrawer->stroke(Color(0, 0, 0));
+    pDrawer->stroke_width(15.0);
+    pDrawer->rect(m_origin, m_size, m_radius);
+    pDrawer->end_path();
+
+    GmoSimpleShape::on_draw(pDrawer, opt);
+}
 
 
 

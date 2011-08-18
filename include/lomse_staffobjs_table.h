@@ -25,6 +25,7 @@
 #include <ostream>
 #include <map>
 #include "lomse_document.h"
+#include "lomse_time.h"
 
 using namespace std;
 
@@ -38,6 +39,7 @@ class ImoGoBackFwd;
 class ImoAuxObj;
 class ImoSpacer;
 class ImoScore;
+class ImoTimeSignature;
 
 
 //---------------------------------------------------------------------------------------
@@ -88,20 +90,23 @@ class ColStaffObjs
 protected:
     std::vector<ColStaffObjsEntry*> m_table;
     int m_numLines;
+    float m_rMissingTime;
 
 public:
     ColStaffObjs();
     ~ColStaffObjs();
 
-    //void build();
     //table info
     inline int num_entries() { return static_cast<int>(m_table.size()); }
     inline int num_lines() { return m_numLines; }
+    inline bool is_anacrusis_start() { return is_greater_time(m_rMissingTime, 0.0f); }
+    inline float anacrusis_missing_time() { return m_rMissingTime; }
 
     //table management
     void sort();
     void AddEntry(int measure, float time, int instr, int voice, int staff, ImoObj* pImo);
     inline void set_total_lines(int number) { m_numLines = number; }
+    inline void set_anacrusis_missing_time(float rTime) { m_rMissingTime = rTime; }
 
     class iterator
     {
@@ -198,6 +203,7 @@ private:
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
     void add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr);
     ImoSpacer* anchor_object(ImoAuxObj* pImo);
+    void collect_anacrusis_info();
 
 };
 

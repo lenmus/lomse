@@ -20,12 +20,11 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_internal_model.h"
-#include "lomse_basic_objects.h"
 #include "lomse_im_note.h"
 #include "lomse_note_engraver.h"
 #include "lomse_chord_engraver.h"
@@ -34,6 +33,7 @@
 #include "lomse_shape_note.h"
 #include "lomse_score_meter.h"
 #include "lomse_shapes_storage.h"
+#include "lomse_im_factory.h"
 
 #include <cmath>
 
@@ -103,18 +103,19 @@ public:
                      int step3=-1, int octave3=-1, int noteType=k_eighth)
     {
         delete_chord();
-        m_pChord = new ImoChord();
+        Document doc(m_libraryScope);
+        m_pChord = static_cast<ImoChord*>( ImFactory::inject(k_imo_chord, &doc) );
 
-        m_pNote1 = new ImoNote(step1, octave1, noteType, k_no_accidentals);
-        m_pNote1->include_in_relation(m_pChord);
+        m_pNote1 = ImFactory::inject_note(&doc, step1, octave1, noteType, k_no_accidentals);
+        m_pNote1->include_in_relation(&doc, m_pChord);
 
-        m_pNote2 = new ImoNote(step2, octave2, noteType, k_no_accidentals);
-        m_pNote2->include_in_relation(m_pChord);
+        m_pNote2 = ImFactory::inject_note(&doc, step2, octave2, noteType, k_no_accidentals);
+        m_pNote2->include_in_relation(&doc, m_pChord);
 
         if (step3 >= 0)
         {
-            m_pNote3 = new ImoNote(step3, octave3, noteType, k_no_accidentals);
-            m_pNote3->include_in_relation(m_pChord);
+            m_pNote3 = ImFactory::inject_note(&doc, step3, octave3, noteType, k_no_accidentals);
+            m_pNote3->include_in_relation(&doc, m_pChord);
         }
         else
             m_pNote3 = NULL;
@@ -123,12 +124,12 @@ public:
         m_pStorage = new ShapesStorage();
         m_pNoteEngrv = new NoteEngraver(m_libraryScope, m_pMeter, m_pStorage);
         m_pShape1 =
-            dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote1, 0, 0, ImoClef::k_G2, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote1, 0, 0, k_clef_G2, UPoint(10.0f, 15.0f)) );
         m_pShape2 =
-            dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote2, 0, 0, ImoClef::k_G2, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote2, 0, 0, k_clef_G2, UPoint(10.0f, 15.0f)) );
         if (step3 >= 0)
             m_pShape3 =
-                dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote3, 0, 0, ImoClef::k_G2, UPoint(10.0f, 15.0f)) );
+                dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote3, 0, 0, k_clef_G2, UPoint(10.0f, 15.0f)) );
         else
             m_pShape3 = NULL;
     }

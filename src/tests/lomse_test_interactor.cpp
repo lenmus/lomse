@@ -20,7 +20,7 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_injectors.h"
@@ -73,8 +73,6 @@ public:
     bool update_window_invoked() { return m_fUpdateWindowInvoked; }
     const std::string& get_title() { return m_title; }
     double get_screen_ppi() const { return 96.0; }
-    void start_timer() {}
-    double elapsed_time() const { return 0.0; }
 
 };
 
@@ -519,6 +517,21 @@ SUITE(InteractorTest)
         delete pDoc;
         delete pIntor;
     }
+
+    //TEST_FIXTURE(InteractorTestFixture, NotificationReceived)
+    //{
+    //    fNotified = false;
+    //    Document* pDoc = Injector::inject_Document(m_libraryScope);
+    //    pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n c4 q)(n d4 e)(barline simple))))))" );
+    //    Presenter* pPresenter = Injector::inject_Presenter(m_libraryScope,
+    //                                                   ViewFactory::k_view_simple, pDoc);
+    //    pPresenter->set_callback( &my_callback_function );
+    //    pDoc->notify_that_document_has_been_modified();
+
+    //    CHECK( fNotified == true );
+
+    //    delete pPresenter;
+    //}
 
 
     //TEST_FIXTURE(InteractorTestFixture, Presenter_InsertRest)

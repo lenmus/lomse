@@ -20,7 +20,7 @@
 
 #include <UnitTest++.h>
 #include <sstream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_document_layouter.h"
@@ -50,8 +50,9 @@ using namespace lomse;
 class MyScoreLayouter : public ScoreLayouter
 {
 public:
-    MyScoreLayouter(ImoContentObj* pImo, GraphicModel* pGModel, LibraryScope& libraryScope)
-        : ScoreLayouter(pImo, pGModel, libraryScope)
+    MyScoreLayouter(ImoContentObj* pImo, GraphicModel* pGModel, 
+                    LibraryScope& libraryScope)
+        : ScoreLayouter(pImo, NULL, pGModel, libraryScope)
     {
     }
     virtual ~MyScoreLayouter() {}
@@ -75,7 +76,7 @@ public:
     LUnits my_get_target_size_for_system(int iSystem) {
         return get_target_size_for_system(iSystem);
     }
-    UPoint my_get_page_cursor() { return m_pageCursor; }
+    UPoint my_get_page_cursor() { return m_cursor; }
     LUnits my_get_first_system_staves_size() { return get_first_system_staves_size(); }
     LUnits my_get_other_systems_staves_size() { return get_other_systems_staves_size();}
     LUnits my_remaining_height() { return remaining_height(); }
@@ -121,7 +122,6 @@ public:
     GraphicModel* m_pGModel;
     GmoStubScore* m_pStub;
     ScoreLayouter* m_pScoreLayouter;
-    SystemLayouter* m_pSysLayouter;
 
     ScoreLayouterTestFixture()   // setUp()
         : m_libraryScope(cout)
@@ -132,7 +132,6 @@ public:
         , m_pGModel(NULL)
         , m_pStub(NULL)
         , m_pScoreLayouter(NULL)
-        , m_pSysLayouter(NULL)
     {
     }
 
@@ -176,10 +175,8 @@ public:
         GmoBoxScorePage* pPage = m_pStub->get_page(0);
         CHECK( pPage != NULL );
 
-        m_pScoreLayouter
-            = dynamic_cast<ScoreLayouter*>( m_pDocLayouter->get_last_layouter() );
+        m_pScoreLayouter = m_pDocLayouter->get_score_layouter();
         CHECK( m_pScoreLayouter != NULL );
-        m_pSysLayouter = m_pScoreLayouter->get_system_layouter(0);
     }
 
     void check_line_data_equal(int iSys, int iCol, int numCols, int nSrcLine)
@@ -1024,43 +1021,43 @@ SUITE(ScoreLayouterTest)
 //////        pageBox.set_origin(1500.0f, 2000.0f);
 //////        pageBox.set_width(19000.0f);
 //////        pageBox.set_height(25700.0f);
-//////        scoreLyt.layout_in_page(&pageBox);
+//////        scoreLyt.layout_in_box(&pageBox);
 //////    }
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, SystemLayouter_FillSystemOneColumn)
-    {
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(n c4 q) )) )))" );
-        GraphicModel gmodel;
-        ImoScore* pImoScore = doc.get_score();
-        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-        scoreLyt.prepare_to_start_layout();
-        GmoStubScore* pStub = gmodel.get_score_stub(0);
-        GmoBoxScorePage pageBox(pStub);
-        pageBox.set_origin(1500.0f, 2000.0f);
-        pageBox.set_width(19000.0f);
-        pageBox.set_height(25700.0f);
-        scoreLyt.my_page_initializations(&pageBox);
-        scoreLyt.my_move_cursor_to_top_left_corner();
-        scoreLyt.my_decide_line_breaks();
-        scoreLyt.my_create_system_layouter();
-        scoreLyt.my_create_system_box();
-
-        scoreLyt.my_engrave_system();
-
-        GmoBoxSystem* pBox = scoreLyt.my_get_current_system_box();
-        //cout << "system box: top = " << pBox->get_top() << endl;
-        //cout << "system box: left = " << pBox->get_left() << endl;
-        //cout << "system box: width = " << pBox->get_width() << endl;
-        //cout << "system box: height = " << pBox->get_height() << endl;
-        CHECK( pBox->get_top() == 2000.0f );
-        CHECK( pBox->get_left() == 1500.0f );
-        CHECK( pBox->get_width() == 19000.0f );
-        CHECK( pBox->get_height() == 2735.0f );
-
-        //scoreLyt.my_delete_all();
-    }
+//    TEST_FIXTURE(ScoreLayouterTestFixture, SystemLayouter_FillSystemOneColumn)
+//    {
+//        Document doc(m_libraryScope);
+//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+//            "(instrument (musicData (clef G)(n c4 q) )) )))" );
+//        GraphicModel gmodel;
+//        ImoScore* pImoScore = doc.get_score();
+//        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+//        scoreLyt.prepare_to_start_layout();
+//        GmoStubScore* pStub = gmodel.get_score_stub(0);
+//        GmoBoxScorePage pageBox(pStub);
+//        pageBox.set_origin(1500.0f, 2000.0f);
+//        pageBox.set_width(19000.0f);
+//        pageBox.set_height(25700.0f);
+//        scoreLyt.my_page_initializations(&pageBox);
+//        scoreLyt.my_move_cursor_to_top_left_corner();
+//        scoreLyt.my_decide_line_breaks();
+//        scoreLyt.my_create_system_layouter();
+//        scoreLyt.my_create_system_box();
+//
+//        scoreLyt.my_engrave_system();
+//
+//        GmoBoxSystem* pBox = scoreLyt.my_get_current_system_box();
+//        //cout << "system box: top = " << pBox->get_top() << endl;
+//        //cout << "system box: left = " << pBox->get_left() << endl;
+//        //cout << "system box: width = " << pBox->get_width() << endl;
+//        //cout << "system box: height = " << pBox->get_height() << endl;
+//        CHECK( pBox->get_top() == 2000.0f );
+//        CHECK( pBox->get_left() == 1500.0f );
+//        CHECK( pBox->get_width() == 19000.0f );
+//        CHECK( pBox->get_height() == 2735.0f );
+//
+//        //scoreLyt.my_delete_all();
+//    }
 
     //TEST_FIXTURE(ScoreLayouterTestFixture, SystemLayouter_FillSystemTwoColumns)
     //{
@@ -1169,6 +1166,7 @@ SUITE(ScoreLayouterTest)
 ////    //    CHECK( pBox->get_height() == 2735.0f );
 ////    //}
 
+#if 0
     //-----------------------------------------------------------------------------------
     //test using scores in file ---------------------------------------------------------
     //-----------------------------------------------------------------------------------
@@ -1863,6 +1861,8 @@ SUITE(ScoreLayouterTest)
 //////        delete_test_data();
 //////    }
 //////
+
+#endif
 //////}
 
 

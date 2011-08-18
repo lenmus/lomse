@@ -28,8 +28,9 @@ namespace lomse
 
 
 //---------------------------------------------------------------------------------------
-SystemCursor::SystemCursor(ImoScore* pScore)
-    : m_scoreIt( pScore->get_staffobjs_table() )
+StaffObjsCursor::StaffObjsCursor(ImoScore* pScore)
+    : m_pColStaffObjs( pScore->get_staffobjs_table() )
+    , m_scoreIt(m_pColStaffObjs)
     , m_savedPos(m_scoreIt)
     , m_numInstruments( pScore->get_num_instruments() )
     , m_numLines( pScore->get_staffobjs_table()->num_lines() )
@@ -52,7 +53,7 @@ SystemCursor::SystemCursor(ImoScore* pScore)
 }
 
 //---------------------------------------------------------------------------------------
-SystemCursor::~SystemCursor()
+StaffObjsCursor::~StaffObjsCursor()
 {
 //    std::vector<ScoreIterator*>::iterator it;
 //    for (it = m_iterators.begin(); it != m_iterators.end(); ++it)
@@ -65,7 +66,7 @@ SystemCursor::~SystemCursor()
 }
 
 //---------------------------------------------------------------------------------------
-void SystemCursor::initialize_clefs_keys_times(ImoScore* pScore)
+void StaffObjsCursor::initialize_clefs_keys_times(ImoScore* pScore)
 {
     m_staffIndex.reserve(m_numInstruments);
     int staves = 0;
@@ -86,7 +87,7 @@ void SystemCursor::initialize_clefs_keys_times(ImoScore* pScore)
 }
 
 //---------------------------------------------------------------------------------------
-void SystemCursor::move_next()
+void StaffObjsCursor::move_next()
 {
     ImoObj* pSO = imo_object();
     if (pSO->is_clef())
@@ -102,7 +103,7 @@ void SystemCursor::move_next()
 }
 
 //---------------------------------------------------------------------------------------
-void SystemCursor::save_clef()
+void StaffObjsCursor::save_clef()
 {
     int iInstr = num_instrument();
     int idx = m_staffIndex[iInstr] + staff();
@@ -110,7 +111,7 @@ void SystemCursor::save_clef()
 }
 
 //---------------------------------------------------------------------------------------
-void SystemCursor::save_key_signature()
+void StaffObjsCursor::save_key_signature()
 {
     int iInstr = num_instrument();
     int idx = m_staffIndex[iInstr] + staff();
@@ -118,33 +119,33 @@ void SystemCursor::save_key_signature()
 }
 
 //---------------------------------------------------------------------------------------
-void SystemCursor::save_barline()
+void StaffObjsCursor::save_barline()
 {
     m_pLastBarline = dynamic_cast<ImoBarline*>( imo_object() );
 }
 
 //---------------------------------------------------------------------------------------
-void SystemCursor::save_time_signature()
+void StaffObjsCursor::save_time_signature()
 {
     int iInstr = num_instrument();
     m_times[iInstr] = *m_scoreIt;
 }
 
 //---------------------------------------------------------------------------------------
-ImoStaffObj* SystemCursor::get_staffobj()
+ImoStaffObj* StaffObjsCursor::get_staffobj()
 {
     return dynamic_cast<ImoStaffObj*>( imo_object() );
 }
 
 //---------------------------------------------------------------------------------------
-ColStaffObjsEntry* SystemCursor::get_clef_entry_for_instr_staff(int iInstr, int iStaff)
+ColStaffObjsEntry* StaffObjsCursor::get_clef_entry_for_instr_staff(int iInstr, int iStaff)
 {
     int idx = m_staffIndex[iInstr] + iStaff;
     return m_clefs[idx];
 }
 
 //---------------------------------------------------------------------------------------
-ImoClef* SystemCursor::get_clef_for_instr_staff(int iInstr, int iStaff)
+ImoClef* StaffObjsCursor::get_clef_for_instr_staff(int iInstr, int iStaff)
 {
     ColStaffObjsEntry* pEntry = get_clef_entry_for_instr_staff(iInstr, iStaff);
     if (pEntry)
@@ -154,17 +155,17 @@ ImoClef* SystemCursor::get_clef_for_instr_staff(int iInstr, int iStaff)
 }
 
 //---------------------------------------------------------------------------------------
-int SystemCursor::get_clef_type_for_instr_staff(int iInstr, int iStaff)
+int StaffObjsCursor::get_clef_type_for_instr_staff(int iInstr, int iStaff)
 {
     ImoClef* pClef = get_clef_for_instr_staff(iInstr, iStaff);
     if (pClef)
         return pClef->get_clef_type();
     else
-        return ImoClef::k_undefined;
+        return k_clef_undefined;
 }
 
 //---------------------------------------------------------------------------------------
-ImoClef* SystemCursor::get_applicable_clef()
+ImoClef* StaffObjsCursor::get_applicable_clef()
 {
     if (m_fScoreIsEmpty)
         return NULL;
@@ -173,23 +174,23 @@ ImoClef* SystemCursor::get_applicable_clef()
 }
 
 //---------------------------------------------------------------------------------------
-int SystemCursor::get_applicable_clef_type()
+int StaffObjsCursor::get_applicable_clef_type()
 {
     if (m_fScoreIsEmpty)
-        return ImoClef::k_undefined;
+        return k_clef_undefined;
     else
         return get_clef_type_for_instr_staff( num_instrument(), staff() );
 }
 
 //---------------------------------------------------------------------------------------
-ColStaffObjsEntry* SystemCursor::get_key_entry_for_instr_staff(int iInstr, int iStaff)
+ColStaffObjsEntry* StaffObjsCursor::get_key_entry_for_instr_staff(int iInstr, int iStaff)
 {
     int idx = m_staffIndex[iInstr] + iStaff;
     return m_keys[idx];
 }
 
 //---------------------------------------------------------------------------------------
-ImoKeySignature* SystemCursor::get_key_for_instr_staff(int iInstr, int iStaff)
+ImoKeySignature* StaffObjsCursor::get_key_for_instr_staff(int iInstr, int iStaff)
 {
     ColStaffObjsEntry* pEntry = get_key_entry_for_instr_staff(iInstr, iStaff);
     if (pEntry)
@@ -199,7 +200,7 @@ ImoKeySignature* SystemCursor::get_key_for_instr_staff(int iInstr, int iStaff)
 }
 
 //---------------------------------------------------------------------------------------
-ImoKeySignature* SystemCursor::get_applicable_key()
+ImoKeySignature* StaffObjsCursor::get_applicable_key()
 {
     if (m_fScoreIsEmpty)
         return NULL;
@@ -208,26 +209,26 @@ ImoKeySignature* SystemCursor::get_applicable_key()
 }
 
 //---------------------------------------------------------------------------------------
-int SystemCursor::get_applicable_key_type()
+int StaffObjsCursor::get_applicable_key_type()
 {
     if (m_fScoreIsEmpty)
-        return ImoKeySignature::k_undefined;
+        return k_key_undefined;
     else
         return get_key_type_for_instr_staff( num_instrument(), staff() );
 }
 
 //---------------------------------------------------------------------------------------
-int SystemCursor::get_key_type_for_instr_staff(int iInstr, int iStaff)
+int StaffObjsCursor::get_key_type_for_instr_staff(int iInstr, int iStaff)
 {
     ImoKeySignature* pKey = get_key_for_instr_staff(iInstr, iStaff);
     if (pKey)
         return pKey->get_key_type();
     else
-        return ImoKeySignature::k_undefined;
+        return k_key_undefined;
 }
 
 //---------------------------------------------------------------------------------------
-ImoTimeSignature* SystemCursor::get_applicable_time_signature()
+ImoTimeSignature* StaffObjsCursor::get_applicable_time_signature()
 {
     if (m_fScoreIsEmpty)
         return NULL;
@@ -236,7 +237,7 @@ ImoTimeSignature* SystemCursor::get_applicable_time_signature()
 }
 
 //---------------------------------------------------------------------------------------
-ImoTimeSignature* SystemCursor::get_time_signature_for_instrument(int iInstr)
+ImoTimeSignature* StaffObjsCursor::get_time_signature_for_instrument(int iInstr)
 {
     ColStaffObjsEntry* pEntry = get_time_entry_for_instrument(iInstr);
     if (pEntry)
@@ -246,25 +247,25 @@ ImoTimeSignature* SystemCursor::get_time_signature_for_instrument(int iInstr)
 }
 
 //---------------------------------------------------------------------------------------
-ColStaffObjsEntry* SystemCursor::get_time_entry_for_instrument(int iInstr)
+ColStaffObjsEntry* StaffObjsCursor::get_time_entry_for_instrument(int iInstr)
 {
     return m_times[iInstr];
 }
 
 //---------------------------------------------------------------------------------------
-void SystemCursor::save_position()
+void StaffObjsCursor::save_position()
 {
     m_savedPos = m_scoreIt;
 }
 
 //---------------------------------------------------------------------------------------
-void SystemCursor::go_back_to_saved_position()
+void StaffObjsCursor::go_back_to_saved_position()
 {
     m_scoreIt = m_savedPos;
 }
 
 //---------------------------------------------------------------------------------------
-//int SystemCursor::GetNumMeasure(int iInstr)
+//int StaffObjsCursor::GetNumMeasure(int iInstr)
 //{
 //    //returns current absolute measure number (1..n) for VStaff
 //
@@ -272,7 +273,7 @@ void SystemCursor::go_back_to_saved_position()
 //}
 //
 //---------------------------------------------------------------------------------------
-//void SystemCursor::AdvanceAfterTimepos(float rTimepos)
+//void StaffObjsCursor::AdvanceAfterTimepos(float rTimepos)
 //{
 //    //advance all iterators so that last processed timepos is rTimepos. That is, pointed
 //    //objects will be the firsts ones with timepos > rTimepos.

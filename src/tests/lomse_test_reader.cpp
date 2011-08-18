@@ -20,7 +20,7 @@
 
 #include <UnitTest++.h>
 #include <iostream>
-#include "lomse_config.h"
+#include "lomse_build_options.h"
 
 //classes related to these tests
 #include "lomse_reader.h"

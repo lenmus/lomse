@@ -40,7 +40,7 @@ class ImoNote;
 class GmoShapeNote;
 class ImoNoteRest;
 class GmoShape;
-class ImoTextStyleInfo;
+class ImoStyle;
 
 
 //---------------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ protected:
     UPoint m_pos;
     GmoShapeTuplet* m_pTupletShape;
     string m_label;
-    ImoTextStyleInfo* m_pStyle;
+    ImoStyle* m_pStyle;
     ImoTuplet* m_pTuplet;
     std::list< pair<ImoNoteRest*, GmoShape*> > m_noteRests;
     ShapeBoxInfo m_shapesInfo[1];

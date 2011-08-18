@@ -47,7 +47,7 @@ private:
 //    ImoInstrument*   m_pInstr;           //instrument to which this slice belongs
 
 public:
-    GmoBoxSliceInstr(); //, ImoInstrument* pInstr);
+    GmoBoxSliceInstr(ImoInstrument* pInstr);
     ~GmoBoxSliceInstr();
 
 //    inline ImoInstrument* GetInstrument() const { return m_pInstr; }

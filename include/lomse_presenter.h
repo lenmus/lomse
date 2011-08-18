@@ -24,6 +24,7 @@
 #include <list>
 #include <iostream>
 
+#include "lomse_reader.h"
 
 using namespace std;
 
@@ -94,6 +95,7 @@ public:
     //presenter creation
     Presenter* new_document(int viewType, const std::string& content="");
     Presenter* open_document(int viewType, const std::string& filename);
+    Presenter* open_document(int viewType, LdpReader& reader);
 
 };
 

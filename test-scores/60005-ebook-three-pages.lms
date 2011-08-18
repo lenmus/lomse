@@ -1,0 +1,459 @@
+(lenmusdoc (vers 0.0) 
+    (styles 
+        (defineStyle "content" (font "Liberation serif" 12pt bold)(color #000000))
+        (defineStyle "heading-1" (font "Liberation serif" 16pt bold)(color #000000))
+        (defineStyle "heading-2" (font "Liberation serif" 14pt bold)(color #000000))
+        (defineStyle "para" (margin-bottom 423.3333))
+        (defineStyle "normal" (font "Liberation serif" 12pt normal)(color #000000))
+        (defineStyle "normal emphasis" (font "Liberation serif" 12pt bold)(color #000000))
+        (defineStyle "normal italics" (font "Liberation serif" 12pt italic)(color #000000))
+    )
+    
+    (content
+        (heading 1 (txt (style "heading-1") "Scales"))
+ 
+        (para (style "para")
+            (txt (style "normal") "If you're learning an instrument you've probably played some scales already, but you might have learnt to play them without thinking about the actual notes, (your fingers do the thinking!). But to understand music and learn about harmony you need to know the scales and how they are built.")
+        )
+
+        (para (style "para")
+            (txt (style "normal") "A scale, from latin word ")
+            (txt (style "normal italics") "'scala'")
+            (txt (style "normal") " meaning ")
+            (txt (style "normal emphasis") "'ladder'")
+            (txt (style "normal") ", is a predefined series of notes going up (ascending) or down (descending). People in different musical traditions have different ideas about what notes they think sound best together. In the Western musical tradition - which includes most familiar music from Europe and the Americas - the octave is divided up into twelve equally spaced notes. Other musical traditions - traditional Chinese music for example - have divided the octave differently and so they use different scales.")
+        )
+
+        (score
+           (vers 1.6)
+           (defineStyle "Estilo0" (font "Times New Roman" 14pt bold)(color #000000))
+           (defineStyle "Estilo1" (font "Times New Roman" 10pt normal)(color #000000))
+           (title center "Greenslevees" (style "Estilo0"))
+           (title center "(English popular song)" (style "Estilo1"))
+           (pageLayout (pageSize 21000 29700)(pageMargins 2000 2000 1500 2000 0) portrait)
+           (systemLayout first (systemMargins 0 0 2000 0))
+           (systemLayout other (systemMargins 0 0 2000 3000))
+           (instrument
+              (staves 1)
+              (staff 1 (staffType regular)(staffLines 5)(staffSpacing 180.00)(staffDistance 2000.00)(lineThickness 15.00))
+              //(infoMIDI 4 1)
+              (musicData
+
+                 //Measure 1
+                 (clef G)
+                 (key C)
+                 (time 6 8)
+                 (n d4 e v1)
+                 (barline simple)
+
+                 //Measure 2
+                 (n f4 q v1)
+                 (n g4 e v1)
+                 (n a4 e. v1 (beam 14 +))
+                 (n b4 s v1 (beam 14 =b))
+                 (n a4 e v1 (beam 14 -))
+                 (barline simple)
+
+                 //Measure 3
+                 (n g4 q v1)
+                 (n e4 e v1)
+                 (n c4 e. v1 (beam 21 +))
+                 (n d4 s v1 (beam 21 =b))
+                 (n e4 e v1 (beam 21 -))
+                 (barline simple)
+
+                 //Measure 4
+                 (n f4 q v1)
+                 (n d4 e v1)
+                 (n d4 e v1 (beam 28 +))
+                 (n c4 e v1 (beam 28 =))
+                 (n d4 e v1 (beam 28 -))
+                 (barline simple)
+
+                 //Measure 5
+                 (n e4 q v1)
+                 (n c4 e v1)
+                 (n a3 q v1)
+                 (n d4 e v1)
+                 (barline simple)
+
+                 //Measure 6
+                 (n f4 q v1)
+                 (n g4 e v1)
+                 (n a4 e. v1 (beam 40 +))
+                 (n b4 s v1 (beam 40 =b))
+                 (n a4 e v1 (beam 40 -))
+                 (barline simple)
+
+                 //Measure 7
+                 (n g4 q v1)
+                 (n e4 e v1)
+                 (n c4 e. v1 (beam 47 +))
+                 (n d4 s v1 (beam 47 =b))
+                 (n e4 e v1 (beam 47 -))
+                 (barline simple)
+
+                 //Measure 8
+                 (n f4 e. v1 (beam 52 +))
+                 (n e4 s v1 (beam 52 =b))
+                 (n d4 e v1 (beam 52 -))
+                 (n +c4 e v1 (beam 56 +))
+                 (n b3 e v1 (beam 56 =))
+                 (n c4 e v1 (beam 56 -))
+                 (barline simple)
+
+                 //Measure 9
+                 (n d4 q v1)
+                 (n d4 e v1)
+                 (n d4 q. v1)
+                 (barline simple)
+
+                 //Measure 10
+                 (n c5 q. v1)
+                 (n c5 e. v1 (beam 66 +))
+                 (n b4 s v1 (beam 66 =b))
+                 (n a4 e v1 (beam 66 -))
+                 (barline simple)
+
+                 //Measure 11
+                 (n g4 q v1)
+                 (n e4 e v1)
+                 (n c4 e. v1 (beam 73 +))
+                 (n d4 s v1 (beam 73 =b))
+                 (n e4 e v1 (beam 73 -))
+                 (barline simple)
+
+                 //Measure 12
+                 (n f4 q v1)
+                 (n d4 e v1)
+                 (n d4 e. v1 (beam 80 +))
+                 (n c4 s v1 (beam 80 =b))
+                 (n d4 e v1 (beam 80 -))
+                 (barline simple)
+
+                 //Measure 13
+                 (n e4 q v1)
+                 (n c4 e v1)
+                 (n a3 q. v1)
+                 (barline simple)
+
+                 //Measure 14
+                 (n c5 q. v1)
+                 (n c5 e. v1 (beam 90 +))
+                 (n b4 s v1 (beam 90 =b))
+                 (n a4 e v1 (beam 90 -))
+                 (barline simple)
+
+                 //Measure 15
+                 (n g4 q v1)
+                 (n e4 e v1)
+                 (n c4 e. v1 (beam 97 +))
+                 (n d4 s v1 (beam 97 =b))
+                 (n e4 e v1 (beam 97 -))
+                 (barline simple)
+
+                 //Measure 16
+                 (n f4 e. v1 (beam 102 +))
+                 (n e4 s v1 (beam 102 =b))
+                 (n d4 e v1 (beam 102 -))
+                 (n +c4 e. v1 (beam 106 +))
+                 (n b3 s v1 (beam 106 =b))
+                 (n c4 e v1 (beam 106 -))
+                 (barline simple)
+
+                 //Measure 17
+                 (n d4 q. v1)
+                 (n d4 q v1)
+                 (r e v1)
+                 (barline end)
+
+                 //Measure 18
+              )
+           )
+        ) 
+
+        (para (style "para")
+            (txt (style "normal") "If you're learning an instrument you've probably played some scales already, but you might have learnt to play them without thinking about the actual notes, (your fingers do the thinking!). But to understand music and learn about harmony you need to know the scales and how they are built.")
+        )
+        
+        (heading 2 (txt (style "heading-2") "Exercises"))
+ 
+        (para (style "para")
+            (txt (style "normal") "Now, let's practise with some exercises:")
+        )
+        
+        (dynamic (classid example))
+
+        (score
+           (vers 1.6)
+           
+           (defineStyle "Title" (font "Trebuchet MS" 21pt bold) (color #000000))
+           (defineStyle "Subtitle" (font "Trebuchet MS" 12pt bold) (color #000000))
+           (defineStyle "Composer" (font "Times New Roman" 12pt normal) (color #000000))
+           (defineStyle "Instruments" (font "Times New Roman" 14pt bold) (color #000000))
+           (defineStyle "Notations" (font "Times New Roman" 10pt bold) (color #000000))
+           
+           (title center "Prelude" (style "Title"))
+           (title center "Op. 28, No. 20" (style "Subtitle"))
+           (title right "F. Chopin" (dy 30) (style "Composer"))
+
+           (instrument (name "Piano" (style "Instruments"))(staves 2)
+              (musicData 
+                (clef G p1)
+                (clef F4 p2)
+                (key c)
+                (time 4 4)
+                (text "Largo" (style "Notations")(dx -20)(dy -45))
+                (clef F4 p1)
+                (chord (n g3 q p1)(n c4 q)(n e4 q)(n g4 q))
+                (chord (n a3 q)(n c4 q)(n e4 q)(n a4 q))
+                (chord (n g3 q)(n =b3 q))
+                (chord (n e3 q)(n g3 q)(n c4 q)(n e4 q))
+                
+                //second voice
+                (goBack 128)
+                (chord (n e4 e. g+ (stem up))(n g4 e.))(chord (n d4 s g- (stem up))(n f4 s))
+                (goFwd 64)     //to end of measure
+
+                (goBack 256)    //left hand
+                (chord (n c2 q p2)(n c3 q))
+                (chord (n f1 q)(n f2 q (stem down)))
+                (chord (n g1 q)(n g2 q ))
+                (chord (n c2 q)(n g2 q)(n c3 q))
+                (barline)
+                
+                //2
+                (chord (n e3 q p1)(n a3 q)(n c4 q)(n e4 q))
+                (chord (n f3 q)(n a3 q)(n -d4 q)(n f4 q))
+                (chord (n -d3 q)(n e3 q)(n g3 q))
+                (chord (n c3 q)(n e3 q)(n a3 q)(n c4 q))
+
+                (goBack 128)    //second voice
+                (chord (n c4 e. g+ (stem up))(n e4 e.))(chord (n -b3 s g- (stem up))(n d4 s))
+                
+                // left hand
+                (goBack start)
+                (chord (n a1 q p2)(n a2 q))
+                (chord (n -d1 q)(n -d2 q))
+                (chord (n e1 q)(n e2 q ))
+                (chord (n a1 q)(n a2 q))
+                (barline)
+                
+                //3
+                (chord (n =d3 q p1)(n f3 q)(n =b3 q)(n =d4 q))
+                (chord (n =e3 q)(n g3 q)(n -b3 q)(n c4 q)(n =e4 q))
+                (chord (n a3 q)(n c4 q))
+                (chord (n g3 q)(n c4 q)(n -e4 q))
+
+                (goBack 128)    //second voice
+                (n g4 e. g+ (stem up))(n f4 s g- (stem up))
+                
+                // left hand
+                (goBack start)
+                (chord (n g1 q p2)(n g2 q))
+                (chord (n c1 q)(n c2 q))
+                (chord (n f1 q)(n f2 q ))
+                (chord (n c2 q)(n c3 q))
+                (barline)
+
+                //4
+                (chord (n +f3 q p1)(n c4 q)(n d4 q))
+                (chord (n g3 q)(n =b3 q)(n d4 q)(n g4 q))
+                (clef G p1)
+                (chord (n c4 q (stem down))(n d4 q)(n +f4 q))
+                (chord (n =b3 q)(n d4 q)(n g4 q))
+
+                (goBack 128)    //second voice
+                (n =b4 e. g+ (stem up))(n =a4 s g- (stem up))
+                
+                // left hand
+                (goBack start)
+                (chord (n d2 q p2)(n =a2 q)(n d3 q))
+                (chord (n g1 q)(n g2 q))
+                (chord (n d1 q)(n d2 q ))
+                (chord (n g1 q)(n g2 q))
+                (barline)
+
+                //5
+                (chord (n -e4 q p1)(n g4 q)(n -e5 q))
+                (chord (n e4 q)(n -a4 q)(n e5 q))
+                (chord (n d4 q)(n d5 q))
+                (chord (n d4 q)(n g4 q)(n d5 q))
+
+                (goBack 128)    //second voice
+                (n a4 e. g+ (stem down))(n +f4 s g- (stem down))
+                
+                // left hand
+                (goBack start)
+                (chord (n c2 q p2)(n c3 q))
+                (chord (n c3 q)(n c4 q))
+                (chord (n =b2 q)(n =b3 q ))
+                (chord (n -b2 q)(n -b3 q))
+                (barline)
+
+                //6
+                (chord (n c4 q p1)(n g4 q)(n c5 q))
+                (chord (n c4 q)(n d4 q)(n +f4 q)(n d5 q))
+                (chord (n d4 e. g+)(n g4 e.)(n =b4 e.))(chord (n c4 s g-)(n =a4 s))
+                (chord (n =b3 q)(n d4 q)(n g4 q))
+
+                // left hand
+                (goBack start)
+                (chord (n =a2 q p2)(n =a3 q))
+                (chord (n -a2 q)(n -a3 q))
+                (chord (n g2 q)(n g3 q ))
+                (chord (n =f2 q)(n =f3 q))
+                (barline)
+
+                //7
+                (chord (n c4 q p1)(n g4 q)(n c5 q))
+                (chord (n -a3 q)(n c4 q)(n -a4 q))
+                (chord (n g3 q (stem down))(n d4 q))
+                (chord (n g3 q)(n c4 q)(n e4 q))
+
+                (goBack 128)    //second voice
+                (n g4 e. g+)(n f4 s g-)
+                
+                // left hand
+                (goBack start)
+                (chord (n e2 q p2)(n e3 q))
+                (chord (n f2 q)(n f3 q))
+                (chord (n =b1 q)(n =b2 q ))
+                (chord (n c2 q)(n c3 q))
+                (clef F4 p1)
+                (barline)
+
+                //8
+                (chord (n e3 q p1)(n a3 q)(n c4 q)(n e4 q))
+                (chord (n f3 q)(n a3 q)(n -d4 q)(n f4 q))
+                (chord (n f3 q)(n g3 q)(n =b3 q))
+                (chord (n e3 q)(n g3 q)(n c4 q))
+
+                (goBack 128)    //second voice
+                (n e4 e. g+ (stem up))(n =d4 s g- (stem up))
+                
+                // left hand
+                (goBack start)
+                (chord (n a1 q p2)(n a2 q))
+                (chord (n -d1 q)(n -d2 q))
+                (chord (n g1 q)(n g2 q ))
+                (chord (n c1 q)(n c2 q))
+                (clef G p1)
+                (barline)
+                
+                //9
+                (chord (n -e4 q p1)(n g4 q)(n -e5 q))
+                (chord (n e4 q)(n -a4 q)(n e5 q))
+                (chord (n d4 q)(n d5 q))
+                (chord (n d4 q)(n g4 q)(n d5 q))
+
+                (goBack 128)    //second voice
+                (n a4 e. g+ (stem down))(n +f4 s g- (stem down))
+                
+                // left hand
+                (goBack start)
+                (chord (n c2 q p2)(n c3 q))
+                (chord (n c3 q)(n c4 q))
+                (chord (n =b2 q)(n =b3 q ))
+                (chord (n -b2 q)(n -b3 q))
+                (barline)
+
+                //10
+                (chord (n c4 q p1)(n g4 q)(n c5 q))
+                (chord (n c4 q)(n d4 q)(n +f4 q)(n d5 q))
+                (chord (n d4 e. g+)(n g4 e.)(n =b4 e.))(chord (n c4 s g-)(n =a4 s))
+                (chord (n =b3 q)(n d4 q)(n g4 q))
+
+                // left hand
+                (goBack start)
+                (chord (n =a2 q p2)(n =a3 q))
+                (chord (n -a2 q)(n -a3 q))
+                (chord (n g2 q)(n g3 q ))
+                (chord (n =f2 q)(n =f3 q))
+                (barline)
+
+                //11
+                (chord (n c4 q p1)(n g4 q)(n c5 q))
+                (chord (n -a3 q)(n c4 q)(n -a4 q))
+                (chord (n g3 q (stem down))(n d4 q))
+                (chord (n g3 q)(n c4 q)(n e4 q))
+
+                (goBack 128)    //second voice
+                (n g4 e. g+)(n f4 s g-)
+                
+                // left hand
+                (goBack start)
+                (chord (n e2 q p2)(n e3 q))
+                (chord (n f2 q)(n f3 q))
+                (chord (n =b1 q)(n =b2 q ))
+                (chord (n c2 q)(n c3 q))
+                (clef F4 p1)
+                (barline)
+
+                //12
+                (chord (n e3 q p1)(n a3 q)(n c4 q)(n e4 q))
+                (chord (n f3 q)(n a3 q)(n -d4 q)(n f4 q))
+                (chord (n f3 q)(n g3 q)(n =b3 q))
+                (chord (n e3 q)(n g3 q)(n c4 q))
+
+                (goBack 128)    //second voice
+                (n e4 e. g+ (stem up))(n =d4 s g- (stem up))
+                
+                // left hand
+                (goBack start)
+                (chord (n a1 q p2)(n a2 q))
+                (chord (n -d1 q)(n -d2 q))
+                (chord (n g1 q)(n g2 q ))
+                (chord (n c1 q)(n c2 q))
+                (clef G p1)
+                (barline)
+                
+                //13
+                (chord (n c4 w p1)(n e4 w)(n g4 w)(n c5 w))
+
+                // left hand
+                (goBack start)
+                (chord (n c3 w p2)(n g3 w))
+                
+                (barline end)
+              )
+           )
+        )
+
+        (para (style "para")
+            (txt (style "normal") "If you're learning an instrument you've probably played some scales already, but you might have learnt to play them without thinking about the actual notes, (your fingers do the thinking!). But to understand music and learn about harmony you need to know the scales and how they are built.")
+        )
+
+        (para (style "para")
+            (txt (style "normal") "A scale, from latin word ")
+            (txt (style "normal italics") "'scala'")
+            (txt (style "normal") " meaning ")
+            (txt (style "normal emphasis") "'ladder'")
+            (txt (style "normal") ", is a predefined series of notes going up (ascending) or down (descending). People in different musical traditions have different ideas about what notes they think sound best together. In the Western musical tradition - which includes most familiar music from Europe and the Americas - the octave is divided up into twelve equally spaced notes. Other musical traditions - traditional Chinese music for example - have divided the octave differently and so they use different scales.")
+        )
+
+        (para (style "para")
+            (txt (style "normal") "If you're learning an instrument you've probably played some scales already, but you might have learnt to play them without thinking about the actual notes, (your fingers do the thinking!). But to understand music and learn about harmony you need to know the scales and how they are built.")
+        )
+
+        (para (style "para")
+            (txt (style "normal") "A scale, from latin word ")
+            (txt (style "normal italics") "'scala'")
+            (txt (style "normal") " meaning ")
+            (txt (style "normal emphasis") "'ladder'")
+            (txt (style "normal") ", is a predefined series of notes going up (ascending) or down (descending). People in different musical traditions have different ideas about what notes they think sound best together. In the Western musical tradition - which includes most familiar music from Europe and the Americas - the octave is divided up into twelve equally spaced notes. Other musical traditions - traditional Chinese music for example - have divided the octave differently and so they use different scales.")
+        )
+
+        (para (style "para")
+            (txt (style "normal") "If you're learning an instrument you've probably played some scales already, but you might have learnt to play them without thinking about the actual notes, (your fingers do the thinking!). But to understand music and learn about harmony you need to know the scales and how they are built.")
+        )
+
+        (para (style "para")
+            (txt (style "normal") "A scale, from latin word ")
+            (txt (style "normal italics") "'scala'")
+            (txt (style "normal") " meaning ")
+            (txt (style "normal emphasis") "'ladder'")
+            (txt (style "normal") ", is a predefined series of notes going up (ascending) or down (descending). People in different musical traditions have different ideas about what notes they think sound best together. In the Western musical tradition - which includes most familiar music from Europe and the Americas - the octave is divided up into twelve equally spaced notes. Other musical traditions - traditional Chinese music for example - have divided the octave differently and so they use different scales.")
+        )
+
+))

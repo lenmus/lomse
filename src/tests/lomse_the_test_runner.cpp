@@ -20,17 +20,8 @@
 
 #include <iostream>
 #include <UnitTest++.h>
-#include "lomse_config.h"
-
-#if defined WIN32 || defined _WIN32
-    //for detecting and isolating memory leaks with Visual C++
-    #ifndef _DEBUG
-        #define _DEBUG
-    #endif
-    #define _CRTDBG_MAP_ALLOC
-    #include <stdlib.h>
-    #include <crtdbg.h>
-#endif
+#include "lomse_build_options.h"
+#include "lomse_build_options.h"
 
 
 using namespace std;

@@ -34,31 +34,9 @@ class ImoDocument;
 class ImoObj;
 
 //-------------------------------------------------------------------------------------
-// ImObjectsBuilder. Helper class to build the ImoObj model from the basic model
-//-------------------------------------------------------------------------------------
-
-class ImObjectsBuilder
-{
-protected:
-    ostream&    m_reporter;
-    InternalModel* m_IModel;
-
-public:
-    ImObjectsBuilder(ostream& reporter);
-    virtual ~ImObjectsBuilder();
-
-    ImoDocument* create_objects(InternalModel* IModel);
-
-protected:
-
-};
-
-
-//-------------------------------------------------------------------------------------
 // ModelBuilder. Implements the final step of LDP compiler: code generation.
 // Traverses the parse tree and creates the internal model
 //-------------------------------------------------------------------------------------
-
 class ModelBuilder
 {
 protected:

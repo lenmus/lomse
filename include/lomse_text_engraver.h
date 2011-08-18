@@ -35,7 +35,7 @@ class FontStorage;
 class ImoScore;
 class GmoBox;
 class GmoShapeText;
-class ImoTextStyleInfo;
+class ImoStyle;
 class ImoScoreText;
 
 //---------------------------------------------------------------------------------------
@@ -43,12 +43,12 @@ class TextEngraver : public Engraver
 {
 protected:
     const string& m_text;
-    ImoTextStyleInfo* m_pStyle;
+    ImoStyle* m_pStyle;
     FontStorage* m_pFontStorage;
 
 public:
     TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 const string& text, ImoTextStyleInfo* pStyle);
+                 const string& text, ImoStyle* pStyle);
     TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                  ImoScoreText* pText, ImoScore* pScore);
     ~TextEngraver();

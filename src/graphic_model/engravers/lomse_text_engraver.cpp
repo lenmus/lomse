@@ -33,7 +33,7 @@ namespace lomse
 // TextEngraver implementation
 //=======================================================================================
 TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           const string& text, ImoTextStyleInfo* pStyle)
+                           const string& text, ImoStyle* pStyle)
     : Engraver(libraryScope, pScoreMeter)
     , m_text(text)
     , m_pStyle(pStyle)
@@ -50,7 +50,7 @@ TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 {
     m_pStyle = pText->get_style();
     if (!m_pStyle)
-        m_pStyle = pScore->get_default_style_info();
+        m_pStyle = pScore->get_default_style();
 }
 
 //---------------------------------------------------------------------------------------
@@ -62,7 +62,8 @@ TextEngraver::~TextEngraver()
 LUnits TextEngraver::measure_width()
 {
     TextMeter meter(m_libraryScope);
-    meter.select_font( m_pStyle->get_font_name(), m_pStyle->get_font_size() );
+    meter.select_font( m_pStyle->get_string_property(ImoStyle::k_font_name),
+                       m_pStyle->get_float_property(ImoStyle::k_font_size) );
     return meter.measure_width(m_text);
 }
 
@@ -70,7 +71,8 @@ LUnits TextEngraver::measure_width()
 LUnits TextEngraver::measure_height()
 {
     TextMeter meter(m_libraryScope);
-    meter.select_font( m_pStyle->get_font_name(), m_pStyle->get_font_size() );
+    meter.select_font( m_pStyle->get_string_property(ImoStyle::k_font_name),
+                       m_pStyle->get_float_property(ImoStyle::k_font_size) );
     return meter.get_font_height();
 }
 

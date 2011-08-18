@@ -133,7 +133,7 @@ namespace lomse
 //-------------------------------------------------------------------------------------
 
 GmoBoxScorePage::GmoBoxScorePage(GmoStubScore* pStub)
-    : GmoBox(GmoObj::k_box_score_page)
+    : GmoBox(GmoObj::k_box_score_page, pStub->get_creator_imo())
 //    , m_nNumPage(nNumPage)
     , m_pStubScore(pStub)
     , m_nFirstSystem(-1)
@@ -143,7 +143,7 @@ GmoBoxScorePage::GmoBoxScorePage(GmoStubScore* pStub)
 //    CreateLayers();     //create standard layers
 //
 //    //create margin shapes
-//	lmScore* pScore = (lmScore*)m_pOwner;
+//	ImoScore* pScore = (ImoScore*)m_pOwner;
 //	LUnits uxLeftMargin = pScore->GetLeftMarginXPos();
 //    LUnits uxRightMargin = pScore->GetRightMarginXPos();
 //	LUnits uyTopMargin = pScore->GetPageTopMargin();

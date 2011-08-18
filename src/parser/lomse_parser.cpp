@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,15 +16,13 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #include "lomse_parser.h"
 
 #include <algorithm>
 #include <iostream>
-#include "lomse_reader.h"
 #include "lomse_ldp_factory.h"
-#include "lomse_exceptions.h"
 
 using namespace std;
 
@@ -32,9 +30,9 @@ namespace lomse
 {
 
 
-//========================================================================================
+//=======================================================================================
 // LdpParser implementation
-//========================================================================================
+//=======================================================================================
 
 LdpParser::LdpParser(ostream& reporter, LdpFactory* pFactory)
     : m_reporter(reporter)
@@ -47,11 +45,13 @@ LdpParser::LdpParser(ostream& reporter, LdpFactory* pFactory)
 {
 }
 
+//---------------------------------------------------------------------------------------
 LdpParser::~LdpParser()
 {
     clear_all();
 }
 
+//---------------------------------------------------------------------------------------
 void LdpParser::clear_all()
 {
     delete m_pTokenizer;
@@ -67,18 +67,29 @@ void LdpParser::clear_all()
     m_numErrors = 0;
 }
 
+//---------------------------------------------------------------------------------------
 LdpTree* LdpParser::parse_text(const std::string& sourceText)
 {
     LdpTextReader reader(sourceText);
-    return do_syntax_analysis(reader);
+    return parse_input(reader);
+    //return do_syntax_analysis(reader);
 }
 
+//---------------------------------------------------------------------------------------
 LdpTree* LdpParser::parse_file(const std::string& filename, bool fErrorMsg)
 {
     LdpFileReader reader(filename);
+    return parse_input(reader);
+    //return do_syntax_analysis(reader);
+}
+
+//---------------------------------------------------------------------------------------
+LdpTree* LdpParser::parse_input(LdpReader& reader)
+{
     return do_syntax_analysis(reader);
 }
 
+//---------------------------------------------------------------------------------------
 LdpTree* LdpParser::do_syntax_analysis(LdpReader& reader)
 {
     //This function analyzes source code. The result of the analysis is a tree
@@ -137,11 +148,13 @@ LdpTree* LdpParser::do_syntax_analysis(LdpReader& reader)
 
     // at this point m_curNode is all the tree
     if (!m_curNode)
-        throw ldp_format_error();
+        throw std::runtime_error(
+            "[LdpParser::do_syntax_analysis] LDP file format error.");
 
     return new LdpTree(m_curNode);
 }
 
+//---------------------------------------------------------------------------------------
 void LdpParser::Do_WaitingForStartOfElement()
 {
     switch (m_pTk->get_type())
@@ -158,6 +171,7 @@ void LdpParser::Do_WaitingForStartOfElement()
     }
 }
 
+//---------------------------------------------------------------------------------------
 void LdpParser::Do_WaitingForName()
 {
     switch (m_pTk->get_type())
@@ -206,6 +220,7 @@ void LdpParser::Do_WaitingForName()
 
 }
 
+//---------------------------------------------------------------------------------------
 void LdpParser::Do_WaitingForParameter()
 {
     //switch (m_pTk->get_type())
@@ -249,6 +264,7 @@ void LdpParser::Do_WaitingForParameter()
     //}
 }
 
+//---------------------------------------------------------------------------------------
 void LdpParser::Do_ProcessingParameter()
 {
     switch (m_pTk->get_type())
@@ -295,11 +311,13 @@ void LdpParser::Do_ProcessingParameter()
     }
 }
 
+//---------------------------------------------------------------------------------------
 bool LdpParser::must_replace_tag(const std::string& nodename)
 {
     return nodename == "noVisible";
 }
 
+//---------------------------------------------------------------------------------------
 void LdpParser::replace_current_tag()
 {
     //TODO: refactor to deal with many replacements
@@ -326,6 +344,7 @@ void LdpParser::replace_current_tag()
     terminate_current_parameter();
 }
 
+//---------------------------------------------------------------------------------------
 void LdpParser::terminate_current_parameter()
 {
     m_state = A3_ProcessingParameter;
@@ -352,15 +371,18 @@ void LdpParser::terminate_current_parameter()
     }
 }
 
+//---------------------------------------------------------------------------------------
 void LdpParser::PushNode(EParsingState state)
 {
     std::pair<EParsingState, LdpElement*> data(state, m_curNode);
     m_stack.push(data);
 }
 
-//! returns true if error
+//---------------------------------------------------------------------------------------
 bool LdpParser::PopNode()
 {
+    //returns true if error
+
     if (m_stack.size() == 0)
     {
         //more closing parenthesis than parenthesis opened
@@ -377,6 +399,7 @@ bool LdpParser::PopNode()
     }
 }
 
+//---------------------------------------------------------------------------------------
 void LdpParser::report_error(EParsingState nState, LdpToken* pTk)
 {
     m_numErrors++;
@@ -385,6 +408,7 @@ void LdpParser::report_error(EParsingState nState, LdpToken* pTk)
                << ", tkValue <" << pTk->get_value() << ">" << endl;
 }
 
+//---------------------------------------------------------------------------------------
 void LdpParser::report_error(const std::string& msg)
 {
     m_numErrors++;

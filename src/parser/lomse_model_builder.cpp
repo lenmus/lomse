@@ -30,30 +30,6 @@ namespace lomse
 {
 
 //-------------------------------------------------------------------------------------
-// ImObjectsBuilder. Helper class to build the ImoObj model from the basic model
-//-------------------------------------------------------------------------------------
-
-ImObjectsBuilder::ImObjectsBuilder(ostream& reporter)
-    : m_reporter(reporter)
-    , m_IModel(NULL)
-{
-    if (m_IModel)
-        delete m_IModel;
-}
-
-ImObjectsBuilder::~ImObjectsBuilder()
-{
-}
-
-ImoDocument* ImObjectsBuilder::create_objects(InternalModel* IModel)
-{
-    m_IModel = IModel;
-    return dynamic_cast<ImoDocument*>( IModel->get_root() );
-}
-
-
-
-//-------------------------------------------------------------------------------------
 // ModelBuilder implementation
 //-------------------------------------------------------------------------------------
 
@@ -68,8 +44,7 @@ ModelBuilder::~ModelBuilder()
 
 ImoDocument* ModelBuilder::build_model(InternalModel* IModel)
 {
-    ImObjectsBuilder imb(m_reporter);
-    ImoDocument* pDoc = imb.create_objects(IModel);
+    ImoDocument* pDoc = dynamic_cast<ImoDocument*>( IModel->get_root() );
     int numContent = pDoc->get_num_content_items();
     for (int i = 0; i < numContent; i++)
         structurize( pDoc->get_content_item(i) );

@@ -83,7 +83,7 @@ LdpFactory* LibraryScope::ldp_factory()
 FontStorage* LibraryScope::font_storage()
 {
     if (!m_pFontStorage)
-        m_pFontStorage = new FontStorage( m_pDoorway->get_font_callback() );
+        m_pFontStorage = new FontStorage(this);
     return m_pFontStorage;
 }
 
@@ -99,20 +99,25 @@ int LibraryScope::get_pixel_format() const
     return m_pDoorway->get_pixel_format();
 }
 
-
 //---------------------------------------------------------------------------------------
-void LibraryScope::notify_user_about(EventInfo& event)
+void LibraryScope::post_event(EventInfo* pEvent)
 {
-    m_pDoorway->notify_callback()(event);
+    m_pDoorway->post_event(pEvent);
 }
 
-////---------------------------------------------------------------------------------------
-//MusicGlyphs* LibraryScope::music_glyphs()
-//{
-//    if (!m_pMusicGlyphs)
-//        m_pMusicGlyphs = new MusicGlyphs();
-//    return m_pMusicGlyphs;
-//}
+//---------------------------------------------------------------------------------------
+void LibraryScope::post_request(Request* pRequest)
+{
+    m_pDoorway->post_request(pRequest);
+}
+
+//---------------------------------------------------------------------------------------
+std::string LibraryScope::get_font(const string& name, bool fBold, bool fItalic)
+{
+    RequestFont request(name, fBold, fItalic);
+    post_request(&request);
+    return request.get_font_fullname();
+}
 
 
 
@@ -127,10 +132,9 @@ LdpParser* Injector::inject_LdpParser(LibraryScope& libraryScope,
 }
 
 //---------------------------------------------------------------------------------------
-Analyser* Injector::inject_Analyser(LibraryScope& libraryScope,
-                                    DocumentScope& documentScope)
+Analyser* Injector::inject_Analyser(LibraryScope& libraryScope, Document* pDoc)
 {
-    return new Analyser(documentScope.default_reporter(), libraryScope);
+    return new Analyser(pDoc->get_scope().default_reporter(), libraryScope, pDoc);
 }
 
 //---------------------------------------------------------------------------------------
@@ -141,12 +145,13 @@ ModelBuilder* Injector::inject_ModelBuilder(DocumentScope& documentScope)
 
 //---------------------------------------------------------------------------------------
 LdpCompiler* Injector::inject_LdpCompiler(LibraryScope& libraryScope,
-                                          DocumentScope& documentScope)
+                                          Document* pDoc)
 {
-    return new LdpCompiler(inject_LdpParser(libraryScope, documentScope),
-                           inject_Analyser(libraryScope, documentScope),
-                           inject_ModelBuilder(documentScope),
-                           documentScope.id_assigner() );
+    return new LdpCompiler(inject_LdpParser(libraryScope, pDoc->get_scope()),
+                           inject_Analyser(libraryScope, pDoc),
+                           inject_ModelBuilder(pDoc->get_scope()),
+                           pDoc->get_scope().id_assigner(),
+                           pDoc );
 }
 
 //---------------------------------------------------------------------------------------

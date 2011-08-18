@@ -36,17 +36,18 @@ class ImoTimeSignature;
 class ColStaffObjsEntry;
 
 //-----------------------------------------------------------------------------------------
-// SystemCursor
+// StaffObjsCursor
 // A cursor for traversing the score by tiempos, all instruments in parallel. As the score
-// is traversed, SystemCursor provides information about context (current clef, key and
+// is traversed, StaffObjsCursor provides information about context (current clef, key and
 // time signature)
 //-----------------------------------------------------------------------------------------
 
 //#define _LOMSE_NO_BREAK_TIME  100000000000000.0f         //any too big value
 
-class SystemCursor
+class StaffObjsCursor
 {
 private:
+    ColStaffObjs* m_pColStaffObjs;
     ScoreIterator m_scoreIt;
     ScoreIterator m_savedPos;
     int m_numInstruments;
@@ -63,8 +64,8 @@ private:
     //float m_rBreakTime;       //last time to include in current column
 
 public:
-    SystemCursor(ImoScore* pScore);
-    ~SystemCursor();
+    StaffObjsCursor(ImoScore* pScore);
+    ~StaffObjsCursor();
 
 //    bool ThereAreObjects();
 //
@@ -83,6 +84,9 @@ public:
     inline ImoObj* imo_object() { return (*m_scoreIt)->imo_object(); }
     ImoStaffObj* get_staffobj();
     inline bool is_empty_score() { return m_fScoreIsEmpty; }
+    inline float anacrusis_missing_time() { 
+        return m_pColStaffObjs->anacrusis_missing_time();
+    }
 
     //context
     inline int get_num_instruments() { return m_numInstruments; }

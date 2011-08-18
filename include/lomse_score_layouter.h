@@ -21,7 +21,7 @@
 #ifndef __LOMSE_SCORE_LAYOUTER_H__        //to avoid nested includes
 #define __LOMSE_SCORE_LAYOUTER_H__
 
-#include "lomse_content_layouter.h"
+#include "lomse_layouter.h"
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
 #include "lomse_score_enums.h"
@@ -51,7 +51,7 @@ class GmoBoxSliceInstr;
 class GmoStubScore;
 class InstrumentEngraver;
 class SystemLayouter;
-class SystemCursor;
+class StaffObjsCursor;
 class GmoShape;
 class ScoreMeter;
 class ColumnLayouter;
@@ -89,16 +89,17 @@ struct PendingAuxObjs
 
 
 //---------------------------------------------------------------------------------------
-class ScoreLayouter : public ContentLayouter
+class ScoreLayouter : public Layouter
 {
 protected:
     LibraryScope&   m_libraryScope;
-    UPoint          m_pageCursor;
     ImoScore*       m_pScore;
     ScoreMeter*     m_pScoreMeter;
     ColumnsBuilder* m_pColsBuilder;
     ShapesStorage   m_shapesStorage;
     ShapesCreator*  m_pShapesCreator;
+    UPoint          m_cursor;
+    LUnits          m_startTop;
 
     std::vector<InstrumentEngraver*> m_instrEngravers;
     std::vector<ColumnLayouter*> m_ColLayouters;
@@ -131,12 +132,13 @@ protected:
     int                 m_iColumnToTrace;
 
 public:
-    ScoreLayouter(ImoContentObj* pImo, GraphicModel* pGModel, LibraryScope& libraryScope);
+    ScoreLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
+                  LibraryScope& libraryScope);
     virtual ~ScoreLayouter();
 
     void prepare_to_start_layout();
-    void layout_in_page(GmoBox* pContainerBox);
-    GmoBox* create_main_box();
+    void layout_in_box();
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
 
     //info
     virtual int get_num_columns();
@@ -237,7 +239,7 @@ protected:
     ShapesCreator*  m_pShapesCreator;
     std::vector<ColumnLayouter*>& m_ColLayouters;    //layouter for each column
     std::vector<InstrumentEngraver*>& m_instrEngravers;
-    SystemCursor* m_pSysCursor;                     //cursor for traversing the score
+    StaffObjsCursor* m_pSysCursor;                     //cursor for traversing the score
     std::vector<LUnits> m_SliceInstrHeights;
     LUnits m_stavesHeight;      //system height without top and bottom margins
     UPoint m_pagePos;           //to track current position
@@ -308,7 +310,7 @@ protected:
     std::vector<bool> m_beamed;
 
 public:
-    ColumnBreaker(int numInstruments, SystemCursor* pSysCursor);
+    ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor);
     ~ColumnBreaker() {}
 
     bool column_should_be_finished(ImoStaffObj* pSO, float rTime, int iLine);

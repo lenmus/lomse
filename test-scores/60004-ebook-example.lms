@@ -1,0 +1,73 @@
+(lenmusdoc (vers 0.0) 
+    (styles 
+        (defineStyle "content" (font "Liberation serif" 12pt bold)(color #000000))
+        (defineStyle "heading-1" (font-name "Liberation serif")(font-size 16pt)
+            (font-weight bold)(color #000000)(margin-bottom 600))
+        (defineStyle "heading-2" (font-name "Liberation serif")(font-size 14pt)
+            (font-weight bold)(color #000000)(margin-bottom 600))
+        (defineStyle "para" (margin-bottom 423.3333))
+        (defineStyle "normal" (font "Liberation serif" 12pt normal)(color #000000))
+        (defineStyle "normal emphasis" (font "Liberation serif" 12pt bold)(color #000000))
+        (defineStyle "normal italics" (font "Liberation serif" 12pt italic)(color #000000))
+    )
+    
+    (content
+        (heading 1 (style "heading-1") (txt (style "heading-1") "Scales"))
+ 
+        (para (style "para")
+            (txt (style "normal") "If you're learning an instrument you've probably played some scales already, but you might have learnt to play them without thinking about the actual notes, (your fingers do the thinking!). But to understand music and learn about harmony you need to know the scales and how they are built.")
+        )
+
+        (para (style "para")
+            (txt (style "normal") "A scale, from latin word ")
+            (txt (style "normal italics") "'scala'")
+            (txt (style "normal") " meaning ")
+            (txt (style "normal emphasis") "'ladder'")
+            (txt (style "normal") ", is a predefined series of notes going up (ascending) or down (descending). People in different musical traditions have different ideas about what notes they think sound best together. In the Western musical tradition - which includes most familiar music from Europe and the Americas - the octave is divided up into twelve equally spaced notes. Other musical traditions - traditional Chinese music for example - have divided the octave differently and so they use different scales.")
+        )
+
+        (score
+           (vers 1.6)
+           (opt Render.SpacingMethod 1)
+           (opt Render.SpacingValue 30)
+           (instrument (staves 1)
+              (musicData
+                 (clef G)
+                 (n a4 w v1)
+                 (n a4 h v1)
+                 (n a4 h v1)
+                 (n a4 q v1)
+                 (n a4 q v1)
+                 (n a4 e g+ v1)
+                 (n a4 e g- v1)
+                 (n a4 s g+ v1)
+                 (n a4 s g- v1)
+                 (n a4 t g+ v1)
+                 (n a4 t g- v1)
+              )
+           )
+        )
+ 
+        (para (style "para")
+            (txt (style "normal") "If you're learning an instrument you've probably played some scales already, but you might have learnt to play them without thinking about the actual notes, (your fingers do the thinking!). But to understand music and learn about harmony you need to know the scales and how they are built.")
+        )
+        
+        (heading 2 (style "heading-2")(txt (style "heading-2") "Exercises"))
+ 
+        (para (style "para")
+            (txt (style "normal") "Now, let's practise with some exercises:")
+        )
+        
+        (dynamic (classid example))
+
+        (score
+           (vers 1.6)
+           (instrument
+              (musicData
+                 (clef G)
+                 (chord (n c4 w)(n e4 w)(n g4 w))
+                 (barline end)
+              )
+           )
+        )
+))

@@ -26,9 +26,15 @@
 #include "lomse_drawer.h"
 #include "lomse_doorway.h"
 #include "lomse_agg_types.h"
+
 #include <vector>
 #include <list>
+#include <ctime>   //clock
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 using namespace std;
+using namespace boost::gregorian;
+using namespace boost::posix_time;
 
 
 namespace lomse
@@ -40,6 +46,7 @@ class Drawer;
 class Interactor;
 class GraphicModel;
 class Document;
+class ImoStaffObj;
 
 
 //---------------------------------------------------------------------------------------
@@ -83,44 +90,61 @@ protected:
     bool                m_fSelRectVisible;
     Rectangle<Pixels>   m_selRect;
 
+    //line to highlight tempo when playing back a score
+    bool                m_fTempoLineVisible;
+    Rectangle<Pixels>   m_tempoLine;
+
+    //objects currently highlighted
+    std::list<ImoStaffObj*> m_highlighted;
+
     //bounds for each displayed page
     std::list< Rectangle<LUnits> > m_pageBounds;
 
     //call backs for application provided methods
     void (*m_pFunc_update_window)(void* pThis);
     void (*m_pFunc_force_redraw)(void* pThis);
-    void (*m_pFunc_start_timer)(void* pThis);
-    double (*m_pFunc_elapsed_time)(void* pThis);
-    void (*m_pFunc_notify)(void* pThis, EventInfo& event);
+    void (*m_pFunc_notify)(void* pThis, EventInfo* event);
     void* m_pObj_update_window;
     void* m_pObj_force_redraw;
-    void* m_pObj_start_timer;
-    void* m_pObj_elapsed_time;
     void* m_pObj_notify;
 
+    //for performance measurements
+    clock_t m_startTime;
+    ptime m_start;
+
+    //for printing
+    RenderingBuffer* m_pPrintBuf;
 
 public:
-    GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
     virtual ~GraphicView();
 
     //view settings
     void new_viewport(Pixels x, Pixels y);
     void set_rendering_buffer(RenderingBuffer* rbuf) { m_pRenderBuf = rbuf; }
     void get_viewport(Pixels* x, Pixels* y) { *x = m_vxOrg; *y = m_vyOrg; }
+    void set_viewport_at_page_center(Pixels screenWidth);
+    virtual void set_viewport_for_page_fit_full(Pixels screenWidth) = 0;
 
-//    //--------------------------------------------------------------------
-//    // Methods to serve platform dependent event handlers.
-   virtual void on_resize(Pixels x, Pixels y);
+    //scrolling support
+    virtual void get_view_size(Pixels* xWidth, Pixels* yHeight) = 0;
 
     //selection rectangle
     void show_selection_rectangle(Pixels x1, Pixels y1, Pixels x2, Pixels y2);
     void hide_selection_rectangle();
     void update_selection_rectangle(Pixels x2, Pixels y2);
 
-    //--------------------------------------------------------------------
+    //tempo line
+    void show_tempo_line(Pixels x1, Pixels y1, Pixels x2, Pixels y2);
+    void hide_tempo_line();
+    void update_tempo_line(Pixels x2, Pixels y2);
+
+    //highlighting staffobjs
+    void highlight_object(ImoStaffObj* pSO);
+    void remove_highlight_from_object(ImoStaffObj* pSO);
+    void remove_all_highlight();
+
     // The View is requested to re-paint itself onto the window
     virtual void on_paint();
-    //virtual void on_post_draw(void* raw_handler);
 
     //window related commands
     void update_window();
@@ -143,6 +167,8 @@ public:
     //scale
     void zoom_in(Pixels x=0, Pixels y=0);
     void zoom_out(Pixels x=0, Pixels y=0);
+    void zoom_fit_full(Pixels width, Pixels height);
+    void zoom_fit_width(Pixels width);
     void set_scale(double scale, Pixels x=0, Pixels y=0);
     double get_scale();
 
@@ -152,15 +178,21 @@ public:
     //setting callbacks to communicate with user application
     void set_update_window_callbak(void* pThis, void (*pt2Func)(void* pObj));
     void set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj));
-    void set_elapsed_time_callbak(void* pThis, double (*pt2Func)(void* pObj));
-    void set_start_timer_callbak(void* pThis, void (*pt2Func)(void* pObj));
-    void set_notify_callback(void* pThis, void (*pt2Func)(void* pObj, EventInfo& event));
+    void set_notify_callback(void* pThis, void (*pt2Func)(void* pObj, EventInfo* event));
 
-    void notify_user(EventInfo& event);
+    void notify_user(EventInfo* pEvent);
+
+    //support for printing
+    void set_printing_buffer(RenderingBuffer* rbuf) { m_pPrintBuf = rbuf; }
+    virtual void on_print_page(int page, double scale, VPoint viewport);
+    VSize get_page_size_in_pixels(int nPage);
 
 protected:
+    GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
+
     void draw_graphic_model();
     void draw_sel_rectangle();
+    void draw_tempo_line();
     void add_controls();
     virtual void generate_paths() = 0;
     URect get_page_bounds(int iPage);
@@ -177,13 +209,13 @@ protected:
 // A graphic view with one page, no margins (i.e. LenMus ScoreAuxCtrol)
 class LOMSE_EXPORT SimpleView : public GraphicView
 {
-protected:
-
 public:
     SimpleView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
     virtual ~SimpleView() {}
 
     virtual int page_at_screen_point(double x, double y);
+    void set_viewport_for_page_fit_full(Pixels screenWidth);
+    void get_view_size(Pixels* xWidth, Pixels* yHeight);
 
 protected:
     void generate_paths();
@@ -195,11 +227,12 @@ protected:
 // A graphic view with pages in vertical (i.e. Adobe PDF Reader, MS Word)
 class LOMSE_EXPORT VerticalBookView : public GraphicView
 {
-protected:
-
 public:
     VerticalBookView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
     virtual ~VerticalBookView() {}
+
+    void set_viewport_for_page_fit_full(Pixels screenWidth);
+    void get_view_size(Pixels* xWidth, Pixels* yHeight);
 
 protected:
     void generate_paths();
@@ -216,6 +249,9 @@ protected:
 public:
     HorizontalBookView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
     virtual ~HorizontalBookView() {}
+
+    void set_viewport_for_page_fit_full(Pixels screenWidth);
+    void get_view_size(Pixels* xWidth, Pixels* yHeight);
 
 protected:
     void generate_paths();
