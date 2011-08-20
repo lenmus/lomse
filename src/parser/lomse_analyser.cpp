@@ -751,12 +751,12 @@ protected:
         {
             m_pParamToAnalyse = get_param_to_analyse();
             ELdpElement type = m_pParamToAnalyse->get_type();
-            if (   /*type == k_inlineWrapper 
+            if (   /*type == k_inlineWrapper
                 ||*/ type == k_txt
                 || type == k_link
                )
             {
-                return dynamic_cast<ImoInlineObj*>( 
+                return dynamic_cast<ImoInlineObj*>(
                     m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
             }
             else
@@ -1287,7 +1287,7 @@ protected:
         ImoColorDto* pColor = new ImoColorDto();
         m_pAnalysedNode->set_imo(pColor);
         std::string value = get_string_value();
-        pColor->get_from_string(value);
+        pColor->set_from_string(value);
         return pColor->is_ok();
     }
 

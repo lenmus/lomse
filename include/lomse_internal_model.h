@@ -590,9 +590,9 @@ public:
     ImoColorDto(Int8u r, Int8u g, Int8u b, Int8u a = 255);
     ~ImoColorDto() {}
 
-    Color& get_from_rgb_string(const std::string& rgb);
-    Color& get_from_rgba_string(const std::string& rgba);
-    Color& get_from_string(const std::string& hex);
+    Color& set_from_rgb_string(const std::string& rgb);
+    Color& set_from_rgba_string(const std::string& rgba);
+    Color& set_from_string(const std::string& hex);
     inline bool is_ok() { return m_ok; }
 
     inline Int8u red() { return m_color.r; }

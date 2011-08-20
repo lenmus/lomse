@@ -786,7 +786,7 @@ Int8u ImoColorDto::convert_from_hex(const std::string& hex)
 }
 
 //---------------------------------------------------------------------------------------
-Color& ImoColorDto::get_from_rgb_string(const std::string& rgb)
+Color& ImoColorDto::set_from_rgb_string(const std::string& rgb)
 {
     m_ok = true;
 
@@ -805,7 +805,7 @@ Color& ImoColorDto::get_from_rgb_string(const std::string& rgb)
 }
 
 //---------------------------------------------------------------------------------------
-Color& ImoColorDto::get_from_rgba_string(const std::string& rgba)
+Color& ImoColorDto::set_from_rgba_string(const std::string& rgba)
 {
     m_ok = true;
 
@@ -824,12 +824,12 @@ Color& ImoColorDto::get_from_rgba_string(const std::string& rgba)
 }
 
 //---------------------------------------------------------------------------------------
-Color& ImoColorDto::get_from_string(const std::string& hex)
+Color& ImoColorDto::set_from_string(const std::string& hex)
 {
     if (hex.length() == 7)
-        return get_from_rgb_string(hex);
+        return set_from_rgb_string(hex);
     else if (hex.length() == 9)
-        return get_from_rgba_string(hex);
+        return set_from_rgba_string(hex);
     else
     {
         m_ok = false;

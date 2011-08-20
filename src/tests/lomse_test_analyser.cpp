@@ -5055,12 +5055,12 @@ SUITE(AnalyserTest)
         CHECK( color.green() == 0 );
         CHECK( color.blue() == 0 );
         CHECK( color.alpha() == 255 );
-        color.get_from_rgb_string("#ff3217");
+        color.set_from_rgb_string("#ff3217");
         CHECK( color.red() == 255 );
         CHECK( color.green() == 50 );
         CHECK( color.blue() == 23 );
         CHECK( color.alpha() == 255 );
-        color.get_from_rgba_string("#fffe4580");
+        color.set_from_rgba_string("#fffe4580");
         CHECK( color.red() == 255 );
         CHECK( color.green() == 254 );
         CHECK( color.blue() == 69 );
@@ -5080,12 +5080,12 @@ SUITE(AnalyserTest)
     TEST_FIXTURE(AnalyserTestFixture, ImoColor_Error)
     {
         ImoColorDto color;
-        color.get_from_string("#ff3g17");
+        color.set_from_string("#ff3g17");
         CHECK( color.red() == 0 );
         CHECK( color.green() == 0 );
         CHECK( color.blue() == 0 );
         CHECK( color.alpha() == 255 );
-        color.get_from_string("#fff");
+        color.set_from_string("#fff");
         CHECK( color.red() == 0 );
         CHECK( color.green() == 0 );
         CHECK( color.blue() == 0 );
