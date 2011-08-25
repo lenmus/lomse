@@ -35,12 +35,12 @@ using namespace UnitTest;
 using namespace std;
 using namespace lomse;
 
-//---------------------------------------------------------------------------------------
-static bool fNotified = false;
-static void my_callback_function(Notification* event)
-{
-    fNotified = true;
-}
+////---------------------------------------------------------------------------------------
+//static bool fNotified = false;
+//static void my_callback_function(Notification* event)
+//{
+//    fNotified = true;
+//}
 
 
 //---------------------------------------------------------------------------------------

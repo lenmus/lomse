@@ -1367,10 +1367,11 @@ ImoInstrument::~ImoInstrument()
 }
 
 //---------------------------------------------------------------------------------------
-void ImoInstrument::add_staff()
+ImoStaffInfo* ImoInstrument::add_staff()
 {
     ImoStaffInfo* pStaff = new ImoStaffInfo();
     m_staves.push_back(pStaff);
+    return pStaff;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1405,10 +1406,34 @@ void ImoInstrument::set_abbrev(ImoScoreText* pText)
 }
 
 //---------------------------------------------------------------------------------------
+void ImoInstrument::set_name(const string& value)
+{
+    m_name.set_text(value);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrument::set_abbrev(const string& value)
+{
+    m_abbrev.set_text(value);
+}
+
+//---------------------------------------------------------------------------------------
 void ImoInstrument::set_midi_info(ImoMidiInfo* pInfo)
 {
     m_midi = *pInfo;
     delete pInfo;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrument::set_midi_instrument(int instr)
+{
+    m_midi.set_instrument(instr);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrument::set_midi_channel(int channel)
+{
+    m_midi.set_channel(channel);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1432,14 +1457,66 @@ LUnits ImoInstrument::get_line_spacing_for_staff(int iStaff)
 }
 
 //---------------------------------------------------------------------------------------
+LUnits ImoInstrument::tenths_to_logical(Tenths value, int iStaff)
+{
+	return (value * get_line_spacing_for_staff(iStaff)) / 10.0f;
+}
+
+//---------------------------------------------------------------------------------------
 // Instrument API
+//---------------------------------------------------------------------------------------
+ImoBarline* ImoInstrument::add_barline(int type, bool fVisible)
+{
+    ImoMusicData* pMD = get_musicdata();
+    ImoBarline* pImo = static_cast<ImoBarline*>(
+                                ImFactory::inject(k_imo_barline, m_pDoc) );
+    pImo->set_type(type);
+    pImo->set_visible(fVisible);
+    pMD->append_child(pImo);
+    return pImo;
+}
+
 //---------------------------------------------------------------------------------------
 ImoClef* ImoInstrument::add_clef(int type)
 {
     ImoMusicData* pMD = get_musicdata();
-    ImoClef* pImo = static_cast<ImoClef*>(
-                                ImFactory::inject(k_imo_clef, m_pDoc) );
+    ImoClef* pImo = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, m_pDoc) );
     pImo->set_clef_type(type);
+    pMD->append_child(pImo);
+    return pImo;
+}
+
+//---------------------------------------------------------------------------------------
+ImoKeySignature* ImoInstrument::add_key_signature(int type)
+{
+    ImoMusicData* pMD = get_musicdata();
+    ImoKeySignature* pImo = static_cast<ImoKeySignature*>(
+                                ImFactory::inject(k_imo_key_signature, m_pDoc) );
+    pImo->set_key_type(type);
+    pMD->append_child(pImo);
+    return pImo;
+}
+
+//---------------------------------------------------------------------------------------
+ImoSpacer* ImoInstrument::add_spacer(Tenths space)
+{
+    ImoMusicData* pMD = get_musicdata();
+    ImoSpacer* pImo = static_cast<ImoSpacer*>( ImFactory::inject(k_imo_spacer, m_pDoc) );
+    pImo->set_width(space);
+    pMD->append_child(pImo);
+    return pImo;
+}
+
+//---------------------------------------------------------------------------------------
+ImoTimeSignature* ImoInstrument::add_time_signature(int beats, int beatType,
+                                                    bool fVisible)
+{
+    ImoMusicData* pMD = get_musicdata();
+    ImoTimeSignature* pImo = static_cast<ImoTimeSignature*>(
+                                ImFactory::inject(k_imo_time_signature, m_pDoc) );
+    pImo->set_beats(beats);
+    pImo->set_beat_type(beatType);
+    pImo->set_visible(fVisible);
     pMD->append_child(pImo);
     return pImo;
 }

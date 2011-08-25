@@ -227,7 +227,7 @@ void on_lomse_request(void* pThis, Request* pRequest)
 void open_document()
 {
     //Normally you will load the content of a file. But in this
-    //simple example we wiil crete an empty document and define its content
+    //simple example we will create an empty document and define its content
     //from a text string
 
     //create a document and get the 'presenter'.

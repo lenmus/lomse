@@ -287,27 +287,27 @@ int NoteEngraver::pitch_to_pos_on_staff(int clefType)
     {
         case k_clef_undefined:
         case k_clef_G2:
-            return dpitch - LOMSE_C4_DPITCH;
+            return dpitch - C4_DPITCH;
         case k_clef_F4:
-            return dpitch - LOMSE_C4_DPITCH + 12;
+            return dpitch - C4_DPITCH + 12;
         case k_clef_F3:
-            return dpitch - LOMSE_C4_DPITCH + 10;
+            return dpitch - C4_DPITCH + 10;
         case k_clef_C1:
-            return dpitch - LOMSE_C4_DPITCH + 2;
+            return dpitch - C4_DPITCH + 2;
         case k_clef_C2:
-            return dpitch - LOMSE_C4_DPITCH + 4;
+            return dpitch - C4_DPITCH + 4;
         case k_clef_C3:
-            return dpitch - LOMSE_C4_DPITCH + 6;
+            return dpitch - C4_DPITCH + 6;
         case k_clef_C4:
-            return dpitch - LOMSE_C4_DPITCH + 8;
+            return dpitch - C4_DPITCH + 8;
         case k_clef_percussion:
             return 5;       //on 2nd space
         case k_clef_C5:
-            return dpitch - LOMSE_C4_DPITCH + 10;
+            return dpitch - C4_DPITCH + 10;
         case k_clef_F5:
-            return dpitch - LOMSE_C4_DPITCH + 14;
+            return dpitch - C4_DPITCH + 14;
         case k_clef_G1:
-            return dpitch - LOMSE_C4_DPITCH - 2;
+            return dpitch - C4_DPITCH - 2;
         case k_clef_8_G2:        //8 above
         case k_clef_G2_8:        //8 below
         case k_clef_8_F4:        //8 above
@@ -320,7 +320,7 @@ int NoteEngraver::pitch_to_pos_on_staff(int clefType)
             return 2;
         default:
             //LogMessage("NoteEngraver::pitch_to_pos_on_staff", "Case %d not treated in switch statement", nClef);
-            return dpitch - LOMSE_C4_DPITCH;     //assume G clef
+            return dpitch - C4_DPITCH;     //assume G clef
     }
 }
 

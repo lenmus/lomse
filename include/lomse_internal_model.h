@@ -46,6 +46,7 @@ class Document;
 
 class ImoAttachments;
 class ImoAuxObj;
+class ImoBarline;
 class ImoBeamData;
 class ImoBeamDto;
 class ImoBeam;
@@ -64,6 +65,7 @@ class ImoHeading;
 class ImoInlineObj;
 class ImoInlineWrapper;
 class ImoInstrument;
+class ImoKeySignature;
 class ImoLineStyle;
 class ImoLink;
 class ImoMusicData;
@@ -79,6 +81,7 @@ class ImoRelObj;
 class ImoScoreText;
 class ImoSimpleObj;
 class ImoSlurDto;
+class ImoSpacer;
 class ImoStaffInfo;
 class ImoStaffObj;
 class ImoStyle;
@@ -89,12 +92,18 @@ class ImoTextItem;
 class ImoTextStyle;
 class ImoTieData;
 class ImoTieDto;
+class ImoTimeSignature;
 class ImoTupletData;
 class ImoTupletDto;
 class ImoTuplet;
 class ImoWrapperBox;
 
 class DtoObj;
+
+//---------------------------------------------------------------------------------------
+// some helper defines
+#define NO_VISIBLE    false
+#define VISIBLE       true
 
 
 //---------------------------------------------------------------------------------------
@@ -379,7 +388,7 @@ public:
     inline bool is_enabled() { return m_fEnabled; }
 
     //setters
-    inline void enabled(bool value) { m_fEnabled = value; }
+    inline void enable(bool value) { m_fEnabled = value; }
 
 };
 
@@ -2162,19 +2171,28 @@ public:
     LUnits get_line_spacing_for_staff(int iStaff);
 
     //setters
-    void add_staff();
+    ImoStaffInfo* add_staff();
     void set_name(ImoScoreText* pText);
     void set_abbrev(ImoScoreText* pText);
+    void set_name(const string& value);
+    void set_abbrev(const string& value);
     void set_midi_info(ImoMidiInfo* pInfo);
+    void set_midi_instrument(int instr);
+    void set_midi_channel(int channel);
     inline void set_in_group(ImoInstrGroup* pGroup) { m_pGroup = pGroup; }
     void replace_staff_info(ImoStaffInfo* pInfo);
 
     //info
     inline bool has_name() { return m_name.get_text() != ""; }
     inline bool has_abbrev() { return m_abbrev.get_text() != ""; }
+    LUnits tenths_to_logical(Tenths value, int iStaff=0);
 
     //API
+    ImoBarline* add_barline(int type, bool fVisible=true);
     ImoClef* add_clef(int type);
+    ImoKeySignature* add_key_signature(int type);
+    ImoTimeSignature* add_time_signature(int beats, int beatType, bool fVisible=true);
+    ImoSpacer* add_spacer(Tenths space);
     ImoObj* add_object(const string& ldpsource);
 
 protected:

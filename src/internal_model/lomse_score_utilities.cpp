@@ -399,7 +399,7 @@ void get_accidentals_for_key(int keyType, int nAccidentals[])
 
 }
 
-//int lmGetRootNoteStep(lmEKeySignatures keyType)
+//int lmGetRootNoteStep(EKeySignature keyType)
 //{
 //    //returns the stpe (0..6, 0=Do, 1=Re, 3=Mi, ... , 6=Si) for the root note in
 //    //the Key signature. For example, if keyType is La sharp minor it returns
@@ -459,18 +459,21 @@ void get_accidentals_for_key(int keyType, int nAccidentals[])
 //    return nRootNote;
 //
 //}
-//
-//bool lmIsMajorKey(lmEKeySignatures keyType)
-//{
-//    return (keyType < k_key_a);
-//}
-//
-//bool lmIsMinorKey(lmEKeySignatures keyType)
-//{
-//    return (keyType >= k_key_a);
-//}
-//
-//const wxString& lmGetKeySignatureName(lmEKeySignatures keyType)
+
+//---------------------------------------------------------------------------------------
+bool is_major_key(EKeySignature keyType)
+{
+    return (keyType < k_key_a);
+}
+
+//---------------------------------------------------------------------------------------
+bool is_minor_key(EKeySignature keyType)
+{
+    return (keyType >= k_key_a);
+}
+
+////---------------------------------------------------------------------------------------
+//const wxString& lmGetKeySignatureName(EKeySignature keyType)
 //{
 //    static bool fStringsLoaded = false;
 //
@@ -513,165 +516,176 @@ void get_accidentals_for_key(int keyType, int nAccidentals[])
 //
 //    return m_sKeySignatureName[keyType - lmMIN_KEY];
 //}
-//
-//int KeySignatureToNumFifths(lmEKeySignatures keyType)
-//{
-//    // Retunrs the number of fifths that corresponds to the encoded key signature
-//
-//    int nFifths = 0;        //num accidentals to draw (0..7)
-//    switch(keyType) {
-//        case k_key_C:
-//        case k_key_a:
-//            nFifths = 0;
-//            break;
-//
-//        //Sharps ---------------------------------------
-//        case k_key_G:
-//        case k_key_e:
-//            nFifths = 1;
-//            break;
-//        case k_key_D:
-//        case k_key_b:
-//            nFifths = 2;
-//            break;
-//        case k_key_A:
-//        case k_key_fs:
-//            nFifths = 3;
-//            break;
-//        case k_key_E:
-//        case k_key_cs:
-//            nFifths = 4;
-//            break;
-//        case k_key_B:
-//        case k_key_gs:
-//            nFifths = 5;
-//            break;
-//        case k_key_Fs:
-//        case k_key_ds:
-//            nFifths = 6;
-//            break;
-//        case k_key_Cs:
-//        case k_key_as:
-//            nFifths = 7;
-//            break;
-//
-//        //Flats -------------------------------------------
-//        case k_key_F:
-//        case k_key_d:
-//            nFifths = -1;
-//            break;
-//        case k_key_Bf:
-//        case k_key_g:
-//            nFifths = -2;
-//            break;
-//        case k_key_Ef:
-//        case k_key_c:
-//            nFifths = -3;
-//            break;
-//        case k_key_Af:
-//        case k_key_f:
-//            nFifths = -4;
-//            break;
-//        case k_key_Df:
-//        case k_key_bf:
-//            nFifths = -5;
-//            break;
-//        case k_key_Gf:
-//        case k_key_ef:
-//            nFifths = -6;
-//            break;
-//        case k_key_Cf:
-//        case k_key_af:
-//            nFifths = -7;
-//            break;
-//        default:
-//            wxASSERT(false);
-//    }
-//    return nFifths;
-//
-//}
-//
-//lmEKeySignatures lmGetRelativeMinorKey(lmEKeySignatures nMajorKey)
-//{
-//    switch(nMajorKey) {
-//        case k_key_C:
-//            return k_key_a;
-//        case k_key_G:
-//            return k_key_e;
-//        case k_key_D:
-//            return k_key_b;
-//        case k_key_A:
-//            return k_key_fs;
-//        case k_key_E:
-//            return k_key_cs;
-//        case k_key_B:
-//            return k_key_gs;
-//        case k_key_Fs:
-//            return k_key_ds;
-//        case k_key_Cs:
-//            return k_key_as;
-//        case k_key_F:
-//            return k_key_d;
-//        case k_key_Bf:
-//            return k_key_g;
-//        case k_key_Ef:
-//            return k_key_c;
-//        case k_key_Af:
-//            return k_key_f;
-//        case k_key_Df:
-//            return k_key_bf;
-//        case k_key_Gf:
-//            return k_key_ef;
-//        case k_key_Cf:
-//            return k_key_af;
-//        default:
-//            wxASSERT(false);
-//            return k_key_c;
-//    }
-//
-//}
-//
-//lmEKeySignatures lmGetRelativeMajorKey(lmEKeySignatures nMinorKey)
-//{
-//    switch(nMinorKey) {
-//        case k_key_a:
-//            return k_key_C;
-//        case k_key_e:
-//            return k_key_G;
-//        case k_key_b:
-//            return k_key_D;
-//        case k_key_fs:
-//            return k_key_A;
-//        case k_key_cs:
-//            return k_key_E;
-//        case k_key_gs:
-//            return k_key_B;
-//        case k_key_ds:
-//            return k_key_Fs;
-//        case k_key_as:
-//            return k_key_Cs;
-//        case k_key_d:
-//            return k_key_F;
-//        case k_key_g:
-//            return k_key_Bf;
-//        case k_key_c:
-//            return k_key_Ef;
-//        case k_key_f:
-//            return k_key_Af;
-//        case k_key_bf:
-//            return k_key_Df;
-//        case k_key_ef:
-//            return k_key_Gf;
-//        case k_key_af:
-//            return k_key_Cf;
-//        default:
-//            wxASSERT(false);
-//            return k_key_c;
-//    }
-//
-//}
-//
-//wxString GetKeyLDPNameFromType(lmEKeySignatures keyType)
+
+//---------------------------------------------------------------------------------------
+int key_signature_to_num_fifths(int keyType)
+{
+    // Retunrs the number of fifths that corresponds to the encoded key signature
+
+    int nFifths = 0;        //num accidentals to return (0..7)
+    switch(keyType)
+    {
+        case k_key_C:
+        case k_key_a:
+            nFifths = 0;
+            break;
+
+        //Sharps ---------------------------------------
+        case k_key_G:
+        case k_key_e:
+            nFifths = 1;
+            break;
+        case k_key_D:
+        case k_key_b:
+            nFifths = 2;
+            break;
+        case k_key_A:
+        case k_key_fs:
+            nFifths = 3;
+            break;
+        case k_key_E:
+        case k_key_cs:
+            nFifths = 4;
+            break;
+        case k_key_B:
+        case k_key_gs:
+            nFifths = 5;
+            break;
+        case k_key_Fs:
+        case k_key_ds:
+            nFifths = 6;
+            break;
+        case k_key_Cs:
+        case k_key_as:
+            nFifths = 7;
+            break;
+
+        //Flats -------------------------------------------
+        case k_key_F:
+        case k_key_d:
+            nFifths = -1;
+            break;
+        case k_key_Bf:
+        case k_key_g:
+            nFifths = -2;
+            break;
+        case k_key_Ef:
+        case k_key_c:
+            nFifths = -3;
+            break;
+        case k_key_Af:
+        case k_key_f:
+            nFifths = -4;
+            break;
+        case k_key_Df:
+        case k_key_bf:
+            nFifths = -5;
+            break;
+        case k_key_Gf:
+        case k_key_ef:
+            nFifths = -6;
+            break;
+        case k_key_Cf:
+        case k_key_af:
+            nFifths = -7;
+            break;
+        default:
+            string msg = str( boost::format(
+                                "[key_signature_to_num_fifths] Invalid key signature %d")
+                                % keyType );
+            throw std::runtime_error(msg);
+    }
+    return nFifths;
+}
+
+//---------------------------------------------------------------------------------------
+EKeySignature get_relative_minor_key(EKeySignature nMajorKey)
+{
+    switch(nMajorKey) {
+        case k_key_C:
+            return k_key_a;
+        case k_key_G:
+            return k_key_e;
+        case k_key_D:
+            return k_key_b;
+        case k_key_A:
+            return k_key_fs;
+        case k_key_E:
+            return k_key_cs;
+        case k_key_B:
+            return k_key_gs;
+        case k_key_Fs:
+            return k_key_ds;
+        case k_key_Cs:
+            return k_key_as;
+        case k_key_F:
+            return k_key_d;
+        case k_key_Bf:
+            return k_key_g;
+        case k_key_Ef:
+            return k_key_c;
+        case k_key_Af:
+            return k_key_f;
+        case k_key_Df:
+            return k_key_bf;
+        case k_key_Gf:
+            return k_key_ef;
+        case k_key_Cf:
+            return k_key_af;
+        default:
+            string msg = str( boost::format(
+                                "[get_relative_minor_key] Invalid key signature %d")
+                                % keyType );
+            throw std::runtime_error(msg);
+    }
+
+}
+
+//---------------------------------------------------------------------------------------
+EKeySignature get_relative_major_key(EKeySignature nMinorKey)
+{
+    switch(nMinorKey) {
+        case k_key_a:
+            return k_key_C;
+        case k_key_e:
+            return k_key_G;
+        case k_key_b:
+            return k_key_D;
+        case k_key_fs:
+            return k_key_A;
+        case k_key_cs:
+            return k_key_E;
+        case k_key_gs:
+            return k_key_B;
+        case k_key_ds:
+            return k_key_Fs;
+        case k_key_as:
+            return k_key_Cs;
+        case k_key_d:
+            return k_key_F;
+        case k_key_g:
+            return k_key_Bf;
+        case k_key_c:
+            return k_key_Ef;
+        case k_key_f:
+            return k_key_Af;
+        case k_key_bf:
+            return k_key_Df;
+        case k_key_ef:
+            return k_key_Gf;
+        case k_key_af:
+            return k_key_Cf;
+        default:
+            string msg = str( boost::format(
+                                "[get_relative_major_key] Invalid key signature %d")
+                                % keyType );
+            throw std::runtime_error(msg);
+            return k_key_c;
+    }
+
+}
+
+//wxString GetKeyLDPNameFromType(EKeySignature keyType)
 //{
 //    return m_sLDPKeyName[keyType];
 //}

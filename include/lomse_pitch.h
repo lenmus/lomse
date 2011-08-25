@@ -21,16 +21,16 @@
 #ifndef __LOMSE_PITCH_H__
 #define __LOMSE_PITCH_H__
 
+#include "lomse_internal_model.h"        //for EKeySignature enum
 
-//using namespace std;
+#include <string>
+using namespace std;
 
 namespace lomse
 {
 
 
-//typedef int FIntval;      // Intervals, in FPitch mode.
-
-
+typedef int FIntval;      // Intervals, in FPitch mode.
 
 
 //---------------------------------------------------------------------------------------
@@ -93,14 +93,13 @@ enum EAccidentals
 //#define LOMSE_NO_ACCIDENTAL     0
 //#define LOMSE_SHARP             1
 //#define LOMSE_SHARP_SHARP       2
-//
-//#define LOMSE_NO_NOTE          -1  // DiatonicPitch = -1
-//
-////forward declarations
-//class DiatonicPitch;
-//class AbsolutePitch;
-//class MidiPitch;
-//class FPitch;
+
+
+//forward declarations
+class DiatonicPitch;
+class AbsolutePitch;
+class MidiPitch;
+class FPitch;
 
 //---------------------------------------------------------------------------------------
 // DiatonicPitch
@@ -126,29 +125,28 @@ public:
     // operator to cast to an int
     operator const int() { return m_dp; }
 
-//    // conversion
-//    MidiPitch to_midi_pitch();
-//    FPitch to_FPitch(lmEKeySignatures nKey);
-//    std::string get_english_note_name();
-//    std::string get_ldp_name();
-//    inline int get_value() { return m_dp; }
-//
-//    //components extraction
-//    inline int step() { return (m_dp - 1) % 7; }
-//    inline int octave() { return (m_dp - 1) / 7; }
-//
-//    // comparison operators
-//    bool operator ==(DiatonicPitch dp) { return m_dp == dp.get_value(); }
-//    bool operator !=(DiatonicPitch dp) { return m_dp != dp.get_value(); }
-//    bool operator < (DiatonicPitch dp) { return m_dp < dp.get_value(); }
-//    bool operator > (DiatonicPitch dp) { return m_dp > dp.get_value(); }
-//    bool operator <= (DiatonicPitch dp) { return m_dp <= dp.get_value(); }
-//    bool operator >= (DiatonicPitch dp) { return m_dp >= dp.get_value(); }
+    // conversion
+    MidiPitch to_midi_pitch();
+    FPitch to_FPitch(EKeySignature nKey);
+    string get_english_note_name();
+    string get_ldp_name();
+
+    //components extraction
+    inline int step() { return (m_dp - 1) % 7; }
+    inline int octave() { return (m_dp - 1) / 7; }
+
+    // comparison operators
+    bool operator ==(DiatonicPitch dp) { return m_dp == int(dp); }
+    bool operator !=(DiatonicPitch dp) { return m_dp != int(dp); }
+    bool operator < (DiatonicPitch dp) { return m_dp < int(dp); }
+    bool operator > (DiatonicPitch dp) { return m_dp > int(dp); }
+    bool operator <= (DiatonicPitch dp) { return m_dp <= int(dp); }
+    bool operator >= (DiatonicPitch dp) { return m_dp >= int(dp); }
 
 };
 
-#define LOMSE_C4_DPITCH   29
-#define LOMSE_NO_DPITCH   -1
+#define C4_DPITCH   DiatonicPitch(29)
+#define NO_DPITCH   DiatonicPitch(-1)
 
 
 
@@ -161,13 +159,13 @@ public:
 //{
 //private:
 //    DiatonicPitch m_dp;
-//    int m_nAcc;
+//    int m_nAcc;   <== convert to float to allow for microtonality?
 //
 //public:
 //    AbsolutePitch() : m_dp(-1), m_nAcc(0) {}
 //    AbsolutePitch(DiatonicPitch dp, int nAcc) : m_dp(dp), m_nAcc(nAcc) {}
 //    AbsolutePitch(int step, int octave, int acc) : m_dp(step, octave), m_nAcc(acc) {}
-//    AbsolutePitch(const std::string& note);
+//    AbsolutePitch(const string& note);
 //
 //    ~AbsolutePitch() {}
 //
@@ -209,8 +207,8 @@ public:
 //    //conversions
 //    inline int step() const { return (m_dp - 1) % 7; }
 //    inline int octave()const { return (m_dp - 1) / 7; }
-//    std::string get_ldp_name() const;
-//    MidiPitch get_midi_pitch() const;
+//    string get_ldp_name() const;
+//    MidiPitch to_MidiPitch() const;
 //
 //};
 
@@ -236,97 +234,74 @@ public:
     // operator to cast to an int
     operator const int() { return m_pitch; }
 
-    //std::string to_ldp_name();
-    //bool is_natural_note(int nKey);
+    string get_ldp_name();
+    bool is_natural_note(EKeySignature nKey);
 
 };
 
-#define LOMSE_C4_MPITCH   60
+#define C4_MPITCH   MidiPitch(60)
 
 
 
-////---------------------------------------------------------------------------------------
-//// FPitch
-////  Base-40 absolute pitch representation. Interval-invariant. Only 2 accidentals
-////---------------------------------------------------------------------------------------
-//class FPitch
-//{
-//protected:
-//    int m_fp;
-//
-//public:
-//    //constructors
-//    FPitch(int value) : m_fp(value) {}
+//---------------------------------------------------------------------------------------
+// FPitch
+//  Base-40 absolute pitch representation. Interval-invariant. Only 2 accidentals
+//---------------------------------------------------------------------------------------
+class FPitch
+{
+protected:
+    int m_fp;
+
+public:
+    //constructors
+    FPitch(int value) : m_fp(value) {}
 //    FPitch(AbsolutePitch ap);
-//    FPitch(DiatonicPitch dp, int nAcc);
-//    FPitch(int nStep, int nOctave, int nAcc);
-//    FPitch(const std::string& sLDPNote);
-//    FPitch(int nStep, int nOctave, int nKey);
-//
-//    ~FPitch() {}
-//
-//    //validation
-//    bool is_valid();
-//
-//    //components extraction
-//    inline int step() { return (((m_fp - 1) % 40) + 1) / 6; }
-//    inline int octave() { return (m_fp - 1) / 40; }
-//    int accidentals();
-//
-//    //conversion
-//    std::string FPitch_ToAbsLDPName();
-//    std::string FPitch_ToRelLDPName(int nKey);
-//    MidiPitch to_MidiPitch();
-//    DiatonicPitch to_DiatonicPitch();
-//    AbsolutePitch to_APitch();
-//
-//    //operations
-//    FPitch add_semitone(int nKey);
-//    FPitch add_semitone(bool fUseSharps);
-//    // Interval between 2 steps
-//    //extern FPitch FPitchStepsInterval(int nStep1, int nStep2, int nKey);
-//    std::string to_abs_ldp_name();
-//    std::string to_rel_ldp_name(int nKey);
-//
-//protected:
-//    void create(int nStep, int nOctave, int nAcc);
-//
-//};
-//
-//#define LOMSE_C4_FPITCH     FPitch(163)
-//#define LOMSE_C4_FPITCH   163
-//
-//////constructors
-////extern FPitch FPitch(AbsolutePitch ap);
-////extern FPitch FPitch(DiatonicPitch dp, int nAcc);
-////extern FPitch FPitch(int nStep, int nOctave, int nAcc);
-////extern FPitch FPitch(const std::string& sLDPNote);
-////extern FPitch FPitchK(int nStep, int nOctave, LOMSE_EKeySignatures nKey);
-////
-//////validation
-////extern bool FPitch_IsValid(FPitch fp);
-////
-//////components extraction
-////#define FPitch_Step(fp) ((((fp - 1) % 40) + 1) / 6)
-////#define FPitch_Octave(fp) ((fp - 1) / 40)
-////extern int FPitch_Accidentals(FPitch fp);
-////
-//////conversion
-////extern std::string FPitch_ToAbsLDPName(FPitch fp);
-////extern std::string FPitch_ToRelLDPName(FPitch fp, LOMSE_EKeySignatures nKey);
-////extern MidiPitch FPitch_ToMidiPitch(FPitch fp);
-////extern DiatonicPitch FPitch_ToDiatonicPitch(FPitch fp);
-////extern AbsolutePitch FPitch_ToAPitch(FPitch fp);
-////
-//////operations
-////extern FPitch FPitch_AddSemitone(FPitch fpNote, LOMSE_EKeySignatures nKey);
-////extern FPitch FPitch_AddSemitone(FPitch fpNote, bool fUseSharps);
-////// Interval between 2 steps
-////extern FPitch FPitchStepsInterval(int nStep1, int nStep2, LOMSE_EKeySignatures nKey);
-////
-////    // return the note letter (A .. G) corresponding to the step of the note, in FPitch notation
-////    extern std::string FPitch_GetEnglishNoteName(FPitch fp);
+    FPitch(DiatonicPitch dp, int nAcc);
+    FPitch(int nStep, int nOctave, int nAcc);
+//    FPitch(const string& sLDPNote);
+//    FPitch(int nStep, int nOctave, EKeySignature nKey);
 
+    ~FPitch() {}
+
+    // operator to cast to an int
+    operator const int() { return m_fp; }
+
+    // comparison operators
+    bool operator ==(FPitch fp) { return m_fp == int(fp); }
+    bool operator !=(FPitch fp) { return m_fp != int(fp); }
+    bool operator < (FPitch fp) { return m_fp < int(fp); }
+    bool operator > (FPitch fp) { return m_fp > int(fp); }
+    bool operator <= (FPitch fp) { return m_fp <= int(fp); }
+    bool operator >= (FPitch fp) { return m_fp >= int(fp); }
+
+    //validation
+    bool is_valid();
+
+    //components extraction
+    inline int step() { return (((m_fp - 1) % 40) + 1) / 6; }
+    inline int octave() { return (m_fp - 1) / 40; }
+    int accidentals();
+
+    //conversion
+    string to_abs_ldp_name();
+    string to_rel_ldp_name(EKeySignature nKey);
+    MidiPitch to_midi_pitch();
+    DiatonicPitch to_diatonic_pitch();
+//    AbsolutePitch to_APitch();
+
+    //operations
+    FPitch add_semitone(EKeySignature nKey);
+    FPitch add_semitone(bool fUseSharps);
+
+    // Interval between 2 steps
+    //extern FPitch FPitchStepsInterval(int nStep1, int nStep2, EKeySignature nKey);
+
+protected:
+    void create(int nStep, int nOctave, int nAcc);
+
+};
+
+#define C4_FPITCH   FPitch(163)
 
 
 } //namespace lomse

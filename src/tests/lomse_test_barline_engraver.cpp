@@ -58,7 +58,7 @@ SUITE(BarlineEngrvTest)
     //TEST_FIXTURE(BarlineEngrvTestFixture, DPitch_C4)
     //{
     //    DiatonicPitch dp(0, 4);
-    //    CHECK( (int)dp == LOMSE_C4_DPITCH );
+    //    CHECK( (int)dp == C4_DPITCH );
     //}
 
 }
