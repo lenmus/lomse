@@ -25,6 +25,7 @@
 #include "lomse_shape_barline.h"
 #include "lomse_box_slice_instr.h"
 #include "lomse_score_meter.h"
+#include "lomse_shapes.h"
 
 
 namespace lomse
@@ -51,12 +52,10 @@ GmoShape* BarlineEngraver::create_shape(ImoBarline* pBarline, int iInstr, LUnits
     //force selection rectangle to have at least a width of half line (5 tenths)
     LUnits uMinWidth = 0;   //m_pMeter->tenths_to_logical(5.0f, iInstr, 0);
 
-    GmoShape* pShape = new GmoShapeBarline(pBarline, 0, m_nBarlineType, xPos, yTop,
-                                           yBottom,
-                                           thinLineWidth, thickLineWidth, spacing,
-                                           radius, Color(0,0,0), uMinWidth);
-
-    return pShape;
+    return LOMSE_NEW GmoShapeBarline(pBarline, 0, m_nBarlineType, xPos, yTop,
+                               yBottom,
+                               thinLineWidth, thickLineWidth, spacing,
+                               radius, Color(0,0,0), uMinWidth);
 }
 
 

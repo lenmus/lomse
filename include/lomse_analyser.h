@@ -25,6 +25,7 @@
 #include "lomse_ldp_elements.h"
 #include "lomse_relation_builder.h"
 #include "lomse_internal_model.h"       //required to define BeamsBuilder, SlursBuilder
+#include "lomse_im_note.h"              //required for enum EAccidentals
 
 using namespace std;
 
@@ -178,6 +179,7 @@ protected:
 
     //analysis input
     LdpTree* m_pTree;
+    string m_fileLocator;
 
     //inherited values
     int m_curStaff;
@@ -193,7 +195,7 @@ public:
     ~Analyser();
 
     //access to results
-    InternalModel* analyse_tree(LdpTree* tree);
+    InternalModel* analyse_tree(LdpTree* tree, const string& locator);
     ImoObj* analyse_tree_and_get_object(LdpTree* tree);
 
     //analysis
@@ -249,15 +251,27 @@ public:
 
     //access to document being analysed
     inline Document* get_document_being_analysed() { return m_pDoc; }
+    inline const string& get_document_locator() { return m_fileLocator; }
 
     //access to root ImoDocument
     inline void save_root_imo_document(ImoDocument* pDoc) { m_pImoDoc = pDoc; }
     inline ImoDocument* get_root_imo_document() { return m_pImoDoc; }
 
+    //static methods for general use
+    static int ldp_name_to_key_type(const string& value);
+    static int ldp_name_to_clef_type(const string& value);
+    static bool ldp_pitch_to_components(const string& pitch, int *step, int* octave,
+                                        EAccidentals* accidentals);
+
+
 protected:
     ElementAnalyser* new_analyser(ELdpElement type, ImoObj* pAnchor=NULL);
     void delete_relation_builders();
 
+    //auxiliary. for ldp notes analysis
+    static int to_step(const char& letter);
+    static int to_octave(const char& letter);
+    static EAccidentals to_accidentals(const std::string& accidentals);
 };
 
 

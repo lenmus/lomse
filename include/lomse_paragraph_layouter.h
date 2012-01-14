@@ -34,35 +34,79 @@ namespace lomse
 
 //forward declarations
 class ImoContentObj;
+class ImoControl;
 class ImoInlineWrapper;
 class ImoInlineObj;
-class ImoTextBlock;
+class ImoBoxContent;
+class ImoBoxInline;
 class ImoStyles;
 class ImoTextItem;
 class ImoStyle;
 class GraphicModel;
 class GmoBox;
-class Cell;
-class CellWord;
+class Engrouter;
+class ButtonEngrouter;
+class ImageEngrouter;
+class WordEngrouter;
+class ParagraphLayouter;
 
 
 //---------------------------------------------------------------------------------------
-// Abstract container for an atomic item (inline object)
-class Cell
+// helper, to contain information about a paragraph line
+struct LineReferences
+{
+    LUnits lineHeight;
+    LUnits baseline;
+    LUnits textTop;           //mean value
+    LUnits textBottom;        //mean value
+    LUnits middleline;        //mean value
+    LUnits supperLine;        //text top of last engrouter
+    LUnits subLine;           //text bottom of last engrouter
+
+    LineReferences()
+        : lineHeight(0.0f)
+        , baseline(0.0f)
+        , textTop(0.0f)
+        , textBottom(0.0f)
+        , middleline(0.0f)
+        , supperLine(0.0f)
+        , subLine(0.0f)
+    {
+    }
+    LineReferences(LUnits top, LUnits middle, LUnits base, LUnits bottom)
+        : lineHeight(bottom + top)
+        , baseline(base)
+        , textTop(top)
+        , textBottom(bottom)
+        , middleline(middle)
+        , supperLine(top)
+        , subLine(base)
+    {
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
+// Abstract layouter + engraver for an inline object
+class Engrouter
 {
 protected:
     UPoint m_org;           //top left
     USize m_size;           //width, height
-    LUnits m_baseline;      //shift from org
-    ImoObj* m_pCreatorImo;
+    ImoContentObj* m_pCreatorImo;
     LibraryScope& m_libraryScope;
+    ImoStyle* m_pStyle;
+
+    //relative: shift from m_org
+    LineReferences m_refLines;
 
 public:
-    virtual ~Cell() {}
+    virtual ~Engrouter() {}
 
     virtual void measure() = 0;
-    virtual GmoObj* create_gm_object(UPoint pos, LUnits paragraphHeight) = 0;
-    virtual LUnits shift_for_vertical_alignment(LUnits paragraphHeight);
+    virtual GmoObj* create_gm_object(UPoint pos, LineReferences& refs) = 0;
+    virtual LUnits shift_for_vertical_alignment(LineReferences& refs);
 
     //size
     inline LUnits get_width() { return m_size.width; }
@@ -78,31 +122,39 @@ public:
     inline void set_position(const UPoint& pos) { m_org = pos; }
     inline UPoint& get_position() { return m_org; }
 
+    //style
+    inline ImoStyle* get_style() { return m_pStyle; }
+
+    //references
+    inline LineReferences& get_reference_lines() { return m_refLines; }
+    inline LUnits get_line_height() { return m_refLines.lineHeight; }
+    inline LUnits get_base_line() { return m_refLines.baseline; }
+    inline LUnits get_text_top() { return m_refLines.textTop; }
+    inline LUnits get_text_bottom() { return m_refLines.textBottom; }
+    inline LUnits get_middle_line() { return m_refLines.middleline; }
+
+
 protected:
-    Cell(ImoObj* pCreatorImo, LibraryScope& libraryScope)
-        : m_baseline(0.0f)
-        , m_pCreatorImo(pCreatorImo)
-        , m_libraryScope(libraryScope)
-    {
-    }
+    Engrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope);
 };
 
 //---------------------------------------------------------------------------------------
-// Container for other Cell objects
-class CellBox : public Cell
+// Engrouter for Boxes
+class BoxEngrouter : public Engrouter
 {
 protected:
-    std::list<Cell*> m_cells;
+    std::list<Engrouter*> m_engrouters;
 
 public:
-    CellBox(ImoObj* pCreatorImo, LibraryScope& libraryScope)
-        : Cell(pCreatorImo, libraryScope) {}
-    virtual ~CellBox();
+    BoxEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope)
+        : Engrouter(pCreatorImo, libraryScope) {}
+    virtual ~BoxEngrouter();
 
     void measure();
-    GmoObj* create_gm_object(UPoint pos, LUnits paragraphHeight);
+    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
+    void update_measures(LUnits lineHeight);
 
-    std::list<Cell*>& get_cells() { return m_cells; }
+    std::list<Engrouter*>& get_engrouters() { return m_engrouters; }
 
     UPoint get_content_org();
     LUnits get_content_width();
@@ -111,44 +163,59 @@ public:
 
 
 protected:
-    void add_cell_shape(GmoObj* pGmo, GmoBox* pBox);
+    void add_engrouter_shape(GmoObj* pGmo, GmoBox* pBox);
 
 };
 
 //---------------------------------------------------------------------------------------
 // Container for a button
-class CellButton : public Cell
+class ButtonEngrouter : public Engrouter
 {
 public:
-    CellButton(ImoObj* pCreatorImo, LibraryScope& libraryScope)
-        : Cell(pCreatorImo, libraryScope) {}
-    virtual ~CellButton() {}
+    ButtonEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope)
+        : Engrouter(pCreatorImo, libraryScope) {}
+    virtual ~ButtonEngrouter() {}
 
     void measure();
-    GmoObj* create_gm_object(UPoint pos, LUnits paragraphHeight);
+    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
+};
+
+//---------------------------------------------------------------------------------------
+// Container for an image
+class ImageEngrouter : public Engrouter
+{
+public:
+    ImageEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope)
+        : Engrouter(pCreatorImo, libraryScope) {}
+    virtual ~ImageEngrouter() {}
+
+    void measure();
+    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
 };
 
 //---------------------------------------------------------------------------------------
 //Container for a word of text
-class CellWord : public Cell
+class WordEngrouter : public Engrouter
 {
 protected:
     string m_word;
-    ImoStyle* m_pStyle;
     LUnits m_descent;
     LUnits m_ascent;
+    LUnits m_halfLeading;
 
 public:
-    CellWord(ImoObj* pCreatorImo, LibraryScope& libraryScope,
-             const std::string& word, ImoStyle* pStyle)
-        : Cell(pCreatorImo, libraryScope), m_word(word), m_pStyle(pStyle) {}
-    virtual ~CellWord() {}
+    WordEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope,
+                  const std::string& word)
+        : Engrouter(pCreatorImo, libraryScope)
+        , m_word(word)
+    {
+    }
+    virtual ~WordEngrouter() {}
 
     inline const string& get_text() { return m_word; }
-    inline ImoStyle* get_style() { return m_pStyle; }
 
     void measure();
-    GmoObj* create_gm_object(UPoint pos, LUnits paragraphHeight);
+    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
 
     //info
     inline LUnits get_descent() { return m_descent; }
@@ -158,84 +225,82 @@ public:
 
 //---------------------------------------------------------------------------------------
 // Wrapper for inline objs
-class CellInlineWrapper : public Cell
+class InlineWrapperEngrouter : public Engrouter
 {
 protected:
     ImoInlineObj* m_pWrapper;
-    std::list<Cell*> m_cells;
+    std::list<Engrouter*> m_engrouters;
 
 public:
-    CellInlineWrapper(ImoObj* pCreatorImo, LibraryScope& libraryScope);
-    virtual ~CellInlineWrapper() {}
+    InlineWrapperEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope);
+    virtual ~InlineWrapperEngrouter() {}
 
     virtual void measure() = 0;
-    virtual GmoObj* create_gm_object(UPoint pos, LUnits paragraphHeight);
+    virtual GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
 
 protected:
-    LUnits add_cells_to_box(GmoBox* pBox);
-    void add_cell_shape(GmoObj* pGmo, GmoBox* pBox);
+    LUnits add_engrouters_to_box(GmoBox* pBox, LineReferences& refs);
+    void add_engrouter_shape(GmoObj* pGmo, GmoBox* pBox);
 };
 
 //---------------------------------------------------------------------------------------
 // Container for an InlineBox
-class CellInlineBox : public CellInlineWrapper
+class InlineBoxEngrouter : public InlineWrapperEngrouter
 {
 protected:
     ImoInlineWrapper* m_pBox;
 
 public:
-    CellInlineBox(ImoObj* pCreatorImo, LibraryScope& libraryScope);
-    virtual ~CellInlineBox() {}
+    InlineBoxEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope);
+    virtual ~InlineBoxEngrouter() {}
 
     void measure();
-    GmoObj* create_gm_object(UPoint pos, LUnits paragraphHeight);
+    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
 };
 
-//class CellInlineBox : public Cell
-//{
-//protected:
-//    ImoInlineWrapper* m_pBox;
-//    std::list<Cell*> m_cells;
-//
-//public:
-//    CellInlineBox(ImoObj* pCreatorImo, LibraryScope& libraryScope);
-//    virtual ~CellInlineBox() {}
-//
-//    void measure();
-//    GmoObj* create_gm_object(UPoint pos, LUnits paragraphHeight);
-//
-//protected:
-//    LUnits add_cells_to_box(GmoBox* pBox);
-//    void add_cell_shape(GmoObj* pGmo, GmoBox* pBox);
-//};
+
+//----------------------------------------------------------------------------------
+// ControlEngrouter: layout algorithm for a gui control
+class ControlEngrouter : public Engrouter
+{
+protected:
+    ImoControl* m_pControl;
+
+public:
+    ControlEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope);
+    virtual ~ControlEngrouter() {}
+
+    //implementation of Engrouter virtual pure methods
+    void measure();
+    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
+};
 
 
 //---------------------------------------------------------------------------------------
-// CellsCreator: splits paragraph content, creating cells for each atomic content
-class CellsCreator
+// EngroutersCreator: splits paragraph content, creating engrouters for each atomic
+// content object
+class EngroutersCreator
 {
 protected:
-    std::list<Cell*>& m_cells;
+    std::list<Engrouter*>& m_engrouters;
     LibraryScope& m_libraryScope;
     UPoint m_cursor;                //current position. Relative to BoxDocPage
 
 public:
-    CellsCreator(std::list<Cell*>& cells, LibraryScope& libraryScope);
-    virtual ~CellsCreator();
+    EngroutersCreator(std::list<Engrouter*>& engrouters, LibraryScope& libraryScope);
+    virtual ~EngroutersCreator();
 
-    void create_cells(ImoContentObj* pImo);
+    void create_engrouters(ImoInlineObj* pImo);
 
 protected:
-    CellBox* create_wrapper_cellbox_for(ImoContentObj* pImo);
-    void create_and_measure_cells(ImoContentObj* pImo, CellBox* pBox);
-    void layout_cells_in_cellbox_and_measure(CellBox* pBox);
+    BoxEngrouter* create_wrapper_engrouterbox_for(ImoBoxInline* pImo);
+    void create_and_measure_engrouters(ImoBoxInline* pImo, BoxEngrouter* pBox);
+    void layout_engrouters_in_engrouterbox_and_measure(BoxEngrouter* pBox);
 
-    void create_text_item_cells(ImoTextItem* pText);
-    //void create_item_cell(ImoObj* pImo);
-    void measure_cells();
+    void create_text_item_engrouters(ImoTextItem* pText);
+    void measure_engrouters();
 
 };
-
 
 
 //---------------------------------------------------------------------------------------
@@ -244,8 +309,8 @@ class ParagraphLayouter : public Layouter
 {
 protected:
     LibraryScope& m_libraryScope;
-    ImoTextBlock* m_pPara;
-    std::list<Cell*> m_cells;
+    ImoBoxContent* m_pPara;
+    std::list<Engrouter*> m_engrouters;
 
 public:
     ParagraphLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
@@ -257,33 +322,41 @@ public:
     void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
     void prepare_to_start_layout();
 
+    //other
+    inline LineReferences& get_line_refs() { return m_lineRefs; }
+
 protected:
     void page_initializations(GmoBox* pMainBox);
-    void create_cells();
+    void create_engrouters();
 
     bool enough_space_in_box();
-    LUnits add_cell_to_line();
-    void add_cell_shape(Cell* pCell, LUnits height);
+    LUnits add_engrouter_to_line();
+    void add_engrouter_shape(Engrouter* pEngrouter, LUnits height);
 
-    //helper: cells traversing
-    std::list<Cell*>::iterator m_itCells;
-    inline void point_to_first_cell() { m_itCells = m_cells.begin(); }
-    inline bool more_cells() { return m_itCells != m_cells.end(); }
-    inline void next_cell() { ++m_itCells; }
-    inline Cell* get_current_cell() { return *m_itCells; };
+    //helper: engrouters traversing
+    std::list<Engrouter*>::iterator m_itEngrouters;
+    inline void point_to_first_engrouter() { m_itEngrouters = m_engrouters.begin(); }
+    inline bool more_engrouters() { return m_itEngrouters != m_engrouters.end(); }
+    inline void next_engrouter() { ++m_itEngrouters; }
+    inline Engrouter* get_current_engrouter() { return *m_itEngrouters; };
 
     //helper: space in current line
     LUnits m_availableSpace;
-    inline bool space_in_line() { return m_availableSpace > (*m_itCells)->get_width(); }
+    inline bool space_in_line() { return m_availableSpace > (*m_itEngrouters)->get_width(); }
 
     //helper: info about next line to add to paragraph
-    std::list<Cell*>::iterator m_itStart;       //first cell for this line
-    std::list<Cell*>::iterator m_itEnd;         //first cell for next line
-    LUnits m_lineHeight;                        //line height
-    inline void initialize_lines() { m_itStart = m_cells.end(); }
-    inline bool is_line_ready() { return m_itStart != m_cells.end(); }
+    std::list<Engrouter*>::iterator m_itStart;       //first engrouter for this line
+    std::list<Engrouter*>::iterator m_itEnd;         //first engrouter for next line
+    LineReferences m_lineRefs;                       //reference lines
+    LUnits m_lineWidth;
+
+    inline void initialize_lines() { m_itStart = m_engrouters.end(); }
+    inline bool is_line_ready() { return m_itStart != m_engrouters.end(); }
     void prepare_line();
     void add_line();
+    void advance_current_line_space(LUnits left);
+    void initialize_line_references();
+    void update_line_references(LineReferences& engr, LUnits shift, bool fUpdateText);
 
 };
 

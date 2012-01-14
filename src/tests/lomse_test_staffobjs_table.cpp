@@ -109,7 +109,7 @@ SUITE(ColStaffObjsTest)
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content "
             "(score (vers 1.6) (instrument (musicData (n c4 q) (barline simple))))))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -128,7 +128,7 @@ SUITE(ColStaffObjsTest)
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (barline simple))))))" );
         Document doc(m_libraryScope);
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -154,7 +154,7 @@ SUITE(ColStaffObjsTest)
             "(n d4 e) (barline simple) (n e4 w))))))" );
         Document doc(m_libraryScope);
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -196,7 +196,7 @@ SUITE(ColStaffObjsTest)
                 "(n c4 q)(n d4 e.)(n d4 s)(n e4 h)))) ))" );
         Document doc(m_libraryScope);
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -238,7 +238,7 @@ SUITE(ColStaffObjsTest)
             "(score (vers 1.6) (instrument (musicData"
             "(n c4 q)(n d4 e.)(n d4 s)(goBack start)(n e4 h)(n g4 q)))) ))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -287,7 +287,7 @@ SUITE(ColStaffObjsTest)
             "(n c4 q)(n d4 e.)(n e4 s)(barline)"
             "(n f4 q)(n g4 e.)(n a4 s)(goBack start)(n b4 q)(n c5 q)))) ))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -353,7 +353,7 @@ SUITE(ColStaffObjsTest)
             "(score (vers 1.6) (instrument (musicData "
             "(n c4 q)(n d4 e.)(n d4 s)(goBack start)(n e4 q)(goFwd end)(barline)))) ))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -396,7 +396,7 @@ SUITE(ColStaffObjsTest)
             "(score (vers 1.6) (instrument (musicData "
             "(n c4 q p2)(n d4 e.)(n d4 s p3)(n e4 h)))) ))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -433,7 +433,7 @@ SUITE(ColStaffObjsTest)
             "(score (vers 1.6) (instrument (musicData "
             "(n c4 q v1)(n d4 e.)(n d4 s v3)(n e4 h)))) ))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -471,7 +471,7 @@ SUITE(ColStaffObjsTest)
             "(score (vers 1.6) (instrument (musicData "
             "(clef G)(n c4 q v2)(n d4 e.)(n d4 s v3)(n e4 h)))) ))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -514,7 +514,7 @@ SUITE(ColStaffObjsTest)
             "(clef G p1)(clef F4 p2)(key D)(n c4 q v2 p1)(n d4 e.)"
             "(n d4 s v3 p2)(n e4 h)))) ))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -569,7 +569,7 @@ SUITE(ColStaffObjsTest)
             "(clef G p1)(clef F4 p2)(key D)(time 2 4)(n c4 q v2 p1)"
             "(n d4 e.)(n d4 s v3 p2)(n e4 h)))) ))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -605,7 +605,7 @@ SUITE(ColStaffObjsTest)
             "(score (vers 1.6) (instrument (musicData "
             "(clef G)(time 3 4)(n c4 q)(barline)(n d4 e.)(n d4 s)) )) ))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -653,7 +653,7 @@ SUITE(ColStaffObjsTest)
                         "(goBack h)(n c3 q p2)(n c3 e)(clef G p2)(clef F4 p2)"
                         "(n c3 e)(barline)))  )))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -857,7 +857,7 @@ SUITE(ColStaffObjsTest)
                         "(instrument (musicData (clef G)(key C)"
                         "(n f4 q)(text \"Hello world\")(barline)))  )))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -901,7 +901,7 @@ SUITE(ColStaffObjsTest)
             "(musicData (clef G p1)(clef F4 p2)(key D)(n c4 q v2 p1)(n d4 e.)"
             "(n d4 s v3 p2)(n e4 h)))) ))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -956,7 +956,7 @@ SUITE(ColStaffObjsTest)
             "(clef G)(chord (n c4 q)(n e4 q)(n g4 q))"
             "))) ))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -1003,7 +1003,7 @@ SUITE(ColStaffObjsTest)
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content (score "
             "(vers 1.6) (instrument )) ))" );
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
@@ -1034,7 +1034,7 @@ SUITE(ColStaffObjsTest)
             "(n f2 h p2)(barline)"
             ")) )))" );
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;

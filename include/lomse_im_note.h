@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_IM_NOTE_H__        //to avoid nested includes
 #define __LOMSE_IM_NOTE_H__
@@ -30,6 +30,7 @@ namespace lomse
 {
 
 
+//---------------------------------------------------------------------------------------
 //noteheads
 enum ENoteHeads
 {
@@ -41,24 +42,8 @@ enum ENoteHeads
     k_notehead_cross,              //Cross (for percussion)
 };
 
-//note/rest type
-enum ENoteType
-{
-    k_unknown_notetype = -1,
-    k_longa = 0,
-    k_breve = 1,
-    k_whole = 2,
-    k_half = 3,
-    k_quarter = 4,
-    k_eighth = 5,
-    k_16th = 6,
-    k_32th = 7,
-    k_64th = 8,
-    k_128th = 9,
-    k_256th = 10,
-};
-
-//stemp
+//---------------------------------------------------------------------------------------
+//stem
 enum ENoteStem
 {
     k_stem_default = 0,
@@ -68,11 +53,14 @@ enum ENoteStem
     k_stem_none,
 };
 
+//---------------------------------------------------------------------------------------
+// actaul accidentals are, normally, not specified in LDP. Therefore, note pitch is
+// computed from notated accidentals. But for this, it is necessary to know when it
+// is specified and when not.
+#define k_acc_not_computed      10000.0f    //an absurd value
 
 
-
-
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoNoteRest : public ImoStaffObj
 {
 protected:
@@ -109,7 +97,7 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoRest : public ImoNoteRest
 {
 protected:
@@ -121,13 +109,14 @@ public:
 
 };
 
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class ImoNote : public ImoNoteRest
 {
 protected:
     int     m_step;
     int     m_octave;
-    int     m_accidentals;
+    EAccidentals m_notated_acc;
+    float   m_actual_acc;
     int     m_stemDirection;
     ImoTie* m_pTieNext;
     ImoTie* m_pTiePrev;
@@ -135,7 +124,7 @@ protected:
 
     friend class ImFactory;
     ImoNote();
-    ImoNote(int step, int octave, int noteType, int accidentals=0,
+    ImoNote(int step, int octave, int noteType, EAccidentals accidentals=k_no_accidentals,
             int dots=0, int staff=0, int voice=0, int stem=k_stem_default);
 
 public:
@@ -144,17 +133,29 @@ public:
     //pitch
     inline int get_step() { return m_step; }
     inline int get_octave() { return m_octave; }
-    inline int get_accidentals() { return m_accidentals; }
+    inline EAccidentals get_notated_accidentals() { return m_notated_acc; }
+    inline float get_actual_accidentals() { return m_actual_acc; }
     inline bool is_pitch_defined() { return m_step != k_no_pitch; }
     inline bool accidentals_are_cautionary() { return false; }  //TODO
     inline void set_step(int step) { m_step = step; }
     inline void set_octave(int octave) { m_octave = octave; }
-    inline void set_accidentals(int accidentals) { m_accidentals = accidentals; }
-    inline void set_pitch(int step, int octave, int accidentals) {
+    inline void set_notated_accidentals(EAccidentals accidentals) { m_notated_acc = accidentals; }
+    inline void set_notated_pitch(int step, int octave, EAccidentals accidentals)
+    {
         m_step = step;
         m_octave = octave;
-        m_accidentals = accidentals;
+        m_notated_acc = accidentals;
+        m_actual_acc = k_acc_not_computed;
     }
+    void set_actual_accidentals(float value) { m_actual_acc = value; }
+    void set_pitch(FPitch fp) {
+        m_step = fp.step();
+        m_octave = fp.octave();
+        m_notated_acc = fp.accidentals();
+        m_actual_acc = float(fp.num_accidentals());
+    }
+
+
 
     //ties
     inline ImoTie* get_tie_next() { return m_pTieNext; }
@@ -180,6 +181,12 @@ public:
     ////in chord
     //inline void set_in_chord(bool value) { m_inChord = value; }
 
+    //pitch. Only valid when m_actual_acc is computed
+    FPitch get_fpitch();            //FPitch. Ignores fractional part of actual accidentals
+    float get_frequency();          //frequecy, in Herzs
+    MidiPitch get_midi_pitch();     //MidiPitch
+    int get_midi_bend();            //Midi bend (two bytes)
+    float get_cents();              //deviation from diatonic pitch implied by step and octave, in cents.
 
 };
 

@@ -20,6 +20,7 @@
 
 #include "lomse_pitch.h"
 #include "lomse_score_utilities.h"
+#include "lomse_analyser.h"
 
 #include <sstream>
 using namespace std;
@@ -33,15 +34,26 @@ static const string m_sOctave[13] = { "0",  "1", "2", "3", "4", "5", "6",
                                       "7", "8", "9", "10", "11", "12"  };
 
 
-////interval names. The index in this array is the FInterval value
-//string m_sFIntvalCode[41] = {
-//    "p1", "a1", "no", "no", "d2", "m2", "M2", "a2",
-//    "no", "no", "d3", "m3", "M3", "a3", "no", "no",
-//    "d4", "p4", "a4", "no", "no", "no", "d5", "p5",
-//    "a5", "no", "no", "d6", "m6", "M6", "a6", "no",
-//    "no", "d7", "m7", "M7", "a7", "no", "no", "d8",
-//    "p8"
-//};
+//=======================================================================================
+// implementation of global methods
+//=======================================================================================
+int accidentals_to_number(EAccidentals accidentals)
+{
+    switch(accidentals)
+    {
+        case k_invalid_accidentals:     return 0;   break;
+        case k_no_accidentals:          return 0;   break;
+        case k_sharp:                   return +1;  break;
+        case k_sharp_sharp:             return +2;  break;
+        case k_double_sharp:            return +2;  break;
+        case k_natural_sharp:           return +1;  break;
+        case k_flat:                    return -1;  break;
+        case k_flat_flat:               return -2;  break;
+        case k_natural_flat:            return -1;  break;
+        case k_natural:                 return 0;   break;
+        default:                        return 0;   break;
+    }
+}
 
 
 //=======================================================================================
@@ -122,75 +134,28 @@ bool FPitch::is_valid()
     return !(x == 6 || x == 12 || x == 23 || x == 29 || x == 35);
 }
 
-////---------------------------------------------------------------------------------------
-//FPitch::FPitch(const string& sNote)
-//{
-//    // sNote must be letter followed by a number (i.e.: "c4" ) optionally precedeed by
-//    // accidentals (i.e.: "++c4")
-//    // It is assumed that sNote is trimmed (no spaces before or after data)
-//    // and lower case.
-//
-//    //split the string: accidentals and name
-//    string sAccidentals;
-//    switch (sNote.length()) {
-//        case 2:
-//            sAccidentals = "";
-//            break;
-//        case 3:
-//            sAccidentals = sNote.substr(0, 1);
-//            sNote = sNote.substr(1, 2);
-//            break;
-//        case 4:
-//            sAccidentals = sNote.substr(0, 2);
-//            sNote = sNote.substr(2, 2);
-//            break;
-//        default:
-//            wxLogMessage("[FPitch constructor] Bad note name '%s'", sNote.c_str());
-//            return lmC4_FPITCH;
-//    }
-//
-//    //compute step
-//    wxChar sStep = sNote.at(0);
-//    int nStep;
-//    if (sStep == _T('c')) nStep = 0;
-//    else if (sStep == _T('d')) nStep =  1;
-//    else if (sStep == _T('e')) nStep =  2;
-//    else if (sStep == _T('f')) nStep =  3;
-//    else if (sStep == _T('g')) nStep =  4;
-//    else if (sStep == _T('a')) nStep =  5;
-//    else if (sStep == _T('b')) nStep =  6;
-//    else {
-//        wxLogMessage("[FPitch constructor] Bad note name '%s'", sNote.c_str());
-//        return lmC4_FPITCH;
-//    }
-//
-//    //compute octave
-//    string sOctave = sNote.substr(1, 1);
-//    long nOctave;
-//    if (!sOctave.ToLong(&nOctave)) {
-//        wxLogMessage("[FPitch constructor] Bad note name '%s'", sNote.c_str());
-//        return lmC4_FPITCH;
-//    }
-//
-//    //compute accidentals
-//    int nAccidentals;
-//    if (sAccidentals == ""))          nAccidentals = 0;
-//    else if (sAccidentals == "-"))    nAccidentals = -1;
-//    else if (sAccidentals == "--"))   nAccidentals = -2;
-//    else if (sAccidentals == "+"))    nAccidentals = 1;
-//    else if (sAccidentals == "++"))   nAccidentals = 2;
-//    else if (sAccidentals == "x"))    nAccidentals = 2;
-//    else {
-//        wxLogMessage("[FPitch constructor] Bad note name '%s'", sNote.c_str());
-//        return lmC4_FPITCH;
-//    }
-//
-//    create(nStep, nOctave, nAccidentals);
-//
-//}
+//---------------------------------------------------------------------------------------
+FPitch::FPitch(const string& note)
+{
+    // 'note' must be a note name in ldp format: a letter followed by a number
+    // (i.e.: "c4" ) optionally precedeed by accidentals (i.e.: "++c4")
+    // It is assumed that 'note' is trimmed (no spaces before or after data)
+    // and lower case.
+
+    int step, octave;
+    EAccidentals accidentals;
+    if (Analyser::ldp_pitch_to_components(note, &step, &octave, &accidentals))
+        //TODO throw ?
+        create(k_step_C, k_octave_4, 0);        //error
+    else
+    {
+        int acc = accidentals_to_number(accidentals);
+        create(step, octave, acc);
+    }
+}
 
 //---------------------------------------------------------------------------------------
-int FPitch::accidentals()
+int FPitch::num_accidentals()
 {
     //  Accidentals extraction
     //  Note (n):        0=1-40, 1=41-80, 2=81-120, m=(m*40)+1 - (m+1)*40
@@ -207,13 +172,28 @@ int FPitch::accidentals()
 }
 
 //---------------------------------------------------------------------------------------
+EAccidentals FPitch::accidentals()
+{
+    int acc = num_accidentals();
+    switch(acc)
+    {
+        case -2:    return k_flat_flat;
+        case -1:    return k_flat;
+        case 0:     return k_no_accidentals;
+        case 1:     return k_sharp;
+        case 2:     return k_double_sharp;
+        default:    return k_invalid_accidentals;
+    }
+}
+
+//---------------------------------------------------------------------------------------
 string FPitch::to_abs_ldp_name()
 {
     // The absolute LDP none name is returned
     // If note is invalid (more than two accidentals) returns empty string
 
     string sAnswer;
-    switch(accidentals()) {
+    switch(num_accidentals()) {
         case -2: sAnswer ="--"; break;
         case -1: sAnswer ="-"; break;
         case 0:  sAnswer =""; break;
@@ -234,6 +214,9 @@ string FPitch::to_rel_ldp_name(EKeySignature nKey)
     // For instace F4 sharp in C major will return "+f4" but in D major
     // will return "f4" as the accidental is implied by the key signature
 
+    if (m_fp < 0)
+        return "*";
+
     // Get the accidentals implied by the key signature.
     // Each element of the array refers to one note: 0=Do, 1=Re, 2=Mi, 3=Fa, ... , 6=Si
     // and its value can be one of: 0=no accidental, -1 = a flat, 1 = a sharp
@@ -242,8 +225,9 @@ string FPitch::to_rel_ldp_name(EKeySignature nKey)
 
     //compute note accidentals
     string sAnswer;
-    int nAbsAcc = accidentals();
-    switch(nAbsAcc) {
+    int nAbsAcc = num_accidentals();
+    switch(nAbsAcc)
+    {
         case -2: sAnswer ="--"; break;
         case -1: sAnswer ="-"; break;
         case 0:  sAnswer =""; break;
@@ -272,7 +256,48 @@ string FPitch::to_rel_ldp_name(EKeySignature nKey)
     return sAnswer;
 }
 
-////---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+EAccidentals FPitch::notated_accidentals_for(EKeySignature key)
+{
+    int accidentals[7];
+    get_accidentals_for_key(key, accidentals);
+
+    int step = this->step();
+    int keyAcc = accidentals[step];
+    int numAcc = num_accidentals();
+    if (keyAcc == 0)
+    {
+        switch(numAcc)
+        {
+            case -2:    return k_flat_flat;
+            case -1:    return k_flat;
+            case 0:     return k_no_accidentals;
+            case 1:     return k_sharp;
+            case 2:     return k_double_sharp;
+            default:    return k_invalid_accidentals;
+        }
+    }
+
+    else if (keyAcc == numAcc)
+        return k_no_accidentals;
+
+    else if (keyAcc == -2 && numAcc == -1)
+        return k_natural_flat;
+
+    else if (keyAcc == -1 && numAcc == 0)
+        return k_natural;
+
+    else if (keyAcc == 2 && numAcc == 1)
+        return k_natural_sharp;
+
+    else if (keyAcc == 1 && numAcc == 0)
+        return k_natural;
+
+    else
+        return k_invalid_accidentals;
+}
+
+//---------------------------------------------------------------------------------------
 MidiPitch FPitch::to_midi_pitch()
 {
     MidiPitch nMidi = MidiPitch( (octave()+1) * 12 );
@@ -302,7 +327,7 @@ MidiPitch FPitch::to_midi_pitch()
             break;
     }
 
-    return nMidi + accidentals();
+    return nMidi + num_accidentals();
 
 }
 
@@ -315,7 +340,7 @@ DiatonicPitch FPitch::to_diatonic_pitch()
 ////---------------------------------------------------------------------------------------
 //AbsolutePitch FPitch::to_APitch()
 //{
-//    return AbsolutePitch(to_DiatonicPitch(), accidentals());
+//    return AbsolutePitch(to_DiatonicPitch(), num_accidentals());
 //}
 //
 ////---------------------------------------------------------------------------------------
@@ -347,7 +372,7 @@ FPitch FPitch::add_semitone(bool fUseSharps)
 
     // extract components
     int nStep = step();
-    int nAcc = accidentals();
+    int nAcc = num_accidentals();
     int nOctave = octave();
 
     //Determine what type of accidentals to use for semitones: flats or sharps
@@ -409,6 +434,15 @@ FPitch FPitch::add_semitone(bool fUseSharps)
     return *this;
 }
 
+//---------------------------------------------------------------------------------------
+bool FPitch::is_natural_note_for(EKeySignature nKey)
+{
+    int keyAccidentals[7];
+    get_accidentals_for_key(nKey, keyAccidentals);
+    int noteAcc = num_accidentals();
+    return noteAcc == keyAccidentals[step()];
+}
+
 ////---------------------------------------------------------------------------------------
 // // Interval step2 - step1
 //FPitch FPitchStepsInterval(int nStep1, int nStep2, EKeySignature nKey)
@@ -431,7 +465,7 @@ FPitch FPitch::add_semitone(bool fUseSharps)
 //// returns the note letter (a .. g) corresponding to the step of the note, in FPitch notation
 //string FPitch_GetEnglishNoteName(FPitch fp)
 //{
-//    return m_sNoteName[FPitch_Step(fp)].c_str();
+//    return m_sNoteName[fp.step()].c_str();
 //}
 //
 
@@ -669,7 +703,7 @@ string MidiPitch::get_ldp_name()
 }
 
 //---------------------------------------------------------------------------------------
-bool MidiPitch::is_natural_note(EKeySignature nKey)
+bool MidiPitch::is_natural_note_for(EKeySignature nKey)
 {
     // Returns true if the Midi note is natural for the key signature scale
 
@@ -742,7 +776,7 @@ bool MidiPitch::is_natural_note(EKeySignature nKey)
             //        C D EF G A B
             sScale = "010110101011";   break;
         default:
-            throw runtime_error( "[MidiPitch::is_natural_note]. Invalid key signature" );
+            throw runtime_error( "[MidiPitch::is_natural_note_for]. Invalid key signature" );
     }
 
     int nRemainder = m_pitch % 12;      //nRemainder goes from 0 (Do) to 11 (Si)

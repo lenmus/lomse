@@ -20,11 +20,13 @@
 
 #include "lomse_reader.h"
 
+#include "lomse_file_system.h"
+
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-
 using namespace std;
+
 
 namespace lomse
 {
@@ -32,26 +34,24 @@ namespace lomse
 //=======================================================================================
 // LdpFileReader implementation
 //=======================================================================================
-
-LdpFileReader::LdpFileReader(const std::string& fullFilename)
+LdpFileReader::LdpFileReader(const std::string& filelocator)
     : LdpReader()
-    , m_file(fullFilename.c_str())
-    , m_filename(fullFilename)
+    , m_file( FileSystem::open_input_stream(filelocator) )
+    , m_locator(filelocator)
     , m_numLine(1)
     , m_repeating_last_char(false)
 {
-    if(!m_file.is_open())
-    {
-        stringstream s;
-        s << "File not found: \"" << fullFilename << "\"";
-        throw std::invalid_argument(s.str());
-    }
+}
+//---------------------------------------------------------------------------------------
+LdpFileReader::~LdpFileReader()
+{
+    delete m_file;
 }
 
 //---------------------------------------------------------------------------------------
 char LdpFileReader::get_next_char()
 {
-    char ch = m_file.get();
+    char ch = m_file->get_char();
     if (!m_repeating_last_char && ch == 0x0a)
         m_numLine++;
     m_repeating_last_char = false;
@@ -62,20 +62,21 @@ char LdpFileReader::get_next_char()
 void LdpFileReader::repeat_last_char()
 {
     m_repeating_last_char = true;
-    m_file.unget();
+    m_file->unget();
 }
 
 //---------------------------------------------------------------------------------------
 bool LdpFileReader::is_ready()
 {
-    return m_file.is_open();
+    return m_file->is_open();
 }
 
 //---------------------------------------------------------------------------------------
 bool LdpFileReader::end_of_data()
 {
-    return m_file.eof();
+    return m_file->eof();
 }
+
 
 
 

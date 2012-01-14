@@ -27,6 +27,7 @@
 #include "lomse_calligrapher.h"
 
 #include "lomse_font_storage.h"
+#include "lomse_renderer.h"
 #include "utf8.h"
 #include <vector>
 
@@ -34,6 +35,8 @@ using namespace agg;
 
 namespace lomse
 {
+
+extern LUnits pt_to_LUnits(float pt);
 
 //---------------------------------------------------------------------------------------
 // Calligrapher implementation
@@ -175,7 +178,7 @@ LUnits TextMeter::get_ascender()
     if (!m_pFonts->is_font_valid())
         return 0.0f;
     else
-        return LUnits( m_pFonts->get_ascender() / m_scale );
+        return pt_to_LUnits( float(m_pFonts->get_ascender()) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -184,7 +187,7 @@ LUnits TextMeter::get_descender()
     if (!m_pFonts->is_font_valid())
         return 0.0f;
     else
-        return LUnits( m_pFonts->get_descender() / m_scale );
+        return pt_to_LUnits( float(m_pFonts->get_descender()) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -193,7 +196,7 @@ LUnits TextMeter::get_font_height()
     if (!m_pFonts->is_font_valid())
         return 0.0f;
     else
-        return LUnits( m_pFonts->get_font_height() / m_scale );
+        return pt_to_LUnits( float(m_pFonts->get_font_height_in_points()) );
 }
 
 //---------------------------------------------------------------------------------------

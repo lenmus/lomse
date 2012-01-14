@@ -177,9 +177,9 @@ SUITE(SystemLayouterTest)
     TEST_FIXTURE(SystemLayouterTestFixture, ColumnStartPosition_FirstCol)
     {
         ScoreMeter meter(1, 1, 150.0f);
-        MyColumnStorage1* pStorage0 = new MyColumnStorage1(0.0f, 1800.0f, 500.0f);
+        MyColumnStorage1* pStorage0 = LOMSE_NEW MyColumnStorage1(0.0f, 1800.0f, 500.0f);
         MyColumnLayouter colLyt0(m_libraryScope, &meter, pStorage0);
-        MyColumnStorage1* pStorage1 = new MyColumnStorage1(200, 1200.0f, 400.0f);
+        MyColumnStorage1* pStorage1 = LOMSE_NEW MyColumnStorage1(200, 1200.0f, 400.0f);
         MyColumnLayouter colLyt1(m_libraryScope, &meter, pStorage1);
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
@@ -203,9 +203,9 @@ SUITE(SystemLayouterTest)
         //second column has start hook, but lower than first column end hook.
 
         ScoreMeter meter(1, 1, 150.0f);
-        MyColumnStorage1* pStorage0 = new MyColumnStorage1(0.0f, 1800.0f, 500.0f);
+        MyColumnStorage1* pStorage0 = LOMSE_NEW MyColumnStorage1(0.0f, 1800.0f, 500.0f);
         MyColumnLayouter colLyt0(m_libraryScope, &meter, pStorage0);
-        MyColumnStorage1* pStorage1 = new MyColumnStorage1(200.0f, 1200.0f, 400.0f);
+        MyColumnStorage1* pStorage1 = LOMSE_NEW MyColumnStorage1(200.0f, 1200.0f, 400.0f);
         MyColumnLayouter colLyt1(m_libraryScope, &meter, pStorage1);
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
@@ -229,9 +229,9 @@ SUITE(SystemLayouterTest)
         //second column has start hook, greater than first column end hook.
 
         ScoreMeter meter(1, 1, 150.0f);
-        MyColumnStorage1* pStorage0 = new MyColumnStorage1(0.0f, 1800.0f, 500.0f);
+        MyColumnStorage1* pStorage0 = LOMSE_NEW MyColumnStorage1(0.0f, 1800.0f, 500.0f);
         MyColumnLayouter colLyt0(m_libraryScope, &meter, pStorage0);
-        MyColumnStorage1* pStorage1 = new MyColumnStorage1(850.0f, 1200.0f, 400.0f);
+        MyColumnStorage1* pStorage1 = LOMSE_NEW MyColumnStorage1(850.0f, 1200.0f, 400.0f);
         MyColumnLayouter colLyt1(m_libraryScope, &meter, pStorage1);
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
@@ -259,11 +259,11 @@ SUITE(SystemLayouterTest)
         ScoreMeter meter(1, 1, 150.0f);
         MyColumnStorage1* pStorage0
             //                     x0    sfs    xs    xa     xr       xv       xf       barline
-            = new MyColumnStorage1(0.0f, 20.0f, 20.0, 20.0f, 1800.0f, 1800.0f, 2300.0f, false);
+            = LOMSE_NEW MyColumnStorage1(0.0f, 20.0f, 20.0, 20.0f, 1800.0f, 1800.0f, 2300.0f, false);
         MyColumnLayouter colLyt0(m_libraryScope, &meter, pStorage0);
         MyColumnStorage1* pStorage1
             //                     x0    sfs   xs     xa      xr       xv       xf       barline
-            = new MyColumnStorage1(0.0f, 0.0f, 0.0f,  200.0f, 1200.0f, 1300.0f, 1600.0f, false);
+            = LOMSE_NEW MyColumnStorage1(0.0f, 0.0f, 0.0f,  200.0f, 1200.0f, 1300.0f, 1600.0f, false);
         MyColumnLayouter colLyt1(m_libraryScope, &meter, pStorage1);
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
@@ -290,11 +290,11 @@ SUITE(SystemLayouterTest)
         ScoreMeter meter(1, 1, 150.0f);
         MyColumnStorage1* pStorage0
             //                     x0    sfs    xs    xa     xr       xv       xf       barline
-            = new MyColumnStorage1(0.0f, 20.0f, 20.0, 20.0f, 1800.0f, 1800.0f, 2300.0f, false);
+            = LOMSE_NEW MyColumnStorage1(0.0f, 20.0f, 20.0, 20.0f, 1800.0f, 1800.0f, 2300.0f, false);
         MyColumnLayouter colLyt0(m_libraryScope, &meter, pStorage0);
         MyColumnStorage1* pStorage1
             //                     x0    sfs   xs     xa      xr       xv       xf       barline
-            = new MyColumnStorage1(0.0f, 0.0f, 0.0f,  200.0f, 1200.0f, 1300.0f, 1600.0f, false);
+            = LOMSE_NEW MyColumnStorage1(0.0f, 0.0f, 0.0f,  200.0f, 1200.0f, 1300.0f, 1600.0f, false);
 
         MyColumnLayouter colLyt1(m_libraryScope, &meter, pStorage1);
         std::vector<ColumnLayouter*> colLayouters;
@@ -323,11 +323,11 @@ SUITE(SystemLayouterTest)
         ScoreMeter meter(1, 1, 150.0f);
         MyColumnStorage1* pStorage0
             //                     x0    sfs    xs    xa     xr       xv       xf       barline
-            = new MyColumnStorage1(0.0f, 20.0f, 20.0, 20.0f, 1800.0f, 1800.0f, 2000.0f, false);
+            = LOMSE_NEW MyColumnStorage1(0.0f, 20.0f, 20.0, 20.0f, 1800.0f, 1800.0f, 2000.0f, false);
         MyColumnLayouter colLyt0(m_libraryScope, &meter, pStorage0);
         MyColumnStorage1* pStorage1
             //                     x0    sfs   xs     xa      xr       xv       xf       barline
-            = new MyColumnStorage1(0.0f, 0.0f, 0.0f,  300.0f, 1200.0f, 1300.0f, 1600.0f, false);
+            = LOMSE_NEW MyColumnStorage1(0.0f, 0.0f, 0.0f,  300.0f, 1200.0f, 1300.0f, 1600.0f, false);
         MyColumnLayouter colLyt1(m_libraryScope, &meter, pStorage1);
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
@@ -355,9 +355,9 @@ SUITE(SystemLayouterTest)
     TEST_FIXTURE(SystemLayouterTestFixture, RedistributeSpace_OccupyAllWhenFreeSpace)
     {
         ScoreMeter meter(1, 1, 150.0f);
-        MyColumnStorage1* pStorage0 = new MyColumnStorage1(0.0f, 1800.0f, 500.0f);
+        MyColumnStorage1* pStorage0 = LOMSE_NEW MyColumnStorage1(0.0f, 1800.0f, 500.0f);
         MyColumnLayouter colLyt0(m_libraryScope, &meter, pStorage0);
-        MyColumnStorage1* pStorage1 = new MyColumnStorage1(850.0f, 1550.0f, 400.0f);
+        MyColumnStorage1* pStorage1 = LOMSE_NEW MyColumnStorage1(850.0f, 1550.0f, 400.0f);
         MyColumnLayouter colLyt1(m_libraryScope, &meter, pStorage1);
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
@@ -385,9 +385,9 @@ SUITE(SystemLayouterTest)
     TEST_FIXTURE(SystemLayouterTestFixture, RedistributeSpace_DoesNothingWhenNoSpace)
     {
         ScoreMeter meter(1, 1, 150.0f);
-        MyColumnStorage1* pStorage0 = new MyColumnStorage1(0.0f, 1800.0f, 500.0f);
+        MyColumnStorage1* pStorage0 = LOMSE_NEW MyColumnStorage1(0.0f, 1800.0f, 500.0f);
         MyColumnLayouter colLyt0(m_libraryScope, &meter, pStorage0);
-        MyColumnStorage1* pStorage1 = new MyColumnStorage1(850.0f, 1550.0f, 400.0f);
+        MyColumnStorage1* pStorage1 = LOMSE_NEW MyColumnStorage1(850.0f, 1550.0f, 400.0f);
         MyColumnLayouter colLyt1(m_libraryScope, &meter, pStorage1);
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);

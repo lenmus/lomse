@@ -28,8 +28,12 @@
 #include "agg_math_stroke.h"    //line_cap_e & line_join_e
 #include "agg_trans_affine.h"   //trans_affine
 #include "lomse_shape_base.h"   //enums ELineEdge, ...
+#include "lomse_agg_types.h"    //RenderingBuffer
+#include "lomse_gm_basic.h"     //for GmoObj::k_max
+#include "lomse_path_attributes.h"
 
 #include <string>
+#include <bitset>
 using namespace std;
 
 using namespace agg;
@@ -58,13 +62,8 @@ enum ERenderOptions
 //---------------------------------------------------------------------------------------
 struct RenderOptions
 {
-    //for debug: draw a border around boxes
-    bool draw_box_doc_page_content_flag;    //draw bounds for page content box
-    bool draw_box_container_flag;           //draw bounds for BoxContainer/BoxContent
-    bool draw_box_system_flag;              //draw bounds for systems
-    bool draw_box_slice_flag;               //draw bounds for slices
-    bool draw_box_slice_instr_flag;         //draw bounds for SliceInstr
-    bool draw_box_inline_flag;              //draw bounds for InlineBox
+    //for debug: draw a box around boxes of selected types
+    bitset<GmoObj::k_max> boxes;
 
     //bool g_fDrawBoundsShapes;           //draw bound rectangles for non boxes
     //bool g_fDrawSelRect;    //draw selection rectangles around staff objects
@@ -89,19 +88,31 @@ struct RenderOptions
     bool cast_shadow_flag;
 
     RenderOptions()
-        : draw_box_doc_page_content_flag(false)
-        , draw_box_container_flag(false)
-        , draw_box_system_flag(false)
-        , draw_box_slice_flag(false)
-        , draw_box_slice_instr_flag(false)
-        , draw_box_inline_flag(false)
-        , scale(1.0)
+        : scale(1.0)
         , background_color(127, 127, 127)   //grey
         , highlighted_color(255,0,0)        //red
         , selected_color(0,0,255)           //blue
         , page_border_flag(true)
         , cast_shadow_flag(true)
-    {}
+    {
+        boxes.reset();
+    }
+
+    void reset_boxes_to_draw()
+    {
+        boxes.reset();
+    }
+
+    void draw_box_for(int type)
+    {
+        boxes[type] = true;
+    }
+
+    bool must_draw_box_for(int type)
+    {
+        return boxes[type];
+    }
+
 
 };
 
@@ -120,11 +131,51 @@ struct RenderOptions
     //-------------------------------------------------------------------------
     enum ETextAlignment
     {
-        k_align_left,
+        k_align_left = 0,
         k_align_right,
         k_align_center,
         k_align_top = k_align_right,
         k_align_bottom = k_align_left
+    };
+
+    //-------------------------------------------------------------------------
+    enum EBlendMode
+    {
+        k_blend_alpha       = agg::end_of_comp_op_e,
+        k_blend_clear       = agg::comp_op_clear,
+        k_blend_src         = agg::comp_op_src,
+        k_blend_dst         = agg::comp_op_dst,
+        k_blend_src_over    = agg::comp_op_src_over,
+        k_blend_dst_over    = agg::comp_op_dst_over,
+        k_blend_src_in      = agg::comp_op_src_in,
+        k_blend_dst_in      = agg::comp_op_dst_in,
+        k_blend_src_out     = agg::comp_op_src_out,
+        k_blend_dst_out     = agg::comp_op_dst_out,
+        k_blend_src_atop    = agg::comp_op_src_atop,
+        k_blend_dst_atop    = agg::comp_op_dst_atop,
+        k_blend_xor         = agg::comp_op_xor,
+        k_blend_plus        = agg::comp_op_plus,
+        k_blend_minus       = agg::comp_op_minus,
+        k_blend_multiply    = agg::comp_op_multiply,
+        k_blend_screen      = agg::comp_op_screen,
+        k_blend_overlay     = agg::comp_op_overlay,
+        k_blend_darken      = agg::comp_op_darken,
+        k_blend_lighten     = agg::comp_op_lighten,
+        k_blend_color_dodge = agg::comp_op_color_dodge,
+        k_blend_color_burn  = agg::comp_op_color_burn,
+        k_blend_hard_light  = agg::comp_op_hard_light,
+        k_blend_soft_light  = agg::comp_op_soft_light,
+        k_blend_difference  = agg::comp_op_difference,
+        k_blend_exclusion   = agg::comp_op_exclusion,
+        k_blend_contrast    = agg::comp_op_contrast,
+    };
+
+    //-------------------------------------------------------------------------
+    enum EResamplingQuality
+    {
+        k_quality_low = 0,  ///uses a nearest-neighbour algorithm
+        k_quality_medium,   //bilinear, for upsampling and area-averaging for downsampling
+        k_quality_high,     //bicubic, for upsampling and area-averaging for downsampling
     };
 
 
@@ -204,6 +255,17 @@ public:
     virtual int draw_text(double x, double y, const std::string& str) = 0;
     virtual void draw_glyph(double x, double y, unsigned int ch) = 0;
 
+    //copy/blend a bitmap
+    virtual void copy_bitmap(RenderingBuffer& img, UPoint pos) = 0;
+    virtual void copy_bitmap(RenderingBuffer& bmap,
+                             Pixels srcX1, Pixels srcY1, Pixels srcX2, Pixels srcY2,
+                             UPoint dest) = 0;
+    virtual void draw_bitmap(RenderingBuffer& bmap, bool hasAlpha,
+                             Pixels srcX1, Pixels srcY1, Pixels srcX2, Pixels srcY2,
+                             LUnits dstX1, LUnits dstY1, LUnits dstX2, LUnits dstY2,
+                             EResamplingQuality resamplingMode,
+                             double alpha=1.0) = 0;
+
     // Attribute setting functions.
     virtual void fill(Color color) = 0;
     virtual void stroke(Color color) = 0;
@@ -216,15 +278,16 @@ public:
     virtual void line_join(line_join_e join) = 0;
     virtual void line_cap(line_cap_e cap) = 0;
     virtual void miter_limit(double ml) = 0;
+    virtual void fill_linear_gradient(LUnits x1, LUnits y1, LUnits x2, LUnits y2) = 0;
+    virtual void gradient_color(Color c1, Color c2, double start, double stop) = 0;
+    virtual void gradient_color(Color c1, double start, double stop) = 0;
 
 
     // settings
     //-----------------------
     virtual void set_shift(LUnits x, LUnits y) = 0;
     virtual void remove_shift() = 0;
-    virtual void render(bool fillColor)= 0;
-
-
+    virtual void render()= 0;
 
 
 };

@@ -117,11 +117,11 @@ public:
         UPoint pos(0.0f, 0.0f);
 
         m_shapes.reserve(numNotes);
-        m_pMeter = new ScoreMeter(1, 1, 180.0f);
-        m_pStorage = new ShapesStorage();
+        m_pMeter = LOMSE_NEW ScoreMeter(1, 1, 180.0f);
+        m_pStorage = LOMSE_NEW ShapesStorage();
 
         //engrave notes
-        m_pNoteEngrv = new NoteEngraver(m_libraryScope, m_pMeter, m_pStorage);
+        m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage);
         for (int i=0; i < numNotes; ++i)
         {
             GmoShapeNote* pShape = dynamic_cast<GmoShapeNote*>(
@@ -136,7 +136,7 @@ public:
             if (i == 0)
             {
                 //first note
-                m_pBeamEngrv = new MyBeamEngraver(m_libraryScope, m_pMeter);
+                m_pBeamEngrv = LOMSE_NEW MyBeamEngraver(m_libraryScope, m_pMeter);
                 m_pBeamEngrv->set_start_staffobj(pBeam, notes[i], m_shapes[i],
                                                  iInstr, iStaff, iSystem, iCol, pos);
                 m_pStorage->save_engraver(m_pBeamEngrv, pBeam);

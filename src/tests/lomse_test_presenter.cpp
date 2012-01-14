@@ -61,10 +61,10 @@ SUITE(PresenterTest)
 
 //    //TEST_FIXTURE(PresenterBuilderTestFixture, PresenterBuilderCreatesPresenter)
 //    //{
-//    //    Document* pDoc = new Document(m_libraryScope);
+//    //    Document* pDoc = LOMSE_NEW Document(m_libraryScope);
 //    //    pDoc->create_empty();
-//    //    UserCommandExecuter* pExec = new UserCommandExecuter(pDoc);
-//    //    Interactor* pInteractor = new EditInteractor(m_libraryScope, pDoc, pExec);
+//    //    UserCommandExecuter* pExec = LOMSE_NEW UserCommandExecuter(pDoc);
+//    //    Interactor* pInteractor = LOMSE_NEW EditInteractor(m_libraryScope, pDoc, pExec);
 //    //    delete pDoc;
 //    //    delete pExec;
 //    //    delete pInteractor;
@@ -162,7 +162,7 @@ SUITE(PresenterTest)
 //        PresentersCollection elements;
 //        PresenterBuilder builder(m_libraryScope);
 //        Document* pDoc = builder.new_document(ViewFactory::k_view_simple);
-//        View* pView = new SimpleView(pDoc);
+//        View* pView = LOMSE_NEW SimpleView(pDoc);
 //        CHECK( elements.get_num_views(pDoc) == 0 );
 //        elements.add_view(pDoc, pView);
 //        CHECK( elements.get_num_views(pDoc) == 1 );

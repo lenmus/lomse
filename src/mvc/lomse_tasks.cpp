@@ -43,13 +43,13 @@ Task* TaskFactory::create_task(int taskType, Interactor* pIntor)
     switch(taskType)
     {
         case k_task_drag_view:
-            return new TaskDragView(pIntor);
+            return LOMSE_NEW TaskDragView(pIntor);
 
         case k_task_null:
-            return new TaskNull(pIntor);
+            return LOMSE_NEW TaskNull(pIntor);
 
         case k_task_selection:
-            return new TaskSelection(dynamic_cast<Interactor*>(pIntor));
+            return LOMSE_NEW TaskSelection(dynamic_cast<Interactor*>(pIntor));
 
         default:
             throw std::runtime_error("[TaskFactory::create_task] invalid task type");
@@ -111,16 +111,16 @@ void TaskDragView::init_task()
 void TaskDragView::start_drag(Event& event)
 {
     m_pIntor->get_viewport(&m_vxOrg, &m_vyOrg);
-    m_dx = event.x() - m_vxOrg;
-    m_dy = event.y() - m_vyOrg;
+    m_dx = event.x() + m_vxOrg;
+    m_dy = event.y() + m_vyOrg;
     m_drag_flag = true;
 }
 
 //---------------------------------------------------------------------------------------
 void TaskDragView::do_drag(Event& event)
 {
-    m_vxOrg = event.x() - m_dx;
-    m_vyOrg = event.y() - m_dy;
+    m_vxOrg = m_dx - event.x();
+    m_vyOrg = m_dy - event.y();
 
     repaint_view();
 }
@@ -167,6 +167,9 @@ void TaskSelection::process_event(Event event)
                     record_first_point(event);
                     m_state = k_waiting_for_point_2_right;
                     break;
+                case Event::k_mouse_move:
+                    mouse_in_out(event);
+                    break;
             }
             break;
        }
@@ -177,7 +180,7 @@ void TaskSelection::process_event(Event event)
             switch (event.type())
             {
                 case Event::k_mouse_left_up:
-                    select_objects(event);
+                    select_objects_or_click(event);
                     m_state = k_waiting_for_first_point;
                     break;
 
@@ -225,11 +228,19 @@ void TaskSelection::record_first_point(Event& event)
 }
 
 //---------------------------------------------------------------------------------------
-void TaskSelection::select_objects(Event& event)
+void TaskSelection::select_objects_or_click(Event& event)
 {
-    m_pIntor->select_objects_in_screen_rectangle(m_xStart, m_yStart, event.x(), event.y());
     m_pIntor->hide_selection_rectangle();
-    repaint_view();
+
+    //at least 5 pixels width, height to consider it a selection rectangle
+    if (abs(m_xStart - event.x()) < 5 || abs(m_yStart - event.y()) < 5)
+        m_pIntor->click_at_screen_point(m_xStart, m_yStart);
+    else
+    {
+        m_pIntor->select_objects_in_screen_rectangle(m_xStart, m_yStart,
+                                                     event.x(), event.y());
+        repaint_view();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -252,10 +263,15 @@ void TaskSelection::show_contextual_menu()
 }
 
 //---------------------------------------------------------------------------------------
+void TaskSelection::mouse_in_out(Event& event)
+{
+    m_pIntor->mouse_in_out(event.x(), event.y());
+}
+
+//---------------------------------------------------------------------------------------
 void TaskSelection::repaint_view()
 {
-    m_pIntor->on_paint();
-    m_pIntor->update_window();
+    m_pIntor->force_redraw();
 }
 
 

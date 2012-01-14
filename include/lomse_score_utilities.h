@@ -23,6 +23,8 @@
 
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"        //for EKeySignature enum
+#include "lomse_pitch.h"
+#include "lomse_im_note.h"        //for EKeySignature enum
 
 
 //---------------------------------------------------------------------------------------
@@ -46,24 +48,8 @@ class ImoTimeSignature;
     extern int get_beat_position(float timePos, ImoTimeSignature* pTS);
 
     //-----------------------------------------------------------------------------------
-    // returns the number of pulses (metronome pulses) implied by the time signature
-    //int lmGetNumPulsesForTimeSignature(lmETimeSignature nTimeSign)
-
-    //-----------------------------------------------------------------------------------
-    // returns the numerator of time signature fraction
-    //int lmGetNumBeatsFromTimeSignType(lmETimeSignature nTimeSign)
-
-    //-----------------------------------------------------------------------------------
-    //int GetBeatTypeFromTimeSignType(lmETimeSignature nTimeSign)
-
-    //-----------------------------------------------------------------------------------
     // returns beat duration (in LDP notes duration units)
-    //float GetBeatDuration(lmETimeSignature nTimeSign)
-    //float GetBeatDuration(int nBeatType)
-
-    //-----------------------------------------------------------------------------------
-    // Returns the required duration for a measure in the received time signature
-    //float GetMeasureDuration(lmETimeSignature nTimeSign)
+    extern float get_beat_duration_for(int nBeatType);
 
 
 //---------------------------------------------------------------------------------------
@@ -84,14 +70,26 @@ class ImoTimeSignature;
     //-----------------------------------------------------------------------------------
     //returns the step (0..6, 0=Do, 1=Re, 3=Mi, ... , 6=Si) for the root note in
     //the Key signature. For example, if keyType is A sharp minor it returns 5 (step A)
-    //int lmGetRootNoteStep(EKeySignature keyType)
+    int get_step_for_root_note(EKeySignature keyType);
 
     //-----------------------------------------------------------------------------------
-    bool is_major_key(EKeySignature keyType);
-    bool is_minor_key(EKeySignature keyType);
-    EKeySignature get_relative_minor_key(EKeySignature majorKey);
-    EKeySignature get_relative_major_key(EKeySignature minorKey);
+    extern bool is_major_key(EKeySignature keyType);
+    extern bool is_minor_key(EKeySignature keyType);
+    extern EKeySignature get_relative_minor_key(EKeySignature majorKey);
+    extern EKeySignature get_relative_major_key(EKeySignature minorKey);
 
+
+//---------------------------------------------------------------------------------------
+// Clef related functions
+
+    //-----------------------------------------------------------------------------------
+    // Returns the diatonic pitch for first line, when using received clef.
+    extern DiatonicPitch get_diatonic_pitch_for_first_line(EClef nClef);
+
+    //-----------------------------------------------------------------------------------
+    // returns the index (over global glyphs table) to the character to use to print
+    // the clef (LenMus font)
+    //extern lmEGlyphIndex lmGetGlyphForCLef(EClef nClefType);
 
 }   //namespace lomse
 

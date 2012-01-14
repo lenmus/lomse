@@ -199,7 +199,7 @@ SUITE(ImVisitorTest)
 //             << ", num_in_nodes=" << v.num_in_nodes()
 //             << ", num_out_nodes=" << v.num_out_nodes() << endl;
         CHECK( v.max_depth() == 9 );
-        CHECK( v.num_in_nodes() == 105 );
+        CHECK( v.num_in_nodes() == 103 );
         CHECK( v.num_out_nodes() == v.num_in_nodes() );
     }
 
@@ -285,7 +285,7 @@ SUITE(LdpExporterTest)
 {
     // clef ------------------------------------------------------------------------------------
 
-    TEST_FIXTURE(LdpExporterTestFixture, ExportLdp_clef)
+    TEST_FIXTURE(LdpExporterTestFixture, clef)
     {
         Document doc(m_libraryScope);
         ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
@@ -299,7 +299,7 @@ SUITE(LdpExporterTest)
 
     // lenmusdoc ----------------------------------------------------------------------------------
 
-    TEST_FIXTURE(LdpExporterTestFixture, ExportLdp_lenmusdoc_empty)
+    TEST_FIXTURE(LdpExporterTestFixture, lenmusdoc_empty)
     {
         Document doc(m_libraryScope);
         ImoDocument* pImoDoc = static_cast<ImoDocument*>(
@@ -312,7 +312,7 @@ SUITE(LdpExporterTest)
         delete pImoDoc;
     }
 
-    TEST_FIXTURE(LdpExporterTestFixture, ExportLdp_ErrorNotImplemented)
+    TEST_FIXTURE(LdpExporterTestFixture, ErrorNotImplemented)
     {
         Document doc(m_libraryScope);
         ImoTie* pTie = static_cast<ImoTie*>(ImFactory::inject(k_imo_tie, &doc));
@@ -323,18 +323,64 @@ SUITE(LdpExporterTest)
         delete pTie;
     }
 
-//    // color ------------------------------------------------------------------------------------
-//
-//    TEST_FIXTURE(LdpExporterTestFixture, ExportLdp_color)
-//    {
-//        ImoClef obj(k_clef_G2);
-//        obj.set_color( rgba16(127, 40, 12, 128) );
-//        LdpExporter exporter;
-//        string source = exporter.get_source(&obj);
-//        //cout << "\"" << source << "\"" << endl;
-//        CHECK( source == "(clef G p1 (color #7f280c80))" );
-//    }
-//
+    // score ----------------------------------------------------------------------------
+
+    TEST_FIXTURE(LdpExporterTestFixture, score)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
+            "(instrument (musicData (clef G)(key D)(n c4 q)(barline) ))"
+            ")))" );
+        ImoScore* pScore = doc.get_score(0);
+        LdpExporter exporter;
+        string source = exporter.get_source(pScore);
+        //cout << "\"" << source << "\"" << endl;
+        CHECK( source == "(score (vers 1.6)(instrument (musicData (clef G p1)(key D)(n c4 q p1)(barline ))))" );
+    }
+
+    // note ------------------------------------------------------------------------------------
+
+    TEST_FIXTURE(LdpExporterTestFixture, Note)
+    {
+        Document doc(m_libraryScope);
+        ImoNote* pImo = ImFactory::inject_note(&doc, k_step_D, k_octave_4,
+                            k_eighth, k_no_accidentals);
+        LdpExporter exporter;
+        string source = exporter.get_source(pImo);
+        //cout << "\"" << source << "\"" << endl;
+        CHECK( source == "(n d4 e p1)" );
+        delete pImo;
+    }
+
+    TEST_FIXTURE(LdpExporterTestFixture, Note_dots)
+    {
+        Document doc(m_libraryScope);
+        ImoNote* pImo = ImFactory::inject_note(&doc, k_step_B, k_octave_7,
+                            k_whole, k_sharp, 2);
+        LdpExporter exporter;
+        string source = exporter.get_source(pImo);
+        //cout << "\"" << source << "\"" << endl;
+        CHECK( source == "(n +b7 w.. p1)" );
+        delete pImo;
+    }
+
+
+    // color ------------------------------------------------------------------------------------
+
+    TEST_FIXTURE(LdpExporterTestFixture, color)
+    {
+        Document doc(m_libraryScope);
+        ImoClef* pImo = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pImo->set_clef_type(k_clef_F4);
+        pImo->set_color( Color(127, 40, 12, 128) );
+        LdpExporter exporter;
+        string source = exporter.get_source(pImo);
+        //cout << "\"" << source << "\"" << endl;
+        CHECK( source == "(clef F4 p1 (color #7f280c80))" );
+        delete pImo;
+    }
+
 //    // user location ----------------------------------------------------------------------------
 //
 //    TEST_FIXTURE(LdpExporterTestFixture, ExportLdp_user_location)
@@ -348,36 +394,5 @@ SUITE(LdpExporterTest)
 //        cout << "\"" << source << "\"" << endl;
 //        CHECK( source == "(clef G3 p1 (dx 30.0000) (dy -7.0500))" );
 //    }
-//
-//    // note ------------------------------------------------------------------------------------
-//
-//    TEST_FIXTURE(LdpExporterTestFixture, ExportLdp_Note)
-//    {
-//        ImoNote obj;
-//        obj.set_octave(4);
-//        obj.set_step(ImoNote::D);
-//        obj.set_duration(k_eighth);
-//        //obj.set_dots(1);
-//        LdpExporter exporter;
-//        string source = exporter.get_source(&obj);
-//        cout << "\"" << source << "\"" << endl;
-//        CHECK( source == "(n d4 e. p1)" );
-//    }
 
-    // compiler usage ---------------------------------------------------------------------------
-
-//    TEST_FIXTURE(LdpExporterTestFixture, ExportLdp_Compiler)
-//    {
-//        DocumentScope documentScope(cout);
-//        LdpCompiler compiler(m_libraryScope, documentScope);
-//        BasicModel* pBasicModel = compiler.create_basic_model("(n d4 e.)" );
-//        ImoObj* pObj = pBasicModel->get_root();
-//        CHECK( pObj != NULL );
-//        CHECK( pObj->is_note() == true );
-//        LdpExporter exporter;
-//        string source = exporter.get_source(pObj);
-//        cout << "\"" << source << "\"" << endl;
-//        CHECK( source == "(n d4 e. p1)" );
-//        delete pBasicModel;
-//    }
 };

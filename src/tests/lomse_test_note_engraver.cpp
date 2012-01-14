@@ -78,7 +78,7 @@ public:
         m_pNote1 = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         m_pNote1->set_step(0);
         m_pNote1->set_octave(4);
-        m_pNote1->set_accidentals(0);
+        m_pNote1->set_notated_accidentals(k_no_accidentals);
         m_pNote1->set_note_type(k_eighth);
         m_pNote1->set_dots(0);
 
@@ -105,9 +105,9 @@ public:
         m_pTupletData3 = ImFactory::inject_tuplet_data(&doc, &dto3);
         m_pNote3->include_in_relation(&doc, m_pTuplet, m_pTupletData3);
 
-        m_pMeter = new ScoreMeter(1, 1, 180.0f);
-        m_pStorage = new ShapesStorage();
-        m_pEngrv = new NoteEngraver(m_libraryScope, m_pMeter, m_pStorage);
+        m_pMeter = LOMSE_NEW ScoreMeter(1, 1, 180.0f);
+        m_pStorage = LOMSE_NEW ShapesStorage();
+        m_pEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage);
         m_pShape1 =
             dynamic_cast<GmoShapeNote*>(m_pEngrv->create_shape(m_pNote1, 0, 0, k_clef_G2, UPoint(10.0f, 15.0f)) );
         m_pShape2 =
@@ -158,7 +158,7 @@ SUITE(NoteEngraverTest)
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         pNote->set_step(0);
         pNote->set_octave(4);
-        pNote->set_accidentals(0);
+        pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_whole);
 
         ScoreMeter meter(1, 1, 180.0f);
@@ -183,7 +183,7 @@ SUITE(NoteEngraverTest)
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         pNote->set_step(0);
         pNote->set_octave(4);
-        pNote->set_accidentals(0);
+        pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_quarter);
 
         ScoreMeter meter(1, 1, 180.0f);
@@ -210,7 +210,7 @@ SUITE(NoteEngraverTest)
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         pNote->set_step(0);
         pNote->set_octave(4);
-        pNote->set_accidentals(0);
+        pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_eighth);
 
         ScoreMeter meter(1, 1, 180.0f);
@@ -239,7 +239,7 @@ SUITE(NoteEngraverTest)
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         pNote->set_step(0);
         pNote->set_octave(4);
-        pNote->set_accidentals(0);
+        pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_whole);
         pNote->set_dots(1);
 
@@ -267,7 +267,7 @@ SUITE(NoteEngraverTest)
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         pNote->set_step(0);
         pNote->set_octave(4);
-        pNote->set_accidentals(0);
+        pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_eighth);
         pNote->set_dots(2);
 

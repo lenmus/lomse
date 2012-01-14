@@ -24,6 +24,7 @@
 #include "lomse_ldp_factory.h"
 #include "lomse_id_assigner.h"
 #include "lomse_build_options.h"
+#include "lomse_events.h"
 
 #include <iostream>
 using namespace std;
@@ -51,7 +52,6 @@ class LomseDoorway;
 class Drawer;
 class ScreenDrawer;
 class Task;
-class EventInfo;
 class Request;
 
 //---------------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ public:
     FontStorage* font_storage();
 
     //callbacks
-    void post_event(EventInfo* pEvent);
+    void post_event(SpEventInfo pEvent);
     void post_request(Request* pRequest);
     std::string get_font(const string& name, bool fBold, bool fItalic);
 

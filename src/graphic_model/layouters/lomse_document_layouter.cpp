@@ -48,7 +48,7 @@ DocLayouter::DocLayouter(InternalModel* pIModel, LibraryScope& libraryScope)
 {
     m_pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
     m_pStyles = m_pDoc->get_styles();
-    m_pGModel = new GraphicModel();
+    m_pGModel = LOMSE_NEW GraphicModel();
 }
 
 //---------------------------------------------------------------------------------------

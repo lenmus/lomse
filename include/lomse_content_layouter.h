@@ -25,15 +25,20 @@
 #include "lomse_injectors.h"
 #include "lomse_basic.h"
 
+#include <vector>
+using namespace std;
+
 
 namespace lomse
 {
 
 //forward declarations
 class InternalModel;
+//class ImoControl;
 class ImoContent;
 class ImoContentObj;
 class ImoDocument;
+class ImoMultiColumn;
 class ImoStyles;
 class GraphicModel;
 class GmoBox;
@@ -52,13 +57,62 @@ protected:
 public:
     ContentLayouter(ImoContentObj* pItem, Layouter* pParent,
                     GraphicModel* pGModel, LibraryScope& libraryScope, ImoStyles* pStyles);
-    virtual ~ContentLayouter();
+    virtual ~ContentLayouter() {}
 
     //implementation of Layouter virtual methods
     void layout_in_box();
     void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
 
 };
+
+
+//----------------------------------------------------------------------------------
+// MultiColumnLayouter
+//  layout algorithm for organising content in several columns
+class MultiColumnLayouter : public Layouter
+{
+protected:
+    ImoMultiColumn* m_pMultiColumn;
+    vector<Layouter*> m_colLayouters;
+    vector<UPoint> m_colPosition;
+    vector<LUnits> m_colWidth;
+    UPoint m_cursor;
+
+public:
+    MultiColumnLayouter(ImoContentObj* pItem, Layouter* pParent,
+                        GraphicModel* pGModel, LibraryScope& libraryScope,
+                        ImoStyles* pStyles);
+    virtual ~MultiColumnLayouter();
+
+    //implementation of Layouter virtual methods
+    void layout_in_box();
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
+
+protected:
+    void layout_column(Layouter* pColLayouter, GmoBox* pParentBox,
+                       LUnits width, UPoint pos);
+
+};
+
+
+////----------------------------------------------------------------------------------
+//// ControlLayouter
+////  layout algorithm for a gui control
+//class ControlLayouter : public Layouter
+//{
+//protected:
+//    ImoControl* m_pControl;
+//
+//public:
+//    ControlLayouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGModel,
+//                  LibraryScope& libraryScope, ImoStyles* pStyles);
+//    virtual ~ControlLayouter() {}
+//
+//    //implementation of Layouter virtual methods
+//    void layout_in_box();
+//    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
+//
+//};
 
 
 }   //namespace lomse

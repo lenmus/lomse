@@ -103,22 +103,23 @@
 //---------------------------------------------------------------------------------------
 // for detecting and isolating memory leaks with Visual C++
 
-#if (LOMSE_COMPILER_MSVC == 1)
+#if (LOMSE_COMPILER_MSVC == 1) && (LOMSE_DEBUG == 1)
     #ifndef _DEBUG
         #define _DEBUG
     #endif
-    #define _CRTDBG_MAP_ALLOC
-    #include <stdlib.h>
-    #include <crtdbg.h>
-    //#ifndef DBG_NEW
-    //   #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-    //   #define new DBG_NEW
-    //#endif
-    //#ifndef DBG_NEW
-    //    #define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
-    //    #define new DEBUG_NEW
-    //#endif
+    #ifndef LOMSE_NEW
+        #define _CRTDBG_MAP_ALLOC
+        #define _CRTDBG_MAP_ALLOC_NEW
+        #include <stdlib.h>
+        #include <crtdbg.h>
+        #define LOMSE_NEW new ( (_NORMAL_BLOCK) , (__FILE__) , (__LINE__) )
+    #endif
+#else
+    #ifndef LOMSE_NEW
+        #define LOMSE_NEW new
+    #endif
 #endif
+
 
 
 

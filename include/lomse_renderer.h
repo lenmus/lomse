@@ -24,6 +24,14 @@
 #include "lomse_basic.h"
 #include "lomse_agg_types.h"
 #include "lomse_path_attributes.h"
+#include "lomse_drawer.h"           //enums EBlendMode, EResamplingQuality
+
+#include "agg_image_accessors.h"
+#include "agg_span_image_filter_rgb.h"
+#include "agg_span_interpolator_linear.h"
+#include "agg_span_image_filter_rgba.h"
+
+#include "agg_rounded_rect.h"
 
 
 namespace lomse
@@ -55,6 +63,7 @@ typedef agg::pixfmt_abgr64      PixFormat_abgr64;
 typedef agg::pixfmt_bgra64      PixFormat_bgra64;
 
 
+//---------------------------------------------------------------------------------------
 class Renderer
 {
 protected:
@@ -76,19 +85,25 @@ protected:
     TransAffine m_mtx;          //global transform
 
     AttrStorage& m_attr_storage;
-    AttrStorage& m_attr_stack;
     PathStorage& m_path;
 
 
 public:
-    Renderer(double ppi, AttrStorage& attr_storage, AttrStorage& attr_stack,
-             PathStorage& path);
+    Renderer(double ppi, AttrStorage& attr_storage, PathStorage& path);
     virtual ~Renderer() {}
     virtual void initialize(RenderingBuffer& buf, Color bgcolor) = 0;
-    virtual void render(bool fillColor) = 0;
+    virtual void render() = 0;
     virtual void render(FontRasterizer& ras, FontScanline& sl, Color color) = 0;
     virtual void render_gsv_text(double x, double y, const char* str) = 0;
-
+    virtual void copy_from(RenderingBuffer& img, const AggRectInt* srcRect,
+                           int xDest, int yDest) = 0;
+    virtual void blend_from(RenderingBuffer& bmap, const AggRectInt* srcRect,
+                            int xShift, int yShift, unsigned alpha) = 0;
+    virtual void render_bitmap(RenderingBuffer& bmap, bool hasAlpha,
+                               double srcX1, double srcY1, double srcX2, double srcY2,
+                               double dstX1, double dstY1, double dstX2, double dstY2,
+                               EResamplingQuality resamplingMode,
+                               double alpha) = 0;
 
     // Make all polygons CCW-oriented
     inline void arrange_orientations() {
@@ -124,15 +139,11 @@ public:
     void set_transform(TransAffine& transform);
 
 protected:
-    void push_attr();
-    void pop_attr();
-    PathAttributes& cur_attr();
     TransAffine& set_transformation();
 
     //void clear_all(Color c);
     void reset();
     agg::rgba to_rgba(Color c);
-    agg::rgba8 to_rgba8(Color c);
 
 };
 
@@ -141,17 +152,51 @@ protected:
 // RendererTemplate: Helper class to render paths and texts
 // Knows how to render bitmaps and paths created by Calligrapher and Drawer objects
 //---------------------------------------------------------------------------------------
-template <typename PixFormat>
+template <typename PixFormat, typename ColorType>
 class RendererTemplate : public Renderer
 {
+protected:
+    //premultiplied pixel format for blending
+    //typedef agg::pixel_formats_rgba<BlenderPre, agg::pixel32_type> PixFormatPre;
+    typedef agg::pixfmt_bgra32_pre      PixFormatPre;
+
+    //renderers types
+    typedef agg::renderer_base<PixFormat>                   RendererBase;
+    typedef agg::renderer_scanline_aa_solid<RendererBase>   RendererSolid;
+    typedef agg::renderer_base<PixFormatPre>                RendererBasePre;
+
+    //span interpolators for gradients (gradients always in rgba8 colors)
+    typedef agg::span_gradient<agg::rgba8,
+                               agg::span_interpolator_linear<>,
+                               agg::gradient_x,
+                               GradientColors>              LinearGradientSpan;
+    typedef agg::span_gradient<agg::rgba8,
+                               agg::span_interpolator_linear<>,
+                               agg::gradient_circle,
+                               GradientColors>              RadialGradientSpan;
+
+    RenderingBuffer         m_rbuf;         //the rendering buffer provided by the user
+    PixFormat               m_pixFormat;    //pixel accessor to m_rbuf
+    PixFormatPre            m_pixFormatPre;    //pixel accessor to m_rbuf
+    RendererBase            m_renBase;      //base renderer associated to m_rbuf
+    RendererSolid           m_renSolid;     //solid renderer associated to m_rbuf
+    RendererBasePre         m_renBasePre;
+
+    CurvedConverter         m_curved;
+    CurvedStroked           m_curved_stroked;
+    CurvedStrokedTrans      m_curved_stroked_trans;
+    CurvedTrans             m_curved_trans;
+    CurvedTransContour      m_curved_trans_contour;
+
 public:
-    RendererTemplate(double ppi, AttrStorage& attr_storage, AttrStorage& attr_stack,
-             PathStorage& path)
-        : Renderer(ppi, attr_storage, attr_stack, path)
+    RendererTemplate(double ppi, AttrStorage& attr_storage, PathStorage& path)
+        : Renderer(ppi, attr_storage, path)
         , m_rbuf()
-        , m_pixFormat(m_rbuf)
-        , m_renBase(m_pixFormat)
-        , m_renSolid(m_renBase)
+        , m_pixFormat(m_rbuf)       //attach the pixel accessor to the rendering buffer
+        , m_pixFormatPre(m_rbuf)       //attach the pixel accessor to the rendering buffer
+        , m_renBase(m_pixFormat)    //attach the pixel accessor (and the buffer)
+        , m_renSolid(m_renBase)     //attach the base renderer (and the buffer)
+        , m_renBasePre(m_pixFormatPre)
 
         , m_curved(m_path)
         , m_curved_stroked(m_curved)
@@ -177,7 +222,7 @@ public:
     }
 
     //-----------------------------------------------------------------------------------
-    void render(bool fillColor)
+    void render()
     {
         agg::rasterizer_scanline_aa<> ras;
         agg::scanline_p8 sl;
@@ -191,8 +236,10 @@ public:
         //set expand value for strokes
         expand(m_expand);
 
-        //do renderization
-        render(ras, sl, m_renSolid, m_mtx, m_renBase.clip_box(), 1.0);
+        //do renderization. Method doing renderization is a template member, so that
+        //it can be created for different Renderer types.
+        double alpha = 1.0;
+        render(ras, sl, m_renSolid, m_mtx, m_renBase.clip_box(), alpha);
 
         ////////render controls
         //////ras.gamma(agg::gamma_none());
@@ -244,11 +291,48 @@ public:
         agg::bounding_rect(trans, *this, 0, m_attr_storage.size(), x1, y1, x2, y2);
     }
 
+    //-----------------------------------------------------------------------------------
+    void copy_from(RenderingBuffer& bmap, const AggRectInt* srcRect, int xDest, int yDest)
+    {
+        m_renBase.copy_from(bmap, srcRect, xDest, yDest);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void blend_from(RenderingBuffer& bmap, const AggRectInt* srcRect, int xShift,
+                    int yShift, unsigned alpha)
+    {
+        typedef agg::pixfmt_rgba32   ImgPixFmt;
+        ImgPixFmt img_pixf(bmap);
+
+        m_renBasePre.blend_from(img_pixf, srcRect, xShift, yShift, alpha);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void render_bitmap(RenderingBuffer& bmap, bool hasAlpha,
+                       double srcX1, double srcY1, double srcX2, double srcY2,
+                       double dstX1, double dstY1, double dstX2, double dstY2,
+                       EResamplingQuality resamplingMode,
+                       double alpha)
+    {
+        //set affine transformation (rotation, scale, translation, skew)
+        set_transformation();
+
+        TransAffine mtx;
+        if (true)   //hasAlpha)
+            render_bitmap<RendererSolid, true>(m_renSolid,
+                                bmap, srcX1, srcY1, srcX2, srcY2,
+                                dstX1, dstY1, dstX2, dstY2, resamplingMode, mtx, alpha);
+        else
+            render_bitmap<RendererSolid, false>(m_renSolid,
+                                bmap, srcX1, srcY1, srcX2, srcY2,
+                                dstX1, dstY1, dstX2, dstY2, resamplingMode, mtx, alpha);
+    }
+
 
 protected:
 
     //-----------------------------------------------------------------------------------
-    // Rendering. One can specify two additional parameters:
+    // Rendering. You can specify two additional parameters:
     // trans_affine and opacity. They can be used to transform the whole
     // image and/or to make it translucent.
     template<class Rasterizer, class Scanline, class Renderer>
@@ -256,12 +340,12 @@ protected:
                 Scanline& sl,
                 Renderer& ren,
                 const TransAffine& mtx,
-                const rect_i& cb,
+                const AggRectInt& clipBox,
                 double opacity=1.0)
     {
         unsigned i;
 
-        ras.clip_box(cb.x1, cb.y1, cb.x2, cb.y2);
+        ras.clip_box(clipBox.x1, clipBox.y1, clipBox.x2, clipBox.y2);
 
         for(i = 0; i < m_attr_storage.size(); i++)
         {
@@ -275,7 +359,7 @@ protected:
 
             rgba8 color;
 
-            if(attr.fill_flag)
+            if (attr.fill_mode == k_fill_solid)
             {
                 ras.reset();
                 ras.filling_rule(attr.even_odd_flag ? fill_even_odd : fill_non_zero);
@@ -289,10 +373,59 @@ protected:
                     ras.add_path(m_curved_trans_contour, attr.path_index);
                 }
 
-                color = to_rgba8( attr.fill_color );
+                color = attr.fill_color;
                 color.opacity(color.opacity() * opacity);
                 ren.color(color);
                 agg::render_scanlines(ras, sl, ren);
+            }
+
+            else if (attr.fill_mode == k_fill_gradient_linear)
+            {
+                ras.reset();
+                ras.filling_rule(attr.even_odd_flag ? fill_even_odd : fill_non_zero);
+                if(fabs(m_curved_trans_contour.width()) < 0.0001)
+                {
+                    ras.add_path(m_curved_trans, attr.path_index);
+                }
+                else
+                {
+                    m_curved_trans_contour.miter_limit(attr.miter_limit);
+                    ras.add_path(m_curved_trans_contour, attr.path_index);
+                }
+
+                //TODO apply 'opacity' received param to gradient colors
+                //------------------------------------
+                //define a linear interpolator, to interpolate colors
+                TransAffine mtx = attr.fill_gradient->transform;
+                mtx *= m_transform;
+                mtx.invert();
+                agg::span_interpolator_linear<> interpolator(mtx);
+
+                //define the gradien function, linear in this case
+                agg::gradient_x     gradientFunction;
+
+                //define a span object using the gradient interpolator, the function
+                //and the gradient colors
+                LinearGradientSpan span(interpolator,
+                                        gradientFunction,
+                                        attr.fill_gradient->colors,
+                                        attr.fill_gradient->d1,
+                                        attr.fill_gradient->d2);
+
+                //define a span_allocator. It is responsible for allocating an array of
+                //colors for the length of the span
+                typedef agg::span_allocator<agg::rgba8>   SpanAllocatorType;
+                SpanAllocatorType spanAllocator;
+
+                //define a renderer using the span allocator and the linear gradient span
+                typedef agg::renderer_scanline_aa<RendererBase,
+                                                  SpanAllocatorType,
+                                                  LinearGradientSpan> RendererLinearGradient;
+
+                RendererLinearGradient renderer(m_renBase, spanAllocator, span);
+
+                //procceed to render using defined renderer
+                agg::render_scanlines(ras, sl, renderer);
             }
 
             if(attr.stroke_flag)
@@ -315,7 +448,7 @@ protected:
                 ras.reset();
                 ras.filling_rule(fill_non_zero);
                 ras.add_path(m_curved_stroked_trans, attr.path_index);
-                color = to_rgba8( attr.stroke_color );
+                color = attr.stroke_color;
                 color.opacity(color.opacity() * opacity);
                 ren.color(color);
                 agg::render_scanlines(ras, sl, ren);
@@ -323,19 +456,103 @@ protected:
         }
     }
 
-    typedef agg::renderer_base<PixFormat>                   RendererBase;
-    typedef agg::renderer_scanline_aa_solid<RendererBase>   RendererSolid;
+    //-----------------------------------------------------------------------------------
+    // Render a bitmap.
+    template<class Renderer, bool hasAlpha>
+    void render_bitmap(Renderer& ren, RenderingBuffer& bmap,
+                       double srcX1, double srcY1, double srcX2, double srcY2,
+                       double dstX1, double dstY1, double dstX2, double dstY2,
+                       EResamplingQuality quality,
+                       const TransAffine& mtx,
+                       double alpha=1.0)
+    {
+        //pipeline:
+        // the path to render is a rectangle, and the span generator fills it with
+        // the image. During filling, the image is scaled by img_mtx
 
-    RenderingBuffer         m_rbuf;
-    PixFormat               m_pixFormat;
-    RendererBase            m_renBase;
-    RendererSolid           m_renSolid;
+        //mtx to clip and scale the image
+        double parallelogram[6] = { dstX1, dstY1, dstX2, dstY1, dstX2, dstY2 };
+        agg::trans_affine img_mtx(srcX1, srcY1, srcX2, srcY2, parallelogram);
+        img_mtx.invert();
 
-    CurvedConverter         m_curved;
-    CurvedStroked           m_curved_stroked;
-    CurvedStrokedTrans      m_curved_stroked_trans;
-    CurvedTrans             m_curved_trans;
-    CurvedTransContour      m_curved_trans_contour;
+        //lineal inerpolator, to re-dimension the image
+        typedef agg::span_interpolator_linear<agg::trans_affine> InterpolatorType;
+        InterpolatorType interpolator(img_mtx);
+
+        //attach the image to a pixel renderer
+        typedef agg::pixfmt_rgba32   ImgPixFmt;
+        ImgPixFmt img_pixf(bmap);
+
+        //define an accesor to bitmap pixels
+        //Alternatives:
+        //  image_accessor_no_clip
+        //  image_accessor_clip
+        //  image_accessor_clone
+        typedef agg::image_accessor_no_clip<ImgPixFmt> img_accessor_type;
+        img_accessor_type source(img_pixf);
+
+        //define the rasterizer
+        agg::rasterizer_scanline_aa<> ras;
+        ras.clip_box(dstX1, dstY1, dstX2, dstY2);
+        ras.gamma(agg::gamma_power(m_gamma));
+
+        //add rectangle path
+        ras.move_to_d(dstX1, dstY1);
+        ras.line_to_d(dstX2, dstY1);
+        ras.line_to_d(dstX2, dstY2);
+        ras.line_to_d(dstX1, dstY2);
+
+        //define the scanline class we are going to use (u8)
+        agg::scanline_u8 sl;
+
+        //define an allocator for spanlines
+        agg::span_allocator<ColorType> sa;
+
+
+        #if (1)     //hasAlpha)  //bitmap has alpha channel: use rgba filter
+//            //define a span generator to fill lines with the image and do renderization
+//            if (quality == k_quality_low)
+//            {
+//                //nearest-neighbor filter
+//		        typedef agg::span_image_filter_rgba_nn<img_accessor_type,
+//                                                    InterpolatorType> span_gen_type;
+//                span_gen_type sg(source, interpolator);
+//                agg::render_scanlines_aa(ras, sl, m_renBase, sa, sg);
+//            }
+//
+//            else if (quality == k_quality_medium)
+//            {
+                //bilinear filter
+		        typedef agg::span_image_filter_rgba_bilinear<img_accessor_type,
+                                                    InterpolatorType> span_gen_type;
+                span_gen_type sg(source, interpolator);
+                agg::render_scanlines_aa(ras, sl, m_renBase, sa, sg);
+//            }
+
+        #else  //bitmap without alpha channel: use rgb filter
+            //define a span generator to fill lines with the image and do renderization
+            if (quality == k_quality_low)
+            {
+                //nearest-neighbor filter
+		        typedef agg::span_image_filter_rgb_nn<img_accessor_type,
+                                                    InterpolatorType> span_gen_type;
+                span_gen_type sg(source, interpolator);
+                agg::render_scanlines_aa(ras, sl, m_renBase, sa, sg);
+            }
+            else if (quality == k_quality_medium)
+            {
+                //bilinear filter
+		        typedef agg::span_image_filter_rgb_bilinear<img_accessor_type,
+                                                    InterpolatorType> span_gen_type;
+                span_gen_type sg(source, interpolator);
+                agg::render_scanlines_aa(ras, sl, m_renBase, sa, sg);
+            }
+        #endif
+
+        ////test to fill rectangle in solid color
+        //m_renSolid.color(agg::rgba(0, 0.3, 0.5, 1.0));
+        //agg::render_scanlines(ras, sl, m_renSolid);
+    }
 
 };
 
@@ -349,7 +566,6 @@ public:
 
     static Renderer* create_renderer(LibraryScope& libraryScope,
                                      AttrStorage& attr_storage,
-                                     AttrStorage& attr_stack,
                                      PathStorage& path);
 };
 

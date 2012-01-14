@@ -24,6 +24,7 @@
 #include "lomse_internal_model.h"
 #include "lomse_injectors.h"
 #include "lomse_events.h"
+#include "lomse_interactor.h"
 
 #include <algorithm>     //max(), min()
 
@@ -130,7 +131,8 @@ void ScorePlayer::play_segment(int nEvStart, int nEvEnd, int playMode,
                                Interactor* pInteractor)
 {
     //Create a new thread. It starts inmediately to execute do_play()
-    m_pThread = new SoundThread(&ScorePlayer::thread_main, this,
+    delete m_pThread;
+    m_pThread = LOMSE_NEW SoundThread(&ScorePlayer::thread_main, this,
                                 nEvStart, nEvEnd, playMode, fVisualTracking,
                                 fCountOff, nMM, pInteractor);
 }
@@ -171,6 +173,7 @@ void ScorePlayer::stop()
         m_pThread->interrupt();    //request the tread to terminate
 
     m_pThread->join();
+    delete m_pThread;
     m_pThread = NULL;
     m_fShouldStop = false;
 }
@@ -193,6 +196,7 @@ void ScorePlayer::wait_for_termination()
 
     if (!m_pThread) return;
     m_pThread->join();
+    delete m_pThread;
     m_pThread = NULL;
 }
 
@@ -319,8 +323,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
     curTime = delta_to_milliseconds( nMtrEvDeltaTime );
 
     //define and prepare highlight event
-    EventScoreHighlight* pEvent
-        = new EventScoreHighlight(pInteractor, m_pScore->get_id());
+    SpEventScoreHighlight pEvent(
+        LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id()) );
 
 
     bool fFirstBeatInMeasure = true;    //first beat of a measure
@@ -393,9 +397,9 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
             if (nMtrEvDeltaTime < events[i]->DeltaTime)
             {
                 //last metronome click is previous to first event from table.
-                //Flush highlight event
+                //send highlight event
                 m_libScope.post_event(pEvent);
-                pEvent = new EventScoreHighlight(pInteractor, m_pScore->get_id());
+                pEvent = LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id());
             }
         }
 
@@ -419,7 +423,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
                 if (fVisualTracking && pEvent->get_num_items() > 0)
                 {
                     m_libScope.post_event(pEvent);
-                    pEvent = new EventScoreHighlight(pInteractor, m_pScore->get_id());
+                    pEvent = LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id());
                 }
 
                 //wait for current time
@@ -473,7 +477,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
                 if (fVisualTracking && pEvent->get_num_items() > 0)
                 {
                     m_libScope.post_event(pEvent);
-                    pEvent = new EventScoreHighlight(pInteractor, m_pScore->get_id());
+                    pEvent = LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id());
                 }
 
                 //wait until new time arives
@@ -605,22 +609,16 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
     //ensure that all visual highlight is removed in case the loop was exited because
     //stop playing was requested
     if (fVisualTracking)
-        pEvent->add_item(k_end_of_higlight_event, NULL);
-
-    //send any pending event
-    if (fVisualTracking)
     {
-        if (pEvent->get_num_items() > 0)
-            m_libScope.post_event(pEvent);
-        else
-            delete pEvent;
+        pEvent->add_item(k_end_of_higlight_event, NULL);
+        m_libScope.post_event(pEvent);
     }
-    else
-        delete pEvent;
 
     //ensure that all sounds are off
     m_pMidi->all_sounds_off();
 
+    SpEventEndOfPlayScore pEv( LOMSE_NEW EventEndOfPlayScore(pInteractor, m_pScore) );
+    m_libScope.post_event(pEv);
 }
 
 

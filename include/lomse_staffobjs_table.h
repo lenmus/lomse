@@ -128,6 +128,8 @@ public:
 
 	iterator begin() { std::vector<ColStaffObjsEntry*>::iterator it = m_table.begin(); return iterator(it); }
 	iterator end() { std::vector<ColStaffObjsEntry*>::iterator it = m_table.end(); return iterator(it); }
+    inline ColStaffObjsEntry* back() { return m_table.back(); }
+    inline ColStaffObjsEntry* front() { return m_table.front(); }
 
     //debug
     void dump();

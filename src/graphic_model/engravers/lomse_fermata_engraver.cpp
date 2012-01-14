@@ -54,7 +54,7 @@ GmoShapeFermata* FermataEngraver::create_shape(ImoFermata* pFermata, int iInstr,
     int iGlyph = (m_fAbove ? k_glyph_fermata_above : k_glyph_fermata_below);
     double fontSize = determine_font_size();
     UPoint position = compute_location(pos);
-    m_pFermataShape = new GmoShapeFermata(pFermata, 0, iGlyph, position, Color(0,0,0),
+    m_pFermataShape = LOMSE_NEW GmoShapeFermata(pFermata, 0, iGlyph, position, Color(0,0,0),
                                           m_libraryScope, fontSize);
     center_on_parent();
     return m_pFermataShape;

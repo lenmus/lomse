@@ -40,7 +40,7 @@ public:
 
     LinkerTestFixture()     //SetUp fixture
     {
-        m_pLibraryScope = new LibraryScope(cout);
+        m_pLibraryScope = LOMSE_NEW LibraryScope(cout);
     }
 
     ~LinkerTestFixture()    //TearDown fixture

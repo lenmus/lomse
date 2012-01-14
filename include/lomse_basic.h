@@ -21,6 +21,8 @@
 #ifndef __LOMSE_BASIC_H__
 #define __LOMSE_BASIC_H__
 
+#include "agg_color_rgba.h"
+
 namespace lomse
 {
 
@@ -242,7 +244,6 @@ struct Rectangle
 //    bool intersects(const Rectangle& rect) const;
 };
 
-
 //---------------------------------------------------------------------------------------
 //specific types
 typedef float Tenths;           //relative unit: one tenth of staff interline space
@@ -264,48 +265,97 @@ typedef Rectangle<Pixels> VRect; //rectangle, in pixels
 typedef unsigned short Int16u;
 typedef unsigned char Int8u;
 
+//---------------------------------------------------------------------------------------
+//utility functions
+inline URect normalized_rectangle(LUnits xLeft, LUnits yTop,
+                                  LUnits xRight, LUnits yBottom)
+{
+    LUnits xL, xR, yT, yB;
+
+    if (xLeft > xRight)
+    {
+        xL = xRight;
+        xR  = xLeft;
+    }
+    else
+    {
+        xL = xLeft;
+        xR = xRight;
+    }
+
+    if (yTop > yBottom)
+    {
+        yT = yBottom;
+        yB = yTop;
+    }
+    else
+    {
+        yT = yTop;
+        yB = yBottom;
+    }
+
+    return URect(xL, yT, xR-xL, yB-yT);
+}
 
 //---------------------------------------------------------------------------------------
 // color type: rgba 8bits.
 // Remember: alpha 0 means transparent and 255 means opaque
-struct Color
-{
-    Int8u r;
-    Int8u g;
-    Int8u b;
-    Int8u a;
+typedef agg::rgba8      Color;
+inline bool is_equal(Color c1, Color c2) {
+    return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b && c1.a == c2.a ;
+}
 
-    Color() : r(0), g(0), b(0), a(255) {}
+inline bool is_different(Color c1, Color c2) {
+    return c1.r != c2.r || c1.g != c2.g || c1.b != c2.b || c1.a != c2.a ;
+}
 
-    Color(unsigned r_, unsigned g_, unsigned b_, unsigned a_= 255)
-        : r(Int8u(r_)), g(Int8u(g_)), b(Int8u(b_)), a(Int8u(a_)) {}
-
-    Color(const Color& c, unsigned a_) :
-        r(c.r), g(c.g), b(c.b), a(Int8u(a_)) {}
-
-    bool operator == (Color color) {
-        return r == color.r && g == color.g && b == color.b && a == color.a ;
-    }
-
-    bool operator != (Color color){
-        return r != color.r || g != color.g || b != color.b || a != color.a ;
-    }
-
-    void clear() { r = g = b = a = 0; }
-
-    const Color& transparent() {
-        a = 0;
-        return *this;
-    }
-
-    void red(unsigned value) { r = value; }
-    void green(unsigned value) { g = value; }
-    void blue(unsigned value) { b = value; }
-    void opacity(unsigned value) { a = value; }
-
-    static Color no_color() { return Color(0,0,0,0); }
-
-};
+//struct Color
+//{
+//    Int8u r;
+//    Int8u g;
+//    Int8u b;
+//    Int8u a;
+//
+//    Color() : r(0), g(0), b(0), a(255) {}
+//
+//    Color(unsigned r_, unsigned g_, unsigned b_, unsigned a_= 255)
+//        : r(Int8u(r_)), g(Int8u(g_)), b(Int8u(b_)), a(Int8u(a_)) {}
+//
+//    Color(const Color& c, unsigned a_) :
+//        r(c.r), g(c.g), b(c.b), a(Int8u(a_)) {}
+//
+//    bool operator == (Color color) {
+//        return r == color.r && g == color.g && b == color.b && a == color.a ;
+//    }
+//
+//    bool operator != (Color color) {
+//        return r != color.r || g != color.g || b != color.b || a != color.a ;
+//    }
+//
+//    void clear() { r = g = b = a = 0; }
+//
+//    const Color& transparent() {
+//        a = 0;
+//        return *this;
+//    }
+//
+//    void red(unsigned value) { r = value; }
+//    void green(unsigned value) { g = value; }
+//    void blue(unsigned value) { b = value; }
+//    void opacity(unsigned value) { a = value; }
+//
+//    static Color no_color() { return Color(0,0,0,0); }
+//
+//    Color gradient(Color c1, double k) {
+//        unsigned rx = unsigned( double(r) + (double(r) - double(c1.r)) * k );
+//        unsigned gx = unsigned( double(g) + (double(g) - double(c1.g)) * k );
+//        unsigned bx = unsigned( double(b) + (double(b) - double(c1.b)) * k );
+//        unsigned ax = unsigned( double(a) + (double(a) - double(c1.a)) * k );
+//        return Color(rx, gx, bx, ax);
+//    }
+//
+//
+//};
 
 
 }   //namespace lomse

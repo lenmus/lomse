@@ -161,7 +161,7 @@ void SoundEventsTable::store_event(float rTime, int eventType, int channel,
                                    MidiPitch pitch, int volume, int step,
                                    ImoStaffObj* pSO, int measure)
 {
-    SoundEvent* pEvent = new SoundEvent(rTime, eventType, channel, pitch,
+    SoundEvent* pEvent = LOMSE_NEW SoundEvent(rTime, eventType, channel, pitch,
                                         volume, step, pSO, measure);
     m_events.push_back(pEvent);
     m_numMeasures = max(m_numMeasures, measure);
@@ -179,10 +179,7 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
     if (pSO->is_note())
     {
         pNote = dynamic_cast<ImoNote*>(pSO);
-        update_context_accidentals(pNote);
-        step = pNote->get_step();
-        MidiPitch mp(step, pNote->get_octave(), m_accidentals[step]);
-        pitch = int(mp);
+        pitch = int(pNote->get_midi_pitch());
     }
 
     //Generate Note ON event
@@ -464,10 +461,10 @@ void SoundEventsTable::reset_accidentals(ImoKeySignature* pKey)
 void SoundEventsTable::update_context_accidentals(ImoNote* pNote)
 {
     int step = pNote->get_step();
-    int acc = pNote->get_accidentals();
+    EAccidentals acc = pNote->get_notated_accidentals();
     switch (acc)
     {
-    case k_no_accidentals:
+        case k_no_accidentals:
             //do not modify context
             break;
         case k_natural:

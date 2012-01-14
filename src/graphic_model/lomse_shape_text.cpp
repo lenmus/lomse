@@ -94,6 +94,15 @@ void GmoShapeText::select_font()
                           m_pStyle->is_italic() );
 }
 
+//---------------------------------------------------------------------------------------
+void GmoShapeText::set_text(const std::string& text)
+{
+    m_text = text;
+    select_font();
+    TextMeter meter(m_libraryScope);
+    m_size.width = meter.measure_width(text);
+    set_dirty(true);
+}
 
 
 
@@ -101,26 +110,28 @@ void GmoShapeText::select_font()
 // GmoShapeWord implementation
 //=======================================================================================
 GmoShapeWord::GmoShapeWord(ImoObj* pCreatorImo, int idx, const std::string& text,
-                           ImoStyle* pStyle, LUnits x, LUnits y,
+                           ImoStyle* pStyle, LUnits x, LUnits y, LUnits halfLeading,
                            LibraryScope& libraryScope)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_word, idx, Color(0,0,0))
     , m_text(text)
     , m_pStyle(pStyle)
     , m_pFontStorage( libraryScope.font_storage() )
     , m_libraryScope(libraryScope)
+    , m_halfLeading(halfLeading)
 {
     //bounds
     TextMeter meter(m_libraryScope);
     select_font();
     m_size.width = meter.measure_width(text);
-    m_size.height = meter.get_ascender() - meter.get_descender();
+    m_size.height = halfLeading + meter.get_font_height() + halfLeading;
 
     //position
     m_origin.x = x;
-    m_origin.y = y - m_size.height;     //move reference at baseline
+    m_origin.y = y;
 
-    //color
+    //other
     m_color = m_pStyle->get_color_property(ImoStyle::k_color);
+    m_baseline = m_origin.y + m_halfLeading + meter.get_ascender();
 }
 
 //---------------------------------------------------------------------------------------
@@ -138,46 +149,54 @@ void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
     select_font();
     Color color = determine_color_to_use(opt);
     pDrawer->set_text_color(color);
-    LUnits x = m_origin.x;
-    LUnits y = m_origin.y + m_size.height;     //reference is at text bottom
-    pDrawer->draw_text(x, y, m_text);
+    //AWARE: FreeType reference is at baseline
+    pDrawer->draw_text(m_origin.x, m_baseline, m_text);
+//    URect pos = determine_text_position_and_size();
+//    pDrawer->draw_text(pos.x, pos.y, m_label);
 
     //text decoration
     if (m_pStyle->get_int_property(ImoStyle::k_text_decoration) == ImoStyle::k_decoration_underline)
     {
-        TextMeter meter(m_libraryScope);
         LUnits xStart = m_origin.x;
         LUnits xEnd = m_origin.x + m_size.width;
-        LUnits y = m_origin.y + m_size.height;
+        LUnits y = m_origin.y + m_size.height * 1.12f;
         pDrawer->begin_path();
         pDrawer->fill(color);
         pDrawer->stroke(color);
-        pDrawer->stroke_width(15.0);
+        pDrawer->stroke_width( m_size.height * 0.075f );
         pDrawer->move_to(xStart, y);
         pDrawer->hline_to(xEnd);
         pDrawer->end_path();
+//        LUnits y = pos.y + pos.height * 0.12f;
+//        pDrawer->begin_path();
+//        pDrawer->fill(color);
+//        pDrawer->stroke(color);
+//        pDrawer->stroke_width( pos.height * 0.075f );
+//        pDrawer->move_to(pos.x, y);
+//        pDrawer->hline_to( pos.right() );
+//        pDrawer->end_path();
     }
 
     //draw reference lines
-    if (false)
+    if (opt.must_draw_box_for(GmoObj::k_box_paragraph))
     {
         TextMeter meter(m_libraryScope);
         LUnits xStart = m_origin.x;
         LUnits xEnd = m_origin.x + m_size.width;
         pDrawer->begin_path();
-        pDrawer->fill(Color(0, 0, 0, 0));
+        pDrawer->fill(Color(0, 0, 0, 0));     //transparent black
 
-        float factor = 1.500f;
-        //org
-        LUnits yOrg = m_origin.y;
-        pDrawer->stroke(Color(255, 0, 0));
+        //text-top (ascender: cyan)
+        LUnits yTextTop = m_origin.y + m_halfLeading;
+        pDrawer->begin_path();
+        pDrawer->stroke(Color(0, 255, 255));
         pDrawer->stroke_width(10.0);
-        pDrawer->move_to(xStart, yOrg);
+        pDrawer->move_to(xStart, yTextTop);
         pDrawer->hline_to(xEnd);
         pDrawer->end_path();
 
-        //baseline
-        LUnits yBase = m_origin.y + m_size.height;
+        //baseline (blue)
+        LUnits yBase = yTextTop + meter.get_ascender();
         pDrawer->begin_path();
         pDrawer->stroke(Color(0, 0, 255));
         pDrawer->stroke_width(10.0);
@@ -185,8 +204,8 @@ void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
         pDrawer->hline_to(xEnd);
         pDrawer->end_path();
 
-        //bottom
-        LUnits yBottom = yBase - meter.get_descender() * factor;
+        //text-bottom (descender: green)
+        LUnits yBottom = m_origin.y + m_size.height - m_halfLeading;
         pDrawer->begin_path();
         pDrawer->stroke(Color(0, 255, 0));
         pDrawer->stroke_width(10.0);
@@ -194,17 +213,27 @@ void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
         pDrawer->hline_to(xEnd);
         pDrawer->end_path();
 
-        //ascender
-        LUnits yAsc = yBase - meter.get_ascender() * factor ;
+        //middle line (magenta)
+        URect rect = meter.bounding_rectangle('x');
+        LUnits yMiddle = yBase - rect.height / 2.0f;
         pDrawer->begin_path();
-        pDrawer->stroke(Color(0, 255, 255));
+        pDrawer->stroke(Color(255, 0, 255));
         pDrawer->stroke_width(10.0);
-        pDrawer->move_to(xStart, yAsc);
+        pDrawer->fill(Color(0, 0, 0, 0));     //transparent black
+        pDrawer->move_to(xStart, yMiddle);
         pDrawer->hline_to(xEnd);
+        pDrawer->end_path();
 
-//        pDrawer->vline_to(m_origin.y + m_size.height);
-//        pDrawer->hline_to(m_origin.x);
-//        pDrawer->vline_to(m_origin.y);
+        //shape bounding box (red)
+        pDrawer->begin_path();
+        pDrawer->stroke(Color(255, 0, 0));
+        pDrawer->stroke_width(10.0);
+        pDrawer->fill(Color(0, 0, 0, 0));     //transparent black
+        pDrawer->move_to(m_origin.x, m_origin.y);
+        pDrawer->hline_to(m_origin.x + m_size.width);
+        pDrawer->vline_to(m_origin.y + m_size.height);
+        pDrawer->hline_to(m_origin.x);
+        pDrawer->vline_to(m_origin.y);
         pDrawer->end_path();
     }
 
@@ -488,7 +517,7 @@ void GmoShapeWord::select_font()
 //    // Make the bitmap masked
 //    wxImage image = bitmap.ConvertToImage();
 //    image.SetMaskColour(255, 255, 255);
-//    wxBitmap* pBitmap = new wxBitmap(image);
+//    wxBitmap* pBitmap = LOMSE_NEW wxBitmap(image);
 //
 //    ////DBG -----------
 //    //std::string sFileName = _T("GmoShapeTitle.bmp");
@@ -649,13 +678,13 @@ void GmoShapeWord::select_font()
 //	if (uBoxAreaWidth >= m_uTextWidth)
 //    {
 //        //the text fits in one line
-//        pCurLine = new TextLine(m_text, m_uTextWidth, m_uTextHeight);
+//        pCurLine = LOMSE_NEW TextLine(m_text, m_uTextWidth, m_uTextHeight);
 //    }
 //    else
 //	{
 //		//we have to split the text. Loop to add chars until line full
 //		LUnits uWidth, uHeight;
-//        pCurLine = new TextLine(_T(""), 0.0f, m_uTextHeight);
+//        pCurLine = LOMSE_NEW TextLine(_T(""), 0.0f, m_uTextHeight);
 //		int iC = 0;
 //		LUnits uAvailable = uBoxAreaWidth;
 //		while(iC < (int)m_text.Length())
@@ -670,7 +699,7 @@ void GmoShapeWord::select_font()
 //                pCurLine->uPos = UPoint(uxLine, uyLine);
 //                uyLine += pCurLine->uHeight;
 //
-//                pCurLine = new TextLine(_T(""), 0.0f, m_uTextHeight);
+//                pCurLine = LOMSE_NEW TextLine(_T(""), 0.0f, m_uTextHeight);
 //                uAvailable = uBoxAreaWidth;
 //            }
 //
@@ -812,7 +841,7 @@ void GmoShapeWord::select_font()
 //    // Make the bitmap masked
 //    wxImage image = bitmap.ConvertToImage();
 //    image.SetMaskColour(255, 255, 255);
-//    wxBitmap* pBitmap = new wxBitmap(image);
+//    wxBitmap* pBitmap = LOMSE_NEW wxBitmap(image);
 //
 //    ////DBG -----------
 //    //std::string sFileName = _T("GmoShapeTextbox.bmp");

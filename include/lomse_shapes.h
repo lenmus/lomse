@@ -23,6 +23,7 @@
 
 #include "lomse_shape_base.h"
 #include "lomse_injectors.h"
+#include "lomse_image.h"
 
 namespace lomse
 {
@@ -30,6 +31,7 @@ namespace lomse
 //forward declarations
 class FontStorage;
 class ImoButton;
+class ImoImage;
 class ImoStyle;
 
 //---------------------------------------------------------------------------------------
@@ -75,6 +77,7 @@ protected:
     ImoButton* m_pButton;
     LUnits m_xLabel;
     LUnits m_yLabel;
+    Color m_bgColor;
 
 public:
     GmoShapeButton(ImoObj* pCreatorImo, UPoint pos, USize size,
@@ -83,11 +86,29 @@ public:
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
+    //modifiers
+    void change_color(Color color);
+
 protected:
     void select_font();
     void center_text();
 
     //Color get_normal_color();
+};
+
+//---------------------------------------------------------------------------------------
+class GmoShapeImage : public GmoSimpleShape
+{
+protected:
+    SpImage m_image;
+
+public:
+    GmoShapeImage(ImoObj* pCreatorImo, SpImage image, UPoint pos, USize size);
+    ~GmoShapeImage() {}
+
+    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+
+protected:
 };
 
 //---------------------------------------------------------------------------------------
@@ -225,7 +246,7 @@ public:
 //
 //protected:
 //
-//    wxWindow*       m_pWidget;      //the window to embbed
+//    wxWindow*       m_pControl;      //the window to embbed
 //};
 //
 ////global functions defined in this module

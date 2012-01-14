@@ -37,7 +37,7 @@ public:
 
     LdpParserTestFixture()     //SetUp fixture
     {
-        m_pLibraryScope = new LibraryScope(cout);
+        m_pLibraryScope = LOMSE_NEW LibraryScope(cout);
         m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
 
@@ -246,6 +246,15 @@ SUITE(LdpParserTest)
         SpLdpTree score = parser.parse_text("(clef G noVisible)");
         //cout << score->get_root()->to_string() << endl;
         CHECK( score->get_root()->to_string() == "(clef G (visible no))" );
+        delete score->get_root();
+    }
+
+    TEST_FIXTURE(LdpParserTestFixture, ParserReadChinese)
+    {
+        LdpParser parser(cout, m_pLibraryScope->ldp_factory());
+        SpLdpTree score = parser.parse_text("(heading 1 (style \"header\")(txt \"普通练习\"))");
+        //cout << score->get_root()->to_string() << endl;
+        CHECK( score->get_root()->to_string() == "(heading 1 (style \"header\") (txt \"普通练习\"))" );
         delete score->get_root();
     }
 

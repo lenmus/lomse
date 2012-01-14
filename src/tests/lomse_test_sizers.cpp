@@ -38,7 +38,7 @@ public:
 
     SizersTestFixture()     //SetUp fixture
     {
-        m_pLibraryScope = new LibraryScope(cout);
+        m_pLibraryScope = LOMSE_NEW LibraryScope(cout);
         m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
 
@@ -59,8 +59,7 @@ SUITE(SizersTest)
     TEST_FIXTURE(SizersTestFixture, SizersTest_FlowVerticalTakesAllWidth)
     {
         FlowSizer sizer(FlowSizer::k_vertical);
-        GmoStubScore stub(NULL);
-        GmoBoxScorePage box(&stub);
+        GmoBoxScorePage box(NULL);
         sizer.add_child( new SizerChild(&box) );
         sizer.layout(2100.0f, 2970.0f);
         CHECK( sizer.is_vertical() == true );
@@ -73,8 +72,7 @@ SUITE(SizersTest)
     TEST_FIXTURE(SizersTestFixture, SizersTest_FlowHorizontalTakesAllHeight)
     {
         FlowSizer sizer(FlowSizer::k_horizontal);
-        GmoStubScore stub(NULL);
-        GmoBoxScorePage box(&stub);
+        GmoBoxScorePage box(NULL);
         sizer.add_child( new SizerChild(&box) );
         sizer.layout(2100.0f, 2970.0f);
         CHECK( sizer.is_vertical() == false );

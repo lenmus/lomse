@@ -63,18 +63,17 @@ ScoreLayouter::ScoreLayouter(ImoContentObj* pItem, Layouter* pParent,
     : Layouter(pItem, pParent, pGModel, libraryScope, NULL)
     , m_libraryScope(libraryScope)
     , m_pScore( dynamic_cast<ImoScore*>(pItem) )
-    , m_pScoreMeter( new ScoreMeter(m_pScore) )
+    , m_pScoreMeter( LOMSE_NEW ScoreMeter(m_pScore) )
     , m_pColsBuilder(NULL)
     , m_pShapesCreator(NULL)
-    , m_pStubScore(NULL)
     , m_pCurBoxPage(NULL)
     , m_pCurBoxSystem(NULL)
     , m_iColumnToTrace(-1)
 {
-    m_pShapesCreator = new ShapesCreator(m_libraryScope, m_pScoreMeter,
+    m_pShapesCreator = LOMSE_NEW ShapesCreator(m_libraryScope, m_pScoreMeter,
                                          m_shapesStorage, m_instrEngravers);
 
-    m_pColsBuilder = new ColumnsBuilder(m_libraryScope, m_pScoreMeter,
+    m_pColsBuilder = LOMSE_NEW ColumnsBuilder(m_libraryScope, m_pScoreMeter,
                                         this, m_pScore, m_shapesStorage,
                                         m_pShapesCreator,
                                         m_ColLayouters, m_instrEngravers);
@@ -99,7 +98,6 @@ void ScoreLayouter::prepare_to_start_layout()
 {
     Layouter::prepare_to_start_layout();
 
-    create_stub_for_score();
     create_instrument_engravers();
     get_score_renderization_options();
     decide_systems_indentation();
@@ -163,7 +161,7 @@ void ScoreLayouter::create_system()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::create_system_layouter()
 {
-    m_pCurSysLyt = new SystemLayouter(this, m_libraryScope, m_pScoreMeter,
+    m_pCurSysLyt = LOMSE_NEW SystemLayouter(this, m_libraryScope, m_pScoreMeter,
                                       m_pScore, m_shapesStorage, m_pShapesCreator,
                                       m_ColLayouters, m_instrEngravers);
     m_sysLayouters.push_back(m_pCurSysLyt);
@@ -210,7 +208,7 @@ void ScoreLayouter::create_system_box()
 void ScoreLayouter::add_system_to_page()
 {
     m_pCurBoxPage->add_system(m_pCurBoxSystem, m_iCurSystem);
-    m_pCurBoxSystem->store_shapes_in_doc_page();
+    m_pCurBoxSystem->add_shapes_to_tables();
 
     advance_paper_cursor_to_bottom_of_added_system();
     is_first_system_in_page(false);
@@ -279,7 +277,7 @@ void ScoreLayouter::decide_line_breaks()
 void ScoreLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
                                        LUnits height)
 {
-    m_pItemMainBox = new GmoBoxScorePage(m_pStubScore);
+    m_pItemMainBox = LOMSE_NEW GmoBoxScorePage(m_pScore);
     pParentBox->add_child_box(m_pItemMainBox);
 
     m_pItemMainBox->set_origin(pos);
@@ -459,19 +457,12 @@ int ScoreLayouter::get_num_columns()
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreLayouter::create_stub_for_score()
-{
-    m_pStubScore = new GmoStubScore( m_pScore );
-    m_pGModel->add_stub(m_pStubScore);
-}
-
-//---------------------------------------------------------------------------------------
 void ScoreLayouter::create_instrument_engravers()
 {
     for (int iInstr = 0; iInstr < m_pScore->get_num_instruments(); iInstr++)
     {
         ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
-        m_instrEngravers.push_back( new InstrumentEngraver(m_libraryScope, m_pScoreMeter,
+        m_instrEngravers.push_back( LOMSE_NEW InstrumentEngraver(m_libraryScope, m_pScoreMeter,
                                                            pInstr, m_pScore) );
     }
 }
@@ -623,7 +614,7 @@ ColumnsBuilder::ColumnsBuilder(LibraryScope& libraryScope, ScoreMeter* pScoreMet
     , m_pShapesCreator(pShapesCreator)
     , m_ColLayouters(colLayouters)
     , m_instrEngravers(instrEngravers)
-    , m_pSysCursor( new StaffObjsCursor(m_pScore) )
+    , m_pSysCursor( LOMSE_NEW StaffObjsCursor(m_pScore) )
     , m_iColumnToTrace(-1)
 {
 }
@@ -686,7 +677,7 @@ void ColumnsBuilder::collect_content_for_this_column()
         if ( breaker.column_should_be_finished(pSO, rTime, iLine) )
             break;
 
-        if (pSO->is_control())
+        if (pSO->is_system_break())
         {
             if (m_iColumn > 0)
                 m_ColLayouters[m_iColumn-1]->set_system_break(true);
@@ -719,7 +710,8 @@ void ColumnsBuilder::collect_content_for_this_column()
                 int clefType = m_pSysCursor->get_applicable_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                                                                  m_pagePos, clefType);
-                include_object(m_iColumn, iLine, iInstr, pSO, rTime, iStaff, pShape);
+                float time = (pSO->is_spacer() ? -1.0f : rTime);
+                include_object(m_iColumn, iLine, iInstr, pSO, time, iStaff, pShape);
             }
 
             store_info_about_attached_objects(pSO, pShape, iInstr, iStaff,
@@ -760,7 +752,7 @@ void ColumnsBuilder::store_info_about_attached_objects(ImoStaffObj* pSO,
     if (!pAuxObjs)
         return;
 
-    PendingAuxObjs* data = new PendingAuxObjs(pSO, pMainShape, iInstr, iStaff,
+    PendingAuxObjs* data = LOMSE_NEW PendingAuxObjs(pSO, pMainShape, iInstr, iStaff,
                                               iCol, iLine, pInstr);
     m_pScoreLyt->m_pendingAuxObjs.push_back(data);
 }
@@ -884,7 +876,7 @@ void ColumnsBuilder::create_column_boxes()
 //---------------------------------------------------------------------------------------
 GmoBoxSlice* ColumnsBuilder::create_slice_box()
 {
-    GmoBoxSlice* pSlice = new GmoBoxSlice(m_iColumn, m_pScore);
+    GmoBoxSlice* pSlice = LOMSE_NEW GmoBoxSlice(m_iColumn, m_pScore);
 	pSlice->set_left(0.0f);
 	pSlice->set_top(0.0f);
 
@@ -896,8 +888,8 @@ GmoBoxSlice* ColumnsBuilder::create_slice_box()
 //---------------------------------------------------------------------------------------
 void ColumnsBuilder::create_column_layouter()
 {
-    ColumnStorage* pStorage = new ColumnStorage();
-    ColumnLayouter* pLyt = new ColumnLayouter(m_libraryScope, m_pScoreMeter, pStorage);
+    ColumnStorage* pStorage = LOMSE_NEW ColumnStorage();
+    ColumnLayouter* pLyt = LOMSE_NEW ColumnLayouter(m_libraryScope, m_pScoreMeter, pStorage);
     m_ColLayouters.push_back( pLyt );
 }
 
@@ -935,7 +927,7 @@ bool ColumnsBuilder::determine_if_is_in_prolog(float rTime)
 //////void ScoreLayouter::AddTimeGridToBoxSlice(int iCol, GmoBoxSlice* pBSlice)
 //////{
 //////    //create the time-grid table and transfer it (and its ownership) to GmoBoxSlice
-//////    pBSlice->SetTimeGridTable( new TimeGridTable(m_ColStorage[iCol]) );
+//////    pBSlice->SetTimeGridTable( LOMSE_NEW TimeGridTable(m_ColStorage[iCol]) );
 //////}
 
 ////////---------------------------------------------------------------------------------------
@@ -1020,6 +1012,10 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
 {
     //factory method to create shapes for staffobjs
 
+    if (!pSO->is_visible())
+        return LOMSE_NEW GmoShapeInvisible(pSO, 0, pos, USize(0.0f, 0.0f));
+
+
     switch (pSO->get_obj_type())
     {
         case k_imo_barline:
@@ -1079,8 +1075,15 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             return engrv.create_shape_normal(pImo, iInstr, iStaff, pos,
                                              beats, beat_type);
         }
+        case k_imo_spacer:
+        {
+            ImoSpacer* pImo = dynamic_cast<ImoSpacer*>(pSO);
+            LUnits space = m_pScoreMeter->tenths_to_logical(pImo->get_width(),
+                                                            iInstr, iStaff);
+            return LOMSE_NEW GmoShapeInvisible(pSO, 0, pos, USize(space, 0.0f));
+        }
         default:
-            return new GmoShapeInvisible(pSO, 0, pos, USize(0.0, 0.0));
+            return LOMSE_NEW GmoShapeInvisible(pSO, 0, pos, USize(0.0f, 0.0f));
     }
 }
 
@@ -1101,7 +1104,7 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
                                       pParentShape);
         }
         default:
-            return new GmoShapeInvisible(pAO, 0, pos, USize(0.0, 0.0));
+            return LOMSE_NEW GmoShapeInvisible(pAO, 0, pos, USize(0.0, 0.0));
     }
 }
 
@@ -1121,13 +1124,13 @@ void ShapesCreator::start_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO,
     {
         case k_imo_beam:
         {
-            pEngrv = new BeamEngraver(m_libraryScope, m_pScoreMeter);
+            pEngrv = LOMSE_NEW BeamEngraver(m_libraryScope, m_pScoreMeter);
             break;
         }
 
         //case k_imo_chord:
         //{
-        //    pEngrv = new ChordEngraver(m_libraryScope, m_pScoreMeter);
+        //    pEngrv = LOMSE_NEW ChordEngraver(m_libraryScope, m_pScoreMeter);
         //    break;
         //}
 
@@ -1136,7 +1139,7 @@ void ShapesCreator::start_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO,
             InstrumentEngraver* pInstrEngrv = m_instrEngravers[iInstr];
             LUnits xRight = pInstrEngrv->get_staves_right();
             LUnits xLeft = pInstrEngrv->get_staves_left();
-            pEngrv = new SlurEngraver(m_libraryScope, m_pScoreMeter, xLeft, xRight);
+            pEngrv = LOMSE_NEW SlurEngraver(m_libraryScope, m_pScoreMeter, xLeft, xRight);
             break;
         }
 
@@ -1145,13 +1148,13 @@ void ShapesCreator::start_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO,
             InstrumentEngraver* pInstrEngrv = m_instrEngravers[iInstr];
             LUnits xRight = pInstrEngrv->get_staves_right();
             LUnits xLeft = pInstrEngrv->get_staves_left();
-            pEngrv = new TieEngraver(m_libraryScope, m_pScoreMeter, xLeft, xRight);
+            pEngrv = LOMSE_NEW TieEngraver(m_libraryScope, m_pScoreMeter, xLeft, xRight);
             break;
         }
 
         case k_imo_tuplet:
         {
-            pEngrv = new TupletEngraver(m_libraryScope, m_pScoreMeter);
+            pEngrv = LOMSE_NEW TupletEngraver(m_libraryScope, m_pScoreMeter);
             break;
         }
 

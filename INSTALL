@@ -183,9 +183,16 @@ Alternatively, build step-by-step, checking results:
 
  	cd bin				# run example app.
 	./example_1
-	
 
-Now you can install lomse:
+
+In case of problems, before repeating al the build procedure (after fixing the errors), the makefile should be re-created. The safest way to proceed is to delete the whole content of the build folder and start againg from step 1. So move to folder to build and clean all:
+
+    cd ../build-lomse
+    rm * -r     #AWARE: BE SURE YOU ARE IN THE build-lomse FOLDER !!!!
+    and repeat build process from step 1.
+
+
+When build is ok and test and example works, you can install lomse:
 
     sudo make install
 

@@ -28,6 +28,8 @@
 #ifndef __LOMSE_FONT_CACHE_MANAGER_H__
 #define __LOMSE_FONT_CACHE_MANAGER_H__
 
+#include "lomse_config.h"
+
 #include <string.h>
 #include "agg_array.h"
 

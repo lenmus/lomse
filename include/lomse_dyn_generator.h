@@ -21,7 +21,7 @@
 #ifndef __LOMSE_DYN_GENERATOR_H__
 #define __LOMSE_DYN_GENERATOR_H__
 
-//#include "lomse_events.h"
+#include "lomse_control.h"
 
 namespace lomse
 {
@@ -37,15 +37,36 @@ class DynGenerator
 {
 protected:
     long m_dynId;
+    list<Control*> m_controls;
 
     DynGenerator(long dynId) : m_dynId(dynId) {}
 
 public:
-    virtual ~DynGenerator() {}
+    virtual ~DynGenerator() {
+        list<Control*>::iterator it;
+        for (it = m_controls.begin(); it != m_controls.end(); ++it)
+            delete *it;
+        m_controls.clear();
+    }
 
     virtual void generate_content(ImoDynamic* pDyn, Document* pDoc) = 0;
     virtual long get_dynid() { return m_dynId; }
-    //virtual void on_event(EventInfo* pEvent) = 0;
+
+    void accept_control_ownership(Control* control) {
+        m_controls.push_back(control);
+    }
+    void delete_control(Control* control) {
+        list<Control*>::iterator it;
+        for (it = m_controls.begin(); it != m_controls.end(); ++it)
+        {
+            if (*it == control)
+            {
+                delete *it;
+                break;
+            }
+        }
+    }
+
 };
 
 

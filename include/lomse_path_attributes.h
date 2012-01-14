@@ -21,6 +21,7 @@
 #ifndef __LOMSE_PATH_ATTRIBUTES_H__        //to avoid nested includes
 #define __LOMSE_PATH_ATTRIBUTES_H__
 
+#include "lomse_build_options.h"
 #include "lomse_agg_types.h"
 
 using namespace agg;
@@ -28,28 +29,80 @@ using namespace agg;
 namespace lomse
 {
 
-// PathAttributes: struct to contain attributes for a path
 //---------------------------------------------------------------------------------------
+enum EFillMode
+{
+    k_fill_none = 0,
+    k_fill_solid,
+    k_fill_gradient_linear,
+    k_fill_gradient_radial,
+};
+
+
+
+//---------------------------------------------------------------------------------------
+// GradientAttributes: struct to contain attributes for a gradient
+// - colors: an array of 256 colors with the gradient colors
+// - transform: the surface to apply the gradient to is not necessarily 256 pixels long
+//       so this transform doest the mapping between the surface and the colors.
+// - d1, d2: are two values that define the range to scale the gradient, that is, the
+//      total number of steps desired. For instance d1=0, d2=100 means 100 steps
+
+struct GradientAttributes
+{
+    GradientColors  colors;
+    TransAffine     transform;
+    double          d1;
+    double          d2;
+
+    // Empty constructor
+    GradientAttributes()
+        : transform()
+        , d1(0.0)
+        , d2(0.0)
+    {
+        Color c1(255, 255, 255, 0);     //transparent white
+        for (int i=0; i < 256; ++i)
+        {
+            colors[i] = c1;
+        }
+    }
+
+    // Copy constructor
+    GradientAttributes(GradientAttributes* grad)
+        : colors(grad->colors)
+        , transform(grad->transform)
+        , d1(grad->d1)
+        , d2(grad->d2)
+    {
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
+// PathAttributes: struct to contain attributes for a path
 struct PathAttributes
 {
-    unsigned     path_index;
-    Color        fill_color;
-    Color        stroke_color;
-    bool         fill_flag;
-    bool         stroke_flag;
-    bool         even_odd_flag;
-    line_join_e  line_join;
-    line_cap_e   line_cap;
-    double       miter_limit;
-    double       stroke_width;
-    TransAffine  transform;
+    unsigned            path_index;
+    Color               fill_color;
+    Color               stroke_color;
+    EFillMode           fill_mode;
+    bool                stroke_flag;
+    bool                even_odd_flag;
+    line_join_e         line_join;
+    line_cap_e          line_cap;
+    double              miter_limit;
+    double              stroke_width;
+    TransAffine         transform;
+    GradientAttributes* fill_gradient;
 
     // Empty constructor
     PathAttributes()
         : path_index(0)
         , fill_color(Color(0,0,0))
         , stroke_color(Color(0,0,0))
-        , fill_flag(true)
+        , fill_mode(k_fill_solid)
         , stroke_flag(false)
         , even_odd_flag(false)
         , line_join(miter_join)
@@ -57,6 +110,7 @@ struct PathAttributes
         , miter_limit(4.0)
         , stroke_width(1.0)
         , transform()
+        , fill_gradient(NULL)
     {
     }
 
@@ -65,7 +119,7 @@ struct PathAttributes
         : path_index(attr.path_index)
         , fill_color(attr.fill_color)
         , stroke_color(attr.stroke_color)
-        , fill_flag(attr.fill_flag)
+        , fill_mode(attr.fill_mode)
         , stroke_flag(attr.stroke_flag)
         , even_odd_flag(attr.even_odd_flag)
         , line_join(attr.line_join)
@@ -73,7 +127,10 @@ struct PathAttributes
         , miter_limit(attr.miter_limit)
         , stroke_width(attr.stroke_width)
         , transform(attr.transform)
+        , fill_gradient(NULL)
     {
+        if (attr.fill_gradient)
+            fill_gradient = LOMSE_NEW GradientAttributes(attr.fill_gradient);
     }
 
     // Copy constructor with new index value
@@ -81,7 +138,7 @@ struct PathAttributes
         : path_index(idx)
         , fill_color(attr.fill_color)
         , stroke_color(attr.stroke_color)
-        , fill_flag(attr.fill_flag)
+        , fill_mode(attr.fill_mode)
         , stroke_flag(attr.stroke_flag)
         , even_odd_flag(attr.even_odd_flag)
         , line_join(attr.line_join)
@@ -89,13 +146,21 @@ struct PathAttributes
         , miter_limit(attr.miter_limit)
         , stroke_width(attr.stroke_width)
         , transform(attr.transform)
+        , fill_gradient(NULL)
     {
+        if (attr.fill_gradient)
+            fill_gradient = LOMSE_NEW GradientAttributes(attr.fill_gradient);
+    }
+
+    //destructor
+    ~PathAttributes()
+    {
+        //TODO: Following sentence produces a crash. Why?
+        //delete fill_gradient;
     }
 };
 
-
-typedef pod_bvector<PathAttributes>     AttrStorage;
-
+typedef pod_bvector<PathAttributes>         AttrStorage;
 
 
 }   //namespace lomse

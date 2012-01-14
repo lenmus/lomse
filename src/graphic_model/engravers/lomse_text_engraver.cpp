@@ -88,7 +88,7 @@ GmoShapeText* TextEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft,
     }
 
     int idx = 0;
-    return new GmoShapeText(pCreatorImo, idx, m_text, m_pStyle, xLeft, yTop,
+    return LOMSE_NEW GmoShapeText(pCreatorImo, idx, m_text, m_pStyle, xLeft, yTop,
                             m_libraryScope);
 }
 

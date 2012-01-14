@@ -117,7 +117,7 @@ ImoObj* Linker::add_content(ImoContent* pContent)
 {
     if (m_pParent && (m_pParent->is_document() || m_pParent->is_box_container()))
     {
-        m_pParent->append_child(pContent);
+        m_pParent->append_child_imo(pContent);
         return NULL;
     }
     return pContent;
@@ -141,7 +141,7 @@ ImoObj* Linker::add_option(ImoOptionInfo* pOpt)
     if (m_pParent && m_pParent->is_score())
     {
         ImoScore* pScore = static_cast<ImoScore*>( m_pParent );
-        pScore->add_option(pOpt);
+        pScore->add_or_replace_option(pOpt);
         return NULL;
     }
     return pOpt;
@@ -339,9 +339,9 @@ ImoObj* Linker::add_text_item(ImoTextItem* pText)
 {
     if (m_pParent)
     {
-        if (m_pParent->is_textblock())
+        if (m_pParent->is_box_content())
         {
-            ImoTextBlock* pBox = static_cast<ImoTextBlock*>(m_pParent);
+            ImoBoxContent* pBox = static_cast<ImoBoxContent*>(m_pParent);
             pBox->add_item(pText);
             return NULL;
         }
@@ -370,7 +370,7 @@ ImoObj* Linker::add_title(ImoScoreTitle* pTitle)
 ImoObj* Linker::add_child(int parentType, ImoObj* pImo)
 {
     if (m_pParent && m_pParent->get_obj_type() == parentType)
-        m_pParent->append_child(pImo);
+        m_pParent->append_child_imo(pImo);
     return pImo;
 }
 
@@ -380,7 +380,7 @@ ImoObj* Linker::add_staffobj(ImoStaffObj* pSO)
     if (m_pParent)
     {
         if (m_pParent->is_music_data())
-            m_pParent->append_child(pSO);
+            m_pParent->append_child_imo(pSO);
         else if (m_pParent->is_chord() && pSO->is_note())
         {
             ImoChord* pChord = static_cast<ImoChord*>(m_pParent);

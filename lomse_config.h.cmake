@@ -60,7 +60,11 @@
 #define LOMSE_CREATE_DLL    @LOMSE_CREATE_DLL@
 #define LOMSE_USE_DLL       @LOMSE_USE_DLL@
 
-        
+//---------------------------------------------------------------------------------------
+// build options
+//---------------------------------------------------------------------------------------
+#define LOMSE_DEBUG      @LOMSE_DEBUG@      //Debug build: include debug options
+
 
 #endif  // __LOMSE_CONFIG_H__
 

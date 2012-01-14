@@ -53,6 +53,7 @@ protected:
     IdAssigner*     m_pIdAssigner;
     Document*       m_pDoc;
     LdpTree*        m_pFinalTree;
+    string          m_fileLocator;
 
 public:
     LdpCompiler(LdpParser* p, Analyser* a, ModelBuilder* mb, IdAssigner* ida,
@@ -69,8 +70,9 @@ public:
     InternalModel* create_empty();
     InternalModel* create_with_empty_score();
 
+    //info
     int get_num_errors();
-
+    string get_file_locator() { return m_fileLocator; }
 
 protected:
     InternalModel* compile(LdpTree* pParseTree);

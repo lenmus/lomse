@@ -69,6 +69,28 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
+class xxxxxxLdpGenerator : public LdpGenerator
+{
+protected:
+    //ImoXXXXX* m_pObj;
+
+public:
+    xxxxxxLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        //m_pObj = static_cast<ImoXXXXX*>(pImo);
+    }
+
+    std::string generate_source()
+    {
+        start_element();
+        //add_element_name("xxxxx", m_pObj);
+        end_element();
+        return m_source.str();
+    }
+};
+
+
+//---------------------------------------------------------------------------------------
 class BarlineLdpGenerator : public LdpGenerator
 {
 protected:
@@ -77,7 +99,7 @@ protected:
 public:
     BarlineLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
     {
-        m_pObj = dynamic_cast<ImoBarline*>(pImo);
+        m_pObj = static_cast<ImoBarline*>(pImo);
     }
 
     std::string generate_source()
@@ -101,7 +123,7 @@ protected:
 public:
     ClefLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
     {
-        m_pObj = dynamic_cast<ImoClef*>(pImo);
+        m_pObj = static_cast<ImoClef*>(pImo);
     }
 
     std::string generate_source()
@@ -125,45 +147,6 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-class ScoreObjLdpGenerator : public LdpGenerator
-{
-protected:
-    ImoScoreObj* m_pObj;
-
-public:
-    ScoreObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
-        : LdpGenerator(pExporter)
-    {
-        m_pObj = dynamic_cast<ImoScoreObj*>(pImo);
-    }
-
-    std::string generate_source()
-    {
-        add_visible();
-        add_color();
-        source_for_base_contentobj(m_pObj);
-        return m_source.str();
-    }
-
-protected:
-
-    void add_visible()
-    {
-        if (!m_pObj->is_visible())
-            m_source << " (visible no)";
-    }
-
-    void add_color()
-    {
-        //color (if not black)
-        Color color = m_pObj->get_color();
-        if (color != Color(0,0,0))
-            m_source << " (color " << LdpExporter::color_to_ldp(color) << ")";
-    }
-};
-
-
-//---------------------------------------------------------------------------------------
 class ContentObjLdpGenerator : public LdpGenerator
 {
 protected:
@@ -172,7 +155,7 @@ protected:
 public:
     ContentObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
     {
-        m_pObj = dynamic_cast<ImoContentObj*>(pImo);
+        m_pObj = static_cast<ImoContentObj*>(pImo);
     }
 
     std::string generate_source()
@@ -210,7 +193,7 @@ protected:
 //                {
 //                    ImRelObj* pRO = dynamic_cast<ImRelObj*)>(pAuxObj);
 //
-//                    //exclude beams, as source code for them is generted in lmNote.
+//                    //exclude beams, as source code for them is generted in ImoNote.
 //                    //AWARE. This is necessary because LDP parser needs to have beam
 //                    //info to crete the note, before it can process any other attachment.
 //                    //Therefore, it was decided to generate beam tag before generating
@@ -229,7 +212,7 @@ protected:
 //                {
 //                    lmRelObX* pRO = (lmRelObX*)pAuxObj;
 //
-//                    //exclude beams, as source code for them is generted in lmNote.
+//                    //exclude beams, as source code for them is generted in ImoNote.
 //                    //AWARE. This is necessary because LDP parser needs to have beam
 //                    //info to crete the note, before it can process any other attachment.
 //                    //Therefore, it was decided to generate beam tag before generating
@@ -288,6 +271,138 @@ public:
 
 
 //---------------------------------------------------------------------------------------
+class InstrumentLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoInstrument* m_pObj;
+
+public:
+    InstrumentLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoInstrument*>(pImo);
+    }
+
+    std::string generate_source()
+    {
+        start_element();
+        add_element_name("instrument", m_pObj);
+
+        add_num_staves();
+        add_midi_info();
+        add_name_abbreviation();
+        add_music_data();
+
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_num_staves()
+    {
+	    //sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
+	    //sSource += wxString::Format(_T("(staves %d)\n"), m_pVStaff->GetNumStaves());
+     //   int nStaves = m_pVStaff->GetNumStaves();
+     //   for (int i=0; i < nStaves; i++)
+     //       sSource += m_pVStaff->GetStaff(i+1)->SourceLDP(nIndent, fUndoData);
+    }
+
+    void add_midi_info()
+    {
+	    //sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
+	    //sSource += wxString::Format(_T("(infoMIDI %d %d)\n"), m_nMidiInstr, m_nMidiChannel);
+    }
+
+    void add_name_abbreviation()
+    {
+     //   if (m_pName)
+     //   {
+	    //    sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
+     //       sSource += m_pName->SourceLDP(_T("name"), fUndoData);
+     //       sSource += _T("\n");
+     //   }
+     //   if (m_pAbbreviation)
+     //   {
+	    //    sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
+     //       sSource += m_pAbbreviation->SourceLDP(_T("abbrev"), fUndoData);
+     //       sSource += _T("\n");
+     //   }
+    }
+
+    void add_music_data()
+    {
+        add_source_for( m_pObj->get_musicdata() );
+    }
+};
+
+
+//---------------------------------------------------------------------------------------
+class KeySignatureLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoKeySignature* m_pObj;
+
+public:
+    KeySignatureLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoKeySignature*>(pImo);
+    }
+
+    std::string generate_source()
+    {
+        start_element();
+        add_element_name("key", m_pObj);
+
+        add_key_type();
+
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_key_type()
+    {
+        switch(m_pObj->get_key_type())
+        {
+            case k_key_C:   m_source << "C";    break;
+            case k_key_G:   m_source << "G";    break;
+            case k_key_D:   m_source << "D";    break;
+            case k_key_A:   m_source << "A";    break;
+            case k_key_E:   m_source << "E";    break;
+            case k_key_B:   m_source << "B";    break;
+            case k_key_Fs:  m_source << "Fs";   break;
+            case k_key_Cs:  m_source << "Cs";   break;
+            case k_key_Cf:  m_source << "Cf";   break;
+            case k_key_Gf:  m_source << "Gf";   break;
+            case k_key_Df:  m_source << "Df";   break;
+            case k_key_Af:  m_source << "Af";   break;
+            case k_key_Ef:  m_source << "Ef";   break;
+            case k_key_Bf:  m_source << "Bf";   break;
+            case k_key_F:   m_source << "F";    break;
+            case k_key_a:   m_source << "a";    break;
+            case k_key_e:   m_source << "e";    break;
+            case k_key_b:   m_source << "b";    break;
+            case k_key_fs:  m_source << "fs";   break;
+            case k_key_cs:  m_source << "cs";   break;
+            case k_key_gs:  m_source << "gs";   break;
+            case k_key_ds:  m_source << "ds";   break;
+            case k_key_as:  m_source << "as";   break;
+            case k_key_af:  m_source << "af";   break;
+            case k_key_ef:  m_source << "ef";   break;
+            case k_key_bf:  m_source << "bf";   break;
+            case k_key_f:   m_source << "f";    break;
+            case k_key_c:   m_source << "c";    break;
+            case k_key_g:   m_source << "g";    break;
+            case k_key_d:   m_source << "d";    break;
+            default:                            break;
+        }
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
 class LenmusdocLdpGenerator : public LdpGenerator
 {
 protected:
@@ -296,7 +411,7 @@ protected:
 public:
     LenmusdocLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
     {
-        m_pObj = dynamic_cast<ImoDocument*>(pImo);
+        m_pObj = static_cast<ImoDocument*>(pImo);
     }
 
     std::string generate_source()
@@ -304,6 +419,7 @@ public:
         start_element();
         add_element_name("lenmusdoc", m_pObj);
         add_version();
+        add_comment();
         add_content();
         end_element();
         return m_source.str();
@@ -316,6 +432,15 @@ protected:
         m_source << "(vers ";
         m_source << m_pObj->get_version();
         m_source << ") ";
+    }
+
+    void add_comment()
+    {
+        //m_source << "   //LDP file generated by LenMus, version ";
+        //m_source << wxGetApp().GetVersionNumber();
+        //m_source << ". Date: ";
+        //m_source << (wxDateTime::Now()).Format(_T("%Y-%m-%d"));
+        //m_source << _T("\n");
     }
 
     void add_content()
@@ -334,6 +459,129 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
+class MusicDataLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoMusicData* m_pObj;
+
+public:
+    MusicDataLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoMusicData*>(pImo);
+    }
+
+    std::string generate_source()
+    {
+        start_element();
+        add_element_name("musicData", m_pObj);
+
+        add_staffobjs();
+
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_staffobjs()
+    {
+        ImoObj::children_iterator it = m_pObj->begin();
+        while (it != m_pObj->end())
+        {
+            add_source_for(*it);
+            ++it;
+        }
+      //  //iterate over the collection of StaffObjs, ordered by voice.
+      //  //Measures must be processed one by one
+      //  for (int nMeasure=1; nMeasure <= m_cStaffObjs.GetNumMeasures(); nMeasure++)
+      //  {
+      //      //add comment to separate measures
+      //      sSource += _T("\n");
+      //      sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
+      //      sSource += wxString::Format(_T("//Measure %d\n"), nMeasure);
+
+      //      int nNumVoices = m_cStaffObjs.GetNumVoicesInMeasure(nMeasure);
+      //      int nVoice = 1;
+      //      while (!m_cStaffObjs.IsVoiceUsedInMeasure(nVoice, nMeasure) &&
+      //          nVoice <= lmMAX_VOICE)
+      //      {
+      //          nVoice++;
+      //      }
+      //      int nVoicesProcessed = 1;   //voice 0 is automatically processed
+		    //lmBarline* pBL = (lmBarline*)NULL;
+      //      bool fGoBack = false;
+		    //float rTime = 0.0f;
+      //      while (true)
+      //      {
+      //          lmSOIterator* pIT = m_cStaffObjs.CreateIterator();
+      //          pIT->AdvanceToMeasure(nMeasure);
+      //          while(!pIT->ChangeOfMeasure() && !pIT->EndOfCollection())
+      //          {
+      //              lmStaffObj* pSO = pIT->GetCurrent();
+      //              //voice 0 staffobjs go with first voice if more than one voice
+				  //  if (!pSO->IsBarline())
+				  //  {
+					 //   if (nVoicesProcessed == 1)
+					 //   {
+						//    if (!pSO->IsNoteRest() || ((lmNoteRest*)pSO)->GetVoice() == nVoice)
+						//    {
+						//	    LDP_AddShitTimeTagIfNeeded(sSource, nIndent, lmGO_FWD, rTime, pSO);
+						//	    sSource += pSO->SourceLDP(nIndent, fUndoData);
+						//	    rTime = LDP_AdvanceTimeCounter(pSO);
+						//    }
+					 //   }
+					 //   else
+						//    if (pSO->IsNoteRest() && ((lmNoteRest*)pSO)->GetVoice() == nVoice)
+						//    {
+						//	    LDP_AddShitTimeTagIfNeeded(sSource, nIndent, lmGO_FWD, rTime, pSO);
+						//	    sSource += pSO->SourceLDP(nIndent, fUndoData);
+						//	    rTime = LDP_AdvanceTimeCounter(pSO);
+						//    }
+				  //  }
+				  //  else
+					 //   pBL = (lmBarline*)pSO;
+
+      //              pIT->MoveNext();
+      //          }
+      //          delete pIT;
+
+      //          //check if more voices
+      //          if (++nVoicesProcessed >= nNumVoices) break;
+      //          nVoice++;
+      //          while (!m_cStaffObjs.IsVoiceUsedInMeasure(nVoice, nMeasure) &&
+      //              nVoice <= lmMAX_VOICE)
+      //          {
+      //              nVoice++;
+      //          }
+      //          wxASSERT(nVoice <= lmMAX_VOICE);
+
+      //          //there are more voices. Add (goBak) tag
+      //          fGoBack = true;
+      //          sSource += _T("\n");
+      //          sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
+      //          sSource += _T("(goBack start)\n");
+      //          rTime = 0.0f;
+      //      }
+
+      //      //if goBack added, add a goFwd to ensure that we are at end of measure
+      //      if (fGoBack)
+      //      {
+      //          sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
+      //          sSource += _T("(goFwd end)\n");
+      //      }
+
+		    ////add barline, if present
+		    //if (pBL)
+			   // sSource += pBL->SourceLDP(nIndent, fUndoData);
+
+      //  }
+
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
 class NoteLdpGenerator : public LdpGenerator
 {
 protected:
@@ -342,7 +590,7 @@ protected:
 public:
     NoteLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
     {
-        m_pObj = dynamic_cast<ImoNote*>(pImo);
+        m_pObj = static_cast<ImoNote*>(pImo);
     }
 
     std::string generate_source()
@@ -360,12 +608,62 @@ protected:
 
     void add_pitch()
     {
-        m_source << " (TODO: pitch)";
+        static const string sNoteName[7] = { "c",  "d", "e", "f", "g", "a", "b" };
+        static const string sOctave[13] = { "0",  "1", "2", "3", "4", "5", "6",
+                                            "7", "8", "9", "10", "11", "12"  };
+
+        if (m_pObj->get_step() == k_no_pitch)
+        {
+            m_source << "* ";
+            return;
+        }
+
+        EAccidentals acc = m_pObj->get_notated_accidentals();
+        switch(acc)
+        {
+            case k_invalid_accidentals:     break;
+            case k_no_accidentals:          break;
+            case k_sharp:                   m_source << "+";  break;
+            case k_sharp_sharp:             m_source << "++";  break;
+            case k_double_sharp:            m_source << "x";  break;
+            case k_natural_sharp:           m_source << "=+";  break;
+            case k_flat:                    m_source << "-";  break;
+            case k_flat_flat:               m_source << "--";  break;
+            case k_natural_flat:            m_source << "=-";  break;
+            case k_natural:                 m_source << "=";   break;
+            default:                        break;
+        }
+
+        m_source << sNoteName[m_pObj->get_step()];
+        m_source << sOctave[m_pObj->get_octave()];
+        m_source << " ";
     }
 
     void add_duration()
     {
-        m_source << " (TODO: duration)";
+        switch(m_pObj->get_note_type())
+        {
+            case k_longa:   m_source << "l";  break;
+            case k_breve:   m_source << "b";  break;
+            case k_whole:   m_source << "w";  break;
+            case k_half:    m_source << "h";  break;
+            case k_quarter: m_source << "q";  break;
+            case k_eighth:  m_source << "e";  break;
+            case k_16th:    m_source << "s";  break;
+            case k_32th:    m_source << "t";  break;
+            case k_64th:    m_source << "i";  break;
+            case k_128th:   m_source << "o";  break;
+            case k_256th:   m_source << "f";  break;
+            default:                          break;
+        }
+
+        int dots = m_pObj->get_dots();
+        while (dots > 0)
+        {
+            m_source << ".";
+            --dots;
+        }
+
     }
 
 };
@@ -380,7 +678,7 @@ protected:
 public:
     RestLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
     {
-        m_pObj = dynamic_cast<ImoRest*>(pImo);
+        m_pObj = static_cast<ImoRest*>(pImo);
     }
 
     std::string generate_source()
@@ -404,6 +702,209 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
+class ScoreLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoScore* m_pObj;
+
+public:
+    ScoreLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoScore*>(pImo);
+    }
+
+    std::string generate_source()
+    {
+        start_element();
+        add_element_name("score", m_pObj);
+
+        add_version();
+        add_undo_data();
+        add_creation_mode();
+        add_styles();
+        add_titles();
+        add_page_layout();
+        add_system_layout();
+        add_cursor();
+        add_options();
+        add_instruments_and_groups();
+
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_version()
+    {
+        m_source << "(vers ";
+        m_source << m_pObj->get_version();
+        m_source << ")";
+    }
+
+    void add_undo_data()
+    {
+    ////ID counter value for undo/redo
+    //if (fUndoData)
+    //    sSource += wxString::Format(_T("   (undoData (idCounter  %d))\n"), m_nCounterID);
+    }
+
+    void add_creation_mode()
+    {
+//    //creation mode
+//    if (!m_sCreationModeName.empty())
+//    {
+//        m_source << _T("   (creationMode ");
+//        m_source << m_sCreationModeName;
+//        m_source << _T(" ");
+//        m_source << m_sCreationModeVers;
+//        m_source << _T(")\n");
+//    }
+    }
+
+    void add_styles()
+    {
+//    //styles
+//    m_source << m_TextStyles.SourceLDP(1, fUndoData);
+    }
+
+    void add_titles()
+    {
+//    //titles and other attached auxobjs
+//    if (m_pAuxObjs)
+//    {
+//	    for (int i=0; i < (int)m_pAuxObjs->size(); i++)
+//	    {
+//		    m_source << (*m_pAuxObjs)[i]->SourceLDP(1, fUndoData);
+//	    }
+//    }
+    }
+
+    void add_page_layout()
+    {
+//    //first section layout info
+//    //TODO: sections
+//    //int nSection = 0;
+//    {
+//        //page layout info
+//#if 0
+//		std::list<lmPageInfo*>::iterator it;
+//		for (it = m_PagesInfo.begin(); it != m_PagesInfo.end(); ++it)
+//            m_source << (*it)->SourceLDP(1, fUndoData);
+//#else
+//        lmPageInfo* pPageInfo = m_PagesInfo.front();
+//        m_source << pPageInfo->SourceLDP(1, fUndoData);
+//#endif
+//        //first system and other systems layout info
+//        m_source << m_SystemsInfo.front()->SourceLDP(1, true, fUndoData);
+//        m_source << m_SystemsInfo.back()->SourceLDP(1, false, fUndoData);
+//    }
+    }
+
+    void add_system_layout()
+    {
+    }
+
+    void add_cursor()
+    {
+//    //score cursor information
+//    if (fUndoData)
+//    {
+//        lmCursorState tState = m_SCursor.GetState();
+//        m_source << wxString::Format(_T("   (cursor %d %d %s %d)\n"),
+//                        tState.GetNumInstr(),
+//                        tState.GetNumStaff(),
+//		                DoubleToStr((double)tState.GetTimepos(), 2).c_str(),
+//                        tState.GetObjID() );
+//    }
+    }
+
+    void add_options()
+    {
+    //    //options with non-default values
+    //    bool fBoolValue;
+    //    long nLongValue;
+    //    double rDoubleValue;
+    //
+    //    //bool
+    //    for (int i=0; i < (int)(sizeof(m_BoolOptions)/sizeof(lmBoolOption)); i++)
+    //    {
+    //        fBoolValue = GetOptionBool(m_BoolOptions[i].sOptName);
+    //        if (fBoolValue != m_BoolOptions[i].fBoolValue)
+    //            m_source << wxString::Format(_T("   (opt %s %s)\n"), m_BoolOptions[i].sOptName.c_str(),
+    //                                        (fBoolValue ? _T("true") : _T("false")) );
+    //    }
+    //
+    //    //long
+    //    for (int i=0; i < (int)(sizeof(m_LongOptions)/sizeof(lmLongOption)); i++)
+    //    {
+    //        nLongValue = GetOptionLong(m_LongOptions[i].sOptName);
+    //        if (nLongValue != m_LongOptions[i].nLongValue)
+    //            m_source << wxString::Format(_T("   (opt %s %d)\n"), m_LongOptions[i].sOptName.c_str(),
+    //                                        nLongValue );
+    //    }
+    //
+    //    //double
+    //    for (int i=0; i < (int)(sizeof(m_DoubleOptions)/sizeof(lmDoubleOption)); i++)
+    //    {
+    //        rDoubleValue = GetOptionDouble(m_DoubleOptions[i].sOptName);
+    //        if (rDoubleValue != m_DoubleOptions[i].rDoubleValue)
+    //            m_source << wxString::Format(_T("   (opt %s %s)\n"), m_DoubleOptions[i].sOptName.c_str(),
+    //                                        DoubleToStr(rDoubleValue, 4).c_str() );
+    //    }
+    }
+
+    void add_instruments_and_groups()
+    {
+        int numInstr = m_pObj->get_num_instruments();
+        for (int i=0; i < numInstr; ++i)
+            add_source_for( m_pObj->get_instrument(i) );
+    }
+
+
+};
+
+
+//---------------------------------------------------------------------------------------
+class ScoreObjLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoScoreObj* m_pObj;
+
+public:
+    ScoreObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoScoreObj*>(pImo);
+    }
+
+    std::string generate_source()
+    {
+        add_visible();
+        add_color();
+        source_for_base_contentobj(m_pObj);
+        return m_source.str();
+    }
+
+protected:
+
+    void add_visible()
+    {
+        if (!m_pObj->is_visible())
+            m_source << " (visible no)";
+    }
+
+    void add_color()
+    {
+        //color (if not black)
+        Color color = m_pObj->get_color();
+        if (color.r != 0 || color.g != 0  || color.b != 0 || color.a != 255)
+            m_source << " (color " << LdpExporter::color_to_ldp(color) << ")";
+    }
+};
+
+
+//---------------------------------------------------------------------------------------
 class StaffObjLdpGenerator : public LdpGenerator
 {
 protected:
@@ -412,7 +913,7 @@ protected:
 public:
     StaffObjLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
     {
-        m_pObj = dynamic_cast<ImoStaffObj*>(pImo);
+        m_pObj = static_cast<ImoStaffObj*>(pImo);
     }
 
     std::string generate_source()
@@ -559,36 +1060,37 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
 
     switch(pImo->get_obj_type())
     {
-        case k_imo_barline:         return new BarlineLdpGenerator(pImo, this);
-//        case k_imo_beam_dto:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_bezier_info:         return new XxxxxxxLdpGenerator(pImo, this);
-        case k_imo_clef:            return new ClefLdpGenerator(pImo, this);
-//        case k_imo_color_dto:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_instr_group:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_midi_info:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_option:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_system_info:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_tie_dto:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_tuplet_dto:         return new XxxxxxxLdpGenerator(pImo, this);
-        case k_imo_document:        return new LenmusdocLdpGenerator(pImo, this);
-//        case k_imo_content:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_music_data:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_instrument:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_score:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_key_signature:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_time_signature:         return new XxxxxxxLdpGenerator(pImo, this);
-        case k_imo_note:            return new NoteLdpGenerator(pImo, this);
-        case k_imo_rest:            return new RestLdpGenerator(pImo, this);
-//        case k_imo_go_back_fwd:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_metronome_mark:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_control:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_spacer:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_figured_bass:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_score_text:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_fermata:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_tie:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_beam:         return new XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_tuplet:         return new XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_barline:         return LOMSE_NEW BarlineLdpGenerator(pImo, this);
+//        case k_imo_beam_dto:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_bezier_info:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_clef:            return LOMSE_NEW ClefLdpGenerator(pImo, this);
+//        case k_imo_color_dto:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_instr_group:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_midi_info:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_option:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_system_info:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_tie_dto:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_tuplet_dto:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_document:        return LOMSE_NEW LenmusdocLdpGenerator(pImo, this);
+//        case k_imo_content:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_instrument:      return LOMSE_NEW InstrumentLdpGenerator(pImo, this);
+//        case k_imo_score:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_key_signature:   return LOMSE_NEW KeySignatureLdpGenerator(pImo, this);
+//        case k_imo_time_signature:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_music_data:      return LOMSE_NEW MusicDataLdpGenerator(pImo, this);
+        case k_imo_note:            return LOMSE_NEW NoteLdpGenerator(pImo, this);
+        case k_imo_rest:            return LOMSE_NEW RestLdpGenerator(pImo, this);
+//        case k_imo_go_back_fwd:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_metronome_mark:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_system_break:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_spacer:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_figured_bass:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_score:           return LOMSE_NEW ScoreLdpGenerator(pImo, this);
+//        case k_imo_score_text:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_fermata:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_tie:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_beam:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+//        case k_imo_tuplet:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
         default:
             return new ErrorLdpGenerator(pImo, this);
     }
@@ -633,14 +1135,18 @@ std::string LdpExporter::clef_type_to_ldp(int clefType)
 }
 
 //---------------------------------------------------------------------------------------
-std::string LdpExporter::color_to_ldp(Color& color)
+std::string LdpExporter::color_to_ldp(Color color)
 {
     stringstream source;
     source << "#";
-    source << std::hex << setfill('0') << setw(2) << color.r;
-    source << std::hex << setfill('0') << setw(2) << color.g;
-    source << std::hex << setfill('0') << setw(2) << color.b;
-    source << std::hex << setfill('0') << setw(2) << color.a;
+    int r = color.r;
+    int g = color.g;
+    int b = color.b;
+    int a = color.a;
+    source << std::hex << setfill('0') << setw(2) << r;
+    source << std::hex << setfill('0') << setw(2) << g;
+    source << std::hex << setfill('0') << setw(2) << b;
+    source << std::hex << setfill('0') << setw(2) << a;
     return source.str();
 }
 

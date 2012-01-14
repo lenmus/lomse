@@ -105,8 +105,8 @@ SUITE(LinkableTest)
 
     TEST_FIXTURE(LinkableTestFixture, RefToMasterRemoved)
     {
-        MyShape* pMaster = new MyShape();
-        MyShape* pSlave = new MyShape();
+        MyShape* pMaster = LOMSE_NEW MyShape();
+        MyShape* pSlave = LOMSE_NEW MyShape();
         pMaster->accept_link_from(pSlave, 7);
         CHECK( pSlave->get_num_links_to() == 1 );
 
@@ -118,8 +118,8 @@ SUITE(LinkableTest)
 
     TEST_FIXTURE(LinkableTestFixture, RefToSlaveRemoved)
     {
-        MyShape* pMaster = new MyShape();
-        MyShape* pSlave = new MyShape();
+        MyShape* pMaster = LOMSE_NEW MyShape();
+        MyShape* pSlave = LOMSE_NEW MyShape();
         pMaster->accept_link_from(pSlave, 7);
         CHECK( pMaster->get_num_links_from() == 1 );
 
@@ -131,9 +131,9 @@ SUITE(LinkableTest)
 
     TEST_FIXTURE(LinkableTestFixture, ChainDeleteMaster)
     {
-        MyShape* pNote = new MyShape();
-        MyShape* pFermata = new MyShape();
-        MyShape* pText = new MyShape();
+        MyShape* pNote = LOMSE_NEW MyShape();
+        MyShape* pFermata = LOMSE_NEW MyShape();
+        MyShape* pText = LOMSE_NEW MyShape();
         pNote->accept_link_from(pFermata, 7);
         pFermata->accept_link_from(pText, 6);
         CHECK( pNote->get_num_links_from() == 1 );
@@ -155,9 +155,9 @@ SUITE(LinkableTest)
 
     TEST_FIXTURE(LinkableTestFixture, ChainDeleteMasterSlave)
     {
-        MyShape* pNote = new MyShape();
-        MyShape* pFermata = new MyShape();
-        MyShape* pText = new MyShape();
+        MyShape* pNote = LOMSE_NEW MyShape();
+        MyShape* pFermata = LOMSE_NEW MyShape();
+        MyShape* pText = LOMSE_NEW MyShape();
         pNote->accept_link_from(pFermata, 7);
         pFermata->accept_link_from(pText, 6);
 
@@ -173,9 +173,9 @@ SUITE(LinkableTest)
 
     TEST_FIXTURE(LinkableTestFixture, ChainDeleteSlave)
     {
-        MyShape* pNote = new MyShape();
-        MyShape* pFermata = new MyShape();
-        MyShape* pText = new MyShape();
+        MyShape* pNote = LOMSE_NEW MyShape();
+        MyShape* pFermata = LOMSE_NEW MyShape();
+        MyShape* pText = LOMSE_NEW MyShape();
         pNote->accept_link_from(pFermata, 7);
         pFermata->accept_link_from(pText, 6);
 

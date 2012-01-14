@@ -40,6 +40,7 @@
 #include "lomse_events.h"
 #include "lomse_im_factory.h"
 #include "lomse_document.h"
+#include "lomse_image_reader.h"
 
 using namespace std;
 
@@ -319,16 +320,16 @@ protected:
 
     //building the model
     void add_to_model(ImoObj* pImo);
-//    void add_chord_to_model(ImoChord* pChord) {
-//        m_pAnalyser->add_chord(pChord);
-//    }
 
     //auxiliary
     inline long get_node_id() { return m_pAnalysedNode->get_id(); }
     bool contains(ELdpElement type, ELdpElement* pValid, int nValid);
+    inline const string& get_document_locator() {
+        return m_pAnalyser->get_document_locator();
+    }
 
     //-----------------------------------------------------------------------------------
-    inline void post_event(EventInfo* event)
+    inline void post_event(SpEventInfo event)
     {
         m_libraryScope.post_event(event);
     }
@@ -620,6 +621,13 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
+    float get_float_param(float rDefault=1.0f)
+    {
+        m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+        return get_float_value(rDefault);
+    }
+
+    //-----------------------------------------------------------------------------------
     float get_lenght_param(float rDefault=0.0f)
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
@@ -753,6 +761,7 @@ protected:
             ELdpElement type = m_pParamToAnalyse->get_type();
             if (   /*type == k_inlineWrapper
                 ||*/ type == k_txt
+                || type == k_image
                 || type == k_link
                )
             {
@@ -928,7 +937,7 @@ public:
     void do_analysis()
     {
         //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoBeamDto* pInfo = new ImoBeamDto( m_pAnalysedNode );
+        ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto( m_pAnalysedNode );
 
         // num
         if (get_optional(k_number))
@@ -1059,7 +1068,7 @@ public:
 
     void do_analysis()
     {
-        ImoBorderDto* border = new ImoBorderDto();
+        ImoBorderDto* border = LOMSE_NEW ImoBorderDto();
 
         // <width>
         if (get_mandatory(k_width))
@@ -1138,7 +1147,7 @@ protected:
             for (it = notes.begin(); it != notes.end(); ++it)
             {
                 ImoNote* pNote = dynamic_cast<ImoNote*>( (*it).first );
-                pMD->append_child(pNote);
+                pMD->append_child_imo(pNote);
             }
 
             add_to_model(pChord);
@@ -1190,54 +1199,15 @@ public:
     int get_clef_type()
     {
         string value = m_pParamToAnalyse->get_value();
-        int type = k_clef_G2;
-        if (value == "G")
-            type = k_clef_G2;
-        else if (value == "F4")
-            type = k_clef_F4;
-        else if (value == "F3")
-            type = k_clef_F3;
-        else if (value == "C1")
-            type = k_clef_C1;
-        else if (value == "C2")
-            type = k_clef_C2;
-        else if (value == "C3")
-            type = k_clef_C3;
-        else if (value == "C4")
-            type = k_clef_C4;
-        else if (value == "percussion")
-            type = k_clef_percussion;
-        else if (value == "C3")
-            type = k_clef_C3;
-        else if (value == "C5")
-            type = k_clef_C5;
-        else if (value == "F5")
-            type = k_clef_F5;
-        else if (value == "G1")
-            type = k_clef_G1;
-        else if (value == "8_G")
-            type = k_clef_8_G2;
-        else if (value == "G_8")
-            type = k_clef_G2_8;
-        else if (value == "8_F4")
-            type = k_clef_8_F4;
-        else if (value == "F4_8")
-            type = k_clef_F4_8;
-        else if (value == "15_G")
-            type = k_clef_15_G2;
-        else if (value == "G_15")
-            type = k_clef_G2_15;
-        else if (value == "15_F4")
-            type = k_clef_15_F4;
-        else if (value == "F4_15")
-            type = k_clef_F4_15;
-        else
+        int clef = Analyser::ldp_name_to_clef_type(value);
+        if (clef == k_clef_undefined)
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                     "Unknown clef type '" + value + "'. Assumed 'G'.");
+            return k_clef_G2;
         }
-
-        return type;
+        else
+            return clef;
     }
 
     void set_symbol_size(ImoClef* pClef)
@@ -1284,7 +1254,7 @@ protected:
 
     bool set_color()
     {
-        ImoColorDto* pColor = new ImoColorDto();
+        ImoColorDto* pColor = LOMSE_NEW ImoColorDto();
         m_pAnalysedNode->set_imo(pColor);
         std::string value = get_string_value();
         pColor->set_from_string(value);
@@ -1346,8 +1316,8 @@ public:
     void do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoControl* pCtrl = static_cast<ImoControl*>(
-                                    ImFactory::inject(k_imo_control, pDoc) );
+        ImoSystemBreak* pCtrl = static_cast<ImoSystemBreak*>(
+                                    ImFactory::inject(k_imo_system_break, pDoc) );
         add_to_model(pCtrl);
     }
 };
@@ -1521,6 +1491,8 @@ public:
                     pStyle->set_int_property(ImoStyle::k_vertical_align, get_valign() );
                 else if (get_optional(k_text_align))
                     pStyle->set_int_property(ImoStyle::k_text_align, get_text_align() );
+                else if (get_optional(k_line_height))
+                    pStyle->set_float_property(ImoStyle::k_line_height, get_float_param(1.5f) );
 
                 else
                 {
@@ -1591,26 +1563,26 @@ protected:
     {
         const string value = get_string_param();
         if (value == "baseline")
-            return ImoStyle::k_valing_baseline;
+            return ImoStyle::k_valign_baseline;
         else if (value == "sub")
-            return ImoStyle::k_valing_sub;
+            return ImoStyle::k_valign_sub;
         else if (value == "super")
-            return ImoStyle::k_valing_super;
+            return ImoStyle::k_valign_super;
         else if (value == "top")
-            return ImoStyle::k_valing_top;
+            return ImoStyle::k_valign_top;
         else if (value == "text-top")
-            return ImoStyle::k_valing_text_top;
+            return ImoStyle::k_valign_text_top;
         else if (value == "middle")
-            return ImoStyle::k_valing_middle;
+            return ImoStyle::k_valign_middle;
         else if (value == "bottom")
-            return ImoStyle::k_valing_bottom;
+            return ImoStyle::k_valign_bottom;
         else if (value == "text-bottom")
-            return ImoStyle::k_valing_text_bottom;
+            return ImoStyle::k_valign_text_bottom;
         else
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Unknown vertical align '" + value + "'. Replaced by 'baseline'.");
-            return ImoStyle::k_valing_baseline;
+            return ImoStyle::k_valign_baseline;
         }
     }
 
@@ -1824,7 +1796,7 @@ public:
 
             error_if_more_elements();
 
-            add_to_model( new ImoFiguredBass(info) );
+            add_to_model( LOMSE_NEW ImoFiguredBass(info) );
         }
     }
 };
@@ -1922,7 +1894,7 @@ public:
 
     void do_analysis()
     {
-        ImoFontStyleDto* pFont = new ImoFontStyleDto();
+        ImoFontStyleDto* pFont = LOMSE_NEW ImoFontStyleDto();
 
         //<font_name> = string
         if (get_mandatory(k_string))
@@ -2182,15 +2154,14 @@ public:
             ImoHeading* pHeading = static_cast<ImoHeading*>(
                                         ImFactory::inject(k_imo_heading, pDoc) );
             pHeading->set_level( get_integer_value(1) );
-            string styleName = "Default style";
 
             // [<style>]
+            ImoStyle* pStyle = NULL;
             if (get_optional(k_style))
             {
                 m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-                styleName = get_string_value();
+                pStyle = get_doc_text_style( get_string_value() );
             }
-            ImoStyle* pStyle = get_doc_text_style(styleName);
             pHeading->set_style(pStyle);
 
 
@@ -2207,6 +2178,54 @@ public:
             add_to_model(pHeading);
         }
 
+    }
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <image> = (image [<style>] <file>)
+//@ <file> = (file <string>)
+//@
+//@
+//@
+
+class ImageAnalyser : public ElementAnalyser
+{
+public:
+    ImageAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                  ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoImage* pImg = static_cast<ImoImage*>( ImFactory::inject(k_imo_image, pDoc) );
+
+//        // [<style>]
+//        ImoStyle* pStyle = NULL;
+//        if (get_optional(k_style))
+//        {
+//            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+//            pStyle = get_doc_text_style( get_string_value() );
+//        }
+//        pHeading->set_style(pStyle);
+
+        // <file>
+        if (get_mandatory(k_file))
+        {
+            LdpElement* pValue = m_pParamToAnalyse->get_first_child();
+            load_image(pImg, pValue->get_value(), get_document_locator());
+        }
+
+        add_to_model(pImg);
+    }
+
+protected:
+
+    void load_image(ImoImage* pImg, string imagename, string locator)
+    {
+        LmbDocLocator loc(locator);
+        SpImage img = ImageReader::load_image( loc.get_locator_for_image(imagename) );
+        pImg->set_content(img);
     }
 };
 
@@ -2378,73 +2397,13 @@ public:
     int get_key_type()
     {
         string value = m_pParamToAnalyse->get_value();
-        int type = k_key_C;
-        if (value == "C")
-            type = k_key_C;
-        else if (value == "G")
-            type = k_key_G;
-        else if (value == "D")
-            type = k_key_D;
-        else if (value == "A")
-            type = k_key_A;
-        else if (value == "E")
-            type = k_key_E;
-        else if (value == "B")
-            type = k_key_B;
-        else if (value == "F+")
-            type = k_key_Fs;
-        else if (value == "C+")
-            type = k_key_Cs;
-        else if (value == "C-")
-            type = k_key_Cf;
-        else if (value == "G-")
-            type = k_key_Gf;
-        else if (value == "D-")
-            type = k_key_Df;
-        else if (value == "A-")
-            type = k_key_Af;
-        else if (value == "E-")
-            type = k_key_Ef;
-        else if (value == "B-")
-            type = k_key_Bf;
-        else if (value == "F")
-            type = k_key_F;
-        else if (value == "a")
-            type = k_key_a;
-        else if (value == "e")
-            type = k_key_e;
-        else if (value == "b")
-            type = k_key_b;
-        else if (value == "f+")
-            type = k_key_fs;
-        else if (value == "c+")
-            type = k_key_cs;
-        else if (value == "g+")
-            type = k_key_gs;
-        else if (value == "d+")
-            type = k_key_ds;
-        else if (value == "a+")
-            type = k_key_as;
-        else if (value == "a-")
-            type = k_key_af;
-        else if (value == "e-")
-            type = k_key_ef;
-        else if (value == "b-")
-            type = k_key_bf;
-        else if (value == "f")
-            type = k_key_f;
-        else if (value == "c")
-            type = k_key_c;
-        else if (value == "g")
-            type = k_key_g;
-        else if (value == "d")
-            type = k_key_d;
-       else
+        int type = Analyser::ldp_name_to_key_type(value);
+        if (type == k_key_undefined)
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                     "Unknown key '" + value + "'. Assumed 'C'.");
+            type = k_key_C;
         }
-
         return type;
     }
 
@@ -2597,12 +2556,11 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ <link> = (link [<style>] [<size>] <uri> <inlineObject>+ )
+//@ <link> = (link [<style>] <url> <inlineObject>+ )
+//@ <url> = (url <strings>)
 //@
 //@ Example:
-//@     (link "#TheoryHarmony_ch3.lms" (txt "Harmony exercise"))
-//@
-//@
+//@     (link (url "#TheoryHarmony_ch3.lms")(txt "Harmony exercise"))
 //@
 
 class LinkAnalyser : public ElementAnalyser
@@ -2619,21 +2577,17 @@ public:
 
 
         // [<style>]
-        string styleName = "Default style";
+        ImoStyle* pStyle = NULL;
         if (get_optional(k_style))
         {
             m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-            styleName = get_string_value();
+            pStyle = get_doc_text_style( get_string_value() );
         }
-        ImoStyle* pStyle = get_doc_text_style(styleName);
         pLink->set_style(pStyle);
 
-        // <uri> - string
-        if (get_optional(k_string))
-            pLink->set_url( get_string_value() );
-        else
-            report_msg(m_pParamToAnalyse->get_line_number(),
-                       "link: missing mandatory url (string).");
+        // <url>
+        if (get_mandatory(k_url))
+            set_url(pLink);
 
         // <inlineObject>+
         while( more_params_to_analyse() )
@@ -2648,6 +2602,16 @@ public:
         add_to_model(pLink);
     }
 
+protected:
+
+    void set_url(ImoLink* pLink)
+    {
+        // <url> = (url <string>)
+
+        LdpElement* pValue = m_pParamToAnalyse->get_first_child();
+        string url = pValue->get_value();
+        pLink->set_url(url);
+    }
 };
 
 //@-------------------------------------------------------------------------------------
@@ -2856,7 +2820,7 @@ public:
         {
             // <pitch> (label)
             if (get_mandatory(k_label))
-                set_pitch(pNote);
+                set_notated_pitch(pNote);
         }
 
         // <duration> (label)
@@ -3030,18 +2994,24 @@ protected:
         }
     }
 
-    void set_pitch(ImoNote* pNote)
+    void set_notated_pitch(ImoNote* pNote)
     {
         string pitch = m_pParamToAnalyse->get_value();
-        int step, octave, accidentals;
-        if (ldp_pitch_to_components(pitch, &step, &octave, &accidentals))
-        {
-            report_msg(m_pParamToAnalyse->get_line_number(),
-                "Unknown note pitch '" + pitch + "'. Replaced by 'c4'.");
-            pNote->set_pitch(k_step_C, 4, k_no_accidentals);
-        }
+        int step, octave;
+        EAccidentals accidentals = k_no_accidentals;
+        if (pitch == "*")
+            pNote->set_notated_pitch(k_no_pitch, 4, k_no_accidentals);
         else
-            pNote->set_pitch(step, octave, accidentals);
+        {
+            if (Analyser::ldp_pitch_to_components(pitch, &step, &octave, &accidentals))
+            {
+                report_msg(m_pParamToAnalyse->get_line_number(),
+                    "Unknown note pitch '" + pitch + "'. Replaced by 'c4'.");
+                pNote->set_notated_pitch(k_step_C, 4, k_no_accidentals);
+            }
+            else
+                pNote->set_notated_pitch(step, octave, accidentals);
+        }
     }
 
     void set_duration(ImoNoteRest* pNR)
@@ -3113,7 +3083,7 @@ protected:
 
     void add_to_old_beam(ImoNoteRest* pNR)
     {
-        ImoBeamDto* pInfo = new ImoBeamDto();
+        ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto();
         pInfo->set_note_rest(pNR);
         m_pAnalyser->add_old_beam(pInfo);
     }
@@ -3144,7 +3114,7 @@ protected:
         }
         else
         {
-            ImoBeamDto* pInfo = new ImoBeamDto();
+            ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto();
             pInfo->set_note_rest(pNR);
             m_pAnalyser->close_old_beam(pInfo);
         }
@@ -3172,7 +3142,7 @@ protected:
 
     void add_to_current_tuplet(ImoNoteRest* pNR)
     {
-        ImoTupletDto* pInfo = new ImoTupletDto();
+        ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
         pInfo->set_note_rest(pNR);
         pInfo->set_tuplet_type(ImoTupletDto::k_continue);
         m_pAnalyser->add_relation_info(pInfo);
@@ -3238,7 +3208,7 @@ protected:
 
     void end_old_tuplet(ImoNoteRest* pNR)
     {
-        ImoTupletDto* pInfo = new ImoTupletDto();
+        ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
         pInfo->set_note_rest(pNR);
         pInfo->set_tuplet_type(ImoTupletDto::k_stop);
         m_pAnalyser->add_relation_info(pInfo);
@@ -3259,7 +3229,7 @@ protected:
             //else
             //    pInfo->set_normal_number(0);  //required
         }
-        ImoTupletDto* pInfo = new ImoTupletDto();
+        ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
         pInfo->set_note_rest(pNR);
         pInfo->set_actual_number(actual);
         pInfo->set_normal_number(normal);
@@ -3614,15 +3584,14 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoParagraph* pPara = static_cast<ImoParagraph*>(
                                         ImFactory::inject(k_imo_para, pDoc) );
-        string styleName = "Default style";
 
         // [<style>]
+        ImoStyle* pStyle = NULL;
         if (get_optional(k_style))
         {
             m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-            styleName = get_string_value();
+            pStyle = get_doc_text_style( get_string_value() );
         }
-        ImoStyle* pStyle = get_doc_text_style(styleName);
         pPara->set_style(pStyle);
 
         // <inlineObject>+
@@ -3708,7 +3677,7 @@ public:
 
         error_if_more_elements();
 
-        add_to_model( new ImoPointDto(point) );
+        add_to_model( LOMSE_NEW ImoPointDto(point) );
     }
 };
 
@@ -3847,6 +3816,45 @@ protected:
 };
 
 //@-------------------------------------------------------------------------------------
+//@ <scorePlayer> = (scorePlayer <opt>+ )
+//@ <file> = (file <string>)
+//@
+//@
+//@
+
+class ScorePlayerAnalyser : public ElementAnalyser
+{
+public:
+    ScorePlayerAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                        ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+//        ImoImage* pImg = static_cast<ImoImage*>( ImFactory::inject(k_imo_image, pDoc) );
+//
+////        // [<style>]
+////        ImoStyle* pStyle = NULL;
+////        if (get_optional(k_style))
+////        {
+////            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+////            pStyle = get_doc_text_style( get_string_value() );
+////        }
+////        pHeading->set_style(pStyle);
+//
+//        // <file>
+//        if (get_mandatory(k_file))
+//        {
+//            LdpElement* pValue = m_pParamToAnalyse->get_first_child();
+//            pImg->set_file( pValue->get_value() );
+//        }
+//
+//        add_to_model(pImg);
+    }
+};
+
+//@-------------------------------------------------------------------------------------
 //@ <size> = (size <width><height>)
 //@ <width> = (width number)        value in LUnits
 //@ <height> = (height number)      value in LUnits
@@ -3874,7 +3882,7 @@ public:
 
         error_if_more_elements();
 
-        add_to_model( new ImoSizeDto(size) );
+        add_to_model( LOMSE_NEW ImoSizeDto(size) );
     }
 };
 
@@ -3897,7 +3905,7 @@ public:
     void do_analysis()
     {
         //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoSlurDto* pInfo = new ImoSlurDto();
+        ImoSlurDto* pInfo = LOMSE_NEW ImoSlurDto();
 
         // num
         if (get_mandatory(k_number))
@@ -4332,12 +4340,12 @@ public:
         string styleName = "Default style";
 
         // [<style>]
+        ImoStyle* pStyle = NULL;
         if (get_optional(k_style))
         {
             m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-            styleName = get_string_value();
+            pStyle = get_doc_text_style( get_string_value() );
         }
-
 
         //// [<location>]
         //while (more_params_to_analyse())
@@ -4359,7 +4367,7 @@ public:
             ImoTextItem* pText = static_cast<ImoTextItem*>(
                                         ImFactory::inject(k_imo_text_item, pDoc) );
             pText->set_text( get_string_value() );
-            pText->set_style( get_doc_text_style(styleName) );
+            pText->set_style(pStyle);
 
             error_if_more_elements();
 
@@ -4414,7 +4422,7 @@ public:
             ImoScoreText* pText = static_cast<ImoScoreText*>(
                                         ImFactory::inject(k_imo_score_text, pDoc));
             pText->set_text(get_string_value());
-            set_default_style(pText);
+            pText->set_style(NULL);
 
             // [<alingment>]
             if (get_optional(k_label))
@@ -4438,14 +4446,6 @@ public:
 
             add_to_model(pText);
         }
-    }
-
-protected:
-    void set_default_style(ImoScoreText* pText)
-    {
-        ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
-        if (pScore)
-            pText->set_style( pScore->get_style_or_default(m_styleName) );
     }
 
 };
@@ -4643,7 +4643,7 @@ public:
     void do_analysis()
     {
         //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoTupletDto* pInfo = new ImoTupletDto();
+        ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
         set_default_values(pInfo);
 
         // [<tupletID>]     //optional for 1.5 compatibility. TO BE REMOVED
@@ -4989,15 +4989,11 @@ void ElementAnalyser::analyse_scoreobj_options(ImoScoreObj* pSO)
             }
             case k_dx:
             {
-                //m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-                //dto.set_user_location_x( get_float_value(0.0f) );
                 pSO->set_user_location_x( get_location_param() );
                 break;
             }
             case k_dy:
             {
-                //m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-                //dto.set_user_location_y( get_float_value(0.0f) );
                 pSO->set_user_location_y( get_location_param() );
                 break;
             }
@@ -5039,6 +5035,7 @@ Analyser::Analyser(ostream& reporter, LibraryScope& libraryScope, Document* pDoc
     , m_pScore(NULL)
     , m_pImoDoc(NULL)
     , m_pTree(NULL)
+    , m_fileLocator("")
     , m_nShowTupletBracket(k_yesno_default)
     , m_nShowTupletNumber(k_yesno_default)
     , m_pLastNote(NULL)
@@ -5066,12 +5063,12 @@ void Analyser::delete_relation_builders()
 ImoObj* Analyser::analyse_tree_and_get_object(LdpTree* tree)
 {
     delete_relation_builders();
-    m_pTiesBuilder = new TiesBuilder(m_reporter, this);
-    m_pOldTiesBuilder = new OldTiesBuilder(m_reporter, this);
-    m_pBeamsBuilder = new BeamsBuilder(m_reporter, this);
-    m_pOldBeamsBuilder = new OldBeamsBuilder(m_reporter, this);
-    m_pTupletsBuilder = new TupletsBuilder(m_reporter, this);
-    m_pSlursBuilder = new SlursBuilder(m_reporter, this);
+    m_pTiesBuilder = LOMSE_NEW TiesBuilder(m_reporter, this);
+    m_pOldTiesBuilder = LOMSE_NEW OldTiesBuilder(m_reporter, this);
+    m_pBeamsBuilder = LOMSE_NEW BeamsBuilder(m_reporter, this);
+    m_pOldBeamsBuilder = LOMSE_NEW OldBeamsBuilder(m_reporter, this);
+    m_pTupletsBuilder = LOMSE_NEW TupletsBuilder(m_reporter, this);
+    m_pSlursBuilder = LOMSE_NEW SlursBuilder(m_reporter, this);
 
     m_pTree = tree;
     m_curStaff = 0;
@@ -5083,10 +5080,11 @@ ImoObj* Analyser::analyse_tree_and_get_object(LdpTree* tree)
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* Analyser::analyse_tree(LdpTree* tree)
+InternalModel* Analyser::analyse_tree(LdpTree* tree, const string& locator)
 {
+    m_fileLocator = locator;
     ImoObj* pRoot = analyse_tree_and_get_object(tree);
-    return new InternalModel( pRoot );
+    return LOMSE_NEW InternalModel( pRoot );
 }
 
 //---------------------------------------------------------------------------------------
@@ -5130,78 +5128,309 @@ void Analyser::clear_pending_relations()
 }
 
 //---------------------------------------------------------------------------------------
+int Analyser::ldp_name_to_key_type(const string& value)
+{
+    if (value == "C")
+        return k_key_C;
+    else if (value == "G")
+        return k_key_G;
+    else if (value == "D")
+        return k_key_D;
+    else if (value == "A")
+        return k_key_A;
+    else if (value == "E")
+        return k_key_E;
+    else if (value == "B")
+        return k_key_B;
+    else if (value == "F+")
+        return k_key_Fs;
+    else if (value == "C+")
+        return k_key_Cs;
+    else if (value == "C-")
+        return k_key_Cf;
+    else if (value == "G-")
+        return k_key_Gf;
+    else if (value == "D-")
+        return k_key_Df;
+    else if (value == "A-")
+        return k_key_Af;
+    else if (value == "E-")
+        return k_key_Ef;
+    else if (value == "B-")
+        return k_key_Bf;
+    else if (value == "F")
+        return k_key_F;
+    else if (value == "a")
+        return k_key_a;
+    else if (value == "e")
+        return k_key_e;
+    else if (value == "b")
+        return k_key_b;
+    else if (value == "f+")
+        return k_key_fs;
+    else if (value == "c+")
+        return k_key_cs;
+    else if (value == "g+")
+        return k_key_gs;
+    else if (value == "d+")
+        return k_key_ds;
+    else if (value == "a+")
+        return k_key_as;
+    else if (value == "a-")
+        return k_key_af;
+    else if (value == "e-")
+        return k_key_ef;
+    else if (value == "b-")
+        return k_key_bf;
+    else if (value == "f")
+        return k_key_f;
+    else if (value == "c")
+        return k_key_c;
+    else if (value == "g")
+        return k_key_g;
+    else if (value == "d")
+        return k_key_d;
+    else
+        return k_key_undefined;
+}
+
+//---------------------------------------------------------------------------------------
+int Analyser::ldp_name_to_clef_type(const string& value)
+{
+    if (value == "G")
+        return k_clef_G2;
+    else if (value == "F4")
+        return k_clef_F4;
+    else if (value == "F3")
+        return k_clef_F3;
+    else if (value == "C1")
+        return k_clef_C1;
+    else if (value == "C2")
+        return k_clef_C2;
+    else if (value == "C3")
+        return k_clef_C3;
+    else if (value == "C4")
+        return k_clef_C4;
+    else if (value == "percussion")
+        return k_clef_percussion;
+    else if (value == "C3")
+        return k_clef_C3;
+    else if (value == "C5")
+        return k_clef_C5;
+    else if (value == "F5")
+        return k_clef_F5;
+    else if (value == "G1")
+        return k_clef_G1;
+    else if (value == "8_G")
+        return k_clef_8_G2;
+    else if (value == "G_8")
+        return k_clef_G2_8;
+    else if (value == "8_F4")
+        return k_clef_8_F4;
+    else if (value == "F4_8")
+        return k_clef_F4_8;
+    else if (value == "15_G")
+        return k_clef_15_G2;
+    else if (value == "G_15")
+        return k_clef_G2_15;
+    else if (value == "15_F4")
+        return k_clef_15_F4;
+    else if (value == "F4_15")
+        return k_clef_F4_15;
+    else
+        return k_clef_undefined;
+}
+
+//---------------------------------------------------------------------------------------
+bool Analyser::ldp_pitch_to_components(const string& pitch, int *step, int* octave,
+                                       EAccidentals* accidentals)
+{
+    // Analyzes string pitch (LDP format), extracts its parts (step, octave and
+    // accidentals) and stores them in the corresponding parameters.
+    // Returns true if error (pitch is not a valid pitch name)
+    //
+    // In LDP pitch is represented as a combination of the step of the diatonic
+    // scale, the chromatic alteration, and the octave.
+    //    - The accidentals parameter represents chromatic alteration (does not
+    //      include key alterations)
+    //    - The octave element is represented by the numbers 0 to 9, where 4
+    //      is the octave started by middle C.
+    //
+    // pitch must be trimed (no spaces before or after real data) and lower case
+
+    size_t i = pitch.length() - 1;
+    if (i < 1)
+        return true;   //error
+
+    *octave = to_octave(pitch[i--]);
+    if (*octave == -1)
+        return true;   //error
+
+    *step = to_step(pitch[i--]);
+    if (*step == -1)
+        return true;   //error
+
+    if (++i == 0)
+    {
+        *accidentals = k_no_accidentals;
+        return false;   //no error
+    }
+    else
+        *accidentals = to_accidentals(pitch.substr(0, i));
+    if (*accidentals == k_invalid_accidentals)
+        return true;   //error
+
+    return false;  //no error
+}
+
+//---------------------------------------------------------------------------------------
+int Analyser::to_step(const char& letter)
+{
+	switch (letter)
+    {
+		case 'a':	return k_step_A;
+		case 'b':	return k_step_B;
+		case 'c':	return k_step_C;
+		case 'd':	return k_step_D;
+		case 'e':	return k_step_E;
+		case 'f':	return k_step_F;
+		case 'g':	return k_step_G;
+	}
+	return -1;
+}
+
+//---------------------------------------------------------------------------------------
+int Analyser::to_octave(const char& letter)
+{
+	switch (letter)
+    {
+		case '0':	return 0;
+		case '1':	return 1;
+		case '2':	return 2;
+		case '3':	return 3;
+		case '4':	return 4;
+		case '5':	return 5;
+		case '6':	return 6;
+		case '7':	return 7;
+		case '8':	return 8;
+		case '9':	return 9;
+	}
+	return -1;
+}
+
+//---------------------------------------------------------------------------------------
+EAccidentals Analyser::to_accidentals(const std::string& accidentals)
+{
+    switch (accidentals.length())
+    {
+        case 0:
+            return k_no_accidentals;
+            break;
+
+        case 1:
+            if (accidentals[0] == '+')
+                return k_sharp;
+            else if (accidentals[0] == '-')
+                return k_flat;
+            else if (accidentals[0] == '=')
+                return k_natural;
+            else if (accidentals[0] == 'x')
+                return k_double_sharp;
+            else
+                return k_invalid_accidentals;
+            break;
+
+        case 2:
+            if (accidentals.compare(0, 2, "++") == 0)
+                return k_sharp_sharp;
+            else if (accidentals.compare(0, 2, "--") == 0)
+                return k_flat_flat;
+            else if (accidentals.compare(0, 2, "=-") == 0)
+                return k_natural_flat;
+            else
+                return k_invalid_accidentals;
+            break;
+
+        default:
+            return k_invalid_accidentals;
+    }
+}
+
+//---------------------------------------------------------------------------------------
 ElementAnalyser* Analyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
 {
     //Factory method to create analysers
 
     switch (type)
     {
-        case k_abbrev:          return new InstrNameAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_anchorLine:      return new AnchorLineAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_barline:         return new BarlineAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_beam:            return new BeamAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_bezier:          return new BezierAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_border:          return new BorderAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_chord:           return new ChordAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_clef:            return new ClefAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_content:         return new ContentAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_creationMode:    return new ContentAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_color:           return new ColorAnalyser(this, m_reporter, m_libraryScope);
-        case k_cursor:          return new CursorAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_defineStyle:     return new DefineStyleAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_endPoint:        return new PointAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_dynamic:         return new DynamicAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_fermata:         return new FermataAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_figuredBass:     return new FiguredBassAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_font:            return new FontAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_goBack:          return new GoBackFwdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_goFwd:           return new GoBackFwdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_graphic:         return new XxxxxxxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_group:           return new GroupAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_heading:         return new HeadingAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_infoMIDI:        return new InfoMidiAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_instrument:      return new InstrumentAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_key_signature:   return new KeySignatureAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_language:        return new LanguageAnalyser(this, m_reporter, m_libraryScope);
-        case k_lenmusdoc:       return new LenmusdocAnalyser(this, m_reporter, m_libraryScope);
-        case k_line:            return new LineAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_link:            return new LinkAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_metronome:       return new MetronomeAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_musicData:       return new MusicDataAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_na:              return new NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_name:            return new InstrNameAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_newSystem:       return new ControlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_note:            return new NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_opt:             return new OptAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_pageLayout:      return new PageLayoutAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_pageMargins:     return new PageMarginsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_pageSize:        return new PageSizeAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_para:            return new ParagraphAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_parameter:       return new ParamAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_rest:            return new NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_settings:        return new SettingsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_score:           return new ScoreAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_size:            return new SizeAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_slur:            return new SlurAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_spacer:          return new SpacerAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_staff:           return new StaffAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_symbol:          return new XxxxxxxAnalyser(this, m_reporter, m_libraryScope);
-//        case k_symbolSize:      return new XxxxxxxAnalyser(this, m_reporter, m_libraryScope);
-        case k_startPoint:      return new PointAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_styles:          return new StylesAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_systemLayout:    return new SystemLayoutAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_systemMargins:   return new SystemMarginsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_txt:             return new TextItemAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_text:            return new TextStringAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_textbox:         return new TextBoxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_time_signature:  return new TimeSignatureAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tie:             return new TieAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_title:           return new TitleAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tuplet:          return new TupletAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_undoData:        return new XxxxxxxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_abbrev:          return LOMSE_NEW InstrNameAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_anchorLine:      return LOMSE_NEW AnchorLineAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_barline:         return LOMSE_NEW BarlineAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_beam:            return LOMSE_NEW BeamAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_bezier:          return LOMSE_NEW BezierAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_border:          return LOMSE_NEW BorderAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_chord:           return LOMSE_NEW ChordAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_clef:            return LOMSE_NEW ClefAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_content:         return LOMSE_NEW ContentAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_creationMode:    return LOMSE_NEW ContentAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_color:           return LOMSE_NEW ColorAnalyser(this, m_reporter, m_libraryScope);
+        case k_cursor:          return LOMSE_NEW CursorAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_defineStyle:     return LOMSE_NEW DefineStyleAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_endPoint:        return LOMSE_NEW PointAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_dynamic:         return LOMSE_NEW DynamicAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_fermata:         return LOMSE_NEW FermataAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_figuredBass:     return LOMSE_NEW FiguredBassAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_font:            return LOMSE_NEW FontAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_goBack:          return LOMSE_NEW GoBackFwdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_goFwd:           return LOMSE_NEW GoBackFwdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_graphic:         return LOMSE_NEW XxxxxxxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_group:           return LOMSE_NEW GroupAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_heading:         return LOMSE_NEW HeadingAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_image:           return LOMSE_NEW ImageAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_infoMIDI:        return LOMSE_NEW InfoMidiAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_instrument:      return LOMSE_NEW InstrumentAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_key_signature:   return LOMSE_NEW KeySignatureAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_language:        return LOMSE_NEW LanguageAnalyser(this, m_reporter, m_libraryScope);
+        case k_lenmusdoc:       return LOMSE_NEW LenmusdocAnalyser(this, m_reporter, m_libraryScope);
+        case k_line:            return LOMSE_NEW LineAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_link:            return LOMSE_NEW LinkAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_metronome:       return LOMSE_NEW MetronomeAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_musicData:       return LOMSE_NEW MusicDataAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_na:              return LOMSE_NEW NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_name:            return LOMSE_NEW InstrNameAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_newSystem:       return LOMSE_NEW ControlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_note:            return LOMSE_NEW NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_opt:             return LOMSE_NEW OptAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_pageLayout:      return LOMSE_NEW PageLayoutAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_pageMargins:     return LOMSE_NEW PageMarginsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_pageSize:        return LOMSE_NEW PageSizeAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_para:            return LOMSE_NEW ParagraphAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_parameter:       return LOMSE_NEW ParamAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_rest:            return LOMSE_NEW NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_settings:        return LOMSE_NEW SettingsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_score:           return LOMSE_NEW ScoreAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_score_player:    return LOMSE_NEW ScorePlayerAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_size:            return LOMSE_NEW SizeAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_slur:            return LOMSE_NEW SlurAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_spacer:          return LOMSE_NEW SpacerAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_staff:           return LOMSE_NEW StaffAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_symbol:          return LOMSE_NEW XxxxxxxAnalyser(this, m_reporter, m_libraryScope);
+//        case k_symbolSize:      return LOMSE_NEW XxxxxxxAnalyser(this, m_reporter, m_libraryScope);
+        case k_startPoint:      return LOMSE_NEW PointAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_styles:          return LOMSE_NEW StylesAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_systemLayout:    return LOMSE_NEW SystemLayoutAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_systemMargins:   return LOMSE_NEW SystemMarginsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_txt:             return LOMSE_NEW TextItemAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_text:            return LOMSE_NEW TextStringAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_textbox:         return LOMSE_NEW TextBoxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_time_signature:  return LOMSE_NEW TimeSignatureAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_tie:             return LOMSE_NEW TieAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_title:           return LOMSE_NEW TitleAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_tuplet:          return LOMSE_NEW TupletAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_undoData:        return LOMSE_NEW XxxxxxxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 
         default:
-            return new NullAnalyser(this, m_reporter, m_libraryScope);
+            return LOMSE_NEW NullAnalyser(this, m_reporter, m_libraryScope);
     }
 }
 
@@ -5226,7 +5455,7 @@ bool TiesBuilder::notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote)
 {
     return (pStartNote->get_voice() == pEndNote->get_voice())
             && (pStartNote->get_staff() == pEndNote->get_staff())
-            && (pStartNote->get_accidentals() == pEndNote->get_accidentals())
+            && (pStartNote->get_actual_accidentals() == pEndNote->get_actual_accidentals())
             && (pStartNote->get_step() == pEndNote->get_step())
             && (pStartNote->get_octave() == pEndNote->get_octave()) ;
 }
@@ -5286,7 +5515,7 @@ bool OldTiesBuilder::notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote)
 {
     return (pStartNote->get_voice() == pEndNote->get_voice())
             && (pStartNote->get_staff() == pEndNote->get_staff())
-            && (pStartNote->get_accidentals() == pEndNote->get_accidentals())
+            && (pStartNote->get_actual_accidentals() == pEndNote->get_actual_accidentals())
             && (pStartNote->get_step() == pEndNote->get_step())
             && (pStartNote->get_octave() == pEndNote->get_octave()) ;
 }

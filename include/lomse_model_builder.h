@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -16,7 +16,7 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_MODEL_BUILDER_H__
 #define __LOMSE_MODEL_BUILDER_H__
@@ -32,26 +32,44 @@ namespace lomse
 class InternalModel;
 class ImoDocument;
 class ImoObj;
+class ImoScore;
+class ImoKeySignature;
+class ImoNote;
 
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 // ModelBuilder. Implements the final step of LDP compiler: code generation.
 // Traverses the parse tree and creates the internal model
-//-------------------------------------------------------------------------------------
 class ModelBuilder
 {
-protected:
-    ostream&    m_reporter;
-    //LdpTree*    m_pTree;
-
 public:
-    ModelBuilder(ostream& reporter);
-    virtual ~ModelBuilder();
+    ModelBuilder() {}
+    virtual ~ModelBuilder() {}
 
     ImoDocument* build_model(InternalModel* IModel);
+    void structurize(ImoObj* pImo);
+
+};
+
+//---------------------------------------------------------------------------------------
+// PitchAssigner. Implements the algorithm to traverse the score and assign pitch to
+// notes, based on notated pitch, and taking into account key signature and notated
+// accidentals introduced by previous notes on the same measure.
+class PitchAssigner
+{
+protected:
+    int m_accidentals[7];
+
+public:
+    PitchAssigner();
+    virtual ~PitchAssigner() {}
+
+    void assign_pitch(ImoScore* pScore);
 
 
 protected:
-    void structurize(ImoObj* pImo);
+    void reset_accidentals(ImoKeySignature* pKey);
+    void update_context_accidentals(ImoNote* pNote);
+    void compute_pitch(ImoNote* pNote);
 
 };
 

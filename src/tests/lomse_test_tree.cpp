@@ -89,26 +89,26 @@ public:
 //                           +--- T
     void CreateTree()
     {
-        a = new Element("A");
-        b = new Element("B");
-        c = new Element("C");
-        d = new Element("D");
-        e = new Element("E");
-        f = new Element("F");
-        g = new Element("G");
-        h = new Element("H");
-        i = new Element("I");
-        j = new Element("J");
-        k = new Element("K");
-        l = new Element("L");
-        m = new Element("M");
-        n = new Element("N");
-        o = new Element("O");
-        p = new Element("P");
-        q = new Element("Q");
-        r = new Element("R");
-        s = new Element("S");
-        t = new Element("T");
+        a = LOMSE_NEW Element("A");
+        b = LOMSE_NEW Element("B");
+        c = LOMSE_NEW Element("C");
+        d = LOMSE_NEW Element("D");
+        e = LOMSE_NEW Element("E");
+        f = LOMSE_NEW Element("F");
+        g = LOMSE_NEW Element("G");
+        h = LOMSE_NEW Element("H");
+        i = LOMSE_NEW Element("I");
+        j = LOMSE_NEW Element("J");
+        k = LOMSE_NEW Element("K");
+        l = LOMSE_NEW Element("L");
+        m = LOMSE_NEW Element("M");
+        n = LOMSE_NEW Element("N");
+        o = LOMSE_NEW Element("O");
+        p = LOMSE_NEW Element("P");
+        q = LOMSE_NEW Element("Q");
+        r = LOMSE_NEW Element("R");
+        s = LOMSE_NEW Element("S");
+        t = LOMSE_NEW Element("T");
         m_tree.set_root(a);
         a->append_child(b);
         b->append_child(c);

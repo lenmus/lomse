@@ -1,4 +1,4 @@
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
 //  Copyright (c) 2010-2011 Lomse project
 //
@@ -18,11 +18,19 @@
 //
 //  -------------------------
 //  Credits:
-//  This file is based on Anti-Grain Geometry version 2.4 examples' code.
+//  This file is based on Anti-Grain Geometry version 2.4 examples' code and on
+//  ScreenDrawer version 1.0 code.
+//
 //  Anti-Grain Geometry (AGG) is copyright (C) 2002-2005 Maxim Shemanarev
 //  (http://www.antigrain.com). AGG 2.4 is distributed under BSD license.
 //
-//-------------------------------------------------------------------------------------
+//  ScreenDrawer code is licensed as follows:
+//    "Permission to copy, use, modify, sell and distribute this software
+//    is granted provided this copyright notice appears in all copies.
+//    This software is provided "as is" without express or implied
+//    warranty, and with no claim as to its suitability for any purpose."
+//
+//---------------------------------------------------------------------------------------
 
 #include "lomse_screen_drawer.h"
 
@@ -58,17 +66,8 @@ void Drawer::set_text_color(Color color)
 
 ScreenDrawer::ScreenDrawer(LibraryScope& libraryScope)
     : Drawer(libraryScope)
-//    , m_pRenderer( new RendererTemplate<PixFormat_rgba32>(libraryScope.get_screen_ppi(),
-//                                                          m_attr_storage,
-//                                                          m_attr_stack,
-//                                                          m_path) )
-//    , m_pRenderer( new Renderer(libraryScope.get_screen_ppi(), m_attr_storage,
-//                                m_attr_stack, m_path) )
-//    , m_pRenderer( Injector::inject_Renderer(libraryScope, m_attr_storage,
-//                                             m_attr_stack, m_path)
-    , m_pRenderer( RendererFactory::create_renderer(libraryScope, m_attr_storage,
-                                                    m_attr_stack, m_path) )
-    , m_pCalligrapher( new Calligrapher(m_pFonts, m_pRenderer) )
+    , m_pRenderer( RendererFactory::create_renderer(libraryScope, m_attr_storage, m_path) )
+    , m_pCalligrapher( LOMSE_NEW Calligrapher(m_pFonts, m_pRenderer) )
 {
 }
 
@@ -94,11 +93,39 @@ void ScreenDrawer::end_path()
     {
         throw std::runtime_error("[ScreenDrawer::end_path] The path was not begun");
     }
-    PathAttributes attr = cur_attr();
+    PathAttributes& attr = cur_attr();
     unsigned idx = m_attr_storage[m_attr_storage.size() - 1].path_index;
     attr.path_index = idx;
     m_attr_storage[m_attr_storage.size() - 1] = attr;
     pop_attr();
+}
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::push_attr()
+{
+    m_attr_stack.add(m_attr_stack.size() ?
+                        m_attr_stack[m_attr_stack.size() - 1] :
+                        PathAttributes());
+}
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::pop_attr()
+{
+    if(m_attr_stack.size() == 0)
+    {
+        throw std::runtime_error("[ScreenDrawer::pop_attr] Attribute stack is empty");
+    }
+    m_attr_stack.remove_last();
+}
+
+//---------------------------------------------------------------------------------------
+PathAttributes& ScreenDrawer::cur_attr()
+{
+    if(m_attr_stack.size() == 0)
+    {
+        throw std::runtime_error("[ScreenDrawer::cur_attr] Attribute stack is empty");
+    }
+    return m_attr_stack[m_attr_stack.size() - 1];
 }
 
 //---------------------------------------------------------------------------------------
@@ -238,39 +265,11 @@ void ScreenDrawer::close_subpath()
 }
 
 //---------------------------------------------------------------------------------------
-PathAttributes& ScreenDrawer::cur_attr()
-{
-    if(m_attr_stack.size() == 0)
-    {
-        throw std::runtime_error("[ScreenDrawer::cur_attr] Attribute stack is empty");
-    }
-    return m_attr_stack[m_attr_stack.size() - 1];
-}
-
-//---------------------------------------------------------------------------------------
-void ScreenDrawer::push_attr()
-{
-    m_attr_stack.add(m_attr_stack.size() ?
-                        m_attr_stack[m_attr_stack.size() - 1] :
-                        PathAttributes());
-}
-
-//---------------------------------------------------------------------------------------
-void ScreenDrawer::pop_attr()
-{
-    if(m_attr_stack.size() == 0)
-    {
-        throw std::runtime_error("[ScreenDrawer::pop_attr] Attribute stack is empty");
-    }
-    m_attr_stack.remove_last();
-}
-
-//---------------------------------------------------------------------------------------
 void ScreenDrawer::fill(Color color)
 {
     PathAttributes& attr = cur_attr();
     attr.fill_color = color;
-    attr.fill_flag = true;
+    attr.fill_mode = k_fill_solid;
 }
 
 //---------------------------------------------------------------------------------------
@@ -296,7 +295,7 @@ void ScreenDrawer::stroke_width(double w)
 //---------------------------------------------------------------------------------------
 void ScreenDrawer::fill_none()
 {
-    cur_attr().fill_flag = false;
+    cur_attr().fill_mode = k_fill_none;
 }
 
 //---------------------------------------------------------------------------------------
@@ -380,8 +379,7 @@ bool ScreenDrawer::select_vector_font(const std::string& fontName, double height
 //---------------------------------------------------------------------------------------
 void ScreenDrawer::draw_glyph(double x, double y, unsigned int ch)
 {
-    if (m_path.total_vertices() > 0)
-        render(true);
+    render_existing_paths();
 
     TransAffine& mtx = m_pRenderer->get_transform();
     mtx.transform(&x, &y);
@@ -393,8 +391,7 @@ int ScreenDrawer::draw_text(double x, double y, const std::string& str)
 {
     //returns the number of chars drawn
 
-    if (m_path.total_vertices() > 0)
-        render(true);
+    render_existing_paths();
 
     TransAffine& mtx = m_pRenderer->get_transform();
     mtx.transform(&x, &y);
@@ -427,7 +424,7 @@ int ScreenDrawer::draw_text(double x, double y, const std::string& str)
 //    if(glyph)
 //    {
 //        //m_pFonts->init_adaptors(glyph, x, y);
-//        agg::rect_i bbox = glyph->bounds;        //rect_i is a rectangle with integer values
+//        agg::AggRectInt bbox = glyph->bounds;        //AggRectInt is a rectangle with integer values
 //        boxRect.x = bbox.x1;
 //        boxRect.y = bbox.y1;
 //        boxRect.width = bbox.x2-bbox.x1;
@@ -529,6 +526,7 @@ Pixels ScreenDrawer::LUnits_to_Pixels(double value)
 void ScreenDrawer::reset(RenderingBuffer& buf, Color bgcolor)
 {
     m_pRenderer->initialize(buf, bgcolor);
+    m_attr_stack.remove_all();
 }
 
 //---------------------------------------------------------------------------------------
@@ -545,9 +543,9 @@ void ScreenDrawer::set_transform(TransAffine& transform)
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::render(bool fillColor)
+void ScreenDrawer::render()
 {
-    m_pRenderer->render(fillColor);
+    m_pRenderer->render();
 }
 
 //---------------------------------------------------------------------------------------
@@ -649,18 +647,171 @@ void ScreenDrawer::rect(UPoint pos, USize size, LUnits radius)
 
     agg::rounded_rect rr(x1, y1, x2, y2, r);
     m_path.concat_path<agg::rounded_rect>(rr);
-
-//    begin_path();
-//    fill(Color(0, 0, 0, 0));
-//    stroke(Color(0, 0, 0));
-//    stroke_width(15.0);
-//    move_to(pos.x, pos.y);
-//    hline_to(pos.x + size.width);
-//    vline_to(pos.y + size.height);
-//    hline_to(pos.x);
-//    vline_to(pos.y);
-//    end_path();
 }
+
+////------------------------------------------------------------------------
+//void ScreenDrawer::blendImage(Image& img,
+//                       int imgX1, int imgY1, int imgX2, int imgY2,
+//                       double dstX, double dstY, unsigned alpha)
+//{
+//    model_point_to_screen(dstX, dstY);
+//    PixFormat pixF(img.renBuf);
+//    // JME
+//    //agg::rect r(imgX1, imgY1, imgX2, imgY2);
+//    AggRectInt r(imgX1, imgY1, imgX2, imgY2);
+//    if(m_blendMode == BlendAlpha)
+//    {
+//        m_renBasePre.blend_from(pixF, &r, int(dstX)-imgX1, int(dstY)-imgY1, alpha);
+//    }
+//    else
+//    {
+//        m_renBaseCompPre.blend_from(pixF, &r, int(dstX)-imgX1, int(dstY)-imgY1, alpha);
+//    }
+//}
+//
+//
+////------------------------------------------------------------------------
+//void ScreenDrawer::blendImage(Image& img, double dstX, double dstY, unsigned alpha)
+//{
+//    model_point_to_screen(dstX, dstY);
+//    PixFormat pixF(img.renBuf);
+//    m_renBasePre.blend_from(pixF, 0, int(dstX), int(dstY), alpha);
+//    if(m_blendMode == BlendAlpha)
+//    {
+//        m_renBasePre.blend_from(pixF, 0, int(dstX), int(dstY), alpha);
+//    }
+//    else
+//    {
+//        m_renBaseCompPre.blend_from(pixF, 0, int(dstX), int(dstY), alpha);
+//    }
+//}
+//
+//
+////------------------------------------------------------------------------
+//void ScreenDrawer::copyImage(RenderingBuffer& img,
+//                      VPoint srcOrg, VSize srcSize
+                        //int imgX1, int imgY1, int imgX2, int imgY2,
+//                      UPoint dest)
+//{
+    //double x = double(dest.x);
+    //double y = double(dest.y);
+    //model_point_to_screen(&x, &y);
+//    AggRectInt r(imgX1, imgY1, imgX2, imgY2);
+//    m_renBase.copy_from(img.renBuf, &r, int(dstX)-imgX1, int(dstY)-imgY1);
+//}
+
+//------------------------------------------------------------------------
+void ScreenDrawer::render_existing_paths()
+{
+    if (m_path.total_vertices() > 0)
+        render();
+}
+
+//------------------------------------------------------------------------
+void ScreenDrawer::copy_bitmap(RenderingBuffer& bmap, UPoint dest)
+{
+    render_existing_paths();
+
+    double x = double(dest.x);
+    double y = double(dest.y);
+    model_point_to_screen(&x, &y);
+    m_pRenderer->copy_from(bmap, NULL, int(x), int(y));
+}
+
+//------------------------------------------------------------------------
+void ScreenDrawer::copy_bitmap(RenderingBuffer& bmap,
+                               Pixels srcX1, Pixels srcY1, Pixels srcX2, Pixels srcY2,
+                               UPoint dest)
+{
+    render_existing_paths();
+
+    double x = double(dest.x);
+    double y = double(dest.y);
+    model_point_to_screen(&x, &y);
+
+    AggRectInt r(srcX1, srcY1, srcX2, srcY2);
+    m_pRenderer->copy_from(bmap, &r, int(x)-srcX1, int(y)-srcY1);
+}
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::draw_bitmap(RenderingBuffer& bmap, bool hasAlpha,
+                               Pixels srcX1, Pixels srcY1, Pixels srcX2, Pixels srcY2,
+                               LUnits dstX1, LUnits dstY1, LUnits dstX2, LUnits dstY2,
+                               EResamplingQuality resamplingMode,
+                               double alpha)
+{
+    render_existing_paths();
+
+    double x1 = double(dstX1);
+    double y1 = double(dstY1);
+    double x2 = double(dstX2);
+    double y2 = double(dstY2);
+    model_point_to_screen(&x1, &y1);
+    model_point_to_screen(&x2, &y2);
+
+    m_pRenderer->render_bitmap(bmap, hasAlpha, double(srcX1), double(srcY1),
+                               double(srcX2), double(srcY2), x1, y1, x2, y2,
+                               resamplingMode, alpha);
+}
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::fill_linear_gradient(LUnits x1, LUnits y1, LUnits x2, LUnits y2)
+{
+    PathAttributes& attr = cur_attr();
+    if (!attr.fill_gradient)
+        attr.fill_gradient = LOMSE_NEW GradientAttributes();
+
+    double angle = atan2(double(y2-y1), double(x2-x1));
+    attr.fill_gradient->transform.reset();
+    attr.fill_gradient->transform *= agg::trans_affine_rotation(angle);
+    attr.fill_gradient->transform *= agg::trans_affine_translation(x1, y1);
+
+    attr.fill_gradient->d1 = 0.0;
+    attr.fill_gradient->d2 =
+        sqrt(double(x2-x1) * double(x2-x1) + double(y2-y1) * double(y2-y1));
+    attr.fill_mode = k_fill_gradient_linear;
+}
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::gradient_color(Color c1, Color c2, double start, double stop)
+{
+    PathAttributes& attr = cur_attr();
+    if (!attr.fill_gradient)
+        attr.fill_gradient = LOMSE_NEW GradientAttributes();
+
+    int iStart = int(255.0 * start);
+    int iStop   = int(255.0 * stop);
+    if (iStop <= iStart)
+        iStop = iStart + 1;
+    double k = 1.0 / double(iStop - iStart);
+
+    GradientColors& colors = attr.fill_gradient->colors;
+    for (int i = iStart; i < iStop; i++)
+    {
+        colors[i] = c1.gradient(c2, double(i - iStart) * k);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::gradient_color(Color c1, double start, double stop)
+{
+    PathAttributes& attr = cur_attr();
+    if (!attr.fill_gradient)
+        attr.fill_gradient = LOMSE_NEW GradientAttributes();
+
+    int iStart = int(255.0 * start);
+    int iStop   = int(255.0 * stop);
+    if (iStop <= iStart)
+        iStop = iStart + 1;
+
+    GradientColors& colors = attr.fill_gradient->colors;
+    for (int i = iStart; i < iStop; i++)
+    {
+        colors[i] = c1;
+    }
+}
+
+
 
 
 }  //namespace lomse

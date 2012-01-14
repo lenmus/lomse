@@ -244,7 +244,7 @@ MusicLine::~MusicLine()
 LineEntry* MusicLine::add_entry(ImoStaffObj* pSO, GmoShape* pShape, float rTime,
                                 bool fInProlog)
 {
-    LineEntry* pEntry = new LineEntry(pSO, pShape, fInProlog, rTime);
+    LineEntry* pEntry = LOMSE_NEW LineEntry(pSO, pShape, fInProlog, rTime);
     push_back(pEntry);
 	return pEntry;
 }
@@ -541,7 +541,7 @@ void ColumnLayouter::create_line_spacers()
     const LinesIterator itEnd = m_pColStorage->end();
     for (LinesIterator it=m_pColStorage->begin(); it != itEnd; ++it)
 	{
-        LineSpacer* pLinSpacer = new LineSpacer(*it, m_pScoreMeter);
+        LineSpacer* pLinSpacer = LOMSE_NEW LineSpacer(*it, m_pScoreMeter);
         m_LineSpacers.push_back(pLinSpacer);
     }
 }
@@ -761,7 +761,7 @@ SystemLayouter::~SystemLayouter()
 GmoBoxSystem* SystemLayouter::create_system_box(LUnits left, LUnits top, LUnits width,
                                                 LUnits height)
 {
-    m_pBoxSystem = new GmoBoxSystem(m_pScore);
+    m_pBoxSystem = LOMSE_NEW GmoBoxSystem(m_pScore);
     m_pBoxSystem->set_origin(left, top);
 
     LUnits leftMargin = 0.0f; //TODO-LOG: m_pScoreLyt->get_system_left_space(iSystem);
@@ -1158,7 +1158,7 @@ void SystemLayouter::add_initial_line_joining_all_staves_in_system()
         LUnits yBottom = m_instrEngravers[iInstr]->get_staves_bottom_line();
         LUnits uLineThickness =
             m_pScoreMeter->tenths_to_logical(LOMSE_THIN_LINE_WIDTH, 0, 0);
-        GmoShape* pLine = new GmoShapeBarline(pCreator, 0, ImoBarline::k_simple,
+        GmoShape* pLine = LOMSE_NEW GmoShapeBarline(pCreator, 0, ImoBarline::k_simple,
                                               xPos, yTop, yBottom,
                                               uLineThickness, uLineThickness,
                                               0.0f, 0.0f, Color(0,0,0), uLineThickness);
@@ -1365,7 +1365,7 @@ LinesIterator ColumnStorage::find_line(int line)
 MusicLine* ColumnStorage::open_new_line(int line, int instr, LUnits uxStart,
                                         LUnits fixedSpace)
 {
-    MusicLine* pLineTable = new MusicLine(line, instr, uxStart, fixedSpace);
+    MusicLine* pLineTable = LOMSE_NEW MusicLine(line, instr, uxStart, fixedSpace);
     m_Lines.push_back(pLineTable);
     return pLineTable;
 }
@@ -2085,7 +2085,7 @@ void TimeGridTable::create_line_explorers()
     const LinesIterator itEnd = m_pColStorage->end();
     for (LinesIterator it=m_pColStorage->begin(); it != itEnd; ++it)
 	{
-        TimeGridLineExplorer* pLinExplorer = new TimeGridLineExplorer(*it);
+        TimeGridLineExplorer* pLinExplorer = LOMSE_NEW TimeGridLineExplorer(*it);
         m_LineExplorers.push_back(pLinExplorer);
     }
 }
@@ -2369,7 +2369,7 @@ void ColumnResizer::create_line_resizers()
 {
 	for (LinesIterator it=m_pColStorage->begin(); it != m_pColStorage->end(); ++it)
 	{
-        LineResizer* pResizer = new LineResizer(*it, m_uOldWidth, m_uNewWidth,
+        LineResizer* pResizer = LOMSE_NEW LineResizer(*it, m_uOldWidth, m_uNewWidth,
                                                 m_uNewStart, m_sliceOrg);
         m_LineResizers.push_back(pResizer);
     }

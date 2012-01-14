@@ -52,7 +52,7 @@ public:
     }
     virtual ~MyDoorway() {}
 
-    void update_window() { m_fUpdateWindowInvoked = true; }
+    //void request_window_update() { m_fUpdateWindowInvoked = true; }
     void set_window_title(const std::string& title) {
         m_fSetWindowTitleInvoked = true;
         m_title = title;
@@ -67,6 +67,48 @@ public:
 
 };
 
+
+//---------------------------------------------------------------------------------------
+//helper, to have access to protected/private members
+class MyVerticalView : public VerticalBookView
+{
+public:
+    MyVerticalView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
+        : VerticalBookView(libraryScope, pDrawer)
+    {
+    }
+    virtual ~MyVerticalView() {}
+
+    list<URect>& my_get_page_bounds() { return m_pageBounds; }
+    bool my_shift_right_x_to_be_on_page(double* xLeft)
+    {
+        return shift_right_x_to_be_on_page(xLeft);
+    }
+    bool my_shift_left_x_to_be_on_page(double* xRight)
+    {
+        return shift_left_x_to_be_on_page(xRight);
+    }
+    bool my_shift_down_y_to_be_on_page(double* yTop)
+    {
+        return shift_down_y_to_be_on_page(yTop);
+    }
+    bool my_shift_up_y_to_be_on_page(double* yBottom)
+    {
+        return shift_up_y_to_be_on_page(yBottom);
+    }
+    void my_trimmed_rectangle_to_page_rectangles(list<PageRectangle*>* rectangles,
+                                                 double xLeft, double yTop,
+                                                 double xRight, double yBottom)
+    {
+        trimmed_rectangle_to_page_rectangles(rectangles, xLeft, yTop, xRight, yBottom);
+    }
+    void my_normalize_rectangle(double* xLeft, double* yTop,
+                                double* xRight, double* yBottom)
+    {
+        normalize_rectangle(xLeft, yTop, xRight, yBottom);
+    }
+
+};
 
 //---------------------------------------------------------------------------------------
 class GraphicViewTestFixture
@@ -102,10 +144,11 @@ SUITE(GraphicViewTest)
         pView->set_interactor(pIntor);
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
-        pView->on_paint();
+        pView->redraw_bitmap();
 
-        VPoint screen(5, 5);
-        CHECK( pView->page_at_screen_point(double(screen.x), double(screen.y)) == -1 );
+        //page top-left corner is placed, in vertical book view, at (0+, 0+) pixels
+        VPoint screen(3, 3);
+        CHECK( pView->page_at_screen_point(double(screen.x), double(screen.y)) == 0 );
 
         delete pIntor;
     }
@@ -122,7 +165,7 @@ SUITE(GraphicViewTest)
         pView->set_interactor(pIntor);
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
-        pView->on_paint();
+        pView->redraw_bitmap();
 
         VPoint screen(100, 100);
         CHECK( pView->page_at_screen_point(double(screen.x), double(screen.y)) == 0 );
@@ -142,7 +185,7 @@ SUITE(GraphicViewTest)
 //        pView->set_interactor(pIntor);
 //        RenderingBuffer rbuf;
 //        pView->set_rendering_buffer(&rbuf);
-//        pView->on_paint();
+//        pView->redraw_bitmap();
 //
 //        VPoint screen(100, 600);
 //        CHECK( pView->page_at_screen_point(double(screen.x), double(screen.y)) == 1 );
@@ -162,9 +205,9 @@ SUITE(GraphicViewTest)
         pView->set_interactor(pIntor);
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
-        pView->on_paint();
+        pView->redraw_bitmap();
 
-        //page top-left corner is placed, in vertical book view, at (0+, 18+)
+        //page top-left corner is placed, in vertical book view, at (0+, 0+)
         double vx = 0.0;
         double vy = 0.0;
         int iPage = 0;
@@ -174,7 +217,7 @@ SUITE(GraphicViewTest)
 
 //        cout << "x=" << x << ", y=" << y << endl;
         CHECK( x == 0 );
-        CHECK( y == 18 );
+        CHECK( y == 0 );
 
         delete pIntor;
     }
@@ -191,20 +234,294 @@ SUITE(GraphicViewTest)
         pView->set_interactor(pIntor);
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
-        pView->on_paint();
+        pView->redraw_bitmap();
 
-        //page top-left corner is placed, in vertical book view, at (0+, 18+)
+        //page top-left corner is placed, in vertical book view, at (0+, 0+)
         double vx = 1.0;
-        double vy = 19.0;
-        pIntor->screen_point_to_model(&vx, &vy);
+        double vy = 1.0;
+        pIntor->screen_point_to_page_point(&vx, &vy);
 
 //        cout << "vx=" << vx << ", vy=" << vy << endl;
         CHECK( vx > 21.0  && vx < 31.0);       //tolerance: 10 LUnits
-        CHECK( vy > -5.0  && vy < 5.0);
+        CHECK( vy > 21.0  && vy < 31.0);
 
         delete pIntor;
     }
 
+    // normalize_rectangle --------------------------------------------------------------
+
+    TEST_FIXTURE(GraphicViewTestFixture, normalize_rectangle_1)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        MyVerticalView view(libraryScope, pDrawer);
+
+        double xLeft = 10.0;
+        double yTop = 12.0;
+        double xRight = 14.0;
+        double yBottom = 26.0;
+        view.my_normalize_rectangle(&xLeft, &yTop, &xRight, &yBottom);
+
+        CHECK( xLeft == 10.0 );
+        CHECK( yTop == 12.0 );
+        CHECK( xRight == 14.0 );
+        CHECK( yBottom == 26.0 );
+    }
+
+    TEST_FIXTURE(GraphicViewTestFixture, normalize_rectangle_2)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        MyVerticalView view(libraryScope, pDrawer);
+
+        double xLeft = 14.0;
+        double yTop = 26.0;
+        double xRight = 10.0;
+        double yBottom = 12.0;
+        view.my_normalize_rectangle(&xLeft, &yTop, &xRight, &yBottom);
+
+        CHECK( xLeft == 10.0 );
+        CHECK( yTop == 12.0 );
+        CHECK( xRight == 14.0 );
+        CHECK( yBottom == 26.0 );
+    }
+
+    TEST_FIXTURE(GraphicViewTestFixture, normalize_rectangle_3)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        MyVerticalView view(libraryScope, pDrawer);
+
+        double xLeft = 10.0;
+        double yTop = 26.0;
+        double xRight = 14.0;
+        double yBottom = 12.0;
+        view.my_normalize_rectangle(&xLeft, &yTop, &xRight, &yBottom);
+
+        CHECK( xLeft == 10.0 );
+        CHECK( yTop == 12.0 );
+        CHECK( xRight == 14.0 );
+        CHECK( yBottom == 26.0 );
+    }
+
+    TEST_FIXTURE(GraphicViewTestFixture, normalize_rectangle_4)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        MyVerticalView view(libraryScope, pDrawer);
+
+        double xLeft = 14.0;
+        double yTop = 12.0;
+        double xRight = 10.0;
+        double yBottom = 26.0;
+        view.my_normalize_rectangle(&xLeft, &yTop, &xRight, &yBottom);
+
+        CHECK( xLeft == 10.0 );
+        CHECK( yTop == 12.0 );
+        CHECK( xRight == 14.0 );
+        CHECK( yBottom == 26.0 );
+    }
+
+    TEST_FIXTURE(GraphicViewTestFixture, shift_right_x_to_be_on_page)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        MyVerticalView view(libraryScope, pDrawer);
+        list<URect>& pageBounds = view.my_get_page_bounds();
+        pageBounds.push_back( URect(0, 0, 100, 200) );
+        pageBounds.push_back( URect(0, 210, 100, 200) );
+        pageBounds.push_back( URect(0, 420, 100, 200) );
+
+        double xLeft = -10.0;
+        CHECK( view.my_shift_right_x_to_be_on_page(&xLeft) == true );
+        CHECK( xLeft == 0.0 );
+
+        xLeft = 10.0;
+        CHECK( view.my_shift_right_x_to_be_on_page(&xLeft) == true );
+        CHECK( xLeft == 10.0 );
+
+        xLeft = 110.0;
+        CHECK( view.my_shift_right_x_to_be_on_page(&xLeft) == false );
+        CHECK( xLeft == 110.0 );
+    }
+
+    TEST_FIXTURE(GraphicViewTestFixture, shift_left_x_to_be_on_page)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        MyVerticalView view(libraryScope, pDrawer);
+        list<URect>& pageBounds = view.my_get_page_bounds();
+        pageBounds.push_back( URect(0, 0, 100, 200) );
+        pageBounds.push_back( URect(0, 210, 100, 200) );
+        pageBounds.push_back( URect(0, 420, 100, 200) );
+
+        double xRight = 150.0;
+        CHECK( view.my_shift_left_x_to_be_on_page(&xRight) == true );
+        CHECK( xRight == 100.0 );
+
+        xRight = 70.0;
+        CHECK( view.my_shift_left_x_to_be_on_page(&xRight) == true );
+        CHECK( xRight == 70.0 );
+
+        xRight = -10.0;
+        CHECK( view.my_shift_left_x_to_be_on_page(&xRight) == false );
+        CHECK( xRight == -10.0 );
+    }
+
+    TEST_FIXTURE(GraphicViewTestFixture, shift_down_y_to_be_on_page)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        MyVerticalView view(libraryScope, pDrawer);
+        list<URect>& pageBounds = view.my_get_page_bounds();
+        pageBounds.push_back( URect(0, 0, 100, 200) );
+        pageBounds.push_back( URect(0, 210, 100, 200) );
+        pageBounds.push_back( URect(0, 420, 100, 200) );
+
+        double yTop = -10.0;
+        CHECK( view.my_shift_down_y_to_be_on_page(&yTop) == true );
+        CHECK( yTop == 0.0 );
+
+        yTop = 70.0;
+        CHECK( view.my_shift_down_y_to_be_on_page(&yTop) == true );
+        CHECK( yTop == 70.0 );
+
+        yTop = 415.0;
+        CHECK( view.my_shift_down_y_to_be_on_page(&yTop) == true );
+        CHECK( yTop == 420.0 );
+
+        yTop = 700.0;
+        CHECK( view.my_shift_down_y_to_be_on_page(&yTop) == false );
+        CHECK( yTop == 700.0 );
+    }
+
+    TEST_FIXTURE(GraphicViewTestFixture, shift_up_y_to_be_on_page)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        MyVerticalView view(libraryScope, pDrawer);
+        list<URect>& pageBounds = view.my_get_page_bounds();
+        pageBounds.push_back( URect(0, 0, 100, 200) );
+        pageBounds.push_back( URect(0, 210, 100, 200) );
+        pageBounds.push_back( URect(0, 420, 100, 200) );
+
+        double yBottom = -10.0;
+        CHECK( view.my_shift_up_y_to_be_on_page(&yBottom) == false );
+        CHECK( yBottom == -10.0 );
+
+        yBottom = 70.0;
+        CHECK( view.my_shift_up_y_to_be_on_page(&yBottom) == true );
+        CHECK( yBottom == 70.0 );
+
+        yBottom = 415.0;
+        CHECK( view.my_shift_up_y_to_be_on_page(&yBottom) == true );
+        CHECK( yBottom == 410.0 );
+
+        yBottom = 700.0;
+        CHECK( view.my_shift_up_y_to_be_on_page(&yBottom) == true );
+        CHECK( yBottom == 620.0 );
+    }
+
+    TEST_FIXTURE(GraphicViewTestFixture, trim_rectangle_to_be_on_pages_ok)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        MyVerticalView view(libraryScope, pDrawer);
+        list<URect>& pageBounds = view.my_get_page_bounds();
+        pageBounds.push_back( URect(0, 0, 100, 200) );
+        pageBounds.push_back( URect(0, 210, 100, 200) );
+        pageBounds.push_back( URect(0, 420, 100, 200) );
+
+        double xLeft = -10.0;
+        double yTop = 10.0;
+        double xRight = 50.0;
+        double yBottom = 500.0;
+        CHECK( view.trim_rectangle_to_be_on_pages(&xLeft, &yTop, &xRight, &yBottom) == true );
+        CHECK( xLeft == 0.0 );
+        CHECK( yTop == 10.0 );
+        CHECK( xRight == 50.0 );
+        CHECK( yBottom == 500.0 );
+//        cout << "left=" << xLeft << ", top=" << yTop << ", right=" << xRight << ", bottom=" << yBottom << endl;
+    }
+
+    TEST_FIXTURE(GraphicViewTestFixture, trim_rectangle_to_be_on_pages_out)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        MyVerticalView view(libraryScope, pDrawer);
+        list<URect>& pageBounds = view.my_get_page_bounds();
+        pageBounds.push_back( URect(0, 0, 100, 200) );
+        pageBounds.push_back( URect(0, 210, 100, 200) );
+        pageBounds.push_back( URect(0, 420, 100, 200) );
+
+        double xLeft = 110.0;
+        double yTop =  10.0;
+        double xRight = 150.0;
+        double yBottom = 500.0;
+        CHECK( view.trim_rectangle_to_be_on_pages(&xLeft, &yTop, &xRight, &yBottom) == false );
+        CHECK( xLeft == 110.0 );
+        CHECK( yTop == 10.0 );
+        CHECK( xRight == 100.0 );
+        CHECK( yBottom == 500.0 );
+//        cout << "left=" << xLeft << ", top=" << yTop << ", right=" << xRight << ", bottom=" << yBottom << endl;
+    }
+
+    TEST_FIXTURE(GraphicViewTestFixture, trimmed_rectangle_to_page_rectangles)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        MyVerticalView view(libraryScope, pDrawer);
+        list<URect>& pageBounds = view.my_get_page_bounds();
+        pageBounds.push_back( URect(0, 0, 100, 200) );
+        pageBounds.push_back( URect(0, 210, 100, 200) );
+        pageBounds.push_back( URect(0, 420, 100, 200) );
+
+        list<PageRectangle*> rectangles;
+        view.my_trimmed_rectangle_to_page_rectangles(&rectangles, 0.0, 10.0, 50.0, 500.0);
+
+        CHECK( rectangles.size() == 3 );
+//        cout << "num.rectangles=" << rectangles.size() << endl;
+        list<PageRectangle*>::iterator it = rectangles.begin();
+        CHECK( (*it)->iPage == 0 );
+        CHECK( (*it)->rect.left() == 0.0f );
+        CHECK( (*it)->rect.top() == 10.0f );
+        CHECK( (*it)->rect.right() == 50.0f );
+        CHECK( (*it)->rect.bottom() == 200.0f );
+        //cout << "LT=(" << (*it)->rect.left() << ", " << (*it)->rect.top() <<
+        //    "), RB=(" << (*it)->rect.right() << ", " << (*it)->rect.bottom() << ")" << endl;
+        delete *it;
+        ++it;
+        CHECK( (*it)->iPage == 1 );
+        CHECK( (*it)->rect.left() == 0.0f );
+        CHECK( (*it)->rect.top() == 0.0f );
+        CHECK( (*it)->rect.right() == 50.0f );
+        CHECK( (*it)->rect.bottom() == 200.0f );
+        //cout << "LT=(" << (*it)->rect.left() << ", " << (*it)->rect.top() <<
+        //    "), RB=(" << (*it)->rect.right() << ", " << (*it)->rect.bottom() << ")" << endl;
+        delete *it;
+        ++it;
+        CHECK( (*it)->iPage == 2 );
+        CHECK( (*it)->rect.left() == 0.0f );
+        CHECK( (*it)->rect.top() == 0.0f );
+        CHECK( (*it)->rect.right() == 50.0f );
+        CHECK( (*it)->rect.bottom() == 80.0f );
+        //cout << "LT=(" << (*it)->rect.left() << ", " << (*it)->rect.top() <<
+        //    "), RB=(" << (*it)->rect.right() << ", " << (*it)->rect.bottom() << ")" << endl;
+        delete *it;
+
+        rectangles.clear();
+    }
 
     //TEST_FIXTURE(GraphicViewTestFixture, EditView_UpdateWindow)
     //{
@@ -216,7 +533,7 @@ SUITE(GraphicViewTest)
     //    VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
     //        Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
     //    CHECK( m_platform.update_window_invoked() == false );
-    //    pView->update_window();
+    //    pView->request_window_update();
     //    CHECK( m_platform.update_window_invoked() == true );
     //    delete pView;
     //}

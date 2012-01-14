@@ -21,11 +21,13 @@
 #ifndef __LOMSE_AGG_TYPES_H__        //to avoid nested includes
 #define __LOMSE_AGG_TYPES_H__
 
-#include "lomse_doorway.h"
+#include "lomse_pixel_formats.h"
 #include "agg_color_rgba.h"     //rgba & rgba8 formats
 #include "agg_pixfmt_rgb.h"     //rgb pixel formats
+#include "agg_pixfmt_rgba.h"    //rgba pixel formats
 #include "agg_pixfmt_gray.h"    //gray pixel formats
 #include "agg_pixfmt_rgb_packed.h"
+#include "agg_basics.h"         //rect_i, rect_d
 
 #include "agg_math_stroke.h"    //line_cap_e & line_join_e
 #include "agg_trans_affine.h"   //trans_affine
@@ -40,6 +42,9 @@
 #include "agg_scanline_p.h"
 #include "agg_bounding_rect.h"
 #include "agg_gsv_text.h"
+#include "agg_span_gradient.h"
+#include "agg_span_interpolator_linear.h"
+#include "agg_span_allocator.h"
 
 #include "lomse_font_cache_manager.h"     //font renderization using FreeType
 #include "lomse_font_freetype.h"
@@ -80,6 +85,12 @@ typedef FontCacheManager::gray8_scanline_type       FontScanline;
 
 typedef agg::rendering_buffer  RenderingBuffer;
 
+//rectangles, integer and double
+typedef agg::rect_i       AggRectInt;          //rectangle, int
+typedef agg::rect_d       AggRectDouble;       //rectangle, double
+
+//array of colors defining a gradient
+typedef agg::pod_auto_array<agg::rgba8, 256> GradientColors;
 
 
 }   //namespace lomse

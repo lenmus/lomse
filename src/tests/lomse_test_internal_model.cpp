@@ -79,7 +79,7 @@ SUITE(InternalModelTest)
         ImoScoreText* pText = static_cast<ImoScoreText*>(
                                     ImFactory::inject(k_imo_score_text, &doc));
         pText->set_text("Hello world");
-        pContent->append_child(pText);
+        pContent->append_child_imo(pText);
         CHECK( pDoc->get_num_content_items() == 1 );
         CHECK( pDoc->get_content_item(0) == pText );
     }
@@ -115,7 +115,7 @@ SUITE(InternalModelTest)
         CHECK( pNote->get_num_attachments() == 0 );
         CHECK( pNote->get_num_reldataobjs() == 0 );
         CHECK( pNote->get_reldataobjs() == NULL );
-        CHECK( pNote->get_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_quarter );
         CHECK( pNote->get_octave() == 4 );
@@ -156,7 +156,7 @@ SUITE(InternalModelTest)
                                     ImFactory::inject(k_imo_instrument, &doc));
         ImoMusicData* pMD = static_cast<ImoMusicData*>(
                                 ImFactory::inject(k_imo_music_data, &doc) );
-        pInstr->append_child(pMD);
+        pInstr->append_child_imo(pMD);
         CHECK( pInstr->get_musicdata() == pMD );
         delete pInstr;
     }
@@ -205,7 +205,7 @@ SUITE(InternalModelTest)
         CHECK( pScore->get_option("Staff.DrawLeftBarline")->get_bool_value() == true );
         CHECK( pScore->get_option("Staff.UpperLegerLines.Displacement")->get_long_value() == 0L  );
         CHECK( pScore->get_option("Render.SpacingMethod")->get_long_value() == long(k_spacing_proportional) );
-        CHECK( pScore->get_option("Render.SpacingValue")->get_long_value() == 15L );
+        CHECK( pScore->get_option("Render.SpacingValue")->get_long_value() == 35L );
         ImoInstruments* pColInstr = pScore->get_instruments();
         CHECK( pColInstr != NULL );
         CHECK( pColInstr->get_num_children() == 0 );
@@ -256,7 +256,7 @@ SUITE(InternalModelTest)
         pOpt->set_name("Staff.Green");
         pOpt->set_bool_value(true);
         CHECK( pOpt->get_bool_value() == true );
-        pScore->add_option(pOpt);
+        pScore->add_or_replace_option(pOpt);
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Green");
         CHECK( pOpt2 != NULL );
@@ -274,7 +274,7 @@ SUITE(InternalModelTest)
         pOpt->set_name("Staff.Dots");
         pOpt->set_long_value(27L);
         CHECK( pOpt->get_long_value() == 27L );
-        pScore->add_option(pOpt);
+        pScore->add_or_replace_option(pOpt);
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Dots");
         CHECK( pOpt2 != NULL );
@@ -292,7 +292,7 @@ SUITE(InternalModelTest)
         pOpt->set_name("Staff.Pi");
         pOpt->set_float_value(3.1416f);
         CHECK( pOpt->get_float_value() == 3.1416f );
-        pScore->add_option(pOpt);
+        pScore->add_or_replace_option(pOpt);
         CHECK( pScore->has_options() == true );
         ImoOptionInfo* pOpt2 = pScore->get_option("Staff.Pi");
         CHECK( pOpt2 != NULL );
@@ -351,20 +351,20 @@ SUITE(InternalModelTest)
                                     ImFactory::inject(k_imo_option, &doc) );
         pOpt->set_name("Staff.Green");
         pOpt->set_bool_value(true);
-        pScore->add_option(pOpt);
+        pScore->add_or_replace_option(pOpt);
 
         ImoInstrument* pInstr = static_cast<ImoInstrument*>(
                                     ImFactory::inject(k_imo_instrument, &doc));
         ImoMusicData* pMD = static_cast<ImoMusicData*>(
                                 ImFactory::inject(k_imo_music_data, &doc) );
-        pInstr->append_child(pMD);
+        pInstr->append_child_imo(pMD);
         ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
         pClef->set_clef_type(k_clef_G2);
         ImoScoreText* pText = static_cast<ImoScoreText*>(
                                     ImFactory::inject(k_imo_score_text, &doc));
         pText->set_text("Hello world");
         pClef->add_attachment(&doc, pText);
-        pMD->append_child(pClef);
+        pMD->append_child_imo(pClef);
         pScore->add_instrument(pInstr);
 
         CHECK( pScore->has_options() == true );
@@ -448,24 +448,24 @@ SUITE(InternalModelTest)
         ImoContent* pContent = pDoc->get_content();
 
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
-        pContent->append_child(pScore);
+        pContent->append_child_imo(pScore);
         ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
                                     ImFactory::inject(k_imo_option, &doc) );
         pOpt->set_name("Staff.Green");
         pOpt->set_bool_value(true);
-        pScore->add_option(pOpt);
+        pScore->add_or_replace_option(pOpt);
         ImoInstrument* pInstr = static_cast<ImoInstrument*>(
                                     ImFactory::inject(k_imo_instrument, &doc));
         ImoMusicData* pMD = static_cast<ImoMusicData*>(
                                 ImFactory::inject(k_imo_music_data, &doc) );
-        pInstr->append_child(pMD);
+        pInstr->append_child_imo(pMD);
         ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
         pClef->set_clef_type(k_clef_G2);
         ImoScoreText* pText = static_cast<ImoScoreText*>(
                                     ImFactory::inject(k_imo_score_text, &doc));
         pText->set_text("Hello world");
         pClef->add_attachment(&doc, pText);
-        pMD->append_child(pClef);
+        pMD->append_child_imo(pClef);
         pScore->add_instrument(pInstr);
 
         CHECK( pDoc->get_num_content_items() == 1 );
@@ -497,8 +497,8 @@ SUITE(InternalModelTest)
         CHECK( info.get_height() == 100.0f );
         CHECK( info.get_width() == 160.0f );
         CHECK( info.get_position() == TPoint(0.0f, 0.0f) );
-        CHECK( info.get_bg_color() == Color(255,255,255,255) );
-        CHECK( info.get_border_color() == Color(0,0,0,255) );
+        CHECK( is_equal(info.get_bg_color(), Color(255,255,255,255)) );
+        CHECK( is_equal(info.get_border_color(), Color(0,0,0,255)) );
         CHECK( info.get_border_width() == 1.0f );
         CHECK( info.get_border_style() == k_line_solid );
     }
@@ -841,7 +841,7 @@ SUITE(InternalModelTest)
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         pNote->set_step(1);
         pNote->set_octave(4);
-        pNote->set_accidentals(0);
+        pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_eighth);
         pNote->set_dots(0);
 
@@ -865,7 +865,7 @@ SUITE(InternalModelTest)
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         pNote->set_step(1);
         pNote->set_octave(4);
-        pNote->set_accidentals(0);
+        pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_eighth);
         pNote->set_dots(0);
 
@@ -890,7 +890,7 @@ SUITE(InternalModelTest)
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         pNote->set_step(1);
         pNote->set_octave(4);
-        pNote->set_accidentals(0);
+        pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_eighth);
         pNote->set_dots(0);
 
@@ -991,7 +991,7 @@ SUITE(InternalModelTest)
         CHECK( pNote->get_voice() == 0 );
         CHECK( pNote->get_staff() == 0 );
         CHECK( pNote->get_duration() == 32.0f );
-        CHECK( pNote->get_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_stem_direction() == k_stem_default );
 
         delete pNote;
@@ -1009,7 +1009,7 @@ SUITE(InternalModelTest)
         CHECK( pNote->get_voice() == 3 );
         CHECK( pNote->get_staff() == 2 );
         CHECK( pNote->get_duration() == 48.0f );
-        CHECK( pNote->get_accidentals() == k_flat );
+        CHECK( pNote->get_notated_accidentals() == k_flat );
         CHECK( pNote->get_stem_direction() == k_stem_up );
 
         delete pNote;
@@ -1049,11 +1049,12 @@ SUITE(InternalModelTest)
 
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Default style" );
-        CHECK( pStyle->get_color_property(ImoStyle::k_color) == Color(0,0,0,255) );
+        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0,0,0,255)) );
         CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Liberation serif" );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_font_normal );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_font_normal );
         CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 12.0f );
+        CHECK( pStyle->get_float_property(ImoStyle::k_line_height) == 1.5f );
 
         delete pScore;
     }
@@ -1085,7 +1086,7 @@ SUITE(InternalModelTest)
 
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Default style" );
-        CHECK( pStyle->get_color_property(ImoStyle::k_color) == Color(0,0,0,255) );
+        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0,0,0,255)) );
         CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Liberation serif" );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_font_normal );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_font_normal );
@@ -1105,7 +1106,7 @@ SUITE(InternalModelTest)
         ImoStyle* pStyle = pImo->get_style();
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Default style" );
-        CHECK( pStyle->get_color_property(ImoStyle::k_color) == Color(0,0,0,255) );
+        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0,0,0,255)) );
         CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Liberation serif" );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_font_normal );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_font_normal );
@@ -1130,6 +1131,20 @@ SUITE(InternalModelTest)
         ImoContentObj* pPara = dynamic_cast<ImoContentObj*>(*it);
         CHECK( pPara->margin_top() == 400 );
         CHECK( pPara->margin_bottom() == 300 );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, PrivateStyle_overrides_values)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoStyle* pStyle = pDoc->create_private_style();
+
+        CHECK( pStyle != NULL );
+        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 12.0f );
+
+        pStyle->set_float_property(ImoStyle::k_font_size, 21.0f) ;
+        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 21.0f );
     }
 
     // API ------------------------------------------------------------------------------
@@ -1206,6 +1221,156 @@ SUITE(InternalModelTest)
         CHECK( pScore->get_num_instruments() == 1 );
     }
 
+    TEST_FIXTURE(InternalModelTestFixture, API_AddObjects)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoScore* pScore = doc.add_score();
+        ImoInstrument* pInstr = pScore->add_instrument();
+        pInstr->add_clef(k_clef_G2);
+        pInstr->add_key_signature(k_key_C);
+        pInstr->add_time_signature(4 ,4);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD->get_num_items() == 3 );
+
+        pInstr->add_staff_objects("(n c4 q)(n d4 q)(n e4 q)(n f4 q)");
+
+        CHECK( pMD->get_num_items() == 7 );
+    }
+
+    // ImoMultiColumn -------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, MultiColumn_creates_columns)
+    {
+        Document doc(m_libraryScope);
+        ImoMultiColumn* pMC = ImFactory::inject_multicolumn(&doc);
+
+        CHECK( pMC != NULL );
+        CHECK( pMC->is_multicolumn() == true );
+        CHECK( pMC->get_num_columns() == 0 );
+
+        delete pMC;
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, MultiColumn_initial_width)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoMultiColumn* pMC = doc.add_multicolumn_wrapper(3);
+
+        CHECK( pMC->get_num_columns() == 3 );
+        CHECK( pMC->get_column_width(0) == 100.0f/3.0f );   //in percentage 33.3%
+        CHECK( pMC->get_column_width(1) == 100.0f/3.0f );
+        CHECK( pMC->get_column_width(2) == 100.0f/3.0f );
+    }
+
+    // ImoWidget -------------------------------------------------------------------------
+
+//    TEST_FIXTURE(InternalModelTestFixture, Panel_create)
+//    {
+//        Document doc(m_libraryScope);
+//        ImoWidget* pImo = static_cast<ImoWidget*>( ImFactory::inject(k_imo_widget, &doc) );
+//
+//        CHECK( pImo != NULL );
+//        CHECK( pImo->is_imo_widget() == true );
+////        CHECK( pImo->get_size() == USize(0.0f, 0.0f) );
+//
+//        delete pImo;
+//    }
+
+//    TEST_FIXTURE(InternalModelTestFixture, Panel_add_to_block_api)
+//    {
+//        Document doc(m_libraryScope);
+//        doc.create_empty();
+//        ImoWidget* pImo = doc.add_widget((1000.0f, 600.0f);
+//
+//        CHECK( pImo != NULL );
+//        CHECK( pImo->is_imo_widget() == true );
+//        CHECK( pImo->get_size() == USize(1000.0f, 600.0f) );
+//    }
+
+    //TEST_FIXTURE(InternalModelTestFixture, Panel_add_child)
+    //{
+    //    Document doc(m_libraryScope);
+    //    doc.create_empty();
+    //    ImoWidget* pImo = doc.add_panel(1000.0f, 600.0f);
+    //
+    //    pImo->add()
+
+    //    CHECK( pImo != NULL );
+    //    CHECK( pImo->is_imo_widget() == true );
+    //    CHECK( pImo->get_size() == USize(1000.0f, 600.0f) );
+    //}
+
+    // dirty bits -----------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, dirty_bit_initially_set)
+    {
+        //AWARE: score and instrument can not be used directly in these tests as, at
+        //creation, also some children are automatically created
+
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoScore* pScore = doc.add_score();
+        ImoInstrument* pInstr = pScore->add_instrument();
+        ImoClef* pClef = pInstr->add_clef(k_clef_G2);
+
+        CHECK( pScore->is_dirty() == true );
+        CHECK( pScore->are_children_dirty() == true );
+        CHECK( pClef->is_dirty() == true );
+        CHECK( pClef->are_children_dirty() == false );
+        CHECK( doc.is_dirty() == true );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, clear_dirty)
+    {
+        //clear dirty clears both: dirty and children dirty. But does'n propagate down
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoScore* pScore = doc.add_score();
+        ImoInstrument* pInstr = pScore->add_instrument();
+        ImoClef* pClef = pInstr->add_clef(k_clef_G2);
+
+        pScore->set_dirty(false);
+        CHECK( pScore->is_dirty() == false );
+        CHECK( pScore->are_children_dirty() == false );
+        CHECK( pClef->is_dirty() == true );
+        CHECK( doc.is_dirty() == true );
+
+        doc.clear_dirty();
+
+        CHECK( pClef->is_dirty() == true );
+        CHECK( doc.is_dirty() == false );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, set_dirty_propagates_up)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoScore* pScore = doc.add_score();
+        pScore->set_dirty(false);
+        ImoInstrument* pInstr = pScore->add_instrument();
+        ImoClef* pClef = pInstr->add_clef(k_clef_G2);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        pScore->set_dirty(false);
+        pInstr->set_dirty(false);
+        pMD->set_dirty(false);
+        pClef->set_dirty(false);
+        doc.clear_dirty();
+
+        ImoKeySignature* pKey = pInstr->add_key_signature(k_key_C);
+
+        CHECK( pKey->is_dirty() == true );
+        CHECK( pKey->are_children_dirty() == false );
+        CHECK( pMD->is_dirty() == true );
+        CHECK( pMD->are_children_dirty() == false );
+        CHECK( pInstr->is_dirty() == false );
+        CHECK( pInstr->are_children_dirty() == true );
+        CHECK( pScore->is_dirty() == false );
+        CHECK( pScore->are_children_dirty() == true );
+        CHECK( pScore->are_children_dirty() == true );
+        CHECK( doc.is_dirty() == true );
+    }
 
 }
 

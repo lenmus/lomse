@@ -42,69 +42,70 @@ ImoObj* ImFactory::inject(int type, Document* pDoc)
     ImoObj* pObj = NULL;
     switch(type)
     {
-        case k_imo_attachments:         pObj = new ImoAttachments();        break;
-        case k_imo_barline:             pObj = new ImoBarline();            break;
-        case k_imo_beam:                pObj = new ImoBeam();               break;
-        case k_imo_beam_dto:            pObj = new ImoBeamDto();            break;
-        case k_imo_bezier_info:         pObj = new ImoBezierInfo();         break;
-//        case k_imo_border_dto:      pObj = new ImoBorderDto();              break;
-        case k_imo_textblock_info:      pObj = new ImoTextBlockInfo();      break;
-        case k_imo_button:              pObj = new ImoButton();             break;
-        case k_imo_chord:               pObj = new ImoChord();              break;
-        case k_imo_clef:                pObj = new ImoClef();               break;
-        case k_imo_color_dto:           pObj = new ImoColorDto();           break;
-        case k_imo_content:             pObj = new ImoContent(pDoc);        break;
-        case k_imo_control:             pObj = new ImoControl();            break;
-        case k_imo_cursor_info:         pObj = new ImoCursorInfo();         break;
-        case k_imo_document:            pObj = new ImoDocument(pDoc);       break;
-        case k_imo_dynamic:             pObj = new ImoDynamic();            break;
-        case k_imo_fermata:             pObj = new ImoFermata();            break;
-//        case k_imo_figured_bass:    pObj = new ImoFiguredBass();              break;
-//        case k_imo_figured_bass_info:   pObj = new ImoFBInfo();          break;
-        case k_imo_font_style_dto:      pObj = new ImoFontStyleDto();       break;
-        case k_imo_go_back_fwd:         pObj = new ImoGoBackFwd();          break;
-        case k_imo_heading:             pObj = new ImoHeading();            break;
-        case k_imo_inline_wrapper:      pObj = new ImoInlineWrapper();      break;
-        case k_imo_instr_group:         pObj = new ImoInstrGroup();         break;
-        case k_imo_instrument:          pObj = new ImoInstrument(pDoc);     break;
-        case k_imo_instruments:         pObj = new ImoInstruments();        break;
-        case k_imo_instrument_groups:   pObj = new ImoInstrGroups();        break;
-        case k_imo_key_signature:       pObj = new ImoKeySignature();       break;
-        case k_imo_line:                pObj = new ImoLine();               break;
-        case k_imo_line_style:          pObj = new ImoLineStyle();          break;
-        case k_imo_link:                pObj = new ImoLink();               break;
-        case k_imo_metronome_mark:      pObj = new ImoMetronomeMark();      break;
-        case k_imo_midi_info:           pObj = new ImoMidiInfo();           break;
-        case k_imo_music_data:          pObj = new ImoMusicData();          break;
-        case k_imo_note:                pObj = new ImoNote();               break;
-        case k_imo_option:              pObj = new ImoOptionInfo();         break;
-        case k_imo_options:             pObj = new ImoOptions();            break;
-        case k_imo_page_info:           pObj = new ImoPageInfo();           break;
-        case k_imo_para:                pObj = new ImoParagraph();          break;
-        case k_imo_param_info:          pObj = new ImoParamInfo();          break;
-//        case k_imo_point_dto:       pObj = new ImoParagraph();              break;
-        case k_imo_reldataobjs:         pObj = new ImoReldataobjs();        break;
-        case k_imo_rest:                pObj = new ImoRest();               break;
-        case k_imo_score:               pObj = new ImoScore(pDoc);          break;
-        case k_imo_score_text:          pObj = new ImoScoreText();          break;
-        case k_imo_score_title:         pObj = new ImoScoreTitle();         break;
-//        case k_imo_size_dto:        pObj = new ImoParagraph();              break;
-        case k_imo_slur:                pObj = new ImoSlur();               break;
-        case k_imo_slur_dto:            pObj = new ImoSlurDto();            break;
-        case k_imo_spacer:              pObj = new ImoSpacer();             break;
-        case k_imo_staff_info:          pObj = new ImoStaffInfo();          break;
-        case k_imo_style:               pObj = new ImoStyle();              break;
-        case k_imo_styles:              pObj = new ImoStyles(pDoc);         break;
-        case k_imo_system_info:         pObj = new ImoSystemInfo();         break;
-        case k_imo_text_box:            pObj = new ImoTextBox();            break;
-        case k_imo_text_info:           pObj = new ImoTextInfo();           break;
-        case k_imo_text_item:           pObj = new ImoTextItem();           break;
-//        case k_imo_text_style:      pObj = new ImoParagraph();              break;
-        case k_imo_tie:                 pObj = new ImoTie();                break;
-        case k_imo_tie_dto:             pObj = new ImoTieDto();             break;
-        case k_imo_time_signature:      pObj = new ImoTimeSignature();      break;
-        case k_imo_tuplet:              pObj = new ImoTuplet();             break;
-        case k_imo_tuplet_dto:          pObj = new ImoTupletDto();          break;
+        case k_imo_attachments:         pObj = LOMSE_NEW ImoAttachments();        break;
+        case k_imo_barline:             pObj = LOMSE_NEW ImoBarline();            break;
+        case k_imo_beam:                pObj = LOMSE_NEW ImoBeam();               break;
+        case k_imo_beam_dto:            pObj = LOMSE_NEW ImoBeamDto();            break;
+        case k_imo_bezier_info:         pObj = LOMSE_NEW ImoBezierInfo();         break;
+//        case k_imo_border_dto:      pObj = LOMSE_NEW ImoBorderDto();              break;
+        case k_imo_textblock_info:      pObj = LOMSE_NEW ImoTextBlockInfo();      break;
+        case k_imo_button:              pObj = LOMSE_NEW ImoButton();             break;
+        case k_imo_chord:               pObj = LOMSE_NEW ImoChord();              break;
+        case k_imo_clef:                pObj = LOMSE_NEW ImoClef();               break;
+        case k_imo_color_dto:           pObj = LOMSE_NEW ImoColorDto();           break;
+        case k_imo_content:             pObj = LOMSE_NEW ImoContent(pDoc);        break;
+        case k_imo_cursor_info:         pObj = LOMSE_NEW ImoCursorInfo();         break;
+        case k_imo_document:            pObj = LOMSE_NEW ImoDocument(pDoc);       break;
+        case k_imo_dynamic:             pObj = LOMSE_NEW ImoDynamic();            break;
+        case k_imo_fermata:             pObj = LOMSE_NEW ImoFermata();            break;
+//        case k_imo_figured_bass:    pObj = LOMSE_NEW ImoFiguredBass();              break;
+//        case k_imo_figured_bass_info:   pObj = LOMSE_NEW ImoFBInfo();          break;
+        case k_imo_font_style_dto:      pObj = LOMSE_NEW ImoFontStyleDto();       break;
+        case k_imo_go_back_fwd:         pObj = LOMSE_NEW ImoGoBackFwd();          break;
+        case k_imo_heading:             pObj = LOMSE_NEW ImoHeading();            break;
+        case k_imo_image:               pObj = LOMSE_NEW ImoImage();              break;
+        case k_imo_inline_wrapper:      pObj = LOMSE_NEW ImoInlineWrapper();      break;
+        case k_imo_instr_group:         pObj = LOMSE_NEW ImoInstrGroup();         break;
+        case k_imo_instrument:          pObj = LOMSE_NEW ImoInstrument(pDoc);     break;
+        case k_imo_instruments:         pObj = LOMSE_NEW ImoInstruments();        break;
+        case k_imo_instrument_groups:   pObj = LOMSE_NEW ImoInstrGroups();        break;
+        case k_imo_key_signature:       pObj = LOMSE_NEW ImoKeySignature();       break;
+        case k_imo_line:                pObj = LOMSE_NEW ImoLine();               break;
+        case k_imo_line_style:          pObj = LOMSE_NEW ImoLineStyle();          break;
+        case k_imo_link:                pObj = LOMSE_NEW ImoLink();               break;
+        case k_imo_metronome_mark:      pObj = LOMSE_NEW ImoMetronomeMark();      break;
+        case k_imo_midi_info:           pObj = LOMSE_NEW ImoMidiInfo();           break;
+        case k_imo_music_data:          pObj = LOMSE_NEW ImoMusicData();          break;
+        case k_imo_note:                pObj = LOMSE_NEW ImoNote();               break;
+        case k_imo_option:              pObj = LOMSE_NEW ImoOptionInfo();         break;
+        case k_imo_options:             pObj = LOMSE_NEW ImoOptions();            break;
+        case k_imo_page_info:           pObj = LOMSE_NEW ImoPageInfo();           break;
+        case k_imo_para:                pObj = LOMSE_NEW ImoParagraph();          break;
+        case k_imo_param_info:          pObj = LOMSE_NEW ImoParamInfo();          break;
+//        case k_imo_point_dto:       pObj = LOMSE_NEW ImoParagraph();              break;
+        case k_imo_reldataobjs:         pObj = LOMSE_NEW ImoReldataobjs();        break;
+        case k_imo_rest:                pObj = LOMSE_NEW ImoRest();               break;
+        case k_imo_score:               pObj = LOMSE_NEW ImoScore(pDoc);          break;
+        case k_imo_score_text:          pObj = LOMSE_NEW ImoScoreText();          break;
+        case k_imo_score_title:         pObj = LOMSE_NEW ImoScoreTitle();         break;
+//        case k_imo_size_dto:        pObj = LOMSE_NEW ImoParagraph();              break;
+        case k_imo_slur:                pObj = LOMSE_NEW ImoSlur();               break;
+        case k_imo_slur_dto:            pObj = LOMSE_NEW ImoSlurDto();            break;
+        case k_imo_spacer:              pObj = LOMSE_NEW ImoSpacer();             break;
+        case k_imo_staff_info:          pObj = LOMSE_NEW ImoStaffInfo();          break;
+        case k_imo_style:               pObj = LOMSE_NEW ImoStyle();              break;
+        case k_imo_styles:              pObj = LOMSE_NEW ImoStyles(pDoc);         break;
+        case k_imo_system_break:        pObj = LOMSE_NEW ImoSystemBreak();        break;
+        case k_imo_system_info:         pObj = LOMSE_NEW ImoSystemInfo();         break;
+        case k_imo_text_box:            pObj = LOMSE_NEW ImoTextBox();            break;
+        case k_imo_text_info:           pObj = LOMSE_NEW ImoTextInfo();           break;
+        case k_imo_text_item:           pObj = LOMSE_NEW ImoTextItem();           break;
+//        case k_imo_text_style:      pObj = LOMSE_NEW ImoParagraph();              break;
+        case k_imo_tie:                 pObj = LOMSE_NEW ImoTie();                break;
+        case k_imo_tie_dto:             pObj = LOMSE_NEW ImoTieDto();             break;
+        case k_imo_time_signature:      pObj = LOMSE_NEW ImoTimeSignature();      break;
+        case k_imo_tuplet:              pObj = LOMSE_NEW ImoTuplet();             break;
+        case k_imo_tuplet_dto:          pObj = LOMSE_NEW ImoTupletDto();          break;
 
         default:
             throw std::runtime_error("[ImFactory::inject] invalid type.");
@@ -117,7 +118,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc)
 //---------------------------------------------------------------------------------------
 ImoBeamData* ImFactory::inject_beam_data(Document* pDoc, ImoBeamDto* pDto)
 {
-    ImoBeamData* pObj = new ImoBeamData(pDto);
+    ImoBeamData* pObj = LOMSE_NEW ImoBeamData(pDto);
     pObj->set_id( pDoc->new_id() );
     return pObj;
 }
@@ -125,7 +126,7 @@ ImoBeamData* ImFactory::inject_beam_data(Document* pDoc, ImoBeamDto* pDto)
 //---------------------------------------------------------------------------------------
 ImoTieData* ImFactory::inject_tie_data(Document* pDoc, ImoTieDto* pDto)
 {
-    ImoTieData* pObj = new ImoTieData(pDto);
+    ImoTieData* pObj = LOMSE_NEW ImoTieData(pDto);
     pObj->set_id( pDoc->new_id() );
     return pObj;
 }
@@ -133,7 +134,7 @@ ImoTieData* ImFactory::inject_tie_data(Document* pDoc, ImoTieDto* pDto)
 //---------------------------------------------------------------------------------------
 ImoTupletData* ImFactory::inject_tuplet_data(Document* pDoc, ImoTupletDto* pDto)
 {
-    ImoTupletData* pObj = new ImoTupletData(pDto);
+    ImoTupletData* pObj = LOMSE_NEW ImoTupletData(pDto);
     pObj->set_id( pDoc->new_id() );
     return pObj;
 }
@@ -141,7 +142,7 @@ ImoTupletData* ImFactory::inject_tuplet_data(Document* pDoc, ImoTupletDto* pDto)
 //---------------------------------------------------------------------------------------
 ImoSlurData* ImFactory::inject_slur_data(Document* pDoc, ImoSlurDto* pDto)
 {
-    ImoSlurData* pObj = new ImoSlurData(pDto);
+    ImoSlurData* pObj = LOMSE_NEW ImoSlurData(pDto);
     pObj->set_id( pDoc->new_id() );
     return pObj;
 }
@@ -149,7 +150,7 @@ ImoSlurData* ImFactory::inject_slur_data(Document* pDoc, ImoSlurDto* pDto)
 //---------------------------------------------------------------------------------------
 ImoTuplet* ImFactory::inject_tuplet(Document* pDoc, ImoTupletDto* pDto)
 {
-    ImoTuplet* pObj = new ImoTuplet(pDto);
+    ImoTuplet* pObj = LOMSE_NEW ImoTuplet(pDto);
     pObj->set_id( pDoc->new_id() );
     return pObj;
 }
@@ -157,18 +158,43 @@ ImoTuplet* ImFactory::inject_tuplet(Document* pDoc, ImoTupletDto* pDto)
 //---------------------------------------------------------------------------------------
 ImoTextBox* ImFactory::inject_text_box(Document* pDoc, ImoTextBlockInfo& dto)
 {
-    ImoTextBox* pObj = new ImoTextBox(dto);
+    ImoTextBox* pObj = LOMSE_NEW ImoTextBox(dto);
     pObj->set_id( pDoc->new_id() );
     return pObj;
 }
 
 //---------------------------------------------------------------------------------------
 ImoNote* ImFactory::inject_note(Document* pDoc, int step, int octave,
-                                int noteType, int accidentals, int dots,
-                                int staff, int voice, int stem)
+                                int noteType, EAccidentals accidentals,
+                                int dots, int staff, int voice, int stem)
 {
-    ImoNote* pObj = new ImoNote(step, octave, noteType, accidentals, dots,
+    ImoNote* pObj = LOMSE_NEW ImoNote(step, octave, noteType, accidentals, dots,
                                 staff, voice, stem);
+    pObj->set_id( pDoc->new_id() );
+    return pObj;
+}
+
+//---------------------------------------------------------------------------------------
+ImoMultiColumn* ImFactory::inject_multicolumn(Document* pDoc)
+{
+    ImoMultiColumn* pObj = LOMSE_NEW ImoMultiColumn();
+    pObj->set_id( pDoc->new_id() );
+    return pObj;
+}
+
+//---------------------------------------------------------------------------------------
+ImoImage* ImFactory::inject_image(Document* pDoc, unsigned char* imgbuf, VSize bmpSize,
+                                  EPixelFormat format, USize imgSize)
+{
+    ImoImage* pObj = LOMSE_NEW ImoImage(imgbuf, bmpSize, format, imgSize);
+    pObj->set_id( pDoc->new_id() );
+    return pObj;
+}
+
+//---------------------------------------------------------------------------------------
+ImoControl* ImFactory::inject_control(Document* pDoc, Control* ctrol)
+{
+    ImoControl* pObj = LOMSE_NEW ImoControl(ctrol);
     pObj->set_id( pDoc->new_id() );
     return pObj;
 }

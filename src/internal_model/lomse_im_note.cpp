@@ -116,7 +116,8 @@ ImoNote::ImoNote()
     : ImoNoteRest(k_imo_note)
     , m_step(k_no_pitch)
     , m_octave(4)
-    , m_accidentals(k_no_accidentals)
+    , m_notated_acc(k_no_accidentals)
+    , m_actual_acc(k_acc_not_computed)
     , m_stemDirection(k_stem_default)
     , m_pTieNext(NULL)
     , m_pTiePrev(NULL)
@@ -125,12 +126,13 @@ ImoNote::ImoNote()
 }
 
 //---------------------------------------------------------------------------------------
-ImoNote::ImoNote(int step, int octave, int noteType, int accidentals, int dots,
+ImoNote::ImoNote(int step, int octave, int noteType, EAccidentals accidentals, int dots,
                  int staff, int voice, int stem)
     : ImoNoteRest(k_imo_note)
     , m_step(step)
     , m_octave(octave)
-    , m_accidentals(accidentals)
+    , m_notated_acc(accidentals)
+    , m_actual_acc(k_acc_not_computed)
     , m_stemDirection(stem)
     , m_pTieNext(NULL)
     , m_pTiePrev(NULL)
@@ -171,6 +173,56 @@ bool ImoNote::is_end_of_chord()
 {
     ImoChord* pChord = get_chord();
     return pChord && pChord->get_end_object() == this;
+}
+
+//---------------------------------------------------------------------------------------
+FPitch ImoNote::get_fpitch()
+{
+    //FPitch. Ignores fractional part of actual accidentals
+
+    if (m_actual_acc == k_acc_not_computed)
+        return k_undefined_fpitch;
+    else
+        return FPitch(m_step, m_octave, int(m_actual_acc));
+}
+
+//---------------------------------------------------------------------------------------
+float ImoNote::get_frequency()
+{
+    //frequecy, in Herzs
+
+    //TODO
+    return 0.0f;
+}
+
+
+//---------------------------------------------------------------------------------------
+MidiPitch ImoNote::get_midi_pitch()
+{
+    if (m_actual_acc == k_acc_not_computed)
+        return k_undefined_midi_pitch;
+    else
+        return MidiPitch(m_step, m_octave, int(m_actual_acc));
+}
+
+
+//---------------------------------------------------------------------------------------
+int ImoNote::get_midi_bend()
+{
+    //Midi bend (two bytes)
+
+    //TODO
+    return 0;
+}
+
+
+//---------------------------------------------------------------------------------------
+float ImoNote::get_cents()
+{
+    //deviation from diatonic pitch implied by step and octave, in cents.
+
+    //TODO
+    return 0.0f;
 }
 
 

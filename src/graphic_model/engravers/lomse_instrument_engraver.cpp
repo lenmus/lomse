@@ -179,12 +179,12 @@ void InstrumentEngraver::add_brace_bracket(GmoBoxSystem* pBox)
 
         GmoShape* pShape;
 //        if (nSymbol == lm_eBracket)
-            pShape = new GmoShapeBracket(m_pInstr, 0, xLeft, yTop, xRight, yBottom,
+            pShape = LOMSE_NEW GmoShapeBracket(m_pInstr, 0, xLeft, yTop, xRight, yBottom,
                                          Color(0,0,0));
 //        else
 //        {
 //            LUnits dyHook = tenths_to_logical(6.0f);
-//            pShape = new GmoShapeBrace(this, xLeft, yTop, xRight, yBottom,
+//            pShape = LOMSE_NEW GmoShapeBrace(this, xLeft, yTop, xRight, yBottom,
 //                                      dyHook, *wxBLACK);
 //        }
         pBox->add_shape(pShape, GmoShape::k_layer_staff);
@@ -198,7 +198,7 @@ void InstrumentEngraver::add_staff_lines(GmoBoxSystem* pBox)
 	{
         ImoStaffInfo* pStaff = m_pInstr->get_staff(iStaff);
         GmoShapeStaff* pShape
-            = new GmoShapeStaff(m_pInstr, iStaff, pStaff, iStaff, m_stavesWidth,
+            = LOMSE_NEW GmoShapeStaff(m_pInstr, iStaff, pStaff, iStaff, m_stavesWidth,
                                 Color(0,0,0));
         pShape->set_origin(m_stavesLeft + m_org.x, m_staffTop[iStaff] + m_org.y);
         pBox->add_staff_shape(pShape);

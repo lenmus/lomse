@@ -77,11 +77,11 @@ void RestEngraver::determine_position()
 void RestEngraver::create_main_shape()
 {
     int nIdx = 0;   //single-shape
-    m_pRestShape = new GmoShapeRest(m_pCreatorImo, nIdx, m_uxLeft, m_uyTop, Color(0,0,0),
+    m_pRestShape = LOMSE_NEW GmoShapeRest(m_pCreatorImo, nIdx, m_uxLeft, m_uyTop, Color(0,0,0),
                                     m_libraryScope);
     m_pNoteRestShape = m_pRestShape;
 
-    GmoShape* pGlyph = new GmoShapeRestGlyph(m_pCreatorImo, nIdx, m_iGlyph,
+    GmoShape* pGlyph = LOMSE_NEW GmoShapeRestGlyph(m_pCreatorImo, nIdx, m_iGlyph,
                                              UPoint(m_uxLeft, m_uyTop),
                                              Color(0,0,0), m_libraryScope, m_fontSize);
     m_pRestShape->add(pGlyph);
@@ -135,7 +135,7 @@ void RestEngraver::add_shapes_for_dots_if_required()
 LUnits RestEngraver::add_dot_shape(LUnits x, LUnits y, Color color)
 {
     y += get_glyph_offset(k_glyph_dot) + tenths_to_logical(-75.0);
-    GmoShapeDot* pShape = new GmoShapeDot(m_pCreatorImo, 0, k_glyph_dot, UPoint(x, y),
+    GmoShapeDot* pShape = LOMSE_NEW GmoShapeDot(m_pCreatorImo, 0, k_glyph_dot, UPoint(x, y),
                                           color, m_libraryScope, m_fontSize);
 	m_pRestShape->add(pShape);
     return pShape->get_width();

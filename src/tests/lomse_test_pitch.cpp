@@ -151,7 +151,7 @@ SUITE(PitchTest)
         FPitch fp(k_step_C, k_octave_4, -2);
         CHECK( fp.step() == 0 );
         CHECK( fp.octave() == 4 );
-        CHECK( fp.accidentals() == -2 );
+        CHECK( fp.num_accidentals() == -2 );
     }
 
     TEST_FIXTURE(PitchTestFixture, FPitch_to_rel_ldp_name)
@@ -222,6 +222,29 @@ SUITE(PitchTest)
         CHECK( fp3 == FPitch(k_step_D, k_octave_4, 1) );
         CHECK( fp4 == FPitch(k_step_G, k_octave_4, -1) );
         CHECK( fp5 == FPitch(k_step_F, k_octave_4, 0) );
+    }
+
+    TEST_FIXTURE(PitchTestFixture, FPitch_from_ldp_string)
+    {
+        FPitch fp1("+c4");
+        CHECK( fp1.step() == k_step_C );
+        CHECK( fp1.octave() == 4 );
+        CHECK( fp1.num_accidentals() == 1 );
+
+        FPitch fp2("f5");
+        CHECK( fp2.step() == k_step_F );
+        CHECK( fp2.octave() == 5 );
+        CHECK( fp2.num_accidentals() == 0 );
+
+        FPitch fp3("--d3");
+        CHECK( fp3.step() == k_step_D );
+        CHECK( fp3.octave() == 3 );
+        CHECK( fp3.num_accidentals() == -2 );
+
+        FPitch fp4("z7");   //error -> returns c4
+        CHECK( fp4.step() == k_step_C );
+        CHECK( fp4.octave() == 4 );
+        CHECK( fp4.num_accidentals() == 0 );
     }
 
 }

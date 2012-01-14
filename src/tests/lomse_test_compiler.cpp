@@ -69,6 +69,7 @@ SUITE(LdpCompilerTest)
         Document doc(m_libraryScope);
         LdpCompiler compiler(m_libraryScope, &doc);
         InternalModel* pIModel = compiler.compile_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (language en iso-8859-1) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData )))))" );
+        CHECK( compiler.get_file_locator() == "string:" );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
         CHECK( pDoc->get_version() == "0.0" );
         CHECK( pDoc->get_num_content_items() == 1 );
@@ -98,29 +99,33 @@ SUITE(LdpCompilerTest)
     //    delete pIModel;
     //}
 
-    //TEST_FIXTURE(LdpCompilerTestFixture, LdpCompilerFromFile)
-    //{
-    //    Document doc(m_libraryScope);
-    //    LdpCompiler compiler(m_libraryScope, &doc);
-    //    InternalModel* pIModel = compiler.compile_file(m_scores_path + "00011-empty-fill-page.lms");
-    //    ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
-    //    CHECK( pDoc->get_version() == "0.0" );
-    //    CHECK( pDoc->get_num_content_items() == 1 );
-    //    ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-    //    CHECK( pScore != NULL );
+    TEST_FIXTURE(LdpCompilerTestFixture, LdpCompilerFromFile)
+    {
+        Document doc(m_libraryScope);
+        LdpCompiler compiler(m_libraryScope, &doc);
+        string path = m_scores_path + "00011-empty-fill-page.lms";
+        InternalModel* pIModel = compiler.compile_file(path);
+        CHECK( compiler.get_file_locator() == path );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
+        CHECK( pDoc->get_version() == "0.0" );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
     //    CHECK( pScore->get_id() == 3L );
-    //    CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore->get_num_instruments() == 1 );
     //    ImoInstrument* pInstr = pScore->get_instrument(0);
     //    CHECK( pInstr->get_id() == 11L );
-    //    delete pIModel;
-    //}
+        delete pIModel;
+    }
 
-    //TEST_FIXTURE(LdpCompilerTestFixture, LdpCompilerFromInput)
-    //{
-    //    Document doc(m_libraryScope);
-    //    LdpCompiler compiler(m_libraryScope, &doc);
-    //    LdpFileReader reader(m_scores_path + "00011-empty-fill-page.lms");
-    //    InternalModel* pIModel = compiler.compile_input(reader);
+    TEST_FIXTURE(LdpCompilerTestFixture, LdpCompilerFromInput)
+    {
+        Document doc(m_libraryScope);
+        LdpCompiler compiler(m_libraryScope, &doc);
+        string path = m_scores_path + "00011-empty-fill-page.lms";
+        LdpFileReader reader(path);
+        InternalModel* pIModel = compiler.compile_input(reader);
+        CHECK( compiler.get_file_locator() == path );
     //    ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
     //    CHECK( pDoc->get_version() == "0.0" );
     //    CHECK( pDoc->get_num_content_items() == 1 );
@@ -130,8 +135,8 @@ SUITE(LdpCompilerTest)
     //    CHECK( pScore->get_num_instruments() == 1 );
     //    ImoInstrument* pInstr = pScore->get_instrument(0);
     //    CHECK( pInstr->get_id() == 11L );
-    //    delete pIModel;
-    //}
+        delete pIModel;
+    }
 
 };
 

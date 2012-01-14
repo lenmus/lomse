@@ -23,10 +23,6 @@
 
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
-//#include "lomse_layouter.h"
-
-//#include <sstream>
-//using namespace std;
 
 namespace lomse
 {
@@ -63,9 +59,6 @@ protected:
     //constructor for DocumentLayouter
     Layouter(LibraryScope& libraryScope);
 
-    //info
-    inline GmoBox* get_item_main_box() { return m_pItemMainBox; }
-
 public:
     virtual ~Layouter() {}
 
@@ -82,6 +75,9 @@ public:
     inline GraphicModel* get_graphic_model() { return m_pGModel; }
     inline LibraryScope& get_library_scope() { return m_libraryScope; }
 
+    void add_end_margins();
+    void set_box_height();
+    inline GmoBox* get_item_main_box() { return m_pItemMainBox; }
 
 protected:
     virtual GmoBox* start_new_page();
@@ -89,8 +85,6 @@ protected:
     Layouter* create_layouter(ImoContentObj* pItem);
     void layout_item(ImoContentObj* pItem, GmoBox* pParentBox);
 
-    void add_end_margins();
-    void set_box_height();
     void set_cursor_and_available_space(GmoBox* pItemMainBox);
 
     inline UPoint get_cursor() { return m_pageCursor; }

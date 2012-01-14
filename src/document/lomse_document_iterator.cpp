@@ -179,7 +179,7 @@ void DocIterator::point_to_current()
 //    {
 //        if (m_pScoreElmIterator)
 //            delete m_pScoreElmIterator;
-//        m_pScoreElmIterator = new ScoreElmIterator(this, dynamic_cast<ImScore*>(m_pCurItem) );
+//        m_pScoreElmIterator = LOMSE_NEW ScoreElmIterator(this, dynamic_cast<ImScore*>(m_pCurItem) );
 //    }
 //}
 

@@ -125,6 +125,7 @@ enum ELdpElement
     k_end_y,
     k_endPoint,
     k_fbline,
+    k_file,
     k_font,
     k_font_name,
     k_font_size,
@@ -134,6 +135,7 @@ enum ELdpElement
     k_group,
     k_hasWidth,
     k_height,
+    k_image,
     k_infoMIDI,
     k_joinBarlines,
     k_landscape,
@@ -143,6 +145,7 @@ enum ELdpElement
     k_lineCapStart,
     k_lineStyle,
     k_lineThickness,
+    k_line_height,      //css
     k_margin,
     k_margin_top,
     k_margin_right,
@@ -162,6 +165,7 @@ enum ELdpElement
     k_parameter,
     k_parenthesis,
     k_pitch,
+    k_score_player,
     k_size,
     k_slur,
     k_split,
@@ -185,6 +189,7 @@ enum ELdpElement
     k_text_align,
     k_text_decoration,
     k_title,
+    k_url,
     k_vers,
     k_vertical_align,
     k_visible,
@@ -285,25 +290,6 @@ public:
 
     //! random access to parameter i (1..n)
     LdpElement* get_parameter(int i);
-
-    ////---------------------------------------------------------------------------
-    ////TO_REMOVE
-    //// Compatibility with lmLDPNode
-    ////---------------------------------------------------------------------------
-    //inline bool IsProcessed() { return m_fProcessed; }
-    //inline void SetProcessed(bool fValue) { m_fProcessed = fValue; }
-    //inline bool IsSimple() { return is_simple(); }
-    //inline long GetNumLine() { return get_line_number(); }
-    //LdpElement* GetParameter(int i);
-    //LdpElement* GetParameterFromName(const std::string& name);
-    //LdpElement* StartIterator(long iP=1, bool fOnlyNotProcessed = true);
-    //LdpElement* GetNextParameter(bool fOnlyNotProcessed = true);
-
-    //protected:
-    //    bool            m_fProcessed;       //the node has been processed
-    //    int             m_iP;               //for sequential accsess
-    ////END_TO_REMOVE
-    ////---------------------------------------------------------------------------
 };
 
 //---------------------------------------------------------------------------------------
@@ -321,7 +307,7 @@ class LdpObject : public LdpElement
 	public:
         //! static constructor to be used by Factory
 		static LdpElement* new_ldp_object()
-			{ LdpObject<type>* o = new LdpObject<type>; assert(o!=0); return o; }
+			{ LdpObject<type>* o = LOMSE_NEW LdpObject<type>; assert(o!=0); return o; }
 
         //! implementation of Visitable interface
         virtual void accept_visitor(BaseVisitor& v) {
@@ -337,7 +323,7 @@ class LdpObject : public LdpElement
 // A tree of LdpElements
 typedef Tree<LdpElement>        LdpTree;
 typedef SmartPtr<LdpTree>       SpLdpTree;
-typedef TreeNode<LdpElement>  LdpNode;
+typedef TreeNode<LdpElement>    LdpNode;
 typedef SmartPtr<LdpNode>       SpLdpNode;
 
 ////typedefs for all LDP elements

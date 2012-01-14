@@ -84,7 +84,7 @@ NoterestEngraver::NoterestEngraver(LibraryScope& libraryScope, ScoreMeter* pScor
 //void NoterestEngraver::create_beam_shape_and_link()
 //{
 //    ImoBeam* pBeam = get_beam();
-//    BeamEngraver* pEngrv = new BeamEngraver(m_libraryScope, m_pMeter);
+//    BeamEngraver* pEngrv = LOMSE_NEW BeamEngraver(m_libraryScope, m_pMeter);
 //    m_pBeamShape = pEngrv->create_shape(pBeam, m_iInstr, m_iStaff);
 //    m_pShapesStorage->save_engraver(pEngrv, pBeam);
 //

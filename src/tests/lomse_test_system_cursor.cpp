@@ -63,7 +63,7 @@ SUITE(SystemCursorTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q v2)(n d4 e.)(n d4 s v3)(n e4 h) ))) "
             "))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         StaffObjsCursor cursor(pScore);
 
         CHECK( cursor.get_num_instruments() == 1 );
@@ -82,7 +82,7 @@ SUITE(SystemCursorTest)
                         "(key D)(time 2 4)(n f4 q. p1)(clef F4 p1)(n a3 e)"
                         "(goBack h)(n c3 q p2)(n c3 e)(clef G p2)(clef F4 p2)"
                         "(n c3 e)(barline)))  )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         StaffObjsCursor cursor(pScore);
         CHECK( cursor.get_num_instruments() == 2 );
         CHECK( cursor.get_clef_for_instr_staff(0, 0) == NULL );
@@ -101,7 +101,7 @@ SUITE(SystemCursorTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key a)(n c4 q v2)(n d4 e.)(n d4 s v3)(n e4 h) ))) "
             "))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         StaffObjsCursor cursor(pScore);
         cursor.move_next();     //points to key
 
@@ -115,7 +115,7 @@ SUITE(SystemCursorTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key a)(n c4 q v2)(n d4 e.)(n d4 s v3)(n e4 h) ))) "
             "))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         StaffObjsCursor cursor(pScore);
         cursor.move_next();     //points to key
         cursor.move_next();     //points to first note
@@ -135,7 +135,7 @@ SUITE(SystemCursorTest)
                         "(key D)(time 2 4)(n f4 q. p1)(clef F4 p1)(n a3 e)"
                         "(goBack h)(n c3 q p2)(n c3 e)(clef G p2)(clef F4 p2)"
                         "(n c3 e)(barline)))  )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         StaffObjsCursor cursor(pScore);
 
         CHECK( cursor.get_num_instruments() == 2 );
@@ -229,7 +229,7 @@ SUITE(SystemCursorTest)
                         "(key D)(time 2 4)(n f4 q. p1)(clef F4 p1)(n a3 e)"
                         "(goBack h)(n c3 q p2)(n c3 e)(clef G p2)(clef F4 p2)"
                         "(n c3 e)(barline)))  )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         //pScore->get_staffobjs_table()->dump();
         StaffObjsCursor cursor(pScore);
 
@@ -288,7 +288,7 @@ SUITE(SystemCursorTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData ) )) "
             "))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         StaffObjsCursor cursor(pScore);
 
         CHECK( cursor.get_num_instruments() == 1 );
@@ -302,7 +302,7 @@ SUITE(SystemCursorTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key a)(n c4 q v2)(n d4 e.)(n d4 s v3)(n e4 h) ))) "
             "))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         StaffObjsCursor cursor(pScore);
                                 //points to (clef G)
         cursor.move_next();     //points to (key a)
@@ -323,7 +323,7 @@ SUITE(SystemCursorTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key a)(n c4 q v2)(n d4 e.)(n d4 s v3)(n e4 h) ))) "
             "))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         StaffObjsCursor cursor(pScore);
                                 //points to (clef G)
         cursor.move_next();     //points to (key a)
@@ -354,7 +354,7 @@ SUITE(SystemCursorTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q v2)(n d4 e.)(n d4 s v3)(n e4 h) ))) "
             "))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         StaffObjsCursor cursor(pScore);
 
         CHECK( cursor.get_time_signature_for_instrument(0) == NULL );
@@ -371,7 +371,7 @@ SUITE(SystemCursorTest)
                         "(key D)(time 2 4)(n f4 q. p1)(clef F4 p1)(n a3 e)"
                         "(goBack h)(n c3 q p2)(n c3 e)(clef G p2)(clef F4 p2)"
                         "(n c3 e)(barline)))  )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         StaffObjsCursor cursor(pScore);
         CHECK( cursor.get_num_instruments() == 2 );
         CHECK( cursor.get_time_signature_for_instrument(0) == NULL );
@@ -384,7 +384,7 @@ SUITE(SystemCursorTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key a)(time 2 4)(n c4 q v2)(n d4 e.)"
             "(n d4 s v3)(n e4 h) ))) ))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         StaffObjsCursor cursor(pScore);
         cursor.move_next();     //points to (clef G)
         cursor.move_next();     //points to (key a)

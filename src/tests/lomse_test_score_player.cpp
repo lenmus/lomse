@@ -41,7 +41,7 @@ using namespace lomse;
 
 //---------------------------------------------------------------------------------------
 //Helper, to save Highlight events
-std::list<EventInfo*> m_notifications;
+std::list<SpEventInfo> m_notifications;
 
 //---------------------------------------------------------------------------------------
 //Helper, as mock class and for accessing protected members
@@ -57,11 +57,6 @@ public:
     {
     }
     virtual ~MyScorePlayer() {
-        std::list<EventInfo*>::iterator it;
-        for (it = m_notifications.begin(); it != m_notifications.end(); ++it)
-        {
-            delete *it;
-        }
         m_notifications.clear();
     }
 
@@ -84,7 +79,7 @@ public:
         //                              fCountOff, nMM, pInteractor);
     }
 
-    static void my_callback(void* pThis, EventInfo* event)
+    static void my_callback(void* pThis, SpEventInfo event)
     {
         m_notifications.push_back(event);
     }
@@ -127,6 +122,34 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+class MyEventHandlerCPP2 : public EventHandler
+{
+protected:
+    bool m_fEventReceived;
+    int m_nLastEventType;
+
+public:
+    MyEventHandlerCPP2() : m_fEventReceived(false), m_nLastEventType(-1) {}
+    ~MyEventHandlerCPP2() {}
+
+    //mandatory override
+    void handle_event(SpEventInfo pEvent)
+    {
+        m_fEventReceived = true;
+        m_nLastEventType = pEvent->get_event_type();
+    }
+
+    static void wrapper_for_handler(void* pThis, SpEventInfo pEvent) {
+        static_cast<MyEventHandlerCPP2*>(pThis)->handle_event(pEvent);
+    }
+
+    bool event_received() { return m_fEventReceived; }
+    int my_last_event_type() { return m_nLastEventType; }
+
+};
+
+
+//---------------------------------------------------------------------------------------
 class ScorePlayerTestFixture
 {
 public:
@@ -152,7 +175,7 @@ SUITE(ScorePlayerTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MidiServerBase midi;
         MyScorePlayer player(m_libraryScope, &midi);
         player.prepare_to_play(pScore);
@@ -168,7 +191,7 @@ SUITE(ScorePlayerTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MidiServerBase midi;
         MyScorePlayer player(m_libraryScope, &midi);
         player.prepare_to_play(pScore);
@@ -185,7 +208,7 @@ SUITE(ScorePlayerTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MyScorePlayer player(m_libraryScope, NULL);
         player.prepare_to_play(pScore);
         player.do_play(0, 3, k_play_normal_instrument, k_no_visual_tracking,
@@ -201,7 +224,7 @@ SUITE(ScorePlayerTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MyMidiServer midi;
         MyScorePlayer player(m_libraryScope, &midi);
         player.prepare_to_play(pScore);
@@ -219,7 +242,7 @@ SUITE(ScorePlayerTest)
         CHECK( *(it++) == MyMidiServer::k_note_on );
         CHECK( *(it++) == MyMidiServer::k_note_off );
         CHECK( *(it++) == MyMidiServer::k_all_sounds_off );
-        CHECK( m_notifications.size() == 0 );
+        CHECK( m_notifications.size() == 1 );
     }
 
     TEST_FIXTURE(ScorePlayerTestFixture, DoPlay_NoCountoff_HighlightNote)
@@ -229,7 +252,7 @@ SUITE(ScorePlayerTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MyMidiServer midi;
         MyScorePlayer player(m_libraryScope, &midi);
         player.prepare_to_play(pScore);
@@ -249,11 +272,12 @@ SUITE(ScorePlayerTest)
         CHECK( *(it++) == MyMidiServer::k_note_off );
         CHECK( *(it++) == MyMidiServer::k_all_sounds_off );
         //cout << "notifications = " << m_notifications.size() << endl;
-        CHECK( int(m_notifications.size()) == 3 );
-        std::list<EventInfo*>::iterator itN = m_notifications.begin();
+        CHECK( int(m_notifications.size()) == 4 );
+        std::list<SpEventInfo>::iterator itN = m_notifications.begin();
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_highlight_event );
-        EventScoreHighlight* pEv = dynamic_cast<EventScoreHighlight*>( *itN );
+        SpEventScoreHighlight pEv(
+            static_cast<EventScoreHighlight*>( (*itN).get_pointer() ));
         //cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 1);
         std::list< pair<int, ImoStaffObj*> >& items = pEv->get_items();
@@ -264,7 +288,8 @@ SUITE(ScorePlayerTest)
 
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = dynamic_cast<EventScoreHighlight*>( *itN );
+        pEv = static_cast<EventScoreHighlight*>( (*itN).get_pointer() );
+
         //cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 2);
         items = pEv->get_items();
@@ -278,7 +303,7 @@ SUITE(ScorePlayerTest)
 
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = dynamic_cast<EventScoreHighlight*>( *itN );
+        pEv = static_cast<EventScoreHighlight*>( (*itN).get_pointer() );
         //cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 3);
         items = pEv->get_items();
@@ -301,7 +326,7 @@ SUITE(ScorePlayerTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(chord (n c4 q)(n e4 q)(n g4 q)) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MyMidiServer midi;
         MyScorePlayer player(m_libraryScope, &midi);
         player.prepare_to_play(pScore);
@@ -326,11 +351,12 @@ SUITE(ScorePlayerTest)
         CHECK( *(it++) == MyMidiServer::k_all_sounds_off );
 
         //cout << "notifications = " << m_notifications.size() << endl;
-        CHECK( m_notifications.size() == 3 );
-        std::list<EventInfo*>::iterator itN = m_notifications.begin();
+        CHECK( m_notifications.size() == 4 );
+        std::list<SpEventInfo>::iterator itN = m_notifications.begin();
 //        cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_highlight_event );
-        EventScoreHighlight* pEv = dynamic_cast<EventScoreHighlight*>( *itN );
+        SpEventScoreHighlight pEv(
+            static_cast<EventScoreHighlight*>( (*itN).get_pointer() ));
 //        cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 1);
         std::list< pair<int, ImoStaffObj*> >& items = pEv->get_items();
@@ -341,7 +367,7 @@ SUITE(ScorePlayerTest)
 
 //        cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = dynamic_cast<EventScoreHighlight*>( *itN );
+        pEv = static_cast<EventScoreHighlight*>( (*itN).get_pointer() );
 //        cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 4);
         items = pEv->get_items();
@@ -361,7 +387,7 @@ SUITE(ScorePlayerTest)
 
 //        cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = dynamic_cast<EventScoreHighlight*>( *itN );
+        pEv = static_cast<EventScoreHighlight*>( (*itN).get_pointer() );
 //        cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 5);
         items = pEv->get_items();
@@ -383,6 +409,29 @@ SUITE(ScorePlayerTest)
         ++itN;
     }
 
+    TEST_FIXTURE(ScorePlayerTestFixture, EndOfPlayEventReceived)
+    {
+        LomseDoorway* pLomse = m_libraryScope.platform_interface();
+        MyEventHandlerCPP2 handler;
+        pLomse->set_notify_callback(&handler, MyEventHandlerCPP2::wrapper_for_handler);
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(chord (n c4 q)(n e4 q)(n g4 q)) )) )))" );
+        ImoScore* pScore = doc.get_score(0);
+        MyMidiServer midi;
+        ScorePlayer player(m_libraryScope, &midi);
+
+        CHECK( handler.event_received() == false );
+        player.prepare_to_play(pScore);
+        player.play(k_no_visual_tracking, k_no_countoff, k_play_normal_instrument,
+                    60L, NULL);
+        player.wait_for_termination();
+
+        CHECK( handler.event_received() == true );
+        CHECK( handler.my_last_event_type() == k_end_of_playback_event );
+    }
+
+
 //    TEST_FIXTURE(ScorePlayerTestFixture, DoPlay_Metronme_Highlight)
 //    {
 //        LomseDoorway* pLomse = m_libraryScope.platform_interface();
@@ -390,7 +439,7 @@ SUITE(ScorePlayerTest)
 //        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
 //            "(instrument (musicData (clef G)(n c4 q) )) )))" );
-//        ImoScore* pScore = doc.get_score();
+//        ImoScore* pScore = doc.get_score(0);
 //        MyMidiServer midi;
 //        MyScorePlayer player(m_libraryScope, &midi);
 //        player.prepare_to_play(pScore);

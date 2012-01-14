@@ -112,24 +112,12 @@ void display_view_content(const rendering_buffer* rbuf)
 }
 
 //---------------------------------------------------------------------------------------
-void force_redraw(void* pThis)
-{
-    // Callback method for Lomse. It can be used also by your application.
-    // force_redraw() is an analog of the Win32 InvalidateRect() function.
-    // When invoked by Lomse it must it set a flag (or send a message) which
-    // results in invoking View->on_paint() and then updating the content of
-    // the window when the next event cycle comes.
-
-    m_view_needs_redraw = true;             //force to invoke View->on_paint()
-}
-
-//---------------------------------------------------------------------------------------
-void update_window(void* pThis)
+void update_window(SpEventInfo pEvent)
 {
     // Callback method for Lomse. It can be used also by your application.
     // Invoking update_window() results in just putting immediately the content
-    // of the currently rendered buffer to the window without calling
-    // any View methods (i.e. on_paint)
+    // of the currently rendered buffer to the window without neither calling
+    // any lomse methods nor generating events (i.e. window on_paint)
 
     display_view_content(&m_rbuf_window);
     XSync(m_pDisplay, false);
@@ -510,8 +498,7 @@ void open_document()
 
     //connect the View with the window buffer and set required callbacks
     m_pInteractor->set_rendering_buffer(&m_rbuf_window);
-    m_pInteractor->set_force_redraw_callbak(NULL, force_redraw);
-    m_pInteractor->set_update_window_callbak(NULL, update_window);
+    m_pInteractor->add_event_handler(k_update_window_event, update_window);
 
 }
 
@@ -521,7 +508,7 @@ void update_view_content()
     //request the view to re-draw the bitmap
 
     if (!m_pInteractor) return;
-    m_pInteractor->on_paint();
+    m_pInteractor->redraw_bitmap();
 }
 
 //-------------------------------------------------------------------------
@@ -601,7 +588,7 @@ void on_key(int x, int y, unsigned key, unsigned flags)
             ;
     }
 
-    force_redraw(NULL);
+    m_pInteractor->force_redraw();
 }
 
 //---------------------------------------------------------------------------------------

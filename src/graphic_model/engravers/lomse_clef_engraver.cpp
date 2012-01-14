@@ -57,7 +57,7 @@ GmoShape* ClefEngraver::create_shape(ImoObj* pCreatorImo, int iInstr, int iStaff
 
     //create the shape object
     int nIdx = 0;   //single-shape
-    GmoShape* pShape = new GmoShapeClef(pCreatorImo, nIdx, m_iGlyph, UPoint(uPos.x, y),
+    GmoShape* pShape = LOMSE_NEW GmoShapeClef(pCreatorImo, nIdx, m_iGlyph, UPoint(uPos.x, y),
                                         Color(0,0,0), m_libraryScope, fontSize);
     return pShape;
 }

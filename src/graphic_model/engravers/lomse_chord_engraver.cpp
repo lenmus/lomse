@@ -100,7 +100,7 @@ void ChordEngraver::add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape)
 
     if (m_notes.size() == 0)
     {
-        ChordNoteData* pData = new ChordNoteData(pNote, pNoteShape, posOnStaff, m_iInstr);
+        ChordNoteData* pData = LOMSE_NEW ChordNoteData(pNote, pNoteShape, posOnStaff, m_iInstr);
 	    m_notes.push_back(pData);
         m_pBaseNoteData = pData;
         m_stemWidth = tenths_to_logical(LOMSE_STEM_THICKNESS);
@@ -116,12 +116,12 @@ void ChordEngraver::add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape)
             if (newPitch < curPitch)
             {
                 ChordNoteData* pData =
-                    new ChordNoteData(pNote, pNoteShape, posOnStaff, m_iInstr);
+                    LOMSE_NEW ChordNoteData(pNote, pNoteShape, posOnStaff, m_iInstr);
 	            m_notes.insert(it, 1, pData);
                 return;
             }
         }
-        ChordNoteData* pData = new ChordNoteData(pNote, pNoteShape, posOnStaff, m_iInstr);
+        ChordNoteData* pData = LOMSE_NEW ChordNoteData(pNote, pNoteShape, posOnStaff, m_iInstr);
 	    m_notes.push_back(pData);
     }
 }

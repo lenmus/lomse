@@ -30,7 +30,6 @@ namespace lomse
 {
 
 //forward declarations
-class GmoStubScore;
 class GmoBoxScorePage;
 //class ImoStaffInfo;
 //class GmoBoxSlice;
@@ -97,9 +96,6 @@ public:
 //
 //	//owners and related
 //	GmoBoxSystem* GetOwnerSystem() { return this; }
-//	GmoStubScore* GetBoxScore();
-//    inline GmoBoxScorePage* GetOwnerBoxPage() { return m_pBPage; }
-//    GmoStubScore* GetOwnerBoxScore();
 
     //Staff shapes
     GmoShapeStaff* add_staff_shape(GmoShapeStaff* pShape);

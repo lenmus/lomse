@@ -43,10 +43,6 @@ using namespace std;
 using namespace lomse;
 
 
-
-
-
-
 //---------------------------------------------------------------------------------------
 class MyDoorway : public LomseDoorway
 {
@@ -64,7 +60,7 @@ public:
     }
     virtual ~MyDoorway() {}
 
-    void update_window() { m_fUpdateWindowInvoked = true; }
+    //void request_window_update() { m_fUpdateWindowInvoked = true; }
     void set_window_title(const std::string& title) {
         m_fSetWindowTitleInvoked = true;
         m_title = title;
@@ -79,14 +75,27 @@ public:
 
 };
 
+//---------------------------------------------------------------------------------------
+//helper, for accessing private members
+class MyGraphicModel : public GraphicModel
+{
+public:
+    MyGraphicModel() : GraphicModel() {}
+    ~MyGraphicModel() {}
+
+    std::map<ImoObj*, RefToGmo*>& my_get_map() { return m_imoToGmo; }
+};
+
 
 //---------------------------------------------------------------------------------------
 class GraphicModelTestFixture
 {
 public:
+    LibraryScope m_libraryScope;
     std::string m_scores_path;
 
     GraphicModelTestFixture()     //SetUp fixture
+        : m_libraryScope(cout)
     {
         m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
@@ -101,7 +110,7 @@ SUITE(GraphicModelTest)
 
     TEST_FIXTURE(GraphicModelTestFixture, GraphicModel_RootIsDocBox)
     {
-        GraphicModel* pGModel = new GraphicModel();
+        GraphicModel* pGModel = LOMSE_NEW GraphicModel();
         GmoObj* pRoot = pGModel->get_root();
         CHECK( pRoot != NULL );
         delete pGModel;
@@ -378,43 +387,302 @@ SUITE(GraphicModelTest)
         delete pIntor;
     }
 
+    // map imo -> gmo -------------------------------------------------------------------
+
     TEST_FIXTURE(GraphicModelTestFixture, NoterestAddedToShapesMap)
     {
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
 
+        //build document, in steps, for easier access to ImObjs
         Document doc(libraryScope);
         doc.create_empty();
-
-        ImoDocument* pDoc = doc.get_imodoc();
-        ImoScore* pScore = static_cast<ImoScore*>( 
-                                ImFactory::inject(k_imo_score, &doc) );
-        pDoc->append_content_item(pScore);
-        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
-                                    ImFactory::inject(k_imo_instrument, &doc));
-        pScore->add_instrument(pInstr);
-        ImoMusicData* pMD = static_cast<ImoMusicData*>(
-                                ImFactory::inject(k_imo_music_data, &doc) );
-        pInstr->append_child(pMD);
-        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
-        pClef->set_clef_type(k_clef_G2);
-        pMD->append_child(pClef);
-        ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(&doc, "(n c4 q)"));
-        pMD->append_child(pNote);
-
+        ImoScore* pScore = doc.add_score();
+        ImoInstrument* pInstr = pScore->add_instrument();
+        pInstr->add_clef(k_clef_G2);
+        ImoNote* pNote = static_cast<ImoNote*>( pInstr->add_object("(n c4 q)") );
         doc.end_of_changes();
 
+        //build gmodel
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoShape* pShape = pModel->get_shape_for_noterest(pNote);
+
         CHECK ( pShape != NULL );
         CHECK ( pShape->is_shape_note() == true );
 
         delete pIntor;
     }
+
+    // dirty bits -----------------------------------------------------------------------
+
+    TEST_FIXTURE(GraphicModelTestFixture, dirty_at_creation)
+    {
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        Document doc(libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        GraphicModel* pModel = pIntor->get_graphic_model();
+        GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
+        GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
+        GmoBox* pBSys = pBSP->get_child_box(0);         //System
+        GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
+        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
+        GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
+
+        CHECK ( pPage->is_dirty() == true );
+        CHECK ( pBDPC->is_dirty() == true );
+        CHECK ( pBSP->is_dirty() == true );
+        CHECK ( pBSys->is_dirty() == true );
+        CHECK ( pBSlice->is_dirty() == true );
+        CHECK ( pBSliceInstr->is_dirty() == true );
+        CHECK ( pShape->is_dirty() == true );
+
+        CHECK ( pPage->are_children_dirty() == false );
+        CHECK ( pBDPC->are_children_dirty() == false );
+        CHECK ( pBSP->are_children_dirty() == false );
+        CHECK ( pBSys->are_children_dirty() == false );
+        CHECK ( pBSlice->are_children_dirty() == false );
+        CHECK ( pBSliceInstr->are_children_dirty() == false );
+        CHECK ( pShape->are_children_dirty() == false );
+
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(GraphicModelTestFixture, set_dirty_propagates)
+    {
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        Document doc(libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        GraphicModel* pModel = pIntor->get_graphic_model();
+        GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
+        GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
+        GmoBox* pBSys = pBSP->get_child_box(0);         //System
+        GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
+        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
+        GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
+
+        pPage->set_dirty(false);
+        pBDPC->set_dirty(false);
+        pBSP->set_dirty(false);
+        pBSys->set_dirty(false);
+        pBSlice->set_dirty(false);
+        pBSliceInstr->set_dirty(false);
+        pShape->set_dirty(false);
+
+        CHECK ( pPage->is_dirty() == false );
+        CHECK ( pBDPC->is_dirty() == false );
+        CHECK ( pBSP->is_dirty() == false );
+        CHECK ( pBSys->is_dirty() == false );
+        CHECK ( pBSlice->is_dirty() == false );
+        CHECK ( pBSliceInstr->is_dirty() == false );
+        CHECK ( pShape->is_dirty() == false );
+
+        CHECK ( pPage->are_children_dirty() == false );
+        CHECK ( pBDPC->are_children_dirty() == false );
+        CHECK ( pBSP->are_children_dirty() == false );
+        CHECK ( pBSys->are_children_dirty() == false );
+        CHECK ( pBSlice->are_children_dirty() == false );
+        CHECK ( pBSliceInstr->are_children_dirty() == false );
+        CHECK ( pShape->are_children_dirty() == false );
+
+
+        pShape->set_dirty(true);
+
+
+        CHECK ( pPage->is_dirty() == false );
+        CHECK ( pBDPC->is_dirty() == false );
+        CHECK ( pBSP->is_dirty() == false );
+        CHECK ( pBSys->is_dirty() == false );
+        CHECK ( pBSlice->is_dirty() == false );
+        CHECK ( pBSliceInstr->is_dirty() == false );
+        CHECK ( pShape->is_dirty() == true );
+
+        CHECK ( pPage->are_children_dirty() == true );
+        CHECK ( pBDPC->are_children_dirty() == true );
+        CHECK ( pBSP->are_children_dirty() == true );
+        CHECK ( pBSys->are_children_dirty() == true );
+        CHECK ( pBSlice->are_children_dirty() == true );
+        CHECK ( pBSliceInstr->are_children_dirty() == true );
+        CHECK ( pShape->are_children_dirty() == false );
+
+        delete pIntor;
+    }
+
+    TEST_FIXTURE(GraphicModelTestFixture, set_dirty_propagates_to_gmodel)
+    {
+        MyDoorway doorway;
+        LibraryScope libraryScope(cout, &doorway);
+        Document doc(libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
+        VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        GraphicModel* pModel = pIntor->get_graphic_model();
+        GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
+        GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
+        GmoBox* pBSP = pBDPC->get_child_box(0);         //ScorePage
+        GmoBox* pBSys = pBSP->get_child_box(0);         //System
+        GmoBox* pBSlice = pBSys->get_child_box(0);          //Slice
+        GmoBox* pBSliceInstr = pBSlice->get_child_box(0);   //SliceInsr
+        GmoShape* pShape = pBSliceInstr->get_shape(0);      //Clef
+
+        pPage->set_dirty(false);
+        pBDPC->set_dirty(false);
+        pBSP->set_dirty(false);
+        pBSys->set_dirty(false);
+        pBSlice->set_dirty(false);
+        pBSliceInstr->set_dirty(false);
+        pShape->set_dirty(false);
+
+        CHECK ( pModel->is_modified() == true );
+        pModel->set_modified(false);
+        CHECK ( pModel->is_modified() == false );
+
+        pShape->set_dirty(true);
+        CHECK ( pModel->is_modified() == true );
+
+        delete pIntor;
+    }
+
+    // map Imo-> Gmo --------------------------------------------------------------------
+
+    TEST_FIXTURE(GraphicModelTestFixture, map_empty)
+    {
+        MyGraphicModel gm;
+        GmoBoxDocument* pBD = gm.get_root();
+        GmoBoxDocPage* pBDP = LOMSE_NEW GmoBoxDocPage(NULL);
+        pBD->add_child_box(pBDP);
+
+        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
+
+//        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(NULL);
+//        pDP->add_child_box(pDPC);
+
+        CHECK( rmap.size() == 0 );
+    }
+
+    TEST_FIXTURE(GraphicModelTestFixture, add_to_map)
+    {
+        MyGraphicModel gm;
+        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoScore* pScore = doc.add_score();
+        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
+
+        gm.add_to_map_imo_gmo(pBox);
+
+        CHECK( rmap.size() == 1 );
+
+        delete pBox;
+    }
+
+    TEST_FIXTURE(GraphicModelTestFixture, add_to_map_ignored_if_no_imo)
+    {
+        MyGraphicModel gm;
+        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
+        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(NULL);
+
+        gm.add_to_map_imo_gmo(pBox);
+
+        CHECK( rmap.size() == 0 );
+
+        delete pBox;
+    }
+
+    TEST_FIXTURE(GraphicModelTestFixture, map_get_box_simple)
+    {
+        MyGraphicModel gm;
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoScore* pScore = doc.add_score();
+        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
+
+        gm.add_to_map_imo_gmo(pBox);
+
+        CHECK( gm.get_box_for(pScore) == pBox );
+
+        delete pBox;
+    }
+
+    TEST_FIXTURE(GraphicModelTestFixture, add_to_map_twice)
+    {
+        MyGraphicModel gm;
+        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoScore* pScore = doc.add_score();
+        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
+        gm.add_to_map_imo_gmo(pBox);
+
+        gm.add_to_map_imo_gmo(pBox);
+
+        CHECK( rmap.size() == 1 );
+        CHECK( gm.get_box_for(pScore) == pBox );
+
+        delete pBox;
+    }
+
+    TEST_FIXTURE(GraphicModelTestFixture, add_to_map_update)
+    {
+        MyGraphicModel gm;
+        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoScore* pScore = doc.add_score();
+        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
+        gm.add_to_map_imo_gmo(pBox);
+        delete pBox;
+        pBox = LOMSE_NEW GmoBoxScorePage(pScore);
+
+        gm.add_to_map_imo_gmo(pBox);
+
+        CHECK( rmap.size() == 1 );
+        CHECK( gm.get_box_for(pScore) == pBox );
+
+        delete pBox;
+    }
+
+//    TEST_FIXTURE(GraphicModelTestFixture, map_add_box)
+//    {
+//        MyGraphicModel gm;
+//        GmoBoxDocument* pBD = gm.get_root();
+//        GmoBoxDocPage* pBDP = LOMSE_NEW GmoBoxDocPage(NULL);
+//        pBD->add_child_box(pBDP);
+//        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
+//
+//        Document doc(m_libraryScope);
+//        doc.create_empty();
+//        ImoScore* pScore = doc.add_score();
+////        ImoInstrument* pInstr = pScore->add_instrument();
+////        ImoClef* pClef = pInstr->add_clef(k_clef_G2);
+//
+//        ImoDocument* pDoc = doc.get_imodoc();
+//        ImoContent* pContent = static_cast<ImoContent*>(
+//                                    pDoc->get_child_of_type(k_content) );
+//        GmoBoxDocPageContent* pBDPC = LOMSE_NEW GmoBoxDocPageContent(pContent);
+//        CHECK( rmap.size() == 0 );
+//
+//        pBDP->add_child_box(pBDPC);
+//
+//        CHECK( rmap.size() == 1 );
+//    }
 
 };
 

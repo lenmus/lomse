@@ -56,7 +56,7 @@ LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
 {
     if (!m_pDoorway)
     {
-        m_pNullDoorway = new LomseDoorway();
+        m_pNullDoorway = LOMSE_NEW LomseDoorway();
         m_pNullDoorway->init_library(k_pix_format_rgba32, 96, false);
         m_pDoorway = m_pNullDoorway;
     }
@@ -75,7 +75,7 @@ LibraryScope::~LibraryScope()
 LdpFactory* LibraryScope::ldp_factory()
 {
     if (!m_pLdpFactory)
-        m_pLdpFactory = new LdpFactory();
+        m_pLdpFactory = LOMSE_NEW LdpFactory();
     return m_pLdpFactory;
 }
 
@@ -83,7 +83,7 @@ LdpFactory* LibraryScope::ldp_factory()
 FontStorage* LibraryScope::font_storage()
 {
     if (!m_pFontStorage)
-        m_pFontStorage = new FontStorage(this);
+        m_pFontStorage = LOMSE_NEW FontStorage(this);
     return m_pFontStorage;
 }
 
@@ -100,7 +100,7 @@ int LibraryScope::get_pixel_format() const
 }
 
 //---------------------------------------------------------------------------------------
-void LibraryScope::post_event(EventInfo* pEvent)
+void LibraryScope::post_event(SpEventInfo pEvent)
 {
     m_pDoorway->post_event(pEvent);
 }
@@ -127,27 +127,27 @@ std::string LibraryScope::get_font(const string& name, bool fBold, bool fItalic)
 LdpParser* Injector::inject_LdpParser(LibraryScope& libraryScope,
                                       DocumentScope& documentScope)
 {
-    return new LdpParser(documentScope.default_reporter(),
+    return LOMSE_NEW LdpParser(documentScope.default_reporter(),
                          libraryScope.ldp_factory());
 }
 
 //---------------------------------------------------------------------------------------
 Analyser* Injector::inject_Analyser(LibraryScope& libraryScope, Document* pDoc)
 {
-    return new Analyser(pDoc->get_scope().default_reporter(), libraryScope, pDoc);
+    return LOMSE_NEW Analyser(pDoc->get_scope().default_reporter(), libraryScope, pDoc);
 }
 
 //---------------------------------------------------------------------------------------
 ModelBuilder* Injector::inject_ModelBuilder(DocumentScope& documentScope)
 {
-    return new ModelBuilder(documentScope.default_reporter());
+    return LOMSE_NEW ModelBuilder();
 }
 
 //---------------------------------------------------------------------------------------
 LdpCompiler* Injector::inject_LdpCompiler(LibraryScope& libraryScope,
                                           Document* pDoc)
 {
-    return new LdpCompiler(inject_LdpParser(libraryScope, pDoc->get_scope()),
+    return LOMSE_NEW LdpCompiler(inject_LdpParser(libraryScope, pDoc->get_scope()),
                            inject_Analyser(libraryScope, pDoc),
                            inject_ModelBuilder(pDoc->get_scope()),
                            pDoc->get_scope().id_assigner(),
@@ -157,19 +157,19 @@ LdpCompiler* Injector::inject_LdpCompiler(LibraryScope& libraryScope,
 //---------------------------------------------------------------------------------------
 Document* Injector::inject_Document(LibraryScope& libraryScope)
 {
-    return new Document(libraryScope);
+    return LOMSE_NEW Document(libraryScope);
 }
 
 //---------------------------------------------------------------------------------------
 ScreenDrawer* Injector::inject_ScreenDrawer(LibraryScope& libraryScope)
 {
-    return new ScreenDrawer(libraryScope);
+    return LOMSE_NEW ScreenDrawer(libraryScope);
 }
 
 ////---------------------------------------------------------------------------------------
 //UserCommandExecuter* Injector::inject_UserCommandExecuter(Document* pDoc)
 //{
-//    return new UserCommandExecuter(pDoc);
+//    return LOMSE_NEW UserCommandExecuter(pDoc);
 //}
 
 //---------------------------------------------------------------------------------------
@@ -218,7 +218,7 @@ Interactor* Injector::inject_Interactor(LibraryScope& libraryScope,
 {
     //factory method
 
-    return new EditInteractor(libraryScope, pDoc, pView);  //, pExec);
+    return LOMSE_NEW EditInteractor(libraryScope, pDoc, pView);  //, pExec);
 }
 
 //---------------------------------------------------------------------------------------
@@ -229,7 +229,7 @@ Presenter* Injector::inject_Presenter(LibraryScope& libraryScope,
     View* pView = Injector::inject_View(libraryScope, viewType, pDoc); //, pExec);
     Interactor* pInteractor = Injector::inject_Interactor(libraryScope, pDoc, pView);
     pView->set_interactor(pInteractor);
-    return new Presenter(pDoc, pInteractor);  //, pExec);
+    return LOMSE_NEW Presenter(pDoc, pInteractor);  //, pExec);
 }
 
 //---------------------------------------------------------------------------------------

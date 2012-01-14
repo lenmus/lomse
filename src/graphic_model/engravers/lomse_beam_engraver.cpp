@@ -101,7 +101,7 @@ int BeamEngraver::create_shapes()
 //---------------------------------------------------------------------------------------
 void BeamEngraver::create_shape()
 {
-    m_pBeamShape = new GmoShapeBeam(m_pBeam, m_uBeamThickness);
+    m_pBeamShape = LOMSE_NEW GmoShapeBeam(m_pBeam, m_uBeamThickness);
     m_pBeamShape->set_layout_data(m_segments, m_origin, m_size,
                                   m_outerLeftPoint, m_outerRightPoint);
 

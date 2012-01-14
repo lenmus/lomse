@@ -127,12 +127,12 @@ public:
 
     void create_score_layouter()
     {
-        m_pDoc = new Document(m_libraryScope, cout);
+        m_pDoc = LOMSE_NEW Document(m_libraryScope, cout);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData ))) ))" );
-        m_pGModel = new GraphicModel();
-        m_pScore = m_pDoc->get_score();
-        m_pLyt = new MyScoreLayouter2(m_pScore, m_pGModel, m_libraryScope);
+        m_pGModel = LOMSE_NEW GraphicModel();
+        m_pScore = m_pDoc->get_score(0);
+        m_pLyt = LOMSE_NEW MyScoreLayouter2(m_pScore, m_pGModel, m_libraryScope);
         m_pLyt->my_set_systems_sizes(15000.0f, 18000.0f);
     }
 

@@ -98,9 +98,11 @@ GmoShapeButton::GmoShapeButton(ImoObj* pCreatorImo, UPoint pos, USize size,
     m_origin = pos;
     m_size = size;
     m_pButton = dynamic_cast<ImoButton*>( pCreatorImo );
+    m_bgColor = m_pButton->get_bg_color();
 
     center_text();
 }
+
 //---------------------------------------------------------------------------------------
 void GmoShapeButton::center_text()
 {
@@ -121,23 +123,23 @@ void GmoShapeButton::on_draw(Drawer* pDrawer, RenderOptions& opt)
 
     Color textColor = m_pButton->is_enabled() ? Color(0, 0, 0) : Color(128, 128, 128);
     Color strokeColor = Color(128, 128, 128);
-    Color bgColor = m_pButton->get_bg_color();
 
-    //draw border
+    //draw button gradient and border
     pDrawer->begin_path();
-    pDrawer->fill( bgColor );
+    pDrawer->fill( m_bgColor );
     pDrawer->stroke( strokeColor );
     pDrawer->stroke_width(15.0);
+    Color white(255, 255, 255);
+    Color dark(m_bgColor);    //dark(210, 210, 210);      //0.82
+    //dark.a = 45;
+    Color light(dark);      //light(230, 230, 230);     //0.90
+    light = light.gradient(white, 0.2);
+    pDrawer->gradient_color(white, 0.0, 0.1);
+    pDrawer->gradient_color(white, dark, 0.1, 0.7);
+    pDrawer->gradient_color(dark, light, 0.7, 1.0);
+    pDrawer->fill_linear_gradient(m_origin.x, m_origin.y,
+                                  m_origin.x, m_origin.y + m_size.height);
     pDrawer->rect(m_origin, m_size, 100.0f);
-
-    UPoint org2 = m_origin;
-    org2.x += 50.0f;
-    org2.y += 50.0f;
-    USize size2 = m_size;
-    size2.width -= 100.0f;
-    size2.height -= 100.0f;
-    pDrawer->rect(org2, size2, 90.0f);
-
     pDrawer->end_path();
 
     //draw text
@@ -159,6 +161,44 @@ void GmoShapeButton::select_font()
                       pStyle->get_float_property(ImoStyle::k_font_size),
                       pStyle->is_bold(),
                       pStyle->is_italic() );
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeButton::change_color(Color color)
+{
+    m_bgColor = color;
+    set_dirty(true);
+}
+
+
+//=======================================================================================
+// GmoShapeImage implementation: a bitmap image
+//=======================================================================================
+GmoShapeImage::GmoShapeImage(ImoObj* pCreatorImo, SpImage image, UPoint pos, USize size)
+	: GmoSimpleShape(pCreatorImo, GmoObj::k_shape_image, 0, Color(0,0,0))
+	, m_image(image)
+{
+    m_origin = pos;
+    m_size = size;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeImage::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+//    if (!m_pImage->is_visible())
+//        return;
+
+    RenderingBuffer rbuf;
+    rbuf.attach(m_image->get_buffer(), m_image->get_bitmap_width(),
+                m_image->get_bitmap_height(), m_image->get_stride());
+    //pDrawer->copy_bitmap(rbuf, m_origin);
+    pDrawer->draw_bitmap(rbuf, m_image->has_alpha(), 0, 0, m_image->get_bitmap_width(),
+                          m_image->get_bitmap_height(), m_origin.x, m_origin.y,
+                          m_origin.x + m_image->get_image_width(),
+                          m_origin.y + m_image->get_image_height(),
+                          k_quality_low);
+
+    GmoSimpleShape::on_draw(pDrawer, opt);
 }
 
 
@@ -259,7 +299,7 @@ void GmoShapeSimpleLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->move_to(m_origin.x + m_uWidth / 2.0f, m_origin.y);
     pDrawer->line_to(m_origin.x + m_uWidth / 2.0f, m_origin.y + m_size.height);
     pDrawer->end_path();
-    pDrawer->render(true);
+    pDrawer->render();
 
     GmoSimpleShape::on_draw(pDrawer, opt);
 }
@@ -409,7 +449,7 @@ void GmoShapeStem::set_stem_down(LUnits xLeft, LUnits yNote)
 //    : GmoShapeRectangle(pOwner, uxLeft, uyTop, uxRight, uyBottom, uBorderWidth,
 //                       nBorderColor, nBgColor, nShapeIdx, sName,
 //                       fDraggable, fSelectable, fVisible)
-//    , m_pWidget((wxWindow*)NULL)
+//    , m_pControl((wxWindow*)NULL)
 //{
 //}
 //
@@ -425,7 +465,7 @@ void GmoShapeStem::set_stem_down(LUnits xLeft, LUnits yNote)
 //    wxSize size(pPaper->LogicalToDeviceX(GetBounds().GetWidth()),
 //                pPaper->LogicalToDeviceX(GetBounds().GetHeight()) );
 //
-//    m_pWidget =
+//    m_pControl =
 //        new wxTextCtrl(pWindow, wxID_ANY,
 //                       _T("This is a text using a wxTextCtrl window!"),
 //                       pos, size );

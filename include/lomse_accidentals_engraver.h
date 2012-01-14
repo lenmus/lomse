@@ -24,6 +24,7 @@
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
 #include "lomse_engraver.h"
+#include "lomse_pitch.h"
 
 namespace lomse
 {
@@ -37,7 +38,7 @@ class ScoreMeter;
 class AccidentalsEngraver : public Engraver
 {
 protected:
-    int m_accidentals;
+    EAccidentals m_accidentals;
     bool m_fCautionary;
     int m_iInstr;
     int m_iStaff;
@@ -50,7 +51,7 @@ public:
     ~AccidentalsEngraver() {}
 
     GmoShapeAccidentals* create_shape(ImoObj* pCreatorImo, int iInstr, int iStaff,
-                                      UPoint uPos, int accidentals, 
+                                      UPoint uPos, EAccidentals accidentals, 
                                       bool fCautionary=false);
 
 protected:

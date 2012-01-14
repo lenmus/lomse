@@ -65,7 +65,7 @@ public:
     ScoreMeter (int numInstruments, int numStaves, LUnits lineSpacing,
                 float rSpacingFactor=0.547f,
                 ESpacingMethod nSpacingMethod=k_spacing_proportional,
-                Tenths rSpacingValue=15.0f,
+                Tenths rSpacingValue=35.0f,
                 bool fDrawLeftBarline=true);
 
     //options
@@ -84,8 +84,8 @@ public:
     //info about the score
     inline int num_instruments() { return m_numInstruments; }
     inline int num_staves() { return m_numStaves; }
-    inline int staff_index(int iInstr, int iStaff) { 
-        return m_staffIndex[iInstr] + iStaff; 
+    inline int staff_index(int iInstr, int iStaff) {
+        return m_staffIndex[iInstr] + iStaff;
     }
     inline bool is_empty_score() { return m_fScoreIsEmpty; }
 

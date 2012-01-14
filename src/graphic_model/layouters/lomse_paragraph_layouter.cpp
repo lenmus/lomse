@@ -28,6 +28,8 @@
 #include "lomse_shapes.h"
 #include "lomse_calligrapher.h"
 
+//other
+#include <boost/format.hpp>
 
 namespace lomse
 {
@@ -40,15 +42,15 @@ ParagraphLayouter::ParagraphLayouter(ImoContentObj* pItem, Layouter* pParent,
                                      ImoStyles* pStyles)
     : Layouter(pItem, pParent, pGModel, libraryScope, pStyles)
     , m_libraryScope(libraryScope)
-    , m_pPara( dynamic_cast<ImoTextBlock*>(pItem) )
+    , m_pPara( dynamic_cast<ImoBoxContent*>(pItem) )
 {
 }
 
 //---------------------------------------------------------------------------------------
 ParagraphLayouter::~ParagraphLayouter()
 {
-    std::list<Cell*>::iterator it;
-    for (it = m_cells.begin(); it != m_cells.end(); ++it)
+    std::list<Engrouter*>::iterator it;
+    for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
         delete *it;
 }
 
@@ -56,8 +58,8 @@ ParagraphLayouter::~ParagraphLayouter()
 void ParagraphLayouter::prepare_to_start_layout()
 {
     Layouter::prepare_to_start_layout();
-    create_cells();
-    point_to_first_cell();
+    create_engrouters();
+    point_to_first_engrouter();
     initialize_lines();
 }
 
@@ -75,6 +77,12 @@ void ParagraphLayouter::layout_in_box()
     if (!is_line_ready())
         prepare_line();
 
+    if (!is_line_ready())
+    {
+        //empty paragraph
+        advance_current_line_space(m_pageCursor.x);
+    }
+
     while(is_line_ready() && enough_space_in_box())
     {
         add_line();
@@ -83,7 +91,7 @@ void ParagraphLayouter::layout_in_box()
 
     bool fMoreText = is_line_ready();
     if (!fMoreText)
-        m_pItemMainBox->store_shapes_in_doc_page();
+        m_pItemMainBox->add_shapes_to_tables();
 
     set_layout_is_finished( !fMoreText );
 }
@@ -92,7 +100,7 @@ void ParagraphLayouter::layout_in_box()
 void ParagraphLayouter::create_main_box(GmoBox* pParentBox, UPoint pos,
                                         LUnits width, LUnits height)
 {
-    m_pItemMainBox = new GmoBoxParagraph(m_pPara);
+    m_pItemMainBox = LOMSE_NEW GmoBoxParagraph(m_pPara);
     pParentBox->add_child_box(m_pItemMainBox);
 
     m_pItemMainBox->set_origin(pos);
@@ -101,32 +109,36 @@ void ParagraphLayouter::create_main_box(GmoBox* pParentBox, UPoint pos,
 }
 
 //---------------------------------------------------------------------------------------
-void ParagraphLayouter::create_cells()
+void ParagraphLayouter::create_engrouters()
 {
-    CellsCreator creator(m_cells, m_libraryScope);
-    creator.create_cells(m_pPara);
+    EngroutersCreator creator(m_engrouters, m_libraryScope);
+    TreeNode<ImoObj>::children_iterator it;
+    for (it = m_pPara->begin(); it != m_pPara->end(); ++it)
+        creator.create_engrouters( dynamic_cast<ImoInlineObj*>( *it ) );
 }
 
 //---------------------------------------------------------------------------------------
 void ParagraphLayouter::prepare_line()
 {
     //After execution:
-    //  m_itStart - will point to first cell to include or m_cells.end() if no more cells
-    //  m_itEnd - will point to after last cell to include
-    //  m_lineHeight - will contain line height
+    //  m_itStart - will point to first engrouter to include or m_engrouters.end()
+    //              if no more engrouters
+    //  m_itEnd - will point to after last engrouter to include
+    //  m_lineHeight and other reference points will be updated to final data
 
-    m_itStart = more_cells() ? m_itCells :  m_cells.end();
-    m_itEnd = m_cells.end();
-    m_lineHeight = 0.0f;
+    m_itStart = more_engrouters() ? m_itEngrouters :  m_engrouters.end();
+    m_itEnd = m_engrouters.end();
     UPoint pos = m_pageCursor;
+    m_lineWidth = 0.0f;
 
-    while(more_cells() && space_in_line())
+    initialize_line_references();
+
+    while(more_engrouters() && space_in_line())
     {
-        LUnits cellHeight = add_cell_to_line();
-        m_lineHeight = max(m_lineHeight, cellHeight);
-        next_cell();
+        m_lineWidth += add_engrouter_to_line();
+        next_engrouter();
     }
-    m_itEnd = m_itCells;
+    m_itEnd = m_itEngrouters;
 
     m_pageCursor = pos;     //restore cursor
 }
@@ -135,44 +147,160 @@ void ParagraphLayouter::prepare_line()
 void ParagraphLayouter::add_line()
 {
     LUnits left = m_pageCursor.x;       //save left margin
-    std::list<Cell*>::iterator it;
+
+    //horizontal alignment
+    ImoStyle* pStyle = m_pPara->get_style();
+    switch (pStyle->get_int_property(ImoStyle::k_text_align))
+    {
+        case ImoStyle::k_align_left:
+            break;
+
+        case ImoStyle::k_align_right:
+            m_pageCursor.x += m_availableWidth - m_lineWidth;
+            break;
+
+        case ImoStyle::k_align_center:
+            m_pageCursor.x += (m_availableWidth - m_lineWidth) / 2.0f;
+            break;
+
+        case ImoStyle::k_align_justify:
+            //TODO: For now just align left
+            break;
+    }
+
+    std::list<Engrouter*>::iterator it;
     for(it = m_itStart; it != m_itEnd; ++it)
     {
-        add_cell_shape(*it, m_lineHeight);
+        add_engrouter_shape(*it, m_lineRefs.lineHeight);
     }
+    advance_current_line_space(left);
+}
 
-    m_lineHeight *= 1.5f;     //TODO: now interline space is fixed: 0.5 em
-
-    //prepare for next line
+//---------------------------------------------------------------------------------------
+void ParagraphLayouter::advance_current_line_space(LUnits left)
+{
     m_pageCursor.x = left;
-    m_pageCursor.y += m_lineHeight;
+    m_pageCursor.y += m_lineRefs.lineHeight;
     m_availableSpace = m_availableWidth;
 
-    m_pItemMainBox->set_height( m_pItemMainBox->get_height() + m_lineHeight );
+    m_pItemMainBox->set_height( m_pItemMainBox->get_height() + m_lineRefs.lineHeight );
 }
 
 //---------------------------------------------------------------------------------------
-LUnits ParagraphLayouter::add_cell_to_line()
+LUnits ParagraphLayouter::add_engrouter_to_line()
 {
-    LUnits height = 0.0f;
+    //Current engrouter is going to be included in current line. Here we proceed to do
+    //vertical alignement of the engrouter.
+    //This could imply changes in the reference lines for the line. But as engrouters
+    //are not yet engraved, these changes doesn't matter: we are only computing the
+    //final reference lines for the line. Later, when the engrouters are engraved, they will
+    //be properlly positioned on final reference lines.
+    //Returns: width of added item
 
-    Cell* pCell = get_current_cell();
-    if (pCell)
+    Engrouter* pEngrouter = get_current_engrouter();
+
+    LUnits shift = pEngrouter->shift_for_vertical_alignment(m_lineRefs);
+    bool fUpdateText = dynamic_cast<WordEngrouter*>(pEngrouter) != NULL;
+    if (fUpdateText)
     {
-        LUnits width = pCell->get_width();
-        height = pCell->get_height();
+        int valign = pEngrouter->get_style()->get_int_property(ImoStyle::k_vertical_align);
+        fUpdateText = valign == ImoStyle::k_valign_baseline;
+    }
+    update_line_references(pEngrouter->get_reference_lines(), shift, fUpdateText);
 
-        m_pageCursor.x += width;
-        m_availableSpace -= width;
+    LUnits width = pEngrouter->get_width();
+    m_pageCursor.x += width;
+    m_availableSpace -= width;
+    return width;
+}
+
+//---------------------------------------------------------------------------------------
+void ParagraphLayouter::initialize_line_references()
+{
+    //line height: 'strut' line height
+    ImoStyle* pStyle = m_pPara->get_style();
+
+    TextMeter meter(m_libraryScope);
+    meter.select_font(pStyle->get_string_property(ImoStyle::k_font_name)
+                      , pStyle->get_float_property(ImoStyle::k_font_size)
+                      , pStyle->is_bold()
+                      , pStyle->is_italic() );
+    LUnits fontHeight = meter.get_font_height();
+
+    float lineHeight = pStyle->get_float_property(ImoStyle::k_line_height);
+    m_lineRefs.lineHeight = fontHeight * LUnits(lineHeight);
+
+    //half-leading
+    LUnits halfLeading = (m_lineRefs.lineHeight - fontHeight) / 2.0f;
+
+    m_lineRefs.textTop = halfLeading;
+    m_lineRefs.baseline = halfLeading + meter.get_ascender();
+
+    //text-bottom
+    m_lineRefs.textBottom = m_lineRefs.baseline - meter.get_descender();
+
+    //middle line (center of 'x' glyph)
+    URect rect = meter.bounding_rectangle('x');
+    m_lineRefs.middleline = m_lineRefs.baseline - rect.height / 2.0f;
+}
+
+//---------------------------------------------------------------------------------------
+void ParagraphLayouter::update_line_references(LineReferences& engr, LUnits shift,
+                                               bool fUpdateText)
+{
+    if (fUpdateText)
+    {
+        if (shift < 0.0f)
+        {
+            m_lineRefs.textTop = (m_lineRefs.textTop - shift + engr.textTop) / 2.0f;
+            m_lineRefs.middleline = (m_lineRefs.middleline - shift + engr.middleline) / 2.0f;
+            m_lineRefs.baseline = max(m_lineRefs.baseline - shift, engr.baseline);
+            m_lineRefs.textBottom = (m_lineRefs.textBottom - shift + engr.textBottom) / 2.0f;
+            m_lineRefs.lineHeight = max(m_lineRefs.lineHeight - shift, engr.lineHeight);
+            m_lineRefs.supperLine = engr.supperLine;
+            m_lineRefs.subLine = engr.subLine;
+        }
+        else
+        {
+            m_lineRefs.textTop = (m_lineRefs.textTop + shift + engr.textTop) / 2.0f;
+            m_lineRefs.middleline = (m_lineRefs.middleline + shift + engr.middleline) / 2.0f;
+            m_lineRefs.baseline = max(m_lineRefs.baseline, engr.baseline + shift);
+            m_lineRefs.textBottom = (m_lineRefs.textBottom + shift + engr.textBottom) / 2.0f;
+            m_lineRefs.lineHeight = max(m_lineRefs.lineHeight, engr.lineHeight + shift);
+            m_lineRefs.supperLine = engr.supperLine + shift;
+            m_lineRefs.subLine = engr.subLine + shift;
+        }
+    }
+    else
+    {
+        if (shift < 0.0f)
+        {
+            //m_lineRefs.textTop        //no change
+            m_lineRefs.middleline = (m_lineRefs.middleline - shift + engr.middleline) / 2.0f;
+            //m_lineRefs.baseline       //no change
+            //m_lineRefs.textBottom     //no change
+            m_lineRefs.lineHeight = max(m_lineRefs.lineHeight - shift, engr.lineHeight);
+            //m_lineRefs.supperLine     //no change
+            //m_lineRefs.subLine        //no change
+        }
+        else
+        {
+            //m_lineRefs.textTop        no change
+            m_lineRefs.middleline = (m_lineRefs.middleline + shift + engr.middleline) / 2.0f;
+            //m_lineRefs.baseline       no change
+            //m_lineRefs.textBottom     no change
+            m_lineRefs.lineHeight = max(m_lineRefs.lineHeight, engr.lineHeight + shift);
+            //m_lineRefs.supperLine     no change
+            //m_lineRefs.subLine        no change
+        }
     }
 
-    return height;
 }
 
 //---------------------------------------------------------------------------------------
-void ParagraphLayouter::add_cell_shape(Cell* pCell, LUnits paragraphHeight)
+void ParagraphLayouter::add_engrouter_shape(Engrouter* pEngrouter, LUnits lineHeight)
 {
-    GmoObj* pGmo = pCell->create_gm_object(m_pageCursor, paragraphHeight);
+    GmoObj* pGmo = pEngrouter->create_gm_object(m_pageCursor, get_line_refs());
 
     if (pGmo->is_shape())
     {
@@ -183,10 +311,6 @@ void ParagraphLayouter::add_cell_shape(Cell* pCell, LUnits paragraphHeight)
     else if (pGmo->is_box())
     {
         GmoBox* pBox = dynamic_cast<GmoBox*>(pGmo);
-        //UPoint pos(0.0f, 0.0f); // = m_pageCursor;
-        //pos.y += pCell->shift_for_vertical_alignment(paragraphHeight);
-        //USize shift(pos.x, pos.y);
-        //pBox->shift_origin(shift);
         m_pItemMainBox->add_child_box(pBox);
         m_pageCursor.x += pBox->get_width();
     }
@@ -211,82 +335,93 @@ void ParagraphLayouter::page_initializations(GmoBox* pMainBox)
 //---------------------------------------------------------------------------------------
 bool ParagraphLayouter::enough_space_in_box()
 {
-    return m_availableHeight >= m_pItemMainBox->get_height() + m_lineHeight;
+    return m_availableHeight >= m_pItemMainBox->get_height() + m_lineRefs.lineHeight;
 }
 
 
 
 //=======================================================================================
-// CellsCreator implementation
+// EngroutersCreator implementation
 //=======================================================================================
-CellsCreator::CellsCreator(std::list<Cell*>& cells, LibraryScope& libraryScope)
-    : m_cells(cells)
+EngroutersCreator::EngroutersCreator(std::list<Engrouter*>& engrouters, LibraryScope& libraryScope)
+    : m_engrouters(engrouters)
     , m_libraryScope(libraryScope)
 {
 }
 
 //---------------------------------------------------------------------------------------
-CellsCreator::~CellsCreator()
+EngroutersCreator::~EngroutersCreator()
 {
 }
 
 //---------------------------------------------------------------------------------------
-void CellsCreator::create_cells(ImoContentObj* pImo)
+void EngroutersCreator::create_engrouters(ImoInlineObj* pImo)
 {
-    if (!pImo->is_box_inline())
+    //factory method to create Cells and measure the ocupied space
+
+    if (pImo->is_text_item())
     {
-        //non-wrapping items
-
-        if (pImo->is_textblock())
-        {
-            TreeNode<ImoObj>::children_iterator it;
-            for (it = pImo->begin(); it != pImo->end(); ++it)
-                create_cells( dynamic_cast<ImoContentObj*>( *it ) );
-        }
-        else if (pImo->is_text_item())
-        {
-            create_text_item_cells(dynamic_cast<ImoTextItem*>(pImo));
-            measure_cells();
-        }
-        else if (pImo->is_button())
-        {
-            Cell* pCell = new CellButton(pImo, m_libraryScope);
-            pCell->measure();
-            m_cells.push_back(pCell);
-        }
+        create_text_item_engrouters(dynamic_cast<ImoTextItem*>(pImo));
+        measure_engrouters();
     }
-
+    else if (pImo->is_button())
+    {
+        Engrouter* pEngrouter = LOMSE_NEW ButtonEngrouter(pImo, m_libraryScope);
+        pEngrouter->measure();
+        m_engrouters.push_back(pEngrouter);
+    }
+    else if (pImo->is_image())
+    {
+        Engrouter* pEngrouter = LOMSE_NEW ImageEngrouter(pImo, m_libraryScope);
+        pEngrouter->measure();
+        m_engrouters.push_back(pEngrouter);
+    }
+    else if (pImo->is_control())
+    {
+        Engrouter* pEngrouter = LOMSE_NEW ControlEngrouter(pImo, m_libraryScope);
+        pEngrouter->measure();
+        m_engrouters.push_back(pEngrouter);
+    }
+    else if (pImo->is_box_inline())
+    {
+        ImoBoxInline* pIB = static_cast<ImoBoxInline*>(pImo);
+        BoxEngrouter* pBox = create_wrapper_engrouterbox_for(pIB);
+        create_and_measure_engrouters(pIB, pBox);
+        layout_engrouters_in_engrouterbox_and_measure(pBox);
+        m_engrouters.push_back(pBox);
+    }
     else
     {
-        CellBox* pBox = create_wrapper_cellbox_for(pImo);
-        create_and_measure_cells(pImo, pBox);
-        layout_cells_in_cellbox_and_measure(pBox);
-        m_cells.push_back(pBox);
+        string msg = str( boost::format(
+                            "[EngroutersCreator::create_engrouters] invalid object %d")
+                            % pImo->get_obj_type() );
+        throw std::runtime_error(msg);
     }
 }
 
 //---------------------------------------------------------------------------------------
-void CellsCreator::create_and_measure_cells(ImoContentObj* pImo, CellBox* pBox)
+void EngroutersCreator::create_and_measure_engrouters(ImoBoxInline* pImo,
+                                                      BoxEngrouter* pBox)
 {
-    CellsCreator creator(pBox->get_cells(), m_libraryScope);
+    EngroutersCreator creator(pBox->get_engrouters(), m_libraryScope);
 
     TreeNode<ImoObj>::children_iterator it;
     for (it = pImo->begin(); it != pImo->end(); ++it)
     {
-        creator.create_cells( dynamic_cast<ImoContentObj*>(*it) );
+        creator.create_engrouters( dynamic_cast<ImoInlineObj*>(*it) );
     }
 }
 
 //---------------------------------------------------------------------------------------
-CellBox* CellsCreator::create_wrapper_cellbox_for(ImoContentObj* pImo)
+BoxEngrouter* EngroutersCreator::create_wrapper_engrouterbox_for(ImoBoxInline* pImo)
 {
-    CellBox* pBox = new CellBox(pImo, m_libraryScope);
+    BoxEngrouter* pBox = LOMSE_NEW BoxEngrouter(pImo, m_libraryScope);
     pBox->measure();
     return pBox;
 }
 
 //---------------------------------------------------------------------------------------
-void CellsCreator::layout_cells_in_cellbox_and_measure(CellBox* pBox)
+void EngroutersCreator::layout_engrouters_in_engrouterbox_and_measure(BoxEngrouter* pBox)
 {
     UPoint cursor = pBox->get_content_org();
     LUnits left = cursor.x;
@@ -294,14 +429,14 @@ void CellsCreator::layout_cells_in_cellbox_and_measure(CellBox* pBox)
     LUnits lineHeight = 0.0f;
     LUnits availableWidth = lineWidth;
 
-    std::list<Cell*>& cells = pBox->get_cells();
-    std::list<Cell*>::iterator it;
-    for (it = cells.begin(); it != cells.end(); ++it)
+    std::list<Engrouter*>& engrouters = pBox->get_engrouters();
+    std::list<Engrouter*>::iterator it;
+    for (it = engrouters.begin(); it != engrouters.end(); ++it)
     {
-        Cell* pCell = *it;
-        if (pCell)
+        Engrouter* pEngrouter = *it;
+        if (pEngrouter)
         {
-            LUnits width = pCell->get_width();
+            LUnits width = pEngrouter->get_width();
             if (availableWidth < width)
             {
                 availableWidth = lineWidth;
@@ -310,11 +445,11 @@ void CellsCreator::layout_cells_in_cellbox_and_measure(CellBox* pBox)
                 lineHeight = 0.0f;
 
                 if (availableWidth < width)
-                    break; // cell doesn't fit
+                    break; // engrouter doesn't fit
             }
 
-            pCell->set_position(cursor);
-            lineHeight = max(lineHeight, pCell->get_height());
+            pEngrouter->set_position(cursor);
+            lineHeight = max(lineHeight, pEngrouter->get_line_height());
 
             cursor.x += width;
             availableWidth -= width;
@@ -329,12 +464,13 @@ void CellsCreator::layout_cells_in_cellbox_and_measure(CellBox* pBox)
         pBox->set_height(cursor.y);
     else
         pBox->set_size(cursor.x, cursor.y);
+
+    pBox->update_measures(cursor.y);
 }
 
 //---------------------------------------------------------------------------------------
-void CellsCreator::create_text_item_cells(ImoTextItem* pText)
+void EngroutersCreator::create_text_item_engrouters(ImoTextItem* pText)
 {
-    ImoStyle* pStyle = pText->get_style();
     string& text = pText->get_text();
     size_t n = text.length();
     if (n == 0)
@@ -346,7 +482,7 @@ void CellsCreator::create_text_item_cells(ImoTextItem* pText)
     size_t spaces = 0;
     if (text[0] == ' ')
     {
-        m_cells.push_back( new CellWord(pText, m_libraryScope, " ", pStyle));
+        m_engrouters.push_back( LOMSE_NEW WordEngrouter(pText, m_libraryScope, " "));
         start = text.find_first_not_of(" ");
     }
 
@@ -363,26 +499,26 @@ void CellsCreator::create_text_item_cells(ImoTextItem* pText)
                 spaces = n;
             length = (spaces >= 1 ? stop - start + 1 : stop - start);
         }
-        m_cells.push_back( new CellWord(pText, m_libraryScope,
-                                        text.substr(start, length), pStyle) );
+        m_engrouters.push_back( LOMSE_NEW WordEngrouter(pText, m_libraryScope,
+                                        text.substr(start, length)) );
         start += length + (spaces > 1 ? spaces - 1 : 0);
     }
 }
 
 ////---------------------------------------------------------------------------------------
-//void CellsCreator::create_item_cell(ImoObj* pImo)
+//void EngroutersCreator::create_item_engrouter(ImoObj* pImo)
 //{
 //    if (pImo->is_button())
-//        m_cells.push_back( new CellButton(pImo, m_libraryScope) );
+//        m_engrouters.push_back( LOMSE_NEW ButtonEngrouter(pImo, m_libraryScope) );
 //    else if (pImo->is_box_inline())
-//        m_cells.push_back( new CellInlineBox(pImo, m_libraryScope) );
+//        m_engrouters.push_back( LOMSE_NEW InlineBoxEngrouter(pImo, m_libraryScope) );
 //}
 
 //---------------------------------------------------------------------------------------
-void CellsCreator::measure_cells()
+void EngroutersCreator::measure_engrouters()
 {
-    std::list<Cell*>::iterator it;
-    for (it = m_cells.begin(); it != m_cells.end(); ++it)
+    std::list<Engrouter*>::iterator it;
+    for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
     {
         (*it)->measure();
     }
@@ -390,24 +526,48 @@ void CellsCreator::measure_cells()
 
 
 //=======================================================================================
-// Cell implementation
+// Engrouter implementation
 //=======================================================================================
-LUnits Cell::shift_for_vertical_alignment(LUnits paragraphHeight)
+Engrouter::Engrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope)
+    : m_pCreatorImo(pCreatorImo)
+    , m_libraryScope(libraryScope)
+    , m_pStyle( pCreatorImo->get_style() )
+    , m_refLines()
 {
-    if (paragraphHeight == 0.0f)
+}
+
+//---------------------------------------------------------------------------------------
+LUnits Engrouter::shift_for_vertical_alignment(LineReferences& refs)
+{
+    if (refs.lineHeight == 0.0f)
         return 0.0f;
 
-    int valign = k_valign_middle;
+    int valign = k_valign_top;  //m_pStyle->get_int_property(ImoStyle::k_vertical_align);
     switch (valign)
     {
-        case k_valign_middle:
-            return (paragraphHeight - m_size.height) / 2.0f;
+        case ImoStyle::k_valign_baseline:
+            return refs.baseline - m_refLines.baseline;
 
-        case k_valign_top:
+        case ImoStyle::k_valign_sub:
+            return 0.0f;    //TODO
+
+        case ImoStyle::k_valign_super:
+            return 0.0f;    //TODO
+
+        case ImoStyle::k_valign_top:
             return 0.0f;
 
-        case k_valign_bottom:
-            return (paragraphHeight - m_size.height);
+        case ImoStyle::k_valign_text_top:
+            return 0.0f;    //TODO
+
+        case ImoStyle::k_valign_middle:
+            return 0.0f;    //TODO
+
+        case ImoStyle::k_valign_bottom:
+            return 0.0f;    //TODO
+
+        case ImoStyle::k_valign_text_bottom:
+            return 0.0f;    //TODO
 
         default:
             return 0.0f;
@@ -417,126 +577,144 @@ LUnits Cell::shift_for_vertical_alignment(LUnits paragraphHeight)
 
 
 //=======================================================================================
-// CellBox implementation
+// BoxEngrouter implementation
 //=======================================================================================
-CellBox::~CellBox()
+BoxEngrouter::~BoxEngrouter()
 {
-    std::list<Cell*>::iterator it;
-    for (it = m_cells.begin(); it != m_cells.end(); ++it)
+    std::list<Engrouter*>::iterator it;
+    for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
         delete *it;
-    m_cells.clear();
+    m_engrouters.clear();
 }
 
 //---------------------------------------------------------------------------------------
-void CellBox::measure()
+void BoxEngrouter::measure()
 {
     ImoBoxInline* pWrapper = dynamic_cast<ImoBoxInline*>(m_pCreatorImo);
     set_size( pWrapper->get_size() );
+
+    m_refLines.lineHeight = m_size.height;
+    m_refLines.baseline = m_size.height;
+    m_refLines.textTop = 0.0f;
+    m_refLines.textBottom = m_size.height;
+    m_refLines.middleline = m_size.height / 2.0f;
+    m_refLines.supperLine = m_refLines.textTop;
+    m_refLines.subLine = m_refLines.baseline;
 }
 
 //---------------------------------------------------------------------------------------
-GmoObj* CellBox::create_gm_object(UPoint pos, LUnits paragraphHeight)
+void BoxEngrouter::update_measures(LUnits lineHeight)
+{
+    m_refLines.lineHeight = lineHeight;
+    m_refLines.baseline = lineHeight;
+    m_refLines.textBottom = lineHeight;
+    m_refLines.middleline = lineHeight / 2.0f;
+    m_refLines.subLine = lineHeight;
+}
+
+//---------------------------------------------------------------------------------------
+GmoObj* BoxEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
 {
     //create box
-    pos.y += shift_for_vertical_alignment(paragraphHeight);
-    GmoBoxInline* pBox = new GmoBoxInline(m_pCreatorImo);
+    pos.y += shift_for_vertical_alignment(refs);
+
+    GmoBox* pBox;
+    if (m_pCreatorImo->is_link())
+        pBox = LOMSE_NEW GmoBoxLink(m_pCreatorImo);
+    else
+        pBox = LOMSE_NEW GmoBoxInline(m_pCreatorImo);
+
     pBox->set_origin(pos);
     pBox->set_height( m_size.height );
     pBox->set_width( m_size.width );
 
     //create shapes
-    std::list<Cell*>::iterator it;
-    for (it = m_cells.begin(); it != m_cells.end(); ++it)
+    std::list<Engrouter*>::iterator it;
+    for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
     {
-        GmoObj* pGmo = (*it)->create_gm_object(pos, paragraphHeight);
-        add_cell_shape(pGmo, pBox);
+        GmoObj* pGmo = (*it)->create_gm_object(pos, refs);
+        add_engrouter_shape(pGmo, pBox);
+        if (m_pCreatorImo->is_link())
+            pGmo->set_in_link(true);
     }
 
     return pBox;
 }
 
 //---------------------------------------------------------------------------------------
-UPoint CellBox::get_content_org()
+UPoint BoxEngrouter::get_content_org()
 {
     UPoint org(0.0f, 0.0f);
-    ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( m_pCreatorImo );
-    ImoStyle* pStyle = pImo->get_style();
-    if (pStyle)
+    if (m_pStyle)
     {
-        org.x = pStyle->get_lunits_property(ImoStyle::k_margin_left);
-        org.x += pStyle->get_lunits_property(ImoStyle::k_border_width_left);
-        org.x += pStyle->get_lunits_property(ImoStyle::k_padding_left);
+        org.x = m_pStyle->get_lunits_property(ImoStyle::k_margin_left);
+        org.x += m_pStyle->get_lunits_property(ImoStyle::k_border_width_left);
+        org.x += m_pStyle->get_lunits_property(ImoStyle::k_padding_left);
 
-        org.y = pStyle->get_lunits_property(ImoStyle::k_margin_top);
-        org.y += pStyle->get_lunits_property(ImoStyle::k_border_width_top);
-        org.y += pStyle->get_lunits_property(ImoStyle::k_padding_top);
+        org.y = m_pStyle->get_lunits_property(ImoStyle::k_margin_top);
+        org.y += m_pStyle->get_lunits_property(ImoStyle::k_border_width_top);
+        org.y += m_pStyle->get_lunits_property(ImoStyle::k_padding_top);
     }
     return org;
 }
 
 //---------------------------------------------------------------------------------------
-LUnits CellBox::get_content_width()
+LUnits BoxEngrouter::get_content_width()
 {
     LUnits lineWidth = get_width() > 0.0f ? get_width() : 10000000.0f;
 
-    ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( m_pCreatorImo );
-    ImoStyle* pStyle = pImo->get_style();
-    if (pStyle)
+    if (m_pStyle)
     {
-        lineWidth -= pStyle->get_lunits_property(ImoStyle::k_border_width_left);
-        lineWidth -= pStyle->get_lunits_property(ImoStyle::k_padding_left);
-        lineWidth -= pStyle->get_lunits_property(ImoStyle::k_border_width_right);
-        lineWidth -= pStyle->get_lunits_property(ImoStyle::k_padding_right);
+        lineWidth -= m_pStyle->get_lunits_property(ImoStyle::k_border_width_left);
+        lineWidth -= m_pStyle->get_lunits_property(ImoStyle::k_padding_left);
+        lineWidth -= m_pStyle->get_lunits_property(ImoStyle::k_border_width_right);
+        lineWidth -= m_pStyle->get_lunits_property(ImoStyle::k_padding_right);
     }
     return lineWidth;
 }
 
 //---------------------------------------------------------------------------------------
-LUnits CellBox::get_total_bottom_spacing()
+LUnits BoxEngrouter::get_total_bottom_spacing()
 {
     LUnits space = 0.0f;
 
-    ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( m_pCreatorImo );
-    ImoStyle* pStyle = pImo->get_style();
-    if (pStyle)
+    if (m_pStyle)
     {
-        space = pStyle->get_lunits_property(ImoStyle::k_margin_bottom);
-        space += pStyle->get_lunits_property(ImoStyle::k_border_width_bottom);
-        space += pStyle->get_lunits_property(ImoStyle::k_padding_bottom);
+        space = m_pStyle->get_lunits_property(ImoStyle::k_margin_bottom);
+        space += m_pStyle->get_lunits_property(ImoStyle::k_border_width_bottom);
+        space += m_pStyle->get_lunits_property(ImoStyle::k_padding_bottom);
     }
     return space;
 }
 
 //---------------------------------------------------------------------------------------
-LUnits CellBox::get_total_right_spacing()
+LUnits BoxEngrouter::get_total_right_spacing()
 {
     LUnits space = 0.0f;
 
-    ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( m_pCreatorImo );
-    ImoStyle* pStyle = pImo->get_style();
-    if (pStyle)
+    if (m_pStyle)
     {
-        space = pStyle->get_lunits_property(ImoStyle::k_margin_right);
-        space += pStyle->get_lunits_property(ImoStyle::k_border_width_right);
-        space += pStyle->get_lunits_property(ImoStyle::k_padding_right);
+        space = m_pStyle->get_lunits_property(ImoStyle::k_margin_right);
+        space += m_pStyle->get_lunits_property(ImoStyle::k_border_width_right);
+        space += m_pStyle->get_lunits_property(ImoStyle::k_padding_right);
     }
     return space;
 }
 
 ////---------------------------------------------------------------------------------------
-//LUnits CellBox::add_cells_to_box(GmoBox* pBox)
+//LUnits BoxEngrouter::add_engrouters_to_box(GmoBox* pBox)
 //{
 //    LUnits lineHeight = 0.0f;
 //    LUnits availableWidth = m_size.width;
 //    UPoint cursor;
 //
-//    std::list<Cell*>::iterator it;
-//    for (it = m_cells.begin(); it != m_cells.end(); ++it)
+//    std::list<Engrouter*>::iterator it;
+//    for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
 //    {
-//        Cell* pCell = *it;
-//        if (pCell)
+//        Engrouter* pEngrouter = *it;
+//        if (pEngrouter)
 //        {
-//            LUnits width = pCell->get_width();
+//            LUnits width = pEngrouter->get_width();
 //            if (availableWidth < width)
 //            {
 //                availableWidth = m_size.width;
@@ -545,12 +723,12 @@ LUnits CellBox::get_total_right_spacing()
 //                lineHeight = 0.0f;
 //
 //                if (availableWidth < width)
-//                    break; // cell doesn't fit
+//                    break; // engrouter doesn't fit
 //            }
 //
-//            GmoObj* pGmo = pCell->create_gm_object(cursor, lineHeight);
-//            add_cell_shape(pGmo, pBox);
-//            lineHeight = max(lineHeight, pCell->get_height());
+//            GmoObj* pGmo = pEngrouter->create_gm_object(cursor, lineHeight);
+//            add_engrouter_shape(pGmo, pBox);
+//            lineHeight = max(lineHeight, pEngrouter->get_height());
 //
 //            cursor.x += width;
 //            availableWidth -= width;
@@ -562,7 +740,7 @@ LUnits CellBox::get_total_right_spacing()
 //}
 
 //---------------------------------------------------------------------------------------
-void CellBox::add_cell_shape(GmoObj* pGmo, GmoBox* pBox)
+void BoxEngrouter::add_engrouter_shape(GmoObj* pGmo, GmoBox* pBox)
 {
     if (pGmo->is_shape())
     {
@@ -579,83 +757,138 @@ void CellBox::add_cell_shape(GmoObj* pGmo, GmoBox* pBox)
 
 
 //=======================================================================================
-// CellButton implementation
+// ButtonEngrouter implementation
 //=======================================================================================
-GmoObj* CellButton::create_gm_object(UPoint pos, LUnits paragraphHeight)
+GmoObj* ButtonEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
 {
-    pos.y += shift_for_vertical_alignment(paragraphHeight);
+    pos.y += shift_for_vertical_alignment(refs);
 
-    ////add cell origin
+    ////add engrouter origin
     //pos.x += m_org.x;
     //pos.y += m_org.y;
 
-    return new GmoShapeButton(m_pCreatorImo, pos, m_size, m_libraryScope);
+    return LOMSE_NEW GmoShapeButton(m_pCreatorImo, pos, m_size, m_libraryScope);
 }
 
 //---------------------------------------------------------------------------------------
-void CellButton::measure()
+void ButtonEngrouter::measure()
 {
-    ImoButton* pButton = dynamic_cast<ImoButton*>(m_pCreatorImo);
+    ImoButton* pButton = static_cast<ImoButton*>(m_pCreatorImo);
     m_size = pButton->get_size();
+
+    m_refLines.lineHeight = m_size.height;
+    m_refLines.baseline = m_size.height;
+    m_refLines.textTop = 0.0f;
+    m_refLines.textBottom = m_size.height;
+    m_refLines.middleline = m_size.height / 2.0f;
+    m_refLines.supperLine = m_refLines.textTop;
+    m_refLines.subLine = m_refLines.baseline;
 }
 
 
 
 //=======================================================================================
-// CellWord implementation
+// ImageEngrouter implementation
 //=======================================================================================
-void CellWord::measure()
+GmoObj* ImageEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
+{
+    pos.y += shift_for_vertical_alignment(refs);
+    ImoImage* pImage = dynamic_cast<ImoImage*>(m_pCreatorImo);
+    SpImage image = pImage->get_image();
+    return LOMSE_NEW GmoShapeImage(m_pCreatorImo, image, pos, m_size);
+}
+
+//---------------------------------------------------------------------------------------
+void ImageEngrouter::measure()
+{
+    ImoImage* pImg = static_cast<ImoImage*>(m_pCreatorImo);
+    m_size = pImg->get_image_size();
+
+    m_refLines.lineHeight = m_size.height;
+    m_refLines.baseline = m_size.height;
+    m_refLines.textTop = 0.0f;
+    m_refLines.textBottom = m_size.height;
+    m_refLines.middleline = m_size.height / 2.0f;
+    m_refLines.supperLine = m_refLines.textTop;
+    m_refLines.subLine = m_refLines.baseline;
+}
+
+
+
+//=======================================================================================
+// WordEngrouter implementation
+//=======================================================================================
+void WordEngrouter::measure()
 {
     TextMeter meter(m_libraryScope);
     meter.select_font(m_pStyle->get_string_property(ImoStyle::k_font_name)
                       , m_pStyle->get_float_property(ImoStyle::k_font_size)
                       , m_pStyle->is_bold()
                       , m_pStyle->is_italic() );
-    m_size.height = meter.get_font_height();
+
+    LUnits fontHeight = meter.get_font_height();
+
+    float lineHeight = m_pStyle->get_float_property(ImoStyle::k_line_height);
+    m_refLines.lineHeight = (lineHeight == 0.0f ?
+                             fontHeight : fontHeight * LUnits(lineHeight));
+
+    m_halfLeading = (m_refLines.lineHeight - fontHeight) / 2.0f;
+    m_refLines.textTop = m_halfLeading;
+    m_refLines.baseline = m_refLines.textTop + meter.get_ascender();
+    m_refLines.textBottom = m_refLines.textTop + fontHeight;
+
+    //middle line (center of 'x' glyph)
+    URect rect = meter.bounding_rectangle('x');
+    m_refLines.middleline = m_refLines.baseline - rect.height / 2.0f;
+
+    m_refLines.supperLine = m_refLines.textTop;
+    m_refLines.subLine = m_refLines.baseline;
+
+    m_size.height = m_refLines.lineHeight;
     m_size.width = meter.measure_width(m_word);
+
     m_descent = meter.get_descender();
     m_ascent = meter.get_ascender();
 }
 
 //---------------------------------------------------------------------------------------
-GmoObj* CellWord::create_gm_object(UPoint pos, LUnits paragraphHeight)
+GmoObj* WordEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
 {
-    pos.y += shift_for_vertical_alignment(paragraphHeight);
-    pos.y += m_size.height;     //GmoShapeWord reference point is bottom
+    pos.y += shift_for_vertical_alignment(refs);
 
-    //add cell origin
+    //add engrouter origin
     pos.x += m_org.x;
     pos.y += m_org.y;
 
-    return new GmoShapeWord(m_pCreatorImo, 0, m_word, m_pStyle,
-                            pos.x, pos.y, m_libraryScope);
+    return LOMSE_NEW GmoShapeWord(m_pCreatorImo, 0, m_word, m_pStyle,
+                            pos.x, pos.y, m_halfLeading, m_libraryScope);
 }
 
 
 
 //=======================================================================================
-// CellInlineWrapper implementation
+// InlineWrapperEngrouter implementation
 //=======================================================================================
-CellInlineWrapper::CellInlineWrapper(ImoObj* pCreatorImo, LibraryScope& libraryScope)
-    : Cell(pCreatorImo, libraryScope)
+InlineWrapperEngrouter::InlineWrapperEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope)
+    : Engrouter(pCreatorImo, libraryScope)
 {
     m_pWrapper = dynamic_cast<ImoInlineObj*>( pCreatorImo );
 }
 
 //---------------------------------------------------------------------------------------
-GmoObj* CellInlineWrapper::create_gm_object(UPoint pos, LUnits paragraphHeight)
+GmoObj* InlineWrapperEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
 {
     //create box
-    GmoBoxInline* pBox = new GmoBoxInline(m_pCreatorImo);
+    GmoBoxInline* pBox = LOMSE_NEW GmoBoxInline(m_pCreatorImo);
 
     ////create shapes and add them to box
-    //CellsCreator creator(m_cells, m_libraryScope);
+    //EngroutersCreator creator(m_engrouters, m_libraryScope);
     //std::list<ImoInlineObj*>& items = m_pWrapper->get_items();
     //std::list<ImoInlineObj*>::iterator it;
     //for (it = items.begin(); it != items.end(); ++it)
-    //    creator.create_cells(*it);
+    //    creator.create_engrouters(*it);
 
-    //LUnits boxHeight = add_cells_to_box(pBox);
+    //LUnits boxHeight = add_engrouters_to_box(pBox);
     //pBox->set_height( boxHeight );
     //pBox->set_width( m_size.width );
 
@@ -664,28 +897,28 @@ GmoObj* CellInlineWrapper::create_gm_object(UPoint pos, LUnits paragraphHeight)
 }
 
 ////---------------------------------------------------------------------------------------
-//void CellInlineWrapper::measure()
+//void InlineWrapperEngrouter::measure()
 //{
-//    //CellsCreator creator(m_cells, m_libraryScope);
-//    //creator.measure_cells();
+//    //EngroutersCreator creator(m_engrouters, m_libraryScope);
+//    //creator.measure_engrouters();
 //
 //    m_size = m_pWrapper->get_size();
 //}
 
 //---------------------------------------------------------------------------------------
-LUnits CellInlineWrapper::add_cells_to_box(GmoBox* pBox)
+LUnits InlineWrapperEngrouter::add_engrouters_to_box(GmoBox* pBox, LineReferences& refs)
 {
     LUnits lineHeight = 0.0f;
     LUnits availableWidth = m_size.width;
     UPoint cursor;
 
-    std::list<Cell*>::iterator it;
-    for (it = m_cells.begin(); it != m_cells.end(); ++it)
+    std::list<Engrouter*>::iterator it;
+    for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
     {
-        Cell* pCell = *it;
-        if (pCell)
+        Engrouter* pEngrouter = *it;
+        if (pEngrouter)
         {
-            LUnits width = pCell->get_width();
+            LUnits width = pEngrouter->get_width();
             if (availableWidth < width)
             {
                 availableWidth = m_size.width;
@@ -694,12 +927,12 @@ LUnits CellInlineWrapper::add_cells_to_box(GmoBox* pBox)
                 lineHeight = 0.0f;
 
                 if (availableWidth < width)
-                    break; // cell doesn't fit
+                    break; // engrouter doesn't fit
             }
 
-            GmoObj* pGmo = pCell->create_gm_object(cursor, lineHeight);
-            add_cell_shape(pGmo, pBox);
-            lineHeight = max(lineHeight, pCell->get_height());
+            GmoObj* pGmo = pEngrouter->create_gm_object(cursor, refs);
+            add_engrouter_shape(pGmo, pBox);
+            lineHeight = max(lineHeight, pEngrouter->get_height());
 
             cursor.x += width;
             availableWidth -= width;
@@ -711,7 +944,7 @@ LUnits CellInlineWrapper::add_cells_to_box(GmoBox* pBox)
 }
 
 //---------------------------------------------------------------------------------------
-void CellInlineWrapper::add_cell_shape(GmoObj* pGmo, GmoBox* pBox)
+void InlineWrapperEngrouter::add_engrouter_shape(GmoObj* pGmo, GmoBox* pBox)
 {
     if (pGmo->is_shape())
     {
@@ -726,118 +959,30 @@ void CellInlineWrapper::add_cell_shape(GmoObj* pGmo, GmoBox* pBox)
 }
 
 
-
-////=======================================================================================
-//// CellInlineBox implementation
-////=======================================================================================
-//CellInlineBox::CellInlineBox(ImoObj* pCreatorImo, LibraryScope& libraryScope)
-//    : Cell(pCreatorImo, libraryScope)
-//{
-//    m_pBox = dynamic_cast<ImoInlineWrapper*>( pCreatorImo );
-//}
-//
-////---------------------------------------------------------------------------------------
-//GmoObj* CellInlineBox::create_gm_object(UPoint pos, LUnits paragraphHeight)
-//{
-//    //create box
-//    GmoBoxInline* pBox = new GmoBoxInline();
-//    pBox->set_width( m_pBox->get_width() );
-//
-//    //create shapes and add them to box
-//    CellsCreator creator(m_cells, m_libraryScope);
-//    std::list<ImoInlineObj*>& items = m_pBox->get_items();
-//    std::list<ImoInlineObj*>::iterator it;
-//    for (it = items.begin(); it != items.end(); ++it)
-//        creator.create_cells(*it);
-//
-//    LUnits boxHeight = add_cells_to_box(pBox);
-//    pBox->set_height( boxHeight );
-//
-//    //return box
-//    return pBox;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void CellInlineBox::measure()
-//{
-//    m_size = m_pBox->get_size();
-//}
-//
-////---------------------------------------------------------------------------------------
-//LUnits CellInlineBox::add_cells_to_box(GmoBox* pBox)
-//{
-//    LUnits lineHeight = 0.0f;
-//    LUnits availableWidth = m_size.width;
-//    UPoint cursor;
-//
-//    std::list<Cell*>::iterator it;
-//    for (it = m_cells.begin(); it != m_cells.end(); ++it)
-//    {
-//        Cell* pCell = *it;
-//        if (pCell)
-//        {
-//            LUnits width = pCell->get_width();
-//            if (availableWidth < width)
-//            {
-//                availableWidth = m_size.width;
-//                cursor.x = 0.0f;
-//                cursor.y += lineHeight;
-//                lineHeight = 0.0f;
-//
-//                if (availableWidth < width)
-//                    break; // cell doesn't fit
-//            }
-//
-//            GmoObj* pGmo = pCell->create_gm_object(cursor, lineHeight);
-//            add_cell_shape(pGmo, pBox);
-//            lineHeight = max(lineHeight, pCell->get_height());
-//
-//            cursor.x += width;
-//            availableWidth -= width;
-//        }
-//    }
-//
-//    m_size.height = cursor.y + lineHeight;
-//    return m_size.height;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void CellInlineBox::add_cell_shape(GmoObj* pGmo, GmoBox* pBox)
-//{
-//    if (pGmo->is_shape())
-//    {
-//        GmoShape* pShape = dynamic_cast<GmoShape*>(pGmo);
-//        pBox->add_shape(pShape, GmoShape::k_layer_staff);
-//    }
-//    else if (pGmo->is_box())
-//    {
-//        GmoBox* pBox = dynamic_cast<GmoBox*>(pGmo);
-//        pBox->add_child_box(pBox);
-//    }
-//}
 //=======================================================================================
-// CellInlineBox implementation
+// InlineBoxEngrouter implementation
 //=======================================================================================
-CellInlineBox::CellInlineBox(ImoObj* pCreatorImo, LibraryScope& libraryScope)
-    : CellInlineWrapper(pCreatorImo, libraryScope)
+InlineBoxEngrouter::InlineBoxEngrouter(ImoContentObj* pCreatorImo,
+                                       LibraryScope& libraryScope)
+    : InlineWrapperEngrouter(pCreatorImo, libraryScope)
 {
     m_pBox = dynamic_cast<ImoInlineWrapper*>( pCreatorImo );
 }
 
 //---------------------------------------------------------------------------------------
-GmoObj* CellInlineBox::create_gm_object(UPoint pos, LUnits paragraphHeight)
+GmoObj* InlineBoxEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
 {
     //create box
-    GmoBoxInline* pBox = new GmoBoxInline(m_pCreatorImo);
+    GmoBoxInline* pBox = LOMSE_NEW GmoBoxInline(m_pCreatorImo);
 
     //create shapes
-    CellsCreator creator(m_cells, m_libraryScope);
+    EngroutersCreator creator(m_engrouters, m_libraryScope);
     TreeNode<ImoObj>::children_iterator it;
     for (it = m_pBox->begin(); it != m_pBox->end(); ++it)
-        creator.create_cells( dynamic_cast<ImoInlineObj*>(*it) );
+        creator.create_engrouters( dynamic_cast<ImoInlineObj*>(*it) );
 
     //add shapes to box
-    LUnits boxHeight = add_cells_to_box(pBox);
+    LUnits boxHeight = add_engrouters_to_box(pBox, refs);
     pBox->set_height( boxHeight );
     pBox->set_width( m_size.width );
 
@@ -846,11 +991,50 @@ GmoObj* CellInlineBox::create_gm_object(UPoint pos, LUnits paragraphHeight)
 }
 
 //---------------------------------------------------------------------------------------
-void CellInlineBox::measure()
+void InlineBoxEngrouter::measure()
 {
     m_size = m_pBox->get_size();
+
+    m_refLines.lineHeight = m_size.height;
+    m_refLines.baseline = m_size.height;
+    m_refLines.textTop = 0.0f;
+    m_refLines.textBottom = m_size.height;
+    m_refLines.middleline = m_size.height / 2.0f;
+    m_refLines.supperLine = m_refLines.textTop;
+    m_refLines.subLine = m_refLines.baseline;
 }
 
+
+
+//=======================================================================================
+// ControlEngrouter implementation
+//=======================================================================================
+ControlEngrouter::ControlEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope)
+    : Engrouter(pCreatorImo, libraryScope)
+    , m_pControl( dynamic_cast<ImoControl*>(pCreatorImo) )
+{
+}
+
+//---------------------------------------------------------------------------------------
+void ControlEngrouter::measure()
+{
+    m_size = m_pControl->measure();
+
+    m_refLines.lineHeight = m_size.height;
+    m_refLines.baseline = m_size.height;
+    m_refLines.textTop = 0.0f;
+    m_refLines.textBottom = m_size.height;
+    m_refLines.middleline = m_size.height / 2.0f;
+    m_refLines.supperLine = m_refLines.textTop;
+    m_refLines.subLine = m_refLines.baseline;
+}
+
+//---------------------------------------------------------------------------------------
+GmoObj* ControlEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
+{
+    pos.y += shift_for_vertical_alignment(refs);
+    return m_pControl->layout(m_libraryScope, pos);
+}
 
 
 }  //namespace lomse

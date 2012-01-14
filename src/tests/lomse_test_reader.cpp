@@ -92,6 +92,12 @@ SUITE(LdpTextReaderTest)
         CHECK( reader.end_of_data() );
     }
 
+    TEST_FIXTURE(LdpTextReaderTestFixture, TextReaderKnowsItsLocator)
+    {
+        LdpTextReader reader("abc");
+        CHECK( reader.get_locator() == "string:");
+    }
+
 }
 
 //---------------------------------------------------------------------------
@@ -167,6 +173,13 @@ SUITE(LdpFileReaderTest)
         while( !reader.end_of_data())
             reader.get_next_char();
         CHECK( reader.end_of_data() );
+    }
+
+    TEST_FIXTURE(LdpFileReaderTestFixture, FileReaderKnowsItsLocator)
+    {
+        string loc = m_scores_path + "00011-empty-fill-page.lms";
+        LdpFileReader reader(loc);
+        CHECK( reader.get_locator() == loc);
     }
 
 }

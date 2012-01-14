@@ -180,10 +180,11 @@ public:
 protected:
     //actions
     void record_first_point(Event& event);
-    void select_objects(Event& event);
+    void select_objects_or_click(Event& event);
     void track_sel_rectangle(Event& event);
     void select_object_at_first_point(Event& event);
     void show_contextual_menu();
+    void mouse_in_out(Event& event);
 
     //helpers
     void repaint_view();

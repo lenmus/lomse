@@ -73,7 +73,7 @@ GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int iInstr, int iStaff,
     m_uxLeft = uPos.x;
 
 	//create the note container shape
-    m_pNoteShape = new GmoShapeNote(pNote, m_uxLeft, m_uyTop, m_color, m_libraryScope);
+    m_pNoteShape = LOMSE_NEW GmoShapeNote(pNote, m_uxLeft, m_uyTop, m_color, m_libraryScope);
     m_pNoteShape->set_pos_on_staff(m_nPosOnStaff);
     m_pNoteRestShape = m_pNoteShape;
 
@@ -143,7 +143,7 @@ void NoteEngraver::add_shapes_for_dots_if_required()
 LUnits NoteEngraver::add_dot_shape(LUnits x, LUnits y, Color color)
 {
     y += tenths_to_logical(get_glyph_offset(k_glyph_dot));
-    GmoShapeDot* pShape = new GmoShapeDot(m_pNote, 0, k_glyph_dot, UPoint(x, y),
+    GmoShapeDot* pShape = LOMSE_NEW GmoShapeDot(m_pNote, 0, k_glyph_dot, UPoint(x, y),
                                           color, m_libraryScope, m_fontSize);
 	m_pNoteShape->add(pShape);
     return pShape->get_width();
@@ -172,7 +172,7 @@ void NoteEngraver::add_stem_and_flag_if_required()
 //---------------------------------------------------------------------------------------
 void NoteEngraver::add_shapes_for_accidentals_if_required()
 {
-    int acc = m_pNote->get_accidentals();
+    EAccidentals acc = m_pNote->get_notated_accidentals();
     if (acc != k_no_accidentals)
     {
         AccidentalsEngraver engrv(m_libraryScope, m_pMeter);
@@ -190,7 +190,7 @@ void NoteEngraver::add_notehead_shape()
     int notehead = decide_notehead_type();
     int iGlyph = get_glyph_for_notehead(notehead);
     LUnits y = m_uyTop + tenths_to_logical(get_glyph_offset(iGlyph));
-    m_pNoteheadShape = new GmoShapeNotehead(m_pNote, 0, iGlyph, UPoint(m_uxLeft, y),
+    m_pNoteheadShape = LOMSE_NEW GmoShapeNotehead(m_pNote, 0, iGlyph, UPoint(m_uxLeft, y),
                                             m_color, m_libraryScope, m_fontSize);
     m_pNoteShape->add_notehead(m_pNoteheadShape);
     m_pNoteShape->set_anchor_offset(m_pNoteShape->get_left() - m_uxLeft);
@@ -416,7 +416,7 @@ void NoteEngraver::add_leger_lines_if_necessary()
     LUnits lineSpacing = tenths_to_logical(10.0f);
 
     //TODO
-    //ImoOptionInfo* pOpt = get_score()->get_option("Staff.UpperLegerLines.Displacement");
+    //ImoOptionInfo* pOpt = get_score(0)->get_option("Staff.UpperLegerLines.Displacement");
     //Tenths dsplz = Tenths( pOpt->get_long_value() );
 
     //AWARE: yStart is relative to notehead top
@@ -451,7 +451,7 @@ void NoteEngraver::add_to_chord_if_in_chord()
 void NoteEngraver::create_chord()
 {
     ImoChord* pChord = m_pNote->get_chord();
-    ChordEngraver* pEngrv = new ChordEngraver(m_libraryScope, m_pMeter);
+    ChordEngraver* pEngrv = LOMSE_NEW ChordEngraver(m_libraryScope, m_pMeter);
     m_pShapesStorage->save_engraver(pEngrv, pChord);
 
     pEngrv->set_start_staffobj(pChord, m_pNote, m_pNoteShape, m_iInstr, m_iStaff,
@@ -524,7 +524,7 @@ void StemFlagEngraver::add_stem_shape()
     LUnits yTop = (m_fStemDown ? m_uyStemNote : m_uyStemFlag);
     LUnits yBottom = (m_fStemDown ? m_uyStemFlag : m_uyStemNote);
     m_pBaseNoteShape->add_stem(
-        new GmoShapeStem(m_pCreatorImo, m_uxStem, yTop, 0.0f, yBottom, m_fStemDown,
+        LOMSE_NEW GmoShapeStem(m_pCreatorImo, m_uxStem, yTop, 0.0f, yBottom, m_fStemDown,
                          m_uStemThickness, m_color) );
 }
 

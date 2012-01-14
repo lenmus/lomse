@@ -90,7 +90,7 @@ SUITE(GmoShapeTest)
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         pNote->set_step(0);
         pNote->set_octave(4);
-        pNote->set_accidentals(0);
+        pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_whole);
 
         ScoreMeter meter(1, 1, 180.0f);
@@ -112,7 +112,7 @@ SUITE(GmoShapeTest)
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         pNote->set_step(0);
         pNote->set_octave(4);
-        pNote->set_accidentals(0);
+        pNote->set_notated_accidentals(k_no_accidentals);
         pNote->set_note_type(k_whole);
 
         ScoreMeter meter(1, 1, 180.0f);
@@ -146,7 +146,7 @@ SUITE(GmoShapeTest)
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         pNote->set_step(0);
         pNote->set_octave(4);
-        pNote->set_accidentals(k_flat);
+        pNote->set_notated_accidentals(k_flat);
         pNote->set_note_type(k_whole);
 
         ScoreMeter meter(1, 1, 180.0f);
@@ -236,6 +236,55 @@ SUITE(GmoShapeTest)
         delete pInfo;
     }
 
+    // flags ----------------------------------------------------------------------------
+
+    TEST_FIXTURE(GmoShapeTestFixture, set_selected)
+    {
+        Document doc(m_libraryScope);
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
+                                    ImFactory::inject(k_imo_staff_info, &doc));
+        GmoShapeStaff staff(NULL, 0, pInfo, 0, 0.0f, Color(0,0,0));
+        CHECK( staff.is_selected() == false );
+
+        staff.set_selected(true);
+        CHECK( staff.is_selected() == true );
+        staff.set_selected(false);
+        CHECK( staff.is_selected() == false );
+
+        delete pInfo;
+    }
+
+    TEST_FIXTURE(GmoShapeTestFixture, set_dirty)
+    {
+        Document doc(m_libraryScope);
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
+                                    ImFactory::inject(k_imo_staff_info, &doc));
+        GmoShapeStaff staff(NULL, 0, pInfo, 0, 0.0f, Color(0,0,0));
+        CHECK( staff.is_dirty() == true );
+
+        staff.set_dirty(false);
+        CHECK( staff.is_dirty() == false );
+        staff.set_dirty(true);
+        CHECK( staff.is_dirty() == true );
+
+        delete pInfo;
+    }
+
+    TEST_FIXTURE(GmoShapeTestFixture, set_children_dirty)
+    {
+        Document doc(m_libraryScope);
+        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
+                                    ImFactory::inject(k_imo_staff_info, &doc));
+        GmoShapeStaff staff(NULL, 0, pInfo, 0, 0.0f, Color(0,0,0));
+        CHECK( staff.are_children_dirty() == false );
+
+        staff.set_children_dirty(true);
+        CHECK( staff.are_children_dirty() == true );
+        staff.set_children_dirty(false);
+        CHECK( staff.are_children_dirty() == false );
+
+        delete pInfo;
+    }
 
 }
 

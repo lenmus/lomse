@@ -22,6 +22,7 @@
 #define __LOMSE_EVENTS_H__
 
 #include "lomse_build_options.h"
+#include "lomse_smart_pointer.h"
 
 #include <list>
 #include <string>
@@ -32,15 +33,23 @@ namespace lomse
 
 //forward declarations
 class ImoObj;
+class ImoContentObj;
 class ImoDynamic;
 class ImoDocument;
+class ImoScore;
 class ImoStaffObj;
 class Interactor;
 class GmoObj;
 class DynGenerator;
 class Document;
-class EventCallback;
+class GraphicModel;
 
+//observer pattern
+class EventNotifier;
+class Observer;
+class Observable;
+class EventHandler;
+class EventCallback;
 
 //---------------------------------------------------------------------------------------
 // enum for even types
@@ -48,69 +57,73 @@ enum EEventType
 {
     k_null_event = -1,
 
-    k_view_level_event = 0,         //U: events for user app, L: events for library
-        k_update_window_event,      //U: now, rebuild gmodel and update view
-        k_force_redraw_event,       //U: when suitable, ask Interactor to repaint
-        k_on_click_event,           //U: click on a ctrol object
+    k_view_level_event = 0,
 
-        k_highlight_event,
-            k_highlight_on_event,           //L: add highlight to a note/rest
-            k_highlight_off_event,          //L: remove highlight from a note/rest
-            k_end_of_higlight_event,        //L: end of score play back. Remove all highlight.
+        k_update_window_event,      //ask user app to update window with current bitmap
+
+        k_mouse_event,
+            k_mouse_in_event,           //mouse goes over an object
+            k_mouse_out_event,          //mouse goes out from an object
+            k_on_click_event,           //Document, ImoContentObj: click on object
+
+        k_highlight_event,          //Score
+            k_highlight_on_event,           //add highlight to a note/rest
+            k_highlight_off_event,          //remove highlight from a note/rest
+            k_end_of_higlight_event,        //end of score play back. Remove all highlight.
             k_advance_tempo_line_event,
+
+        k_end_of_playback_event,    //Score. end of playback
 
     k_doc_level_event = 1000,
         k_doc_modified_event,
-
-    k_library_level_event = 5000,
 };
 
 //---------------------------------------------------------------------------------------
 // Abstract class for information about an event
-class EventInfo
+class EventInfo : public RefCounted
 {
 protected:
-    int m_type;
+    EEventType m_type;
 
-    EventInfo(int type) : m_type(type) {}
+    EventInfo(EEventType type) : m_type(type) {}
 
 public:
     virtual ~EventInfo() {}
 
-    virtual ImoObj* get_originator_imo() { return NULL; }
+    virtual Observable* get_source() { return NULL; }
 
 
     //classification
 
-    inline int get_event_type() { return m_type; }
+    inline EEventType get_event_type() { return m_type; }
 
         //view level events
     inline bool is_view_level_event() { return m_type >= k_view_level_event
                                             && m_type < k_doc_level_event;
     }
     inline bool is_update_window_event() { return m_type == k_update_window_event; }
-    inline bool is_force_redraw_event() { return m_type == k_force_redraw_event; }
+    inline bool is_mouse_event() { return m_type == k_on_click_event
+                                       || m_type == k_mouse_in_event
+                                       || m_type == k_mouse_out_event;
+    }
+    inline bool is_mouse_in_event() { return m_type == k_mouse_in_event; }
+    inline bool is_mouse_out_event() { return m_type == k_mouse_out_event; }
     inline bool is_on_click_event() { return m_type == k_on_click_event; }
-        //higlight events
-//    inline bool is_highlight_event() { return m_type == k_highlight_event
-//                                            && m_type < k_doc_level_event;
-//    }
     inline bool is_highlight_event() { return m_type == k_highlight_event; }
     inline bool is_highlight_on_event() { return m_type == k_highlight_on_event; }
     inline bool is_highlight_off_event() { return m_type == k_highlight_off_event; }
     inline bool is_end_of_higlight_event() { return m_type == k_end_of_higlight_event; }
     inline bool is_advance_tempo_line_event() { return m_type == k_advance_tempo_line_event; }
+    inline bool is_end_of_playback_event() { return m_type == k_end_of_playback_event; }
 
         //document level events
-    inline bool is_doc_level_event() { return m_type >= k_doc_level_event
-                                            && m_type < k_library_level_event;
-    }
+    inline bool is_doc_level_event() { return m_type >= k_doc_level_event; }
     inline bool is_doc_modified_event() { return m_type == k_doc_modified_event; }
 
-        //library level events
-    inline bool is_library_level_event() { return m_type >= k_library_level_event; }
-
 };
+
+typedef SmartPtr<EventInfo>  SpEventInfo;
+
 
 //---------------------------------------------------------------------------------------
 class EventDoc : public EventInfo
@@ -119,7 +132,7 @@ protected:
    Document* m_pDoc;
 
 public:
-    EventDoc(int type, Document* pDoc)
+    EventDoc(EEventType type, Document* pDoc)
         : EventInfo(type)
         , m_pDoc(pDoc)
     {
@@ -129,6 +142,9 @@ public:
     inline Document* get_document() { return m_pDoc; }
 };
 
+typedef SmartPtr<EventDoc>  SpEventDoc;
+
+
 //---------------------------------------------------------------------------------------
 class EventView : public EventInfo
 {
@@ -136,7 +152,7 @@ protected:
     Interactor* m_pInteractor;
 
 public:
-    EventView(int type, Interactor* pInteractor)
+    EventView(EEventType type, Interactor* pInteractor)
         : EventInfo(type)
         , m_pInteractor(pInteractor)
     {
@@ -146,46 +162,71 @@ public:
     inline Interactor* get_interactor() { return m_pInteractor; }
 };
 
+typedef SmartPtr<EventView>  SpEventView;
+
+
 //---------------------------------------------------------------------------------------
-// click on a control object
-class EventOnClick : public EventView
+// Mouse event
+class EventMouse : public EventView
 {
 protected:
     GmoObj* m_pGmo;
-    ImoObj* m_pImo;
+    ImoContentObj* m_pImo;
     DynGenerator* m_pGenerator;
+    GraphicModel* m_pGModel;
 
-    EventOnClick(): EventView(k_on_click_event, NULL) {}    //for unit tests
+    EventMouse(EEventType type) : EventView(type, NULL) {}    //for unit tests
 
 public:
-    EventOnClick(Interactor* pInteractor, GmoObj* pGmo)
-        : EventView(k_on_click_event, pInteractor)
+    EventMouse(EEventType type, Interactor* pInteractor, GmoObj* pGmo,
+               GraphicModel* pGModel)
+        : EventView(type, pInteractor)
         , m_pGmo(pGmo)
         , m_pImo( find_originator_imo(pGmo) )
         , m_pGenerator( find_generator(pGmo) )
+        , m_pGModel(pGModel)
     {
     }
 
-    //// copy constructor
-    //EventOnClick(const EventOnClick& event)
-    //    : EventView(event.m_type, event.m_pInteractor)
-    //    , m_pGmo(event.m_pGmo)
-    //    , m_pImo(event.m_pImo)
-    //    , m_pGenerator(event.m_pGenerator)
-    //{
-    //}
-
     // accessors
     inline GmoObj* get_gm_object() { return m_pGmo; }
+    inline ImoContentObj* get_imo_object() { return m_pImo; }
     inline DynGenerator* get_generator() { return m_pGenerator; }
-    inline ImoObj* get_originator_imo() { return m_pImo; }
+    Observable* get_source();
+    inline GraphicModel* get_gmodel() { return m_pGModel; }
 
 
 protected:
     DynGenerator* find_generator(GmoObj* pGmo);
-    ImoObj* find_originator_imo(GmoObj* pGmo);
+    ImoContentObj* find_originator_imo(GmoObj* pGmo);
 
 };
+
+typedef SmartPtr<EventMouse>  SpEventMouse;
+
+
+//---------------------------------------------------------------------------------------
+// EndOfPlayScore event
+class EventEndOfPlayScore : public EventView
+{
+protected:
+    ImoScore* m_pScore;
+
+    EventEndOfPlayScore() : EventView(k_end_of_playback_event, NULL) {}    //for unit tests
+
+public:
+    EventEndOfPlayScore(Interactor* pInteractor, ImoScore* pScore)
+        : EventView(k_end_of_playback_event, pInteractor)
+        , m_pScore(pScore)
+    {
+    }
+
+    // accessors
+    inline ImoScore* get_score() { return m_pScore; }
+};
+
+typedef SmartPtr<EventEndOfPlayScore>  SpEventEndOfPlayScore;
+
 
 //---------------------------------------------------------------------------------------
 // EventScoreHighlight: An event to signal different actions related to
@@ -223,25 +264,7 @@ public:
     inline std::list< pair<int, ImoStaffObj*> >&  get_items() { return m_items; }
 };
 
-////-----------------------------------------------------------------------------------------
-//// lmEndOfPlayEvent: An event to signal end of playback
-////-----------------------------------------------------------------------------------------
-//
-//DECLARE_EVENT_TYPE( lmEVT_END_OF_PLAY, -1 )
-//
-//class lmEndOfPlayEvent : public wxEvent
-//{
-//public:
-//    lmEndOfPlayEvent(int id = 0 )    : wxEvent(id, lmEVT_END_OF_PLAY)
-//        {    m_propagationLevel = wxEVENT_PROPAGATE_MAX; }
-//
-//    // copy constructor
-//    lmEndOfPlayEvent(const lmEndOfPlayEvent& event) : wxEvent(event) {}
-//
-//    // clone constructor. Required for sending with wxPostEvent()
-//    virtual wxEvent *Clone() const { return new lmEndOfPlayEvent(*this); }
-//
-//};
+typedef SmartPtr<EventScoreHighlight>  SpEventScoreHighlight;
 
 
 //=======================================================================================
@@ -350,40 +373,42 @@ protected:
 
 //=======================================================================================
 // EventHandler
-// Any class that wants to receive events from a Document must be derived from
-// EventHandler and implement the handling methods.
+//  Any class that wants to receive events must derive from EventHandler and
+//  must implement the event handling methods.
 //=======================================================================================
 class EventHandler
 {
 public:
 	virtual ~EventHandler() {}
 
-	virtual void handle_event(EventInfo* pEvent) = 0;
+	virtual void handle_event(SpEventInfo pEvent) = 0;
 };
 
 
 //=======================================================================================
 // Observer
-//  Any object that wants to generate events must create Observer object,
-//  specifiying the changes/actions to listen to and the methods to handle each
-//  event type. Then it must register the Observer
+//  Auxiliary object responsible for keeping information about an Observable object
+//  beign observed, the events to listen to and the methods that must invoke to
+//  distpatch each event. It is also responsible for doing this dispatch when
+//  requested.
 //=======================================================================================
 class Observer
 {
 protected:
-    ImoObj* m_target;
+    Observable* m_target;
     std::list<EventCallback*> m_handlers;
 
-    friend class Document;
-    Observer(ImoObj* pImo) : m_target(pImo) {}
+    friend class EventNotifier;
+    Observer(Observable* target) : m_target(target) {}
 
 public:
     virtual ~Observer();
 
-    inline ImoObj* target() { return m_target; }
-    void notify(EventInfo* pEvent);
+    inline Observable* target() { return m_target; }
+    void notify(SpEventInfo pEvent);
+    void add_handler(int eventType, void (*pt2Func)(SpEventInfo event) );
     void add_handler(int eventType, void* pThis,
-                     void (*pt2Func)(void* pObj, EventInfo* event) );
+                     void (*pt2Func)(void* pObj, SpEventInfo event) );
     void add_handler(int eventType, EventHandler* pHandler);
     void remove_handler(int evtType);
 
@@ -392,6 +417,66 @@ protected:
     void remove_old_handler(int eventType);
 
 };
+
+
+//=======================================================================================
+// Observable
+//  Any object generating events must derive from Observable and must implement
+//  method "get_event_notifier()".
+//
+//  Objects generating events can be part of a hierarchy (i.e. ImoObjs in a Document).
+//  In order to allow for diferento event management models, responsibilities for
+//  event generation and event dispatching are decoupled. For this, the Observable
+//  pattern is splitted into two objects: the Observable itself is just a facade
+//  object providing the interface for addind/removing observers, and delegates in
+//  the EventNotifier object for doing the real work and event dispatching.
+//=======================================================================================
+class Observable
+{
+public:
+	virtual ~Observable() {}
+
+	virtual EventNotifier* get_event_notifier() = 0;
+
+    void add_event_handler(int eventType, EventHandler* pHandler);
+    void add_event_handler(int eventType, void* pThis,
+                           void (*pt2Func)(void* pObj, SpEventInfo event) );
+    void add_event_handler(int eventType, void (*pt2Func)(SpEventInfo event) );
+};
+
+
+//=======================================================================================
+// EventNotifier
+//  Any object that wants to dispatch events must derive from EventNotifier class
+//=======================================================================================
+class EventNotifier
+{
+protected:
+    std::list<Observer*> m_observers;
+
+public:
+    EventNotifier() {}
+    virtual ~EventNotifier();
+
+    //Event notification
+    void notify_observers(SpEventInfo pEvent, Observable* target);
+    void remove_observer(Observer* observer);
+    Observer* add_observer_for(Observable* target);
+
+protected:
+    friend class Observable;
+
+    void add_handler(Observable* target, int eventType, EventHandler* pHandler);
+    void add_handler(Observable* target, int eventType, void* pThis,
+                     void (*pt2Func)(void* pObj, SpEventInfo event) );
+    void add_handler(Observable* target, int eventType,
+                     void (*pt2Func)(SpEventInfo event) );
+
+protected:
+    void delete_observers();
+
+};
+
 
 }   //namespace lomse
 

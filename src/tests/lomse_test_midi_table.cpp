@@ -75,7 +75,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.my_program_sounds_for_instruments();
 
@@ -93,7 +93,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.my_program_sounds_for_instruments();
         table.my_create_events();
@@ -113,7 +113,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(r q) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.my_program_sounds_for_instruments();
         table.my_create_events();
@@ -134,7 +134,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q l)(n c4 e) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.my_program_sounds_for_instruments();
         table.my_create_events();
@@ -158,7 +158,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q)(barline)(n c4 e) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.my_program_sounds_for_instruments();
         table.my_create_events();
@@ -183,7 +183,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(time 2 4) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.my_program_sounds_for_instruments();
         table.my_create_events();
@@ -207,7 +207,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(time 6 8) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.my_program_sounds_for_instruments();
         table.my_create_events();
@@ -231,7 +231,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (r q) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.my_close_table();
 
@@ -247,7 +247,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (r q) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.my_program_sounds_for_instruments();
         table.my_create_events();
@@ -271,7 +271,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(chord (n c4 q)(n e4 q)) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.my_program_sounds_for_instruments();
         table.my_create_events();
@@ -303,7 +303,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(chord (n c4 q)(n e4 q)) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.create_table();
 
@@ -325,7 +325,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(chord (n c4 q)(n e4 q)) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.create_table();
 
@@ -341,7 +341,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(chord (n c4 q)(n e4 q)) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.create_table();
 
@@ -357,7 +357,7 @@ SUITE(MidiTableTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q)(barline)(n c4 e) )) )))" );
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         MySoundEventsTable table(pScore);
         table.create_table();
 

@@ -73,7 +73,7 @@ public:
                       LUnits xLeft, LUnits uSize, LUnits uFixedSpace,
                       LUnits uVarSpace, LUnits xFinal)
     {
-        LineEntry* pEntry = new LineEntry(fIsBarline, fProlog, rTime, xAnchor, xLeft,
+        LineEntry* pEntry = LOMSE_NEW LineEntry(fIsBarline, fProlog, rTime, xAnchor, xLeft,
                                           uSize, uFixedSpace, uVarSpace, xFinal);
         push_back(pEntry);
     }
@@ -100,7 +100,7 @@ public:
     void my_add_line(LUnits xs, LUnits xa, LUnits xr, LUnits xv, LUnits xf,
                      bool fEndsInBarline=false)
     {
-        MyMusicLine* pLine = new MyMusicLine(m_uxStart, m_uStartFixedSpace,
+        MyMusicLine* pLine = LOMSE_NEW MyMusicLine(m_uxStart, m_uStartFixedSpace,
                                              xs, xa, xr, xv, xf, fEndsInBarline);
         m_Lines.push_back(pLine);
     }
@@ -334,7 +334,7 @@ public:
                       LUnits xLeft, LUnits uSize, LUnits uFixedSpace,
                       LUnits uVarSpace, LUnits xFinal)
     {
-        LineEntry* pEntry = new LineEntry(fIsBarline, fProlog, rTime, xAnchor, xLeft,
+        LineEntry* pEntry = LOMSE_NEW LineEntry(fIsBarline, fProlog, rTime, xAnchor, xLeft,
                                           uSize, uFixedSpace, uVarSpace, xFinal);
         push_back(pEntry);
     }
@@ -662,7 +662,7 @@ public:
         const LinesIterator itEnd = m_pColStorage->end();
         for (LinesIterator it=m_pColStorage->begin(); it != itEnd; ++it)
 	    {
-            MyLineSpacer* pLinSpacer = new MyLineSpacer(*it, m_pScoreMeter);
+            MyLineSpacer* pLinSpacer = LOMSE_NEW MyLineSpacer(*it, m_pScoreMeter);
             m_LineSpacers.push_back(pLinSpacer);
         }
     }
@@ -713,13 +713,13 @@ SUITE(ColumnLayouterTest)
     TEST_FIXTURE(ColumnLayouterTestFixture, NonTimedAtProlog_1)
     {
         ScoreMeter meter(1, 1, 150.0f);
-        MyColumnStorage* pStorage = new MyColumnStorage(30.0f, 60.0f);
+        MyColumnStorage* pStorage = LOMSE_NEW MyColumnStorage(30.0f, 60.0f);
 
-        MyMusicLine2* pLine0 = new MyMusicLine2(0, 0, 0.0f, 0.0f);
+        MyMusicLine2* pLine0 = LOMSE_NEW MyMusicLine2(0, 0, 0.0f, 0.0f);
         //               Barline, Prolog,   rTime,  xAnchor,   xLeft,     uSize,  FixedSp,     VarSp,     xFinal
         pLine0->my_add_entry(false, false,  256.00f,  1.00f,     1.00f,   258.00f,   45.00f,   782.85f,   1086.85f);
 
-        MyMusicLine2* pLine1 = new MyMusicLine2(0, 0, 0.0f, 0.0f);
+        MyMusicLine2* pLine1 = LOMSE_NEW MyMusicLine2(0, 0, 0.0f, 0.0f);
         //               Barline, Prolog,   rTime,  xAnchor,   xLeft,     uSize,  FixedSp,     VarSp,     xFinal
         pLine1->my_add_entry(false, false,  256.00f, -218.00f,   0.00f,   477.00f,   45.00f,   782.85f,   1304.85f);
 
@@ -740,13 +740,13 @@ SUITE(ColumnLayouterTest)
     TEST_FIXTURE(ColumnLayouterTestFixture, TimedAtCurrentTimepos_1)
     {
         ScoreMeter meter(1, 1, 150.0f);
-        MyColumnStorage* pStorage = new MyColumnStorage(30.0f, 60.0f);
+        MyColumnStorage* pStorage = LOMSE_NEW MyColumnStorage(30.0f, 60.0f);
 
-        MyMusicLine2* pLine0 = new MyMusicLine2(0, 0, 0.0f, 0.0f);
+        MyMusicLine2* pLine0 = LOMSE_NEW MyMusicLine2(0, 0, 0.0f, 0.0f);
         //               Barline, Prolog,   rTime,  xAnchor,     xLeft,     uSize,  FixedSp,     VarSp,     xFinal
         pLine0->my_add_entry(false, false,  256.00f,  0.00f,     0.00f,   260.00f,   40.00f,   700.00f,   1000.00f);
 
-        MyMusicLine2* pLine1 = new MyMusicLine2(0, 0, 0.0f, 0.0f);
+        MyMusicLine2* pLine1 = LOMSE_NEW MyMusicLine2(0, 0, 0.0f, 0.0f);
         //               Barline, Prolog,   rTime,    xAnchor,   xLeft,     uSize,  FixedSp,     VarSp,     xFinal
         pLine1->my_add_entry(false, false,  256.00f, -220.00f,   0.00f,   480.00f,   40.00f,   700.00f,   1220.00f);
 

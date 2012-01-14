@@ -29,7 +29,7 @@
 #include "lomse_staffobjs_table.h"
 #include "lomse_internal_model.h"
 #include "lomse_score_layouter.h"
-#include "lomse_system_cursor.h"
+#include "lomse_staffobjs_cursor.h"
 #include "lomse_im_note.h"
 #include "lomse_time.h"
 
@@ -85,7 +85,7 @@ SUITE(ColumnBreakerTest)
 //            "(instrument (musicData (clef G)(n c4 q)(barline)(n d4 q)(barline)"
 //            "(n e4 q) ))) ))" );
 //
-//        ImoScore* pScore = doc.get_score();
+//        ImoScore* pScore = doc.get_score(0);
 //        StaffObjsCursor sysCursor(pScore);
 //        pScore->get_staffobjs_table()->dump();
 //
@@ -108,7 +108,7 @@ SUITE(ColumnBreakerTest)
 //            "(n d4 q)(n b4 q)(n c4 q)"
 //            ")) )))" );
 //
-//        ImoScore* pScore = doc.get_score();
+//        ImoScore* pScore = doc.get_score(0);
 //        StaffObjsCursor sysCursor(pScore);
 //        //pScore->get_staffobjs_table()->dump();
 //
@@ -130,7 +130,7 @@ SUITE(ColumnBreakerTest)
 //            "(n d4 q)(n b4 q)(n c4 q)"
 //            ")) )))" );
 //
-//        ImoScore* pScore = doc.get_score();
+//        ImoScore* pScore = doc.get_score(0);
 //        StaffObjsCursor sysCursor(pScore);
 //        //pScore->get_staffobjs_table()->dump();
 //
@@ -157,7 +157,7 @@ SUITE(ColumnBreakerTest)
 //            "(n f3 s g+ v2)(n f3 s g- v2)(n f3 t g+ v2)(n f3 t g- v2)"
 //            ")) )))" );
 //
-//        ImoScore* pScore = doc.get_score();
+//        ImoScore* pScore = doc.get_score(0);
 //        StaffObjsCursor sysCursor(pScore);
 ////        pScore->get_staffobjs_table()->dump();
 //
@@ -176,7 +176,7 @@ SUITE(ColumnBreakerTest)
 //            "(n c4 h p1)(n d4 q p1)(goBack start)(n c3 q p2)(n d3 q p2)(n e3 q p2)"
 //            ")) )))" );
 //
-//        ImoScore* pScore = doc.get_score();
+//        ImoScore* pScore = doc.get_score(0);
 //        StaffObjsCursor sysCursor(pScore);
 //        //pScore->get_staffobjs_table()->dump();
 //
@@ -196,7 +196,7 @@ SUITE(ColumnBreakerTest)
 //            "(goBack start)(n c3 q p2)(n d3 q p2)"
 //            ")) )))" );
 //
-//        ImoScore* pScore = doc.get_score();
+//        ImoScore* pScore = doc.get_score(0);
 //        StaffObjsCursor sysCursor(pScore);
 //        //pScore->get_staffobjs_table()->dump();
 //
@@ -216,7 +216,7 @@ SUITE(ColumnBreakerTest)
 //            "(goBack start)(n c3 e p2)(r e p2)(n e3 e p2)(n g3 e p2 g+)(n b3 e p2 g-)"
 //            ")) )))" );
 //
-//        ImoScore* pScore = doc.get_score();
+//        ImoScore* pScore = doc.get_score(0);
 //        StaffObjsCursor sysCursor(pScore);
 //        //pScore->get_staffobjs_table()->dump();
 //
@@ -237,7 +237,7 @@ SUITE(ColumnBreakerTest)
 //            "(n c3 q)(barline)(n d3 q) ))"
 //            ")))" );
 //
-//        ImoScore* pScore = doc.get_score();
+//        ImoScore* pScore = doc.get_score(0);
 //        StaffObjsCursor sysCursor(pScore);
 //        //pScore->get_staffobjs_table()->dump();
 //
@@ -258,7 +258,7 @@ SUITE(ColumnBreakerTest)
 //            "(n b5 e g+)(n a5 s)(n g5 s g-)(n g5 e g+)(n g5 e g-) ))"
 //            ")))" );
 //
-//        ImoScore* pScore = doc.get_score();
+//        ImoScore* pScore = doc.get_score(0);
 //        StaffObjsCursor sysCursor(pScore);
 //        //pScore->get_staffobjs_table()->dump();
 //
@@ -295,7 +295,7 @@ SUITE(ColumnBreakerTest)
 //            "(n c5 e g+)(n b4 s)(n a4 s g-)(barline) ))"
 //            ")))" );
 //
-//        ImoScore* pScore = doc.get_score();
+//        ImoScore* pScore = doc.get_score(0);
 //        StaffObjsCursor sysCursor(pScore);
 //        //pScore->get_staffobjs_table()->dump();
 //
@@ -355,7 +355,7 @@ SUITE(ColumnBreakerTest)
 ////    {
 ////        Document doc(m_libraryScope);
 ////        doc.from_file(m_scores_path + "00201-systems-are-justified.lms");
-////        ImoScore* pScore = doc.get_score();
+////        ImoScore* pScore = doc.get_score(0);
 ////        pScore->get_staffobjs_table()->dump();
 ////    }
 

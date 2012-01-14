@@ -152,21 +152,25 @@ Layouter* LayouterFactory::create_layouter(ImoContentObj* pItem, Layouter* pPare
 
     switch (pItem->get_obj_type())
     {
-        case k_imo_heading:
-            return new ParagraphLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
-
-        case k_imo_para:
-            return new ParagraphLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
-
-        case k_imo_score:
-            return new ScoreLayouter(pItem, pParent, pGModel, libraryScope);
+//        case k_imo_control:
+//            return LOMSE_NEW ControlLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
 
         case k_imo_dynamic:
         case k_imo_content:
-            return new ContentLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+            return LOMSE_NEW ContentLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+
+        case k_imo_para:
+        case k_imo_heading:
+            return LOMSE_NEW ParagraphLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+
+        case k_imo_multicolumn:
+            return LOMSE_NEW MultiColumnLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+
+        case k_imo_score:
+            return LOMSE_NEW ScoreLayouter(pItem, pParent, pGModel, libraryScope);
 
         default:
-            return new NullLayouter(pItem, pParent, pGModel, libraryScope);
+            return LOMSE_NEW NullLayouter(pItem, pParent, pGModel, libraryScope);
     }
 }
 

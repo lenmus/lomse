@@ -28,48 +28,6 @@ using namespace std;
 namespace lomse
 {
 
-////forward declarations
-//class Observable;
-//
-//
-////-------------------------------------------------------------------------------------
-//class Observer
-//{
-//public:
-//    Observer() {}
-//	virtual ~Observer() {}
-//
-//	virtual void handle_event(Observable* ref) = 0;
-//};
-//
-//
-////-------------------------------------------------------------------------------------
-//class Observable
-//{
-//protected:
-//    std::list<Observer*>    m_observers;
-//
-//public:
-//    Observable() {}
-//	virtual ~Observable() {}
-//
-//	void add_observer(Observer* ref) {
-//		m_observers.push_back(ref);
-//	}
-//
-//	void remove_observer(Observer* ref) {
-//		m_observers.remove(ref);
-//	}
-//
-//protected:
-//	void notify_observers() {
-//        std::list<Observer*>::iterator it;
-//		for(it = m_observers.begin(); it != m_observers.end(); ++it)
-//            (*it)->handle_event(this);
-//	}
-//
-//};
-
 //-------------------------------------------------------------------------------------
 template <typename T>
 class Linkable

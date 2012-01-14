@@ -207,7 +207,7 @@ Presenter::Presenter(Document* pDoc, Interactor* pIntor)   //, UserCommandExecut
     , m_callback(NULL)
 {
     m_interactors.push_back(pIntor);
-    m_pDoc->add_event_handler(NULL, k_doc_modified_event, pIntor);
+    m_pDoc->add_event_handler(k_doc_modified_event, pIntor);
 }
 
 //---------------------------------------------------------------------------------------

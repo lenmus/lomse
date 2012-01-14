@@ -29,12 +29,6 @@
 
 #include <vector>
 #include <list>
-#include <ctime>   //clock
-#include <boost/date_time/gregorian/gregorian.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-using namespace std;
-using namespace boost::gregorian;
-using namespace boost::posix_time;
 
 
 namespace lomse
@@ -47,6 +41,14 @@ class Interactor;
 class GraphicModel;
 class Document;
 class ImoStaffObj;
+
+
+////---------------------------------------------------------------------------------------
+//enum ERepaintOptions
+//{
+//    k_repaint_full = 0,     //repaint all
+//    k_repaint_only_dirty,   //only GmoObj objects marked as dirty
+//};
 
 
 //---------------------------------------------------------------------------------------
@@ -64,6 +66,19 @@ public:
 
 };
 
+//---------------------------------------------------------------------------------------
+// helper struct to contain data about a rectangle on a page
+struct PageRectangle
+{
+    int iPage;
+    URect rect;
+
+    PageRectangle(int page, LUnits left, LUnits top, LUnits right, LUnits bottom)
+        : iPage(page)
+        , rect(left, top, right-left, bottom-top)
+    {
+    }
+};
 
 //---------------------------------------------------------------------------------------
 // A view to edit the score in full page
@@ -98,19 +113,7 @@ protected:
     std::list<ImoStaffObj*> m_highlighted;
 
     //bounds for each displayed page
-    std::list< Rectangle<LUnits> > m_pageBounds;
-
-    //call backs for application provided methods
-    void (*m_pFunc_update_window)(void* pThis);
-    void (*m_pFunc_force_redraw)(void* pThis);
-    void (*m_pFunc_notify)(void* pThis, EventInfo* event);
-    void* m_pObj_update_window;
-    void* m_pObj_force_redraw;
-    void* m_pObj_notify;
-
-    //for performance measurements
-    clock_t m_startTime;
-    ptime m_start;
+    std::list<URect> m_pageBounds;
 
     //for printing
     RenderingBuffer* m_pPrintBuf;
@@ -144,10 +147,7 @@ public:
     void remove_all_highlight();
 
     // The View is requested to re-paint itself onto the window
-    virtual void on_paint();
-
-    //window related commands
-    void update_window();
+    virtual void redraw_bitmap();
 
     //inline DocCursor& get_cursor() { return m_cursor; }
 
@@ -160,9 +160,14 @@ public:
     GraphicModel* get_graphic_model();
 
     //coordinates conversions
-    void screen_point_to_model(double* x, double* y);
+    void screen_point_to_page_point(double* x, double* y);
     void model_point_to_screen(double* x, double* y, int iPage);
     virtual int page_at_screen_point(double x, double y);
+    virtual bool trim_rectangle_to_be_on_pages(double* xLeft, double* yTop,
+                                               double* xRight, double* yBottom);
+    virtual void screen_rectangle_to_page_rectangles(Pixels x1, Pixels y1,
+                                                     Pixels x2, Pixels y2,
+                                                     list<PageRectangle*>* rectangles);
 
     //scale
     void zoom_in(Pixels x=0, Pixels y=0);
@@ -174,13 +179,8 @@ public:
 
     //rendering options
     void set_rendering_option(int option, bool value);
-
-    //setting callbacks to communicate with user application
-    void set_update_window_callbak(void* pThis, void (*pt2Func)(void* pObj));
-    void set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj));
-    void set_notify_callback(void* pThis, void (*pt2Func)(void* pObj, EventInfo* event));
-
-    void notify_user(EventInfo* pEvent);
+    void reset_boxes_to_draw();
+    void set_box_to_draw(int boxType);
 
     //support for printing
     void set_printing_buffer(RenderingBuffer* rbuf) { m_pPrintBuf = rbuf; }
@@ -197,10 +197,15 @@ protected:
     virtual void generate_paths() = 0;
     URect get_page_bounds(int iPage);
     int find_page_at_point(LUnits x, LUnits y);
-    void do_update_window();
-    void do_force_redraw();
-    void start_timer();
-    double get_elapsed_time() const;
+    bool shift_right_x_to_be_on_page(double* xLeft);
+    bool shift_left_x_to_be_on_page(double* xRight);
+    bool shift_down_y_to_be_on_page(double* yTop);
+    bool shift_up_y_to_be_on_page(double* yBottom);
+    void normalize_rectangle(double* xLeft, double* yTop,
+                             double* xRight, double* yBottom);
+    void trimmed_rectangle_to_page_rectangles(list<PageRectangle*>* rectangles,
+                                              double xLeft, double yTop,
+                                              double xRight, double yBottom);
 
 };
 

@@ -26,8 +26,14 @@
 #include "lomse_agg_types.h"
 #include "lomse_selections.h"
 #include "lomse_events.h"
+
 #include <iostream>
+#include <ctime>   //clock
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 using namespace std;
+using namespace boost::gregorian;
+using namespace boost::posix_time;
 
 namespace lomse
 {
@@ -39,6 +45,7 @@ class Task;
 class GraphicModel;
 class GmoObj;
 class ImoStaffObj;
+class ImoScore;
 //class UserCommandExecuter;
 //class LdpCompiler;
 
@@ -46,6 +53,8 @@ class ImoStaffObj;
 //---------------------------------------------------------------------------------------
 //Abstract class from which all Interactors must derive
 class Interactor : public EventHandler
+                 , public EventNotifier
+                 , public Observable
 {
 protected:
     LibraryScope&   m_libScope;
@@ -54,6 +63,19 @@ protected:
     GraphicModel*   m_pGraphicModel;
     Task*           m_pTask;
     SelectionSet    m_selections;
+    GmoObj*         m_pLastMouseOverGmo;
+
+    //for performance measurements
+    clock_t     m_startTime;
+    ptime       m_start;
+
+    //measured times (milliseconds)
+    double      m_renderTime;
+    double      m_gmodelBuildTime;
+
+    //to know that view parameters (viewport, scale, ..) has been changed
+    bool        m_fViewParamsChanged;
+
     //UserCommandExecuter*    m_pExec;
     //LdpCompiler*            m_pCompiler;
 
@@ -69,19 +91,25 @@ public:
     inline View* get_view() { return m_pView; }
 
     //mandatory override required by EventHandler
-	void handle_event(EventInfo* pEvent);
+	void handle_event(SpEventInfo pEvent);
 
     //interface to View
-    virtual void on_paint();
-    virtual void update_window();
+    virtual void redraw_bitmap();
     virtual void force_redraw();
+    bool view_needs_repaint();
+
+    //creating events
+    virtual void request_window_update();
+    virtual void send_end_of_play_event(ImoScore* pScore);
 
     //interface to GraphicView
         //renderization
     virtual void set_rendering_buffer(RenderingBuffer* rbuf);
     virtual void set_rendering_option(int option, bool value);
+    virtual void set_box_to_draw(int boxType);
+    virtual void reset_boxes_to_draw();
         //units conversion and related
-    virtual void screen_point_to_model(double* x, double* y);
+    virtual void screen_point_to_page_point(double* x, double* y);
     virtual void model_point_to_screen(double* x, double* y, int iPage);
     virtual int page_at_screen_point(double x, double y);
         //wiewport / scroll
@@ -108,19 +136,18 @@ public:
     virtual void highlight_object(ImoStaffObj* pSO);
     virtual void remove_highlight_from_object(ImoStaffObj* pSO);
     virtual void remove_all_highlight();
+    void on_visual_highlight(SpEventScoreHighlight pEvent);
         //printing
     virtual void set_printing_buffer(RenderingBuffer* rbuf);
     virtual void on_print_page(int page, double scale, VPoint viewport);
     virtual VSize get_page_size_in_pixels(int nPage);
 
-    //setting callbacks
-    void set_update_window_callbak(void* pThis, void (*pt2Func)(void* pObj));
-    void set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj));
-    void set_notify_callback(void* pThis, void (*pt2Func)(void* pObj, EventInfo* pEvent));
-
     //interface to SelectionSet
     virtual void select_object(GmoObj* pGmo, unsigned flags=0);
     virtual bool is_in_selection(GmoObj* pGmo);
+
+    //mandatory overrides from Observable
+    EventNotifier* get_event_notifier() { return this; }
 
 
     ////abstract class implements all possible commands. Derived classes override
@@ -142,13 +169,32 @@ public:
     //commands
 
     //selection
+    virtual void click_at_screen_point(Pixels x, Pixels y, unsigned flags=0);
     virtual void select_object_at_screen_point(Pixels x, Pixels y, unsigned flags=0);
     virtual void select_objects_in_screen_rectangle(Pixels x1, Pixels y1,
                                                     Pixels x2, Pixels y2,
                                                     unsigned flags=0);
 
+    virtual void mouse_in_out(Pixels x, Pixels y);
+
+    //performance measurements
+    void start_timer();
+    double get_elapsed_time() const;
+    inline void gmodel_rendering_time(double milliseconds) { m_renderTime = milliseconds; }
+    inline double gmodel_rendering_time() { return m_renderTime; }
+    inline double gmodel_build_time() { return m_gmodelBuildTime; }
+
+
 protected:
     void create_graphic_model();
+    void delete_graphic_model();
+    GmoObj* find_object_at(Pixels x, Pixels y);
+    void send_mouse_out_event(GmoObj* pGmo);
+    void send_mouse_in_event(GmoObj* pGmo);
+    void notify_event(SpEventInfo pEvent, GmoObj* pGmo);
+    void update_view_if_gmodel_modified();
+    void update_view_if_needed();
+    void find_parent_link_box_and_notify_event(SpEventInfo pEvent, GmoObj* pGmo);
 
 };
 

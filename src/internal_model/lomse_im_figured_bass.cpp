@@ -540,7 +540,7 @@ ImoFiguredBass::~ImoFiguredBass()
 //    ImoFiguredBassLine* pFBL = (ImoFiguredBassLine*)NULL;
 //    if (pEndFB)
 //    {
-//        pFBL = new ImoFiguredBassLine(this, nID, this, pEndFB);
+//        pFBL = LOMSE_NEW ImoFiguredBassLine(this, nID, this, pEndFB);
 //        this->SetAsStartOfFBLine(pFBL);
 //        pEndFB->SetAsEndOfFBLine(pFBL);
 //

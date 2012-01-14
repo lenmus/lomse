@@ -53,8 +53,9 @@ public:
 
     //specific injectors, to simplify testing
     static ImoNote* inject_note(Document* pDoc, int step, int octave,
-                                int noteType, int accidentals=0, int dots=0,
-                                int staff=0, int voice=0, int stem=k_stem_default);
+                                int noteType, EAccidentals accidentals=k_no_accidentals,
+                                int dots=0, int staff=0, int voice=0,
+                                int stem=k_stem_default);
 
     static ImoBeamData* inject_beam_data(Document* pDoc, ImoBeamDto* pDto);
     static ImoTieData* inject_tie_data(Document* pDoc, ImoTieDto* pDto);
@@ -62,6 +63,10 @@ public:
     static ImoSlurData* inject_slur_data(Document* pDoc, ImoSlurDto* pDto);
     static ImoTuplet* inject_tuplet(Document* pDoc, ImoTupletDto* pDto);
     static ImoTextBox* inject_text_box(Document* pDoc, ImoTextBlockInfo& dto);
+    static ImoMultiColumn* inject_multicolumn(Document* pDoc);
+    static ImoImage* inject_image(Document* pDoc, unsigned char* imgbuf,
+                                  VSize bmpSize, EPixelFormat format, USize imgSize);
+    static ImoControl* inject_control(Document* pDoc, Control* ctrol);
 
 };
 

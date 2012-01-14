@@ -34,7 +34,9 @@
 #include "lomse_events.h"
 #include <sstream>
 using namespace std;
-//#define TRT(a) (a)
+
+//other
+#include <boost/format.hpp>
 
 namespace lomse
 {
@@ -44,16 +46,22 @@ namespace lomse
 //=======================================================================================
 Interactor::Interactor(LibraryScope& libraryScope, Document* pDoc, View* pView)      //UserCommandExecuter* pExec)
     : EventHandler()
+    , EventNotifier()
+    , Observable()
     , m_libScope(libraryScope)
     , m_pDoc(pDoc)
     , m_pView(pView)
     , m_pGraphicModel(NULL)
     , m_pTask( Injector::inject_Task(TaskFactory::k_task_null, NULL) )
     , m_selections()
+    , m_pLastMouseOverGmo(NULL)
+    , m_renderTime(0.0)
+    , m_gmodelBuildTime(0.0)
+    , m_fViewParamsChanged(false)
     //, m_pExec(pExec)
     //m_pCompiler( Injector::inject_LdpCompiler(m_libScope, *pDocScope) )
 {
-    switch_task(TaskFactory::k_task_drag_view);
+    switch_task(TaskFactory::k_task_selection);     //k_task_drag_view);
 }
 
 //---------------------------------------------------------------------------------------
@@ -61,7 +69,7 @@ Interactor::~Interactor()
 {
     delete m_pTask;
     delete m_pView;
-    delete m_pGraphicModel;
+    delete_graphic_model();
 }
 
 //---------------------------------------------------------------------------------------
@@ -83,15 +91,19 @@ GraphicModel* Interactor::get_graphic_model()
 //---------------------------------------------------------------------------------------
 void Interactor::create_graphic_model()
 {
+    start_timer();
+
     DocLayouter layouter( m_pDoc->get_im_model(), m_libScope);
     layouter.layout_document();
     m_pGraphicModel = layouter.get_gm_model();
+
+    m_gmodelBuildTime = get_elapsed_time();
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::on_document_reloaded()
 {
-    delete m_pGraphicModel;
+    delete_graphic_model();
     create_graphic_model();
     //TODO
     //DocCursor cursor(m_pDoc);
@@ -99,16 +111,34 @@ void Interactor::on_document_reloaded()
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::handle_event(EventInfo* pEvent)
+void Interactor::handle_event(SpEventInfo pEvent)
 {
-    //for now the only event received is when the documen has been modified
-    //Therefore, action to do is to update associated view
+    switch(pEvent->get_event_type())
+    {
+        case k_doc_modified_event:
+            delete_graphic_model();
+            force_redraw();
+            break;
+
+        case k_highlight_event:
+        {
+            SpEventScoreHighlight pEv(
+                static_cast<EventScoreHighlight*>( pEvent.get_pointer() ) );
+            on_visual_highlight(pEv);
+        }
+
+        default:
+            break;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::delete_graphic_model()
+{
+    m_selections.clear();
     delete m_pGraphicModel;
     m_pGraphicModel = NULL;
-    force_redraw();
-
-    //EventView* pEvent = new EventView(k_update_window_event, this);
-    //m_libScope.post_event(pEvent);
+    m_pLastMouseOverGmo = NULL;
 }
 
 ////---------------------------------------------------------------------------------------
@@ -122,7 +152,7 @@ void Interactor::handle_event(EventInfo* pEvent)
 //    cursor.reset_and_point_to( pElm->get_id() );
 //    cursor.move_next();
 //
-//    m_pDoc->notify_that_document_has_been_modified();
+//    m_pDoc->notify_if_document_modified();
 //}
 
 //---------------------------------------------------------------------------------------
@@ -151,11 +181,6 @@ void Interactor::on_mouse_button_up(Pixels x, Pixels y, unsigned flags)
 void Interactor::select_object(GmoObj* pGmo, unsigned flags)
 {
     m_selections.add(pGmo, flags);
-    EventOnClick* pEvent = new EventOnClick(this, pGmo);
-    m_pDoc->notify_observers(pEvent, pEvent->get_originator_imo() );
-//    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-//    if (pGView)
-//        pGView->notify_user( new EventOnClick(this, pGmo) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -167,14 +192,87 @@ bool Interactor::is_in_selection(GmoObj* pGmo)
 //---------------------------------------------------------------------------------------
 void Interactor::select_object_at_screen_point(Pixels x, Pixels y, unsigned flags)
 {
+    GmoObj* pGmo = find_object_at(x, y);
+    if (pGmo)
+        select_object(pGmo, flags);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::click_at_screen_point(Pixels x, Pixels y, unsigned flags)
+
+{
+    GmoObj* pGmo = find_object_at(x, y);
+    if (pGmo)
+    {
+        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
+        if (pGmo->is_box_control() || (pImo && pImo->is_visible()) )
+        {
+            SpEventMouse pEvent( LOMSE_NEW EventMouse(k_on_click_event, this, pGmo,
+                                                get_graphic_model()) );
+            notify_event(pEvent, pGmo);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::mouse_in_out(Pixels x, Pixels y)
+{
+    GmoObj* pGmo = find_object_at(x, y);
+
+    if (m_pLastMouseOverGmo && m_pLastMouseOverGmo != pGmo)
+    {
+        send_mouse_out_event(m_pLastMouseOverGmo);
+        m_pLastMouseOverGmo = NULL;
+    }
+
+    if (pGmo && m_pLastMouseOverGmo != pGmo)
+    {
+        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
+        if (pGmo->is_box_control() || (pImo && pImo->is_visible()) )
+        {
+            send_mouse_in_event(pGmo);
+            m_pLastMouseOverGmo = pGmo;
+        }
+    }
+
+    update_view_if_needed();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::update_view_if_gmodel_modified()
+{
+    GraphicModel* pGM = get_graphic_model();
+    if (pGM->is_modified())
+    {
+        force_redraw();
+        pGM->set_modified(false);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+bool Interactor::view_needs_repaint()
+{
+    if (m_pDoc->is_dirty() || m_fViewParamsChanged)
+        return true;
+    else
+    {
+        GraphicModel* pGM = get_graphic_model();
+        return pGM->is_modified();
+    }
+}
+
+//---------------------------------------------------------------------------------------
+GmoObj* Interactor::find_object_at(Pixels x, Pixels y)
+{
     double xPos = double(x);
     double yPos = double(y);
     int iPage = page_at_screen_point(xPos, yPos);
-    screen_point_to_model(&xPos, &yPos);
+    if (iPage == -1)
+        return NULL;
+
+    screen_point_to_page_point(&xPos, &yPos);
     GraphicModel* pGM = get_graphic_model();
-    GmoObj* pGmo = pGM->hit_test(iPage, LUnits(xPos), LUnits(yPos));
-    if (pGmo)
-        select_object(pGmo, flags);
+    return pGM->hit_test(iPage, LUnits(xPos), LUnits(yPos));
 }
 
 //---------------------------------------------------------------------------------------
@@ -182,33 +280,38 @@ void Interactor::select_objects_in_screen_rectangle(Pixels x1, Pixels y1,
                                                     Pixels x2, Pixels y2,
                                                     unsigned flags)
 {
-    double xLeft = double(x1);
-    double yTop = double(y1);
-    double xRight = double(x2);
-    double yBottom = double(y2);
-    int iPage = page_at_screen_point(xLeft, yTop);
-    screen_point_to_model(&xLeft, &yTop);
-    screen_point_to_model(&xRight, &yBottom);
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (!pGView)
+        return;
+
+    list<PageRectangle*> rectangles;
+    pGView->screen_rectangle_to_page_rectangles(x1, y1, x2, y2, &rectangles);
+    if (rectangles.size() == 0)
+        return;
 
     GraphicModel* pGM = get_graphic_model();
-    URect selRect(LUnits(xLeft), LUnits(yTop), LUnits(xRight-xLeft), LUnits(yBottom-yTop));
-    pGM->select_objects_in_rectangle(iPage, m_selections, selRect, flags);
+    list<PageRectangle*>::iterator it;
+    for (it = rectangles.begin(); it != rectangles.end(); ++it)
+    {
+        pGM->select_objects_in_rectangle((*it)->iPage, m_selections, (*it)->rect, flags);
+        delete *it;
+    }
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::on_paint()
+void Interactor::redraw_bitmap()
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->on_paint();
+        pGView->redraw_bitmap();
+    m_fViewParamsChanged = false;
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::update_window()
+void Interactor::request_window_update()
 {
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->update_window();
+    EventView* pEvent = LOMSE_NEW EventView(k_update_window_event, this);
+    notify_observers(pEvent, this);
 }
 
 //---------------------------------------------------------------------------------------
@@ -217,14 +320,15 @@ void Interactor::force_redraw()
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
     {
-        pGView->on_paint();
-        pGView->update_window();
+        pGView->redraw_bitmap();
+        request_window_update();
     }
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::new_viewport(Pixels x, Pixels y)
 {
+    m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->new_viewport(x, y);
@@ -241,6 +345,7 @@ void Interactor::get_view_size(Pixels* xWidth, Pixels* yHeight)
 //---------------------------------------------------------------------------------------
 void Interactor::set_viewport_at_page_center(Pixels screenWidth)
 {
+    m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->set_viewport_at_page_center(screenWidth);
@@ -335,11 +440,11 @@ void Interactor::remove_highlight_from_object(ImoStaffObj* pSO)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::screen_point_to_model(double* x, double* y)
+void Interactor::screen_point_to_page_point(double* x, double* y)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->screen_point_to_model(x, y);
+        pGView->screen_point_to_page_point(x, y);
 }
 
 //---------------------------------------------------------------------------------------
@@ -362,6 +467,7 @@ int Interactor::page_at_screen_point(double x, double y)
 //---------------------------------------------------------------------------------------
 void Interactor::zoom_in(Pixels x, Pixels y)
 {
+    m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->zoom_in(x, y);
@@ -370,6 +476,7 @@ void Interactor::zoom_in(Pixels x, Pixels y)
 //---------------------------------------------------------------------------------------
 void Interactor::zoom_out(Pixels x, Pixels y)
 {
+    m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->zoom_out(x, y);
@@ -378,6 +485,7 @@ void Interactor::zoom_out(Pixels x, Pixels y)
 //---------------------------------------------------------------------------------------
 void Interactor::zoom_fit_full(Pixels width, Pixels height)
 {
+    m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->zoom_fit_full(width, height);
@@ -386,6 +494,7 @@ void Interactor::zoom_fit_full(Pixels width, Pixels height)
 //---------------------------------------------------------------------------------------
 void Interactor::zoom_fit_width(Pixels width)
 {
+    m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->zoom_fit_width(width);
@@ -404,6 +513,7 @@ double Interactor::get_scale()
 //---------------------------------------------------------------------------------------
 void Interactor::set_scale(double scale, Pixels x, Pixels y)
 {
+    m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->set_scale(scale, x, y);
@@ -412,34 +522,28 @@ void Interactor::set_scale(double scale, Pixels x, Pixels y)
 //---------------------------------------------------------------------------------------
 void Interactor::set_rendering_option(int option, bool value)
 {
+    m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->set_rendering_option(option, value);
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::set_update_window_callbak(void* pThis, void (*pt2Func)(void* pObj))
+void Interactor::set_box_to_draw(int boxType)
 {
+    m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->set_update_window_callbak(pThis, pt2Func);
+        pGView->set_box_to_draw(boxType);
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj))
+void Interactor::reset_boxes_to_draw()
 {
+    m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->set_force_redraw_callbak(pThis, pt2Func);
-}
-
-//---------------------------------------------------------------------------------------
-void Interactor::set_notify_callback(void* pThis,
-                                     void (*pt2Func)(void* pObj, EventInfo* pEvent))
-{
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->set_notify_callback(pThis, pt2Func);
+        pGView->reset_boxes_to_draw();
 }
 
 //---------------------------------------------------------------------------------------
@@ -476,6 +580,128 @@ VSize Interactor::get_page_size_in_pixels(int nPage)
 //        pGView->on_resize(x, y);
 //}
 
+
+//---------------------------------------------------------------------------------------
+void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
+{
+    static Pixels xPos = 100;
+
+    std::list< pair<int, ImoStaffObj*> >& items = pEvent->get_items();
+    std::list< pair<int, ImoStaffObj*> >::iterator it;
+    for (it = items.begin(); it != items.end(); ++it)
+    {
+        ImoStaffObj* pSO = (*it).second;
+        switch ((*it).first)
+        {
+            case k_end_of_higlight_event:
+                hide_tempo_line();
+                //pScore->RemoveAllHighlight((wxWindow*)m_pPanel);
+                break;
+
+            case k_highlight_off_event:
+                remove_highlight_from_object(pSO);
+                break;
+
+            case k_highlight_on_event:
+                highlight_object(pSO);
+                break;
+
+            case k_advance_tempo_line_event:
+                xPos += 20;
+                show_tempo_line(xPos, 150, xPos+1, 200);
+                break;
+
+            default:
+                string msg = str( boost::format(
+                                "[Interactor::on_visual_highlight] Unknown event type %d.")
+                                % (*it).first );
+                throw std::runtime_error(msg);
+        }
+    }
+    force_redraw();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::send_end_of_play_event(ImoScore* pScore)
+{
+    remove_all_highlight();
+    SpEventView pEvent( LOMSE_NEW EventView(k_end_of_playback_event, this) );
+    m_pDoc->notify_observers(pEvent, m_pDoc);
+
+    update_view_if_needed();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::update_view_if_needed()
+{
+    if (m_pDoc->is_dirty())
+        m_pDoc->notify_if_document_modified();
+    else
+        update_view_if_gmodel_modified();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::send_mouse_out_event(GmoObj* pGmo)
+{
+    SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_out_event, this, pGmo,
+                                        get_graphic_model()) );
+    notify_event(pEvent, pGmo);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::send_mouse_in_event(GmoObj* pGmo)
+{
+    SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_in_event, this, pGmo,
+                                        get_graphic_model()) );
+    notify_event(pEvent, pGmo);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::notify_event(SpEventInfo pEvent, GmoObj* pGmo)
+{
+    if (pGmo->is_box_control())
+        (static_cast<GmoBoxControl*>(pGmo))->notify_event(pEvent);
+    else if (pGmo->is_in_link())
+        find_parent_link_box_and_notify_event(pEvent, pGmo);
+    else
+        m_pDoc->notify_observers(pEvent, pEvent->get_source() );
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::find_parent_link_box_and_notify_event(SpEventInfo pEvent, GmoObj* pGmo)
+{
+    while(pGmo && !pGmo->is_box_link())
+        pGmo = pGmo->get_owner_box();
+
+    if (pGmo)
+    {
+        (static_cast<GmoBoxLink*>(pGmo))->notify_event(pEvent);
+        if (pEvent->is_on_click_event())
+            m_libScope.post_event(pEvent);
+            //AWARE: current document will be destroyed when the event is processed
+        else
+            update_view_if_needed();
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::start_timer()
+{
+    m_startTime = clock();
+    m_start = microsec_clock::universal_time();
+}
+
+//---------------------------------------------------------------------------------------
+double Interactor::get_elapsed_time() const
+{
+    //millisecods since last start_timer() invocation
+
+    ptime now = microsec_clock::universal_time();
+    time_duration diff = now - m_start;
+    return double( diff.total_milliseconds() );
+    //return double( diff.total_microseconds() );
+    //return double(clock() - m_startTime) * 1000.0 / CLOCKS_PER_SEC;
+}
 
 
 //=======================================================================================

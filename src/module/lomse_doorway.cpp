@@ -80,12 +80,12 @@ void LomseDoorway::init_library(int pixel_format, int ppi, bool reverse_y_axis,
     m_platform.flip_y = reverse_y_axis;
     m_platform.screen_ppi = float(ppi);
 
-    m_pLibraryScope = new LibraryScope(reporter, this);
+    m_pLibraryScope = LOMSE_NEW LibraryScope(reporter, this);
 }
 
 //---------------------------------------------------------------------------------------
 void LomseDoorway::set_notify_callback(void* pThis,
-                                       void (*pt2Func)(void* pObj, EventInfo* event))
+                                       void (*pt2Func)(void* pObj, SpEventInfo event))
 {
     m_pFunc_notify = pt2Func;
     m_pObj_notify = pThis;
@@ -100,11 +100,10 @@ void LomseDoorway::set_request_callback(void* pThis,
 }
 
 //---------------------------------------------------------------------------------------
-void LomseDoorway::null_notify_function(void* pObj, EventInfo* event)
+void LomseDoorway::null_notify_function(void* pObj, SpEventInfo event)
 {
     //This is just a mock method to avoid crashes when using the libary without
     //initializing it
-    delete event;
 }
 
 //---------------------------------------------------------------------------------------

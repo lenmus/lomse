@@ -28,10 +28,8 @@
 #define __LOMSE_CALLIGRAPHER_H__
 
 #include "lomse_injectors.h"
-#include "lomse_renderer.h"
+#include "lomse_basic.h"
 
-
-using namespace agg;
 
 namespace lomse
 {

@@ -61,7 +61,7 @@ public:
     }
     virtual ~MyDoorway() {}
 
-    void update_window() { m_fUpdateWindowInvoked = true; }
+    //void request_window_update() { m_fUpdateWindowInvoked = true; }
     void set_window_title(const std::string& title) {
         m_fSetWindowTitleInvoked = true;
         m_title = title;
@@ -197,6 +197,7 @@ SUITE(InteractorTest)
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             &doc);
         Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, &doc, pView);
+        pView->set_interactor(pIntor);
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
         GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
@@ -228,7 +229,7 @@ SUITE(InteractorTest)
         pView->set_interactor(pIntor);
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
-        pView->on_paint();
+        pView->redraw_bitmap();
 
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -256,7 +257,7 @@ SUITE(InteractorTest)
 
     TEST_FIXTURE(InteractorTestFixture, Interactor_SelectObjectsAtScreenRectangle)
     {
-        //as coordinates conversion is involved, the View must be rendered
+        //AWARE: as coordinates conversion is involved, the View must be rendered
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
         Document doc(libraryScope);
@@ -267,7 +268,7 @@ SUITE(InteractorTest)
         pView->set_interactor(pIntor);
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
-        pView->on_paint();
+        pView->redraw_bitmap();
 
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -309,6 +310,7 @@ SUITE(InteractorTest)
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             pDoc);
         Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, pDoc, pView);
+        pView->set_interactor(pIntor);
         MyTaskDragView task(pIntor);
         task.init_task();
 
@@ -325,6 +327,7 @@ SUITE(InteractorTest)
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             pDoc);
         Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, pDoc, pView);
+        pView->set_interactor(pIntor);
         MyTaskDragView task(pIntor);
         task.init_task();
 
@@ -345,11 +348,12 @@ SUITE(InteractorTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
-        Document* pDoc= new Document(libraryScope);
+        Document* pDoc= LOMSE_NEW Document(libraryScope);
         pDoc->create_empty();
         View* pView = Injector::inject_View(libraryScope, ViewFactory::k_view_simple,
                                             pDoc);
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        pView->set_interactor(pIntor);
         MyTaskDragView task(pIntor);
         task.init_task();
         task.process_event( Event(Event::k_mouse_left_down) );
@@ -377,6 +381,7 @@ SUITE(InteractorTest)
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();
 
@@ -396,6 +401,7 @@ SUITE(InteractorTest)
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();
 
@@ -419,6 +425,7 @@ SUITE(InteractorTest)
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();
         task.process_event( Event(Event::k_mouse_left_down, 10, 33, k_mouse_left) );
@@ -437,7 +444,8 @@ SUITE(InteractorTest)
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        MyInteractor* pIntor = new MyInteractor(libraryScope, pDoc, pView);
+        MyInteractor* pIntor = LOMSE_NEW MyInteractor(libraryScope, pDoc, pView);
+        pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();
         task.process_event( Event(Event::k_mouse_left_down, 10, 33, k_mouse_left) );
@@ -461,6 +469,7 @@ SUITE(InteractorTest)
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();
 
@@ -484,6 +493,7 @@ SUITE(InteractorTest)
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
         Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();
         task.process_event( Event(Event::k_mouse_right_down, 10, 33, k_mouse_right) );
@@ -502,7 +512,8 @@ SUITE(InteractorTest)
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        MyInteractor* pIntor = new MyInteractor(libraryScope, pDoc, pView);
+        MyInteractor* pIntor = LOMSE_NEW MyInteractor(libraryScope, pDoc, pView);
+        pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();
         task.process_event( Event(Event::k_mouse_right_down, 10, 33, k_mouse_right) );

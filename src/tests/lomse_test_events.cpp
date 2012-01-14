@@ -34,22 +34,24 @@ using namespace lomse;
 
 
 //---------------------------------------------------------------------------------------
-class MyEventOnClick : public EventOnClick
+class MyEventOnClick : public EventMouse
 {
 public:
-    MyEventOnClick(ImoObj* pImo) : EventOnClick() { m_pImo = pImo; }
+    MyEventOnClick(ImoContentObj* pImo) : EventMouse(k_on_click_event) { m_pImo = pImo; }
     ~MyEventOnClick() {}
 };
 
 
 //---------------------------------------------------------------------------------------
-class MyEventNotifier : public EventNotifier
+class MyDocument : public Document
 {
 public:
-    MyEventNotifier(ImoObj* pImo) : EventNotifier(pImo) {}
-    ~MyEventNotifier() {}
+    MyDocument(LibraryScope& libraryScope) :  Document(libraryScope) {}
+   ~MyDocument() {}
 
-    int my_num_handlers() { return  int( m_handlers.size() ); }
+    int my_num_observers() { return  int( m_observers.size() ); }
+    std::list<Observer*> my_get_observers() { return m_observers; }
+    Observer* my_get_first_observer() { return m_observers.front(); }
 };
 
 //---------------------------------------------------------------------------------------
@@ -62,15 +64,14 @@ public:
     MyEventHandler() : m_fEventReceived(false) {}
     ~MyEventHandler() {}
 
-    static void my_on_event_received_wrapper(void* pThis, EventInfo* pEvent)
+    static void my_on_event_received_wrapper(void* pThis, SpEventInfo pEvent)
     {
         static_cast<MyEventHandler*>(pThis)->my_on_event_received(pEvent);
     }
 
-    void my_on_event_received(EventInfo* pEvent)
+    void my_on_event_received(SpEventInfo pEvent)
     {
         m_fEventReceived = true;
-        delete pEvent;
     }
 
     bool event_received() { return m_fEventReceived; }
@@ -87,133 +88,120 @@ public:
     ~MyEventHandlerCPP() {}
 
     //mandatory override
-    void handle_event(EventInfo* pEvent)
+    void handle_event(SpEventInfo pEvent)
     {
         m_fEventReceived = true;
-        delete pEvent;
     }
 
     bool event_received() { return m_fEventReceived; }
 };
 
 //---------------------------------------------------------------------------------------
-class EventNotifierTestFixture
+class DocumentEventsTestFixture
 {
 public:
 
     LibraryScope m_libraryScope;
     std::string m_scores_path;
 
-    EventNotifierTestFixture()     //SetUp fixture
+    DocumentEventsTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
     {
         m_scores_path = LOMSE_TEST_SCORES_PATH;
     }
 
-    ~EventNotifierTestFixture()    //TearDown fixture
+    ~DocumentEventsTestFixture()    //TearDown fixture
     {
     }
 };
 
-SUITE(EventNotifierTest)
+SUITE(DocumentEventsTest)
 {
 
-    TEST_FIXTURE(EventNotifierTestFixture, DocumentCreatesEventNotifier)
+    TEST_FIXTURE(DocumentEventsTestFixture, AddHandler_C)
     {
-        Document doc(m_libraryScope);
+        MyDocument doc(m_libraryScope);
         doc.create_empty();
         ImoParagraph* pPara = doc.add_paragraph();
         ImoButton* pButton = pPara->add_button("Click me", USize(1000.0f, 600.0f));
 
-        EventNotifier* pNotifier = doc.get_event_notifier(pButton);
+        MyEventHandler handler;
+        pButton->add_event_handler(k_on_click_event, &handler,
+                                   MyEventHandler::my_on_event_received_wrapper);
 
-        CHECK( pNotifier != NULL );
-        CHECK( pNotifier->target() == pButton );
+        std::list<Observer*> observers = doc.my_get_observers();
+        CHECK( observers.size() == 1 );
+        Observer* pObserver = observers.front();
+        CHECK( pObserver->target() == pButton );
     }
 
-    TEST_FIXTURE(EventNotifierTestFixture, AddHandler)
+    TEST_FIXTURE(DocumentEventsTestFixture, NotifyEvent_C)
     {
-        Document doc(m_libraryScope);
+        MyDocument doc(m_libraryScope);
         doc.create_empty();
         ImoParagraph* pPara = doc.add_paragraph();
         ImoButton* pButton = pPara->add_button("Click me", USize(1000.0f, 600.0f));
-
-        MyEventNotifier notifier(pButton);
         MyEventHandler handler;
-        notifier.add_handler(k_on_click_event, &handler,
-                             MyEventHandler::my_on_event_received_wrapper);
-
-        CHECK( notifier.my_num_handlers() == 1 );
-    }
-
-    TEST_FIXTURE(EventNotifierTestFixture, ReplaceHandler)
-    {
-        Document doc(m_libraryScope);
-        doc.create_empty();
-        ImoParagraph* pPara = doc.add_paragraph();
-        ImoButton* pButton = pPara->add_button("Click me", USize(1000.0f, 600.0f));
-
-        MyEventNotifier notifier(pButton);
-        MyEventHandler handler;
-        notifier.add_handler(k_on_click_event, &handler,
-                             MyEventHandler::my_on_event_received_wrapper);
-        MyEventHandler handler2;
-        notifier.add_handler(k_on_click_event, &handler2,
-                             MyEventHandler::my_on_event_received_wrapper);
-
-        CHECK( notifier.my_num_handlers() == 1 );
-    }
-
-    TEST_FIXTURE(EventNotifierTestFixture, NotifyEvent)
-    {
-        Document doc(m_libraryScope);
-        doc.create_empty();
-        ImoParagraph* pPara = doc.add_paragraph();
-        ImoButton* pButton = pPara->add_button("Click me", USize(1000.0f, 600.0f));
-
-        MyEventNotifier notifier(pButton);
-        MyEventHandler handler;
-        notifier.add_handler(k_on_click_event, &handler,
-                             MyEventHandler::my_on_event_received_wrapper);
+        pButton->add_event_handler(k_on_click_event, &handler,
+                                   MyEventHandler::my_on_event_received_wrapper);
 
         CHECK( handler.event_received() == false );
 
-        notifier.notify( new MyEventOnClick(pButton) );
+        Observer* pObs = doc.my_get_first_observer();
+        pObs->notify( new MyEventOnClick(pButton) );
 
         CHECK( handler.event_received() == true );
     }
 
-    TEST_FIXTURE(EventNotifierTestFixture, AddHandlerCPP)
+    TEST_FIXTURE(DocumentEventsTestFixture, AddHandler_CPP)
     {
-        Document doc(m_libraryScope);
+        MyDocument doc(m_libraryScope);
         doc.create_empty();
         ImoParagraph* pPara = doc.add_paragraph();
         ImoButton* pButton = pPara->add_button("Click me", USize(1000.0f, 600.0f));
 
-        MyEventNotifier notifier(pButton);
         MyEventHandlerCPP handler;
-        notifier.add_handler(k_on_click_event, &handler);
+        pButton->add_event_handler(k_on_click_event, &handler);
 
-        CHECK( notifier.my_num_handlers() == 1 );
+        std::list<Observer*> observers = doc.my_get_observers();
+        CHECK( observers.size() == 1 );
+        Observer* pObserver = observers.front();
+        CHECK( pObserver->target() == pButton );
     }
 
-    TEST_FIXTURE(EventNotifierTestFixture, NotifyEventCPP)
+    TEST_FIXTURE(DocumentEventsTestFixture, NotifyEvent_CPP)
     {
-        Document doc(m_libraryScope);
+        MyDocument doc(m_libraryScope);
         doc.create_empty();
         ImoParagraph* pPara = doc.add_paragraph();
         ImoButton* pButton = pPara->add_button("Click me", USize(1000.0f, 600.0f));
-
-        MyEventNotifier notifier(pButton);
         MyEventHandlerCPP handler;
-        notifier.add_handler(k_on_click_event, &handler);
-
+        pButton->add_event_handler(k_on_click_event, &handler);
         CHECK( handler.event_received() == false );
 
-        notifier.notify( new MyEventOnClick(pButton) );
+        Observer* pObs = doc.my_get_first_observer();
+        pObs->notify( new MyEventOnClick(pButton) );
 
         CHECK( handler.event_received() == true );
     }
+
+//    TEST_FIXTURE(DocumentEventsTestFixture, ReplaceHandler)
+//    {
+//        Document doc(m_libraryScope);
+//        doc.create_empty();
+//        ImoParagraph* pPara = doc.add_paragraph();
+//        ImoButton* pButton = pPara->add_button("Click me", USize(1000.0f, 600.0f));
+//
+//        MyObserver observer(pButton);
+//        MyEventHandler handler;
+//        observer.add_handler(k_on_click_event, &handler,
+//                             MyEventHandler::my_on_event_received_wrapper);
+//        MyEventHandler handler2;
+//        observer.add_handler(k_on_click_event, &handler2,
+//                             MyEventHandler::my_on_event_received_wrapper);
+//
+//        CHECK( observer.my_num_observers() == 1 );
+//    }
 
 };
 

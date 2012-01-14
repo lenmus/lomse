@@ -288,7 +288,7 @@ void StaffObjsCursor::go_back_to_saved_position()
 //        while (!pIT->ChangeOfMeasure() && !pIT->EndOfCollection())
 //        {
 //            lmStaffObj* pSO = pIT->GetCurrent();
-//            if (IsHigherTime(pSO->GetTimePos(), rTimepos))
+//            if (is_greater_time(pSO->GetTimePos(), rTimepos))
 //                break;
 //            pIT->MoveNext();
 //        }

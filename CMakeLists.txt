@@ -42,6 +42,7 @@ project(lomse)
 # main directories 
 set( ROOT_DIR  ${CMAKE_CURRENT_SOURCE_DIR} )
 set( SRC_DIR  ${ROOT_DIR}/src )
+set( PKG_DIR  ${ROOT_DIR}/packages )
 set( OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/bin )
 set( EXECUTABLE_OUTPUT_PATH ${OUTDIR})
 set( LIBRARY_OUTPUT_PATH ${OUTDIR})
@@ -68,6 +69,9 @@ set( LOMSE_VERSION_MINOR "0")
 # build type
 set( LOMSE_USE_DLL "0")
 set( LOMSE_CREATE_DLL "0")
+
+# build options
+set( LOMSE_DEBUG "0")
 
 # platform
 if(WIN32)
@@ -143,6 +147,28 @@ else()
 endif()
 
 
+# Check for libpng
+find_package( libpng )                    
+if( LIBPNG_FOUND )
+    include_directories( ${LIBPNG_INCLUDE_DIRS} )
+    link_libraries( ${LIBPNG_LIBRARIES} )
+    link_directories( ${LIBPNG_LINK_DIR} )        
+else()
+    message(SEND_ERROR "libpng package not found.")
+endif()
+
+
+# Check for zlib
+find_package( zlib )                    
+if( ZLIB_FOUND )
+    include_directories( ${ZLIB_INCLUDE_DIRS} )
+    link_libraries( ${ZLIB_LIBRARIES} )
+    link_directories( ${ZLIB_LINK_DIR} )        
+else()
+    message(SEND_ERROR "zlib package not found.")
+endif()
+
+
 
 # include directories to be installed
 set( INCLUDES_LOMSE  ${ROOT_DIR}/include )
@@ -152,6 +178,7 @@ include_directories(
     ${INCLUDES_AGG}
     ${ROOT_DIR}/src/agg/font_freetype
     ${ROOT_DIR}/packages/utfcpp
+    ${ROOT_DIR}/packages/minizip
     ${UNITTEST_INCLUDE_DIRS}
 )
 
@@ -248,6 +275,12 @@ set(EXPORTERS_FILES
     ${SRC_DIR}/exporters/lomse_ldp_exporter.cpp
 )
 
+set(FILE_SYSTEM_FILES
+    ${SRC_DIR}/file_system/lomse_file_system.cpp
+    ${SRC_DIR}/file_system/lomse_image_reader.cpp
+    ${SRC_DIR}/file_system/lomse_zip_stream.cpp
+)
+
 set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/lomse_box_score_page.cpp
     ${SRC_DIR}/graphic_model/lomse_box_slice.cpp
@@ -296,16 +329,23 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/layouters/lomse_system_layouter.cpp
 )
 
+set(GUI_CONTROLS_FILES
+    ${SRC_DIR}/gui_controls/lomse_hyperlink_ctrl.cpp
+    ${SRC_DIR}/gui_controls/lomse_static_text_ctrl.cpp
+)
+
 set(INTERNAL_MODEL_FILES
     ${SRC_DIR}/internal_model/lomse_im_factory.cpp
     ${SRC_DIR}/internal_model/lomse_im_figured_bass.cpp
     ${SRC_DIR}/internal_model/lomse_im_note.cpp
+    ${SRC_DIR}/internal_model/lomse_image.cpp
     ${SRC_DIR}/internal_model/lomse_internal_model.cpp
     ${SRC_DIR}/internal_model/lomse_score_utilities.cpp)
 
 set(MODULE_FILES
     ${SRC_DIR}/module/lomse_doorway.cpp
     ${SRC_DIR}/module/lomse_events.cpp
+    ${SRC_DIR}/module/lomse_image.cpp
     ${SRC_DIR}/module/lomse_injectors.cpp
     ${SRC_DIR}/module/lomse_logger.cpp
     ${SRC_DIR}/module/lomse_pitch.cpp
@@ -350,6 +390,11 @@ set(SOUND_FILES
     ${SRC_DIR}/sound/lomse_score_player.cpp
 )
 
+set(PACKAGES_FILES
+    ${PKG_DIR}/minizip/unzip.c
+    ${PKG_DIR}/minizip/ioapi.c
+)
+
 if(WIN32)
     set(PLATFORM_FILES
         ${SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp
@@ -361,11 +406,11 @@ elseif(UNIX)
 endif()
 
 set(ALL_SOURCES 
-    ${AGG_FILES} ${DOCUMENT_FILES} ${EXPORTERS_FILES}
-    ${GRAPHIC_MODEL_FILES} ${INTERNAL_MODEL_FILES} 
+    ${AGG_FILES} ${DOCUMENT_FILES} ${EXPORTERS_FILES} ${FILE_SYSTEM_FILES}
+    ${GRAPHIC_MODEL_FILES} ${GUI_CONTROLS_FILES} ${INTERNAL_MODEL_FILES} 
     ${MODULE_FILES} ${MVC_FILES}
     ${PARSER_FILES} ${RENDER_FILES} ${SCORE_FILES} 
-    ${SOUND_FILES} ${PLATFORM_FILES}
+    ${SOUND_FILES} ${PLATFORM_FILES} ${PACKAGES_FILES}
 )
 
 
@@ -373,7 +418,9 @@ set(ALL_SOURCES
 source_group( "agg"             FILES ${AGG_FILES} ${PLATFORM_FILES} )
 source_group( "document"        FILES ${DOCUMENT_FILES} )
 source_group( "exporters"       FILES ${EXPORTERS_FILES} )
+source_group( "file_system"     FILES ${FILE_SYSTEM_FILES} )
 source_group( "graphic_model"   FILES ${GRAPHIC_MODEL_FILES} )
+source_group( "gui_controls"    FILES ${GUI_CONTROLS_FILES} )
 source_group( "internal_model"  FILES ${INTERNAL_MODEL_FILES} )
 source_group( "module"          FILES ${MODULE_FILES} )
 source_group( "mvc"             FILES ${MVC_FILES} )
@@ -381,6 +428,7 @@ source_group( "parser"          FILES ${PARSER_FILES} )
 source_group( "render"          FILES ${RENDER_FILES} )
 source_group( "score"           FILES ${SCORE_FILES} )
 source_group( "sound"           FILES ${SOUND_FILES} )
+source_group( "packages"        FILES ${PACKAGES_FILES} )
 
 
 
@@ -469,6 +517,7 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_lines_breaker.cpp
         ${SRC_DIR}/tests/lomse_test_linkable.cpp
         ${SRC_DIR}/tests/lomse_test_midi_table.cpp
+        ${SRC_DIR}/tests/lomse_test_multicolumn_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_model_builder.cpp
         ${SRC_DIR}/tests/lomse_test_note_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_paragraph_layouter.cpp
@@ -652,7 +701,7 @@ set(CPACK_SOURCE_IGNORE_FILES
 set(CPACK_PACKAGE_VERSION ${PACKAGE_VERSION})
 set(CPACK_SOURCE_PACKAGE_FILE_NAME
     ${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION})
-	
+    
 set(CPACK_PACKAGE_VENDOR "LenMus")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Library to render music scores")

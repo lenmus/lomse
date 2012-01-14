@@ -22,7 +22,7 @@
 #define __LOMSE_SCREEN_DRAWER_H__
 
 #include "lomse_drawer.h"
-#include "lomse_doorway.h"
+#include "lomse_pixel_formats.h"
 #include "lomse_agg_types.h"
 #include "lomse_path_attributes.h"
 #include "lomse_font_storage.h"
@@ -96,8 +96,8 @@ public:
     // not the same but similar to SVG path command
     void add_path(VertexSource& vs, unsigned path_id = 0, bool solid_path = true);
 
+
     // Attribute setting functions.
-    //-----------------------
     void fill(Color color);
     void stroke(Color color);
     void even_odd(bool flag);
@@ -109,10 +109,12 @@ public:
     void line_join(line_join_e join);
     void line_cap(line_cap_e cap);
     void miter_limit(double ml);
+    void fill_linear_gradient(LUnits x1, LUnits y1, LUnits x2, LUnits y2);
+    void gradient_color(Color c1, Color c2, double start, double stop);
+    void gradient_color(Color c1, double start, double stop);
 
 
     // current font
-    //-----------------------
     bool select_font(const std::string& fontName, double height,
                      bool fBold=false, bool fItalic=false);
     bool select_raster_font(const std::string& fontName, double height,
@@ -150,6 +152,19 @@ public:
     //lmURect FtGetGlyphBounds(unsigned int nGlyph);
     //wxRect FtGetGlyphBoundsInPixels(unsigned int nGlyph);
 
+    //copy/blend a bitmap
+    //-----------------------
+    void copy_bitmap(RenderingBuffer& bmap, UPoint pos);
+    void copy_bitmap(RenderingBuffer& bmap,
+                     Pixels srcX1, Pixels srcY1, Pixels srcX2, Pixels srcY2,
+                     UPoint dest);
+    void draw_bitmap(RenderingBuffer& bmap, bool hasAlpha,
+                     Pixels srcX1, Pixels srcY1, Pixels srcX2, Pixels srcY2,
+                     LUnits dstX1, LUnits dstY1, LUnits dstX2, LUnits dstY2,
+                     EResamplingQuality resamplingMode,
+                     double alpha=1.0);
+
+
     // point conversion
     //-----------------------
     void screen_point_to_model(double* x, double* y) const;
@@ -166,7 +181,7 @@ public:
     void set_transform(TransAffine& transform);
     void set_shift(LUnits x, LUnits y);
     void remove_shift();
-    void render(bool fillColor);
+    void render();
     void render(FontRasterizer& ras, FontScanline& sl, Color color);
 
 
@@ -174,6 +189,7 @@ protected:
     void push_attr();
     void pop_attr();
     PathAttributes& cur_attr();
+    void render_existing_paths();
 
 };
 

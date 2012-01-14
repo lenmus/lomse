@@ -80,7 +80,7 @@ void GmoShapeTie::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->fill(color);
     pDrawer->add_path(*this);
     pDrawer->end_path();
-    pDrawer->render(true);
+    pDrawer->render();
 
     GmoSimpleShape::on_draw(pDrawer, opt);
 
@@ -95,7 +95,7 @@ void GmoShapeTie::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->line_to(m_points[CTROL2].x + uWidth / 2.0f, m_points[CTROL2].y);
     pDrawer->line_to(m_points[END].x + uWidth / 2.0f, m_points[END].y);
     pDrawer->end_path();
-    pDrawer->render(true);
+    pDrawer->render();
 }
 
 //---------------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ unsigned GmoShapeTie::vertex(double* px, double* py)
 //=======================================================================================
 GmoShapeSlur::GmoShapeSlur(ImoObj* pCreatorImo, int idx, UPoint* points, LUnits tickness,
                          Color color)
-    : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_tie, idx, color)
+    : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_slur, idx, color)
     , m_thickness(tickness)
 {
     save_points(points);
@@ -168,7 +168,7 @@ void GmoShapeSlur::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->fill(color);
     pDrawer->add_path(*this);
     pDrawer->end_path();
-    pDrawer->render(true);
+    pDrawer->render();
 
     GmoSimpleShape::on_draw(pDrawer, opt);
 
@@ -183,7 +183,7 @@ void GmoShapeSlur::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //    pDrawer->line_to(m_points[CTROL2].x + uWidth / 2.0f, m_points[CTROL2].y);
 //    pDrawer->line_to(m_points[END].x + uWidth / 2.0f, m_points[END].y);
 //    pDrawer->end_path();
-//    pDrawer->render(true);
+//    pDrawer->render();
 }
 
 //---------------------------------------------------------------------------------------

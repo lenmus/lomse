@@ -30,6 +30,7 @@
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_events.h"
+#include "lomse_document_iterator.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -78,7 +79,7 @@ SUITE(DocumentTest)
         ImoDocument* pImoDoc = doc.get_imodoc();
         CHECK( pImoDoc != NULL );
         CHECK( pImoDoc->get_owner() == &doc );
-        CHECK( doc.is_modified() == false );
+        CHECK( doc.is_dirty() == true );
         //cout << doc.to_string() << endl;
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content))" );
     }
@@ -90,7 +91,7 @@ SUITE(DocumentTest)
         ImoDocument* pImoDoc = doc.get_imodoc();
         CHECK( pImoDoc != NULL );
         CHECK( pImoDoc->get_owner() == &doc );
-        CHECK( doc.is_modified() == false );
+        CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData)))))" );
     }
@@ -103,7 +104,7 @@ SUITE(DocumentTest)
         ImoDocument* pImoDoc = doc.get_imodoc();
         CHECK( pImoDoc != NULL );
         CHECK( pImoDoc->get_owner() == &doc );
-        CHECK( doc.is_modified() == false );
+        CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
 //            "(instrument (musicData (n c4 q))))))" );
@@ -117,7 +118,7 @@ SUITE(DocumentTest)
         ImoDocument* pImoDoc = doc.get_imodoc();
         CHECK( pImoDoc != NULL );
         CHECK( pImoDoc->get_owner() == &doc );
-        CHECK( doc.is_modified() == false );
+        CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData)))))" );
     }
@@ -134,7 +135,6 @@ SUITE(DocumentTest)
         catch(exception& e)
         {
             //cout << e.what() << endl;
-            e.what();
             fOk = true;
         }
         CHECK( fOk );
@@ -171,7 +171,6 @@ SUITE(DocumentTest)
         catch(exception& e)
         {
             //cout << e.what() << endl;
-            e.what();
             fOk = true;
         }
         CHECK( fOk );
@@ -199,7 +198,7 @@ SUITE(DocumentTest)
     {
         Document doc(m_libraryScope);
         doc.create_empty();
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         CHECK( pScore == NULL );
     }
 
@@ -207,7 +206,7 @@ SUITE(DocumentTest)
     {
         Document doc(m_libraryScope);
         doc.from_file(m_scores_path + "00011-empty-fill-page.lms");
-        ImoScore* pScore = doc.get_score();
+        ImoScore* pScore = doc.get_score(0);
         CHECK( pScore != NULL );
 //        CHECK( pScore.to_string() == "(score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData )))" );
     }
@@ -219,8 +218,8 @@ SUITE(DocumentTest)
         ImoDocument* pImoDoc = doc.get_imodoc();
         CHECK( pImoDoc != NULL );
         CHECK( pImoDoc->get_owner() == &doc );
-        CHECK( doc.is_modified() == false );
-        ImoScore* pScore = doc.get_score();
+        CHECK( doc.is_dirty() == true );
+        ImoScore* pScore = doc.get_score(0);
         CHECK( pScore != NULL );
     }
 
@@ -288,7 +287,7 @@ SUITE(DocumentTest)
 //        LdpElement* elm = doc.remove(it);
 //        //cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (content ))" );
-//        CHECK( doc.is_modified() == false );
+//        CHECK( doc.is_dirty() == false );
 //        delete elm;
 //    }
 //
@@ -303,7 +302,7 @@ SUITE(DocumentTest)
 //        ++it;   //vers
 //        doc.insert(it, elm);
 //        //cout << doc.to_string() << endl;
-//        CHECK( doc.is_modified() == false );
+//        CHECK( doc.is_dirty() == false );
 //        CHECK( doc.to_string() == "(lenmusdoc (dx 20) (vers 0.0) (content ))" );
 //    }
 //
@@ -311,7 +310,7 @@ SUITE(DocumentTest)
 //    {
 //        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q)(n b3 e.)(n c4 s)))) ))" );
-//        Document::iterator it = doc.get_score();
+//        Document::iterator it = doc.get_score(0);
 //        //cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (n b3 e.) (n c4 s))))))" );
 //        ImScore* pScore = dynamic_cast<ImScore*>( (*it)->get_imobj() );
@@ -358,7 +357,7 @@ SUITE(DocumentTest)
 //        ce.execute( new DocCommandPushBack(it, elm) );
 //        CHECK( ce.undo_stack_size() == 1 );
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content ) (text \"Title of this book\"))" );
-//        CHECK( doc.is_modified() == true );
+//        CHECK( doc.is_dirty() == true );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoPushBackCommand)
@@ -374,7 +373,7 @@ SUITE(DocumentTest)
 //        ce.undo();
 //        CHECK( ce.undo_stack_size() == 0 );
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content ))" );
-//        CHECK( doc.is_modified() == false );
+//        CHECK( doc.is_dirty() == false );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRedoPushBackCommand)
@@ -391,7 +390,7 @@ SUITE(DocumentTest)
 //        ce.redo();
 //        CHECK( ce.undo_stack_size() == 1 );
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content ) (text \"Title of this book\"))" );
-//        CHECK( doc.is_modified() == true );
+//        CHECK( doc.is_dirty() == true );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRedoUndoPushBackCommand)
@@ -410,7 +409,7 @@ SUITE(DocumentTest)
 //        //cout << doc.to_string() << endl;
 //        CHECK( ce.undo_stack_size() == 0 );
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content ))" );
-//        CHECK( doc.is_modified() == false );
+//        CHECK( doc.is_dirty() == false );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentRemoveCommandIsStored)
@@ -423,7 +422,7 @@ SUITE(DocumentTest)
 //        ce.execute( new DocCommandRemove(it) );
 //        CHECK( ce.undo_stack_size() == 1 );
 //        CHECK( doc.to_string() == "(lenmusdoc (content ))" );
-//        CHECK( doc.is_modified() == true );
+//        CHECK( doc.is_dirty() == true );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRemoveCommand)
@@ -438,7 +437,7 @@ SUITE(DocumentTest)
 //        CHECK( ce.undo_stack_size() == 0 );
 //        //cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content ))" );
-//        CHECK( doc.is_modified() == false );
+//        CHECK( doc.is_dirty() == false );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentRedoRemoveCommand)
@@ -453,7 +452,7 @@ SUITE(DocumentTest)
 //        ce.redo();
 //        //cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (content ))" );
-//        CHECK( doc.is_modified() == true );
+//        CHECK( doc.is_dirty() == true );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRedoUndoRemoveCommand)
@@ -469,7 +468,7 @@ SUITE(DocumentTest)
 //        ce.undo();
 //        //cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content ))" );
-//        CHECK( doc.is_modified() == false );
+//        CHECK( doc.is_dirty() == false );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentInsertCommandIsStored)
@@ -486,7 +485,7 @@ SUITE(DocumentTest)
 //        CHECK( ce.undo_stack_size() == 1 );
 //        //cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (dx 20) (vers 0.0) (content ))" );
-//        CHECK( doc.is_modified() == true );
+//        CHECK( doc.is_dirty() == true );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoInsertCommandIsStored)
@@ -504,7 +503,7 @@ SUITE(DocumentTest)
 //        CHECK( ce.undo_stack_size() == 0 );
 //        //cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content ))" );
-//        CHECK( doc.is_modified() == false );
+//        CHECK( doc.is_dirty() == false );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRedoInsertCommandIsStored)
@@ -523,7 +522,7 @@ SUITE(DocumentTest)
 //        CHECK( ce.undo_stack_size() == 1 );
 //        //cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (dx 20) (vers 0.0) (content ))" );
-//        CHECK( doc.is_modified() == true );
+//        CHECK( doc.is_dirty() == true );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRedoUndoInsertCommandIsStored)
@@ -543,7 +542,7 @@ SUITE(DocumentTest)
 //        CHECK( ce.undo_stack_size() == 0 );
 //        //cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content ))" );
-//        CHECK( doc.is_modified() == false );
+//        CHECK( doc.is_dirty() == false );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentRemoveNotLast)
@@ -569,7 +568,7 @@ SUITE(DocumentTest)
 //        CHECK( ce.undo_stack_size() == 1 );
 //        //cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (musicData (n c4 q) (n b3 e) (dx 20)) (vers 0.0) (content ))" );
-//        CHECK( doc.is_modified() == true );
+//        CHECK( doc.is_dirty() == true );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRemoveNotLast)
@@ -607,7 +606,7 @@ SUITE(DocumentTest)
 //        CHECK( ce.undo_stack_size() == 1 );
 //        //cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content ))" );
-//        CHECK( doc.is_modified() == true );
+//        CHECK( doc.is_dirty() == true );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoRedoUndoRemoveNotLast)
@@ -672,29 +671,29 @@ SUITE(DocumentTest)
 //        ce.execute( new DocCommandRemove(it) );
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G) (n c4 q) (r q) (barline simple))))))" );
 //        it = doc.begin();   //lenmusdoc
-//        CHECK( (*it)->is_modified() );
+//        CHECK( (*it)->is_dirty() );
 //        ++it;   //vers
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //0.0
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //content
-//        CHECK( (*it)->is_modified() );
+//        CHECK( (*it)->is_dirty() );
 //        ++it;   //score
-//        CHECK( (*it)->is_modified() );
+//        CHECK( (*it)->is_dirty() );
 //        ++it;   //vers
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //1.6
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //instrument
-//        CHECK( (*it)->is_modified() );
+//        CHECK( (*it)->is_dirty() );
 //        ++it;   //musicData
-//        CHECK( (*it)->is_modified() );
+//        CHECK( (*it)->is_dirty() );
 //        ++it;   //clef
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //G
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //n
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentUndoNodesMarkedAsModified)
@@ -717,29 +716,29 @@ SUITE(DocumentTest)
 //        ce.execute( new DocCommandRemove(it) );
 //        ce.undo();
 //        it = doc.begin();   //lenmusdoc
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //vers
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //0.0
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //content
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //score
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //vers
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //1.6
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //instrument
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //musicData
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //clef
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //G
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //        ++it;   //key
-//        CHECK( !(*it)->is_modified() );
+//        CHECK( !(*it)->is_dirty() );
 //    }
 //
 //    TEST_FIXTURE(DocumentTestFixture, DocumentKnowsLastId_FromString)
@@ -793,6 +792,35 @@ SUITE(DocumentTest)
 //        ce.execute( new DocCommandPushBack(it, elm) );
 //        //cout << "Last Id = " << doc.test_last_id() << endl;
 //        CHECK( doc.test_last_id() == 3L );
+//    }
+
+    // dirty bit ------------------------------------------------------------------------
+
+    TEST_FIXTURE(DocumentTestFixture, clear_dirty)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (n c4 q))))))");
+        CHECK( doc.is_dirty() == true );
+
+        doc.clear_dirty();
+
+        CHECK( doc.is_dirty() == false );
+    }
+
+//    TEST_FIXTURE(DocumentTestFixture, initially_is_modified)
+//    {
+//        Document doc(m_libraryScope);
+//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+//            "(instrument (musicData (n c4 q))))))");
+//
+//        ImoDocument* pImoDoc = doc.get_imodoc();
+//        CHECK( pImoDoc != NULL );
+//        CHECK( pImoDoc->get_owner() == &doc );
+//        CHECK( doc.is_dirty() == false );
+////        cout << doc.to_string() << endl;
+////        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+////            "(instrument (musicData (n c4 q))))))" );
 //    }
 
 };

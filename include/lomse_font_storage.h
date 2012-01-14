@@ -30,8 +30,7 @@
 #include "lomse_basic.h"
 #include "lomse_vertex_source.h"
 #include "lomse_agg_types.h"
-#include "lomse_renderer.h"
-#include "lomse_doorway.h"
+#include "lomse_injectors.h"
 #include <string>
 using namespace std;
 
@@ -39,9 +38,6 @@ using namespace agg;
 
 namespace lomse
 {
-
-//forward declarations
-class Renderer;
 
 
 //---------------------------------------------------------------------------------------
@@ -78,7 +74,7 @@ public:
 
     inline bool is_font_valid() { return m_fValidFont; }
 
-    inline double get_font_height() { return m_fontHeight; }
+    inline double get_font_height_in_points() { return m_fontHeight; }
     inline double get_ascender() { return m_fontEngine.ascender(); }
     inline double get_descender() { return m_fontEngine.descender(); }
 

@@ -30,9 +30,6 @@ namespace lomse
 {
 
 
-typedef int FIntval;      // Intervals, in FPitch mode.
-
-
 //---------------------------------------------------------------------------------------
 // Note steps: 'step' refers to the diatonic note name in the octave
 enum ESteps
@@ -65,6 +62,7 @@ enum EOctave
     k_octave_9,
 };
 
+
 //---------------------------------------------------------------------------------------
 // Accidentals
 // No microtonal accidentals. Only traditional ones.
@@ -73,6 +71,7 @@ enum EOctave
 
 enum EAccidentals
 {
+    k_invalid_accidentals = -1,
     k_no_accidentals = 0,
     k_sharp,
     k_sharp_sharp,
@@ -85,21 +84,18 @@ enum EAccidentals
 };
 
 
-////---------------------------------------------------------------------------------------
-//// Accidentals
-//// No microtonal accidentals. Only traditional ones.
-//#define LOMSE_FLAT_FLAT        -2
-//#define LOMSE_FLAT             -1
-//#define LOMSE_NO_ACCIDENTAL     0
-//#define LOMSE_SHARP             1
-//#define LOMSE_SHARP_SHARP       2
+//---------------------------------------------------------------------------------------
+//global functions
+extern int accidentals_to_number(EAccidentals accidentals);
 
 
+//---------------------------------------------------------------------------------------
 //forward declarations
 class DiatonicPitch;
 class AbsolutePitch;
 class MidiPitch;
 class FPitch;
+
 
 //---------------------------------------------------------------------------------------
 // DiatonicPitch
@@ -115,12 +111,21 @@ protected:
 public:
     DiatonicPitch(int value) : m_dp(value) {}
     DiatonicPitch(int step, int octave);
+    DiatonicPitch() : m_dp(-1) {}
     ~DiatonicPitch() {}
 
     //operations
     //DiatonicPitch operator - (DiatonicPitch pitch) { return DiatonicPitch(m_dp - pitch); }
     DiatonicPitch operator -(int i) { return DiatonicPitch(m_dp - i); }
     DiatonicPitch operator +(int i) { return DiatonicPitch(m_dp + i); }
+    DiatonicPitch operator -=(int i) {
+        m_dp -= i;
+        return *this; 
+    }
+    DiatonicPitch operator +=(int i) {
+        m_dp += i;
+        return *this; 
+    }
 
     // operator to cast to an int
     operator const int() { return m_dp; }
@@ -235,11 +240,12 @@ public:
     operator const int() { return m_pitch; }
 
     string get_ldp_name();
-    bool is_natural_note(EKeySignature nKey);
+    bool is_natural_note_for(EKeySignature nKey);
 
 };
 
-#define C4_MPITCH   MidiPitch(60)
+#define C4_MPITCH               MidiPitch(60)
+#define k_undefined_midi_pitch  MidiPitch(-1)
 
 
 
@@ -254,11 +260,12 @@ protected:
 
 public:
     //constructors
+    FPitch() : m_fp(163) {}     //C4
     FPitch(int value) : m_fp(value) {}
 //    FPitch(AbsolutePitch ap);
     FPitch(DiatonicPitch dp, int nAcc);
     FPitch(int nStep, int nOctave, int nAcc);
-//    FPitch(const string& sLDPNote);
+    FPitch(const string& note);
 //    FPitch(int nStep, int nOctave, EKeySignature nKey);
 
     ~FPitch() {}
@@ -280,7 +287,9 @@ public:
     //components extraction
     inline int step() { return (((m_fp - 1) % 40) + 1) / 6; }
     inline int octave() { return (m_fp - 1) / 40; }
-    int accidentals();
+    int num_accidentals();
+    EAccidentals accidentals();
+    EAccidentals notated_accidentals_for(EKeySignature nKey);
 
     //conversion
     string to_abs_ldp_name();
@@ -296,12 +305,65 @@ public:
     // Interval between 2 steps
     //extern FPitch FPitchStepsInterval(int nStep1, int nStep2, EKeySignature nKey);
 
+    //other
+    bool is_natural_note_for(EKeySignature nKey);
+
 protected:
     void create(int nStep, int nOctave, int nAcc);
 
 };
 
 #define C4_FPITCH   FPitch(163)
+#define k_undefined_fpitch   FPitch(-1)
+
+
+//---------------------------------------------------------------------------------------
+// UPitch: Microtonal pitch
+//  Chromatic absolute pitch plus deviation in cents.
+//---------------------------------------------------------------------------------------
+class UPitch
+{
+private:
+    int m_step;
+    int m_octave;
+    float m_acc;
+
+public:
+    //UPitch() : m_dp(-1), m_nAcc(0) {}
+    //UPitch(DiatonicPitch dp, int nAcc) : m_dp(dp), m_nAcc(nAcc) {}
+    UPitch(int step, int octave, float acc=0.0f) 
+        : m_step(step), m_octave(octave), m_acc(acc)
+    {
+    }
+    //UPitch(const string& note);
+
+    ~UPitch() {}
+
+    //access to components
+    inline int step() const { return m_step; }
+    inline int octave()const { return m_octave; }
+    inline float accidentals() const { return m_acc; }
+
+    //// comparison operators
+    //bool operator ==(UPitch& up) { return m_dp == up.to_diatonic_pitch() && m_nAcc == up.accidentals(); }
+    //bool operator !=(UPitch& up) { return m_dp != up.to_diatonic_pitch() || m_nAcc != up.accidentals(); }
+    //bool operator < (UPitch& up) { return m_dp < up.to_diatonic_pitch() ||
+    //    (m_dp == up.to_diatonic_pitch() && m_nAcc < up.accidentals()); }
+    //bool operator > (UPitch& up) { return m_dp > up.to_diatonic_pitch() ||
+    //    (m_dp == up.to_diatonic_pitch() && m_nAcc > up.accidentals()); }
+    //bool operator <= (UPitch& up) { return m_dp < up.to_diatonic_pitch() ||
+    //    (m_dp == up.to_diatonic_pitch() && m_nAcc <= up.accidentals()); }
+    //bool operator >= (UPitch& up) { return m_dp > up.to_diatonic_pitch() ||
+    //    (m_dp == up.to_diatonic_pitch() && m_nAcc >= up.accidentals()); }
+
+    ////operations
+    //inline DiatonicPitch IncrStep() { return ++m_dp; }
+    //inline DiatonicPitch DecrStep() { return --m_dp; }
+
+    ////conversions
+    //string get_ldp_name() const;
+    //MidiPitch to_MidiPitch() const;
+};
 
 
 } //namespace lomse

@@ -119,23 +119,17 @@ void display_view_content(HDC dc)
 //---------------------------------------------------------------------------------------
 void force_redraw(void* pThis)
 {
-    // Callback method for Lomse. It can be used also by your application.
-    // force_redraw() is an analog of the Win32 InvalidateRect() function.
-    // When invoked by Lomse it must it set a flag (or send a message) which
-    // results in invoking View->on_paint() and then updating the content of 
-    // the window when the next event cycle comes.
-
     m_view_needs_redraw = true;             //force to invoke View->on_paint()
     ::InvalidateRect(m_hWnd, 0, FALSE);     //generate WM_PAINT event
 }
 
 //---------------------------------------------------------------------------------------
-void update_window(void* pThis)
+void update_window(EventInfo* pEvent)
 {
     // Callback method for Lomse. It can be used also by your application.
     // Invoking update_window() results in just putting immediately the content
-    // of the currently rendered buffer to the window without calling
-    // any View methods (i.e. on_paint)
+    // of the currently rendered buffer to the window without neither calling
+    // any lomse methods nor generating any event (i.e. window on paint).
 
     HDC dc = ::GetDC(m_hWnd);
     display_view_content(dc);       //render view buffer into the main window
@@ -143,7 +137,7 @@ void update_window(void* pThis)
 }
 
 //---------------------------------------------------------------------------------------
-string get_font_filename(void* pThis, const string& fontname, bool bold, bool italic)
+string get_font_filename(RequestFont* pRequest)
 {
     //This is just a trivial example. In real applications you should 
     //use operating system services to find a suitable font
@@ -152,29 +146,27 @@ string get_font_filename(void* pThis, const string& fontname, bool bold, bool it
     // - fontname can be either the face name (i.e. "Book Antiqua") or
     //   the familly name (i.e. "sans-serif")
 
+    string fontname = pRequest->get_fontname();
+    bool bold = pRequest->get_bold();
+    bool italic = pRequest->get_italic();
 
-//#if WINDOWS
     string path = "C:\\WINNT\\Fonts\\";
-//#else if LINUX
-//    string path = "\usr\shared\fonts\";
-//#endif
 
     //if family name, choose a font name
-    string name = fontname;
-    if (name == "serif")
-        name = "Times New Roman";
-    else if (name == "sans-serif")
-        name = "Tahoma";
-    else if (name == "handwritten")
-        name = "Lucida Handwriting";
-    else if (name == "cursive")
-        name = "Monotype Corsiva";
-    else if (name == "monospaced")
-        name = "Courier New";
+    if (fontname == "serif")
+        fontname = "Times New Roman";
+    else if (fontname == "sans-serif")
+        fontname = "Tahoma";
+    else if (fontname == "handwritten")
+        fontname = "Lucida Handwriting";
+    else if (fontname == "cursive")
+        fontname = "Monotype Corsiva";
+    else if (fontname == "monospaced")
+        fontname = "Courier New";
 
     //choose a suitable font file
     string fontfile;
-    if (name == "Times New Roman")
+    if (fontname == "Times New Roman")
     {
         if (italic && bold)
             fontfile = "timesbi.ttf";
@@ -186,7 +178,7 @@ string get_font_filename(void* pThis, const string& fontname, bool bold, bool it
             fontfile = "times.ttf";
     }
 
-    else if (name == "Tahoma")
+    else if (fontname == "Tahoma")
     {
         if (bold)
             fontfile = "tahomabd.ttf";
@@ -194,17 +186,17 @@ string get_font_filename(void* pThis, const string& fontname, bool bold, bool it
             fontfile = "tahoma.ttf";
     }
 
-    else if (name == "Lucida Handwriting")
+    else if (fontname == "Lucida Handwriting")
     {
         fontfile = "lhandw.ttf";
     }
 
-    else if (name == "Monotype Corsiva")
+    else if (fontname == "Monotype Corsiva")
     {
         fontfile = "mtcorsva.ttf";
     }
 
-    else if (name == "Courier New")
+    else if (fontname == "Courier New")
     {
         if (italic && bold)
             fontfile = "courbi.ttf";
@@ -221,6 +213,21 @@ string get_font_filename(void* pThis, const string& fontname, bool bold, bool it
 
     
    return path + fontfile;
+}
+
+//---------------------------------------------------------------------------------------
+void on_lomse_request(void* pThis, Request* pRequest)
+{
+    int type = pRequest->get_request_type();
+    switch (type)
+    {
+        case k_get_font_filename:
+            get_font_filename( dynamic_cast<RequestFont*>(pRequest) );
+            break;
+
+        default:
+            fprintf(stderr, "on_lomse_request] Unknown request\n");
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -266,13 +273,12 @@ void on_open_file()
     m_pPresenter = m_lomse.open_document(ViewFactory::k_view_horizontal_book,
                                          filename);
 
-    //now, get the pointers to the relevant components
+    //get the interactor, for communicationg with the View
     m_pInteractor = m_pPresenter->get_interactor(0);
 
-    //connect the View with the window buffer and set required callbacks
+    //connect the View with the window buffer
     m_pInteractor->set_rendering_buffer(&m_rbuf_window);
-    m_pInteractor->set_force_redraw_callbak(NULL, force_redraw);
-    m_pInteractor->set_update_window_callbak(NULL, update_window);
+    m_pInteractor->add_event_handler(k_update_window_event, update_window);
 
     force_redraw(NULL);
 }
@@ -787,10 +793,9 @@ void open_document()
     //now, get the pointers to the relevant components
     m_pInteractor = m_pPresenter->get_interactor(0);
 
-    //connect the View with the window buffer and set required callbacks
+    //connect the View with the window buffer
     m_pInteractor->set_rendering_buffer(&m_rbuf_window);
-    m_pInteractor->set_force_redraw_callbak(NULL, force_redraw);
-    m_pInteractor->set_update_window_callbak(NULL, update_window);
+    m_pInteractor->add_event_handler(k_update_window_event, update_window);
 }
 
 //---------------------------------------------------------------------------------------
@@ -799,7 +804,7 @@ void update_view_content()
     //request the view to re-draw the bitmap
 
     if (!m_pInteractor) return;
-    m_pInteractor->on_paint();
+    m_pInteractor->force_redraw();
 }
 
 //---------------------------------------------------------------------------------------
@@ -827,7 +832,7 @@ void on_mouse_button_up(int x, int y, unsigned flags)
 void reset_boxes_to_draw()
 {
     m_pInteractor->set_rendering_option(k_option_draw_box_doc_page_content, false);
-    m_pInteractor->set_rendering_option(k_option_draw_box_score_page, false);
+    m_pInteractor->set_rendering_option(k_option_draw_box_container, false);
     m_pInteractor->set_rendering_option(k_option_draw_box_system, false);
     m_pInteractor->set_rendering_option(k_option_draw_box_slice, false);
     m_pInteractor->set_rendering_option(k_option_draw_box_slice_instr, false);
@@ -846,7 +851,7 @@ void on_key(int x, int y, unsigned key, unsigned flags)
             break;
         case '2':
             reset_boxes_to_draw();
-            m_pInteractor->set_rendering_option(k_option_draw_box_score_page, true);
+            m_pInteractor->set_rendering_option(k_option_draw_box_container, true);
             break;
         case '3':
             reset_boxes_to_draw();
@@ -968,7 +973,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance,
     m_lomse.init_library(pixel_format, resolution, reverse_y_axis);
 
     //set required callbacks
-    m_lomse.set_get_font_callback(NULL, get_font_filename);
+    m_lomse.set_request_callback(NULL, on_lomse_request);
 
     //create a music score and a View. The view will display the score 
     //when the paint event is sent to lomse, once the main windows is

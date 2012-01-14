@@ -58,7 +58,7 @@ GmoBoxSystem* GmoBoxSlice::get_system_box()
 //--------------------------------------------------------------------------------------
 GmoBoxSliceInstr* GmoBoxSlice::add_box_for_instrument(ImoInstrument* pInstr)
 {
-    GmoBoxSliceInstr* pBox = new GmoBoxSliceInstr(pInstr);
+    GmoBoxSliceInstr* pBox = LOMSE_NEW GmoBoxSliceInstr(pInstr);
     add_child_box(pBox);
     return pBox;
 }

@@ -57,6 +57,7 @@ LdpCompiler::LdpCompiler(LibraryScope& libraryScope, Document* pDoc)
     , m_pIdAssigner( pDoc->get_scope().id_assigner() )
     , m_pDoc(pDoc)
     , m_pFinalTree(NULL)
+    , m_fileLocator("")
 {
 }
 
@@ -76,6 +77,7 @@ LdpCompiler::~LdpCompiler()
 //---------------------------------------------------------------------------------------
 InternalModel* LdpCompiler::compile_file(const std::string& filename)
 {
+    m_fileLocator = filename;
     m_pFinalTree = m_pParser->parse_file(filename);
     m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile(m_pFinalTree);
@@ -84,6 +86,7 @@ InternalModel* LdpCompiler::compile_file(const std::string& filename)
 //---------------------------------------------------------------------------------------
 InternalModel* LdpCompiler::compile_string(const std::string& source)
 {
+    m_fileLocator = "string:";
     m_pFinalTree = m_pParser->parse_text(source);
     m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile(m_pFinalTree);
@@ -92,6 +95,7 @@ InternalModel* LdpCompiler::compile_string(const std::string& source)
 //---------------------------------------------------------------------------------------
 InternalModel* LdpCompiler::compile_input(LdpReader& reader)
 {
+    m_fileLocator = reader.get_locator();
     m_pFinalTree = m_pParser->parse_input(reader);
     m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile(m_pFinalTree);
@@ -124,7 +128,7 @@ InternalModel* LdpCompiler::compile(LdpTree* pParseTree)
     else
         m_pFinalTree = pParseTree;
 
-    InternalModel* IModel = m_pAnalyser->analyse_tree(m_pFinalTree);
+    InternalModel* IModel = m_pAnalyser->analyse_tree(m_pFinalTree, m_fileLocator);
     m_pModelBuilder->build_model(IModel);
     return IModel;
 }

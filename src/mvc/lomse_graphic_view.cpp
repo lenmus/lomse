@@ -50,13 +50,13 @@ View* ViewFactory::create_view(LibraryScope& libraryScope, int viewType,
     switch(viewType)
     {
         case k_view_simple:
-            return new SimpleView(libraryScope, pDrawer);
+            return LOMSE_NEW SimpleView(libraryScope, pDrawer);
 
         case k_view_vertical_book:
-            return new VerticalBookView(libraryScope, pDrawer);
+            return LOMSE_NEW VerticalBookView(libraryScope, pDrawer);
 
         case k_view_horizontal_book:
-            return new HorizontalBookView(libraryScope, pDrawer);
+            return LOMSE_NEW HorizontalBookView(libraryScope, pDrawer);
 
         default:
             throw std::runtime_error("[ViewFactory::create_view] invalid view type");
@@ -84,13 +84,6 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_vyOrg(0)
     , m_fSelRectVisible(false)
     , m_fTempoLineVisible(false)
-
-    , m_pFunc_update_window(NULL)
-    , m_pFunc_force_redraw(NULL)
-    , m_pFunc_notify(NULL)
-    , m_pObj_update_window(NULL)
-    , m_pObj_force_redraw(NULL)
-    , m_pObj_notify(NULL)
 {
 }
 
@@ -105,10 +98,8 @@ void GraphicView::new_viewport(Pixels x, Pixels y)
 {
     m_vxOrg = x;
     m_vyOrg = y;
-    m_transform.tx = double(x);
-    m_transform.ty = double(y);
-
-    do_force_redraw();
+    m_transform.tx = double(-x);
+    m_transform.ty = double(-y);
 }
 
 //---------------------------------------------------------------------------------------
@@ -124,13 +115,7 @@ GraphicModel* GraphicView::get_graphic_model()
 //}
 
 //---------------------------------------------------------------------------------------
-void GraphicView::update_window()
-{
-    do_update_window();
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicView::on_paint() //, RepaintOptions& opt)
+void GraphicView::redraw_bitmap() //, RepaintOptions& opt)
 {
     if (m_pRenderBuf)
     {
@@ -156,7 +141,7 @@ void GraphicView::on_print_page(int page, double scale, VPoint viewport)
     UPoint origin(0.0f, 0.0f);
     GraphicModel* pGModel = get_graphic_model();
     pGModel->draw_page(page, origin, m_pDrawer, m_options);
-    m_pDrawer->render(true);
+    m_pDrawer->render();
 
     //restore scale
     set_scale(screenScale);
@@ -165,9 +150,9 @@ void GraphicView::on_print_page(int page, double scale, VPoint viewport)
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_graphic_model()
 {
-    start_timer();
+    m_pInteractor->start_timer();
 
-    m_options.background_color = Color(35, 52, 91); //127,127,127);
+    m_options.background_color = Color(145, 156, 166);  //35, 52, 91); //127,127,127);
     m_options.page_border_flag = true;
     m_options.cast_shadow_flag = true;
 
@@ -176,17 +161,19 @@ void GraphicView::draw_graphic_model()
     m_pDrawer->set_transform(m_transform);
 
     generate_paths();
-    m_pDrawer->render(true);
+    m_pDrawer->render();
 
-    ////render statistics
-    //double tm = get_elapsed_time();
-    //char buf[256];
-    //sprintf(buf, "Time=%.3f ms, scale=%.3f\n\n"
-    //            "+/- : ZoomIn / ZoomOut (zoom center at mouse point)\n\n"
-    //            "1-5 : draw boxes  |  0- remove boxes  |  Click and drag: move score\n\n"
-    //            "8-drag mode, 9-selection mode",
-    //            tm, m_transform.scale() );
-    //m_pDrawer->gsv_text(10.0, 20.0, buf);
+    double tm = m_pInteractor->get_elapsed_time();
+    m_pInteractor->gmodel_rendering_time(tm);
+
+#if (0)
+    //render statistics
+    double buildTime = m_pInteractor->gmodel_build_time();
+    char buf[256];
+    sprintf(buf, "Build time=%.3f, render time=%.3f ms, scale=%.3f",
+                 buildTime, tm, m_transform.scale() );
+    m_pDrawer->gsv_text(10.0, 20.0, buf);
+#endif
 }
 
 //---------------------------------------------------------------------------------------
@@ -215,7 +202,7 @@ void GraphicView::draw_sel_rectangle()
         m_pDrawer->vline_to(y1);
         m_pDrawer->end_path();
 
-        m_pDrawer->render(true);
+        m_pDrawer->render();
     }
 }
 
@@ -245,7 +232,7 @@ void GraphicView::draw_tempo_line()
         m_pDrawer->vline_to(y1);
         m_pDrawer->end_path();
 
-        m_pDrawer->render(true);
+        m_pDrawer->render();
     }
 }
 
@@ -368,8 +355,8 @@ void GraphicView::zoom_in(Pixels x, Pixels y)
 
     //move origin back to (rx, ry) so this point remains un-moved
     m_transform *= agg::trans_affine_translation(rx, ry);
-    m_vxOrg = Pixels(m_transform.tx);
-    m_vyOrg = Pixels(m_transform.ty);
+    m_vxOrg = -Pixels(m_transform.tx);
+    m_vyOrg = -Pixels(m_transform.ty);
 
     //ensure drawer has the new transform, for pixels <-> LUnits conversions
     m_pDrawer->set_transform(m_transform);
@@ -389,14 +376,13 @@ void GraphicView::zoom_out(Pixels x, Pixels y)
 
     //move origin back to (rx, ry) so this point remains un-moved
     m_transform *= agg::trans_affine_translation(rx, ry);
-    m_vxOrg = Pixels(m_transform.tx);
-    m_vyOrg = Pixels(m_transform.ty);
+    m_vxOrg = -Pixels(m_transform.tx);
+    m_vyOrg = -Pixels(m_transform.ty);
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::zoom_fit_full(Pixels screenWidth, Pixels screenHeight)
 {
-//    VPoint invariant = get_invariant_point_for_fit_full(screenWidth, screenHeight);
     //move viewport origin (left-top window corner) to top screen, center
     double rx(screenWidth/2);
     double ry(0);
@@ -409,9 +395,10 @@ void GraphicView::zoom_fit_full(Pixels screenWidth, Pixels screenHeight)
     //from currently displayed page
     GmoBoxDocPage* pPage = pGModel->get_page(0);
     URect rect = pPage->get_bounds();
-    double xScale = m_pDrawer->Pixels_to_LUnits(screenWidth) / rect.width;
-    double yScale = m_pDrawer->Pixels_to_LUnits(screenHeight) / rect.height;
-    double scale = 0.95 * min (xScale, yScale);
+    double margin = 0.05 * rect.width;      //5% margin, 2.5 at each side
+    double xScale = m_pDrawer->Pixels_to_LUnits(screenWidth) / (rect.width + margin);
+    double yScale = m_pDrawer->Pixels_to_LUnits(screenHeight) / (rect.height + margin);
+    double scale = min (xScale, yScale);
 
     //apply new user scaling factor
     m_transform.scale(scale);
@@ -419,8 +406,8 @@ void GraphicView::zoom_fit_full(Pixels screenWidth, Pixels screenHeight)
 
     //move origin back to (rx, ry) so this point remains un-moved
     m_transform *= agg::trans_affine_translation(rx, ry);
-    m_vxOrg = Pixels(m_transform.tx);
-    m_vyOrg = Pixels(m_transform.ty);
+    m_vxOrg = -Pixels(m_transform.tx);
+    m_vyOrg = -Pixels(m_transform.ty);
 
     set_viewport_for_page_fit_full(screenWidth);
 }
@@ -437,7 +424,8 @@ void GraphicView::zoom_fit_width(Pixels screenWidth)
     GraphicModel* pGModel = get_graphic_model();
     GmoBoxDocPage* pPage = pGModel->get_page(0);
     URect rect = pPage->get_bounds();
-    double scale = 0.95 * ( m_pDrawer->Pixels_to_LUnits(screenWidth) / rect.width );
+    double margin = 0.05 * rect.width;      //5% margin, 2.5 at each side
+    double scale = m_pDrawer->Pixels_to_LUnits(screenWidth) / (rect.width + margin);
 
     //apply new user scaling factor
     m_transform.scale(scale);
@@ -445,8 +433,8 @@ void GraphicView::zoom_fit_width(Pixels screenWidth)
 
     //move origin back to (rx, ry) so this point remains un-moved
     m_transform *= agg::trans_affine_translation(rx, ry);
-    m_vxOrg = Pixels(m_transform.tx);
-    m_vyOrg = Pixels(m_transform.ty);
+    m_vxOrg = -Pixels(m_transform.tx);
+    m_vyOrg = -Pixels(m_transform.ty);
 
     set_viewport_at_page_center(screenWidth);
 }
@@ -462,11 +450,11 @@ void GraphicView::set_viewport_at_page_center(Pixels screenWidth)
 
     //determine new viewport origin to center page on screen
     Pixels pageWidth = m_pDrawer->LUnits_to_Pixels(rect.width);
-    Pixels left = (screenWidth - pageWidth) / 2;
+    Pixels left = (pageWidth - screenWidth) / 2;
 
     //force new viewport
     m_vxOrg = left;
-    m_transform.tx = double(left);
+    m_transform.tx = double(-left);
 }
 
 //---------------------------------------------------------------------------------------
@@ -484,8 +472,8 @@ void GraphicView::set_scale(double scale, Pixels x, Pixels y)
 
     //move origin back to (rx, ry) so this point remains un-moved
     m_transform *= agg::trans_affine_translation(rx, ry);
-    m_vxOrg = Pixels(m_transform.tx);
-    m_vyOrg = Pixels(m_transform.ty);
+    m_vxOrg = -Pixels(m_transform.tx);
+    m_vyOrg = -Pixels(m_transform.ty);
 }
 
 //---------------------------------------------------------------------------------------
@@ -495,7 +483,7 @@ double GraphicView::get_scale()
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::screen_point_to_model(double* x, double* y)
+void GraphicView::screen_point_to_page_point(double* x, double* y)
 {
     m_pDrawer->screen_point_to_model(x, y);
     int iPage = find_page_at_point(LUnits(*x), LUnits(*y));
@@ -525,7 +513,7 @@ void GraphicView::model_point_to_screen(double* x, double* y, int iPage)
 URect GraphicView::get_page_bounds(int iPage)
 {
     int i = 0;
-    std::list< Rectangle<LUnits> >::iterator it;
+    std::list<URect>::iterator it;
     for (it = m_pageBounds.begin(); it != m_pageBounds.end() && i != iPage; ++it, ++i);
     return URect(*it);
 }
@@ -537,7 +525,7 @@ int GraphicView::page_at_screen_point(double x, double y)
 
     double ux = x;
     double uy = y;
-    screen_point_to_model(&ux, &uy);
+    m_pDrawer->screen_point_to_model(&ux, &uy);
 
     return find_page_at_point(LUnits(ux), LUnits(uy));
 }
@@ -545,7 +533,7 @@ int GraphicView::page_at_screen_point(double x, double y)
 //---------------------------------------------------------------------------------------
 int GraphicView::find_page_at_point(LUnits x, LUnits y)
 {
-    std::list< Rectangle<LUnits> >::iterator it;
+    std::list<URect>::iterator it;
     int iPage = 0;
     for (it = m_pageBounds.begin(); it != m_pageBounds.end(); ++it, ++iPage)
     {
@@ -556,96 +544,253 @@ int GraphicView::find_page_at_point(LUnits x, LUnits y)
 }
 
 //---------------------------------------------------------------------------------------
+void GraphicView::screen_rectangle_to_page_rectangles(Pixels x1, Pixels y1,
+                                                      Pixels x2, Pixels y2,
+                                                      list<PageRectangle*>* rectangles)
+{
+    //convert to logical units and normalize rectangle
+    double xLeft = double(x1);
+    double xRight = double(x2);
+    double yTop = double(y1);
+    double yBottom = double(y2);
+    m_pDrawer->screen_point_to_model(&xLeft, &yTop);
+    m_pDrawer->screen_point_to_model(&xRight, &yBottom);
+
+    normalize_rectangle(&xLeft, &yTop, &xRight, &yBottom);
+
+    if (!trim_rectangle_to_be_on_pages(&xLeft, &yTop, &xRight, &yBottom))
+        return;     //rectangle out of any page
+
+    trimmed_rectangle_to_page_rectangles(rectangles, xLeft, yTop, xRight, yBottom);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::normalize_rectangle(double* xLeft, double* yTop,
+                                      double* xRight, double* yBottom)
+{
+    if (*xLeft > *xRight)
+    {
+        double x = *xLeft;
+        *xLeft  = *xRight;
+        *xRight = x;
+    }
+
+    if (*yTop > *yBottom)
+    {
+        double y = *yTop;
+        *yTop = *yBottom;
+        *yBottom = y;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::trimmed_rectangle_to_page_rectangles(list<PageRectangle*>* rectangles,
+                                                       double xLeft, double yTop,
+                                                       double xRight, double yBottom)
+{
+    list<URect>::iterator it = m_pageBounds.begin();
+
+    //advance to page containing left-top point
+    int page = 0;
+    while (it != m_pageBounds.end() && xLeft < (*it).left())
+    {
+        ++it;
+        ++page;
+    }
+
+    //loop to add rectangles
+    LUnits xL = LUnits(xLeft);
+    LUnits yT = LUnits(yTop);
+    LUnits xR = LUnits(xRight);
+    LUnits yB = LUnits(yBottom);
+    while (it != m_pageBounds.end())
+    {
+        if (xL < (*it).left())
+            xL = (*it).left();
+        if (yT < (*it).top())
+            yT = (*it).top();
+        xR = (LUnits(xRight) > (*it).right() ? (*it).right() : LUnits(xRight));
+        yB = (LUnits(yBottom) > (*it).bottom() ? (*it).bottom() : LUnits(yBottom));
+        //rectangles are relative to page origin
+        rectangles->push_back( LOMSE_NEW PageRectangle(page, xL - (*it).left(),
+                                                       yT - (*it).top(),
+                                                       xR - (*it).left(),
+                                                       yB - (*it).top()) );
+
+        if (xRight <= (*it).right() && LUnits(yBottom) <= (*it).bottom())
+            break;
+
+        ++it;
+        ++page;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+bool GraphicView::trim_rectangle_to_be_on_pages(double* xLeft, double* yTop,
+                                                double* xRight, double* yBottom)
+{
+    //return true if it has been posible to trim rectangle
+
+    bool fOk = shift_right_x_to_be_on_page(xLeft);
+    fOk &= shift_left_x_to_be_on_page(xRight);
+    fOk &= shift_down_y_to_be_on_page(yTop);
+    fOk &= shift_up_y_to_be_on_page(yBottom);
+    return fOk;
+}
+
+//---------------------------------------------------------------------------------------
+bool GraphicView::shift_right_x_to_be_on_page(double* xLeft)
+{
+    //returns true if returned x is on a page
+
+    list<URect>::iterator it = m_pageBounds.begin();
+    while (it != m_pageBounds.end())
+    {
+        if (*xLeft < (*it).left() )
+        {
+            //it is at left of current page. Adjust to this page
+            *xLeft = (*it).left();
+            return true;
+        }
+        else if (*xLeft <= (*it).right())
+        {
+            //it is on this page. Nothing to do
+            return true;
+        }
+        else
+        {
+            //it is at right of current page. Advance to next page
+            ++it;
+        }
+    }
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+bool GraphicView::shift_left_x_to_be_on_page(double* xRight)
+{
+    //returns true if returned x is on a page
+
+    list<URect>::reverse_iterator it = m_pageBounds.rbegin();
+    while (it != m_pageBounds.rend())
+    {
+        if (*xRight > (*it).right() )
+        {
+            //it is at right of current page. Adjust to this page
+            *xRight = (*it).right();
+            return true;
+        }
+        else if (*xRight >= (*it).left())
+        {
+            //it is on this page. Nothing to do
+            return true;
+        }
+        else
+        {
+            //it is at left of current page. Move to previous page
+            ++it;
+        }
+    }
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+bool GraphicView::shift_down_y_to_be_on_page(double* yTop)
+{
+    //returns true if returned x is on a page
+
+    list<URect>::iterator it = m_pageBounds.begin();
+    while (it != m_pageBounds.end())
+    {
+        if (*yTop < (*it).top() )
+        {
+            //it is above of current page. Adjust to this page
+            *yTop = (*it).top();
+            return true;
+        }
+        else if (*yTop <= (*it).bottom())
+        {
+            //it is on this page. Nothing to do
+            return true;
+        }
+        else
+        {
+            //it is below current page. Advance to next page
+            ++it;
+        }
+    }
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+bool GraphicView::shift_up_y_to_be_on_page(double* yBottom)
+{
+    //returns true if returned x is on a page
+
+    list<URect>::reverse_iterator it = m_pageBounds.rbegin();
+    while (it != m_pageBounds.rend())
+    {
+        if (*yBottom > (*it).bottom() )
+        {
+            //it is below current page. Adjust to this page
+            *yBottom = (*it).bottom();
+            return true;
+        }
+        else if (*yBottom >= (*it).top())
+        {
+            //it is on this page. Nothing to do
+            return true;
+        }
+        else
+        {
+            //it is above current page. Move to previous page
+            ++it;
+        }
+    }
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
 void GraphicView::set_rendering_option(int option, bool value)
 {
     switch(option)
     {
         case k_option_draw_box_doc_page_content:
-            m_options.draw_box_doc_page_content_flag = value;
+            m_options.draw_box_for(GmoObj::k_box_doc_page_content);
             break;
 
         case k_option_draw_box_container:
-            m_options.draw_box_container_flag = value;
+            m_options.draw_box_for(GmoObj::k_box_paragraph);
             break;
 
         case k_option_draw_box_system:
-            m_options.draw_box_system_flag = value;
+            m_options.draw_box_for(GmoObj::k_box_system);
             break;
 
         case k_option_draw_box_slice:
-            m_options.draw_box_slice_flag = value;
+            m_options.draw_box_for(GmoObj::k_box_slice);
             break;
 
         case k_option_draw_box_slice_instr:
-            m_options.draw_box_slice_instr_flag = value;
+            m_options.draw_box_for(GmoObj::k_box_slice_instr);
             break;
 
         case k_option_draw_box_inline_flag:
-            m_options.draw_box_inline_flag = value;
+            m_options.draw_box_for(GmoObj::k_box_inline);
             break;
     }
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::set_update_window_callbak(void* pThis, void (*pt2Func)(void* pObj))
+void GraphicView::reset_boxes_to_draw()
 {
-    m_pFunc_update_window = pt2Func;
-    m_pObj_update_window = pThis;
+    m_options.reset_boxes_to_draw();
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::set_force_redraw_callbak(void* pThis, void (*pt2Func)(void* pObj))
+void GraphicView::set_box_to_draw(int boxType)
 {
-    m_pFunc_force_redraw = pt2Func;
-    m_pObj_force_redraw = pThis;
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicView::set_notify_callback(void* pThis,
-                                      void (*pt2Func)(void* pObj, EventInfo* pEvent))
-{
-    m_pFunc_notify = pt2Func;
-    m_pObj_notify = pThis;
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicView::do_update_window()
-{
-    if (m_pFunc_update_window)
-        m_pFunc_update_window(m_pObj_update_window);
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicView::do_force_redraw()
-{
-    if (m_pFunc_force_redraw)
-        m_pFunc_force_redraw(m_pObj_force_redraw);
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicView::start_timer()
-{
-    m_startTime = clock();
-    m_start = microsec_clock::universal_time();
-}
-
-//---------------------------------------------------------------------------------------
-double GraphicView::get_elapsed_time() const
-{
-    //millisecods since last start_timer() invocation
-
-    ptime now = microsec_clock::universal_time();
-    time_duration diff = now - m_start;
-    return double( diff.total_milliseconds() );
-    //return double( diff.total_microseconds() );
-    //return double(clock() - m_startTime) * 1000.0 / CLOCKS_PER_SEC;
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicView::notify_user(EventInfo* pEvent)
-{
-    if (m_pFunc_notify)
-        m_pFunc_notify(m_pObj_notify, pEvent);
+    m_options.draw_box_for(boxType);
 }
 
 //---------------------------------------------------------------------------------------
@@ -732,18 +877,20 @@ VerticalBookView::VerticalBookView(LibraryScope& libraryScope, ScreenDrawer* pDr
 void VerticalBookView::generate_paths()
 {
     GraphicModel* pGModel = get_graphic_model();
-    UPoint origin(0.0f, 500.0f);
+    UPoint origin(0.0f, 0.0f);
 
     m_pageBounds.clear();
 
     for (int i=0; i < pGModel->get_num_pages(); i++)
     {
+        if (i > 0)
+            origin.y += 1000;
         GmoBoxDocPage* pPage = pGModel->get_page(i);
         URect rect = pPage->get_bounds();
         UPoint bottomRight(origin.x+rect.width, origin.y+rect.height);
         m_pageBounds.push_back( URect(origin, bottomRight) );
         pGModel->draw_page(i, origin, m_pDrawer, m_options);
-        origin.y += rect.height + 1500;
+        origin.y += rect.height;
     }
 }
 
@@ -757,19 +904,22 @@ void VerticalBookView::set_viewport_for_page_fit_full(Pixels screenWidth)
 void VerticalBookView::get_view_size(Pixels* xWidth, Pixels* yHeight)
 {
     LUnits width = 0.0f;
-    LUnits height = 500.0f;
+    LUnits height = 0.0f;
 
     GraphicModel* pGModel = get_graphic_model();
     for (int i=0; i < pGModel->get_num_pages(); i++)
     {
+        if (i > 0)
+            height += 1000.0f;
         GmoBoxDocPage* pPage = pGModel->get_page(i);
         URect rect = pPage->get_bounds();
         width = max(width, rect.width);
-        height += rect.height + 1500;
+        height += rect.height;
     }
+    LUnits margin = 0.05f * width;      //5% margin, 2.5 at each side
 
-    *xWidth = m_pDrawer->LUnits_to_Pixels(width);
-    *yHeight = m_pDrawer->LUnits_to_Pixels(height);
+    *xWidth = m_pDrawer->LUnits_to_Pixels(width + margin);
+    *yHeight = m_pDrawer->LUnits_to_Pixels(height + margin);
 }
 
 

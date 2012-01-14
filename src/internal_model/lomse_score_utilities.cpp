@@ -39,7 +39,7 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 int get_beat_position(float timePos, ImoTimeSignature* pTS)
 {
-    // Some times it is necessary to know the type of beak (strong, medium, weak,
+    // Some times it is necessary to know the type of beat (strong, medium, weak,
     // off-beat) at which a note or rest is positioned.
     // This function receives the time for a note/rest and the current time signature
     // and returns the type of beat: either an integer positive value 0..n, meaning
@@ -75,192 +75,33 @@ int get_beat_position(float timePos, ImoTimeSignature* pTS)
 
 }
 
+//---------------------------------------------------------------------------------------
+float get_beat_duration_for(int nBeatType)
+{
+    // returns beat duration (in LDP notes duration units)
 
-
-//int lmGetNumPulsesForTimeSignature(lmETimeSignature nTimeSign)
-//{
-//    //returns the number of pulses (metronome pulses) implied by the received
-//    //time signature
-//
-//    switch (nTimeSign) {
-//        case emtr24:
-//            return 2;
-//        case emtr34:
-//            return 3;
-//        case emtr44:
-//            return 4;
-//        case emtr28:
-//            return 2;
-//        case emtr38:
-//            return 3;
-//        case emtr22:
-//            return 2;
-//        case emtr32:
-//            return 3;
-//        case emtr68:
-//            return 2;
-//        case emtr98:
-//            return 3;
-//        case emtr128:
-//            return 4;
-//        default:
-//            wxASSERT(false);
-//            return 4;
-//    }
-//}
-//
-//int lmGetNumBeatsFromTimeSignType(lmETimeSignature nTimeSign)
-//{
-//    //returns the numerator of time signature fraction
-//
-//    switch (nTimeSign) {
-//        case emtr24:
-//            return 2;
-//        case emtr34:
-//            return 3;
-//        case emtr44:
-//            return 4;
-//        case emtr28:
-//            return 2;
-//        case emtr38:
-//            return 3;
-//        case emtr22:
-//            return 2;
-//        case emtr32:
-//            return 3;
-//        case emtr68:
-//            return 6;
-//        case emtr98:
-//            return 9;
-//        case emtr128:
-//            return 12;
-//        default:
-//            wxASSERT(false);
-//            return 4;
-//    }
-//}
-//
-//int GetBeatTypeFromTimeSignType(lmETimeSignature nTimeSign)
-//{
-//    switch (nTimeSign) {
-//        case emtr24:
-//        case emtr34:
-//        case emtr44:
-//            return 4;
-//
-//        case emtr28:
-//        case emtr38:
-//        case emtr68:
-//        case emtr98:
-//        case emtr128:
-//            return 8;
-//
-//        case emtr22:
-//        case emtr32:
-//            return 2;
-//
-//        default:
-//            wxASSERT(false);
-//            return 4;
-//    }
-//}
-//
-//float GetBeatDuration(lmETimeSignature nTimeSign)
-//{
-//    // returns beat duration (in LDP notes duration units)
-//
-//    int nBeatType = GetBeatTypeFromTimeSignType(nTimeSign);
-//    return GetBeatDuration(nBeatType);
-//}
-//
-//float GetBeatDuration(int nBeatType)
-//{
-//    // returns beat duration (in LDP notes duration units)
-//
-//    switch(nBeatType) {
-//        case 1:
-//            return pow(2.0f, (10 - ImoNoteRest::k_whole));
-//        case 2:
-//            return pow(2.0f, (10 - ImoNoteRest::k_half));
-//        case 4:
-//            return pow(2.0f, (10 - ImoNoteRest::k_quarter));
-//        case 8:
-//            return pow(2.0f, (10 - ImoNoteRest::k_eighth));
-//        case 16:
-//            return pow(2.0f, (10 - ImoNoteRest::k_16th));
-//        default:
-//            wxASSERT(false);
-//            return 0;     //compiler happy
-//    }
-//}
-//
-//float GetMeasureDuration(lmETimeSignature nTimeSign)
-//{
-//    // Returns the required duration for a measure in the received time signature
-//
-//    float rNumBeats = (float)lmGetNumBeatsFromTimeSignType(nTimeSign);
-//    return rNumBeats * GetBeatDuration(nTimeSign);
-//}
-//
-//int GetBeatPosition(float rTimePos, float rDuration, int nBeats, int nBeatType)
-//{
-//    // Some times it is necessary to know if a note/rest sounds in beat part.
-//    // This method receives the time for a note/rest and the current time signature
-//    // and returns the beat number if the note sounds in beat part (starts in beat or
-//    // is sounding at beat time, or returns -1 (lmNOT_ON_BEAT) if non-chord note
-//
-//    // coumpute beat duration
-//    int nBeatDuration;
-//    switch (nBeatType) {
-//        case 1: nBeatDuration = (int)eWholeDuration; break;
-//        case 2: nBeatDuration = (int)eHalfDuration; break;
-//        case 4: nBeatDuration = (int)eQuarterDuration; break;
-//        case 8: nBeatDuration = 3* (int)eEighthDuration; break;
-//        case 16: nBeatDuration = (int)e16thDuration; break;
-//        default:
-//            wxLogMessage(_T("[GetPositionBeatType] BeatType %d unknown."), nBeatType);
-//            wxASSERT(false);
-//    }
-//
-//    // compute start and end time
-//    // Duration: quarter = 64, eighth = 32
-//    // Example. 3/4 time, quarter note starting on third beat:
-//    //      rTimePos= 128
-//    //      nStartBeat = 128 / 64 = 2
-//    //      rStartShift = 128 - 2*64 = 0  --> starts on beat
-//    //
-//    // Example. 3/4 time, off-baet quarter note starting before third beat (rTimePos=96)
-//    //      rTimePos = 64+32= 96
-//    //      nStartBeat = 96/64 = 1
-//    //      rStartShift = 96 - 1*64 = 32 ==> Doesn't start on beat
-//    //      rEndTimePos = 96+64 = 160
-//    //      nEndBeat = 160/64 = 2
-//    //      rEndShift = 160 - 64*2 = 160-128 = 32
-//
-//    // compute relative position of this note/rest with reference to the beat
-//    int nStartBeat = (int)rTimePos / nBeatDuration;               //start beat number (minus 1)
-//    float rStartShift = fabs(rTimePos - (float)(nBeatDuration * nStartBeat));
-//
-//    float rEndTimePos = rTimePos + rDuration;
-//    int nEndBeat = (int)rEndTimePos /nBeatDuration;
-//    float rEndShift = fabs(rEndTimePos - (float)(nBeatDuration * nEndBeat));
-//
-//    // note is on chord if it starts on beat or start point on beat N and end point on beat N+1.
-//    // 1.0 is the duration of a 256th note. I use 1.0 instead of e256thDuration to avoid
-//    // conversions
-//    if (rStartShift < 1.0 )
-//        return nStartBeat;
-//    else if (nStartBeat != nEndBeat && rEndShift > 1.0)
-//        return nStartBeat+1;    //AWARE: The note might last for many beats. So nEndBeat is
-//                                // not the right answer.
-//    else
-//        return lmNOT_ON_BEAT;
-//
-//}
-
-
-
-
+    switch(nBeatType) {
+        case 1:
+            return pow(2.0f, (10 - k_whole));
+        case 2:
+            return pow(2.0f, (10 - k_half));
+        case 4:
+            return pow(2.0f, (10 - k_quarter));
+        case 8:
+            return pow(2.0f, (10 - k_eighth));
+        case 16:
+            return pow(2.0f, (10 - k_16th));
+        case 32:
+            return pow(2.0f, (10 - k_32th));
+        case 64:
+            return pow(2.0f, (10 - k_64th));
+        default:
+            string msg = str( boost::format(
+                                "[get_beat_duration_for] Invalid beat type %d")
+                                % nBeatType );
+            throw std::runtime_error(msg);
+    }
+}
 
 
 //=======================================================================================
@@ -278,12 +119,12 @@ void get_accidentals_for_key(int keyType, int nAccidentals[])
     //     1  = a sharp
 
     // initialize array: no accidentals
-    for (int i=0; i < 7; i++) {
+    for (int i=0; i < 7; i++) 
         nAccidentals[i] = 0;
-    }
 
     // accidentals implied by the key signature
-    switch (keyType) {
+    switch (keyType) 
+    {
         case k_key_C:
         case k_key_a:
             //no accidentals
@@ -399,66 +240,67 @@ void get_accidentals_for_key(int keyType, int nAccidentals[])
 
 }
 
-//int lmGetRootNoteStep(EKeySignature keyType)
-//{
-//    //returns the stpe (0..6, 0=Do, 1=Re, 3=Mi, ... , 6=Si) for the root note in
-//    //the Key signature. For example, if keyType is La sharp minor it returns
-//    //step = 5 (La)
-//
-//    //compute root note
-//    int nRootNote;
-//    switch(keyType) {
-//        case k_key_C:
-//        case k_key_c:
-//        case k_key_cs:
-//        case k_key_Cs:
-//        case k_key_Cf:
-//            nRootNote = 0;
-//            break;
-//        case k_key_D:
-//        case k_key_Df:
-//        case k_key_ds:
-//        case k_key_d:
-//            nRootNote = 1;
-//            break;
-//        case k_key_E:
-//        case k_key_e:
-//        case k_key_Ef:
-//        case k_key_ef:
-//            nRootNote = 2;
-//            break;
-//        case k_key_F:
-//        case k_key_fs:
-//        case k_key_Fs:
-//        case k_key_f:
-//            nRootNote = 3;
-//            break;
-//        case k_key_G:
-//        case k_key_gs:
-//        case k_key_g:
-//        case k_key_Gf:
-//            nRootNote = 4;
-//            break;
-//        case k_key_A:
-//        case k_key_a:
-//        case k_key_as:
-//        case k_key_Af:
-//        case k_key_af:
-//            nRootNote = 5;
-//            break;
-//        case k_key_b:
-//        case k_key_B:
-//        case k_key_Bf:
-//        case k_key_bf:
-//            nRootNote = 6;
-//            break;
-//        default:
-//            wxASSERT(false);
-//    }
-//
-//    return nRootNote;
-//
-//}
+//---------------------------------------------------------------------------------------
+int get_step_for_root_note(EKeySignature keyType)
+{
+    //returns the step (0..6, 0=Do, 1=Re, 3=Mi, ... , 6=Si) for the root note in
+    //the Key signature. For example, if keyType is La sharp minor it returns
+    //step = 5 (La)
+
+    //compute root note
+    switch(keyType)
+    {
+        case k_key_C:
+        case k_key_c:
+        case k_key_cs:
+        case k_key_Cs:
+        case k_key_Cf:
+            return k_step_C;
+
+        case k_key_D:
+        case k_key_Df:
+        case k_key_ds:
+        case k_key_d:
+            return k_step_D;
+
+        case k_key_E:
+        case k_key_e:
+        case k_key_Ef:
+        case k_key_ef:
+            return k_step_E;
+
+        case k_key_F:
+        case k_key_fs:
+        case k_key_Fs:
+        case k_key_f:
+            return k_step_F;
+
+        case k_key_G:
+        case k_key_gs:
+        case k_key_g:
+        case k_key_Gf:
+            return k_step_G;
+
+        case k_key_A:
+        case k_key_a:
+        case k_key_as:
+        case k_key_Af:
+        case k_key_af:
+            return k_step_A;
+
+        case k_key_b:
+        case k_key_B:
+        case k_key_Bf:
+        case k_key_bf:
+            return k_step_B;
+
+        default:
+            string msg = str( boost::format(
+                                "[get_step_for_root_note] Invalid key signature %d")
+                                % keyType );
+            throw std::runtime_error(msg);
+    }
+}
 
 //---------------------------------------------------------------------------------------
 bool is_major_key(EKeySignature keyType)
@@ -473,7 +315,7 @@ bool is_minor_key(EKeySignature keyType)
 }
 
 ////---------------------------------------------------------------------------------------
-//const wxString& lmGetKeySignatureName(EKeySignature keyType)
+//const wxString& get_key_signature_name(EKeySignature keyType)
 //{
 //    static bool fStringsLoaded = false;
 //
@@ -635,7 +477,7 @@ EKeySignature get_relative_minor_key(EKeySignature nMajorKey)
         default:
             string msg = str( boost::format(
                                 "[get_relative_minor_key] Invalid key signature %d")
-                                % keyType );
+                                % nMajorKey );
             throw std::runtime_error(msg);
     }
 
@@ -678,16 +520,114 @@ EKeySignature get_relative_major_key(EKeySignature nMinorKey)
         default:
             string msg = str( boost::format(
                                 "[get_relative_major_key] Invalid key signature %d")
-                                % keyType );
+                                % nMinorKey );
             throw std::runtime_error(msg);
             return k_key_c;
     }
 
 }
 
+////---------------------------------------------------------------------------------------
 //wxString GetKeyLDPNameFromType(EKeySignature keyType)
 //{
 //    return m_sLDPKeyName[keyType];
 //}
+
+
+//=======================================================================================
+// global functions related to Clefs
+//=======================================================================================
+
+////---------------------------------------------------------------------------------------
+//wxString GetClefLDPNameFromType(lmEClefType nType)
+//{
+//    //AWARE: indexes in correspondence with enum lmEClefType
+//    static const wxString sName[] = {
+//        _T("G"),
+//        _T("F"),
+//        _T("F3"),
+//        _T("C1"),
+//        _T("C2"),
+//        _T("C3"),
+//        _T("C4"),
+//        _T("percussion"),
+//        _T("C5"),
+//        _T("F5"),
+//        _T("G1"),
+//        _T("G+8va"),    //8 above
+//        _T("G-8va"),    //8 below
+//        _T("F+8va"),    //8 above
+//        _T("F-8va"),    //8 below
+//        _T("G+15ma"),   //15 above
+//        _T("G-15ma"),   //15 below
+//        _T("F+15ma"),   //15 above
+//        _T("F-15ma"),   //15 below
+//    };
+//    static const wxString sUndefined = _T("undefined");
+//
+//
+//    if (nType == k_clefUndefined)
+//        return sUndefined;
+//    else
+//        return sName[nType];
+//}
+
+//---------------------------------------------------------------------------------------
+DiatonicPitch get_diatonic_pitch_for_first_line(EClef nClef)
+{
+    // Returns the diatonic pitch for first line, when using received clef.
+
+    switch(nClef)
+    {
+        case k_clef_G2:           return DiatonicPitch(k_step_E, k_octave_4);
+        case k_clef_F4:           return DiatonicPitch(k_step_G, k_octave_2);
+        case k_clef_F3:           return DiatonicPitch(k_step_B, k_octave_2);
+        case k_clef_C1:           return DiatonicPitch(k_step_C, k_octave_4);
+        case k_clef_C2:           return DiatonicPitch(k_step_A, k_octave_3);
+        case k_clef_C3:           return DiatonicPitch(k_step_F, k_octave_3);
+        case k_clef_C4:           return DiatonicPitch(k_step_D, k_octave_3);
+        case k_clef_C5:           return DiatonicPitch(k_step_B, k_octave_2);
+        case k_clef_F5:           return DiatonicPitch(k_step_E, k_octave_2);
+        case k_clef_G1:           return DiatonicPitch(k_step_G, k_octave_4);
+        case k_clef_8_G2:         return DiatonicPitch(k_step_E, k_octave_5);  //8 above
+        case k_clef_G2_8:         return DiatonicPitch(k_step_E, k_octave_3);  //8 below
+        case k_clef_8_F4:         return DiatonicPitch(k_step_G, k_octave_3);  //8 above
+        case k_clef_F4_8:         return DiatonicPitch(k_step_G, k_octave_1);  //8 below
+        case k_clef_15_G2:        return DiatonicPitch(k_step_E, k_octave_6);  //15 above
+        case k_clef_G2_15:        return DiatonicPitch(k_step_E, k_octave_2);  //15 below
+        case k_clef_15_F4:        return DiatonicPitch(k_step_G, k_octave_4);  //15 above
+        case k_clef_F4_15:        return DiatonicPitch(k_step_G, k_octave_0);  //15 below
+        case k_clef_undefined:
+        case k_clef_percussion:   return NO_DPITCH;
+        default:
+            string msg = str( boost::format(
+                                "[get_diatonic_pitch_for_first_line] Invalid clef %d")
+                                % nClef );
+            throw std::runtime_error(msg);
+    }
+    return NO_DPITCH;
+}
+
+////---------------------------------------------------------------------------------------
+//lmEGlyphIndex lmGetGlyphForCLef(lmEClefType nClefType)
+//{
+//    // returns the index (over global glyphs table) to the character to use to print
+//    // the clef (LenMus font)
+//
+//    switch (nClefType) {
+//        case k_clefSol: return GLYPH_G_CLEF;
+//        case k_clefFa4: return GLYPH_F_CLEF;
+//        case k_clefFa3: return GLYPH_F_CLEF;
+//        case k_clefDo1: return GLYPH_C_CLEF;
+//        case k_clefDo2: return GLYPH_C_CLEF;
+//        case k_clefDo3: return GLYPH_C_CLEF;
+//        case k_clefDo4: return GLYPH_C_CLEF;
+//        case k_clef_percussion: return GLYPH_PERCUSSION_CLEF_BLOCK;
+//        default:
+//            wxLogMessage(_T("[::lmGetGlyphForCLef] Invalid value (%d) for clef type"), nClefType);
+//            return GLYPH_G_CLEF;
+//    }
+//}
+
 
 }  //namespace lomse

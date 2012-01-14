@@ -120,9 +120,9 @@ public:
         else
             m_pNote3 = NULL;
 
-        m_pMeter = new ScoreMeter(1, 1, 180.0f);
-        m_pStorage = new ShapesStorage();
-        m_pNoteEngrv = new NoteEngraver(m_libraryScope, m_pMeter, m_pStorage);
+        m_pMeter = LOMSE_NEW ScoreMeter(1, 1, 180.0f);
+        m_pStorage = LOMSE_NEW ShapesStorage();
+        m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage);
         m_pShape1 =
             dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote1, 0, 0, k_clef_G2, UPoint(10.0f, 15.0f)) );
         m_pShape2 =
@@ -157,7 +157,7 @@ public:
         UPoint pos(0.0f, 0.0f);
 
         //first note
-        m_pChordEngrv = new MyChordEngraver(m_libraryScope, m_pMeter);
+        m_pChordEngrv = LOMSE_NEW MyChordEngraver(m_libraryScope, m_pMeter);
         m_pChordEngrv->set_start_staffobj(m_pChord, m_pNote1, m_pShape1, iInstr, iStaff,
                                           iSystem, iCol, pos);
         m_pStorage->save_engraver(m_pChordEngrv, m_pChord);

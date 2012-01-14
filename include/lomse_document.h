@@ -41,13 +41,13 @@ class DocCommand;
 class DocCommandExecuter;
 class LdpCompiler;
 class IdAssigner;
+class Interactor;
 class InternalModel;
 class ImoDocument;
+class ImoMusicData;
 class ImoScore;
 class ImoStyle;
 class ImoObj;
-class Observer;
-class EventInfo;
 
 class ImoButton;
 class ImoParagraph;
@@ -70,6 +70,8 @@ typedef UndoableStack<DocCommand*>     UndoStack;
 //------------------------------------------------------------------------------------
 
 class LOMSE_EXPORT Document : public BlockLevelCreatorApi
+                            , public EventNotifier
+                            , public Observable
 {
 protected:
     LibraryScope&   m_libraryScope;
@@ -79,7 +81,7 @@ protected:
     IdAssigner*     m_pIdAssigner;
     InternalModel*  m_pIModel;
     ImoDocument*    m_pImoDoc;
-    std::list<Observer*> m_observers;
+    unsigned int    m_flags;
 
     //for assingning unique Id to this document ImoObj objects
     long            m_idCounter;
@@ -92,6 +94,11 @@ public:
     Document(LibraryScope& libraryScope, ostream& reporter=cout);
     virtual ~Document();
 
+    //flag values
+    enum {
+        k_dirty             = 0x0001,   //dirty: modified since last "clear_dirty()" ==> need to rebuild GModel
+    };
+
     //scope access
     inline DocumentScope& get_scope() { return m_docScope; }
 
@@ -102,9 +109,11 @@ public:
     void create_empty();
     void create_with_empty_score();
 
-    inline bool is_modified() { return false; } //TODO:  return m_pTree->is_modified(); }
-//    inline void clear_modified() { m_pTree->clear_modified(); }
-//    inline LdpTree* get_tree() { return m_pTree; }
+    //dirty
+    inline void clear_dirty() { m_flags &= !k_dirty; }
+    inline bool is_dirty() { return (m_flags & k_dirty) != 0; }
+
+    //internal model
     inline ImoDocument* get_imodoc() const { return m_pImoDoc; }
     inline InternalModel* get_im_model() const { return m_pIModel; }
 
@@ -145,18 +154,11 @@ public:
 //    //removes last param of element pointed by 'it'.
 //    void remove_last_param(iterator& it);
 
-    //To have more control about when to update views, the document doesn't
-    //automatically notify views when the document is updated.
-    //Views observing the document will be notified about modifications only
-    //when the following method is invoked. Commands (atomic, DocCommands and
-    //UserCommands)don't invoke it. Invoking this method is a responsibility
-    //of the Interactor (or the user application if Interactor is not used)
-    void notify_that_document_has_been_modified();
-
     //API: objects creation/modification
     void end_of_changes();
 
     ImoObj* create_object(const string& source);
+    void add_staff_objects(const string& source, ImoMusicData* pMD);
 //    ImoObj* create_object(int type);
 
     //API: styles
@@ -178,20 +180,32 @@ public:
 //    ImoButton* create_button(const string& label, const USize& size,
 //                             ImoStyle* pStyle=NULL);
 
-    //Event notification
-    void notify_observers(EventInfo* pEvent, ImoObj* pImo);
-    void remove_observer(Observer* observer);
-    Observer* add_observer(ImoObj* pImo);
+    //mandatory overrides from Observable
+    EventNotifier* get_event_notifier() { return this; }
 
-    //API
-    void add_event_handler(ImoObj* pImo, int eventType, EventHandler* pHandler);
+    /** Send doc-modified events
+        To have more control about when to update views, the document doesn't
+        automatically notify observers when the document is updated.
+        Views observing the document will be notified about modifications only
+        when the following method is invoked. Commands (atomic, DocCommands and
+        UserCommands)don't invoke it. Invoking this method is a responsibility
+        of the Interactor (or the user application if Interactor is not used)
+        whenever a command or an event altering the document is processed.
+    */
+    void notify_if_document_modified();
+
+    //TODO: public to be used by exercises (reconfigure buttons), To be changed to
+    //protected as sson as buttons changed to controls
+    inline void set_dirty() { m_flags |= k_dirty; }
 
 protected:
     void initialize();
-    void delete_observers();
 
     friend class ImFactory;
     inline long new_id() { return ++m_idCounter; }
+
+    friend class ImoObj;
+
 
     //------------------------------------------------------------------
     // Transitional, while moving from score to lenmusdoc
@@ -199,7 +213,7 @@ protected:
 public:
     //TODO Replace by     DocIterator it = document.find_by_type(k_score, i)
     //                    fint element number i [0..n-1] (breath first search)
-    ImoScore* get_score();
+    ImoScore* get_score(int i);
 
 };
 

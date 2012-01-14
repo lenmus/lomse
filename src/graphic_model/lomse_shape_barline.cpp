@@ -167,7 +167,7 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
             draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
             break;
     }
-    pDrawer->render(true);
+    pDrawer->render();
 
     GmoSimpleShape::on_draw(pDrawer, opt);
 }
@@ -242,7 +242,7 @@ void GmoShapeBarline::draw_two_dots(Drawer* pDrawer, LUnits uxPos, LUnits uyPos)
 //    // Make the bitmap masked
 //    wxImage image = bitmap.ConvertToImage();
 //    image.SetMaskColour(255, 255, 255);
-//    wxBitmap* pBitmap = new wxBitmap(image);
+//    wxBitmap* pBitmap = LOMSE_NEW wxBitmap(image);
 //
 //    ////DBG -----------
 //    //wxString sFileName = _T("ShapeGlyp2.bmp");

@@ -1,5 +1,5 @@
 (score
-   (vers 1.6)(language en utf-8)
+   (vers 1.6)
    (opt Render.SpacingMethod 1)
    (opt Render.SpacingValue 30)
    (instrument (staves 1)

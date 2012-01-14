@@ -39,18 +39,21 @@ class FontStorage;
 class GmoShapeText : public GmoSimpleShape
 {
 protected:
-    const std::string m_text;
+    std::string m_text;
     ImoStyle* m_pStyle;
     FontStorage* m_pFontStorage;
     LibraryScope& m_libraryScope;
 
 public:
     GmoShapeText(ImoObj* pCreatorImo, int idx, const std::string& text,
-                 ImoStyle* pStyle,
-                 LUnits x, LUnits y, LibraryScope& libraryScope);
+                 ImoStyle* pStyle, LUnits x, LUnits y, LibraryScope& libraryScope);
     virtual ~GmoShapeText() {}
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
+
+    //dynamic modification
+    void set_text(const std::string& text);
+
 
 protected:
     void select_font();
@@ -66,13 +69,21 @@ protected:
     ImoStyle* m_pStyle;
     FontStorage* m_pFontStorage;
     LibraryScope& m_libraryScope;
+    LUnits m_halfLeading;
+    LUnits m_baseline;
 
 public:
     GmoShapeWord(ImoObj* pCreatorImo, int idx, const std::string& text,
-                 ImoStyle* pStyle, LUnits x, LUnits y, LibraryScope& libraryScope);
+                 ImoStyle* pStyle, LUnits x, LUnits y,
+                 LUnits halfLeading, LibraryScope& libraryScope);
     virtual ~GmoShapeWord() {}
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
+
+    //for unit tests
+    inline LUnits get_top_line() { return m_origin.y + m_halfLeading; }
+    inline LUnits get_baseline() { return m_baseline; }
+    inline LUnits get_bottom_line() { return m_origin.y + m_size.height - m_halfLeading; }
 
 protected:
     void select_font();

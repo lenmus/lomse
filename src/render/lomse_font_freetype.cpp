@@ -26,6 +26,7 @@
 //---------------------------------------------------------------------------------------
 
 #include "lomse_font_freetype.h"
+#include "lomse_build_options.h"
 
 #include <stdio.h>
 #include "agg_bitset_iterator.h"
@@ -498,15 +499,15 @@ font_engine_freetype_base::font_engine_freetype_base(bool flag32,
     , m_name_len(256-16-1)
     , m_face_index(0)
     , m_char_map(FT_ENCODING_NONE)
-    , m_signature(new char [256+256-16])
+    , m_signature(LOMSE_NEW char [256+256-16])
     , m_height(0)
     , m_width(0)
     , m_hinting(true)
     , m_flip_y(false)
     , m_library_initialized(false)
     , m_library(0)
-    , m_faces(new FT_Face [max_faces])
-    , m_face_names(new char* [max_faces])
+    , m_faces(LOMSE_NEW FT_Face [max_faces])
+    , m_face_names(LOMSE_NEW char* [max_faces])
     , m_num_faces(0)
     , m_max_faces(max_faces)
     , m_cur_face(0)
@@ -656,7 +657,7 @@ void font_engine_freetype_base::load_font_file(const std::string& font_name,
     //For error codes have a look into file include/freetype/fterrdef.h; 
     if(m_last_error == 0)
     {
-        m_face_names[m_num_faces] = new char [font_name.size() + 1];
+        m_face_names[m_num_faces] = LOMSE_NEW char [font_name.size() + 1];
         strcpy(m_face_names[m_num_faces], font_name.c_str());
         m_cur_face = m_faces[m_num_faces];
         m_name     = m_face_names[m_num_faces];
@@ -810,7 +811,7 @@ void font_engine_freetype_base::update_signature()
         if(name_len > m_name_len)
         {
             delete [] m_signature;
-            m_signature = new char [name_len + 32 + 256];
+            m_signature = LOMSE_NEW char [name_len + 32 + 256];
             m_name_len = name_len + 32 - 1;
         }
 

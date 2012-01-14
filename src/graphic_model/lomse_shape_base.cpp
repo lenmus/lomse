@@ -36,7 +36,6 @@ GmoShape::GmoShape(ImoObj* pCreatorImo, int objtype, int idx, Color color)
     , m_layer(GmoShape::k_layer_background)
     , m_color(color)
     , m_pRelatedShapes(NULL)
-    , m_fHighlighted(false)
 {
 }
 
@@ -75,6 +74,8 @@ Color GmoShape::determine_color_to_use(RenderOptions& opt)
         return opt.highlighted_color;
     else if (is_selected())
         return opt.selected_color;
+    else if (is_hover())
+        return Color(255,0,0);
     else
         return get_normal_color();
 }
@@ -104,7 +105,7 @@ void GmoShape::set_origin_and_notify_observers(LUnits xLeft, LUnits yTop)
 void GmoShape::add_related_shape(GmoShape* pShape)
 {
     if (!m_pRelatedShapes)
-        m_pRelatedShapes = new std::list<GmoShape*>();
+        m_pRelatedShapes = LOMSE_NEW std::list<GmoShape*>();
 
     m_pRelatedShapes->push_back(pShape);
 }

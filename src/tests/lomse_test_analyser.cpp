@@ -94,7 +94,7 @@ SUITE(AnalyserTest)
                  << "Line 0. score: missing mandatory element 'instrument'." << endl;
         SpLdpTree tree = parser.parse_text("(score )");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( pIModel->get_root() != NULL );
@@ -114,7 +114,7 @@ SUITE(AnalyserTest)
                  << "Line 0. score: missing mandatory element 'instrument'." << endl;
         SpLdpTree tree = parser.parse_text("(score)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << score->get_root()->to_string() << endl;
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -135,7 +135,7 @@ SUITE(AnalyserTest)
                  << "Line 0. score: missing mandatory element 'instrument'." << endl;
         SpLdpTree tree = parser.parse_text("(score (language en utf-8))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( pIModel->get_root() != NULL );
@@ -154,7 +154,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. score: missing mandatory element 'instrument'." << endl;
         SpLdpTree tree = parser.parse_text("(score (vers 1.6))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
         CHECK( pScore != NULL );
         CHECK( pScore->get_version() == "1.6" );
@@ -172,7 +172,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(barline)");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_barline() == true );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
         CHECK( pBarline != NULL );
@@ -189,7 +189,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(barline double)");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_barline() == true );
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
         CHECK( pBarline != NULL );
@@ -209,7 +209,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Unknown barline type 'invalid'. 'simple' barline assumed." << endl;
         SpLdpTree tree = parser.parse_text("(barline invalid)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -229,7 +229,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(barline double (visible yes))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
         CHECK( pBarline != NULL );
         CHECK( pBarline->get_type() == ImoBarline::k_double );
@@ -245,7 +245,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(barline double noVisible)");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
         CHECK( pBarline != NULL );
         CHECK( pBarline->get_type() == ImoBarline::k_double );
@@ -264,7 +264,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'label:invisible' unknown or not possible here. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(barline double invisible)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -283,7 +283,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(barline double (dx 70))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
         CHECK( pBarline != NULL );
         CHECK( pBarline->get_type() == ImoBarline::k_double );
@@ -301,7 +301,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(barline double (dy 60.5))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
         CHECK( pBarline != NULL );
         CHECK( pBarline->get_type() == ImoBarline::k_double );
@@ -319,7 +319,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(barline double (dx 70)(dy 20.3))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
         CHECK( pBarline != NULL );
         CHECK( pBarline->get_type() == ImoBarline::k_double );
@@ -340,7 +340,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid real number 'seven'. Replaced by '0'." << endl;
         SpLdpTree tree = parser.parse_text("(barline double (dx seven))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -364,7 +364,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid real number 'six'. Replaced by '0'." << endl;
         SpLdpTree tree = parser.parse_text("(barline double (dy six))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -388,7 +388,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Element 'barline': too many parameters. Extra parameters from 'number' have been ignored." << endl;
         SpLdpTree tree = parser.parse_text("(barline double (dy 70)(dx 20.3))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -412,7 +412,7 @@ SUITE(AnalyserTest)
 //        //expected << "Line 0. " << endl;
 //        SpLdpTree tree = parser.parse_text("(barline#7 double)");
 //        Analyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree);
+//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //        //cout << "[" << errormsg.str() << "]" << endl;
 //        //cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
@@ -444,7 +444,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. score: missing mandatory element 'instrument'." << endl;
         SpLdpTree tree = parser.parse_text("(score (vers 1.6))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << score->get_root()->to_string() << endl;
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -466,7 +466,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(score (vers 1.6)(instrument (musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -487,7 +487,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(score (vers 1.6)(instrument (musicData))(instrument (musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -510,7 +510,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'instrument' unknown or not possible here. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q)(instrument 3))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_music_data() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -529,7 +529,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'instrument' unknown or not possible here. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q)(instrument 3)(n d4 e))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -547,7 +547,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q)(n d4 e.))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -565,7 +565,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q)(text \"Hello world\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -585,14 +585,14 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(n +d3 e.)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_note() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
-        CHECK( pNote->get_accidentals() == k_sharp );
+        CHECK( pNote->get_notated_accidentals() == k_sharp );
         CHECK( pNote->get_dots() == 1 );
         CHECK( pNote->get_note_type() == k_eighth );
         CHECK( pNote->get_octave() == 3 );
@@ -615,13 +615,13 @@ SUITE(AnalyserTest)
         expected << "Line 0. Unknown note pitch 'j17'. Replaced by 'c4'." << endl;
         SpLdpTree tree = parser.parse_text("(n j17 q)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
-        CHECK( pNote->get_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_quarter );
         CHECK( pNote->get_octave() == 4 );
@@ -640,13 +640,13 @@ SUITE(AnalyserTest)
         expected << "Line 0. Unknown note/rest duration 'j.'. Replaced by 'q'." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 j.)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
-        CHECK( pNote->get_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_quarter );
         CHECK( pNote->get_octave() == 4 );
@@ -665,13 +665,13 @@ SUITE(AnalyserTest)
         expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e.1)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
-        CHECK( pNote->get_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_quarter );
         CHECK( pNote->get_octave() == 4 );
@@ -690,13 +690,13 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e p7)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
-        CHECK( pNote->get_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_eighth );
         CHECK( pNote->get_octave() == 4 );
@@ -716,7 +716,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid staff 'pz'. Replaced by 'p1'." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e pz)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -740,13 +740,13 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e v3)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
-        CHECK( pNote->get_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_eighth );
         CHECK( pNote->get_octave() == 4 );
@@ -767,7 +767,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid voice 'vx'. Replaced by 'v1'." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e vx)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -792,13 +792,13 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e v3 (text \"andante\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
-        CHECK( pNote->get_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_eighth );
         CHECK( pNote->get_octave() == 4 );
@@ -818,8 +818,8 @@ SUITE(AnalyserTest)
         stringstream expected;
         expected << "Line 0. No 'end' element for tie number 12. Tie ignored." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e (tie 12 start))");
-        Analyser* pAnalyser = new Analyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pAnalyser->analyse_tree(tree);
+        Analyser* pAnalyser = LOMSE_NEW Analyser(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = pAnalyser->analyse_tree(tree, "string:");
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
         CHECK( pNote->is_tied_next() == false );
@@ -842,7 +842,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. No 'start/continue' elements for tie number 12. Tie ignored." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e (tie 12 stop))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
         //cout << "[" << errormsg.str() << "]" << endl;
@@ -864,7 +864,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. No 'start' element for tie number 12. Tie ignored." << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q (tie 12 start)) (n c4 e (tie 12 stop)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -901,7 +901,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Requesting to tie notes of different voice or pitch. Tie number 12 will be ignored." << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q (tie 12 start)) (n c3 e (tie 12 stop)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -926,6 +926,33 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_Several_Notes)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. No 'start' element for tie number 12. Tie ignored." << endl;
+        SpLdpTree tree = parser.parse_text("(musicData (n c4 q)(n d4 q)(n e4 q))");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        CHECK( pMusic != NULL );
+        ImoObj::children_iterator it;
+        int numNotes;
+        for(numNotes=0, it=pMusic->begin(); it != pMusic->end(); ++it, ++numNotes)
+            CHECK( (*it)->is_note() == true );
+        CHECK( numNotes == 3 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     // stem
 
     TEST_FIXTURE(AnalyserTestFixture, Analyser_Note_StemUp)
@@ -937,7 +964,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. ?" << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e (stem up))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
         CHECK( pNote->is_stem_up() == true );
@@ -958,7 +985,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. ?" << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e (stem down))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
         CHECK( pNote->is_stem_down() == true );
@@ -979,7 +1006,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid value 'no' for stem type. Default stem asigned." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e (stem no))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
         CHECK( pNote->is_stem_default() == true );
@@ -1004,7 +1031,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q (tie 12 start)(stem down)) (n c4 e (stem up)(tie 12 stop)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -1040,14 +1067,14 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(n +d3 e. g+ p2)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_note() == true );
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
-        CHECK( pNote->get_accidentals() == k_sharp );
+        CHECK( pNote->get_notated_accidentals() == k_sharp );
         CHECK( pNote->get_dots() == 1 );
         CHECK( pNote->get_note_type() == k_eighth );
         CHECK( pNote->get_octave() == 3 );
@@ -1070,7 +1097,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 e l)(n c4 q))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -1113,7 +1140,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. No note found to match old syntax tie. Tie ignored." << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 e l)(n d4 q))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -1147,7 +1174,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. No 'start' element for tie number 12. Tie ignored." << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q v1 l)(n e4 q v2)(n c4 e v1))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -1185,7 +1212,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. No 'start' element for tie number 12. Tie ignored." << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q v1 l)(barline simple)(n c4 e v1))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -1224,7 +1251,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q l)(n c4 e l)(n c4 e))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -1282,7 +1309,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
         SpLdpTree tree = parser.parse_text("(tie 12 stop)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_tie_dto() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -1307,7 +1334,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
         SpLdpTree tree = parser.parse_text("(tie 15 start)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1331,7 +1358,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
         SpLdpTree tree = parser.parse_text("(tie 15 start (bezier (ctrol2-x -25)(start-y 36.765)) )");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1364,7 +1391,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing or invalid tie type. Tie ignored." << endl;
         SpLdpTree tree = parser.parse_text("(tie 15 end)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1382,7 +1409,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(tie 12 stop (color #00ff00))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_tie_dto() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -1393,7 +1420,7 @@ SUITE(AnalyserTest)
         CHECK( pInfo->get_tie_number() == 12 );
         CHECK( pInfo->get_note() == NULL );
         CHECK( pInfo->get_bezier() == NULL );
-        CHECK( pInfo->get_color() == Color(0,255,0,255) );
+        CHECK( is_equal(pInfo->get_color(), Color(0,255,0,255)) );
 
         delete tree->get_root();
         delete pIModel;
@@ -1410,7 +1437,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
         SpLdpTree tree = parser.parse_text("(bezier ctrol1-x:-25 (start-x 36.765) ctrol1-y:55)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1448,7 +1475,7 @@ SUITE(AnalyserTest)
             "Line 0. Element 'undefined' unknown or not possible here. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(bezier (startx 36.765) ctrol1-x:-25 ctrol1-y:55)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1484,7 +1511,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
         SpLdpTree tree = parser.parse_text("(bezier (start-x 36.765))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1523,7 +1550,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(slur 12 stop)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_slur_dto() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -1548,7 +1575,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(slur 15 start)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1572,7 +1599,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(slur 15 continue)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1596,7 +1623,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
         SpLdpTree tree = parser.parse_text("(slur 27 start (bezier (ctrol2-x -25)(start-y 36.765)) )");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1629,7 +1656,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(slur 12 start (color #00ff00))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_slur_dto() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -1640,7 +1667,7 @@ SUITE(AnalyserTest)
         CHECK( pInfo->get_slur_number() == 12 );
         CHECK( pInfo->get_note() == NULL );
         CHECK( pInfo->get_bezier() == NULL );
-        CHECK( pInfo->get_color() == Color(0,255,0,255) );
+        CHECK( is_equal(pInfo->get_color(), Color(0,255,0,255)) );
 
         delete tree->get_root();
         delete pIModel;
@@ -1655,7 +1682,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing or invalid slur type. Slur ignored." << endl;
         SpLdpTree tree = parser.parse_text("(slur 15 end)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1673,7 +1700,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q (slur 12 start)) (n c4 e (slur 12 stop)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -1712,7 +1739,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(r e.)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1736,7 +1763,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(r e. p2)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1759,7 +1786,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(r e.)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1782,7 +1809,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(musicData (r e. p2)(n c4 q)(n d4 e p3)(r q))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1824,7 +1851,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(r e. (text \"andante\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1849,7 +1876,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(fermata below)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1871,7 +1898,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Unknown fermata placement 'under'. Replaced by 'above'." << endl;
         SpLdpTree tree = parser.parse_text("(fermata under)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1892,7 +1919,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Invalid voice 'vx'. Replaced by 'v1'." << endl;
         SpLdpTree tree = parser.parse_text("(fermata above (dx 70))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1915,7 +1942,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'fermata': too many parameters. Extra parameters from 'fermata' have been ignored." << endl;
         SpLdpTree tree = parser.parse_text("(fermata above (dx 70)(fermata below))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1938,7 +1965,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. ?" << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e (stem up)(fermata above (dx 70)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
         CHECK( pNote->is_stem_up() == true );
@@ -1968,7 +1995,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Invalid voice 'vx'. Replaced by 'v1'." << endl;
         SpLdpTree tree = parser.parse_text("(goBack start)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1990,7 +2017,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'goBack' has an incoherent value: go backwards to end?. Element ignored." << endl;
         SpLdpTree tree = parser.parse_text("(goBack end)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2008,7 +2035,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Element 'goBack' has an incoherent value: go backwards to end?. Element ignored." << endl;
         SpLdpTree tree = parser.parse_text("(goBack q)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2031,7 +2058,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Invalid voice 'vx'. Replaced by 'v1'." << endl;
         SpLdpTree tree = parser.parse_text("(goFwd end)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2052,7 +2079,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'goFwd' has an incoherent value: go forward to start?. Element ignored." << endl;
         SpLdpTree tree = parser.parse_text("(goFwd start)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2070,7 +2097,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Element 'goBack' has an incoherent value: go backwards to end?. Element ignored." << endl;
         SpLdpTree tree = parser.parse_text("(goFwd h)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2093,7 +2120,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Element 'goBack' has an incoherent value: go backwards to end?. Element ignored." << endl;
         SpLdpTree tree = parser.parse_text("(goFwd 128)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2116,7 +2143,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Negative value for element 'goFwd/goBack'. Element ignored." << endl;
         SpLdpTree tree = parser.parse_text("(goFwd -128.3)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2134,7 +2161,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. Element 'goBack' has an incoherent value: go backwards to end?. Element ignored." << endl;
         SpLdpTree tree = parser.parse_text("(goBack 21.3)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2159,7 +2186,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(clef G)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2181,7 +2208,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Unknown clef type 'Fa4'. Assumed 'G'." << endl;
         SpLdpTree tree = parser.parse_text("(clef Fa4)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2199,7 +2226,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(clef G (dx 70))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
         CHECK( pClef != NULL );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
@@ -2217,7 +2244,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(clef C2 noVisible)");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
         CHECK( pClef != NULL );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
@@ -2236,7 +2263,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(clef C2 p2 noVisible)");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
         CHECK( pClef != NULL );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
@@ -2256,7 +2283,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(clef C2 (symbolSize cue))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
         CHECK( pClef != NULL );
         CHECK( pClef->get_clef_type() == k_clef_C2 );
@@ -2279,7 +2306,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid symbol size 'small'. 'full' size assumed." << endl;
         SpLdpTree tree = parser.parse_text("(clef C2 (symbolSize small))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
 
 //        cout << "[" << errormsg.str() << "]" << endl;
@@ -2308,7 +2335,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(key G)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_key_signature() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -2331,7 +2358,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Unknown key 'Sol'. Assumed 'C'." << endl;
         SpLdpTree tree = parser.parse_text("(key Sol)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2349,7 +2376,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(key d (dx 70))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
         CHECK( pKeySignature != NULL );
         CHECK( pKeySignature->get_key_type() == k_key_d );
@@ -2368,7 +2395,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(key E- noVisible)");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoKeySignature* pKeySignature = dynamic_cast<ImoKeySignature*>( pIModel->get_root() );
         CHECK( pKeySignature != NULL );
         CHECK( pKeySignature->get_key_type() == k_key_Ef );
@@ -2392,7 +2419,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(instrument (staves 2)(musicData))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_instrument() == true );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -2415,7 +2442,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid value 'two' for staves. Replaced by 1." << endl;
         SpLdpTree tree = parser.parse_text("(instrument (staves two)(musicData))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2437,7 +2464,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(score (vers 1.6)(instrument (musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2462,7 +2489,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(instrument (name \"Guitar\")(musicData))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -2487,7 +2514,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(instrument (abbrev \"G.\")(musicData))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -2512,7 +2539,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(instrument (name \"Guitar\")(abbrev \"G.\")(musicData))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -2537,7 +2564,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing or invalid MIDI instrument (1..256). MIDI info ignored." << endl;
         SpLdpTree tree = parser.parse_text("(infoMIDI piano 1)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -2559,7 +2586,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing or invalid MIDI instrument (1..256). MIDI info ignored." << endl;
         SpLdpTree tree = parser.parse_text("(infoMIDI 315 1)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -2581,7 +2608,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(infoMIDI 56)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -2606,7 +2633,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid MIDI channel (1..16). Channel info ignored." << endl;
         SpLdpTree tree = parser.parse_text("(infoMIDI 56 25)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -2630,7 +2657,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(infoMIDI 56 10)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -2654,7 +2681,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(instrument (infoMIDI 56 12)(musicData))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -2683,7 +2710,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(time 6 8)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2706,7 +2733,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. time: missing mandatory element 'number'." << endl;
         SpLdpTree tree = parser.parse_text("(time 2)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2725,7 +2752,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(time 3 4 (dx 70))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
         CHECK( pTimeSignature != NULL );
         CHECK( pTimeSignature->get_beats() == 3 );
@@ -2744,7 +2771,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(time 6 8 noVisible)");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
         CHECK( pTimeSignature != NULL );
         CHECK( pTimeSignature->get_beats() == 6 );
@@ -2768,7 +2795,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Expected 'first' or 'other' value but found 'third'. 'first' assumed." << endl;
         SpLdpTree tree = parser.parse_text("(systemLayout third (systemMargins 0 0 0 2000))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2794,7 +2821,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. systemLayout: missing mandatory element 'systemMargins'." << endl;
         SpLdpTree tree = parser.parse_text("(systemLayout other)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2819,7 +2846,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(systemLayout other (systemMargins 0 100 0 2000))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2845,7 +2872,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. systemInfo: missing mandatory element 'systemMargins'." << endl;
         SpLdpTree tree = parser.parse_text("(systemLayout other (systemMargins 0 100 0 2000))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2868,7 +2895,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. systemInfo: missing mandatory element 'systemMargins'." << endl;
         SpLdpTree tree = parser.parse_text("(text \"This is a text\")");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2890,7 +2917,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. text: missing mandatory element 'string'." << endl;
         SpLdpTree tree = parser.parse_text("(text)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2910,7 +2937,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(text \"Moonlight sonata\" center (style \"Header1\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -2936,7 +2963,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(text \"F. Chopin\" (style \"Composer\")(dy 30)(dx 20))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -2966,7 +2993,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(metronome 88)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -2991,7 +3018,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing metronome parameters. Replaced by '(metronome 60)'." << endl;
         SpLdpTree tree = parser.parse_text("(metronome)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3015,7 +3042,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(metronome e. 77)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3041,7 +3068,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(metronome e. s)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3068,7 +3095,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Error in metronome parameters. Replaced by '(metronome 60)'." << endl;
         SpLdpTree tree = parser.parse_text("(metronome e. \"s\")");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3089,7 +3116,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(metronome 88 (dx 70))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
         CHECK( pMM != NULL );
         CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
@@ -3110,7 +3137,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(metronome 88 noVisible)");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
         CHECK( pMM != NULL );
         CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
@@ -3130,7 +3157,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(metronome 88 parenthesis (visible no))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoMetronomeMark* pMM = dynamic_cast<ImoMetronomeMark*>( pIModel->get_root() );
         CHECK( pMM != NULL );
         CHECK( pMM->get_mark_type() == ImoMetronomeMark::k_value );
@@ -3153,7 +3180,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. ?" << endl;
         SpLdpTree tree = parser.parse_text("(metronome 88 parenthesis (dx 7) noVisible)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3179,7 +3206,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'label:parentesis' unknown or not possible here. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(metronome 88 parentesis (dx 7))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3207,7 +3234,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(opt StaffLines.StopAtFinalBarline true)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3231,7 +3258,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid value for option 'StaffLines.StopAtFinalBarline'. Option ignored." << endl;
         SpLdpTree tree = parser.parse_text("(opt StaffLines.StopAtFinalBarline perhaps)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3249,7 +3276,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid option 'StaffLines.Funny'. Option ignored." << endl;
         SpLdpTree tree = parser.parse_text("(opt StaffLines.Funny funny thing)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3267,7 +3294,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(opt Render.SpacingValue 40)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3290,7 +3317,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid value for option 'Render.SpacingValue'. Option ignored." << endl;
         SpLdpTree tree = parser.parse_text("(opt Render.SpacingValue perhaps)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3308,7 +3335,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(opt Render.SpacingFactor 0.536)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3331,7 +3358,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid value for option 'Render.SpacingFactor'. Option ignored." << endl;
         SpLdpTree tree = parser.parse_text("(opt Render.SpacingFactor perhaps)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3349,7 +3376,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing value for option 'Render.SpacingFactor'. Option ignored." << endl;
         SpLdpTree tree = parser.parse_text("(opt Render.SpacingFactor)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3367,7 +3394,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(score (vers 1.6)(opt StaffLines.StopAtFinalBarline true)(instrument (musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3379,6 +3406,40 @@ SUITE(AnalyserTest)
         CHECK( pOpt->get_name() == "StaffLines.StopAtFinalBarline" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_boolean );
         CHECK( pOpt->get_bool_value() == true );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_DefaultOptReplaced)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        SpLdpTree tree = parser.parse_text("(score (vers 1.6)"
+            "(opt Render.SpacingMethod 1)(opt Render.SpacingValue 30)"
+            "(instrument (musicData)))"
+        );
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore != NULL );
+        CHECK( pScore->has_options() == true );
+        ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingMethod");
+        CHECK( pOpt != NULL );
+        CHECK( pOpt->get_name() == "Render.SpacingMethod" );
+        CHECK( pOpt->get_type() == ImoOptionInfo::k_number_long );
+        CHECK( pOpt->get_long_value() == 1L );
+        pOpt = pScore->get_option("Render.SpacingValue");
+        CHECK( pOpt != NULL );
+        CHECK( pOpt->get_name() == "Render.SpacingValue" );
+        CHECK( pOpt->get_type() == ImoOptionInfo::k_number_long );
+        CHECK( pOpt->get_long_value() == 30L );
 
         delete tree->get_root();
         delete pIModel;
@@ -3396,7 +3457,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'label:instrument' unknown or not possible here. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 q instrument)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3419,7 +3480,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid option 'StaffLines.Funny'. Option ignored." << endl;
         SpLdpTree tree = parser.parse_text("(opt StaffLines.Funny true)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( errormsg.str() == expected.str() );
 
         delete tree->get_root();
@@ -3437,7 +3498,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(spacer 70.5)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3460,7 +3521,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing width for spacer. Spacer ignored." << endl;
         SpLdpTree tree = parser.parse_text("(spacer)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3478,7 +3539,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(spacer 70.5 p3)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3500,7 +3561,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid staff 'pan'. Replaced by 'p1'." << endl;
         SpLdpTree tree = parser.parse_text("(spacer 70.5 pan)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3522,7 +3583,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'label:more' unknown or not possible here. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(spacer 70.5 more)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3544,7 +3605,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(spacer 70 (text \"andante\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3567,7 +3628,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'r' unknown or not possible here. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(spacer 70 (r q))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3590,7 +3651,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'r' unknown or not possible here. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(spacer 70 (r q)(text \"andante\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3615,7 +3676,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0)(content ))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3638,7 +3699,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0)(content (text \"hello world\")))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -3656,7 +3717,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0)(content (text \"hello world\")))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pDoc->get_content_item(0) );
         CHECK( pText != NULL );
@@ -3672,7 +3733,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0)(content (score (vers 1.6)(instrument (musicData))) (text \"hello world\")))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         CHECK( pDoc->get_num_content_items() == 2 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
@@ -3753,13 +3814,13 @@ SUITE(AnalyserTest)
         ImoNote* startNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         startNote->set_octave(4);
         startNote->set_step(2);
-        startNote->set_accidentals(k_sharp);
+        startNote->set_notated_accidentals(k_sharp);
         startNote->set_note_type(k_eighth);
 
         ImoNote* endNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         endNote->set_octave(3);
         endNote->set_step(2);
-        endNote->set_accidentals(k_sharp);
+        endNote->set_notated_accidentals(k_sharp);
         endNote->set_note_type(k_eighth);
 
         ImoTieDto* pStartInfo = static_cast<ImoTieDto*>(ImFactory::inject(k_imo_tie_dto, &doc));
@@ -3822,7 +3883,7 @@ SUITE(AnalyserTest)
         pOtherInfo->set_tie_number(14);
 
         Analyser a(errormsg, m_libraryScope, &doc);
-        TiesBuilder* pBuilder = new TiesBuilder(errormsg, &a);
+        TiesBuilder* pBuilder = LOMSE_NEW TiesBuilder(errormsg, &a);
         pBuilder->add_item_info(pStartInfo);
         pBuilder->add_item_info(pOtherInfo);
 
@@ -3843,7 +3904,7 @@ SUITE(AnalyserTest)
                  << "Line 0. No 'start/continue' elements for tie number 12. Tie ignored." << endl;
         SpLdpTree tree = parser.parse_text("(score (vers 1.6)(instrument (musicData (n c4 q (tie 12 start))))(instrument (musicData (n d4 e (tie 12 stop)))))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -3889,7 +3950,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(beam 12 +)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_beam_dto() == true );
         ImoBeamDto* pInfo = dynamic_cast<ImoBeamDto*>( pIModel->get_root() );
         CHECK( pInfo != NULL );
@@ -3913,7 +3974,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(beam 12 ++f)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoBeamDto* pInfo = dynamic_cast<ImoBeamDto*>( pIModel->get_root() );
         CHECK( pInfo != NULL );
         CHECK( pInfo->get_beam_number() == 12 );
@@ -3940,7 +4001,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing or invalid beam number. Beam ignored." << endl;
         SpLdpTree tree = parser.parse_text("(beam +)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root() == NULL );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -3959,7 +4020,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing or invalid beam type. Beam ignored." << endl;
         SpLdpTree tree = parser.parse_text("(beam 34 empieza)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root() == NULL );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -3977,8 +4038,8 @@ SUITE(AnalyserTest)
         stringstream expected;
         expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e (beam 14 +))");
-        Analyser* pA = new Analyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree);
+        Analyser* pA = LOMSE_NEW Analyser(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
         delete pA;
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
@@ -4002,8 +4063,8 @@ SUITE(AnalyserTest)
         expected << "Line 0. No 'start/continue' elements for beam number 13. Beam ignored." << endl
                  << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q. (beam 14 +)) (n d4 s (beam 13 -)))");
-        Analyser* pA = new Analyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree);
+        Analyser* pA = LOMSE_NEW Analyser(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
         delete pA;
         ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
         CHECK( pMusic != NULL );
@@ -4036,8 +4097,8 @@ SUITE(AnalyserTest)
         stringstream expected;
         //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q. (beam 14 +)) (n d4 s (beam 14 -b)))");
-        Analyser* pA = new Analyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree);
+        Analyser* pA = LOMSE_NEW Analyser(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
         delete pA;
         ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
         CHECK( pMusic != NULL );
@@ -4075,7 +4136,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
         SpLdpTree tree = parser.parse_text("(score (vers 1.6) (instrument (musicData (n c4 q. (beam 14 +)))) (instrument (musicData (n c4 e))))" );
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -4107,7 +4168,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid parameter 'g+7'. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e g+7)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -4131,7 +4192,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Requesting beaming a note longer than eighth. Beam ignored." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 w g+)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -4155,7 +4216,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Requesting to start a beam (g+) but there is already an open beam. Beam ignored." << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 s g+) (n e4 e g+))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
         CHECK( pMusic != NULL );
@@ -4175,8 +4236,8 @@ SUITE(AnalyserTest)
         stringstream expected;
         //expected << "Line 0. No 'start' element for beam number 12. Tie ignored." << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 s g+)(n e4 e)(n c4 s g-))");
-        Analyser* pA = new Analyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree);
+        Analyser* pA = LOMSE_NEW Analyser(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
         delete pA;
 
         //cout << "[" << errormsg.str() << "]" << endl;
@@ -4313,7 +4374,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing or invalid tuplet type. Tuplet ignored." << endl;
         SpLdpTree tree = parser.parse_text("(t 5 start 3)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -4333,7 +4394,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(t + 3)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -4359,7 +4420,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Tuplet: Missing or invalid normal notes number. Tuplet ignored." << endl;
         SpLdpTree tree = parser.parse_text("(t 4 + 7)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -4379,7 +4440,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(t 2 + 7 4)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -4405,7 +4466,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(t 2 + 3 2 (displayBracket no))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -4431,7 +4492,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(t 1 + 3 2 (displayNumber none))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -4457,7 +4518,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid yes/no value 'false'. Replaced by default." << endl;
         SpLdpTree tree = parser.parse_text("(t 1 + 3 2 (displayBracket false))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -4484,7 +4545,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing or invalid tuplet type. Tuplet ignored." << endl;
         SpLdpTree tree = parser.parse_text("(t start 3)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -4504,7 +4565,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(t + 3)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -4530,7 +4591,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Tuplet: Missing or invalid normal notes number. Tuplet ignored." << endl;
         SpLdpTree tree = parser.parse_text("(t + 7)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -4550,7 +4611,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(t + 7 4)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -4575,7 +4636,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(t + 3 noBracket)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -4600,7 +4661,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'label:blue' unknown or not possible here. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(t + 3 noBracket blue)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -4625,7 +4686,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'color' unknown or not possible here. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(t + 3 (color blue) noBracket)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -4649,8 +4710,8 @@ SUITE(AnalyserTest)
         stringstream expected;
         expected << "Line 0. No 'end' element for tuplet number 0. Tuplet ignored." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e (t + 3))");
-        Analyser* pA = new Analyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree);
+        Analyser* pA = LOMSE_NEW Analyser(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
         delete pA;
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
@@ -4672,8 +4733,8 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(musicData "
             "(n c4 e (t + 3)) (n e4 e) (n d4 e (t -)) )");
-        Analyser* pA = new Analyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree);
+        Analyser* pA = LOMSE_NEW Analyser(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
         delete pA;
 
 //        cout << "[" << errormsg.str() << "]" << endl;
@@ -4735,7 +4796,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(score (vers 1.6) (instrument "
             "(musicData (n c4 e (t + 3)))) (instrument (musicData (n c4 e))))" );
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -4767,7 +4828,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid parameter 't-7'. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e t-7)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -4790,7 +4851,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e t3)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -4807,8 +4868,8 @@ SUITE(AnalyserTest)
         stringstream expected;
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e t7/6)");
-        Analyser* pA = new Analyser(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = pA->analyse_tree(tree);
+        Analyser* pA = LOMSE_NEW Analyser(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -4827,7 +4888,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Requesting to start a tuplet but there is already an open tuplet. Tuplet ignored." << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 s t3) (n d4 e) (n e4 e t3))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -4854,7 +4915,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 e t3) (n e4 e) (n d4 e t-))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -4908,7 +4969,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. ?" << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e (voice 7))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
         CHECK( pNote->get_voice() == 7 );
@@ -4929,7 +4990,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid integer number 'no'. Replaced by '1'." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e (voice no))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
         CHECK( pNote->get_voice() == 1 );
@@ -4952,7 +5013,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. ?" << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e (staffNum 2))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
         CHECK( pNote->get_staff() == 1 );
@@ -4973,7 +5034,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid integer number 'alpha'. Replaced by '1'." << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e (staffNum alpha))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
         CHECK( pNote != NULL );
         CHECK( pNote->get_staff() == 0 );
@@ -4997,7 +5058,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(musicData "
             "(r e (t + 3)(voice 3)(staffNum 2)) (r e (text \"Hello\")) (r e (t -)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -5101,7 +5162,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing or invalid color value. Must be #rrggbbaa. Color ignored." << endl;
         SpLdpTree tree = parser.parse_text("(color 321700)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root() == NULL );
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5120,7 +5181,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(color #f0457f)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoColorDto* pColor = dynamic_cast<ImoColorDto*>( pIModel->get_root() );
         CHECK( pColor != NULL );
         CHECK( pColor->red() == 240 );
@@ -5144,7 +5205,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(n c4 e (color #f0457f))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5168,12 +5229,12 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(barline double (color #ff0000))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
         CHECK( pBarline != NULL );
         CHECK( pBarline->get_type() == ImoBarline::k_double );
         CHECK( pBarline->is_visible() );
-        CHECK( pBarline->get_color() == Color(255,0,0) );
+        CHECK( is_equal(pBarline->get_color(), Color(255,0,0)) );
 
         delete tree->get_root();
         delete pIModel;
@@ -5194,7 +5255,7 @@ SUITE(AnalyserTest)
                 "(instrument (name \"Tenor\")(abbrev \"T\")(musicData))"
                 "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5231,7 +5292,7 @@ SUITE(AnalyserTest)
                 "(instrument (name \"Tenor\")(abbrev \"T\")(musicData))"
                 "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5267,7 +5328,7 @@ SUITE(AnalyserTest)
                 "(instrument (name \"Tenor\")(abbrev \"T\")(musicData))"
                 "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5302,7 +5363,7 @@ SUITE(AnalyserTest)
                 "(instrument (name \"Tenor\")(abbrev \"T\")(musicData))"
                 "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5337,7 +5398,7 @@ SUITE(AnalyserTest)
                 "(instrument (name \"Tenor\")(abbrev \"T\")(musicData))"
                 "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5361,7 +5422,7 @@ SUITE(AnalyserTest)
                 "(instrument (name \"Tenor\")(abbrev \"T\")(musicData))"
                 "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5393,7 +5454,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing instruments in group!. Group ignored." << endl;
         SpLdpTree tree = parser.parse_text("(group (symbol brace)(joinBarlines true))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5416,7 +5477,7 @@ SUITE(AnalyserTest)
                 "(n c4 q)"
                 "(instrument (name \"Bass\")(abbrev \"B\")(musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5449,7 +5510,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(musicData (chord (n c4 q)(n e4 q)(n g4 q)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5494,7 +5555,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(musicData (n c4 q)(na e4 q)(na g4 q))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5541,7 +5602,7 @@ SUITE(AnalyserTest)
             "(chord (n a3 e (beam 1 +)) (n d3 e))"
             "(chord (n a3 e (beam 1 -))(n d3 e)) )");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5599,7 +5660,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(pageLayout (pageSize 14000 10000)(pageMargins 1000 1200 3000 2500 4000) landscape)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5630,7 +5691,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(score (vers 1.6)(pageLayout (pageSize 14000 10000)(pageMargins 1000 1200 3000 2500 4000) landscape)(instrument (musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5663,7 +5724,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0)(pageLayout (pageSize 14000 10000)(pageMargins 1000 1200 3000 2500 4000) landscape)(content))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5698,7 +5759,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(font \"Trebuchet\" 12pt bold)" );
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5724,7 +5785,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Unknown font style 'grey'. Replaced by 'normal'." << endl;
         SpLdpTree tree = parser.parse_text("(font \"Trebuchet\" 8pt grey)" );
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5750,7 +5811,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid size 'six'. Replaced by '12'." << endl;
         SpLdpTree tree = parser.parse_text("(font \"Trebuchet\" six bold)" );
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5776,7 +5837,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(font \"Trebuchet\" 17 normal)" );
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5805,7 +5866,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(defineStyle \"Composer\" "
             "(font \"Times New Roman\" 14pt bold-italic) (color #00fe0f7f))" );
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5814,7 +5875,7 @@ SUITE(AnalyserTest)
         ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Composer" );
-        CHECK( pStyle->get_color_property(ImoStyle::k_color) == Color(0, 254,15, 127) );
+        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
         CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
@@ -5833,7 +5894,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(score (vers 1.6)(defineStyle \"Header1\" (font \"Times New Roman\" 14pt bold-italic) (color #00fe0f7f))(instrument (musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5844,7 +5905,7 @@ SUITE(AnalyserTest)
         ImoStyle* pStyle = pScore->find_style("Header1");
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Header1" );
-        CHECK( pStyle->get_color_property(ImoStyle::k_color) == Color(0, 254,15, 127) );
+        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
         CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
@@ -5864,7 +5925,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(defineStyle \"Composer\" "
             "(color #00fe0f7f)(margin-bottom 2) )" );
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -5873,7 +5934,7 @@ SUITE(AnalyserTest)
         ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Composer" );
-        CHECK( pStyle->get_color_property(ImoStyle::k_color) == Color(0, 254,15, 127) );
+        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
         CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_bottom) == 2.0f );
 
         delete tree->get_root();
@@ -5891,7 +5952,7 @@ SUITE(AnalyserTest)
             "(font-name \"Arial\")(font-size 14pt)"
             "(font-style italic)(font-weight bold) )" );
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -5919,7 +5980,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(defineStyle \"Composer\" "
             "(margin-top 3)(margin-bottom 2)(margin-left 5)(margin-right 7) )" );
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -5947,7 +6008,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(defineStyle \"Composer\" "
             "(margin 0.5) )" );
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -5960,6 +6021,31 @@ SUITE(AnalyserTest)
         CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_bottom) == 0.5f );
         CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_left) == 0.5f );
         CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_right) == 0.5f );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, DefineStyle_LineHeight)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text("(defineStyle \"Composer\" "
+            "(line-height 1.2) )" );
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
+        CHECK( pStyle != NULL );
+        CHECK( pStyle->get_name() == "Composer" );
+        CHECK( pStyle->get_float_property(ImoStyle::k_line_height) == 1.2f );
 
         delete tree->get_root();
         delete pIModel;
@@ -5978,7 +6064,7 @@ SUITE(AnalyserTest)
                  << "Line 0. title: missing mandatory element 'string'." << endl;
         SpLdpTree tree = parser.parse_text("(title)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -5997,7 +6083,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. title: missing mandatory element 'string'." << endl;
         SpLdpTree tree = parser.parse_text("(title center)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6016,7 +6102,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(title center \"Moonlight sonata\")");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6040,7 +6126,7 @@ SUITE(AnalyserTest)
         //expected << "" << endl;
         SpLdpTree tree = parser.parse_text("(score (vers 1.6)(title center \"Moonlight sonata\")(instrument (musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6069,7 +6155,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(title center \"Moonlight sonata\" (style \"Header1\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6098,7 +6184,7 @@ SUITE(AnalyserTest)
             "(title center \"Moonlight sonata\" (style \"Header1\"))"
             "(instrument (musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6116,7 +6202,7 @@ SUITE(AnalyserTest)
         ImoStyle* pStyle = pTitle->get_style();
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Header1" );
-        CHECK( pStyle->get_color_property(ImoStyle::k_color) == Color(0, 254,15, 127) );
+        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
         CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
@@ -6135,7 +6221,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(title right \"F. Chopin\" (style \"Composer\")(dy 30))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6165,7 +6251,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0))(width 2.0)(color #ff0000)(lineStyle solid)(lineCapStart arrowhead)(lineCapEnd none))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6182,7 +6268,7 @@ SUITE(AnalyserTest)
         CHECK( pInfo->get_end_edge() == k_edge_normal );
         CHECK( pInfo->get_start_style() == k_cap_arrowhead );
         CHECK( pInfo->get_end_style() == k_cap_none );
-        CHECK( pInfo->get_color() == Color(255,0,0,255) );
+        CHECK( is_equal(pInfo->get_color(), Color(255,0,0,255)) );
         CHECK( pInfo->get_width() == 2.0f );
 
         delete tree->get_root();
@@ -6198,7 +6284,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6215,7 +6301,7 @@ SUITE(AnalyserTest)
         CHECK( pInfo->get_end_edge() == k_edge_normal );
         CHECK( pInfo->get_start_style() == k_cap_none );
         CHECK( pInfo->get_end_style() == k_cap_none );
-        CHECK( pInfo->get_color() == Color(0,0,0,255) );
+        CHECK( is_equal(pInfo->get_color(), Color(0,0,0,255)) );
         CHECK( pInfo->get_width() == 1.0f );
 
         delete tree->get_root();
@@ -6231,7 +6317,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0))(width 2.0)(lineStyle solid)(lineCapStart arrowhead)(lineCapEnd diamond))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6248,7 +6334,7 @@ SUITE(AnalyserTest)
         CHECK( pInfo->get_end_edge() == k_edge_normal );
         CHECK( pInfo->get_start_style() == k_cap_arrowhead );
         CHECK( pInfo->get_end_style() == k_cap_diamond );
-        CHECK( pInfo->get_color() == Color(0,0,0,255) );
+        CHECK( is_equal(pInfo->get_color(), Color(0,0,0,255)) );
         CHECK( pInfo->get_width() == 2.0f );
 
         delete tree->get_root();
@@ -6264,7 +6350,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'lineCap': Invalid value 'diamont'. Replaced by 'none'." << endl;
         SpLdpTree tree = parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0))(width 2.0)(lineStyle dot)(lineCapStart arrowhead)(lineCapEnd diamont))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6281,7 +6367,7 @@ SUITE(AnalyserTest)
         CHECK( pInfo->get_end_edge() == k_edge_normal );
         CHECK( pInfo->get_start_style() == k_cap_arrowhead );
         CHECK( pInfo->get_end_style() == k_cap_none );
-        CHECK( pInfo->get_color() == Color(0,0,0,255) );
+        CHECK( is_equal(pInfo->get_color(), Color(0,0,0,255)) );
         CHECK( pInfo->get_width() == 2.0f );
 
         delete tree->get_root();
@@ -6297,7 +6383,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Element 'lineStyle': Invalid value 'simple'. Replaced by 'solid'." << endl;
         SpLdpTree tree = parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0))(width 2.0)(lineStyle simple))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6314,7 +6400,7 @@ SUITE(AnalyserTest)
         CHECK( pInfo->get_end_edge() == k_edge_normal );
         CHECK( pInfo->get_start_style() == k_cap_none );
         CHECK( pInfo->get_end_style() == k_cap_none );
-        CHECK( pInfo->get_color() == Color(0,0,0,255) );
+        CHECK( is_equal(pInfo->get_color(), Color(0,0,0,255)) );
         CHECK( pInfo->get_width() == 2.0f );
 
         delete tree->get_root();
@@ -6335,7 +6421,7 @@ SUITE(AnalyserTest)
             "(size (width 300)(height 150))"
             "(text \"This is a test of a textbox\" (style \"Textbox\")))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6351,8 +6437,8 @@ SUITE(AnalyserTest)
         CHECK( pInfo->get_height() == 150.0f );
         CHECK( pInfo->get_width() == 300.0f );
         CHECK( pInfo->get_position() == TPoint(50.0f, 5.0f) );
-        CHECK( pInfo->get_bg_color() == Color(255,255,255,255) );
-        CHECK( pInfo->get_border_color() == Color(0,0,0,255) );
+        CHECK( is_equal(pInfo->get_bg_color(), Color(255,255,255,255)) );
+        CHECK( is_equal(pInfo->get_border_color(), Color(0,0,0,255)) );
         CHECK( pInfo->get_border_width() == 1.0f );
         CHECK( pInfo->get_border_style() == k_line_solid );
 
@@ -6376,7 +6462,7 @@ SUITE(AnalyserTest)
             "(anchorLine (dx 40)(dy 70)(lineStyle dot)(color #ff0a00)(width 3.5)"
                         "(lineCapEnd arrowhead)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6392,8 +6478,8 @@ SUITE(AnalyserTest)
         CHECK( pInfo->get_height() == 150.0f );
         CHECK( pInfo->get_width() == 300.0f );
         CHECK( pInfo->get_position() == TPoint(50.0f, 5.0f) );
-        CHECK( pInfo->get_bg_color() == Color(255,254,11,255) );
-        CHECK( pInfo->get_border_color() == Color(0,0,253,255) );
+        CHECK( is_equal(pInfo->get_bg_color(), Color(255,254,11,255)) );
+        CHECK( is_equal(pInfo->get_border_color(), Color(0,0,253,255)) );
         CHECK( pInfo->get_border_width() == 5.0f );
         CHECK( pInfo->get_border_style() == k_line_dot );
 
@@ -6408,7 +6494,7 @@ SUITE(AnalyserTest)
         CHECK( pLine->get_end_edge() == k_edge_normal );
         CHECK( pLine->get_start_style() == k_cap_none );
         CHECK( pLine->get_end_style() == k_cap_arrowhead );
-        CHECK( pLine->get_color() == Color(255,10,0,255) );
+        CHECK( is_equal(pLine->get_color(), Color(255,10,0,255)) );
         CHECK( pLine->get_width() == 3.5f );
 
         delete tree->get_root();
@@ -6426,7 +6512,7 @@ SUITE(AnalyserTest)
             "(size (width 300)(height 150))"
             "(text \"This is a test of a textbox\" (style \"Textbox\"))))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6445,8 +6531,8 @@ SUITE(AnalyserTest)
         CHECK( pInfo->get_height() == 150.0f );
         CHECK( pInfo->get_width() == 300.0f );
         CHECK( pInfo->get_position() == TPoint(50.0f, 5.0f) );
-        CHECK( pInfo->get_bg_color() == Color(255,255,255,255) );
-        CHECK( pInfo->get_border_color() == Color(0,0,0,255) );
+        CHECK( is_equal(pInfo->get_bg_color(), Color(255,255,255,255)) );
+        CHECK( is_equal(pInfo->get_border_color(), Color(0,0,0,255)) );
         CHECK( pInfo->get_border_width() == 1.0f );
         CHECK( pInfo->get_border_style() == k_line_solid );
 
@@ -6467,7 +6553,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(cursor 1 2 64.0 34)");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6493,7 +6579,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. 'cursor' in score is obsolete. Now must be in 'lenmusdoc' element. Ignored." << endl;
         SpLdpTree tree = parser.parse_text("(score (vers 1.6)(cursor 1 2 64.0 34)(instrument (musicData)))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6519,7 +6605,7 @@ SUITE(AnalyserTest)
     //    SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0)"
     //        "(settings (cursor 1 2 64.0 34)) (content))");
     //    Analyser a(errormsg, m_libraryScope, &doc);
-    //    InternalModel* pIModel = a.analyse_tree(tree);
+    //    InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
     //    //cout << "[" << errormsg.str() << "]" << endl;
     //    //cout << "[" << expected.str() << "]" << endl;
@@ -6547,7 +6633,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(figuredBass \"7 5 2\")");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6573,7 +6659,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing or invalid staff number. Staff info ignored." << endl;
         SpLdpTree tree = parser.parse_text("(staff (staffType ossia))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6599,7 +6685,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid staff type 'bonito'. 'regular' staff assumed." << endl;
         SpLdpTree tree = parser.parse_text("(staff 2 (staffType bonito))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6628,7 +6714,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Invalid staff. Num lines must be greater than zero. Five assumed." << endl;
         SpLdpTree tree = parser.parse_text("(staff 2 (staffType ossia)(staffLines 0))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6658,7 +6744,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(staff 2 (staffType ossia)(staffLines 5)"
             "(staffSpacing five) )");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6688,7 +6774,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(staff 2 (staffType ossia)(staffLines 5)"
             "(staffSpacing 200.0) )");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6718,7 +6804,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(staff 2 (staffType ossia)(staffLines 4)"
             "(staffSpacing 200.0)(staffDistance 800)(lineThickness 20.5) )");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6749,7 +6835,7 @@ SUITE(AnalyserTest)
             "(staffLines 4)(staffSpacing 200.0)(staffDistance 800)(lineThickness 20.5))"
             "(musicData ))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6782,7 +6868,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(txt \"This is a text\")");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -6803,7 +6889,7 @@ SUITE(AnalyserTest)
     //    expected << "Line 0. text: missing mandatory element 'string'." << endl;
     //    SpLdpTree tree = parser.parse_text("(text)");
     //    Analyser a(errormsg, m_libraryScope, &doc);
-    //    InternalModel* pIModel = a.analyse_tree(tree);
+    //    InternalModel* pIModel = a.analyse_tree(tree, "string:");
     //    //cout << "[" << errormsg.str() << "]" << endl;
     //    //cout << "[" << expected.str() << "]" << endl;
     //    CHECK( errormsg.str() == expected.str() );
@@ -6823,7 +6909,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(txt (style \"Header1\") \"This is a text\")");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6849,7 +6935,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content "
             "(para (txt \"Hello world!\")) ))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != NULL );
@@ -6870,7 +6956,7 @@ SUITE(AnalyserTest)
     //    //expected << "Line 0. " << endl;
     //    SpLdpTree tree = parser.parse_text("(text \"F. Chopin\" (style \"Composer\")(dy 30)(dx 20))");
     //    Analyser a(errormsg, m_libraryScope, &doc);
-    //    InternalModel* pIModel = a.analyse_tree(tree);
+    //    InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
     //    //cout << "[" << errormsg.str() << "]" << endl;
     //    //cout << "[" << expected.str() << "]" << endl;
@@ -6900,7 +6986,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(para (txt \"This is a paragraph\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6920,7 +7006,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(para (txt \"This is a paragraph\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6942,9 +7028,9 @@ SUITE(AnalyserTest)
         stringstream expected;
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text(
-            "(para (link \"This is the url\" (txt \"This is the link\")))");
+            "(para (link (url \"This is the url\")(txt \"This is the link\")))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6972,7 +7058,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(para (txt \"This is a paragraph\")"
             "(txt \" with two items.\") )");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -6997,7 +7083,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content "
             "(para (txt \"Hello world!\")) ))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != NULL );
@@ -7024,7 +7110,7 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != NULL );
@@ -7053,7 +7139,7 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != NULL );
@@ -7078,7 +7164,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(heading 1 (txt \"This is a header\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -7098,7 +7184,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(heading 1 (txt \"This is a header\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -7122,7 +7208,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(heading 1 (txt \"This is a header\")"
             "(txt \" with two items.\") )");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -7147,7 +7233,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content "
             "(heading 1 (txt \"Hello world!\")) ))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
         CHECK( pH != NULL );
@@ -7174,7 +7260,7 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
         CHECK( pH != NULL );
@@ -7203,7 +7289,7 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
         CHECK( pH != NULL );
@@ -7229,7 +7315,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(styles (defineStyle \"Header1\" "
             "(font \"Times New Roman\" 14pt bold-italic) (color #00fe0f7f)) )");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -7240,7 +7326,7 @@ SUITE(AnalyserTest)
 
         ImoStyle* pStyle = pStyles->find_style("Header1");
         CHECK( pStyle->get_name() == "Header1" );
-        CHECK( pStyle->get_color_property(ImoStyle::k_color) == Color(0, 254,15, 127) );
+        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
         CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
@@ -7262,7 +7348,7 @@ SUITE(AnalyserTest)
                 "(font \"Times New Roman\" 14pt bold-italic) (color #00fe0f7f)) )"
             "(content (text \"hello world\")) )");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -7276,7 +7362,7 @@ SUITE(AnalyserTest)
         ImoStyle* pStyle = pDoc->find_style("Header1");
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Header1" );
-        CHECK( pStyle->get_color_property(ImoStyle::k_color) == Color(0, 254,15, 127) );
+        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
         CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
         CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
@@ -7296,7 +7382,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) "
             "(content (text \"hello world\")) )");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -7323,7 +7409,7 @@ SUITE(AnalyserTest)
         LdpParser parser(cout, m_libraryScope.ldp_factory());
         SpLdpTree tree = parser.parse_text("(param green \"this is green\")");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         CHECK( pIModel->get_root()->is_param_info() == true );
         ImoParamInfo* pParam = dynamic_cast<ImoParamInfo*>( pIModel->get_root() );
         CHECK( pParam != NULL );
@@ -7343,7 +7429,7 @@ SUITE(AnalyserTest)
         expected << "Line 0. Missing name for element 'param' (should be a label). Element ignored." << endl;
         SpLdpTree tree = parser.parse_text("(param \"green\" \"this is green\")");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -7351,6 +7437,7 @@ SUITE(AnalyserTest)
 
         CHECK( pIModel->get_root() == NULL );
 
+        delete tree->get_root();
         delete pIModel;
     }
 
@@ -7365,7 +7452,7 @@ SUITE(AnalyserTest)
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text("(dynamic (classid test))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -7388,7 +7475,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0)(content "
             "(dynamic (classid test)) ))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pDoc->get_content_item(0) );
         CHECK( pDyn != NULL );
@@ -7407,7 +7494,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0)(content "
             "(dynamic (classid test)) ))");
         Analyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
 
         CHECK( m_fRequestReceived == true );
@@ -7428,7 +7515,7 @@ SUITE(AnalyserTest)
         SpLdpTree tree = parser.parse_text("(dynamic (classid test)"
             "(param play \"all notes\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -7456,9 +7543,9 @@ SUITE(AnalyserTest)
         stringstream expected;
         //expected << "Line 0. " << endl;
         SpLdpTree tree = parser.parse_text(
-            "(link \"#TheoryHarmony_ch3.lms\" (txt \"Harmony exercise\"))");
+            "(link (url \"#TheoryHarmony_ch3.lms\")(txt \"Harmony exercise\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -7482,14 +7569,14 @@ SUITE(AnalyserTest)
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
-        expected << "Line 0. link: missing mandatory url (string)." << endl;
+        expected << "Line 0. link: missing mandatory element 'url'." << endl;
         SpLdpTree tree = parser.parse_text(
             "(link (txt \"Harmony exercise\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
         CHECK( pIModel->get_root()->is_link() == true );
@@ -7503,6 +7590,32 @@ SUITE(AnalyserTest)
         delete tree->get_root();
         delete pIModel;
     }
+
+    // image ----------------------------------------------------------------------------
+
+//    TEST_FIXTURE(AnalyserTestFixture, Image_Ok)
+//    {
+//        stringstream errormsg;
+//        Document doc(m_libraryScope);
+//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+//        stringstream expected;
+//        //expected << "Line 0. " << endl;
+//        SpLdpTree tree = parser.parse_text(
+//            "(image (file \"chopin.png\"))");
+//        Analyser a(errormsg, m_libraryScope, &doc);
+//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//
+////        cout << "[" << errormsg.str() << "]" << endl;
+////        cout << "[" << expected.str() << "]" << endl;
+//        CHECK( errormsg.str() == expected.str() );
+//
+//        ImoImage* pImg = dynamic_cast<ImoImage*>( pIModel->get_root() );
+//        CHECK( pImg != NULL );
+//        //CHECK( pImg->get_locator() == "chopin.png" );
+//
+//        delete tree->get_root();
+//        delete pIModel;
+//    }
 
 }
 

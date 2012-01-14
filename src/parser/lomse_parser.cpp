@@ -107,7 +107,7 @@ LdpTree* LdpParser::do_syntax_analysis(LdpReader& reader)
 
     clear_all();
 
-    m_pTokenizer = new LdpTokenizer(reader, m_reporter);
+    m_pTokenizer = LOMSE_NEW LdpTokenizer(reader, m_reporter);
     m_id = 0L;
     m_state = A0_WaitingForStartOfElement;
     PushNode(A0_WaitingForStartOfElement);      //start the tree with the root node
@@ -151,7 +151,7 @@ LdpTree* LdpParser::do_syntax_analysis(LdpReader& reader)
         throw std::runtime_error(
             "[LdpParser::do_syntax_analysis] LDP file format error.");
 
-    return new LdpTree(m_curNode);
+    return LOMSE_NEW LdpTree(m_curNode);
 }
 
 //---------------------------------------------------------------------------------------

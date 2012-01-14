@@ -107,7 +107,7 @@ void ColStaffObjs::AddEntry(int measure, float time, int instr, int voice, int s
                             ImoObj* pImo)
 {
     ColStaffObjsEntry* pEntry =
-        new ColStaffObjsEntry(measure, time, instr, voice, staff, pImo, NULL);
+        LOMSE_NEW ColStaffObjsEntry(measure, time, instr, voice, staff, pImo, NULL);
     m_table.push_back(pEntry);
 }
 
@@ -145,7 +145,7 @@ ColStaffObjs* ColStaffObjsBuilder::build(ImoScore* pScore, bool fSort)
 {
     //param fSort is to prevent sorting the table for unit tests
 
-    m_pColStaffObjs = new ColStaffObjs();
+    m_pColStaffObjs = LOMSE_NEW ColStaffObjs();
     m_pScore = NULL;
     m_pImScore = pScore;
     create_table();

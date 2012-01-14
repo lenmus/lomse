@@ -21,6 +21,8 @@
 #ifndef __LOMSE__LDP_EXPORTER_H__        //to avoid nested includes
 #define __LOMSE__LDP_EXPORTER_H__
 
+#include "lomse_basic.h"
+
 #include <sstream>
 using namespace std;
 
@@ -30,7 +32,7 @@ namespace lomse
 //forward declarations
 class ImoObj;
 class LdpGenerator;
-struct Color;
+//struct Color;
 
 
 // LdpExporter: Generates LDP source code for a basic model object
@@ -58,7 +60,7 @@ public:
 
     //static methods for ldp names to types conversion
     static std::string clef_type_to_ldp(int clefType);
-    static std::string color_to_ldp(Color& color);
+    static std::string color_to_ldp(Color color);
     static std::string float_to_string(float num);
 
 protected:

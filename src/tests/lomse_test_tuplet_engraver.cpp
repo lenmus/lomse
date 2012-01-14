@@ -101,7 +101,7 @@ public:
         TupletsBuilder builder(cout, &a);
         for (int i=0; i < numNotes; ++i)
         {
-            ImoTupletDto* pDto = new ImoTupletDto();
+            ImoTupletDto* pDto = LOMSE_NEW ImoTupletDto();
             if (i == 0)
             {
                 pDto->set_tuplet_type(ImoTupletDto::k_start);
@@ -130,12 +130,12 @@ public:
         UPoint pos(0.0f, 0.0f);
 
         m_shapes.reserve(numNotes);
-        m_pMeter = new ScoreMeter(1, 1, 180.0f);
-        m_pStorage = new ShapesStorage();
+        m_pMeter = LOMSE_NEW ScoreMeter(1, 1, 180.0f);
+        m_pStorage = LOMSE_NEW ShapesStorage();
 
         //engrave notes/rests
-        m_pNoteEngrv = new NoteEngraver(m_libraryScope, m_pMeter, m_pStorage);
-        m_pRestEngrv = new RestEngraver(m_libraryScope, m_pMeter, m_pStorage);
+        m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage);
+        m_pRestEngrv = LOMSE_NEW RestEngraver(m_libraryScope, m_pMeter, m_pStorage);
         for (int i=0; i < numNotes; ++i)
         {
             GmoShape* pShape;
@@ -162,7 +162,7 @@ public:
             if (i == 0)
             {
                 //first note
-                m_pTupletEngrv = new MyTupletEngraver(m_libraryScope, m_pMeter);
+                m_pTupletEngrv = LOMSE_NEW MyTupletEngraver(m_libraryScope, m_pMeter);
                 m_pTupletEngrv->set_start_staffobj(pTuplet, notes[i], m_shapes[i],
                                                  iInstr, iStaff, iSystem, iCol, pos);
                 m_pStorage->save_engraver(m_pTupletEngrv, pTuplet);

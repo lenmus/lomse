@@ -47,8 +47,6 @@
 #include "lomse_interactor.h"
 #include "lomse_presenter.h"
 
-#include "lomse_test_runner_class.h"
-
 using namespace lomse;
 
 
@@ -73,11 +71,10 @@ public:
     void update_view_content();
 
     //callback wrappers
-    static void wrapper_start_timer(void* pThis);
-    static double wrapper_elapsed_time(void* pThis);
     static void wrapper_force_redraw(void* pThis);
     static void wrapper_update_window(void* pThis);
-    static string get_font_filename(const string& fontname, bool bold, bool italic);
+    static void get_font_filename(RequestFont* pRequest);
+    static void on_lomse_request(void* pThis, Request* pRequest);
 
 protected:
     void OnQuit(wxCommandEvent& event);
@@ -89,7 +86,6 @@ protected:
     void OnZoomOut(wxCommandEvent& WXUNUSED(event));
     void OnMouseEvent(wxMouseEvent& event);
     void OnKeyDown(wxKeyEvent& event);
-    void OnDoTests(wxCommandEvent& WXUNUSED(event));
 
     void start_timer();
     double elapsed_time();
@@ -156,7 +152,6 @@ enum
     Menu_Help_About = wxID_ABOUT,
 
     Menu_File_Open = 300,
-    Menu_Do_Tests,
 
     Menu_Max
 };
@@ -191,7 +186,6 @@ BEGIN_EVENT_TABLE(MyFrame, wxFrame)
     EVT_MENU(Menu_File_Open, MyFrame::OnOpen)
     EVT_MENU(wxID_ZOOM_IN, MyFrame::OnZoomIn)
     EVT_MENU(wxID_ZOOM_OUT, MyFrame::OnZoomOut)
-    EVT_MENU(Menu_Do_Tests, MyFrame::OnDoTests)
     EVT_SIZE(MyFrame::OnSize)
     EVT_PAINT(MyFrame::OnPaint)
 END_EVENT_TABLE()
@@ -236,16 +230,12 @@ void MyFrame::create_menu()
     zoomMenu->Append(wxID_ZOOM_IN);
     zoomMenu->Append(wxID_ZOOM_OUT);
 
-    wxMenu* debugMenu = new wxMenu;
-    debugMenu->Append(Menu_Do_Tests, _T("Run unit tests"));
-
     wxMenu *helpMenu = new wxMenu;
     helpMenu->Append(Menu_Help_About, _T("&About"));
 
     wxMenuBar* menuBar = new wxMenuBar;
     menuBar->Append(fileMenu, _T("&File"));
     menuBar->Append(zoomMenu, _T("&Zoom"));
-    menuBar->Append(debugMenu, _T("&Debug"));
     menuBar->Append(helpMenu, _T("&Help"));
 
     SetMenuBar(menuBar);
@@ -285,7 +275,7 @@ void MyFrame::initialize_lomse()
     m_lomse.init_library(pixel_format,resolution, reverse_y_axis);
 
     //set required callbacks
-    m_lomse.set_get_font_callback(get_font_filename);
+    m_lomse.set_request_callback(NULL, on_lomse_request);
 
     //create a bitmap for the View
     wxSize size = this->GetClientSize();
@@ -331,8 +321,6 @@ void MyFrame::OnOpen(wxCommandEvent& WXUNUSED(event))
     m_pInteractor->set_rendering_buffer(&m_rbuf_window);
     m_pInteractor->set_force_redraw_callbak(this, wrapper_force_redraw);
     m_pInteractor->set_update_window_callbak(this, wrapper_update_window);
-    m_pInteractor->set_start_timer_callbak(this, wrapper_start_timer);
-    m_pInteractor->set_elapsed_time_callbak(this, wrapper_elapsed_time);
 
     //render the new score
     force_redraw();
@@ -419,8 +407,6 @@ void MyFrame::open_document()
     m_pInteractor->set_rendering_buffer(&m_rbuf_window);
     m_pInteractor->set_force_redraw_callbak(this, wrapper_force_redraw);
     m_pInteractor->set_update_window_callbak(this, wrapper_update_window);
-    m_pInteractor->set_start_timer_callbak(this, wrapper_start_timer);
-    m_pInteractor->set_elapsed_time_callbak(this, wrapper_elapsed_time);
 
     //Now let's place content on the created document
     m_pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
@@ -611,37 +597,7 @@ void MyFrame::do_update_window(wxDC& dc)
 }
 
 //---------------------------------------------------------------------------------------
-void MyFrame::start_timer()
-{
-    //::QueryPerformanceCounter(&(m_sw_start));
-}
-
-//---------------------------------------------------------------------------------------
-void MyFrame::wrapper_start_timer(void* pThis)
-{
-    static_cast<MyFrame*>(pThis)->start_timer();
-}
-
-
-//---------------------------------------------------------------------------------------
-double MyFrame::elapsed_time()
-{
-//    LARGE_INTEGER stop;
-//    ::QueryPerformanceCounter(&stop);
-//    return double(stop.QuadPart -
-//                    m_sw_start.QuadPart) * 1000.0 /
-//                    double(m_sw_freq.QuadPart);
-    return 0.0;
-}
-
-//---------------------------------------------------------------------------------------
-double MyFrame::wrapper_elapsed_time(void* pThis)
-{
-    return static_cast<MyFrame*>(pThis)->elapsed_time();
-}
-
-//---------------------------------------------------------------------------------------
-string MyFrame::get_font_filename(const string& fontname, bool bold, bool italic)
+void MyFrame::get_font_filename(RequestFont* pRequest)
 {
     //This is just a trivial example. In real applications you should
     //use operating system services to find a suitable font
@@ -649,6 +605,10 @@ string MyFrame::get_font_filename(const string& fontname, bool bold, bool italic
     //notes on parameters received:
     // - fontname can be either the face name (i.e. "Book Antiqua") or
     //   the familly name (i.e. "sans-serif")
+
+    const string& fontname = pRequest->get_fontname();
+    bool bold = pRequest->get_bold();
+    bool italic = pRequest->get_italic();
 
 #if defined(__WXGTK__)
 
@@ -708,14 +668,81 @@ string MyFrame::get_font_filename(const string& fontname, bool bold, bool italic
         fontfile = "freefont/FreeSerif.ttf";
 
 
-   return path + fontfile;
+    pRequest->set_font_fullname( path + fontfile );
+
+
 #elif defined(__WXMSW__)
 
-    return "";
+    pRequest->set_font_fullname("");
+
+    string path = "C:\\WINNT\\Fonts\\";
+
+    //if family name, choose a font name
+    string name = fontname;
+    if (name == "serif")
+        name = "Times New Roman";
+    else if (name == "sans-serif")
+        name = "Tahoma";
+    else if (name == "handwritten")
+        name = "Lucida Handwriting";
+    else if (name == "cursive")
+        name = "Monotype Corsiva";
+    else if (name == "monospaced")
+        name = "Courier New";
+
+    //choose a suitable font file
+    string fontfile;
+    if (name == "Times New Roman")
+    {
+        if (italic && bold)
+            fontfile = "timesbi.ttf";
+        else if (italic)
+            fontfile = "timesi.ttf";
+        else if (bold)
+            fontfile = "timesbd.ttf";
+        else
+            fontfile = "times.ttf";
+    }
+
+    else if (name == "Tahoma")
+    {
+        if (bold)
+            fontfile = "tahomabd.ttf";
+        else
+            fontfile = "tahoma.ttf";
+    }
+
+    else if (name == "Lucida Handwriting")
+    {
+        fontfile = "lhandw.ttf";
+    }
+
+    else if (name == "Monotype Corsiva")
+    {
+        fontfile = "mtcorsva.ttf";
+    }
+
+    else if (name == "Courier New")
+    {
+        if (italic && bold)
+            fontfile = "courbi.ttf";
+        else if (italic)
+            fontfile = "couri.ttf";
+        else if (bold)
+            fontfile = "courbd.ttf";
+        else
+            fontfile = "cour.ttf";
+    }
+
+    else
+        fontfile = "times.ttf";
+
+    pRequest->set_font_fullname( path + fontfile );
+
 
 #else
 
-    return "";
+    pRequest->set_font_fullname("");
 
 #endif
 }
@@ -761,10 +788,25 @@ void MyFrame::OnKeyDown(wxKeyEvent& event)
 void MyFrame::reset_boxes_to_draw()
 {
     m_pInteractor->set_rendering_option(k_option_draw_box_doc_page_content, false);
-    m_pInteractor->set_rendering_option(k_option_draw_box_score_page, false);
+    m_pInteractor->set_rendering_option(k_option_draw_box_container, false);
     m_pInteractor->set_rendering_option(k_option_draw_box_system, false);
     m_pInteractor->set_rendering_option(k_option_draw_box_slice, false);
     m_pInteractor->set_rendering_option(k_option_draw_box_slice_instr, false);
+}
+
+//---------------------------------------------------------------------------------------
+void MyFrame::on_lomse_request(void* pThis, Request* pRequest)
+{
+    int type = pRequest->get_request_type();
+    switch (type)
+    {
+        case k_get_font_filename:
+            get_font_filename( dynamic_cast<RequestFont*>(pRequest) );
+            break;
+
+        default:
+            fprintf(stderr, "on_lomse_request] Unknown request\n");
+    }
 }
 
 //-------------------------------------------------------------------------
@@ -778,7 +820,7 @@ void MyFrame::on_key(int x, int y, unsigned key, unsigned flags)
             break;
         case '2':
             reset_boxes_to_draw();
-            m_pInteractor->set_rendering_option(k_option_draw_box_score_page, true);
+            m_pInteractor->set_rendering_option(k_option_draw_box_container, true);
             break;
         case '3':
             reset_boxes_to_draw();
@@ -835,15 +877,6 @@ void MyFrame::OnZoomOut(wxCommandEvent& WXUNUSED(event))
     wxSize size = this->GetClientSize();
     m_pInteractor->zoom_out(size.GetWidth()/2, size.GetHeight()/2);
     force_redraw();
-}
-
-//-------------------------------------------------------------------------
-void MyFrame::OnDoTests(wxCommandEvent& WXUNUSED(event))
-{
-//    cout << "Lomse library tests runner" << endl << endl;
-//    UnitTest::RunAllTests();
-    MyTestRunner oTR(this);
-    oTR.RunTests();
 }
 
 //---------------------------------------------------------------------------------------

@@ -108,7 +108,7 @@ LdpToken* LdpTokenizer::read_token()
         // when flag 'm_expectingEndOfElement' is set it implies that the 'value' part was
         // the last returned token. Therefore, the next token to return is an implicit ')'
         m_expectingEndOfElement = false;
-        m_pToken = new LdpToken(tkEndOfElement, chCloseParenthesis, numLine);
+        m_pToken = LOMSE_NEW LdpToken(tkEndOfElement, chCloseParenthesis, numLine);
         return m_pToken;
     }
     if (m_expectingNamePart)
@@ -134,7 +134,7 @@ LdpToken* LdpTokenizer::read_token()
     {
         if (m_reader.end_of_data())
         {
-            m_pToken = new LdpToken(tkEndOfFile, "", m_reader.get_line_number());
+            m_pToken = LOMSE_NEW LdpToken(tkEndOfFile, "", m_reader.get_line_number());
             return m_pToken;
         }
 
@@ -206,9 +206,9 @@ LdpToken* LdpTokenizer::parse_new_token()
                     switch (curChar)
                     {
                         case chOpenParenthesis:
-                            return new LdpToken(tkStartOfElement, chOpenParenthesis, numLine);
+                            return LOMSE_NEW LdpToken(tkStartOfElement, chOpenParenthesis, numLine);
                         case chCloseParenthesis:
-                            return new LdpToken(tkEndOfElement, chCloseParenthesis, numLine);
+                            return LOMSE_NEW LdpToken(tkEndOfElement, chCloseParenthesis, numLine);
                         case chSpace:
                             state = k_SPC01;
                             break;
@@ -227,9 +227,9 @@ LdpToken* LdpTokenizer::parse_new_token()
                             state = k_STR02;
                             break;
                         case nEOF:
-                            return new LdpToken(tkEndOfFile, "", numLine);
+                            return LOMSE_NEW LdpToken(tkEndOfFile, "", numLine);
                         case chLF:
-                            return new LdpToken(tkSpaces, chSpace, numLine);
+                            return LOMSE_NEW LdpToken(tkSpaces, chSpace, numLine);
                         case chComma:
                             state = k_Error;
                             break;
@@ -255,12 +255,12 @@ LdpToken* LdpTokenizer::parse_new_token()
                     // compact notation [ name:value --> (name value) ]
                     // 'name' part is parsed and we've found the ':' sign
                     m_expectingNamePart = true;
-                    m_pTokenNamePart = new LdpToken(tkLabel, tokendata.str(), numLine);
-                    return new LdpToken(tkStartOfElement, chOpenParenthesis, numLine);
+                    m_pTokenNamePart = LOMSE_NEW LdpToken(tkLabel, tokendata.str(), numLine);
+                    return LOMSE_NEW LdpToken(tkStartOfElement, chOpenParenthesis, numLine);
                 }
                 else {
                     m_reader.repeat_last_char();
-                    return new LdpToken(tkLabel, tokendata.str(), numLine);
+                    return LOMSE_NEW LdpToken(tkLabel, tokendata.str(), numLine);
                 }
                 break;
 
@@ -286,7 +286,7 @@ LdpToken* LdpTokenizer::parse_new_token()
             case k_STR00:
                 curChar = get_next_char();
                 if (curChar == chQuotes) {
-                    return new LdpToken(tkString, tokendata.str(), numLine);
+                    return LOMSE_NEW LdpToken(tkString, tokendata.str(), numLine);
                 } else {
                     if (curChar == nEOF) {
                         state = k_Error;
@@ -300,7 +300,7 @@ LdpToken* LdpTokenizer::parse_new_token()
                 tokendata << curChar;
                 curChar = get_next_char();
                 if (curChar == chQuotes) {
-                    return new LdpToken(tkString, tokendata.str(), numLine);
+                    return LOMSE_NEW LdpToken(tkString, tokendata.str(), numLine);
                 } else {
                     if (curChar == nEOF) {
                         state = k_Error;
@@ -332,7 +332,7 @@ LdpToken* LdpTokenizer::parse_new_token()
             case k_STR03:
                 curChar = get_next_char();
                 if (curChar == chApostrophe) {
-                    return new LdpToken(tkString, tokendata.str(), numLine);
+                    return LOMSE_NEW LdpToken(tkString, tokendata.str(), numLine);
                 } else {
                     state = k_STR02;
                 }
@@ -351,7 +351,7 @@ LdpToken* LdpTokenizer::parse_new_token()
                 tokendata << curChar;
                 curChar = get_next_char();
                 if (curChar == chLF) {
-                    return new LdpToken(tkComment, tokendata.str(), numLine);
+                    return LOMSE_NEW LdpToken(tkComment, tokendata.str(), numLine);
                 }
                 //else continue in this state
                 break;
@@ -367,7 +367,7 @@ LdpToken* LdpTokenizer::parse_new_token()
                     state = k_ETQ01;
                 } else {
                     m_reader.repeat_last_char();
-                    return new LdpToken(tkIntegerNumber, tokendata.str(), numLine);
+                    return LOMSE_NEW LdpToken(tkIntegerNumber, tokendata.str(), numLine);
                 }
                 break;
 
@@ -378,7 +378,7 @@ LdpToken* LdpTokenizer::parse_new_token()
                     state = k_NUM02;
                 } else {
                     m_reader.repeat_last_char();
-                    return new LdpToken(tkRealNumber, tokendata.str(), numLine);
+                    return LOMSE_NEW LdpToken(tkRealNumber, tokendata.str(), numLine);
                 }
                 break;
 
@@ -388,7 +388,7 @@ LdpToken* LdpTokenizer::parse_new_token()
                     state = k_SPC01;
                 } else {
                     m_reader.repeat_last_char();
-                    return new LdpToken(tkSpaces, chSpace, numLine);
+                    return LOMSE_NEW LdpToken(tkSpaces, chSpace, numLine);
                 }
                 break;
 
@@ -396,12 +396,12 @@ LdpToken* LdpTokenizer::parse_new_token()
                 tokendata << curChar;
                 curChar = get_next_char();
                 if (curChar == chSpace || curChar == chTab) {
-                    return new LdpToken(tkLabel, tokendata.str(), numLine);
+                    return LOMSE_NEW LdpToken(tkLabel, tokendata.str(), numLine);
                 }
                 else if (curChar == chCloseParenthesis)
                 {
                     m_reader.repeat_last_char();
-                    return new LdpToken(tkLabel, tokendata.str(), numLine);
+                    return LOMSE_NEW LdpToken(tkLabel, tokendata.str(), numLine);
                 }
                 else if (is_number(curChar)) {
                     state = k_NUM01;
@@ -413,7 +413,7 @@ LdpToken* LdpTokenizer::parse_new_token()
 
             case k_Error:
                 if (curChar == nEOF) {
-                    return new LdpToken(tkEndOfFile, "", numLine);
+                    return LOMSE_NEW LdpToken(tkEndOfFile, "", numLine);
                 } else {
                     m_reporter << "[LdpTokenizer::parse_new_token]: Bad character '"
                                << curChar << "' found" << endl;

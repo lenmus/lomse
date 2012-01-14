@@ -40,7 +40,7 @@ public:
 
     LdpElementsTestFixture()     //SetUp fixture
     {
-        m_pLibraryScope = new LibraryScope(cout);
+        m_pLibraryScope = LOMSE_NEW LibraryScope(cout);
         m_pLdpFactory = m_pLibraryScope->ldp_factory();
     }
 

@@ -51,7 +51,7 @@ GmoShape* KeyEngraver::create_shape(ImoKeySignature* pKey, int iInstr, int iStaf
 
     //create the container shape object
     int idx = 0;
-    m_pKeyShape = new GmoShapeKeySignature(pKey, idx, uPos, Color(0,0,0), m_libraryScope);
+    m_pKeyShape = LOMSE_NEW GmoShapeKeySignature(pKey, idx, uPos, Color(0,0,0), m_libraryScope);
     //m_pKeyShape->SetShapeLevel(lm_eMainShape);
 
     int numAccidentals = get_num_fifths(m_nKeyType);
@@ -80,7 +80,7 @@ void KeyEngraver::add_accidentals(int numAccidentals, int iGlyph, UPoint uPos)
     {
         Tenths yOffset = glyphs_lmbasic2[iGlyph].GlyphOffset + m_tPos[i] + 40.0f;
         LUnits y = uPos.y + m_pMeter->tenths_to_logical(yOffset, m_iInstr, m_iStaff);
-        GmoShape* pSA = new GmoShapeAccidental(m_pCreatorImo, 0, iGlyph, UPoint(x, y),
+        GmoShape* pSA = LOMSE_NEW GmoShapeAccidental(m_pCreatorImo, 0, iGlyph, UPoint(x, y),
                                                Color(0,0,0), m_libraryScope, m_fontSize);
         m_pKeyShape->add(pSA);
         x += pSA->get_width();

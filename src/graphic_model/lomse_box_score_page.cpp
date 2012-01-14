@@ -132,10 +132,9 @@ namespace lomse
 // GmoBoxScorePage implementation
 //-------------------------------------------------------------------------------------
 
-GmoBoxScorePage::GmoBoxScorePage(GmoStubScore* pStub)
-    : GmoBox(GmoObj::k_box_score_page, pStub->get_creator_imo())
+GmoBoxScorePage::GmoBoxScorePage(ImoScore* pScore)
+    : GmoBox(GmoObj::k_box_score_page, pScore)
 //    , m_nNumPage(nNumPage)
-    , m_pStubScore(pStub)
     , m_nFirstSystem(-1)
     , m_nLastSystem(-1)
 //    , m_pRenderWindow(NULL)
@@ -152,21 +151,20 @@ GmoBoxScorePage::GmoBoxScorePage(GmoStubScore* pStub)
 //    LUnits uPageHeight = pScore->GetPaperSize().GetHeight();
 //
 //    m_pMarginShapes[0] =
-//        new lmShapeMargin(pScore, this, lmMARGIN_TOP, m_nNumPage, lmHORIZONTAL,
+//        LOMSE_NEW lmShapeMargin(pScore, this, lmMARGIN_TOP, m_nNumPage, lmHORIZONTAL,
 //                          uyTopMargin, uPageWidth);
 //
 //    m_pMarginShapes[1] =
-//        new lmShapeMargin(pScore, this, lmMARGIN_BOTTOM, m_nNumPage, lmHORIZONTAL,
+//        LOMSE_NEW lmShapeMargin(pScore, this, lmMARGIN_BOTTOM, m_nNumPage, lmHORIZONTAL,
 //                          uyBottomMargin, uPageWidth);
 //
 //    m_pMarginShapes[2] =
-//        new lmShapeMargin(pScore, this, lmMARGIN_LEFT, m_nNumPage, lmVERTICAL,
+//        LOMSE_NEW lmShapeMargin(pScore, this, lmMARGIN_LEFT, m_nNumPage, lmVERTICAL,
 //                          uxLeftMargin, uPageHeight);
 //
 //    m_pMarginShapes[3] =
-//        new lmShapeMargin(pScore, this, lmMARGIN_RIGHT, m_nNumPage, lmVERTICAL,
+//        LOMSE_NEW lmShapeMargin(pScore, this, lmMARGIN_RIGHT, m_nNumPage, lmVERTICAL,
 //                          uxRightMargin, uPageHeight);
-    m_pStubScore->add_page(this);
 }
 
 GmoBoxScorePage::~GmoBoxScorePage()
@@ -186,12 +184,12 @@ GmoBoxScorePage::~GmoBoxScorePage()
 //void GmoBoxScorePage::CreateLayers()
 //{
 //    //create standard layers and layer indexes
-//    m_Layers.push_back( new lmLayer(lm_eLayerBackground) );
-//    m_Layers.push_back( new lmLayer(lm_eLayerStaff) );
-//    m_Layers.push_back( new lmLayer(lm_eLayerBarlines) );
-//    m_Layers.push_back( new lmLayer(lm_eLayerNotes) );
-//    m_Layers.push_back( new lmLayer(lm_eLayerAuxObjs) );
-//    m_Layers.push_back( new lmLayer(lm_eLayerTop) );
+//    m_Layers.push_back( LOMSE_NEW lmLayer(lm_eLayerBackground) );
+//    m_Layers.push_back( LOMSE_NEW lmLayer(lm_eLayerStaff) );
+//    m_Layers.push_back( LOMSE_NEW lmLayer(lm_eLayerBarlines) );
+//    m_Layers.push_back( LOMSE_NEW lmLayer(lm_eLayerNotes) );
+//    m_Layers.push_back( LOMSE_NEW lmLayer(lm_eLayerAuxObjs) );
+//    m_Layers.push_back( LOMSE_NEW lmLayer(lm_eLayerTop) );
 //}
 //
 //void GmoBoxScorePage::AddShapeToLayer(lmShape* pShape, long nLayerID)

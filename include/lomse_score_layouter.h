@@ -48,7 +48,6 @@ class GmoBoxScorePage;
 class GmoBoxSlice;
 class GmoBoxSystem;
 class GmoBoxSliceInstr;
-class GmoStubScore;
 class InstrumentEngraver;
 class SystemLayouter;
 class StaffObjsCursor;
@@ -124,7 +123,6 @@ protected:
     LUnits              m_uOtherSystemIndent;
 
     //current boxes being layouted
-    GmoStubScore*       m_pStubScore;
     GmoBoxScorePage*    m_pCurBoxPage;
     GmoBoxSystem*       m_pCurBoxSystem;
 
@@ -170,7 +168,6 @@ protected:
     inline bool is_first_system_in_score() { return m_iCurSystem == 0; }
 
     //---------------------------------------------------------------
-    void create_stub_for_score();
     void create_instrument_engravers();
     void decide_systems_indentation();
     void add_score_titles();

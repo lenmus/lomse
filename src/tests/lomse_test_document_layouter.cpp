@@ -143,19 +143,6 @@ SUITE(DocLayouterTest)
         delete pGModel;
     }
 
-    TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_HasScoreStub)
-    {
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        DocLayouter dl( doc.get_im_model(), m_libraryScope);
-        dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
-        GmoStubScore* pStub = pGModel->get_score_stub(0);
-        CHECK( pStub != NULL );
-        delete pGModel;
-    }
-
     TEST_FIXTURE(DocLayouterTestFixture, DocLayouter_DocPageHasBoxScore)
     {
         Document doc(m_libraryScope);

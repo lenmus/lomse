@@ -58,7 +58,7 @@ GmoShape* TimeEngraver::create_shape_normal(ImoObj* pCreatorImo, int iInstr, int
 void TimeEngraver::create_main_container_shape(UPoint uPos)
 {
     int idx = 0;
-    m_pTimeShape = new GmoShapeTimeSignature(m_pCreatorImo, idx, uPos, Color(0,0,0),
+    m_pTimeShape = LOMSE_NEW GmoShapeTimeSignature(m_pCreatorImo, idx, uPos, Color(0,0,0),
                                              m_libraryScope);
     //m_pTimeShape->SetShapeLevel(lm_eMainShape);
 }
@@ -101,7 +101,7 @@ GmoShape* TimeEngraver::create_digit(int digit)
     int iGlyph = k_glyph_number_0 + digit;
     Tenths yOffset = glyphs_lmbasic2[iGlyph].GlyphOffset + 40.0f;
     LUnits y = m_uPos.y + m_pMeter->tenths_to_logical(yOffset, m_iInstr, m_iStaff);
-    GmoShape* pShape = new GmoShapeDigit(m_pCreatorImo, 0, iGlyph, UPoint(m_uPos.x, y),
+    GmoShape* pShape = LOMSE_NEW GmoShapeDigit(m_pCreatorImo, 0, iGlyph, UPoint(m_uPos.x, y),
                                          Color(0,0,0), m_libraryScope, m_fontSize);
     m_uPos.x += pShape->get_width();
     return pShape;
@@ -163,7 +163,7 @@ GmoShape* TimeEngraver::create_shape_common(ImoObj* pCreatorImo, int iInstr, int
 //            int nGlyph = (m_nType==eTS_Common ? GLYPH_COMMON_TIME : GLYPH_CUT_TIME);
 //		    LUnits uyPos = uyPosTop
 //						    + m_pVStaff->TenthsToLogical(aGlyphsInfo[nGlyph].GlyphOffset, m_nStaffNum );
-//            lmShape* pShape = new lmShapeGlyph(this, nShapeIdx, nGlyph, pPaper,
+//            lmShape* pShape = LOMSE_NEW lmShapeGlyph(this, nShapeIdx, nGlyph, pPaper,
 //                                               UPoint(uxPosTop, uyPos),
 //									           _T("Time signature"), lmNO_DRAGGABLE,
 //                                               color );

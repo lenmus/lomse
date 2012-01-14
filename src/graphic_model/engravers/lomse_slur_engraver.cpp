@@ -108,7 +108,7 @@ void SlurEngraver::create_one_shape()
 //    compute_end_point(&m_points1[END]);
     compute_default_control_points(&m_points1[0]);
     //add_user_displacements(0, &m_points1[0]);
-    m_shapesInfo[0].pShape = new GmoShapeSlur(m_pSlur, 0, &m_points1[0], m_thickness);
+    m_shapesInfo[0].pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, 0, &m_points1[0], m_thickness);
 
     m_shapesInfo[1].pShape = NULL;
 }
@@ -123,14 +123,14 @@ void SlurEngraver::create_one_shape()
 //    //compute_end_of_staff_point();
 //    //compute_default_control_points(&m_points1[0]);
 //    //add_user_displacements(0, &m_points1[0]);
-//    //m_shapesInfo[0].pShape = new GmoShapeSlur(m_pSlur, 0, &m_points1[0], m_thickness);
+//    //m_shapesInfo[0].pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, 0, &m_points1[0], m_thickness);
 //
 //    ////create second shape
 //    //compute_end_point(&m_points2[END]);
 //    //compute_start_of_staff_point();
 //    //compute_default_control_points(&m_points2[0]);
 //    //add_user_displacements(1, &m_points2[0]);
-//    //m_shapesInfo[1].pShape = new GmoShapeSlur(m_pSlur, 0, &m_points2[0], m_thickness);
+//    //m_shapesInfo[1].pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, 0, &m_points2[0], m_thickness);
 //}
 
 //---------------------------------------------------------------------------------------
