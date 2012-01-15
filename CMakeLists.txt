@@ -125,45 +125,56 @@ set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0")
 set(Boost_USE_STATIC_LIBS   OFF)
 set(Boost_USE_MULTITHREADED OFF)
 #set(Boost_DEBUG TRUE)
-find_package( Boost 1.42.0 COMPONENTS date_time thread )
+find_package(Boost 1.42.0 COMPONENTS date_time thread REQUIRED)
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
     link_libraries( ${Boost_LIBRARIES} )
     link_directories( ${Boost_LIBRARY_DIRS} )
-    message("Boost libraries: ${Boost_LIBRARIES}" )
+#    message("Boost found: libraries: ${Boost_LIBRARIES}" )
+#    message("Boost found: include= ${Boost_INCLUDE_DIRS}" )
+#    message("Boost found: libdir= ${Boost_LIBRARY_DIRS}" )
 else()
     message(SEND_ERROR "Boost package not found. Reason: ${Boost_ERROR_REASON}" )
 endif()
 
 
 # Check for FreeType
-find_package( Freetype )                    
+find_package(Freetype REQUIRED)                    
 if( FREETYPE_FOUND )
     include_directories( ${FREETYPE_INCLUDE_DIRS} )
     link_libraries( ${FREETYPE_LIBRARIES} )
     link_directories( ${FREETYPE_LINK_DIR} )        
+#    message("Freetype found: libraries= ${FREETYPE_LIBRARIES}" )
+#    message("Freetype found: include= ${FREETYPE_INCLUDE_DIRS}" )
+#    message("Freetype found: libdir= ${FREETYPE_LINK_DIR}" )
 else()
     message(SEND_ERROR "FreeType package not found.")
 endif()
 
 
 # Check for libpng
-find_package( libpng )                    
-if( LIBPNG_FOUND )
-    include_directories( ${LIBPNG_INCLUDE_DIRS} )
-    link_libraries( ${LIBPNG_LIBRARIES} )
-    link_directories( ${LIBPNG_LINK_DIR} )        
+find_package(PNG REQUIRED)                    
+if( PNG_FOUND )
+    include_directories( ${PNG_INCLUDE_DIRS} )
+    link_libraries( ${PNG_LIBRARIES} )
+    link_directories( ${PNG_LINK_DIR} )        
+#    message("libpng found: libraries= ${PNG_LIBRARIES}" )
+#    message("libpng found: include= ${PNG_INCLUDE_DIRS}" )
+#    message("libpng found: libdir= ${PNG_LINK_DIR}" )
 else()
     message(SEND_ERROR "libpng package not found.")
 endif()
 
 
 # Check for zlib
-find_package( zlib )                    
+find_package(ZLIB REQUIRED)
 if( ZLIB_FOUND )
-    include_directories( ${ZLIB_INCLUDE_DIRS} )
+    include_directories( ${ZLIB_INCLUDE_DIR} )
     link_libraries( ${ZLIB_LIBRARIES} )
     link_directories( ${ZLIB_LINK_DIR} )        
+#    message("zlib found: libraries= ${ZLIB_LIBRARIES}" )
+#    message("zlib found: include= ${ZLIB_INCLUDE_DIRS}" )
+#    message("zlib found: libdir= ${ZLIB_LINK_DIR}" )
 else()
     message(SEND_ERROR "zlib package not found.")
 endif()
@@ -338,9 +349,9 @@ set(INTERNAL_MODEL_FILES
     ${SRC_DIR}/internal_model/lomse_im_factory.cpp
     ${SRC_DIR}/internal_model/lomse_im_figured_bass.cpp
     ${SRC_DIR}/internal_model/lomse_im_note.cpp
-    ${SRC_DIR}/internal_model/lomse_image.cpp
     ${SRC_DIR}/internal_model/lomse_internal_model.cpp
-    ${SRC_DIR}/internal_model/lomse_score_utilities.cpp)
+    ${SRC_DIR}/internal_model/lomse_score_utilities.cpp
+)
 
 set(MODULE_FILES
     ${SRC_DIR}/module/lomse_doorway.cpp
