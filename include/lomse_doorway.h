@@ -106,12 +106,20 @@ public:
 
     //common operations
     Presenter* new_document(int viewType);
-    Presenter* new_document(int viewType, const string& ldpSource);
-    Presenter* open_document(int viewType, const string& filename);
-    Presenter* open_document(int viewType, LdpReader& reader);
+    Presenter* new_document(int viewType, const string& ldpSource,
+                            ostream& reporter = cout);
+    Presenter* open_document(int viewType, const string& filename,
+                             ostream& reporter = cout);
+    Presenter* open_document(int viewType, LdpReader& reader,
+                             ostream& reporter = cout);
 
     static void null_notify_function(void* pObj, SpEventInfo event);
     static void null_request_function(void* pObj, Request* event);
+
+    //library info
+    static string get_version_string();
+    static int get_version_number();
+
 };
 
 

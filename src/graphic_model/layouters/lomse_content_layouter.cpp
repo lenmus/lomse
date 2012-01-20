@@ -25,6 +25,7 @@
 #include "lomse_document_layouter.h"
 #include "lomse_sizers.h"
 #include "lomse_calligrapher.h"
+#include "lomse_shape_text.h"
 
 
 namespace lomse
@@ -213,6 +214,68 @@ void MultiColumnLayouter::layout_column(Layouter* pColLayouter, GmoBox* pParentB
 //    m_pItemMainBox = m_pControl->layout(m_libraryScope, pos);
 //    pParentBox->add_child_box(m_pItemMainBox);
 //}
+
+
+
+//=======================================================================================
+// ListLayouter implementation
+//=======================================================================================
+ListLayouter::ListLayouter(ImoContentObj* pItem, Layouter* pParent,
+                                 GraphicModel* pGModel, LibraryScope& libraryScope,
+                                 ImoStyles* pStyles)
+    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles)
+    , m_pList( dynamic_cast<ImoList*>(pItem) )
+    , m_indent(1000.0f)        //1 cm
+{
+}
+
+//---------------------------------------------------------------------------------------
+void ListLayouter::layout_in_box()
+{
+    set_cursor_and_available_space(m_pItemMainBox);
+
+    TreeNode<ImoObj>::children_iterator it;
+    for (it = m_pList->begin(); it != m_pList->end(); ++it)
+    {
+        add_bullet( static_cast<ImoListItem*>(*it) );
+        layout_item( static_cast<ImoContentObj*>( *it ), m_pItemMainBox );
+    }
+    set_layout_is_finished(true);
+}
+
+//---------------------------------------------------------------------------------------
+void ListLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
+                                   LUnits height)
+{
+    m_pItemMainBox = LOMSE_NEW GmoBoxDocPageContent(m_pList);
+    pParentBox->add_child_box(m_pItemMainBox);
+
+    m_pItemMainBox->set_origin(pos.x + m_indent, pos.y);
+    m_pItemMainBox->set_width(width - m_indent);
+    m_pItemMainBox->set_height(height);
+}
+
+//---------------------------------------------------------------------------------------
+void ListLayouter::add_bullet(ImoListItem* pItem)
+{
+    //TO_FIX: Bullet position has to take into account top margin,padding and border of
+    //listitem.
+    LUnits xPos = m_pageCursor.x - 500.0f;
+    LUnits yPos = m_pageCursor.y;
+    ImoStyle* pStyle = pItem->get_style();
+    if (pStyle)
+    {
+        yPos += pStyle->get_lunits_property(ImoStyle::k_margin_top);
+        yPos += pStyle->get_lunits_property(ImoStyle::k_border_width_top);
+        yPos += pStyle->get_lunits_property(ImoStyle::k_padding_top);
+    }
+
+//    GmoBox* pLiBox = get_listitem_box();
+//    UPos pos = pLiBox->get
+    GmoShape* pShape = LOMSE_NEW GmoShapeText(pItem, 0, "*", pItem->get_style(),
+                                              xPos, yPos, m_libraryScope);
+    m_pItemMainBox->add_shape(pShape, GmoShape::k_layer_staff);
+}
 
 
 }  //namespace lomse

@@ -34,7 +34,7 @@
 #include "lomse_calligrapher.h"
 #include "lomse_score_meter.h"
 #include "lomse_internal_model.h"
-#include "lomse_paragraph_layouter.h"
+#include "lomse_box_content_layouter.h"
 #include "lomse_im_factory.h"
 
 using namespace UnitTest;

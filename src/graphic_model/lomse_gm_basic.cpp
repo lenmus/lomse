@@ -377,13 +377,13 @@ void GmoObj::set_dirty(bool dirty)
         propagate_dirty();
     }
     else
-        m_flags &= !k_dirty;
+        m_flags &= ~k_dirty;
 }
 
 //---------------------------------------------------------------------------------------
 void GmoObj::set_children_dirty(bool value)
 {
-    value ? m_flags |= k_children_dirty : m_flags &= !k_children_dirty;
+    value ? m_flags |= k_children_dirty : m_flags &= ~k_children_dirty;
 }
 
 //---------------------------------------------------------------------------------------
@@ -522,7 +522,7 @@ void GmoBox::set_flag_value(bool value, unsigned int flag)
     if (value)
         m_flags |= flag;
     else
-        m_flags &= !flag;
+        m_flags &= ~flag;
 
     //propagate to contained shapes
     std::list<GmoShape*>::iterator itS;

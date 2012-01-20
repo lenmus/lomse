@@ -18,8 +18,8 @@
 //
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_PARAGRAPH_LAYOUTER_H__        //to avoid nested includes
-#define __LOMSE_PARAGRAPH_LAYOUTER_H__
+#ifndef __LOMSE_BOX_CONTENT_LAYOUTER_H__        //to avoid nested includes
+#define __LOMSE_BOX_CONTENT_LAYOUTER_H__
 
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
@@ -48,7 +48,7 @@ class Engrouter;
 class ButtonEngrouter;
 class ImageEngrouter;
 class WordEngrouter;
-class ParagraphLayouter;
+class BoxContentLayouter;
 
 
 //---------------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ struct LineReferences
 
 
 //---------------------------------------------------------------------------------------
-// Abstract layouter + engraver for an inline object
+// Engrouter: combines layouter + engraver for an inline object (abstract class)
 class Engrouter
 {
 protected:
@@ -168,7 +168,7 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-// Container for a button
+// Engrouter for a button
 class ButtonEngrouter : public Engrouter
 {
 public:
@@ -181,7 +181,7 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-// Container for an image
+// Engrouter for an image
 class ImageEngrouter : public Engrouter
 {
 public:
@@ -194,7 +194,7 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-//Container for a word of text
+//Engrouter for a word of text
 class WordEngrouter : public Engrouter
 {
 protected:
@@ -224,7 +224,7 @@ public:
 
 
 //---------------------------------------------------------------------------------------
-// Wrapper for inline objs
+// Engrouter for inline objs
 class InlineWrapperEngrouter : public Engrouter
 {
 protected:
@@ -304,8 +304,8 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-// ParagraphLayouter: layouts a paragraph
-class ParagraphLayouter : public Layouter
+// BoxContentLayouter: layouts a paragraph
+class BoxContentLayouter : public Layouter
 {
 protected:
     LibraryScope& m_libraryScope;
@@ -313,9 +313,9 @@ protected:
     std::list<Engrouter*> m_engrouters;
 
 public:
-    ParagraphLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
+    BoxContentLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
                       LibraryScope& libraryScope, ImoStyles* pStyles);
-    virtual ~ParagraphLayouter();
+    virtual ~BoxContentLayouter();
 
     //virtual methods in base class
     void layout_in_box();
@@ -363,5 +363,5 @@ protected:
 
 }   //namespace lomse
 
-#endif    // __LOMSE_PARAGRAPH_LAYOUTER_H__
+#endif    // __LOMSE_BOX_CONTENT_LAYOUTER_H__
 

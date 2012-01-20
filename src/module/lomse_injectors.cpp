@@ -155,9 +155,9 @@ LdpCompiler* Injector::inject_LdpCompiler(LibraryScope& libraryScope,
 }
 
 //---------------------------------------------------------------------------------------
-Document* Injector::inject_Document(LibraryScope& libraryScope)
+Document* Injector::inject_Document(LibraryScope& libraryScope, ostream& reporter)
 {
-    return LOMSE_NEW Document(libraryScope);
+    return LOMSE_NEW Document(libraryScope, reporter);
 }
 
 //---------------------------------------------------------------------------------------

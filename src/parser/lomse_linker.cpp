@@ -64,6 +64,9 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
         case k_imo_instr_group:
             return add_instruments_group(static_cast<ImoInstrGroup*>(pChild));
 
+        case k_imo_listitem:
+            return add_listitem(static_cast<ImoListItem*>(pChild));
+
         case k_imo_midi_info:
             return add_midi_info(static_cast<ImoMidiInfo*>(pChild));
 
@@ -227,6 +230,15 @@ ImoObj* Linker::add_bezier(ImoBezierInfo* pBezier)
         return NULL;
     }
     return pBezier;
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj* Linker::add_listitem(ImoListItem* pItem)
+{
+    if (m_pParent && m_pParent->is_list())
+        return add_child(k_imo_list, pItem);
+    else
+        return pItem;
 }
 
 //---------------------------------------------------------------------------------------

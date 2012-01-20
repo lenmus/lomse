@@ -76,6 +76,8 @@ class ImoInstrument;
 class ImoKeySignature;
 class ImoLineStyle;
 class ImoLink;
+class ImoList;
+class ImoListItem;
 class ImoMultiColumn;
 class ImoMusicData;
 class ImoNote;
@@ -322,12 +324,12 @@ class DtoObj;
 
                 // ImoBoxContainer (A)
                 k_imo_box_container,
-                    k_imo_content, k_imo_dynamic, k_imo_document,
+                    k_imo_content, k_imo_dynamic, k_imo_document, k_imo_list,
                     k_imo_multicolumn, k_imo_score,
 
                 // ImoBoxContent (A)
                 k_imo_box_content,
-                    k_imo_heading, k_imo_para,
+                    k_imo_heading, k_imo_para, k_imo_listitem,
 
                 // ImoInlineObj
                 k_imo_inlineobj,
@@ -398,9 +400,10 @@ public:
     virtual ~BlockLevelCreatorApi() {}
 
     //API
-    ImoParagraph* add_paragraph(ImoStyle* pStyle=NULL);
     ImoContent* add_content_wrapper(ImoStyle* pStyle=NULL);
+    ImoList* add_list(int type, ImoStyle* pStyle=NULL);
     ImoMultiColumn* add_multicolumn_wrapper(int numCols, ImoStyle* pStyle=NULL);
+    ImoParagraph* add_paragraph(ImoStyle* pStyle=NULL);
     ImoScore* add_score(ImoStyle* pStyle=NULL);
 
 private:
@@ -587,6 +590,7 @@ public:
     inline bool is_dynamic() { return m_objtype == k_imo_dynamic; }
 	inline bool is_score() { return m_objtype == k_imo_score; }
 	inline bool is_multicolumn() { return m_objtype == k_imo_multicolumn; }
+	inline bool is_list() { return m_objtype == k_imo_list; }
 
         // box content objs
 	inline bool is_box_content() { return m_objtype >= k_imo_box_content
@@ -594,6 +598,7 @@ public:
     }
     inline bool is_heading() { return m_objtype == k_imo_heading; }
     inline bool is_paragraph() { return m_objtype == k_imo_para; }
+	inline bool is_listitem() { return m_objtype == k_imo_listitem; }
 
         //inline objs
 	inline bool is_inlineobj() { return m_objtype >= k_imo_inlineobj; }
@@ -2543,6 +2548,54 @@ public:
 
     inline ImoLineStyle* get_line_info() { return m_pStyle; }
     inline void set_line_style(ImoLineStyle* pStyle) { m_pStyle = pStyle; }
+
+};
+
+//---------------------------------------------------------------------------------------
+class ImoListItem : public ImoBoxContent
+{
+protected:
+    friend class ImoBoxContainer;
+    friend class Document;
+    friend class ImFactory;
+    ImoListItem() : ImoBoxContent(k_imo_listitem) {}
+
+public:
+    virtual ~ImoListItem() {}
+
+    //required by Visitable parent class
+	virtual void accept_visitor(BaseVisitor& v);
+};
+
+//---------------------------------------------------------------------------------------
+class ImoList : public ImoBoxContainer
+{
+protected:
+    int m_listType;
+
+    friend class ImFactory;
+    ImoList() : ImoBoxContainer(k_imo_list), m_listType(k_itemized) {}
+
+public:
+    virtual ~ImoList() {}
+
+    enum { k_itemized=0, k_ordered, };
+
+    inline void set_list_type(int type) { m_listType = type; }
+    inline int get_list_type() { return m_listType; }
+
+    //API
+    ImoListItem* add_listitem(ImoStyle* pStyle=NULL);
+
+    //contents
+    inline int get_num_items() { return get_num_children(); }
+    inline void add_item(ImoListItem* pItem) { append_child_imo(pItem); }
+    ImoListItem* get_item(int iItem) {   //iItem = 0..n-1
+        return dynamic_cast<ImoListItem*>( get_child(iItem) );
+    }
+
+protected:
+    friend class BlockLevelCreatorApi;
 
 };
 

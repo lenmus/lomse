@@ -72,6 +72,8 @@ ImoObj* ImFactory::inject(int type, Document* pDoc)
         case k_imo_key_signature:       pObj = LOMSE_NEW ImoKeySignature();       break;
         case k_imo_line:                pObj = LOMSE_NEW ImoLine();               break;
         case k_imo_line_style:          pObj = LOMSE_NEW ImoLineStyle();          break;
+        case k_imo_list:                pObj = LOMSE_NEW ImoList();               break;
+        case k_imo_listitem:            pObj = LOMSE_NEW ImoListItem();           break;
         case k_imo_link:                pObj = LOMSE_NEW ImoLink();               break;
         case k_imo_metronome_mark:      pObj = LOMSE_NEW ImoMetronomeMark();      break;
         case k_imo_midi_info:           pObj = LOMSE_NEW ImoMidiInfo();           break;

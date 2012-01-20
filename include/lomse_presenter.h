@@ -93,9 +93,12 @@ public:
     virtual ~PresenterBuilder();
 
     //presenter creation
-    Presenter* new_document(int viewType, const std::string& content="");
-    Presenter* open_document(int viewType, const std::string& filename);
-    Presenter* open_document(int viewType, LdpReader& reader);
+    Presenter* new_document(int viewType, const std::string& content="",
+                            ostream& reporter = cout);
+    Presenter* open_document(int viewType, const std::string& filename,
+                             ostream& reporter = cout);
+    Presenter* open_document(int viewType, LdpReader& reader,
+                             ostream& reporter = cout);
 
 };
 

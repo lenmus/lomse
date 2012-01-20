@@ -18,7 +18,7 @@
 //
 //---------------------------------------------------------------------------------------
 
-#include "lomse_paragraph_layouter.h"
+#include "lomse_box_content_layouter.h"
 #include "lomse_build_options.h"
 
 #include "lomse_gm_basic.h"
@@ -35,9 +35,9 @@ namespace lomse
 {
 
 //=======================================================================================
-// ParagraphLayouter implementation
+// BoxContentLayouter implementation
 //=======================================================================================
-ParagraphLayouter::ParagraphLayouter(ImoContentObj* pItem, Layouter* pParent,
+BoxContentLayouter::BoxContentLayouter(ImoContentObj* pItem, Layouter* pParent,
                                      GraphicModel* pGModel, LibraryScope& libraryScope,
                                      ImoStyles* pStyles)
     : Layouter(pItem, pParent, pGModel, libraryScope, pStyles)
@@ -47,7 +47,7 @@ ParagraphLayouter::ParagraphLayouter(ImoContentObj* pItem, Layouter* pParent,
 }
 
 //---------------------------------------------------------------------------------------
-ParagraphLayouter::~ParagraphLayouter()
+BoxContentLayouter::~BoxContentLayouter()
 {
     std::list<Engrouter*>::iterator it;
     for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
@@ -55,7 +55,7 @@ ParagraphLayouter::~ParagraphLayouter()
 }
 
 //---------------------------------------------------------------------------------------
-void ParagraphLayouter::prepare_to_start_layout()
+void BoxContentLayouter::prepare_to_start_layout()
 {
     Layouter::prepare_to_start_layout();
     create_engrouters();
@@ -64,7 +64,7 @@ void ParagraphLayouter::prepare_to_start_layout()
 }
 
 //---------------------------------------------------------------------------------------
-void ParagraphLayouter::layout_in_box()
+void BoxContentLayouter::layout_in_box()
 {
     //AWARE: This method is invoked to layout a page. If there are more pages to
     //layout, it will be invoked more times. Therefore, this method must not initialize
@@ -97,7 +97,7 @@ void ParagraphLayouter::layout_in_box()
 }
 
 //---------------------------------------------------------------------------------------
-void ParagraphLayouter::create_main_box(GmoBox* pParentBox, UPoint pos,
+void BoxContentLayouter::create_main_box(GmoBox* pParentBox, UPoint pos,
                                         LUnits width, LUnits height)
 {
     m_pItemMainBox = LOMSE_NEW GmoBoxParagraph(m_pPara);
@@ -109,7 +109,7 @@ void ParagraphLayouter::create_main_box(GmoBox* pParentBox, UPoint pos,
 }
 
 //---------------------------------------------------------------------------------------
-void ParagraphLayouter::create_engrouters()
+void BoxContentLayouter::create_engrouters()
 {
     EngroutersCreator creator(m_engrouters, m_libraryScope);
     TreeNode<ImoObj>::children_iterator it;
@@ -118,7 +118,7 @@ void ParagraphLayouter::create_engrouters()
 }
 
 //---------------------------------------------------------------------------------------
-void ParagraphLayouter::prepare_line()
+void BoxContentLayouter::prepare_line()
 {
     //After execution:
     //  m_itStart - will point to first engrouter to include or m_engrouters.end()
@@ -144,7 +144,7 @@ void ParagraphLayouter::prepare_line()
 }
 
 //---------------------------------------------------------------------------------------
-void ParagraphLayouter::add_line()
+void BoxContentLayouter::add_line()
 {
     LUnits left = m_pageCursor.x;       //save left margin
 
@@ -177,7 +177,7 @@ void ParagraphLayouter::add_line()
 }
 
 //---------------------------------------------------------------------------------------
-void ParagraphLayouter::advance_current_line_space(LUnits left)
+void BoxContentLayouter::advance_current_line_space(LUnits left)
 {
     m_pageCursor.x = left;
     m_pageCursor.y += m_lineRefs.lineHeight;
@@ -187,7 +187,7 @@ void ParagraphLayouter::advance_current_line_space(LUnits left)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits ParagraphLayouter::add_engrouter_to_line()
+LUnits BoxContentLayouter::add_engrouter_to_line()
 {
     //Current engrouter is going to be included in current line. Here we proceed to do
     //vertical alignement of the engrouter.
@@ -215,7 +215,7 @@ LUnits ParagraphLayouter::add_engrouter_to_line()
 }
 
 //---------------------------------------------------------------------------------------
-void ParagraphLayouter::initialize_line_references()
+void BoxContentLayouter::initialize_line_references()
 {
     //line height: 'strut' line height
     ImoStyle* pStyle = m_pPara->get_style();
@@ -245,7 +245,7 @@ void ParagraphLayouter::initialize_line_references()
 }
 
 //---------------------------------------------------------------------------------------
-void ParagraphLayouter::update_line_references(LineReferences& engr, LUnits shift,
+void BoxContentLayouter::update_line_references(LineReferences& engr, LUnits shift,
                                                bool fUpdateText)
 {
     if (fUpdateText)
@@ -298,7 +298,7 @@ void ParagraphLayouter::update_line_references(LineReferences& engr, LUnits shif
 }
 
 //---------------------------------------------------------------------------------------
-void ParagraphLayouter::add_engrouter_shape(Engrouter* pEngrouter, LUnits lineHeight)
+void BoxContentLayouter::add_engrouter_shape(Engrouter* pEngrouter, LUnits lineHeight)
 {
     GmoObj* pGmo = pEngrouter->create_gm_object(m_pageCursor, get_line_refs());
 
@@ -317,7 +317,7 @@ void ParagraphLayouter::add_engrouter_shape(Engrouter* pEngrouter, LUnits lineHe
 }
 
 //---------------------------------------------------------------------------------------
-void ParagraphLayouter::page_initializations(GmoBox* pMainBox)
+void BoxContentLayouter::page_initializations(GmoBox* pMainBox)
 {
     m_pItemMainBox = pMainBox;
 
@@ -333,7 +333,7 @@ void ParagraphLayouter::page_initializations(GmoBox* pMainBox)
 }
 
 //---------------------------------------------------------------------------------------
-bool ParagraphLayouter::enough_space_in_box()
+bool BoxContentLayouter::enough_space_in_box()
 {
     return m_availableHeight >= m_pItemMainBox->get_height() + m_lineRefs.lineHeight;
 }
@@ -590,8 +590,12 @@ BoxEngrouter::~BoxEngrouter()
 //---------------------------------------------------------------------------------------
 void BoxEngrouter::measure()
 {
+    //set size if forced by user
     ImoBoxInline* pWrapper = dynamic_cast<ImoBoxInline*>(m_pCreatorImo);
-    set_size( pWrapper->get_size() );
+    if (pWrapper->get_size().width > 0.0)
+        m_size.width = pWrapper->get_size().width;
+    if (pWrapper->get_size().height > 0.0)
+        m_size.height = pWrapper->get_size().height;
 
     m_refLines.lineHeight = m_size.height;
     m_refLines.baseline = m_size.height;

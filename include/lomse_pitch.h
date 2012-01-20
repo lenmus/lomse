@@ -120,11 +120,11 @@ public:
     DiatonicPitch operator +(int i) { return DiatonicPitch(m_dp + i); }
     DiatonicPitch operator -=(int i) {
         m_dp -= i;
-        return *this; 
+        return *this;
     }
     DiatonicPitch operator +=(int i) {
         m_dp += i;
-        return *this; 
+        return *this;
     }
 
     // operator to cast to an int
@@ -148,6 +148,8 @@ public:
     bool operator <= (DiatonicPitch dp) { return m_dp <= int(dp); }
     bool operator >= (DiatonicPitch dp) { return m_dp >= int(dp); }
 
+protected:
+    inline bool is_valid() { return m_dp > 0; }
 };
 
 #define C4_DPITCH   DiatonicPitch(29)
@@ -331,7 +333,7 @@ private:
 public:
     //UPitch() : m_dp(-1), m_nAcc(0) {}
     //UPitch(DiatonicPitch dp, int nAcc) : m_dp(dp), m_nAcc(nAcc) {}
-    UPitch(int step, int octave, float acc=0.0f) 
+    UPitch(int step, int octave, float acc=0.0f)
         : m_step(step), m_octave(octave), m_acc(acc)
     {
     }

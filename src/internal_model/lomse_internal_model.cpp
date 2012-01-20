@@ -146,6 +146,16 @@ ImoParagraph* BlockLevelCreatorApi::add_paragraph(ImoStyle* pStyle)
 }
 
 //---------------------------------------------------------------------------------------
+ImoList* BlockLevelCreatorApi::add_list(int type, ImoStyle* pStyle)
+{
+    Document* pDoc = m_pParent->get_the_document();
+    ImoList* pImo = static_cast<ImoList*>(ImFactory::inject(k_imo_list, pDoc) );
+    pImo->set_list_type(type);
+    add_to_model(pImo, pStyle);
+    return pImo;
+}
+
+//---------------------------------------------------------------------------------------
 ImoContent* BlockLevelCreatorApi::add_content_wrapper(ImoStyle* pStyle)
 {
     Document* pDoc = m_pParent->get_the_document();
@@ -368,13 +378,13 @@ void ImoObj::set_dirty(bool dirty)
         propagate_dirty();
     }
     else
-        m_flags &= !k_dirty;
+        m_flags &= ~k_dirty;
 }
 
 //---------------------------------------------------------------------------------------
 void ImoObj::set_children_dirty(bool value)
 {
-    value ? m_flags |= k_children_dirty : m_flags &= !k_children_dirty;
+    value ? m_flags |= k_children_dirty : m_flags &= ~k_children_dirty;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1295,10 +1305,10 @@ ImoDocument::ImoDocument(Document* owner, const std::string& version)
 //---------------------------------------------------------------------------------------
 ImoDocument::~ImoDocument()
 {
-    //std::list<ImoStyle*>::iterator it;
-    //for (it = m_privateStyles.begin(); it != m_privateStyles.end(); ++it)
-    //    delete *it;
-    //m_privateStyles.clear();
+    std::list<ImoStyle*>::iterator it;
+    for (it = m_privateStyles.begin(); it != m_privateStyles.end(); ++it)
+        delete *it;
+    m_privateStyles.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -1806,6 +1816,47 @@ void ImoInstrGroup::add_instrument(ImoInstrument* pInstr)
 int ImoInstrGroup::get_num_instruments()
 {
     return static_cast<int>( m_instruments.size() );
+}
+
+
+//=======================================================================================
+// ImoList implementation
+//=======================================================================================
+ImoListItem* ImoList::add_listitem(ImoStyle* pStyle)
+{
+    Document* pDoc = get_the_document();
+    ImoListItem* pImo = static_cast<ImoListItem*>(
+                            ImFactory::inject(k_imo_listitem, pDoc) );
+    pImo->set_style(pStyle);
+    add_item(pImo);
+    return pImo;
+}
+
+
+//=======================================================================================
+// ImoListItem implementation
+//=======================================================================================
+void ImoListItem::accept_visitor(BaseVisitor& v)
+{
+    Visitor<ImoListItem>* vLi = NULL;
+    Visitor<ImoObj>* vObj = NULL;
+
+    vLi = dynamic_cast<Visitor<ImoListItem>*>(&v);
+    if (vLi)
+        vLi->start_visit(this);
+    else
+    {
+        vObj = dynamic_cast<Visitor<ImoObj>*>(&v);
+        if (vObj)
+            vObj->start_visit(this);
+    }
+
+    visit_children(v);
+
+    if (vLi)
+        vLi->end_visit(this);
+    else if (vObj)
+        vObj->end_visit(this);
 }
 
 

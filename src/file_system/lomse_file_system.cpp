@@ -190,7 +190,7 @@ InputStream* FileSystem::open_input_stream(const string& filelocator)
 //=======================================================================================
 LocalInputStream::LocalInputStream(const std::string& filelocator)
     : InputStream()
-    , m_file(filelocator.c_str())
+    , m_file(filelocator.c_str(), ios::in | ios::binary)
 {
     if(!m_file.is_open())
     {

@@ -121,6 +121,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_infoMIDI] = "infoMIDI";
     m_TypeToName[k_instrument] = "instrument";
     m_TypeToName[k_italic] = "italic";
+    m_TypeToName[k_itemizedlist] = "itemizedlist";
     m_TypeToName[k_joinBarlines] = "joinBarlines";
     m_TypeToName[k_key_signature] = "key";
     m_TypeToName[k_landscape] = "landscape";
@@ -134,6 +135,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_lineStyle] = "lineStyle";
     m_TypeToName[k_lineThickness] = "lineThickness";
     m_TypeToName[k_line_height] = "line-height";
+    m_TypeToName[k_listitem] = "listitem";
     m_TypeToName[k_margin] = "margin";
     m_TypeToName[k_margin_top] = "margin-top";
     m_TypeToName[k_margin_right] = "margin-right";
@@ -149,6 +151,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_normal] = "normal";
     m_TypeToName[k_note] = "n";   //note
     m_TypeToName[k_opt] = "opt";
+    m_TypeToName[k_orderedlist] = "orderedlist";
     m_TypeToName[k_padding] = "padding";
     m_TypeToName[k_padding_top] = "padding-top";
     m_TypeToName[k_padding_right] = "padding-right";
@@ -281,6 +284,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["infoMIDI"] = LOMSE_NEW LdpElementFunctor<k_infoMIDI>;
     m_NameToFunctor["instrument"] = LOMSE_NEW LdpElementFunctor<k_instrument>;
     m_NameToFunctor["italic"] = LOMSE_NEW LdpElementFunctor<k_italic>;
+    m_NameToFunctor["itemizedlist"] = LOMSE_NEW LdpElementFunctor<k_itemizedlist>;
     m_NameToFunctor["joinBarlines"] = LOMSE_NEW LdpElementFunctor<k_joinBarlines>;
     m_NameToFunctor["key"] = LOMSE_NEW LdpElementFunctor<k_key_signature>;
     m_NameToFunctor["landscape"] = LOMSE_NEW LdpElementFunctor<k_landscape>;
@@ -294,6 +298,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["lineStyle"] = LOMSE_NEW LdpElementFunctor<k_lineStyle>;
     m_NameToFunctor["lineThickness"] = LOMSE_NEW LdpElementFunctor<k_lineThickness>;
     m_NameToFunctor["line-height"] = LOMSE_NEW LdpElementFunctor<k_line_height>;
+    m_NameToFunctor["listitem"] = LOMSE_NEW LdpElementFunctor<k_listitem>;
     m_NameToFunctor["margin"] = LOMSE_NEW LdpElementFunctor<k_margin>;
     m_NameToFunctor["margin-top"] = LOMSE_NEW LdpElementFunctor<k_margin_top>;
     m_NameToFunctor["margin-right"] = LOMSE_NEW LdpElementFunctor<k_margin_right>;
@@ -309,6 +314,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["no"] = LOMSE_NEW LdpElementFunctor<k_no>;
     m_NameToFunctor["normal"] = LOMSE_NEW LdpElementFunctor<k_normal>;
     m_NameToFunctor["opt"] = LOMSE_NEW LdpElementFunctor<k_opt>;
+    m_NameToFunctor["orderedlist"] = LOMSE_NEW LdpElementFunctor<k_orderedlist>;
     m_NameToFunctor["padding"] = LOMSE_NEW LdpElementFunctor<k_padding>;
     m_NameToFunctor["padding-top"] = LOMSE_NEW LdpElementFunctor<k_padding_top>;
     m_NameToFunctor["padding-right"] = LOMSE_NEW LdpElementFunctor<k_padding_right>;

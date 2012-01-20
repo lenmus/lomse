@@ -43,15 +43,17 @@ protected:
     VSize m_bmpSize;
     USize m_imgSize;
     EPixelFormat m_format;
+    string m_error;
 
 public:
-    Image() : m_bmap(NULL) {}
+    Image();
     Image(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format, USize imgSize);
     virtual ~Image();
 
     //creation
     void load(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format, USize imgSize);
     void load_from_file(const string& locator);
+    void set_error_msg(const string& msg);
 
     //accessors
     inline unsigned char* get_buffer() { return m_bmap; }
@@ -63,6 +65,8 @@ public:
     inline VSize& get_bitmap_size() { return m_bmpSize; }
     int get_stride() { return m_bmpSize.width * (get_bits_per_pixel() / 8); }
     inline int get_format() { return m_format; }
+    inline string& get_error_msg() { return m_error; }
+    inline bool is_ok() { return m_error.empty(); }
 
     int get_bits_per_pixel();
     bool has_alpha();

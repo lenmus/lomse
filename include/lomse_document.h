@@ -110,7 +110,7 @@ public:
     void create_with_empty_score();
 
     //dirty
-    inline void clear_dirty() { m_flags &= !k_dirty; }
+    inline void clear_dirty() { m_flags &= ~k_dirty; }
     inline bool is_dirty() { return (m_flags & k_dirty) != 0; }
 
     //internal model

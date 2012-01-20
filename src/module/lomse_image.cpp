@@ -22,25 +22,59 @@
 
 #include "lomse_image_reader.h"
 
+#include <iostream>
+#include <sstream>
+#include <stdexcept>
+#include <cstring>
+#include <cstdlib>
+using namespace std;
 
 namespace lomse
 {
 
+//static unsigned char m_no_image[] =
+
 //=======================================================================================
 // Image implementation
 //=======================================================================================
-Image::Image(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format,
-                   USize imgSize)
+Image::Image(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format, USize imgSize)
     : m_bmap(NULL)
+    , m_error("")
 {
+    //AWARE: ownership of imgbuf is transferred to this Image object
+
     load(imgbuf, bmpSize, format, imgSize);
+}
+
+//---------------------------------------------------------------------------------------
+Image::Image()
+    : m_error("")
+{
+    m_bmpSize = VSize(24, 24);
+    //TODO: get display reolution from lomse initialization. Here it is assumed 96 ppi
+    m_imgSize = USize(24.0 * 2540.0f / 96.0f, 24.0 * 2540.0f / 96.0f);
+    m_format = k_pix_format_rgba32;
+
+    //allocate a buffer for the bitmap
+    int bmpsize = 24 * 24 * 4;   //24px width, 24px height, 4bytes per pixel (RGBA)
+    if ((m_bmap = (unsigned char*)malloc(bmpsize)) == NULL)
+        throw std::runtime_error("[Image constructor]: not enough memory for image buffer");
+
+    unsigned char m_no_image = 0x77;
+    memset(m_bmap, m_no_image, bmpsize);
 }
 
 //---------------------------------------------------------------------------------------
 Image::~Image()
 {
-    delete [] m_bmap;
-//    if (m_bmap) free(m_bmap);
+    //delete [] m_bmap;
+    if (m_bmap) free(m_bmap);
+}
+
+//---------------------------------------------------------------------------------------
+void Image::set_error_msg(const string& msg)
+{
+    m_error = msg;
 }
 
 //---------------------------------------------------------------------------------------
@@ -50,14 +84,10 @@ void Image::load(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format,
     m_bmpSize = bmpSize;
     m_imgSize = imgSize;
     m_format = format;
+    m_error = "";
 
-    int bpp = get_bits_per_pixel();
-    size_t size = bmpSize.width * bmpSize.height * (bpp / 8);
-    delete [] m_bmap;
-    m_bmap = LOMSE_NEW unsigned char[size];
-//    if (m_bmap) free(m_bmap);
-//    m_bmap = (unsigned char*)malloc(size);
-    memcpy(m_bmap, imgbuf, size);
+    if (m_bmap) free(m_bmap);
+    m_bmap = imgbuf;
 }
 
 //---------------------------------------------------------------------------------------
@@ -126,6 +156,12 @@ bool Image::has_alpha()
         case k_pix_format_abgr64:       // A-B-G-R, one byte per color component
         case k_pix_format_bgra64:       // B-G-R-A, native win32 BMP format
             return true;
+        default:
+        {
+            stringstream s;
+            s << "[Image::has_alpha] unsupported pixel format " << m_format;
+            throw std::runtime_error(s.str());
+        }
     }
     return false;       //compiler happy
 }

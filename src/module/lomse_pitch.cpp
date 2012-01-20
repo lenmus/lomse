@@ -649,7 +649,9 @@ string DiatonicPitch::get_ldp_name()
     // Returns the LDP note name (without accidentals). For example,
     // pitch 29 will return "c4".
 
-    return m_sNoteName[step()] + m_sOctave[octave()];
+    if (is_valid())
+        return m_sNoteName[step()] + m_sOctave[octave()];
+    throw runtime_error("Operation on non-valid DiatonicPitch");
 }
 
 //---------------------------------------------------------------------------------------

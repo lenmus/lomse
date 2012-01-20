@@ -7591,8 +7591,8 @@ SUITE(AnalyserTest)
         delete pIModel;
     }
 
-    // image ----------------------------------------------------------------------------
-
+//    // image ----------------------------------------------------------------------------
+//
 //    TEST_FIXTURE(AnalyserTestFixture, Image_Ok)
 //    {
 //        stringstream errormsg;
@@ -7601,7 +7601,7 @@ SUITE(AnalyserTest)
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        SpLdpTree tree = parser.parse_text(
-//            "(image (file \"chopin.png\"))");
+//            "(image (file \"test-image-1.png\"))");
 //        Analyser a(errormsg, m_libraryScope, &doc);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //
@@ -7616,6 +7616,65 @@ SUITE(AnalyserTest)
 //        delete tree->get_root();
 //        delete pIModel;
 //    }
+
+    // list -----------------------------------------------------------------------------
+
+    TEST_FIXTURE(AnalyserTestFixture, Listitem_created)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. link: missing mandatory element 'url'." << endl;
+        SpLdpTree tree = parser.parse_text(
+            "(listitem (txt \"This is the first item\"))");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pIModel->get_root()->is_listitem() == true );
+        ImoListItem* pLI = dynamic_cast<ImoListItem*>( pIModel->get_root() );
+        CHECK( pLI != NULL );
+        CHECK( pLI->get_num_items() == 1 );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pLI->get_first_item() );
+        CHECK( pText->get_text() == "This is the first item" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, List_created)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. link: missing mandatory element 'url'." << endl;
+        SpLdpTree tree = parser.parse_text(
+            "(itemizedlist (listitem (txt \"This is the first item\")))");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pIModel->get_root()->is_list() == true );
+        ImoList* pList = dynamic_cast<ImoList*>( pIModel->get_root() );
+        CHECK( pList != NULL );
+        CHECK( pList->get_list_type() == ImoList::k_itemized );
+        CHECK( pList->get_num_items() == 1 );
+        ImoListItem* pLI = pList->get_item(0);
+        CHECK( pLI->get_num_items() == 1 );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pLI->get_first_item() );
+        CHECK( pText->get_text() == "This is the first item" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
 
 }
 

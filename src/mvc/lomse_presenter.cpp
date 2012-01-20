@@ -167,9 +167,10 @@ PresenterBuilder::~PresenterBuilder()
 }
 
 //---------------------------------------------------------------------------------------
-Presenter* PresenterBuilder::new_document(int viewType, const std::string& content)
+Presenter* PresenterBuilder::new_document(int viewType, const std::string& content,
+                                          ostream& reporter)
 {
-    Document* pDoc = Injector::inject_Document(m_libScope);
+    Document* pDoc = Injector::inject_Document(m_libScope, reporter);
     if (content != "")
         pDoc->from_string(content);
     else
@@ -179,18 +180,20 @@ Presenter* PresenterBuilder::new_document(int viewType, const std::string& conte
 }
 
 //---------------------------------------------------------------------------------------
-Presenter* PresenterBuilder::open_document(int viewType, const std::string& filename)
+Presenter* PresenterBuilder::open_document(int viewType, const std::string& filename,
+                                           ostream& reporter)
 {
-    Document* pDoc = Injector::inject_Document(m_libScope);
+    Document* pDoc = Injector::inject_Document(m_libScope, reporter);
     pDoc->from_file(filename);
 
     return Injector::inject_Presenter(m_libScope, viewType, pDoc);
 }
 
 //---------------------------------------------------------------------------------------
-Presenter* PresenterBuilder::open_document(int viewType, LdpReader& reader)
+Presenter* PresenterBuilder::open_document(int viewType, LdpReader& reader,
+                                           ostream& reporter)
 {
-    Document* pDoc = Injector::inject_Document(m_libScope);
+    Document* pDoc = Injector::inject_Document(m_libScope, reporter);
     pDoc->from_input(reader);
 
     return Injector::inject_Presenter(m_libScope, viewType, pDoc);

@@ -751,6 +751,20 @@ protected:
         }
     }
 
+    //-----------------------------------------------------------------------------------
+    bool is_auxobj(int type)
+    {
+        return     type == k_beam
+                || type == k_text
+                || type == k_textbox
+                || type == k_line
+                || type == k_fermata
+                || type == k_tie
+                || type == k_tuplet
+                ;
+    }
+
+    //-----------------------------------------------------------------------------------
     ImoInlineObj* analyse_inline_object()
     {
         // { <inlineWrapper> | <link> | <textItem> | <image> | <button> }
@@ -1289,7 +1303,9 @@ public:
         {
             if (! (analyse_optional(k_score, pContent)
                  || analyse_optional(k_dynamic, pContent)
+                 || analyse_optional(k_itemizedlist, pContent)
                  || analyse_optional(k_heading, pContent)
+                 || analyse_optional(k_orderedlist, pContent)
                  || analyse_optional(k_para, pContent)
                  || analyse_optional(k_text, pContent)
                ))
@@ -2200,14 +2216,14 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoImage* pImg = static_cast<ImoImage*>( ImFactory::inject(k_imo_image, pDoc) );
 
-//        // [<style>]
-//        ImoStyle* pStyle = NULL;
-//        if (get_optional(k_style))
-//        {
-//            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-//            pStyle = get_doc_text_style( get_string_value() );
-//        }
-//        pHeading->set_style(pStyle);
+        // [<style>]
+        ImoStyle* pStyle = NULL;
+        if (get_optional(k_style))
+        {
+            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+            pStyle = get_doc_text_style( get_string_value() );
+        }
+        pImg->set_style(pStyle);
 
         // <file>
         if (get_mandatory(k_file))
@@ -2226,6 +2242,8 @@ protected:
         LmbDocLocator loc(locator);
         SpImage img = ImageReader::load_image( loc.get_locator_for_image(imagename) );
         pImg->set_content(img);
+        if (!img->is_ok())
+            report_msg(m_pAnalysedNode->get_line_number(), "Error loading image. " + img->get_error_msg());
     }
 };
 
@@ -2611,6 +2629,81 @@ protected:
         LdpElement* pValue = m_pParamToAnalyse->get_first_child();
         string url = pValue->get_value();
         pLink->set_url(url);
+    }
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <list> = ("itemizedlist" | "orderedlist" [<style>] <listitem>* )
+//@
+class ListAnalyser : public ElementAnalyser
+{
+public:
+    ListAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                 ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        ELdpElement type = m_pAnalysedNode->get_type();
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoList* pList = static_cast<ImoList*>(ImFactory::inject(k_imo_list, pDoc) );
+        pList->set_list_type(type == k_itemizedlist ? ImoList::k_itemized
+                                                    : ImoList::k_ordered);
+
+        // [<style>]
+        ImoStyle* pStyle = NULL;
+        if (get_optional(k_style))
+        {
+            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+            pStyle = get_doc_text_style( get_string_value() );
+        }
+        pList->set_style(pStyle);
+
+        // <listitem>*
+        while (analyse_optional(k_listitem, pList));
+        error_if_more_elements();
+
+        add_to_model(pList);
+    }
+};
+
+//@-------------------------------------------------------------------------------------
+//@ <listitem> = (listitem [<style>] <inlineObject>+)  [same as <paragraph>]
+//@
+class ListItemAnalyser : public ElementAnalyser
+{
+public:
+    ListItemAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                     ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoListItem* pListItem = static_cast<ImoListItem*>(
+                                ImFactory::inject(k_imo_listitem, pDoc) );
+
+        // [<style>]
+        ImoStyle* pStyle = NULL;
+        if (get_optional(k_style))
+        {
+            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+            pStyle = get_doc_text_style( get_string_value() );
+        }
+        pListItem->set_style(pStyle);
+
+        // <inlineObject>+
+        while( more_params_to_analyse() )
+        {
+            ImoInlineObj* pItem = analyse_inline_object();
+            if (pItem)
+                pListItem->add_item(pItem);
+
+            move_to_next_param();
+        }
+
+        add_to_model(pListItem);
     }
 };
 
@@ -5387,6 +5480,7 @@ ElementAnalyser* Analyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_group:           return LOMSE_NEW GroupAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_heading:         return LOMSE_NEW HeadingAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_image:           return LOMSE_NEW ImageAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_itemizedlist:    return LOMSE_NEW ListAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_infoMIDI:        return LOMSE_NEW InfoMidiAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_instrument:      return LOMSE_NEW InstrumentAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_key_signature:   return LOMSE_NEW KeySignatureAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -5394,6 +5488,7 @@ ElementAnalyser* Analyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_lenmusdoc:       return LOMSE_NEW LenmusdocAnalyser(this, m_reporter, m_libraryScope);
         case k_line:            return LOMSE_NEW LineAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_link:            return LOMSE_NEW LinkAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_listitem:        return LOMSE_NEW ListItemAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_metronome:       return LOMSE_NEW MetronomeAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_musicData:       return LOMSE_NEW MusicDataAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_na:              return LOMSE_NEW NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -5401,6 +5496,7 @@ ElementAnalyser* Analyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_newSystem:       return LOMSE_NEW ControlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_note:            return LOMSE_NEW NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_opt:             return LOMSE_NEW OptAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_orderedlist:     return LOMSE_NEW ListAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_pageLayout:      return LOMSE_NEW PageLayoutAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_pageMargins:     return LOMSE_NEW PageMarginsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_pageSize:        return LOMSE_NEW PageSizeAnalyser(this, m_reporter, m_libraryScope, pAnchor);

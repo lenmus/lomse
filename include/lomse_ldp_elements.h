@@ -51,8 +51,6 @@ enum ELdpElement
     k_settings,
 
     //staffobjs
-    k_staffobj_start,
-
     k_barline,
     k_clef,
     k_figuredBass,
@@ -67,11 +65,7 @@ enum ELdpElement
     k_spacer,
     k_time_signature,
 
-    k_staffobj_end,
-
     //auxobjs
-    k_auxobj_start,
-
     k_beam,
     k_text,
     k_textbox,
@@ -79,18 +73,19 @@ enum ELdpElement
     k_fermata,
     k_tie,
     k_tuplet,
-    k_auxobj_end,
 
     //doc_only objs
     k_dynamic,
     k_heading,
+    k_itemizedlist,
     k_link,
+    k_listitem,
+    k_orderedlist,
     k_para,
     k_styles,
     k_txt,
 
     //properties
-
     k_abbrev,
     k_anchorLine,
     k_background_color,
@@ -217,10 +212,7 @@ enum ELdpElement
     eElmLast,
 };
 
-//helper global functions
-extern bool is_auxobj(int type);
-extern bool is_staffobj(int type);
-
+//forward declarations
 class LdpElement;
 class ImoObj;
 typedef SmartPtr<LdpElement>    SpLdpElement;

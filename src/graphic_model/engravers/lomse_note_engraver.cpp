@@ -438,9 +438,13 @@ void NoteEngraver::add_to_chord_if_in_chord()
 {
     if (is_in_chord())
     {
-        if (m_pNote->is_start_of_chord())
+        ImoChord* pChord = m_pNote->get_chord();
+        ChordEngraver* pEngrv
+            = dynamic_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
+
+        if (!pEngrv)
             create_chord();
-        else if (is_last_note_of_chord())
+        else if (pEngrv->notes_missing() == 1)
             layout_chord();
         else
             add_to_chord();
@@ -451,7 +455,8 @@ void NoteEngraver::add_to_chord_if_in_chord()
 void NoteEngraver::create_chord()
 {
     ImoChord* pChord = m_pNote->get_chord();
-    ChordEngraver* pEngrv = LOMSE_NEW ChordEngraver(m_libraryScope, m_pMeter);
+    int numNotes = pChord->get_num_objects();
+    ChordEngraver* pEngrv = LOMSE_NEW ChordEngraver(m_libraryScope, m_pMeter, numNotes);
     m_pShapesStorage->save_engraver(pEngrv, pChord);
 
     pEngrv->set_start_staffobj(pChord, m_pNote, m_pNoteShape, m_iInstr, m_iStaff,
@@ -481,6 +486,9 @@ void NoteEngraver::layout_chord()
 //    pEngrv->set_prolog_width( prologWidth );
 //
     pEngrv->create_shapes();
+
+    m_pShapesStorage->remove_engraver(pChord);
+    delete pEngrv;
 }
 
 

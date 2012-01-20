@@ -122,6 +122,11 @@ int Document::from_input(LdpReader& reader)
     }
     catch (...)
     {
+        //this avoids programs crashes when a document is malformed but 
+        //will produce memory lekeages
+        m_pIModel = NULL;
+        m_pCompiler = NULL;
+        m_pIdAssigner = NULL;
         create_empty();
         return 0;
     }

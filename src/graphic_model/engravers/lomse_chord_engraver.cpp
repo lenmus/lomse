@@ -28,6 +28,8 @@
 #include "lomse_engraving_options.h"
 
 #include <cstdlib>      //abs
+#include <stdexcept>
+using namespace std;
 
 
 namespace lomse
@@ -37,9 +39,11 @@ namespace lomse
 //=======================================================================================
 // ClefEngraver implementation
 //=======================================================================================
-ChordEngraver::ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
+ChordEngraver::ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                             int numNotes)
     : RelAuxObjEngraver(libraryScope, pScoreMeter)
     , m_pBaseNoteData(NULL)
+    , m_numNotesMissing(numNotes)
 {
 }
 
@@ -78,6 +82,8 @@ void ChordEngraver::set_end_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
                                       int iSystem, int iCol)
 {
     add_note(pSO, pStaffObjShape);
+    if (m_numNotesMissing != 0)
+        throw runtime_error("[ChordEngraver::set_end_staffobj] Num added notes doesn't match exzpected notes in chord");
 }
 
 //---------------------------------------------------------------------------------------
@@ -94,6 +100,7 @@ int ChordEngraver::create_shapes()
 //---------------------------------------------------------------------------------------
 void ChordEngraver::add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape)
 {
+    m_numNotesMissing--;
     ImoNote* pNote = dynamic_cast<ImoNote*>(pSO);
     GmoShapeNote* pNoteShape = dynamic_cast<GmoShapeNote*>(pStaffObjShape);
     int posOnStaff = pNoteShape->get_pos_on_staff();

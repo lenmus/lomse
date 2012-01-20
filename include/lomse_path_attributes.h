@@ -155,8 +155,9 @@ struct PathAttributes
     //destructor
     ~PathAttributes()
     {
-        //TODO: Following sentence produces a crash. Why?
+        //AWARE: Following sentence produces a crash. Why?
         //delete fill_gradient;
+        //See explanation at ScreenDrawer destructor, and how to delele fill_gradient.
     }
 };
 

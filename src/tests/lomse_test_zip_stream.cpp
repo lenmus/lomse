@@ -311,7 +311,6 @@ SUITE(ZipInputStreamTest)
         InputStream* file = FileSystem::open_input_stream(path);
         MyZipInputStream* zs  = static_cast<MyZipInputStream*>(file);
 
-        int i=0;
         for (int i=0; i < 8; ++i)
             zs->get_char();
 
@@ -330,7 +329,6 @@ SUITE(ZipInputStreamTest)
         InputStream* file = FileSystem::open_input_stream(path);
         MyZipInputStream* zs  = static_cast<MyZipInputStream*>(file);
 
-        int i=0;
         for (int i=0; i < 97; ++i)
             zs->get_char();
 

@@ -24,6 +24,8 @@
 #include <pngconf.h>
 
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
 using namespace std;
 
 #include <cstdlib>
@@ -38,28 +40,62 @@ namespace lomse
 //=======================================================================================
 SpImage ImageReader::load_image(const string& locator)
 {
-    InputStream* pFile = FileSystem::open_input_stream(locator);
-    cout << "[ImageReader::load_image] " << locator << endl;
+    InputStream* pFile = NULL;
+    try
+    {
+        pFile = FileSystem::open_input_stream(locator)
+        ;
+        //find a reader that can decode the file
+        {
+            //PNG Format
+            PngImageDecoder decoder;
+            if (decoder.can_decode(pFile))
+            {
+                SpImage img = decoder.decode_file(pFile);
+                delete pFile;
+                return img;
+            }
+        }
+        {
+            //JPG Format
+            JpgImageDecoder decoder;
+            if (decoder.can_decode(pFile))
+            {
+                SpImage img = decoder.decode_file(pFile);
+                delete pFile;
+                return img;
+            }
+        }
 
-    //find a reader that can decode the file
-    {
-        //PNG Format
-        PngImageDecoder decoder;
-        if (decoder.can_decode(pFile))
-            return decoder.decode_file(pFile);
+        //other formats not supported. throw error
+        delete pFile;
+        stringstream s;
+        s << "[ImageReader::load_image] Image format not supported. Locator: "
+          << locator;
+        throw runtime_error(s.str());
     }
+    catch(exception& e)
     {
-        //JPG Format
-        JpgImageDecoder decoder;
-        if (decoder.can_decode(pFile))
-            return decoder.decode_file(pFile);
+        Image* pImage = LOMSE_NEW Image();
+        pImage->set_error_msg(e.what());
+        cerr << e.what() << " (catch in ImageReader::load_image)" << endl;
+        return SpImage(pImage);
     }
-    throw("Image format not supported");
+    catch(...)
+    {
+        Image* pImage = LOMSE_NEW Image();
+        pImage->set_error_msg("Non-standard unknown exception");
+        cerr << "Non-standard unknown exception (catch in ImageReader::load_image)" << endl;
+        return SpImage(pImage);
+    }
+    return SpImage( LOMSE_NEW Image() );   //compiler happy
 }
 
 //=======================================================================================
 // PngImageDecoder implementation
+//
 // See: http://www.libpng.org/pub/png/book/chapter13.html
+//      http://www.piko3d.com/tutorials/libpng-tutorial-loading-png-files-from-streams
 //=======================================================================================
 
 
@@ -89,26 +125,19 @@ bool PngImageDecoder::can_decode(InputStream* file)
 
     unsigned char header[8];
 
-    if (file->read(header, 8) != 8)
+    if (file->read(header, 8) == 8 && png_check_sig(header, 8))
+        return true;
+    else
+    {
+        //TODO: rewind file
         return false;
-
-    cout << "header=" << hex << (int)header[0] << (int)header[1] << (int)header[2] << (int)header[3]
-          << (int)header[4] << (int)header[5] << (int)header[6] << (int)header[7] << (int)header[8] << endl;
-    return header[0] == 0x89
-        && header[1] == 'P'
-        && header[2] == 'N'
-        && header[3] == 'G'
-        && header[4] == 0x0D
-        && header[5] == 0x0A
-        && header[6] == 0x1A
-        && header[7] == 0x0A;
+    }
 }
 
 //---------------------------------------------------------------------------------------
 SpImage PngImageDecoder::decode_file(InputStream* file)
 {
     //TODO: error checking and handling
-
 
     //create an empty image to be returned when errors
     Image* pImage = LOMSE_NEW Image();
@@ -117,12 +146,16 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
     png_structp pReadStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING,
                                                      NULL, NULL, NULL);
     if (!pReadStruct)
+    {
+        pImage->set_error_msg("[PngImageDecoder::decode_file] out of memory creating read struct");
         return SpImage(pImage);
+    }
 
     //create info struct
     png_infop pInfoStruct = png_create_info_struct(pReadStruct);
     if (!pInfoStruct)
     {
+        pImage->set_error_msg("[PngImageDecoder::decode_file] out of memory creating info struct");
         png_destroy_read_struct(&pReadStruct, 0, 0);
         return SpImage(pImage );
     }
@@ -178,6 +211,7 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
     int stride = int(width) * 4;
     if ((imgbuf = (unsigned char*)malloc(height * stride)) == NULL)
     {
+        pImage->set_error_msg("[PngImageDecoder::decode_file] error allocating memory for image");
         png_destroy_read_struct(&pReadStruct, &pInfoStruct, NULL);
         return SpImage(pImage);
     }
@@ -186,6 +220,7 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
     png_bytepp pRows = NULL;
     if ((pRows = (png_bytepp)malloc(height*sizeof(png_bytep))) == NULL)
     {
+        pImage->set_error_msg("[PngImageDecoder::decode_file] error allocating memory for line ptrs.");
         png_destroy_read_struct(&pReadStruct, &pInfoStruct, NULL);
         free(imgbuf);
         imgbuf = NULL;
@@ -209,10 +244,10 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
     pRows = NULL;
 
     //create the Image object
-    VSize bmpSize(height, width);
+    VSize bmpSize(width, height);
     EPixelFormat format = k_pix_format_rgba32;
     //TODO: get display reolution from lomse initialization. Here it is assumed 96 ppi
-    USize imgSize(float(height) * 2540.0f / 96.0f, float(width) * 2540.0f / 96.0f);
+    USize imgSize(float(width) * 2540.0f / 96.0f, float(height) * 2540.0f / 96.0f);
     delete pImage;
     pImage = LOMSE_NEW Image(imgbuf, bmpSize, format, imgSize);
 

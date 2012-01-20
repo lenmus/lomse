@@ -66,7 +66,8 @@ std::string ColStaffObjsEntry::to_string_with_ids()
 // ColStaffObjs implementation
 //=======================================================================================
 
-//auxiliary, for sort: by time, object type (barlines before objects in other lines), line and staff
+//auxiliary, for sort: by time, object type (barlines before objects in other lines),
+//line and staff
 bool is_lower_entry(ColStaffObjsEntry* a, ColStaffObjsEntry* b)
 {
     if ( is_lower_time(a->time(), b->time()) )

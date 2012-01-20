@@ -152,7 +152,7 @@ public:
     //selection
     inline bool is_selected() { return (m_flags & k_selected) != 0; }
     virtual void set_selected(bool value) { value ? m_flags |= k_selected
-                                                  : m_flags &= !k_selected; }
+                                                  : m_flags &= ~k_selected; }
 
     //hover (mouse over)
     inline bool is_hover() { return (m_flags & k_hover) != 0; }
@@ -331,14 +331,14 @@ public:
     void highlight_off() { set_highlighted(false); };
     void highlight_on() { set_highlighted(true); };
     virtual	void set_highlighted(bool value) { value ? m_flags |= k_highlighted
-                                                     : m_flags &= !k_highlighted; }
+                                                     : m_flags &= ~k_highlighted; }
     inline bool is_highlighted() { return (m_flags & k_highlighted) != 0; }
 
     //other flags
-    void set_hover(bool value) { value ? m_flags |= k_hover : m_flags &= !k_hover; }
-    void set_in_link(bool value) { value ? m_flags |= k_in_link : m_flags &= !k_in_link; }
+    void set_hover(bool value) { value ? m_flags |= k_hover : m_flags &= ~k_hover; }
+    void set_in_link(bool value) { value ? m_flags |= k_in_link : m_flags &= ~k_in_link; }
     void set_flag_value(bool value, unsigned int flag) {
-        value ? m_flags |= flag : m_flags &= !flag;
+        value ? m_flags |= flag : m_flags &= ~flag;
     }
 
 protected:

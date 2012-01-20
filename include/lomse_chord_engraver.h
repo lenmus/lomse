@@ -70,10 +70,11 @@ protected:
     bool m_fSomeNoteReversed;
     int m_noteType;
     LUnits m_stemWidth;
+    int m_numNotesMissing;
 
 
 public:
-    ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
+    ChordEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int numNotes);
     virtual ~ChordEngraver();
 
     //implementation of virtual methods from RelAuxObjEngraver
@@ -89,6 +90,8 @@ public:
     int create_shapes();
     int get_num_shapes() { return 0; }
     ShapeBoxInfo* get_shape_box_info(int i) { return NULL; }
+
+    inline int notes_missing() { return m_numNotesMissing; }
 
 
 protected:

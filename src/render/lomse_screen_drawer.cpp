@@ -76,6 +76,18 @@ ScreenDrawer::~ScreenDrawer()
 {
     delete m_pRenderer;
     delete m_pCalligrapher;
+
+    //AttrStorage objects are pod_bvector<PathAttributes>
+    //and pod_bvector doesn't invoke destructors, just dealloc memory. Therefore, we need to
+    //free memory allocated for GradientColors, to avoid memory leaks
+
+    unsigned int numAttr = m_attr_storage.size();
+    for (unsigned int i = 0; i < numAttr; ++i)
+    {
+        PathAttributes& attr = m_attr_storage[i];
+        delete attr.fill_gradient;
+        attr.fill_gradient = NULL;
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -115,6 +127,11 @@ void ScreenDrawer::pop_attr()
     {
         throw std::runtime_error("[ScreenDrawer::pop_attr] Attribute stack is empty");
     }
+
+//    PathAttributes& attr = cur_attr();
+//    delete attr.fill_gradient;
+//    attr.fill_gradient = NULL;
+
     m_attr_stack.remove_last();
 }
 

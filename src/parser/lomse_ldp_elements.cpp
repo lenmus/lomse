@@ -178,13 +178,4 @@ void LdpElement::set_imo(ImoObj* pImo)
 }
 
 
-
-//---------------------------------------------------------------------------------------
-// global functions related to elements
-//---------------------------------------------------------------------------------------
-
-bool is_auxobj(int type) { return type >= k_auxobj_start && type <= k_auxobj_end; }
-bool is_staffobj(int type) { return type >= k_staffobj_start && type <= k_staffobj_end; }
-
-
 }   //namespace lomse

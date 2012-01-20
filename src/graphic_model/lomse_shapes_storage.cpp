@@ -62,10 +62,7 @@ Engraver* ShapesStorage::get_engraver(ImoObj* pImo)
     if (it !=  m_engravers.end())
         return it->second;
     else
-    {
-        throw std::runtime_error( "ImoObj doesn't exists!" );
         return NULL;
-    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -74,6 +71,7 @@ void ShapesStorage::shape_ready_for_gmodel(ImoObj* pImo, int layer)
     Engraver* pEngrv = get_engraver(pImo);
     m_readyShapes.push_back( make_pair(pEngrv->get_shape(), layer) );
     remove_engraver(pImo);
+    delete pEngrv;
 }
 
 //---------------------------------------------------------------------------------------

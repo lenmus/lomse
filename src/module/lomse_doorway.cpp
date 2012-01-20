@@ -19,11 +19,15 @@
 //---------------------------------------------------------------------------------------
 
 #include "lomse_doorway.h"
+#include "lomse_config.h"
 
 #include "lomse_injectors.h"
 #include "lomse_agg_types.h"
 #include "lomse_presenter.h"
 #include "lomse_events.h"
+
+#include <sstream>
+using namespace std;
 
 namespace lomse
 {
@@ -52,24 +56,27 @@ Presenter* LomseDoorway::new_document(int viewType)
 }
 
 //---------------------------------------------------------------------------------------
-Presenter* LomseDoorway::new_document(int viewType, const string& ldpSource)
+Presenter* LomseDoorway::new_document(int viewType, const string& ldpSource,
+                                      ostream& reporter)
 {
     PresenterBuilder builder(*m_pLibraryScope);
-    return builder.new_document(viewType, ldpSource);
+    return builder.new_document(viewType, ldpSource, reporter);
 }
 
 //---------------------------------------------------------------------------------------
-Presenter* LomseDoorway::open_document(int viewType, const string& filename)
+Presenter* LomseDoorway::open_document(int viewType, const string& filename,
+                                       ostream& reporter)
 {
     PresenterBuilder builder(*m_pLibraryScope);
-    return builder.open_document(viewType, filename);
+    return builder.open_document(viewType, filename, reporter);
 }
 
 //---------------------------------------------------------------------------------------
-Presenter* LomseDoorway::open_document(int viewType, LdpReader& reader)
+Presenter* LomseDoorway::open_document(int viewType, LdpReader& reader,
+                                       ostream& reporter)
 {
     PresenterBuilder builder(*m_pLibraryScope);
-    return builder.open_document(viewType, reader);
+    return builder.open_document(viewType, reader, reporter);
 }
 
 //---------------------------------------------------------------------------------------
@@ -112,6 +119,31 @@ void LomseDoorway::null_request_function(void* pObj, Request* pRequest)
     //This is just a mock method to avoid crashes when using the libary without
     //initializing it
 }
+
+//---------------------------------------------------------------------------------------
+string LomseDoorway::get_version_string()
+{
+    //i.e. "0.7"
+
+    int major = LOMSE_VERSION_MAJOR;
+    int minor = LOMSE_VERSION_MINOR;
+    stringstream s;
+    s << major << "." << minor;
+    return s.str();
+}
+
+//---------------------------------------------------------------------------------------
+int LomseDoorway::get_version_number()
+{
+    //returns 1000 * major + minor
+    //i.e. "1.2" -> 1002
+    //i.e. "12.114" -> 12114
+
+    int major = LOMSE_VERSION_MAJOR;
+    int minor = LOMSE_VERSION_MINOR;
+    return 1000 * major + minor;
+}
+
 
 
 }   //namespace lomse

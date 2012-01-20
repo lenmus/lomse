@@ -38,6 +38,8 @@ class InternalModel;
 class ImoContent;
 class ImoContentObj;
 class ImoDocument;
+class ImoList;
+class ImoListItem;
 class ImoMultiColumn;
 class ImoStyles;
 class GraphicModel;
@@ -113,6 +115,30 @@ protected:
 //    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
 //
 //};
+
+
+//----------------------------------------------------------------------------------
+// ListLayouter
+//  layout algorithm for a collection of listitems.
+class ListLayouter : public Layouter
+{
+protected:
+    ImoList* m_pList;
+    LUnits m_indent;
+
+public:
+    ListLayouter(ImoContentObj* pItem, Layouter* pParent,
+                 GraphicModel* pGModel, LibraryScope& libraryScope, ImoStyles* pStyles);
+    virtual ~ListLayouter() {}
+
+    //implementation of Layouter virtual methods
+    void layout_in_box();
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
+
+protected:
+    void add_bullet(ImoListItem* pItem);
+
+};
 
 
 }   //namespace lomse

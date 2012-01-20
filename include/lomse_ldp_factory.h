@@ -16,13 +16,6 @@
 //  For any comment, suggestion or feature request, please contact the manager of
 //  the project at cecilios@users.sourceforge.net
 //
-//  ----------------------
-//  Credits:
-//      This file is based on the "LdpFactory.h" file from the MusicXML Library
-//      v.2.00, distributed under LGPL 2.1 or greater. Copyright (c) 2006 Grame,
-//      Grame Research Laboratory, 9 rue du Garet, 69001 Lyon - France,
-//      research@grame.fr.
-//
 //---------------------------------------------------------------------------------------
 
 #ifndef __LOMSE_LDP_FACTORY_H__
@@ -47,21 +40,16 @@ class LdpFunctor;
 class LOMSE_EXPORT LdpFactory
 {
 protected:
-    //the functors to create each specific ldp object
 	std::map<std::string, LdpFunctor*> m_NameToFunctor;
-    //association element-type <-> element-name
 	std::map<ELdpElement, std::string>	m_TypeToName;
 
 public:
     LdpFactory();
 	virtual ~LdpFactory();
 
-    //Creates an element from its name
 	LdpElement* create(const std::string& name, int numLine=0) const;
-    //Creates an element from its type
 	LdpElement* create(ELdpElement type, int numLine=0) const;
 
-    //Get the name from element type
     const std::string& get_name(ELdpElement type) const;
 
     //utility methods

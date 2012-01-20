@@ -24,7 +24,7 @@
 #include "lomse_internal_model.h"
 #include "lomse_content_layouter.h"
 #include "lomse_score_layouter.h"
-#include "lomse_paragraph_layouter.h"
+#include "lomse_box_content_layouter.h"
 
 namespace lomse
 {
@@ -159,9 +159,13 @@ Layouter* LayouterFactory::create_layouter(ImoContentObj* pItem, Layouter* pPare
         case k_imo_content:
             return LOMSE_NEW ContentLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
 
+        case k_imo_list:
+            return LOMSE_NEW ListLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+
         case k_imo_para:
         case k_imo_heading:
-            return LOMSE_NEW ParagraphLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+        case k_imo_listitem:
+            return LOMSE_NEW BoxContentLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
 
         case k_imo_multicolumn:
             return LOMSE_NEW MultiColumnLayouter(pItem, pParent, pGModel, libraryScope, pStyles);

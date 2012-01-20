@@ -28,60 +28,47 @@
 #ifndef __LOMSE_SMART_POINTER_H__
 #define __LOMSE_SMART_POINTER_H__
 
-#include <cassert>
-
 #include "lomse_build_options.h"
+
+#include <cassert>
+#include <sstream>
+#include <stdexcept>
+using namespace std;
+
 
 namespace lomse
 {
 
-/*!
- \brief     Base class for objects that would like to have support for smart pointers.
-
-    We use smart pointers based on reference counting. The policy used for counter
-    ownership is 'intrusive reference counting'. This implies that the reference
-    count is an "intruder" in the pointee. Class RefCounted provides the counter,
-    members to maintain the count and automatic object delete when the reference
-    count drops to zero. RefCounted is a mandatory base class for objects that
-    would like to have support for smart pointers.
-
-*/
+//---------------------------------------------------------------------------------------
+// RefCounted: Base class for objects with intrusive reference counting
 class LOMSE_EXPORT RefCounted
 {
 private:
-	unsigned int m_count;
+	int m_counter;
 public:
-	//! returns the reference count of the object
-	unsigned int refs() const { return m_count; }
-	//! addReference increments the ref count and checks for m_count overflow
-	void addReference() { m_count++; assert(m_count != 0); }
-	//! removeReference delete the object when m_count is zero
-	void removeReference() { if (--m_count == 0) delete this; }
+	inline int refs() const { return m_counter; }
+	void addReference() {
+        m_counter++;
+        if (m_counter == 0)
+            throw runtime_error("Reference counted object: invalid counter value");
+    }
+	void removeReference() { if (--m_counter == 0) delete this; }
 
 protected:
-	RefCounted() : m_count(0) {}
-	RefCounted(const RefCounted&): m_count(0) {}
-	//! destructor checks for non-zero m_count
-	virtual ~RefCounted() { assert (m_count == 0); }
+	RefCounted() : m_counter(0) {}
+	RefCounted(const RefCounted&): m_counter(0) {}
+	virtual ~RefCounted() { assert (m_counter == 0); }
 	RefCounted& operator=(const RefCounted&) { return *this; }
 
 };
 
-/*!
-\brief the smart pointer implementation
-
-	A smart pointer is in charge of maintaining the objects reference count
-	by the way of pointers operators overloading. It supports class
-	inheritance and conversion whenever possible.
-\n	Instances of the SmartPtr class are supposed to use \e RefCounted types (or at least
-	objects that implements the \e addReference and \e removeReference
-	methods in a consistent way).
-*/
+//---------------------------------------------------------------------------------------
+// SmartPtr: base class for objects having smart pointers.
+//    Deriving from SmartPtr also requires deriving from RefCounted
 template<class T>
 class SmartPtr
 {
 private:
-	//! the actual pointer to the class
 	T* m_pThePointer;
 
 public:

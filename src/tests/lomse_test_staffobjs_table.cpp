@@ -596,7 +596,6 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-
     TEST_FIXTURE(ColStaffObjsTestFixture, Anacrusis)
     {
         Document doc(m_libraryScope);
@@ -885,6 +884,65 @@ SUITE(ColStaffObjsTest)
         CHECK( is_equal_time((*it)->time(), 64.0f) );
         CHECK( (*it)->line() == 0 );
         CHECK( (*it)->staff() == 0 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(ColStaffObjsTestFixture, ChordAcrossTwoStaves)
+    {
+        Document doc(m_libraryScope);
+        LdpParser parser(cout, m_pLdpFactory);
+        SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 1.6) (instrument (staves 2)(musicData "
+            "(clef G p1)(clef F4 p2)(key C)(time 2 4)(chord (n c3 w p2)(n g3 w p2)"
+            "(n e4 w p1)(n c5 w p1))(barline)) )) ))" );
+        Analyser a(cout, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pColStaffObjs = builder.build(pScore, true /*sort table*/);
+        //pColStaffObjs->dump();
+        CHECK( pColStaffObjs->num_lines() == 2 );
+        CHECK( pColStaffObjs->num_entries() == 11 );
+        CHECK( pColStaffObjs->is_anacrusis_start() == false );
+        //pColStaffObjs->dump();
+        ColStaffObjs::iterator it = pColStaffObjs->begin();
+                    //(clef G p1)
+        CHECK( (*it)->imo_object()->is_clef() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;       //(key C)
+        CHECK( (*it)->imo_object()->is_key_signature() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;       //(time 2 4)
+        CHECK( (*it)->imo_object()->is_time_signature() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;       //(n e4 w p1)
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;       //(n c5 w p1)
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;       //(clef F4 p2)
+        CHECK( (*it)->imo_object()->is_clef() == true );
+        CHECK( (*it)->line() == 1 );
+        ++it;       //(key C)
+        CHECK( (*it)->imo_object()->is_key_signature() == true );
+        CHECK( (*it)->line() == 1 );
+        ++it;       //(time 2 4)
+        CHECK( (*it)->imo_object()->is_time_signature() == true );
+        CHECK( (*it)->line() == 1 );
+        ++it;       //(n c3 w p2)
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 1 );
+        ++it;       //(n g3 w p2)
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 1 );
+        ++it;       //(barline)
+        CHECK( (*it)->imo_object()->is_barline() == true );
+        CHECK( (*it)->line() == 0 );
+        CHECK( is_equal_time((*it)->time(), 256.0f) );
 
         delete tree->get_root();
         delete pIModel;

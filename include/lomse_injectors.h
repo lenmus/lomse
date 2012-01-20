@@ -124,7 +124,8 @@ public:
     static ModelBuilder* inject_ModelBuilder(DocumentScope& documentScope);
     static LdpCompiler* inject_LdpCompiler(LibraryScope& libraryScope,
                                            Document* pDoc);
-    static Document* inject_Document(LibraryScope& libraryScope);
+    static Document* inject_Document(LibraryScope& libraryScope,
+                                     ostream& reporter = cout);
     static ScreenDrawer* inject_ScreenDrawer(LibraryScope& libraryScope);
 //    static UserCommandExecuter* inject_UserCommandExecuter(Document* pDoc);
     static View* inject_View(LibraryScope& libraryScope, int viewType, Document* pDoc);  //UserCommandExecuter* pExec)

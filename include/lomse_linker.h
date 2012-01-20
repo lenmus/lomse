@@ -37,6 +37,7 @@ class ImoCursorInfo;
 class ImoFontStyleDto;
 class ImoInstrGroup;
 class ImoInstrument;
+class ImoListItem;
 class ImoMidiInfo;
 class ImoObj;
 class ImoOptionInfo;
@@ -76,6 +77,7 @@ protected:
     ImoObj* add_system_info(ImoSystemInfo* pSI);
     ImoObj* add_bezier(ImoBezierInfo* pBezier);
     ImoObj* add_cursor(ImoCursorInfo* pCursor);
+    ImoObj* add_listitem(ImoListItem* pItem);
     ImoObj* add_midi_info(ImoMidiInfo* pInfo);
     ImoObj* add_param_info(ImoParamInfo* pParam);
     ImoObj* add_staff_info(ImoStaffInfo* pInfo);
