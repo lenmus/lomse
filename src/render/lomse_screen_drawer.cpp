@@ -68,6 +68,7 @@ ScreenDrawer::ScreenDrawer(LibraryScope& libraryScope)
     : Drawer(libraryScope)
     , m_pRenderer( RendererFactory::create_renderer(libraryScope, m_attr_storage, m_path) )
     , m_pCalligrapher( LOMSE_NEW Calligrapher(m_pFonts, m_pRenderer) )
+    , m_numPaths(0)
 {
 }
 
@@ -76,73 +77,46 @@ ScreenDrawer::~ScreenDrawer()
 {
     delete m_pRenderer;
     delete m_pCalligrapher;
+    delete_paths();
+}
 
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::delete_paths()
+{
     //AttrStorage objects are pod_bvector<PathAttributes>
     //and pod_bvector doesn't invoke destructors, just dealloc memory. Therefore, we need to
-    //free memory allocated for GradientColors, to avoid memory leaks
+    //free memory allocated for GradientAttributes, to avoid memory leaks
 
-    unsigned int numAttr = m_attr_storage.size();
-    for (unsigned int i = 0; i < numAttr; ++i)
+    for (int i = 0; i < m_numPaths; ++i)
     {
         PathAttributes& attr = m_attr_storage[i];
         delete attr.fill_gradient;
         attr.fill_gradient = NULL;
     }
+
+    m_attr_storage.clear();
+    m_numPaths = 0;
 }
 
 //---------------------------------------------------------------------------------------
 void ScreenDrawer::begin_path()
 {
-    push_attr();
     unsigned idx = m_path.start_new_path();
-    m_attr_storage.add(PathAttributes(cur_attr(), idx));
+    m_attr_storage.add( m_numPaths==0 ? PathAttributes(idx) : PathAttributes(cur_attr(), idx) );
+    m_numPaths++;
 }
 
 //---------------------------------------------------------------------------------------
 void ScreenDrawer::end_path()
 {
     if(m_attr_storage.size() == 0)
-    {
         throw std::runtime_error("[ScreenDrawer::end_path] The path was not begun");
-    }
-    PathAttributes& attr = cur_attr();
-    unsigned idx = m_attr_storage[m_attr_storage.size() - 1].path_index;
-    attr.path_index = idx;
-    m_attr_storage[m_attr_storage.size() - 1] = attr;
-    pop_attr();
-}
-
-//---------------------------------------------------------------------------------------
-void ScreenDrawer::push_attr()
-{
-    m_attr_stack.add(m_attr_stack.size() ?
-                        m_attr_stack[m_attr_stack.size() - 1] :
-                        PathAttributes());
-}
-
-//---------------------------------------------------------------------------------------
-void ScreenDrawer::pop_attr()
-{
-    if(m_attr_stack.size() == 0)
-    {
-        throw std::runtime_error("[ScreenDrawer::pop_attr] Attribute stack is empty");
-    }
-
-//    PathAttributes& attr = cur_attr();
-//    delete attr.fill_gradient;
-//    attr.fill_gradient = NULL;
-
-    m_attr_stack.remove_last();
 }
 
 //---------------------------------------------------------------------------------------
 PathAttributes& ScreenDrawer::cur_attr()
 {
-    if(m_attr_stack.size() == 0)
-    {
-        throw std::runtime_error("[ScreenDrawer::cur_attr] Attribute stack is empty");
-    }
-    return m_attr_stack[m_attr_stack.size() - 1];
+    return m_attr_storage[m_numPaths - 1];
 }
 
 //---------------------------------------------------------------------------------------
@@ -364,6 +338,7 @@ void ScreenDrawer::render(FontRasterizer& ras, FontScanline& sl, Color color)
         m_pRenderer->render(ras, sl, color);
     //else
     //    m_pRenderer->render(*this, m_renBaseComp, m_renSolidComp, ras, sl);
+    delete_paths();
 }
 
 //---------------------------------------------------------------------------------------
@@ -543,7 +518,7 @@ Pixels ScreenDrawer::LUnits_to_Pixels(double value)
 void ScreenDrawer::reset(RenderingBuffer& buf, Color bgcolor)
 {
     m_pRenderer->initialize(buf, bgcolor);
-    m_attr_stack.remove_all();
+    delete_paths();
 }
 
 //---------------------------------------------------------------------------------------
@@ -563,6 +538,7 @@ void ScreenDrawer::set_transform(TransAffine& transform)
 void ScreenDrawer::render()
 {
     m_pRenderer->render();
+    delete_paths();
 }
 
 //---------------------------------------------------------------------------------------

@@ -26,6 +26,8 @@
 #include "lomse_sizers.h"
 #include "lomse_calligrapher.h"
 #include "lomse_shape_text.h"
+#include "lomse_box_content_layouter.h"
+#include "lomse_score_player_ctrl.h"
 
 
 namespace lomse
@@ -237,7 +239,6 @@ void ListLayouter::layout_in_box()
     TreeNode<ImoObj>::children_iterator it;
     for (it = m_pList->begin(); it != m_pList->end(); ++it)
     {
-        add_bullet( static_cast<ImoListItem*>(*it) );
         layout_item( static_cast<ImoContentObj*>( *it ), m_pItemMainBox );
     }
     set_layout_is_finished(true);
@@ -255,27 +256,56 @@ void ListLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
     m_pItemMainBox->set_height(height);
 }
 
-//---------------------------------------------------------------------------------------
-void ListLayouter::add_bullet(ImoListItem* pItem)
-{
-    //TO_FIX: Bullet position has to take into account top margin,padding and border of
-    //listitem.
-    LUnits xPos = m_pageCursor.x - 500.0f;
-    LUnits yPos = m_pageCursor.y;
-    ImoStyle* pStyle = pItem->get_style();
-    if (pStyle)
-    {
-        yPos += pStyle->get_lunits_property(ImoStyle::k_margin_top);
-        yPos += pStyle->get_lunits_property(ImoStyle::k_border_width_top);
-        yPos += pStyle->get_lunits_property(ImoStyle::k_padding_top);
-    }
 
-//    GmoBox* pLiBox = get_listitem_box();
-//    UPos pos = pLiBox->get
-    GmoShape* pShape = LOMSE_NEW GmoShapeText(pItem, 0, "*", pItem->get_style(),
-                                              xPos, yPos, m_libraryScope);
-    m_pItemMainBox->add_shape(pShape, GmoShape::k_layer_staff);
+
+//=======================================================================================
+// ScorePlayerLayouter implementation
+//=======================================================================================
+ScorePlayerLayouter::ScorePlayerLayouter(ImoContentObj* pItem, Layouter* pParent,
+                                 GraphicModel* pGModel, LibraryScope& libraryScope,
+                                 ImoStyles* pStyles)
+    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles)
+    , m_pPlayer( dynamic_cast<ImoScorePlayer*>(pItem) )
+{
 }
+
+//---------------------------------------------------------------------------------------
+void ScorePlayerLayouter::layout_in_box()
+{
+    set_cursor_and_available_space(m_pItemMainBox);
+
+
+    //WordEngrouter engrouter(m_pPlayer, m_libraryScope, "Play");
+    //LineReferences refs;
+
+    //GmoShape* pShape = dynamic_cast<GmoShape*>(
+    //                        engrouter.create_gm_object(m_pageCursor, refs) );
+    //m_pItemMainBox->add_shape(pShape, GmoShape::k_layer_staff);
+    //m_pageCursor.x += pShape->get_width();
+    //m_pageCursor.y += pShape->get_height() + 500.0f;
+
+    Control* pControl = m_pPlayer->get_player();
+    pControl->measure();
+    GmoBoxControl* pBox = pControl->layout(m_libraryScope, m_pageCursor);
+    m_pItemMainBox->add_child_box(pBox);
+    m_pageCursor.x += pBox->get_width();
+    m_pageCursor.y += pBox->get_height() + 500.0f;
+
+    set_layout_is_finished(true);
+}
+
+//---------------------------------------------------------------------------------------
+void ScorePlayerLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
+                                   LUnits height)
+{
+    m_pItemMainBox = LOMSE_NEW GmoBoxDocPageContent(m_pPlayer);
+    pParentBox->add_child_box(m_pItemMainBox);
+
+    m_pItemMainBox->set_origin(pos.x, pos.y);
+    m_pItemMainBox->set_width(width);
+    m_pItemMainBox->set_height(height);
+}
+
 
 
 }  //namespace lomse

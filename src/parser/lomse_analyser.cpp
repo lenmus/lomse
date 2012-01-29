@@ -41,6 +41,7 @@
 #include "lomse_im_factory.h"
 #include "lomse_document.h"
 #include "lomse_image_reader.h"
+#include "lomse_score_player_ctrl.h"
 
 using namespace std;
 
@@ -1278,7 +1279,8 @@ protected:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ <content> = (content { <score> | <text> | <para> | <heading> }
+//@ <content> = (content { <heading> | <dynamic> | <itemizedlist> | <orderedlist> |
+//@                        <para> | <score> | <scorePlayer> | <text> }* )
 
 class ContentAnalyser : public ElementAnalyser
 {
@@ -1303,10 +1305,11 @@ public:
         {
             if (! (analyse_optional(k_score, pContent)
                  || analyse_optional(k_dynamic, pContent)
-                 || analyse_optional(k_itemizedlist, pContent)
                  || analyse_optional(k_heading, pContent)
+                 || analyse_optional(k_itemizedlist, pContent)
                  || analyse_optional(k_orderedlist, pContent)
                  || analyse_optional(k_para, pContent)
+                 || analyse_optional(k_score_player, pContent)
                  || analyse_optional(k_text, pContent)
                ))
             {
@@ -3812,7 +3815,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, pDoc));
-        m_pAnalyser->set_score_being_analysed(pScore);
+        m_pAnalyser->score_analysis_begin(pScore);
 
         // <vers>
         if (get_mandatory(k_vers))
@@ -3869,7 +3872,7 @@ public:
         error_if_more_elements();
 
         add_to_model(pScore);
-        m_pAnalyser->set_score_being_analysed(NULL);
+        m_pAnalyser->score_analysis_end();
     }
 
 protected:
@@ -3909,12 +3912,11 @@ protected:
 };
 
 //@-------------------------------------------------------------------------------------
-//@ <scorePlayer> = (scorePlayer <opt>+ )
-//@ <file> = (file <string>)
+//@ <scorePlayer> = (scorePlayer [<style>] <opt>* )
+//@ <opt> = (opt <string>)
 //@
 //@
 //@
-
 class ScorePlayerAnalyser : public ElementAnalyser
 {
 public:
@@ -3924,26 +3926,23 @@ public:
 
     void do_analysis()
     {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoImage* pImg = static_cast<ImoImage*>( ImFactory::inject(k_imo_image, pDoc) );
-//
-////        // [<style>]
-////        ImoStyle* pStyle = NULL;
-////        if (get_optional(k_style))
-////        {
-////            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-////            pStyle = get_doc_text_style( get_string_value() );
-////        }
-////        pHeading->set_style(pStyle);
-//
-//        // <file>
-//        if (get_mandatory(k_file))
-//        {
-//            LdpElement* pValue = m_pParamToAnalyse->get_first_child();
-//            pImg->set_file( pValue->get_value() );
-//        }
-//
-//        add_to_model(pImg);
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoScorePlayer* pSP = static_cast<ImoScorePlayer*>(
+                                    ImFactory::inject(k_imo_score_player, pDoc) );
+        ScorePlayerCtrl* pPlayer = LOMSE_NEW ScorePlayerCtrl(m_libraryScope, pSP, pDoc);
+        pSP->attach_player(pPlayer);
+        pSP->attach_score( m_pAnalyser->get_last_analysed_score() );
+
+        // [<style>]
+        ImoStyle* pStyle = NULL;
+        if (get_optional(k_style))
+        {
+            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+            pStyle = get_doc_text_style( get_string_value() );
+        }
+        pSP->set_style(pStyle);
+
+        add_to_model(pSP);
     }
 };
 
@@ -4450,7 +4449,10 @@ public:
         //    else if (get_optional(k_string)
         //        break;
         //    else
-        //        error_invalid_param();
+            //{
+            //    error_invalid_param();
+            //    move_to_next_param();
+            //}
         //}
 
         // <string>
@@ -4533,7 +4535,10 @@ public:
                 else if (get_optional(k_dy))
                     pText->set_user_location_y( get_location_param() );
                 else
+                {
                     error_invalid_param();
+                    move_to_next_param();
+                }
             }
             error_if_more_elements();
 
@@ -4690,9 +4695,10 @@ public:
                 else if (get_optional(k_dy))
                     pTitle->set_user_location_y( get_location_param() );
                 else
+                {
                     error_invalid_param();
-
-                move_to_next_param();
+                    move_to_next_param();
+                }
             }
             error_if_more_elements();
 
@@ -5125,9 +5131,10 @@ Analyser::Analyser(ostream& reporter, LibraryScope& libraryScope, Document* pDoc
     , m_pOldBeamsBuilder(NULL)
     , m_pTupletsBuilder(NULL)
     , m_pSlursBuilder(NULL)
-    , m_pScore(NULL)
+    , m_pCurScore(NULL)
+    , m_pLastScore(NULL)
     , m_pImoDoc(NULL)
-    , m_pTree(NULL)
+    , m_pTree()
     , m_fileLocator("")
     , m_nShowTupletBracket(k_yesno_default)
     , m_nShowTupletNumber(k_yesno_default)
@@ -5153,7 +5160,7 @@ void Analyser::delete_relation_builders()
 }
 
 //---------------------------------------------------------------------------------------
-ImoObj* Analyser::analyse_tree_and_get_object(LdpTree* tree)
+ImoObj* Analyser::analyse_tree_and_get_object(SpLdpTree tree)
 {
     delete_relation_builders();
     m_pTiesBuilder = LOMSE_NEW TiesBuilder(m_reporter, this);
@@ -5173,7 +5180,7 @@ ImoObj* Analyser::analyse_tree_and_get_object(LdpTree* tree)
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* Analyser::analyse_tree(LdpTree* tree, const string& locator)
+InternalModel* Analyser::analyse_tree(SpLdpTree tree, const string& locator)
 {
     m_fileLocator = locator;
     ImoObj* pRoot = analyse_tree_and_get_object(tree);

@@ -35,6 +35,7 @@ class ImoBezierInfo;
 class ImoContent;
 class ImoCursorInfo;
 class ImoFontStyleDto;
+class ImoInlineObj;
 class ImoInstrGroup;
 class ImoInstrument;
 class ImoListItem;
@@ -90,6 +91,7 @@ protected:
     ImoObj* add_attachment(ImoAuxObj* pAuxObj);
     ImoObj* add_child(int parentType, ImoObj* pImo);
     ImoObj* add_font_style(ImoFontStyleDto* pDto);
+    ImoObj* add_inline_or_block_item(ImoInlineObj* pImo);
 
 };
 

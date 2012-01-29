@@ -88,6 +88,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc)
         case k_imo_reldataobjs:         pObj = LOMSE_NEW ImoReldataobjs();        break;
         case k_imo_rest:                pObj = LOMSE_NEW ImoRest();               break;
         case k_imo_score:               pObj = LOMSE_NEW ImoScore(pDoc);          break;
+        case k_imo_score_player:        pObj = LOMSE_NEW ImoScorePlayer();        break;
         case k_imo_score_text:          pObj = LOMSE_NEW ImoScoreText();          break;
         case k_imo_score_title:         pObj = LOMSE_NEW ImoScoreTitle();         break;
 //        case k_imo_size_dto:        pObj = LOMSE_NEW ImoParagraph();              break;

@@ -57,9 +57,10 @@ SUITE(LdpElementsTest)
 {
     TEST_FIXTURE(LdpElementsTestFixture, CanCreateElementFromName)
     {
-        SpLdpElement clef = m_pLdpFactory->create("clef");
+        LdpElement* clef = m_pLdpFactory->create("clef");
         CHECK( clef->get_type() == k_clef );
         CHECK( clef->get_name() == "clef" );
+        delete clef;
     }
 
     TEST_FIXTURE(LdpElementsTestFixture, CanCreateElementFromType)
@@ -80,10 +81,11 @@ SUITE(LdpElementsTest)
 
     TEST_FIXTURE(LdpElementsTestFixture, CanAddSimpleSubElements)
     {
-        SpLdpElement note = m_pLdpFactory->create("n");
+        LdpElement* note = m_pLdpFactory->create("n");
         note->append_child( m_pLdpFactory->new_value(k_pitch, "c4") );
         //cout << note->to_string() << endl;
         CHECK( note->to_string() == "(n c4)" );
+        delete note;
     }
 
     TEST_FIXTURE(LdpElementsTestFixture, CanAddCompositeSubElements)

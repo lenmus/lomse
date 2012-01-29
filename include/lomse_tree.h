@@ -27,15 +27,15 @@
 #include <iterator>
 #include <stdexcept>
 
-#include "lomse_smart_pointer.h"
 #include "lomse_visitor.h"
+
 
 namespace lomse
 {
 
 
 template <typename T>
-class LOMSE_EXPORT Tree : virtual public RefCounted
+class Tree
 {
 protected:
 	T* m_root;
@@ -216,25 +216,17 @@ public:
 
 	        T* operator *() const { return m_currentNode; }
 
-	        children_iterator& operator ++() {
-                //cout << "before: it=" << m_currentNode.get_pointer() << endl;
+	        children_iterator& operator ++()
+	        {
                 if (m_currentNode)
-                {
-                    //cout << "sibling=" << m_currentNode->get_next_sibling() << endl;
                     m_currentNode = m_currentNode->get_next_sibling();
-                }
-                //cout << "after: it=" << m_currentNode.get_pointer() << endl;
                 return *this;
             }
 
-	        children_iterator& operator --() {
-                //cout << "before: it=" << m_currentNode.get_pointer() << endl;
+	        children_iterator& operator --()
+	        {
                 if (m_currentNode)
-                {
-                    //cout << "sibling=" << m_currentNode->get_next_sibling() << endl;
                     m_currentNode = m_currentNode->get_prev_sibling();
-                }
-                //cout << "after: it=" << m_currentNode.get_pointer() << endl;
                 return *this;
             }
 
@@ -271,10 +263,7 @@ void TreeNode<T>::append_child(T* child)
 
     //links in old last child
     if (oldLastChild)
-    {
-        assert( oldLastChild->get_next_sibling() == NULL );
         oldLastChild->set_next_sibling( child );
-    }
 
     //cout << "Append child ----------------------------------" << endl;
     //cout << "first child: " << m_firstChild << ", last child: " << m_lastChild << endl;
@@ -297,7 +286,7 @@ int TreeNode<T>::get_num_children()
 	int numChildren = 0;
     for (it=this->begin(); it != this->end(); ++it)
     {
-        //cout << "it=" << (*it).get_pointer() << endl;
+        //cout << "it=" << (*it).get_p() << endl;
         //cout << "this.end=" << *(this->end()) << endl;
         numChildren++;
     }

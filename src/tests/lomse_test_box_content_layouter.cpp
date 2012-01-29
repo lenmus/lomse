@@ -506,10 +506,16 @@ SUITE(EngroutersCreatorTest)
 // helper, access to protected members
 class MyBoxContentLayouter : public BoxContentLayouter
 {
+protected:
+    LUnits m_firstLineIndent;
+    string m_prefix;
+
 public:
     MyBoxContentLayouter(ImoContentObj* pImo, GraphicModel* pGModel,
                         LibraryScope& libraryScope, ImoStyles* pStyles)
         : BoxContentLayouter(pImo, NULL, pGModel, libraryScope, pStyles)
+        , m_firstLineIndent(0.0f)
+        , m_prefix("")
     {
     }
     MyBoxContentLayouter(LibraryScope& libraryScope, LineReferences& refs)
@@ -519,9 +525,16 @@ public:
     }
     virtual ~MyBoxContentLayouter() {}
 
+    //mandatory overrides
+    LUnits get_first_line_indent() { return m_firstLineIndent; }
+    string get_first_line_prefix() { return m_prefix; }
+
     GmoBox* my_get_main_box() { return m_pItemMainBox; }
     UPoint my_get_cursor() { return m_pageCursor; }
 
+    bool my_is_first_line() { return is_first_line(); }
+    void my_set_first_line_indent(LUnits value) { m_firstLineIndent = value; }
+    void my_set_first_line_prefix(const string& prefix) { m_prefix = prefix; }
     void my_page_initializations(GmoBox* pMainBox) { page_initializations(pMainBox); }
     void my_create_engrouters() { create_engrouters(); }
     void my_add_line() { add_line(); }
@@ -587,6 +600,7 @@ SUITE(BoxContentLayouterTest)
         box.set_owner_box(&page);
 
         MyBoxContentLayouter lyt(pPara, &model, m_libraryScope, pStyles);
+        CHECK( lyt.my_is_first_line() == true );
         lyt.prepare_to_start_layout();
         lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 10000.0f, 20000.0f);
         lyt.layout_in_box();
@@ -751,6 +765,53 @@ SUITE(BoxContentLayouterTest)
         CHECK( is_equal(pWord->get_top(), 0.0f) );
         CHECK( is_equal(lyt.my_get_cursor().x, 1000.0f) );
         CHECK( is_equal(lyt.my_get_cursor().y, 1635.0f) );
+    }
+
+    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_FirstLineIndent)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoStyle* pDefStyle = doc.get_default_style();
+        pDefStyle->vertical_align(ImoStyle::k_valign_top);
+        ImoStyle* pParaStyle = doc.create_style("para");
+        pParaStyle->margin_left(1000.0f);
+        ImoParagraph* pPara = doc.get_imodoc()->get_content()->add_paragraph(pParaStyle);
+        pPara->add_text_item("Exercise options", pDefStyle);
+
+        GraphicModel model;
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoStyles* pStyles = pDoc->get_styles();
+        GmoBoxDocPage page(NULL);
+        GmoBoxDocPageContent box(NULL);
+        box.set_owner_box(&page);
+
+        MyBoxContentLayouter lyt(pPara, &model, m_libraryScope, pStyles);
+        lyt.my_set_first_line_indent(2000.0f);
+        lyt.prepare_to_start_layout();
+        lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 10000.0f, 20000.0f);
+        lyt.layout_in_box();
+        lyt.my_set_box_height();
+        lyt.my_add_end_margins();
+
+        GmoBox* pParaBox = lyt.my_get_main_box();
+        GmoShape* pWord = pParaBox->get_shape(0);
+        //cout << "box: org=(" << pParaBox->get_origin().x << ", "
+        //     << pParaBox->get_origin().y << ") size=("
+        //     << pParaBox->get_size().width << ", "
+        //     << pParaBox->get_size().height << ")"
+        //     << endl;
+        //cout << "cursor=(" << lyt.my_get_cursor().x << ", "
+        //     << lyt.my_get_cursor().y << ")" << endl;
+        //cout << "word: org=(" << pWord->get_left() << ", "
+        //     << pWord->get_top() << ")" << endl;
+        CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
+        CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
+        CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
+        CHECK( is_equal(pParaBox->get_size().height, 635.0f) );
+        CHECK( is_equal(pWord->get_left(), 3000.0f) );
+        CHECK( is_equal(pWord->get_top(), 0.0f) );
+        CHECK( is_equal(lyt.my_get_cursor().x, 3000.0f) );
+        CHECK( is_equal(lyt.my_get_cursor().y, 635.0f) );
     }
 
     TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_NotEnoughSpaceInPage)

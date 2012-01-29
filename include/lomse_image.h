@@ -23,7 +23,8 @@
 
 #include "lomse_basic.h"
 #include "lomse_pixel_formats.h"
-#include "lomse_smart_pointer.h"
+
+#include <boost/shared_ptr.hpp>
 
 #include <string>
 using namespace std;
@@ -36,7 +37,7 @@ namespace lomse
 //basic object to represent an image
 //As images can take a lot of memory, to facilitate sharing instances the Image class
 //is reference counted and a specific smart pointer class (SpImage) is defined
-class Image : public RefCounted
+class Image
 {
 protected:
     unsigned char* m_bmap;
@@ -75,7 +76,7 @@ protected:
 
 };
 
-typedef SmartPtr<Image>     SpImage;
+typedef boost::shared_ptr<Image>     SpImage;
 
 
 }   //namespace lomse

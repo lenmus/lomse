@@ -66,23 +66,27 @@ public:
     void my_do_play(int nEvStart, int nEvEnd, int playMode, bool fVisualTracking,
                     bool fCountOff, long nMM, Interactor* pInteractor )
     {
-        ScorePlayer::play_segment(nEvStart, nEvEnd, playMode, fVisualTracking,
-                                  fCountOff, nMM,  pInteractor);
+        m_fVisualTracking = fVisualTracking;
+        m_fCountOff = fCountOff;
+        m_playMode = playMode;
+        m_nMM = nMM;
+        m_pInteractor = pInteractor;
+        ScorePlayer::play_segment(nEvStart, nEvEnd);
     }
 
     //overrides
-    void play_segment(int nEvStart, int nEvEnd, int playMode, bool fVisualTracking,
-                      bool fCountOff, long nMM, Interactor* pInteractor)
+    void play_segment(int nEvStart, int nEvEnd)
     {
         m_fPlaySegmentInvoked = true;
-        //ScorePlayer::play_segment(nEvStart, nEvEnd, playMode, fVisualTracking,
-        //                              fCountOff, nMM, pInteractor);
     }
 
     static void my_callback(void* pThis, SpEventInfo event)
     {
         m_notifications.push_back(event);
     }
+
+    void my_wait_for_termination() { wait_for_termination(); }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -196,7 +200,7 @@ SUITE(ScorePlayerTest)
         MyScorePlayer player(m_libraryScope, &midi);
         player.prepare_to_play(pScore);
         player.play();
-        player.wait_for_termination();
+        player.my_wait_for_termination();
 
         CHECK( player.my_play_segment_invoked() == true );
     }
@@ -231,16 +235,21 @@ SUITE(ScorePlayerTest)
         int nEvMax = player.my_get_table()->num_events() - 1;
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_no_visual_tracking,
                           k_no_countoff, 60L, NULL);
-        player.wait_for_termination();
+        player.my_wait_for_termination();
 
         std::list<int>& events = midi.my_get_events();
         std::list<int>::iterator it = events.begin();
         CHECK( events.size() == 5 );
 //        cout << "midi events = " << events.size() << endl;
+//        cout << *it << endl;
         CHECK( *(it++) == MyMidiServer::k_program_change );
+//        cout << *it << endl;
         CHECK( *(it++) == MyMidiServer::k_voice_change );
+//        cout << *it << endl;
         CHECK( *(it++) == MyMidiServer::k_note_on );
+//        cout << *it << endl;
         CHECK( *(it++) == MyMidiServer::k_note_off );
+//        cout << *it << endl;
         CHECK( *(it++) == MyMidiServer::k_all_sounds_off );
         CHECK( m_notifications.size() == 1 );
     }
@@ -260,7 +269,7 @@ SUITE(ScorePlayerTest)
         Interactor inter(m_libraryScope, &doc, NULL);
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_visual_tracking,
                           k_no_countoff, 60L, &inter);
-        player.wait_for_termination();
+        player.my_wait_for_termination();
 
         std::list<int>& events = midi.my_get_events();
         std::list<int>::iterator it = events.begin();
@@ -276,8 +285,8 @@ SUITE(ScorePlayerTest)
         std::list<SpEventInfo>::iterator itN = m_notifications.begin();
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_highlight_event );
-        SpEventScoreHighlight pEv(
-            static_cast<EventScoreHighlight*>( (*itN).get_pointer() ));
+        SpEventInfo evt = *itN;
+        SpEventScoreHighlight pEv( static_pointer_cast<EventScoreHighlight>(evt) );
         //cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 1);
         std::list< pair<int, ImoStaffObj*> >& items = pEv->get_items();
@@ -288,7 +297,7 @@ SUITE(ScorePlayerTest)
 
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = static_cast<EventScoreHighlight*>( (*itN).get_pointer() );
+        pEv = static_pointer_cast<EventScoreHighlight>(*itN);
 
         //cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 2);
@@ -303,7 +312,7 @@ SUITE(ScorePlayerTest)
 
         //cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = static_cast<EventScoreHighlight*>( (*itN).get_pointer() );
+        pEv = static_pointer_cast<EventScoreHighlight>(*itN);
         //cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 3);
         items = pEv->get_items();
@@ -334,7 +343,7 @@ SUITE(ScorePlayerTest)
         Interactor inter(m_libraryScope, &doc, NULL);
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_visual_tracking,
                           k_no_countoff, 60L, &inter);
-        player.wait_for_termination();
+        player.my_wait_for_termination();
 
         std::list<int>& events = midi.my_get_events();
         std::list<int>::iterator it = events.begin();
@@ -356,7 +365,7 @@ SUITE(ScorePlayerTest)
 //        cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_highlight_event );
         SpEventScoreHighlight pEv(
-            static_cast<EventScoreHighlight*>( (*itN).get_pointer() ));
+            static_pointer_cast<EventScoreHighlight>(*itN) );
 //        cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 1);
         std::list< pair<int, ImoStaffObj*> >& items = pEv->get_items();
@@ -367,7 +376,7 @@ SUITE(ScorePlayerTest)
 
 //        cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = static_cast<EventScoreHighlight*>( (*itN).get_pointer() );
+        pEv = static_pointer_cast<EventScoreHighlight>(*itN);
 //        cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 4);
         items = pEv->get_items();
@@ -387,7 +396,7 @@ SUITE(ScorePlayerTest)
 
 //        cout << "notif.type = " << (*itN)->get_event_type() << endl;
         CHECK( (*itN)->get_event_type() == k_highlight_event );
-        pEv = static_cast<EventScoreHighlight*>( (*itN).get_pointer() );
+        pEv = static_pointer_cast<EventScoreHighlight>(*itN);
 //        cout << "num.items = " << pEv->get_num_items() << endl;
         CHECK( pEv->get_num_items() == 5);
         items = pEv->get_items();
@@ -425,7 +434,7 @@ SUITE(ScorePlayerTest)
         player.prepare_to_play(pScore);
         player.play(k_no_visual_tracking, k_no_countoff, k_play_normal_instrument,
                     60L, NULL);
-        player.wait_for_termination();
+        //player.my_wait_for_termination();
 
         CHECK( handler.event_received() == true );
         CHECK( handler.my_last_event_type() == k_end_of_playback_event );

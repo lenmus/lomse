@@ -22,7 +22,8 @@
 #define __LOMSE_EVENTS_H__
 
 #include "lomse_build_options.h"
-#include "lomse_smart_pointer.h"
+
+#include <boost/shared_ptr.hpp>
 
 #include <list>
 #include <string>
@@ -66,13 +67,16 @@ enum EEventType
             k_mouse_out_event,          //mouse goes out from an object
             k_on_click_event,           //Document, ImoContentObj: click on object
 
-        k_highlight_event,          //Score
+        k_highlight_event,          //score playbaxk (highlight)
             k_highlight_on_event,           //add highlight to a note/rest
             k_highlight_off_event,          //remove highlight from a note/rest
             k_end_of_higlight_event,        //end of score play back. Remove all highlight.
             k_advance_tempo_line_event,
 
-        k_end_of_playback_event,    //Score. end of playback
+        k_play_score_event,         //score playback (sound)
+            k_do_play_score_event,          //start/resume playback
+            k_pause_score_event,            //pause playback
+            k_end_of_playback_event,        //end of playback
 
     k_doc_level_event = 1000,
         k_doc_modified_event,
@@ -80,7 +84,7 @@ enum EEventType
 
 //---------------------------------------------------------------------------------------
 // Abstract class for information about an event
-class EventInfo : public RefCounted
+class EventInfo
 {
 protected:
     EEventType m_type;
@@ -106,6 +110,10 @@ public:
                                        || m_type == k_mouse_in_event
                                        || m_type == k_mouse_out_event;
     }
+    inline bool is_play_score_event() { return m_type == k_do_play_score_event
+                                            || m_type == k_pause_score_event
+                                            || m_type == k_end_of_playback_event;
+    }
     inline bool is_mouse_in_event() { return m_type == k_mouse_in_event; }
     inline bool is_mouse_out_event() { return m_type == k_mouse_out_event; }
     inline bool is_on_click_event() { return m_type == k_on_click_event; }
@@ -115,6 +123,8 @@ public:
     inline bool is_end_of_higlight_event() { return m_type == k_end_of_higlight_event; }
     inline bool is_advance_tempo_line_event() { return m_type == k_advance_tempo_line_event; }
     inline bool is_end_of_playback_event() { return m_type == k_end_of_playback_event; }
+    inline bool is_do_play_score_event() { return m_type == k_do_play_score_event; }
+    inline bool is_pause_score_event() { return m_type == k_pause_score_event; }
 
         //document level events
     inline bool is_doc_level_event() { return m_type >= k_doc_level_event; }
@@ -122,7 +132,7 @@ public:
 
 };
 
-typedef SmartPtr<EventInfo>  SpEventInfo;
+typedef boost::shared_ptr<EventInfo>  SpEventInfo;
 
 
 //---------------------------------------------------------------------------------------
@@ -142,7 +152,7 @@ public:
     inline Document* get_document() { return m_pDoc; }
 };
 
-typedef SmartPtr<EventDoc>  SpEventDoc;
+typedef boost::shared_ptr<EventDoc>  SpEventDoc;
 
 
 //---------------------------------------------------------------------------------------
@@ -162,7 +172,7 @@ public:
     inline Interactor* get_interactor() { return m_pInteractor; }
 };
 
-typedef SmartPtr<EventView>  SpEventView;
+typedef boost::shared_ptr<EventView>  SpEventView;
 
 
 //---------------------------------------------------------------------------------------
@@ -202,7 +212,7 @@ protected:
 
 };
 
-typedef SmartPtr<EventMouse>  SpEventMouse;
+typedef boost::shared_ptr<EventMouse>  SpEventMouse;
 
 
 //---------------------------------------------------------------------------------------
@@ -225,7 +235,30 @@ public:
     inline ImoScore* get_score() { return m_pScore; }
 };
 
-typedef SmartPtr<EventEndOfPlayScore>  SpEventEndOfPlayScore;
+typedef boost::shared_ptr<EventEndOfPlayScore>  SpEventEndOfPlayScore;
+
+
+//---------------------------------------------------------------------------------------
+// EventPlayScore: several events related to score playback
+class EventPlayScore : public EventView
+{
+protected:
+    ImoScore* m_pScore;
+
+    EventPlayScore(EEventType evType) : EventView(evType, NULL) {}    //for unit tests
+
+public:
+    EventPlayScore(EEventType evType, Interactor* pInteractor, ImoScore* pScore)
+        : EventView(evType, pInteractor)
+        , m_pScore(pScore)
+    {
+    }
+
+    // accessors
+    inline ImoScore* get_score() { return m_pScore; }
+};
+
+typedef boost::shared_ptr<EventPlayScore>  SpEventPlayScore;
 
 
 //---------------------------------------------------------------------------------------
@@ -264,7 +297,7 @@ public:
     inline std::list< pair<int, ImoStaffObj*> >&  get_items() { return m_items; }
 };
 
-typedef SmartPtr<EventScoreHighlight>  SpEventScoreHighlight;
+typedef boost::shared_ptr<EventScoreHighlight>  SpEventScoreHighlight;
 
 
 //=======================================================================================

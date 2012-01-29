@@ -93,8 +93,11 @@ void Layouter::layout_item(ImoContentObj* pItem, GmoBox* pParentBox)
 
     //update cursor and available space
     GmoBox* pChildBox = m_pCurLayouter->get_item_main_box();
-    m_pageCursor.y = pChildBox->get_bottom();
-    m_availableHeight -= pChildBox->get_height();
+    if (pChildBox)  //AWARE: NullLayouter does not create a box
+    {
+        m_pageCursor.y = pChildBox->get_bottom();
+        m_availableHeight -= pChildBox->get_height();
+    }
 
     if (!pItem->is_score())
         delete m_pCurLayouter;
@@ -121,7 +124,7 @@ void Layouter::set_box_height()
 void Layouter::add_end_margins()
 {
     ImoStyle* pStyle = m_pItem->get_style();
-    if (pStyle)
+    if (pStyle && m_pItemMainBox)   //NullLayouter doesn't have main box
     {
         LUnits space = pStyle->get_lunits_property(ImoStyle::k_margin_bottom)
                        + pStyle->get_lunits_property(ImoStyle::k_border_width_bottom)
@@ -164,14 +167,19 @@ Layouter* LayouterFactory::create_layouter(ImoContentObj* pItem, Layouter* pPare
 
         case k_imo_para:
         case k_imo_heading:
+            return LOMSE_NEW ParagraphLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+
         case k_imo_listitem:
-            return LOMSE_NEW BoxContentLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+            return LOMSE_NEW ListItemLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
 
         case k_imo_multicolumn:
             return LOMSE_NEW MultiColumnLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
 
         case k_imo_score:
             return LOMSE_NEW ScoreLayouter(pItem, pParent, pGModel, libraryScope);
+
+        case k_imo_score_player:
+            return LOMSE_NEW ScorePlayerLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
 
         default:
             return LOMSE_NEW NullLayouter(pItem, pParent, pGModel, libraryScope);

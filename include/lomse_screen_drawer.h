@@ -43,11 +43,11 @@ class LOMSE_EXPORT ScreenDrawer : public Drawer
 {
 private:
     AttrStorage     m_attr_storage;
-    AttrStorage     m_attr_stack;
     PathStorage     m_path;
     Renderer*       m_pRenderer;
     TextMeter*      m_pTextMeter;
     Calligrapher*   m_pCalligrapher;
+    int             m_numPaths;
 
 public:
     ScreenDrawer(LibraryScope& libraryScope);
@@ -190,6 +190,7 @@ protected:
     void pop_attr();
     PathAttributes& cur_attr();
     void render_existing_paths();
+    void delete_paths();
 
 };
 

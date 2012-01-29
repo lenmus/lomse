@@ -49,6 +49,7 @@ class DynGenerator;
 class Document;
 class EventHandler;
 class Control;
+class ScorePlayerCtrl;
 
 class ImoAttachments;
 class ImoAuxObj;
@@ -89,6 +90,7 @@ class ImoParamInfo;
 class ImoReldataobjs;
 class ImoRelDataObj;
 class ImoRelObj;
+class ImoScorePlayer;
 class ImoScoreText;
 class ImoSimpleObj;
 class ImoSlurDto;
@@ -271,34 +273,45 @@ class DtoObj;
         k_imo_obj=0,
 
             //ImoDto (A)
-            k_imo_dto, k_imo_font_style_dto,
+            k_imo_dto,
+                k_imo_font_style_dto,
+            k_imo_dto_last,
 
             // ImoSimpleObj (A)
-            k_imo_simpleobj, k_imo_beam_dto, k_imo_bezier_info, k_imo_border_dto,
-            k_imo_textblock_info,
-            k_imo_color_dto, k_imo_cursor_info, k_imo_figured_bass_info,
-            k_imo_instr_group,
-            k_imo_line_style, k_imo_midi_info, k_imo_option, k_imo_page_info,
-            k_imo_param_info, k_imo_point_dto,
-            k_imo_size_dto, k_imo_slur_dto, k_imo_staff_info, k_imo_system_info,
-            k_imo_text_info,
-            k_imo_text_style, k_imo_style,
-            k_imo_tie_dto, k_imo_tuplet_dto,
+            k_imo_simpleobj,
+                k_imo_beam_dto, k_imo_bezier_info, k_imo_border_dto,
+                k_imo_textblock_info,
+                k_imo_color_dto, k_imo_cursor_info, k_imo_figured_bass_info,
+                k_imo_instr_group,
+                k_imo_line_style, k_imo_midi_info, k_imo_option, k_imo_page_info,
+                k_imo_param_info, k_imo_point_dto,
+                k_imo_size_dto, k_imo_slur_dto, k_imo_staff_info, k_imo_system_info,
+                k_imo_text_info,
+                k_imo_text_style, k_imo_style,
+                k_imo_tie_dto, k_imo_tuplet_dto,
+            k_imo_simpleobj_last,
+
 
             // ImoRelDataObj (A)
-            k_imo_reldataobj, k_imo_beam_data, k_imo_slur_data,
-            k_imo_tie_data, k_imo_tuplet_data,
+            k_imo_reldataobj,
+                k_imo_beam_data, k_imo_slur_data,
+                k_imo_tie_data, k_imo_tuplet_data,
+            k_imo_reldataobj_last,
 
             //ImoCollection(A)
-            k_imo_collection, k_imo_instruments,
-            k_imo_instrument_groups, k_imo_music_data, k_imo_options,
-            k_imo_reldataobjs, k_imo_styles,
+            k_imo_collection,
+                k_imo_instruments,
+                k_imo_instrument_groups, k_imo_music_data, k_imo_options,
+                k_imo_reldataobjs, k_imo_styles,
+            k_imo_collection_last,
 
             // Special collections
             k_imo_attachments,
 
             // ImoContainerObj (A)
-            k_imo_containerobj, k_imo_instrument,
+            k_imo_containerobj,
+                k_imo_instrument,
+            k_imo_containerobj_last,
 
             // ImoContentObj (A)
             k_imo_contentobj,
@@ -307,37 +320,61 @@ class DtoObj;
                 k_imo_scoreobj,
 
                     // ImoStaffObj (A)
-                    k_imo_staffobj, k_imo_barline, k_imo_clef, k_imo_key_signature,
-                    k_imo_time_signature,
-                    k_imo_note, k_imo_rest, k_imo_go_back_fwd,
-                    k_imo_metronome_mark, k_imo_system_break,
-                    k_imo_spacer, k_imo_figured_bass,
+                    k_imo_staffobj,
+                        k_imo_barline, k_imo_clef, k_imo_key_signature,
+                        k_imo_time_signature,
+                        k_imo_note, k_imo_rest, k_imo_go_back_fwd,
+                        k_imo_metronome_mark, k_imo_system_break,
+                        k_imo_spacer, k_imo_figured_bass,
+                    k_imo_staffobj_last,
 
                     // ImoAuxObj (A)
-                    k_imo_auxobj, k_imo_fermata, k_imo_line, k_imo_score_text,
-                    k_imo_score_title,
-                    k_imo_text_box,
+                    k_imo_auxobj,
+                        k_imo_fermata, k_imo_line, k_imo_score_text,
+                        k_imo_score_title,
+                        k_imo_text_box,
 
                         // ImoRelObj (A)
-                        k_imo_relobj, k_imo_beam, k_imo_chord, k_imo_slur, k_imo_tie,
-                        k_imo_tuplet,
+                        k_imo_relobj,
+                            k_imo_beam, k_imo_chord, k_imo_slur, k_imo_tie,
+                            k_imo_tuplet,
+                        k_imo_relobj_last,
 
-                // ImoBoxContainer (A)
-                k_imo_box_container,
-                    k_imo_content, k_imo_dynamic, k_imo_document, k_imo_list,
-                    k_imo_multicolumn, k_imo_score,
+                    k_imo_auxobj_last,
 
-                // ImoBoxContent (A)
-                k_imo_box_content,
-                    k_imo_heading, k_imo_para, k_imo_listitem,
+                k_imo_scoreobj_last,
+
+                // ImoBoxLevelObj (A)
+                k_imo_boxlevel_obj,
+                    k_imo_score,
+
+                    // ImoBoxContainer (A)
+                    k_imo_box_container,
+                        k_imo_content, k_imo_dynamic, k_imo_document, k_imo_list,
+                        k_imo_multicolumn,
+                    k_imo_box_container_last,
+
+                    // ImoBoxContent (A)
+                    k_imo_box_content,
+                        k_imo_heading, k_imo_para, k_imo_listitem,
+                    k_imo_box_content_last,
+
+                k_imo_boxlevel_obj_last,
 
                 // ImoInlineObj
                 k_imo_inlineobj,
-                    k_imo_button, k_imo_control, k_imo_image, k_imo_text_item,
+                    k_imo_button, k_imo_image, k_imo_text_item,
+                    k_imo_control,
+                        k_imo_score_player,
 
                     // ImoBoxInline (A)
                     k_imo_box_inline,
                         k_imo_inline_wrapper, k_imo_link,
+                    k_imo_box_inline_last,
+
+                k_imo_inlineobj_last,
+
+            k_imo_contentobj_last,
 
     };
 
@@ -492,125 +529,108 @@ public:
     inline int get_obj_type() { return m_objtype; }
 	inline bool has_children() { return !is_terminal(); }
 
-    //simple objs
-        // DTOs
-    inline bool is_dto() { return m_objtype >= k_imo_dto
-                               && m_objtype < k_imo_simpleobj; }
-    inline bool is_font_style_dto() { return m_objtype == k_imo_font_style_dto; }
-    inline bool is_color_dto() { return m_objtype == k_imo_color_dto; }
+    //groups
+    inline bool is_dto() { return m_objtype > k_imo_dto
+                               && m_objtype < k_imo_dto_last; }
+    inline bool is_simpleobj() { return m_objtype > k_imo_simpleobj
+                                     && m_objtype < k_imo_simpleobj_last; }
+    inline bool is_reldataobj() { return m_objtype > k_imo_reldataobj
+                                      && m_objtype < k_imo_reldataobj_last; }
+    inline bool is_containerobj() { return m_objtype > k_imo_containerobj
+                                        && m_objtype < k_imo_containerobj_last; }
+    inline bool is_contentobj() { return m_objtype > k_imo_contentobj
+                                      && m_objtype < k_imo_contentobj_last; }
+    inline bool is_scoreobj() { return m_objtype > k_imo_scoreobj
+                                    && m_objtype < k_imo_scoreobj_last; }
+	inline bool is_staffobj() { return m_objtype > k_imo_staffobj
+                                    && m_objtype < k_imo_staffobj_last; }
+	inline bool is_auxobj() { return m_objtype > k_imo_auxobj
+                                  && m_objtype < k_imo_auxobj_last; }
+    inline bool is_relobj() { return m_objtype > k_imo_relobj
+                                  && m_objtype < k_imo_relobj_last; }
+    inline bool is_boxlevel_obj() { return m_objtype > k_imo_boxlevel_obj
+                                        && m_objtype < k_imo_boxlevel_obj_last; }
+	inline bool is_box_container() { return m_objtype > k_imo_box_container
+	                                     && m_objtype < k_imo_box_container_last; }
+	inline bool is_box_content() { return m_objtype > k_imo_box_content
+	                                   && m_objtype < k_imo_box_content_last; }
+    inline bool is_box_inline() { return m_objtype > k_imo_box_inline
+                                      && m_objtype < k_imo_box_inline_last; }
+	inline bool is_inlineobj() { return m_objtype > k_imo_inlineobj
+                                     && m_objtype < k_imo_inlineobj_last; }
 
-        //SimpleObj
-    inline bool is_simpleobj() { return m_objtype >= k_imo_simpleobj
-                                     && m_objtype < k_imo_contentobj; }
-    inline bool is_beam_dto() { return m_objtype == k_imo_beam_dto; }
-    inline bool is_border_dto() { return m_objtype == k_imo_border_dto; }
-    inline bool is_point_dto() { return m_objtype == k_imo_point_dto; }
-    inline bool is_size_info() { return m_objtype == k_imo_size_dto; }
-    inline bool is_slur_dto() { return m_objtype == k_imo_slur_dto; }
-    inline bool is_tie_dto() { return m_objtype == k_imo_tie_dto; }
-    inline bool is_tuplet_dto() { return m_objtype == k_imo_tuplet_dto; }
-        // VOs
-    inline bool is_bezier_info() { return m_objtype == k_imo_bezier_info; }
-    inline bool is_textblock_info() { return m_objtype == k_imo_textblock_info; }
-    inline bool is_cursor_info() { return m_objtype == k_imo_cursor_info; }
-    inline bool is_figured_bass_info() { return m_objtype == k_imo_figured_bass_info; }
-    inline bool is_instr_group() { return m_objtype == k_imo_instr_group; }
-    inline bool is_line_style() { return m_objtype == k_imo_line_style; }
-    inline bool is_midi_info() { return m_objtype == k_imo_midi_info; }
-    inline bool is_page_info() { return m_objtype == k_imo_page_info; }
-    inline bool is_param_info() { return m_objtype == k_imo_param_info; }
-    inline bool is_staff_info() { return m_objtype == k_imo_staff_info; }
-    inline bool is_system_info() { return m_objtype == k_imo_system_info; }
-    inline bool is_text_info() { return m_objtype == k_imo_text_info; }
-    inline bool is_text_style() { return m_objtype == k_imo_text_style; }
-    inline bool is_style() { return m_objtype == k_imo_style; }
-        // relation data objects
-    inline bool is_reldataobj() { return m_objtype >= k_imo_reldataobj
-                                      && m_objtype < k_imo_collection; }
-    inline bool is_beam_data() { return m_objtype == k_imo_beam_data; }
-    inline bool is_slur_data() { return m_objtype == k_imo_slur_data; }
-    inline bool is_tie_data() { return m_objtype == k_imo_tie_data; }
-    inline bool is_tuplet_data() { return m_objtype == k_imo_tuplet_data; }
-        //collections
-    inline bool is_music_data() { return m_objtype == k_imo_music_data; }
-    inline bool is_option() { return m_objtype == k_imo_option; }
-    inline bool is_reldataobjs() { return m_objtype == k_imo_reldataobjs; }
-    inline bool is_styles() { return m_objtype == k_imo_styles; }
-        // special collections
+    //items
     inline bool is_attachments() { return m_objtype == k_imo_attachments; }
-        // container objs
-    inline bool is_containerobj() { return m_objtype >= k_imo_containerobj
-                                        && m_objtype < k_imo_contentobj; }
-    inline bool is_instrument() { return m_objtype == k_imo_instrument; }
-
-    // content objs
-    inline bool is_contentobj() { return m_objtype >= k_imo_contentobj; }
-
-        //score objs
-    inline bool is_scoreobj() { return m_objtype >= k_imo_scoreobj
-                                    && m_objtype < k_imo_box_content; }
-	        // staff objs
-	inline bool is_staffobj() { return m_objtype >= k_imo_staffobj
-                                    && m_objtype < k_imo_auxobj; }
     inline bool is_barline() { return m_objtype == k_imo_barline; }
-    inline bool is_clef() { return m_objtype == k_imo_clef; }
-    inline bool is_key_signature() { return m_objtype == k_imo_key_signature; }
-    inline bool is_time_signature() { return m_objtype == k_imo_time_signature; }
-    inline bool is_note_rest() { return m_objtype == k_imo_note
-                                     || m_objtype == k_imo_rest; }
-    inline bool is_note() { return m_objtype == k_imo_note; }
-    inline bool is_rest() { return m_objtype == k_imo_rest; }
-    inline bool is_go_back_fwd() { return m_objtype == k_imo_go_back_fwd; }
-    inline bool is_metronome_mark() { return m_objtype == k_imo_metronome_mark; }
-    inline bool is_system_break() { return m_objtype == k_imo_system_break; }
-    inline bool is_spacer() { return m_objtype == k_imo_spacer; }
-    inline bool is_figured_bass() { return m_objtype == k_imo_figured_bass; }
-            // aux objs
-	inline bool is_auxobj() { return m_objtype >= k_imo_auxobj
-                                  && m_objtype < k_imo_box_content; }
-    inline bool is_fermata() { return m_objtype == k_imo_fermata; }
-    inline bool is_line() { return m_objtype == k_imo_line; }
-    inline bool is_score_text() { return m_objtype == k_imo_score_text; }
-    inline bool is_score_title() { return m_objtype == k_imo_score_title; }
-                // relation objects
-    inline bool is_relobj() { return m_objtype >= k_imo_relobj
-                                  && m_objtype < k_imo_box_content; }
     inline bool is_beam() { return m_objtype == k_imo_beam; }
+    inline bool is_beam_data() { return m_objtype == k_imo_beam_data; }
+    inline bool is_beam_dto() { return m_objtype == k_imo_beam_dto; }
+    inline bool is_bezier_info() { return m_objtype == k_imo_bezier_info; }
+    inline bool is_border_dto() { return m_objtype == k_imo_border_dto; }
+    inline bool is_button() { return m_objtype == k_imo_button; }
     inline bool is_chord() { return m_objtype == k_imo_chord; }
-    inline bool is_slur() { return m_objtype == k_imo_slur; }
-    inline bool is_tie() { return m_objtype == k_imo_tie; }
-    inline bool is_tuplet() { return m_objtype == k_imo_tuplet; }
-
-        // box container objs
-	inline bool is_box_container() { return m_objtype >= k_imo_box_container
-	                                   && m_objtype < k_imo_box_content;
-    }
+    inline bool is_clef() { return m_objtype == k_imo_clef; }
+    inline bool is_color_dto() { return m_objtype == k_imo_color_dto; }
     inline bool is_content() { return m_objtype == k_imo_content; }
+    inline bool is_control() { return m_objtype == k_imo_control; }
+    inline bool is_cursor_info() { return m_objtype == k_imo_cursor_info; }
     inline bool is_document() { return m_objtype == k_imo_document; }
     inline bool is_dynamic() { return m_objtype == k_imo_dynamic; }
-	inline bool is_score() { return m_objtype == k_imo_score; }
-	inline bool is_multicolumn() { return m_objtype == k_imo_multicolumn; }
-	inline bool is_list() { return m_objtype == k_imo_list; }
-
-        // box content objs
-	inline bool is_box_content() { return m_objtype >= k_imo_box_content
-	                                   && m_objtype < k_imo_inlineobj;
-    }
+    inline bool is_fermata() { return m_objtype == k_imo_fermata; }
+    inline bool is_figured_bass() { return m_objtype == k_imo_figured_bass; }
+    inline bool is_figured_bass_info() { return m_objtype == k_imo_figured_bass_info; }
+    inline bool is_font_style_dto() { return m_objtype == k_imo_font_style_dto; }
+    inline bool is_go_back_fwd() { return m_objtype == k_imo_go_back_fwd; }
     inline bool is_heading() { return m_objtype == k_imo_heading; }
-    inline bool is_paragraph() { return m_objtype == k_imo_para; }
-	inline bool is_listitem() { return m_objtype == k_imo_listitem; }
-
-        //inline objs
-	inline bool is_inlineobj() { return m_objtype >= k_imo_inlineobj; }
-    inline bool is_button() { return m_objtype == k_imo_button; }
     inline bool is_image() { return m_objtype == k_imo_image; }
-    inline bool is_text_item() { return m_objtype == k_imo_text_item; }
-    inline bool is_control() { return m_objtype == k_imo_control; }
-
-        //box inline objects
-    inline bool is_box_inline() { return m_objtype >= k_imo_box_inline; }
     inline bool is_inline_wrapper() { return m_objtype == k_imo_inline_wrapper; }
+    inline bool is_instrument() { return m_objtype == k_imo_instrument; }
+    inline bool is_instr_group() { return m_objtype == k_imo_instr_group; }
+    inline bool is_key_signature() { return m_objtype == k_imo_key_signature; }
+    inline bool is_line() { return m_objtype == k_imo_line; }
+    inline bool is_line_style() { return m_objtype == k_imo_line_style; }
     inline bool is_link() { return m_objtype == k_imo_link; }
+	inline bool is_list() { return m_objtype == k_imo_list; }
+	inline bool is_listitem() { return m_objtype == k_imo_listitem; }
+    inline bool is_metronome_mark() { return m_objtype == k_imo_metronome_mark; }
+    inline bool is_midi_info() { return m_objtype == k_imo_midi_info; }
+	inline bool is_multicolumn() { return m_objtype == k_imo_multicolumn; }
+    inline bool is_music_data() { return m_objtype == k_imo_music_data; }
+    inline bool is_note() { return m_objtype == k_imo_note; }
+    inline bool is_note_rest() { return m_objtype == k_imo_note
+                                     || m_objtype == k_imo_rest; }
+    inline bool is_option() { return m_objtype == k_imo_option; }
+    inline bool is_page_info() { return m_objtype == k_imo_page_info; }
+    inline bool is_paragraph() { return m_objtype == k_imo_para; }
+    inline bool is_param_info() { return m_objtype == k_imo_param_info; }
+    inline bool is_point_dto() { return m_objtype == k_imo_point_dto; }
+    inline bool is_reldataobjs() { return m_objtype == k_imo_reldataobjs; }
+    inline bool is_rest() { return m_objtype == k_imo_rest; }
+	inline bool is_score() { return m_objtype == k_imo_score; }
+    inline bool is_score_player() { return m_objtype == k_imo_score_player; }
+    inline bool is_score_text() { return m_objtype == k_imo_score_text; }
+    inline bool is_score_title() { return m_objtype == k_imo_score_title; }
+    inline bool is_size_info() { return m_objtype == k_imo_size_dto; }
+    inline bool is_slur() { return m_objtype == k_imo_slur; }
+    inline bool is_slur_data() { return m_objtype == k_imo_slur_data; }
+    inline bool is_slur_dto() { return m_objtype == k_imo_slur_dto; }
+    inline bool is_spacer() { return m_objtype == k_imo_spacer; }
+    inline bool is_staff_info() { return m_objtype == k_imo_staff_info; }
+    inline bool is_style() { return m_objtype == k_imo_style; }
+    inline bool is_styles() { return m_objtype == k_imo_styles; }
+    inline bool is_system_break() { return m_objtype == k_imo_system_break; }
+    inline bool is_system_info() { return m_objtype == k_imo_system_info; }
+    inline bool is_text_info() { return m_objtype == k_imo_text_info; }
+    inline bool is_text_item() { return m_objtype == k_imo_text_item; }
+    inline bool is_text_style() { return m_objtype == k_imo_text_style; }
+    inline bool is_textblock_info() { return m_objtype == k_imo_textblock_info; }
+    inline bool is_tie() { return m_objtype == k_imo_tie; }
+    inline bool is_tie_data() { return m_objtype == k_imo_tie_data; }
+    inline bool is_tie_dto() { return m_objtype == k_imo_tie_dto; }
+    inline bool is_time_signature() { return m_objtype == k_imo_time_signature; }
+    inline bool is_tuplet() { return m_objtype == k_imo_tuplet; }
+    inline bool is_tuplet_dto() { return m_objtype == k_imo_tuplet_dto; }
+    inline bool is_tuplet_data() { return m_objtype == k_imo_tuplet_data; }
 
 protected:
     void visit_children(BaseVisitor& v);
@@ -2077,6 +2097,10 @@ protected:
 
     friend class ImFactory;
     ImoControl(Control* ctrol) : ImoInlineObj(k_imo_control), m_ctrol(ctrol) {}
+    ImoControl(int type) : ImoInlineObj(type), m_ctrol(NULL) {}
+
+    friend class ImoScorePlayer;
+    inline void attach_control(Control* ctrol) { m_ctrol = ctrol; }
 
 public:
     virtual ~ImoControl() {}
@@ -2831,6 +2855,28 @@ public:
     inline void set_x(Tenths x) { m_point.x = x; }
     inline void set_y(Tenths y) { m_point.y = y; }
 
+};
+
+//---------------------------------------------------------------------------------------
+// ImoScorePlayer: A control for managing score playback
+class ImoScorePlayer : public ImoControl
+{
+protected:
+    ScorePlayerCtrl* m_pPlayer;
+    ImoScore* m_pScore;
+
+    friend class ImFactory;
+    ImoScorePlayer();
+
+    friend class ScorePlayerAnalyser;
+    inline void attach_score(ImoScore* pScore) { m_pScore = pScore; }
+    void attach_player(ScorePlayerCtrl* pPlayer);
+
+public:
+    virtual ~ImoScorePlayer();
+
+    inline ImoScore* get_score() { return m_pScore; }
+    inline ScorePlayerCtrl* get_player() { return m_pPlayer; }
 };
 
 //---------------------------------------------------------------------------------------

@@ -30,6 +30,7 @@
 #include "lomse_im_factory.h"
 #include "lomse_model_builder.h"
 #include "lomse_control.h"
+#include "lomse_score_player_ctrl.h"
 
 using namespace std;
 
@@ -1216,6 +1217,8 @@ ImoStyle* ImoContentObj::get_style()
         ImoContentObj* pParent = dynamic_cast<ImoContentObj*>( get_parent() );
         if (pParent)
             return pParent->get_style();
+        else if (this->is_document())
+            return (static_cast<ImoDocument*>(this))->get_default_style();
         else
             return NULL;
     }
@@ -2405,6 +2408,30 @@ void ImoScore::close()
     builder.structurize(this);
 }
 
+
+
+//=======================================================================================
+// ImoScorePlayer implementation
+//=======================================================================================
+ImoScorePlayer::ImoScorePlayer()
+    : ImoControl(k_imo_score_player)
+    , m_pPlayer(NULL)
+    , m_pScore(NULL)
+{
+}
+
+//---------------------------------------------------------------------------------------
+ImoScorePlayer::~ImoScorePlayer()
+{
+    delete m_pPlayer;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoScorePlayer::attach_player(ScorePlayerCtrl* pPlayer)
+{
+    m_pPlayer = pPlayer;
+    ImoControl::attach_control(m_pPlayer);
+}
 
 
 

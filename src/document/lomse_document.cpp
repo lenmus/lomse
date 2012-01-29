@@ -122,7 +122,7 @@ int Document::from_input(LdpReader& reader)
     }
     catch (...)
     {
-        //this avoids programs crashes when a document is malformed but 
+        //this avoids programs crashes when a document is malformed but
         //will produce memory lekeages
         m_pIModel = NULL;
         m_pCompiler = NULL;
@@ -216,7 +216,7 @@ std::string Document::to_string()
 ImoObj* Document::create_object(const string& source)
 {
     LdpParser parser(m_reporter, m_libraryScope.ldp_factory());
-    SpLdpTree tree = parser.parse_text(source);
+    SpLdpTree tree( parser.parse_text(source) );
     Analyser a(m_reporter, m_libraryScope, this);
     ImoObj* pImo = a.analyse_tree_and_get_object(tree);
     delete tree->get_root();
@@ -228,7 +228,7 @@ void Document::add_staff_objects(const string& source, ImoMusicData* pMD)
 {
     string data = "(musicData " + source + ")";
     LdpParser parser(m_reporter, m_libraryScope.ldp_factory());
-    SpLdpTree tree = parser.parse_text(data);
+    SpLdpTree tree( parser.parse_text(data) );
     Analyser a(m_reporter, m_libraryScope, this);
     InternalModel* pIModel = a.analyse_tree(tree, "string:");
     ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
@@ -275,7 +275,7 @@ void Document::notify_if_document_modified()
         return;
 
     clear_dirty();
-    EventDoc* pEvent = LOMSE_NEW EventDoc(k_doc_modified_event, this);
+    SpEventDoc pEvent( LOMSE_NEW EventDoc(k_doc_modified_event, this) );
     notify_observers(pEvent, this);
 }
 

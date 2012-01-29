@@ -342,6 +342,7 @@ set(GRAPHIC_MODEL_FILES
 
 set(GUI_CONTROLS_FILES
     ${SRC_DIR}/gui_controls/lomse_hyperlink_ctrl.cpp
+    ${SRC_DIR}/gui_controls/lomse_score_player_ctrl.cpp
     ${SRC_DIR}/gui_controls/lomse_static_text_ctrl.cpp
 )
 

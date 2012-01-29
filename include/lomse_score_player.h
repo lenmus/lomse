@@ -86,13 +86,11 @@ protected:
     LibraryScope&       m_libScope;
     SoundThread*        m_pThread;      //execution thread
     MidiServerBase*     m_pMidi;        //MIDI server to receive MIDI events
-    Interactor*         m_pInteractor;  //Interactor to receive SCORE_HIGHLIGHT events
     bool                m_fPaused;      //execution is paused
     bool                m_fShouldStop;  //request to stop playback
     bool                m_fPlaying;     //playing (control in do_play loop)
     ImoScore*           m_pScore;       //score to play
     SoundEventsTable*   m_pTable;
-    int                 m_nMM;          //metronome speed (beats per minute)
     SoundMutex          m_mutex;        //for pause/continue play back
     SoundFlag           m_canPlay;      //playback is not paused
 
@@ -102,14 +100,22 @@ protected:
     int m_MtrTone1;
     int m_MtrTone2;
 
+    //current play parameters
+    bool            m_fVisualTracking;
+    bool            m_fCountOff;
+    int             m_playMode;
+    long            m_nMM;
+    Interactor*     m_pInteractor;
+
+
 public:
     ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi);
     ~ScorePlayer();
 
     //construction
-    void prepare_to_play(ImoScore* pScore, int nMM=60,
+    void prepare_to_play(ImoScore* pScore,
                          int metronomeChannel=9, int metronomeInstr=0,
-                         int tone1=60, int tone2=77, Interactor* pInteractor=NULL);
+                         int tone1=60, int tone2=77);
 
     // playing
     void play(bool fVisualTracking = k_no_visual_tracking,
@@ -130,9 +136,6 @@ public:
 						   Interactor* pInteractor = NULL);
     void stop();
     void pause();
-    void wait_for_termination();
-
-    //inline void EndOfThread() { m_pThread = (SoundThreadBase*)NULL; }
 
     inline bool is_playing() { return m_fPlaying; }
 
@@ -141,12 +144,11 @@ public:
                  bool fCountOff, long nMM, Interactor* pInteractor );
 
 protected:
-    virtual void play_segment(int nEvStart, int nEvEnd, int playMode,
-                              bool fVisualTracking, bool fCountOff, long nMM,
-                              Interactor* pInteractor);
-
+    virtual void play_segment(int nEvStart, int nEvEnd);
     void thread_main(int nEvStart, int nEvEnd, int playMode,
-                     bool fVisualTracking, bool fCountOff, long nMM, Interactor* pInteractor);
+                     bool fVisualTracking, bool fCountOff, long nMM,
+                     Interactor* pInteractor);
+    void wait_for_termination();
 
     //helper, for do_play()
     //-----------------------------------------------------------------------------------

@@ -52,7 +52,7 @@ protected:
     ModelBuilder*   m_pModelBuilder;
     IdAssigner*     m_pIdAssigner;
     Document*       m_pDoc;
-    LdpTree*        m_pFinalTree;
+    SpLdpTree       m_pFinalTree;
     string          m_fileLocator;
 
 public:
@@ -75,9 +75,9 @@ public:
     string get_file_locator() { return m_fileLocator; }
 
 protected:
-    InternalModel* compile(LdpTree* pParseTree);
-    LdpTree* wrap_score_in_lenmusdoc(LdpTree* pParseTree);
-    LdpTree* parse_empty_doc();
+    InternalModel* compile(SpLdpTree pParseTree);
+    SpLdpTree wrap_score_in_lenmusdoc(SpLdpTree pParseTree);
+    SpLdpTree parse_empty_doc();
 
 };
 

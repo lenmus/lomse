@@ -275,6 +275,35 @@ public:
     GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
 };
 
+////---------------------------------------------------------------------------------------
+////Engrouter for BoxContent prefix
+//class PrefixEngrouter : public Engrouter
+//{
+//protected:
+//    string m_prefix;
+//    LUnits m_descent;
+//    LUnits m_ascent;
+//    LUnits m_halfLeading;
+//
+//public:
+//    PrefixEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope,
+//                    const std::string& prefix)
+//        : Engrouter(pCreatorImo, libraryScope)
+//        , m_prefix(prefix)
+//    {
+//    }
+//    virtual ~PrefixEngrouter() {}
+//
+//    inline const string& get_text() { return m_word; }
+//
+//    void measure();
+//    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
+//
+//    //info
+//    inline LUnits get_descent() { return m_descent; }
+//    inline LUnits get_ascent() { return m_ascent; }
+//};
+
 
 //---------------------------------------------------------------------------------------
 // EngroutersCreator: splits paragraph content, creating engrouters for each atomic
@@ -291,6 +320,7 @@ public:
     virtual ~EngroutersCreator();
 
     void create_engrouters(ImoInlineObj* pImo);
+    void create_prefix_engrouter(ImoBoxContent* pBoxContent, const string& prefix);
 
 protected:
     BoxEngrouter* create_wrapper_engrouterbox_for(ImoBoxInline* pImo);
@@ -304,23 +334,29 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-// BoxContentLayouter: layouts a paragraph
+// BoxContentLayouter: base class for layouters for BoxContent derived objects
 class BoxContentLayouter : public Layouter
 {
 protected:
     LibraryScope& m_libraryScope;
     ImoBoxContent* m_pPara;
     std::list<Engrouter*> m_engrouters;
+    bool m_fFirstLine;
+    LUnits m_xLineStart;
 
 public:
     BoxContentLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
                       LibraryScope& libraryScope, ImoStyles* pStyles);
     virtual ~BoxContentLayouter();
 
-    //virtual methods in base class
+    //mandatory overrides
     void layout_in_box();
     void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
     void prepare_to_start_layout();
+
+    //virtual methods to be implemented by derived classes
+    virtual LUnits get_first_line_indent() = 0;
+    virtual string get_first_line_prefix() = 0;
 
     //other
     inline LineReferences& get_line_refs() { return m_lineRefs; }
@@ -350,13 +386,49 @@ protected:
     LineReferences m_lineRefs;                       //reference lines
     LUnits m_lineWidth;
 
+    //other
+    inline bool is_first_line() { return m_fFirstLine; }
     inline void initialize_lines() { m_itStart = m_engrouters.end(); }
     inline bool is_line_ready() { return m_itStart != m_engrouters.end(); }
     void prepare_line();
     void add_line();
     void advance_current_line_space(LUnits left);
     void initialize_line_references();
+    void set_line_pos_and_width();
     void update_line_references(LineReferences& engr, LUnits shift, bool fUpdateText);
+
+};
+
+
+//---------------------------------------------------------------------------------------
+// ParagraphLayouter: layouts a paragraph
+class ParagraphLayouter : public BoxContentLayouter
+{
+public:
+    ParagraphLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
+                      LibraryScope& libraryScope, ImoStyles* pStyles);
+    virtual ~ParagraphLayouter() {}
+
+    //mandatory overrides
+    LUnits get_first_line_indent() { return 0.0f; }
+    string get_first_line_prefix() { return ""; }
+};
+
+
+//---------------------------------------------------------------------------------------
+// ListItemLayouter: layouts a list item
+class ListItemLayouter : public BoxContentLayouter
+{
+public:
+    ListItemLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
+                      LibraryScope& libraryScope, ImoStyles* pStyles);
+    virtual ~ListItemLayouter() {}
+
+    //mandatory overrides
+    LUnits get_first_line_indent();
+    string get_first_line_prefix();
+
+protected:
 
 };
 

@@ -1333,7 +1333,7 @@ SUITE(InternalModelTest)
 
         pScore->set_dirty(false);
         CHECK( pScore->is_dirty() == false );
-        CHECK( pScore->are_children_dirty() == false );
+        CHECK( pScore->are_children_dirty() == true );  //set dirty(false) doesn't propagate down
         CHECK( pClef->is_dirty() == true );
         CHECK( doc.is_dirty() == true );
 

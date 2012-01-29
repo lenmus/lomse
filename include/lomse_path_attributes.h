@@ -98,8 +98,8 @@ struct PathAttributes
     GradientAttributes* fill_gradient;
 
     // Empty constructor
-    PathAttributes()
-        : path_index(0)
+    PathAttributes(unsigned idx=0)
+        : path_index(idx)
         , fill_color(Color(0,0,0))
         , stroke_color(Color(0,0,0))
         , fill_mode(k_fill_solid)
@@ -156,7 +156,7 @@ struct PathAttributes
     ~PathAttributes()
     {
         //AWARE: Following sentence produces a crash. Why?
-        //delete fill_gradient;
+        delete fill_gradient;
         //See explanation at ScreenDrawer destructor, and how to delele fill_gradient.
     }
 };

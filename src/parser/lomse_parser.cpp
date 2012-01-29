@@ -68,7 +68,7 @@ void LdpParser::clear_all()
 }
 
 //---------------------------------------------------------------------------------------
-LdpTree* LdpParser::parse_text(const std::string& sourceText)
+SpLdpTree LdpParser::parse_text(const std::string& sourceText)
 {
     LdpTextReader reader(sourceText);
     return parse_input(reader);
@@ -76,7 +76,7 @@ LdpTree* LdpParser::parse_text(const std::string& sourceText)
 }
 
 //---------------------------------------------------------------------------------------
-LdpTree* LdpParser::parse_file(const std::string& filename, bool fErrorMsg)
+SpLdpTree LdpParser::parse_file(const std::string& filename, bool fErrorMsg)
 {
     LdpFileReader reader(filename);
     return parse_input(reader);
@@ -84,13 +84,13 @@ LdpTree* LdpParser::parse_file(const std::string& filename, bool fErrorMsg)
 }
 
 //---------------------------------------------------------------------------------------
-LdpTree* LdpParser::parse_input(LdpReader& reader)
+SpLdpTree LdpParser::parse_input(LdpReader& reader)
 {
     return do_syntax_analysis(reader);
 }
 
 //---------------------------------------------------------------------------------------
-LdpTree* LdpParser::do_syntax_analysis(LdpReader& reader)
+SpLdpTree LdpParser::do_syntax_analysis(LdpReader& reader)
 {
     //This function analyzes source code. The result of the analysis is a tree
     //of nodes, each one representing an element. The root node is the parsed
@@ -144,14 +144,14 @@ LdpTree* LdpParser::do_syntax_analysis(LdpReader& reader)
 
     // exit if error
     if (m_state == A5_ExitError)
-        return new LdpTree();
+        return SpLdpTree( LOMSE_NEW LdpTree() );
 
     // at this point m_curNode is all the tree
     if (!m_curNode)
         throw std::runtime_error(
             "[LdpParser::do_syntax_analysis] LDP file format error.");
 
-    return LOMSE_NEW LdpTree(m_curNode);
+    return SpLdpTree( LOMSE_NEW LdpTree(m_curNode) );
 }
 
 //---------------------------------------------------------------------------------------

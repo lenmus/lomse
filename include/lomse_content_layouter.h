@@ -41,6 +41,7 @@ class ImoDocument;
 class ImoList;
 class ImoListItem;
 class ImoMultiColumn;
+class ImoScorePlayer;
 class ImoStyles;
 class GraphicModel;
 class GmoBox;
@@ -49,8 +50,7 @@ class DocLayouter;
 
 
 //----------------------------------------------------------------------------------
-// ContentLayouter
-//  layout algorithm for a collection of content items.
+// ContentLayouter: layout algorithm for a collection of content items.
 class ContentLayouter : public Layouter
 {
 protected:
@@ -67,10 +67,8 @@ public:
 
 };
 
-
 //----------------------------------------------------------------------------------
-// MultiColumnLayouter
-//  layout algorithm for organising content in several columns
+// MultiColumnLayouter: layout algorithm for organising content in several columns
 class MultiColumnLayouter : public Layouter
 {
 protected:
@@ -96,10 +94,8 @@ protected:
 
 };
 
-
 ////----------------------------------------------------------------------------------
-//// ControlLayouter
-////  layout algorithm for a gui control
+//// ControlLayouter: layout algorithm for a gui control
 //class ControlLayouter : public Layouter
 //{
 //protected:
@@ -116,10 +112,8 @@ protected:
 //
 //};
 
-
 //----------------------------------------------------------------------------------
-// ListLayouter
-//  layout algorithm for a collection of listitems.
+// ListLayouter: layout algorithm for a collection of listitems.
 class ListLayouter : public Layouter
 {
 protected:
@@ -134,10 +128,24 @@ public:
     //implementation of Layouter virtual methods
     void layout_in_box();
     void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
+};
 
+//----------------------------------------------------------------------------------
+// ScorePlayerLayouter: layout algorithm for scorePlayer objects.
+class ScorePlayerLayouter : public Layouter
+{
 protected:
-    void add_bullet(ImoListItem* pItem);
+    ImoScorePlayer* m_pPlayer;
 
+public:
+    ScorePlayerLayouter(ImoContentObj* pItem, Layouter* pParent,
+                        GraphicModel* pGModel, LibraryScope& libraryScope, 
+                        ImoStyles* pStyles);
+    virtual ~ScorePlayerLayouter() {}
+
+    //implementation of Layouter virtual methods
+    void layout_in_box();
+    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
 };
 
 

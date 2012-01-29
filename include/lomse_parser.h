@@ -47,9 +47,9 @@ public:
 //    //setings and options
 //    inline void SetIgnoreList(std::set<long>* pSet) { m_pIgnoreSet = pSet; }
 //
-    LdpTree* parse_file(const std::string& filename, bool fErrorMsg = true);
-    LdpTree* parse_text(const std::string& sourceText);
-    LdpTree* parse_input(LdpReader& reader);
+    SpLdpTree parse_file(const std::string& filename, bool fErrorMsg = true);
+    SpLdpTree parse_text(const std::string& sourceText);
+    SpLdpTree parse_input(LdpReader& reader);
 
     inline int get_num_errors() { return m_numErrors; }
     inline long get_max_id() { return m_nMaxId; }
@@ -65,7 +65,7 @@ protected:
         A5_ExitError
     };
 
-    LdpTree* do_syntax_analysis(LdpReader& reader);
+    SpLdpTree do_syntax_analysis(LdpReader& reader);
 
     void clear_all();
     void PushNode(EParsingState nPopState);

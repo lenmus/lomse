@@ -37,17 +37,20 @@ ScorePlayer::ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi)
     : m_libScope(libScope)
     , m_pThread(NULL)
     , m_pMidi(pMidi)
-    , m_pInteractor(NULL)
     , m_fPaused(false)
     , m_fShouldStop(false)
     , m_fPlaying(false)
     , m_pScore(NULL)
     , m_pTable(NULL)
-    , m_nMM(60)
     , m_MtrChannel(9)
     , m_MtrInstr(0)
     , m_MtrTone1(60)
     , m_MtrTone2(77)
+    , m_fVisualTracking(false)
+    , m_fCountOff(false)
+    , m_playMode(k_play_normal_instrument)
+    , m_nMM(60)
+    , m_pInteractor(NULL)
 {
 }
 
@@ -58,17 +61,14 @@ ScorePlayer::~ScorePlayer()
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayer::prepare_to_play(ImoScore* pScore, int nMM, int metronomeChannel,
-                                      int metronomeInstr, int tone1, int tone2,
-                                      Interactor* pInteractor)
+void ScorePlayer::prepare_to_play(ImoScore* pScore, int metronomeChannel,
+                                  int metronomeInstr, int tone1, int tone2)
 {
     m_pScore = pScore;
-    m_nMM = nMM;
     m_MtrChannel = metronomeChannel;
     m_MtrInstr = metronomeInstr;
     m_MtrTone1 = tone1;
     m_MtrTone2 = tone2;
-    m_pInteractor = pInteractor;
 
     m_pTable = m_pScore->get_midi_table();
 }
@@ -79,10 +79,16 @@ void ScorePlayer::play(bool fVisualTracking, bool fCountOff,
 {
 	//play all the score
 
+    m_fVisualTracking = fVisualTracking;
+    m_fCountOff = fCountOff;
+    m_playMode = playMode;
+    m_nMM = nMM;
+    m_pInteractor = pInteractor;
+
     int evStart = m_pTable->get_first_event_for_measure(1);
     int evEnd = m_pTable->get_last_event();
 
-    play_segment(evStart, evEnd, playMode, fVisualTracking, fCountOff, nMM, pInteractor);
+    play_segment(evStart, evEnd);
 }
 
 //---------------------------------------------------------------------------------------
@@ -91,13 +97,19 @@ void ScorePlayer::play_measure(int nMeasure, bool fVisualTracking,
 {
     // Play back measure n (n = 1 ... num_measures)
 
+    m_fVisualTracking = fVisualTracking;
+    m_fCountOff = false;
+    m_playMode = playMode;
+    m_nMM = nMM;
+    m_pInteractor = pInteractor;
+
     //remember:
     //   real measures 1..n correspond to table items 1..n
     //   items 0 and n+1 are fictitius measures for pre and post control events
     int evStart = m_pTable->get_first_event_for_measure(nMeasure);
     int evEnd = m_pTable->get_first_event_for_measure(nMeasure + 1) - 1;
 
-    play_segment(evStart, evEnd, playMode, fVisualTracking, k_no_countoff, nMM, pInteractor);
+    play_segment(evStart, evEnd);
 }
 
 //---------------------------------------------------------------------------------------
@@ -105,6 +117,12 @@ void ScorePlayer::play_from_measure(int nMeasure, bool fVisualTracking, bool fCo
                                     int playMode, long nMM, Interactor* pInteractor)
 {
     // Play back from measure n (n = 1 ... num_measures) to end
+
+    m_fVisualTracking = fVisualTracking;
+    m_fCountOff = fCountOff;
+    m_playMode = playMode;
+    m_nMM = nMM;
+    m_pInteractor = pInteractor;
 
     //remember:
     //   real measures 1..n correspond to table items 1..n
@@ -122,19 +140,17 @@ void ScorePlayer::play_from_measure(int nMeasure, bool fVisualTracking, bool fCo
 
     int nEvEnd = m_pTable->get_last_event();
 
-    play_segment(nEvStart, nEvEnd, playMode, fVisualTracking, fCountOff, nMM, pInteractor);
+    play_segment(nEvStart, nEvEnd);
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayer::play_segment(int nEvStart, int nEvEnd, int playMode,
-                               bool fVisualTracking, bool fCountOff, long nMM,
-                               Interactor* pInteractor)
+void ScorePlayer::play_segment(int nEvStart, int nEvEnd)
 {
     //Create a new thread. It starts inmediately to execute do_play()
     delete m_pThread;
     m_pThread = LOMSE_NEW SoundThread(&ScorePlayer::thread_main, this,
-                                nEvStart, nEvEnd, playMode, fVisualTracking,
-                                fCountOff, nMM, pInteractor);
+                                nEvStart, nEvEnd, m_playMode, m_fVisualTracking,
+                                m_fCountOff, m_nMM, m_pInteractor);
 }
 
 //---------------------------------------------------------------------------------------
@@ -172,10 +188,7 @@ void ScorePlayer::stop()
     if (m_fPlaying)
         m_pThread->interrupt();    //request the tread to terminate
 
-    m_pThread->join();
-    delete m_pThread;
-    m_pThread = NULL;
-    m_fShouldStop = false;
+    wait_for_termination();
 }
 
 //---------------------------------------------------------------------------------------
@@ -192,12 +205,13 @@ void ScorePlayer::pause()
 //---------------------------------------------------------------------------------------
 void ScorePlayer::wait_for_termination()
 {
-    // Waits until the end of the score playback
-
-    if (!m_pThread) return;
-    m_pThread->join();
-    delete m_pThread;
-    m_pThread = NULL;
+    if (m_pThread)
+    {
+        m_pThread->join();
+        delete m_pThread;
+        m_pThread = NULL;
+    }
+    m_fShouldStop = false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -399,7 +413,9 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
                 //last metronome click is previous to first event from table.
                 //send highlight event
                 m_libScope.post_event(pEvent);
-                pEvent = LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id());
+                pEvent = SpEventScoreHighlight(
+                            LOMSE_NEW EventScoreHighlight(pInteractor,
+                                                          m_pScore->get_id()) );
             }
         }
 
@@ -423,7 +439,9 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
                 if (fVisualTracking && pEvent->get_num_items() > 0)
                 {
                     m_libScope.post_event(pEvent);
-                    pEvent = LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id());
+                    pEvent = SpEventScoreHighlight(
+                                LOMSE_NEW EventScoreHighlight(pInteractor,
+                                                              m_pScore->get_id()) );
                 }
 
                 //wait for current time
@@ -477,7 +495,9 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
                 if (fVisualTracking && pEvent->get_num_items() > 0)
                 {
                     m_libScope.post_event(pEvent);
-                    pEvent = LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id());
+                    pEvent = SpEventScoreHighlight(
+                                LOMSE_NEW EventScoreHighlight(pInteractor,
+                                                              m_pScore->get_id()) );
                 }
 
                 //wait until new time arives

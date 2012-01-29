@@ -123,7 +123,7 @@ void Interactor::handle_event(SpEventInfo pEvent)
         case k_highlight_event:
         {
             SpEventScoreHighlight pEv(
-                static_cast<EventScoreHighlight*>( pEvent.get_pointer() ) );
+                boost::static_pointer_cast<EventScoreHighlight>(pEvent) );
             on_visual_highlight(pEv);
         }
 
@@ -310,7 +310,7 @@ void Interactor::redraw_bitmap()
 //---------------------------------------------------------------------------------------
 void Interactor::request_window_update()
 {
-    EventView* pEvent = LOMSE_NEW EventView(k_update_window_event, this);
+    SpEventView pEvent( LOMSE_NEW EventView(k_update_window_event, this) );
     notify_observers(pEvent, this);
 }
 

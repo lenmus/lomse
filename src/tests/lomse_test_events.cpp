@@ -148,7 +148,8 @@ SUITE(DocumentEventsTest)
         CHECK( handler.event_received() == false );
 
         Observer* pObs = doc.my_get_first_observer();
-        pObs->notify( new MyEventOnClick(pButton) );
+        SpEventInfo ev( new MyEventOnClick(pButton) );
+        pObs->notify(ev);
 
         CHECK( handler.event_received() == true );
     }
@@ -180,7 +181,8 @@ SUITE(DocumentEventsTest)
         CHECK( handler.event_received() == false );
 
         Observer* pObs = doc.my_get_first_observer();
-        pObs->notify( new MyEventOnClick(pButton) );
+        SpEventInfo ev( new MyEventOnClick(pButton) );
+        pObs->notify(ev);
 
         CHECK( handler.event_received() == true );
     }

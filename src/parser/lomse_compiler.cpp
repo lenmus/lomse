@@ -44,7 +44,7 @@ LdpCompiler::LdpCompiler(LdpParser* p, Analyser* a, ModelBuilder* mb, IdAssigner
     , m_pModelBuilder(mb)
     , m_pIdAssigner(ida)
     , m_pDoc(pDoc)
-    , m_pFinalTree(NULL)
+    , m_pFinalTree()
 {
 }
 
@@ -56,7 +56,7 @@ LdpCompiler::LdpCompiler(LibraryScope& libraryScope, Document* pDoc)
     , m_pModelBuilder( Injector::inject_ModelBuilder(pDoc->get_scope()) )
     , m_pIdAssigner( pDoc->get_scope().id_assigner() )
     , m_pDoc(pDoc)
-    , m_pFinalTree(NULL)
+    , m_pFinalTree()
     , m_fileLocator("")
 {
 }
@@ -68,10 +68,7 @@ LdpCompiler::~LdpCompiler()
     delete m_pAnalyser;
     delete m_pModelBuilder;
     if (m_pFinalTree)
-    {
         delete m_pFinalTree->get_root();
-        delete m_pFinalTree;
-    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -118,25 +115,23 @@ InternalModel* LdpCompiler::create_with_empty_score()
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LdpCompiler::compile(LdpTree* pParseTree)
+InternalModel* LdpCompiler::compile(SpLdpTree pParseTree)
 {
     if (pParseTree->get_root()->is_type(k_score))
-    {
         m_pFinalTree = wrap_score_in_lenmusdoc(pParseTree);
-        delete pParseTree;
-    }
     else
         m_pFinalTree = pParseTree;
 
-    InternalModel* IModel = m_pAnalyser->analyse_tree(m_pFinalTree, m_fileLocator);
+    SpLdpTree finalTree( m_pFinalTree );
+    InternalModel* IModel = m_pAnalyser->analyse_tree(finalTree, m_fileLocator);
     m_pModelBuilder->build_model(IModel);
     return IModel;
 }
 
 //---------------------------------------------------------------------------------------
-LdpTree* LdpCompiler::wrap_score_in_lenmusdoc(LdpTree* pParseTree)
+SpLdpTree LdpCompiler::wrap_score_in_lenmusdoc(SpLdpTree pParseTree)
 {
-    LdpTree* pFinalTree = parse_empty_doc();
+    SpLdpTree pFinalTree = parse_empty_doc();
     m_pIdAssigner->reassign_ids(pParseTree);
 
     LdpTree::depth_first_iterator it = pFinalTree->begin();
@@ -148,9 +143,9 @@ LdpTree* LdpCompiler::wrap_score_in_lenmusdoc(LdpTree* pParseTree)
 }
 
 //---------------------------------------------------------------------------------------
-LdpTree* LdpCompiler::parse_empty_doc()
+SpLdpTree LdpCompiler::parse_empty_doc()
 {
-    LdpTree* pTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content ))");
+    SpLdpTree pTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content ))");
     m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return pTree;
 }

@@ -174,11 +174,12 @@ protected:
     OldBeamsBuilder* m_pOldBeamsBuilder;
     TupletsBuilder* m_pTupletsBuilder;
     SlursBuilder*   m_pSlursBuilder;
-    ImoScore*       m_pScore;
+    ImoScore*       m_pCurScore;
+    ImoScore*       m_pLastScore;
     ImoDocument*    m_pImoDoc;
 
     //analysis input
-    LdpTree* m_pTree;
+    SpLdpTree m_pTree;
     string m_fileLocator;
 
     //inherited values
@@ -195,8 +196,8 @@ public:
     ~Analyser();
 
     //access to results
-    InternalModel* analyse_tree(LdpTree* tree, const string& locator);
-    ImoObj* analyse_tree_and_get_object(LdpTree* tree);
+    InternalModel* analyse_tree(SpLdpTree tree, const string& locator);
+    ImoObj* analyse_tree_and_get_object(SpLdpTree tree);
 
     //analysis
     void analyse_node(LdpTree::iterator itNode);
@@ -246,8 +247,13 @@ public:
 //    void add_chord(ImoChord* pChord);
 
     //access to score being analysed
-    inline void set_score_being_analysed(ImoScore* pScore) { m_pScore = pScore; }
-    inline ImoScore* get_score_being_analysed() { return m_pScore; }
+    inline void score_analysis_begin(ImoScore* pScore) { m_pCurScore = pScore; }
+    inline void score_analysis_end() {
+        m_pLastScore = m_pCurScore;
+        m_pCurScore = NULL;
+    }
+    inline ImoScore* get_score_being_analysed() { return m_pCurScore; }
+    inline ImoScore* get_last_analysed_score() { return m_pLastScore; }
 
     //access to document being analysed
     inline Document* get_document_being_analysed() { return m_pDoc; }

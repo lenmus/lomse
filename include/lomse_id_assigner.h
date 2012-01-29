@@ -41,15 +41,15 @@ public:
     ~IdAssigner() {}
 
     void reassign_ids(LdpElement* pElm);
-    void reassign_ids(LdpTree* pTree);
+    void reassign_ids(SpLdpTree pTree);
     inline void set_last_id(long id) { m_idCounter = id + 1L; }
     inline long get_last_id() { return m_idCounter - 1L; }
 
     void assign_id(ImoObj* pImo);
 
 protected:
-    long find_min_id(LdpTree* pTree);
-    void shift_ids(LdpTree* pTree, long shift);
+    long find_min_id(SpLdpTree pTree);
+    void shift_ids(SpLdpTree pTree, long shift);
 
 };
 

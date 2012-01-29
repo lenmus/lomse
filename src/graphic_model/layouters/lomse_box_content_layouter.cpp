@@ -43,6 +43,7 @@ BoxContentLayouter::BoxContentLayouter(ImoContentObj* pItem, Layouter* pParent,
     : Layouter(pItem, pParent, pGModel, libraryScope, pStyles)
     , m_libraryScope(libraryScope)
     , m_pPara( dynamic_cast<ImoBoxContent*>(pItem) )
+    , m_fFirstLine(true)
 {
 }
 
@@ -112,6 +113,11 @@ void BoxContentLayouter::create_main_box(GmoBox* pParentBox, UPoint pos,
 void BoxContentLayouter::create_engrouters()
 {
     EngroutersCreator creator(m_engrouters, m_libraryScope);
+
+    string prefix = get_first_line_prefix();
+    if (!prefix.empty())
+        creator.create_prefix_engrouter(m_pPara, prefix);
+
     TreeNode<ImoObj>::children_iterator it;
     for (it = m_pPara->begin(); it != m_pPara->end(); ++it)
         creator.create_engrouters( dynamic_cast<ImoInlineObj*>( *it ) );
@@ -128,9 +134,8 @@ void BoxContentLayouter::prepare_line()
 
     m_itStart = more_engrouters() ? m_itEngrouters :  m_engrouters.end();
     m_itEnd = m_engrouters.end();
-    UPoint pos = m_pageCursor;
-    m_lineWidth = 0.0f;
 
+    set_line_pos_and_width();
     initialize_line_references();
 
     while(more_engrouters() && space_in_line())
@@ -139,13 +144,27 @@ void BoxContentLayouter::prepare_line()
         next_engrouter();
     }
     m_itEnd = m_itEngrouters;
+}
 
-    m_pageCursor = pos;     //restore cursor
+//---------------------------------------------------------------------------------------
+void BoxContentLayouter::set_line_pos_and_width()
+{
+    m_xLineStart = m_pItemMainBox->get_content_left();
+    m_lineWidth = 0.0f;
+
+    if (is_first_line())
+    {
+        LUnits indent = get_first_line_indent();
+        m_xLineStart += indent;
+        m_lineWidth = indent;
+        m_availableSpace -= indent;
+    }
 }
 
 //---------------------------------------------------------------------------------------
 void BoxContentLayouter::add_line()
 {
+    m_pageCursor.x = m_xLineStart;
     LUnits left = m_pageCursor.x;       //save left margin
 
     //horizontal alignment
@@ -174,6 +193,7 @@ void BoxContentLayouter::add_line()
         add_engrouter_shape(*it, m_lineRefs.lineHeight);
     }
     advance_current_line_space(left);
+    m_fFirstLine = false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -341,6 +361,42 @@ bool BoxContentLayouter::enough_space_in_box()
 
 
 //=======================================================================================
+// ParagraphLayouter implementation
+//=======================================================================================
+ParagraphLayouter::ParagraphLayouter(ImoContentObj* pImo, Layouter* pParent, 
+                                     GraphicModel* pGModel, LibraryScope& libraryScope,
+                                     ImoStyles* pStyles)
+    : BoxContentLayouter(pImo, pParent, pGModel, libraryScope, pStyles)
+{
+}
+
+
+
+//=======================================================================================
+// ListItemLayouter implementation
+//=======================================================================================
+ListItemLayouter::ListItemLayouter(ImoContentObj* pImo, Layouter* pParent, 
+                                   GraphicModel* pGModel, LibraryScope& libraryScope,
+                                   ImoStyles* pStyles)
+    : BoxContentLayouter(pImo, pParent, pGModel, libraryScope, pStyles)
+{
+}
+
+//---------------------------------------------------------------------------------------
+LUnits ListItemLayouter::get_first_line_indent()
+{ 
+    return -500.0f; 
+}
+
+//---------------------------------------------------------------------------------------
+string ListItemLayouter::get_first_line_prefix()
+{ 
+    return "*  ";
+}
+
+
+
+//=======================================================================================
 // EngroutersCreator implementation
 //=======================================================================================
 EngroutersCreator::EngroutersCreator(std::list<Engrouter*>& engrouters, LibraryScope& libraryScope)
@@ -397,6 +453,12 @@ void EngroutersCreator::create_engrouters(ImoInlineObj* pImo)
                             % pImo->get_obj_type() );
         throw std::runtime_error(msg);
     }
+}
+//---------------------------------------------------------------------------------------
+void EngroutersCreator::create_prefix_engrouter(ImoBoxContent* pBoxContent,
+                                                const string& prefix)
+{
+    m_engrouters.push_back( LOMSE_NEW WordEngrouter(pBoxContent, m_libraryScope, prefix) );
 }
 
 //---------------------------------------------------------------------------------------

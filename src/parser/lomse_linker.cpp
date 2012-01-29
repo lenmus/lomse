@@ -100,11 +100,14 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
         case k_imo_text_item:
             return add_text_item(static_cast<ImoTextItem*>(pChild));
 
+        case k_imo_score_player:
+            return add_inline_or_block_item(static_cast<ImoInlineObj*>(pChild));
+
         case k_imo_style:
             return add_style(static_cast<ImoStyle*>(pChild));
 
         default:
-            if (pChild->is_box_container() || pChild->is_box_content())
+            if (pChild->is_boxlevel_obj())
                 return add_child(k_imo_content, pChild);
             else if (pChild->is_staffobj())
                 return add_staffobj(static_cast<ImoStaffObj*>(pChild));
@@ -349,6 +352,9 @@ ImoObj* Linker::add_text(ImoScoreText* pText)
 //---------------------------------------------------------------------------------------
 ImoObj* Linker::add_text_item(ImoTextItem* pText)
 {
+    //TODO: The behaviour implemente in this method is common to all ImoOb objects
+    //that can be used, indistinctly, as box-level and as inline-level (i.e. image,
+    //button, etc.). Study generalization and change method name. See next method
     if (m_pParent)
     {
         if (m_pParent->is_box_content())
@@ -365,6 +371,27 @@ ImoObj* Linker::add_text_item(ImoTextItem* pText)
         }
     }
     return pText;
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj* Linker::add_inline_or_block_item(ImoInlineObj* pImo)
+{
+    if (m_pParent)
+    {
+        if (m_pParent->is_box_content())
+        {
+            ImoBoxContent* pBox = static_cast<ImoBoxContent*>(m_pParent);
+            pBox->add_item(pImo);
+            return NULL;
+        }
+
+        if (m_pParent->is_content())
+        {
+            add_child(k_imo_content, pImo);
+            return NULL;
+        }
+    }
+    return pImo;
 }
 
 //---------------------------------------------------------------------------------------

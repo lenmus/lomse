@@ -651,7 +651,9 @@ string DiatonicPitch::get_ldp_name()
 
     if (is_valid())
         return m_sNoteName[step()] + m_sOctave[octave()];
-    throw runtime_error("Operation on non-valid DiatonicPitch");
+    else
+        return "*";
+        //throw runtime_error("Operation on non-valid DiatonicPitch");
 }
 
 //---------------------------------------------------------------------------------------
