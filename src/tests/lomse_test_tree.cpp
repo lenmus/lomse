@@ -883,4 +883,33 @@ SUITE(TreeTest)
         DeleteTestData();
     }
 
+    TEST_FIXTURE(TreeTestFixture, RemoveLastChildAnddAppendNew)
+    {
+        Element* a = LOMSE_NEW Element("A");
+        Element* b = LOMSE_NEW Element("B");
+        Element* c = LOMSE_NEW Element("C");
+        Element* d = LOMSE_NEW Element("D");
+        Element* z = LOMSE_NEW Element("Z");
+
+        m_tree.set_root(a);
+        a->append_child(b);
+        a->append_child(c);
+        a->append_child(d);
+
+        a->remove_child(d);
+        a->append_child(z);
+
+        stringstream path;
+        Tree<Element>::depth_first_iterator it = m_tree.begin();
+        for (it=m_tree.begin(); it != m_tree.end(); ++it)
+            path << (*it)->m_value;
+        //cout << path.str() << endl;
+        CHECK( path.str() == "ABCZ" );
+
+        delete a;
+        delete b;
+        delete c;
+        delete z;
+    }
+
 }

@@ -38,14 +38,461 @@
 #include "agg_ellipse.h"
 #include "agg_rounded_rect.h"
 
+#include "agg_renderer_markers.h"       //for rendering markers
+#include "agg_conv_curve.h"
+#include "agg_conv_stroke.h"
+#include "agg_conv_marker.h"
+#include "agg_conv_concat.h"
+#include "agg_path_storage.h"
+#include "agg_vcgen_markers_term.h"
+
+
+
 using namespace std;
 
 namespace lomse
 {
 
+//=======================================================================================
+// Helper class LineVertexSource: a vertex source for a line
+//=======================================================================================
+struct LineVertexSource
+{
+    double x1, y1, x2, y2;
+    int f;
+
+    LineVertexSource(double x1_, double y1_, double x2_, double y2_)
+        : x1(x1_)
+        , y1(y1_)
+        , x2(x2_)
+        , y2(y2_)
+        , f(0)
+    {
+    }
+
+    void rewind(unsigned) { f = 0; }
+    unsigned vertex(double* x, double* y)
+    {
+        if(f == 0) { ++f; *x = x1; *y = y1; return agg::path_cmd_move_to; }
+        if(f == 1) { ++f; *x = x2; *y = y2; return agg::path_cmd_line_to; }
+        return agg::path_cmd_stop;
+    }
+};
+
+
+//=======================================================================================
+// Helper class MarkerVertexSource:
+//    It is a vertex source for different line caps markers
+//=======================================================================================
+class MarkerVertexSource
+{
+public:
+    MarkerVertexSource();
+
+    void head_arrowhead(double d1, double d2, double d3, double d4)
+    {
+        m_head_d1 = d1;
+        m_head_d2 = d2;
+        m_head_d3 = d3;
+        m_head_d4 = d4;
+        m_head_type = k_arrowhead;
+    }
+
+    void head_arrowtail(double d1, double d2, double d3, double d4)
+    {
+        m_head_d1 = d1;
+        m_head_d2 = d2;
+        m_head_d3 = d3;
+        m_head_d4 = d4;
+        m_head_type = k_arrowtail;
+    }
+
+    void head_circle(double r1)
+    {
+        m_head_d1 = r1;
+        m_head_type = k_circle;
+    }
+
+    void head_square(double d1, double d2)
+    {
+        m_head_d1 = d1;
+        m_head_d2 = d2;
+        m_head_d3 = d1 / 2.0;
+        m_head_type = k_square;
+    }
+
+    void head_diamond(double d1)
+    {
+        m_head_d1 = d1;
+        m_head_d2 = d1;
+        m_head_d3 = d1;
+        m_head_d4 = -d1;
+        m_head_type = k_arrowhead;
+    }
+
+    void no_head() { m_head_type = k_none; }
+
+    //-----------------------------------------------------------------------------------
+
+    void tail_diamond(double d1)
+    {
+        m_tail_d1 = d1;
+        m_tail_d2 = d1;
+        m_tail_d3 = d1;
+        m_tail_d4 = -d1;
+        m_tail_type = k_arrowhead;
+    }
+
+    void tail_arrowhead(double d1, double d2, double d3, double d4)
+    {
+        m_tail_d1 = d1;
+        m_tail_d2 = d2;
+        m_tail_d3 = d3;
+        m_tail_d4 = d4;
+        m_tail_type = k_arrowhead;
+    }
+
+    void tail_arrowtail(double d1, double d2, double d3, double d4)
+    {
+        m_tail_d1 = d1;
+        m_tail_d2 = d2;
+        m_tail_d3 = d3;
+        m_tail_d4 = d4;
+        m_tail_type = k_arrowtail;
+    }
+
+    void tail_square(double d1, double d2)
+    {
+        m_tail_d1 = d1;
+        m_tail_d2 = d2;
+        m_tail_d3 = d1 / 2.0;
+        m_tail_type = k_square;
+    }
+
+    void tail_circle(double r1)
+    {
+        m_tail_d1 = r1;
+        m_tail_type = k_circle;
+    }
+
+    void no_tail() { m_tail_type = k_none; }
+
+    void rewind(unsigned path_id);
+    unsigned vertex(double* x, double* y);
+
+private:
+    double   m_head_d1;
+    double   m_head_d2;
+    double   m_head_d3;
+    double   m_head_d4;
+    double   m_tail_d1;
+    double   m_tail_d2;
+    double   m_tail_d3;
+    double   m_tail_d4;
+
+    enum type_e { k_none=0, k_arrowhead, k_arrowtail, k_circle, k_square, };
+    unsigned    m_head_type;
+    unsigned    m_tail_type;
+
+    double      m_coord[16];
+    unsigned    m_cmd[8];
+    unsigned    m_curr_id;
+    unsigned    m_curr_coord;
+
+    enum status_e
+    {
+        stop,
+        circle_start,
+        circle_point,
+        points,
+    };
+
+    unsigned        m_status;
+    agg::ellipse    m_circle;
+    double			m_radius;
+};
+
 //---------------------------------------------------------------------------------------
+MarkerVertexSource::MarkerVertexSource()
+    : m_head_d1(1.0)
+    , m_head_d2(1.0)
+    , m_head_d3(1.0)
+    , m_head_d4(0.0)
+    , m_tail_d1(1.0)
+    , m_tail_d2(1.0)
+    , m_tail_d3(1.0)
+    , m_tail_d4(0.0)
+    , m_head_type(k_none)
+    , m_tail_type(k_none)
+    , m_curr_id(0)
+    , m_curr_coord(0)
+{
+}
+
+//---------------------------------------------------------------------------------------
+void MarkerVertexSource::rewind(unsigned path_id)
+{
+    m_status = stop;
+    m_curr_id = path_id;
+    m_curr_coord = 0;
+
+    if(path_id == 0)    //head
+    {
+        switch(m_head_type)
+        {
+        case k_none:
+            m_cmd[0] = agg::path_cmd_stop;
+            return;
+
+        case k_arrowhead:
+			m_status = points;
+            m_coord[0]  = -m_head_d1;            m_coord[1]  = 0.0;
+            m_coord[2]  = m_head_d2 + m_head_d4; m_coord[3]  = -m_head_d3;
+            m_coord[4]  = m_head_d2;             m_coord[5]  = 0.0;
+            m_coord[6]  = m_head_d2 + m_head_d4; m_coord[7]  = m_head_d3;
+
+            m_cmd[0] = agg::path_cmd_move_to;
+            m_cmd[1] = agg::path_cmd_line_to;
+            m_cmd[2] = agg::path_cmd_line_to;
+            m_cmd[3] = agg::path_cmd_line_to;
+            m_cmd[4] = agg::path_cmd_end_poly | agg::path_flags_close | agg::path_flags_ccw;
+            m_cmd[5] = agg::path_cmd_stop;
+			return;
+
+        case k_arrowtail:
+			m_status = points;
+			m_coord[0]  =  m_head_d4;                   m_coord[1]  =  0.0;
+			m_coord[2]  =  m_coord[0] - m_head_d2;      m_coord[3]  =  m_head_d3;
+			m_coord[4]  =  m_coord[2] - m_head_d1;      m_coord[5]  =  m_head_d3;
+			m_coord[6]  =  m_coord[0] - m_head_d1;      m_coord[7]  =  0.0;
+			m_coord[8]  =  m_coord[2] - m_head_d1;      m_coord[9]  = -m_head_d3;
+			m_coord[10] =  m_coord[0] - m_head_d2;      m_coord[11] = -m_head_d3;
+
+			m_cmd[0] = agg::path_cmd_move_to;
+			m_cmd[1] = agg::path_cmd_line_to;
+			m_cmd[2] = agg::path_cmd_line_to;
+			m_cmd[3] = agg::path_cmd_line_to;
+			m_cmd[4] = agg::path_cmd_line_to;
+			m_cmd[5] = agg::path_cmd_line_to;
+			m_cmd[6] = agg::path_cmd_end_poly | agg::path_flags_close | agg::path_flags_ccw;
+			m_cmd[7] = agg::path_cmd_stop;
+			return;
+
+        case k_circle:
+            m_radius = m_head_d1;
+            m_status = circle_start;
+            return;
+
+        case k_square:
+			m_status = points;
+			m_coord[0]  =  m_head_d2;                   m_coord[1]  =  m_head_d3;
+			m_coord[2]  =  m_coord[0] - m_head_d1;      m_coord[3]  =  m_head_d3;
+			m_coord[4]  =  m_coord[2];                  m_coord[5]  = -m_head_d3;
+			m_coord[6]  =  m_coord[0];                  m_coord[7]  = -m_head_d3;
+
+			m_cmd[0] = agg::path_cmd_move_to;
+			m_cmd[1] = agg::path_cmd_line_to;
+			m_cmd[2] = agg::path_cmd_line_to;
+			m_cmd[3] = agg::path_cmd_line_to;
+			m_cmd[4] = agg::path_cmd_end_poly | agg::path_flags_close | agg::path_flags_ccw;
+			m_cmd[5] = agg::path_cmd_stop;
+			return;
+        }
+        return;
+    }
+
+    if(path_id == 1)    //tail
+    {
+        switch(m_tail_type)
+        {
+        case k_none:
+            m_cmd[0] = agg::path_cmd_stop;
+            return;
+
+        case k_arrowhead:
+			m_status = points;
+            m_coord[0]  = -m_tail_d1;            m_coord[1]  = 0.0;
+            m_coord[2]  = m_tail_d2 + m_tail_d4; m_coord[3]  = -m_tail_d3;
+            m_coord[4]  = m_tail_d2;             m_coord[5]  = 0.0;
+            m_coord[6]  = m_tail_d2 + m_tail_d4; m_coord[7]  = m_tail_d3;
+
+            m_cmd[0] = agg::path_cmd_move_to;
+            m_cmd[1] = agg::path_cmd_line_to;
+            m_cmd[2] = agg::path_cmd_line_to;
+            m_cmd[3] = agg::path_cmd_line_to;
+            m_cmd[4] = agg::path_cmd_end_poly | agg::path_flags_close | agg::path_flags_ccw;
+            m_cmd[5] = agg::path_cmd_stop;
+			return;
+
+        case k_arrowtail:
+			m_status = points;
+			m_coord[0]  =  m_tail_d4;                   m_coord[1]  =  0.0;
+			m_coord[2]  =  m_coord[0] - m_tail_d2;      m_coord[3]  =  m_tail_d3;
+			m_coord[4]  =  m_coord[2] - m_tail_d1;      m_coord[5]  =  m_tail_d3;
+			m_coord[6]  =  m_coord[0] - m_tail_d1;      m_coord[7]  =  0.0;
+			m_coord[8]  =  m_coord[2] - m_tail_d1;      m_coord[9]  = -m_tail_d3;
+			m_coord[10] =  m_coord[0] - m_tail_d2;      m_coord[11] = -m_tail_d3;
+
+			m_cmd[0] = agg::path_cmd_move_to;
+			m_cmd[1] = agg::path_cmd_line_to;
+			m_cmd[2] = agg::path_cmd_line_to;
+			m_cmd[3] = agg::path_cmd_line_to;
+			m_cmd[4] = agg::path_cmd_line_to;
+			m_cmd[5] = agg::path_cmd_line_to;
+			m_cmd[6] = agg::path_cmd_end_poly | agg::path_flags_close | agg::path_flags_ccw;
+			m_cmd[7] = agg::path_cmd_stop;
+			return;
+
+        case k_circle:
+            m_radius = m_tail_d1;
+            m_status = circle_start;
+            return;
+
+        case k_square:
+			m_status = points;
+			m_coord[0]  =  m_tail_d2;                   m_coord[1]  =  m_tail_d3;
+			m_coord[2]  =  m_coord[0] - m_tail_d1;      m_coord[3]  =  m_tail_d3;
+			m_coord[4]  =  m_coord[2];                  m_coord[5]  = -m_tail_d3;
+			m_coord[6]  =  m_coord[0];                  m_coord[7]  = -m_tail_d3;
+
+			m_cmd[0] = agg::path_cmd_move_to;
+			m_cmd[1] = agg::path_cmd_line_to;
+			m_cmd[2] = agg::path_cmd_line_to;
+			m_cmd[3] = agg::path_cmd_line_to;
+			m_cmd[4] = agg::path_cmd_end_poly | agg::path_flags_close | agg::path_flags_ccw;
+			m_cmd[5] = agg::path_cmd_stop;
+			return;
+        }
+        return;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+unsigned MarkerVertexSource::vertex(double* x, double* y)
+{
+    unsigned cmd = agg::path_cmd_stop;
+    switch(m_status)
+    {
+        case circle_start:
+            m_circle.init(0.0, 0.0, m_radius, m_radius);
+            m_circle.rewind(0);
+            m_status = circle_point;
+
+        case circle_point:
+            cmd = m_circle.vertex(x, y);
+            if(agg::is_stop(cmd)) m_status = stop;
+            else return cmd;
+
+        case points:
+            if(m_curr_id < 2)
+            {
+                unsigned curr_idx = m_curr_coord * 2;
+                *x = m_coord[curr_idx];
+                *y = m_coord[curr_idx + 1];
+                return m_cmd[m_curr_coord++];
+            }
+            return agg::path_cmd_stop;
+
+        case stop:
+    	    return agg::path_cmd_stop;
+    }
+
+    return cmd;
+}
+
+
+//=======================================================================================
+// Helper class LineCapsConverter
+// It is a conversion pipeline to add stroke and line head/tail markers.
+// Internally it has three converters:
+//  * stroke_type [of type agg::conv_stroke] converts the path to the required stroke
+//  * marker_type [of type agg::conv_marker, MarkerVertexSource>] adds an arrow head
+//    to the line.
+//  * concat_type [of type agg::conv_concat] concats both converters
+//=======================================================================================
+template<class Source> struct LineCapsConverter
+{
+    typedef agg::conv_stroke<Source, agg::vcgen_markers_term> stroke_type;
+    typedef agg::conv_marker<typename stroke_type::marker_type, MarkerVertexSource>
+            marker_type;
+    typedef agg::conv_concat<stroke_type, marker_type> concat_type;
+
+    stroke_type    s;
+    MarkerVertexSource   vs;
+    marker_type    m;
+    concat_type    c;
+
+    LineCapsConverter(Source& src, double w, ELineCap nStartCap, ELineCap nEndCap)
+        : s(src)
+        , vs()
+        , m(s.markers(), vs)
+        , c(s, m)
+    {
+        s.width(w);
+
+        double k = ::pow(w, 0.7);
+        switch(nStartCap)
+        {
+            case k_cap_none:
+                break;
+
+            case k_cap_arrowhead:
+                vs.head_arrowhead(3.0*w, 3.0*w, 2.25*w, 1.5*w);
+                break;
+
+            case k_cap_arrowtail:
+                vs.head_arrowtail(5.0*w, 2.0*w, 2.0*w, 5.0*w);
+                break;
+
+            case k_cap_diamond:
+                vs.head_diamond(3.0*w);
+                break;
+
+            case k_cap_square:
+                vs.head_square(4.0*w, 2.0*w);
+                break;
+
+            case k_cap_circle:
+                vs.head_circle(2.8*w);
+                break;
+        }
+
+        switch(nEndCap)
+        {
+            case k_cap_none:
+                break;
+
+            case k_cap_arrowhead:
+                vs.tail_arrowhead(3.0*w, 3.0*w, 2.25*w, 1.5*w);
+                break;
+
+            case k_cap_arrowtail:
+                vs.tail_arrowtail(5.0*w, 2.0*w, 2.0*w, 5.0*w);
+                break;
+
+            case k_cap_diamond:
+                vs.tail_diamond(3.0*w);
+                break;
+
+            case k_cap_square:
+                vs.tail_square(4.0*w, 2.0*w);
+                break;
+
+            case k_cap_circle:
+                vs.tail_circle(2.8*w);
+                break;
+        }
+        //s.shorten(w * 2.0);       //reduce el tamaño de la linea, recortando el final
+    }
+
+    void rewind(unsigned path_id) { c.rewind(path_id); }
+    unsigned vertex(double* x, double* y) { return c.vertex(x, y); }
+};
+
+
+//=======================================================================================
 // Drawer implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 Drawer::Drawer(LibraryScope& libraryScope)
     : m_libraryScope(libraryScope)
 {
@@ -60,10 +507,9 @@ void Drawer::set_text_color(Color color)
 
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // ScreenDrawer implementation
-//---------------------------------------------------------------------------------------
-
+//=======================================================================================
 ScreenDrawer::ScreenDrawer(LibraryScope& libraryScope)
     : Drawer(libraryScope)
     , m_pRenderer( RendererFactory::create_renderer(libraryScope, m_attr_storage, m_path) )
@@ -803,6 +1249,23 @@ void ScreenDrawer::gradient_color(Color c1, double start, double stop)
         colors[i] = c1;
     }
 }
+
+//---------------------------------------------------------------------------------------
+void ScreenDrawer::line_with_markers(UPoint start, UPoint end, LUnits width,
+                                     ELineCap startCap, ELineCap endCap)
+{
+    //add paths for antialiased line with head/tail markers
+
+    LineVertexSource line(double(start.x), double(start.y),
+                          double(end.x), double(end.y) );
+
+    typedef LineCapsConverter<LineVertexSource> MyConverter;
+
+    //width = 100.0f;       //100 = 1 mm
+    MyConverter converter(line, double(width), startCap, endCap);
+    m_path.concat_path<MyConverter>(converter);
+}
+
 
 
 

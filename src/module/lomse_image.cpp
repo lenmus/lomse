@@ -32,8 +32,6 @@ using namespace std;
 namespace lomse
 {
 
-//static unsigned char m_no_image[] =
-
 //=======================================================================================
 // Image implementation
 //=======================================================================================
@@ -50,6 +48,8 @@ Image::Image(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format, USize im
 Image::Image()
     : m_error("")
 {
+    //Build default img: grey square 24x24 px
+
     m_bmpSize = VSize(24, 24);
     //TODO: get display reolution from lomse initialization. Here it is assumed 96 ppi
     m_imgSize = USize(24.0 * 2540.0f / 96.0f, 24.0 * 2540.0f / 96.0f);
@@ -60,15 +60,15 @@ Image::Image()
     if ((m_bmap = (unsigned char*)malloc(bmpsize)) == NULL)
         throw std::runtime_error("[Image constructor]: not enough memory for image buffer");
 
-    unsigned char m_no_image = 0x77;
-    memset(m_bmap, m_no_image, bmpsize);
+    unsigned char no_image = 0x77;
+    memset(m_bmap, no_image, bmpsize);
 }
 
 //---------------------------------------------------------------------------------------
 Image::~Image()
 {
-    //delete [] m_bmap;
-    if (m_bmap) free(m_bmap);
+    if (m_bmap)
+        free(m_bmap);
 }
 
 //---------------------------------------------------------------------------------------
@@ -88,12 +88,6 @@ void Image::load(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format,
 
     if (m_bmap) free(m_bmap);
     m_bmap = imgbuf;
-}
-
-//---------------------------------------------------------------------------------------
-void Image::load_from_file(const string& locator)
-{
-    //TODO
 }
 
 //---------------------------------------------------------------------------------------

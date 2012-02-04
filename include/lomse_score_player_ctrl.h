@@ -22,6 +22,7 @@
 #define _LOMSE_SCORE_PLAYER_CTRL_H__
 
 #include "lomse_control.h"
+#include "lomse_player_ctrl.h"
 
 
 namespace lomse
@@ -33,7 +34,7 @@ class ImoScorePlayer;
 
 //---------------------------------------------------------------------------------------
 // A Control containing s static text element and/or and image which links to an URL
-class ScorePlayerCtrl : public Control
+class ScorePlayerCtrl : public Control, public PlayerCtrl
 {
 protected:
     LibraryScope& m_libraryScope;
@@ -69,6 +70,9 @@ public:
     LUnits bottom() { return m_pos.y + m_height; }
     LUnits left() { return m_pos.x; }
     LUnits right() { return m_pos.x + m_width; }
+
+    //PlayerCtrl mandatory overrides
+    void on_end_of_playback();
 
     //specific methods
     void set_text(const string& text);

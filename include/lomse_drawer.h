@@ -69,7 +69,7 @@ struct RenderOptions
     //bool g_fDrawSelRect;    //draw selection rectangles around staff objects
     //bool g_fDrawBounds;     //draw bounds rectangles around staff objects
     //bool g_fShowMargins;    //draw margins in scores, so user can change them
-    //bool g_fDrawAnchors;    //draw anchors, to see them in the score
+    bool draw_anchors;      //draw anchors, to see them in the score
     //bool g_fFreeMove;		//the shapes can be dragged without restrictions
 
 
@@ -94,6 +94,7 @@ struct RenderOptions
         , selected_color(0,0,255)           //blue
         , page_border_flag(true)
         , cast_shadow_flag(true)
+        , draw_anchors(false)
     {
         boxes.reset();
     }
@@ -265,6 +266,11 @@ public:
                              LUnits dstX1, LUnits dstY1, LUnits dstX2, LUnits dstY2,
                              EResamplingQuality resamplingMode,
                              double alpha=1.0) = 0;
+
+    //SVG line with start/end markers
+    virtual void line_with_markers(UPoint start, UPoint end, LUnits width,
+                                   ELineCap startCap, ELineCap endCap) = 0;
+
 
     // Attribute setting functions.
     virtual void fill(Color color) = 0;

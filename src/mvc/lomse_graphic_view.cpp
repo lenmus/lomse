@@ -155,6 +155,7 @@ void GraphicView::draw_graphic_model()
     m_options.background_color = Color(145, 156, 166);  //35, 52, 91); //127,127,127);
     m_options.page_border_flag = true;
     m_options.cast_shadow_flag = true;
+    m_options.draw_anchors = m_libraryScope.draw_anchors();
 
     m_pDrawer->reset(*m_pRenderBuf, m_options.background_color);
     m_pDrawer->set_viewport(m_vxOrg, m_vyOrg);

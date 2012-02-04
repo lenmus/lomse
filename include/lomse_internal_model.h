@@ -90,6 +90,8 @@ class ImoParamInfo;
 class ImoReldataobjs;
 class ImoRelDataObj;
 class ImoRelObj;
+class ImoScore;
+class ImoScoreLine;
 class ImoScorePlayer;
 class ImoScoreText;
 class ImoSimpleObj;
@@ -108,7 +110,6 @@ class ImoTimeSignature;
 class ImoTupletData;
 class ImoTupletDto;
 class ImoTuplet;
-class ImoControl;
 class ImoWrapperBox;
 
 class DtoObj;
@@ -331,7 +332,7 @@ class DtoObj;
                     // ImoAuxObj (A)
                     k_imo_auxobj,
                         k_imo_fermata, k_imo_line, k_imo_score_text,
-                        k_imo_score_title,
+                        k_imo_score_line, k_imo_score_title,
                         k_imo_text_box,
 
                         // ImoRelObj (A)
@@ -607,6 +608,7 @@ public:
     inline bool is_reldataobjs() { return m_objtype == k_imo_reldataobjs; }
     inline bool is_rest() { return m_objtype == k_imo_rest; }
 	inline bool is_score() { return m_objtype == k_imo_score; }
+    inline bool is_score_line() { return m_objtype == k_imo_score_line; }
     inline bool is_score_player() { return m_objtype == k_imo_score_player; }
     inline bool is_score_text() { return m_objtype == k_imo_score_text; }
     inline bool is_score_title() { return m_objtype == k_imo_score_title; }
@@ -1746,6 +1748,7 @@ protected:
     friend class ImFactory;
     friend class ImoTextBox;
     friend class ImoLine;
+    friend class ImoScoreLine;
     ImoLineStyle()
         : ImoSimpleObj(k_imo_line_style)
         , m_lineStyle(k_line_solid)
@@ -1765,8 +1768,8 @@ protected:
         , m_lineStyle( info.get_line_style() )
         , m_startEdge( info.get_start_edge() )
         , m_endEdge( info.get_end_edge() )
-        , m_startStyle( info.get_start_style() )
-        , m_endStyle( info.get_end_style() )
+        , m_startStyle( info.get_start_cap() )
+        , m_endStyle( info.get_end_cap() )
         , m_color( info.get_color() )
         , m_width( info.get_width() )
         , m_startPoint( info.get_start_point() )
@@ -1778,22 +1781,22 @@ public:
     ~ImoLineStyle() {}
 
     //getters
-    inline ELineStyle get_line_style() { return m_lineStyle; }
-    inline ELineEdge get_start_edge() { return m_startEdge; }
-    inline ELineEdge get_end_edge() { return m_endEdge; }
-    inline ELineCap get_start_style() { return m_startStyle; }
-    inline ELineCap get_end_style() { return m_endStyle; }
-    inline Color get_color() { return m_color; }
-    inline Tenths get_width() { return m_width; }
-    inline TPoint get_start_point() { return m_startPoint; }
-    inline TPoint get_end_point() { return m_endPoint; }
+    inline ELineStyle get_line_style() const { return m_lineStyle; }
+    inline ELineEdge get_start_edge() const { return m_startEdge; }
+    inline ELineEdge get_end_edge() const { return m_endEdge; }
+    inline ELineCap get_start_cap() const { return m_startStyle; }
+    inline ELineCap get_end_cap() const { return m_endStyle; }
+    inline Color get_color() const { return m_color; }
+    inline Tenths get_width() const { return m_width; }
+    inline TPoint get_start_point() const { return m_startPoint; }
+    inline TPoint get_end_point() const { return m_endPoint; }
 
     //setters
     inline void set_line_style(ELineStyle value) { m_lineStyle = value; }
     inline void set_start_edge(ELineEdge value) { m_startEdge = value; }
     inline void set_end_edge(ELineEdge value) { m_endEdge = value; }
-    inline void set_start_style(ELineCap value) { m_startStyle = value; }
-    inline void set_end_style(ELineCap value) { m_endStyle = value; }
+    inline void set_start_cap(ELineCap value) { m_startStyle = value; }
+    inline void set_end_cap(ELineCap value) { m_endStyle = value; }
     inline void set_color(Color value) { m_color = value; }
     inline void set_width(Tenths value) { m_width = value; }
     inline void set_start_point(TPoint point) { m_startPoint = point; }
@@ -2856,6 +2859,66 @@ public:
     inline void set_y(Tenths y) { m_point.y = y; }
 
 };
+
+//---------------------------------------------------------------------------------------
+// A graphical line
+class ImoScoreLine : public ImoAuxObj
+{
+protected:
+    TPoint m_startPoint;
+    TPoint m_endPoint;
+    ImoLineStyle m_style;
+
+    friend class ImFactory;
+    ImoScoreLine()
+        : ImoAuxObj(k_imo_score_line)
+        , m_startPoint(0.0f, 0.0f)
+        , m_endPoint(0.0f, 0.0f)
+        , m_style()
+    {
+        m_style.set_line_style(k_line_solid);
+        m_style.set_start_edge(k_edge_normal);
+        m_style.set_end_edge(k_edge_normal);
+        m_style.set_start_cap(k_cap_none);
+        m_style.set_end_cap(k_cap_none);
+        m_style.set_color(Color(0,0,0));
+        m_style.set_width(1.0f);
+    }
+
+public:
+    ~ImoScoreLine() {}
+
+    //setters
+    inline void set_start_point(TPoint point) { m_startPoint = point; }
+    inline void set_end_point(TPoint point) { m_endPoint = point; }
+    inline void set_x_start(Tenths value) { m_startPoint.x = value; }
+    inline void set_y_start(Tenths value) { m_startPoint.y = value; }
+    inline void set_x_end(Tenths value) { m_endPoint.x = value; }
+    inline void set_y_end(Tenths value) { m_endPoint.y = value; }
+    inline void set_line_style(ELineStyle value) { m_style.set_line_style(value); }
+    inline void set_start_edge(ELineEdge value) { m_style.set_start_edge(value); }
+    inline void set_end_edge(ELineEdge value) { m_style.set_end_edge(value); }
+    inline void set_start_cap(ELineCap value) { m_style.set_start_cap(value); }
+    inline void set_end_cap(ELineCap value) { m_style.set_end_cap(value); }
+    inline void set_color(Color value) { m_style.set_color(value); }
+    inline void set_width(Tenths value) { m_style.set_width(value); }
+
+    //getters
+    inline Tenths get_x_start() const { return m_startPoint.x; }
+    inline Tenths get_y_start() const { return m_startPoint.y; }
+    inline Tenths get_x_end() const { return m_endPoint.x; }
+    inline Tenths get_y_end() const { return m_endPoint.y; }
+    inline TPoint get_start_point() const { return m_startPoint; }
+    inline TPoint get_end_point() const { return m_endPoint; }
+    inline Tenths get_line_width() const { return m_style.get_width(); }
+    inline Color get_line_color() const { return m_style.get_color(); }
+    inline ELineEdge get_start_edge() const { return m_style.get_start_edge(); }
+    inline ELineEdge get_end_edge() const { return m_style.get_end_edge(); }
+    inline ELineStyle get_line_style() const { return m_style.get_line_style(); }
+    inline ELineCap get_start_cap() const { return m_style.get_start_cap(); }
+    inline ELineCap get_end_cap() const { return m_style.get_end_cap(); }
+};
+
 
 //---------------------------------------------------------------------------------------
 // ImoScorePlayer: A control for managing score playback

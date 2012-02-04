@@ -165,6 +165,12 @@ public:
                      double alpha=1.0);
 
 
+    //SVG line with start/end markers
+    //-----------------------
+    void line_with_markers(UPoint start, UPoint end, LUnits width, 
+                           ELineCap startCap, ELineCap endCap);
+
+
     // point conversion
     //-----------------------
     void screen_point_to_model(double* x, double* y) const;

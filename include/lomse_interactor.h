@@ -46,6 +46,7 @@ class GraphicModel;
 class GmoObj;
 class ImoStaffObj;
 class ImoScore;
+class PlayerCtrl;
 //class UserCommandExecuter;
 //class LdpCompiler;
 
@@ -100,7 +101,7 @@ public:
 
     //creating events
     virtual void request_window_update();
-    virtual void send_end_of_play_event(ImoScore* pScore);
+    virtual void send_end_of_play_event(ImoScore* pScore, PlayerCtrl* pPlayCtrl);
 
     //interface to GraphicView
         //renderization

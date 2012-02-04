@@ -830,7 +830,7 @@ public:
                                     ImFactory::inject(k_imo_line_style, pDoc) );
         pLine->set_start_point( TPoint(0.0f, 0.0f) );
         pLine->set_start_edge(k_edge_normal);
-        pLine->set_start_style(k_cap_none);
+        pLine->set_start_cap(k_cap_none);
         pLine->set_end_edge(k_edge_normal);
 
         // <destination-point> = <dx><dy>
@@ -855,7 +855,7 @@ public:
 
         // [<lineCapEnd>])
         if (get_optional(k_lineCapEnd))
-            pLine->set_end_style( get_line_cap_param() );
+            pLine->set_end_cap( get_line_cap_param() );
 
         add_to_model( pLine );
     }
@@ -2066,6 +2066,71 @@ public:
 };
 
 //@-------------------------------------------------------------------------------------
+//@ DEPRECATED: Since v1.6 <graphic> element is only supported in backwards
+//@             compatibility mode.
+//@
+//@ <graphic> = (graphic line <xStart><yStart><xEnd><yEnd>)
+//@ <xStart>,<yStart>,<xEnd>,<yEnd> = number in tenths, relative to current pos
+//@ line width is always 1 tenth
+//@ colour is always black
+//@
+//@ Examples:
+//@    (graphic line 30 0  80 -20)
+//@    (graphic line 30 10 80 0)
+//@
+#if (LOMSE_COMPATIBILITY_1_5 == 1)
+
+class GraphicAnalyser : public ElementAnalyser
+{
+public:
+    GraphicAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                    ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        // "line"
+        if (get_optional(k_label))
+        {
+            string value = m_pParamToAnalyse->get_value();
+            if (value != "line")
+            {
+                report_msg(m_pParamToAnalyse->get_line_number(),
+                        "Unknown type '" + value + "'. Element 'graphic' ignored.");
+                return;
+            }
+        }
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoScoreLine* pLine = static_cast<ImoScoreLine*>(
+                                    ImFactory::inject(k_imo_score_line, pDoc));
+
+        //xStart
+        if (get_mandatory(k_number))
+            pLine->set_x_start( get_float_value(0.0f) );
+
+        //yStart
+        if (get_mandatory(k_number))
+            pLine->set_y_start( get_float_value(0.0f) );
+
+        //xEnd
+        if (get_mandatory(k_number))
+            pLine->set_x_end( get_float_value(0.0f) );
+
+        //yEnd
+        if (get_mandatory(k_number))
+            pLine->set_y_end( get_float_value(0.0f) );
+
+        error_if_more_elements();
+
+        pLine->set_start_cap(k_cap_arrowhead);
+        add_to_model(pLine);
+    }
+
+};
+#endif  //(LOMSE_COMPATIBILITY_1_5 == 1)
+
+//@-------------------------------------------------------------------------------------
 //@ <group> = (group [<grpName>][<grpAbbrev>]<grpSymbol>[<joinBarlines>]
 //@                  <instrument>+ )
 //@
@@ -2252,8 +2317,8 @@ protected:
 
 //@-------------------------------------------------------------------------------------
 //@ <infoMIDI> = (infoMIDI num_instr [num_channel])
-//@ num_instr = integer: 1..256
-//@ num_channel = integer: 1..16
+//@ num_instr = integer: 0..255
+//@ num_channel = integer: 0..15
 
 class InfoMidiAnalyser : public ElementAnalyser
 {
@@ -2271,7 +2336,7 @@ public:
         // num_instr
         if (!get_optional(k_number) || !set_instrument(pInfo))
         {
-            error_msg("Missing or invalid MIDI instrument (1..256). MIDI info ignored.");
+            error_msg("Missing or invalid MIDI instrument (0..255). MIDI info ignored.");
             delete pInfo;
             return;
         }
@@ -2280,7 +2345,7 @@ public:
         if (get_optional(k_number) && !set_channel(pInfo))
         {
             report_msg(m_pAnalysedNode->get_line_number(),
-                        "Invalid MIDI channel (1..16). Channel info ignored.");
+                        "Invalid MIDI channel (0..15). Channel info ignored.");
         }
 
         error_if_more_elements();
@@ -2293,18 +2358,20 @@ protected:
     bool set_instrument(ImoMidiInfo* pInfo)
     {
         int value = get_integer_value(0);
-        if (value < 1 || value > 256)
+        if (value < 0 || value > 255)
             return false;   //error
-        pInfo->set_instrument(value-1);
+
+        pInfo->set_instrument(value);
         return true;
     }
 
     bool set_channel(ImoMidiInfo* pInfo)
     {
         int value = get_integer_value(0);
-        if (value < 1 || value > 16)
+        if (value < 0 || value > 15)
             return false;   //error
-        pInfo->set_channel(value-1);
+
+        pInfo->set_channel(value);
         return true;
     }
 
@@ -2538,39 +2605,37 @@ public:
     void do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoLineStyle* pStyle = static_cast<ImoLineStyle*>(
-                                    ImFactory::inject(k_imo_line_style, pDoc) );
+        ImoScoreLine* pLine = static_cast<ImoScoreLine*>(
+                                    ImFactory::inject(k_imo_score_line, pDoc) );
 
         // <startPoint>
         if (get_mandatory(k_startPoint))
-            pStyle->set_start_point( get_point_param() );
+            pLine->set_start_point( get_point_param() );
 
         // <endPoint>
         if (get_mandatory(k_endPoint))
-            pStyle->set_end_point( get_point_param() );
+            pLine->set_end_point( get_point_param() );
 
         // [<width>]
         if (get_optional(k_width))
-            pStyle->set_width( get_width_param(1.0f) );
+            pLine->set_width( get_width_param(1.0f) );
 
         // [<color>])
         if (get_optional(k_color))
-            pStyle->set_color( get_color_param() );
+            pLine->set_color( get_color_param() );
 
         // [<lineStyle>]
         if (get_optional(k_lineStyle))
-            pStyle->set_line_style( get_line_style_param() );
+            pLine->set_line_style( get_line_style_param() );
 
         // [<startCap>]
         if (get_optional(k_lineCapStart))
-            pStyle->set_start_style( get_line_cap_param() );
+            pLine->set_start_cap( get_line_cap_param() );
 
         // [<endCap>]
         if (get_optional(k_lineCapEnd))
-            pStyle->set_end_style( get_line_cap_param() );
+            pLine->set_end_cap( get_line_cap_param() );
 
-        ImoLine* pLine = static_cast<ImoLine*>( ImFactory::inject(k_imo_line, pDoc) );
-        pLine->set_line_style(pStyle);
         add_to_model(pLine);
     }
 
@@ -2802,11 +2867,12 @@ public:
 
 //@-------------------------------------------------------------------------------------
 //@ <musicData> = (musicData [{<note>|<rest>|<barline>|<chord>|<clef>|<figuredBass>|
-//@                            <graphic>|<key>|<metronome>|<newSystem>|<spacer>|
+//@                            <graphic>|<key>|<line>|<metronome>|<newSystem>|<spacer>|
 //@                            <text>|<time>|<goFwd>|<goBack>}*] )
-//AWARE: <graphic and <text> elements are accepted for compatibility with 1.5.
-//These elements will no longer be possible. They must go attached to an spacer or
-//other staffobj
+//@
+//@ <graphic>, <line> and <text> elements are accepted for compatibility with 1.5.
+//@ From 1.6 these elements will no longer be possible. They must go attached to an
+//@ spacer or other staffobj
 
 
 class MusicDataAnalyser : public ElementAnalyser
@@ -2832,15 +2898,19 @@ public:
                    || analyse_optional(k_barline, pMD)
                    || analyse_optional(k_clef, pMD)
                    || analyse_optional(k_figuredBass, pMD)
-                   || analyse_optional(k_graphic, pMD)
                    || analyse_optional(k_key_signature, pMD)
                    || analyse_optional(k_metronome, pMD)
                    || analyse_optional(k_newSystem, pMD)
                    || analyse_optional(k_spacer, pMD)
-                   || analyse_optional(k_text, pMD)
                    || analyse_optional(k_time_signature, pMD)
                    || analyse_optional(k_goFwd, pMD)
-                   || analyse_optional(k_goBack, pMD) ))
+                   || analyse_optional(k_goBack, pMD)
+#if (LOMSE_COMPATIBILITY_1_5 == 1)
+                   || analyse_optional(k_graphic, pMD)
+                   || analyse_optional(k_line, pMD)
+                   || analyse_optional(k_text, pMD)
+#endif
+                  ))
             {
                 error_invalid_param();
                 move_to_next_param();
@@ -5337,6 +5407,12 @@ int Analyser::ldp_name_to_clef_type(const string& value)
         return k_clef_15_F4;
     else if (value == "F4_15")
         return k_clef_F4_15;
+#if (LOMSE_COMPATIBILITY_1_5 == 1)
+    else if (value == "F" || value == "bass")
+        return k_clef_F4;
+    else if (value == "trebble")
+        return k_clef_G2;
+#endif
     else
         return k_clef_undefined;
 }
@@ -5483,7 +5559,9 @@ ElementAnalyser* Analyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_font:            return LOMSE_NEW FontAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_goBack:          return LOMSE_NEW GoBackFwdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_goFwd:           return LOMSE_NEW GoBackFwdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_graphic:         return LOMSE_NEW XxxxxxxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+#if (LOMSE_COMPATIBILITY_1_5 == 1)
+        case k_graphic:         return LOMSE_NEW GraphicAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+#endif
         case k_group:           return LOMSE_NEW GroupAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_heading:         return LOMSE_NEW HeadingAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_image:           return LOMSE_NEW ImageAnalyser(this, m_reporter, m_libraryScope, pAnchor);

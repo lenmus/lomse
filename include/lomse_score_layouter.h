@@ -336,6 +336,8 @@ public:
                                     UPoint pos, int clefType=0, unsigned flags=0);
     GmoShape* create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
                                   GmoShape* pParentShape, UPoint pos);
+    GmoShape* create_invisible_shape(ImoObj* pSO, int iInstr, int iStaff,
+                                     UPoint uPos, USize uSize);
 
 
     void start_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO, ImoStaffObj* pSO,

@@ -25,6 +25,7 @@
 #include "lomse_injectors.h"
 #include "lomse_events.h"
 #include "lomse_interactor.h"
+#include "lomse_player_ctrl.h"
 
 #include <algorithm>     //max(), min()
 
@@ -51,6 +52,7 @@ ScorePlayer::ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi)
     , m_playMode(k_play_normal_instrument)
     , m_nMM(60)
     , m_pInteractor(NULL)
+    , m_pPlayCtrl(NULL)
 {
 }
 
@@ -61,10 +63,12 @@ ScorePlayer::~ScorePlayer()
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayer::prepare_to_play(ImoScore* pScore, int metronomeChannel,
-                                  int metronomeInstr, int tone1, int tone2)
+void ScorePlayer::prepare_to_play(ImoScore* pScore, PlayerCtrl* pPlayCtrl,
+                                  int metronomeChannel, int metronomeInstr,
+                                  int tone1, int tone2)
 {
     m_pScore = pScore;
+    m_pPlayCtrl = pPlayCtrl;
     m_MtrChannel = metronomeChannel;
     m_MtrInstr = metronomeInstr;
     m_MtrTone1 = tone1;
@@ -527,7 +531,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
                                         events[i]->Volume);
                 }
 
-                if (fVisualTracking)
+                if (fVisualTracking && events[i]->pSO->is_visible())
                     pEvent->add_item(k_highlight_on_event, events[i]->pSO);
 
             }
@@ -550,7 +554,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
                         m_pMidi->note_off(events[i]->Channel, events[i]->NotePitch, 127);
                 }
 
-                if (fVisualTracking)
+                if (fVisualTracking && events[i]->pSO->is_visible())
                     pEvent->add_item(k_highlight_off_event, events[i]->pSO);
             }
             else if (events[i]->EventType == SoundEvent::k_visual_on)
@@ -637,8 +641,13 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
     //ensure that all sounds are off
     m_pMidi->all_sounds_off();
 
-    SpEventEndOfPlayScore pEv( LOMSE_NEW EventEndOfPlayScore(pInteractor, m_pScore) );
-    m_libScope.post_event(pEv);
+    if (m_pPlayCtrl)
+    {
+        SpEventPlayScore event(
+            LOMSE_NEW EventPlayScore(k_end_of_playback_event, pInteractor,
+                                     m_pScore, m_pPlayCtrl) );
+        m_libScope.post_event(event);
+    }
 }
 
 

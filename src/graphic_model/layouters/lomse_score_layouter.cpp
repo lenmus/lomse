@@ -36,6 +36,7 @@
 #include "lomse_system_layouter.h"
 #include "lomse_staffobjs_cursor.h"
 #include "lomse_shape_barline.h"
+#include "lomse_shape_line.h"
 #include "lomse_barline_engraver.h"
 #include "lomse_beam_engraver.h"
 #include "lomse_chord_engraver.h"
@@ -43,6 +44,7 @@
 #include "lomse_fermata_engraver.h"
 #include "lomse_instrument_engraver.h"
 #include "lomse_key_engraver.h"
+#include "lomse_line_engraver.h"
 #include "lomse_note_engraver.h"
 #include "lomse_rest_engraver.h"
 #include "lomse_slur_engraver.h"
@@ -1013,7 +1015,7 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
     //factory method to create shapes for staffobjs
 
     if (!pSO->is_visible())
-        return LOMSE_NEW GmoShapeInvisible(pSO, 0, pos, USize(0.0f, 0.0f));
+        return create_invisible_shape(pSO, iInstr, iStaff, pos, USize(0.0f, 0.0f));
 
 
     switch (pSO->get_obj_type())
@@ -1080,10 +1082,10 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             ImoSpacer* pImo = dynamic_cast<ImoSpacer*>(pSO);
             LUnits space = m_pScoreMeter->tenths_to_logical(pImo->get_width(),
                                                             iInstr, iStaff);
-            return LOMSE_NEW GmoShapeInvisible(pSO, 0, pos, USize(space, 0.0f));
+            return create_invisible_shape(pSO, iInstr, iStaff, pos, USize(space, 0.0f));
         }
         default:
-            return LOMSE_NEW GmoShapeInvisible(pSO, 0, pos, USize(0.0f, 0.0f));
+            return create_invisible_shape(pSO, iInstr, iStaff, pos, USize(0.0f, 0.0f));
     }
 }
 
@@ -1103,9 +1105,23 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
             return engrv.create_shape(pImo, iInstr, iStaff, pos, placement,
                                       pParentShape);
         }
+        case k_imo_score_line:
+        {
+            ImoScoreLine* pImo = dynamic_cast<ImoScoreLine*>(pAO);
+            LineEngraver engrv(m_libraryScope, m_pScoreMeter);
+            return engrv.create_shape(pImo, iInstr, iStaff, pos, pParentShape);
+        }
         default:
-            return LOMSE_NEW GmoShapeInvisible(pAO, 0, pos, USize(0.0, 0.0));
+            return create_invisible_shape(pAO, iInstr, iStaff, pos, USize(0.0, 0.0));
     }
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* ShapesCreator::create_invisible_shape(ImoObj* pSO, int iInstr, int iStaff,
+                                                UPoint uPos, USize uSize)
+{
+    uSize.height = m_pScoreMeter->tenths_to_logical(40.0f, iInstr, iStaff);
+    return LOMSE_NEW GmoShapeInvisible(pSO, 0, uPos, uSize);
 }
 
 //---------------------------------------------------------------------------------------

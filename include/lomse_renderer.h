@@ -510,24 +510,24 @@ protected:
 
 
         #if (1)     //hasAlpha)  //bitmap has alpha channel: use rgba filter
-//            //define a span generator to fill lines with the image and do renderization
-//            if (quality == k_quality_low)
-//            {
-//                //nearest-neighbor filter
-//		        typedef agg::span_image_filter_rgba_nn<img_accessor_type,
-//                                                    InterpolatorType> span_gen_type;
-//                span_gen_type sg(source, interpolator);
-//                agg::render_scanlines_aa(ras, sl, m_renBase, sa, sg);
-//            }
-//
-//            else if (quality == k_quality_medium)
-//            {
+            //define a span generator to fill lines with the image and do renderization
+            if (quality == k_quality_low)
+            {
+                //nearest-neighbor filter
+		        typedef agg::span_image_filter_rgba_nn<img_accessor_type,
+                                                    InterpolatorType> span_gen_type;
+                span_gen_type sg(source, interpolator);
+                agg::render_scanlines_aa(ras, sl, m_renBase, sa, sg);
+            }
+
+            else if (quality == k_quality_medium)
+            {
                 //bilinear filter
 		        typedef agg::span_image_filter_rgba_bilinear<img_accessor_type,
                                                     InterpolatorType> span_gen_type;
                 span_gen_type sg(source, interpolator);
                 agg::render_scanlines_aa(ras, sl, m_renBase, sa, sg);
-//            }
+            }
 
         #else  //bitmap without alpha channel: use rgb filter
             //define a span generator to fill lines with the image and do renderization

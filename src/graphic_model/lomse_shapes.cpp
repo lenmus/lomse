@@ -317,6 +317,26 @@ GmoShapeInvisible::GmoShapeInvisible(ImoObj* pCreatorImo, int idx, UPoint uPos,
     m_size = uSize;
 }
 
+//---------------------------------------------------------------------------------------
+void GmoShapeInvisible::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    if (opt.draw_anchors)
+    {
+        pDrawer->begin_path();
+        pDrawer->fill(Color(255, 0, 0, 32));    //light red, transparent
+        pDrawer->stroke(Color(255, 0, 0));
+        pDrawer->stroke_width(15.0);
+        pDrawer->move_to(m_origin.x, m_origin.y);
+        pDrawer->hline_to(m_origin.x + m_size.width + 10.0f);
+        pDrawer->vline_to(m_origin.y + m_size.height);
+        pDrawer->hline_to(m_origin.x);
+        pDrawer->vline_to(m_origin.y);
+        pDrawer->end_path();
+    }
+    GmoShape::on_draw(pDrawer, opt);
+}
+
+
 
 
 //=======================================================================================

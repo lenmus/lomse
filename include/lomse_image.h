@@ -53,7 +53,6 @@ public:
 
     //creation
     void load(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format, USize imgSize);
-    void load_from_file(const string& locator);
     void set_error_msg(const string& msg);
 
     //accessors

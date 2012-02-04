@@ -68,6 +68,7 @@ protected:
     //options
     bool m_fJustifySystems;
     bool m_fDumpColumnTables;
+    bool m_fDrawAnchors;
 
 
 public:
@@ -93,6 +94,8 @@ public:
     inline bool justify_systems() { return m_fJustifySystems; }
     inline void set_dump_column_tables(bool value) { m_fDumpColumnTables = value; }
     inline bool dump_column_tables() { return m_fDumpColumnTables; }
+    inline void set_draw_anchors(bool value) { m_fDrawAnchors = value; }
+    inline bool draw_anchors() { return m_fDrawAnchors; }
 };
 
 //---------------------------------------------------------------------------------------

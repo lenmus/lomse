@@ -1461,105 +1461,6 @@ void ImoHeading::accept_visitor(BaseVisitor& v)
 }
 
 
-////=======================================================================================
-//// ImoImage implementation
-////=======================================================================================
-//ImoImage::ImoImage(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format,
-//                   USize imgSize)
-//    : ImoInlineObj(k_imo_image)
-//    , m_bmap(NULL)
-//{
-//    load(imgbuf, bmpSize, format, imgSize);
-//}
-//
-////---------------------------------------------------------------------------------------
-//ImoImage::~ImoImage()
-//{
-//    //delete [] m_bmap;
-//    if (m_bmap) free(m_bmap);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ImoImage::load(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format,
-//                    USize imgSize)
-//{
-//    m_bmpSize = bmpSize;
-//    m_imgSize = imgSize;
-//    m_format = format;
-//
-//    int bpp = get_bits_per_pixel();
-//    size_t size = bmpSize.width * bmpSize.height * (bpp / 8);
-//    //delete [] m_bmap;
-//    //m_bmap = LOMSE_NEW unsigned char[size];
-//    if (m_bmap) free(m_bmap);
-//    m_bmap = (unsigned char*)malloc(size);
-//    memcpy(m_bmap, imgbuf, size);
-//}
-//
-////---------------------------------------------------------------------------------------
-//int ImoImage::get_bits_per_pixel()
-//{
-//    switch(m_format)
-//    {
-//        case k_pix_format_undefined:    return 0;    // By default. No conversions are applied
-//    //    case k_pix_format_bw = 1,         // 1 bit per color B/W
-//        case k_pix_format_gray8:    return 8;    // Simple 256 level grayscale
-//        case k_pix_format_gray16:   return 16;   // Simple 65535 level grayscale
-//        case k_pix_format_rgb555:   return 15;   // 15 bit rgb. Depends on the byte ordering!
-//        case k_pix_format_rgb565:   return 16;   // 16 bit rgb. Depends on the byte ordering!
-//        case k_pix_format_rgbAAA:   return 30;   // 30 bit rgb. Depends on the byte ordering!
-//        case k_pix_format_rgbBBA:   return 32;   // 32 bit rgb. Depends on the byte ordering!
-//        case k_pix_format_bgrAAA:   return 30;   // 30 bit bgr. Depends on the byte ordering!
-//        case k_pix_format_bgrABB:   return 32;   // 32 bit bgr. Depends on the byte ordering!
-//        case k_pix_format_rgb24:    return 24;   // R-G-B, one byte per color component
-//        case k_pix_format_bgr24:    return 24;   // B-G-R, native win32 BMP format.
-//        case k_pix_format_rgba32:   return 32;   // R-G-B-A, one byte per color component
-//        case k_pix_format_argb32:   return 32;   // A-R-G-B, native MAC format
-//        case k_pix_format_abgr32:   return 32;   // A-B-G-R, one byte per color component
-//        case k_pix_format_bgra32:   return 32;   // B-G-R-A, native win32 BMP format
-//        case k_pix_format_rgb48:    return 48;   // R-G-B, 16 bits per color component
-//        case k_pix_format_bgr48:    return 48;   // B-G-R, native win32 BMP format.
-//        case k_pix_format_rgba64:   return 64;   // R-G-B-A, 16 bits byte per color component
-//        case k_pix_format_argb64:   return 64;   // A-R-G-B, native MAC format
-//        case k_pix_format_abgr64:   return 64;   // A-B-G-R, one byte per color component
-//        case k_pix_format_bgra64:   return 64;   // B-G-R-A, native win32 BMP format
-//    }
-//    return 0;       //compiler happy
-//}
-//
-////---------------------------------------------------------------------------------------
-//bool ImoImage::has_alpha()
-//{
-//    switch(m_format)
-//    {
-//        case k_pix_format_undefined:    // By default. No conversions are applied
-////        case k_pix_format_gray8:        // Simple 256 level grayscale
-//        case k_pix_format_gray16:       // Simple 65535 level grayscale
-//        case k_pix_format_rgb555:       // 15 bit rgb. Depends on the byte ordering!
-//        case k_pix_format_rgb565:       // 16 bit rgb. Depends on the byte ordering!
-//        case k_pix_format_rgbAAA:       // 30 bit rgb. Depends on the byte ordering!
-//        case k_pix_format_rgbBBA:       // 32 bit rgb. Depends on the byte ordering!
-//        case k_pix_format_bgrAAA:       // 30 bit bgr. Depends on the byte ordering!
-//        case k_pix_format_bgrABB:       // 32 bit bgr. Depends on the byte ordering!
-//        case k_pix_format_rgb24:        // R-G-B, one byte per color component
-//        case k_pix_format_bgr24:        // B-G-R, native win32 BMP format.
-//        case k_pix_format_rgb48:        // R-G-B, 16 bits per color component
-//        case k_pix_format_bgr48:        // B-G-R, native win32 BMP format.
-//            return false;
-//
-//        case k_pix_format_rgba32:       // R-G-B-A, one byte per color component
-//        case k_pix_format_argb32:       // A-R-G-B, native MAC format
-//        case k_pix_format_abgr32:       // A-B-G-R, one byte per color component
-//        case k_pix_format_bgra32:       // B-G-R-A, native win32 BMP format
-//        case k_pix_format_rgba64:       // R-G-B-A, 16 bits byte per color component
-//        case k_pix_format_argb64:       // A-R-G-B, native MAC format
-//        case k_pix_format_abgr64:       // A-B-G-R, one byte per color component
-//        case k_pix_format_bgra64:       // B-G-R-A, native win32 BMP format
-//            return true;
-//    }
-//    return false;       //compiler happy
-//}
-
 
 //=======================================================================================
 // ImoInstrument implementation
@@ -2143,15 +2044,6 @@ void ImoScore::set_long_option(const std::string& name, long value)
 }
 
 //---------------------------------------------------------------------------------------
-void ImoScore::add_or_replace_option(ImoOptionInfo* pOpt)
-{
-    ImoOptionInfo* pOldOpt = get_option( pOpt->get_name() );
-    if (pOldOpt)
-        remove_child(pOldOpt);
-    add_option(pOpt);
-}
-
-//---------------------------------------------------------------------------------------
 ImoInstruments* ImoScore::get_instruments()
 {
     return dynamic_cast<ImoInstruments*>( get_child_of_type(k_imo_instruments) );
@@ -2203,6 +2095,19 @@ void ImoScore::add_option(ImoOptionInfo* pOpt)
 {
     ImoOptions* pColOpts = get_options();
     return pColOpts->append_child_imo(pOpt);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoScore::add_or_replace_option(ImoOptionInfo* pOpt)
+{
+    ImoOptionInfo* pOldOpt = get_option( pOpt->get_name() );
+    if (pOldOpt)
+    {
+        ImoOptions* pColOpts = get_options();
+        pColOpts->remove_child(pOldOpt);
+        delete pOldOpt;
+    }
+    add_option(pOpt);
 }
 
 //---------------------------------------------------------------------------------------
@@ -2407,6 +2312,30 @@ void ImoScore::close()
     ModelBuilder builder;
     builder.structurize(this);
 }
+
+
+
+//=======================================================================================
+// ImoScoreLine implementation
+//=======================================================================================
+
+//ImoScoreLine::ImoScoreLine(lmScoreObj* pOwner, long nID, lmTenths xStart, lmTenths yStart,
+//                         lmTenths xEnd, lmTenths yEnd, lmTenths nWidth,
+//                         lmELineCap nStartCap, lmELineCap nEndCap, lmELineStyle nStyle,
+//                         wxColour nColor)
+//    : lmAuxObj(pOwner, nID, lm_eSO_Line, lmDRAGGABLE)
+//    , m_txStart(xStart)
+//    , m_tyStart(yStart)
+//    , m_txEnd(xEnd)
+//    , m_tyEnd(yEnd)
+//    , m_tWidth(nWidth)
+//	, m_nColor(nColor)
+//	, m_nEdge(lm_eEdgeNormal)
+//    , m_nStyle(nStyle)
+//    , m_nStartCap(nStartCap)
+//    , m_nEndCap(nEndCap)
+//{
+//}
 
 
 

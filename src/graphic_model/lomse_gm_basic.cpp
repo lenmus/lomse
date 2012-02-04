@@ -346,6 +346,7 @@ string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_image]             = "image          ";
         m_typeToName[k_shape_invisible]         = "invisible      ";
         m_typeToName[k_shape_key_signature]     = "key            ";
+        m_typeToName[k_shape_line]              = "line           ";
         m_typeToName[k_shape_note]              = "note           ";
         m_typeToName[k_shape_notehead]          = "notehead       ";
         m_typeToName[k_shape_rectangle]         = "rectangle      ";

@@ -76,17 +76,17 @@ SpImage ImageReader::load_image(const string& locator)
     }
     catch(exception& e)
     {
-        Image* pImage = LOMSE_NEW Image();
-        pImage->set_error_msg(e.what());
+        SpImage img( LOMSE_NEW Image() );
+        img->set_error_msg(e.what());
         cerr << e.what() << " (catch in ImageReader::load_image)" << endl;
-        return SpImage(pImage);
+        return img;
     }
     catch(...)
     {
-        Image* pImage = LOMSE_NEW Image();
-        pImage->set_error_msg("Non-standard unknown exception");
+        SpImage img( LOMSE_NEW Image() );
+        img->set_error_msg("Non-standard unknown exception");
         cerr << "Non-standard unknown exception (catch in ImageReader::load_image)" << endl;
-        return SpImage(pImage);
+        return img;
     }
     return SpImage( LOMSE_NEW Image() );   //compiler happy
 }

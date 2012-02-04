@@ -32,6 +32,7 @@
 #include "lomse_view.h"
 #include "lomse_graphic_view.h"
 #include "lomse_events.h"
+#include "lomse_player_ctrl.h"
 #include <sstream>
 using namespace std;
 
@@ -622,10 +623,13 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::send_end_of_play_event(ImoScore* pScore)
+void Interactor::send_end_of_play_event(ImoScore* pScore, PlayerCtrl* pPlayCtrl)
 {
     remove_all_highlight();
     SpEventView pEvent( LOMSE_NEW EventView(k_end_of_playback_event, this) );
+    if (pPlayCtrl)
+        pPlayCtrl->on_end_of_playback();
+
     m_pDoc->notify_observers(pEvent, m_pDoc);
 
     update_view_if_needed();

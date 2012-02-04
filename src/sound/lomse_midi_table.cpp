@@ -187,7 +187,8 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
     if (pSO->is_rest())
     {
         //it is a rest. Generate only event for visual highlight
-        store_event(rTime, SoundEvent::k_visual_on, channel, 0, 0, 0, pSO, measure);
+        if (pSO->is_visible())
+            store_event(rTime, SoundEvent::k_visual_on, channel, 0, 0, 0, pSO, measure);
     }
     else
     {
@@ -214,7 +215,8 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
     if (pSO->is_rest())
     {
         //Is a rest. Genera only a VisualOff event
-        store_event(rTime, SoundEvent::k_visual_off, channel, 0, 0, 0, pSO, measure);
+        if (pSO->is_visible())
+            store_event(rTime, SoundEvent::k_visual_off, channel, 0, 0, 0, pSO, measure);
     }
     else
     {

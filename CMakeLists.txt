@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------------------
 #  This file is part of the Lomse library.
-#  Copyright (c) 2010-2011 Lomse project
+#  Copyright (c) 2010-2012 Cecilio Salmeron
 #
 #  Lomse is free software; you can redistribute it and/or modify it under the
 #  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -72,6 +72,7 @@ set( LOMSE_CREATE_DLL "0")
 
 # build options
 set( LOMSE_DEBUG "0")
+set( LOMSE_COMPATIBILITY_1_5 "1")
 
 # platform
 if(WIN32)
@@ -272,6 +273,7 @@ set(AGG_FILES
     ${SRC_DIR}/agg/src/agg_rounded_rect.cpp
     ${SRC_DIR}/agg/src/agg_trans_affine.cpp
     ${SRC_DIR}/agg/src/agg_vcgen_contour.cpp
+    ${SRC_DIR}/agg/src/agg_vcgen_markers_term.cpp
     ${SRC_DIR}/agg/src/agg_vcgen_stroke.cpp
     ${SRC_DIR}/agg/font_freetype/agg_font_freetype.cpp
 )
@@ -304,6 +306,7 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/lomse_shape_base.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_beam.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_brace_bracket.cpp
+    ${SRC_DIR}/graphic_model/lomse_shape_line.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_note.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_staff.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_text.cpp
@@ -321,6 +324,7 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/engravers/lomse_fermata_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_instrument_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_key_engraver.cpp
+    ${SRC_DIR}/graphic_model/engravers/lomse_line_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_note_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_noterest_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_rest_engraver.cpp

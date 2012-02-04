@@ -38,6 +38,7 @@ class SoundEventsTable;
 class SoundEvent;
 class Interactor;
 class LibraryScope;
+class PlayerCtrl;
 
 //some constants for greater code legibility
 #define k_no_visual_tracking    false
@@ -106,14 +107,14 @@ protected:
     int             m_playMode;
     long            m_nMM;
     Interactor*     m_pInteractor;
-
+    PlayerCtrl*     m_pPlayCtrl;
 
 public:
     ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi);
     ~ScorePlayer();
 
     //construction
-    void prepare_to_play(ImoScore* pScore,
+    void prepare_to_play(ImoScore* pScore, PlayerCtrl* pPlayCtrl,
                          int metronomeChannel=9, int metronomeInstr=0,
                          int tone1=60, int tone2=77);
 

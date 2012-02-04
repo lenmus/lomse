@@ -44,6 +44,7 @@ class GmoObj;
 class DynGenerator;
 class Document;
 class GraphicModel;
+class PlayerCtrl;
 
 //observer pattern
 class EventNotifier;
@@ -216,46 +217,27 @@ typedef boost::shared_ptr<EventMouse>  SpEventMouse;
 
 
 //---------------------------------------------------------------------------------------
-// EndOfPlayScore event
-class EventEndOfPlayScore : public EventView
-{
-protected:
-    ImoScore* m_pScore;
-
-    EventEndOfPlayScore() : EventView(k_end_of_playback_event, NULL) {}    //for unit tests
-
-public:
-    EventEndOfPlayScore(Interactor* pInteractor, ImoScore* pScore)
-        : EventView(k_end_of_playback_event, pInteractor)
-        , m_pScore(pScore)
-    {
-    }
-
-    // accessors
-    inline ImoScore* get_score() { return m_pScore; }
-};
-
-typedef boost::shared_ptr<EventEndOfPlayScore>  SpEventEndOfPlayScore;
-
-
-//---------------------------------------------------------------------------------------
 // EventPlayScore: several events related to score playback
 class EventPlayScore : public EventView
 {
 protected:
     ImoScore* m_pScore;
+    PlayerCtrl* m_pPlayer;
 
     EventPlayScore(EEventType evType) : EventView(evType, NULL) {}    //for unit tests
 
 public:
-    EventPlayScore(EEventType evType, Interactor* pInteractor, ImoScore* pScore)
+    EventPlayScore(EEventType evType, Interactor* pInteractor, ImoScore* pScore,
+                   PlayerCtrl* pPlayer)
         : EventView(evType, pInteractor)
         , m_pScore(pScore)
+        , m_pPlayer(pPlayer)
     {
     }
 
     // accessors
-    inline ImoScore* get_score() { return m_pScore; }
+    inline ImoScore* get_score() const { return m_pScore; }
+    inline PlayerCtrl* get_player() const { return m_pPlayer; }
 };
 
 typedef boost::shared_ptr<EventPlayScore>  SpEventPlayScore;

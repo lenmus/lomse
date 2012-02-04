@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 //  This file is part of the Lomse library.
-//  Copyright (c) 2010 Lomse project
+//  Copyright (c) 2010-2012 Cecilio Salmeron
 //
 //  Lomse is free software; you can redistribute it and/or modify it under the
 //  terms of the GNU General Public License as published by the Free Software Foundation,
@@ -63,7 +63,12 @@
 //---------------------------------------------------------------------------------------
 // build options
 //---------------------------------------------------------------------------------------
-#define LOMSE_DEBUG      @LOMSE_DEBUG@      //Debug build: include debug options
+
+// 1 - Debug build: include debug options
+#define LOMSE_DEBUG                 @LOMSE_DEBUG@ 
+
+// 1 - Accept without warning/error LDP v1.5 syntax
+#define LOMSE_COMPATIBILITY_1_5     @LOMSE_COMPATIBILITY_1_5@
 
 
 #endif  // __LOMSE_CONFIG_H__

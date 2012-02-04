@@ -439,6 +439,27 @@ ImoObj* Linker::add_attachment(ImoAuxObj* pAuxObj)
         ImoContentObj* pContentObj = static_cast<ImoContentObj*>(m_pParent);
         pContentObj->add_attachment(m_pDoc, pAuxObj);
     }
+#if (LOMSE_COMPATIBILITY_1_5 == 1)
+    //backwards compatibility with 1.5
+    //Until v.1.5 included, it was ok to include AuxObj in a musicData element, and
+    //the parser will create an anchor object for it. Since v1.6 the anchor object *must*
+    //be explicitly defined in LDP source.
+    else if (m_pParent && m_pParent->is_music_data())
+    {
+        if (pAuxObj->is_score_line())
+        {
+            //auxObj in musicData: create anchor (ImoSpacer) and attach to it
+            ImoSpacer* pSpacer = static_cast<ImoSpacer*>(
+                                        ImFactory::inject(k_imo_spacer, m_pDoc) );
+            pSpacer->add_attachment(m_pDoc, pAuxObj);
+            add_staffobj(pSpacer);
+            return NULL;
+        }
+        else
+            return pAuxObj;
+    }
+#endif  //(LOMSE_COMPATIBILITY_1_5 == 1)
+
     return pAuxObj;
 }
 

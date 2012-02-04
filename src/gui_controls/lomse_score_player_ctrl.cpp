@@ -40,6 +40,7 @@ namespace lomse
 ScorePlayerCtrl::ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner,
                                  Document* pDoc)
     : Control(NULL, pDoc)
+    , PlayerCtrl()
     , m_libraryScope(libScope)
     , m_pOwnerImo(pOwner)
     , m_label("Play")
@@ -57,8 +58,6 @@ ScorePlayerCtrl::ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner,
     m_normalColor = m_style->get_color_property(ImoStyle::k_color);
     m_prevColor = m_normalColor;
     m_currentColor = m_normalColor;
-
-    pDoc->add_event_handler(k_end_of_playback_event, this);
 
     measure();
 }
@@ -120,7 +119,7 @@ void ScorePlayerCtrl::handle_event(SpEventInfo pEvent)
             set_text( fPlay ? "Stop playing" : "Play" );
 
             //TO_FIX: AS we create a new event here, processing of current event does
-            //not finish until this new event is processed. This avoids inmediate
+            //not finish until this new event is processed. This prevents inmediate
             //update of "Stop playing" / "Play" label
 
             //create event for user app
@@ -129,16 +128,18 @@ void ScorePlayerCtrl::handle_event(SpEventInfo pEvent)
             Interactor* pIntor = pEv->get_interactor();
             ImoScore* pScore = m_pOwnerImo->get_score();
             SpEventPlayScore event(
-                    LOMSE_NEW EventPlayScore(evType, pIntor, pScore) );
+                    LOMSE_NEW EventPlayScore(evType, pIntor, pScore, this) );
 
             //AWARE: we notify directly to user app. (to observers of Interactor)
             pIntor->notify_observers(event, pIntor);
         }
-        else if (pEvent->is_end_of_playback_event())
-        {
-            set_text("Play");
-        }
     }
+}
+
+//---------------------------------------------------------------------------------------
+void ScorePlayerCtrl::on_end_of_playback()
+{
+    set_text("Play");
 }
 
 //---------------------------------------------------------------------------------------

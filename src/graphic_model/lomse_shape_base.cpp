@@ -51,8 +51,8 @@ void GmoShape::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //    if (IsVisible())
 //        Render(pPaper, (IsSelected() ? g_pColors->ScoreSelected() : m_color) );
 
-    //draw bounding box if selected (just for testing)
-    if (is_selected())
+
+    if (is_selected())  //draw bounding box if selected (just for testing)
     {
         pDrawer->begin_path();
         pDrawer->fill(Color(0, 0, 0, 0));

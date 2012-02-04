@@ -176,6 +176,9 @@ class GmoShapeInvisible : public GmoSimpleShape
 public:
     GmoShapeInvisible(ImoObj* pCreatorImo, int idx, UPoint uPos, USize uSize);
     ~GmoShapeInvisible() {}
+
+    //implementation of virtual methods from base class
+    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
 };
 
 //---------------------------------------------------------------------------------------

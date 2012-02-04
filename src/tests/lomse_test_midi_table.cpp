@@ -88,6 +88,24 @@ SUITE(MidiTableTest)
         CHECK( ev->EventType == SoundEvent::k_prog_instr );
     }
 
+    TEST_FIXTURE(MidiTableTestFixture, ProgramSoundsMidiInfo)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (infoMIDI 2 0)(musicData (clef G)(n c4 q) )) )))" );
+        ImoScore* pScore = doc.get_score(0);
+        MySoundEventsTable table(pScore);
+        table.my_program_sounds_for_instruments();
+
+        //cout << "num.events = " << table.num_events() << endl;
+        CHECK( table.num_events() == 1 );
+        std::vector<SoundEvent*>& events = table.get_events();
+        SoundEvent* ev = events.front();
+        CHECK( ev->Channel == 0 );
+        CHECK( ev->Instrument == 2 );
+        CHECK( ev->EventType == SoundEvent::k_prog_instr );
+    }
+
     TEST_FIXTURE(MidiTableTestFixture, CreateEvents_OneNote)
     {
         Document doc(m_libraryScope);
@@ -127,6 +145,27 @@ SUITE(MidiTableTest)
         CHECK( (*it)->EventType == SoundEvent::k_visual_on );
         ++it;
         CHECK( (*it)->EventType == SoundEvent::k_visual_off );
+    }
+
+    TEST_FIXTURE(MidiTableTestFixture, CreateEvents_RestNoVisible)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef G)(r q noVisible)(n c4 q) )) )))" );
+        ImoScore* pScore = doc.get_score(0);
+        MySoundEventsTable table(pScore);
+        table.my_program_sounds_for_instruments();
+        table.my_create_events();
+
+        //cout << "num.events = " << table.num_events() << endl;
+        CHECK( table.num_events() == 3 );
+        std::vector<SoundEvent*>& events = table.get_events();
+        std::vector<SoundEvent*>::iterator it = events.begin();
+        CHECK( (*it)->EventType == SoundEvent::k_prog_instr );
+        ++it;
+        CHECK( (*it)->EventType == SoundEvent::k_note_on );
+        ++it;
+        CHECK( (*it)->EventType == SoundEvent::k_note_off );
     }
 
     TEST_FIXTURE(MidiTableTestFixture, CreateEvents_TwoNotesTied)

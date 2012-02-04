@@ -2561,7 +2561,7 @@ SUITE(AnalyserTest)
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
-        expected << "Line 0. Missing or invalid MIDI instrument (1..256). MIDI info ignored." << endl;
+        expected << "Line 0. Missing or invalid MIDI instrument (0..255). MIDI info ignored." << endl;
         SpLdpTree tree = parser.parse_text("(infoMIDI piano 1)");
         Analyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -2583,7 +2583,7 @@ SUITE(AnalyserTest)
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
-        expected << "Line 0. Missing or invalid MIDI instrument (1..256). MIDI info ignored." << endl;
+        expected << "Line 0. Missing or invalid MIDI instrument (0..255). MIDI info ignored." << endl;
         SpLdpTree tree = parser.parse_text("(infoMIDI 315 1)");
         Analyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -2618,7 +2618,7 @@ SUITE(AnalyserTest)
         ImoMidiInfo* pInfo = dynamic_cast<ImoMidiInfo*>( pIModel->get_root() );
         CHECK( pInfo != NULL );
         CHECK( pInfo->get_channel() == 0 );
-        CHECK( pInfo->get_instrument() == 55 );
+        CHECK( pInfo->get_instrument() == 56 );
 
         delete tree->get_root();
         delete pIModel;
@@ -2630,7 +2630,7 @@ SUITE(AnalyserTest)
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
-        expected << "Line 0. Invalid MIDI channel (1..16). Channel info ignored." << endl;
+        expected << "Line 0. Invalid MIDI channel (0..15). Channel info ignored." << endl;
         SpLdpTree tree = parser.parse_text("(infoMIDI 56 25)");
         Analyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -2642,7 +2642,7 @@ SUITE(AnalyserTest)
         ImoMidiInfo* pInfo = dynamic_cast<ImoMidiInfo*>( pIModel->get_root() );
         CHECK( pInfo != NULL );
         CHECK( pInfo->get_channel() == 0 );
-        CHECK( pInfo->get_instrument() == 55 );
+        CHECK( pInfo->get_instrument() == 56 );
 
         delete tree->get_root();
         delete pIModel;
@@ -2665,8 +2665,8 @@ SUITE(AnalyserTest)
 
         ImoMidiInfo* pInfo = dynamic_cast<ImoMidiInfo*>( pIModel->get_root() );
         CHECK( pInfo != NULL );
-        CHECK( pInfo->get_channel() == 9 );
-        CHECK( pInfo->get_instrument() == 55 );
+        CHECK( pInfo->get_channel() == 10 );
+        CHECK( pInfo->get_instrument() == 56 );
 
         delete tree->get_root();
         delete pIModel;
@@ -2692,8 +2692,8 @@ SUITE(AnalyserTest)
         CHECK( pInstr->get_num_staves() == 1 );
         CHECK( pInstr->get_name().get_text() == "" );
         CHECK( pInstr->get_abbrev().get_text() == "" );
-        CHECK( pInstr->get_channel() == 11 );
-        CHECK( pInstr->get_instrument() == 55 );
+        CHECK( pInstr->get_channel() == 12 );
+        CHECK( pInstr->get_instrument() == 56 );
 
         delete tree->get_root();
         delete pIModel;
@@ -3440,6 +3440,34 @@ SUITE(AnalyserTest)
         CHECK( pOpt->get_name() == "Render.SpacingValue" );
         CHECK( pOpt->get_type() == ImoOptionInfo::k_number_long );
         CHECK( pOpt->get_long_value() == 30L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, Analyser_LastDefaultOptReplaced)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        SpLdpTree tree = parser.parse_text("(score (vers 1.6)"
+            "(opt Render.SpacingFactor 4.0)(instrument (musicData)))"
+        );
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore != NULL );
+        CHECK( pScore->has_options() == true );
+        ImoOptionInfo* pOpt = pScore->get_option("Render.SpacingFactor");
+        CHECK( pOpt != NULL );
+        CHECK( pOpt->get_name() == "Render.SpacingFactor" );
+        CHECK( pOpt->get_type() == ImoOptionInfo::k_number_float );
+        CHECK( pOpt->get_float_value() == 4.0f );
 
         delete tree->get_root();
         delete pIModel;
@@ -6257,19 +6285,17 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoLine* pLine = dynamic_cast<ImoLine*>( pIModel->get_root() );
+        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pIModel->get_root() );
         CHECK( pLine != NULL );
-        ImoLineStyle* pInfo = pLine->get_line_info();
-        CHECK( pInfo != NULL );
-        CHECK( pInfo->get_start_point() == TPoint(5.0f, 6.0f) );
-        CHECK( pInfo->get_end_point() == TPoint( 80.0f, -10.0f) );
-        CHECK( pInfo->get_line_style() == k_line_solid );
-        CHECK( pInfo->get_start_edge() == k_edge_normal );
-        CHECK( pInfo->get_end_edge() == k_edge_normal );
-        CHECK( pInfo->get_start_style() == k_cap_arrowhead );
-        CHECK( pInfo->get_end_style() == k_cap_none );
-        CHECK( is_equal(pInfo->get_color(), Color(255,0,0,255)) );
-        CHECK( pInfo->get_width() == 2.0f );
+        CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
+        CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
+        CHECK( pLine->get_line_style() == k_line_solid );
+        CHECK( pLine->get_start_edge() == k_edge_normal );
+        CHECK( pLine->get_end_edge() == k_edge_normal );
+        CHECK( pLine->get_start_cap() == k_cap_arrowhead );
+        CHECK( pLine->get_end_cap() == k_cap_none );
+        CHECK( is_equal(pLine->get_color(), Color(255,0,0,255)) );
+        CHECK( pLine->get_line_width() == 2.0f );
 
         delete tree->get_root();
         delete pIModel;
@@ -6290,19 +6316,17 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoLine* pLine = dynamic_cast<ImoLine*>( pIModel->get_root() );
+        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pIModel->get_root() );
         CHECK( pLine != NULL );
-        ImoLineStyle* pInfo = pLine->get_line_info();
-        CHECK( pInfo != NULL );
-        CHECK( pInfo->get_start_point() == TPoint(5.0f, 6.0f) );
-        CHECK( pInfo->get_end_point() == TPoint( 80.0f, -10.0f) );
-        CHECK( pInfo->get_line_style() == k_line_solid );
-        CHECK( pInfo->get_start_edge() == k_edge_normal );
-        CHECK( pInfo->get_end_edge() == k_edge_normal );
-        CHECK( pInfo->get_start_style() == k_cap_none );
-        CHECK( pInfo->get_end_style() == k_cap_none );
-        CHECK( is_equal(pInfo->get_color(), Color(0,0,0,255)) );
-        CHECK( pInfo->get_width() == 1.0f );
+        CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
+        CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
+        CHECK( pLine->get_line_style() == k_line_solid );
+        CHECK( pLine->get_start_edge() == k_edge_normal );
+        CHECK( pLine->get_end_edge() == k_edge_normal );
+        CHECK( pLine->get_start_cap() == k_cap_none );
+        CHECK( pLine->get_end_cap() == k_cap_none );
+        CHECK( is_equal(pLine->get_color(), Color(0,0,0,255)) );
+        CHECK( pLine->get_line_width() == 1.0f );
 
         delete tree->get_root();
         delete pIModel;
@@ -6323,19 +6347,17 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoLine* pLine = dynamic_cast<ImoLine*>( pIModel->get_root() );
+        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pIModel->get_root() );
         CHECK( pLine != NULL );
-        ImoLineStyle* pInfo = pLine->get_line_info();
-        CHECK( pInfo != NULL );
-        CHECK( pInfo->get_start_point() == TPoint(5.0f, 6.0f) );
-        CHECK( pInfo->get_end_point() == TPoint( 80.0f, -10.0f) );
-        CHECK( pInfo->get_line_style() == k_line_solid );
-        CHECK( pInfo->get_start_edge() == k_edge_normal );
-        CHECK( pInfo->get_end_edge() == k_edge_normal );
-        CHECK( pInfo->get_start_style() == k_cap_arrowhead );
-        CHECK( pInfo->get_end_style() == k_cap_diamond );
-        CHECK( is_equal(pInfo->get_color(), Color(0,0,0,255)) );
-        CHECK( pInfo->get_width() == 2.0f );
+        CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
+        CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
+        CHECK( pLine->get_line_style() == k_line_solid );
+        CHECK( pLine->get_start_edge() == k_edge_normal );
+        CHECK( pLine->get_end_edge() == k_edge_normal );
+        CHECK( pLine->get_start_cap() == k_cap_arrowhead );
+        CHECK( pLine->get_end_cap() == k_cap_diamond );
+        CHECK( is_equal(pLine->get_color(), Color(0,0,0,255)) );
+        CHECK( pLine->get_line_width() == 2.0f );
 
         delete tree->get_root();
         delete pIModel;
@@ -6356,19 +6378,17 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoLine* pLine = dynamic_cast<ImoLine*>( pIModel->get_root() );
+        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pIModel->get_root() );
         CHECK( pLine != NULL );
-        ImoLineStyle* pInfo = pLine->get_line_info();
-        CHECK( pInfo != NULL );
-        CHECK( pInfo->get_start_point() == TPoint(5.0f, 6.0f) );
-        CHECK( pInfo->get_end_point() == TPoint( 80.0f, -10.0f) );
-        CHECK( pInfo->get_line_style() == k_line_dot );
-        CHECK( pInfo->get_start_edge() == k_edge_normal );
-        CHECK( pInfo->get_end_edge() == k_edge_normal );
-        CHECK( pInfo->get_start_style() == k_cap_arrowhead );
-        CHECK( pInfo->get_end_style() == k_cap_none );
-        CHECK( is_equal(pInfo->get_color(), Color(0,0,0,255)) );
-        CHECK( pInfo->get_width() == 2.0f );
+        CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
+        CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
+        CHECK( pLine->get_line_style() == k_line_dot );
+        CHECK( pLine->get_start_edge() == k_edge_normal );
+        CHECK( pLine->get_end_edge() == k_edge_normal );
+        CHECK( pLine->get_start_cap() == k_cap_arrowhead );
+        CHECK( pLine->get_end_cap() == k_cap_none );
+        CHECK( is_equal(pLine->get_color(), Color(0,0,0,255)) );
+        CHECK( pLine->get_line_width() == 2.0f );
 
         delete tree->get_root();
         delete pIModel;
@@ -6389,19 +6409,17 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
 
-        ImoLine* pLine = dynamic_cast<ImoLine*>( pIModel->get_root() );
+        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pIModel->get_root() );
         CHECK( pLine != NULL );
-        ImoLineStyle* pInfo = pLine->get_line_info();
-        CHECK( pInfo != NULL );
-        CHECK( pInfo->get_start_point() == TPoint(5.0f, 6.0f) );
-        CHECK( pInfo->get_end_point() == TPoint( 80.0f, -10.0f) );
-        CHECK( pInfo->get_line_style() == k_line_solid );
-        CHECK( pInfo->get_start_edge() == k_edge_normal );
-        CHECK( pInfo->get_end_edge() == k_edge_normal );
-        CHECK( pInfo->get_start_style() == k_cap_none );
-        CHECK( pInfo->get_end_style() == k_cap_none );
-        CHECK( is_equal(pInfo->get_color(), Color(0,0,0,255)) );
-        CHECK( pInfo->get_width() == 2.0f );
+        CHECK( pLine->get_start_point() == TPoint(5.0f, 6.0f) );
+        CHECK( pLine->get_end_point() == TPoint( 80.0f, -10.0f) );
+        CHECK( pLine->get_line_style() == k_line_solid );
+        CHECK( pLine->get_start_edge() == k_edge_normal );
+        CHECK( pLine->get_end_edge() == k_edge_normal );
+        CHECK( pLine->get_start_cap() == k_cap_none );
+        CHECK( pLine->get_end_cap() == k_cap_none );
+        CHECK( is_equal(pLine->get_color(), Color(0,0,0,255)) );
+        CHECK( pLine->get_line_width() == 2.0f );
 
         delete tree->get_root();
         delete pIModel;
@@ -6492,8 +6510,8 @@ SUITE(AnalyserTest)
         CHECK( pLine->get_line_style() == k_line_dot );
         CHECK( pLine->get_start_edge() == k_edge_normal );
         CHECK( pLine->get_end_edge() == k_edge_normal );
-        CHECK( pLine->get_start_style() == k_cap_none );
-        CHECK( pLine->get_end_style() == k_cap_arrowhead );
+        CHECK( pLine->get_start_cap() == k_cap_none );
+        CHECK( pLine->get_end_cap() == k_cap_arrowhead );
         CHECK( is_equal(pLine->get_color(), Color(255,10,0,255)) );
         CHECK( pLine->get_width() == 3.5f );
 
@@ -7671,6 +7689,100 @@ SUITE(AnalyserTest)
         CHECK( pLI->get_num_items() == 1 );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pLI->get_first_item() );
         CHECK( pText->get_text() == "This is the first item" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // graphic line  --------------------------------------------------------------------
+
+    TEST_FIXTURE(AnalyserTestFixture, graphic_type_error)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. Unknown type 'circle'. Element 'graphic' ignored." << endl;
+        SpLdpTree tree = parser.parse_text("(graphic circle 0.0 0.67)");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pIModel->get_root() == NULL );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, graphic_type_ok)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text("(graphic line 0.0 7.0 17.0 3.5)");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pIModel->get_root()->is_score_line() == true );
+        ImoScoreLine* pLine = static_cast<ImoScoreLine*>( pIModel->get_root() );
+        CHECK( pLine != NULL );
+        CHECK( pLine->get_x_start() == 0.0f );
+        CHECK( pLine->get_y_start() == 7.0f );
+        CHECK( pLine->get_x_end() == 17.0f );
+        CHECK( pLine->get_y_end() == 3.5f );
+        CHECK( pLine->get_line_width() == 1.0f );
+        CHECK( pLine->get_start_edge() == k_edge_normal );
+        CHECK( pLine->get_line_style() == k_line_solid );
+        CHECK( pLine->get_start_cap() == k_cap_none );
+        CHECK( pLine->get_end_cap() == k_cap_none );
+        Color color = pLine->get_line_color();
+        CHECK( color.r == 0 );
+        CHECK( color.g == 0 );
+        CHECK( color.b == 0 );
+        CHECK( color.a == 255 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, graphic_is_anchored)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        SpLdpTree tree = parser.parse_text("(musicData "
+            "(n c4 q)(graphic line 0.0 7.0 17.0 3.5) )");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        CHECK( pMusic != NULL );
+        ImoObj::children_iterator it = pMusic->begin();
+
+        ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote != NULL );
+
+        ++it;
+        ImoSpacer* pSpacer = dynamic_cast<ImoSpacer*>( *it );
+        CHECK( pSpacer != NULL );
+        ImoAttachments* pAuxObjs = pSpacer->get_attachments();
+        CHECK( pAuxObjs != NULL );
+        ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pAuxObjs->get_item(0) );
+        CHECK( pLine != NULL );
 
         delete tree->get_root();
         delete pIModel;
