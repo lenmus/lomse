@@ -528,6 +528,7 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_analyser.cpp
         ${SRC_DIR}/tests/lomse_test_barline_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_beam_engraver.cpp
+        ${SRC_DIR}/tests/lomse_test_box_content_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_chord_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_column_breaker.cpp
         ${SRC_DIR}/tests/lomse_test_column_layouter.cpp
@@ -551,7 +552,6 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_model_builder.cpp
         ${SRC_DIR}/tests/lomse_test_multicolumn_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_note_engraver.cpp
-        ${SRC_DIR}/tests/lomse_test_paragraph_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_parser.cpp
         ${SRC_DIR}/tests/lomse_test_pitch.cpp
         ${SRC_DIR}/tests/lomse_test_presenter.cpp

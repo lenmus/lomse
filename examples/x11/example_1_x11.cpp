@@ -28,12 +28,12 @@
 #include <stdlib.h>
 
 //lomse headers
-#include "lomse_doorway.h"
-#include "lomse_document.h"
-#include "lomse_graphic_view.h"
-#include "lomse_interactor.h"
-#include "lomse_presenter.h"
-#include "lomse_events.h"
+#include <lomse_doorway.h>
+#include <lomse_document.h>
+#include <lomse_graphic_view.h>
+#include <lomse_interactor.h>
+#include <lomse_presenter.h>
+#include <lomse_events.h>
 
 using namespace lomse;
 
@@ -77,7 +77,7 @@ int           m_xMouse;
 int           m_yMouse;
 
 
-//To be moved to platform support
+//To be moved to a platform support class
 XSetWindowAttributes m_window_attributes;
 Atom                 m_close_atom;
 
@@ -112,15 +112,22 @@ void display_view_content(const rendering_buffer* rbuf)
 }
 
 //---------------------------------------------------------------------------------------
-void update_window(SpEventInfo pEvent)
+void do_update_window()
 {
-    // Callback method for Lomse. It can be used also by your application.
-    // Invoking update_window() results in just putting immediately the content
+    // Invoking do_update_window() results in just putting immediately the content
     // of the currently rendered buffer to the window without neither calling
     // any lomse methods nor generating events (i.e. window on_paint)
 
     display_view_content(&m_rbuf_window);
     XSync(m_pDisplay, false);
+}
+
+//---------------------------------------------------------------------------------------
+void update_window(SpEventInfo pEvent)
+{
+    // Callback method for Lomse
+
+    do_update_window();
 }
 
 //---------------------------------------------------------------------------------------
@@ -496,10 +503,12 @@ void open_document()
     //next, get the pointers to the relevant components
     m_pInteractor = m_pPresenter->get_interactor(0);
 
-    //connect the View with the window buffer and set required callbacks
+    //connect the View with the window buffer
     m_pInteractor->set_rendering_buffer(&m_rbuf_window);
-    m_pInteractor->add_event_handler(k_update_window_event, update_window);
 
+    //ask to receive desired events
+    //m_pInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
+    m_pInteractor->add_event_handler(k_update_window_event, update_window);
 }
 
 //-------------------------------------------------------------------------
@@ -795,7 +804,7 @@ int handle_events()
         if(m_view_needs_redraw)
         {
             update_view_content();
-            update_window(NULL);
+            do_update_window();
             m_view_needs_redraw = false;
         }
 
@@ -827,7 +836,7 @@ int handle_events()
                     int height = event.xconfigure.height;
                     delete_rendering_buffer();
                     create_rendering_buffer(width, height, 0);
-                    update_window(NULL);
+                    do_update_window();
                 }
                 break;
             }
