@@ -94,7 +94,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc)
         case k_imo_para:                pObj = LOMSE_NEW ImoParagraph();          break;
         case k_imo_param_info:          pObj = LOMSE_NEW ImoParamInfo();          break;
 //        case k_imo_point_dto:       pObj = LOMSE_NEW ImoParagraph();              break;
-        case k_imo_reldataobjs:         pObj = LOMSE_NEW ImoReldataobjs();        break;
+        case k_imo_relations:           pObj = LOMSE_NEW ImoRelations();          break;
         case k_imo_rest:                pObj = LOMSE_NEW ImoRest();               break;
         case k_imo_score:               pObj = LOMSE_NEW ImoScore(pDoc);          break;
         case k_imo_score_line:          pObj = LOMSE_NEW ImoScoreLine();          break;

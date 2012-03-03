@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -142,15 +142,16 @@ string LomseDoorway::get_version_string()
 }
 
 //---------------------------------------------------------------------------------------
-int LomseDoorway::get_version_number()
+long LomseDoorway::get_version_number()
 {
-    //returns 1000 * major + minor
-    //i.e. "1.2" -> 1002
-    //i.e. "12.114" -> 12114
+    //returns 1000000 * major + minor
+    //i.e. "0.44" -> 44
+    //i.e. "1.44" -> 1000044
+    //i.e. "12.3114" -> 12003114
 
     int major = LOMSE_VERSION_MAJOR;
     int minor = LOMSE_VERSION_MINOR;
-    return 1000 * major + minor;
+    return 1000000 * major + minor;
 }
 
 

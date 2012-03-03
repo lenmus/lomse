@@ -59,11 +59,11 @@ TieEngraver::TieEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 }
 
 //---------------------------------------------------------------------------------------
-void TieEngraver::set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+void TieEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                      GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                      int iSystem, int iCol, UPoint pos)
 {
-    m_pTie = dynamic_cast<ImoTie*>( pAO );
+    m_pTie = dynamic_cast<ImoTie*>( pRO );
 
     m_pStartNote = dynamic_cast<ImoNote*>(pSO);
     m_pStartNoteShape = dynamic_cast<GmoShapeNote*>(pStaffObjShape);
@@ -77,7 +77,7 @@ void TieEngraver::set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-void TieEngraver::set_end_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+void TieEngraver::set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                    GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                    int iSystem, int iCol)
 {

@@ -59,14 +59,14 @@ SlurEngraver::SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 }
 
 //---------------------------------------------------------------------------------------
-void SlurEngraver::set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+void SlurEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                       int iSystem, int iCol, UPoint pos)
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
     m_pos = pos;
-    m_pSlur = dynamic_cast<ImoSlur*>(pAO);
+    m_pSlur = dynamic_cast<ImoSlur*>(pRO);
     //int numNotes = m_pSlur->get_num_objects();
     //m_notes.reserve(numNotes);
 
@@ -80,7 +80,7 @@ void SlurEngraver::set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-void SlurEngraver::set_end_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+void SlurEngraver::set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                    GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                    int iSystem, int iCol)
 {

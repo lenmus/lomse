@@ -95,7 +95,7 @@ public:
 
     //beam
     ImoBeam* get_beam();
-    inline bool is_beamed() { return find_attachment(k_imo_beam) != NULL; }
+    inline bool is_beamed() { return find_relation(k_imo_beam) != NULL; }
     void set_beam_type(int level, int type);
     int get_beam_type(int level);
     bool is_end_of_beam();

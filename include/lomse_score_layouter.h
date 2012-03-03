@@ -349,15 +349,15 @@ public:
                                      UPoint uPos, USize uSize);
 
 
-    void start_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO, ImoStaffObj* pSO,
+    void start_engraving_relobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                 GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                 int iSystem, int iCol, int iLine, ImoInstrument* pInstr,
                                 UPoint pos);
-    void continue_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO, ImoStaffObj* pSO,
+    void continue_engraving_relobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                    GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                    int iSystem, int iCol, int iLine,
                                    ImoInstrument* pInstr);
-    void finish_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO, ImoStaffObj* pSO,
+    void finish_engraving_relobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                  GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                  int iSystem, int iCol, int iLine, LUnits prologWidth,
                                  ImoInstrument* pInstr);

@@ -59,13 +59,13 @@ BeamEngraver::~BeamEngraver()
 }
 
 //---------------------------------------------------------------------------------------
-void BeamEngraver::set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+void BeamEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                         GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                         int iSystem, int iCol, UPoint pos)
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
-    m_pBeam = dynamic_cast<ImoBeam*>(pAO);
+    m_pBeam = dynamic_cast<ImoBeam*>(pRO);
 
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
@@ -76,7 +76,7 @@ void BeamEngraver::set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-void BeamEngraver::set_middle_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+void BeamEngraver::set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                          GmoShape* pStaffObjShape, int iInstr,
                                          int iStaff, int iSystem, int iCol)
 {
@@ -85,7 +85,7 @@ void BeamEngraver::set_middle_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-void BeamEngraver::set_end_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+void BeamEngraver::set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                       int iSystem, int iCol)
 {

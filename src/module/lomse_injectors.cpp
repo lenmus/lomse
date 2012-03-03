@@ -62,6 +62,7 @@ LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
     , m_pFontStorage(NULL)      //lazzy instantiation. Singleton scope.
     , m_fJustifySystems(true)
     , m_fDumpColumnTables(false)
+    , m_fDrawAnchors(false)
 {
     if (!m_pDoorway)
     {

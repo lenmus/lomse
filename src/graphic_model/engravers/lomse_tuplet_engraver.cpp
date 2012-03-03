@@ -62,14 +62,14 @@ TupletEngraver::~TupletEngraver()
 }
 
 //---------------------------------------------------------------------------------------
-void TupletEngraver::set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+void TupletEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                         GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                         int iSystem, int iCol, UPoint pos)
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
     m_pos = pos;
-    m_pTuplet = dynamic_cast<ImoTuplet*>( pAO );
+    m_pTuplet = dynamic_cast<ImoTuplet*>( pRO );
 
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
@@ -80,7 +80,7 @@ void TupletEngraver::set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-void TupletEngraver::set_middle_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+void TupletEngraver::set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                          GmoShape* pStaffObjShape, int iInstr,
                                          int iStaff, int iSystem, int iCol)
 {
@@ -89,7 +89,7 @@ void TupletEngraver::set_middle_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-void TupletEngraver::set_end_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+void TupletEngraver::set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                       int iSystem, int iCol)
 {

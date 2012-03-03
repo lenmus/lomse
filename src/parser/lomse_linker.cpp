@@ -120,6 +120,8 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
                 return add_child(k_imo_content, pChild);
             else if (pChild->is_staffobj())
                 return add_staffobj(static_cast<ImoStaffObj*>(pChild));
+            else if (pChild->is_relobj())
+                return add_relation(static_cast<ImoRelObj*>(pChild));
             else if (pChild->is_auxobj())
                 return add_attachment(static_cast<ImoAuxObj*>(pChild));
             else
@@ -470,6 +472,18 @@ ImoObj* Linker::add_attachment(ImoAuxObj* pAuxObj)
 #endif  //(LOMSE_COMPATIBILITY_1_5 == 1)
 
     return pAuxObj;
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj* Linker::add_relation(ImoRelObj* pRelObj)
+{
+    if (m_pParent && m_pParent->is_staffobj())
+    {
+        ImoStaffObj* pSO = static_cast<ImoStaffObj*>(m_pParent);
+        pSO->add_relation(m_pDoc, pRelObj);
+        return NULL;
+    }
+    return pRelObj;
 }
 
 //---------------------------------------------------------------------------------------

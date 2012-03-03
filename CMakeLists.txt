@@ -25,6 +25,7 @@
 #
 # For any comment, suggestion or feature request, please contact the manager of
 # the project at cecilios@users.sourceforge.net
+# 
 #---------------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------------
@@ -40,7 +41,7 @@
 #   Linux:
 #       Unix Makefiles
 #       CodeBlocks - Unix Makefiles
-#
+# 
 #-------------------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8)
@@ -67,13 +68,39 @@ message("OUTDIR: ${OUTDIR}")
 set( CMAKE_MODULE_PATH "${ROOT_DIR}/cmake-modules" )
 
 
+if(0)
+# Various options that the user can select (var, msg, default value).
+# Values can be changed directly in the CMake GUI or through
+# the command line by prefixing a variable's name with '-D':
+# i.e.:    cmake -DLOMSE_BUILD_DEBUG=ON
+#
+#-------------------------------------------------------------------
+option(LOMSE_BUILD_STATIC_LIB "Build Lomse as static library" ON)
+option(LOMSE_BUILD_DEBUG      "Build with debug symbols" OFF)
+
+if(WIN32)
+    option(LOMSE_USE_PREBUILT_FREETYPE "Use supplied prebuilt lib for freetype" OFF)
+    option(LOMSE_USE_PREBUILT_BOOST "Use supplied prebuilt lib for boost" OFF)
+    option(LOMSE_USE_PREBUILT_OTHER "Use supplied prebuilt libs for zlib and libpng" OFF)
+endif()
+
+endif()
+
+
 
 # set up configuration variables for lomse_config.h
 #------------------------------------------------------
 
-# version
+# version. Get SVN revision number and use it in Lomse version string
 set( LOMSE_VERSION_MAJOR "0")
-set( LOMSE_VERSION_MINOR "0")
+include(FindSubversion)
+if(Subversion_FOUND)
+    Subversion_WC_INFO(${ROOT_DIR} LOMSE)
+    message("Current Lomse revision is ${LOMSE_WC_REVISION}")
+    set( LOMSE_VERSION_MINOR ${LOMSE_WC_REVISION})
+else()
+  message(FATAL_ERROR "Subversion not found.")
+endif()
 
 # build type
 set( LOMSE_USE_DLL "0")
@@ -114,6 +141,29 @@ if(CMAKE_NO_STD_NAMESPACE)
 endif()
 
 
+if (0)
+# Get SVN revision number and use it in Lomse version string
+# http://stackoverflow.com/questions/3780667/use-cmake-to-get-build-time-svn-revision
+#-------------------------------------------------------------------------
+
+# a custom target that is always built
+add_custom_target(svnheader ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/svnheader.h)
+
+# creates svnheader.h using cmake script
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/svnheader.h
+    COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+                         -P ${CMAKE_CURRENT_SOURCE_DIR}/getsvn.cmake)
+
+# svnversion.h is a generated file
+set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/svnversion.h
+    PROPERTIES GENERATED TRUE
+    HEADER_FILE_ONLY TRUE)
+
+# explicitly say that the executable depends on the svnheader
+add_dependencies(test svnheader)
+endif()
+
 
 # Check for needed libraries and set all related includes, flags, etc. 
 #-------------------------------------------------------------------------
@@ -131,10 +181,13 @@ link_directories( ${UNITTEST_LIBDIR} )
 
 
 # Check for Boost >= 1.42.0
-set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0")
-set(Boost_USE_STATIC_LIBS   OFF)
-set(Boost_USE_MULTITHREADED OFF)
-#set(Boost_DEBUG TRUE)
+set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0"
+    "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0")
+#set(Boost_USE_STATIC_LIBS       OFF)
+#set(Boost_USE_MULTITHREADED     OFF)
+#set(Boost_USE_STATIC_RUNTIME    OFF)
+#set(Boost_DEBUG                 TRUE)
+
 find_package(Boost 1.42.0 COMPONENTS date_time thread REQUIRED)
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
@@ -284,7 +337,6 @@ set(AGG_FILES
     ${SRC_DIR}/agg/src/agg_vcgen_contour.cpp
     ${SRC_DIR}/agg/src/agg_vcgen_markers_term.cpp
     ${SRC_DIR}/agg/src/agg_vcgen_stroke.cpp
-    ${SRC_DIR}/agg/font_freetype/agg_font_freetype.cpp
 )
 
 set(DOCUMENT_FILES
@@ -674,10 +726,19 @@ add_dependencies(example_1 lomse)
 #
 #   cmake -DCMAKE_INSTALL_PREFIX=/new/install/prefix
 #
-# By default, the prefix is "/usr/local"
+# By default, CMake uses the following prefix:
+#   - Linux: "/usr/local"
+#   - Windows: "C:\Program Files\lomse\"
 #///////////////////////////////////////////////////////////////////////////////
 
 message("CMAKE_INSTALL_PREFIX = " ${CMAKE_INSTALL_PREFIX} )
+
+#if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+#set(CMAKE_INSTALL_PREFIX
+#    "/opt/foo" CACHE PATH "FOO install prefix" FORCE
+#)
+#endif()
+
 if( UNIX )
 
     # copy generated libraries
@@ -693,7 +754,31 @@ if( UNIX )
 
     # copy agg includes
     install(DIRECTORY "${INCLUDES_AGG}/"
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse/agg"
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse"
+            FILES_MATCHING PATTERN "*.h"
+            PATTERN ".svn" EXCLUDE )
+
+    # copy also lomse_config.h
+    install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse" )
+
+elseif( WIN32 )
+#-------------------------------------------------------------
+
+    # copy generated libraries
+    install( TARGETS ${LOMSE} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
+    install( TARGETS ${LOMSE_DYN} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
+
+    # copy lomse includes
+    install(DIRECTORY ${INCLUDES_LOMSE}/
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse"
+            FILES_MATCHING PATTERN "*.h"
+            PATTERN ".svn" EXCLUDE
+            PATTERN "platform" EXCLUDE )
+
+    # copy agg includes
+    install(DIRECTORY "${INCLUDES_AGG}/"
+            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse"
             FILES_MATCHING PATTERN "*.h"
             PATTERN ".svn" EXCLUDE )
 
@@ -702,6 +787,7 @@ if( UNIX )
             DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse" )
 
 endif()
+
 
 ## Set the path of the application executable
 #if( MSVC )

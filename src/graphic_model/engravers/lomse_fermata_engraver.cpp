@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -73,9 +73,9 @@ GmoShapeFermata* FermataEngraver::create_shape(ImoFermata* pFermata, int iInstr,
 UPoint FermataEngraver::compute_location(UPoint pos)
 {
 	if (m_fAbove)
-		pos.y -= tenths_to_logical(5.0f);
-	else
 		pos.y += tenths_to_logical(50.0f);
+	else
+		pos.y += tenths_to_logical(100.0f);
 
 	return pos;
 }
@@ -99,7 +99,7 @@ void FermataEngraver::center_on_parent()
         //Center fermata on parent shape
     	uCenterPos = m_pParentShape->get_left() + m_pParentShape->get_width() / 2.0f;
     }
-    LUnits xShift = uCenterPos - 
+    LUnits xShift = uCenterPos -
                     (m_pFermataShape->get_left() + m_pFermataShape->get_width() / 2.0f);
 
     if (xShift != 0.0f)
@@ -127,7 +127,7 @@ bool FermataEngraver::determine_if_above()
 {
     if (m_placement == k_placement_above)
         return true;
-    
+
     else if (m_placement == k_placement_below)
         return false;
 

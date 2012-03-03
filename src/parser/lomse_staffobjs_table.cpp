@@ -117,7 +117,7 @@ void ColStaffObjs::AddEntry(int measure, float time, int instr, int voice, int s
                             ImoObj* pImo)
 {
     ColStaffObjsEntry* pEntry =
-        LOMSE_NEW ColStaffObjsEntry(measure, time, instr, voice, staff, pImo, NULL);
+        LOMSE_NEW ColStaffObjsEntry(measure, time, instr, voice, staff, pImo);
     m_table.push_back(pEntry);
 }
 
@@ -320,16 +320,16 @@ void ColStaffObjsBuilder::update_time_counter(ImoGoBackFwd* pGBF)
     }
 }
 
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::update(LdpElement* pElmScore)
-{
+////---------------------------------------------------------------------------------------
+//void ColStaffObjsBuilder::update(LdpElement* pElmScore)
+//{
 //    ColStaffObjs* pOldColStaffObjs = m_pImScore->get_staffobjs_table();
 //    delete pOldColStaffObjs;
 //
 //    //For now, rebuild the table
 //    ImoScore* pScore = dynamic_cast<ImoScore*>( pElmScore->get_imobj() );
 //    this->build(pScore);
-}
+//}
 
 //---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::update(ImoScore* pScore)

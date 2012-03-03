@@ -1122,9 +1122,9 @@ SUITE(AnalyserTest)
         CHECK( pNote1->is_tied_next() == true );
         CHECK( pNote1->is_tied_prev() == false );
         CHECK( pTie->get_start_note() == pNote1 );
-        ImoAttachments* pAuxObjs = pNote1->get_attachments();
-        CHECK( pAuxObjs != NULL );
-        CHECK( pAuxObjs->get_item(0) == pTie );
+        ImoRelations* pRelObjs = pNote1->get_relations();
+        CHECK( pRelObjs != NULL );
+        CHECK( pRelObjs->get_item(0) == pTie );
 
         ++it;
         ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
@@ -1132,9 +1132,9 @@ SUITE(AnalyserTest)
         CHECK( pNote2->is_tied_next() == false );
         CHECK( pNote2->is_tied_prev() == true );
         CHECK( pTie->get_end_note() == pNote2 );
-        pAuxObjs = pNote2->get_attachments();
-        CHECK( pAuxObjs != NULL );
-        CHECK( pAuxObjs->get_item(0) == pTie );
+        pRelObjs = pNote2->get_relations();
+        CHECK( pRelObjs != NULL );
+        CHECK( pRelObjs->get_item(0) == pTie );
 
         delete tree->get_root();
         delete pIModel;
@@ -1276,9 +1276,9 @@ SUITE(AnalyserTest)
         CHECK( pNote1->is_tied_prev() == false );
         ImoTie* pTie1 = pNote1->get_tie_next();
         CHECK( pTie1->get_start_note() == pNote1 );
-        ImoAttachments* pAuxObjs = pNote1->get_attachments();
-        CHECK( pAuxObjs != NULL );
-        CHECK( pAuxObjs->get_item(0) == pTie1 );
+        ImoRelations* pRelObjs = pNote1->get_relations();
+        CHECK( pRelObjs != NULL );
+        CHECK( pRelObjs->get_item(0) == pTie1 );
 
         ++it;
         ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
@@ -1288,10 +1288,10 @@ SUITE(AnalyserTest)
         ImoTie* pTie2 = pNote2->get_tie_next();
         CHECK( pTie1->get_end_note() == pNote2 );
         CHECK( pTie2->get_start_note() == pNote2 );
-        pAuxObjs = pNote2->get_attachments();
-        CHECK( pAuxObjs != NULL );
-        CHECK( pAuxObjs->get_item(0) == pTie1 );
-        CHECK( pAuxObjs->get_item(1) == pTie2 );
+        pRelObjs = pNote2->get_relations();
+        CHECK( pRelObjs != NULL );
+        CHECK( pRelObjs->get_item(0) == pTie1 );
+        CHECK( pRelObjs->get_item(1) == pTie2 );
 
         ++it;
         ImoNote* pNote3 = dynamic_cast<ImoNote*>( *it );
@@ -1299,9 +1299,9 @@ SUITE(AnalyserTest)
         CHECK( pNote3->is_tied_next() == false );
         CHECK( pNote3->is_tied_prev() == true );
         CHECK( pTie2->get_end_note() == pNote3 );
-        pAuxObjs = pNote3->get_attachments();
-        CHECK( pAuxObjs != NULL );
-        CHECK( pAuxObjs->get_item(0) == pTie2 );
+        pRelObjs = pNote3->get_relations();
+        CHECK( pRelObjs != NULL );
+        CHECK( pRelObjs->get_item(0) == pTie2 );
 
         delete tree->get_root();
         delete pIModel;
@@ -1719,7 +1719,7 @@ SUITE(AnalyserTest)
         CHECK( pMusic != NULL );
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
-        ImoSlur* pSlur = static_cast<ImoSlur*>( pNote->find_attachment(k_imo_slur) );
+        ImoSlur* pSlur = static_cast<ImoSlur*>( pNote->find_relation(k_imo_slur) );
         CHECK( pSlur->get_slur_number() == 12 );
         CHECK( pSlur->get_num_objects() == 2 );
         ImoNote* pSlurNote1 = pSlur->get_start_note();
@@ -4783,7 +4783,7 @@ SUITE(AnalyserTest)
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != NULL);
-        ImoTuplet* pTuplet = static_cast<ImoTuplet*>(pNote->find_attachment(k_imo_tuplet));
+        ImoTuplet* pTuplet = static_cast<ImoTuplet*>(pNote->find_relation(k_imo_tuplet));
         CHECK( pTuplet->is_tuplet() == true );
         CHECK( pTuplet->get_num_objects() == 3 );
 //        cout << "num.objects = " << pTuplet->get_num_objects() << endl;
@@ -4805,19 +4805,19 @@ SUITE(AnalyserTest)
         ImoNote* pNote1 = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote1 != NULL );
         CHECK( pNote1 == pNt1 );
-        CHECK( pNote1->find_attachment(k_imo_tuplet) == pTuplet );
+        CHECK( pNote1->find_relation(k_imo_tuplet) == pTuplet );
 
         ++it;
         ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote2 != NULL );
         CHECK( pNote2 == pNt2 );
-        CHECK( pNote2->find_attachment(k_imo_tuplet) == pTuplet );
+        CHECK( pNote2->find_relation(k_imo_tuplet) == pTuplet );
 
         ++it;
         ImoNote* pNote3 = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote3 != NULL );
         CHECK( pNote3 == pNt3 );
-        CHECK( pNote3->find_attachment(k_imo_tuplet) == pTuplet );
+        CHECK( pNote3->find_relation(k_imo_tuplet) == pTuplet );
 
         delete tree->get_root();
         delete pIModel;
@@ -4936,7 +4936,7 @@ SUITE(AnalyserTest)
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != NULL);
-        ImoTuplet* pTuplet = static_cast<ImoTuplet*>(pNote->find_attachment(k_imo_tuplet));
+        ImoTuplet* pTuplet = static_cast<ImoTuplet*>(pNote->find_relation(k_imo_tuplet));
         CHECK( pTuplet == NULL );
 
         delete tree->get_root();
@@ -4963,7 +4963,7 @@ SUITE(AnalyserTest)
         ImoObj::children_iterator it = pMusic->begin();
         ImoNote* pNote = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote != NULL);
-        ImoTuplet* pTuplet = static_cast<ImoTuplet*>(pNote->find_attachment(k_imo_tuplet));
+        ImoTuplet* pTuplet = static_cast<ImoTuplet*>(pNote->find_relation(k_imo_tuplet));
         CHECK( pTuplet->get_num_objects() == 3 );
         CHECK( pTuplet->get_actual_number() == 3 );
         CHECK( pTuplet->get_normal_number() == 2 );
@@ -5106,7 +5106,7 @@ SUITE(AnalyserTest)
         ImoObj::children_iterator it = pMusic->begin();
         ImoRest* pRest = dynamic_cast<ImoRest*>( *it );
         CHECK( pRest != NULL);
-        ImoTuplet* pTuplet = static_cast<ImoTuplet*>(pRest->find_attachment(k_imo_tuplet));
+        ImoTuplet* pTuplet = static_cast<ImoTuplet*>(pRest->find_relation(k_imo_tuplet));
         CHECK( pTuplet->get_num_objects() == 3 );
 
         std::list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes =
@@ -6286,7 +6286,9 @@ SUITE(AnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "Line 0. " << endl;
-        SpLdpTree tree = parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0))(width 2.0)(color #ff0000)(lineStyle solid)(lineCapStart arrowhead)(lineCapEnd none))");
+        SpLdpTree tree = parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))"
+            "(endPoint (dx 80.0)(dy -10.0))(width 2.0)(color #ff0000)(lineStyle solid)"
+            "(lineCapStart arrowhead)(lineCapEnd none))");
         Analyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
@@ -7753,7 +7755,7 @@ SUITE(AnalyserTest)
         CHECK( pLine->get_line_style() == k_line_solid );
         CHECK( pLine->get_start_cap() == k_cap_arrowhead );
         CHECK( pLine->get_end_cap() == k_cap_none );
-        Color color = pLine->get_line_color();
+        Color color = pLine->get_color();
         CHECK( color.r == 0 );
         CHECK( color.g == 0 );
         CHECK( color.b == 0 );

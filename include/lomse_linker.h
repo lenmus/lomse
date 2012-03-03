@@ -53,6 +53,7 @@ class ImoObj;
 class ImoOptionInfo;
 class ImoPageInfo;
 class ImoParamInfo;
+class ImoRelObj;
 class ImoStaffObj;
 class ImoSystemInfo;
 class ImoScoreText;
@@ -98,6 +99,7 @@ protected:
     ImoObj* add_style(ImoStyle* pStyle);
     ImoObj* add_staffobj(ImoStaffObj* pSO);
     ImoObj* add_attachment(ImoAuxObj* pAuxObj);
+    ImoObj* add_relation(ImoRelObj* pRelObj);
     ImoObj* add_child(int parentType, ImoObj* pImo);
     ImoObj* add_font_style(ImoFontStyleDto* pDto);
     ImoObj* add_inline_or_block_item(ImoInlineObj* pImo);

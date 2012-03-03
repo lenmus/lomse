@@ -96,7 +96,7 @@ class ImoObj;
 class ImoOptionInfo;
 class ImoParagraph;
 class ImoParamInfo;
-class ImoReldataobjs;
+class ImoRelations;
 class ImoRelDataObj;
 class ImoRelObj;
 class ImoScore;
@@ -312,11 +312,12 @@ class DtoObj;
             k_imo_collection,
                 k_imo_instruments,
                 k_imo_instrument_groups, k_imo_music_data, k_imo_options,
-                k_imo_reldataobjs, k_imo_styles,
+                k_imo_styles,
             k_imo_collection_last,
 
             // Special collections
             k_imo_attachments,
+            k_imo_relations,
 
             // ImoContainerObj (A)
             k_imo_containerobj,
@@ -343,14 +344,13 @@ class DtoObj;
                         k_imo_fermata, k_imo_line, k_imo_score_text,
                         k_imo_score_line, k_imo_score_title,
                         k_imo_text_box,
-
-                        // ImoRelObj (A)
-                        k_imo_relobj,
-                            k_imo_beam, k_imo_chord, k_imo_slur, k_imo_tie,
-                            k_imo_tuplet,
-                        k_imo_relobj_last,
-
                     k_imo_auxobj_last,
+
+                    // ImoRelObj (A)
+                    k_imo_relobj,
+                        k_imo_beam, k_imo_chord, k_imo_slur, k_imo_tie,
+                        k_imo_tuplet,
+                    k_imo_relobj_last,
 
                 k_imo_scoreobj_last,
 
@@ -614,8 +614,8 @@ public:
     inline bool is_paragraph() { return m_objtype == k_imo_para; }
     inline bool is_param_info() { return m_objtype == k_imo_param_info; }
     inline bool is_point_dto() { return m_objtype == k_imo_point_dto; }
-    inline bool is_reldataobjs() { return m_objtype == k_imo_reldataobjs; }
     inline bool is_rest() { return m_objtype == k_imo_rest; }
+    inline bool is_relations() { return m_objtype == k_imo_relations; }
 	inline bool is_score() { return m_objtype == k_imo_score; }
     inline bool is_score_line() { return m_objtype == k_imo_score_line; }
     inline bool is_score_player() { return m_objtype == k_imo_score_player; }
@@ -1235,43 +1235,41 @@ public:
         return dynamic_cast<ImoContentObj*>( get_child(iItem) );
     }
     inline int get_num_items() { return get_num_children(); }
-    inline void remove_item(ImoContentObj* pItem) { remove_child(pItem); }
+    inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
 
 protected:
     ImoCollection(int objtype) : ImoSimpleObj(objtype) {}
 };
 
 //---------------------------------------------------------------------------------------
-class ImoAttachments : public ImoSimpleObj
+class ImoRelations : public ImoSimpleObj
 {
 protected:
-    std::list<ImoAuxObj*> m_attachments;
+    std::list<ImoRelObj*> m_relations;
 
     friend class ImFactory;
     friend class ImoContentObj;
-    ImoAttachments() : ImoSimpleObj(k_imo_attachments) {}
+    ImoRelations() : ImoSimpleObj(k_imo_relations) {}
 
 public:
-    ~ImoAttachments();
+    ~ImoRelations();
 
     //overrides, to traverse this special node
 	void accept_visitor(BaseVisitor& v);
     bool has_visitable_children() { return get_num_items() > 0; }
 
     //contents
-    ImoAuxObj* get_item(int iItem);   //iItem = 0..n-1
-    inline int get_num_items() { return int(m_attachments.size()); }
-    inline std::list<ImoAuxObj*>& get_attachments() { return m_attachments; }
-    void remove(ImoAuxObj* pAO);
-    void add(ImoAuxObj* pAO);
-    ImoAuxObj* find_item_of_type(int type);
+    ImoRelObj* get_item(int iItem);   //iItem = 0..n-1
+    inline int get_num_items() { return int(m_relations.size()); }
+    inline std::list<ImoRelObj*>& get_relations() { return m_relations; }
+    void remove(ImoRelObj* pRO);
+    void add(ImoRelObj* pRO);
+    ImoRelObj* find_item_of_type(int type);
     void remove_from_all_relations(ImoStaffObj* pSO);
-    //void remove_all_attachments();
 
 protected:
     static int get_priority(int type);
 };
-
 
 //---------------------------------------------------------------------------------------
 // ContainerObj: A collection of containers and contained objs.
@@ -1346,7 +1344,7 @@ public:
 
     //contents
     inline int get_num_items() { return get_num_children(); }
-    inline void remove_item(ImoContentObj* pItem) { remove_child(pItem); }
+    inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
     inline void add_item(ImoContentObj* pItem) { append_child_imo(pItem); }
     inline ImoContentObj* get_first_item() {
         return dynamic_cast<ImoContentObj*>( get_first_child() );
@@ -1370,7 +1368,7 @@ public:
 //
 //    //contents
 //    inline int get_num_items() { return get_num_children(); }
-//    inline void remove_item(ImoContentObj* pItem) { remove_child(pItem); }
+//    inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
 //    inline void add_item(ImoContentObj* pItem) { append_child_imo(pItem); }
 //    inline ImoContentObj* get_first_item() {
 //        return dynamic_cast<ImoContentObj*>( get_first_child() );
@@ -1418,7 +1416,7 @@ public:
     //content
     inline int get_num_items() { return get_num_children(); }
     inline void add_item(ImoInlineObj* pItem) { append_child_imo(pItem); }
-    inline void remove_item(ImoContentObj* pItem) { remove_child(pItem); }
+    inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
     inline ImoInlineObj* get_first_item() {
         return dynamic_cast<ImoInlineObj*>( get_first_child() );
     }
@@ -1497,20 +1495,18 @@ protected:
 public:
     virtual ~ImoStaffObj();
 
-    //attachments: relobjs
+    //relations
     void include_in_relation(Document* pDoc, ImoRelObj* pRelObj,
                              ImoRelDataObj* pData=NULL);
     void remove_from_relation(ImoRelObj* pRelObj);
     void remove_but_not_delete_relation(ImoRelObj* pRelObj);
 
-    //reldata objects
-    bool has_reldataobjs();
-    ImoReldataobjs* get_reldataobjs();
-    void add_reldataobj(Document* pDoc, ImoSimpleObj* pSO);
-    int get_num_reldataobjs();
-    ImoSimpleObj* get_reldataobj(int i);
-    void remove_reldataobj(ImoSimpleObj* pSO);
-    ImoSimpleObj* find_reldataobj(int type);
+    void add_relation(Document* pDoc, ImoRelObj* pRO);
+    ImoRelations* get_relations();
+    bool has_relations();
+    int get_num_relations();
+    ImoRelObj* get_relation(int i);
+    ImoRelObj* find_relation(int type);
 
     //getters
     virtual float get_duration() { return 0.0f; }
@@ -1518,8 +1514,6 @@ public:
 
     //setters
     virtual void set_staff(int staff) { m_staff = staff; }
-
-
 };
 
 //---------------------------------------------------------------------------------------
@@ -1552,7 +1546,8 @@ protected:
 
 //---------------------------------------------------------------------------------------
 //An abstract object relating two or more StaffObjs
-class ImoRelObj : public ImoAuxObj
+class ImoRelObj : public ImoScoreObj
+//class ImoRelObj : public ImoAuxObj
 {
 protected:
 	std::list< pair<ImoStaffObj*, ImoRelDataObj*> > m_relatedObjects;
@@ -1576,8 +1571,27 @@ public:
     virtual int get_min_number_for_autodelete() { return 2; }
 
 protected:
-    ImoRelObj(int objtype) : ImoAuxObj(objtype) {}
+    //ImoRelObj(int objtype) : ImoAuxObj(objtype) {}
+    ImoRelObj(int objtype) : ImoScoreObj(objtype) {}
 
+};
+
+//---------------------------------------------------------------------------------------
+class ImoAttachments : public ImoCollection
+{
+protected:
+    friend class ImFactory;
+    friend class ImoContentObj;
+    ImoAttachments() : ImoCollection(k_imo_attachments) {}
+
+public:
+    virtual ~ImoAttachments() {}
+
+    void remove(ImoAuxObj* pAO) { remove_child_imo(pAO); }
+    void add(ImoAuxObj* pAO) { append_child_imo(pAO); }
+    ImoAuxObj* find_item_of_type(int type) { 
+        return static_cast<ImoAuxObj*>( get_child_of_type(type) ); 
+    }
 };
 
 
@@ -2170,7 +2184,7 @@ public:
         return dynamic_cast<ImoContentObj*>( get_child(iItem) );
     }
     inline int get_num_items() { return get_num_children(); }
-    inline void remove_item(ImoContentObj* pItem) { remove_child(pItem); }
+    inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
 
 //protected:
 //    //mandatory overrides
@@ -2842,18 +2856,6 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoReldataobjs : public ImoCollection
-{
-protected:
-    friend class ImFactory;
-    ImoReldataobjs() : ImoCollection(k_imo_reldataobjs) {}
-
-public:
-    ~ImoReldataobjs() {}
-
-};
-
-//---------------------------------------------------------------------------------------
 class ImoPointDto : public ImoSimpleObj
 {
     TPoint m_point;
@@ -2920,7 +2922,7 @@ public:
     inline TPoint get_start_point() const { return m_startPoint; }
     inline TPoint get_end_point() const { return m_endPoint; }
     inline Tenths get_line_width() const { return m_style.get_width(); }
-    inline Color get_line_color() const { return m_style.get_color(); }
+    inline Color get_color() const { return m_style.get_color(); }
     inline ELineEdge get_start_edge() const { return m_style.get_start_edge(); }
     inline ELineEdge get_end_edge() const { return m_style.get_end_edge(); }
     inline ELineStyle get_line_style() const { return m_style.get_line_style(); }
@@ -3562,7 +3564,6 @@ typedef Visitor<ImoObj> ImObjVisitor;
 //typedef Visitor<ImoOptionInfo> ImVisitor;
 typedef Visitor<ImoParagraph> ImParagraphVisitor;
 //typedef Visitor<ImoParamInfo> ImVisitor;
-//typedef Visitor<ImoReldataobjs> ImVisitor;
 //typedef Visitor<ImoRelDataObj> ImVisitor;
 //typedef Visitor<ImoRelObj> ImVisitor;
 //typedef Visitor<ImoScoreText> ImVisitor;

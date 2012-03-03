@@ -760,7 +760,8 @@ void ColumnsBuilder::store_info_about_attached_objects(ImoStaffObj* pSO,
                                     int iCol, int iLine, ImoInstrument* pInstr)
 {
     ImoAttachments* pAuxObjs = pSO->get_attachments();
-    if (!pAuxObjs)
+    ImoRelations* pRelObjs = pSO->get_relations();
+    if (!pAuxObjs && !pRelObjs)
         return;
 
     PendingAuxObjs* data = LOMSE_NEW PendingAuxObjs(pSO, pMainShape, iInstr, iStaff,
@@ -1134,7 +1135,7 @@ GmoShape* ShapesCreator::create_invisible_shape(ImoObj* pSO, int iInstr, int iSt
 }
 
 //---------------------------------------------------------------------------------------
-void ShapesCreator::start_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO,
+void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
                                            ImoStaffObj* pSO,
                                            GmoShape* pStaffObjShape,
                                            int iInstr, int iStaff, int iSystem,
@@ -1145,7 +1146,7 @@ void ShapesCreator::start_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO,
     //factory method to create the engraver for relation auxobjs
 
     RelAuxObjEngraver* pEngrv = NULL;
-    switch (pAO->get_obj_type())
+    switch (pRO->get_obj_type())
     {
         case k_imo_beam:
         {
@@ -1189,14 +1190,14 @@ void ShapesCreator::start_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO,
 
     if (pEngrv)
     {
-        pEngrv->set_start_staffobj(pAO, pSO, pStaffObjShape, iInstr, iStaff,
+        pEngrv->set_start_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff,
                                    iSystem, iCol, pos);
         m_shapesStorage.save_engraver(pEngrv, pRO);
     }
 }
 
 //---------------------------------------------------------------------------------------
-void ShapesCreator::continue_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO,
+void ShapesCreator::continue_engraving_relobj(ImoRelObj* pRO,
                                               ImoStaffObj* pSO,
                                               GmoShape* pStaffObjShape, int iInstr,
                                               int iStaff, int iSystem, int iCol,
@@ -1204,11 +1205,11 @@ void ShapesCreator::continue_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO,
 {
     RelAuxObjEngraver* pEngrv
         = dynamic_cast<RelAuxObjEngraver*>(m_shapesStorage.get_engraver(pRO));
-    pEngrv->set_middle_staffobj(pAO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol);
+    pEngrv->set_middle_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol);
 }
 
 //---------------------------------------------------------------------------------------
-void ShapesCreator::finish_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO,
+void ShapesCreator::finish_engraving_relobj(ImoRelObj* pRO,
                                             ImoStaffObj* pSO,
                                             GmoShape* pStaffObjShape,
                                             int iInstr, int iStaff, int iSystem,
@@ -1217,7 +1218,7 @@ void ShapesCreator::finish_engraving_relobj(ImoAuxObj* pAO, ImoRelObj* pRO,
 {
     RelAuxObjEngraver* pEngrv
         = dynamic_cast<RelAuxObjEngraver*>(m_shapesStorage.get_engraver(pRO));
-    pEngrv->set_end_staffobj(pAO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol);
+    pEngrv->set_end_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol);
     pEngrv->set_prolog_width( prologWidth );
 
     pEngrv->create_shapes();

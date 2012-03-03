@@ -38,7 +38,7 @@ namespace lomse
 //forward declarations
 class ScoreMeter;
 class GmoShape;
-class ImoAuxObj;
+class ImoRelObj;
 class ImoStaffObj;
 
 //---------------------------------------------------------------------------------------
@@ -94,13 +94,13 @@ public:
     }
     virtual ~RelAuxObjEngraver() {}
 
-    virtual void set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+    virtual void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                     GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                     int iSystem, int iCol, UPoint pos) = 0;
-    virtual void set_middle_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+    virtual void set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                      GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                      int iSystem, int iCol) {}
-    virtual void set_end_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+    virtual void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                   GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                   int iSystem, int iCol) = 0;
     virtual int create_shapes() = 0;

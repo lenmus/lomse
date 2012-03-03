@@ -49,7 +49,7 @@ ImoNoteRest::ImoNoteRest(int objtype)
 //---------------------------------------------------------------------------------------
 int ImoNoteRest::get_beam_type(int level)
 {
-    ImoBeam* pBeam = static_cast<ImoBeam*>( find_attachment(k_imo_beam) );
+    ImoBeam* pBeam = static_cast<ImoBeam*>( find_relation(k_imo_beam) );
     if (pBeam)
     {
         ImoBeamData* pData = dynamic_cast<ImoBeamData*>( pBeam->get_data_for(this) );
@@ -62,20 +62,21 @@ int ImoNoteRest::get_beam_type(int level)
 //---------------------------------------------------------------------------------------
 void ImoNoteRest::set_beam_type(int level, int type)
 {
-    ImoBeamData* pData = static_cast<ImoBeamData*>( find_reldataobj(k_imo_beam_data) );
+    ImoBeam* pBeam = get_beam();
+    ImoBeamData* pData = static_cast<ImoBeamData*>( pBeam->get_data_for(this) );
     pData->set_beam_type(level, type);
 }
 
 //---------------------------------------------------------------------------------------
 ImoBeam* ImoNoteRest::get_beam()
 {
-    return static_cast<ImoBeam*>( find_attachment(k_imo_beam) );
+    return static_cast<ImoBeam*>( find_relation(k_imo_beam) );
 }
 
 //---------------------------------------------------------------------------------------
 bool ImoNoteRest::is_end_of_beam()
 {
-    ImoBeam* pBeam = static_cast<ImoBeam*>( find_attachment(k_imo_beam) );
+    ImoBeam* pBeam = static_cast<ImoBeam*>( find_relation(k_imo_beam) );
     if (pBeam)
     {
         ImoBeamData* pData = dynamic_cast<ImoBeamData*>( pBeam->get_data_for(this) );
@@ -88,13 +89,13 @@ bool ImoNoteRest::is_end_of_beam()
 //---------------------------------------------------------------------------------------
 bool ImoNoteRest::is_in_tuplet()
 {
-    return find_attachment(k_imo_tuplet) != NULL;
+    return find_relation(k_imo_tuplet) != NULL;
 }
 
 //---------------------------------------------------------------------------------------
 ImoTuplet* ImoNoteRest::get_tuplet()
 {
-    return static_cast<ImoTuplet*>( find_attachment(k_imo_tuplet) );
+    return static_cast<ImoTuplet*>( find_relation(k_imo_tuplet) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -167,7 +168,7 @@ bool ImoNote::is_in_chord()
 //---------------------------------------------------------------------------------------
 ImoChord* ImoNote::get_chord()
 {
-    return static_cast<ImoChord*>( find_attachment(k_imo_chord) );
+    return static_cast<ImoChord*>( find_relation(k_imo_chord) );
 }
 
 //---------------------------------------------------------------------------------------

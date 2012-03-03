@@ -69,7 +69,7 @@ Visual*             m_visual;           //X11 Visual to use
 
 //Lomse can manage a lot of bitmap formats and pixel formats. You must
 //define the format that you are going to use
-int              m_byte_order;	//endian (platform byte ordering)
+int              m_byte_order;
 EPixelFormat     m_format;      //bitmap format
 unsigned         m_bpp;         //bits per pixel
 bool             m_flip_y;      //true if y axis is reversed
@@ -85,6 +85,12 @@ XSetWindowAttributes m_window_attributes;
 
 //some additinal variables
 bool    m_view_needs_redraw;      //to control when the View must be re-drawn
+
+//for mouse click & move position
+int           m_xMouse;
+int           m_yMouse;
+
+
 
 
 //---------------------------------------------------------------------------------------
@@ -223,16 +229,46 @@ void open_document()
     //create a document and get the 'presenter'.
     //The Presenter takes care of creating and maintaining all objects
     //and relationships between the document, its views and the interactors
-    //to interact with the view
+    //to interct with the view
     delete m_pPresenter;
     m_pPresenter = m_lomse.new_document(ViewFactory::k_view_vertical_book,
-        "(lenmusdoc (vers 0.0)"
-            "(content "
-                "(para (txt \"Hello world!\"))"
-                "(score (vers 1.6) "
-                    "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q) )))"
-            ")"
-        ")" );
+        "(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        "(instrument (name \"Violin\")(abbrev \"Vln.\")(musicData "
+        "(clef F4)(key E)(time 2 4)(n +c3 e.)(barline)"
+        "(n e2 q)(n e3 q)(barline)"
+        "(n f2 e (beam 1 +))(n g2 e (beam 1 -))"
+            "(n f3 e (beam 3 +))(n g3 e (beam 3 -))(barline)"
+        "(n f2 e. (beam 4 +))(n g2 s (beam 4 -b))"
+            "(n f3 s (beam 5 +f))(n g3 e. (beam 5 -))(barline)"
+        "(n g2 e. (beam 2 +))(n e3 s (beam 2 -b))(n g3 q)(barline)"
+        "(n a2 e (beam 6 +))(n g2 e (beam 6 -))(n a3 q)(barline)"
+        "(n -b2 q)(n =b3 q)(barline)"
+        "(n xc3 q)(n ++c4 q)(barline)"
+        "(n d3 q)(n --d4 q)(barline)"
+        "(chord (n e3 q)(n c3 q)(n g3 q))"
+        "(n e4 q)(barline)"
+        "(n f3 q)(n f4 q)(barline end)"
+        "))"
+        "(instrument (name \"piano\")(abbrev \"P.\")(staves 2)(musicData "
+        "(clef G p1)(clef F4 p2)(key F)(time 12 8)"
+        "(n c5 e. p1)(barline)"
+        "(n e4 e p1 (beam 10 +))(n g3 e p2 (beam 10 -))"
+        "(n e4 e p1 (stem up)(beam 11 +))(n e5 e p1 (stem down)(beam 11 -))(barline)"
+        "(n e4 s p1 (beam 12 ++))(n f4 s p1 (beam 12 ==))"
+            "(n g4 s p1 (beam 12 ==))(n a4 s p1 (beam 12 --))"
+        "(n c5 q p1)(barline)"
+        "(n c4 q (slur 1 start))(n e4 q)"
+        "(barline)"
+        "(n g4 q )(n c5 q (slur 1 stop))"
+        "(barline)"
+        "(n e4 q (tie 1 start))(n e4 q (tie 1 stop))"
+        "(barline)"
+        "(n c4 e g+ t3/2)(n e4 e)(n d4 e g- t-)(n g4 q)"
+        "(barline)"
+        "(n c4 e t3/2)(n e4 e)(n d4 e t-)(n g4 q)"
+        "(barline)"
+        "))"
+        ")))" );
 
     //next, get the pointers to the relevant components
     m_pInteractor = m_pPresenter->get_interactor(0);
@@ -253,11 +289,79 @@ void update_view_content()
     m_pInteractor->redraw_bitmap();
 }
 
+//-------------------------------------------------------------------------
+void on_mouse_button_down(int x, int y, unsigned flags)
+{
+    if (!m_pInteractor) return;
+    m_pInteractor->on_mouse_button_down(x, y, flags);
+}
+
+//-------------------------------------------------------------------------
+void on_mouse_move(int x, int y, unsigned flags)
+{
+    if (!m_pInteractor) return;
+    m_pInteractor->on_mouse_move(x, y, flags);
+}
+
+//-------------------------------------------------------------------------
+void on_mouse_button_up(int x, int y, unsigned flags)
+{
+    if (!m_pInteractor) return;
+    m_pInteractor->on_mouse_button_up(x, y, flags);
+}
+
+//-------------------------------------------------------------------------
+void on_key(int x, int y, unsigned key, unsigned flags)
+{
+    if (!m_pInteractor) return;
+
+    switch (key)
+    {
+        case 'd':
+            m_pInteractor->switch_task(TaskFactory::k_task_drag_view);
+            break;
+        case 's':
+            m_pInteractor->switch_task(TaskFactory::k_task_selection);
+            break;
+        case '+':
+            m_pInteractor->zoom_in(x, y);
+            break;
+        case '-':
+            m_pInteractor->zoom_out(x, y);
+            break;
+        default:
+            ;
+    }
+
+    m_pInteractor->force_redraw();
+}
+
+//---------------------------------------------------------------------------------------
+void get_mouse_position(XEvent& event)
+{
+    m_xMouse = event.xbutton.x;
+    m_yMouse = m_flip_y ? m_rbuf_window.height() - event.xbutton.y
+                        : event.xbutton.y;
+}
+
+//---------------------------------------------------------------------------------------
+unsigned get_mouse_flags(XEvent& event)
+{
+    unsigned flags = 0;
+    if(event.xbutton.state & ShiftMask)   flags |= k_kbd_shift;
+    if(event.xbutton.state & ControlMask) flags |= k_kbd_ctrl;
+    if(event.xbutton.state & Button1Mask) flags |= k_mouse_left;
+    if(event.xbutton.state & Button3Mask) flags |= k_mouse_right;
+    if(event.xbutton.button == Button1)   flags |= k_mouse_left;
+    if(event.xbutton.button == Button3)   flags |= k_mouse_right;
+    return flags;
+}
+
 //---------------------------------------------------------------------------------------
 bool determine_suitable_bitmap_format()
 {
-    //Returns false if we can not find a suitable bitmap format
-    //for this platform
+    //Returns false if Lomse can not find a suitable bitmap format
+    //for this /operating system / platform
 
     //determine color depth
     m_depth  = XDefaultDepth(m_pDisplay, m_screen);
@@ -420,6 +524,10 @@ int handle_events()
     XFlush(m_pDisplay);
 
     bool quit = false;
+//    unsigned flags;
+//    int cur_x;
+//    int cur_y;
+
     while(!quit)
     {
         if(m_view_needs_redraw)
@@ -431,6 +539,19 @@ int handle_events()
 
         XEvent event;
         XNextEvent(m_pDisplay, &event);
+
+        //discard all intermediate MotionNotify events
+        if(event.type == MotionNotify)
+        {
+            XEvent te = event;
+            for(;;)
+            {
+                if(XPending(m_pDisplay) == 0) break;
+                XNextEvent(m_pDisplay, &te);
+                if(te.type != MotionNotify) break;
+            }
+            event = te;
+        }
 
         switch(event.type)
         {
@@ -460,6 +581,52 @@ int handle_events()
                 break;
 
             //--------------------------------------------------------------------
+            case KeyPress:
+            {
+                KeySym key = XLookupKeysym(&event.xkey, 0);
+                on_key(event.xkey.x,
+                       m_flip_y ?
+                           m_rbuf_window.height() - event.xkey.y :
+                           event.xkey.y,
+                       key,
+                       0);
+                break;
+            }
+
+            //--------------------------------------------------------------------
+            case ButtonPress:
+            {
+                unsigned flags = get_mouse_flags(event);
+                get_mouse_position(event);
+
+                if(flags & (k_mouse_left | k_mouse_right))
+                    on_mouse_button_down(m_xMouse, m_yMouse, flags);
+
+                break;
+            }
+
+            //--------------------------------------------------------------------
+            case ButtonRelease:
+            {
+                unsigned flags = get_mouse_flags(event);
+                get_mouse_position(event);
+
+                if(flags & (k_mouse_left | k_mouse_right))
+                    on_mouse_button_up(m_xMouse, m_yMouse, flags);
+
+                break;
+            }
+
+            //--------------------------------------------------------------------
+            case MotionNotify:
+            {
+                unsigned flags = get_mouse_flags(event);
+                get_mouse_position(event);
+                on_mouse_move(m_xMouse, m_yMouse, flags);
+                break;
+            }
+
+            //--------------------------------------------------------------------
             case ClientMessage:
                 if(event.xclient.format == 32
                    && event.xclient.data.l[0] == int(m_close_atom) )
@@ -476,7 +643,13 @@ int handle_events()
 //---------------------------------------------------------------------------------------
 void define_events_to_process()
 {
-    XSelectInput(m_pDisplay, m_window, ExposureMask | StructureNotifyMask );
+    XSelectInput(m_pDisplay, m_window, PointerMotionMask
+                                       | ButtonPressMask
+                                       | ButtonReleaseMask
+                                       | ExposureMask
+                                       | KeyPressMask
+                                       | StructureNotifyMask );
+
 }
 
 //---------------------------------------------------------------------------------------

@@ -66,19 +66,19 @@ ChordEngraver::~ChordEngraver()
 }
 
 //---------------------------------------------------------------------------------------
-void ChordEngraver::set_start_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+void ChordEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                        GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                        int iSystem, int iCol, UPoint pos)
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
-    m_pChord = dynamic_cast<ImoChord*>(pAO);
+    m_pChord = dynamic_cast<ImoChord*>(pRO);
 
     add_note(pSO, pStaffObjShape);
 }
 
 //---------------------------------------------------------------------------------------
-void ChordEngraver::set_middle_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+void ChordEngraver::set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                          GmoShape* pStaffObjShape, int iInstr,
                                          int iStaff, int iSystem, int iCol)
 {
@@ -86,7 +86,7 @@ void ChordEngraver::set_middle_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-void ChordEngraver::set_end_staffobj(ImoAuxObj* pAO, ImoStaffObj* pSO,
+void ChordEngraver::set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                       int iSystem, int iCol)
 {

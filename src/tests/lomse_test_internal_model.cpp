@@ -122,8 +122,6 @@ SUITE(InternalModelTest)
         Document doc(m_libraryScope);
         ImoNote* pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, &doc));
         CHECK( pNote->get_num_attachments() == 0 );
-        CHECK( pNote->get_num_reldataobjs() == 0 );
-        CHECK( pNote->get_reldataobjs() == NULL );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
         CHECK( pNote->get_note_type() == k_quarter );
@@ -614,126 +612,6 @@ SUITE(InternalModelTest)
         CHECK( info.get_figured_bass_string() == "9" );
     }
 
-    // RelDataObjs ----------------------------------------------------------------------
-
-    TEST_FIXTURE(InternalModelTestFixture, ClefNoReldataobjs)
-    {
-        Document doc(m_libraryScope);
-        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
-        pClef->set_clef_type(k_clef_G2);
-        CHECK( pClef->has_reldataobjs() == false );
-
-        delete pClef;
-    }
-
-    TEST_FIXTURE(InternalModelTestFixture, AddReldataobj)
-    {
-        Document doc(m_libraryScope);
-        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
-        pClef->set_clef_type(k_clef_G2);
-        ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
-                                    ImFactory::inject(k_imo_midi_info, &doc));
-        pClef->add_reldataobj(&doc, pMidi);
-
-        CHECK( pClef->has_reldataobjs() == true );
-
-        delete pClef;
-    }
-
-    TEST_FIXTURE(InternalModelTestFixture, GetNumReldataobjs)
-    {
-        Document doc(m_libraryScope);
-        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
-        pClef->set_clef_type(k_clef_G2);
-        ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
-                                    ImFactory::inject(k_imo_midi_info, &doc));
-        pClef->add_reldataobj(&doc, pMidi);
-        ImoParamInfo* pParam = static_cast<ImoParamInfo*>(
-                                    ImFactory::inject(k_imo_param_info, &doc));
-        pClef->add_reldataobj(&doc, pParam);
-
-        CHECK( pClef->get_num_reldataobjs() == 2 );
-
-        delete pClef;
-    }
-
-    TEST_FIXTURE(InternalModelTestFixture, GetReldataobj)
-    {
-        Document doc(m_libraryScope);
-        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
-        pClef->set_clef_type(k_clef_G2);
-        ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
-                                    ImFactory::inject(k_imo_midi_info, &doc));
-        pClef->add_reldataobj(&doc, pMidi);
-        ImoParamInfo* pParam = static_cast<ImoParamInfo*>(
-                                    ImFactory::inject(k_imo_param_info, &doc));
-        pClef->add_reldataobj(&doc, pParam);
-
-        CHECK( pClef->get_reldataobj(0) == pMidi );
-        CHECK( pClef->get_reldataobj(1) == pParam );
-
-        delete pClef;
-    }
-
-    TEST_FIXTURE(InternalModelTestFixture, RemoveReldataobj)
-    {
-        Document doc(m_libraryScope);
-        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
-        pClef->set_clef_type(k_clef_G2);
-        ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
-                                    ImFactory::inject(k_imo_midi_info, &doc));
-        pClef->add_reldataobj(&doc, pMidi);
-        ImoParamInfo* pParam = static_cast<ImoParamInfo*>(
-                                    ImFactory::inject(k_imo_param_info, &doc));
-        pClef->add_reldataobj(&doc, pParam);
-
-        pClef->remove_reldataobj(pMidi);
-
-        CHECK( pClef->get_num_reldataobjs() == 1 );
-        CHECK( pClef->get_reldataobj(0) == pParam );
-
-        delete pClef;
-    }
-
-    TEST_FIXTURE(InternalModelTestFixture, RemoveAllReldataobjs)
-    {
-        Document doc(m_libraryScope);
-        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
-        pClef->set_clef_type(k_clef_G2);
-        ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
-                                    ImFactory::inject(k_imo_midi_info, &doc));
-        pClef->add_reldataobj(&doc, pMidi);
-        ImoParamInfo* pParam = static_cast<ImoParamInfo*>(
-                                    ImFactory::inject(k_imo_param_info, &doc));
-        pClef->add_reldataobj(&doc, pParam);
-
-        pClef->remove_reldataobj(pMidi);
-        pClef->remove_reldataobj(pParam);
-
-        CHECK( pClef->get_num_reldataobjs() == 0 );
-        CHECK( pClef->get_reldataobjs() == NULL );
-
-        delete pClef;
-    }
-
-    TEST_FIXTURE(InternalModelTestFixture, FindReldataobj)
-    {
-        Document doc(m_libraryScope);
-        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
-        pClef->set_clef_type(k_clef_G2);
-        ImoMidiInfo* pMidi = static_cast<ImoMidiInfo*>(
-                                    ImFactory::inject(k_imo_midi_info, &doc));
-        pClef->add_reldataobj(&doc, pMidi);
-        ImoParamInfo* pParam = static_cast<ImoParamInfo*>(
-                                    ImFactory::inject(k_imo_param_info, &doc));
-        pClef->add_reldataobj(&doc, pParam);
-
-        CHECK( pClef->find_reldataobj(k_imo_param_info) == pParam );
-        CHECK( pClef->find_reldataobj(k_imo_midi_info) == pMidi );
-
-        delete pClef;
-    }
-
 
     // attachments ----------------------------------------------------------------------
 
@@ -859,10 +737,8 @@ SUITE(InternalModelTest)
         ImoTie* pTie = static_cast<ImoTie*>( ImFactory::inject(k_imo_tie, &doc) );
         pNote->include_in_relation(&doc, pTie, pData);
 
-        CHECK( pNote->get_num_attachments() == 1 );
-        CHECK( pNote->get_attachment(0) == pTie );
-        CHECK( pNote->get_num_reldataobjs() == 1 );
-        CHECK( pNote->get_reldataobj(0) == pData );
+        CHECK( pNote->get_num_relations() == 1 );
+        CHECK( pNote->get_relation(0) == pTie );
         CHECK( pTie->get_data_for(pNote) == pData );
 
         delete pNote;
@@ -885,10 +761,8 @@ SUITE(InternalModelTest)
 
         pNote->remove_from_relation(pTie);
 
-        CHECK( pNote->get_num_attachments() == 0 );
-        CHECK( pNote->get_attachments() != NULL );
-        CHECK( pNote->get_num_reldataobjs() == 0 );
-        CHECK( pNote->get_reldataobjs() == NULL );
+        CHECK( pNote->get_num_relations() == 0 );
+        CHECK( pNote->get_relations() != NULL );
 
         delete pNote;
     }
@@ -908,20 +782,17 @@ SUITE(InternalModelTest)
         ImoTie* pTie = static_cast<ImoTie*>( ImFactory::inject(k_imo_tie, &doc) );
         pNote->include_in_relation(&doc, pTie, pData);
 
-        ImoScoreText* pText = static_cast<ImoScoreText*>(
-                                    ImFactory::inject(k_imo_score_text, &doc));
-        pText->set_text("Hello world");
-        pNote->add_attachment(&doc, pText);
+        ImoBeamDto dtoBeam;
+        ImoBeamData* pBeamData = ImFactory::inject_beam_data(&doc, &dtoBeam);
+        ImoBeam* pBeam = static_cast<ImoBeam*>( ImFactory::inject(k_imo_beam, &doc) );
+        pNote->include_in_relation(&doc, pBeam, pBeamData);
 
-        CHECK( pNote->get_num_attachments() == 2 );
-        CHECK( pNote->get_num_reldataobjs() == 1 );
+        CHECK( pNote->get_num_relations() == 2 );
 
-        ImoAttachments* pAttachments = pNote->get_attachments();
-        pAttachments->remove_from_all_relations(pNote);
+        ImoRelations* pRelations = pNote->get_relations();
+        pRelations->remove_from_all_relations(pNote);
 
-        CHECK( pNote->get_num_attachments() == 0 );
-        CHECK( pNote->get_num_reldataobjs() == 0 );
-        CHECK( pNote->get_reldataobjs() == NULL );
+        CHECK( pNote->get_num_relations() == 0 );
 
         delete pNote;
     }
@@ -940,28 +811,18 @@ SUITE(InternalModelTest)
         delete pTie;
 
         CHECK( pNote->get_num_attachments() == 0 );
-        CHECK( pNote->get_num_reldataobjs() == 0 );
-        CHECK( pNote->get_reldataobjs() == NULL );
 
         delete pNote;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, AttachmentsOrdered)
+    TEST_FIXTURE(InternalModelTestFixture, RelationsOrdered)
     {
-        //@ Attachments must be rendered in a predefined order, i.e. beams before
-        //@ tuplets. For this, they must be stored in renderization order.
+        //@ Relations must be rendered in a predefined order, 
+        //@ i.e. beams before tuplets. For this, they must be stored in 
+        //@ renderization order.
 
         Document doc(m_libraryScope);
         ImoNote* pNote = ImFactory::inject_note(&doc, k_step_A, 4, k_eighth);
-
-        ImoScoreText* pText = static_cast<ImoScoreText*>(
-                                    ImFactory::inject(k_imo_score_text, &doc));
-        pText->set_text("Hello world");
-        pNote->add_attachment(&doc, pText);
-
-        ImoFermata* pFermata = static_cast<ImoFermata*>(
-                                ImFactory::inject(k_imo_fermata, &doc) );
-        pNote->add_attachment(&doc, pFermata);
 
         ImoTieDto dtoTie;
         ImoTieData* pTieData = ImFactory::inject_tie_data(&doc, &dtoTie);
@@ -973,14 +834,10 @@ SUITE(InternalModelTest)
         ImoBeam* pBeam = static_cast<ImoBeam*>( ImFactory::inject(k_imo_beam, &doc) );
         pNote->include_in_relation(&doc, pBeam, pBeamData);
 
-        CHECK( pNote->get_attachment(0) == pTie );
-        CHECK( pNote->get_attachment(1) == pBeam );
-        CHECK( pNote->get_attachment(2) == pFermata );
-        CHECK( pNote->get_attachment(3) == pText );
-//        cout << "order = " << pNote->get_attachment(0)->get_obj_type() << ", "
-//             << pNote->get_attachment(1)->get_obj_type() << ", "
-//             << pNote->get_attachment(2)->get_obj_type() << ", "
-//             << pNote->get_attachment(3)->get_obj_type() << endl;
+        CHECK( pNote->get_relation(0) == pTie );
+        CHECK( pNote->get_relation(1) == pBeam );
+//        cout << "order = " << pNote->get_relation(0)->get_obj_type() << ", "
+//             << pNote->get_relation(1)->get_obj_type() <<  endl;
 
         delete pNote;
     }

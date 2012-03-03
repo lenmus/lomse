@@ -301,7 +301,7 @@ protected:
     void to_start_of_next_instrument();
 
     //helper: dealing with ref.object
-    inline int ref_object_id() { return (*m_it)->element_id(); }
+    //inline int ref_object_id() { return (*m_it)->element_id(); }
     inline float ref_object_time() { return (*m_it)->time(); }
     inline int ref_object_measure() { return (*m_it)->measure(); }
     inline int ref_object_staff() { return (*m_it)->staff(); }

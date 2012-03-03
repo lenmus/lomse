@@ -93,7 +93,8 @@ void GmoShapeTie::on_draw(Drawer* pDrawer, RenderOptions& opt)
 
     GmoSimpleShape::on_draw(pDrawer, opt);
 
-//    //Test code, just to see where the points are located
+    //Test code, just to see where the points are located
+#if (0)
     pDrawer->begin_path();
     pDrawer->fill(Color(0,0,0,0));          //transparent white
     pDrawer->stroke(Color(255,0,0));
@@ -105,6 +106,7 @@ void GmoShapeTie::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->line_to(m_points[END].x + uWidth / 2.0f, m_points[END].y);
     pDrawer->end_path();
     pDrawer->render();
+#endif
 }
 
 //---------------------------------------------------------------------------------------

@@ -114,12 +114,20 @@ void IdAssigner::assign_id(ImoObj* pImo)
 
     //TODO: refactor. IdAssigner has knowledge about ImoAttachmnets internals
     //attachments
-    if (pImo->is_attachments())
+    //if (pImo->is_attachments())
+    //{
+    //    ImoAttachments* pA = static_cast<ImoAttachments*>(pImo);
+    //    std::list<ImoAuxObj*>& attachments = pA->get_attachments();
+    //    std::list<ImoAuxObj*>::iterator it;
+    //    for(it = attachments.begin(); it != attachments.end(); ++it)
+    //        assign_id(*it);
+    //}
+    if (pImo->is_relations())
     {
-        ImoAttachments* pA = static_cast<ImoAttachments*>(pImo);
-        std::list<ImoAuxObj*>& attachments = pA->get_attachments();
-        std::list<ImoAuxObj*>::iterator it;
-        for(it = attachments.begin(); it != attachments.end(); ++it)
+        ImoRelations* pR = static_cast<ImoRelations*>(pImo);
+        std::list<ImoRelObj*>& relations = pR->get_relations();
+        std::list<ImoRelObj*>::iterator it;
+        for(it = relations.begin(); it != relations.end(); ++it)
             assign_id(*it);
     }
 

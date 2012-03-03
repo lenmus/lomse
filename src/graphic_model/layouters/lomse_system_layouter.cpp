@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -1233,20 +1233,19 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
                                              int iCol, int iLine,
                                              ImoInstrument* pInstr)
 {
-    ImoAttachments* pAuxObjs = pSO->get_attachments();
-    int size = pAuxObjs->get_num_items();
-	for (int i=0; i < size; ++i)
-	{
-        ImoAuxObj* pAO = dynamic_cast<ImoAuxObj*>( pAuxObjs->get_item(i) );
+    //rel objs
+    if (pSO->get_num_relations() > 0)
+    {
+        ImoRelations* pRelObjs = pSO->get_relations();
+        int size = pRelObjs->get_num_items();
+	    for (int i=0; i < size; ++i)
+	    {
+            ImoRelObj* pRO = pRelObjs->get_item(i);
 
-        GmoShape* pAuxShape = NULL;
-        if (pAO->is_relobj())
-        {
-            if (!pAO->is_chord())
+            if (!pRO->is_chord())
             {
-                ImoRelObj* pRO = dynamic_cast<ImoRelObj*>(pAO);
 		        if (pSO == pRO->get_start_object())
-                    m_pShapesCreator->start_engraving_relobj(pAO, pRO, pSO, pMainShape,
+                    m_pShapesCreator->start_engraving_relobj(pRO, pSO, pMainShape,
                                                             iInstr, iStaff, iSystem, iCol,
                                                             iLine, pInstr, m_pagePos);
 		        else if (pSO == pRO->get_end_object())
@@ -1254,26 +1253,34 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
                     SystemLayouter* pSysLyt = m_pScoreLyt->get_system_layouter(iSystem);
                     LUnits prologWidth( pSysLyt->get_prolog_width() );
 
-                    m_pShapesCreator->finish_engraving_relobj(pAO, pRO, pSO, pMainShape,
+                    m_pShapesCreator->finish_engraving_relobj(pRO, pSO, pMainShape,
                                                             iInstr, iStaff, iSystem, iCol,
                                                             iLine, prologWidth, pInstr);
                     add_auxobjs_shapes_to_model(pRO, pMainShape, GmoShape::k_layer_aux_objs);
 		        }
                 else
-                    m_pShapesCreator->continue_engraving_relobj(pAO, pRO, pSO, pMainShape,
+                    m_pShapesCreator->continue_engraving_relobj(pRO, pSO, pMainShape,
                                                                 iInstr, iStaff, iSystem,
                                                                 iCol, iLine, pInstr);
             }
         }
+    }
 
-        else    //simple auxobjs
-        {
-            //1-R AuxObjs. Engrave it
-            pAuxShape = m_pShapesCreator->create_auxobj_shape(pAO, iInstr, iStaff,
-                                                              pMainShape, m_pagePos);
+    //aux objs
+    if (pSO->get_num_attachments() > 0)
+    {
+        ImoAttachments* pAuxObjs = pSO->get_attachments();
+        int size = pAuxObjs->get_num_items();
+	    for (int i=0; i < size; ++i)
+	    {
+            ImoAuxObj* pAO = static_cast<ImoAuxObj*>( pAuxObjs->get_item(i) );
+
+            GmoShape* pAuxShape =
+                        m_pShapesCreator->create_auxobj_shape(pAO, iInstr, iStaff,
+                                                            pMainShape, m_pagePos);
             pMainShape->accept_link_from(pAuxShape);
             add_auxobj_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs, iSystem,
-                                      iCol, iInstr);
+                                        iCol, iInstr);
         }
     }
 }

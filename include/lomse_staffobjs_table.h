@@ -63,21 +63,18 @@ protected:
     int                 m_line;
     int                 m_staff;
     ImoObj*             m_pImo;
-    LdpElement*         m_pElm;
 
 public:
     ColStaffObjsEntry(int measure, float time, int instr, int line, int staff,
-                      ImoObj* pImo, LdpElement* pElm)
+                      ImoObj* pImo)
             : m_measure(measure), m_time(time), m_instr(instr), m_line(line)
-            , m_staff(staff), m_pImo(pImo), m_pElm(pElm) {}
+            , m_staff(staff), m_pImo(pImo) {}
 
     inline int measure() const { return m_measure; }
     inline float time() const { return m_time; }
     inline int num_instrument() const { return m_instr; }
     inline int line() const { return m_line; }
     inline int staff() const { return m_staff; }
-    inline LdpElement* element() const { return m_pElm; }
-    inline long element_id() const { return m_pElm->get_id(); }
     inline ImoObj* imo_object() const { return m_pImo; }
 
     //debug
@@ -188,7 +185,7 @@ public:
 
 //    ColStaffObjs* build(LdpElement* pScore, bool fSort=true);
     ColStaffObjs* build(ImoScore* pScore, bool fSort=true);
-    void update(LdpElement* pScore);
+    //void update(LdpElement* pScore);
     void update(ImoScore* pScore);
 
 private:

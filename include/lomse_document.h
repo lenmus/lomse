@@ -138,18 +138,6 @@ public:
 //    std::string to_string_with_ids(iterator& it) { return (*it)->to_string_with_ids(); }
 //    std::string to_string_with_ids() { return m_pTree->get_root()->to_string_with_ids(); }
 
-    //atomic commands to edit the document. No undo/redo capabilities.
-    //In principle, to be used only by DocCommandExecuter
-
-//    void add_content(DocIterator& it, ImoObj* pObj);     //before it
-//    void add_staffobj(DocCursor& cursor, ImoStaffObj* pObj);     //before cursor
-//    ImoStaffObj* remove_staffobj()
-//    void add_attachment()
-//    ImoAuxObj* remove_attachment()
-//    void add_reldataobj()
-//    void remove_reldataobj()
-//    void change_property()
-
 //    //inserts param before the element at position referred by iterator 'it'.
 //    //Returns iterator pointing to the newly inserted element
 //    iterator insert(iterator& it, LdpElement* node);

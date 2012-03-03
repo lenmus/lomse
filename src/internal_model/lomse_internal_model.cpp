@@ -287,7 +287,6 @@ ImoObj::ImoObj(int objtype, long id)
 //            k_imo_instrument_groups,
         m_TypeToName[k_imo_music_data] = "musicData";
         m_TypeToName[k_imo_options] = "options";
-        m_TypeToName[k_imo_reldataobjs] = "reldataobjs";
         m_TypeToName[k_imo_styles] = "styles";
 
         // Special collections
@@ -452,7 +451,7 @@ void ImoRelObj::remove(ImoStaffObj* pSO)
     {
         if ((*it).first == pSO)
         {
-            //delete (*it).second;
+            delete (*it).second;
             m_relatedObjects.erase(it);
             return;
         }
@@ -490,27 +489,34 @@ ImoRelDataObj* ImoRelObj::get_data_for(ImoStaffObj* pSO)
 //=======================================================================================
 ImoStaffObj::~ImoStaffObj()
 {
-    ImoAttachments* pAuxObjs = get_attachments();
-    if (pAuxObjs)
+    ImoRelations* pRelObjs = get_relations();
+    if (pRelObjs)
     {
-        pAuxObjs->remove_from_all_relations(this);
-        //next code not needed. Tree nodes are deleted in ImoObj destructor
-        //if (pAuxObjs->get_num_items() == 0)
-        //{
-            this->remove_child(pAuxObjs);
-            delete pAuxObjs;
-        //}
+        pRelObjs->remove_from_all_relations(this);
+        this->remove_child_imo(pRelObjs);
+        delete pRelObjs;
     }
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStaffObj::add_relation(Document* pDoc, ImoRelObj* pRO)
+{
+    ImoRelations* pRelObjs = get_relations();
+    if (!pRelObjs)
+    {
+        pRelObjs = static_cast<ImoRelations*>(
+                        ImFactory::inject(k_imo_relations, pDoc) );
+        append_child_imo(pRelObjs);
+    }
+    pRelObjs->add(pRO);
 }
 
 //---------------------------------------------------------------------------------------
 void ImoStaffObj::include_in_relation(Document* pDoc, ImoRelObj* pRelObj,
                                       ImoRelDataObj* pData)
 {
-    add_attachment(pDoc, pRelObj);
+    add_relation(pDoc, pRelObj);
     pRelObj->push_back(this, pData);
-    if (pData)
-        add_reldataobj(pDoc, pData);
 }
 
 //---------------------------------------------------------------------------------------
@@ -528,93 +534,53 @@ void ImoStaffObj::remove_from_relation(ImoRelObj* pRelObj)
 //---------------------------------------------------------------------------------------
 void ImoStaffObj::remove_but_not_delete_relation(ImoRelObj* pRelObj)
 {
-    ImoSimpleObj* pData = pRelObj->get_data_for(this);
-    if (pData)
-        this->remove_reldataobj(pData);
-
     pRelObj->remove(this);
 
-    ImoAttachments* pAuxObjs = get_attachments();
-    pAuxObjs->remove(pRelObj);
+    ImoRelations* pRelObjs = get_relations();
+    pRelObjs->remove(pRelObj);
 }
 
 //---------------------------------------------------------------------------------------
-bool ImoStaffObj::has_reldataobjs()
+ImoRelObj* ImoStaffObj::get_relation(int i)
 {
-    return get_num_reldataobjs() > 0;
+    ImoRelations* pRelObjs = get_relations();
+    return pRelObjs->get_item(i);
 }
 
 //---------------------------------------------------------------------------------------
-ImoReldataobjs* ImoStaffObj::get_reldataobjs()
+bool ImoStaffObj::has_relations()
 {
-    return dynamic_cast<ImoReldataobjs*>( get_child_of_type(k_imo_reldataobjs) );
+    ImoRelations* pRelObjs = get_relations();
+    if (pRelObjs)
+        return pRelObjs->get_num_items() > 0;
+    else
+        return false;
 }
 
 //---------------------------------------------------------------------------------------
-void ImoStaffObj::add_reldataobj(Document* pDoc, ImoSimpleObj* pSO)
+int ImoStaffObj::get_num_relations()
 {
-    ImoReldataobjs* pRDOs = get_reldataobjs();
-    if (!pRDOs)
-    {
-        pRDOs = static_cast<ImoReldataobjs*>(ImFactory::inject(k_imo_reldataobjs, pDoc));
-        append_child_imo(pRDOs);
-    }
-
-    pRDOs->append_child_imo(pSO);
-}
-
-//---------------------------------------------------------------------------------------
-int ImoStaffObj::get_num_reldataobjs()
-{
-    ImoReldataobjs* pRDOs = get_reldataobjs();
-    if (pRDOs)
-        return pRDOs->get_num_children();
+    ImoRelations* pRelObjs = get_relations();
+    if (pRelObjs)
+        return pRelObjs->get_num_items();
     else
         return 0;
 }
 
 //---------------------------------------------------------------------------------------
-ImoSimpleObj* ImoStaffObj::get_reldataobj(int i)
+ImoRelations* ImoStaffObj::get_relations()
 {
-    ImoReldataobjs* pRDOs = get_reldataobjs();
-    if (pRDOs)
-        return dynamic_cast<ImoSimpleObj*>( pRDOs->get_child(i) );
-    else
-        return NULL;
+    return dynamic_cast<ImoRelations*>( get_child_of_type(k_imo_relations) );
 }
 
 //---------------------------------------------------------------------------------------
-void ImoStaffObj::remove_reldataobj(ImoSimpleObj* pData)
+ImoRelObj* ImoStaffObj::find_relation(int type)
 {
-    ImoReldataobjs* pRDOs = get_reldataobjs();
-    if (pRDOs)
-    {
-        pRDOs->remove_child(pData);
-        delete pData;
-        if (pRDOs->get_num_children() == 0)
-        {
-            this->remove_child(pRDOs);
-            delete pRDOs;
-        }
-    }
-}
-
-//---------------------------------------------------------------------------------------
-ImoSimpleObj* ImoStaffObj::find_reldataobj(int type)
-{
-    ImoReldataobjs* pRDOs = get_reldataobjs();
-    if (pRDOs)
-    {
-        ImoReldataobjs::children_iterator it;
-        for (it = pRDOs->begin(); it != pRDOs->end(); ++it)
-        {
-            if ((*it)->get_obj_type() == type)
-                return dynamic_cast<ImoSimpleObj*>( *it );
-        }
+    ImoRelations* pRelObjs = get_relations();
+    if (!pRelObjs)
         return NULL;
-    }
     else
-        return NULL;
+        return pRelObjs->find_item_of_type(type);
 }
 
 
@@ -944,18 +910,18 @@ Color& ImoColorDto::set_from_string(const std::string& hex)
 
 
 //=======================================================================================
-// ImoAttachments implementation
+// ImoRelations implementation
 //=======================================================================================
-ImoAttachments::~ImoAttachments()
+ImoRelations::~ImoRelations()
 {
-    std::list<ImoAuxObj*>::iterator it;
-    for(it = m_attachments.begin(); it != m_attachments.end(); ++it)
+    std::list<ImoRelObj*>::iterator it;
+    for(it = m_relations.begin(); it != m_relations.end(); ++it)
         delete *it;
-    m_attachments.clear();
+    m_relations.clear();
 }
 
 //---------------------------------------------------------------------------------------
-void ImoAttachments::accept_visitor(BaseVisitor& v)
+void ImoRelations::accept_visitor(BaseVisitor& v)
 {
     Visitor<ImoObj>* vObj = NULL;
 
@@ -964,8 +930,8 @@ void ImoAttachments::accept_visitor(BaseVisitor& v)
         vObj->start_visit(this);
 
     //visit_children
-    std::list<ImoAuxObj*>::iterator it;
-    for(it = m_attachments.begin(); it != m_attachments.end(); ++it)
+    std::list<ImoRelObj*>::iterator it;
+    for(it = m_relations.begin(); it != m_relations.end(); ++it)
         (*it)->accept_visitor(v);
 
     if (vObj)
@@ -973,48 +939,48 @@ void ImoAttachments::accept_visitor(BaseVisitor& v)
 }
 
 //---------------------------------------------------------------------------------------
-ImoAuxObj* ImoAttachments::get_item(int iItem)
+ImoRelObj* ImoRelations::get_item(int iItem)
 {
-    std::list<ImoAuxObj*>::iterator it;
-    for(it = m_attachments.begin(); it != m_attachments.end() && iItem > 0; ++it, --iItem);
-    if (it != m_attachments.end())
+    std::list<ImoRelObj*>::iterator it;
+    for(it = m_relations.begin(); it != m_relations.end() && iItem > 0; ++it, --iItem);
+    if (it != m_relations.end())
         return *it;
     else
         return NULL;
 }
 
 //---------------------------------------------------------------------------------------
-void ImoAttachments::remove(ImoAuxObj* pAO)
+void ImoRelations::remove(ImoRelObj* pRO)
 {
-    m_attachments.remove(pAO);
+    m_relations.remove(pRO);
 }
 
 //---------------------------------------------------------------------------------------
-void ImoAttachments::add(ImoAuxObj* pAO)
+void ImoRelations::add(ImoRelObj* pRO)
 {
     //attachments must be ordered by renderization priority
 
-    int priority = get_priority( pAO->get_obj_type() );
+    int priority = get_priority( pRO->get_obj_type() );
     if (priority > 1000)
-        m_attachments.push_back(pAO);
+        m_relations.push_back(pRO);
     else
     {
-        std::list<ImoAuxObj*>::iterator it;
-        for(it = m_attachments.begin(); it != m_attachments.end(); ++it)
+        std::list<ImoRelObj*>::iterator it;
+        for(it = m_relations.begin(); it != m_relations.end(); ++it)
         {
             if (get_priority((*it)->get_obj_type()) > priority)
                 break;
         }
 
-        if (it == m_attachments.end())
-            m_attachments.push_back(pAO);
+        if (it == m_relations.end())
+            m_relations.push_back(pRO);
         else
-            m_attachments.insert(it, pAO);
+            m_relations.insert(it, pRO);
     }
 }
 
 //---------------------------------------------------------------------------------------
-int ImoAttachments::get_priority(int type)
+int ImoRelations::get_priority(int type)
 {
     //not listed objects are low priority (order not important, added at end)
     static bool fMapInitialized = false;
@@ -1040,10 +1006,10 @@ int ImoAttachments::get_priority(int type)
 }
 
 //---------------------------------------------------------------------------------------
-ImoAuxObj* ImoAttachments::find_item_of_type(int type)
+ImoRelObj* ImoRelations::find_item_of_type(int type)
 {
-    std::list<ImoAuxObj*>::iterator it;
-    for(it = m_attachments.begin(); it != m_attachments.end(); ++it)
+    std::list<ImoRelObj*>::iterator it;
+    for(it = m_relations.begin(); it != m_relations.end(); ++it)
     {
         if ((*it)->get_obj_type() == type)
             return *it;
@@ -1052,39 +1018,39 @@ ImoAuxObj* ImoAttachments::find_item_of_type(int type)
 }
 
 //---------------------------------------------------------------------------------------
-void ImoAttachments::remove_from_all_relations(ImoStaffObj* pSO)
+void ImoRelations::remove_from_all_relations(ImoStaffObj* pSO)
 {
-    std::list<ImoAuxObj*>::iterator it = m_attachments.begin();
-    while (it != m_attachments.end())
+    std::list<ImoRelObj*>::iterator it = m_relations.begin();
+    while (it != m_relations.end())
     {
         if ((*it)->is_relobj())
         {
             ImoRelObj* pRO = static_cast<ImoRelObj*>( *it );
             ++it;
             pSO->remove_from_relation(pRO);
-            //m_attachments.erase(it++);
+            //m_relations.erase(it++);
         }
         else
         {
-            ImoAuxObj* pAO = *it;
+            ImoRelObj* pRO = *it;
             ++it;
-            delete pAO;
+            delete pRO;
         }
     }
-    m_attachments.clear();
+    m_relations.clear();
 }
 
 ////---------------------------------------------------------------------------------------
-//void ImoAttachments::remove_all_attachments()
+//void ImoRelations::remove_all_attachments()
 //{
-//    std::list<ImoAuxObj*>::iterator it = m_attachments.begin();
-//    while (it != m_attachments.end())
+//    std::list<ImoRelObj*>::iterator it = m_relations.begin();
+//    while (it != m_relations.end())
 //    {
-//        ImoAuxObj* pAO = *it;
+//        ImoRelObj* pRO = *it;
 //        ++it;
-//        delete pAO;
+//        delete pRO;
 //    }
-//    m_attachments.clear();
+//    m_relations.clear();
 //}
 
 
@@ -1115,26 +1081,6 @@ ImoContentObj::ImoContentObj(long id, int objtype)
 //---------------------------------------------------------------------------------------
 ImoContentObj::~ImoContentObj()
 {
-    //delete attachments
-    //NOT NECESSARY: ImoAttachments is deleted in ImoObj destructor. and the AUxOubjs
-    //are deleted in ImoAttachments destructor
-    //ImoAttachments* pAuxObjs = get_attachments();
-    //if (pAuxObjs)
-    //{
-    //    pAuxObjs->remove_all_attachments();
-    //    remove_child(pAuxObjs);
-    //    delete pAuxObjs;
-    //}
-
-    ////delete properties
-    //NOT NECESSARY: ImoReldataobjs is deleted in ImoObj destructor, and the SimpleObjs
-    //are deleted in turn in ImoObj desctructor, when deleting ImoReldataobjs
-    //ImoReldataobjs* pProps = get_reldataobjs();
-    //if (pProps)
-    //{
-    //    remove_child(pProps);
-    //    delete pProps;
-    //}
 }
 
 //---------------------------------------------------------------------------------------
@@ -1154,7 +1100,7 @@ void ImoContentObj::add_attachment(Document* pDoc, ImoAuxObj* pAO)
 ImoAuxObj* ImoContentObj::get_attachment(int i)
 {
     ImoAttachments* pAuxObjs = get_attachments();
-    return pAuxObjs->get_item(i);
+    return static_cast<ImoAuxObj*>( pAuxObjs->get_item(i) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -1188,22 +1134,7 @@ void ImoContentObj::remove_attachment(ImoAuxObj* pAO)
 {
     ImoAttachments* pAuxObjs = get_attachments();
     pAuxObjs->remove(pAO);
-    //if (pAO->is_relobj())
-    //{
-    //    ImoRelObj* pRO = static_cast<ImoRelObj*>(pAO);
-    //    if (pRO->get_num_objects() < pRO->get_min_number_for_autodelete())
-    //    {
-    //        pRO->remove_all();
-    //        delete pRO;
-    //    }
-    //}
-    //else
-        delete pAO;
-    //if (pAuxObjs->get_num_items() == 0)
-    //{
-    //    this->remove_child(pAuxObjs);
-    //    delete pAuxObjs;
-    //}
+    delete pAO;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2113,7 +2044,7 @@ void ImoScore::add_or_replace_option(ImoOptionInfo* pOpt)
     if (pOldOpt)
     {
         ImoOptions* pColOpts = get_options();
-        pColOpts->remove_child(pOldOpt);
+        pColOpts->remove_child_imo(pOldOpt);
         delete pOldOpt;
     }
     add_option(pOpt);

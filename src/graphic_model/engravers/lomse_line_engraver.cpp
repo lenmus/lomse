@@ -68,7 +68,7 @@ GmoShapeLine* LineEngraver::create_shape(ImoScoreLine* pLine, int iInstr,
                                           tenths_to_logical(pLine->get_line_width()),
                                           0.5f,
                                           pLine->get_line_style(),
-                                          pLine->get_line_color(),
+                                          pLine->get_color(),
                                           pLine->get_start_edge(),
                                           pLine->get_start_cap(),
                                           pLine->get_end_cap() );
