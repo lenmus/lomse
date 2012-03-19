@@ -685,7 +685,7 @@ if( WIN32 )
     )
 
     add_executable( ${EXAMPLE1} WIN32
-        ${EXAMPLE1_SRC}/win32/example_1/example_1_win32.cpp
+        ${EXAMPLE1_SRC}/example_1_win32.cpp
         ${EXAMPLE1_SRC}/win32/example_1/example_1.ico
         ${EXAMPLE1_SRC}/win32/example_1/example_1.rc
         ${EXAMPLE1_SRC}/win32/example_1/stdafx.cpp
@@ -707,7 +707,7 @@ elseif( UNIX )
     endif(X11_FOUND)
 
     add_executable( ${EXAMPLE1} ""
-        ${EXAMPLE1_SRC}/x11/example_1_x11.cpp
+        ${EXAMPLE1_SRC}/example_1_x11.cpp
     )
 
     target_link_libraries ( ${EXAMPLE1} liblomse.so )
