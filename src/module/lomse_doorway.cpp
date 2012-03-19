@@ -154,6 +154,11 @@ long LomseDoorway::get_version_number()
     return 1000000 * major + minor;
 }
 
+//---------------------------------------------------------------------------------------
+ScorePlayer* LomseDoorway::create_score_player(MidiServerBase* pSoundServer)
+{
+    return Injector::inject_ScorePlayer(*m_pLibraryScope, pSoundServer);
+}
 
 
 }   //namespace lomse

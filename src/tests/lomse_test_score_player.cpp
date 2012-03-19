@@ -215,7 +215,7 @@ SUITE(ScorePlayerTest)
         ImoScore* pScore = doc.get_score(0);
         MidiServerBase midi;
         MyScorePlayer player(m_libraryScope, &midi);
-        player.prepare_to_play(pScore, NULL);
+        player.load_score(pScore, NULL);
 
         SoundEventsTable* pTable = player.my_get_table();
 
@@ -231,7 +231,7 @@ SUITE(ScorePlayerTest)
         ImoScore* pScore = doc.get_score(0);
         MidiServerBase midi;
         MyScorePlayer player(m_libraryScope, &midi);
-        player.prepare_to_play(pScore, NULL);
+        player.load_score(pScore, NULL);
         player.play();
         player.my_wait_for_termination();
 
@@ -247,7 +247,7 @@ SUITE(ScorePlayerTest)
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
         ImoScore* pScore = doc.get_score(0);
         MyScorePlayer player(m_libraryScope, NULL);
-        player.prepare_to_play(pScore, NULL);
+        player.load_score(pScore, NULL);
         player.do_play(0, 3, k_play_normal_instrument, k_no_visual_tracking,
                        k_no_countoff, 60L, NULL);
 
@@ -265,7 +265,7 @@ SUITE(ScorePlayerTest)
         MyMidiServer midi;
         MyScorePlayer player(m_libraryScope, &midi);
         MyPlayCtrl playCtrl;
-        player.prepare_to_play(pScore, &playCtrl);
+        player.load_score(pScore, &playCtrl);
         int nEvMax = player.my_get_table()->num_events() - 1;
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_no_visual_tracking,
                           k_no_countoff, 60L, NULL);
@@ -299,7 +299,7 @@ SUITE(ScorePlayerTest)
         MyMidiServer midi;
         MyScorePlayer player(m_libraryScope, &midi);
         MyPlayCtrl playCtrl;
-        player.prepare_to_play(pScore, &playCtrl);
+        player.load_score(pScore, &playCtrl);
         int nEvMax = player.my_get_table()->num_events() - 1;
         Interactor inter(m_libraryScope, &doc, NULL);
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_visual_tracking,
@@ -374,7 +374,7 @@ SUITE(ScorePlayerTest)
         MyMidiServer midi;
         MyScorePlayer player(m_libraryScope, &midi);
         MyPlayCtrl playCtrl;
-        player.prepare_to_play(pScore, &playCtrl);
+        player.load_score(pScore, &playCtrl);
         int nEvMax = player.my_get_table()->num_events() - 1;
         Interactor inter(m_libraryScope, &doc, NULL);
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_visual_tracking,
@@ -468,7 +468,7 @@ SUITE(ScorePlayerTest)
 
         CHECK( handler.event_received() == false );
         MyPlayCtrl playCtrl;
-        player.prepare_to_play(pScore, &playCtrl);
+        player.load_score(pScore, &playCtrl);
         player.play(k_no_visual_tracking, k_no_countoff, k_play_normal_instrument,
                     60L, NULL);
         player.my_wait_for_termination(); //AWARE: need to wait. Otherwise events arrive *after* CHECKs
@@ -488,7 +488,7 @@ SUITE(ScorePlayerTest)
 //        ImoScore* pScore = doc.get_score(0);
 //        MyMidiServer midi;
 //        MyScorePlayer player(m_libraryScope, &midi);
-//        player.prepare_to_play(pScore, NULL);
+//        player.load_score(pScore, NULL);
 //        int nEvMax = player.my_get_table()->num_events() - 1;
 //        player.my_do_play(0, nEvMax, k_play_normal_instrument, k_visual_tracking,
 //                          k_no_countoff, 60L, NULL);

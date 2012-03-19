@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/02/17 -->
+<!-- $Updated: 2012/03/03 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -46,7 +46,7 @@ This is meant to be an introduction to using Lomse in a wxWidgets program. Befor
 
 <p>
 In this first example we are just going to open a window and display an score on it. You can download the full source code for this example from
-<a href="../../examples/wxWidgets/example_1_wxwidgets.cpp">../../examples/wxWidgets/example_1_wxwidgets.cpp</a>.
+<a href="../../examples/example_1_wxwidgets.cpp">../../examples/example_1_wxwidgets.cpp</a>.
 </p>
 
 <p>
@@ -528,7 +528,7 @@ void MyCanvas::open_test_document()
 <p>The score element contains one instrument (this implies, by default, one staff). Finally, element 'musicData' describes the content for this instrument. In the example, a G clef, a C key signature, a 2/4 time signature and a quarter C4 note.
 </p>
 
-<p>For a detailed description of the LDP language see the <a href="###ldp###">LDP Reference Manual</a>. I have plans for supporting scores in MusicXML format, as well as to move the LDP language to XML syntax. But other more urgent task force me to always postpone these objectives. Any help is welcome!
+<p>For a detailed description of the LDP language see the <a href="###ldp_full###">LDP Reference Manual</a>. I have plans for supporting scores in MusicXML format, as well as to move the LDP language to XML syntax. But other more urgent task force me to always postpone these objectives. Any help is welcome!
 </p>
 
 <p>Once the Document and a View for it are created, we just get pointers to the Interactor, so that we can 'communicate' with the Document and its View:
@@ -668,7 +668,7 @@ void MyCanvas::OnPaint(wxPaintEvent& event)
 </p>
 
 <p>
-If the interactor is already created, the only thing to do is to ask Lomse to paint the bitmap and copy it to the window. But notice that we don't have to ask Lomse to paint the bitmap whenever a <tt>wxPaintEvent</tt> event arrives. These events are generated because several reasons. The most frequent is when our window image is damaged (i.e. another window covering our window has moved). But in these cases the image is preserved in the bitmap so it is enough to re-display the bitmap. Other cases for receiving paint events are because the window has changed: when the window is created or when it is resized or when our program changes its content (i.e. because the if the user asks to open a different score). In our application this last case is not possible and so, the only source for additional paint event com form size events.
+If the interactor is already created, the only thing to do is to ask Lomse to paint the bitmap and copy it to the window. But notice that we don't have to ask Lomse to paint the bitmap whenever a <tt>wxPaintEvent</tt> event arrives. These events are generated because several reasons. The most frequent is when our window image is damaged (i.e. another window covering our window has moved). But in these cases the image is preserved in the bitmap so it is enough to re-display the bitmap. Other cases for receiving paint events are because the window has changed: when the window is created or when it is resized or when our program changes its content (i.e. because the if the user asks to open a different score). In our application this last case is not possible and so, the only source for additional paint event com from size events.
 </p>
 
 <p>But as we have seen, whenever the window is resized a new bitmap is automatically created, and flag <tt>m_view_needs_redraw</tt> is set. Therefore, this flag can be used to determine if have to ask Lomse to repaint the bitmap. Here is the code:
@@ -731,7 +731,7 @@ void initialize_lomse()
 </pre>
 
 <p>
-Lomse library does not contains any platform dependent code. But, for certain tasks, Lomse needs specific platform information. As I was aware of these needs, I was solving them without including platform dependent code. The chosen solution has been to delegate on user application the responsibility for providing this information at appropriate places. For instance, the bitmap format to use has to be specified at Lomse initialization. But in other cases I didn't have clear ideas about how to proceed, so I decided to postpone any decision until the Lomse library development was more advanced, and solve any specific need by forwarding a 'request' for the needed information to the user application. And this is the purpose of the callback that we set up at Lomse initialization.
+Lomse library does not contains any platform dependent code. But, for certain tasks, Lomse needs specific platform information. As I was being aware of these needs, I was solving them without including platform dependent code. The chosen solution has been to delegate on user application the responsibility for providing this information at appropriate places. For instance, the bitmap format to use has to be specified at Lomse initialization. But in other cases I didn't have clear ideas about how to proceed, so I decided to postpone any decision until the Lomse library development was more advanced, and solve any specific need by forwarding a 'request' for the needed information to the user application. And this is the purpose of the callback that we set up at Lomse initialization.
 </p>
 
 <p>
@@ -911,7 +911,7 @@ void MyFrame::get_font_filename(RequestFont* pRequest)
 </pre>
 
 <p>
-The issue of finding a good solution for locating font files is pending. Current solution of delegating on user application should be avoided as it creates a non-trivial burden on user applications. Probably, the best solution will be to create a Lomse helper library with all needed platform dependent code. But for now, this is the situation. If you would like to help with this you are welcome!
+The issue of finding a good solution for locating font files is pending. Current solution of delegating on user application should be avoided as it creates a non-trivial burden on user applications. Probably, the best solution will be to create a Lomse helper library with all needed platform dependent code. But for now, this is the situation. If you would like to help to solve this you are welcome!
 </p>
 
 
@@ -919,7 +919,7 @@ The issue of finding a good solution for locating font files is pending. Current
 <!--====================================================-->
 
 <p>
-The only important point to comment is to remind you that, to avoid memory leaks, it is necessary to delete the rendering buffer and the Presenter (which in turn will delete all Lomse related objects, such as the View, the Document and the Interactor). This code has been included in <code>MyCanvas</code> destructor:
+Finally, the last important point to comment is to remind you that, to avoid memory leaks, it is necessary to delete the rendering buffer and the Presenter (which in turn will delete all Lomse related objects, such as the View, the Document and the Interactor). This code has been included in <code>MyCanvas</code> destructor:
 </p>
 
 <pre class="code">
@@ -935,8 +935,8 @@ MyCanvas::~MyCanvas()
 
 <p>
 With this, I finish the explanation of the code. You can download the full source code for this example from
-<a href="../../examples/wxWidgets/example_1_wxwidgets.cpp">
-../../examples/wxWidgets/example_1_wxwidgets.cpp</a>.
+<a href="../../examples/example_1_wxwidgets.cpp">
+../../examples/example_1_wxwidgets.cpp</a>.
 In the next section we are going to build and run our sample.
 </p>
 
@@ -949,12 +949,11 @@ In the next section we are going to build and run our sample.
 <!--====================================================-->
 
 <p>
-Your project makefile must include the following paths for Lomse header files:
+Your project makefile must include the following path for Lomse header files:
 </p>
 
 <pre class="code">
     /usr/local/include/lomse
-    /usr/local/include/lomse/agg
 </pre>
 
 <p>Some Lomse headers include freetype2 references and, therefore, it is necessary to include Freetype2 headers. As the specific paths could be different in your machine, the best for this is to use the pkg-config tool:
@@ -989,9 +988,8 @@ Ok, lets's do it. Open a terminal window, move to the directory containing the s
 
 <pre class="console">
 gcc example_1_wxwidgets.cpp -o example-1-wx `wx-config --cflags`   \
-    -I /usr/local/include/lomse  -I /usr/local/include/lomse/agg   \
-    -I /usr/include  `pkg-config --cflags freetype2`               \
-    -L /usr/local/lib -llomse `wx-config --libs`
+    -I /usr/local/include/lomse  -I /usr/include                   \
+    `pkg-config --cflags freetype2` -L /usr/local/lib -llomse `wx-config --libs`
 </pre>
 
 <p>
@@ -1013,12 +1011,11 @@ And now, execute your first program using Lomse:
 <!--====================================================-->
 
 <p>
-Your project makefile must include the following paths for Lomse header files. For instance:
+Your project makefile must include the following path for Lomse header files. For instance:
 </p>
 
 <pre class="code">
     C:\Program Files\LenMus\lomse\include\
-    C:\Program Files\LenMus\lomse\include\agg\
 </pre>
 
 <p>Some Lomse headers include freetype2 references and, therefore, it is necessary to include Freetype2 headers. For me, guessing were things are installed in Windows is a nightmare. Therefore, I have included all the needed libraries in the Lomse distribution package. So, if you also doesn't know if freetype2 is installed in your machine and were, just use the freetype prebuilt library included in Lomse sources, at:

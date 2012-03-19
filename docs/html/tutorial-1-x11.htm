@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/02/13 -->
+<!-- $Updated: 2012/03/03 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -467,7 +467,7 @@ void open_document()
     m_pInteractor->add_event_handler(k_update_window_event, update_window);
 </pre>
 
-<p>In this example, we are interested in receiving a notification each time the View changes, so that we can display the updated bitmap in the window. we will see this in more detail later.</p>
+<p>In this example, we are interested in receiving a notification each time the View changes, so that we can display the updated bitmap in the window. We will see this in more detail later.</p>
 </p>
 
 
@@ -785,12 +785,11 @@ In the next section we are going to build and run our sample.
 <!--====================================================-->
 
 <p>
-Now for the fun (an sometimes troubling) part. Compiling your code and running it! Your proyect makefile must include the following paths for Lomse header files:
+Now for the fun (an sometimes troubling) part. Compiling your code and running it! Your proyect makefile must include the following path for Lomse header files:
 </p>
 
 <pre class="code">
     /usr/local/include/lomse
-    /usr/local/include/lomse/agg
 </pre>
 
 <p>
@@ -816,8 +815,7 @@ Also, do not forget to add path for X11 headers (usually at <code>/usr/include/X
 <pre class="console">
 gcc example_1_x11.cpp -o example-1-x11  \
     -I /usr/include/X11 -L /usr/X11/lib -lX11 \
-    -I /usr/local/include/lomse -I /usr/local/include/lomse/agg  \
-    -L /usr/local/lib -llomse \
+    -I /usr/local/include/lomse -L /usr/local/lib -llomse \
     -I /usr/include `pkg-config --cflags freetype2`
 </pre>
 

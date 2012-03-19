@@ -89,7 +89,7 @@ public:
 
 
 //---------------------------------------------------------------------------------------
-// ScorePlayer: abstract class for implementing score players
+// ScorePlayer: reponsible for score playback
 class ScorePlayer
 {
 protected:
@@ -118,12 +118,14 @@ protected:
     Interactor*     m_pInteractor;
     PlayerCtrl*     m_pPlayCtrl;
 
-public:
+    friend class Injector;
     ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi);
-    ~ScorePlayer();
+
+public:
+    virtual ~ScorePlayer();
 
     //construction
-    void prepare_to_play(ImoScore* pScore, PlayerCtrl* pPlayCtrl,
+    void load_score(ImoScore* pScore, PlayerCtrl* pPlayCtrl,
                          int metronomeChannel=9, int metronomeInstr=0,
                          int tone1=60, int tone2=77);
 

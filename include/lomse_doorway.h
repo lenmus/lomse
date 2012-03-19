@@ -65,6 +65,8 @@ class HorizontalBookView;
 class SimpleView;
 class Document;
 class Presenter;
+class ScorePlayer;
+class MidiServerBase;
 
 
 //---------------------------------------------------------------------------------------
@@ -121,6 +123,8 @@ public:
                              ostream& reporter = cout);
     Presenter* open_document(int viewType, LdpReader& reader,
                              ostream& reporter = cout);
+    ScorePlayer* create_score_player(MidiServerBase* pSoundServer);
+
 
     static void null_notify_function(void* pObj, SpEventInfo event);
     static void null_request_function(void* pObj, Request* event);

@@ -62,6 +62,8 @@ class Drawer;
 class ScreenDrawer;
 class Task;
 class Request;
+class ScorePlayer;
+class MidiServerBase;
 
 //---------------------------------------------------------------------------------------
 class LOMSE_EXPORT LibraryScope
@@ -151,6 +153,8 @@ public:
     static Presenter* inject_Presenter(LibraryScope& libraryScope,
                                        int viewType, Document* pDoc);
     static Task* inject_Task(int taskType, Interactor* pIntor);
+    static ScorePlayer* inject_ScorePlayer(LibraryScope& libraryScope, 
+                                           MidiServerBase* pSoundServer);
 
 };
 

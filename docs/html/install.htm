@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/02/16 -->
+<!-- $Updated: 2012/03/11 -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Lomse installation</title>
@@ -10,7 +10,7 @@
 <h1>Lomse library installation instructions</h1>
 
 <div class="important">
-<p><b>Important</b></p>
+<p class="admonition-title">Important</p>
 <p>
 Lomse distribution does not include makefiles. All makefiles are generated
 with CMake build system. CMake can generate different kinds of
@@ -22,34 +22,14 @@ project files, Visual Studio project files).
 You need CMake 2.8.0 or later on your platform. You can download it from
 <a href="http://www.cmake.org/cmake/resources/software.html" target="_blank">
 http://www.cmake.org/cmake/resources/software.html</a>.
-Just download and install it (very simple). In Linux, you can install it
-using the package manager. For instance, in Debian based systems do:
+Just download and install it (very simple).
 </p>
-<pre class="console">
-    sudo apt-get install cmake
-</pre>
-<p>&nbsp;</p>
 </div>
 
 <p>
 This document contains detailed instructions for building Lomse library and tests
-program from sources, on Linux and MS Windows. If you find things that need to be fixed or you install Lomse in other platforms and would like to contribute, you are welcome. Pleass post a message on the Lomse list. Thank you.
+program from sources. If you find things that need to be fixed and would like to contribute, you are welcome. Please post a message on the Lomse list. Thank you.
 </p>
-
-<p>
-I have only generated and tested on following platforms:
-</p>
-<ul>
-    <li>Windows XP, using Visual Studio .NET 2003 (VS7) (generator "Visual Studio 7 .NET")</li>
-    <li>Linux Ubuntu 10.4, 11.04. Using CodeBlocs with linux makefiles (generator "CodeBlocks - Unix Makefiles")</li>
-    <li>Linux Ubuntu 10.4, 11.04. Using linux makefiles  (generator "Unix Makefiles")</li>
-</ul>
-<p>
-   No idea if there will be problems for other platforms/configurations. But if
-   you try, please let me know for updating the documentation.
-</p>
-
-
 
 
 <h2>Table Of Content</h2>
@@ -57,9 +37,9 @@ I have only generated and tested on following platforms:
 <ul>
     <li><a href="#requirements">Requirements.</a></li>
     <li><a href="#quick-guide">Quick installation guide</a></li>
-    <li><a href="#linux">Building on Linux</a></li>
-    <li><a href="#windows">Building on Windows</a></li>
     <li><a href="#in-out-source">"In-source" vs. "Out-of-source" builds</a></li>
+    <li><a href="install-linux.htm">Building on Linux</a></li>
+    <li><a href="install-windows.htm">Building on Windows</a></li>
 </ul>
 
 <a name="requirements"></a>
@@ -72,6 +52,7 @@ To build the lomse library, the following software should be installed in your s
 
 <ul>
 <li>CMake version 2.8 or higher (<a href="http://www.cmake.org" target="_blank">http://www.cmake.org</a>)</li>
+<li>SVN client (<a href="http://subversion.apache.org/" target="_blank">http://subversion.apache.org/</a>)</li>
 <li>UnitTest++ 1.3.0 or higher (<a href="http://unittest-cpp.sourceforge.net/" target="_blank">http://unittest-cpp.sourceforge.net/</a>)</li>
 <li>FreeType 2.3.5-1 or higher (<a href="http://www.freetype.org/" target="_blank">http://www.freetype.org/</a>)</li>
 <li>Boost Threads 1.42 or higher (<a href="http://www.boost.org/" target="_blank">http://www.boost.org/</a>)</li>
@@ -79,14 +60,9 @@ To build the lomse library, the following software should be installed in your s
 <li>libpng (<a href="http://www.libpng.org/" target="_blank">http://www.libpng.org/</a>)</li>
 </ul>
 
-<p>In Linux, normally these packages are already installed in your system, so normally you do not have
-to install them.
-</p>
-
-<p>For Windows XP, pre-built libraries for these packages, except CMake, are included in the lomse distribution package, so the only thing you have to do is to download and install CMake.
-</p>
-
-<p>For other MS Windows versions or other operating systems you will have to check if your system has these packages installed, and install any missing one. Please refer to each package website for instructions.
+<p>
+In Linux, normally these packages are already installed in your system, so normally you do not have
+to install them. For other  operating systems you will have to check if your system has these packages installed, and install any missing one. Please refer to each package website for instructions.
 </p>
 
 
@@ -100,13 +76,13 @@ This procedure should work for any operating system supported by CMake, using CM
 </p>
 
 <ol>
-<li>Download lomse source tree from SVN. Let's assume the rrot folder containing the souce tree is at folder "/projects/lomse".</li>
+<li>Download lomse source tree from SVN. Let's assume the root folder containing the source tree is at folder "/projects/lomse".</li>
 
 <li>(Recommended) Create a directory to hold your build files (e.g. "/projects/lomse-build")</li>
 
 <li>Change directory to the directory you created in the previous step.</li>
 
-<li>Run cmake to generate the makefiles. For example, in linux:
+<li>Run cmake to generate the makefiles. For example, in Linux:
 <p class="indent">For using CodeBlocs:</p>
 <pre class="command">
     cmake -G "CodeBlocks - Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../lomse
@@ -118,284 +94,17 @@ This procedure should work for any operating system supported by CMake, using CM
 </li>
 </ol>
 
-<p>At this point you've generated a makefile or project files using cmake. Now, just run 'make' or use your favorite IDE to build and install the library.
-</p>
-
-
-
-
-<a name="linux"></a>
-<h2>Building on Linux</h2>
-<!--===================-->
-
-<p>
-You need CMake 2.8.0 or later.
-</p>
-
-<p>
-First, you need to install the required packages. Usually the Boost libraries
-(http://www.boost.org/) and the FreeType library (http://www.freetype.org/) are
-already included in your Linux distro. So, usually, the only package you need
-to install is UnitTest++. Installing it should be as simple as typing the
-following commands in your terminal (on Debian-like systems):
-</p>
-<pre class="command">
-    sudo apt-get install libunittest++-dev
-</pre>
-
-
-<p>
-Now you can procedd to build Lomse.
-</p>
-
-<p>
-In following instructions it is assumed you want to generate Makefiles. Open a
-terminal window, move to the folder in which you have unpackaged the lomse
-sources, and create a folder for building. For instance:
-</p>
-
-<p class="indent">checkout a working copy:</p>
-<pre class="command">
-    mkdir lomse
-    cd lomse
-    svn co https://lomse.svn.sourceforge.net/svnroot/lomse/trunk .
-</pre>
-
-<p class="indent">create folder to build:</p>
-<pre class="command">
-    cd ..
-    mkdir build-lomse
-    cd build-lomse
-</pre>
-
-<p>
-Now, using CMake, proceed to create the makefile:
-</p>
-<pre class="command">
-    cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug ../lomse
-</pre>
-
-<p>
-Now, build the lomse library, the library unit-testing program (testlib) and
-the examples:
-</p>
-<pre class="command">
-    make
-</pre>
-<pre class="console">
-        ...
-        Linking CXX executable bin/testlib
-        Lomse library tests runner
-
-        Success: 832 tests passed.
-        Test time: 8.77 seconds.
-        [100%] Built target testlib
-</pre>
-
-<p>
-Run the example:
-</p>
-<pre class="command">
-    cd bin
-    ./example_1
-</pre>
-
-
-
-<p>
-Alternatively, build step-by-step, checking results:
-</p>
-
-<p class="indent">build the library:</p>
-<pre class="command">
-    make lomse
-</pre>
-<pre class="console">
-        ...
-        [100%] Built target lomse
-</pre>
-
-<p class="indent">build testlib and check library is ok:</p>
-<pre class="command">
-    make testlib
-</pre>
-<pre class="console">
-        ...
-        Lomse library tests runner
-
-        Success: 832 tests passed.
-        Test time: 8.77 seconds.
-        [100%] Built target testlib
-
-        The number of tests will grow over time, and the times reported will
-        depend on your computer.
-</pre>
-
-<p class="indent">build example application:</p>
-<pre class="command">
-    make example_1
-</pre>
-<pre class="console">
-        ...
-        [100%] Built target example_1
-</pre>
-
-<p class="indent"run example app.:</p>
-<pre class="command">
-    cd bin
-    ./example_1
-</pre>
-
-<p>
-In case of problems, before repeating al the build procedure (after fixing the errors), the makefile should be re-created. The safest way to proceed is to delete the whole content of the build folder and start againg from step 1. So move to folder to build and clean all:
-</p>
-
-<pre class="command">
-    cd ../build-lomse
-    rm * -r     #AWARE: BE SURE YOU ARE IN THE build-lomse FOLDER !!!!
-</pre>
-    and repeat build process from step 1.
-
-
-<p>
-When build is ok and test and example works, you can install lomse:
-</p>
-
-<pre class="command">
-    sudo make install
-</pre>
-
-<p>
-That installs Lomse on your system. By default, Lomse library is installed
-in [prefix]/lib and header files in [prefix]/include/lomse, with [prefix]
-defaulting to usr/local.
-</p>
-
-<p>
-You can change the install location by running cmake like this:
-</p>
-
-<pre class="command">
-    cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/new/install/prefix  \
-        -DCMAKE_BUILD_TYPE=Release ../lomse
-</pre>
-
-<p>
-Building from source in the repository is recommended, since code in the
-repository should always be stable. If it's not, that's a bug to report.
-</p>
-
-
-<a name="windows"></a>
-<h2>Building on Windows</h2>
-<!--=====================-->
-
-<div class="important">
-<p><b>Important</b></p>
-<p>
-I'm no longer a Windows user and, therefore, I only use and test the installer in Windows, from time to time, to ensure that it still works for my old WindowsXP system. So, probably in your Windows system my CMake installer will fail. If you would like to contribute by fixing things or developping a stronger installer, you are welcome. Please post a message on the Lomse list.
-</p>
-<p>&nbsp;</p>
-</div>
-
-
-<p>
-You need CMake 2.8.0 or later.
-</p>
-
-<p>
-In this description it is assumed you want to generate Visual Studio .NET 2003
-project files. The procedure for another MS Visual Studio version or for another tool (i.e. Make) or IDE, such as CodeBlocks, is similar. Just
-replace Visual Studio with the desired target name.
-</p>
-
-<p>
-To create the project file / makefile you have two options:
-</p>
-
-<ol>
-    <li>Using the CMake GUI program.</li>
-    <li>Using a command window.</li>
-</ol>
-
-<p>
-2.a) Using CMake GUI program.
-</p>
-
-<ol>
-    <li>Open CMake GUI program. (usually at C:\Program files\CMake\bin\cmake-gui.exe)</li>
-
-    <li>Enter requested data in following fields:
-        <pre>
-        - Where is the sorce code: [path-to-lomse-root]
-            i.e.: D:/projects/lomse
-        - Where to build the binaries: [folder/to/place/makefiles]
-            i.e.: D:/projects/lomse/build
-        </pre>
-    </li>
-
-    <li>Press the 'Configure' button. A window will open and you will be asked for which tool you would like to generate the makefile. Select, for instance, "Visual Studio 7 .NET".</li>
-
-    <li>If there are lines marked in red color. press again the 'Configure' button. Repeat this until no red lines.
-    It may happen that CMake won't find some needed libraries, such as zlib. If so you have to set CMAKE_PREFIX_PATH to point to the directory where the missing libraries are stored. For example, if CMake can't find ZLIB, and you have installed it at <code>C:\\software\\zlib</code> you will have add this path to CMAKE_PREFIX_PATH.
-    </li>
-
-
-    <li>Press the 'Generate' button.</li>
-</ol>
-
-<p>
-Done. Makefiles for the selected platform and generator will be created in the specified folder.
-</p>
-
-<p>
-Now open the makefiles/project files and proceed to build the library and the test program. All tests will run automatically when the tests program is built.
+<p>At this point you've generated a makefile or project files using cmake. Now, just run 'make' and 'make install' or use your favourite IDE to build and install the library.
 </p>
 
 
 <p>
-2.b) Using a command window:
+For detailed instructions see:
 </p>
-
-<p>
-The procedure is similar, but using the command window.
-</p>
-
-<ol>
-    <li>Open the command window and move to the lomse root folder:
-
-    <pre class="command">
-            cd [path-to-lomse-root]
-    </pre>
-    </li>
-
-    <li>Create a new folder for the makefiles. i.e.  [path-to-lomse-root]/build/
-
-    <pre class="command">
-        mkdir build
-    </pre>
-
-    <li>>Now generate the makefiles:
-
-    <pre class="command">
-        cmake -G "Visual Studio 7 .NET" ./build
-    </pre>
-
-    It may happen that CMake won't find some needed libraries, such as zlib. If so you have to set CMAKE_PREFIX_PATH to point to the directory where the missing libraries are stored. For example, if CMake can't find ZLIB, and you have installed it at <code>C:\\software\\zlib</code> you will have add this path to CMAKE_PREFIX_PATH:
-
-    <pre class="command">
-        cmake -G "Visual Studio 7 .NET" cmake -D_ZLIB_DIR="C:\\software\\zlib" ./build
-    </pre>
-
-    After running cmake it should create .sln and .vcproj files for Visual Studio in the 'build' directory.
-    </li>
-</ol>
-
-<p>
-You can also generate project files for some other VS version. You can get a list of all supported generators by typing in and running cmake.
-</p>
-
-
+<ul>
+    <li><a href="install-linux.htm">Building on Linux</a></li>
+    <li><a href="install-windows.htm">Building on Windows</a></li>
+</ul>
 
 
 <a name="in-out-source"></a>

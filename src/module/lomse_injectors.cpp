@@ -45,6 +45,7 @@
 #include "lomse_screen_drawer.h"
 #include "lomse_tasks.h"
 #include "lomse_events.h"
+#include "lomse_score_player.h"
 
 using namespace std;
 
@@ -246,6 +247,13 @@ Presenter* Injector::inject_Presenter(LibraryScope& libraryScope,
 Task* Injector::inject_Task(int taskType, Interactor* pIntor)
 {
     return TaskFactory::create_task(taskType, pIntor);
+}
+
+//---------------------------------------------------------------------------------------
+ScorePlayer* Injector::inject_ScorePlayer(LibraryScope& libraryScope, 
+                                          MidiServerBase* pSoundServer)
+{
+    return LOMSE_NEW ScorePlayer(libraryScope, pSoundServer);
 }
 
 

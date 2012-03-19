@@ -1,0 +1,259 @@
+<html>
+<!-- $Updated: 2012/03/12 -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Lomse installation</title>
+<link rel="stylesheet" media="all" href="singledoc.css" type="text/css" />
+</head>
+<body>
+
+<h1>Lomse library. Installing on Microsoft Windows</h1>
+
+<p>
+This document contains detailed instructions for building Lomse library and tests
+program from sources, on Microsoft windows systems. If you find things that need to be fixed in this document and would like to contribute, you are welcome. Please post a message on the Lomse list. Thank you.
+</p>
+
+<p>For installing the Lomse library you have to use CMake, version 2.8.0 or greater.
+CMake will generate for you a makefile for doing all necessary steps, as well as additional ones, such as building a test program for checking the library, and an example program.
+</p>
+
+<p>If you don't have CMake, download and install the latest distribution from <a href="http://www.cmake.org/cmake/resources/software.html" target="_blank">
+http://www.cmake.org/cmake/resources/software.html</a>. Download the installer .exe file and run it.
+</p>
+
+
+<a name="requirements"></a>
+<h2>Requirements</h2>
+<!--===================================-->
+
+<p>
+To build the lomse library, the following software should be installed in your system:
+</p>
+
+<ul>
+<li>CMake version 2.8 or higher (<a href="http://www.cmake.org" target="_blank">http://www.cmake.org</a>)</li>
+<li>A command line SVN client</li>
+<li>UnitTest++ 1.3.0 or higher (<a href="http://unittest-cpp.sourceforge.net/" target="_blank">http://unittest-cpp.sourceforge.net/</a>)</li>
+<li>FreeType 2.3.5-1 or higher (<a href="http://www.freetype.org/" target="_blank">http://www.freetype.org/</a>)</li>
+<li>Boost Threads 1.42 or higher (<a href="http://www.boost.org/" target="_blank">http://www.boost.org/</a>)</li>
+<li>zlib (<a href="http://zlib.net/" target="_blank">http://zlib.net/</a> and
+<a href="http://gnuwin32.sourceforge.net/packages/zlib.htm" target="_blank">
+http://gnuwin32.sourceforge.net/packages/zlib.htm</a>)</li>
+<li>libpng (<a href="http://www.libpng.org/pub/png/libpng.html" target="_blank">http://www.libpng.org/pub/png/libpng.html</a>)</li>
+</ul>
+
+<p>&nbsp;</p>
+
+<div class="warning">
+<p>For building, the script require access to a command line SVN client. One of the most common SVN clients used in Windows is TortoiseSVN (<a href="http://tortoisesvn.net/ target="_blank"">http://tortoisesvn.net/</a>). But the command line binaries are not installed by default. If you install TortoiseSVN, remember to check the option "command line client tools" during TortoiseSVN installation.
+</p>
+</div>
+
+
+<h2>Installation steps</h2>
+<!--===================-->
+
+<p>
+Once you have checked that you have the required packages you can proceed to create the makefile or project file for building Lomse.
+</p>
+
+<h4>1. Get the Lomse source code</h4>
+<p>
+Create a folder for Lomse sources. For instance, "C:\MyData\Projects\lomse". Using your SVN client software download a working copy of Lomse project. The URL for the SVN repository is <br /> "https://lomse.svn.sourceforge.net/svnroot/lomse/trunk".
+</p>
+<p>
+If you are using a command window, the command to issue would be:
+</p>
+
+<pre class="command">
+    svn co https://lomse.svn.sourceforge.net/svnroot/lomse/trunk .
+</pre>
+
+
+<h4>2. Generate Makefile</h4>
+<p>
+Now, using CMake, proceed to create the makefile:
+</p>
+
+<ol>
+    <li><p>Open CMake GUI program. (usually at C:\Program Files\CMake\bin\cmake-gui.exe). It will display this window</p>
+
+    <p>
+    <a class="image-reference" href="./images/cmake-01.png">
+    <img class="center" width="500px" src="./images/cmake-01.png" /></a>
+    </p>
+
+    </li>
+
+    <li><p>Click on the 'Browse Source...' button in the top right hand corner of the window. Use the file browser popup to locate the Lomse source directory (i.e.: C:\MyData\Projects\lomse), and click OK.
+    </p>
+    </li>
+
+    <li><p>Now we create a directory in which to create the Visual Studio project files and hold the build products. This directory should not be the same as, or inside, the the source directory. Here we will create this build directory alongside our source directory.
+    </p>
+
+    <p>
+    Click on the 'Browse Build...' button in the top right hand side of the CMake GUI window. Use the file browser popup to browse back to C:\MyData\Projects\, and click on the Make New Folder button. Rename the created folder to lomse-build, and click on the OK button.
+    </p>
+
+    <p>
+    The two text entries at the top of the GUI should now contain C:/MyData/Projects/lomse and C:/MyData/Projects/lomse-build respectively (Note: CMake always represents Windows paths with forward slashes).
+    </p>
+
+    <p>
+    <a class="image-reference" href="./images/cmake-02.png">
+    <img class="center" width="500px" src="./images/cmake-02.png" /></a>
+    </p>
+
+    </li>
+
+    <li><p>Click on the 'Configure' button on the left hand side. A window will open and you will be asked for which tool you would like to generate the makefile for. Select, for instance, "Visual Studio 7 .NET". Ensure only the 'Use default native compilers' radio box is checked. Then click on the 'Finish' button.
+    </p>
+    <p>
+    <a class="image-reference" href="./images/cmake-03.png">
+    <img class="center" width="500px" src="./images/cmake-03.png" /></a>
+    </p>
+
+    <p>
+    Once the generator is selected, the configuration process will start. At some point, you will get a listing of all relevant options (CMakeCache entries). All entries at this point will be highlighted in red to signal that you may want to modify some of them. Mouse-hover over entries will generate a brief description, as shown below.
+    </p>
+
+    <p>
+    <a class="image-reference" href="./images/cmake-04.png">
+    <img class="center" width="500px" src="./images/cmake-04.png" /></a>
+    </p>
+
+    <p>
+    Most of the default settings should be fine, though you may want to change CMAKE_INSTALL_PREFIX. By default, CMake will configure the build to install Lomse under C:\Program Files\lomse. If you do not wish to use this directory, or do not have permission to install there, you can change the installation location. Click on the arrow next to the CMAKE entry in the central options display to expand all CMake specific configuration options. Scroll down to locate the CMAKE_INSTALL_PREFIX entry. Click on the entry and edit the path directly or via the file browser popup. In this example we will modify this install directory to C:/MyData/Projects/lomse-install.
+    </p>
+
+    <p>
+    <a class="image-reference" href="./images/cmake-05.png">
+    <img class="center" width="500px" src="./images/cmake-05.png" />
+    </a>
+    </p>
+
+    </li>
+
+    <li>
+    <p>
+    Once you have adjusted any options, click on the Configure button again. After this has finished, all the options listed in the central option display should be white. If you still have entries in red, click Configure to reconfigure until all entries are white.
+    </p>
+
+    <p>
+    Building with CMake is an iterative process:
+    </p>
+    <ul>
+        <li>Select values, press the Configure button.</li>
+        <li>Set the settings, run configure, set the settings, run configure, etc.</li>
+        <li>Repeat until all values are set (no red lines) and the OK button becomes available.</li>
+        <li>To set the value of a variable, click on that value:
+            <ul>
+                <li>If it is boolean (ON/OFF), a drop-down menu will appear for changing the value.</li>
+                <li>If it is file or directory, an ellipsis button will appear ("...") on the far right of the entry. Clicking this button will bring up the file or directory selection dialog.
+                </li>
+                <li>If it is a string, it will become an editable string. </li>
+            </ul>
+        </li>
+        <li>Some variables (advanced variables) are not visible right away. To see them,
+        toggle to advanced mode ("Show Advanced Values" toggle).</li>
+    </ul>
+    <p>
+    It may happen that CMake won't find some needed libraries, such as FreeType. In this case you will have tree or four variables highlighted in red that you have to fix. Yo have two options for this:
+    </p>
+    <p>
+    <ol>
+    <li>
+    Modify the <tt>CMAKE_PREFIX_PATH</tt> variable to hint search locations to CMake. For instance, if library FreeType is installed at 'C:\MySoftware\freetype' add this path to <tt>CMAKE_PREFIX_PATH</tt>.</li>
+    <li>The other alternative is to directly set up the required variables (i.e. <tt>FREETYPE_INCLUDE_DIR_freetype</tt>, <tt>FREETYPE_INCLUDE_DIR_ft2build</tt> and <tt>FREETYPE_LIBRARY</tt>) to point to appropriate paths.
+    </li></ol>
+    </p>
+    <!--<p><img class="center" width="500px" src="./images/cmake-06.png" /></p>-->
+    </li>
+
+
+
+    <li><p>When no more red lines, click on the 'Generate' button. This will create the Visual Studio project files and will be placed in the specified folder. Finally, CMake will report Configuring done, Generating done in the logging window at the bottom of the GUI. You can now close the CMake GUI.
+    </p></li>
+
+</ol>
+
+
+
+<h4>3. Build the library</h4>
+
+<p>At this point you've generated project files using CMake. Now, just run MS Visual Studio, open the solution file, choose your configuration, and build the ALL_BUILD project.
+</p>
+
+
+
+<h4>4. Install Lomse</h4>
+
+<p>
+Once you have built Lomse you can install it by building the INSTALL target in Visual Studio. In the Solution Explorer, right click on the INSTALL solution, and select Build from the popup menu. The solution will now build and install to the directory you chose for CMAKE_INSTALL_PREFIX earlier. If you wish to build a different configuration (Release if you built Debug first, for example), then simply change the solution configuration as described in the previous paragraph, and build the INSTALL solution again.
+</p>
+
+
+<h2>In case of problems ...</h2>
+
+<p>
+Please notice that:
+</p>
+
+<ul>
+<li><p>
+While running CMake, all configure options are saved in file CMakeCache.txt, Before repeating all the build procedure (after fixing the errors), you should delete the whole content of the build folder and start again from step 3. Otherwise, values saved in the cache would interfere and cause problems. So move to folder to build and delete all its content before using CMake again.
+</p></li>
+
+<li><p>CMake has knowledge about the standard places to look for third party libraries, but my experience is that few Windows users know about these places and they install software here and there. As a consequence, sometimes it is difficult for my current CMake script to locate installed software, generating too many 'red lines' and forcing users to specify all needed paths. And this is not very user friendly.
+</p></li>
+
+<li><p>Probably my CMake script is a bullshit. But you are a good developer and building Lomse is just compiling the source code, including the headers for the required libraries. Probably you can prepare your own solution and project file for MS Visual Studio. That's what I do for building in Windows (yes, I don't use CMake). Or better, if you are good at MS Windows and CMake, and would like to help me to improve Lomse installation procedures for Windows, you are welcome. Please post a message in the Lomse list. Thank you.
+</p></li>
+
+</ul>
+
+
+<!--
+<h3>CMake Options</h3>
+<p>This is a list of commonly used options for configuring the Lomse source code.</p>
+
+
+<h4>Custom library locations</h4>
+
+<p>
+If libraries are installed in non-default locations their location can be specified using:
+</p>
+
+<ul>
+    <li><tt>CMAKE_INCLUDE_PATH</tt> for header files.</li>
+    <li><tt>CMAKE_LIBRARY_PATH </tt>for libraries.</li>
+    <li><tt>CMAKE_PREFIX_PATH</tt> for header, libraries and binaries. The respective include, lib, or bin is appended to the path.</li>
+</ul>
+
+<p>For each option a list of paths can be specified (on Unix separated with &quot;:&quot;). These are environment variables (and not command line arguments) and are used as e.g.:
+</p>
+
+<pre class="command">
+CMAKE_PREFIX_PATH=/data/zlib:/data/freetype
+</pre>
+
+
+
+<h4>Custom compilation flags (CFLAGS)</h4>
+
+<p>The CMake build system will honour the <tt>CFLAGS/CXXFLAGS</tt> environmental variables, if they are set. However, these flags will be appended to the predefined flags for the corresponding platform and build type such as Debug or Release. All settings can be found in CMakeCache.txt in the build directory.
+</p>
+
+<p>Pay attention that variables are called <tt>CMAKE_C_FLAGS, CMAKE_C_FLAGS_RELEASE, CMAKE_XX_FLAGS</tt> etc., and those are the ones that have to be modified for full custom control.
+</p>
+
+
+-->
+
+</body>
+</html>
+
+
+
