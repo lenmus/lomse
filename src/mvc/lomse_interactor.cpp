@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -41,7 +41,7 @@
 #include "lomse_view.h"
 #include "lomse_graphic_view.h"
 #include "lomse_events.h"
-#include "lomse_player_ctrl.h"
+#include "lomse_player_gui.h"
 #include <sstream>
 using namespace std;
 
@@ -68,6 +68,7 @@ Interactor::Interactor(LibraryScope& libraryScope, Document* pDoc, View* pView) 
     , m_renderTime(0.0)
     , m_gmodelBuildTime(0.0)
     , m_fViewParamsChanged(false)
+    , m_fViewUpdatesEnabled(true)
     //, m_pExec(pExec)
     //m_pCompiler( Injector::inject_LdpCompiler(m_libScope, *pDocScope) )
 {
@@ -135,6 +136,14 @@ void Interactor::handle_event(SpEventInfo pEvent)
             SpEventScoreHighlight pEv(
                 boost::static_pointer_cast<EventScoreHighlight>(pEvent) );
             on_visual_highlight(pEv);
+            break;
+        }
+
+        case k_end_of_playback_event:
+        {
+            SpEventPlayScore pEv( boost::static_pointer_cast<EventPlayScore>(pEvent) );
+            send_end_of_play_event(pEv->get_score(), pEv->get_player());
+            break;
         }
 
         default:
@@ -262,6 +271,9 @@ void Interactor::update_view_if_gmodel_modified()
 //---------------------------------------------------------------------------------------
 bool Interactor::view_needs_repaint()
 {
+    //if (!m_fViewUpdatesEnabled)
+    //    return false;
+
     if (m_pDoc->is_dirty() || m_fViewParamsChanged)
         return true;
     else
@@ -326,6 +338,13 @@ void Interactor::request_window_update()
 
 //---------------------------------------------------------------------------------------
 void Interactor::force_redraw()
+{
+    if (m_fViewUpdatesEnabled)
+        do_force_redraw();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::do_force_redraw()
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
@@ -605,7 +624,7 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
         {
             case k_end_of_higlight_event:
                 hide_tempo_line();
-                //pScore->RemoveAllHighlight((wxWindow*)m_pPanel);
+                remove_all_highlight();
                 break;
 
             case k_highlight_off_event:
@@ -628,13 +647,12 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
                 throw std::runtime_error(msg);
         }
     }
-    force_redraw();
+    do_force_redraw();
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::send_end_of_play_event(ImoScore* pScore, PlayerCtrl* pPlayCtrl)
+void Interactor::send_end_of_play_event(ImoScore* pScore, PlayerGui* pPlayCtrl)
 {
-    remove_all_highlight();
     SpEventView pEvent( LOMSE_NEW EventView(k_end_of_playback_event, this) );
     if (pPlayCtrl)
         pPlayCtrl->on_end_of_playback();

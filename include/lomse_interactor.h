@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -55,7 +55,7 @@ class GraphicModel;
 class GmoObj;
 class ImoStaffObj;
 class ImoScore;
-class PlayerCtrl;
+class PlayerGui;
 //class UserCommandExecuter;
 //class LdpCompiler;
 
@@ -86,6 +86,9 @@ protected:
     //to know that view parameters (viewport, scale, ..) has been changed
     bool        m_fViewParamsChanged;
 
+    //to avoid problems during playback
+    bool        m_fViewUpdatesEnabled;
+
     //UserCommandExecuter*    m_pExec;
     //LdpCompiler*            m_pCompiler;
 
@@ -110,7 +113,11 @@ public:
 
     //creating events
     virtual void request_window_update();
-    virtual void send_end_of_play_event(ImoScore* pScore, PlayerCtrl* pPlayCtrl);
+    virtual void send_end_of_play_event(ImoScore* pScore, PlayerGui* pPlayCtrl);
+
+    //play back
+    inline void enable_view_updates(bool value) { m_fViewUpdatesEnabled = value; }
+
 
     //interface to GraphicView
         //renderization
@@ -205,6 +212,7 @@ protected:
     void update_view_if_gmodel_modified();
     void update_view_if_needed();
     void find_parent_link_box_and_notify_event(SpEventInfo pEvent, GmoObj* pGmo);
+    void do_force_redraw();
 
 };
 

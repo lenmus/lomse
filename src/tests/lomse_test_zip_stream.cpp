@@ -103,6 +103,7 @@ SUITE(ZipInputStreamTest)
         CHECK( zs != NULL );
         CHECK( zs->eof() == false );
         CHECK( zs->get_num_entries() == 1 );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_can_open_2)
@@ -129,6 +130,7 @@ SUITE(ZipInputStreamTest)
         zs->get_current_entry_info(info);
         CHECK( info.filename == "test-image-1.png" );
         CHECK( zs->eof() == false );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_get_file_count_2)
@@ -139,6 +141,7 @@ SUITE(ZipInputStreamTest)
         CHECK( zs != NULL );
         CHECK( zs->eof() == false );
         CHECK( zs->get_num_entries() == 2 );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_get_file_info_1)
@@ -163,6 +166,7 @@ SUITE(ZipInputStreamTest)
 //        cout << "is folder='" << info.bFolder << endl;
 
         CHECK( info.filename == "90101-read-png-image.lms" );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_move_to_next_entry_1)
@@ -176,6 +180,7 @@ SUITE(ZipInputStreamTest)
         zs->move_to_next_entry();
         zs->get_current_entry_info(info);
         CHECK( info.filename == "test-image-1.png" );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_move_to_entry_1)
@@ -187,6 +192,7 @@ SUITE(ZipInputStreamTest)
         ZipEntryInfo info;
         zs->get_current_entry_info(info);
         CHECK( info.filename == "test-image-1.png" );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_open_current_entry_1)
@@ -196,6 +202,7 @@ SUITE(ZipInputStreamTest)
         MyZipInputStream* zs  = static_cast<MyZipInputStream*>(file);
 
         CHECK( zs->my_open_current_entry() == true );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_read_buffer_1)
@@ -206,6 +213,7 @@ SUITE(ZipInputStreamTest)
 
         CHECK( zs->my_bytes_pending() == 102 );
         CHECK( zs->my_is_last_buffer() == true );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_read_1)
@@ -219,6 +227,7 @@ SUITE(ZipInputStreamTest)
         data[102] = 0;
         string content((char*)data);
         CHECK ( check_content(content) == true );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_read_3)
@@ -234,6 +243,7 @@ SUITE(ZipInputStreamTest)
         data[102] = 0;
         string content((char*)data);
         CHECK ( check_content(content) == true );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_read_4)
@@ -256,6 +266,7 @@ SUITE(ZipInputStreamTest)
         CHECK( zs->read(actual+4000, 1000) == 1000 );
         CHECK( zs->my_bytes_pending() == 3192 );
         CHECK ( memcmp((void*)actual, (void*)expected, 5000) == 0 );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_get_char_1)
@@ -267,6 +278,7 @@ SUITE(ZipInputStreamTest)
         CHECK( zs->eof() == false );
         CHECK( zs->get_char() == '(' );
         CHECK( zs->eof() == false );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_get_char_2)
@@ -285,6 +297,7 @@ SUITE(ZipInputStreamTest)
         CHECK( i == 102 );
         CHECK( zs->eof() == true );
         CHECK ( check_content(content) == true );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_get_char_3)
@@ -298,6 +311,7 @@ SUITE(ZipInputStreamTest)
             zs->get_char();
 
         CHECK( i == 44490 );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_get_char_4)
@@ -312,6 +326,7 @@ SUITE(ZipInputStreamTest)
             zs->get_char();
 
         CHECK( i == 4096 );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_unget_middle)
@@ -330,6 +345,7 @@ SUITE(ZipInputStreamTest)
         CHECK( zs->my_bytes_pending() == 4088 );
         CHECK( zs->get_char() == '9' );
         CHECK( zs->get_char() == '0' );
+        delete file;
     }
 
     TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_unget_last_1)
@@ -354,6 +370,7 @@ SUITE(ZipInputStreamTest)
         CHECK( zs->eof() == false );
         CHECK( zs->get_char() == '\n' );
         CHECK( zs->eof() == true );
+        delete file;
     }
 
 }

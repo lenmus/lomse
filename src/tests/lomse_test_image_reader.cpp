@@ -86,6 +86,7 @@ SUITE(ImageReaderTest)
         InputStream* file = FileSystem::open_input_stream(path);
         PngImageDecoder dec;
         CHECK( dec.can_decode(file) == true );
+        delete file;
     }
 
     TEST_FIXTURE(ImageReaderTestFixture, ImageReader_can_decode_png_2)
@@ -94,6 +95,7 @@ SUITE(ImageReaderTest)
         InputStream* file = FileSystem::open_input_stream(path);
         PngImageDecoder dec;
         CHECK( dec.can_decode(file) == false );
+        delete file;
     }
 
 }

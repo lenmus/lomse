@@ -34,9 +34,10 @@
 #include "lomse_injectors.h"
 #include "lomse_events.h"
 #include "lomse_interactor.h"
-#include "lomse_player_ctrl.h"
+#include "lomse_player_gui.h"
 
-#include <algorithm>     //max(), min()
+#include <algorithm>    //max(), min()
+#include <ctime>        //clock()
 
 
 namespace lomse
@@ -50,6 +51,7 @@ ScorePlayer::ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi)
     , m_fPaused(false)
     , m_fShouldStop(false)
     , m_fPlaying(false)
+    , m_fPostEvents(true)
     , m_pScore(NULL)
     , m_pTable(NULL)
     , m_MtrChannel(9)
@@ -61,7 +63,7 @@ ScorePlayer::ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi)
     , m_playMode(k_play_normal_instrument)
     , m_nMM(60)
     , m_pInteractor(NULL)
-    , m_pPlayCtrl(NULL)
+    , m_pPlayerGui(NULL)
 {
 }
 
@@ -72,14 +74,14 @@ ScorePlayer::~ScorePlayer()
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayer::load_score(ImoScore* pScore, PlayerCtrl* pPlayCtrl,
+void ScorePlayer::load_score(ImoScore* pScore, PlayerGui* pPlayerGui,
                              int metronomeChannel, int metronomeInstr,
                              int tone1, int tone2)
 {
     stop();
 
     m_pScore = pScore;
-    m_pPlayCtrl = pPlayCtrl;
+    m_pPlayerGui = pPlayerGui;
     m_MtrChannel = metronomeChannel;
     m_MtrInstr = metronomeInstr;
     m_MtrTone1 = tone1;
@@ -181,29 +183,36 @@ void ScorePlayer::thread_main(int nEvStart, int nEvEnd, int playMode,
             m_canPlay.notify_one();
         }
         m_fPlaying = true;
+        if (pInteractor && !m_fPostEvents)
+            pInteractor->enable_view_updates(false);
         fVisualTracking &= (pInteractor != NULL);
         do_play(nEvStart, nEvEnd, playMode, fVisualTracking, fCountOff, nMM, pInteractor);
     }
     catch (boost::thread_interrupted&)
     {
     }
-    m_fPlaying = false;
+
+    end_of_playback_housekeeping(fVisualTracking, pInteractor);
 }
 
 //---------------------------------------------------------------------------------------
 void ScorePlayer::stop()
 {
-    if (!m_pThread) return;
+    if (m_pThread)
+    {
+        {
+            SoundLock lock(m_mutex);
+            m_fShouldStop = true;
+        }
 
-    m_fShouldStop = true;
+        if (m_fPaused)                  //unlock if paused
+            pause();
 
-    if (m_fPaused)                  //unlock if paused
-        pause();
+        if (m_fPlaying)
+            m_pThread->interrupt();    //request the tread to terminate
 
-    if (m_fPlaying)
-        m_pThread->interrupt();    //request the tread to terminate
-
-    wait_for_termination();
+        wait_for_termination();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -211,9 +220,13 @@ void ScorePlayer::pause()
 {
     if (!m_pThread) return;
 
-    SoundLock lock(m_mutex);
-    m_fPaused = !m_fPaused;
-    if (!m_fPaused)
+    {
+        SoundLock lock(m_mutex);
+        m_fPaused = !m_fPaused;
+    }
+    if (m_fPaused)
+        m_pMidi->all_sounds_off();
+    else
         m_canPlay.notify_one();
 }
 
@@ -239,10 +252,6 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
 {
     // This is the real method doing the work. It is executed inside a
     // different thread.
-    // This code was initially coded in LenMus 2.0 and was in a single
-    // method for performance. When Lomse lybrary was created I maintained
-    // the code as it was, instead of splitting it. It is more difficult to
-    // read, but I wouldn't like to introduce delays.
 
     // if no MIDI server terminate or not inside a thread, return
     if (!m_pMidi || !m_pThread)
@@ -254,8 +263,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
     if (events.size() == 0)
         return;
 
-    #define lmQUARTER_DURATION  64        //duration (LDP units) of a quarter note (to convert to milliseconds)
-    #define lmSOLFA_NOTE        60        //pitch for sight reading with percussion sound
+    #define k_QUARTER_DURATION  64        //duration (LDP units) of a quarter note (to convert to milliseconds)
+    #define k_SOLFA_NOTE        60        //pitch for sight reading with percussion sound
     int nPercussionChannel = m_MtrChannel;        //channel to use for percussion
 
 //    //prepare metronome settings
@@ -281,14 +290,14 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
     //default beat and metronome information. It is going to be properly set
     //when a SoundEvent::k_RhythmChange event is found (a time signature object). So these
     //default settings will be used when no time signature in the score.
-    m_nMtrPulseDuration = lmQUARTER_DURATION;                     //a beat duration, in TU
+    m_nMtrPulseDuration = k_QUARTER_DURATION;                     //a beat duration, in TU
     long nMtrIntvalOff = min(7L, m_nMtrPulseDuration / 4L);            //click sound duration, in TU
     long nMtrIntvalNextClick = m_nMtrPulseDuration - nMtrIntvalOff;    //interval from click off to next click
     long nMeasureDuration = m_nMtrPulseDuration * 4;                   //in TU. Assume 4/4 time signature
     long nMtrNumPulses = 4;                                          //assume 4/4 time signature
 
-    boost::this_thread::disable_interruption di;
-    //from this point, interruptions disabled
+    //boost::this_thread::disable_interruption di;
+    //from this point, interruptions disabled -------------------------------------------
 
     //Execute control events that take place before the segment to play, so that
     //instruments and tempo are properly programmed. Continue in the loop while
@@ -338,7 +347,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
 
     //Define and initialize time counter. If playback starts not at the begining but
 	//in another measure, advance time counter to that measure
-    long curTime = 0;
+    long curTime = 0L;
 	if (nEvStart > 1)
 		curTime = delta_to_milliseconds( events[nEvStart]->DeltaTime );
 
@@ -427,7 +436,10 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
             {
                 //last metronome click is previous to first event from table.
                 //send highlight event
-                m_libScope.post_event(pEvent);
+                if (m_fPostEvents)
+                    m_libScope.post_event(pEvent);
+                else if (pInteractor)
+                    pInteractor->handle_event(pEvent);
                 pEvent = SpEventScoreHighlight(
                             LOMSE_NEW EventScoreHighlight(pInteractor,
                                                           m_pScore->get_id()) );
@@ -451,17 +463,28 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
             if (curTime < nEvTime)
             {
                 //flush pending events
+                long elapsed = 0L;
                 if (fVisualTracking && pEvent->get_num_items() > 0)
                 {
-                    m_libScope.post_event(pEvent);
+                    clock_t t1=clock();
+                    if (m_fPostEvents)
+                        m_libScope.post_event(pEvent);
+                    else if (pInteractor)
+                        pInteractor->handle_event(pEvent);
                     pEvent = SpEventScoreHighlight(
                                 LOMSE_NEW EventScoreHighlight(pInteractor,
                                                               m_pScore->get_id()) );
+                    clock_t t2=clock();
+                    elapsed = long( ((t2-t1)*1000.0)/double(CLOCKS_PER_SEC));
                 }
 
                 //wait for current time
-                boost::posix_time::milliseconds waitTime(nEvTime - curTime);
-                boost::this_thread::sleep(waitTime);
+                long waitT = nEvTime - curTime - elapsed;
+                if (waitT > 0L)
+                {
+                    boost::posix_time::milliseconds waitTime(waitT);
+                    boost::this_thread::sleep(waitTime);
+                }
                 curTime = nEvTime;
             }
 
@@ -507,17 +530,28 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
             if (nEvTime > curTime)
             {
                 //flush acummulated events for curTime
+                long elapsed = 0L;
                 if (fVisualTracking && pEvent->get_num_items() > 0)
                 {
-                    m_libScope.post_event(pEvent);
+                    clock_t t1=clock();
+                    if (m_fPostEvents)
+                        m_libScope.post_event(pEvent);
+                    else if (pInteractor)
+                        pInteractor->handle_event(pEvent);
                     pEvent = SpEventScoreHighlight(
                                 LOMSE_NEW EventScoreHighlight(pInteractor,
                                                               m_pScore->get_id()) );
+                    clock_t t2=clock();
+                    elapsed = long( ((t2-t1)*1000.0)/double(CLOCKS_PER_SEC));
                 }
 
                 //wait until new time arives
-                boost::posix_time::milliseconds waitTime(nEvTime - curTime);
-                boost::this_thread::sleep(waitTime);
+                long waitT = nEvTime - curTime - elapsed;
+                if (waitT > 0L)
+                {
+                    boost::posix_time::milliseconds waitTime(waitT);
+                    boost::this_thread::sleep(waitTime);
+                }
             }
 
             if (events[i]->EventType == SoundEvent::k_note_on)
@@ -526,11 +560,11 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
                 switch(playMode)
                 {
                     case k_play_rhythm_instrument:
-                        m_pMidi->note_on(events[i]->Channel, lmSOLFA_NOTE,
+                        m_pMidi->note_on(events[i]->Channel, k_SOLFA_NOTE,
                                         events[i]->Volume);
                         break;
                     case k_play_rhythm_percussion:
-                        m_pMidi->note_on(nPercussionChannel, lmSOLFA_NOTE,
+                        m_pMidi->note_on(nPercussionChannel, k_SOLFA_NOTE,
                                         events[i]->Volume);
                         break;
                     case k_play_rhythm_human_voice:
@@ -552,10 +586,10 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
                 switch(playMode)
                 {
                     case k_play_rhythm_instrument:
-                        m_pMidi->note_off(events[i]->Channel, lmSOLFA_NOTE, 127);
+                        m_pMidi->note_off(events[i]->Channel, k_SOLFA_NOTE, 127);
                         break;
                     case k_play_rhythm_percussion:
-                        m_pMidi->note_off(nPercussionChannel, lmSOLFA_NOTE, 127);
+                        m_pMidi->note_off(nPercussionChannel, k_SOLFA_NOTE, 127);
                         break;
                     case k_play_rhythm_human_voice:
                         //WaveOff
@@ -627,6 +661,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
         }
 
         //check if the thread should be paused or stopped
+        //boost::this_thread::interruption_point();
         {
             SoundLock lock(m_mutex);
             if (m_fShouldStop)
@@ -641,24 +676,44 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
 
     } while (i <= nEvEnd);
 
+}
+
+//---------------------------------------------------------------------------------------
+void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
+                                               Interactor* pInteractor)
+{
     //ensure that all visual highlight is removed in case the loop was exited because
     //stop playing was requested
     if (fVisualTracking)
     {
+        SpEventScoreHighlight pEvent(
+            LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id()) );
         pEvent->add_item(k_end_of_higlight_event, NULL);
-        m_libScope.post_event(pEvent);
+        if (m_fPostEvents)
+            m_libScope.post_event(pEvent);
+        else if (pInteractor)
+            pInteractor->handle_event(pEvent);
     }
 
     //ensure that all sounds are off
     m_pMidi->all_sounds_off();
 
-    if (m_pPlayCtrl)
+    // allow view updates
+    if (pInteractor)
+        pInteractor->enable_view_updates(true);
+
+    if (m_pPlayerGui)
     {
         SpEventPlayScore event(
             LOMSE_NEW EventPlayScore(k_end_of_playback_event, pInteractor,
-                                     m_pScore, m_pPlayCtrl) );
-        m_libScope.post_event(event);
+                                     m_pScore, m_pPlayerGui) );
+        if (m_fPostEvents)
+            m_libScope.post_event(event);
+        else if (pInteractor)
+            pInteractor->handle_event(event);
     }
+
+    m_fPlaying = false;
 }
 
 

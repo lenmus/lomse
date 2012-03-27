@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -47,7 +47,7 @@ class SoundEventsTable;
 class SoundEvent;
 class Interactor;
 class LibraryScope;
-class PlayerCtrl;
+class PlayerGui;
 
 //some constants for greater code legibility
 #define k_no_visual_tracking    false
@@ -99,6 +99,7 @@ protected:
     bool                m_fPaused;      //execution is paused
     bool                m_fShouldStop;  //request to stop playback
     bool                m_fPlaying;     //playing (control in do_play loop)
+    bool                m_fPostEvents;  //post events to application events loop
     ImoScore*           m_pScore;       //score to play
     SoundEventsTable*   m_pTable;
     SoundMutex          m_mutex;        //for pause/continue play back
@@ -116,7 +117,7 @@ protected:
     int             m_playMode;
     long            m_nMM;
     Interactor*     m_pInteractor;
-    PlayerCtrl*     m_pPlayCtrl;
+    PlayerGui*      m_pPlayerGui;
 
     friend class Injector;
     ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi);
@@ -125,16 +126,17 @@ public:
     virtual ~ScorePlayer();
 
     //construction
-    void load_score(ImoScore* pScore, PlayerCtrl* pPlayCtrl,
-                         int metronomeChannel=9, int metronomeInstr=0,
-                         int tone1=60, int tone2=77);
+    void load_score(ImoScore* pScore, PlayerGui* pPlayerGui,
+                    int metronomeChannel=9, int metronomeInstr=0,
+                    int tone1=60, int tone2=77);
+    inline void post_highlight_events(bool value) { m_fPostEvents = value; }
 
     // playing
     void play(bool fVisualTracking = k_no_visual_tracking,
               bool fCountOff = k_no_countoff,
               int playMode = k_play_normal_instrument,
               long nMM = 0,
-              Interactor* pInteractor = NULL );
+              Interactor* pInteractor = NULL);
 
     void play_measure(int nMeasure, bool fVisualTracking = k_no_visual_tracking,
                       int playMode = k_play_normal_instrument,
@@ -161,6 +163,7 @@ protected:
                      bool fVisualTracking, bool fCountOff, long nMM,
                      Interactor* pInteractor);
     void wait_for_termination();
+    void end_of_playback_housekeeping(bool fVisualTracking, Interactor* pInteractor);
 
     //helper, for do_play()
     //-----------------------------------------------------------------------------------

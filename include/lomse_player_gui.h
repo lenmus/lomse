@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -27,24 +27,24 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef _LOMSE_PLAYER_CTRL_H__
-#define _LOMSE_PLAYER_CTRL_H__
+#ifndef _LOMSE_PLAYER_GUI_H__
+#define _LOMSE_PLAYER_GUI_H__
 
 namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-// PlayerCtrl: Interface for any GUI control for score playback. It will receive 
+// PlayerGui: Interface for any GUI control for score playback. It will receive
 //  end_of_playback events and is responsible for ensuring GUI consistency (i.e.
 //  changing the state of "playing now" display or "stop play" button)
-class PlayerCtrl
+class PlayerGui
 {
 protected:
     //LibraryScope& m_libraryScope;
 
 public:
-    PlayerCtrl() {}     //LibraryScope& libScope);
-    virtual ~PlayerCtrl() {}
+    PlayerGui() {}     //LibraryScope& libScope);
+    virtual ~PlayerGui() {}
 
     //mandatory overrides
     virtual void on_end_of_playback() = 0;
@@ -54,4 +54,4 @@ public:
 
 } //namespace lomse
 
-#endif    //_LOMSE_PLAYER_CTRL_H__
+#endif    //_LOMSE_PLAYER_GUI_H__

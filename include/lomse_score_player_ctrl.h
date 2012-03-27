@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -31,7 +31,7 @@
 #define _LOMSE_SCORE_PLAYER_CTRL_H__
 
 #include "lomse_control.h"
-#include "lomse_player_ctrl.h"
+#include "lomse_player_gui.h"
 
 
 namespace lomse
@@ -43,7 +43,7 @@ class ImoScorePlayer;
 
 //---------------------------------------------------------------------------------------
 // A Control containing s static text element and/or and image which links to an URL
-class ScorePlayerCtrl : public Control, public PlayerCtrl
+class ScorePlayerCtrl : public Control, public PlayerGui
 {
 protected:
     LibraryScope& m_libraryScope;
@@ -80,7 +80,7 @@ public:
     LUnits left() { return m_pos.x; }
     LUnits right() { return m_pos.x + m_width; }
 
-    //PlayerCtrl mandatory overrides
+    //PlayerGui mandatory overrides
     void on_end_of_playback();
 
     //specific methods

@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -53,7 +53,7 @@ class GmoObj;
 class DynGenerator;
 class Document;
 class GraphicModel;
-class PlayerCtrl;
+class PlayerGui;
 
 //observer pattern
 class EventNotifier;
@@ -231,13 +231,13 @@ class EventPlayScore : public EventView
 {
 protected:
     ImoScore* m_pScore;
-    PlayerCtrl* m_pPlayer;
+    PlayerGui* m_pPlayer;
 
     EventPlayScore(EEventType evType) : EventView(evType, NULL) {}    //for unit tests
 
 public:
     EventPlayScore(EEventType evType, Interactor* pInteractor, ImoScore* pScore,
-                   PlayerCtrl* pPlayer)
+                   PlayerGui* pPlayer)
         : EventView(evType, pInteractor)
         , m_pScore(pScore)
         , m_pPlayer(pPlayer)
@@ -246,7 +246,7 @@ public:
 
     // accessors
     inline ImoScore* get_score() const { return m_pScore; }
-    inline PlayerCtrl* get_player() const { return m_pPlayer; }
+    inline PlayerGui* get_player() const { return m_pPlayer; }
 };
 
 typedef boost::shared_ptr<EventPlayScore>  SpEventPlayScore;
