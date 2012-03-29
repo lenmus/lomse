@@ -91,7 +91,11 @@ endif()
 # set up configuration variables for lomse_config.h
 #------------------------------------------------------
 
-# version. Get SVN revision number
+# version. Get SVN revision number and use it in Lomse version string
+set( LOMSE_VERSION_MAJOR "0")
+set( LOMSE_VERSION_MINOR "7")
+set( LOMSE_VERSION_PATCH "48")
+set( LOMSE_VERSION_TYPE "'b'")
 include(FindSubversion)
 if(Subversion_FOUND)
     Subversion_WC_INFO(${ROOT_DIR} LOMSE)

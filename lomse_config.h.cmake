@@ -44,9 +44,13 @@
 
 
 //---------------------------------------------------------------------------------------
-// library reversion (SVN revision number)
+// library version 
 //---------------------------------------------------------------------------------------
-#define LOMSE_REVISION     @LOMSE_REVISION@
+#define LOMSE_VERSION_MAJOR     @LOMSE_VERSION_MAJOR@
+#define LOMSE_VERSION_MINOR     @LOMSE_VERSION_MINOR@
+#define LOMSE_VERSION_PATCH     @LOMSE_VERSION_PATCH@
+#define LOMSE_VERSION_TYPE      @LOMSE_VERSION_TYPE@
+#define LOMSE_REVISION          @LOMSE_REVISION@
 
 
 //---------------------------------------------------------------------------------------

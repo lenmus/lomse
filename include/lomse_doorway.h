@@ -79,14 +79,6 @@ struct PlatformInfo
 
 
 //---------------------------------------------------------------------------------------
-// Constants to facilitate compile-time checks
-#define LOMSE_VERSION_MAJOR 0
-#define LOMSE_VERSION_MINOR 7
-#define LOMSE_VERSION_TYPE  'b'
-#define LOMSE_VERSION_PATCH 48
-
-
-//---------------------------------------------------------------------------------------
 // This class represent the gate for lomse <-> platform/user app. communication
 // For the lomse library, it is the way to access platform dependent methods
 // For the user application it is the way to set up lomse and access basic methods
