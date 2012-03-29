@@ -44,10 +44,9 @@
 
 
 //---------------------------------------------------------------------------------------
-// library version, i.e.: 2.3
+// library reversion (SVN revision number)
 //---------------------------------------------------------------------------------------
-#define LOMSE_VERSION_MAJOR     @LOMSE_VERSION_MAJOR@
-#define LOMSE_VERSION_MINOR     @LOMSE_VERSION_MINOR@
+#define LOMSE_REVISION     @LOMSE_REVISION@
 
 
 //---------------------------------------------------------------------------------------

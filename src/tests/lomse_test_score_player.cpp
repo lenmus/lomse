@@ -95,7 +95,12 @@ public:
         m_notifications.push_back(event);
     }
 
+    //access to protected members
     void my_wait_for_termination() { wait_for_termination(); }
+    void my_end_of_playback_housekeeping(bool fVisualTracking, Interactor* pInteractor) {
+        end_of_playback_housekeeping(fVisualTracking, pInteractor);
+    }
+
 
 };
 
@@ -302,14 +307,14 @@ SUITE(ScorePlayerTest)
         player.load_score(pScore, &playGui);
         int nEvMax = player.my_get_table()->num_events() - 1;
         Interactor inter(m_libraryScope, &doc, NULL);
-        player.my_do_play(0, nEvMax, k_play_normal_instrument, k_visual_tracking,
+        player.my_do_play(0, nEvMax, k_play_normal_instrument, k_do_visual_tracking,
                           k_no_countoff, 60L, &inter);
         player.my_wait_for_termination();
 
         std::list<int>& events = midi.my_get_events();
         std::list<int>::iterator it = events.begin();
         CHECK( events.size() == 5 );
-//        cout << "midi events = " << events.size() << endl;
+        //cout << "midi events = " << events.size() << endl;
         CHECK( *(it++) == MyMidiServer::k_program_change );
         CHECK( *(it++) == MyMidiServer::k_voice_change );
         CHECK( *(it++) == MyMidiServer::k_note_on );
@@ -349,18 +354,11 @@ SUITE(ScorePlayerTest)
         CHECK( (*itN)->get_event_type() == k_highlight_event );
         pEv = static_pointer_cast<EventScoreHighlight>(*itN);
         //cout << "num.items = " << pEv->get_num_items() << endl;
-        CHECK( pEv->get_num_items() == 3);
+        CHECK( pEv->get_num_items() == 1);
         items = pEv->get_items();
         itItem = items.begin();
-        CHECK( (*itItem).first == k_advance_tempo_line_event );
-        //cout << "item type: " << (*itItem).first << endl;
-        ++itItem;
-        CHECK( (*itItem).first == k_highlight_off_event );
-        //cout << "item type: " << (*itItem).first << endl;
-        ++itItem;
         CHECK( (*itItem).first == k_end_of_higlight_event );
         //cout << "item type: " << (*itItem).first << endl;
-        ++itN;
     }
 
     TEST_FIXTURE(ScorePlayerTestFixture, DoPlay_NoCountoff_HighlightChord)
@@ -377,7 +375,7 @@ SUITE(ScorePlayerTest)
         player.load_score(pScore, &playGui);
         int nEvMax = player.my_get_table()->num_events() - 1;
         Interactor inter(m_libraryScope, &doc, NULL);
-        player.my_do_play(0, nEvMax, k_play_normal_instrument, k_visual_tracking,
+        player.my_do_play(0, nEvMax, k_play_normal_instrument, k_do_visual_tracking,
                           k_no_countoff, 60L, &inter);
         player.my_wait_for_termination();
 
@@ -434,24 +432,11 @@ SUITE(ScorePlayerTest)
         CHECK( (*itN)->get_event_type() == k_highlight_event );
         pEv = static_pointer_cast<EventScoreHighlight>(*itN);
 //        cout << "num.items = " << pEv->get_num_items() << endl;
-        CHECK( pEv->get_num_items() == 5);
+        CHECK( pEv->get_num_items() == 1);
         items = pEv->get_items();
         itItem = items.begin();
-        CHECK( (*itItem).first == k_advance_tempo_line_event );
-//        cout << "item type: " << (*itItem).first << endl;
-        ++itItem;
-        CHECK( (*itItem).first == k_highlight_off_event );
-//        cout << "item type: " << (*itItem).first << endl;
-        ++itItem;
-        CHECK( (*itItem).first == k_highlight_off_event );
-//        cout << "item type: " << (*itItem).first << endl;
-        ++itItem;
-        CHECK( (*itItem).first == k_highlight_off_event );
-//        cout << "item type: " << (*itItem).first << endl;
-        ++itItem;
         CHECK( (*itItem).first == k_end_of_higlight_event );
 //        cout << "item type: " << (*itItem).first << endl;
-        ++itN;
     }
 
     TEST_FIXTURE(ScorePlayerTestFixture, EndOfPlayEventReceived)
@@ -490,7 +475,7 @@ SUITE(ScorePlayerTest)
 //        MyScorePlayer player(m_libraryScope, &midi);
 //        player.load_score(pScore, NULL);
 //        int nEvMax = player.my_get_table()->num_events() - 1;
-//        player.my_do_play(0, nEvMax, k_play_normal_instrument, k_visual_tracking,
+//        player.my_do_play(0, nEvMax, k_play_normal_instrument, k_do_visual_tracking,
 //                          k_no_countoff, 60L, NULL);
 //
 //        std::list<int>& events = midi.my_get_events();

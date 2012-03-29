@@ -130,28 +130,31 @@ void LomseDoorway::null_request_function(void* pObj, Request* pRequest)
 }
 
 //---------------------------------------------------------------------------------------
-string LomseDoorway::get_version_string()
-{
-    //i.e. "0.7"
-
-    int major = LOMSE_VERSION_MAJOR;
-    int minor = LOMSE_VERSION_MINOR;
-    stringstream s;
-    s << major << "." << minor;
-    return s.str();
-}
+long LomseDoorway::get_revision() { return LOMSE_REVISION; }
 
 //---------------------------------------------------------------------------------------
-long LomseDoorway::get_version_number()
+string LomseDoorway::get_version_string()
 {
-    //returns 1000000 * major + minor
-    //i.e. "0.44" -> 44
-    //i.e. "1.44" -> 1000044
-    //i.e. "12.3114" -> 12003114
+    //i.e. "0.7 (rev.48)", "0.7 beta 48 (rev.56)", "1.0 (rev.75)", "1.0.2 (rev.77)"
 
-    int major = LOMSE_VERSION_MAJOR;
-    int minor = LOMSE_VERSION_MINOR;
-    return 1000000 * major + minor;
+    stringstream s;
+    s << get_version_major() << "." << get_version_minor();
+    if (get_version_type() != ' ')
+    {
+        if (get_version_type() == 'a')
+            s << " alpha ";
+        else
+            s << " beta ";
+        s << get_version_patch();
+    }
+    else
+    {
+        if (get_version_patch() > 0)
+            s << "." << get_version_patch();
+    }
+
+    s << " (rev." << get_revision() << ")";
+    return s.str();
 }
 
 //---------------------------------------------------------------------------------------

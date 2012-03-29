@@ -778,7 +778,6 @@ ScorePlayer* MyFrame::get_score_player()
     {
         MidiServer* pMidi = get_midi_server();
         m_pPlayer = m_lomse.create_score_player(pMidi);
-        m_pPlayer->post_highlight_events(true);
     }
     return m_pPlayer;
 }
@@ -936,7 +935,7 @@ void MyCanvas::open_test_document()
         "(n g2 q p2)"
         "(n d3 e g+)(n d3 e g-)"
         "(n b3 e g+)(n a3 s)(n g3 s g-)"
-        "(n g3 e g+)(n g3 e g-)"
+        "(chord (n g3 q)(n e3 q)(n c3 q))"
         "(barline)"
         "))"
         ")))" );

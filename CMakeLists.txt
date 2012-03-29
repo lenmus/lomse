@@ -91,15 +91,15 @@ endif()
 # set up configuration variables for lomse_config.h
 #------------------------------------------------------
 
-# version. Get SVN revision number and use it in Lomse version string
-set( LOMSE_VERSION_MAJOR "0")
+# version. Get SVN revision number
 include(FindSubversion)
 if(Subversion_FOUND)
     Subversion_WC_INFO(${ROOT_DIR} LOMSE)
     message("Current Lomse revision is ${LOMSE_WC_REVISION}")
-    set( LOMSE_VERSION_MINOR ${LOMSE_WC_REVISION})
+    set( LOMSE_REVISION ${LOMSE_WC_REVISION})
 else()
-  message(FATAL_ERROR "Subversion not found.")
+    message("Subversion not found. Revision set to zero.")
+    set( LOMSE_REVISION "0")
 endif()
 
 # build type

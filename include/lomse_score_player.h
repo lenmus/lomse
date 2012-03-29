@@ -51,9 +51,9 @@ class PlayerGui;
 
 //some constants for greater code legibility
 #define k_no_visual_tracking    false
-#define k_visual_tracking       true
+#define k_do_visual_tracking    true
 #define k_no_countoff           false
-#define k_countoff              true
+#define k_do_countoff           true
 
 //---------------------------------------------------------------------------------------
 typedef boost::thread SoundThread;

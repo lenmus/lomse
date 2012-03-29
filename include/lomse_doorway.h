@@ -79,6 +79,14 @@ struct PlatformInfo
 
 
 //---------------------------------------------------------------------------------------
+// Constants to facilitate compile-time checks
+#define LOMSE_VERSION_MAJOR 0
+#define LOMSE_VERSION_MINOR 7
+#define LOMSE_VERSION_TYPE  'b'
+#define LOMSE_VERSION_PATCH 48
+
+
+//---------------------------------------------------------------------------------------
 // This class represent the gate for lomse <-> platform/user app. communication
 // For the lomse library, it is the way to access platform dependent methods
 // For the user application it is the way to set up lomse and access basic methods
@@ -131,12 +139,13 @@ public:
 
     //library info
     static string get_version_string();
-    static long get_version_number();
-    static long get_version_major() { return LOMSE_VERSION_MAJOR; }
-    static long get_version_minor() { return LOMSE_VERSION_MINOR; }
+    static int get_version_major() { return LOMSE_VERSION_MAJOR; }
+    static int get_version_minor() { return LOMSE_VERSION_MINOR; }
+    static int get_version_patch() { return LOMSE_VERSION_PATCH; }
+    static char get_version_type() { return LOMSE_VERSION_TYPE; }
+    static long get_revision();
 
 };
-
 
 }   //namespace lomse
 

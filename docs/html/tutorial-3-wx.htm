@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/03/26 -->
+<!-- $Updated: 2012/03/29 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -31,8 +31,6 @@ In this third tutorial we are going to see how to add score playback capabilitie
 <li><a href="#score-player">Creating ScorePlayer object</a></li>
 <li><a href="#mycanvas">Modifications in MyCanvas for score playback</a></li>
 <li><a href="#compile">Compiling your code and building</a></li>
-<li><a href="#drawbacks">Drawbacks of the code in this example</li></a>
-<li><a href="#portmidi">Installing PortMidi libraries</li></a>
 <li><a href="#sound-problems">Problems with MIDI sound in Linux</li></a>
 <li><a href="#conclusions">Conclusions</a></li>
 </ol>
@@ -72,7 +70,7 @@ This is an excerpt of the needed code:
 
 
 <p>
-Invocation of <tt>play</tt> method will trigger all the playback machinery. But <b>Lomse will not generate any sounds</b>. Sound generation is always responsibility of your application. What Lomse will do is to generate <i>sound events</i>. Therefore, for playback, your application has two responsibilities:
+Invocation of <tt>play</tt> method will trigger all the playback machinery. But <b>Lomse will not generate any sounds</b>. Sound generation is always responsibility of your application. What Lomse will do is to generate <i>sound events</i>. Therefore, for playback, your application has two main responsibilities:
 </p>
 
 <ol>
@@ -99,7 +97,10 @@ With this, all playback machinery is in place.
 </p>
 
 <p>
-As to visual highlight effects (visual tracking by highlighting notes being played and/or by displaying a vertical tempo line marking beats), this is automatically done by Lomse, depending on the specified options. Your application will just receive <i>update view</i> events when the display should be updated, and all you have to do is to copy the already updated rendering bitmap onto the window. All the required code is already included in code from tutorial 2.
+As to visual tracking effects (highlighting notes being played and/or displaying a vertical tempo line marking beats),  Lomse will also post <i>score highlight</i> events, to be handled by your application. By handling them you will have full control, and your application can create whatever fancy visual tracking effects you would like.
+</p>
+
+<p>Nevertheless, Lomse implements standard visual effects so you can delegate in Lomse for generating visual effects. In this case, your application will just receive <i>update view</i> events when the display should be updated, and all you have to do is to copy the already updated rendering bitmap onto the window. All the required code for updating the display is already included in code from tutorial 2.
 </p>
 
 <p>
@@ -126,6 +127,10 @@ For controlling playback we are going to add some menu items (play, pause, stop)
 
 <p>
 For sound generation we will use the wxMidi (<a href="http://www.lenmus.org/en/wxmidi/intro">http://www.lenmus.org/en/wxmidi/intro</a>) component. It is just a wrapper for using the PortMidi library (<a href="http://sourceforge.net/apps/trac/portmedia/wiki/portmidi" target="_blank">http://sourceforge.net/apps/trac/portmedia/wiki/portmidi</a>) in wxWidgets applications.
+</p>
+
+<p>
+In this tuturial on score playback we will have to devote a lot of time to something not directly related to using Lomse: sound generation. Therefore, I will split this toturial into two. In this tutorial we are not going to generate any visual tracking effects during playback. And we will do it in fourth tutorial.
 </p>
 
 <p>
@@ -555,7 +560,7 @@ void MyFrame::on_sound_test(wxCommandEvent& WXUNUSED(event))
 <!--====================================================-->
 
 <p>
-Now, compile and build the example code. It is not yet finished but we can test our Midi interface. When running the program the first thing you will see is the Midi settings dialog, a window similar to one of these:
+Now, compile and build the example code (see section <a href="#compile">Compiling your code and building</a>). It is not yet finished but we can test our Midi interface. When running the program the first thing you will see is the Midi settings dialog, a window similar to one of these:
 </p>
 
 <img src="./images/midi-settings-linux.png" />
@@ -653,14 +658,12 @@ In <tt>MyFrame</tt> constructor the new variable <tt>m_pPlayer</tt> is initializ
 </p>
 
 <pre class="code">
-
 ScorePlayer* MyFrame::get_score_player()
 {
     if (!m_pPlayer)
     {
         MidiServer* pMidi = get_midi_server();
         m_pPlayer = m_lomse.create_score_player(pMidi);
-        m_pPlayer->post_events(false);
     }
     return m_pPlayer;
 }
@@ -778,11 +781,26 @@ And this is all. Our code is now finished and our application is ready for build
 <!--====================================================-->
 
 <p>
-At this point, we could compile and tests all these changes. Please follow the instructions in Tutorial 1 and do not forget to install the PortMidi library. Modify your makefile or project file as follows:
+At this point, we could compile and tests all these changes. Do not forget to install the PortMidi libraries. For detailed instructions you should see the PortMidi documentation. Nevertheless, on most Linux systems it is just installing the PortMidi package. For instance, execute the following command on a terminal window (enter your password as needed):
+</p>
+
+<pre class="command">
+sudo apt-get install libportmidi-dev
+</pre>
+
+<p>
+Headers will be placed at /usr/include/ and libraries at /usr/lib/.
+</p>
+
+<p>
+Once PortMidi libraries are installed, you can proceed to build your application. For building, you can use the makefile or build command used for tutorials 1 or 2. But you will have to modify it as follows:
 </p>
 
 <ul>
-    <li>You have to add more search directories, to look for wxMidi and PortMidi headers.
+    <li>You have to add source files from wxMidi package.
+    </li>
+
+    <li>You have to add search directories to look for wxMidi and PortMidi headers.
     For instance, in Linux you will have to add '/usr/include/ and './wxMidi/'.
     </li>
 
@@ -794,76 +812,31 @@ At this point, we could compile and tests all these changes. Please follow the i
 </ul>
 
 <p>
-Run the program, click on the 'sound > test' menu item, and check that sounds are produced. In Windows systems there should not be any problems but in many Linux distros a MIDI synthesizer is not installed by default. If you have problems with sound, please read section <a href="#sound-problems">"Problems with MIDI sound"</a> near the end of this tutorial.
+With these changes, your build command in Linux will be something as (adjust paths if necessary):
 </p>
 
+<pre class="console">
+gcc example_3_wxwidgets.cpp ./wxMidi/wxMidi.cpp ./wxMidi/wxMidiDatabase.cpp  \
+    -o example-3-wx `wx-config --cflags`                       \
+    -I /usr/local/include/lomse  -I /usr/include -I ./wxMidi/  \
+    `pkg-config --cflags freetype2` -L /usr/local/lib -llomse  \
+    -lportmidi -lporttime `wx-config --libs`
+</pre>
+
 <p>
-When executing example-3 and playing the score you will hear the music and you will see that notes get coloured in red as they are being played. You should see something as:
+Run the program. You should see something as:
 </p>
 
 <a class="image-reference" href="./images/example-3-wx.png">
 <img class="center" src="./images/example-3-wx.png" width="500px" />
 </a>
 
-
-
-
-
-<h2><a name="drawbacks">11. Drawbacks of the code in this example</a></h2>
-<!--====================================================-->
-
 <p>
-In this example, score highlight is completely managed by Lomse. It takes care of score highlight and we just receive <i>update view</i> events when the display should be updated. But our code is not really prepared for this and you can force crashes very easily. For instance, try resizing the window while an score is being played.
-</p>
-
-<p>
-The cause of these problems is concurrency. There are two threads working concurrently: your application thread, running the application code, and Lomse playback thread, running all playback code. But both are using the same resources: the internal model, the graphical model and the render bitmap. As our application code has not taken this into account, we have not added guarding code to avoid conflicts when both threads try to modify simultaneously these shared resources.
-</p>
-
-<p>
-When delegating in Lomse all score highlight management, during play back your code can not do any action that could result in modifying the internal model, the graphical model or the render bitmap. For instance, you can not:
-</p>
-
-<ul>
-    <li>Force view redraws.</li>
-    <li>Destroy and create a new render bitmap (i.e. resize the window).</li>
-    <li>Modify the internal model or the graphical model. Only changing attributes in graphical model objects are allowed, but not deleting/creating GmoObjs.</li>
-</ul>
-
-<p>
-To avoid problems you have to include, in your application, additional code for controlling modification of these shared resources during playback. Perhaps, a simpler alternative is the one that we will implement in tutorial 4.
+Click on the 'Sound > Midi test' menu item, and check that sounds are produced. When executing example-3 and playing an score you will hear the music but you will not see any visual effects. We will learn in next tutorial how to add visual tracking effects. In Windows systems there should not be any problems with sound but in many Linux distros a MIDI synthesizer is not installed by default. If you have problems with sound, please read next section.
 </p>
 
 
-<h2><a name="portmidi">12. Installing PortMidi libraries</a></h2>
-<!--====================================================-->
-
-<p>For detailed instructions you should see the PortMidi documentation. Nevertheless, the following quick guides should work on most systems.
-</p>
-
-<h5>Installing PortMidi in Linux</h5>
-
-<p>
-Execute the following command on a terminal window (enter your password as needed):
-</p>
-
-<pre class="command">
-sudo apt-get install libportmidi-dev
-</pre>
-
-<p>
-Headers are placed at /usr/include/ and libraries at /usr/lib/.
-</p>
-
-
-<h5>Installing PortMidi in Windows</h5>
-
-<p>
-Download the portmidi package and follow the instructions in this package. Nevertheless, probably you could use my built libraries (Windows XP, 32bits). They are in Lomse source code package.
-</p>
-
-
-<h2><a name="sound-problems">13. Problems with MIDI sound in Linux</a></h2>
+<h2><a name="sound-problems">11. Problems with MIDI sound in Linux</a></h2>
 <!--====================================================-->
 
 <p>
@@ -882,12 +855,11 @@ http://timidity.sourceforge.net/#info</a><br />
 </p>
 
 
-<h2><a name="conclusions">14. Conclusions</a></h2>
+<h2><a name="conclusions">12. Conclusions</a></h2>
 <!--====================================================-->
 
 <p>
-In this long tutorial I have introduced score playback. Unfortunately, most of the tutorial is not directly related to using the Lomse library but to generating sounds.
-The way in which I have implemented score highlight has some drawbacks due to concurrency (see section <a href="tutorial-3-wx.htm#drawbacks">"Drawbacks of the code in this example"</a>), but is simple and can be useful in some applications in which the user does not interact with the score. In the <a href="tutorial-4-wx.htm">fourth tutorial</a> I will continue with this subject and we will study a safer way for doing score highlight.
+In this long tutorial I have introduced score playback. Unfortunately, most of the tutorial is not directly related to using the Lomse library but to generating sounds. In the <a href="tutorial-4-wx.htm">fourth tutorial</a> I will continue with this subject and we will study how to add visual tracking effects during playback.
 </p>
 
 <p>

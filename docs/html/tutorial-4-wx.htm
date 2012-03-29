@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/03/27 -->
+<!-- $Updated: 2012/03/29 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -12,18 +12,7 @@
 <!--====================================================-->
 
 <p>
-In previous tutorial we learn that visual highlight effects during score playback (visual tracking by highlighting notes being played and/or by displaying a vertical tempo line marking beats) is automatically done by Lomse. Your application will just receive <i>update view</i> events when the display should be updated, and all you have to do is to copy the already updated rendering bitmap onto the window.
-</p>
-
-<p>
-But when delegating in Lomse all score highlight management, there are two threads working concurrently: your application thread, running the application code, and Lomse playback thread, running all playback code. As both are using the same resources (the internal model, the graphical model and the render bitmap), during playback your application can not do any action that could result in modifying the internal model, the graphical model or the render bitmap, unless you include safeguarding code to avoid conflicts when both threads try to modify simultaneously these shared resources.
-</p>
-
-<p>
-A different approach for visual highlight effects during score playback is also possible: instead of delegating its management to Lomse and receiving only <i>update view</i> events, your application can opt for directly handling the <i>score highlight</i> events. With this approach, visual highlight code will run in the same thread than your application code, thus avoiding the commented concurrency problems without having to add safeguarding code.
-</p>
-
-<p>
+In previous tutorial we learn hoe to implement score playback. But we didn't include any visual effects during score playback (visual tracking by highlighting notes being played and/or by displaying a vertical tempo line marking beats).
 In this tutorial we are going to learn how to do this. You can download the full source code for this example from
 <a href="../../examples/example_4_wxwidgets.cpp">../../examples/example_4_wxwidgets.cpp</a>.
 </p>
@@ -53,36 +42,14 @@ In this tutorial we are going to learn how to do this. You can download the full
 As we learn in previous tutorial, invocation of <tt>ScorePlayer::play()</tt> method will trigger all the playback machinery. As a consequence, Lomse will start playback and will generate two types of events: <i>sound</i> events and <i>score highlight</i> events. Sound event must always be handled by your application code, but handling <i>score highlight</i> events is optional.
 </p>
 
-<p>
-By default, Lomse will assume that your application will <b>do</b> handle all <i>score highlight</i> events. Therefore, if you would like that Lomse handle these events instead of posting them to your application, it is necessary to request it by invoking <tt>ScorePlayer</tt> method <tt>post_highlight_events</tt>. That's what we did in tutorial 3. If you review the code from that tutorial you will see that at <tt>ScorePlayer</tt> creation we did:
-</p>
-
-<pre class="code">
-MidiServer* pMidi = ...
-ScorePlayer* pPlayer = m_lomse.create_score_player(pMidi);
-pPlayer->post_highlight_events(false);
-</pre>
-
-<p>
-That is, we instructed <tt>ScorePlayer</tt> to not send highlight events. In this tutorial we will change last sentence to:
-</p>
-
-<pre class="code">
-pPlayer->post_highlight_events(true);
-</pre>
-
-<p>
-This change will modify <tt>ScorePlayer</tt> behaviour and, as consequence, our application will receive all <i>score highlight</i> events, instead of being handled internally by Lomse.
-</p>
-
 <div class="warning">
 <p>
-When your application handles <i>score highlight</i> events it is important to return control to Lomse as soon as possible. This is because, currently, Lomse does not implement an event subsystem with its own thread. Instead Lomse sends events to your application by invoking a callback. This implies that your application code for handling the event is processed by the Lomse thread. As this thread is dealing with sound generation, any delay will cause delays in sound generation, which will be unacceptable. Therefore, to avoid delays, the suggested way for handling <i>score highlight</i> events is to generate an application event and to enqueue it in the application events system.
+When your application handles <i>score highlight</i> events it is important to return control to Lomse as soon as possible. This is because, currently, Lomse does not implement an event subsystem with its own thread. Instead Lomse sends events to your application by invoking a callback. This implies that your application code for handling the event is processed by the Lomse thread. As this thread is dealing with sound generation, any delay will cause delays in the music tempo, which will be unacceptable. Therefore, to avoid delays, the suggested way for handling <i>score highlight</i> events is to generate an application event and to enqueue it in the application events system.
 </p>
 </div>
 
 <p>
-In your application, processing an <i>score highlight</i> event can be as complex as you like, and to generate any fancy visual feedback. Alternatively, it can be a trivial task, as Lomse provides standard event handlers for creating standard visual effects (coloured notes, tempo line or both). If you would like to use Lomse standard visual effects, your application code should be just passing the event to the interactor, and it will take care of all necessary tasks. Finally, your application will receive an <i>update view</i> event, and all you have to do is to copy the already updated rendering bitmap onto the window.
+In your application, processing an <i>score highlight</i> event can be as complex as needed for generating any fancy visual feedback. Alternatively, it can be a trivial task, as Lomse provides standard event handlers for creating standard visual effects (coloured notes, tempo line or both). If you would like to use Lomse standard visual effects, your application code should just pass the event to the interactor, and it will take care of all necessary tasks. Finally, your application will receive an <i>update view</i> event, and all you have to do is to copy the already updated rendering bitmap onto the window.
 </p>
 
 <p>
@@ -101,43 +68,7 @@ To avoid this burden in your application, probably the best solution will be to 
 
 <p>
 In this tutorial we will use the code from tutorial 3 and modify it for handling <i>score highlight</i> events.
-</p>
-
-<p>
-The first change is to inform Lomse that our application will handle the <i>score highlight</i> events. For this, it is enough to change the code in <tt>MyFrame::get_score_player()</tt>. This is the original code:
-
-<pre class="code">
-ScorePlayer* MyFrame::get_score_player()
-{
-    if (!m_pPlayer)
-    {
-        MidiServer* pMidi = get_midi_server();
-        m_pPlayer = m_lomse.create_score_player(pMidi);
-        m_pPlayer->post_highlight_events(false);
-    }
-    return m_pPlayer;
-}
-</pre>
-
-<p>
-The change to do is to remove sentence:
-</p>
-
-<pre class="code">
-m_pPlayer->post_highlight_events(false);
-</pre>
-
-<p>
-Alternatively, change the parameter to <tt>true</tt>. With any of these changes we instruct <tt>ScorePlayer</tt> to post <i>score highlight</i> events to our application.
-</p>
-
-
-
-<h2><a name="handling">3. Defining our application events</h2></a>
-<!--====================================================-->
-
-<p>
-Next step is to prepare our application to handle these events. For this, we will define a callback method in <tt>MyFrame</tt>. This is the standard procedure for handling events, of any type, sent by Lomse. As explained in tutorial 2 (see section <a href="tutorial-2-wx.htm#paint" target="_blank">Events sent by Lomse</a>) setting a callback requires defining two methods: an static one (the wrapper method) and the real one that will do the job. Here is our definition:
+First step is to prepare our application to handle these events. For this, we will define a callback method in <tt>MyFrame</tt>. This is the standard procedure for handling events, of any type, sent by Lomse. As explained in tutorial 2 (see section <a href="tutorial-2-wx.htm#paint" target="_blank">Events sent by Lomse</a>) setting a callback requires defining two methods: an static one (the wrapper method) and the real one that will do the job. Here is our definition:
 </p>
 
 <pre class="code">
@@ -180,7 +111,16 @@ void MyFrame::wrapper_lomse_event(void* pThis, SpEventInfo pEvent)
 </pre>
 
 <p>
-As to the method doing the real work, it has to create an application event and to enqueue it in the application events system. Therefore, before coding this method we have to define our own application event. We have to deal with Lomse events of type <tt>k_highlight_event</tt>. Therefore we will define an equivalent wxWidgets event: <tt>MyScoreHighlightEvent</tt>. It will wrap the Lomse event. As this is standard wxWidgets coding, I will not enter into details. Here is the declaration:
+As to the method doing the real work, it has to create an application event and to enqueue it in the application events system, as explained in <a href="highlight">Lomse playback: score highlight events</a>. Therefore, before coding this method we have to define our own application event. 
+</p>
+
+
+
+<h2><a name="handling">3. Defining our application events</h2></a>
+<!--====================================================-->
+
+<p>
+As we have to deal with Lomse events of type <tt>k_highlight_event</tt>, we will define an equivalent wxWidgets event: <tt>MyScoreHighlightEvent</tt>. It will wrap the Lomse event. As this is standard wxWidgets coding, I will not enter into details. Here is the declaration:
 </p>
 
 <pre class="code">
@@ -329,12 +269,9 @@ At this point, we could compile and tests all these changes. Please follow the i
 When executing example-4 and playing the score you will hear the music and you will see that notes get coloured in red as they are being played. You should see something as:
 </p>
 
-<a class="image-reference" href="./images/example-3-wx.png">
-<img class="center" src="./images/example-3-wx.png" width="500px" />
+<a class="image-reference" href="./images/example-4-wx.png">
+<img class="center" src="./images/example-4-wx.png" width="500px" />
 </a>
-
-<p>
-Play with the program. Resize the window while it is playing back an score and you will see that it works perfectly: sound goes in time and it doesn't crash: all problems of sample code in tutorial 3 are solved!
 
 
 
@@ -342,7 +279,7 @@ Play with the program. Resize the window while it is playing back an score and y
 <!--====================================================-->
 
 <p>
-In this tutorial I have shown the right way to implement visual effects during score playback, to avoid the concurrency problems present in tutorial 3. Handling score highlight events in your application also opens the door for creating your own visual effects as you are not limited by standard visual effects canned in Lomse.
+In this tutorial I have shown the way to implement visual effects during score playback. It also opens the door for creating your own visual effects, as you are not limited by standard visual effects canned in Lomse.
 </p>
 
 <p>

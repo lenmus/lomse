@@ -399,7 +399,6 @@ void MyFrame::initialize_lomse()
 
     //set required callbacks
     m_lomse.set_request_callback(NULL, on_lomse_request);
-    //m_lomse.set_notify_callback(this, wrapper_lomse_event);
 }
 
 //---------------------------------------------------------------------------------------
@@ -693,7 +692,6 @@ ScorePlayer* MyFrame::get_score_player()
     {
         MidiServer* pMidi = get_midi_server();
         m_pPlayer = m_lomse.create_score_player(pMidi);
-        m_pPlayer->post_events(false);
     }
     return m_pPlayer;
 }
@@ -850,7 +848,7 @@ void MyCanvas::open_test_document()
         "(n g2 q p2)"
         "(n d3 e g+)(n d3 e g-)"
         "(n b3 e g+)(n a3 s)(n g3 s g-)"
-        "(n g3 e g+)(n g3 e g-)"
+        "(chord (n g3 q)(n e3 q)(n c3 q))"
         "(barline)"
         "))"
         ")))" );
