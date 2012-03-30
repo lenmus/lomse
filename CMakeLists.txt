@@ -91,11 +91,18 @@ endif()
 # set up configuration variables for lomse_config.h
 #------------------------------------------------------
 
-# version. Get SVN revision number and use it in Lomse version string
-set( LOMSE_VERSION_MAJOR "0")
-set( LOMSE_VERSION_MINOR "7")
-set( LOMSE_VERSION_PATCH "48")
-set( LOMSE_VERSION_TYPE "'b'")
+# version. Extract values from lomse_version.h header file
+file(STRINGS ${ROOT_DIR}/include/lomse_version.h LOMSE_VERSION_LIST)
+list (GET LOMSE_VERSION_LIST 5 MAJOR_LINE)
+list (GET LOMSE_VERSION_LIST 6 MINOR_LINE)
+list (GET LOMSE_VERSION_LIST 7 TYPE_LINE)
+list (GET LOMSE_VERSION_LIST 8 PATCH_LINE)
+string(REGEX REPLACE "\#define LOMSE_VERSION_MAJOR    " "" LOMSE_VERSION_MAJOR "${MAJOR_LINE}")
+string(REGEX REPLACE "\#define LOMSE_VERSION_MINOR    " "" LOMSE_VERSION_MINOR "${MINOR_LINE}")
+string(REGEX REPLACE "\#define LOMSE_VERSION_TYPE     " "" LOMSE_VERSION_TYPE "${TYPE_LINE}")
+string(REGEX REPLACE "\#define LOMSE_VERSION_PATCH    " "" LOMSE_VERSION_PATCH "${PATCH_LINE}")
+
+# revision. Get SVN revision number and use it in Lomse version string
 include(FindSubversion)
 if(Subversion_FOUND)
     Subversion_WC_INFO(${ROOT_DIR} LOMSE)
@@ -105,6 +112,13 @@ else()
     message("Subversion not found. Revision set to zero.")
     set( LOMSE_REVISION "0")
 endif()
+
+message ("major = '${LOMSE_VERSION_MAJOR}'") 
+message ("minor = '${LOMSE_VERSION_MINOR}'") 
+message ("type = '${LOMSE_VERSION_TYPE}'") 
+message ("patch = '${LOMSE_VERSION_PATCH}'") 
+message ("revision = '${LOMSE_REVISION}'") 
+
 
 # build type
 set( LOMSE_USE_DLL "0")

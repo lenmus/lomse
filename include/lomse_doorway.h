@@ -131,11 +131,12 @@ public:
 
     //library info
     static string get_version_string();
-    static int get_version_major() { return LOMSE_VERSION_MAJOR; }
-    static int get_version_minor() { return LOMSE_VERSION_MINOR; }
-    static int get_version_patch() { return LOMSE_VERSION_PATCH; }
-    static char get_version_type() { return LOMSE_VERSION_TYPE; }
-    static long get_revision();
+    static int get_version_major();
+    static int get_version_minor();
+    static int get_version_patch();
+    static char get_version_type();
+    static long get_revision() { return LOMSE_REVISION; }
+
 
 };
 

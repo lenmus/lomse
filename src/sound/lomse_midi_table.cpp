@@ -49,9 +49,10 @@ namespace lomse
 // SoundEventsTable: Manager for the events table
 //
 //    There are two tables to maintain:
-//    - m_events: contains the MIDI events.
+//    - m_events (std::vector<SoundEvent*>):
+//        Contains the MIDI events.
 //    - m_measures (std::vector<int>):
-//        It contains the index over m_events for the first event of each measure.
+//        Contains the index over m_events for the first event of each measure.
 //
 //    AWARE
 //    Measures are numbered 1..n (musicians usual way) not 0..n-1. But tables
@@ -64,15 +65,7 @@ namespace lomse
 //    In the events table m_events, all events not in a real measure (measures 1..n) are
 //    marked as belonging to measure 0.
 //
-//    The two tables must be synchronized but are populated as follows:
-//    - store_event() is invoked many times to store the events of that measure.
-//      This process is repeated for every lmVStaff and ImoInstrument and all tables are
-//      merged.
-//    - When all events are computed, method close_table() is invoked to add the last
-//      entry (End_Of-Table), sort the events table by time, and crete the measures
-//      table.
-//
-//
+//    The two tables must be synchronized.
 //=======================================================================================
 SoundEventsTable::SoundEventsTable(ImoScore* pScore)
     : m_pScore(pScore)

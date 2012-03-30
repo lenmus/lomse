@@ -31,9 +31,8 @@
 #include "lomse_config.h"
 
 #include "lomse_injectors.h"
-#include "lomse_agg_types.h"
 #include "lomse_presenter.h"
-#include "lomse_events.h"
+#include "lomse_version.h"
 
 #include <sstream>
 using namespace std;
@@ -130,7 +129,16 @@ void LomseDoorway::null_request_function(void* pObj, Request* pRequest)
 }
 
 //---------------------------------------------------------------------------------------
-long LomseDoorway::get_revision() { return LOMSE_REVISION; }
+int LomseDoorway::get_version_major() { return LOMSE_VERSION_MAJOR; }
+
+//---------------------------------------------------------------------------------------
+int LomseDoorway::get_version_minor() { return LOMSE_VERSION_MINOR; }
+
+//---------------------------------------------------------------------------------------
+int LomseDoorway::get_version_patch() { return LOMSE_VERSION_PATCH; }
+
+//---------------------------------------------------------------------------------------
+char LomseDoorway::get_version_type() { return LOMSE_VERSION_TYPE; }
 
 //---------------------------------------------------------------------------------------
 string LomseDoorway::get_version_string()
