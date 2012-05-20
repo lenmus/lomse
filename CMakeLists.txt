@@ -719,7 +719,13 @@ if( WIN32 )
         ${SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp 
     )
 
-    target_link_libraries( ${EXAMPLE1} lomse.lib )
+    target_link_libraries( ${EXAMPLE1}
+        lomse.lib
+        ${Boost_LIBRARIES}
+        ${FREETYPE_LIBRARIES}
+        ${PNG_LIBRARIES}
+        ${ZLIB_LIBRARIES}
+    )
 
     
 elseif( UNIX )
@@ -734,8 +740,13 @@ elseif( UNIX )
         ${EXAMPLE1_SRC}/example_1_x11.cpp
     )
 
-    target_link_libraries ( ${EXAMPLE1} liblomse.so )
-
+    target_link_libraries ( ${EXAMPLE1} 
+        liblomse.so
+        ${Boost_LIBRARIES}
+        ${FREETYPE_LIBRARIES}
+        ${PNG_LIBRARIES}
+        ${ZLIB_LIBRARIES}
+    )
         
 endif()
 
