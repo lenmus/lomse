@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -42,7 +42,6 @@ class ImoRest;
 class GmoShapeRest;
 class ScoreMeter;
 class ShapesStorage;
-class ImoRest;
 class GmoShapeBeam;
 
 //---------------------------------------------------------------------------------------
@@ -52,22 +51,19 @@ protected:
     int m_restType;
     int m_numDots;
     ImoRest* m_pRest;
-    ImoObj* m_pCreatorImo;
 
 public:
     RestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 ShapesStorage* pShapesStorage);
+                 ShapesStorage* pShapesStorage, int iInstr, int iStaff);
     ~RestEngraver() {}
 
-    GmoShapeRest* create_shape(ImoObj* pCreatorImo, int iInstr, int iStaff, UPoint uPos,
-                               int restType, int numDots, ImoRest* pRest);
+    GmoShapeRest* create_shape(ImoRest* pRest, UPoint uPos);
 
 protected:
     void determine_position();
     void create_main_shape();
     void add_shapes_for_dots_if_required();
 
-    LUnits tenths_to_logical(Tenths tenths);
     int find_glyph();
     LUnits get_glyph_offset(int iGlyph);
     LUnits add_dot_shape(LUnits x, LUnits y, Color color);

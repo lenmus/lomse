@@ -85,18 +85,6 @@ void GmoShapeGlyph::compute_size_origin(double fontHeight, UPoint pos)
 
 
 //=======================================================================================
-// GmoShapeClef
-//=======================================================================================
-GmoShapeClef::GmoShapeClef(ImoObj* pCreatorImo, int idx, int nGlyph, UPoint pos,
-                           Color color, LibraryScope& libraryScope, double fontSize)
-    : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_clef, idx, nGlyph, pos, color,
-                    libraryScope, fontSize )
-{
-}
-
-
-
-//=======================================================================================
 // GmoShapeButton implementation: a clickable button
 //=======================================================================================
 GmoShapeButton::GmoShapeButton(ImoObj* pCreatorImo, UPoint pos, USize size,
@@ -194,13 +182,9 @@ GmoShapeImage::GmoShapeImage(ImoObj* pCreatorImo, SpImage image, UPoint pos, USi
 //---------------------------------------------------------------------------------------
 void GmoShapeImage::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-//    if (!m_pImage->is_visible())
-//        return;
-
     RenderingBuffer rbuf;
     rbuf.attach(m_image->get_buffer(), m_image->get_bitmap_width(),
                 m_image->get_bitmap_height(), m_image->get_stride());
-    //pDrawer->copy_bitmap(rbuf, m_origin);
     pDrawer->draw_bitmap(rbuf, m_image->has_alpha(), 0, 0, m_image->get_bitmap_width(),
                           m_image->get_bitmap_height(), m_origin.x, m_origin.y,
                           m_origin.x + m_image->get_image_width(),
@@ -209,19 +193,6 @@ void GmoShapeImage::on_draw(Drawer* pDrawer, RenderOptions& opt)
 
     GmoSimpleShape::on_draw(pDrawer, opt);
 }
-
-
-
-//=======================================================================================
-// GmoShapeFermata
-//=======================================================================================
-GmoShapeFermata::GmoShapeFermata(ImoObj* pCreatorImo, int idx, int nGlyph, UPoint pos,
-                           Color color, LibraryScope& libraryScope, double fontSize)
-    : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_fermata, idx, nGlyph, pos, color,
-                    libraryScope, fontSize )
-{
-}
-
 
 
 

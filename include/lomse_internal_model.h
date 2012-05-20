@@ -110,6 +110,11 @@ class ImoStaffInfo;
 class ImoStaffObj;
 class ImoStyle;
 class ImoStyles;
+class ImoTable;
+class ImoTableCell;
+class ImoTableBody;
+class ImoTableHead;
+class ImoTableRow;
 class ImoTextInfo;
 class ImoTextItem;
 class ImoTextStyle;
@@ -310,13 +315,14 @@ class DtoObj;
 
             //ImoCollection(A)
             k_imo_collection,
+                k_imo_attachments,
                 k_imo_instruments,
                 k_imo_instrument_groups, k_imo_music_data, k_imo_options,
-                k_imo_styles,
+                k_imo_table_head, k_imo_table_body,
             k_imo_collection_last,
 
             // Special collections
-            k_imo_attachments,
+            k_imo_styles,
             k_imo_relations,
 
             // ImoContainerObj (A)
@@ -362,11 +368,13 @@ class DtoObj;
                     k_imo_box_container,
                         k_imo_content, k_imo_dynamic, k_imo_document, k_imo_list,
                         k_imo_multicolumn,
+                        k_imo_table, k_imo_table_row,
                     k_imo_box_container_last,
 
                     // ImoBoxContent (A)
                     k_imo_box_content,
                         k_imo_heading, k_imo_para, k_imo_listitem,
+                        k_imo_table_caption, k_imo_table_cell,
                     k_imo_box_content_last,
 
                 k_imo_boxlevel_obj_last,
@@ -631,6 +639,11 @@ public:
     inline bool is_styles() { return m_objtype == k_imo_styles; }
     inline bool is_system_break() { return m_objtype == k_imo_system_break; }
     inline bool is_system_info() { return m_objtype == k_imo_system_info; }
+    inline bool is_table() { return m_objtype == k_imo_table; }
+    inline bool is_table_cell() { return m_objtype == k_imo_table_cell; }
+    inline bool is_table_body() { return m_objtype == k_imo_table_body; }
+    inline bool is_table_head() { return m_objtype == k_imo_table_head; }
+    inline bool is_table_row() { return m_objtype == k_imo_table_row; }
     inline bool is_text_info() { return m_objtype == k_imo_text_info; }
     inline bool is_text_item() { return m_objtype == k_imo_text_item; }
     inline bool is_text_style() { return m_objtype == k_imo_text_style; }
@@ -838,6 +851,17 @@ public:
         k_border_width_bottom,
         k_border_width_left,
         k_border_width_right,
+
+            //size
+        k_width,
+        k_height,
+        k_min_width,
+        k_min_height,
+        k_max_width,
+        k_max_height,
+
+            //table
+        k_table_col_width,
     };
 
     //general
@@ -1013,6 +1037,37 @@ public:
     }
     inline ImoStyle* margin_right(LUnits value) {
         set_lunits_property(ImoStyle::k_margin_right, value);
+        return this;
+    }
+        //size
+    inline ImoStyle* width(LUnits value) {
+        set_lunits_property(ImoStyle::k_width, value);
+        return this;
+    }
+    inline ImoStyle* height(LUnits value) {
+        set_lunits_property(ImoStyle::k_height, value);
+        return this;
+    }
+    inline ImoStyle* min_width(LUnits value) {
+        set_lunits_property(ImoStyle::k_min_width, value);
+        return this;
+    }
+    inline ImoStyle* min_height(LUnits value) {
+        set_lunits_property(ImoStyle::k_min_height, value);
+        return this;
+    }
+    inline ImoStyle* max_width(LUnits value) {
+        set_lunits_property(ImoStyle::k_max_width, value);
+        return this;
+    }
+    inline ImoStyle* max_height(LUnits value) {
+        set_lunits_property(ImoStyle::k_max_height, value);
+        return this;
+    }
+
+            //table
+    inline ImoStyle* table_col_width(LUnits value) {
+        set_lunits_property(ImoStyle::k_table_col_width, value);
         return this;
     }
 
@@ -1231,9 +1286,7 @@ public:
     virtual ~ImoCollection() {}
 
     //contents
-    ImoContentObj* get_item(int iItem) {   //iItem = 0..n-1
-        return dynamic_cast<ImoContentObj*>( get_child(iItem) );
-    }
+    inline ImoObj* get_item(int iItem) { return get_child(iItem); }   //iItem = 0..n-1
     inline int get_num_items() { return get_num_children(); }
     inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
 
@@ -2357,27 +2410,22 @@ class ImoScoreText : public ImoAuxObj
 {
 protected:
     ImoTextInfo m_text;
-    int m_hAlign;
 
     friend class ImFactory;
     friend class ImoInstrument;
     friend class ImoInstrGroup;
-    ImoScoreText()
-        : ImoAuxObj(k_imo_score_text), m_text(), m_hAlign(k_halign_left) {}
-    ImoScoreText(int objtype)
-        : ImoAuxObj(objtype), m_text(), m_hAlign(k_halign_left) {}
+    ImoScoreText() : ImoAuxObj(k_imo_score_text), m_text() {}
+    ImoScoreText(int objtype) : ImoAuxObj(objtype), m_text() {}
 
 public:
     virtual ~ImoScoreText() {}
 
     //getters
-    inline int get_h_align() { return m_hAlign; }
     inline string& get_text() { return m_text.get_text(); }
     inline ImoTextInfo* get_text_info() { return &m_text; }
 
     //setters
     inline void set_text(const std::string& value) { m_text.set_text(value); }
-    inline void set_h_align(int value) { m_hAlign = value; }
 
 };
 
@@ -2945,12 +2993,14 @@ protected:
     friend class ScorePlayerAnalyser;
     inline void attach_score(ImoScore* pScore) { m_pScore = pScore; }
     void attach_player(ScorePlayerCtrl* pPlayer);
+    void set_metronome_mm(int value);
 
 public:
     virtual ~ImoScorePlayer();
 
     inline ImoScore* get_score() { return m_pScore; }
     inline ScorePlayerCtrl* get_player() { return m_pPlayer; }
+    int get_metronome_mm();
 };
 
 //---------------------------------------------------------------------------------------
@@ -3213,7 +3263,7 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoStyles : public ImoCollection
+class ImoStyles : public ImoSimpleObj
 {
 protected:
 	std::map<std::string, ImoStyle*> m_nameToStyle;
@@ -3240,6 +3290,119 @@ protected:
     void delete_text_styles();
     ImoStyle* create_default_styles();
 
+};
+
+//---------------------------------------------------------------------------------------
+class ImoTable : public ImoBoxContainer
+{
+protected:
+    std::list<ImoStyle*> m_colStyles;   //cannot be ImoCollection as ImoStyles are
+                                        //deleted at document level.
+
+    friend class TableColumnAnalyser;
+    inline void add_column_style(ImoStyle* pStyle) { m_colStyles.push_back(pStyle); }
+
+    friend class ImFactory;
+    ImoTable() : ImoBoxContainer(k_imo_table) {}
+
+public:
+    virtual ~ImoTable() {}
+
+    //contents
+    ImoTableHead* get_head();
+    ImoTableBody* get_body();
+    std::list<ImoStyle*>& get_column_styles() { return m_colStyles; }
+    int get_num_columns() { return int( m_colStyles.size() ); }
+
+protected:
+    friend class BlockLevelCreatorApi;
+
+};
+
+//---------------------------------------------------------------------------------------
+class ImoTableCell : public ImoBoxContent
+{
+protected:
+    int m_rowspan;
+    int m_colspan;
+
+    friend class ImoBoxContainer;
+    friend class Document;
+    friend class ImFactory;
+    ImoTableCell() : ImoBoxContent(k_imo_table_cell), m_rowspan(1), m_colspan(1) {}
+
+public:
+    ~ImoTableCell() {}
+
+    //accessors
+    inline void set_rowspan(int value) { m_rowspan = value; }
+    inline int get_rowspan() { return m_rowspan; }
+    inline void set_colspan(int value) { m_colspan = value; }
+    inline int get_colspan() { return m_colspan; }
+
+
+    //required by Visitable parent class
+	virtual void accept_visitor(BaseVisitor& v);
+};
+
+//---------------------------------------------------------------------------------------
+class ImoTableRow : public ImoBoxContainer
+{
+protected:
+
+    friend class ImFactory;
+    ImoTableRow() : ImoBoxContainer(k_imo_table_row) {}
+
+public:
+    virtual ~ImoTableRow() {}
+
+    //contents
+    inline int get_num_cells() { return get_num_children(); }
+    inline void add_cell(ImoTableCell* pCell) { append_child_imo(pCell); }
+    ImoTableCell* get_cell(int iItem) {   //iItem = 0..n-1
+        return dynamic_cast<ImoTableCell*>( get_child(iItem) );
+    }
+
+protected:
+    friend class BlockLevelCreatorApi;
+
+};
+
+//---------------------------------------------------------------------------------------
+class ImoTableSection : public ImoCollection
+{
+protected:
+    ImoTableSection(int type) : ImoCollection(type) {}
+
+public:
+    virtual ~ImoTableSection() {}
+
+    void remove(ImoTableRow* pTR) { remove_child_imo(pTR); }
+    void add(ImoTableRow* pTR) { append_child_imo(pTR); }
+};
+
+//---------------------------------------------------------------------------------------
+class ImoTableBody : public ImoTableSection
+{
+protected:
+    friend class ImFactory;
+    friend class ImoContentObj;
+    ImoTableBody() : ImoTableSection(k_imo_table_body) {}
+
+public:
+    virtual ~ImoTableBody() {}
+};
+
+//---------------------------------------------------------------------------------------
+class ImoTableHead : public ImoTableSection
+{
+protected:
+    friend class ImFactory;
+    friend class ImoContentObj;
+    ImoTableHead() : ImoTableSection(k_imo_table_head) {}
+
+public:
+    virtual ~ImoTableHead() {}
 };
 
 //---------------------------------------------------------------------------------------

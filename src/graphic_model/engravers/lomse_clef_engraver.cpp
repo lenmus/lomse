@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -44,23 +44,22 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // ClefEngraver implementation
 //---------------------------------------------------------------------------------------
-ClefEngraver::ClefEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
-    : Engraver(libraryScope, pScoreMeter)
+ClefEngraver::ClefEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                           int iInstr, int iStaff)
+    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
 {
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* ClefEngraver::create_shape(ImoObj* pCreatorImo, int iInstr, int iStaff,
-                                     UPoint uPos, int clefType, int symbolSize)
+GmoShape* ClefEngraver::create_shape(ImoObj* pCreatorImo, UPoint uPos, int clefType,
+                                     int symbolSize)
 {
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
     m_nClefType = clefType;
     m_symbolSize = symbolSize;
     m_iGlyph = find_glyph();
 
     // get the shift to the staff on which the clef must be drawn
-    LUnits y = uPos.y + m_pMeter->tenths_to_logical(get_glyph_offset(), iInstr, iStaff);
+    LUnits y = uPos.y + m_pMeter->tenths_to_logical(get_glyph_offset(), m_iInstr, m_iStaff);
 
     double fontSize = determine_font_size();
 

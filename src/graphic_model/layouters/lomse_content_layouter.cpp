@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -56,7 +56,7 @@ ContentLayouter::ContentLayouter(ImoContentObj* pItem, Layouter* pParent,
 //---------------------------------------------------------------------------------------
 void ContentLayouter::layout_in_box()
 {
-    set_cursor_and_available_space(m_pItemMainBox);
+    set_cursor_and_available_space();
 
     TreeNode<ImoObj>::children_iterator it;
     for (it = m_pContent->begin(); it != m_pContent->end(); ++it)
@@ -102,7 +102,7 @@ MultiColumnLayouter::~MultiColumnLayouter()
 //---------------------------------------------------------------------------------------
 void MultiColumnLayouter::layout_in_box()
 {
-    set_cursor_and_available_space(m_pItemMainBox);
+    set_cursor_and_available_space();
 
     //get total witdh
     LUnits totalWidth = m_pItemMainBox->get_content_width();
@@ -243,7 +243,7 @@ ListLayouter::ListLayouter(ImoContentObj* pItem, Layouter* pParent,
 //---------------------------------------------------------------------------------------
 void ListLayouter::layout_in_box()
 {
-    set_cursor_and_available_space(m_pItemMainBox);
+    set_cursor_and_available_space();
 
     TreeNode<ImoObj>::children_iterator it;
     for (it = m_pList->begin(); it != m_pList->end(); ++it)
@@ -281,7 +281,7 @@ ScorePlayerLayouter::ScorePlayerLayouter(ImoContentObj* pItem, Layouter* pParent
 //---------------------------------------------------------------------------------------
 void ScorePlayerLayouter::layout_in_box()
 {
-    set_cursor_and_available_space(m_pItemMainBox);
+    set_cursor_and_available_space();
 
 
     //WordEngrouter engrouter(m_pPlayer, m_libraryScope, "Play");

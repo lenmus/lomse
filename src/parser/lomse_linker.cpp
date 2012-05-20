@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -114,6 +114,39 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
 
         case k_imo_style:
             return add_style(static_cast<ImoStyle*>(pChild));
+
+        case k_imo_table_cell:
+        {
+            if (m_pParent && m_pParent->is_table_row())
+                return add_child(k_imo_table_row, pChild);
+            else
+                return pChild;
+        }
+
+        case k_imo_table_row:
+        {
+            if (m_pParent)
+            {
+                if (m_pParent->is_table_head())
+                    return add_child(k_imo_table_head, pChild);
+                else if (m_pParent->is_table_body())
+                    return add_child(k_imo_table_body, pChild);
+                else
+                    return pChild;
+            }
+            else
+                return pChild;
+        }
+
+        case k_imo_table_head:
+        case k_imo_table_body:
+        case k_imo_table_caption:
+        {
+            if (m_pParent && m_pParent->is_table())
+                return add_child(k_imo_table, pChild);
+            else
+                return pChild;
+        }
 
         default:
             if (pChild->is_boxlevel_obj())

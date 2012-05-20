@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -36,6 +36,7 @@
 #include "lomse_time.h"
 #include "lomse_im_factory.h"
 
+#include <sstream>
 using namespace std;
 
 namespace lomse
@@ -44,14 +45,12 @@ namespace lomse
 //=======================================================================================
 // ColStaffObjsEntry implementation
 //=======================================================================================
-void ColStaffObjsEntry::dump()
+string ColStaffObjsEntry::dump()
 {
-    //cout << to_string() << ", time=" << m_time << ", staff=" << m_staff
-    //     << ", line=" << m_line << endl;
-    //measure     time       instr     line     staff     object
-    cout << m_measure << "\t" << m_time << "\t" << m_instr << "\t"
-         << m_line << "\t" << m_staff << "\t" << to_string_with_ids() << endl;
-
+    stringstream s;
+    s << m_measure << "\t" << m_time << "\t" << m_instr << "\t"
+      << m_line << "\t" << m_staff << "\t" << to_string_with_ids() << endl;
+    return s.str();
 }
 
 //---------------------------------------------------------------------------------------
@@ -122,17 +121,19 @@ void ColStaffObjs::AddEntry(int measure, float time, int instr, int voice, int s
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjs::dump()
+string ColStaffObjs::dump()
 {
+    stringstream s;
     std::vector<ColStaffObjsEntry*>::iterator it;
-    cout << "Num.entries = " << num_entries() << endl;
-    //       +.......+.......+.......+.......+.......+.......+
-    cout << "seg.    time    instr   line    staff   object" << endl;
-    cout << "----------------------------------------------------------------" << endl;
+    s << "Num.entries = " << num_entries() << endl;
+    //    +.......+.......+.......+.......+.......+.......+
+    s << "seg.    time    instr   line    staff   object" << endl;
+    s << "----------------------------------------------------------------" << endl;
     for (it=m_table.begin(); it != m_table.end(); ++it)
     {
-        (*it)->dump();
+        s << (*it)->dump();
     }
+    return s.str();
 }
 
 //---------------------------------------------------------------------------------------
@@ -156,7 +157,6 @@ ColStaffObjs* ColStaffObjsBuilder::build(ImoScore* pScore, bool fSort)
     //param fSort is to prevent sorting the table for unit tests
 
     m_pColStaffObjs = LOMSE_NEW ColStaffObjs();
-    m_pScore = NULL;
     m_pImScore = pScore;
     create_table();
     set_num_lines();
@@ -203,7 +203,7 @@ void ColStaffObjsBuilder::create_entries(int nInstr)
     {
         if ((*it)->is_go_back_fwd())
         {
-            ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>(*it);
+            ImoGoBackFwd* pGBF = static_cast<ImoGoBackFwd*>(*it);
             update_time_counter(pGBF);
         }
         else if ((*it)->is_key_signature() || (*it)->is_time_signature())
@@ -212,7 +212,7 @@ void ColStaffObjsBuilder::create_entries(int nInstr)
         }
         else
         {
-            ImoStaffObj* pSO = dynamic_cast<ImoStaffObj*>(*it);
+            ImoStaffObj* pSO = static_cast<ImoStaffObj*>(*it);
             add_entry_for_staffobj(pSO, nInstr);
             update_measure(pSO);
         }
@@ -227,9 +227,11 @@ void ColStaffObjsBuilder::add_entry_for_staffobj(ImoObj* pImo, int nInstr)
     float rTime = determine_timepos(pSO);
     int nStaff = pSO->get_staff();
     int nVoice = 0;
-    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
-    if (pNR)
+    if (pSO->is_note_rest())
+    {
+        ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
         nVoice = pNR->get_voice();
+    }
     int nLine = get_line_for(nVoice, nStaff);
     m_pColStaffObjs->AddEntry(m_nCurSegment, rTime, nInstr, nLine, nStaff, pSO);
 }
@@ -284,7 +286,7 @@ float ColStaffObjsBuilder::determine_timepos(ImoStaffObj* pSO)
     float rTime = m_rCurTime;
     if (pSO->is_note())
     {
-        ImoNote* pNote = dynamic_cast<ImoNote*>(pSO);
+        ImoNote* pNote = static_cast<ImoNote*>(pSO);
         if (!pNote->is_in_chord() || pNote->is_end_of_chord())
             m_rCurTime += pSO->get_duration();
     }
@@ -297,8 +299,7 @@ float ColStaffObjsBuilder::determine_timepos(ImoStaffObj* pSO)
 //---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::update_measure(ImoStaffObj* pSO)
 {
-    ImoBarline* pBL = dynamic_cast<ImoBarline*>(pSO);
-    if (pBL)
+    if (pSO->is_barline())
     {
         ++m_nCurSegment;
         m_rMaxSegmentTime = 0.0f;
@@ -334,9 +335,6 @@ void ColStaffObjsBuilder::update_time_counter(ImoGoBackFwd* pGBF)
 //---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::update(ImoScore* pScore)
 {
-    ColStaffObjs* pOldColStaffObjs = pScore->get_staffobjs_table();
-    delete pOldColStaffObjs;
-
     //For now, rebuild the table
     m_pImScore = pScore;
     this->build(pScore);
@@ -364,7 +362,7 @@ void ColStaffObjsBuilder::collect_anacrusis_info()
         ImoObj* pSO = (*it)->imo_object();
         if (pSO->is_time_signature())
         {
-            pTS = dynamic_cast<ImoTimeSignature*>( pSO );
+            pTS = static_cast<ImoTimeSignature*>( pSO );
             break;
         }
         else if (pSO->is_note_rest())

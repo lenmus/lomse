@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -74,7 +74,6 @@ class GraphicModel
 {
 protected:
     GmoBoxDocument* m_root;
-    bool m_fCanBeDrawn;
     bool m_modified;
     std::map<ImoNoteRest*, GmoShape*> m_noterestToShape;
     std::map<ImoObj*, RefToGmo*> m_imoToGmo;
@@ -91,7 +90,6 @@ public:
     inline bool is_modified() { return m_modified; }
 
     //drawing
-    inline void set_ready(bool value) { m_fCanBeDrawn = value; }
     void draw_page(int iPage, UPoint& origin, Drawer* pDrawer, RenderOptions& opt);
     void highlight_object(ImoStaffObj* pSO, bool value);
 
@@ -183,7 +181,7 @@ public:
                 k_box_document=0, k_box_doc_page, k_box_doc_page_content,
                 k_box_inline, k_box_link, k_box_paragraph,
                 k_box_score_page, k_box_slice, k_box_slice_instr, k_box_system,
-                k_box_control,
+                k_box_control, k_box_table, k_box_table_rows,
            k_shape,
                 k_shape_accidentals, k_shape_accidental_sign,
                 k_shape_barline,
@@ -191,6 +189,7 @@ public:
                 k_shape_bracket, k_shape_button,
                 k_shape_clef, k_shape_dot, k_shape_fermata, k_shape_flag, k_shape_image,
                 k_shape_invisible, k_shape_key_signature,
+                k_shape_metronome_glyph, k_shape_metronome_mark,
                 k_shape_line, k_shape_note, k_shape_notehead,
                 k_shape_rectangle, k_shape_rest, k_shape_rest_glyph,
                 k_shape_slur, k_shape_stem, k_shape_staff,
@@ -209,9 +208,10 @@ public:
     inline bool is_shape() { return m_objtype >= k_shape; }
 
     //item main boxes
+    inline bool is_box_control() { return m_objtype == k_box_control; }
     inline bool is_box_score_page() { return m_objtype == k_box_score_page; }
     inline bool is_box_paragraph() { return m_objtype == k_box_paragraph; }
-    inline bool is_box_control() { return m_objtype == k_box_control; }
+    inline bool is_box_table() { return m_objtype == k_box_table; }
 
     //other boxes
     inline bool is_box_document() { return m_objtype == k_box_document; }
@@ -222,6 +222,7 @@ public:
     inline bool is_box_slice() { return m_objtype == k_box_slice; }
     inline bool is_box_slice_instr() { return m_objtype == k_box_slice_instr; }
     inline bool is_box_system() { return m_objtype == k_box_system; }
+    inline bool is_box_table_rows() { return m_objtype == k_box_table_rows; }
 
     inline bool is_shape_accidentals() { return m_objtype == k_shape_accidentals; }
     inline bool is_shape_accidental_sign() { return m_objtype == k_shape_accidental_sign; }
@@ -238,6 +239,8 @@ public:
     inline bool is_shape_invisible() { return m_objtype == k_shape_invisible; }
     inline bool is_shape_key_signature() { return m_objtype == k_shape_key_signature; }
     inline bool is_shape_line() { return m_objtype == k_shape_line; }
+    inline bool is_shape_metronome_glyph() { return m_objtype == k_shape_metronome_glyph; }
+    inline bool is_shape_metronome_mark() { return m_objtype == k_shape_metronome_mark; }
     inline bool is_shape_note() { return m_objtype == k_shape_note; }
     inline bool is_shape_notehead() { return m_objtype == k_shape_notehead; }
     inline bool is_shape_rectangle() { return m_objtype == k_shape_rectangle; }
@@ -484,8 +487,7 @@ class GmoBoxDocPage : public GmoBox
 {
 protected:
     int m_numPage;
-	std::list<GmoLayer*> m_Layers;     //contained shapes, ordered by layer
-    std::list<GmoShape*> m_allShapes;		//contained shapes, ordered by creation order
+    std::list<GmoShape*> m_allShapes;		//contained shapes, ordered by layer and creation order
 
 public:
     GmoBoxDocPage(ImoObj* pCreatorImo);
@@ -605,6 +607,28 @@ public:
 protected:
     //overrides
     ImoStyle* get_style() { return m_pStyle; }
+};
+
+//---------------------------------------------------------------------------------------
+class GmoBoxTable : public GmoBox
+{
+protected:
+
+public:
+    GmoBoxTable(ImoObj* pCreatorImo)
+        : GmoBox(GmoObj::k_box_table, pCreatorImo) {}
+    virtual ~GmoBoxTable() {}
+};
+
+//---------------------------------------------------------------------------------------
+class GmoBoxTableRows : public GmoBox
+{
+protected:
+
+public:
+    GmoBoxTableRows(ImoObj* pCreatorImo)
+        : GmoBox(GmoObj::k_box_table_rows, pCreatorImo) {}
+    virtual ~GmoBoxTableRows() {}
 };
 
 

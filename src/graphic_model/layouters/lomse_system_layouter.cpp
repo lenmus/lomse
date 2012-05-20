@@ -40,9 +40,9 @@
 #include "lomse_logger.h"
 
 #include "lomse_score_layouter.h"
-#include "lomse_shape_barline.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_engraving_options.h"
+#include "lomse_barline_engraver.h"
 #include "lomse_instrument_engraver.h"
 
 #include <iostream>
@@ -65,7 +65,8 @@ namespace lomse
 //=====================================================================================
 //LineEntry implementation
 //=====================================================================================
-LineEntry::LineEntry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, float rTime)
+LineEntry::LineEntry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, float rTime,
+                     LUnits xUserShift, LUnits yUserShift)
     : m_fIsBarlineEntry(false)
     , m_pSO(pSO)
     , m_pShape(pShape)
@@ -77,6 +78,8 @@ LineEntry::LineEntry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, float rTi
     , m_uSize(0.0f)
     , m_uFixedSpace(0.0f)
     , m_uVariableSpace(0.0f)
+    , m_xUserShift(xUserShift)
+    , m_yUserShift(yUserShift)
 {
     //AWARE: At this moment is not possible to use shape information because, as
     //layouting continues and more objects are added to the line, the shape
@@ -102,6 +105,8 @@ LineEntry::LineEntry(bool fIsBarlineEntry, bool fProlog, float rTime, LUnits xAn
     , m_uSize(uSize)
     , m_uFixedSpace(uFixedSpace)
     , m_uVariableSpace(uVarSpace)
+    , m_xUserShift(0.0f)
+    , m_yUserShift(0.0f)
 {
 }
 
@@ -146,10 +151,8 @@ void LineEntry::move_shape(UPoint sliceOrg)
 {
     if (m_pSO && m_pShape)
     {
-        //TODO
-        //LUnits uShift = m_xLeft - m_pShape->get_left();
-//        m_pSO->StoreOriginAndShiftShapes( uShift, m_pShape->GetOwnerIDX() );
-        m_pShape->set_origin_and_notify_observers(m_xLeft, sliceOrg.y);
+        m_pShape->set_origin_and_notify_observers(m_xLeft + m_xUserShift,
+                                                  sliceOrg.y + m_yUserShift);
     }
 }
 
@@ -251,9 +254,10 @@ MusicLine::~MusicLine()
 
 //---------------------------------------------------------------------------------------
 LineEntry* MusicLine::add_entry(ImoStaffObj* pSO, GmoShape* pShape, float rTime,
-                                bool fInProlog)
+                                bool fInProlog, LUnits xUserShift, LUnits yUserShift)
 {
-    LineEntry* pEntry = LOMSE_NEW LineEntry(pSO, pShape, fInProlog, rTime);
+    LineEntry* pEntry = LOMSE_NEW LineEntry(pSO, pShape, fInProlog, rTime,
+                                            xUserShift, yUserShift);
     push_back(pEntry);
 	return pEntry;
 }
@@ -263,8 +267,9 @@ void MusicLine::add_shapes(GmoBoxSliceInstr* pSliceInstrBox)
 {
     for (LineEntryIterator it = m_LineEntries.begin(); it != m_LineEntries.end(); ++it)
     {
-        if ((*it)->get_shape())
-            pSliceInstrBox->add_shape((*it)->get_shape(), GmoShape::k_layer_notes);
+        GmoShape* pShape = (*it)->get_shape();
+        if (pShape)
+            pSliceInstrBox->add_shape(pShape, GmoShape::k_layer_notes);
     }
 }
 
@@ -430,6 +435,9 @@ ColumnLayouter::ColumnLayouter(LibraryScope& libraryScope, ScoreMeter* pScoreMet
     , m_pScoreMeter(pScoreMeter)
     , m_fHasSystemBreak(false)
     , m_penalty(1.0f)
+    , m_fHasShapes(false)
+    , m_yMin(10000000.0f)
+    , m_yMax(-10000000.0f)
 {
     reserve_space_for_prolog_clefs_keys( m_pScoreMeter->num_staves() );
 }
@@ -684,7 +692,14 @@ LUnits ColumnLayouter::redistribute_space(LUnits uNewStart, LUnits uNewWidth,
                                           UPoint org)
 {
     ColumnResizer oResizer(m_pColStorage, uNewWidth);
-	return oResizer.reposition_shapes(uNewStart, uNewWidth, org);
+	LUnits xPos = oResizer.reposition_shapes(uNewStart, uNewWidth, org);
+    if (oResizer.has_shapes())
+    {
+        m_fHasShapes = true;
+        m_yMin = min(m_yMin, oResizer.get_y_min());
+        m_yMax = max(m_yMax, oResizer.get_y_max());
+    }
+    return xPos;
 }
 
 //---------------------------------------------------------------------------------------
@@ -698,11 +713,17 @@ void ColumnLayouter::start_column_measurements(LUnits uxStart, LUnits fixedSpace
 
 //---------------------------------------------------------------------------------------
 void ColumnLayouter::include_object(int iLine, int iInstr, ImoStaffObj* pSO, float rTime,
-                                   int nStaff, GmoShape* pShape, bool fInProlog)
+                                   int iStaff, GmoShape* pShape, bool fInProlog)
 {
     //caller sends data about one staffobj in current bar, for column iCol [0..n-1]
 
-    m_pColStorage->include_object(iLine, iInstr, pSO, rTime, nStaff, pShape, fInProlog);
+    LUnits xUserShift =
+        m_pScoreMeter->tenths_to_logical(pSO->get_user_location_x(), iInstr, iStaff);
+    LUnits yUserShift =
+        m_pScoreMeter->tenths_to_logical(pSO->get_user_location_y(), iInstr, iStaff);
+
+    m_pColStorage->include_object(iLine, iInstr, pSO, rTime, iStaff, pShape, fInProlog,
+                                  xUserShift, yUserShift);
 }
 
 //---------------------------------------------------------------------------------------
@@ -758,6 +779,9 @@ SystemLayouter::SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& librarySc
     , m_ColLayouters(colLayouters)
     , m_instrEngravers(instrEngravers)
     , m_uPrologWidth(0.0f)
+    , m_pBoxSystem(NULL)
+    , m_yMin(0.0f)
+    , m_yMax(0.0f)
 {
 }
 
@@ -778,6 +802,9 @@ GmoBoxSystem* SystemLayouter::create_system_box(LUnits left, LUnits top, LUnits 
 
     m_pBoxSystem->set_width(width);
     m_pBoxSystem->set_height(height);
+    m_yMin = top;
+    m_yMax = top + height;
+
     return m_pBoxSystem;
 }
 
@@ -800,7 +827,9 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
 
     engrave_instrument_details();
 
-    if (!m_pScoreLyt->is_system_empty(m_iSystem))
+    ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.Hide");
+    bool fDrawStafflines = (pOpt == NULL || pOpt->get_bool_value() == false);
+    if (!m_pScoreLyt->is_system_empty(m_iSystem) && fDrawStafflines)
         add_initial_line_joining_all_staves_in_system();
 }
 
@@ -945,7 +974,7 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
     //at the start of the new system.
     LUnits xStartPos = m_pagePos.x;      //Save x to align all clefs
 
-    //iterate over the collection of lmStaff objects to draw current clef and key signature
+    //iterate over the collection of staff objects to draw current clef and key signature
     ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
 
     GmoBoxSystem* pBox = get_box_system();
@@ -959,21 +988,20 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
             m_ColLayouters[m_iFirstCol]->get_prolog_clef(iStaffIndex);
         ColStaffObjsEntry* pKeyEntry =
             m_ColLayouters[m_iFirstCol]->get_prolog_key(iStaffIndex);
-        ImoClef* pClef = pClefEntry ? dynamic_cast<ImoClef*>(pClefEntry->imo_object())
+        ImoClef* pClef = pClefEntry ? static_cast<ImoClef*>(pClefEntry->imo_object())
                                     : NULL;
         int clefType = pClef ? pClef->get_clef_type() : k_clef_undefined;
 
         //add clef shape
         if (pClefEntry)
         {
-            ImoClef* pClef = dynamic_cast<ImoClef*>( pClefEntry->imo_object() );
             if (pClef && pClef->is_visible())
             {
                 xPos += m_pScoreMeter->tenths_to_logical(LOMSE_SPACE_BEFORE_PROLOG, iInstr, iStaff);
                 m_pagePos.x = xPos;
                 GmoShape* pShape =
                     m_pShapesCreator->create_staffobj_shape(pClef, iInstr, iStaff,
-                                                            m_pagePos);
+                                                            m_pagePos, clefType);
                 pBox->add_shape(pShape, GmoShape::k_layer_notes);
                 xPos += pShape->get_width();
             }
@@ -1048,6 +1076,13 @@ void SystemLayouter::reposition_slices_and_staffobjs()
 
         //reposition staffobjs
         LUnits xEndPos = redistribute_space(iCol, xStartPos);
+
+        //collect information about system vertical limits
+        if (m_ColLayouters[iCol]->has_shapes())
+        {
+            m_yMin = min(m_yMin, m_ColLayouters[iCol]->get_y_min());
+            m_yMax = max(m_yMax, m_ColLayouters[iCol]->get_y_max());
+        }
 
         //assign justified width to boxes
         m_ColLayouters[iCol]->set_slice_width(xEndPos - xStartPos);
@@ -1160,17 +1195,26 @@ void SystemLayouter::add_initial_line_joining_all_staves_in_system()
 //    lmVStaff* pVStaff = m_pScore->GetFirstInstrument()->GetVStaff();
 	if (m_pScoreMeter->must_draw_left_barline())    //&& !pVStaff->HideStaffLines() )
 	{
+        //ImoObj* pCreator = m_pScore->get_instrument(0);
+        //LUnits xPos = m_instrEngravers[0]->get_staves_left();
+        //LUnits yTop = m_instrEngravers[0]->get_staves_top_line();
+        //int iInstr = m_pScoreMeter->num_instruments() - 1;
+        //LUnits yBottom = m_instrEngravers[iInstr]->get_staves_bottom_line();
+        //LUnits uLineThickness =
+        //    m_pScoreMeter->tenths_to_logical(LOMSE_THIN_LINE_WIDTH, 0, 0);
+        //GmoShape* pLine = LOMSE_NEW GmoShapeBarline(pCreator, 0, ImoBarline::k_simple,
+        //                                      xPos, yTop, yBottom,
+        //                                      uLineThickness, uLineThickness,
+        //                                      0.0f, 0.0f, Color(0,0,0), uLineThickness);
+        //m_pBoxSystem->add_shape(pLine, GmoShape::k_layer_staff);
+
         ImoObj* pCreator = m_pScore->get_instrument(0);
         LUnits xPos = m_instrEngravers[0]->get_staves_left();
         LUnits yTop = m_instrEngravers[0]->get_staves_top_line();
         int iInstr = m_pScoreMeter->num_instruments() - 1;
         LUnits yBottom = m_instrEngravers[iInstr]->get_staves_bottom_line();
-        LUnits uLineThickness =
-            m_pScoreMeter->tenths_to_logical(LOMSE_THIN_LINE_WIDTH, 0, 0);
-        GmoShape* pLine = LOMSE_NEW GmoShapeBarline(pCreator, 0, ImoBarline::k_simple,
-                                              xPos, yTop, yBottom,
-                                              uLineThickness, uLineThickness,
-                                              0.0f, 0.0f, Color(0,0,0), uLineThickness);
+        BarlineEngraver engrv(m_libraryScope, m_pScoreMeter);
+        GmoShape* pLine = engrv.create_system_barline_shape(pCreator, xPos, yTop, yBottom);
         m_pBoxSystem->add_shape(pLine, GmoShape::k_layer_staff);
 	}
 }
@@ -1192,11 +1236,15 @@ void SystemLayouter::truncate_current_system(LUnits indent)
 //---------------------------------------------------------------------------------------
 void SystemLayouter::engrave_instrument_details()
 {
+    ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.Hide");
+    bool fDrawStafflines = (pOpt == NULL || pOpt->get_bool_value() == false);
+
     int maxInstr = m_pScore->get_num_instruments() - 1;
     for (int iInstr = 0; iInstr <= maxInstr; iInstr++)
     {
         InstrumentEngraver* engrv = m_instrEngravers[iInstr];
-        engrv->add_staff_lines(m_pBoxSystem);
+        if (fDrawStafflines)
+            engrv->add_staff_lines(m_pBoxSystem);
         engrv->add_name_abbrev(m_pBoxSystem, m_iSystem);
         engrv->add_brace_bracket(m_pBoxSystem);
     }
@@ -1215,10 +1263,10 @@ void SystemLayouter::engrave_system_details(int iSystem)
         {
             PendingAuxObjs* pPAO = *it;
             engrave_attached_objects((*it)->m_pSO, (*it)->m_pMainShape,
-                                     (*it)->m_iInstr, (*it)->m_iStaff,
-                                     objSystem,
+                                     (*it)->m_iInstr, (*it)->m_iStaff, objSystem,
                                      (*it)->m_iCol, (*it)->m_iLine,
-                                     (*it)->m_pInstr );
+                                     (*it)->m_pInstr
+                                    );
 		    it = m_pScoreLyt->m_pendingAuxObjs.erase(it);
             delete pPAO;
         }
@@ -1233,6 +1281,9 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
                                              int iCol, int iLine,
                                              ImoInstrument* pInstr)
 {
+    InstrumentEngraver* pInstrEngrv = m_instrEngravers[iInstr];
+    LUnits yTop = pInstrEngrv->get_staves_top_line();
+
     //rel objs
     if (pSO->get_num_relations() > 0)
     {
@@ -1247,7 +1298,7 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
 		        if (pSO == pRO->get_start_object())
                     m_pShapesCreator->start_engraving_relobj(pRO, pSO, pMainShape,
                                                             iInstr, iStaff, iSystem, iCol,
-                                                            iLine, pInstr, m_pagePos);
+                                                            iLine, pInstr);
 		        else if (pSO == pRO->get_end_object())
 		        {
                     SystemLayouter* pSysLyt = m_pScoreLyt->get_system_layouter(iSystem);
@@ -1277,10 +1328,11 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
 
             GmoShape* pAuxShape =
                         m_pShapesCreator->create_auxobj_shape(pAO, iInstr, iStaff,
-                                                            pMainShape, m_pagePos);
+                                                            pMainShape, yTop);
             pMainShape->accept_link_from(pAuxShape);
             add_auxobj_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs, iSystem,
                                         iCol, iInstr);
+            m_yMax = max(m_yMax, pAuxShape->get_bottom());
         }
     }
 }
@@ -1303,7 +1355,7 @@ void SystemLayouter::add_auxobjs_shapes_to_model(ImoObj* pAO, GmoShape* pStaffOb
 
         //pStaffObjShape->accept_link_from(pAuxShape);
         add_auxobj_shape_to_model(pAuxShape, layer, iSystem, iCol, iInstr);
-    }
+   }
 
     m_shapesStorage.remove_engraver(pAO);
     delete pEngrv;
@@ -1316,6 +1368,7 @@ void SystemLayouter::add_auxobj_shape_to_model(GmoShape* pShape, int layer, int 
     pShape->set_layer(layer);
     GmoBoxSliceInstr* pBox = m_ColLayouters[iCol]->get_slice_instr(iInstr);
     pBox->add_shape(pShape, layer);
+    m_yMax = max(m_yMax, pShape->get_bottom());
 }
 
 
@@ -1523,7 +1576,8 @@ void ColumnStorage::finish_column_measurements(LUnits xStart)
 
 //---------------------------------------------------------------------------------------
 bool ColumnStorage::include_object(int line, int instr, ImoStaffObj* pSO, float rTime,
-                                  int nStaff, GmoShape* pShape, bool fInProlog)
+                                  int nStaff, GmoShape* pShape, bool fInProlog,
+                                  LUnits xUserShift, LUnits yUserShift)
 {
     //if doesn't exist, start it
     LinesIterator it = find_line(line);
@@ -1531,7 +1585,8 @@ bool ColumnStorage::include_object(int line, int instr, ImoStaffObj* pSO, float 
         it = start_line(line, instr);
 
     //add new entry for this object
-	LineEntry* pCurEntry = (*it)->add_entry(pSO, pShape, rTime, fInProlog);
+	LineEntry* pCurEntry =
+        (*it)->add_entry(pSO, pShape, rTime, fInProlog, xUserShift, yUserShift);
 
 	return pCurEntry->is_prolog_object();
 }
@@ -1550,6 +1605,9 @@ LineResizer::LineResizer(MusicLine* pLine, LUnits uOldWidth,
     , m_uNewWidth(uNewWidth)
     , m_uNewStart(uNewStart)
     , m_sliceOrg(sliceOrg)
+    , m_fHasShapes(false)
+    , m_yMin(10000000.0f)
+    , m_yMax(-10000000.0f)
 {
 }
 
@@ -1571,6 +1629,15 @@ float LineResizer::move_prolog_shapes()
                 LUnits uNewPos = uLineShift + (*it)->get_position();
                 (*it)->reposition_at(uNewPos);
                 (*it)->move_shape(m_sliceOrg);
+
+                //get shape limits
+                GmoShape* pShape = (*it)->get_shape();
+                if (pShape && !pShape->is_shape_invisible())
+                {
+                    m_yMax = max(m_yMax, pShape->get_bottom());
+                    m_yMin = min(m_yMin, pShape->get_top());
+                    m_fHasShapes = true;
+                }
             }
             else
 			    break;
@@ -1612,7 +1679,9 @@ void LineResizer::reasign_position_to_all_other_objects(LUnits uFizedSizeAtStart
     //Compute proportion factor
     LUnits uLineStartPos = m_pLine->get_line_start_position();
     LUnits uDiscount = uFizedSizeAtStart - uLineStartPos;
-    float rProp = (m_uNewWidth-uDiscount) / (m_uOldWidth-uDiscount);
+    float rProp = 1.0f;
+    if (m_uNewWidth-uDiscount != m_uOldWidth-uDiscount)
+        rProp = (m_uNewWidth-uDiscount) / (m_uOldWidth-uDiscount);
 
 	//Reposition the remainder entries
     for (LineEntryIterator it = m_itCurrent; it != m_pLine->end(); ++it)
@@ -1630,10 +1699,18 @@ void LineResizer::reasign_position_to_all_other_objects(LUnits uFizedSizeAtStart
             LUnits uNewPos = uOldPos + uShift + (*it)->get_anchor();;
             (*it)->reposition_at(uNewPos);
             (*it)->move_shape(m_sliceOrg);
+
+            //get shape limits
+            GmoShape* pShape = (*it)->get_shape();
+            if (pShape && !pShape->is_shape_invisible())
+            {
+                m_yMax = max(m_yMax, pShape->get_bottom());
+                m_yMin = min(m_yMin, pShape->get_top());
+                m_fHasShapes = true;
+            }
         }
     }
 }
-
 
 
 //=======================================================================================
@@ -2361,6 +2438,9 @@ LUnits TimeGridLineExplorer::get_position_for_found_entry()
 ColumnResizer::ColumnResizer(ColumnStorage* pColStorage, LUnits uNewWidth)
     : m_pColStorage(pColStorage)
     , m_uNewWidth(uNewWidth)
+    , m_fHasShapes(false)
+    , m_yMin(10000000.0f)
+    , m_yMax(-10000000.0f)
 {
 }
 
@@ -2375,6 +2455,7 @@ LUnits ColumnResizer::reposition_shapes(LUnits uNewStart, LUnits uNewWidth, UPoi
     move_prolog_shapes_and_get_initial_time();
     determine_fixed_size_at_start_of_column();
     reposition_all_other_shapes();
+    determine_vertical_limits();
     delete_line_resizers();
 
     return uNewStart + uNewWidth;
@@ -2419,6 +2500,21 @@ void ColumnResizer::reposition_all_other_shapes()
     std::vector<LineResizer*>::iterator itR;
 	for (itR = m_LineResizers.begin(); itR != m_LineResizers.end(); ++itR)
 		(*itR)->reasign_position_to_all_other_objects(m_uFixedPart);
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnResizer::determine_vertical_limits()
+{
+    std::vector<LineResizer*>::iterator itR;
+	for (itR = m_LineResizers.begin(); itR != m_LineResizers.end(); ++itR)
+	{
+        if ((*itR)->has_shapes())
+        {
+            m_yMax = max(m_yMax, (*itR)->get_y_max());
+            m_yMin = min(m_yMin, (*itR)->get_y_min());
+            m_fHasShapes = true;
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------

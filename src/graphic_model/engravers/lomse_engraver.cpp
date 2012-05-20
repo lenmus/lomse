@@ -27,47 +27,33 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_CLEF_ENGRAVER_H__        //to avoid nested includes
-#define __LOMSE_CLEF_ENGRAVER_H__
-
-#include "lomse_basic.h"
-#include "lomse_injectors.h"
 #include "lomse_engraver.h"
-#include "lomse_score_enums.h"
+
+#include "lomse_internal_model.h"
+#include "lomse_score_meter.h"
+
 
 namespace lomse
 {
 
-//forward declarations
-class ImoClef;
-class GmoBoxSliceInstr;
-class GmoShape;
-class ScoreMeter;
-
 //---------------------------------------------------------------------------------------
-class ClefEngraver : public Engraver
+// Engraver implementation
+//---------------------------------------------------------------------------------------
+LUnits Engraver::tenths_to_logical(Tenths value)
 {
-protected:
-    int m_nClefType;
-    int m_symbolSize;
-    int m_iGlyph;
+    return m_pMeter->tenths_to_logical(value, m_iInstr, m_iStaff);
+}
 
-public:
-    ClefEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int iInstr,
-                 int iStaff);
-    ~ClefEngraver() {}
+double Engraver::determine_font_size()
+{
+    return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
+}
 
-    GmoShape* create_shape(ImoObj* pCreatorImo, UPoint uPos, int clefType,
-                           int m_symbolSize=k_size_full);
-
-protected:
-    int find_glyph();
-    double determine_font_size();
-    Tenths get_glyph_offset();
-};
+void Engraver::add_user_shift(ImoContentObj* pImo, UPoint* pos)
+{
+    (*pos).x += tenths_to_logical(pImo->get_user_location_x());
+    (*pos).y += tenths_to_logical(pImo->get_user_location_y());
+}
 
 
-}   //namespace lomse
-
-#endif    // __LOMSE_CLEF_ENGRAVER_H__
-
+}  //namespace lomse

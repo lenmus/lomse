@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -49,25 +49,22 @@ class KeyEngraver : public Engraver
 protected:
     GmoShapeKeySignature* m_pKeyShape;
     int m_nKeyType;
-    int m_iInstr;
-    int m_iStaff;
     Tenths m_tPos[8];           //sharps/flats positions, in order of appearance
     double m_fontSize;
     ImoObj* m_pCreatorImo;
 
 public:
-    KeyEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
+    KeyEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int iInstr,
+                int iStaff);
     ~KeyEngraver() {}
 
-    GmoShape* create_shape(ImoKeySignature* pKey, int iInstr, int iStaff,
-                           int clefType, UPoint uPos);
+    GmoShape* create_shape(ImoKeySignature* pKey, int clefType, UPoint uPos);
 
 protected:
     void compute_positions_for_flats(int clefType);
     void compute_positions_for_sharps(int clefType);
     void add_accidentals(int numAccidentals, int iGlyph, UPoint uPos);
     int get_num_fifths(int keyType);
-    double determine_font_size();
 
 };
 

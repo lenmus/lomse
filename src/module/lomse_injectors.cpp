@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -186,7 +186,7 @@ ScreenDrawer* Injector::inject_ScreenDrawer(LibraryScope& libraryScope)
 //---------------------------------------------------------------------------------------
 SimpleView* Injector::inject_SimpleView(LibraryScope& libraryScope, Document* pDoc)  //UserCommandExecuter* pExec)
 {
-    return dynamic_cast<SimpleView*>(
+    return static_cast<SimpleView*>(
                         inject_View(libraryScope,
                                     ViewFactory::k_view_simple,
                                     pDoc)
@@ -197,7 +197,7 @@ SimpleView* Injector::inject_SimpleView(LibraryScope& libraryScope, Document* pD
 VerticalBookView* Injector::inject_VerticalBookView(LibraryScope& libraryScope,
                                                     Document* pDoc)  //UserCommandExecuter* pExec)
 {
-    return dynamic_cast<VerticalBookView*>(
+    return static_cast<VerticalBookView*>(
                         inject_View(libraryScope,
                                     ViewFactory::k_view_vertical_book,
                                     pDoc)
@@ -208,7 +208,7 @@ VerticalBookView* Injector::inject_VerticalBookView(LibraryScope& libraryScope,
 HorizontalBookView* Injector::inject_HorizontalBookView(LibraryScope& libraryScope,
                                                         Document* pDoc)  //UserCommandExecuter* pExec)
 {
-    return dynamic_cast<HorizontalBookView*>(
+    return static_cast<HorizontalBookView*>(
                         inject_View(libraryScope,
                                     ViewFactory::k_view_horizontal_book,
                                     pDoc)
@@ -250,7 +250,7 @@ Task* Injector::inject_Task(int taskType, Interactor* pIntor)
 }
 
 //---------------------------------------------------------------------------------------
-ScorePlayer* Injector::inject_ScorePlayer(LibraryScope& libraryScope, 
+ScorePlayer* Injector::inject_ScorePlayer(LibraryScope& libraryScope,
                                           MidiServerBase* pSoundServer)
 {
     return LOMSE_NEW ScorePlayer(libraryScope, pSoundServer);

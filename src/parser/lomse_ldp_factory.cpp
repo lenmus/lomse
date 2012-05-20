@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -87,6 +87,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_classid] = "classid";
     m_TypeToName[k_clef] = "clef";
     m_TypeToName[k_color] = "color";
+    m_TypeToName[k_colspan] = "colspan";
     m_TypeToName[k_content] = "content";
     m_TypeToName[k_creationMode] = "creationMode";
     m_TypeToName[k_ctrol1_x] = "ctrol1-x";
@@ -146,8 +147,13 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_margin_right] = "margin-right";
     m_TypeToName[k_margin_bottom] = "margin-bottom";
     m_TypeToName[k_margin_left] = "margin-left";
+    m_TypeToName[k_max_height] = "max-height";
+    m_TypeToName[k_max_width] = "max-width";
     m_TypeToName[k_meta] = "meta";
     m_TypeToName[k_metronome] = "metronome";
+    m_TypeToName[k_min_height] = "min-height";
+    m_TypeToName[k_min_width] = "min-width";
+    m_TypeToName[k_mm] = "mm";
     m_TypeToName[k_musicData] = "musicData";
     m_TypeToName[k_na] = "na";  //note in chord
     m_TypeToName[k_name] = "name";
@@ -172,6 +178,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_portrait] = "portrait";
     m_TypeToName[k_rest] = "r";   //rest
     m_TypeToName[k_right] = "right";
+    m_TypeToName[k_rowspan] = "rowspan";
     m_TypeToName[k_score] = "score";
     m_TypeToName[k_score_player] = "scorePlayer";
     m_TypeToName[k_settings] = "settings";
@@ -200,7 +207,13 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_styles] = "styles";
     m_TypeToName[k_systemLayout] = "systemLayout";
     m_TypeToName[k_systemMargins] = "systemMargins";
-    m_TypeToName[k_tuplet] = "t";
+    m_TypeToName[k_table] = "table";
+    m_TypeToName[k_table_cell] = "tableCell";
+    m_TypeToName[k_table_column] = "tableColumn";
+    m_TypeToName[k_table_col_width] = "table-col-width";
+    m_TypeToName[k_table_body] = "tableBody";
+    m_TypeToName[k_table_head] = "tableHead";
+    m_TypeToName[k_table_row] = "tableRow";
     m_TypeToName[k_text] = "text";
     m_TypeToName[k_textbox] = "textbox";
     m_TypeToName[k_text_align] = "text-align";
@@ -208,6 +221,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_tie] = "tie";
     m_TypeToName[k_time_signature] = "time";
     m_TypeToName[k_title] = "title";
+    m_TypeToName[k_tuplet] = "t";
     m_TypeToName[k_txt] = "txt";
     m_TypeToName[k_undefined] = "undefined";
     m_TypeToName[k_undoData] = "undoData";
@@ -250,6 +264,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["classid"] = LOMSE_NEW LdpElementFunctor<k_classid>;
     m_NameToFunctor["clef"] = LOMSE_NEW LdpElementFunctor<k_clef>;
     m_NameToFunctor["color"] = LOMSE_NEW LdpElementFunctor<k_color>;
+    m_NameToFunctor["colspan"] = LOMSE_NEW LdpElementFunctor<k_colspan>;
     m_NameToFunctor["content"] = LOMSE_NEW LdpElementFunctor<k_content>;
     m_NameToFunctor["creationMode"] = LOMSE_NEW LdpElementFunctor<k_creationMode>;
     m_NameToFunctor["ctrol1-x"] = LOMSE_NEW LdpElementFunctor<k_ctrol1_x>;
@@ -309,8 +324,13 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["margin-right"] = LOMSE_NEW LdpElementFunctor<k_margin_right>;
     m_NameToFunctor["margin-bottom"] = LOMSE_NEW LdpElementFunctor<k_margin_bottom>;
     m_NameToFunctor["margin-left"] = LOMSE_NEW LdpElementFunctor<k_margin_left>;
+    m_NameToFunctor["max-height"] = LOMSE_NEW LdpElementFunctor<k_max_height>;
+    m_NameToFunctor["max-width"] = LOMSE_NEW LdpElementFunctor<k_max_width>;
     m_NameToFunctor["meta"] = LOMSE_NEW LdpElementFunctor<k_meta>;
     m_NameToFunctor["metronome"] = LOMSE_NEW LdpElementFunctor<k_metronome>;
+    m_NameToFunctor["min-height"] = LOMSE_NEW LdpElementFunctor<k_min_height>;
+    m_NameToFunctor["min-width"] = LOMSE_NEW LdpElementFunctor<k_min_width>;
+    m_NameToFunctor["mm"] = LOMSE_NEW LdpElementFunctor<k_mm>;
     m_NameToFunctor["musicData"] = LOMSE_NEW LdpElementFunctor<k_musicData>;
     m_NameToFunctor["n"] = LOMSE_NEW LdpElementFunctor<k_note>;   //note
     m_NameToFunctor["na"] = LOMSE_NEW LdpElementFunctor<k_na>;    //note in chord
@@ -335,6 +355,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["portrait"] = LOMSE_NEW LdpElementFunctor<k_portrait>;
     m_NameToFunctor["r"] = LOMSE_NEW LdpElementFunctor<k_rest>;   //rest
     m_NameToFunctor["right"] = LOMSE_NEW LdpElementFunctor<k_right>;
+    m_NameToFunctor["rowspan"] = LOMSE_NEW LdpElementFunctor<k_rowspan>;
     m_NameToFunctor["score"] = LOMSE_NEW LdpElementFunctor<k_score>;
     m_NameToFunctor["scorePlayer"] = LOMSE_NEW LdpElementFunctor<k_score_player>;
     m_NameToFunctor["settings"] = LOMSE_NEW LdpElementFunctor<k_settings>;
@@ -361,6 +382,13 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["systemLayout"] = LOMSE_NEW LdpElementFunctor<k_systemLayout>;
     m_NameToFunctor["systemMargins"] = LOMSE_NEW LdpElementFunctor<k_systemMargins>;
     m_NameToFunctor["t"] = LOMSE_NEW LdpElementFunctor<k_tuplet>;
+    m_NameToFunctor["table"] = LOMSE_NEW LdpElementFunctor<k_table>;
+    m_NameToFunctor["table-col-width"] = LOMSE_NEW LdpElementFunctor<k_table_col_width>;
+    m_NameToFunctor["tableCell"] = LOMSE_NEW LdpElementFunctor<k_table_cell>;
+    m_NameToFunctor["tableColumn"] = LOMSE_NEW LdpElementFunctor<k_table_column>;
+    m_NameToFunctor["tableBody"] = LOMSE_NEW LdpElementFunctor<k_table_body>;
+    m_NameToFunctor["tableHead"] = LOMSE_NEW LdpElementFunctor<k_table_head>;
+    m_NameToFunctor["tableRow"] = LOMSE_NEW LdpElementFunctor<k_table_row>;
     m_NameToFunctor["text"] = LOMSE_NEW LdpElementFunctor<k_text>;
     m_NameToFunctor["textbox"] = LOMSE_NEW LdpElementFunctor<k_textbox>;
     m_NameToFunctor["text-align"] = LOMSE_NEW LdpElementFunctor<k_text_align>;

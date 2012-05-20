@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -107,8 +107,9 @@ protected:
     double m_rotation;
     TransAffine m_transform;
 
-    //current viewport origin
+    //current viewport origin and size
     Pixels m_vxOrg, m_vyOrg;
+    VSize  m_viewportSize;
 
     //selection rectangle
     bool                m_fSelRectVisible;
@@ -132,7 +133,7 @@ public:
 
     //view settings
     void new_viewport(Pixels x, Pixels y);
-    void set_rendering_buffer(RenderingBuffer* rbuf) { m_pRenderBuf = rbuf; }
+    void set_rendering_buffer(RenderingBuffer* rbuf);
     void get_viewport(Pixels* x, Pixels* y) { *x = m_vxOrg; *y = m_vyOrg; }
     void set_viewport_at_page_center(Pixels screenWidth);
     virtual void set_viewport_for_page_fit_full(Pixels screenWidth) = 0;
@@ -203,7 +204,9 @@ protected:
     void draw_sel_rectangle();
     void draw_tempo_line();
     void add_controls();
-    virtual void generate_paths() = 0;
+    void generate_paths();
+    virtual void collect_page_bounds() = 0;
+    void draw_visible_pages(int minPage, int maxPage);
     URect get_page_bounds(int iPage);
     int find_page_at_point(LUnits x, LUnits y);
     bool shift_right_x_to_be_on_page(double* xLeft);
@@ -215,6 +218,9 @@ protected:
     void trimmed_rectangle_to_page_rectangles(list<PageRectangle*>* rectangles,
                                               double xLeft, double yTop,
                                               double xRight, double yBottom);
+    void determine_visible_pages(int* minPage, int* maxPage);
+    bool is_valid_viewport();
+    void delete_rectangles(list<PageRectangle*>& rectangles);
 
 };
 
@@ -232,7 +238,7 @@ public:
     void get_view_size(Pixels* xWidth, Pixels* yHeight);
 
 protected:
-    void generate_paths();
+    void collect_page_bounds();
 
 };
 
@@ -249,7 +255,7 @@ public:
     void get_view_size(Pixels* xWidth, Pixels* yHeight);
 
 protected:
-    void generate_paths();
+    void collect_page_bounds();
 
 };
 
@@ -268,7 +274,7 @@ public:
     void get_view_size(Pixels* xWidth, Pixels* yHeight);
 
 protected:
-    void generate_paths();
+    void collect_page_bounds();
 
 };
 

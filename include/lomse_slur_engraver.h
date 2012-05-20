@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -53,9 +53,6 @@ protected:
     LUnits m_uStaffRight;
     int m_numShapes;
     ImoSlur* m_pSlur;
-    int m_iInstr;
-    int m_iStaff;
-    UPoint m_pos;
     bool m_fSlurBelow;
     std::vector< pair<ImoNote*, GmoShapeNote*> > m_notes;
 
@@ -72,7 +69,7 @@ public:
 
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                            int iSystem, int iCol, UPoint pos);
+                            int iSystem, int iCol);
     void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
                           int iSystem, int iCol);
@@ -95,7 +92,6 @@ protected:
     //void compute_end_of_staff_point();
     void compute_default_control_points(UPoint* points);
     //void add_user_displacements(int iTie, UPoint* points);
-    LUnits tenths_to_logical(Tenths tenths);
 
 };
 

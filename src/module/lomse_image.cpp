@@ -74,6 +74,41 @@ Image::Image()
 }
 
 //---------------------------------------------------------------------------------------
+Image::Image(const Image& img)
+{
+    m_bmpSize = img.m_bmpSize;
+    m_imgSize = img.m_imgSize;
+    m_format = img.m_format;
+    m_error = "";
+
+    int bmpsize = m_bmpSize.width * m_bmpSize.height * get_bits_per_pixel()/8;
+    if ((m_bmap = (unsigned char*)malloc(bmpsize)) == NULL)
+        throw std::runtime_error("[Image copy constructor]: not enough memory for image buffer");
+    memcpy(m_bmap, img.m_bmap, bmpsize);
+}
+
+//---------------------------------------------------------------------------------------
+Image& Image::operator=(const Image &img)
+{
+    if (this != &img)
+    {
+        if (m_bmap)
+            free(m_bmap);
+
+        m_bmpSize = img.m_bmpSize;
+        m_imgSize = img.m_imgSize;
+        m_format = img.m_format;
+        m_error = "";
+
+        int bmpsize = m_bmpSize.width * m_bmpSize.height * get_bits_per_pixel()/8;
+        if ((m_bmap = (unsigned char*)malloc(bmpsize)) == NULL)
+            throw std::runtime_error("[Image copy constructor]: not enough memory for image buffer");
+        memcpy(m_bmap, img.m_bmap, bmpsize);
+    }
+    return *this;
+}
+
+//---------------------------------------------------------------------------------------
 Image::~Image()
 {
     if (m_bmap)

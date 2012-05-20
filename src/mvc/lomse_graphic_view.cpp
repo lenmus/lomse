@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -598,21 +598,21 @@ void GraphicView::trimmed_rectangle_to_page_rectangles(list<PageRectangle*>* rec
                                                        double xLeft, double yTop,
                                                        double xRight, double yBottom)
 {
-    list<URect>::iterator it = m_pageBounds.begin();
+    LUnits xL = LUnits(xLeft);
+    LUnits yT = LUnits(yTop);
+    LUnits xR = LUnits(xRight);
+    LUnits yB = LUnits(yBottom);
 
     //advance to page containing left-top point
     int page = 0;
-    while (it != m_pageBounds.end() && xLeft < (*it).left())
+    list<URect>::iterator it = m_pageBounds.begin();
+    while (it != m_pageBounds.end() && !(*it).contains(xL, yT))
     {
         ++it;
         ++page;
     }
 
     //loop to add rectangles
-    LUnits xL = LUnits(xLeft);
-    LUnits yT = LUnits(yTop);
-    LUnits xR = LUnits(xRight);
-    LUnits yB = LUnits(yBottom);
     while (it != m_pageBounds.end())
     {
         if (xL < (*it).left())
@@ -771,6 +771,8 @@ void GraphicView::set_rendering_option(int option, bool value)
 
         case k_option_draw_box_container:
             m_options.draw_box_for(GmoObj::k_box_paragraph);
+            m_options.draw_box_for(GmoObj::k_box_score_page);
+            m_options.draw_box_for(GmoObj::k_box_table);
             break;
 
         case k_option_draw_box_system:
@@ -815,6 +817,73 @@ VSize GraphicView::get_page_size_in_pixels(int nPage)
     return size;
 }
 
+//---------------------------------------------------------------------------------------
+void GraphicView::generate_paths()
+{
+    collect_page_bounds();      //moved out of 'if' block for unit tests
+    if (is_valid_viewport())
+    {
+        int minPage, maxPage;
+
+        determine_visible_pages(&minPage, &maxPage);
+        draw_visible_pages(minPage, maxPage);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::determine_visible_pages(int* minPage, int* maxPage)
+{
+    list<PageRectangle*> rectangles;
+    screen_rectangle_to_page_rectangles(0, 0, m_viewportSize.width,
+                                        m_viewportSize.height, &rectangles);
+
+    *minPage = rectangles.front()->iPage;
+    *maxPage = rectangles.back()->iPage;
+
+    delete_rectangles(rectangles);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::delete_rectangles(list<PageRectangle*>& rectangles)
+{
+    list<PageRectangle*>::iterator it;
+    for (it = rectangles.begin(); it != rectangles.end(); ++it)
+        delete *it;
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::draw_visible_pages(int minPage, int maxPage)
+{
+    GraphicModel* pGModel = get_graphic_model();
+
+    list<URect>::iterator it = m_pageBounds.begin();
+    for (int i=0; i < minPage; i++)
+        ++it;
+
+    for (int i=minPage; i <= maxPage; i++, ++it)
+    {
+        UPoint origin = (*it).get_top_left();
+        pGModel->draw_page(i, origin, m_pDrawer, m_options);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::set_rendering_buffer(RenderingBuffer* rbuf)
+{
+    m_pRenderBuf = rbuf;
+}
+
+//---------------------------------------------------------------------------------------
+bool GraphicView::is_valid_viewport()
+{
+    if (m_pRenderBuf)
+    {
+        m_viewportSize.width = m_pRenderBuf->width();
+        m_viewportSize.height = m_pRenderBuf->height();
+        return m_viewportSize.width > 0 && m_viewportSize.height > 0;
+    }
+    return false;
+}
 
 ////---------------------------------------------------------------------------------------
 //void GraphicView::caret_right()
@@ -846,12 +915,16 @@ SimpleView::SimpleView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
 }
 
 //---------------------------------------------------------------------------------------
-void SimpleView::generate_paths()
+void SimpleView::collect_page_bounds()
 {
     GraphicModel* pGModel = get_graphic_model();
     UPoint origin(0.0f, 0.0f);
 
-    pGModel->draw_page(0, origin, m_pDrawer, m_options);
+    m_pageBounds.clear();
+    GmoBoxDocPage* pPage = pGModel->get_page(0);
+    URect rect = pPage->get_bounds();
+    UPoint bottomRight(origin.x+rect.width, origin.y+rect.height);
+    m_pageBounds.push_back( URect(origin, bottomRight) );
 }
 
 //---------------------------------------------------------------------------------------
@@ -884,8 +957,11 @@ VerticalBookView::VerticalBookView(LibraryScope& libraryScope, ScreenDrawer* pDr
 }
 
 //---------------------------------------------------------------------------------------
-void VerticalBookView::generate_paths()
+void VerticalBookView::collect_page_bounds()
 {
+    //OPTIMIZATION: this could be computed only once instead of each time the view
+    //is repainted.
+
     GraphicModel* pGModel = get_graphic_model();
     UPoint origin(0.0f, 0.0f);
 
@@ -899,7 +975,6 @@ void VerticalBookView::generate_paths()
         URect rect = pPage->get_bounds();
         UPoint bottomRight(origin.x+rect.width, origin.y+rect.height);
         m_pageBounds.push_back( URect(origin, bottomRight) );
-        pGModel->draw_page(i, origin, m_pDrawer, m_options);
         origin.y += rect.height;
     }
 }
@@ -943,8 +1018,11 @@ HorizontalBookView::HorizontalBookView(LibraryScope& libraryScope, ScreenDrawer*
 }
 
 //---------------------------------------------------------------------------------------
-void HorizontalBookView::generate_paths()
+void HorizontalBookView::collect_page_bounds()
 {
+    //OPTIMIZATION: this could be computed only once instead of each time the view
+    //is repainted.
+
     GraphicModel* pGModel = get_graphic_model();
     UPoint origin(0.0f, 500.0f);
 
@@ -956,7 +1034,6 @@ void HorizontalBookView::generate_paths()
         URect rect = pPage->get_bounds();
         UPoint bottomRight(origin.x+rect.width, origin.y+rect.height);
         m_pageBounds.push_back( URect(origin, bottomRight) );
-        pGModel->draw_page(i, origin, m_pDrawer, m_options);
         origin.x += rect.width + 1500;
     }
 }

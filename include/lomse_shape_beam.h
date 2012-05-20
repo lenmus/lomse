@@ -39,6 +39,7 @@ namespace lomse
 //forward declarations
 class ImoObj;
 class Drawer;
+class BeamEngraver;
 
 
 //---------------------------------------------------------------------------------------
@@ -50,10 +51,12 @@ protected:
 	UPoint m_outerLeftPoint;
     UPoint m_outerRightPoint;
 
-public:
+    friend class BeamEngraver;
     GmoShapeBeam(ImoObj* pCreatorImo, LUnits uBeamThickness,
                  Color color = Color(0,0,0));
-	~GmoShapeBeam();
+
+public:
+    ~GmoShapeBeam();
 
     void set_layout_data(std::list<LUnits>& segments, UPoint origin, USize size,
                          UPoint outerLeft, UPoint outerRight);

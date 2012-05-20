@@ -154,7 +154,7 @@ void InstrumentEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
             TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
-            GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop, 0);   //TODO-LOG k_center);
+            GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
     }
@@ -167,7 +167,7 @@ void InstrumentEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
             TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
-            GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop, 0);   //TODO-LOG k_center);
+            GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
     }

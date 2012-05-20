@@ -277,11 +277,6 @@ GmoShapeRest::GmoShapeRest(ImoObj* pCreatorImo, int idx, LUnits x, LUnits y, Col
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeRest::~GmoShapeRest()
-{
-}
-
-//---------------------------------------------------------------------------------------
 void GmoShapeRest::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     GmoCompositeShape::on_draw(pDrawer, opt);

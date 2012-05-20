@@ -101,7 +101,6 @@ public:
         end_of_playback_housekeeping(fVisualTracking, pInteractor);
     }
 
-
 };
 
 //---------------------------------------------------------------------------------------
@@ -125,6 +124,9 @@ public:
     MyPlayerGui() : PlayerGui() {}
 
     void on_end_of_playback() {}
+    bool get_countoff() { return false; }
+    int get_play_mode() { return k_play_normal_instrument; }
+    int get_metronome_mm() { return 60; }
 };
 
 //---------------------------------------------------------------------------------------

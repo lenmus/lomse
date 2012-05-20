@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -817,8 +817,8 @@ SUITE(InternalModelTest)
 
     TEST_FIXTURE(InternalModelTestFixture, RelationsOrdered)
     {
-        //@ Relations must be rendered in a predefined order, 
-        //@ i.e. beams before tuplets. For this, they must be stored in 
+        //@ Relations must be rendered in a predefined order,
+        //@ i.e. beams before tuplets. For this, they must be stored in
         //@ renderization order.
 
         Document doc(m_libraryScope);
@@ -921,6 +921,9 @@ SUITE(InternalModelTest)
         CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_font_normal );
         CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 12.0f );
         CHECK( pStyle->get_float_property(ImoStyle::k_line_height) == 1.5f );
+        CHECK( pStyle->get_lunits_property(ImoStyle::k_min_height) == 0.0f );
+        CHECK( pStyle->get_lunits_property(ImoStyle::k_max_height) == 0.0f );
+        CHECK( pStyle->get_lunits_property(ImoStyle::k_height) == 0.0f );
 
         delete pScore;
     }

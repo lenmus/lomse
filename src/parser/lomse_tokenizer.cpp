@@ -68,12 +68,12 @@ const char chUnderscore = '_';
 const char nEOF = EOF;         //End Of File
 
 
-//-------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 // Implementation of class LdpTokenizer
-//-------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 
 //These methods perform an analysis at character level to form tokens.
-//If during the analyisis the char sequence "//" is found the remaining chars until
+//If during the analysis the char sequence "//" is found the remaining chars until
 //end of line are ignoerd, including both "//" chars. An then analyisis continues as
 //if all those ignored chars never existed.
 
@@ -89,12 +89,27 @@ LdpTokenizer::LdpTokenizer(LdpReader& reader, ostream& reporter)
 {
 }
 
+//---------------------------------------------------------------------------------------
 LdpTokenizer::~LdpTokenizer()
 {
     if (m_pToken)
         delete m_pToken;
 }
 
+//---------------------------------------------------------------------------------------
+void LdpTokenizer::skip_utf_bom()
+{
+    char curChar = get_next_char();
+    if (curChar == '\xef')
+    {
+        curChar = get_next_char();  // 0xbb
+        curChar = get_next_char();  // 0xbf
+    }
+    else
+        m_reader.repeat_last_char();
+}
+
+//---------------------------------------------------------------------------------------
 LdpToken* LdpTokenizer::read_token()
 {
 
@@ -158,6 +173,7 @@ LdpToken* LdpTokenizer::read_token()
 
 }
 
+//---------------------------------------------------------------------------------------
 LdpToken* LdpTokenizer::parse_new_token()
 {
     //Finite automata for parsing LDP tokens
@@ -438,6 +454,7 @@ LdpToken* LdpTokenizer::parse_new_token()
     }
 }
 
+//---------------------------------------------------------------------------------------
 char LdpTokenizer::get_next_char()
 {
     char ch = m_reader.get_next_char();
@@ -447,18 +464,21 @@ char LdpTokenizer::get_next_char()
         return ch;
 }
 
+//---------------------------------------------------------------------------------------
 bool LdpTokenizer::is_letter(char ch)
 {
     static const std::string letters("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
     return (letters.find(ch) != string::npos);
 }
 
+//---------------------------------------------------------------------------------------
 bool LdpTokenizer::is_number(char ch)
 {
     static const std::string numbers("0123456789");
     return (numbers.find(ch) != string::npos);
 }
 
+//---------------------------------------------------------------------------------------
 int LdpTokenizer::get_line_number()
 {
     return m_reader.get_line_number();

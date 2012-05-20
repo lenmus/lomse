@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -40,17 +40,16 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // TimeEngraver implementation
 //---------------------------------------------------------------------------------------
-TimeEngraver::TimeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
-    : Engraver(libraryScope, pScoreMeter)
+TimeEngraver::TimeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                           int iInstr, int iStaff)
+    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
 {
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* TimeEngraver::create_shape_normal(ImoObj* pCreatorImo, int iInstr, int iStaff,
+GmoShape* TimeEngraver::create_shape_normal(ImoObj* pCreatorImo,
                                             UPoint uPos, int beats, int beat_type)
 {
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
     m_fontSize = determine_font_size();
     m_pCreatorImo = pCreatorImo;
 
@@ -110,17 +109,10 @@ GmoShape* TimeEngraver::create_digit(int digit)
     int iGlyph = k_glyph_number_0 + digit;
     Tenths yOffset = glyphs_lmbasic2[iGlyph].GlyphOffset + 40.0f;
     LUnits y = m_uPos.y + m_pMeter->tenths_to_logical(yOffset, m_iInstr, m_iStaff);
-    GmoShape* pShape = LOMSE_NEW GmoShapeDigit(m_pCreatorImo, 0, iGlyph, UPoint(m_uPos.x, y),
+    GmoShape* pShape = LOMSE_NEW GmoShapeTimeDigit(m_pCreatorImo, 0, iGlyph, UPoint(m_uPos.x, y),
                                          Color(0,0,0), m_libraryScope, m_fontSize);
     m_uPos.x += pShape->get_width();
     return pShape;
-}
-
-//---------------------------------------------------------------------------------------
-double TimeEngraver::determine_font_size()
-{
-    //TODO
-    return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -157,12 +149,9 @@ void TimeEngraver::add_all_shapes_to_container()
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* TimeEngraver::create_shape_common(ImoObj* pCreatorImo, int iInstr, int iStaff,
-                                            UPoint uPos)
+GmoShape* TimeEngraver::create_shape_common(ImoObj* pCreatorImo, UPoint uPos)
 {
     //TODO
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
 
     create_main_container_shape(uPos);
 
@@ -183,12 +172,9 @@ GmoShape* TimeEngraver::create_shape_common(ImoObj* pCreatorImo, int iInstr, int
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* TimeEngraver::create_shape_cut(ImoObj* pCreatorImo, int iInstr, int iStaff,
-                                         UPoint uPos)
+GmoShape* TimeEngraver::create_shape_cut(ImoObj* pCreatorImo, UPoint uPos)
 {
     //TODO
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
 
     create_main_container_shape(uPos);
     return m_pTimeShape;

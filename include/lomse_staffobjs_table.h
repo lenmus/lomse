@@ -78,7 +78,7 @@ public:
     inline ImoObj* imo_object() const { return m_pImo; }
 
     //debug
-    void dump();
+    string dump();
     std::string to_string();
     std::string to_string_with_ids();
 
@@ -138,7 +138,7 @@ public:
     inline ColStaffObjsEntry* front() { return m_table.front(); }
 
     //debug
-    void dump();
+    string dump();
 
 protected:
 
@@ -176,7 +176,7 @@ class ColStaffObjsBuilder
 {
 protected:
     ColStaffObjs*   m_pColStaffObjs;
-    LdpElement*     m_pScore;
+    //LdpElement*     m_pScore;
     ImoScore*       m_pImScore;
 
 public:

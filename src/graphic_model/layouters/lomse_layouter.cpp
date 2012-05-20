@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -34,6 +34,7 @@
 #include "lomse_content_layouter.h"
 #include "lomse_score_layouter.h"
 #include "lomse_box_content_layouter.h"
+#include "lomse_table_layouter.h"
 
 namespace lomse
 {
@@ -113,7 +114,7 @@ void Layouter::layout_item(ImoContentObj* pItem, GmoBox* pParentBox)
 }
 
 //---------------------------------------------------------------------------------------
-void Layouter::set_cursor_and_available_space(GmoBox* pItemMainBox)
+void Layouter::set_cursor_and_available_space()
 {
     m_pageCursor.x = m_pItemMainBox->get_content_left();
     m_pageCursor.y = m_pItemMainBox->get_content_top();
@@ -123,10 +124,15 @@ void Layouter::set_cursor_and_available_space(GmoBox* pItemMainBox)
 }
 
 //---------------------------------------------------------------------------------------
-void Layouter::set_box_height()
+LUnits Layouter::set_box_height()
 {
     LUnits start = m_pItemMainBox->get_origin().y;
-    m_pItemMainBox->set_height( m_pageCursor.y - start );
+    LUnits height = m_pageCursor.y - start;
+    ImoStyle* pStyle = m_pItem->get_style();
+    if (pStyle)
+        height = max(pStyle->get_lunits_property(ImoStyle::k_min_height), height);
+    m_pItemMainBox->set_height(height);
+    return height;
 }
 
 //---------------------------------------------------------------------------------------
@@ -146,7 +152,7 @@ void Layouter::add_end_margins()
 //---------------------------------------------------------------------------------------
 Layouter* Layouter::create_layouter(ImoContentObj* pItem)
 {
-    Layouter* pLayouter = LayouterFactory::create_layouter(pItem, this, m_pStyles);
+    Layouter* pLayouter = LayouterFactory::create_layouter(pItem, this);
     if (pItem->is_score())
         save_score_layouter(pLayouter);
     return pLayouter;
@@ -156,11 +162,11 @@ Layouter* Layouter::create_layouter(ImoContentObj* pItem)
 //=======================================================================================
 // LayouterFactory implementation
 //=======================================================================================
-Layouter* LayouterFactory::create_layouter(ImoContentObj* pItem, Layouter* pParent,
-                                           ImoStyles* pStyles)
+Layouter* LayouterFactory::create_layouter(ImoContentObj* pItem, Layouter* pParent)
 {
     GraphicModel* pGModel = pParent->get_graphic_model();
     LibraryScope& libraryScope = pParent->get_library_scope();
+    ImoStyles* pStyles = pParent->get_styles();
 
     switch (pItem->get_obj_type())
     {
@@ -181,6 +187,9 @@ Layouter* LayouterFactory::create_layouter(ImoContentObj* pItem, Layouter* pPare
         case k_imo_listitem:
             return LOMSE_NEW ListItemLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
 
+        case k_imo_table_cell:
+            return LOMSE_NEW TableCellLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+
         case k_imo_multicolumn:
             return LOMSE_NEW MultiColumnLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
 
@@ -189,6 +198,9 @@ Layouter* LayouterFactory::create_layouter(ImoContentObj* pItem, Layouter* pPare
 
         case k_imo_score_player:
             return LOMSE_NEW ScorePlayerLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+
+        case k_imo_table:
+            return LOMSE_NEW TableLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
 
         default:
             return LOMSE_NEW NullLayouter(pItem, pParent, pGModel, libraryScope);

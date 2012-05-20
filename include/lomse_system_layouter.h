@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -82,7 +82,8 @@ class LineEntry
 {
 public:
     // constructor and destructor
-    LineEntry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, float rTime);
+    LineEntry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, float rTime,
+              LUnits xUserShift, LUnits yUserShift);
     ~LineEntry() {}
 
     //constructor for unit tests
@@ -143,6 +144,8 @@ protected:
     LUnits          m_uSize;            //size of the shape (notehead, etc.)
     LUnits          m_uFixedSpace;      //fixed space added after shape
     LUnits          m_uVariableSpace;   //any variable added space we can adjust
+    LUnits          m_xUserShift;       //location shift specified by user
+    LUnits          m_yUserShift;       //location shift specified by user
 
     //debug
     bool m_fShapeInfoLoaded;
@@ -188,7 +191,8 @@ public:
     //building the line
     inline void clear() { m_LineEntries.clear(); }
     inline void push_back(LineEntry* pEntry) { m_LineEntries.push_back(pEntry); }
-	LineEntry* add_entry(ImoStaffObj* pSO, GmoShape* pShape, float rTime, bool fInProlog);
+	LineEntry* add_entry(ImoStaffObj* pSO, GmoShape* pShape, float rTime, bool fInProlog,
+                         LUnits xUserShift, LUnits yUserShift);
     void do_measurements();
 
     //access to an item
@@ -276,7 +280,8 @@ public:
 
     //methods to build the lines
     bool include_object(int iLine, int iInstr, ImoStaffObj* pSO, float rTime,
-                        int nStaff, GmoShape* pShape, bool fInProlog);
+                        int nStaff, GmoShape* pShape, bool fInProlog,
+                        LUnits xUserShift, LUnits yUserShift);
     void finish_column_measurements(LUnits xStart);
 
     //access to an item
@@ -362,6 +367,11 @@ protected:
     std::vector<ColStaffObjsEntry*> m_prologClefs;
     std::vector<ColStaffObjsEntry*> m_prologKeys;
 
+    //final measurements, when shapes are added to graphical model
+    bool m_fHasShapes;
+    LUnits m_yMin;
+    LUnits m_yMax;
+
 
 public:
     ColumnLayouter(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
@@ -413,6 +423,11 @@ public:
     void set_slice_width(LUnits width);
     void set_slice_final_position(LUnits left, LUnits top);
 
+    //values only valid after having invoked add_shapes_to_boxes() method
+    inline bool has_shapes() { return m_fHasShapes; }
+    inline LUnits get_y_min() { return m_yMin; }
+    inline LUnits get_y_max() { return m_yMax; }
+
     //support for debug and unit tests
     inline int get_num_lines() { return int(m_pColStorage->size()); }
     void dump_column_data(ostream& outStream);
@@ -457,6 +472,8 @@ protected:
 
     LUnits m_uPrologWidth;
     GmoBoxSystem* m_pBoxSystem;
+    LUnits m_yMin;
+    LUnits m_yMax;
 
     int m_iSystem;
     int m_iFirstCol;
@@ -483,6 +500,8 @@ public:
     inline void set_prolog_width(LUnits width) { m_uPrologWidth = width; }
     inline LUnits get_prolog_width() { return m_uPrologWidth; }
     inline GmoBoxSystem* get_box_system() { return m_pBoxSystem; }
+    inline LUnits get_y_min() { return m_yMin; }
+    inline LUnits get_y_max() { return m_yMax; }
 
 protected:
     void reposition_staves(LUnits indent);
@@ -534,6 +553,11 @@ protected:
     UPoint      m_sliceOrg;
     LineEntryIterator m_itCurrent;
 
+    //final measurements, when shapes are repositioned
+    bool m_fHasShapes;
+    LUnits m_yMin;
+    LUnits m_yMax;
+
 public:
     LineResizer(MusicLine* pLine, LUnits uOldBarSize, LUnits uNewBarSize,
                 LUnits uNewStart, UPoint sliceOrg);
@@ -541,6 +565,11 @@ public:
     float move_prolog_shapes();
     void reasign_position_to_all_other_objects(LUnits uFizedSizeAtStart);
     LUnits get_time_line_position_for_time(float rFirstTime);
+
+    //values only valid after having resized the line
+    inline bool has_shapes() { return m_fHasShapes; }
+    inline LUnits get_y_min() { return m_yMin; }
+    inline LUnits get_y_max() { return m_yMax; }
 
 protected:
 //    void InformAttachedObjs();
@@ -756,15 +785,26 @@ protected:
     LUnits m_uFixedPart;
     std::vector<LineResizer*> m_LineResizers;
 
+    //final measurements, when shapes are moved to final positions
+    bool m_fHasShapes;
+    LUnits m_yMin;
+    LUnits m_yMax;
+
 public:
     ColumnResizer(ColumnStorage* pColStorage, LUnits uNewBarSize);
     LUnits reposition_shapes(LUnits uNewStart, LUnits uNewWidth, UPoint org);
+
+    //values only valid after having invoked determine_vertical_limits() method
+    inline bool has_shapes() { return m_fHasShapes; }
+    inline LUnits get_y_min() { return m_yMin; }
+    inline LUnits get_y_max() { return m_yMax; }
 
 protected:
     void create_line_resizers();
     void move_prolog_shapes_and_get_initial_time();
     void reposition_all_other_shapes();
     void determine_fixed_size_at_start_of_column();
+    void determine_vertical_limits();
     void delete_line_resizers();
 
 };

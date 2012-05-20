@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -41,6 +41,7 @@
 #include "lomse_shape_staff.h"
 #include "lomse_shapes.h"
 #include "lomse_shape_note.h"
+#include "lomse_shape_text.h"
 #include "lomse_engraving_options.h"
 #include "lomse_system_layouter.h"
 #include "lomse_staffobjs_cursor.h"
@@ -54,9 +55,11 @@
 #include "lomse_instrument_engraver.h"
 #include "lomse_key_engraver.h"
 #include "lomse_line_engraver.h"
+#include "lomse_metronome_engraver.h"
 #include "lomse_note_engraver.h"
 #include "lomse_rest_engraver.h"
 #include "lomse_slur_engraver.h"
+#include "lomse_text_engraver.h"
 #include "lomse_tie_engraver.h"
 #include "lomse_time_engraver.h"
 #include "lomse_tuplet_engraver.h"
@@ -90,7 +93,7 @@ ScoreLayouter::ScoreLayouter(ImoContentObj* pItem, Layouter* pParent,
                                         m_ColLayouters, m_instrEngravers);
 
     //ColStaffObjs* pCol = m_pScore->get_staffobjs_table();
-    //pCol->dump();
+    //cout << pCol->dump()  << endl;
 }
 
 //---------------------------------------------------------------------------------------
@@ -154,10 +157,10 @@ void ScoreLayouter::layout_in_box()
     //if layout finished adjust height of last page (remove unused space)
     if (!fMoreColumns)
     {
-        LUnits yBottom = m_pCurBoxSystem->get_bottom();
+        LUnits yBottom = m_pCurSysLyt->get_y_max();
         m_pCurBoxPage->set_height( yBottom - m_pCurBoxPage->get_top());
+        m_cursor.y = m_pCurBoxPage->get_bottom();
     }
-
     m_pageCursor = m_cursor;
 }
 
@@ -765,7 +768,7 @@ void ColumnsBuilder::store_info_about_attached_objects(ImoStaffObj* pSO,
         return;
 
     PendingAuxObjs* data = LOMSE_NEW PendingAuxObjs(pSO, pMainShape, iInstr, iStaff,
-                                              iCol, iLine, pInstr);
+                                                    iCol, iLine, pInstr);
     m_pScoreLyt->m_pendingAuxObjs.push_back(data);
 }
 
@@ -914,10 +917,10 @@ void ColumnsBuilder::start_column_measurements(int iCol, LUnits uxStart,
 
 //---------------------------------------------------------------------------------------
 void ColumnsBuilder::include_object(int iCol, int iLine, int iInstr, ImoStaffObj* pSO,
-                                    float rTime, int nStaff, GmoShape* pShape,
+                                    float rTime, int iStaff, GmoShape* pShape,
                                     bool fInProlog)
 {
-    m_ColLayouters[iCol]->include_object(iLine, iInstr, pSO, rTime, nStaff, pShape,
+    m_ColLayouters[iCol]->include_object(iLine, iInstr, pSO, rTime, iStaff, pShape,
                                          fInProlog);
 }
 
@@ -1008,6 +1011,25 @@ bool ColumnBreaker::column_should_be_finished(ImoStaffObj* pSO, float rTime, int
 //=======================================================================================
 // ShapesCreator implementation
 //=======================================================================================
+
+//---------------------------------------------------------------------------------------
+// helper engraver to create an invisible shape
+class InvisibleEngraver : public Engraver
+{
+public:
+    InvisibleEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
+        : Engraver(libraryScope, pScoreMeter)
+    {
+    }
+
+    GmoShape* create_shape(ImoObj* pCreatorImo, int idx, UPoint uPos, USize uSize)
+    {
+        return LOMSE_NEW GmoShapeInvisible(pCreatorImo, idx, uPos, uSize);
+    }
+};
+
+
+//---------------------------------------------------------------------------------------
 ShapesCreator::ShapesCreator(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                              ShapesStorage& shapesStorage,
                              std::vector<InstrumentEngraver*>& instrEngravers)
@@ -1025,42 +1047,42 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
     //factory method to create shapes for staffobjs
 
     if (!pSO->is_visible())
-        return create_invisible_shape(pSO, iInstr, iStaff, pos, USize(0.0f, 0.0f));
+        return create_invisible_shape(pSO, iInstr, iStaff, pos, 0.0f);
 
 
     switch (pSO->get_obj_type())
     {
         case k_imo_barline:
         {
-            ImoBarline* pImo = dynamic_cast<ImoBarline*>(pSO);
+            ImoBarline* pImo = static_cast<ImoBarline*>(pSO);
             InstrumentEngraver* pInstrEngrv = m_instrEngravers[iInstr];
             LUnits yTop = pInstrEngrv->get_staves_top_line();
             LUnits yBottom = pInstrEngrv->get_staves_bottom_line();
-            BarlineEngraver engrv(m_libraryScope, m_pScoreMeter);
-            return engrv.create_shape(pImo, iInstr, pos.x, yTop, yBottom);
+            BarlineEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr);
+            return engrv.create_shape(pImo, pos.x, yTop, yBottom);
         }
         case k_imo_clef:
         {
             bool fSmallClef = flags && k_flag_small_clef;
-            ImoClef* pClef = dynamic_cast<ImoClef*>(pSO);
+            ImoClef* pClef = static_cast<ImoClef*>(pSO);
             int clefSize = pClef->get_symbol_size();
             if (clefSize == k_size_default)
                 clefSize = fSmallClef ? k_size_cue : k_size_full;
-            ClefEngraver engrv(m_libraryScope, m_pScoreMeter);
-            return engrv.create_shape(pClef, iInstr, iStaff, pos,
-                                      clefType, clefSize);
+            ClefEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            return engrv.create_shape(pClef, pos, clefType, clefSize);
         }
         case k_imo_key_signature:
         {
-            ImoKeySignature* pImo = dynamic_cast<ImoKeySignature*>(pSO);
-            KeyEngraver engrv(m_libraryScope, m_pScoreMeter);
-            return engrv.create_shape(pImo, iInstr, iStaff, clefType, pos);
+            ImoKeySignature* pImo = static_cast<ImoKeySignature*>(pSO);
+            KeyEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            return engrv.create_shape(pImo, clefType, pos);
         }
         case k_imo_note:
         {
-            ImoNote* pImo = dynamic_cast<ImoNote*>(pSO);
-            NoteEngraver engrv(m_libraryScope, m_pScoreMeter, &m_shapesStorage);
-            GmoShape* pShape = engrv.create_shape(pImo, iInstr, iStaff, clefType, pos);
+            ImoNote* pImo = static_cast<ImoNote*>(pSO);
+            NoteEngraver engrv(m_libraryScope, m_pScoreMeter, &m_shapesStorage,
+                               iInstr, iStaff);
+            GmoShape* pShape = engrv.create_shape(pImo, clefType, pos);
 
             //AWARE: Chords are an exception to the way relations are engraved. This
             //is because chords affect to note positions (reverse noteheads, shift
@@ -1072,66 +1094,77 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
         }
         case k_imo_rest:
         {
-            ImoRest* pImo = dynamic_cast<ImoRest*>(pSO);
-            RestEngraver engrv(m_libraryScope, m_pScoreMeter, &m_shapesStorage);
-            int type = pImo->get_note_type();
-            int dots = pImo->get_dots();
-            return engrv.create_shape(pImo, iInstr, iStaff, pos, type, dots, pImo);
+            ImoRest* pImo = static_cast<ImoRest*>(pSO);
+            RestEngraver engrv(m_libraryScope, m_pScoreMeter, &m_shapesStorage,
+                               iInstr, iStaff);
+            return engrv.create_shape(pImo, pos);
         }
         case k_imo_time_signature:
         {
-            ImoTimeSignature* pImo = dynamic_cast<ImoTimeSignature*>(pSO);
+            ImoTimeSignature* pImo = static_cast<ImoTimeSignature*>(pSO);
             int beats = pImo->get_beats();
             int beat_type = pImo->get_beat_type();
-            TimeEngraver engrv(m_libraryScope, m_pScoreMeter);
-            return engrv.create_shape_normal(pImo, iInstr, iStaff, pos,
-                                             beats, beat_type);
+            TimeEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            return engrv.create_shape_normal(pImo, pos, beats, beat_type);
         }
         case k_imo_spacer:
         {
-            ImoSpacer* pImo = dynamic_cast<ImoSpacer*>(pSO);
+            ImoSpacer* pImo = static_cast<ImoSpacer*>(pSO);
             LUnits space = m_pScoreMeter->tenths_to_logical(pImo->get_width(),
                                                             iInstr, iStaff);
-            return create_invisible_shape(pSO, iInstr, iStaff, pos, USize(space, 0.0f));
+            return create_invisible_shape(pSO, iInstr, iStaff, pos, space);
+        }
+        case k_imo_metronome_mark:
+        {
+            ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pSO);
+            MetronomeMarkEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            return engrv.create_shape(pImo, pos);
         }
         default:
-            return create_invisible_shape(pSO, iInstr, iStaff, pos, USize(0.0f, 0.0f));
+            return create_invisible_shape(pSO, iInstr, iStaff, pos, 0.0f);
     }
 }
 
 //---------------------------------------------------------------------------------------
 GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
-                                             GmoShape* pParentShape, UPoint pos)
+                                             GmoShape* pParentShape, LUnits yTopStaff)
 {
     //factory method to create shapes for auxobjs
 
+    UPoint pos((pParentShape->get_left() + pParentShape->get_width() / 2.0f), yTopStaff);
     switch (pAO->get_obj_type())
     {
         case k_imo_fermata:
         {
-            ImoFermata* pImo = dynamic_cast<ImoFermata*>(pAO);
-            FermataEngraver engrv(m_libraryScope, m_pScoreMeter);
-            int placement = pImo->get_placement();
-            return engrv.create_shape(pImo, iInstr, iStaff, pos, placement,
-                                      pParentShape);
+            ImoFermata* pImo = static_cast<ImoFermata*>(pAO);
+            FermataEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            return engrv.create_shape(pImo, pos, pParentShape);
         }
         case k_imo_score_line:
         {
-            ImoScoreLine* pImo = dynamic_cast<ImoScoreLine*>(pAO);
-            LineEngraver engrv(m_libraryScope, m_pScoreMeter);
-            return engrv.create_shape(pImo, iInstr, iStaff, pos, pParentShape);
+            ImoScoreLine* pImo = static_cast<ImoScoreLine*>(pAO);
+            LineEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            return engrv.create_shape(pImo, pos);
+        }
+        case k_imo_score_text:
+        {
+            ImoScoreText* pImo = static_cast<ImoScoreText*>(pAO);
+            TextEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),
+                               pImo->get_style());
+            return engrv.create_shape(pImo, pos.x, pos.y);
         }
         default:
-            return create_invisible_shape(pAO, iInstr, iStaff, pos, USize(0.0, 0.0));
+            return create_invisible_shape(pAO, iInstr, iStaff, pos, 0.0f);
     }
 }
 
 //---------------------------------------------------------------------------------------
 GmoShape* ShapesCreator::create_invisible_shape(ImoObj* pSO, int iInstr, int iStaff,
-                                                UPoint uPos, USize uSize)
+                                                UPoint uPos, LUnits width)
 {
-    uSize.height = m_pScoreMeter->tenths_to_logical(40.0f, iInstr, iStaff);
-    return LOMSE_NEW GmoShapeInvisible(pSO, 0, uPos, uSize);
+    InvisibleEngraver engrv(m_libraryScope, m_pScoreMeter);
+    USize uSize(width, m_pScoreMeter->tenths_to_logical(40.0f, iInstr, iStaff));
+    return engrv.create_shape(pSO, 0, uPos, uSize);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1140,8 +1173,7 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
                                            GmoShape* pStaffObjShape,
                                            int iInstr, int iStaff, int iSystem,
                                            int iCol, int iLine,
-                                           ImoInstrument* pInstr,
-                                           UPoint pos)
+                                           ImoInstrument* pInstr)
 {
     //factory method to create the engraver for relation auxobjs
 
@@ -1191,7 +1223,7 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
     if (pEngrv)
     {
         pEngrv->set_start_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff,
-                                   iSystem, iCol, pos);
+                                   iSystem, iCol);
         m_shapesStorage.save_engraver(pEngrv, pRO);
     }
 }
@@ -1204,7 +1236,7 @@ void ShapesCreator::continue_engraving_relobj(ImoRelObj* pRO,
                                               int iLine, ImoInstrument* pInstr)
 {
     RelAuxObjEngraver* pEngrv
-        = dynamic_cast<RelAuxObjEngraver*>(m_shapesStorage.get_engraver(pRO));
+        = static_cast<RelAuxObjEngraver*>(m_shapesStorage.get_engraver(pRO));
     pEngrv->set_middle_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol);
 }
 
@@ -1217,7 +1249,7 @@ void ShapesCreator::finish_engraving_relobj(ImoRelObj* pRO,
                                             ImoInstrument* pInstr)
 {
     RelAuxObjEngraver* pEngrv
-        = dynamic_cast<RelAuxObjEngraver*>(m_shapesStorage.get_engraver(pRO));
+        = static_cast<RelAuxObjEngraver*>(m_shapesStorage.get_engraver(pRO));
     pEngrv->set_end_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol);
     pEngrv->set_prolog_width( prologWidth );
 

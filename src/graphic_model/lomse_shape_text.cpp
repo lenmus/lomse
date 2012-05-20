@@ -140,7 +140,7 @@ GmoShapeWord::GmoShapeWord(ImoObj* pCreatorImo, int idx, const std::string& text
 
     //other
     m_color = m_pStyle->get_color_property(ImoStyle::k_color);
-    m_baseline = m_origin.y + m_halfLeading + meter.get_ascender();
+    m_baseline = m_halfLeading + meter.get_ascender();          //relative to m_origin.y
 }
 
 //---------------------------------------------------------------------------------------
@@ -159,7 +159,7 @@ void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
     Color color = determine_color_to_use(opt);
     pDrawer->set_text_color(color);
     //AWARE: FreeType reference is at baseline
-    pDrawer->draw_text(m_origin.x, m_baseline, m_text);
+    pDrawer->draw_text(m_origin.x, m_baseline + m_origin.y, m_text);
 //    URect pos = determine_text_position_and_size();
 //    pDrawer->draw_text(pos.x, pos.y, m_label);
 
@@ -168,7 +168,7 @@ void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
     {
         LUnits xStart = m_origin.x;
         LUnits xEnd = m_origin.x + m_size.width;
-        LUnits y = m_origin.y + m_size.height * 1.12f;
+        LUnits y = m_origin.y + m_size.height * 0.80f;
         pDrawer->begin_path();
         pDrawer->fill(color);
         pDrawer->stroke(color);
@@ -176,14 +176,6 @@ void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
         pDrawer->move_to(xStart, y);
         pDrawer->hline_to(xEnd);
         pDrawer->end_path();
-//        LUnits y = pos.y + pos.height * 0.12f;
-//        pDrawer->begin_path();
-//        pDrawer->fill(color);
-//        pDrawer->stroke(color);
-//        pDrawer->stroke_width( pos.height * 0.075f );
-//        pDrawer->move_to(pos.x, y);
-//        pDrawer->hline_to( pos.right() );
-//        pDrawer->end_path();
     }
 
     //draw reference lines

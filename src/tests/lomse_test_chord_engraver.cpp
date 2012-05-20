@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -131,14 +131,14 @@ public:
 
         m_pMeter = LOMSE_NEW ScoreMeter(1, 1, 180.0f);
         m_pStorage = LOMSE_NEW ShapesStorage();
-        m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage);
+        m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
         m_pShape1 =
-            dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote1, 0, 0, k_clef_G2, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote1, k_clef_G2, UPoint(10.0f, 15.0f)) );
         m_pShape2 =
-            dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote2, 0, 0, k_clef_G2, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote2, k_clef_G2, UPoint(10.0f, 15.0f)) );
         if (step3 >= 0)
             m_pShape3 =
-                dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote3, 0, 0, k_clef_G2, UPoint(10.0f, 15.0f)) );
+                dynamic_cast<GmoShapeNote*>(m_pNoteEngrv->create_shape(m_pNote3, k_clef_G2, UPoint(10.0f, 15.0f)) );
         else
             m_pShape3 = NULL;
     }
@@ -163,14 +163,13 @@ public:
         int iStaff = 0;
         int iSystem = 0;
         int iCol = 0;
-        UPoint pos(0.0f, 0.0f);
 
         int numNotes = (m_pShape3 ? 3 : 2);
 
         //first note
         m_pChordEngrv = LOMSE_NEW MyChordEngraver(m_libraryScope, m_pMeter, numNotes);
         m_pChordEngrv->set_start_staffobj(m_pChord, m_pNote1, m_pShape1, iInstr, iStaff,
-                                          iSystem, iCol, pos);
+                                          iSystem, iCol);
         m_pStorage->save_engraver(m_pChordEngrv, m_pChord);
 
         if (numNotes == 3)

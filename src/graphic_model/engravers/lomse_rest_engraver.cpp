@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -46,27 +46,22 @@ namespace lomse
 // RestEngraver implementation
 //---------------------------------------------------------------------------------------
 RestEngraver::RestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           ShapesStorage* pShapesStorage)
-    : NoterestEngraver(libraryScope, pScoreMeter, pShapesStorage)
+                           ShapesStorage* pShapesStorage, int iInstr, int iStaff)
+    : NoterestEngraver(libraryScope, pScoreMeter, pShapesStorage, iInstr, iStaff)
     , m_pRest(NULL)
 {
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeRest* RestEngraver::create_shape(ImoObj* pCreatorImo, int iInstr, int iStaff,
-                                         UPoint uPos, int restType, int numDots,
-                                         ImoRest* pRest)
+GmoShapeRest* RestEngraver::create_shape(ImoRest* pRest, UPoint uPos)
 {
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
-    m_restType = restType;
-    m_numDots = numDots;
+    m_restType = pRest->get_note_type();
+    m_numDots = pRest->get_dots();
     m_pRest = pRest;
     m_pNoteRest = pRest;
     m_uxLeft = uPos.x;
     m_uyTop = uPos.y;
     m_fontSize = determine_font_size();
-    m_pCreatorImo = pCreatorImo;
 
     determine_position();
     create_main_shape();
@@ -86,11 +81,11 @@ void RestEngraver::determine_position()
 void RestEngraver::create_main_shape()
 {
     int nIdx = 0;   //single-shape
-    m_pRestShape = LOMSE_NEW GmoShapeRest(m_pCreatorImo, nIdx, m_uxLeft, m_uyTop, Color(0,0,0),
+    m_pRestShape = LOMSE_NEW GmoShapeRest(m_pRest, nIdx, m_uxLeft, m_uyTop, Color(0,0,0),
                                     m_libraryScope);
     m_pNoteRestShape = m_pRestShape;
 
-    GmoShape* pGlyph = LOMSE_NEW GmoShapeRestGlyph(m_pCreatorImo, nIdx, m_iGlyph,
+    GmoShape* pGlyph = LOMSE_NEW GmoShapeRestGlyph(m_pRest, nIdx, m_iGlyph,
                                              UPoint(m_uxLeft, m_uyTop),
                                              Color(0,0,0), m_libraryScope, m_fontSize);
     m_pRestShape->add(pGlyph);
@@ -144,16 +139,10 @@ void RestEngraver::add_shapes_for_dots_if_required()
 LUnits RestEngraver::add_dot_shape(LUnits x, LUnits y, Color color)
 {
     y += get_glyph_offset(k_glyph_dot) + tenths_to_logical(-75.0);
-    GmoShapeDot* pShape = LOMSE_NEW GmoShapeDot(m_pCreatorImo, 0, k_glyph_dot, UPoint(x, y),
+    GmoShapeDot* pShape = LOMSE_NEW GmoShapeDot(m_pRest, 0, k_glyph_dot, UPoint(x, y),
                                           color, m_libraryScope, m_fontSize);
 	m_pRestShape->add(pShape);
     return pShape->get_width();
-}
-
-//---------------------------------------------------------------------------------------
-LUnits RestEngraver::tenths_to_logical(Tenths tenths)
-{
-    return m_pMeter->tenths_to_logical(tenths, m_iInstr, m_iStaff);
 }
 
 

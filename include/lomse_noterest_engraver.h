@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -53,8 +53,6 @@ class NoterestEngraver : public Engraver
 {
 protected:
     ShapesStorage* m_pShapesStorage;
-    int m_iInstr;
-    int m_iStaff;
     LUnits m_lineSpacing;
     Color m_color;
     double m_fontSize;
@@ -67,10 +65,9 @@ public:
 
 protected:
     NoterestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 ShapesStorage* pShapesStorage);
+                 ShapesStorage* pShapesStorage, int iInstr, int iStaff);
 
     void layout_tuplet();
-    double determine_font_size();
 
     inline bool is_beamed() { return m_pNoteRest->is_beamed(); }
 
@@ -78,8 +75,6 @@ protected:
     inline bool has_stem() { return m_pNoteRest->get_note_type() >= k_half; }
     inline bool has_flag() { return m_pNoteRest->get_note_type() >= k_eighth; }
     Tenths get_glyph_offset(int iGlyph);
-    LUnits tenths_to_logical(Tenths tenths);
-
 
     LUnits m_uyStaffTopLine;
     LUnits m_uxLeft, m_uyTop;       //current position

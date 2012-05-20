@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -53,23 +53,20 @@ namespace lomse
 // NoteEngraver implementation
 //=======================================================================================
 NoteEngraver::NoteEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           ShapesStorage* pShapesStorage)
-    : NoterestEngraver(libraryScope, pScoreMeter, pShapesStorage)
+                           ShapesStorage* pShapesStorage, int iInstr, int iStaff)
+    : NoterestEngraver(libraryScope, pScoreMeter, pShapesStorage, iInstr, iStaff)
     , m_pNote(NULL)
 {
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int iInstr, int iStaff,
-                                     int clefType, UPoint uPos)
+GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, UPoint uPos)
 {
     //save data and initialize
     m_pNote = pNote;
     m_pNoteRest = pNote;
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
     m_clefType = clefType;
-    m_lineSpacing = m_pMeter->line_spacing_for_instr_staff(iInstr, iStaff);
+    m_lineSpacing = m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff);
     m_color = m_pNote->get_color();
     m_pNoteShape = NULL;
     m_pNoteheadShape = NULL;
@@ -184,9 +181,9 @@ void NoteEngraver::add_shapes_for_accidentals_if_required()
     EAccidentals acc = m_pNote->get_notated_accidentals();
     if (acc != k_no_accidentals)
     {
-        AccidentalsEngraver engrv(m_libraryScope, m_pMeter);
-        m_pAccidentalsShape = engrv.create_shape(m_pNote, m_iInstr, m_iStaff,
-                                    UPoint(m_uxLeft, m_uyTop), acc, false);
+        AccidentalsEngraver engrv(m_libraryScope, m_pMeter, m_iInstr, m_iStaff);
+        m_pAccidentalsShape = engrv.create_shape(m_pNote, UPoint(m_uxLeft, m_uyTop),
+                                                 acc, false /*cautionary accidentals*/);
         m_pNoteShape->add_accidentals(m_pAccidentalsShape);
         m_uxLeft += m_pAccidentalsShape->get_width();
         m_uxLeft += tenths_to_logical(LOMSE_SPACE_AFTER_ACCIDENTALS);
@@ -412,12 +409,6 @@ Tenths NoteEngraver::get_glyph_offset(int iGlyph)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits NoteEngraver::tenths_to_logical(Tenths tenths)
-{
-    return m_pMeter->tenths_to_logical(tenths, m_iInstr, m_iStaff);
-}
-
-//---------------------------------------------------------------------------------------
 void NoteEngraver::add_leger_lines_if_necessary()
 {
     LUnits lineOutgoing = tenths_to_logical(LOMSE_LEGER_LINE_OUTGOING);
@@ -433,13 +424,6 @@ void NoteEngraver::add_leger_lines_if_necessary()
 
     m_pNoteShape->add_leger_lines_info(m_nPosOnStaff, yStart, lineOutgoing,
                                        lineThickness, lineSpacing);
-}
-
-//---------------------------------------------------------------------------------------
-double NoteEngraver::determine_font_size()
-{
-    //TODO
-    return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -468,8 +452,7 @@ void NoteEngraver::create_chord()
     ChordEngraver* pEngrv = LOMSE_NEW ChordEngraver(m_libraryScope, m_pMeter, numNotes);
     m_pShapesStorage->save_engraver(pEngrv, pChord);
 
-    pEngrv->set_start_staffobj(pChord, m_pNote, m_pNoteShape, m_iInstr, m_iStaff,
-                               0, 0, UPoint(0.0f, 0.0f));
+    pEngrv->set_start_staffobj(pChord, m_pNote, m_pNoteShape, m_iInstr, m_iStaff, 0, 0);
 }
 
 //---------------------------------------------------------------------------------------
@@ -553,7 +536,7 @@ void StemFlagEngraver::add_flag_shape_if_required()
         int iGlyph = get_glyph_for_flag();
         LUnits x = (m_fStemDown ? m_uxStem : m_uxStem + m_uStemThickness);
         LUnits y = m_uyStemFlag + get_glyph_offset(iGlyph);
-        m_pBaseNoteShape->add_flag( new GmoShapeFlag(m_pCreatorImo, 0, iGlyph,
+        m_pBaseNoteShape->add_flag( LOMSE_NEW GmoShapeFlag(m_pCreatorImo, 0, iGlyph,
                                                      UPoint(x, y), m_color,
                                                      m_libraryScope, m_fontSize) );
     }
@@ -646,19 +629,6 @@ LUnits StemFlagEngraver::get_glyph_offset(int iGlyph)
 {
     Tenths tenths = glyphs_lmbasic2[iGlyph].GlyphOffset;
     return m_pMeter->tenths_to_logical(tenths, m_iInstr, m_iStaff);
-}
-
-//---------------------------------------------------------------------------------------
-LUnits StemFlagEngraver::tenths_to_logical(Tenths value)
-{
-    return m_pMeter->tenths_to_logical(value, m_iInstr, m_iStaff);
-}
-
-//---------------------------------------------------------------------------------------
-double StemFlagEngraver::determine_font_size()
-{
-    //TODO
-    return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
 }
 
 

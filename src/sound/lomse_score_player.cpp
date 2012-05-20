@@ -200,10 +200,11 @@ void ScorePlayer::stop()
 {
     if (m_pThread)
     {
-        {
-            SoundLock lock(m_mutex);
-            m_fShouldStop = true;
-        }
+        ////request the tread to terminate
+        //{
+        //    SoundLock lock(m_mutex);
+        //    m_fShouldStop = true;
+        //}
 
         if (m_fPaused)                  //unlock if paused
             pause();
@@ -239,7 +240,8 @@ void ScorePlayer::wait_for_termination()
         delete m_pThread;
         m_pThread = NULL;
     }
-    m_fShouldStop = false;
+    //m_fShouldStop = false;
+    //boost::this_thread::sleep(boost::posix_time::seconds(1)); 
 }
 
 //---------------------------------------------------------------------------------------
@@ -458,7 +460,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
         //Verify if next event is a metronome click
         if (nMtrEvDeltaTime <= events[i]->DeltaTime)
         {
-            //Next event shoul be a metronome click or the click off event for the previous metronome click
+            //Next event should be a metronome click or the click off event for the previous metronome click
             nEvTime = delta_to_milliseconds(nMtrEvDeltaTime);
             if (curTime < nEvTime)
             {
@@ -664,26 +666,19 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
         //boost::this_thread::interruption_point();
         {
             SoundLock lock(m_mutex);
-            if (m_fShouldStop)
-                break;
+            //if (m_fShouldStop)
+            //    break;
             while(m_fPaused)
             {
-                if (m_fShouldStop)
-                    break;
+                //if (m_fShouldStop)
+                //    break;
                 m_canPlay.wait(lock);
             }
         }
 
     } while (i <= nEvEnd);
 
-}
-
-//---------------------------------------------------------------------------------------
-void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
-                                               Interactor* pInteractor)
-{
-    //ensure that all visual highlight is removed in case the loop was exited because
-    //stop playing was requested
+    //ensure that all visual highlight is removed
     if (fVisualTracking)
     {
         SpEventScoreHighlight pEvent(
@@ -694,6 +689,23 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
         else if (pInteractor)
             pInteractor->handle_event(pEvent);
     }
+}
+
+//---------------------------------------------------------------------------------------
+void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
+                                               Interactor* pInteractor)
+{
+    ////ensure that all visual highlight is removed
+    //if (fVisualTracking)
+    //{
+    //    SpEventScoreHighlight pEvent(
+    //        LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id()) );
+    //    pEvent->add_item(k_end_of_higlight_event, NULL);
+    //    if (m_fPostEvents)
+    //        m_libScope.post_event(pEvent);
+    //    else if (pInteractor)
+    //        pInteractor->handle_event(pEvent);
+    //}
 
     //ensure that all sounds are off
     m_pMidi->all_sounds_off();

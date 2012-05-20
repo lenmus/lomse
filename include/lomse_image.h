@@ -60,6 +60,10 @@ public:
     Image(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format, USize imgSize);
     virtual ~Image();
 
+    //copy constructor and assignment operator
+    Image(const Image& img);
+    Image& operator=(const Image &img);
+
     //creation
     void load(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format, USize imgSize);
     void set_error_msg(const string& msg);

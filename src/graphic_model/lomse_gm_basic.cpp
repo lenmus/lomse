@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -71,8 +71,7 @@ GmoObj* MultiRefToGmo::get_gmo(int id)
 // Graphic model implementation
 //=======================================================================================
 GraphicModel::GraphicModel()
-    : m_fCanBeDrawn(false)
-    , m_modified(true)
+    : m_modified(true)
 {
     m_root = LOMSE_NEW GmoBoxDocument(this, NULL);    //TODO: replace NULL by ImoDocument
 }
@@ -101,8 +100,6 @@ GmoBoxDocPage* GraphicModel::get_page(int i)
 void GraphicModel::draw_page(int iPage, UPoint& origin, Drawer* pDrawer,
                              RenderOptions& opt)
 {
-    if (!m_fCanBeDrawn) return;
-
     pDrawer->set_shift(-origin.x, -origin.y);
     get_page(iPage)->on_draw(pDrawer, opt);
     pDrawer->render();
@@ -328,6 +325,7 @@ string& GmoObj::get_name(int objtype)
 {
     if (!m_fNamesLoaded)
     {
+        m_typeToName[k_box_control]             = "box-control    ";
         m_typeToName[k_box_document]            = "box-document   ";
         m_typeToName[k_box_doc_page]            = "box-doc-page   ";
         m_typeToName[k_box_doc_page_content]    = "box-docpg-cont.";
@@ -338,7 +336,8 @@ string& GmoObj::get_name(int objtype)
         m_typeToName[k_box_slice]               = "box-slice      ";
         m_typeToName[k_box_slice_instr]         = "box-slice-intr ";
         m_typeToName[k_box_system]              = "box-system     ";
-        m_typeToName[k_box_control]             = "box-control    ";
+        m_typeToName[k_box_table]               = "box-table      ";
+        m_typeToName[k_box_table_rows]          = "box-table-rows ";
 
         // shapes
         m_typeToName[k_shape_accidentals]       = "accidentals    ";
@@ -356,6 +355,8 @@ string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_invisible]         = "invisible      ";
         m_typeToName[k_shape_key_signature]     = "key            ";
         m_typeToName[k_shape_line]              = "line           ";
+        m_typeToName[k_shape_metronome_glyph]   = "metronome-glyph";
+        m_typeToName[k_shape_metronome_mark]    = "metronome-mark ";
         m_typeToName[k_shape_note]              = "note           ";
         m_typeToName[k_shape_notehead]          = "notehead       ";
         m_typeToName[k_shape_rectangle]         = "rectangle      ";

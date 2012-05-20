@@ -186,6 +186,7 @@ protected:
     ImoScore*       m_pCurScore;
     ImoScore*       m_pLastScore;
     ImoDocument*    m_pImoDoc;
+    string          m_scoreVersion;
 
     //analysis input
     SpLdpTree m_pTree;
@@ -256,6 +257,8 @@ public:
 //    void add_chord(ImoChord* pChord);
 
     //access to score being analysed
+    inline void set_score_version(const string& version) { m_scoreVersion = version; }
+    inline const string& get_score_version() { return m_scoreVersion; }
     inline void score_analysis_begin(ImoScore* pScore) { m_pCurScore = pScore; }
     inline void score_analysis_end() {
         m_pLastScore = m_pCurScore;

@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -43,27 +43,25 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // AccidentalsEngraver implementation
 //---------------------------------------------------------------------------------------
-AccidentalsEngraver::AccidentalsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
-    : Engraver(libraryScope, pScoreMeter)
+AccidentalsEngraver::AccidentalsEngraver(LibraryScope& libraryScope,
+                                         ScoreMeter* pScoreMeter, int iInstr, int iStaff)
+    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
 {
 }
 
 //---------------------------------------------------------------------------------------
 GmoShapeAccidentals* AccidentalsEngraver::create_shape(ImoObj* pCreatorImo,
-                                                       int iInstr, int iStaff,
                                                        UPoint uPos,
                                                        EAccidentals accidentals,
                                                        bool fCautionary)
 {
     m_accidentals = accidentals;
     m_fCautionary = fCautionary;
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
     m_fontSize = determine_font_size();
     m_pCreatorImo = pCreatorImo;
 
     find_glyphs();
-    create_container_shape(pCreatorImo, uPos);
+    create_container_shape(uPos);
     add_glyphs_to_container_shape(uPos);
 
     return m_pContainer;
@@ -130,9 +128,9 @@ void AccidentalsEngraver::find_glyphs()
 }
 
 //---------------------------------------------------------------------------------------
-void AccidentalsEngraver::create_container_shape(ImoObj* pCreatorImo, UPoint pos)
+void AccidentalsEngraver::create_container_shape(UPoint pos)
 {
-    m_pContainer = LOMSE_NEW GmoShapeAccidentals(pCreatorImo, 0, pos, Color(0,0,0));
+    m_pContainer = LOMSE_NEW GmoShapeAccidentals(m_pCreatorImo, 0, pos, Color(0,0,0));
 }
 
 //---------------------------------------------------------------------------------------
@@ -158,13 +156,6 @@ LUnits AccidentalsEngraver::glyph_offset(int iGlyph)
 {
     Tenths offset = glyphs_lmbasic2[iGlyph].GlyphOffset + 40.0f;
     return m_pMeter->tenths_to_logical(offset, m_iInstr, m_iStaff);
-}
-
-//---------------------------------------------------------------------------------------
-double AccidentalsEngraver::determine_font_size()
-{
-    //TODO
-    return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
 }
 
 

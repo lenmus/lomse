@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -162,7 +162,8 @@ SUITE(ColumnStorageTest)
         int iInstr = 0;
         float rTime = 0.0f;
 
-        storage.include_object(iLine, iInstr, pClef, rTime, iStaff, pShape, true);
+        storage.include_object(iLine, iInstr, pClef, rTime, iStaff, pShape, true,
+                               0.0f, 0.0f);
 
         CHECK( storage.get_fixed_space_at_start() == 60.0f );
         CHECK( storage.my_are_there_lines() == true );
@@ -182,7 +183,8 @@ SUITE(ColumnStorageTest)
         int iLine = 0;
         int iInstr = 0;
         float rTime = 64.0f;
-        storage.include_object(iLine, iInstr, pBar, rTime, iStaff, pShape, false);
+        storage.include_object(iLine, iInstr, pBar, rTime, iStaff, pShape, false,
+                               0.0f, 0.0f);
 
         storage.determine_sizes();
 

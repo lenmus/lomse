@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -47,8 +47,6 @@ class GmoShapeFermata;
 class FermataEngraver : public Engraver
 {
 protected:
-    int m_iInstr;
-    int m_iStaff;
     ImoFermata* m_pFermata;
     int m_placement;
     bool m_fAbove;
@@ -56,17 +54,16 @@ protected:
     GmoShapeFermata* m_pFermataShape;
 
 public:
-    FermataEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
+    FermataEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                    int iInstr, int iStaff);
     ~FermataEngraver() {}
 
-    GmoShapeFermata* create_shape(ImoFermata* pFermata, int iInstr, int iStaff,
-                                  UPoint pos, int placement, GmoShape* pParentShape=NULL);
+    GmoShapeFermata* create_shape(ImoFermata* pFermata, UPoint pos,
+                                  GmoShape* pParentShape=NULL);
 
 protected:
     bool determine_if_above();
-    double determine_font_size();
     UPoint compute_location(UPoint pos);
-    LUnits tenths_to_logical(Tenths tenths);
     void center_on_parent();
 
 };

@@ -57,16 +57,16 @@ using namespace std;
 namespace lomse
 {
 
-//----------------------------------------------------------------------------------
+//=======================================================================================
 // AutoBeamer implementation
-//----------------------------------------------------------------------------------
-
+//=======================================================================================
 void AutoBeamer::do_autobeam()
 {
     extract_notes();
     process_notes();
 }
 
+//---------------------------------------------------------------------------------------
 void AutoBeamer::extract_notes()
 {
     m_notes.clear();
@@ -75,14 +75,14 @@ void AutoBeamer::extract_notes()
     std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
     for (it = noteRests.begin(); it != noteRests.end(); ++it)
     {
-        ImoNote* pNote = dynamic_cast<ImoNote*>( (*it).first );
-        if (pNote)
-            m_notes.push_back(pNote);
+        if ((*it).first->is_note())
+            m_notes.push_back( static_cast<ImoNote*>( (*it).first ) );
     }
     //cout << "Num. note/rests in beam: " << noteRests.size() << endl;
     //cout << "NUm. notes in beam: " << m_notes.size() << endl;
 }
 
+//---------------------------------------------------------------------------------------
 void AutoBeamer::get_triad(int iNote)
 {
     if (iNote == 0)
@@ -108,6 +108,7 @@ void AutoBeamer::get_triad(int iNote)
     }
 }
 
+//---------------------------------------------------------------------------------------
 void AutoBeamer::determine_maximum_beam_level_for_current_triad()
 {
     m_nLevelPrev = (m_curNotePos == k_first_note ? -1 : m_nLevelCur);
@@ -115,6 +116,7 @@ void AutoBeamer::determine_maximum_beam_level_for_current_triad()
     m_nLevelNext = (m_pNextNote ? get_beaming_level(m_pNextNote) : -1);
 }
 
+//---------------------------------------------------------------------------------------
 void AutoBeamer::process_notes()
 {
     for (int iNote=0; iNote < (int)m_notes.size(); iNote++)
@@ -125,6 +127,7 @@ void AutoBeamer::process_notes()
     }
 }
 
+//---------------------------------------------------------------------------------------
 void AutoBeamer::compute_beam_types_for_current_note()
 {
     for (int level=0; level < 6; level++)
@@ -133,6 +136,7 @@ void AutoBeamer::compute_beam_types_for_current_note()
     }
 }
 
+//---------------------------------------------------------------------------------------
 void AutoBeamer::compute_beam_type_for_current_note_at_level(int level)
 {
     if (level > m_nLevelCur)
@@ -236,6 +240,7 @@ void AutoBeamer::compute_beam_type_for_current_note_at_level(int level)
     }
 }
 
+//---------------------------------------------------------------------------------------
 int AutoBeamer::get_beaming_level(ImoNote* pNote)
 {
     switch(pNote->get_note_type())
@@ -259,7 +264,7 @@ int AutoBeamer::get_beaming_level(ImoNote* pNote)
 
 
 
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 // The syntax analyser is based on the Interpreter pattern ()
 //
 // The basic idea is to have a class for each language symbol, terminal or nonterminal
@@ -275,7 +280,7 @@ int AutoBeamer::get_beaming_level(ImoNote* pNote)
 //
 
 
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 // Abstract class: any element analyser must derive from it
 
 class ElementAnalyser
@@ -531,10 +536,12 @@ protected:
     Color get_color_param()
     {
         ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
-        ImoColorDto* pColor = dynamic_cast<ImoColorDto*>( pImo );
         Color color;
-        if (pColor)
+        if (pImo->is_color_dto())
+        {
+            ImoColorDto* pColor = static_cast<ImoColorDto*>( pImo );
             color = pColor->get_color();
+        }
         delete pImo;
         return color;
     }
@@ -576,6 +583,14 @@ protected:
             pStyle = pScore->find_style(styleName);
             if (!pStyle)
             {
+                //try to find it in document global styles
+                Document* pDoc = m_pAnalyser->get_document_being_analysed();
+                ImoDocument* pImoDoc = pDoc->get_imodoc();
+                if (pImoDoc)
+                    pStyle = pImoDoc->find_style(styleName);
+            }
+            if (!pStyle)
+            {
                 report_msg(m_pParamToAnalyse->get_line_number(),
                         "Style '" + styleName + "' is not defined. Default style will be used.");
                 pStyle = pScore->get_style_or_default(defaulName);
@@ -589,10 +604,12 @@ protected:
     TPoint get_point_param()
     {
         ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
-        ImoPointDto* pPoint = dynamic_cast<ImoPointDto*>( pImo );
         TPoint point;
-        if (pPoint)
+        if (pImo->is_point_dto())
+        {
+            ImoPointDto* pPoint = static_cast<ImoPointDto*>( pImo );
             point = pPoint->get_point();
+        }
         delete pImo;
         return point;
     }
@@ -601,10 +618,12 @@ protected:
     TSize get_size_param()
     {
         ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
-        ImoSizeDto* pSize = dynamic_cast<ImoSizeDto*>( pImo );
         TSize size;
-        if (pSize)
+        if (pImo->is_size_info())
+        {
+            ImoSizeDto* pSize = static_cast<ImoSizeDto*>( pImo );
             size = pSize->get_size();
+        }
         delete pImo;
         return size;
     }
@@ -789,7 +808,7 @@ protected:
                 || type == k_link
                )
             {
-                return dynamic_cast<ImoInlineObj*>(
+                return static_cast<ImoInlineObj*>(
                     m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
             }
             else
@@ -800,9 +819,36 @@ protected:
         return NULL;
     }
 
+    //-----------------------------------------------------------------------------------
+    void analyse_optional_style(ImoContentObj* pParent)
+    {
+        // [<style>]
+        ImoStyle* pStyle = NULL;
+        if (get_optional(k_style))
+        {
+            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+            pStyle = get_doc_text_style( get_string_value() );
+        }
+        pParent->set_style(pStyle);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void analyse_inline_objects(ImoBoxContent* pParent)
+    {
+        // <inlineObject>*
+        while( more_params_to_analyse() )
+        {
+            ImoInlineObj* pItem = analyse_inline_object();
+            if (pItem)
+                pParent->add_item(pItem);
+
+            move_to_next_param();
+        }
+    }
+
 };
 
-//-------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 // default analyser to use when there is no defined analyser for an LDP element
 
 class NullAnalyser : public ElementAnalyser
@@ -818,7 +864,7 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <anchorLine> = (anchorLine <destination-point>[<lineStyle>][<color>][<width>]
 //@                            [<lineCapEnd>])
 //@ <destination-point> = <location>    in Tenths
@@ -871,7 +917,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ ImoBarline StaffObj
 //@ <barline> = (barline) | (barline <type>[<visible>][<location>])
 //@ <type> = label: { start | end | double | simple | startRepetition |
@@ -934,7 +980,7 @@ protected:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <beam> = (beam num <beamtype>)
 //@ <beamtype> = label. Concatenation of 1 to 6 chars from set { + | - | = | f | b }
 //@     meaning:
@@ -1015,7 +1061,7 @@ protected:
 };
 
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <bezier> = (bezier <bezier-location>* )
 //@ <bezier-location> = { (start-x num) | (start-y num) | (end-x num) | (end-y num) |
 //@                       (ctrol1-x num) | (ctrol1-y num) | (ctrol2-x num) | (ctrol2-y num) }
@@ -1079,7 +1125,7 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <border> = (border <width><lineStyle><color>)
 //@     i.e.: (border (width 2.5)(lineStyle solid)(color #ff0000))
 
@@ -1116,17 +1162,16 @@ protected:
             ImoObj* pImo = proceed(k_border, NULL);
             if (pImo)
             {
-                ImoBorderDto* pBorder = dynamic_cast<ImoBorderDto*>(pImo);
-                if (pBorder)
-                    box.set_border(pBorder);
+                if (pImo->is_border_dto())
+                    box.set_border( static_cast<ImoBorderDto*>(pImo) );
                 delete pImo;
             }
         }
 
 };
 
-//@-------------------------------------------------------------------------------------
-// <chord> = (chord <note>+ )
+//@--------------------------------------------------------------------------------------
+//@ <chord> = (chord <note>+ )
 
 class ChordAnalyser : public ElementAnalyser
 {
@@ -1158,11 +1203,9 @@ protected:
     void add_notes_to_music_data(ImoChord* pChord)
     {
         //get anchor musicData
-        if (m_pAnchor)
+        if (m_pAnchor && m_pAnchor->is_music_data())
         {
-            ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
-            if (!pMD)
-                return;
+            ImoMusicData* pMD = static_cast<ImoMusicData*>(m_pAnchor);
 
             //add notes to musicData
             std::list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes
@@ -1170,7 +1213,7 @@ protected:
             std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
             for (it = notes.begin(); it != notes.end(); ++it)
             {
-                ImoNote* pNote = dynamic_cast<ImoNote*>( (*it).first );
+                ImoNote* pNote = static_cast<ImoNote*>( (*it).first );
                 pMD->append_child_imo(pNote);
             }
 
@@ -1180,7 +1223,7 @@ protected:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <clef> = (clef <type> [<symbolSize>] [<staffNum>] [<visible>] [<location>] )
 //@ <type> = label: { G | F4 | F3 | C1 | C2 | C3 | C4 | percussion |
 //@                   C5 | F5 | G1 | 8_G | G_8 | 8_F4 | F4_8 |
@@ -1252,7 +1295,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <color> = (color <rgba>}
 //@ <rgba> = label: { #rrggbb | #rrggbbaa }
 
@@ -1287,9 +1330,9 @@ protected:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <content> = (content { <heading> | <dynamic> | <itemizedlist> | <orderedlist> |
-//@                        <para> | <score> | <scorePlayer> | <text> }* )
+//@                        <para> | <score> | <scorePlayer> | <table> | <text> }* )
 
 class ContentAnalyser : public ElementAnalyser
 {
@@ -1319,6 +1362,7 @@ public:
                  || analyse_optional(k_orderedlist, pContent)
                  || analyse_optional(k_para, pContent)
                  || analyse_optional(k_score_player, pContent)
+                 || analyse_optional(k_table, pContent)
                  || analyse_optional(k_text, pContent)
                ))
             {
@@ -1331,7 +1375,7 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <newSystem> = (newSystem}
 
 class ControlAnalyser : public ElementAnalyser
@@ -1350,7 +1394,7 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <cursor> = (cursor <instrNumber><staffNumber><timePos><objID>)
 //@ <instrNumber> = integer number (0..n-1)
 //@ <staffNumber> = integer number (0..n-1)
@@ -1391,7 +1435,7 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <defineStyle> = (defineStyle <syleName> { <styleProperty>* | <font><color> } )
 //@ <styleProperty> = (property-tag value)
 //@
@@ -1522,6 +1566,24 @@ public:
                 else if (get_optional(k_line_height))
                     pStyle->set_float_property(ImoStyle::k_line_height, get_float_param(1.5f) );
 
+                //size
+                else if (get_optional(k_min_height))
+                    pStyle->set_lunits_property(ImoStyle::k_min_height, get_lenght_param() );
+                else if (get_optional(k_min_width))
+                    pStyle->set_lunits_property(ImoStyle::k_min_width, get_lenght_param() );
+                else if (get_optional(k_max_height))
+                    pStyle->set_lunits_property(ImoStyle::k_max_height, get_lenght_param() );
+                else if (get_optional(k_max_width))
+                    pStyle->set_lunits_property(ImoStyle::k_max_width, get_lenght_param() );
+                else if (get_optional(k_height))
+                    pStyle->set_lunits_property(ImoStyle::k_height, get_lenght_param() );
+                else if (get_optional(k_width))
+                    pStyle->set_lunits_property(ImoStyle::k_width, get_lenght_param() );
+
+                //table
+                else if (get_optional(k_table_col_width))
+                    pStyle->set_lunits_property(ImoStyle::k_table_col_width, get_lenght_param() );
+
                 else
                 {
                     error_invalid_param();
@@ -1635,10 +1697,13 @@ protected:
 
     ImoStyle* create_style(const string& name, const string& parent)
     {
-        ImoStyles* pStyles = dynamic_cast<ImoStyles*>(m_pAnchor);
         ImoStyle* pDefault = NULL;
-        if (pStyles)
+        ImoStyles* pStyles = NULL;
+        if (m_pAnchor && m_pAnchor->is_styles())
+        {
+            pStyles = static_cast<ImoStyles*>(m_pAnchor);
             pDefault = pStyles->get_default_style();
+        }
 
         if (name == "Default style")
         {
@@ -1660,7 +1725,7 @@ protected:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 // <dynamic> = (dynamic <classid> <param>*)
 // <classid> = (classid <label>)
 // <param> = (param <name><value>)
@@ -1715,7 +1780,7 @@ protected:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <fermata> = (fermata <placement>[<componentOptions>*])
 //@ <placement> = { above | below }
 
@@ -1762,7 +1827,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <figuredBass> = (figuredBass <figuredBassSymbols>[<parenthesis>][<fbline>]
 //@                              [<componentOptions>*] )
 //@ <parenthesis> = (parenthesis { yes | no })  default: no
@@ -1903,7 +1968,7 @@ public:
 ////    return pFB;       //no error
 ////}
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <font> = (font <font_name> <font_size> <font_style>)
 //@ <font_name> = string   i.e. "Times New Roman", "Trebuchet"
 //@ <font_size> = num      in points
@@ -1977,7 +2042,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <goBack> = (goBack <timeShift>)
 //@ <goFwd> = (goFwd <timeShift>)
 //@ <timeShift> = { start | end | <number> | <duration> }
@@ -2074,7 +2139,7 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ DEPRECATED: Since v1.6 <graphic> element is only supported in backwards
 //@             compatibility mode.
 //@
@@ -2139,7 +2204,7 @@ public:
 };
 #endif  //(LOMSE_COMPATIBILITY_1_5 == 1)
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <group> = (group [<grpName>][<grpAbbrev>]<grpSymbol>[<joinBarlines>]
 //@                  <instrument>+ )
 //@
@@ -2228,8 +2293,8 @@ protected:
 
 };
 
-//@-------------------------------------------------------------------------------------
-//@ <heading> = (heading <level> [<style>] <textItem>*)
+//@--------------------------------------------------------------------------------------
+//@ <heading> = (heading <level> [<style>] <inlineObject>*)
 
 class HeadingAnalyser : public ElementAnalyser
 {
@@ -2249,24 +2314,10 @@ public:
             pHeading->set_level( get_integer_value(1) );
 
             // [<style>]
-            ImoStyle* pStyle = NULL;
-            if (get_optional(k_style))
-            {
-                m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-                pStyle = get_doc_text_style( get_string_value() );
-            }
-            pHeading->set_style(pStyle);
+            analyse_optional_style(pHeading);
 
-
-            //<textItem>*
-            while (more_params_to_analyse())
-            {
-                if (!analyse_optional(k_txt, pHeading))
-                {
-                    error_invalid_param();
-                    move_to_next_param();
-                }
-            }
+            // <inlineObject>+
+            analyse_inline_objects(pHeading);
 
             add_to_model(pHeading);
         }
@@ -2274,7 +2325,7 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <image> = (image [<style>] <file>)
 //@ <file> = (file <string>)
 //@
@@ -2294,13 +2345,7 @@ public:
         ImoImage* pImg = static_cast<ImoImage*>( ImFactory::inject(k_imo_image, pDoc) );
 
         // [<style>]
-        ImoStyle* pStyle = NULL;
-        if (get_optional(k_style))
-        {
-            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-            pStyle = get_doc_text_style( get_string_value() );
-        }
-        pImg->set_style(pStyle);
+        analyse_optional_style(pImg);
 
         // <file>
         if (get_mandatory(k_file))
@@ -2324,7 +2369,7 @@ protected:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <infoMIDI> = (infoMIDI num_instr [num_channel])
 //@ num_instr = integer: 0..255
 //@ num_channel = integer: 0..15
@@ -2386,7 +2431,7 @@ protected:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <instrument> = (instrument [<instrName>][<instrAbbrev>][<staves>][<staff>]*
 //@                            [<infoMIDI>] <musicData> )
 //@ <instrName> = <textString>
@@ -2460,7 +2505,7 @@ protected:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <key> = (key <type>[<staffobjOptions>*] )
 //@ <type> = label: { C | G | D | A | E | B | F+ | C+ | C- | G- | D- | A- |
 //@                   E- | B- | F | a | e | b | f+ | c+ | g+ | d+ | a+ | a- |
@@ -2506,7 +2551,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <language> = (language <languageCode> <charset>)
 //@ obsolete since vers 1.6
 
@@ -2521,7 +2566,7 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <lenmusdoc> = (lenmusdoc <vers>[<settings>][<meta>][<styles>]<content>)
 //@ <styles> = (styles [<defineStyle>*][<pageLayout>*])
 
@@ -2588,7 +2633,7 @@ protected:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <line> = (line <startPoint><endPoint>[<width>][<color>]
 //@                [<lineStyle>][<startCap>][<endCap>])
 //@ <startPoint> = (startPoint <location>)      (coordinates in tenths)
@@ -2650,7 +2695,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <link> = (link [<style>] <url> <inlineObject>+ )
 //@ <url> = (url <strings>)
 //@
@@ -2672,13 +2717,7 @@ public:
 
 
         // [<style>]
-        ImoStyle* pStyle = NULL;
-        if (get_optional(k_style))
-        {
-            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-            pStyle = get_doc_text_style( get_string_value() );
-        }
-        pLink->set_style(pStyle);
+        analyse_optional_style(pLink);
 
         // <url>
         if (get_mandatory(k_url))
@@ -2709,7 +2748,7 @@ protected:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <list> = ("itemizedlist" | "orderedlist" [<style>] <listitem>* )
 //@
 class ListAnalyser : public ElementAnalyser
@@ -2729,13 +2768,7 @@ public:
                                                     : ImoList::k_ordered);
 
         // [<style>]
-        ImoStyle* pStyle = NULL;
-        if (get_optional(k_style))
-        {
-            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-            pStyle = get_doc_text_style( get_string_value() );
-        }
-        pList->set_style(pStyle);
+        analyse_optional_style(pList);
 
         // <listitem>*
         while (analyse_optional(k_listitem, pList));
@@ -2745,8 +2778,8 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
-//@ <listitem> = (listitem [<style>] <inlineObject>+)  [same as <paragraph>]
+//@--------------------------------------------------------------------------------------
+//@ <listitem> = (listitem [<style>] <inlineObject>*)
 //@
 class ListItemAnalyser : public ElementAnalyser
 {
@@ -2760,31 +2793,17 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoListItem* pListItem = static_cast<ImoListItem*>(
                                 ImFactory::inject(k_imo_listitem, pDoc) );
-
         // [<style>]
-        ImoStyle* pStyle = NULL;
-        if (get_optional(k_style))
-        {
-            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-            pStyle = get_doc_text_style( get_string_value() );
-        }
-        pListItem->set_style(pStyle);
+        analyse_optional_style(pListItem);
 
         // <inlineObject>+
-        while( more_params_to_analyse() )
-        {
-            ImoInlineObj* pItem = analyse_inline_object();
-            if (pItem)
-                pListItem->add_item(pItem);
-
-            move_to_next_param();
-        }
+        analyse_inline_objects(pListItem);
 
         add_to_model(pListItem);
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <metronome> = (metronome { <NoteType><TicksPerMinute> | <NoteType><NoteType> |
 //@                            <TicksPerMinute> }
 //@                          [parenthesis][<componentOptions>*] )
@@ -2874,7 +2893,7 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <musicData> = (musicData [{<note>|<rest>|<barline>|<chord>|<clef>|<figuredBass>|
 //@                            <graphic>|<key>|<line>|<metronome>|<newSystem>|<spacer>|
 //@                            <text>|<time>|<goFwd>|<goBack>}*] )
@@ -2931,7 +2950,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ ImoNote, ImoRest StaffObj
 //@ <note> = ({n | na} <pitch><duration> [<noteOptions>*][<noteRestOptions>*]
 //@             [<componentOptions>*][<attachments>*])
@@ -3039,11 +3058,11 @@ public:
             while (more_params_to_analyse())
             {
                 if (get_optional(k_tie))
-                    m_pTieDto = dynamic_cast<ImoTieDto*>( proceed(k_tie, NULL) );
+                    m_pTieDto = static_cast<ImoTieDto*>( proceed(k_tie, NULL) );
                 else if (get_optional(k_stem))
                     set_stem(pNote);
                 else if (get_optional(k_slur))
-                    m_pSlurDto = dynamic_cast<ImoSlurDto*>( proceed(k_slur, NULL) );
+                    m_pSlurDto = static_cast<ImoSlurDto*>( proceed(k_slur, NULL) );
                 else
                     break;
             }
@@ -3142,17 +3161,17 @@ protected:
             if (type == k_tuplet)
             {
                 ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
-                m_pTupletInfo = dynamic_cast<ImoTupletDto*>( pImo );
+                m_pTupletInfo = static_cast<ImoTupletDto*>( pImo );
             }
             else if (type == k_fermata)
             {
                 ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
-                m_pFermata = dynamic_cast<ImoFermata*>( pImo );
+                m_pFermata = static_cast<ImoFermata*>( pImo );
             }
             else if (type == k_beam)
             {
                 ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
-                m_pBeamInfo = dynamic_cast<ImoBeamDto*>( pImo );
+                m_pBeamInfo = static_cast<ImoBeamDto*>( pImo );
             }
             else if (type == k_voice)
             {
@@ -3472,7 +3491,7 @@ protected:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <option> = (opt <name><value>)
 //@ <name> = label
 //@ <value> = { number | label | string }
@@ -3607,7 +3626,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <pageLayout> = (pageLayout <pageSize><pageMargins><pageOrientation>)
 //@ <pageSize> = (pageSize width height)
 //@ <pageMargins> = (pageMargins left top right bottom binding)
@@ -3668,7 +3687,7 @@ protected:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <pageMargins> = (pageMargins left top right bottom binding)     LUnits
 
 class PageMarginsAnalyser : public ElementAnalyser
@@ -3684,7 +3703,7 @@ public:
         //ImoPageInfo dto;
         ImoPageInfo* pDto;
         if (m_pAnchor && m_pAnchor->is_page_info())
-            pDto = dynamic_cast<ImoPageInfo*>(m_pAnchor);
+            pDto = static_cast<ImoPageInfo*>(m_pAnchor);
         else
             return;         //what is this for?
             //pDto = &dto;
@@ -3713,7 +3732,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <pageSize> = (pageSize width height)        LUnits
 
 class PageSizeAnalyser : public ElementAnalyser
@@ -3729,7 +3748,7 @@ public:
         //ImoPageInfo dto;
         ImoPageInfo* pDto;
         if (m_pAnchor && m_pAnchor->is_page_info())
-            pDto = dynamic_cast<ImoPageInfo*>(m_pAnchor);
+            pDto = static_cast<ImoPageInfo*>(m_pAnchor);
         else
             return;     //what is this for?
             //pDto = &dto;
@@ -3744,7 +3763,7 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <paragraph> = (para [<style>] <inlineObject>*)
 
 class ParagraphAnalyser : public ElementAnalyser
@@ -3759,31 +3778,17 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoParagraph* pPara = static_cast<ImoParagraph*>(
                                         ImFactory::inject(k_imo_para, pDoc) );
-
         // [<style>]
-        ImoStyle* pStyle = NULL;
-        if (get_optional(k_style))
-        {
-            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-            pStyle = get_doc_text_style( get_string_value() );
-        }
-        pPara->set_style(pStyle);
+        analyse_optional_style(pPara);
 
-        // <inlineObject>+
-        while( more_params_to_analyse() )
-        {
-            ImoInlineObj* pItem = analyse_inline_object();
-            if (pItem)
-                pPara->add_item(pItem);
-
-            move_to_next_param();
-        }
+        // <inlineObject>*
+        analyse_inline_objects(pPara);
 
         add_to_model(pPara);
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 // <param> = (param <name> [<value>])
 // <name> = <label>
 // <value> = <string>
@@ -3827,7 +3832,7 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <point> = (tag (dx value)(dy value))
 
 class PointAnalyser : public ElementAnalyser
@@ -3856,7 +3861,7 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <settings> = (settings [<cursor>][<undoData>])
 
 class SettingsAnalyser : public ElementAnalyser
@@ -3878,7 +3883,7 @@ public:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <score> = (score <vers>[<language>][<undoData>][<creationMode>][<defineStyle>*]
 //@                  [<title>*][<pageLayout>*][<systemLayout>*][<option>*]
 //@                  {<instrument> | <group>}* )
@@ -3898,7 +3903,11 @@ public:
 
         // <vers>
         if (get_mandatory(k_vers))
-            pScore->set_version( get_version() );
+        {
+            string version = get_version();
+            pScore->set_version(version);
+            m_pAnalyser->set_score_version(version);
+        }
 
         // [<language>]
         analyse_optional(k_language);
@@ -3990,10 +3999,10 @@ protected:
 
 };
 
-//@-------------------------------------------------------------------------------------
-//@ <scorePlayer> = (scorePlayer [<style>] <opt>* )
-//@ <opt> = (opt <string>)
-//@
+//@--------------------------------------------------------------------------------------
+//@ <scorePlayer> = (scorePlayer [<style>] <opt>*)
+//@ <opt> = { <mm> }
+//@ <mm> = (mm <integer>)
 //@
 //@
 class ScorePlayerAnalyser : public ElementAnalyser
@@ -4013,19 +4022,28 @@ public:
         pSP->attach_score( m_pAnalyser->get_last_analysed_score() );
 
         // [<style>]
-        ImoStyle* pStyle = NULL;
-        if (get_optional(k_style))
+        analyse_optional_style(pSP);
+
+        // <opt>*
+        while (more_params_to_analyse())
         {
-            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-            pStyle = get_doc_text_style( get_string_value() );
+            if (get_optional(k_mm))
+            {
+                m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+                pSP->set_metronome_mm( get_integer_value(60) );
+            }
+            else
+            {
+                error_invalid_param();
+                move_to_next_param();
+            }
         }
-        pSP->set_style(pStyle);
 
         add_to_model(pSP);
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <size> = (size <width><height>)
 //@ <width> = (width number)        value in LUnits
 //@ <height> = (height number)      value in LUnits
@@ -4058,7 +4076,7 @@ public:
 };
 
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <slur> = (slur num <slurType>[<bezier>][color] )   ;num = slur number. integer
 //@ <slurType> = { start | continue | stop }
 //@
@@ -4117,7 +4135,7 @@ protected:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ ImoSpacer StaffObj
 //@ <spacer> = (spacer <width>[<staffobjOptions>*][<attachments>*])     width in Tenths
 
@@ -4157,7 +4175,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ ImoStaffInfo SimpleObj
 //@ <staff> = (staff <num> [<staffType>][<staffLines>][<staffSpacing>]
 //@                        [<staffDistance>][<lineThickness>] )
@@ -4270,7 +4288,7 @@ protected:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <styles> = (styles <defineStyle>*)
 
 class StylesAnalyser : public ElementAnalyser
@@ -4298,7 +4316,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <systemLayout> = (systemLayout {first | other} <systemMargins>)
 
 class SystemLayoutAnalyser : public ElementAnalyser
@@ -4341,7 +4359,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <systemMargins> = (systemMargins <leftMargin><rightMargin><systemDistance>
 //@                                  <topSystemDistance>)
 //@ <leftMargin>, <rightMargin>, <systemDistance>, <topSystemDistance> = number (Tenths)
@@ -4359,7 +4377,7 @@ public:
         //ImoSystemInfo dto;
         ImoSystemInfo* pDto;
         if (m_pAnchor && m_pAnchor->is_system_info())
-            pDto = dynamic_cast<ImoSystemInfo*>(m_pAnchor);
+            pDto = static_cast<ImoSystemInfo*>(m_pAnchor);
         else
             return;     //what is this for?
             //pDto = &dto;
@@ -4381,7 +4399,195 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
+//@ (table [<style>] [<tableColumn>*] [<tableHead>] <tableBody> )
+//@
+
+class TableAnalyser : public ElementAnalyser
+{
+public:
+    TableAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                  ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoTable* pTable= static_cast<ImoTable*>( ImFactory::inject(k_imo_table, pDoc) );
+
+        // [<style>]
+        analyse_optional_style(pTable);
+
+        // [<tableColumn>*]
+        while( analyse_optional(k_table_column, pTable) );
+
+        // [<tableHead>]
+        analyse_optional(k_table_head, pTable);
+
+        // <tableBody>
+        analyse_mandatory(k_table_body, pTable);
+
+        error_if_more_elements();
+
+        add_to_model(pTable);
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <tableBody> = (tableBody <tableRow>* )
+//@
+
+class TableBodyAnalyser : public ElementAnalyser
+{
+public:
+    TableBodyAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                      ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoTableBody* pBody = static_cast<ImoTableBody*>(
+                                        ImFactory::inject(k_imo_table_body, pDoc) );
+
+        // <tableRow>*
+        while( more_params_to_analyse() )
+        {
+            analyse_mandatory(k_table_row, pBody);
+        }
+
+        add_to_model(pBody);
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <tableCell> = (tableCell [<style>] [<rowspan>] [<colspan>] <inlineObject>* )
+//@ <rowspan> = (rowspan <num>)
+//@ <colspan> = (colspan <num>)
+//@
+
+class TableCellAnalyser : public ElementAnalyser
+{
+public:
+    TableCellAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                      ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoTableCell* pImo = static_cast<ImoTableCell*>(
+                                        ImFactory::inject(k_imo_table_cell, pDoc) );
+        //[<style>]
+        analyse_optional_style(pImo);
+
+        //[<rowspan>]
+        if (get_optional(k_rowspan))
+        {
+            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+            pImo->set_rowspan( get_integer_value(1) );
+        }
+
+        //[<colspan>]
+        if (get_optional(k_colspan))
+        {
+            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+            pImo->set_colspan( get_integer_value(1) );
+        }
+
+        // <inlineObject>*
+        analyse_inline_objects(pImo);
+
+        error_if_more_elements();
+
+        add_to_model(pImo);
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <tableColumn> = (tableColumn <style>)
+//@
+
+class TableColumnAnalyser : public ElementAnalyser
+{
+public:
+    TableColumnAnalyser(Analyser* pAnalyser, ostream& reporter,
+                        LibraryScope& libraryScope, ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        // <style>
+        if (get_optional(k_style) && m_pAnchor->is_table())
+        {
+            m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+            ImoStyle* pStyle = get_doc_text_style( get_string_value() );
+            ImoTable* pTable = static_cast<ImoTable*>(m_pAnchor);
+            pTable->add_column_style(pStyle);
+        }
+
+        error_if_more_elements();
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <tableHead> = (tableHead <tableRow>* )
+//@
+
+class TableHeadAnalyser : public ElementAnalyser
+{
+public:
+    TableHeadAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                      ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoTableHead* pHead = static_cast<ImoTableHead*>(
+                                        ImFactory::inject(k_imo_table_head, pDoc) );
+
+        // <tableRow>*
+        while( more_params_to_analyse() )
+        {
+            analyse_mandatory(k_table_row, pHead);
+        }
+
+        add_to_model(pHead);
+    }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <tableRow> = (tableRow [<style>] <tableCell>* )
+//@
+
+class TableRowAnalyser : public ElementAnalyser
+{
+public:
+    TableRowAnalyser(Analyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                     ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoTableRow* pRow = static_cast<ImoTableRow*>(
+                                        ImFactory::inject(k_imo_table_row, pDoc) );
+
+        // [<style>]
+        analyse_optional_style(pRow);
+
+        // <tableCell>*
+        while( more_params_to_analyse() )
+        {
+            analyse_mandatory(k_table_cell, pRow);
+        }
+
+        add_to_model(pRow);
+    }
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <textbox> = (textbox <location><size>[<bgColor>][<border>]<text>[<anchorLine>])
 //@ <location> = (dx value)(dy value)       values in Tenths, relative to cur.pos
 //@     i.e.: (dx 50.0)(dy 5)
@@ -4459,9 +4665,8 @@ protected:
         ImoObj* pImo = proceed(k_border, NULL);
         if (pImo)
         {
-            ImoBorderDto* pBorder = dynamic_cast<ImoBorderDto*>(pImo);
-            if (pBorder)
-                box.set_border(pBorder);
+            if (pImo->is_border_dto())
+                box.set_border( static_cast<ImoBorderDto*>(pImo) );
             delete pImo;
         }
     }
@@ -4471,9 +4676,11 @@ protected:
         ImoObj* pImo = proceed(k_text, NULL);
         if (pImo)
         {
-            ImoScoreText* pText = dynamic_cast<ImoScoreText*>(pImo);
-            if (pText)
+            if (pImo->is_score_text())
+            {
+                ImoScoreText* pText = static_cast<ImoScoreText*>(pImo);
                 pTB->set_text(pText->get_text_info());
+            }
             delete pImo;
         }
     }
@@ -4483,16 +4690,15 @@ protected:
         ImoObj* pImo = proceed(k_anchorLine, NULL);
         if (pImo)
         {
-            ImoLineStyle* pLine = dynamic_cast<ImoLineStyle*>(pImo);
-            if (pLine)
-                pTB->set_anchor_line(pLine);
+            if (pImo->is_line_style())
+                pTB->set_anchor_line( static_cast<ImoLineStyle*>(pImo) );
             delete pImo;
         }
     }
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <textItem> = (txt [<style>] [<location>] string)
 //@ <style> = (style <name>)
 //@     if no style is specified default style is assigned.
@@ -4559,17 +4765,12 @@ protected:
 
 };
 
-//@-------------------------------------------------------------------------------------
-//@ <textString> = (<textTag> string [<alingment>] <style> [<location>])
+//@--------------------------------------------------------------------------------------
+//@ <textString> = (<textTag> string [<style>][<location>])
 //@ <textTag> = { name | abbrev | text }
 //@ <style> = (style <name>)
 //@
 //@ Compatibility 1.5:
-//@ <alignment> = { center | left | right }
-//@     alignement just indicates the position of the anchor point: at string
-//@     center, at start of string (left) or at end of string (right).
-//@     Since version 1.6 anchor point is always start of string.
-//@
 //@ <style> is now mandatory
 //@     For compatibility with 1.5, if no style is specified default style is
 //@     assigned.
@@ -4596,15 +4797,18 @@ public:
             ImoScoreText* pText = static_cast<ImoScoreText*>(
                                         ImFactory::inject(k_imo_score_text, pDoc));
             pText->set_text(get_string_value());
-            pText->set_style(NULL);
-
-            // [<alingment>]
-            if (get_optional(k_label))
-                pText->set_h_align( get_alignment_value(k_halign_left) );
 
             // [<style>]
+            ImoStyle* pStyle = NULL;
             if (get_optional(k_style))
-                pText->set_style( get_text_style_param(m_styleName) );
+                pStyle = get_text_style_param(m_styleName);
+            else
+            {
+                ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
+                if (pScore)     //in unit tests the score might not exist
+                    pStyle = pScore->get_default_style();
+            }
+            pText->set_style(pStyle);
 
             // [<location>]
             while (more_params_to_analyse())
@@ -4637,7 +4841,7 @@ public:
 };
 
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <tie> = (tie num <tieType>[<bezier>][color] )   ;num = tie number. integer
 //@ <tieType> = { start | stop }
 
@@ -4691,7 +4895,7 @@ protected:
     }
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <timeSignature> = (time <beats><beatType>[<visible>][<location>])
 //@ <beats> = <num>
 //@ <beatType> = <num>
@@ -4725,7 +4929,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ <title> = (title <h-alignment> string [<style>][<location>])
 //@ <h-alignment> = label: {left | center | right }
 //@ <style> = (style name)
@@ -4787,7 +4991,7 @@ public:
 
 };
 
-//@-------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
 //@ Old syntax: v1.5
 //@ <tuplet> = (t { - | + <actualNotes>[<normalNotes>][<tupletOptions>] } )
 //@ <actualNotes> = num
@@ -4978,10 +5182,11 @@ protected:
 
 };
 
-//--------------------------------------------------------------------------------
-// ElementAnalyser implementation
-//--------------------------------------------------------------------------------
 
+
+//=======================================================================================
+// ElementAnalyser implementation
+//=======================================================================================
 void ElementAnalyser::analyse_node(LdpElement* pNode)
 {
     m_pAnalysedNode = pNode;
@@ -4989,6 +5194,7 @@ void ElementAnalyser::analyse_node(LdpElement* pNode)
     do_analysis();
 }
 
+//---------------------------------------------------------------------------------------
 bool ElementAnalyser::error_missing_element(ELdpElement type)
 {
     const string& parentName =
@@ -4999,16 +5205,19 @@ bool ElementAnalyser::error_missing_element(ELdpElement type)
     return false;
 }
 
+//---------------------------------------------------------------------------------------
 void ElementAnalyser::report_msg(int numLine, const std::stringstream& msg)
 {
     report_msg(numLine, msg.str());
 }
 
+//---------------------------------------------------------------------------------------
 void ElementAnalyser::report_msg(int numLine, const std::string& msg)
 {
     m_reporter << "Line " << numLine << ". " << msg << endl;
 }
 
+//---------------------------------------------------------------------------------------
 bool ElementAnalyser::get_mandatory(ELdpElement type)
 {
     if (!more_params_to_analyse())
@@ -5028,12 +5237,14 @@ bool ElementAnalyser::get_mandatory(ELdpElement type)
     return true;
 }
 
+//---------------------------------------------------------------------------------------
 void ElementAnalyser::analyse_mandatory(ELdpElement type, ImoObj* pAnchor)
 {
     if (get_mandatory(type))
         m_pAnalyser->analyse_node(m_pParamToAnalyse, pAnchor);
 }
 
+//---------------------------------------------------------------------------------------
 bool ElementAnalyser::get_optional(ELdpElement type)
 {
     if (more_params_to_analyse())
@@ -5048,6 +5259,7 @@ bool ElementAnalyser::get_optional(ELdpElement type)
     return false;
 }
 
+//---------------------------------------------------------------------------------------
 bool ElementAnalyser::analyse_optional(ELdpElement type, ImoObj* pAnchor)
 {
     if (get_optional(type))
@@ -5058,6 +5270,7 @@ bool ElementAnalyser::analyse_optional(ELdpElement type, ImoObj* pAnchor)
     return false;
 }
 
+//---------------------------------------------------------------------------------------
 void ElementAnalyser::analyse_one_or_more(ELdpElement* pValid, int nValid)
 {
     while(more_params_to_analyse())
@@ -5080,6 +5293,7 @@ void ElementAnalyser::analyse_one_or_more(ELdpElement* pValid, int nValid)
     }
 }
 
+//---------------------------------------------------------------------------------------
 bool ElementAnalyser::contains(ELdpElement type, ELdpElement* pValid, int nValid)
 {
     for (int i=0; i < nValid; i++, pValid++)
@@ -5087,6 +5301,7 @@ bool ElementAnalyser::contains(ELdpElement type, ELdpElement* pValid, int nValid
     return false;
 }
 
+//---------------------------------------------------------------------------------------
 void ElementAnalyser::error_invalid_param()
 {
     ELdpElement type = m_pParamToAnalyse->get_type();
@@ -5097,11 +5312,13 @@ void ElementAnalyser::error_invalid_param()
         "Element '" + name + "' unknown or not possible here. Ignored.");
 }
 
+//---------------------------------------------------------------------------------------
 void ElementAnalyser::error_msg(const string& msg)
 {
     report_msg(m_pAnalysedNode->get_line_number(), msg);
 }
 
+//---------------------------------------------------------------------------------------
 void ElementAnalyser::error_if_more_elements()
 {
     if (more_params_to_analyse())
@@ -5117,6 +5334,7 @@ void ElementAnalyser::error_if_more_elements()
     }
 }
 
+//---------------------------------------------------------------------------------------
 void ElementAnalyser::analyse_staffobjs_options(ImoStaffObj* pSO)
 {
     //@----------------------------------------------------------------------------
@@ -5139,6 +5357,7 @@ void ElementAnalyser::analyse_staffobjs_options(ImoStaffObj* pSO)
     analyse_scoreobj_options(pSO);
 }
 
+//---------------------------------------------------------------------------------------
 void ElementAnalyser::analyse_scoreobj_options(ImoScoreObj* pSO)
 {
     //@----------------------------------------------------------------------------
@@ -5213,6 +5432,7 @@ Analyser::Analyser(ostream& reporter, LibraryScope& libraryScope, Document* pDoc
     , m_pCurScore(NULL)
     , m_pLastScore(NULL)
     , m_pImoDoc(NULL)
+    , m_scoreVersion("")
     , m_pTree()
     , m_fileLocator("")
     , m_nShowTupletBracket(k_yesno_default)
@@ -5287,13 +5507,13 @@ void Analyser::add_relation_info(ImoObj* pDto)
     // factory method to deal withh all relations
 
     if (pDto->is_tie_dto())
-        m_pTiesBuilder->add_item_info(dynamic_cast<ImoTieDto*>(pDto));
+        m_pTiesBuilder->add_item_info(static_cast<ImoTieDto*>(pDto));
     else if (pDto->is_slur_dto())
-        m_pSlursBuilder->add_item_info(dynamic_cast<ImoSlurDto*>(pDto));
+        m_pSlursBuilder->add_item_info(static_cast<ImoSlurDto*>(pDto));
     else if (pDto->is_beam_dto())
-        m_pBeamsBuilder->add_item_info(dynamic_cast<ImoBeamDto*>(pDto));
+        m_pBeamsBuilder->add_item_info(static_cast<ImoBeamDto*>(pDto));
     else if (pDto->is_tuplet_dto())
-        m_pTupletsBuilder->add_item_info(dynamic_cast<ImoTupletDto*>(pDto));
+        m_pTupletsBuilder->add_item_info(static_cast<ImoTupletDto*>(pDto));
 }
 
 //---------------------------------------------------------------------------------------
@@ -5610,6 +5830,12 @@ ElementAnalyser* Analyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_styles:          return LOMSE_NEW StylesAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_systemLayout:    return LOMSE_NEW SystemLayoutAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_systemMargins:   return LOMSE_NEW SystemMarginsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_table:           return LOMSE_NEW TableAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_table_cell:      return LOMSE_NEW TableCellAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_table_column:    return LOMSE_NEW TableColumnAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_table_body:      return LOMSE_NEW TableBodyAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_table_head:      return LOMSE_NEW TableHeadAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_table_row:       return LOMSE_NEW TableRowAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_txt:             return LOMSE_NEW TextItemAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_text:            return LOMSE_NEW TextStringAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_textbox:         return LOMSE_NEW TextBoxAnalyser(this, m_reporter, m_libraryScope, pAnchor);

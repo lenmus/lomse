@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -56,10 +56,7 @@ class ImoStyle;
 class TupletEngraver : public RelAuxObjEngraver
 {
 protected:
-    int m_iInstr;
-    int m_iStaff;
     int m_numShapes;
-    UPoint m_pos;
     GmoShapeTuplet* m_pTupletShape;
     string m_label;
     ImoStyle* m_pStyle;
@@ -76,7 +73,7 @@ public:
     //implementation of virtual methods from RelAuxObjEngraver
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                            int iSystem, int iCol, UPoint pos);
+                            int iSystem, int iCol);
     void set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                              GmoShape* pStaffObjShape, int iInstr, int iStaff,
                              int iSystem, int iCol);
@@ -89,7 +86,6 @@ public:
 
 protected:
     void add_text_shape();
-    LUnits tenths_to_logical(Tenths tenths);
     bool check_if_single_beamed_group();
 
     ImoNoteRest* get_start_noterest() { return m_noteRests.front().first; }

@@ -27,47 +27,52 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_CLEF_ENGRAVER_H__        //to avoid nested includes
-#define __LOMSE_CLEF_ENGRAVER_H__
+#ifndef __LOMSE_METRONOME_ENGRAVER_H__        //to avoid nested includes
+#define __LOMSE_METRONOME_ENGRAVER_H__
 
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
 #include "lomse_engraver.h"
-#include "lomse_score_enums.h"
 
 namespace lomse
 {
 
 //forward declarations
-class ImoClef;
-class GmoBoxSliceInstr;
+class GmoShapeMetronomeMark;
+class ImoObj;
 class GmoShape;
 class ScoreMeter;
+class ImoMetronomeMark;
 
 //---------------------------------------------------------------------------------------
-class ClefEngraver : public Engraver
+class MetronomeMarkEngraver : public Engraver
 {
 protected:
-    int m_nClefType;
-    int m_symbolSize;
-    int m_iGlyph;
+    GmoShapeMetronomeMark* m_pMainShape;
+    UPoint m_uPos;
+    double m_fontSize;
+    ImoMetronomeMark* m_pCreatorImo;
 
 public:
-    ClefEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int iInstr,
-                 int iStaff);
-    ~ClefEngraver() {}
+    MetronomeMarkEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                          int iInstr, int iStaff);
+    ~MetronomeMarkEngraver() {}
 
-    GmoShape* create_shape(ImoObj* pCreatorImo, UPoint uPos, int clefType,
-                           int m_symbolSize=k_size_full);
+    GmoShape* create_shape(ImoMetronomeMark* pImo, UPoint uPos);
 
 protected:
-    int find_glyph();
-    double determine_font_size();
-    Tenths get_glyph_offset();
+    void create_main_container_shape();
+    GmoShape* create_shape_mm_value();
+    GmoShape* create_shape_note_note();
+    GmoShape* create_shape_note_value();
+    void create_text_shape(const string& text);
+    void create_symbol_shape(int iGlyph);
+    int select_glyph(int noteType, int dots);
+
 };
 
 
 }   //namespace lomse
 
-#endif    // __LOMSE_CLEF_ENGRAVER_H__
+#endif    // __LOMSE_METRONOME_ENGRAVER_H__
 

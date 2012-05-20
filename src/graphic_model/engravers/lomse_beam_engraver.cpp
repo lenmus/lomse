@@ -60,8 +60,8 @@ BeamEngraver::~BeamEngraver()
 
 //---------------------------------------------------------------------------------------
 void BeamEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                        GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                        int iSystem, int iCol, UPoint pos)
+                                      GmoShape* pStaffObjShape, int iInstr, int iStaff,
+                                      int iSystem, int iCol)
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;

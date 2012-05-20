@@ -71,7 +71,6 @@ void DocLayouter::layout_document()
 {
     start_new_page();
     layout_content();
-    m_pGModel->set_ready(true);
 }
 
 //---------------------------------------------------------------------------------------

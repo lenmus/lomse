@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -31,6 +31,7 @@
 #define __LOMSE_ENGRAVER_H__
 
 #include "lomse_injectors.h"
+#include "lomse_basic.h"
 
 namespace lomse
 {
@@ -48,19 +49,25 @@ class Engraver
 protected:
     LibraryScope& m_libraryScope;
     ScoreMeter* m_pMeter;
-    GmoShape* m_pShape;
+    int m_iInstr;
+    int m_iStaff;
 
 public:
-    Engraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
+    Engraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int iInstr=0,
+             int iStaff=0)
         : m_libraryScope(libraryScope)
         , m_pMeter(pScoreMeter)
-        , m_pShape(NULL)
+        , m_iInstr(iInstr)
+        , m_iStaff(iStaff)
     {
     }
 
     virtual ~Engraver() {}
 
-    virtual GmoShape* get_shape() { return m_pShape; }
+protected:
+    LUnits tenths_to_logical(Tenths value);
+    virtual double determine_font_size();
+    virtual void add_user_shift(ImoContentObj* pImo, UPoint* pos);
 };
 
 
@@ -82,21 +89,23 @@ struct ShapeBoxInfo
 
 
 //---------------------------------------------------------------------------------------
-// base class for relation aux objects engravers
+// base class for all realtion auxiliary objects' engravers
 class RelAuxObjEngraver : public Engraver
 {
 protected:
+    GmoShape* m_pShape;
 
 public:
     RelAuxObjEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
         : Engraver(libraryScope, pScoreMeter)
+        , m_pShape(NULL)
     {
     }
     virtual ~RelAuxObjEngraver() {}
 
     virtual void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                     GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                    int iSystem, int iCol, UPoint pos) = 0;
+                                    int iSystem, int iCol) = 0;
     virtual void set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                      GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                      int iSystem, int iCol) {}
@@ -108,6 +117,7 @@ public:
     virtual ShapeBoxInfo* get_shape_box_info(int i) = 0;
     virtual void set_prolog_width(LUnits width) {}
 
+    virtual GmoShape* get_shape() { return m_pShape; }
 };
 
 

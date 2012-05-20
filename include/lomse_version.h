@@ -4,7 +4,7 @@
 //
 //                             | All values aligned here
 #define LOMSE_VERSION_MAJOR    0
-#define LOMSE_VERSION_MINOR    8
+#define LOMSE_VERSION_MINOR    9
 #define LOMSE_VERSION_TYPE     'b'
 #define LOMSE_VERSION_PATCH    1
 

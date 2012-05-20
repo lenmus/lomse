@@ -48,6 +48,9 @@ public:
 
     //mandatory overrides
     virtual void on_end_of_playback() = 0;
+    virtual bool get_countoff() = 0;   
+    virtual int get_play_mode() = 0;
+    virtual int get_metronome_mm() = 0;
 
 };
 

@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -136,31 +136,27 @@ public:
         int iStaff = 0;
         int iSystem = 0;
         int iCol = 0;
-        UPoint pos(0.0f, 0.0f);
 
         m_shapes.reserve(numNotes);
         m_pMeter = LOMSE_NEW ScoreMeter(1, 1, 180.0f);
         m_pStorage = LOMSE_NEW ShapesStorage();
 
         //engrave notes/rests
-        m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage);
-        m_pRestEngrv = LOMSE_NEW RestEngraver(m_libraryScope, m_pMeter, m_pStorage);
+        m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
+        m_pRestEngrv = LOMSE_NEW RestEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
         for (int i=0; i < numNotes; ++i)
         {
             GmoShape* pShape;
             if (notes[i]->is_note())
             {
                 ImoNote* pNote = dynamic_cast<ImoNote*>(notes[i]);
-                pShape = m_pNoteEngrv->create_shape(pNote, 0, 0, k_clef_G2,
+                pShape = m_pNoteEngrv->create_shape(pNote, k_clef_G2,
                                                     UPoint(10.0f, 15.0f) );
             }
             else
             {
                 ImoRest* pRest = dynamic_cast<ImoRest*>(notes[i]);
-                pShape = m_pRestEngrv->create_shape(pRest, 0, 0, UPoint(10.0f, 15.0f),
-                                                    pRest->get_note_type(),
-                                                    pRest->get_dots(),
-                                                    pRest );
+                pShape = m_pRestEngrv->create_shape(pRest, UPoint(10.0f, 15.0f));
             }
             m_shapes.push_back(pShape);
         }
@@ -173,7 +169,7 @@ public:
                 //first note
                 m_pTupletEngrv = LOMSE_NEW MyTupletEngraver(m_libraryScope, m_pMeter);
                 m_pTupletEngrv->set_start_staffobj(pTuplet, notes[i], m_shapes[i],
-                                                 iInstr, iStaff, iSystem, iCol, pos);
+                                                 iInstr, iStaff, iSystem, iCol);
                 m_pStorage->save_engraver(m_pTupletEngrv, pTuplet);
             }
             else if (i == numNotes-1)

@@ -53,16 +53,16 @@ protected:
     FontStorage* m_pFontStorage;
     LibraryScope& m_libraryScope;
 
-public:
+    friend class TextEngraver;
     GmoShapeText(ImoObj* pCreatorImo, int idx, const std::string& text,
                  ImoStyle* pStyle, LUnits x, LUnits y, LibraryScope& libraryScope);
-    virtual ~GmoShapeText() {}
+
+public:
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
     //dynamic modification
     void set_text(const std::string& text);
-
 
 protected:
     void select_font();
@@ -79,19 +79,20 @@ protected:
     FontStorage* m_pFontStorage;
     LibraryScope& m_libraryScope;
     LUnits m_halfLeading;
-    LUnits m_baseline;
+    LUnits m_baseline;          //relative to m_origin.y
 
-public:
+    friend class WordEngrouter;
     GmoShapeWord(ImoObj* pCreatorImo, int idx, const std::string& text,
                  ImoStyle* pStyle, LUnits x, LUnits y,
                  LUnits halfLeading, LibraryScope& libraryScope);
-    virtual ~GmoShapeWord() {}
+
+public:
 
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
     //for unit tests
     inline LUnits get_top_line() { return m_origin.y + m_halfLeading; }
-    inline LUnits get_baseline() { return m_baseline; }
+    inline LUnits get_baseline() { return m_baseline + m_origin.y; }
     inline LUnits get_bottom_line() { return m_origin.y + m_size.height - m_halfLeading; }
 
 protected:

@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -116,13 +116,13 @@ public:
 
         m_pMeter = LOMSE_NEW ScoreMeter(1, 1, 180.0f);
         m_pStorage = LOMSE_NEW ShapesStorage();
-        m_pEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage);
+        m_pEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
         m_pShape1 =
-            dynamic_cast<GmoShapeNote*>(m_pEngrv->create_shape(m_pNote1, 0, 0, k_clef_G2, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(m_pEngrv->create_shape(m_pNote1, k_clef_G2, UPoint(10.0f, 15.0f)) );
         m_pShape2 =
-            dynamic_cast<GmoShapeNote*>(m_pEngrv->create_shape(m_pNote2, 0, 0, k_clef_G2, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(m_pEngrv->create_shape(m_pNote2, k_clef_G2, UPoint(10.0f, 15.0f)) );
         m_pShape3 =
-            dynamic_cast<GmoShapeNote*>(m_pEngrv->create_shape(m_pNote3, 0, 0, k_clef_G2, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(m_pEngrv->create_shape(m_pNote3, k_clef_G2, UPoint(10.0f, 15.0f)) );
     }
 
     void delete_tuplet()
@@ -172,9 +172,9 @@ SUITE(NoteEngraverTest)
 
         ScoreMeter meter(1, 1, 180.0f);
         ShapesStorage storage;
-        NoteEngraver engraver(m_libraryScope, &meter, &storage);
+        NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, 0, 0, k_clef_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
         CHECK( pShape != NULL );
         CHECK( pShape->is_shape_note() == true );
         std::list<GmoShape*>& components = pShape->get_components();
@@ -197,9 +197,9 @@ SUITE(NoteEngraverTest)
 
         ScoreMeter meter(1, 1, 180.0f);
         ShapesStorage storage;
-        NoteEngraver engraver(m_libraryScope, &meter, &storage);
+        NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, 0, 0, k_clef_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
         CHECK( pShape != NULL );
         CHECK( pShape->is_shape_note() == true );
         std::list<GmoShape*>& components = pShape->get_components();
@@ -224,9 +224,9 @@ SUITE(NoteEngraverTest)
 
         ScoreMeter meter(1, 1, 180.0f);
         ShapesStorage storage;
-        NoteEngraver engraver(m_libraryScope, &meter, &storage);
+        NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, 0, 0, k_clef_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
         CHECK( pShape != NULL );
         CHECK( pShape->is_shape_note() == true );
         std::list<GmoShape*>& components = pShape->get_components();
@@ -254,9 +254,9 @@ SUITE(NoteEngraverTest)
 
         ScoreMeter meter(1, 1, 180.0f);
         ShapesStorage storage;
-        NoteEngraver engraver(m_libraryScope, &meter, &storage);
+        NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, 0, 0, k_clef_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
         CHECK( pShape != NULL );
         CHECK( pShape->is_shape_note() == true );
         std::list<GmoShape*>& components = pShape->get_components();
@@ -282,9 +282,9 @@ SUITE(NoteEngraverTest)
 
         ScoreMeter meter(1, 1, 180.0f);
         ShapesStorage storage;
-        NoteEngraver engraver(m_libraryScope, &meter, &storage);
+        NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, 0, 0, k_clef_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
         CHECK( pShape != NULL );
         CHECK( pShape->is_shape_note() == true );
         std::list<GmoShape*>& components = pShape->get_components();

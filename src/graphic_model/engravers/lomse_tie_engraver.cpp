@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -61,7 +61,7 @@ TieEngraver::TieEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 //---------------------------------------------------------------------------------------
 void TieEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                      GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                     int iSystem, int iCol, UPoint pos)
+                                     int iSystem, int iCol)
 {
     m_pTie = dynamic_cast<ImoTie*>( pRO );
 
@@ -69,7 +69,6 @@ void TieEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
     m_pStartNoteShape = dynamic_cast<GmoShapeNote*>(pStaffObjShape);
     m_iInstr = iInstr;
     m_iStaff = iStaff;
-    m_pos = pos;
 
     m_shapesInfo[0].iCol = iCol;
     m_shapesInfo[0].iInstr = iInstr;
@@ -217,12 +216,6 @@ void TieEngraver::add_user_displacements(int iTie, UPoint* points)
             (points+i)->y += tenths_to_logical(pBezier->get_point(i).y);
         }
     }
-}
-
-//---------------------------------------------------------------------------------------
-LUnits TieEngraver::tenths_to_logical(Tenths tenths)
-{
-    return m_pMeter->tenths_to_logical(tenths, m_iInstr, m_iStaff);
 }
 
 //---------------------------------------------------------------------------------------

@@ -532,6 +532,44 @@ SUITE(GraphicViewTest)
         rectangles.clear();
     }
 
+    TEST_FIXTURE(GraphicViewTestFixture, trimmed_rectangle_to_page_rectangles_2)
+    {
+        MyDoorway platform;
+        LibraryScope libraryScope(cout, &platform);
+        ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
+        MyVerticalView view(libraryScope, pDrawer);
+        list<URect>& pageBounds = view.my_get_page_bounds();
+        pageBounds.push_back( URect(0, 0, 100, 200) );
+        pageBounds.push_back( URect(0, 210, 100, 200) );
+        pageBounds.push_back( URect(0, 420, 100, 200) );
+
+        list<PageRectangle*> rectangles;
+        view.my_trimmed_rectangle_to_page_rectangles(&rectangles, 0.0, 300.0, 50.0, 500.0);
+
+        CHECK( rectangles.size() == 2 );
+//        cout << "num.rectangles=" << rectangles.size() << endl;
+        list<PageRectangle*>::iterator it = rectangles.begin();
+        CHECK( (*it)->iPage == 1 );
+        CHECK( (*it)->rect.left() == 0.0f );
+        CHECK( (*it)->rect.top() == 90.0f );
+        CHECK( (*it)->rect.right() == 50.0f );
+        CHECK( (*it)->rect.bottom() == 200.0f );
+        //cout << "LT=(" << (*it)->rect.left() << ", " << (*it)->rect.top() <<
+        //    "), RB=(" << (*it)->rect.right() << ", " << (*it)->rect.bottom() << ")" << endl;
+        delete *it;
+        ++it;
+        CHECK( (*it)->iPage == 2 );
+        CHECK( (*it)->rect.left() == 0.0f );
+        CHECK( (*it)->rect.top() == 0.0f );
+        CHECK( (*it)->rect.right() == 50.0f );
+        CHECK( (*it)->rect.bottom() == 80.0f );
+        //cout << "LT=(" << (*it)->rect.left() << ", " << (*it)->rect.top() <<
+        //    "), RB=(" << (*it)->rect.right() << ", " << (*it)->rect.bottom() << ")" << endl;
+        delete *it;
+
+        rectangles.clear();
+    }
+
     //TEST_FIXTURE(GraphicViewTestFixture, EditView_UpdateWindow)
     //{
     //    MyDoorway platform;

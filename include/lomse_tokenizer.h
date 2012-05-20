@@ -90,6 +90,7 @@ enum ETokenType {
         inline void repeat_token() { m_repeatToken = true; }
         LdpToken* read_token();
         int get_line_number();
+        void skip_utf_bom();
 
     private:
         LdpToken* parse_new_token();

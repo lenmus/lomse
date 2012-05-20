@@ -2944,7 +2944,7 @@ SUITE(AnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "Line 0. " << endl;
-        SpLdpTree tree = parser.parse_text("(text \"Moonlight sonata\" center (style \"Header1\"))");
+        SpLdpTree tree = parser.parse_text("(text \"Moonlight sonata\" (style \"Header1\"))");
         Analyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
@@ -2955,7 +2955,6 @@ SUITE(AnalyserTest)
         ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pIModel->get_root() );
         CHECK( pText != NULL );
         CHECK( pText->get_text() == "Moonlight sonata" );
-        CHECK( pText->get_h_align() == k_halign_center );
         ImoStyle* pStyle = pText->get_style();
         CHECK( pStyle == NULL );
 
@@ -2981,7 +2980,6 @@ SUITE(AnalyserTest)
         ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pIModel->get_root() );
         CHECK( pText != NULL );
         CHECK( pText->get_text() == "F. Chopin" );
-        CHECK( pText->get_h_align() == k_halign_left );
         CHECK( pText->get_user_location_x() == 20.0f );
         CHECK( pText->get_user_location_y() == 30.0f );
         ImoStyle* pStyle = pText->get_style();
@@ -6994,7 +6992,6 @@ SUITE(AnalyserTest)
     //    ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
     //    CHECK( pText != NULL );
     //    CHECK( pText->get_text() == "F. Chopin" );
-    //    CHECK( pText->get_h_align() == k_halign_left );
     //    CHECK( pText->get_user_location_x() == 20.0f );
     //    CHECK( pText->get_user_location_y() == 30.0f );
     //    ImoStyle* pStyle = pText->get_style();
@@ -7794,6 +7791,360 @@ SUITE(AnalyserTest)
         CHECK( pAuxObjs != NULL );
         ImoScoreLine* pLine = dynamic_cast<ImoScoreLine*>( pAuxObjs->get_item(0) );
         CHECK( pLine != NULL );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // scorePlayer ----------------------------------------------------------------------
+
+    TEST_FIXTURE(AnalyserTestFixture, scorePlayer_Creation)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content "
+            "(scorePlayer) ))");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pDoc->get_content_item(0) );
+        CHECK( pSP->is_score_player() == true );
+        CHECK( pSP->get_metronome_mm() == 60 );
+        //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, scorePlayer_metronome)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text("(lenmusdoc (vers 0.0) (content "
+            "(scorePlayer (mm 65)) ))");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pDoc->get_content_item(0) );
+        CHECK( pSP->is_score_player() == true );
+        CHECK( pSP->get_metronome_mm() == 65 );
+        //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // tableCell ------------------------------------------------------------------------
+
+    TEST_FIXTURE(AnalyserTestFixture, tableCell_Creation)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text(
+            "(tableCell (txt \"This is a cell\"))");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
+        CHECK( pCell->is_table_cell() == true );
+        CHECK( pCell->get_num_items() == 1 );
+        CHECK( pCell->get_rowspan() == 1 );
+        CHECK( pCell->get_colspan() == 1 );
+        ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pCell->get_first_item() );
+        CHECK( pItem->get_text() == "This is a cell" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, tableCell_rowspan)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text(
+            "(tableCell (rowspan 2)(txt \"This is a cell\"))");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
+        CHECK( pCell->is_table_cell() == true );
+        CHECK( pCell->get_num_items() == 1 );
+        CHECK( pCell->get_rowspan() == 2 );
+        CHECK( pCell->get_colspan() == 1 );
+        ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pCell->get_first_item() );
+        CHECK( pItem->get_text() == "This is a cell" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, tableCell_colspan)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text(
+            "(tableCell (colspan 2)(txt \"This is a cell\"))");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
+        CHECK( pCell->is_table_cell() == true );
+        CHECK( pCell->get_num_items() == 1 );
+        CHECK( pCell->get_rowspan() == 1 );
+        CHECK( pCell->get_colspan() == 2 );
+        ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pCell->get_first_item() );
+        CHECK( pItem->get_text() == "This is a cell" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // tableRow -------------------------------------------------------------------------
+
+    TEST_FIXTURE(AnalyserTestFixture, tableRow_Creation)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text(
+            "(tableRow (tableCell (txt \"This is cell 1\"))"
+            "          (tableCell (txt \"This is cell 2\"))"
+            ")");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pIModel->get_root() );
+        CHECK( pRow->is_table_row() == true );
+        CHECK( pRow->get_num_cells() == 2 );
+        ImoTableCell* pImo = dynamic_cast<ImoTableCell*>( pRow->get_cell(0) );
+        CHECK( pImo->is_table_cell() == true );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // tableHead ------------------------------------------------------------------------
+
+    TEST_FIXTURE(AnalyserTestFixture, tableHead_Creation)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text(
+            "(tableHead (tableRow (tableCell (txt \"This is a cell\")) )"
+            "           (tableRow (tableCell (txt \"This is a cell\")) )"
+            ")");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoTableHead* pHead = dynamic_cast<ImoTableHead*>( pIModel->get_root() );
+        CHECK( pHead->is_table_head() == true );
+        CHECK( pHead->get_num_items() == 2 );
+        ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pHead->get_item(0) );
+        CHECK( pRow->is_table_row() == true );
+        CHECK( pRow->get_num_cells() == 1 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // tableBody ------------------------------------------------------------------------
+
+    TEST_FIXTURE(AnalyserTestFixture, tableBody_Creation)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text(
+            "(tableBody (tableRow (tableCell (txt \"This is a cell\")) )"
+            "           (tableRow (tableCell (txt \"This is a cell\")) )"
+            ")");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoTableBody* pBody = dynamic_cast<ImoTableBody*>( pIModel->get_root() );
+        CHECK( pBody->is_table_body() == true );
+        CHECK( pBody->get_num_items() == 2 );
+        ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pBody->get_item(0) );
+        CHECK( pRow->is_table_row() == true );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // table ----------------------------------------------------------------------------
+
+    TEST_FIXTURE(AnalyserTestFixture, table_Creation)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text(
+            "(table (tableBody (tableRow (tableCell (txt \"This is a cell\")) )))");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoTable* pTable = dynamic_cast<ImoTable*>( pIModel->get_root() );
+        CHECK( pTable != NULL );
+
+        CHECK( pTable->get_head() == NULL );
+
+        ImoTableBody* pBody = pTable->get_body();
+        CHECK( pBody != NULL );
+        CHECK( pBody->get_num_items() == 1 );
+        ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pBody->get_item(0) );
+        CHECK( pRow->is_table_row() == true );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // tableColumn ----------------------------------------------------------------------
+
+    TEST_FIXTURE(AnalyserTestFixture, tableColumn_Creation)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text(
+            "(lenmusdoc (vers 0.0)"
+            "(styles"
+            "   (defineStyle \"table1-col1\" (width 70))"
+            "   (defineStyle \"table1-col2\" (width 80))"
+            ")"
+            "(content (table "
+                "(tableColumn (style \"table1-col1\"))"
+                "(tableColumn (style \"table1-col2\"))"
+                "(tableBody"
+                    "(tableRow (tableCell (txt \"This is a cell\")) )"
+                ")"
+            ")) )");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
+        CHECK( pTable != NULL );
+
+        std::list<ImoStyle*>& cols = pTable->get_column_styles();
+        CHECK( cols.size() == 2 );
+        std::list<ImoStyle*>::iterator it = cols.begin();
+        CHECK( (*it)->get_name() == "table1-col1" );
+        ++it;
+        CHECK( (*it)->get_name() == "table1-col2" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(AnalyserTestFixture, table_full_table)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        SpLdpTree tree = parser.parse_text(
+            "(lenmusdoc (vers 0.0)"
+            "(styles"
+            "   (defineStyle \"table1-col1\" (width 70))"
+            "   (defineStyle \"table1-col2\" (width 80))"
+            ")"
+            "(content (table "
+                "(tableColumn (style \"table1-col1\"))"
+                "(tableColumn (style \"table1-col2\"))"
+                "(tableHead (tableRow"
+                    "(tableCell (txt \"This is head cell 1\"))"
+                    "(tableCell (txt \"This is head cell 2\"))"
+                "))"
+                "(tableBody (tableRow"
+                    "(tableCell (txt \"This is body cell 1\"))"
+                    "(tableCell (txt \"This is body cell 2\"))"
+                "))"
+            ")) )");
+        Analyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
+        CHECK( pTable != NULL );
+
+        std::list<ImoStyle*>& cols = pTable->get_column_styles();
+        CHECK( cols.size() == 2 );
+
+        ImoTableHead* pHead = pTable->get_head();
+        CHECK( pHead != NULL );
+        CHECK( pHead->get_num_items() == 1 );
+        ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pHead->get_item(0) );
+        CHECK( pRow->is_table_row() == true );
+
+        ImoTableBody* pBody = pTable->get_body();
+        CHECK( pBody != NULL );
+        CHECK( pBody->get_num_items() == 1 );
+        pRow = dynamic_cast<ImoTableRow*>( pBody->get_item(0) );
+        CHECK( pRow->is_table_row() == true );
 
         delete tree->get_root();
         delete pIModel;

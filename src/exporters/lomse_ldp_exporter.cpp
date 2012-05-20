@@ -947,6 +947,29 @@ protected:
 };
 
 
+//---------------------------------------------------------------------------------------
+class SpacerLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoSpacer* m_pObj;
+
+public:
+    SpacerLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoSpacer*>(pImo);
+    }
+
+    std::string generate_source()
+    {
+        start_element();
+        add_element_name("spacer", m_pObj);
+        //TODO: details
+        end_element();
+        return m_source.str();
+    }
+};
+
+
 
 //=======================================================================================
 // LdpGenerator implementation
@@ -1095,6 +1118,7 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
 //        case k_imo_spacer:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
 //        case k_imo_figured_bass:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
         case k_imo_score:           return LOMSE_NEW ScoreLdpGenerator(pImo, this);
+        case k_imo_spacer:          return LOMSE_NEW SpacerLdpGenerator(pImo, this);
 //        case k_imo_score_text:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
 //        case k_imo_fermata:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
 //        case k_imo_tie:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);

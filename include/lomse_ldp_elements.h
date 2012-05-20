@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -95,6 +95,12 @@ enum ELdpElement
     k_para,
     k_score_player,
     k_styles,
+    k_table,
+    k_table_cell,
+    k_table_column,
+    k_table_body,
+    k_table_head,
+    k_table_row,
     k_txt,
 
     //properties
@@ -114,6 +120,7 @@ enum ELdpElement
     k_chord,
     k_classid,
     k_color,
+    k_colspan,
     k_content,
     k_ctrol1_x,
     k_ctrol1_y,
@@ -158,6 +165,11 @@ enum ELdpElement
     k_margin_right,
     k_margin_bottom,
     k_margin_left,
+    k_max_height,
+    k_max_width,
+    k_min_height,
+    k_min_width,
+    k_mm,
     k_musicData,
     k_name,
     k_opt,
@@ -172,6 +184,7 @@ enum ELdpElement
     k_parameter,
     k_parenthesis,
     k_pitch,
+    k_rowspan,
     k_size,
     k_slur,
     k_split,
@@ -192,6 +205,7 @@ enum ELdpElement
     k_symbolSize,
     k_systemLayout,
     k_systemMargins,
+    k_table_col_width,
     k_text_align,
     k_text_decoration,
     k_title,

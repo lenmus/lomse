@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -49,26 +49,24 @@ class AccidentalsEngraver : public Engraver
 protected:
     EAccidentals m_accidentals;
     bool m_fCautionary;
-    int m_iInstr;
-    int m_iStaff;
     GmoShapeAccidentals* m_pContainer;
     double m_fontSize;
     ImoObj* m_pCreatorImo;
 
 public:
-    AccidentalsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter);
+    AccidentalsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                        int iInstr, int iStaff);
     ~AccidentalsEngraver() {}
 
-    GmoShapeAccidentals* create_shape(ImoObj* pCreatorImo, int iInstr, int iStaff,
-                                      UPoint uPos, EAccidentals accidentals, 
+    GmoShapeAccidentals* create_shape(ImoObj* pCreatorImo, UPoint uPos,
+                                      EAccidentals accidentals,
                                       bool fCautionary=false);
 
 protected:
     void find_glyphs();
-    void create_container_shape(ImoObj* pCreatorImo, UPoint pos);
+    void create_container_shape(UPoint pos);
     void add_glyphs_to_container_shape(UPoint pos);
     LUnits glyph_offset(int iGlyph);
-    double determine_font_size();
 
     int m_glyphs[4];
     int m_numGlyphs;

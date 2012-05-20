@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -104,9 +104,9 @@ SUITE(GmoShapeTest)
 
         ScoreMeter meter(1, 1, 180.0f);
         ShapesStorage storage;
-        NoteEngraver engraver(m_libraryScope, &meter, &storage);
+        NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, 0, 0, k_clef_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
 
         CHECK( pShape != NULL );
         CHECK( pShape->is_locked() == true );
@@ -126,9 +126,9 @@ SUITE(GmoShapeTest)
 
         ScoreMeter meter(1, 1, 180.0f);
         ShapesStorage storage;
-        NoteEngraver engraver(m_libraryScope, &meter, &storage);
+        NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, 0, 0, k_clef_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
 
         pShape->unlock();
         CHECK( pShape->is_locked() == false );
@@ -160,15 +160,14 @@ SUITE(GmoShapeTest)
 
         ScoreMeter meter(1, 1, 180.0f);
         ShapesStorage storage;
-        NoteEngraver engraver(m_libraryScope, &meter, &storage);
+        NoteEngraver engraver(m_libraryScope, &meter, &storage, 0, 0);
         GmoShapeNote* pShape =
-            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, 0, 0, k_clef_F4, UPoint(10.0f, 15.0f)) );
+            dynamic_cast<GmoShapeNote*>(engraver.create_shape(pNote, k_clef_F4, UPoint(10.0f, 15.0f)) );
 
         pShape->unlock();
         CHECK( pShape->is_locked() == false );
 
         USize size = pShape->get_size();
-        UPoint org = pShape->get_origin();
         GmoShapeNotehead* pNH = pShape->get_notehead_shape();
         GmoShapeAccidentals* pAcc = pShape->get_accidentals_shape();
         USize shift(200.0f, 300.0f);

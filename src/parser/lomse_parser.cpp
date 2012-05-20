@@ -117,6 +117,7 @@ SpLdpTree LdpParser::do_syntax_analysis(LdpReader& reader)
     clear_all();
 
     m_pTokenizer = LOMSE_NEW LdpTokenizer(reader, m_reporter);
+    m_pTokenizer->skip_utf_bom();
     m_id = 0L;
     m_state = A0_WaitingForStartOfElement;
     PushNode(A0_WaitingForStartOfElement);      //start the tree with the root node

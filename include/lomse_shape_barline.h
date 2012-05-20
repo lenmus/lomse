@@ -38,6 +38,7 @@ namespace lomse
 
 //forward declarations
 class ImoBarline;
+class BarlineEngraver;
 
 
 class GmoShapeBarline : public GmoSimpleShape
@@ -52,12 +53,14 @@ protected:
     LUnits  m_uSpacing;            // between lines and lines-dots
     LUnits  m_uRadius;             // for dots
 
-public:
+    friend class BarlineEngraver;
     GmoShapeBarline(ImoObj* pCreatorImo, int idx, int nBarlineType,
                     LUnits xPos, LUnits yTop, LUnits yBottom,
                     LUnits uThinLineWidth, LUnits uThickLineWidth,
                     LUnits uSpacing, LUnits uRadius, Color color,
                     LUnits uMinWidth);
+
+public:
 	~GmoShapeBarline();
 
 	//implementation of virtual methods in base class

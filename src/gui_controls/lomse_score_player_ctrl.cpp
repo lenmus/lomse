@@ -28,6 +28,8 @@
 //---------------------------------------------------------------------------------------
 
 #include "lomse_score_player_ctrl.h"
+
+#include "lomse_score_player.h"
 #include "lomse_internal_model.h"
 #include "lomse_shapes.h"
 #include "lomse_document.h"
@@ -60,6 +62,7 @@ ScorePlayerCtrl::ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner,
     , m_hoverColor( Color(255, 0, 0) )      //red
     , m_visitedColor( Color(0, 127, 0) )    //dark green
     , m_visited(false)
+    , m_metronome(60)
 {
     if (!m_style)
         m_style = create_default_style();
@@ -235,6 +238,24 @@ void ScorePlayerCtrl::select_font()
                       m_style->get_float_property(ImoStyle::k_font_size),
                       m_style->is_bold(),
                       m_style->is_italic() );
+}
+
+//---------------------------------------------------------------------------------------
+bool ScorePlayerCtrl::get_countoff()
+{
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+int ScorePlayerCtrl::get_play_mode()
+{
+    return k_play_normal_instrument;
+}
+
+//---------------------------------------------------------------------------------------
+int ScorePlayerCtrl::get_metronome_mm()
+{
+    return m_metronome;
 }
 
 

@@ -64,6 +64,8 @@ protected:
     Color   m_currentColor;
     bool    m_visited;
 
+    int     m_metronome;
+
 public:
     ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner, Document* pDoc);
     virtual ~ScorePlayerCtrl() {}
@@ -82,11 +84,15 @@ public:
 
     //PlayerGui mandatory overrides
     void on_end_of_playback();
+    bool get_countoff();
+    int get_play_mode();
+    int get_metronome_mm();
 
     //specific methods
     void set_text(const string& text);
     void set_tooltip(const string& text);
     void change_label(const string& text);
+    inline void set_metronome_mm(int value) { m_metronome = value; }
 
 protected:
     void select_font();

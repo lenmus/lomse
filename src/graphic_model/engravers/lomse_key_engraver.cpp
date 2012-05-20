@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -42,20 +42,18 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // KeyEngraver implementation
 //---------------------------------------------------------------------------------------
-KeyEngraver::KeyEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
-    : Engraver(libraryScope, pScoreMeter)
+KeyEngraver::KeyEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                         int iInstr, int iStaff)
+    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_pKeyShape(NULL)
 {
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* KeyEngraver::create_shape(ImoKeySignature* pKey, int iInstr, int iStaff,
-                                    int clefType, UPoint uPos)
+GmoShape* KeyEngraver::create_shape(ImoKeySignature* pKey, int clefType, UPoint uPos)
 {
     m_pCreatorImo = pKey;
     m_nKeyType = pKey->get_key_type();
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
     m_fontSize = determine_font_size();
 
     //create the container shape object
@@ -83,7 +81,6 @@ GmoShape* KeyEngraver::create_shape(ImoKeySignature* pKey, int iInstr, int iStaf
 //---------------------------------------------------------------------------------------
 void KeyEngraver::add_accidentals(int numAccidentals, int iGlyph, UPoint uPos)
 {
-    //LUnits width = 0;
     LUnits x = uPos.x;
     for (int i=1; i <= numAccidentals; i++)
     {
@@ -93,7 +90,6 @@ void KeyEngraver::add_accidentals(int numAccidentals, int iGlyph, UPoint uPos)
                                                Color(0,0,0), m_libraryScope, m_fontSize);
         m_pKeyShape->add(pSA);
         x += pSA->get_width();
-        //width += pSA->get_width();
     }
 }
 
@@ -417,13 +413,6 @@ int KeyEngraver::get_num_fifths(int keyType)
             return -7;
             //LogMessage();
     }
-}
-
-//---------------------------------------------------------------------------------------
-double KeyEngraver::determine_font_size()
-{
-    //TODO
-    return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
 }
 
 

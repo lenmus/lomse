@@ -1823,7 +1823,7 @@ static const FloatOption m_FloatOptions[] =
 {
     {"Render.SpacingFactor", 0.547f },
         // Note spacing is proportional to duration.
-        // As the duration of quarter note is 64 (duration units), I am
+        // As the duration of quarter note is 64 (time units), I am
         // going to map it to 35 tenths. This gives a conversion factor
         // of 35/64 = 0.547
 };
@@ -2182,6 +2182,14 @@ ImoStyle* ImoScore::create_default_style()
     pDefStyle->set_lunits_property(ImoStyle::k_border_width_bottom, 0.0f);
     pDefStyle->set_lunits_property(ImoStyle::k_border_width_left, 0.0f);
     pDefStyle->set_lunits_property(ImoStyle::k_border_width_right, 0.0f);
+        //size
+    pDefStyle->set_lunits_property(ImoStyle::k_min_height, 0.0f);
+    pDefStyle->set_lunits_property(ImoStyle::k_max_height, 0.0f);
+    pDefStyle->set_lunits_property(ImoStyle::k_height, 0.0f);
+    pDefStyle->set_lunits_property(ImoStyle::k_min_width, 0.0f);
+    pDefStyle->set_lunits_property(ImoStyle::k_max_width, 0.0f);
+    pDefStyle->set_lunits_property(ImoStyle::k_width, 0.0f);
+
     m_nameToStyle[pDefStyle->get_name()] = pDefStyle;
     add_style(pDefStyle);
     return pDefStyle;
@@ -2302,13 +2310,29 @@ void ImoScorePlayer::attach_player(ScorePlayerCtrl* pPlayer)
     ImoControl::attach_control(m_pPlayer);
 }
 
+//---------------------------------------------------------------------------------------
+void ImoScorePlayer::set_metronome_mm(int value)
+{
+    if (m_pPlayer)
+        m_pPlayer->set_metronome_mm(value);
+}
+
+//---------------------------------------------------------------------------------------
+int ImoScorePlayer::get_metronome_mm()
+{
+    if (m_pPlayer)
+        return m_pPlayer->get_metronome_mm();
+    else
+        return 60;
+}
+
 
 
 //=======================================================================================
 // ImoStyles implementation
 //=======================================================================================
 ImoStyles::ImoStyles(Document* pDoc)
-    : ImoCollection(k_imo_styles)
+    : ImoSimpleObj(k_imo_styles)
     , m_pDoc(pDoc)
 {
     create_default_styles();
@@ -2418,6 +2442,13 @@ ImoStyle* ImoStyles::create_default_styles()
     pDefStyle->set_lunits_property(ImoStyle::k_border_width_bottom, 0.0f);
     pDefStyle->set_lunits_property(ImoStyle::k_border_width_left, 0.0f);
     pDefStyle->set_lunits_property(ImoStyle::k_border_width_right, 0.0f);
+        //size
+    pDefStyle->set_lunits_property(ImoStyle::k_min_height, 0.0f);
+    pDefStyle->set_lunits_property(ImoStyle::k_max_height, 0.0f);
+    pDefStyle->set_lunits_property(ImoStyle::k_height, 0.0f);
+    pDefStyle->set_lunits_property(ImoStyle::k_min_width, 0.0f);
+    pDefStyle->set_lunits_property(ImoStyle::k_max_width, 0.0f);
+    pDefStyle->set_lunits_property(ImoStyle::k_width, 0.0f);
 
     m_nameToStyle[pDefStyle->get_name()] = pDefStyle;
 
@@ -2541,6 +2572,49 @@ ImoSystemInfo::ImoSystemInfo(ImoSystemInfo& dto)
     , m_topSystemDistance( dto.get_top_system_distance() )
 {
 }
+
+
+//=======================================================================================
+// ImoTable implementation
+//=======================================================================================
+ImoTableHead* ImoTable::get_head()
+{
+    return static_cast<ImoTableHead*>( get_child_of_type(k_imo_table_head) );
+}
+
+//---------------------------------------------------------------------------------------
+ImoTableBody* ImoTable::get_body()
+{
+    return static_cast<ImoTableBody*>( get_child_of_type(k_imo_table_body) );
+}
+
+
+//=======================================================================================
+// ImoTableCell implementation
+//=======================================================================================
+void ImoTableCell::accept_visitor(BaseVisitor& v)
+{
+    Visitor<ImoTableCell>* vCell = NULL;
+    Visitor<ImoObj>* vObj = NULL;
+
+    vCell = dynamic_cast<Visitor<ImoTableCell>*>(&v);
+    if (vCell)
+        vCell->start_visit(this);
+    else
+    {
+        vObj = dynamic_cast<Visitor<ImoObj>*>(&v);
+        if (vObj)
+            vObj->start_visit(this);
+    }
+
+    visit_children(v);
+
+    if (vCell)
+        vCell->end_visit(this);
+    else if (vObj)
+        vObj->end_visit(this);
+}
+
 
 //=======================================================================================
 // ImoTextInfo implementation

@@ -43,20 +43,18 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 // FermataEngraver implementation
 //---------------------------------------------------------------------------------------
-FermataEngraver::FermataEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
+FermataEngraver::FermataEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                                 int iInstr, int iStaff)
     : Engraver(libraryScope, pScoreMeter)
 {
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeFermata* FermataEngraver::create_shape(ImoFermata* pFermata, int iInstr,
-                                               int iStaff, UPoint pos, int placement,
+GmoShapeFermata* FermataEngraver::create_shape(ImoFermata* pFermata, UPoint pos,
                                                GmoShape* pParentShape)
 {
-    m_iInstr = iInstr;
-    m_iStaff = iStaff;
     m_pFermata = pFermata;
-    m_placement = placement;
+    m_placement = pFermata->get_placement();
     m_pParentShape = pParentShape;
     m_fAbove = determine_if_above();
 
@@ -73,9 +71,9 @@ GmoShapeFermata* FermataEngraver::create_shape(ImoFermata* pFermata, int iInstr,
 UPoint FermataEngraver::compute_location(UPoint pos)
 {
 	if (m_fAbove)
-		pos.y += tenths_to_logical(50.0f);
+		pos.y -= tenths_to_logical(5.0f);
 	else
-		pos.y += tenths_to_logical(100.0f);
+		pos.y += tenths_to_logical(45.0f);
 
 	return pos;
 }
@@ -108,7 +106,7 @@ void FermataEngraver::center_on_parent()
         m_pFermataShape->shift_origin(shift);
     }
 
-    //ensure that fermata do not collides with parent shape
+    //ensure that fermata does not collides with parent shape
     URect overlap = m_pParentShape->get_bounds();
     overlap.intersection( m_pFermataShape->get_bounds() );
     LUnits yShift = overlap.get_height();
@@ -141,19 +139,6 @@ bool FermataEngraver::determine_if_above()
         else
             return true;
     }
-}
-
-//---------------------------------------------------------------------------------------
-double FermataEngraver::determine_font_size()
-{
-    //TODO
-    return 21.0 * m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff) / 180.0;
-}
-
-//---------------------------------------------------------------------------------------
-LUnits FermataEngraver::tenths_to_logical(Tenths tenths)
-{
-    return m_pMeter->tenths_to_logical(tenths, m_iInstr, m_iStaff);
 }
 
 

@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -73,9 +73,12 @@ protected:
     //required by the beam engraver
     int m_posOnStaff;
 
-public:
+ public:    //TO_FIX: constructor used in tests
+    //friend class NoteEngraver;
     GmoShapeNote(ImoObj* pCreatorImo, LUnits x, LUnits y, Color color,
                  LibraryScope& libraryScope);
+
+public:
     ~GmoShapeNote();
 
 
@@ -130,46 +133,42 @@ protected:
 //---------------------------------------------------------------------------------------
 class GmoShapeNotehead : public GmoShapeGlyph
 {
-public:
+//protected:
+//    friend class NoteEngraver;
+public:     //TO_FIX: Constructor used in tests
     GmoShapeNotehead(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
                      Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_notehead, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
     {
     }
-
-    ~GmoShapeNotehead() {}
-
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeFlag : public GmoShapeGlyph
 {
-public:
+protected:
+    friend class StemFlagEngraver;
     GmoShapeFlag(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
                  Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_flag, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
     {
     }
-
-    ~GmoShapeFlag() {}
-
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeDot : public GmoShapeGlyph
 {
-public:
+protected:
+    friend class NoteEngraver;
+    friend class RestEngraver;
     GmoShapeDot(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
                 Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_dot, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
     {
     }
-
-    ~GmoShapeDot() {}
-
 };
 
 ////global functions defined in this module
@@ -189,28 +188,26 @@ protected:
     LibraryScope& m_libraryScope;
 	GmoShapeBeam* m_pBeamShape;
 
-public:
+public:     //TO_FIX: Constructor used in tests
+//    friend class RestEngraver;
     GmoShapeRest(ImoObj* pCreatorImo, int idx, LUnits x, LUnits y, Color color,
                  LibraryScope& libraryScope);
-	virtual ~GmoShapeRest();
 
-	//overrides of virtual methods in base class
-    virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
+public:
+    void on_draw(Drawer* pDrawer, RenderOptions& opt);
 };
 
 //---------------------------------------------------------------------------------------
 class GmoShapeRestGlyph : public GmoShapeGlyph
 {
-public:
+protected:
+    friend class RestEngraver;
     GmoShapeRestGlyph(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
                       Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_rest_glyph, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
     {
     }
-
-    ~GmoShapeRestGlyph() {}
-
 };
 
 

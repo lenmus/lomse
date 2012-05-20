@@ -44,7 +44,7 @@ namespace lomse
 
 //forward declarations
 class ImoInstrument;
-//class lmPaper;
+class InstrumentEngraver;
 
 //---------------------------------------------------------------------------------------
 class GmoShapeBracketBrace : public GmoSimpleShape, public VertexSource
@@ -73,9 +73,11 @@ protected:
 //---------------------------------------------------------------------------------------
 class GmoShapeBracket : public GmoShapeBracketBrace
 {
-public:
+    friend class InstrumentEngraver;
     GmoShapeBracket(ImoObj* pCreatorImo, int idx, LUnits xLeft, LUnits yTop,
                     LUnits xRight, LUnits yBottom, Color color);
+
+public:
 	~GmoShapeBracket();
 
     //VertexSource
@@ -94,10 +96,12 @@ protected:
     double m_rBraceBarHeight;
     LUnits m_udyHook;
 
-public:
+    friend class InstrumentEngraver;
     GmoShapeBrace(ImoObj* pCreatorImo, int idx, LUnits xLeft, LUnits yTop, LUnits xRight,
                   LUnits yBottom, LUnits dyHook, Color color);
-	~GmoShapeBrace();
+
+public:
+    ~GmoShapeBrace();
 
     //VertexSource
     virtual unsigned vertex(double* px, double* py) = 0;

@@ -65,6 +65,8 @@ namespace agg
             do
             {
                 base_type::interpolator().coordinates(&x, &y);
+                if (y < 0) y = 0;   //CSG. 7/May/2012. Bug by-pass.
+                if (x < 0) x = 0;   //CSG. 7/May/2012. Bug by-pass.
                 const value_type* fg_ptr = (const value_type*)
                     base_type::source().span(x >> image_subpixel_shift, 
                                              y >> image_subpixel_shift, 
