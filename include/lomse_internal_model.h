@@ -66,10 +66,10 @@ class ImoBarline;
 class ImoBeamData;
 class ImoBeamDto;
 class ImoBeam;
-class ImoBoxContainer;
-class ImoBoxContent;
+class ImoBlocksContainer;
+class ImoInlinesContainer;
 class ImoBoxInline;
-class ImoBoxLevelObj;
+class ImoBlockLevelObj;
 class ImoButton;
 class ImoControl;
 class ImoChord;
@@ -80,7 +80,7 @@ class ImoDynamic;
 class ImoFontStyleDto;
 class ImoHeading;
 class ImoImage;
-class ImoInlineObj;
+class ImoInlineLevelObj;
 class ImoInlineWrapper;
 class ImoInstrument;
 class ImoKeySignature;
@@ -360,37 +360,37 @@ class DtoObj;
 
                 k_imo_scoreobj_last,
 
-                // ImoBoxLevelObj (A)
-                k_imo_boxlevel_obj,
+                // ImoBlockLevelObj (A)
+                k_imo_block_level_obj,
                     k_imo_score,
 
-                    // ImoBoxContainer (A)
-                    k_imo_box_container,
+                    // ImoBlocksContainer (A)
+                    ik_imo_blocks_container,
                         k_imo_content, k_imo_dynamic, k_imo_document, k_imo_list,
-                        k_imo_multicolumn,
-                        k_imo_table, k_imo_table_row,
-                    k_imo_box_container_last,
+                        k_imo_listitem, k_imo_multicolumn,
+                        k_imo_table, k_imo_table_cell, k_imo_table_row,
+                    ik_imo_blocks_container_last,
 
-                    // ImoBoxContent (A)
-                    k_imo_box_content,
-                        k_imo_heading, k_imo_para, k_imo_listitem,
-                        k_imo_table_caption, k_imo_table_cell,
-                    k_imo_box_content_last,
+                    // ImoInlinesContainer (A)
+                    k_imo_inlines_container,
+                        k_imo_anonymous_block, k_imo_heading, k_imo_para,
+                    k_imo_inlines_container_last,
 
-                k_imo_boxlevel_obj_last,
+                k_imo_block_level_obj_last,
 
-                // ImoInlineObj
-                k_imo_inlineobj,
+                // ImoInlineLevelObj
+                k_imo_inline_level_obj,
                     k_imo_button, k_imo_image, k_imo_text_item,
                     k_imo_control,
                         k_imo_score_player,
+                    k_imo_control_end,
 
                     // ImoBoxInline (A)
                     k_imo_box_inline,
                         k_imo_inline_wrapper, k_imo_link,
                     k_imo_box_inline_last,
 
-                k_imo_inlineobj_last,
+                k_imo_inline_level_obj_last,
 
             k_imo_contentobj_last,
 
@@ -462,7 +462,7 @@ public:
     ImoScore* add_score(ImoStyle* pStyle=NULL);
 
 private:
-    void add_to_model(ImoBoxLevelObj* pImo, ImoStyle* pStyle);
+    void add_to_model(ImoBlockLevelObj* pImo, ImoStyle* pStyle);
 
 };
 
@@ -566,18 +566,19 @@ public:
                                   && m_objtype < k_imo_auxobj_last; }
     inline bool is_relobj() { return m_objtype > k_imo_relobj
                                   && m_objtype < k_imo_relobj_last; }
-    inline bool is_boxlevel_obj() { return m_objtype > k_imo_boxlevel_obj
-                                        && m_objtype < k_imo_boxlevel_obj_last; }
-	inline bool is_box_container() { return m_objtype > k_imo_box_container
-	                                     && m_objtype < k_imo_box_container_last; }
-	inline bool is_box_content() { return m_objtype > k_imo_box_content
-	                                   && m_objtype < k_imo_box_content_last; }
+    inline bool is_block_level_obj() { return m_objtype > k_imo_block_level_obj
+                                           && m_objtype < k_imo_block_level_obj_last; }
+	inline bool is_blocks_container() { return m_objtype > ik_imo_blocks_container
+	                                        && m_objtype < ik_imo_blocks_container_last; }
+	inline bool is_inlines_container() { return m_objtype > k_imo_inlines_container
+	                                         && m_objtype < k_imo_inlines_container_last; }
     inline bool is_box_inline() { return m_objtype > k_imo_box_inline
                                       && m_objtype < k_imo_box_inline_last; }
-	inline bool is_inlineobj() { return m_objtype > k_imo_inlineobj
-                                     && m_objtype < k_imo_inlineobj_last; }
+	inline bool is_inline_level_obj() { return m_objtype > k_imo_inline_level_obj
+                                            && m_objtype < k_imo_inline_level_obj_last; }
 
     //items
+    inline bool is_anonymous_block() { return m_objtype == k_imo_anonymous_block; }
     inline bool is_attachments() { return m_objtype == k_imo_attachments; }
     inline bool is_barline() { return m_objtype == k_imo_barline; }
     inline bool is_beam() { return m_objtype == k_imo_beam; }
@@ -590,7 +591,8 @@ public:
     inline bool is_clef() { return m_objtype == k_imo_clef; }
     inline bool is_color_dto() { return m_objtype == k_imo_color_dto; }
     inline bool is_content() { return m_objtype == k_imo_content; }
-    inline bool is_control() { return m_objtype == k_imo_control; }
+    inline bool is_control() { return m_objtype >= k_imo_control
+                                   && m_objtype < k_imo_control_end; }
     inline bool is_cursor_info() { return m_objtype == k_imo_cursor_info; }
     inline bool is_document() { return m_objtype == k_imo_document; }
     inline bool is_dynamic() { return m_objtype == k_imo_dynamic; }
@@ -1337,63 +1339,72 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-// ImoBoxLevelObj: abstract class for all box-level objects
-class ImoBoxLevelObj : public ImoContentObj
+// ImoBlockLevelObj: abstract class for all block-level objects
+class ImoBlockLevelObj : public ImoContentObj
 {
 protected:
-    ImoBoxLevelObj(long id, int objtype) : ImoContentObj(id, objtype) {}
-    ImoBoxLevelObj(int objtype) : ImoContentObj(objtype) {}
+    ImoBlockLevelObj(long id, int objtype) : ImoContentObj(id, objtype) {}
+    ImoBlockLevelObj(int objtype) : ImoContentObj(objtype) {}
 
 public:
-    virtual ~ImoBoxLevelObj() {}
+    virtual ~ImoBlockLevelObj() {}
 
 };
 
 //---------------------------------------------------------------------------------------
-// ImoBoxContainer: A box-level container for box-level objects
-class ImoBoxContainer : public ImoBoxLevelObj, public BlockLevelCreatorApi
+// ImoBlocksContainer: A block-level container for block-level objects
+class ImoBlocksContainer : public ImoBlockLevelObj, public BlockLevelCreatorApi
 {
 protected:
-    ImoBoxContainer(long id, int objtype)
-        : ImoBoxLevelObj(id, objtype)
+    ImoBlocksContainer(long id, int objtype)
+        : ImoBlockLevelObj(id, objtype)
         , BlockLevelCreatorApi()
     {
         set_box_level_creator_api_parent(this);
     }
-    ImoBoxContainer(int objtype)
-        : ImoBoxLevelObj(objtype)
+    ImoBlocksContainer(int objtype)
+        : ImoBlockLevelObj(objtype)
         , BlockLevelCreatorApi()
     {
         set_box_level_creator_api_parent(this);
     }
 
 public:
-    virtual ~ImoBoxContainer() {}
+    virtual ~ImoBlocksContainer() {}
 
+    //support for storing content inside an ImoContent node.
+    //Container ImoContent node will be automatically created when storing the
+    //first content item (first invocation of append_content_item() )
+    int get_num_content_items();
+    ImoContent* get_content();
+    ImoContentObj* get_content_item(int iItem);
+    ImoContentObj* get_first_content_item();
+    ImoContentObj* get_last_content_item();
+    void append_content_item(ImoContentObj* pItem);
 
 //    //API
 //    ImoParagraph* add_paragraph(ImoStyle* pStyle=NULL);
-//
-//protected:
+
+protected:
 //    virtual ImoContentObj* get_container_node()=0;
+    void create_content_container(Document* pDoc);
 
 };
 
 //---------------------------------------------------------------------------------------
-// ImoBoxContent: A box-level container for ImoInlineObj objs.
-class ImoBoxContent : public ImoBoxLevelObj, public InlineLevelCreatorApi
+// ImoInlinesContainer: A block-level container for ImoInlineLevelObj objs.
+class ImoInlinesContainer : public ImoBlockLevelObj, public InlineLevelCreatorApi
 {
 protected:
-    //ImoBoxContent(long id, int objtype) : ImoBoxLevelObj(id, objtype) {}
-    ImoBoxContent(int objtype)
-        : ImoBoxLevelObj(objtype)
+    ImoInlinesContainer(int objtype)
+        : ImoBlockLevelObj(objtype)
         , InlineLevelCreatorApi()
     {
         set_inline_level_creator_api_parent(this);
     }
 
 public:
-    virtual ~ImoBoxContent() {}
+    virtual ~ImoInlinesContainer() {}
 
     //contents
     inline int get_num_items() { return get_num_children(); }
@@ -1406,11 +1417,11 @@ public:
 };
 
 ////---------------------------------------------------------------------------------------
-//class ImoTextBlock : public ImoBoxContent, public InlineLevelCreatorApi
+//class ImoTextBlock : public ImoInlinesContainer, public InlineLevelCreatorApi
 //{
 //protected:
 //    ImoTextBlock(int objtype)
-//        : ImoBoxContent(objtype)
+//        : ImoInlinesContainer(objtype)
 //        , InlineLevelCreatorApi()
 //    {
 //        set_inline_level_creator_api_parent(this);
@@ -1430,35 +1441,35 @@ public:
 //};
 
 //---------------------------------------------------------------------------------------
-// ImoInlineObj: Abstract class from which any ImoBoxContent content object must derive
-class ImoInlineObj : public ImoContentObj
+// ImoInlineLevelObj: Abstract class from which any ImoInlinesContainer content object must derive
+class ImoInlineLevelObj : public ImoContentObj
 {
 protected:
-    ImoInlineObj(int objtype) : ImoContentObj(objtype) {}
+    ImoInlineLevelObj(int objtype) : ImoContentObj(objtype) {}
 
 public:
-    virtual ~ImoInlineObj() {}
+    virtual ~ImoInlineLevelObj() {}
 
 };
 
 //---------------------------------------------------------------------------------------
-class ImoBoxInline : public ImoInlineObj, public InlineLevelCreatorApi
+class ImoBoxInline : public ImoInlineLevelObj, public InlineLevelCreatorApi
 {
 protected:
     USize m_size;
 
     ImoBoxInline(int objtype)
-        : ImoInlineObj(objtype), InlineLevelCreatorApi(), m_size(0.0f, 0.0f)
+        : ImoInlineLevelObj(objtype), InlineLevelCreatorApi(), m_size(0.0f, 0.0f)
     {
         set_inline_level_creator_api_parent(this);
     }
     ImoBoxInline(int objtype, const USize& size)
-        : ImoInlineObj(objtype), InlineLevelCreatorApi(), m_size(size)
+        : ImoInlineLevelObj(objtype), InlineLevelCreatorApi(), m_size(size)
     {
         set_inline_level_creator_api_parent(this);
     }
     ImoBoxInline(int objtype, LUnits width, LUnits height)
-        : ImoInlineObj(objtype), InlineLevelCreatorApi(), m_size(width, height)
+        : ImoInlineLevelObj(objtype), InlineLevelCreatorApi(), m_size(width, height)
     {
         set_inline_level_creator_api_parent(this);
     }
@@ -1468,10 +1479,10 @@ public:
 
     //content
     inline int get_num_items() { return get_num_children(); }
-    inline void add_item(ImoInlineObj* pItem) { append_child_imo(pItem); }
+    inline void add_item(ImoInlineLevelObj* pItem) { append_child_imo(pItem); }
     inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
-    inline ImoInlineObj* get_first_item() {
-        return dynamic_cast<ImoInlineObj*>( get_first_child() );
+    inline ImoInlineLevelObj* get_first_item() {
+        return dynamic_cast<ImoInlineLevelObj*>( get_first_child() );
     }
 
     //size
@@ -2034,10 +2045,25 @@ public:
 };
 
 
-//===================================================
+//=======================================================================================
 // Real objects
-//===================================================
+//=======================================================================================
 
+//---------------------------------------------------------------------------------------
+class ImoAnonymousBlock : public ImoInlinesContainer
+{
+protected:
+    friend class ImoBlocksContainer;
+    friend class Document;
+    friend class ImFactory;
+    ImoAnonymousBlock() : ImoInlinesContainer(k_imo_anonymous_block) {}
+
+public:
+    virtual ~ImoAnonymousBlock() {}
+
+    //required by Visitable parent class
+	virtual void accept_visitor(BaseVisitor& v);
+};
 
 //---------------------------------------------------------------------------------------
 class ImoBarline : public ImoStaffObj
@@ -2122,7 +2148,7 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoButton : public ImoInlineObj
+class ImoButton : public ImoInlineLevelObj
 {
 protected:
     string m_text;
@@ -2132,7 +2158,7 @@ protected:
 
     friend class ImFactory;
     ImoButton()
-        : ImoInlineObj(k_imo_button)
+        : ImoInlineLevelObj(k_imo_button)
         , m_bgColor( Color(255,255,255) )
         , m_fEnabled(true)
     {
@@ -2169,14 +2195,14 @@ public:
 
 //---------------------------------------------------------------------------------------
 // ImoControl: An inline wrapper for defining GUI controls (GUI interactive component).
-class ImoControl : public ImoInlineObj
+class ImoControl : public ImoInlineLevelObj
 {
 protected:
     Control* m_ctrol;
 
     friend class ImFactory;
-    ImoControl(Control* ctrol) : ImoInlineObj(k_imo_control), m_ctrol(ctrol) {}
-    ImoControl(int type) : ImoInlineObj(type), m_ctrol(NULL) {}
+    ImoControl(Control* ctrol) : ImoInlineLevelObj(k_imo_control), m_ctrol(ctrol) {}
+    ImoControl(int type) : ImoInlineLevelObj(type), m_ctrol(NULL) {}
 
     friend class ImoScorePlayer;
     inline void attach_control(Control* ctrol) { m_ctrol = ctrol; }
@@ -2218,14 +2244,14 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoContent : public ImoBoxContainer
+class ImoContent : public ImoBlocksContainer
 {
 protected:
     Document* m_pOwner;
 
     friend class ImFactory;
-    ImoContent(Document* pOwner) : ImoBoxContainer(k_imo_content), m_pOwner(pOwner) {}
-    ImoContent(int objtype) : ImoBoxContainer(objtype) {}
+    ImoContent(Document* pOwner) : ImoBlocksContainer(k_imo_content), m_pOwner(pOwner) {}
+    ImoContent(int objtype) : ImoBlocksContainer(objtype) {}
 
 public:
     virtual ~ImoContent() {}
@@ -2285,7 +2311,7 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoDocument : public ImoBoxContainer  //ImoContainerObj
+class ImoDocument : public ImoBlocksContainer  //ImoContainerObj
 {
 protected:
     Document* m_pOwner;
@@ -2304,10 +2330,11 @@ public:
     inline void set_version(const string& version) { m_version = version; }
     inline Document* get_owner() { return m_pOwner;; }
 
-    //content
-    ImoContentObj* get_content_item(int iItem);
-    int get_num_content_items();
-    ImoContent* get_content();
+    ////content
+    //ImoContentObj* get_content_item(int iItem);
+    //int get_num_content_items();
+    //ImoContent* get_content();
+    //void append_content_item(ImoContentObj* pItem);
 
     //document intended paper size
     void add_page_info(ImoPageInfo* pPI);
@@ -2331,7 +2358,6 @@ public:
 //                             ImoStyle* pStyle=NULL);
 //    ImoInlineWrapper* create_inline_box();
     //ImoTextItem* create_text_item(const string& text, ImoStyle* pStyle=NULL);
-    void append_content_item(ImoContentObj* pItem);
 
 
     //cursor
@@ -2448,15 +2474,15 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoImage : public ImoInlineObj
+class ImoImage : public ImoInlineLevelObj
 {
 protected:
     SpImage m_image;
 
     friend class ImFactory;
-    ImoImage() : ImoInlineObj(k_imo_image), m_image( LOMSE_NEW Image() ) {}
+    ImoImage() : ImoInlineLevelObj(k_imo_image), m_image( LOMSE_NEW Image() ) {}
     ImoImage(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format, USize imgSize)
-        : ImoInlineObj(k_imo_image)
+        : ImoInlineLevelObj(k_imo_image)
         , m_image( LOMSE_NEW Image(imgbuf, bmpSize, format, imgSize) )
     {
     }
@@ -2650,29 +2676,28 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoListItem : public ImoBoxContent
+class ImoListItem : public ImoBlocksContainer
 {
 protected:
-    friend class ImoBoxContainer;
     friend class Document;
     friend class ImFactory;
-    ImoListItem() : ImoBoxContent(k_imo_listitem) {}
+    ImoListItem(Document* pDoc);    //pDoc is needed for unit tests
 
 public:
     virtual ~ImoListItem() {}
 
-    //required by Visitable parent class
-	virtual void accept_visitor(BaseVisitor& v);
+ //   //required by Visitable parent class
+	//virtual void accept_visitor(BaseVisitor& v);
 };
 
 //---------------------------------------------------------------------------------------
-class ImoList : public ImoBoxContainer
+class ImoList : public ImoBlocksContainer
 {
 protected:
     int m_listType;
 
     friend class ImFactory;
-    ImoList() : ImoBoxContainer(k_imo_list), m_listType(k_itemized) {}
+    ImoList(Document* pDoc);
 
 public:
     virtual ~ImoList() {}
@@ -2685,11 +2710,9 @@ public:
     //API
     ImoListItem* add_listitem(ImoStyle* pStyle=NULL);
 
-    //contents
-    inline int get_num_items() { return get_num_children(); }
-    inline void add_item(ImoListItem* pItem) { append_child_imo(pItem); }
-    ImoListItem* get_item(int iItem) {   //iItem = 0..n-1
-        return dynamic_cast<ImoListItem*>( get_child(iItem) );
+    //helper, to access content
+    inline ImoListItem* get_list_item(int iItem) {   //iItem = 0..n-1
+        return dynamic_cast<ImoListItem*>( get_content_item(iItem) );
     }
 
 protected:
@@ -2751,28 +2774,29 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoMultiColumn : public ImoBoxContainer
+class ImoMultiColumn : public ImoBlocksContainer
 {
 protected:
     std::vector<float> m_widths;
 
     friend class ImFactory;
-    ImoMultiColumn() : ImoBoxContainer(k_imo_multicolumn) {}
+    ImoMultiColumn(Document* pDoc);
 
 public:
     virtual ~ImoMultiColumn() {}
 
     //contents
-    ImoContent* get_column(int iCol) {   //iCol = 0..n-1
-        return dynamic_cast<ImoContent*>( get_child(iCol) );
+    inline int get_num_columns() { return get_num_content_items(); }
+    inline ImoContent* get_column(int iCol) {   //iCol = 0..n-1
+        return dynamic_cast<ImoContent*>( get_content_item(iCol) );
     }
-    inline int get_num_columns() { return get_num_children(); }
+
     void set_column_width(int iCol, float percentage);
     float get_column_width(int iCol);
 
 protected:
     friend class BlockLevelCreatorApi;
-    void create_columns(int numCols);
+    void create_columns(int numCols, Document* pDoc);
 
 };
 
@@ -2843,13 +2867,13 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoParagraph : public ImoBoxContent
+class ImoParagraph : public ImoInlinesContainer
 {
 protected:
-    friend class ImoBoxContainer;
+    friend class ImoBlocksContainer;
     friend class Document;
     friend class ImFactory;
-    ImoParagraph() : ImoBoxContent(k_imo_para) {}
+    ImoParagraph() : ImoInlinesContainer(k_imo_para) {}
 
 public:
     virtual ~ImoParagraph() {}
@@ -2883,13 +2907,13 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoHeading : public ImoBoxContent
+class ImoHeading : public ImoInlinesContainer
 {
 protected:
     int m_level;
 
     friend class ImFactory;
-    ImoHeading() : ImoBoxContent(k_imo_heading), m_level(1) {}
+    ImoHeading() : ImoInlinesContainer(k_imo_heading), m_level(1) {}
 
 public:
     virtual ~ImoHeading() {};
@@ -3073,7 +3097,7 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoScore : public ImoBoxLevelObj      //ImoBoxContainer
+class ImoScore : public ImoBlockLevelObj      //ImoBlocksContainer
 {
 protected:
     string          m_version;
@@ -3293,7 +3317,7 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoTable : public ImoBoxContainer
+class ImoTable : public ImoBlocksContainer
 {
 protected:
     std::list<ImoStyle*> m_colStyles;   //cannot be ImoCollection as ImoStyles are
@@ -3303,7 +3327,7 @@ protected:
     inline void add_column_style(ImoStyle* pStyle) { m_colStyles.push_back(pStyle); }
 
     friend class ImFactory;
-    ImoTable() : ImoBoxContainer(k_imo_table) {}
+    ImoTable() : ImoBlocksContainer(k_imo_table) {}
 
 public:
     virtual ~ImoTable() {}
@@ -3311,8 +3335,8 @@ public:
     //contents
     ImoTableHead* get_head();
     ImoTableBody* get_body();
-    std::list<ImoStyle*>& get_column_styles() { return m_colStyles; }
-    int get_num_columns() { return int( m_colStyles.size() ); }
+    inline std::list<ImoStyle*>& get_column_styles() { return m_colStyles; }
+    inline int get_num_columns() { return int( m_colStyles.size() ); }
 
 protected:
     friend class BlockLevelCreatorApi;
@@ -3320,16 +3344,15 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoTableCell : public ImoBoxContent
+class ImoTableCell : public ImoBlocksContainer
 {
 protected:
     int m_rowspan;
     int m_colspan;
 
-    friend class ImoBoxContainer;
     friend class Document;
     friend class ImFactory;
-    ImoTableCell() : ImoBoxContent(k_imo_table_cell), m_rowspan(1), m_colspan(1) {}
+    ImoTableCell(Document* pDoc);
 
 public:
     ~ImoTableCell() {}
@@ -3341,26 +3364,26 @@ public:
     inline int get_colspan() { return m_colspan; }
 
 
-    //required by Visitable parent class
-	virtual void accept_visitor(BaseVisitor& v);
+ //   //required by Visitable parent class
+	//virtual void accept_visitor(BaseVisitor& v);
 };
 
 //---------------------------------------------------------------------------------------
-class ImoTableRow : public ImoBoxContainer
+class ImoTableRow : public ImoBlocksContainer
 {
 protected:
 
     friend class ImFactory;
-    ImoTableRow() : ImoBoxContainer(k_imo_table_row) {}
+    ImoTableRow(Document* pDoc);
 
 public:
     virtual ~ImoTableRow() {}
 
     //contents
-    inline int get_num_cells() { return get_num_children(); }
-    inline void add_cell(ImoTableCell* pCell) { append_child_imo(pCell); }
-    ImoTableCell* get_cell(int iItem) {   //iItem = 0..n-1
-        return dynamic_cast<ImoTableCell*>( get_child(iItem) );
+    inline int get_num_cells() { return get_num_content_items(); }
+    inline void add_cell(ImoTableCell* pCell) { append_content_item(pCell); }
+    inline ImoTableCell* get_cell(int iItem) {   //iItem = 0..n-1
+        return dynamic_cast<ImoTableCell*>( get_content_item(iItem) );
     }
 
 protected:
@@ -3406,7 +3429,7 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoTextItem : public ImoInlineObj
+class ImoTextItem : public ImoInlineLevelObj
 {
 private:
     string m_text;
@@ -3415,7 +3438,7 @@ protected:
     friend class ImFactory;
     friend class TextItemAnalyser;
 
-    ImoTextItem() : ImoInlineObj(k_imo_text_item), m_text("") {}
+    ImoTextItem() : ImoInlineLevelObj(k_imo_text_item), m_text("") {}
 
 public:
     virtual ~ImoTextItem() {}
@@ -3708,8 +3731,8 @@ typedef Tree<ImoObj>          ImoTree;
 //typedef Visitor<ImoBeamData> ImVisitor;
 //typedef Visitor<ImoBeamDto> ImVisitor;
 //typedef Visitor<ImoBeam> ImVisitor;
-//typedef Visitor<ImoBoxContainer> ImVisitor;
-//typedef Visitor<ImoBoxContent> ImVisitor;
+//typedef Visitor<ImoBlocksContainer> ImVisitor;
+//typedef Visitor<ImoInlinesContainer> ImVisitor;
 //typedef Visitor<ImoBoxInline> ImVisitor;
 //typedef Visitor<ImoButton> ImVisitor;
 //typedef Visitor<ImoChord> ImVisitor;
@@ -3717,7 +3740,7 @@ typedef Tree<ImoObj>          ImoTree;
 //typedef Visitor<ImoDocument> ImVisitor;
 //typedef Visitor<ImoDynamic> ImVisitor;
 typedef Visitor<ImoHeading> ImHeadingVisitor;
-//typedef Visitor<ImoInlineObj> ImVisitor;
+//typedef Visitor<ImoInlineLevelObj> ImVisitor;
 //typedef Visitor<ImoInstrument> ImVisitor;
 //typedef Visitor<ImoLineStyle> ImVisitor;
 //typedef Visitor<ImoMusicData> ImVisitor;

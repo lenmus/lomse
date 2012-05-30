@@ -7663,9 +7663,9 @@ SUITE(AnalyserTest)
 
         CHECK( pIModel->get_root()->is_listitem() == true );
         ImoListItem* pLI = dynamic_cast<ImoListItem*>( pIModel->get_root() );
-        CHECK( pLI != NULL );
-        CHECK( pLI->get_num_items() == 1 );
-        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pLI->get_first_item() );
+        CHECK( pLI->get_num_content_items() == 1 );
+        ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pLI->get_content_item(0) );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
         CHECK( pText->get_text() == "This is the first item" );
 
         delete tree->get_root();
@@ -7692,10 +7692,11 @@ SUITE(AnalyserTest)
         ImoList* pList = dynamic_cast<ImoList*>( pIModel->get_root() );
         CHECK( pList != NULL );
         CHECK( pList->get_list_type() == ImoList::k_itemized );
-        CHECK( pList->get_num_items() == 1 );
-        ImoListItem* pLI = pList->get_item(0);
-        CHECK( pLI->get_num_items() == 1 );
-        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pLI->get_first_item() );
+        CHECK( pList->get_num_content_items() == 1 );
+        ImoListItem* pLI = pList->get_list_item(0);
+        CHECK( pLI->get_num_content_items() == 1 );
+        ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pLI->get_content_item(0) );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
         CHECK( pText->get_text() == "This is the first item" );
 
         delete tree->get_root();
@@ -7814,7 +7815,8 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pDoc->get_content_item(0) );
+        ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
+        ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->is_score_player() == true );
         CHECK( pSP->get_metronome_mm() == 60 );
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
@@ -7839,7 +7841,8 @@ SUITE(AnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pDoc->get_content_item(0) );
+        ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
+        ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
         CHECK( pSP->is_score_player() == true );
         CHECK( pSP->get_metronome_mm() == 65 );
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
@@ -7867,11 +7870,13 @@ SUITE(AnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
         CHECK( pCell->is_table_cell() == true );
-        CHECK( pCell->get_num_items() == 1 );
+        CHECK( pCell->get_num_content_items() == 1 );
         CHECK( pCell->get_rowspan() == 1 );
         CHECK( pCell->get_colspan() == 1 );
-        ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pCell->get_first_item() );
-        CHECK( pItem->get_text() == "This is a cell" );
+        ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pCell->get_content_item(0) );
+        CHECK( pAB->get_num_items() == 1 );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
+        CHECK( pText->get_text() == "This is a cell" );
 
         delete tree->get_root();
         delete pIModel;
@@ -7894,11 +7899,13 @@ SUITE(AnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
         CHECK( pCell->is_table_cell() == true );
-        CHECK( pCell->get_num_items() == 1 );
+        CHECK( pCell->get_num_content_items() == 1 );
         CHECK( pCell->get_rowspan() == 2 );
         CHECK( pCell->get_colspan() == 1 );
-        ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pCell->get_first_item() );
-        CHECK( pItem->get_text() == "This is a cell" );
+        ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pCell->get_content_item(0) );
+        CHECK( pAB->get_num_items() == 1 );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
+        CHECK( pText->get_text() == "This is a cell" );
 
         delete tree->get_root();
         delete pIModel;
@@ -7921,11 +7928,13 @@ SUITE(AnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
         CHECK( pCell->is_table_cell() == true );
-        CHECK( pCell->get_num_items() == 1 );
+        CHECK( pCell->get_num_content_items() == 1 );
         CHECK( pCell->get_rowspan() == 1 );
         CHECK( pCell->get_colspan() == 2 );
-        ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pCell->get_first_item() );
-        CHECK( pItem->get_text() == "This is a cell" );
+        ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pCell->get_content_item(0) );
+        CHECK( pAB->get_num_items() == 1 );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
+        CHECK( pText->get_text() == "This is a cell" );
 
         delete tree->get_root();
         delete pIModel;

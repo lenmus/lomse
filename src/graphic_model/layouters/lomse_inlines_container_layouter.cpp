@@ -27,7 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_box_content_layouter.h"
+#include "lomse_inlines_content_layouter.h"
 #include "lomse_build_options.h"
 
 #include "lomse_gm_basic.h"
@@ -36,6 +36,7 @@
 #include "lomse_shape_text.h"
 #include "lomse_shapes.h"
 #include "lomse_calligrapher.h"
+#include "lomse_blocks_content_layouter.h"
 
 //other
 #include <boost/format.hpp>
@@ -44,21 +45,22 @@ namespace lomse
 {
 
 //=======================================================================================
-// BoxContentLayouter implementation
+// InlinesContainerLayouter implementation
 //=======================================================================================
-BoxContentLayouter::BoxContentLayouter(ImoContentObj* pItem, Layouter* pParent,
+InlinesContainerLayouter::InlinesContainerLayouter(ImoContentObj* pItem, Layouter* pParent,
                                      GraphicModel* pGModel, LibraryScope& libraryScope,
                                      ImoStyles* pStyles, bool fAddShapesToModel)
-    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles)
+    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles, fAddShapesToModel)
     , m_libraryScope(libraryScope)
-    , m_pPara( dynamic_cast<ImoBoxContent*>(pItem) )
+    , m_pPara( dynamic_cast<ImoInlinesContainer*>(pItem) )
     , m_fFirstLine(true)
-    , m_fAddShapesToModel(fAddShapesToModel)
+    , m_firstLineIndent(0.0f)
+    , m_firstLinePrefix("")
 {
 }
 
 //---------------------------------------------------------------------------------------
-BoxContentLayouter::~BoxContentLayouter()
+InlinesContainerLayouter::~InlinesContainerLayouter()
 {
     std::list<Engrouter*>::iterator it;
     for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
@@ -66,16 +68,28 @@ BoxContentLayouter::~BoxContentLayouter()
 }
 
 //---------------------------------------------------------------------------------------
-void BoxContentLayouter::prepare_to_start_layout()
+void InlinesContainerLayouter::prepare_to_start_layout()
 {
     Layouter::prepare_to_start_layout();
+    set_bullet_info_if_necessary();
     create_engrouters();
     point_to_first_engrouter();
     initialize_lines();
 }
 
 //---------------------------------------------------------------------------------------
-void BoxContentLayouter::layout_in_box()
+void InlinesContainerLayouter::set_bullet_info_if_necessary()
+{
+    ListItemLayouter* pList = dynamic_cast<ListItemLayouter*>(m_pParentLayouter);
+    if (pList && pList->is_first_content_item(m_pItem))
+    {
+        m_firstLineIndent = -500.0f;
+        m_firstLinePrefix = "*  ";
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void InlinesContainerLayouter::layout_in_box()
 {
     //AWARE: This method is invoked to layout a page. If there are more pages to
     //layout, it will be invoked more times. Therefore, this method must not initialize
@@ -108,7 +122,7 @@ void BoxContentLayouter::layout_in_box()
 }
 
 //---------------------------------------------------------------------------------------
-void BoxContentLayouter::create_main_box(GmoBox* pParentBox, UPoint pos,
+void InlinesContainerLayouter::create_main_box(GmoBox* pParentBox, UPoint pos,
                                         LUnits width, LUnits height)
 {
     m_pItemMainBox = LOMSE_NEW GmoBoxParagraph(m_pPara);
@@ -120,7 +134,7 @@ void BoxContentLayouter::create_main_box(GmoBox* pParentBox, UPoint pos,
 }
 
 //---------------------------------------------------------------------------------------
-void BoxContentLayouter::create_engrouters()
+void InlinesContainerLayouter::create_engrouters()
 {
     EngroutersCreator creator(m_engrouters, m_libraryScope);
 
@@ -130,11 +144,11 @@ void BoxContentLayouter::create_engrouters()
 
     TreeNode<ImoObj>::children_iterator it;
     for (it = m_pPara->begin(); it != m_pPara->end(); ++it)
-        creator.create_engrouters( dynamic_cast<ImoInlineObj*>( *it ) );
+        creator.create_engrouters( dynamic_cast<ImoInlineLevelObj*>( *it ) );
 }
 
 //---------------------------------------------------------------------------------------
-void BoxContentLayouter::prepare_line()
+void InlinesContainerLayouter::prepare_line()
 {
     //After execution:
     //  m_itStart - will point to first engrouter to include or m_engrouters.end()
@@ -157,7 +171,7 @@ void BoxContentLayouter::prepare_line()
 }
 
 //---------------------------------------------------------------------------------------
-void BoxContentLayouter::set_line_pos_and_width()
+void InlinesContainerLayouter::set_line_pos_and_width()
 {
     m_xLineStart = m_pItemMainBox->get_content_left();
     m_lineWidth = 0.0f;
@@ -172,7 +186,7 @@ void BoxContentLayouter::set_line_pos_and_width()
 }
 
 //---------------------------------------------------------------------------------------
-void BoxContentLayouter::add_line()
+void InlinesContainerLayouter::add_line()
 {
     m_pageCursor.x = m_xLineStart;
     LUnits left = m_pageCursor.x;       //save left margin
@@ -207,7 +221,7 @@ void BoxContentLayouter::add_line()
 }
 
 //---------------------------------------------------------------------------------------
-void BoxContentLayouter::advance_current_line_space(LUnits left)
+void InlinesContainerLayouter::advance_current_line_space(LUnits left)
 {
     m_pageCursor.x = left;
     m_pageCursor.y += m_lineRefs.lineHeight;
@@ -217,7 +231,7 @@ void BoxContentLayouter::advance_current_line_space(LUnits left)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits BoxContentLayouter::add_engrouter_to_line()
+LUnits InlinesContainerLayouter::add_engrouter_to_line()
 {
     //Current engrouter is going to be included in current line. Here we proceed to do
     //vertical alignement of the engrouter.
@@ -245,7 +259,7 @@ LUnits BoxContentLayouter::add_engrouter_to_line()
 }
 
 //---------------------------------------------------------------------------------------
-void BoxContentLayouter::initialize_line_references()
+void InlinesContainerLayouter::initialize_line_references()
 {
     //line height: 'strut' line height
     ImoStyle* pStyle = m_pPara->get_style();
@@ -275,7 +289,7 @@ void BoxContentLayouter::initialize_line_references()
 }
 
 //---------------------------------------------------------------------------------------
-void BoxContentLayouter::update_line_references(LineReferences& engr, LUnits shift,
+void InlinesContainerLayouter::update_line_references(LineReferences& engr, LUnits shift,
                                                bool fUpdateText)
 {
     if (fUpdateText)
@@ -328,7 +342,7 @@ void BoxContentLayouter::update_line_references(LineReferences& engr, LUnits shi
 }
 
 //---------------------------------------------------------------------------------------
-void BoxContentLayouter::add_engrouter_shape(Engrouter* pEngrouter, LUnits lineHeight)
+void InlinesContainerLayouter::add_engrouter_shape(Engrouter* pEngrouter, LUnits lineHeight)
 {
     GmoObj* pGmo = pEngrouter->create_gm_object(m_pageCursor, get_line_refs());
 
@@ -347,7 +361,7 @@ void BoxContentLayouter::add_engrouter_shape(Engrouter* pEngrouter, LUnits lineH
 }
 
 //---------------------------------------------------------------------------------------
-void BoxContentLayouter::page_initializations(GmoBox* pMainBox)
+void InlinesContainerLayouter::page_initializations(GmoBox* pMainBox)
 {
     m_pItemMainBox = pMainBox;
 
@@ -363,45 +377,9 @@ void BoxContentLayouter::page_initializations(GmoBox* pMainBox)
 }
 
 //---------------------------------------------------------------------------------------
-bool BoxContentLayouter::enough_space_in_box()
+bool InlinesContainerLayouter::enough_space_in_box()
 {
     return m_availableHeight >= m_pItemMainBox->get_height() + m_lineRefs.lineHeight;
-}
-
-
-
-//=======================================================================================
-// ParagraphLayouter implementation
-//=======================================================================================
-ParagraphLayouter::ParagraphLayouter(ImoContentObj* pImo, Layouter* pParent,
-                                     GraphicModel* pGModel, LibraryScope& libraryScope,
-                                     ImoStyles* pStyles)
-    : BoxContentLayouter(pImo, pParent, pGModel, libraryScope, pStyles)
-{
-}
-
-
-
-//=======================================================================================
-// ListItemLayouter implementation
-//=======================================================================================
-ListItemLayouter::ListItemLayouter(ImoContentObj* pImo, Layouter* pParent,
-                                   GraphicModel* pGModel, LibraryScope& libraryScope,
-                                   ImoStyles* pStyles)
-    : BoxContentLayouter(pImo, pParent, pGModel, libraryScope, pStyles)
-{
-}
-
-//---------------------------------------------------------------------------------------
-LUnits ListItemLayouter::get_first_line_indent()
-{
-    return -500.0f;
-}
-
-//---------------------------------------------------------------------------------------
-string ListItemLayouter::get_first_line_prefix()
-{
-    return "*  ";
 }
 
 

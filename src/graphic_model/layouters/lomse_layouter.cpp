@@ -31,9 +31,9 @@
 
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
-#include "lomse_content_layouter.h"
+#include "lomse_blocks_content_layouter.h"
 #include "lomse_score_layouter.h"
-#include "lomse_box_content_layouter.h"
+#include "lomse_inlines_content_layouter.h"
 #include "lomse_table_layouter.h"
 
 namespace lomse
@@ -43,7 +43,8 @@ namespace lomse
 // Layouter implementation
 //=======================================================================================
 Layouter::Layouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGModel,
-                   LibraryScope& libraryScope, ImoStyles* pStyles)
+                   LibraryScope& libraryScope, ImoStyles* pStyles,
+                   bool fAddShapesToModel)
     : m_fIsLayouted(false)
     , m_pGModel(pGModel)
     , m_pParentLayouter(pParent)
@@ -51,6 +52,7 @@ Layouter::Layouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGMode
     , m_pStyles(pStyles)
     , m_pItemMainBox(NULL)
     , m_pItem(pItem)
+    , m_fAddShapesToModel(fAddShapesToModel)
 {
 }
 
@@ -167,40 +169,51 @@ Layouter* LayouterFactory::create_layouter(ImoContentObj* pItem, Layouter* pPare
     GraphicModel* pGModel = pParent->get_graphic_model();
     LibraryScope& libraryScope = pParent->get_library_scope();
     ImoStyles* pStyles = pParent->get_styles();
+    bool fAddShapesToModel = pParent->must_add_shapes_to_model();
 
     switch (pItem->get_obj_type())
     {
 //        case k_imo_control:
 //            return LOMSE_NEW ControlLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
 
+        //blocks container objects
         case k_imo_dynamic:
         case k_imo_content:
-            return LOMSE_NEW ContentLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
-
-        case k_imo_list:
-            return LOMSE_NEW ListLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
-
-        case k_imo_para:
-        case k_imo_heading:
-            return LOMSE_NEW ParagraphLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
-
-        case k_imo_listitem:
-            return LOMSE_NEW ListItemLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
-
-        case k_imo_table_cell:
-            return LOMSE_NEW TableCellLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+            return LOMSE_NEW ContentLayouter(pItem, pParent, pGModel, libraryScope,
+                                             pStyles, fAddShapesToModel);
 
         case k_imo_multicolumn:
-            return LOMSE_NEW MultiColumnLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+            return LOMSE_NEW MultiColumnLayouter(pItem, pParent, pGModel, libraryScope,
+                                                 pStyles, fAddShapesToModel);
+
+        case k_imo_list:
+            return LOMSE_NEW ListLayouter(pItem, pParent, pGModel, libraryScope,
+                                          pStyles, fAddShapesToModel);
+
+        case k_imo_listitem:
+            return LOMSE_NEW ListItemLayouter(pItem, pParent, pGModel, libraryScope,
+                                              pStyles, fAddShapesToModel);
+
+        case k_imo_table_cell:
+            return LOMSE_NEW TableCellLayouter(pItem, pParent, pGModel, libraryScope,
+                                               pStyles);
 
         case k_imo_score:
             return LOMSE_NEW ScoreLayouter(pItem, pParent, pGModel, libraryScope);
 
+        case k_imo_table:
+            return LOMSE_NEW TableLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+
+        // inlines container objects
+        case k_imo_anonymous_block:
+        case k_imo_para:
+        case k_imo_heading:
+            return LOMSE_NEW InlinesContainerLayouter(pItem, pParent, pGModel, libraryScope,
+                                                      pStyles, fAddShapesToModel);
+
         case k_imo_score_player:
             return LOMSE_NEW ScorePlayerLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
 
-        case k_imo_table:
-            return LOMSE_NEW TableLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
 
         default:
             return LOMSE_NEW NullLayouter(pItem, pParent, pGModel, libraryScope);

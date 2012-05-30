@@ -51,6 +51,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc)
     ImoObj* pObj = NULL;
     switch(type)
     {
+        case k_imo_anonymous_block:     pObj = LOMSE_NEW ImoAnonymousBlock();     break;
         case k_imo_attachments:         pObj = LOMSE_NEW ImoAttachments();        break;
         case k_imo_barline:             pObj = LOMSE_NEW ImoBarline();            break;
         case k_imo_beam:                pObj = LOMSE_NEW ImoBeam();               break;
@@ -81,11 +82,12 @@ ImoObj* ImFactory::inject(int type, Document* pDoc)
         case k_imo_key_signature:       pObj = LOMSE_NEW ImoKeySignature();       break;
         case k_imo_line:                pObj = LOMSE_NEW ImoLine();               break;
         case k_imo_line_style:          pObj = LOMSE_NEW ImoLineStyle();          break;
-        case k_imo_list:                pObj = LOMSE_NEW ImoList();               break;
-        case k_imo_listitem:            pObj = LOMSE_NEW ImoListItem();           break;
+        case k_imo_list:                pObj = LOMSE_NEW ImoList(pDoc);           break;
+        case k_imo_listitem:            pObj = LOMSE_NEW ImoListItem(pDoc);       break;
         case k_imo_link:                pObj = LOMSE_NEW ImoLink();               break;
         case k_imo_metronome_mark:      pObj = LOMSE_NEW ImoMetronomeMark();      break;
         case k_imo_midi_info:           pObj = LOMSE_NEW ImoMidiInfo();           break;
+        case k_imo_multicolumn:         pObj = LOMSE_NEW ImoMultiColumn(pDoc);    break;
         case k_imo_music_data:          pObj = LOMSE_NEW ImoMusicData();          break;
         case k_imo_note:                pObj = LOMSE_NEW ImoNote();               break;
         case k_imo_option:              pObj = LOMSE_NEW ImoOptionInfo();         break;
@@ -111,10 +113,10 @@ ImoObj* ImFactory::inject(int type, Document* pDoc)
         case k_imo_system_break:        pObj = LOMSE_NEW ImoSystemBreak();        break;
         case k_imo_system_info:         pObj = LOMSE_NEW ImoSystemInfo();         break;
         case k_imo_table:               pObj = LOMSE_NEW ImoTable();              break;
-        case k_imo_table_cell:          pObj = LOMSE_NEW ImoTableCell();          break;
+        case k_imo_table_cell:          pObj = LOMSE_NEW ImoTableCell(pDoc);      break;
         case k_imo_table_body:          pObj = LOMSE_NEW ImoTableBody();          break;
         case k_imo_table_head:          pObj = LOMSE_NEW ImoTableHead();          break;
-        case k_imo_table_row:           pObj = LOMSE_NEW ImoTableRow();           break;
+        case k_imo_table_row:           pObj = LOMSE_NEW ImoTableRow(pDoc);       break;
         case k_imo_text_box:            pObj = LOMSE_NEW ImoTextBox();            break;
         case k_imo_text_info:           pObj = LOMSE_NEW ImoTextInfo();           break;
         case k_imo_text_item:           pObj = LOMSE_NEW ImoTextItem();           break;
@@ -195,7 +197,7 @@ ImoNote* ImFactory::inject_note(Document* pDoc, int step, int octave,
 //---------------------------------------------------------------------------------------
 ImoMultiColumn* ImFactory::inject_multicolumn(Document* pDoc)
 {
-    ImoMultiColumn* pObj = LOMSE_NEW ImoMultiColumn();
+    ImoMultiColumn* pObj = LOMSE_NEW ImoMultiColumn(pDoc);
     pObj->set_id( pDoc->new_id() );
     return pObj;
 }

@@ -74,7 +74,7 @@ namespace lomse
 //=======================================================================================
 ScoreLayouter::ScoreLayouter(ImoContentObj* pItem, Layouter* pParent,
                              GraphicModel* pGModel, LibraryScope& libraryScope)
-    : Layouter(pItem, pParent, pGModel, libraryScope, NULL)
+    : Layouter(pItem, pParent, pGModel, libraryScope, NULL, true)
     , m_libraryScope(libraryScope)
     , m_pScore( dynamic_cast<ImoScore*>(pItem) )
     , m_pScoreMeter( LOMSE_NEW ScoreMeter(m_pScore) )
@@ -158,6 +158,13 @@ void ScoreLayouter::layout_in_box()
     if (!fMoreColumns)
     {
         LUnits yBottom = m_pCurSysLyt->get_y_max();
+        ImoStyle* pStyle = m_pScore->get_style();
+        if (pStyle)
+        {
+            yBottom += pStyle->get_lunits_property(ImoStyle::k_margin_bottom);
+            yBottom += pStyle->get_lunits_property(ImoStyle::k_border_width_bottom);
+            yBottom += pStyle->get_lunits_property(ImoStyle::k_padding_bottom);
+        }
         m_pCurBoxPage->set_height( yBottom - m_pCurBoxPage->get_top());
         m_cursor.y = m_pCurBoxPage->get_bottom();
     }

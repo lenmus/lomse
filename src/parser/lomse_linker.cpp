@@ -106,22 +106,8 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
         case k_imo_system_info:
             return add_system_info(static_cast<ImoSystemInfo*>(pChild));
 
-        case k_imo_text_item:
-            return add_text_item(static_cast<ImoTextItem*>(pChild));
-
-        case k_imo_score_player:
-            return add_inline_or_block_item(static_cast<ImoInlineObj*>(pChild));
-
         case k_imo_style:
             return add_style(static_cast<ImoStyle*>(pChild));
-
-        case k_imo_table_cell:
-        {
-            if (m_pParent && m_pParent->is_table_row())
-                return add_child(k_imo_table_row, pChild);
-            else
-                return pChild;
-        }
 
         case k_imo_table_row:
         {
@@ -140,7 +126,6 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
 
         case k_imo_table_head:
         case k_imo_table_body:
-        case k_imo_table_caption:
         {
             if (m_pParent && m_pParent->is_table())
                 return add_child(k_imo_table, pChild);
@@ -149,8 +134,10 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
         }
 
         default:
-            if (pChild->is_boxlevel_obj())
-                return add_child(k_imo_content, pChild);
+            if (pChild->is_block_level_obj())
+                return add_block_level_item(static_cast<ImoBlockLevelObj*>(pChild));
+            else if (pChild->is_inline_level_obj())
+                return add_inline_level_item(static_cast<ImoInlineLevelObj*>(pChild));
             else if (pChild->is_staffobj())
                 return add_staffobj(static_cast<ImoStaffObj*>(pChild));
             else if (pChild->is_relobj())
@@ -165,7 +152,7 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
 //---------------------------------------------------------------------------------------
 ImoObj* Linker::add_content(ImoContent* pContent)
 {
-    if (m_pParent && (m_pParent->is_document() || m_pParent->is_box_container()))
+    if (m_pParent && (m_pParent->is_document() || m_pParent->is_blocks_container()))
     {
         m_pParent->append_child_imo(pContent);
         return NULL;
@@ -283,7 +270,7 @@ ImoObj* Linker::add_bezier(ImoBezierInfo* pBezier)
 ImoObj* Linker::add_listitem(ImoListItem* pItem)
 {
     if (m_pParent && m_pParent->is_list())
-        return add_child(k_imo_list, pItem);
+        return add_block_level_item(pItem);
     else
         return pItem;
 }
@@ -394,44 +381,49 @@ ImoObj* Linker::add_text(ImoScoreText* pText)
 }
 
 //---------------------------------------------------------------------------------------
-ImoObj* Linker::add_text_item(ImoTextItem* pText)
-{
-    //TODO: The behaviour implemente in this method is common to all ImoOb objects
-    //that can be used, indistinctly, as box-level and as inline-level (i.e. image,
-    //button, etc.). Study generalization and change method name. See next method
-    if (m_pParent)
-    {
-        if (m_pParent->is_box_content())
-        {
-            ImoBoxContent* pBox = static_cast<ImoBoxContent*>(m_pParent);
-            pBox->add_item(pText);
-            return NULL;
-        }
-
-        if (m_pParent->is_content())
-        {
-            add_child(k_imo_content, pText);
-            return NULL;
-        }
-    }
-    return pText;
-}
-
-//---------------------------------------------------------------------------------------
-ImoObj* Linker::add_inline_or_block_item(ImoInlineObj* pImo)
+ImoObj* Linker::add_inline_level_item(ImoInlineLevelObj* pImo)
 {
     if (m_pParent)
     {
-        if (m_pParent->is_box_content())
+        if (m_pParent->is_inlines_container())
         {
-            ImoBoxContent* pBox = static_cast<ImoBoxContent*>(m_pParent);
+            ImoInlinesContainer* pBox = static_cast<ImoInlinesContainer*>(m_pParent);
             pBox->add_item(pImo);
             return NULL;
         }
 
+        if (m_pParent->is_blocks_container())
+        {
+            ImoBlocksContainer* pParent = static_cast<ImoBlocksContainer*>(m_pParent);
+            ImoAnonymousBlock* pCurBlock = 
+                dynamic_cast<ImoAnonymousBlock*>( pParent->get_last_content_item() );
+            if (!pCurBlock)
+            {
+                pCurBlock = static_cast<ImoAnonymousBlock*>(
+                                ImFactory::inject(k_imo_anonymous_block, m_pDoc) );
+                pParent->append_content_item(pCurBlock);
+            }
+            pCurBlock->add_item(pImo);
+            return NULL;
+        }
+    }
+    return pImo;
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj* Linker::add_block_level_item(ImoBlockLevelObj* pImo)
+{
+    if (m_pParent)
+    {
         if (m_pParent->is_content())
         {
-            add_child(k_imo_content, pImo);
+            m_pParent->append_child_imo(pImo);
+            return NULL;
+        }
+        else if (m_pParent->is_blocks_container())
+        {
+            ImoBlocksContainer* pParent = static_cast<ImoBlocksContainer*>(m_pParent);
+            pParent->append_content_item(pImo);
             return NULL;
         }
     }

@@ -34,7 +34,7 @@
 #include "lomse_injectors.h"
 #include "lomse_drawer.h"
 #include "lomse_layouter.h"
-#include "lomse_box_content_layouter.h"
+#include "lomse_blocks_content_layouter.h"
 
 // other
 #include <sstream>
@@ -170,7 +170,7 @@ protected:
 
 //---------------------------------------------------------------------------------------
 // TableCellLayouter: a layouter for table cells (ImoTableCell objects)
-class TableCellLayouter : public BoxContentLayouter
+class TableCellLayouter : public BlocksContainerLayouter
 {
 protected:
     LibraryScope& m_libraryScope;
@@ -183,10 +183,6 @@ public:
     TableCellLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
                       LibraryScope& libraryScope, ImoStyles* pStyles);
     virtual ~TableCellLayouter() {}
-
-    //mandatory overrides
-    LUnits get_first_line_indent() { return 0.0f; }
-    string get_first_line_prefix() { return ""; }
 
     LUnits get_cell_width();
     virtual int get_rowspan();      //virtual, to override in unit tests

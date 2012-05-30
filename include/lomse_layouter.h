@@ -56,6 +56,7 @@ protected:
     GmoBox* m_pItemMainBox;     //this layouter main box
     Layouter* m_pCurLayouter;
     ImoContentObj* m_pItem;
+    bool m_fAddShapesToModel;
 
     //position (relative to page origin) and available space in current box
     LUnits m_availableWidth;
@@ -64,7 +65,8 @@ protected:
 
     //constructor
     Layouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGModel,
-             LibraryScope& libraryScope, ImoStyles* pStyles);
+             LibraryScope& libraryScope, ImoStyles* pStyles,
+             bool fAddShapesToModel);
     //constructor for DocumentLayouter
     Layouter(LibraryScope& libraryScope);
 
@@ -88,6 +90,8 @@ public:
     void add_end_margins();
     LUnits set_box_height();
     inline GmoBox* get_item_main_box() { return m_pItemMainBox; }
+
+    inline bool must_add_shapes_to_model() { return m_fAddShapesToModel; }
 
 protected:
     virtual GmoBox* start_new_page();
@@ -122,7 +126,7 @@ protected:
 public:
     NullLayouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGModel,
                  LibraryScope& libraryScope)
-        : Layouter(pItem, pParent, pGModel, libraryScope, NULL)
+        : Layouter(pItem, pParent, pGModel, libraryScope, NULL, false)
     {
     }
     ~NullLayouter() {}

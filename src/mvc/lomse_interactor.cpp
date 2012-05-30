@@ -249,6 +249,8 @@ void Interactor::mouse_in_out(Pixels x, Pixels y)
         ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
         if (pGmo->is_box_control() || (pImo && pImo->is_visible()) )
         {
+            if (pImo)
+                cout << "mouse-in: " << pImo->get_obj_type() << endl;
             send_mouse_in_event(pGmo);
             m_pLastMouseOverGmo = pGmo;
         }
@@ -692,7 +694,7 @@ void Interactor::notify_event(SpEventInfo pEvent, GmoObj* pGmo)
 {
     if (pGmo->is_box_control())
         (static_cast<GmoBoxControl*>(pGmo))->notify_event(pEvent);
-    else if (pGmo->is_in_link())
+    else if (pGmo->is_box_link() || pGmo->is_in_link())
         find_parent_link_box_and_notify_event(pEvent, pGmo);
     else
         m_pDoc->notify_observers(pEvent, pEvent->get_source() );

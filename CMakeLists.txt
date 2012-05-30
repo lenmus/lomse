@@ -1,4 +1,4 @@
-#--------------------------------------------------------------------------------------
+﻿#--------------------------------------------------------------------------------------
 # This file is part of the Lomse library.
 # Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
 #
@@ -416,9 +416,9 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/engravers/lomse_time_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_tuplet_engraver.cpp
 
-    ${SRC_DIR}/graphic_model/layouters/lomse_box_content_layouter.cpp
-    ${SRC_DIR}/graphic_model/layouters/lomse_content_layouter.cpp
+    ${SRC_DIR}/graphic_model/layouters/lomse_blocks_container_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_document_layouter.cpp
+    ${SRC_DIR}/graphic_model/layouters/lomse_inlines_container_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_score_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_score_meter.cpp
@@ -602,7 +602,6 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_analyser.cpp
         ${SRC_DIR}/tests/lomse_test_barline_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_beam_engraver.cpp
-        ${SRC_DIR}/tests/lomse_test_box_content_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_chord_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_column_breaker.cpp
         ${SRC_DIR}/tests/lomse_test_column_layouter.cpp
@@ -617,12 +616,14 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_gm_objects.cpp
         ${SRC_DIR}/tests/lomse_test_graphic_model.cpp
         ${SRC_DIR}/tests/lomse_test_image_reader.cpp
+        ${SRC_DIR}/tests/lomse_test_inlines_container_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_interactor.cpp
         ${SRC_DIR}/tests/lomse_test_internal_model.cpp
         ${SRC_DIR}/tests/lomse_test_ldp_exporter.cpp
         ${SRC_DIR}/tests/lomse_test_lines_breaker.cpp
         ${SRC_DIR}/tests/lomse_test_linkable.cpp
         ${SRC_DIR}/tests/lomse_test_linker.cpp
+        ${SRC_DIR}/tests/lomse_test_list_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_midi_table.cpp
         ${SRC_DIR}/tests/lomse_test_model_builder.cpp
         ${SRC_DIR}/tests/lomse_test_multicolumn_layouter.cpp
@@ -644,6 +645,7 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_system_cursor.cpp
         ${SRC_DIR}/tests/lomse_test_system_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_table_layouter.cpp
+        ${SRC_DIR}/tests/lomse_test_text_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_tokenizer.cpp
         ${SRC_DIR}/tests/lomse_test_tree.cpp
         ${SRC_DIR}/tests/lomse_test_tuplet_engraver.cpp

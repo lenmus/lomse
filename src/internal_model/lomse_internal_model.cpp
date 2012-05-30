@@ -182,7 +182,7 @@ ImoMultiColumn* BlockLevelCreatorApi::add_multicolumn_wrapper(int numCols,
     Document* pDoc = m_pParent->get_the_document();
     ImoMultiColumn* pImo = ImFactory::inject_multicolumn(pDoc);
     add_to_model(pImo, pStyle);
-    pImo->create_columns(numCols);
+    pImo->create_columns(numCols, pDoc);
     return pImo;
 }
 
@@ -197,7 +197,7 @@ ImoScore* BlockLevelCreatorApi::add_score(ImoStyle* pStyle)
 }
 
 //---------------------------------------------------------------------------------------
-void BlockLevelCreatorApi::add_to_model(ImoBoxLevelObj* pImo, ImoStyle* pStyle)
+void BlockLevelCreatorApi::add_to_model(ImoBlockLevelObj* pImo, ImoStyle* pStyle)
 {
     pImo->set_style(pStyle);
     ImoObj* pNode = m_pParent->is_document() ?
@@ -232,17 +232,17 @@ ImoObj::ImoObj(int objtype, long id)
         m_TypeToName[k_imo_spacer] = "spacer";
         m_TypeToName[k_imo_figured_bass] = "figuredBass";
 
-        // ImoBoxContainer (A)
+        // ImoBlocksContainer (A)
         m_TypeToName[k_imo_content] = "content";
         m_TypeToName[k_imo_document] = "lenmusdoc";
         m_TypeToName[k_imo_score] = "score";
 
-        // ImoBoxContent (A)
+        // ImoInlinesContainer (A)
         m_TypeToName[k_imo_dynamic] = "dynamic";
         m_TypeToName[k_imo_heading] = "heading";
         m_TypeToName[k_imo_para] = "para";
 
-        // ImoInlineObj
+        // ImoInlineLevelObj
         m_TypeToName[k_imo_button] = "buttom";
         m_TypeToName[k_imo_text_item] = "txt";
 
@@ -766,15 +766,15 @@ ImoBezierInfo::ImoBezierInfo(ImoBezierInfo* pBezier)
 
 
 //=======================================================================================
-// ImoBoxContainer implementation
+// ImoBlocksContainer implementation
 //=======================================================================================
-//ImoContentObj* ImoBoxContainer::get_container_node()
+//ImoContentObj* ImoBlocksContainer::get_container_node()
 //{
 //    return this;
 //}
 //
 ////---------------------------------------------------------------------------------------
-//ImoParagraph* ImoBoxContainer::add_paragraph(ImoStyle* pStyle)
+//ImoParagraph* ImoBlocksContainer::add_paragraph(ImoStyle* pStyle)
 //{
 //    Document* pDoc = get_the_document();
 //    ImoParagraph* pPara = static_cast<ImoParagraph*>(
@@ -785,6 +785,67 @@ ImoBezierInfo::ImoBezierInfo(ImoBezierInfo* pBezier)
 //    node->append_child_imo(pPara);
 //    return pPara;
 //}
+
+//---------------------------------------------------------------------------------------
+int ImoBlocksContainer::get_num_content_items()
+{
+    ImoContent* pContent = get_content();
+    if (pContent)
+        return pContent->get_num_children();
+    else
+        return 0;
+}
+
+//---------------------------------------------------------------------------------------
+ImoContentObj* ImoBlocksContainer::get_content_item(int iItem)
+{
+    ImoContent* pContent = get_content();
+    if (iItem < pContent->get_num_children())
+        return dynamic_cast<ImoContentObj*>( pContent->get_child(iItem) );
+    else
+        return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+ImoContentObj* ImoBlocksContainer::get_first_content_item()
+{
+    return get_content_item(0);
+}
+
+//---------------------------------------------------------------------------------------
+ImoContentObj* ImoBlocksContainer::get_last_content_item()
+{
+    int last = get_num_content_items() - 1;
+    if (last >= 0)
+        return get_content_item(last);
+    else
+        return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+ImoContent* ImoBlocksContainer::get_content()
+{
+    //AWARE: ImoContent doesn't have an inner ImoContent container
+    if (this->is_content())
+        return static_cast<ImoContent*>(this);
+    else
+        return static_cast<ImoContent*>( get_child_of_type(k_imo_content) );
+}
+
+//---------------------------------------------------------------------------------------
+void ImoBlocksContainer::create_content_container(Document* pDoc)
+{
+    append_child_imo( ImFactory::inject(k_imo_content, pDoc) );
+}
+
+//---------------------------------------------------------------------------------------
+void ImoBlocksContainer::append_content_item(ImoContentObj* pItem)
+{
+    ImoContent* pContent = get_content();
+    if (!pContent)
+        pContent = add_content_wrapper();
+    pContent->append_child_imo(pItem);
+}
 
 
 //=======================================================================================
@@ -1235,10 +1296,37 @@ EventNotifier* ImoContentObj::get_event_notifier()
 
 
 //=======================================================================================
+// ImoAnonymousBlock implementation
+//=======================================================================================
+void ImoAnonymousBlock::accept_visitor(BaseVisitor& v)
+{
+    Visitor<ImoAnonymousBlock>* vAb = NULL;
+    Visitor<ImoObj>* vObj = NULL;
+
+    vAb = dynamic_cast<Visitor<ImoAnonymousBlock>*>(&v);
+    if (vAb)
+        vAb->start_visit(this);
+    else
+    {
+        vObj = dynamic_cast<Visitor<ImoObj>*>(&v);
+        if (vObj)
+            vObj->start_visit(this);
+    }
+
+    visit_children(v);
+
+    if (vAb)
+        vAb->end_visit(this);
+    else if (vObj)
+        vObj->end_visit(this);
+}
+
+
+//=======================================================================================
 // ImoDocument implementation
 //=======================================================================================
 ImoDocument::ImoDocument(Document* owner, const std::string& version)
-    : ImoBoxContainer(k_imo_document)
+    : ImoBlocksContainer(k_imo_document)
     , m_pOwner(owner)
     , m_version(version)
     , m_pageInfo()
@@ -1254,31 +1342,31 @@ ImoDocument::~ImoDocument()
     m_privateStyles.clear();
 }
 
-//---------------------------------------------------------------------------------------
-int ImoDocument::get_num_content_items()
-{
-    ImoContent* pContent = get_content();
-    if (pContent)
-        return pContent->get_num_children();
-    else
-        return 0;
-}
-
-//---------------------------------------------------------------------------------------
-ImoContentObj* ImoDocument::get_content_item(int iItem)
-{
-    ImoContent* pContent = get_content();
-    if (iItem < pContent->get_num_children())
-        return dynamic_cast<ImoContentObj*>( pContent->get_child(iItem) );
-    else
-        return NULL;
-}
-
-//---------------------------------------------------------------------------------------
-ImoContent* ImoDocument::get_content()
-{
-    return dynamic_cast<ImoContent*>( get_child_of_type(k_imo_content) );
-}
+////---------------------------------------------------------------------------------------
+//int ImoDocument::get_num_content_items()
+//{
+//    ImoContent* pContent = get_content();
+//    if (pContent)
+//        return pContent->get_num_children();
+//    else
+//        return 0;
+//}
+//
+////---------------------------------------------------------------------------------------
+//ImoContentObj* ImoDocument::get_content_item(int iItem)
+//{
+//    ImoContent* pContent = get_content();
+//    if (iItem < pContent->get_num_children())
+//        return dynamic_cast<ImoContentObj*>( pContent->get_child(iItem) );
+//    else
+//        return NULL;
+//}
+//
+////---------------------------------------------------------------------------------------
+//ImoContent* ImoDocument::get_content()
+//{
+//    return dynamic_cast<ImoContent*>( get_child_of_type(k_imo_content) );
+//}
 
 //---------------------------------------------------------------------------------------
 void ImoDocument::add_page_info(ImoPageInfo* pPI)
@@ -1345,12 +1433,12 @@ ImoStyle* ImoDocument::create_private_style(const string& parent)
     add_private_style(pStyle);
     return pStyle;
 }
-
-//---------------------------------------------------------------------------------------
-void ImoDocument::append_content_item(ImoContentObj* pItem)
-{
-    get_content()->append_child_imo(pItem);
-}
+//
+////---------------------------------------------------------------------------------------
+//void ImoDocument::append_content_item(ImoContentObj* pItem)
+//{
+//    get_content()->append_child_imo(pItem);
+//}
 
 
 //=======================================================================================
@@ -1666,13 +1754,21 @@ int ImoInstrGroup::get_num_instruments()
 //=======================================================================================
 // ImoList implementation
 //=======================================================================================
+ImoList::ImoList(Document* pDoc) 
+    : ImoBlocksContainer(k_imo_list)
+    , m_listType(k_itemized)
+{
+    create_content_container(pDoc);
+}
+
+//---------------------------------------------------------------------------------------
 ImoListItem* ImoList::add_listitem(ImoStyle* pStyle)
 {
     Document* pDoc = get_the_document();
     ImoListItem* pImo = static_cast<ImoListItem*>(
                             ImFactory::inject(k_imo_listitem, pDoc) );
     pImo->set_style(pStyle);
-    add_item(pImo);
+    append_content_item(pImo);
     return pImo;
 }
 
@@ -1680,42 +1776,55 @@ ImoListItem* ImoList::add_listitem(ImoStyle* pStyle)
 //=======================================================================================
 // ImoListItem implementation
 //=======================================================================================
-void ImoListItem::accept_visitor(BaseVisitor& v)
+ImoListItem::ImoListItem(Document* pDoc) 
+    : ImoBlocksContainer(k_imo_listitem)
 {
-    Visitor<ImoListItem>* vLi = NULL;
-    Visitor<ImoObj>* vObj = NULL;
-
-    vLi = dynamic_cast<Visitor<ImoListItem>*>(&v);
-    if (vLi)
-        vLi->start_visit(this);
-    else
-    {
-        vObj = dynamic_cast<Visitor<ImoObj>*>(&v);
-        if (vObj)
-            vObj->start_visit(this);
-    }
-
-    visit_children(v);
-
-    if (vLi)
-        vLi->end_visit(this);
-    else if (vObj)
-        vObj->end_visit(this);
+    create_content_container(pDoc);
 }
+
+////---------------------------------------------------------------------------------------
+//void ImoListItem::accept_visitor(BaseVisitor& v)
+//{
+//    Visitor<ImoListItem>* vLi = NULL;
+//    Visitor<ImoObj>* vObj = NULL;
+//
+//    vLi = dynamic_cast<Visitor<ImoListItem>*>(&v);
+//    if (vLi)
+//        vLi->start_visit(this);
+//    else
+//    {
+//        vObj = dynamic_cast<Visitor<ImoObj>*>(&v);
+//        if (vObj)
+//            vObj->start_visit(this);
+//    }
+//
+//    visit_children(v);
+//
+//    if (vLi)
+//        vLi->end_visit(this);
+//    else if (vObj)
+//        vObj->end_visit(this);
+//}
 
 
 //=======================================================================================
 // ImoMultiColumn implementation
 //=======================================================================================
-void ImoMultiColumn::create_columns(int numCols)
+ImoMultiColumn::ImoMultiColumn(Document* pDoc)
+    : ImoBlocksContainer(k_imo_multicolumn)
+{
+    create_content_container(pDoc);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoMultiColumn::create_columns(int numCols, Document* pDoc)
 {
     m_widths.reserve(numCols);
     float width = 100.0f / float(numCols);
     for (int i=numCols; i > 0; i--)
     {
-        add_content_wrapper();
-        //ImoContent* pCol = LOMSE_NEW ImoContent(k_imo_content);
-        //append_child_imo(pCol);
+        append_content_item( 
+            static_cast<ImoContentObj*>( ImFactory::inject(k_imo_content, pDoc) ));
         m_widths.push_back(width);
     }
 }
@@ -1838,7 +1947,7 @@ static const LongOption m_LongOptions[] =
 
 //---------------------------------------------------------------------------------------
 ImoScore::ImoScore(Document* pDoc)
-    : ImoBoxLevelObj(k_imo_score)
+    : ImoBlockLevelObj(k_imo_score)
     , m_version("")
     , m_pDoc(pDoc)
     , m_pColStaffObjs(NULL)
@@ -2592,27 +2701,46 @@ ImoTableBody* ImoTable::get_body()
 //=======================================================================================
 // ImoTableCell implementation
 //=======================================================================================
-void ImoTableCell::accept_visitor(BaseVisitor& v)
+ImoTableCell::ImoTableCell(Document* pDoc)
+    : ImoBlocksContainer(k_imo_table_cell)
+    , m_rowspan(1)
+    , m_colspan(1)
 {
-    Visitor<ImoTableCell>* vCell = NULL;
-    Visitor<ImoObj>* vObj = NULL;
+    create_content_container(pDoc);
+}
 
-    vCell = dynamic_cast<Visitor<ImoTableCell>*>(&v);
-    if (vCell)
-        vCell->start_visit(this);
-    else
-    {
-        vObj = dynamic_cast<Visitor<ImoObj>*>(&v);
-        if (vObj)
-            vObj->start_visit(this);
-    }
+////---------------------------------------------------------------------------------------
+//void ImoTableCell::accept_visitor(BaseVisitor& v)
+//{
+//    Visitor<ImoTableCell>* vCell = NULL;
+//    Visitor<ImoObj>* vObj = NULL;
+//
+//    vCell = dynamic_cast<Visitor<ImoTableCell>*>(&v);
+//    if (vCell)
+//        vCell->start_visit(this);
+//    else
+//    {
+//        vObj = dynamic_cast<Visitor<ImoObj>*>(&v);
+//        if (vObj)
+//            vObj->start_visit(this);
+//    }
+//
+//    visit_children(v);
+//
+//    if (vCell)
+//        vCell->end_visit(this);
+//    else if (vObj)
+//        vObj->end_visit(this);
+//}
 
-    visit_children(v);
 
-    if (vCell)
-        vCell->end_visit(this);
-    else if (vObj)
-        vObj->end_visit(this);
+//=======================================================================================
+// ImoTableRow implementation
+//=======================================================================================
+ImoTableRow::ImoTableRow(Document* pDoc)
+    : ImoBlocksContainer(k_imo_table_row)
+{
+    create_content_container(pDoc);
 }
 
 

@@ -46,8 +46,8 @@ namespace lomse
 class ImoContentObj;
 class ImoControl;
 class ImoInlineWrapper;
-class ImoInlineObj;
-class ImoBoxContent;
+class ImoInlineLevelObj;
+class ImoInlinesContainer;
 class ImoBoxInline;
 class ImoStyles;
 class ImoTextItem;
@@ -57,31 +57,30 @@ class GmoBox;
 
 
 //---------------------------------------------------------------------------------------
-// BoxContentLayouter: base class for layouters for BoxContent derived objects
-class BoxContentLayouter : public Layouter
+// InlinesContainerLayouter: base class for layouters for BoxContent derived objects
+class InlinesContainerLayouter : public Layouter
 {
 protected:
     LibraryScope& m_libraryScope;
-    ImoBoxContent* m_pPara;
+    ImoInlinesContainer* m_pPara;
     std::list<Engrouter*> m_engrouters;
     bool m_fFirstLine;
     LUnits m_xLineStart;
-    bool m_fAddShapesToModel;
+
+    //bullets
+    LUnits m_firstLineIndent;
+    string m_firstLinePrefix;
 
 public:
-    BoxContentLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
+    InlinesContainerLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
                       LibraryScope& libraryScope, ImoStyles* pStyles,
                       bool fAddShapesToModel=true);
-    virtual ~BoxContentLayouter();
+    virtual ~InlinesContainerLayouter();
 
     //mandatory overrides
     void layout_in_box();
     void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
     void prepare_to_start_layout();
-
-    //virtual methods to be implemented by derived classes
-    virtual LUnits get_first_line_indent() = 0;
-    virtual string get_first_line_prefix() = 0;
 
     //other
     inline LineReferences& get_line_refs() { return m_lineRefs; }
@@ -93,6 +92,11 @@ protected:
     bool enough_space_in_box();
     LUnits add_engrouter_to_line();
     void add_engrouter_shape(Engrouter* pEngrouter, LUnits height);
+
+    //bullet points
+    void set_bullet_info_if_necessary();
+    LUnits get_first_line_indent() { return m_firstLineIndent; }
+    string get_first_line_prefix() { return m_firstLinePrefix; }
 
     //helper: engrouters traversing
     std::list<Engrouter*>::iterator m_itEngrouters;
@@ -121,39 +125,6 @@ protected:
     void initialize_line_references();
     void set_line_pos_and_width();
     void update_line_references(LineReferences& engr, LUnits shift, bool fUpdateText);
-
-};
-
-
-//---------------------------------------------------------------------------------------
-// ParagraphLayouter: layouts a paragraph
-class ParagraphLayouter : public BoxContentLayouter
-{
-public:
-    ParagraphLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
-                      LibraryScope& libraryScope, ImoStyles* pStyles);
-    virtual ~ParagraphLayouter() {}
-
-    //mandatory overrides
-    LUnits get_first_line_indent() { return 0.0f; }
-    string get_first_line_prefix() { return ""; }
-};
-
-
-//---------------------------------------------------------------------------------------
-// ListItemLayouter: layouts a list item
-class ListItemLayouter : public BoxContentLayouter
-{
-public:
-    ListItemLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
-                      LibraryScope& libraryScope, ImoStyles* pStyles);
-    virtual ~ListItemLayouter() {}
-
-    //mandatory overrides
-    LUnits get_first_line_indent();
-    string get_first_line_prefix();
-
-protected:
 
 };
 

@@ -27,7 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_content_layouter.h"
+#include "lomse_blocks_content_layouter.h"
 
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
@@ -35,7 +35,7 @@
 #include "lomse_sizers.h"
 #include "lomse_calligrapher.h"
 #include "lomse_shape_text.h"
-#include "lomse_box_content_layouter.h"
+#include "lomse_inlines_content_layouter.h"
 #include "lomse_score_player_ctrl.h"
 
 
@@ -47,8 +47,8 @@ namespace lomse
 //=======================================================================================
 ContentLayouter::ContentLayouter(ImoContentObj* pItem, Layouter* pParent,
                                  GraphicModel* pGModel, LibraryScope& libraryScope,
-                                 ImoStyles* pStyles)
-    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles)
+                                 ImoStyles* pStyles, bool fAddShapesToModel)
+    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles, fAddShapesToModel)
     , m_pContent( dynamic_cast<ImoContent*>(pItem) )
 {
 }
@@ -84,8 +84,8 @@ void ContentLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits wid
 //=======================================================================================
 MultiColumnLayouter::MultiColumnLayouter(ImoContentObj* pItem, Layouter* pParent,
                                  GraphicModel* pGModel, LibraryScope& libraryScope,
-                                 ImoStyles* pStyles)
-    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles)
+                                 ImoStyles* pStyles, bool fAddShapesToModel)
+    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles, fAddShapesToModel)
     , m_pMultiColumn( dynamic_cast<ImoMultiColumn*>(pItem) )
 {
 }
@@ -109,9 +109,10 @@ void MultiColumnLayouter::layout_in_box()
     UPoint curPos(m_pItemMainBox->get_content_left(), m_pItemMainBox->get_content_top());
 
     //create column layouters and assign position and width to each column
+    ImoContent* pWrapper = m_pMultiColumn->get_content();
     TreeNode<ImoObj>::children_iterator it;
     int iCol;
-    for (iCol=0, it = m_pMultiColumn->begin(); it != m_pMultiColumn->end(); ++it, ++iCol)
+    for (iCol=0, it = pWrapper->begin(); it != pWrapper->end(); ++it, ++iCol)
     {
         //create column layouter and prepare it to layout the column
         ImoContent* pContent = dynamic_cast<ImoContent*>( *it );
@@ -232,32 +233,19 @@ void MultiColumnLayouter::layout_column(Layouter* pColLayouter, GmoBox* pParentB
 // ListLayouter implementation
 //=======================================================================================
 ListLayouter::ListLayouter(ImoContentObj* pItem, Layouter* pParent,
-                                 GraphicModel* pGModel, LibraryScope& libraryScope,
-                                 ImoStyles* pStyles)
-    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles)
-    , m_pList( dynamic_cast<ImoList*>(pItem) )
+                           GraphicModel* pGModel, LibraryScope& libraryScope,
+                           ImoStyles* pStyles, bool fAddShapesToModel)
+    : BlocksContainerLayouter(pItem, pParent, pGModel, libraryScope, pStyles,
+                              fAddShapesToModel)
     , m_indent(1000.0f)        //1 cm
 {
-}
-
-//---------------------------------------------------------------------------------------
-void ListLayouter::layout_in_box()
-{
-    set_cursor_and_available_space();
-
-    TreeNode<ImoObj>::children_iterator it;
-    for (it = m_pList->begin(); it != m_pList->end(); ++it)
-    {
-        layout_item( static_cast<ImoContentObj*>( *it ), m_pItemMainBox );
-    }
-    set_layout_is_finished(true);
 }
 
 //---------------------------------------------------------------------------------------
 void ListLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
                                    LUnits height)
 {
-    m_pItemMainBox = LOMSE_NEW GmoBoxDocPageContent(m_pList);
+    m_pItemMainBox = LOMSE_NEW GmoBoxDocPageContent(m_pItem);
     pParentBox->add_child_box(m_pItemMainBox);
 
     m_pItemMainBox->set_origin(pos.x + m_indent, pos.y);
@@ -268,12 +256,73 @@ void ListLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
 
 
 //=======================================================================================
+// BlocksContainerLayouter implementation
+//=======================================================================================
+BlocksContainerLayouter::BlocksContainerLayouter(ImoContentObj* pImo, Layouter* pParent,
+                                   GraphicModel* pGModel, LibraryScope& libraryScope,
+                                   ImoStyles* pStyles, bool fAddShapesToModel)
+    : Layouter(pImo, pParent, pGModel, libraryScope, pStyles, fAddShapesToModel)
+{
+}
+
+//---------------------------------------------------------------------------------------
+void BlocksContainerLayouter::layout_in_box()
+{
+    set_cursor_and_available_space();
+
+    ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pItem);
+    ImoContent* pContent = pBlock->get_content();
+
+    TreeNode<ImoObj>::children_iterator it;
+    for (it = pContent->begin(); it != pContent->end(); ++it)
+    {
+        layout_item( dynamic_cast<ImoContentObj*>( *it ), m_pItemMainBox );
+    }
+    set_layout_is_finished(true);
+}
+
+//---------------------------------------------------------------------------------------
+void BlocksContainerLayouter::create_main_box(GmoBox* pParentBox, UPoint pos,
+                                              LUnits width, LUnits height)
+{
+    m_pItemMainBox = LOMSE_NEW GmoBoxDocPageContent(m_pItem);
+    pParentBox->add_child_box(m_pItemMainBox);
+
+    m_pItemMainBox->set_origin(pos.x, pos.y);
+    m_pItemMainBox->set_width(width);
+    m_pItemMainBox->set_height(height);
+}
+
+
+
+//=======================================================================================
+// ListItemLayouter implementation
+//=======================================================================================
+ListItemLayouter::ListItemLayouter(ImoContentObj* pImo, Layouter* pParent,
+                                   GraphicModel* pGModel, LibraryScope& libraryScope,
+                                   ImoStyles* pStyles, bool fAddShapesToModel)
+    : BlocksContainerLayouter(pImo, pParent, pGModel, libraryScope, pStyles,
+                              fAddShapesToModel)
+{
+}
+
+//---------------------------------------------------------------------------------------
+bool ListItemLayouter::is_first_content_item(ImoContentObj* pImo)
+{
+    ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pItem);
+    ImoContent* pContent = pBlock->get_content();
+    return (pImo == pContent->get_first_content_item());
+}
+
+
+
+//=======================================================================================
 // ScorePlayerLayouter implementation
 //=======================================================================================
 ScorePlayerLayouter::ScorePlayerLayouter(ImoContentObj* pItem, Layouter* pParent,
                                  GraphicModel* pGModel, LibraryScope& libraryScope,
                                  ImoStyles* pStyles)
-    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles)
+    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles, true)
     , m_pPlayer( dynamic_cast<ImoScorePlayer*>(pItem) )
 {
 }

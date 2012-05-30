@@ -55,6 +55,7 @@ protected:
     float m_rSpacingFactor;             //for proportional spacing of notes
     ESpacingMethod m_nSpacingMethod;    //fixed, proportional, etc.
     Tenths m_rSpacingValue;             //space for 'fixed' method
+    Tenths m_rUpperLegerLinesDisplacement;
     bool m_fDrawLeftBarline;            //draw left barline joining all system staves
 
 	std::vector<LUnits> m_lineSpace;    //spacing for each staff
@@ -86,6 +87,7 @@ public:
         return m_nSpacingMethod == k_spacing_proportional;
     }
     inline bool must_draw_left_barline() { return m_fDrawLeftBarline; }
+    inline Tenths get_upper_ledger_lines_displacement() { return m_rUpperLegerLinesDisplacement; }
 
     //spacing
     LUnits tenths_to_logical(Tenths value, int iInstr, int iStaff);

@@ -736,7 +736,7 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    void check_visible(ImoBoxContent* pCO)
+    void check_visible(ImoInlinesContainer* pCO)
     {
         string value = m_pParamToAnalyse->get_value();
         if (value == "visible")
@@ -794,11 +794,11 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    ImoInlineObj* analyse_inline_object()
+    ImoInlineLevelObj* analyse_inline_object()
     {
         // { <inlineWrapper> | <link> | <textItem> | <image> | <button> }
 
-        while( more_params_to_analyse() )
+        if(more_params_to_analyse())
         {
             m_pParamToAnalyse = get_param_to_analyse();
             ELdpElement type = m_pParamToAnalyse->get_type();
@@ -808,7 +808,7 @@ protected:
                 || type == k_link
                )
             {
-                return static_cast<ImoInlineObj*>(
+                return static_cast<ImoInlineLevelObj*>(
                     m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
             }
             else
@@ -833,14 +833,46 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    void analyse_inline_objects(ImoBoxContent* pParent)
+    void analyse_inline_objects(ImoInlinesContainer* pParent)
     {
         // <inlineObject>*
         while( more_params_to_analyse() )
         {
-            ImoInlineObj* pItem = analyse_inline_object();
+            ImoInlineLevelObj* pItem = analyse_inline_object();
             if (pItem)
                 pParent->add_item(pItem);
+
+            move_to_next_param();
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void analyse_inline_or_block_objects(ImoBlocksContainer* pParent)
+    {
+        // {<inlineObject> | <blockObject>}*
+        while (more_params_to_analyse())
+        {
+            m_pParamToAnalyse = get_param_to_analyse();
+            ELdpElement type = m_pParamToAnalyse->get_type();
+
+            if (
+               // inline: { <inlineWrapper> | <link> | <textItem> | <image> | <button> }
+                /*type == k_inlineWrapper
+                ||*/ type == k_txt
+                || type == k_image
+                || type == k_link
+               // block:  { <list> | <para> | <score> | <table> }
+                || type == k_itemizedlist
+                || type == k_orderedlist
+                || type == k_para
+                || type == k_table
+                || type == k_score
+               )
+            {
+                m_pAnalyser->analyse_node(m_pParamToAnalyse, pParent);
+            }
+            else
+                error_invalid_param();
 
             move_to_next_param();
         }
@@ -2726,7 +2758,7 @@ public:
         // <inlineObject>+
         while( more_params_to_analyse() )
         {
-            ImoInlineObj* pItem = analyse_inline_object();
+            ImoInlineLevelObj* pItem = analyse_inline_object();
             if (pItem)
                 pLink->add_item(pItem);
 
@@ -2779,7 +2811,7 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <listitem> = (listitem [<style>] <inlineObject>*)
+//@ <listitem> = (listitem [<style>] {<inlineObject> | <blockObject>}* )
 //@
 class ListItemAnalyser : public ElementAnalyser
 {
@@ -2796,8 +2828,8 @@ public:
         // [<style>]
         analyse_optional_style(pListItem);
 
-        // <inlineObject>+
-        analyse_inline_objects(pListItem);
+        // {<inlineObject> | <blockObject>}*
+        analyse_inline_or_block_objects(pListItem);
 
         add_to_model(pListItem);
     }
@@ -3884,9 +3916,9 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <score> = (score <vers>[<language>][<undoData>][<creationMode>][<defineStyle>*]
-//@                  [<title>*][<pageLayout>*][<systemLayout>*][<option>*]
-//@                  {<instrument> | <group>}* )
+//@ <score> = (score <vers>[<language>][<style>][<undoData>][<creationMode>]
+//@                  [<defineStyle>*][<title>*][<pageLayout>*][<systemLayout>*]
+//@                  [<option>*]{<instrument> | <group>}* )
 
 class ScoreAnalyser : public ElementAnalyser
 {
@@ -3911,6 +3943,9 @@ public:
 
         // [<language>]
         analyse_optional(k_language);
+
+        // [<style>]
+        analyse_optional_style(pScore);
 
         // [<undoData>]
         //TODO: Not implemented in LenMus. Postponed until need is confirmed
@@ -4461,7 +4496,8 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <tableCell> = (tableCell [<style>] [<rowspan>] [<colspan>] <inlineObject>* )
+//@ <tableCell> = (tableCell [<style>] [<rowspan>] [<colspan>] 
+//@                          {<inlineObject> | <blockObject>}* )
 //@ <rowspan> = (rowspan <num>)
 //@ <colspan> = (colspan <num>)
 //@
@@ -4495,8 +4531,8 @@ public:
             pImo->set_colspan( get_integer_value(1) );
         }
 
-        // <inlineObject>*
-        analyse_inline_objects(pImo);
+        // {<inlineObject> | <blockObject>}*
+        analyse_inline_or_block_objects(pImo);
 
         error_if_more_elements();
 

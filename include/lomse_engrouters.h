@@ -45,8 +45,8 @@ namespace lomse
 class ImoContentObj;
 class ImoControl;
 class ImoInlineWrapper;
-class ImoInlineObj;
-class ImoBoxContent;
+class ImoInlineLevelObj;
+class ImoInlinesContainer;
 class ImoBoxInline;
 class ImoStyles;
 class ImoTextItem;
@@ -232,7 +232,7 @@ public:
 class InlineWrapperEngrouter : public Engrouter
 {
 protected:
-    ImoInlineObj* m_pWrapper;
+    ImoInlineLevelObj* m_pWrapper;
     std::list<Engrouter*> m_engrouters;
 
 public:
@@ -323,8 +323,8 @@ public:
     EngroutersCreator(std::list<Engrouter*>& engrouters, LibraryScope& libraryScope);
     virtual ~EngroutersCreator();
 
-    void create_engrouters(ImoInlineObj* pImo);
-    void create_prefix_engrouter(ImoBoxContent* pBoxContent, const string& prefix);
+    void create_engrouters(ImoInlineLevelObj* pImo);
+    void create_prefix_engrouter(ImoInlinesContainer* pBoxContent, const string& prefix);
 
 protected:
     BoxEngrouter* create_wrapper_engrouterbox_for(ImoBoxInline* pImo);

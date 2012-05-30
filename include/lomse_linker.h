@@ -39,12 +39,14 @@ namespace lomse
 
 //forward declarations
 class Document;
+class ImoAnonymousBlock;
 class ImoAuxObj;
 class ImoBezierInfo;
+class ImoBlockLevelObj;
 class ImoContent;
 class ImoCursorInfo;
 class ImoFontStyleDto;
-class ImoInlineObj;
+class ImoInlineLevelObj;
 class ImoInstrGroup;
 class ImoInstrument;
 class ImoListItem;
@@ -94,7 +96,7 @@ protected:
     ImoObj* add_staff_info(ImoStaffInfo* pInfo);
     ImoObj* add_instrument(ImoInstrument* pInstrument);
     ImoObj* add_text(ImoScoreText* pText);
-    ImoObj* add_text_item(ImoTextItem* pText);
+    //ImoObj* add_text_item(ImoTextItem* pText);
     ImoObj* add_title(ImoScoreTitle* pTitle);
     ImoObj* add_style(ImoStyle* pStyle);
     ImoObj* add_staffobj(ImoStaffObj* pSO);
@@ -102,7 +104,9 @@ protected:
     ImoObj* add_relation(ImoRelObj* pRelObj);
     ImoObj* add_child(int parentType, ImoObj* pImo);
     ImoObj* add_font_style(ImoFontStyleDto* pDto);
-    ImoObj* add_inline_or_block_item(ImoInlineObj* pImo);
+    //ImoObj* add_inline_or_block_item(ImoInlineLevelObj* pImo);
+    ImoObj* add_inline_level_item(ImoInlineLevelObj* pImo);
+    ImoObj* add_block_level_item(ImoBlockLevelObj* pImo);
 
 };
 

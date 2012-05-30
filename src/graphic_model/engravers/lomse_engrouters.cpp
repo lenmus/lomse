@@ -58,9 +58,9 @@ EngroutersCreator::~EngroutersCreator()
 }
 
 //---------------------------------------------------------------------------------------
-void EngroutersCreator::create_engrouters(ImoInlineObj* pImo)
+void EngroutersCreator::create_engrouters(ImoInlineLevelObj* pImo)
 {
-    //factory method to create Cells and measure the ocupied space
+    //factory method to create engrouters and measure the ocupied space
 
     if (pImo->is_text_item())
     {
@@ -98,11 +98,12 @@ void EngroutersCreator::create_engrouters(ImoInlineObj* pImo)
         string msg = str( boost::format(
                             "[EngroutersCreator::create_engrouters] invalid object %d")
                             % pImo->get_obj_type() );
+        cout << "Throw: " << msg << endl;
         throw std::runtime_error(msg);
     }
 }
 //---------------------------------------------------------------------------------------
-void EngroutersCreator::create_prefix_engrouter(ImoBoxContent* pBoxContent,
+void EngroutersCreator::create_prefix_engrouter(ImoInlinesContainer* pBoxContent,
                                                 const string& prefix)
 {
     m_engrouters.push_back( LOMSE_NEW WordEngrouter(pBoxContent, m_libraryScope, prefix) );
@@ -117,7 +118,7 @@ void EngroutersCreator::create_and_measure_engrouters(ImoBoxInline* pImo,
     TreeNode<ImoObj>::children_iterator it;
     for (it = pImo->begin(); it != pImo->end(); ++it)
     {
-        creator.create_engrouters( dynamic_cast<ImoInlineObj*>(*it) );
+        creator.create_engrouters( dynamic_cast<ImoInlineLevelObj*>(*it) );
     }
 }
 
@@ -585,7 +586,7 @@ GmoObj* WordEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
 InlineWrapperEngrouter::InlineWrapperEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope)
     : Engrouter(pCreatorImo, libraryScope)
 {
-    m_pWrapper = dynamic_cast<ImoInlineObj*>( pCreatorImo );
+    m_pWrapper = dynamic_cast<ImoInlineLevelObj*>( pCreatorImo );
 }
 
 //---------------------------------------------------------------------------------------
@@ -596,8 +597,8 @@ GmoObj* InlineWrapperEngrouter::create_gm_object(UPoint pos, LineReferences& ref
 
     ////create shapes and add them to box
     //EngroutersCreator creator(m_engrouters, m_libraryScope);
-    //std::list<ImoInlineObj*>& items = m_pWrapper->get_items();
-    //std::list<ImoInlineObj*>::iterator it;
+    //std::list<ImoInlineLevelObj*>& items = m_pWrapper->get_items();
+    //std::list<ImoInlineLevelObj*>::iterator it;
     //for (it = items.begin(); it != items.end(); ++it)
     //    creator.create_engrouters(*it);
 
@@ -692,7 +693,7 @@ GmoObj* InlineBoxEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
     EngroutersCreator creator(m_engrouters, m_libraryScope);
     TreeNode<ImoObj>::children_iterator it;
     for (it = m_pBox->begin(); it != m_pBox->end(); ++it)
-        creator.create_engrouters( dynamic_cast<ImoInlineObj*>(*it) );
+        creator.create_engrouters( dynamic_cast<ImoInlineLevelObj*>(*it) );
 
     //add shapes to box
     LUnits boxHeight = add_engrouters_to_box(pBox, refs);

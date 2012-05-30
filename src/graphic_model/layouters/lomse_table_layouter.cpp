@@ -42,7 +42,7 @@ namespace lomse
 TableLayouter::TableLayouter(ImoContentObj* pItem, Layouter* pParent,
                              GraphicModel* pGModel, LibraryScope& libraryScope,
                              ImoStyles* pStyles)
-    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles)
+    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles, true)
     , m_libraryScope(libraryScope)
     , m_pTable( static_cast<ImoTable*>(pItem) )
     , m_headLayouter(NULL)
@@ -166,9 +166,10 @@ void TableLayouter::determine_num_columns()
         for (itRow = pHead->begin(); itRow != pHead->end(); ++itRow)
         {
             ImoTableRow* pRow = static_cast<ImoTableRow*>( *itRow );
+            ImoContent* pWrapper = pRow->get_content();
             int numCells = 0;
             TreeNode<ImoObj>::children_iterator itCell;
-            for (itCell = pRow->begin(); itCell != pRow->end(); ++itCell)
+            for (itCell = pWrapper->begin(); itCell != pWrapper->end(); ++itCell)
             {
                 ImoTableCell* pCell = static_cast<ImoTableCell*>( *itCell );
                 numCells += pCell->get_colspan();
@@ -181,9 +182,10 @@ void TableLayouter::determine_num_columns()
     for (itRow = pBody->begin(); itRow != pBody->end(); ++itRow)
     {
         ImoTableRow* pRow = static_cast<ImoTableRow*>( *itRow );
+        ImoContent* pWrapper = pRow->get_content();
         int numCells = 0;
         TreeNode<ImoObj>::children_iterator itCell;
-        for (itCell = pRow->begin(); itCell != pRow->end(); ++itCell)
+        for (itCell = pWrapper->begin(); itCell != pWrapper->end(); ++itCell)
         {
             ImoTableCell* pCell = static_cast<ImoTableCell*>( *itCell );
             numCells += pCell->get_colspan();
@@ -270,7 +272,7 @@ SectionLayouter::SectionLayouter(ImoContentObj* pItem, Layouter* pParent,
                                  int numCols, LUnits tableWidth,
                                  vector<LUnits>& columnsWidth)
     : Layouter(pItem, pParent, pParent->get_graphic_model(),
-               pParent->get_library_scope(), pParent->get_styles() )
+               pParent->get_library_scope(), pParent->get_styles(), true )
     , m_pTable( static_cast<ImoTable*>(pItem) )
     , m_pSection(pSection)
     , m_columnsWidth(columnsWidth)
@@ -332,9 +334,10 @@ void SectionLayouter::create_cell_layouters()
 
         ImoTableRow* pRow = static_cast<ImoTableRow*>( *itRow );
         int iCell = iRow*m_numTableColumns;
+        ImoContent* pWrapper = pRow->get_content();
         TreeNode<ImoObj>::children_iterator itCell;
         int iCol = 0;
-        for (itCell = pRow->begin(); itCell != pRow->end(); ++itCell, ++iCell, ++iCol)
+        for (itCell = pWrapper->begin(); itCell != pWrapper->end(); ++itCell, ++iCell, ++iCol)
         {
             while( iCell < numCells && !freeCell[iCell])
                 ++iCell, ++iCol;
@@ -417,8 +420,8 @@ void SectionLayouter::prepare_row()
 TableCellLayouter::TableCellLayouter(ImoContentObj* pItem, Layouter* pParent,
                                      GraphicModel* pGModel, LibraryScope& libraryScope,
                                      ImoStyles* pStyles)
-    : BoxContentLayouter(pItem, pParent, pGModel, libraryScope, pStyles,
-                         false /*do not add shapes to model*/)
+    : BlocksContainerLayouter(pItem, pParent, pGModel, libraryScope, pStyles,
+                              false /*do not add shapes to model*/)
     , m_libraryScope(libraryScope)
     , m_pCell( static_cast<ImoTableCell*>(pItem) )
     , m_width(0.0f)
@@ -466,7 +469,7 @@ TableRowLayouter::TableRowLayouter(ImoContentObj* pItem, Layouter* pParent,
                                    vector<LUnits>& columnsWidth,
                                    int iFirstRow, int numRows, int numColumns)
     : Layouter(pItem, pParent, pParent->get_graphic_model(),
-               pParent->get_library_scope(), pParent->get_styles() )
+               pParent->get_library_scope(), pParent->get_styles(), true )
     , m_pTable( static_cast<ImoTable*>(pItem) )
     , m_cellLayouters(cells)
     , m_columnsWidth(columnsWidth)

@@ -345,10 +345,8 @@ LUnits NoteEngraver::get_pitch_shift()
         if (m_nPosOnStaff > 11)
         {
             //leger lines at top
-            //TODO
-//            lmTenths nDsplz = (lmTenths) m_pVStaff->GetOptionLong(_T("Staff.UpperLegerLines.Displacement"));
-//            lmLUnits uyDsplz = tenths_to_logical(nDsplz);
-            return uShift ; //+ uyDsplz;
+            Tenths dsplz = m_pMeter->get_upper_ledger_lines_displacement();
+            return uShift + tenths_to_logical(dsplz);
         }
         else
         {
@@ -415,12 +413,14 @@ void NoteEngraver::add_leger_lines_if_necessary()
     LUnits lineThickness = tenths_to_logical(LOMSE_STEM_THICKNESS);
     LUnits lineSpacing = tenths_to_logical(10.0f);
 
-    //TODO
-    //ImoOptionInfo* pOpt = get_score(0)->get_option("Staff.UpperLegerLines.Displacement");
-    //Tenths dsplz = Tenths( pOpt->get_long_value() );
+    //leger lines at top
+    Tenths dsplz = 0.0f;
+    if (m_nPosOnStaff > 11)
+        dsplz = m_pMeter->get_upper_ledger_lines_displacement();
 
     //AWARE: yStart is relative to notehead top
-    LUnits yStart =  m_uyStaffTopLine - m_pNoteShape->get_notehead_top();   // - tenths_to_logical(dsplz);
+    LUnits yStart =  m_uyStaffTopLine - m_pNoteShape->get_notehead_top()
+                     - tenths_to_logical(dsplz);
 
     m_pNoteShape->add_leger_lines_info(m_nPosOnStaff, yStart, lineOutgoing,
                                        lineThickness, lineSpacing);

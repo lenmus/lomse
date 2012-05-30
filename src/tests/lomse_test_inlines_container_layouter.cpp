@@ -32,7 +32,7 @@
 #include "lomse_build_options.h"
 
 //classes related to these tests
-#include "lomse_box_content_layouter.h"
+#include "lomse_inlines_content_layouter.h"
 #include "lomse_engrouters.h"
 #include "lomse_injectors.h"
 #include "lomse_gm_basic.h"
@@ -51,42 +51,31 @@ using namespace lomse;
 
 
 //=======================================================================================
-// BoxContentLayouter tests
+// InlinesContainerLayouter tests
 //=======================================================================================
 
 //---------------------------------------------------------------------------------------
 // helper, access to protected members
-class MyBoxContentLayouter : public BoxContentLayouter
+class MyBoxContentLayouter : public InlinesContainerLayouter
 {
-protected:
-    LUnits m_firstLineIndent;
-    string m_prefix;
-
 public:
     MyBoxContentLayouter(ImoContentObj* pImo, GraphicModel* pGModel,
                         LibraryScope& libraryScope, ImoStyles* pStyles)
-        : BoxContentLayouter(pImo, NULL, pGModel, libraryScope, pStyles)
-        , m_firstLineIndent(0.0f)
-        , m_prefix("")
+        : InlinesContainerLayouter(pImo, NULL, pGModel, libraryScope, pStyles)
     {
     }
     MyBoxContentLayouter(LibraryScope& libraryScope, LineReferences& refs)
-        : BoxContentLayouter(NULL, NULL, NULL, libraryScope, NULL)
+        : InlinesContainerLayouter(NULL, NULL, NULL, libraryScope, NULL)
     {
         m_lineRefs = refs;
     }
     virtual ~MyBoxContentLayouter() {}
-
-    //mandatory overrides
-    LUnits get_first_line_indent() { return m_firstLineIndent; }
-    string get_first_line_prefix() { return m_prefix; }
 
     GmoBox* my_get_main_box() { return m_pItemMainBox; }
     UPoint my_get_cursor() { return m_pageCursor; }
 
     bool my_is_first_line() { return is_first_line(); }
     void my_set_first_line_indent(LUnits value) { m_firstLineIndent = value; }
-    void my_set_first_line_prefix(const string& prefix) { m_prefix = prefix; }
     void my_page_initializations(GmoBox* pMainBox) { page_initializations(pMainBox); }
     void my_create_engrouters() { create_engrouters(); }
     void my_add_line() { add_line(); }

@@ -60,6 +60,7 @@ ScoreMeter::ScoreMeter(int numInstruments, int numStaves, LUnits lineSpacing,
     : m_rSpacingFactor(rSpacingFactor)
     , m_nSpacingMethod(nSpacingMethod)
     , m_rSpacingValue(rSpacingValue)
+    , m_rUpperLegerLinesDisplacement(0.0f)
     , m_fDrawLeftBarline(fDrawLeftBarline)
     , m_tupletsStyle(NULL)
 {
@@ -90,6 +91,9 @@ void ScoreMeter::get_options(ImoScore* pScore)
 
     pOpt = pScore->get_option("Staff.DrawLeftBarline");
     m_fDrawLeftBarline = pOpt->get_bool_value();
+
+    pOpt = pScore->get_option("Staff.UpperLegerLines.Displacement");
+    m_rUpperLegerLinesDisplacement = static_cast<Tenths>( pOpt->get_long_value() );
 }
 
 //---------------------------------------------------------------------------------------

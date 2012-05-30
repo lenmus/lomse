@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -67,7 +67,8 @@ protected:
 
 public:
     ContentLayouter(ImoContentObj* pItem, Layouter* pParent,
-                    GraphicModel* pGModel, LibraryScope& libraryScope, ImoStyles* pStyles);
+                    GraphicModel* pGModel, LibraryScope& libraryScope,
+                    ImoStyles* pStyles, bool fAddShapesToModel=true);
     virtual ~ContentLayouter() {}
 
     //implementation of Layouter virtual methods
@@ -90,7 +91,7 @@ protected:
 public:
     MultiColumnLayouter(ImoContentObj* pItem, Layouter* pParent,
                         GraphicModel* pGModel, LibraryScope& libraryScope,
-                        ImoStyles* pStyles);
+                        ImoStyles* pStyles, bool fAddShapesToModel=true);
     virtual ~MultiColumnLayouter();
 
     //implementation of Layouter virtual methods
@@ -121,22 +122,52 @@ protected:
 //
 //};
 
+//---------------------------------------------------------------------------------------
+// BlocksContainerLayouter: layouts a blocks container item
+class BlocksContainerLayouter : public Layouter
+{
+public:
+    BlocksContainerLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
+                            LibraryScope& libraryScope, ImoStyles* pStyles,
+                            bool fAddShapesToModel=true);
+    virtual ~BlocksContainerLayouter() {}
+
+    //generic implementation of Layouter virtual methods
+    virtual void layout_in_box();
+    virtual void create_main_box(GmoBox* pParentBox, UPoint pos,
+                                 LUnits width, LUnits height);
+};
+
 //----------------------------------------------------------------------------------
 // ListLayouter: layout algorithm for a collection of listitems.
-class ListLayouter : public Layouter
+class ListLayouter : public BlocksContainerLayouter
 {
 protected:
-    ImoList* m_pList;
+    //ImoList* m_pList;
     LUnits m_indent;
 
 public:
-    ListLayouter(ImoContentObj* pItem, Layouter* pParent,
-                 GraphicModel* pGModel, LibraryScope& libraryScope, ImoStyles* pStyles);
+    ListLayouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGModel,
+                 LibraryScope& libraryScope, ImoStyles* pStyles,
+                 bool fAddShapesToModel=true);
     virtual ~ListLayouter() {}
 
-    //implementation of Layouter virtual methods
-    void layout_in_box();
+    //overrides
+    //void layout_in_box();
     void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
+};
+
+//---------------------------------------------------------------------------------------
+// ListItemLayouter: layouts a list item
+class ListItemLayouter : public BlocksContainerLayouter
+{
+public:
+    ListItemLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
+                     LibraryScope& libraryScope, ImoStyles* pStyles,
+                     bool fAddShapesToModel=true);
+    virtual ~ListItemLayouter() {}
+
+    bool is_first_content_item(ImoContentObj* pImo);
 };
 
 //----------------------------------------------------------------------------------
@@ -148,7 +179,7 @@ protected:
 
 public:
     ScorePlayerLayouter(ImoContentObj* pItem, Layouter* pParent,
-                        GraphicModel* pGModel, LibraryScope& libraryScope, 
+                        GraphicModel* pGModel, LibraryScope& libraryScope,
                         ImoStyles* pStyles);
     virtual ~ScorePlayerLayouter() {}
 
