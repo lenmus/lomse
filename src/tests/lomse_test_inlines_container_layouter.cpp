@@ -32,7 +32,7 @@
 #include "lomse_build_options.h"
 
 //classes related to these tests
-#include "lomse_inlines_content_layouter.h"
+#include "lomse_inlines_container_layouter.h"
 #include "lomse_engrouters.h"
 #include "lomse_injectors.h"
 #include "lomse_gm_basic.h"

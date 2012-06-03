@@ -31,9 +31,9 @@
 
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
-#include "lomse_blocks_content_layouter.h"
+#include "lomse_blocks_container_layouter.h"
 #include "lomse_score_layouter.h"
-#include "lomse_inlines_content_layouter.h"
+#include "lomse_inlines_container_layouter.h"
 #include "lomse_table_layouter.h"
 
 namespace lomse

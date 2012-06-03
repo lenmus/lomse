@@ -34,7 +34,7 @@
 #include "lomse_injectors.h"
 #include "lomse_drawer.h"
 #include "lomse_layouter.h"
-#include "lomse_blocks_content_layouter.h"
+#include "lomse_blocks_container_layouter.h"
 
 // other
 #include <sstream>

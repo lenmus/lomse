@@ -27,7 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_blocks_content_layouter.h"
+#include "lomse_blocks_container_layouter.h"
 
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
@@ -35,7 +35,7 @@
 #include "lomse_sizers.h"
 #include "lomse_calligrapher.h"
 #include "lomse_shape_text.h"
-#include "lomse_inlines_content_layouter.h"
+#include "lomse_inlines_container_layouter.h"
 #include "lomse_score_player_ctrl.h"
 
 
