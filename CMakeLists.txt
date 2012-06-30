@@ -638,6 +638,8 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_linker.cpp
         ${SRC_DIR}/tests/lomse_test_list_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_lmd_analyser.cpp
+        ${SRC_DIR}/tests/lomse_test_lmd_compiler.cpp
+        ${SRC_DIR}/tests/lomse_test_lmd_parser.cpp
         ${SRC_DIR}/tests/lomse_test_midi_table.cpp
         ${SRC_DIR}/tests/lomse_test_model_builder.cpp
         ${SRC_DIR}/tests/lomse_test_multicolumn_layouter.cpp

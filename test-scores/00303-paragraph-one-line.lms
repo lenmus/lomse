@@ -1,0 +1,32 @@
+(lenmusdoc (vers 0.0) 
+    (styles 
+        (defineStyle "content" (font "Liberation serif" 12pt bold)(color #000000))
+        (defineStyle "heading-1" (font "Liberation serif" 16pt bold)(color #000000))
+        (defineStyle "heading-2" (font "Liberation serif" 14pt bold)(color #000000))
+        (defineStyle "para" (margin-bottom 1))
+        (defineStyle "normal" (font "Liberation serif" 12pt normal)(color #000000))
+        (defineStyle "sans" (font "Tahoma" 12pt normal)(color #000000))
+        (defineStyle "courier" (font "Courier New" 12pt normal)(color #000000))
+        (defineStyle "cursiva" (font "Monotype Corsiva" 12pt normal)(color #000000))
+        (defineStyle "normal emphasis" (font "Liberation serif" 12pt bold)(color #000000))
+        (defineStyle "normal italics" (font "Liberation serif" 12pt italic)(color #000000))
+    )
+    
+    (content
+        (para (style "para")
+            (txt (style "normal") "xIdentify the following interval: xABCMJ")
+        )
+        (para (txt ""))
+        (para 
+            (txt (style "sans") "xIdentify the following interval: xABCMJ")
+        )
+        (para (txt ""))
+        (para 
+            (txt (style "courier") "xIdentify the following interval: xABCMJ")
+        )
+        (para (txt ""))
+        (para 
+            (txt (style "cursiva") "xIdentify the following interval: xABCMJ")
+        )
+
+))
