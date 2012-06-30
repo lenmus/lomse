@@ -918,6 +918,7 @@ SUITE(TreeTest)
         delete a;
         delete b;
         delete c;
+        delete d;
         delete z;
     }
 

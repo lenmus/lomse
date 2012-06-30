@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -34,8 +34,8 @@
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_document.h"
-#include "lomse_parser.h"
-#include "lomse_compiler.h"
+#include "lomse_ldp_parser.h"
+#include "lomse_ldp_compiler.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_events.h"
@@ -46,15 +46,15 @@ using namespace std;
 using namespace lomse;
 
 
-//helper, to get last id
-class TestDocument : public Document
-{
-public:
-    TestDocument(LibraryScope& libraryScope, ostream& reporter=cout)
-        : Document(libraryScope, reporter) {}
-
-        long test_last_id() { return m_pIdAssigner->get_last_id(); }
-};
+////helper, to get last id
+//class TestDocument : public Document
+//{
+//public:
+//    TestDocument(LibraryScope& libraryScope, ostream& reporter=cout)
+//        : Document(libraryScope, reporter) {}
+//
+//        long test_last_id() { return m_pIdAssigner->get_last_id(); }
+//};
 
 
 
@@ -105,6 +105,16 @@ SUITE(DocumentTest)
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData)))))" );
     }
 
+    TEST_FIXTURE(DocumentTestFixture, DocumentFromFile_lmd)
+    {
+        Document doc(m_libraryScope);
+        doc.from_file(m_scores_path + "30001-paragraph.lmd", Document::k_format_lmd);
+        ImoDocument* pImoDoc = doc.get_imodoc();
+        CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( doc.is_dirty() == true );
+    }
+
     TEST_FIXTURE(DocumentTestFixture, DocumentFromString)
     {
         Document doc(m_libraryScope);
@@ -117,6 +127,33 @@ SUITE(DocumentTest)
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
 //            "(instrument (musicData (n c4 q))))))" );
+    }
+
+    TEST_FIXTURE(DocumentTestFixture, DocumentFromString_lmd)
+    {
+        Document doc(m_libraryScope);
+        string src =
+            "<lenmusdoc vers='0.0'>"
+                "<styles>"
+                    "<defineStyle><name>Credits</name><color>#00fe0f7f</color></defineStyle>"
+                "</styles>"
+                "<content><para style='Credits'>Hello world!</para></content>"
+            "</lenmusdoc>";
+        doc.from_string(src, Document::k_format_lmd);
+        ImoDocument* pImoDoc = doc.get_imodoc();
+        CHECK( pImoDoc != NULL );
+        CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( doc.is_dirty() == true );
+
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
+        CHECK( pPara != NULL );
+        ImoStyle* pStyle = pPara->get_style();
+        CHECK( pStyle != NULL );
+        CHECK( pStyle->get_name() == "Credits" );
+        CHECK( pPara->get_num_items() == 1 );
+        ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
+        CHECK( pItem->get_text() == "Hello world!" );
     }
 
     TEST_FIXTURE(DocumentTestFixture, DocumentFromInput)
@@ -144,6 +181,7 @@ SUITE(DocumentTest)
         catch(exception& e)
         {
             //cout << e.what() << endl;
+            e.what();
             fOk = true;
         }
         CHECK( fOk );
@@ -180,6 +218,7 @@ SUITE(DocumentTest)
         catch(exception& e)
         {
             //cout << e.what() << endl;
+            e.what();
             fOk = true;
         }
         CHECK( fOk );

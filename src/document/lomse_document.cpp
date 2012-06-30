@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -30,9 +30,10 @@
 #include "lomse_document.h"
 
 #include <sstream>
-#include "lomse_parser.h"
-#include "lomse_analyser.h"
-#include "lomse_compiler.h"
+#include "lomse_ldp_parser.h"
+#include "lomse_ldp_analyser.h"
+#include "lomse_ldp_compiler.h"
+#include "lomse_lmd_compiler.h"
 #include "lomse_injectors.h"
 #include "lomse_id_assigner.h"
 #include "lomse_internal_model.h"
@@ -40,6 +41,7 @@
 #include "lomse_model_builder.h"
 #include "lomse_im_factory.h"
 #include "lomse_events.h"
+#include "lomse_ldp_elements.h"
 
 using namespace std;
 
@@ -57,8 +59,8 @@ Document::Document(LibraryScope& libraryScope, ostream& reporter)
     , m_libraryScope(libraryScope)
     , m_reporter(reporter)
     , m_docScope(reporter)
-    , m_pCompiler(NULL)
-    , m_pIdAssigner(NULL)
+    //, m_pCompiler(NULL)
+    //, m_pIdAssigner(NULL)
     , m_pIModel(NULL)
     , m_pImoDoc(NULL)
     , m_flags(k_dirty)
@@ -69,13 +71,8 @@ Document::Document(LibraryScope& libraryScope, ostream& reporter)
 //---------------------------------------------------------------------------------------
 Document::~Document()
 {
-//    if (m_pIModel)
-//    {
-//        ImoObj* pRoot = m_pIModel->get_root();
-//        delete pRoot;
-//    }
     delete m_pIModel;
-    delete m_pCompiler;
+    //delete m_pCompiler;
     delete_observers();
 }
 
@@ -85,11 +82,6 @@ void Document::initialize()
     if (m_pImoDoc)
         throw std::runtime_error(
             "[Document::create] Attempting to create already created document");
-
-    delete m_pCompiler;
-    m_pCompiler  = Injector::inject_LdpCompiler(m_libraryScope, this);
-    delete m_pIdAssigner;
-    m_pIdAssigner = m_docScope.id_assigner();
 
     m_flags = k_dirty;
 }
@@ -102,21 +94,29 @@ void Document::set_imo_doc(ImoDocument* pImoDoc)
 }
 
 //---------------------------------------------------------------------------------------
-int Document::from_file(const std::string& filename)
+int Document::from_file(const std::string& filename, int format)
 {
     initialize();
-    m_pIModel = m_pCompiler->compile_file(filename);
+    Compiler* pCompiler = get_compiler_for_format(format);
+    //m_pIdAssigner = m_docScope.id_assigner();
+    m_pIModel = pCompiler->compile_file(filename);
     m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
-    return m_pCompiler->get_num_errors();
+    int numErrors = pCompiler->get_num_errors();
+    delete pCompiler;
+    return numErrors;
 }
 
 //---------------------------------------------------------------------------------------
-int Document::from_string(const std::string& source)
+int Document::from_string(const std::string& source, int format)
 {
     initialize();
-    m_pIModel = m_pCompiler->compile_string(source);
+    Compiler* pCompiler = get_compiler_for_format(format);
+    //m_pIdAssigner = m_docScope.id_assigner();
+    m_pIModel = pCompiler->compile_string(source);
     m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
-    return m_pCompiler->get_num_errors();
+    int numErrors = pCompiler->get_num_errors();
+    delete pCompiler;
+    return numErrors;
 }
 
 //---------------------------------------------------------------------------------------
@@ -125,17 +125,19 @@ int Document::from_input(LdpReader& reader)
     initialize();
     try
     {
-        m_pIModel = m_pCompiler->compile_input(reader);
+        LdpCompiler* pCompiler  = Injector::inject_LdpCompiler(m_libraryScope, this);
+        //m_pIdAssigner = m_docScope.id_assigner();
+        m_pIModel = pCompiler->compile_input(reader);
         m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
-        return m_pCompiler->get_num_errors();
+        int numErrors = pCompiler->get_num_errors();
+        delete pCompiler;
+        return numErrors;
     }
     catch (...)
     {
         //this avoids programs crashes when a document is malformed but
         //will produce memory lekeages
         m_pIModel = NULL;
-        m_pCompiler = NULL;
-        m_pIdAssigner = NULL;
         create_empty();
         return 0;
     }
@@ -145,16 +147,22 @@ int Document::from_input(LdpReader& reader)
 void Document::create_empty()
 {
     initialize();
-    m_pIModel = m_pCompiler->create_empty();
+    LdpCompiler* pCompiler  = Injector::inject_LdpCompiler(m_libraryScope, this);
+    //m_pIdAssigner = m_docScope.id_assigner();
+    m_pIModel = pCompiler->create_empty();
     m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
+    delete pCompiler;
 }
 
 //---------------------------------------------------------------------------------------
 void Document::create_with_empty_score()
 {
     initialize();
-    m_pIModel = m_pCompiler->create_with_empty_score();
+    LdpCompiler* pCompiler  = Injector::inject_LdpCompiler(m_libraryScope, this);
+    //m_pIdAssigner = m_docScope.id_assigner();
+    m_pIModel = pCompiler->create_with_empty_score();
     m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
+    delete pCompiler;
 }
 
 //---------------------------------------------------------------------------------------
@@ -172,6 +180,23 @@ std::string Document::to_string()
     return exporter.get_source(m_pImoDoc);
 }
 
+//---------------------------------------------------------------------------------------
+Compiler* Document::get_compiler_for_format(int format)
+{
+    switch(format)
+    {
+        case k_format_ldp: 
+            return Injector::inject_LdpCompiler(m_libraryScope, this);
+
+        case k_format_lmd:
+            return Injector::inject_LmdCompiler(m_libraryScope, this);
+
+        default:
+            throw std::runtime_error(
+                "[Document::from_file] Invalid identifier for file format");
+    }
+    return NULL;
+}
 
 //ImDocument* Document::get_root()
 //{
@@ -225,8 +250,9 @@ std::string Document::to_string()
 ImoObj* Document::create_object(const string& source)
 {
     LdpParser parser(m_reporter, m_libraryScope.ldp_factory());
-    SpLdpTree tree( parser.parse_text(source) );
-    Analyser a(m_reporter, m_libraryScope, this);
+    parser.parse_text(source);
+    LdpTree* tree = parser.get_ldp_tree();
+    LdpAnalyser a(m_reporter, m_libraryScope, this);
     ImoObj* pImo = a.analyse_tree_and_get_object(tree);
     delete tree->get_root();
     return pImo;
@@ -237,8 +263,9 @@ void Document::add_staff_objects(const string& source, ImoMusicData* pMD)
 {
     string data = "(musicData " + source + ")";
     LdpParser parser(m_reporter, m_libraryScope.ldp_factory());
-    SpLdpTree tree( parser.parse_text(data) );
-    Analyser a(m_reporter, m_libraryScope, this);
+    parser.parse_text(data);
+    LdpTree* tree = parser.get_ldp_tree();
+    LdpAnalyser a(m_reporter, m_libraryScope, this);
     InternalModel* pIModel = a.analyse_tree(tree, "string:");
     ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
     ImoObj::children_iterator it = pMusic->begin();

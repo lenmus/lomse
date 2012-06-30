@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -48,8 +48,8 @@ namespace lomse
 //forward declarations
 class DocCommand;
 class DocCommandExecuter;
-class LdpCompiler;
-class IdAssigner;
+class Compiler;
+//class IdAssigner;
 class Interactor;
 class InternalModel;
 class ImoDocument;
@@ -86,8 +86,8 @@ protected:
     LibraryScope&   m_libraryScope;
     ostream&        m_reporter;
     DocumentScope   m_docScope;
-    LdpCompiler*    m_pCompiler;
-    IdAssigner*     m_pIdAssigner;
+    //LdpCompiler*    m_pCompiler;
+    //IdAssigner*     m_pIdAssigner;
     InternalModel*  m_pIModel;
     ImoDocument*    m_pImoDoc;
     unsigned int    m_flags;
@@ -97,6 +97,7 @@ protected:
 
 protected:
     friend class LenmusdocAnalyser;
+    friend class LenmusdocLmdAnalyser;
     void set_imo_doc(ImoDocument* pImoDoc);
 
 public:
@@ -108,12 +109,19 @@ public:
         k_dirty             = 0x0001,   //dirty: modified since last "clear_dirty()" ==> need to rebuild GModel
     };
 
+    //supported file formats
+    enum {
+        k_format_ldp = 0,   //Lenguaje De Partituras (LDP, LISP like syntax)
+        k_format_lmd,       //LenMus Document (LMD, XML syntax)
+        k_format_mxl,       //MusicXML 
+    };
+
     //scope access
     inline DocumentScope& get_scope() { return m_docScope; }
 
     //creation
-    int from_file(const std::string& filename);
-    int from_string(const std::string& source);
+    int from_file(const std::string& filename, int format=k_format_ldp);
+    int from_string(const std::string& source, int format=k_format_ldp);
     int from_input(LdpReader& reader);
     void create_empty();
     void create_with_empty_score();
@@ -197,6 +205,7 @@ public:
 
 protected:
     void initialize();
+    Compiler* get_compiler_for_format(int format);
 
     friend class ImFactory;
     inline long new_id() { return ++m_idCounter; }

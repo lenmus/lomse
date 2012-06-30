@@ -37,7 +37,7 @@
 #include "lomse_injectors.h"
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
-#include "lomse_analyser.h"
+#include "lomse_ldp_analyser.h"
 #include "lomse_document.h"
 #include "lomse_im_factory.h"
 #include "lomse_calligrapher.h"

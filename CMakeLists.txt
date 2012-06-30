@@ -265,9 +265,11 @@ endif()
 # include directories to be installed
 set( INCLUDES_LOMSE  ${ROOT_DIR}/include )
 set( INCLUDES_AGG  ${ROOT_DIR}/src/agg/include )
+set( INCLUDES_RAPIDXML  ${ROOT_DIR}/include/rapidxml )
 include_directories(
     ${INCLUDES_LOMSE}
     ${INCLUDES_AGG}
+    ${INCLUDES_RAPIDXML}
     ${ROOT_DIR}/src/agg/font_freetype
     ${ROOT_DIR}/packages/utfcpp
     ${ROOT_DIR}/packages/minizip
@@ -460,8 +462,8 @@ set(MVC_FILES
 )
 
 set(PARSER_FILES
-    ${SRC_DIR}/parser/lomse_analyser.cpp
-    ${SRC_DIR}/parser/lomse_compiler.cpp
+    ${SRC_DIR}/parser/lomse_ldp_analyser.cpp
+    ${SRC_DIR}/parser/lomse_ldp_compiler.cpp
     ${SRC_DIR}/parser/lomse_ldp_elements.cpp
     ${SRC_DIR}/parser/lomse_ldp_factory.cpp
     ${SRC_DIR}/parser/lomse_linker.cpp
@@ -470,6 +472,11 @@ set(PARSER_FILES
     ${SRC_DIR}/parser/lomse_reader.cpp
     ${SRC_DIR}/parser/lomse_staffobjs_table.cpp
     ${SRC_DIR}/parser/lomse_tokenizer.cpp
+)
+
+set(LMD_FILES
+    ${SRC_DIR}/xml/lomse_lmd_analyser.cpp
+    ${SRC_DIR}/xml/lomse_lmd_parser.cpp
 )
 
 set(RENDER_FILES
@@ -508,7 +515,7 @@ set(ALL_SOURCES
     ${AGG_FILES} ${DOCUMENT_FILES} ${EXPORTERS_FILES} ${FILE_SYSTEM_FILES}
     ${GRAPHIC_MODEL_FILES} ${GUI_CONTROLS_FILES} ${INTERNAL_MODEL_FILES} 
     ${MODULE_FILES} ${MVC_FILES}
-    ${PARSER_FILES} ${RENDER_FILES} ${SCORE_FILES} 
+    ${PARSER_FILES} ${LMD_FILES} ${RENDER_FILES} ${SCORE_FILES} 
     ${SOUND_FILES} ${PLATFORM_FILES} ${PACKAGES_FILES}
 )
 
@@ -524,6 +531,7 @@ source_group( "internal_model"  FILES ${INTERNAL_MODEL_FILES} )
 source_group( "module"          FILES ${MODULE_FILES} )
 source_group( "mvc"             FILES ${MVC_FILES} )
 source_group( "parser"          FILES ${PARSER_FILES} )
+source_group( "parser/lmd"      FILES ${LMD_FILES} )
 source_group( "render"          FILES ${RENDER_FILES} )
 source_group( "score"           FILES ${SCORE_FILES} )
 source_group( "sound"           FILES ${SOUND_FILES} )
@@ -599,13 +607,11 @@ endif()
 
 # source files to compile
 add_executable( ${TESTLIB} 
-        ${SRC_DIR}/tests/lomse_test_analyser.cpp
         ${SRC_DIR}/tests/lomse_test_barline_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_beam_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_chord_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_column_breaker.cpp
         ${SRC_DIR}/tests/lomse_test_column_layouter.cpp
-        ${SRC_DIR}/tests/lomse_test_compiler.cpp
         ${SRC_DIR}/tests/lomse_test_document.cpp
         ${SRC_DIR}/tests/lomse_test_document_iterator.cpp
         ${SRC_DIR}/tests/lomse_test_document_layouter.cpp
@@ -619,16 +625,19 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_inlines_container_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_interactor.cpp
         ${SRC_DIR}/tests/lomse_test_internal_model.cpp
+        ${SRC_DIR}/tests/lomse_test_ldp_analyser.cpp
+        ${SRC_DIR}/tests/lomse_test_ldp_compiler.cpp
         ${SRC_DIR}/tests/lomse_test_ldp_exporter.cpp
+        ${SRC_DIR}/tests/lomse_test_ldp_parser.cpp
         ${SRC_DIR}/tests/lomse_test_lines_breaker.cpp
         ${SRC_DIR}/tests/lomse_test_linkable.cpp
         ${SRC_DIR}/tests/lomse_test_linker.cpp
         ${SRC_DIR}/tests/lomse_test_list_layouter.cpp
+        ${SRC_DIR}/tests/lomse_test_lmd_analyser.cpp
         ${SRC_DIR}/tests/lomse_test_midi_table.cpp
         ${SRC_DIR}/tests/lomse_test_model_builder.cpp
         ${SRC_DIR}/tests/lomse_test_multicolumn_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_note_engraver.cpp
-        ${SRC_DIR}/tests/lomse_test_parser.cpp
         ${SRC_DIR}/tests/lomse_test_pitch.cpp
         ${SRC_DIR}/tests/lomse_test_presenter.cpp
         ${SRC_DIR}/tests/lomse_test_reader.cpp

@@ -54,7 +54,7 @@ ScorePlayerCtrl::ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner,
     , PlayerGui()
     , m_libraryScope(libScope)
     , m_pOwnerImo(pOwner)
-    , m_label("Play")
+    , m_label( pOwner->get_play_label() )
     , m_pMainBox(NULL)
     , m_style(NULL)
     , m_width(-1.0f)
@@ -127,8 +127,9 @@ void ScorePlayerCtrl::handle_event(SpEventInfo pEvent)
             m_visited = true;
             m_prevColor = m_visitedColor;
 
-            bool fPlay = (m_label == "Play");
-            set_text( fPlay ? "Stop playing" : "Play" );
+            bool fPlay = (m_label == m_pOwnerImo->get_play_label() );
+            set_text( fPlay ? m_pOwnerImo->get_stop_label()
+                            : m_pOwnerImo->get_play_label() );
 
             //TO_FIX: AS we create a new event here, processing of current event does
             //not finish until this new event is processed. This prevents inmediate
@@ -151,7 +152,7 @@ void ScorePlayerCtrl::handle_event(SpEventInfo pEvent)
 //---------------------------------------------------------------------------------------
 void ScorePlayerCtrl::on_end_of_playback()
 {
-    set_text("Play");
+    set_text( m_pOwnerImo->get_play_label() );
 }
 
 //---------------------------------------------------------------------------------------

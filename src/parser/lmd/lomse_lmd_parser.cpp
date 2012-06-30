@@ -27,40 +27,131 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_parser.h"
+#include "lomse_lmd_parser.h"
 
-//#include <algorithm>
-//#include <iostream>
-//#include "lomse_ldp_factory.h"
-//
-//using namespace std;
+#include <iostream>
+#include <ostream>
+#include <sstream>
+#include <vector>
+using namespace std;
+
+//#include "rapidxml_print.hpp"
+using namespace rapidxml;
 
 namespace lomse
 {
 
 
 //=======================================================================================
-// Parser implementation
+// LmdParser implementation
 //=======================================================================================
-Parser::Parser(ostream& reporter)   //, LdpFactory* pFactory)
-    : m_reporter(reporter)
-//    , m_pLdpFactory(pFactory)
-//    //, m_fDebugMode(g_pLogger->IsAllowedTraceMask("Parser"))
-//    //, m_pIgnoreSet((std::set<long>*)NULL)
-//    , m_pTokenizer(NULL)
-//    , m_pTk(NULL)
-//    , m_curNode(NULL)
+LmdParser::LmdParser(ostream& reporter)
+    : Parser(reporter)
+    , m_root(NULL)
+    , m_file(NULL)
 {
 }
 
 //---------------------------------------------------------------------------------------
-Parser::~Parser()
+LmdParser::~LmdParser()
 {
-//    clear_all();
+    delete m_file;
 }
 
+//---------------------------------------------------------------------------------------
+void LmdParser::parse_text(const std::string& sourceText)
+{
+    parse_char_string( const_cast<char*>(sourceText.c_str()) );
+}
+
+//---------------------------------------------------------------------------------------
+void LmdParser::parse_file(const std::string& filename, bool fErrorMsg)
+{
+    delete m_file;
+    m_file = new rapidxml::file<>( filename.c_str() );
+    parse_char_string( m_file->data() );
+}
+
+//---------------------------------------------------------------------------------------
+void LmdParser::parse_char_string(char* str)
+{
+    try
+    {
+        m_doc.parse<  parse_declaration_node  //XML declaration node
+                    //| parse_no_data_nodes
+                    //| parse_comment_nodes
+                    //| parse_doctype_node
+                    | parse_no_element_values
+                    | parse_normalize_whitespace
+                    >( m_doc.allocate_string(str) );
+
+        // since we have parsed the XML declaration, it is the first node (if exists).
+        // Otherwise the first will be the root node
+        m_root = m_doc.first_node();
+        if (m_root->type() == rapidxml::node_declaration)
+        {
+            m_encoding = m_root->first_attribute("encoding")->value();
+            while (m_root && m_root->type() != rapidxml::node_element)
+                m_root = m_root->next_sibling();
+        }
+        else
+            m_encoding = "unknown";
+    }
+
+    catch( rapidxml::parse_error& e)
+    {
+        m_error = e.what();
+        m_root = NULL;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+string LmdParser::get_node_value(XmlNode* node)
+{
+    return string( node->value() );
+}
+
+//---------------------------------------------------------------------------------------
+string LmdParser::get_node_name_as_string(XmlNode* node)
+{
+    return string( node->name() );
+}
+
+
+
+////=======================================================================================
+//// XmlNode implementation
+////=======================================================================================
+//ELdpElement XmlNode::get_type()
+//{
+//    return m_parser->get_node_type(this);
+//}
+
+//const char* XmlNode::get_name() const
+//{
+//    return m_node->value();
+//}
+
+//
+//LmdParser::LmdParser(ostream& reporter, LdpFactory* pFactory)
+//    : m_reporter(reporter)
+//    , m_pLdpFactory(pFactory)
+//    //, m_fDebugMode(g_pLogger->IsAllowedTraceMask("LmdParser"))
+//    //, m_pIgnoreSet((std::set<long>*)NULL)
+//    , m_pTokenizer(NULL)
+//    , m_pTk(NULL)
+//    , m_curNode(NULL)
+//{
+//}
+//
 ////---------------------------------------------------------------------------------------
-//void Parser::clear_all()
+//LmdParser::~LmdParser()
+//{
+//    clear_all();
+//}
+//
+////---------------------------------------------------------------------------------------
+//void LmdParser::clear_all()
 //{
 //    delete m_pTokenizer;
 //    m_pTokenizer = NULL;
@@ -76,7 +167,7 @@ Parser::~Parser()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//SpLdpTree Parser::parse_text(const std::string& sourceText)
+//SpLdpTree LmdParser::parse_text(const std::string& sourceText)
 //{
 //    LdpTextReader reader(sourceText);
 //    return parse_input(reader);
@@ -84,7 +175,7 @@ Parser::~Parser()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//SpLdpTree Parser::parse_file(const std::string& filename, bool fErrorMsg)
+//SpLdpTree LmdParser::parse_file(const std::string& filename, bool fErrorMsg)
 //{
 //    LdpFileReader reader(filename);
 //    return parse_input(reader);
@@ -92,13 +183,13 @@ Parser::~Parser()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//SpLdpTree Parser::parse_input(LdpReader& reader)
+//SpLdpTree LmdParser::parse_input(LdpReader& reader)
 //{
 //    return do_syntax_analysis(reader);
 //}
 //
 ////---------------------------------------------------------------------------------------
-//SpLdpTree Parser::do_syntax_analysis(LdpReader& reader)
+//SpLdpTree LmdParser::do_syntax_analysis(LdpReader& reader)
 //{
 //    //This function analyzes source code. The result of the analysis is a tree
 //    //of nodes, each one representing an element. The root node is the parsed
@@ -158,13 +249,13 @@ Parser::~Parser()
 //    // at this point m_curNode is all the tree
 //    if (!m_curNode)
 //        throw std::runtime_error(
-//            "[Parser::do_syntax_analysis] LDP file format error.");
+//            "[LmdParser::do_syntax_analysis] LDP file format error.");
 //
 //    return SpLdpTree( LOMSE_NEW LdpTree(m_curNode) );
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void Parser::Do_WaitingForStartOfElement()
+//void LmdParser::Do_WaitingForStartOfElement()
 //{
 //    switch (m_pTk->get_type())
 //    {
@@ -181,7 +272,7 @@ Parser::~Parser()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void Parser::Do_WaitingForName()
+//void LmdParser::Do_WaitingForName()
 //{
 //    switch (m_pTk->get_type())
 //    {
@@ -230,7 +321,7 @@ Parser::~Parser()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void Parser::Do_WaitingForParameter()
+//void LmdParser::Do_WaitingForParameter()
 //{
 //    //switch (m_pTk->get_type())
 //    //{
@@ -274,7 +365,7 @@ Parser::~Parser()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void Parser::Do_ProcessingParameter()
+//void LmdParser::Do_ProcessingParameter()
 //{
 //    switch (m_pTk->get_type())
 //    {
@@ -321,13 +412,13 @@ Parser::~Parser()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//bool Parser::must_replace_tag(const std::string& nodename)
+//bool LmdParser::must_replace_tag(const std::string& nodename)
 //{
 //    return nodename == "noVisible";
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void Parser::replace_current_tag()
+//void LmdParser::replace_current_tag()
 //{
 //    //TODO: refactor to deal with many replacements
 //
@@ -354,7 +445,7 @@ Parser::~Parser()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void Parser::terminate_current_parameter()
+//void LmdParser::terminate_current_parameter()
 //{
 //    m_state = A3_ProcessingParameter;
 //    LdpElement* pParm = m_curNode;        //save ptr to node just created
@@ -381,14 +472,14 @@ Parser::~Parser()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void Parser::PushNode(EParsingState state)
+//void LmdParser::PushNode(EParsingState state)
 //{
 //    std::pair<EParsingState, LdpElement*> data(state, m_curNode);
 //    m_stack.push(data);
 //}
 //
 ////---------------------------------------------------------------------------------------
-//bool Parser::PopNode()
+//bool LmdParser::PopNode()
 //{
 //    //returns true if error
 //
@@ -409,7 +500,7 @@ Parser::~Parser()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void Parser::report_error(EParsingState nState, LdpToken* pTk)
+//void LmdParser::report_error(EParsingState nState, LdpToken* pTk)
 //{
 //    m_numErrors++;
 //    m_reporter << "** LDP ERROR **: Syntax error. State " << nState
@@ -418,7 +509,7 @@ Parser::~Parser()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void Parser::report_error(const std::string& msg)
+//void LmdParser::report_error(const std::string& msg)
 //{
 //    m_numErrors++;
 //    m_reporter << msg << endl;
@@ -428,13 +519,13 @@ Parser::~Parser()
 ////========================================================================================
 ////========================================================================================
 //#if 0
-//long Parser::GetNodeId(LdpElement* pNode)
+//long LmdParser::GetNodeId(LdpElement* pNode)
 //{
 //    long nId = pNode->get_id();
 //    return nId;
 //}
 //
-//bool Parser::ParenthesisMatch(const std::string& sSource)
+//bool LmdParser::ParenthesisMatch(const std::string& sSource)
 //{
 //    int i = sSource.length();
 //    int nPar = 0;

@@ -92,8 +92,7 @@ LdpTokenizer::LdpTokenizer(LdpReader& reader, ostream& reporter)
 //---------------------------------------------------------------------------------------
 LdpTokenizer::~LdpTokenizer()
 {
-    if (m_pToken)
-        delete m_pToken;
+    delete m_pToken;
 }
 
 //---------------------------------------------------------------------------------------

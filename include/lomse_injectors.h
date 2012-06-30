@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -43,9 +43,12 @@ namespace lomse
 
 //forward declarations
 class LdpParser;
-class Analyser;
-class ModelBuilder;
+class LdpAnalyser;
 class LdpCompiler;
+class LmdParser;
+class LmdAnalyser;
+class LmdCompiler;
+class ModelBuilder;
 class Document;
 class LdpFactory;
 class FontStorage;
@@ -132,12 +135,16 @@ public:
     Injector() {}
     ~Injector() {}
 
-    static LdpParser* inject_LdpParser(LibraryScope& libraryScope,
-                                       DocumentScope& documentScope);
-    static Analyser* inject_Analyser(LibraryScope& libraryScope, Document* pDoc);
+    static LdpParser* inject_LdpParser(LibraryScope& libraryScope, DocumentScope& documentScope);
+    static LdpAnalyser* inject_LdpAnalyser(LibraryScope& libraryScope, Document* pDoc);
+    static LdpCompiler* inject_LdpCompiler(LibraryScope& libraryScope, Document* pDoc);
+
+    static LmdParser* inject_LmdParser(LibraryScope& libraryScope, DocumentScope& documentScope);
+    static LmdAnalyser* inject_LmdAnalyser(LibraryScope& libraryScope, Document* pDoc,
+                                           LmdParser* pParser);
+    static LmdCompiler* inject_LmdCompiler(LibraryScope& libraryScope, Document* pDoc);
+
     static ModelBuilder* inject_ModelBuilder(DocumentScope& documentScope);
-    static LdpCompiler* inject_LdpCompiler(LibraryScope& libraryScope,
-                                           Document* pDoc);
     static Document* inject_Document(LibraryScope& libraryScope,
                                      ostream& reporter = cout);
     static ScreenDrawer* inject_ScreenDrawer(LibraryScope& libraryScope);
@@ -153,7 +160,7 @@ public:
     static Presenter* inject_Presenter(LibraryScope& libraryScope,
                                        int viewType, Document* pDoc);
     static Task* inject_Task(int taskType, Interactor* pIntor);
-    static ScorePlayer* inject_ScorePlayer(LibraryScope& libraryScope, 
+    static ScorePlayer* inject_ScorePlayer(LibraryScope& libraryScope,
                                            MidiServerBase* pSoundServer);
 
 };

@@ -175,6 +175,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_parameter] = "param";
     m_TypeToName[k_parenthesis] = "parenthesis";
     m_TypeToName[k_pitch] = "pitch";
+    m_TypeToName[k_playLabel] = "playLabel";
     m_TypeToName[k_portrait] = "portrait";
     m_TypeToName[k_rest] = "r";   //rest
     m_TypeToName[k_right] = "right";
@@ -195,16 +196,14 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_start_x] = "start-x";
     m_TypeToName[k_start_y] = "start-y";
     m_TypeToName[k_startPoint] = "startPoint";
-    m_TypeToName[k_styles] = "styles";
     m_TypeToName[k_start] = "start";
     m_TypeToName[k_staves] = "staves";
     m_TypeToName[k_stem] = "stem";
+    m_TypeToName[k_stopLabel] = "stopLabel";
     m_TypeToName[k_style] = "style";
     m_TypeToName[k_styles] = "styles";
     m_TypeToName[k_symbol] = "symbol";
     m_TypeToName[k_symbolSize] = "symbolSize";
-    m_TypeToName[k_style] = "style";
-    m_TypeToName[k_styles] = "styles";
     m_TypeToName[k_systemLayout] = "systemLayout";
     m_TypeToName[k_systemMargins] = "systemMargins";
     m_TypeToName[k_table] = "table";
@@ -227,6 +226,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_undoData] = "undoData";
     m_TypeToName[k_up] = "up";
     m_TypeToName[k_url] = "url";
+    m_TypeToName[k_value] = "value";
     m_TypeToName[k_vers] = "vers";
     m_TypeToName[k_vertical_align] = "vertical-align";
     m_TypeToName[k_visible] = "visible";
@@ -352,6 +352,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["param"] = LOMSE_NEW LdpElementFunctor<k_parameter>;
     m_NameToFunctor["parenthesis"] = LOMSE_NEW LdpElementFunctor<k_parenthesis>;
     m_NameToFunctor["pitch"] = LOMSE_NEW LdpElementFunctor<k_pitch>;
+    m_NameToFunctor["playLabel"] = LOMSE_NEW LdpElementFunctor<k_playLabel>;
     m_NameToFunctor["portrait"] = LOMSE_NEW LdpElementFunctor<k_portrait>;
     m_NameToFunctor["r"] = LOMSE_NEW LdpElementFunctor<k_rest>;   //rest
     m_NameToFunctor["right"] = LOMSE_NEW LdpElementFunctor<k_right>;
@@ -375,6 +376,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["startPoint"] = LOMSE_NEW LdpElementFunctor<k_startPoint>;
     m_NameToFunctor["staves"] = LOMSE_NEW LdpElementFunctor<k_staves>;
     m_NameToFunctor["stem"] = LOMSE_NEW LdpElementFunctor<k_stem>;
+    m_NameToFunctor["stopLabel"] = LOMSE_NEW LdpElementFunctor<k_stopLabel>;
     m_NameToFunctor["style"] = LOMSE_NEW LdpElementFunctor<k_style>;
     m_NameToFunctor["styles"] = LOMSE_NEW LdpElementFunctor<k_styles>;
     m_NameToFunctor["symbol"] = LOMSE_NEW LdpElementFunctor<k_symbol>;
@@ -401,6 +403,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["undoData"] = LOMSE_NEW LdpElementFunctor<k_undoData>;
     m_NameToFunctor["up"] = LOMSE_NEW LdpElementFunctor<k_up>;
     m_NameToFunctor["url"] = LOMSE_NEW LdpElementFunctor<k_url>;
+    m_NameToFunctor["value"] = LOMSE_NEW LdpElementFunctor<k_value>;
     m_NameToFunctor["vers"] = LOMSE_NEW LdpElementFunctor<k_vers>;
     m_NameToFunctor["vertical-align"] = LOMSE_NEW LdpElementFunctor<k_vertical_align>;
     m_NameToFunctor["visible"] = LOMSE_NEW LdpElementFunctor<k_visible>;

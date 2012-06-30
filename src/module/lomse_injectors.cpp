@@ -30,9 +30,12 @@
 #include "lomse_injectors.h"
 
 #include <sstream>
-#include "lomse_parser.h"
-#include "lomse_analyser.h"
-#include "lomse_compiler.h"
+#include "lomse_ldp_parser.h"
+#include "lomse_ldp_analyser.h"
+#include "lomse_ldp_compiler.h"
+#include "lomse_lmd_parser.h"
+#include "lomse_lmd_analyser.h"
+#include "lomse_lmd_compiler.h"
 #include "lomse_model_builder.h"
 #include "lomse_document.h"
 #include "lomse_font_storage.h"
@@ -143,15 +146,9 @@ LdpParser* Injector::inject_LdpParser(LibraryScope& libraryScope,
 }
 
 //---------------------------------------------------------------------------------------
-Analyser* Injector::inject_Analyser(LibraryScope& libraryScope, Document* pDoc)
+LdpAnalyser* Injector::inject_LdpAnalyser(LibraryScope& libraryScope, Document* pDoc)
 {
-    return LOMSE_NEW Analyser(pDoc->get_scope().default_reporter(), libraryScope, pDoc);
-}
-
-//---------------------------------------------------------------------------------------
-ModelBuilder* Injector::inject_ModelBuilder(DocumentScope& documentScope)
-{
-    return LOMSE_NEW ModelBuilder();
+    return LOMSE_NEW LdpAnalyser(pDoc->get_scope().default_reporter(), libraryScope, pDoc);
 }
 
 //---------------------------------------------------------------------------------------
@@ -159,10 +156,43 @@ LdpCompiler* Injector::inject_LdpCompiler(LibraryScope& libraryScope,
                                           Document* pDoc)
 {
     return LOMSE_NEW LdpCompiler(inject_LdpParser(libraryScope, pDoc->get_scope()),
-                           inject_Analyser(libraryScope, pDoc),
+                           inject_LdpAnalyser(libraryScope, pDoc),
                            inject_ModelBuilder(pDoc->get_scope()),
                            pDoc->get_scope().id_assigner(),
                            pDoc );
+}
+
+//---------------------------------------------------------------------------------------
+LmdParser* Injector::inject_LmdParser(LibraryScope& libraryScope,
+                                      DocumentScope& documentScope)
+{
+    return LOMSE_NEW LmdParser(documentScope.default_reporter());
+}
+
+//---------------------------------------------------------------------------------------
+LmdAnalyser* Injector::inject_LmdAnalyser(LibraryScope& libraryScope, Document* pDoc,
+                                          LmdParser* pParser)
+{
+    return LOMSE_NEW LmdAnalyser(pDoc->get_scope().default_reporter(),
+                                 libraryScope, pDoc, pParser);
+}
+
+//---------------------------------------------------------------------------------------
+LmdCompiler* Injector::inject_LmdCompiler(LibraryScope& libraryScope,
+                                          Document* pDoc)
+{
+    LmdParser* pParser = Injector::inject_LmdParser(libraryScope, pDoc->get_scope());
+    return LOMSE_NEW LmdCompiler(pParser,
+                                 inject_LmdAnalyser(libraryScope, pDoc, pParser),
+                                 inject_ModelBuilder(pDoc->get_scope()),
+                                 pDoc->get_scope().id_assigner(),
+                                 pDoc );
+}
+
+//---------------------------------------------------------------------------------------
+ModelBuilder* Injector::inject_ModelBuilder(DocumentScope& documentScope)
+{
+    return LOMSE_NEW ModelBuilder();
 }
 
 //---------------------------------------------------------------------------------------

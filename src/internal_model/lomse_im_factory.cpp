@@ -31,8 +31,8 @@
 
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
-//#include "lomse_parser.h"
-//#include "lomse_analyser.h"
+//#include "lomse_ldp_parser.h"
+//#include "lomse_ldp_analyser.h"
 #include "lomse_document.h"
 
 

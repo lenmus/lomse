@@ -29,18 +29,73 @@
 
 #include <iostream>
 #include <UnitTest++.h>
+#include <TestReporterStdout.h>
+
 #include "lomse_build_options.h"
 #include "lomse_doorway.h"
 
 
 using namespace std;
 using namespace lomse;
+using namespace UnitTest;
 
-int main()
+int main(int argc, char** argv)
 {
+    //Based on code published here:
+    //  http://stackoverflow.com/questions/3546054/how-do-i-run-a-single-test-with-unittest
+    //
+    //invoke without arguments to run all tests:
+    //  testlib
+    //
+    //invoke with arguments to run a single test:
+    //  testlib MyTestName
+    //
+    //or single suite
+    //  testlib suite MySuite
+
     cout << "Lomse version " << LomseDoorway::get_version_string()
          << ". Library tests runner." << endl << endl;
-    int nErrors = UnitTest::RunAllTests();
+
+    int nErrors = 0;
+
+    if( argc > 1 )
+    {
+        //if first arg is "suite", we search for suite names instead of test names
+        const bool fSuite = strcmp( "suite", argv[1] ) == 0;
+
+        if (fSuite)
+            cout << "Running tests in suite " << argv[2] << endl << endl;
+        else
+            cout << "Running some tests " << endl << endl;
+
+        //walk list of all tests, add those with a name that
+        //matches one of the arguments  to a new TestList
+        const TestList& allTests( Test::GetTestList() );
+        TestList selectedTests;
+        Test* p = allTests.GetHead();
+        while( p )
+        {
+            for( int i = 1 ; i < argc ; ++i )
+            {
+                if( strcmp( fSuite ? p->m_details.suiteName
+                                   : p->m_details.testName, argv[ i ] ) == 0 )
+                    selectedTests.Add( p );
+            }
+            Test* q = p;
+            p = p->next;
+            q->next = NULL;
+        }
+
+        //run selected test(s) only
+        UnitTest::TestReporterStdout reporter;
+        UnitTest::TestRunner runner( reporter );
+        nErrors = runner.RunTestsIf( selectedTests, 0, True(), 0 );
+    }
+    else
+    {
+        cout << "Running all tests" << endl << endl;
+        nErrors = UnitTest::RunAllTests();
+    }
 
     #if defined WIN32 || defined _WIN32
         //system("pause");

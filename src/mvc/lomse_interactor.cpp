@@ -31,7 +31,7 @@
 
 //#include "lomse_user_command.h"
 //#include "lomse_command.h"
-#include "lomse_compiler.h"
+#include "lomse_ldp_compiler.h"
 #include "lomse_document.h"
 #include "lomse_document_cursor.h"
 #include "lomse_basic.h"

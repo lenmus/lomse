@@ -44,7 +44,7 @@
 #include "lomse_shape_tuplet.h"
 #include "lomse_score_meter.h"
 #include "lomse_shapes_storage.h"
-#include "lomse_analyser.h"
+#include "lomse_ldp_analyser.h"
 #include "lomse_im_factory.h"
 
 using namespace UnitTest;
@@ -106,7 +106,7 @@ public:
                              int tupletNum)
     {
         Document doc(m_libraryScope);
-        Analyser a(cout, m_libraryScope, &doc);
+        LdpAnalyser a(cout, m_libraryScope, &doc);
         TupletsBuilder builder(cout, &a);
         for (int i=0; i < numNotes; ++i)
         {

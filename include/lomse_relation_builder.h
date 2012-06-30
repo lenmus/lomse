@@ -39,18 +39,18 @@ namespace lomse
 {
 
 //forward declarations
-class Analyser;
+class A;
 class InternalModel;
 
 
 //---------------------------------------------------------------------------------------
 // helper class to save item info items, match them and build the items
-template <class T>
+template <class T, class A>
 class RelationBuilder
 {
 protected:
     ostream& m_reporter;
-    Analyser* m_pAnalyser;
+    A* m_pAnalyser;
     std::string m_relationNameLowerCase;
     std::string m_relationNameUpperCase;
 
@@ -60,7 +60,7 @@ protected:
 
 
 public:
-    RelationBuilder(ostream& reporter, Analyser* pAnalyser,
+    RelationBuilder(ostream& reporter, A* pAnalyser,
                     const std::string& relationNameLowerCase,
                     const std::string& relationNameUpperCase);
     ~RelationBuilder();
@@ -93,10 +93,10 @@ protected:
 //---------------------------------------------------------------------------------------
 // RelationBuilder implementation
 //---------------------------------------------------------------------------------------
-template <class T>
-RelationBuilder<T>::RelationBuilder(ostream& reporter, Analyser* pAnalyser,
-                                    const std::string& relationNameLowerCase,
-                                    const std::string& relationNameUpperCase)
+template <class T, class A>
+RelationBuilder<T, A>::RelationBuilder(ostream& reporter, A* pAnalyser,
+                                       const std::string& relationNameLowerCase,
+                                       const std::string& relationNameUpperCase)
     : m_reporter(reporter)
     , m_pAnalyser(pAnalyser)
     , m_relationNameLowerCase(relationNameLowerCase)
@@ -105,15 +105,15 @@ RelationBuilder<T>::RelationBuilder(ostream& reporter, Analyser* pAnalyser,
 }
 
 //---------------------------------------------------------------------------------------
-template <class T>
-RelationBuilder<T>::~RelationBuilder()
+template <class T, class A>
+RelationBuilder<T, A>::~RelationBuilder()
 {
     clear_pending_items();
 }
 
 //---------------------------------------------------------------------------------------
-template <class T>
-void RelationBuilder<T>::add_item_info(T* pNewInfo)
+template <class T, class A>
+void RelationBuilder<T, A>::add_item_info(T* pNewInfo)
 {
     if (pNewInfo->is_start_of_relation())
     {
@@ -130,15 +130,15 @@ void RelationBuilder<T>::add_item_info(T* pNewInfo)
 }
 
 //---------------------------------------------------------------------------------------
-template <class T>
-void RelationBuilder<T>::save_item_info(T* pNewInfo)
+template <class T, class A>
+void RelationBuilder<T, A>::save_item_info(T* pNewInfo)
 {
     m_pendingItems.push_back(pNewInfo);
 }
 
 //---------------------------------------------------------------------------------------
-template <class T>
-void RelationBuilder<T>::create_item(T* pEndInfo)
+template <class T, class A>
+void RelationBuilder<T, A>::create_item(T* pEndInfo)
 {
     int itemNum = pEndInfo->get_item_number();
     if ( find_matching_info_items(itemNum) )
@@ -154,8 +154,8 @@ void RelationBuilder<T>::create_item(T* pEndInfo)
 }
 
 //---------------------------------------------------------------------------------------
-template <class T>
-bool RelationBuilder<T>::find_matching_info_items(int itemNum)
+template <class T, class A>
+bool RelationBuilder<T, A>::find_matching_info_items(int itemNum)
 {
     m_matches.clear();
     ListIterator it;
@@ -168,8 +168,8 @@ bool RelationBuilder<T>::find_matching_info_items(int itemNum)
 }
 
 //---------------------------------------------------------------------------------------
-template <class T>
-T* RelationBuilder<T>::find_matching_start_item(T* pInfo)
+template <class T, class A>
+T* RelationBuilder<T, A>::find_matching_start_item(T* pInfo)
 {
     ListIterator it;
     for(it=m_pendingItems.begin(); it != m_pendingItems.end(); ++it)
@@ -182,8 +182,8 @@ T* RelationBuilder<T>::find_matching_start_item(T* pInfo)
 }
 
 //---------------------------------------------------------------------------------------
-template <class T>
-void RelationBuilder<T>::delete_consumed_info_items(T* pEndInfo)
+template <class T, class A>
+void RelationBuilder<T, A>::delete_consumed_info_items(T* pEndInfo)
 {
     m_matches.clear();
     int itemNum = pEndInfo->get_item_number();
@@ -202,15 +202,15 @@ void RelationBuilder<T>::delete_consumed_info_items(T* pEndInfo)
 }
 
 //---------------------------------------------------------------------------------------
-template <class T>
-void RelationBuilder<T>::delete_item_element(T* pInfo)
+template <class T, class A>
+void RelationBuilder<T, A>::delete_item_element(T* pInfo)
 {
     //Nothing to do: pInfo is deleted automatically when erasing node
 }
 
 //---------------------------------------------------------------------------------------
-template <class T>
-void RelationBuilder<T>::clear_pending_items()
+template <class T, class A>
+void RelationBuilder<T, A>::clear_pending_items()
 {
     ListIterator it;
     for (it = m_pendingItems.begin(); it != m_pendingItems.end(); ++it)
@@ -219,8 +219,8 @@ void RelationBuilder<T>::clear_pending_items()
 }
 
 //---------------------------------------------------------------------------------------
-template <class T>
-void RelationBuilder<T>::error_no_matching_items(T* pInfo)
+template <class T, class A>
+void RelationBuilder<T, A>::error_no_matching_items(T* pInfo)
 {
     m_reporter << "Line " << pInfo->get_line_number()
                << ". No 'start/continue' elements for "
@@ -231,8 +231,8 @@ void RelationBuilder<T>::error_no_matching_items(T* pInfo)
 }
 
 //---------------------------------------------------------------------------------------
-template <class T>
-void RelationBuilder<T>::error_no_end_item(T* pInfo)
+template <class T, class A>
+void RelationBuilder<T, A>::error_no_end_item(T* pInfo)
 {
     m_reporter << "Line " << pInfo->get_line_number()
                << ". No 'end' element for "
@@ -243,8 +243,8 @@ void RelationBuilder<T>::error_no_end_item(T* pInfo)
 }
 
 //---------------------------------------------------------------------------------------
-template <class T>
-void RelationBuilder<T>::error_duplicated_number(T* pExistingInfo, T* pNewInfo)
+template <class T, class A>
+void RelationBuilder<T, A>::error_duplicated_number(T* pExistingInfo, T* pNewInfo)
 {
     m_reporter << "Line " << pNewInfo->get_line_number()
                << ". This " << m_relationNameLowerCase

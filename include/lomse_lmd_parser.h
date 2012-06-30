@@ -27,50 +27,130 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_PARSER_H__
-#define __LOMSE_PARSER_H__
+#ifndef __LOMSE_LMD_PARSER_H__
+#define __LOMSE_LMD_PARSER_H__
+
+#include "lomse_parser.h"
 
 //#include <vector>
 //#include <set>
-//
-//#include "lomse_ldp_factory.h"
-//#include "lomse_tokenizer.h"
+#include <string>
+using namespace std;
+
+#include "rapidxml/rapidxml.hpp"
+#include "rapidxml/rapidxml_utils.hpp"
+#include "lomse_internal_model.h"
 //#include "lomse_ldp_elements.h"
 //#include "lomse_reader.h"
 
-#include <ostream>
-using namespace std;
 
 namespace lomse
 {
 
-////forward declarations
+//forward declarations
 //class LdpFactory;
+//class XmlNode;
+
+typedef rapidxml::xml_node<>         XmlNode;
+typedef rapidxml::xml_attribute<>    XmlAttribute;
 
 //---------------------------------------------------------------------------------------
-// Parser: base class for any parser
-class Parser
+class LmdParser : public Parser
 {
-protected:
-    ostream& m_reporter;
-    int m_numErrors;        //number of errors found during parsing
-    long m_nMaxId;          //maximum ID found
-
-    Parser(ostream& reporter);
+private:
+    rapidxml::xml_document<> m_doc;
+    rapidxml::xml_node<>* m_root;
+    string m_encoding;         //i.e. "utf-8"
+    string m_error;
+    rapidxml::file<>* m_file;
 
 public:
-    virtual ~Parser();
+    LmdParser(ostream& reporter=cout);
+    ~LmdParser();
 
-//    //setings and options
-//    inline void SetIgnoreList(std::set<long>* pSet) { m_pIgnoreSet = pSet; }
+    void parse_file(const std::string& filename, bool fErrorMsg = true);
+    void parse_text(const std::string& sourceText);
+//    XmlNode* parse_input(LdpReader& reader);
+    inline const string& get_error() { return m_error; }
 
-    virtual void parse_file(const std::string& filename, bool fErrorMsg = true) = 0;
-    virtual void parse_text(const std::string& sourceText) = 0;
-    //virtual void parse_input(LdpReader& reader) = 0;
+    inline const string& get_encoding() { return m_encoding; }
 
-    inline int get_num_errors() { return m_numErrors; }
-    inline long get_max_id() { return m_nMaxId; }
+    inline XmlNode* get_tree_root() { return m_root; }
 
+
+    //node utility methods
+    //ELdpElement get_node_type(XmlNode* node);
+    string get_node_value(XmlNode* node);
+    string get_node_name_as_string(XmlNode* node);
+    inline const char* get_node_name(XmlNode* node) { return node->name(); }
+//    long get_id() { return 0L; }
+//    XmlNode* get_next_sibling() { return NULL; }
+//    XmlNode* get_first_child() { return NULL; }
+//    int get_line_number() { return 0; }
+//    XmlNode* get_parameter(int i) { return NULL; }
+//    float get_value_as_float() { return 0.0f; }
+//
+//
+//    ImoObj* get_imo() { return NULL; }
+//    void set_imo(ImoObj* pImo) {}
+//    ELdpElement get_type();
+//    bool is_type(ELdpElement type) { return false; }
+
+protected:
+    void parse_char_string(char* string);
+
+
+};
+
+////
+////---------------------------------------------------------------------------------------
+//// To wrap, isolate and extend rapidxml::xml_node<>
+//class XmlNode
+//{
+//private:
+//    rapidxml::xml_node<>* m_node;
+//    LmdParser* m_parser;
+//
+//public:
+//    XmlNode() : m_node(NULL), m_parser(NULL) {}
+//    XmlNode(LmdParser* parser, rapidxml::xml_node<>* node) : m_node(node), m_parser(parser) {}
+//
+//    const string& get_value() { return "TODO"; }
+//    //const char* get_name() const { return m_node->name(); }
+//    string get_name() { return "TODO"; }
+//    long get_id() { return 0L; }
+//    XmlNode* get_next_sibling() { return NULL; }
+//    XmlNode* get_first_child() { return NULL; }
+//    int get_line_number() { return 0; }
+//    XmlNode* get_parameter(int i) { return NULL; }
+//    float get_value_as_float() { return 0.0f; }
+//
+//
+//    ImoObj* get_imo() { return NULL; }
+//    void set_imo(ImoObj* pImo) {}
+//    ELdpElement get_type();
+//    bool is_type(ELdpElement type) { return false; }
+//
+//};
+
+
+//// The LDP parser
+//class LmdParser
+//{
+//public:
+//    LmdParser(ostream& reporter, LdpFactory* pFactory);
+//    ~LmdParser();
+//
+////    //setings and options
+////    inline void SetIgnoreList(std::set<long>* pSet) { m_pIgnoreSet = pSet; }
+////
+//    XmlNode* parse_file(const std::string& filename, bool fErrorMsg = true);
+//    XmlNode* parse_text(const std::string& sourceText);
+//    XmlNode* parse_input(LdpReader& reader);
+//
+//    inline int get_num_errors() { return m_numErrors; }
+//    inline long get_max_id() { return m_nMaxId; }
+//
 //protected:
 //    enum EParsingState
 //    {
@@ -82,7 +162,7 @@ public:
 //        A5_ExitError
 //    };
 //
-//    SpLdpTree do_syntax_analysis(LdpReader& reader);
+//    XmlNode* do_syntax_analysis(LdpReader& reader);
 //
 //    void clear_all();
 //    void PushNode(EParsingState nPopState);
@@ -101,6 +181,7 @@ public:
 ////    long GetNodeId(SpLdpElement pNode);
 ////
 //
+//    ostream&        m_reporter;
 //    LdpFactory*     m_pLdpFactory;
 //    LdpTokenizer*   m_pTokenizer;
 //    LdpToken*       m_pTk;              // current token
@@ -114,9 +195,9 @@ public:
 //    int            m_numErrors;     // number of errors found during parsing
 //    long           m_nMaxId;        //maximun ID found
 ////    std::set<long>*         m_pIgnoreSet;   //set with elements to ignore
-};
+//};
 
 
 } //namespace lomse
 
-#endif    //__LOMSE_PARSER_H__
+#endif    //__LOMSE_LMD_PARSER_H__

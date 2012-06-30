@@ -27,45 +27,65 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include <UnitTest++.h>
-#include <sstream>
-#include "lomse_build_options.h"
+#ifndef __LOMSE_LDP_COMPILER_H__
+#define __LOMSE_LDP_COMPILER_H__
 
-//classes related to these tests
-#include "lomse_injectors.h"
-#include "lomse_ldp_parser.h"
-#include "lomse_ldp_analyser.h"
-#include "lomse_internal_model.h"
-#include "lomse_im_note.h"
+#include "lomse_compiler.h"
+#include "lomse_ldp_elements.h"
+#include "lomse_reader.h"
 
-using namespace UnitTest;
 using namespace std;
-using namespace lomse;
 
-
-class LinkerTestFixture
+namespace lomse
 {
+
+//forward declarations
+class LdpParser;
+class LdpAnalyser;
+class ModelBuilder;
+class DocumentScope;
+class LibraryScope;
+class IdAssigner;
+class InternalModel;
+class ImoDocument;
+class Document;
+
+
+//---------------------------------------------------------------------------------------
+// LdpCompiler: builds the tree for a document
+class LdpCompiler : public Compiler
+{
+protected:
+    LdpParser* m_pLdpParser;
+    LdpAnalyser* m_pLdpAnalyser;
+
 public:
+    LdpCompiler(LdpParser* p, LdpAnalyser* a, ModelBuilder* mb, IdAssigner* ida,
+                Document* pDoc);
+    virtual ~LdpCompiler();
 
-    LinkerTestFixture()     //SetUp fixture
-    {
-        m_pLibraryScope = LOMSE_NEW LibraryScope(cout);
-    }
+    //constructor for testing: direct construction
+    LdpCompiler(LibraryScope& libraryScope, Document* pDoc);
 
-    ~LinkerTestFixture()    //TearDown fixture
-    {
-        delete m_pLibraryScope;
-    }
+    //compilation
+    InternalModel* compile_file(const std::string& filename);
+    InternalModel* compile_string(const std::string& source);
+    InternalModel* compile_input(LdpReader& reader);
+    InternalModel* create_empty();
+    InternalModel* create_with_empty_score();
 
-    LibraryScope* m_pLibraryScope;
+    ////info
+    //int get_num_errors();
+    //string get_file_locator() { return m_fileLocator; }
+
+protected:
+    InternalModel* compile_parsed_tree(LdpTree* tree);
+    LdpTree* wrap_score_in_lenmusdoc(LdpTree* pParseTree);
+    void parse_empty_doc();
+
 };
 
-SUITE(LinkerTest)
-{
 
-//    TEST_FIXTURE(LinkerTestFixture, AnalyserOneOrMorePresentOne)
-//    {
-//    }
+}   //namespace lomse
 
-}
-
+#endif      //__LOMSE_LDP_COMPILER_H__

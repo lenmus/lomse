@@ -2487,6 +2487,7 @@ protected:
     {
     }
     friend class ImageAnalyser;
+    friend class ImageLmdAnalyser;
     inline void set_content(SpImage img) { m_image = img; }
 
 public:
@@ -3010,14 +3011,19 @@ class ImoScorePlayer : public ImoControl
 protected:
     ScorePlayerCtrl* m_pPlayer;
     ImoScore* m_pScore;
+    string m_playLabel;
+    string m_stopLabel;
 
     friend class ImFactory;
     ImoScorePlayer();
 
     friend class ScorePlayerAnalyser;
+    friend class ScorePlayerLmdAnalyser;
     inline void attach_score(ImoScore* pScore) { m_pScore = pScore; }
     void attach_player(ScorePlayerCtrl* pPlayer);
     void set_metronome_mm(int value);
+    inline void set_play_label(const string& value) { m_playLabel = value; }
+    inline void set_stop_label(const string& value) { m_stopLabel = value; }
 
 public:
     virtual ~ImoScorePlayer();
@@ -3025,6 +3031,9 @@ public:
     inline ImoScore* get_score() { return m_pScore; }
     inline ScorePlayerCtrl* get_player() { return m_pPlayer; }
     int get_metronome_mm();
+    inline const string& get_play_label() { return m_playLabel; }
+    inline const string& get_stop_label() { return m_stopLabel; }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -3324,6 +3333,7 @@ protected:
                                         //deleted at document level.
 
     friend class TableColumnAnalyser;
+    friend class TableColumnLmdAnalyser;
     inline void add_column_style(ImoStyle* pStyle) { m_colStyles.push_back(pStyle); }
 
     friend class ImFactory;
@@ -3437,6 +3447,7 @@ private:
 protected:
     friend class ImFactory;
     friend class TextItemAnalyser;
+    friend class TextItemLmdAnalyser;
 
     ImoTextItem() : ImoInlineLevelObj(k_imo_text_item), m_text("") {}
 

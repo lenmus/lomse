@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -30,18 +30,16 @@
 #ifndef __LOMSE_COMPILER_H__
 #define __LOMSE_COMPILER_H__
 
+#include "lomse_parser.h"
+#include "lomse_analyser.h"
 
-#include "lomse_ldp_elements.h"
-#include "lomse_reader.h"
-
+#include <string>
 using namespace std;
 
 namespace lomse
 {
 
 //forward declarations
-class LdpParser;
-class Analyser;
 class ModelBuilder;
 class DocumentScope;
 class LibraryScope;
@@ -52,41 +50,40 @@ class Document;
 
 
 //---------------------------------------------------------------------------------------
-// LdpCompiler: builds the tree for a document
-class LdpCompiler
+// Compiler: base class for all compilers
+class Compiler
 {
 protected:
-    LdpParser*      m_pParser;
+    Parser*         m_pParser;
     Analyser*       m_pAnalyser;
     ModelBuilder*   m_pModelBuilder;
     IdAssigner*     m_pIdAssigner;
     Document*       m_pDoc;
-    SpLdpTree       m_pFinalTree;
-    string          m_fileLocator;
+//    SpLdpTree       m_pFinalTree;
+    string         m_fileLocator;
+
+    Compiler() {}
+    Compiler(Parser* p, Analyser* a, ModelBuilder* mb, IdAssigner* ida,
+             Document* pDoc);
 
 public:
-    LdpCompiler(LdpParser* p, Analyser* a, ModelBuilder* mb, IdAssigner* ida,
-                Document* pDoc);
-    ~LdpCompiler();
-
-    //constructor for testing: direct construction
-    LdpCompiler(LibraryScope& libraryScope, Document* pDoc);
+    virtual ~Compiler();
 
     //compilation
-    InternalModel* compile_file(const std::string& filename);
-    InternalModel* compile_string(const std::string& source);
-    InternalModel* compile_input(LdpReader& reader);
-    InternalModel* create_empty();
-    InternalModel* create_with_empty_score();
+    virtual InternalModel* compile_file(const std::string& filename)=0;
+    virtual InternalModel* compile_string(const std::string& source)=0;
+    //InternalModel* compile_input(LdpReader& reader);
+    virtual InternalModel* create_empty()=0;
+    virtual InternalModel* create_with_empty_score()=0;
 
     //info
     int get_num_errors();
     string get_file_locator() { return m_fileLocator; }
 
-protected:
-    InternalModel* compile(SpLdpTree pParseTree);
-    SpLdpTree wrap_score_in_lenmusdoc(SpLdpTree pParseTree);
-    SpLdpTree parse_empty_doc();
+//protected:
+//    InternalModel* compile_parsed_tree(SpLdpTree pParseTree);
+//    SpLdpTree wrap_score_in_lenmusdoc(SpLdpTree pParseTree);
+//    SpLdpTree parse_empty_doc();
 
 };
 

@@ -48,7 +48,7 @@ ImoObj* Linker::add_child_to_model(ImoObj* pParent, ImoObj* pChild, int ldpChild
 {
     //If the object (or its content, for DTOs) is added to the model it must return NULL.
     //Othewise, it must return the received object. This behaviour is necessary to
-    //simplify unit tests of Analyser
+    //simplify unit tests of LdpAnalyser
 
     m_ldpChildType = ldpChildType;
     m_pParent = pParent;
@@ -395,7 +395,7 @@ ImoObj* Linker::add_inline_level_item(ImoInlineLevelObj* pImo)
         if (m_pParent->is_blocks_container())
         {
             ImoBlocksContainer* pParent = static_cast<ImoBlocksContainer*>(m_pParent);
-            ImoAnonymousBlock* pCurBlock = 
+            ImoAnonymousBlock* pCurBlock =
                 dynamic_cast<ImoAnonymousBlock*>( pParent->get_last_content_item() );
             if (!pCurBlock)
             {

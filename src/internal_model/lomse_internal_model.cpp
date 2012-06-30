@@ -2403,6 +2403,8 @@ ImoScorePlayer::ImoScorePlayer()
     : ImoControl(k_imo_score_player)
     , m_pPlayer(NULL)
     , m_pScore(NULL)
+    , m_playLabel("Play")
+    , m_stopLabel("Stop playing")
 {
 }
 

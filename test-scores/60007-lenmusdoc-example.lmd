@@ -1,0 +1,227 @@
+﻿<!-- =============================================== -->
+<!-- eMusicBook: MusicHarmony                        -->
+<!-- =============================================== -->
+
+<lenmusdoc vers="0.0" id="th1_110_scales">
+
+<styles>
+    <defineStyle>
+        <name>credits</name>
+    </defineStyle>
+</styles>
+
+<content>
+
+<section level="1">Semitones. The chromatic scale</section>
+
+
+<section level="2">Scales</section>
+<!-- =================================================================== -->
+
+<para>
+If you're learning an instrument you've probably played some
+scales already, but you might have learnt to play them without thinking
+about the actual notes, (your fingers do the thinking!). But to understand music and learn about harmony you need to know the scales and how they are built.
+</para>
+
+<para>
+A scale, from latin word 'scala' meaning 'ladder', is a predefined series of notes going up (ascending) or down (descending). People in different musical traditions have different ideas about what notes they think sound best together. In the Western musical tradition - which includes most familiar music from Europe and the Americas - the octave is divided up into twelve equally spaced notes. Other musical traditions - traditional Chinese music for example - have divided the octave differently and so they use different scales.
+</para>
+
+<para>
+Let's start learning about the 'bricks' for building scales: <emphasis>tones</emphasis> and <emphasis>semitones</emphasis>.
+</para>
+
+
+<section level="2">Semitones</section>
+<!-- =================================================================== -->
+
+<para>The minimum distance between two pitches that we will consider in the Western musical tradition is called a <emphasis>semitone</emphasis>, also named <emphasis>half step</emphasis>. Let's use a piano keyboard to look at some examples.</para>
+
+<para role='center'>
+<imagedata fileref='keyboard.png' translate='yes' />
+</para>
+
+<para>
+The first thing to notice is that, as said, we have twelve notes within an octave, represented by seven white keys and five black keys. But only seven letter names are used to name notes: C, D, E, F, G, A and B. The eighth note would, of course, be the next C, beginning the next octave. To name the other notes, the notes on the black piano keys, you have to use a sharp or flat sign. The white keys are the <emphasis>natural notes</emphasis>. Black keys can only be named using sharps or flats.
+</para>
+
+<para>If two notes are as close as possible on the piano keyboard (two neighbouring keys, whatever colour, black or white), we call the distance between them a <emphasis>semitone</emphasis>. In the following picture I have coloured pairs of notes whose distance is a semitone.
+</para>
+
+<para role='center'>
+<imagedata fileref='semitones-keyboard.png' translate='yes' /> <!-- Semitones on the keyboard -->
+</para>
+
+<para>Find E and F on the piano keyboard. The distance between E and F is a
+semitone; it's not possible to squeeze another note in between them,
+because there is nothing between them on the piano keyboard.
+</para>
+
+<!-- score: semitone interval -->
+<ldpmusic id="score1">
+    (score
+       (vers 1.6)
+       (defineStyle "Normal text" (font "Sans" 8pt normal)(color #000000))
+       (instrument
+          (staves 1)
+          (staff 1 (staffType regular)(staffLines 5)(staffSpacing 180.00)(staffDistance 2000.00)(lineThickness 15.00))
+          (infoMIDI 0 1)
+          (musicData
+             (clef G)
+             (key C)
+             (n e4 w v1
+                (line (startPoint dx:53 dy:53)(endPoint dx:53 dy:92)(width 1.0000)(color #000000)(lineStyle solid)(lineCapStart arrowhead)(lineCapEnd none))
+                (text _"Nothing possible here!" (style "Normal text") dx:61.2775 dy:121.1107)
+             )
+             (n f4 w v1)
+             (barline simple noVisible)
+    )))
+</ldpmusic>
+
+
+
+<para>Now find A and B flat. The distance between A and B flat is also a semitone.
+</para>
+
+<!-- score: semitone interval -->
+<ldpmusic id="score2">
+    (score
+       (vers 1.6)
+       (defineStyle "Normal text" (font "Sans" 8pt normal)(color #000000))
+       (instrument
+          (staves 1)
+          (staff 1 (staffType regular)(staffLines 5)(staffSpacing 180.00)(staffDistance 2000.00)(lineThickness 15.00))
+          (infoMIDI 0 1)
+          (musicData
+             (clef G)
+             (key C)
+             (n a4 w v1
+                (line (startPoint dx:53 dy:53)(endPoint dx:53 dy:92)(width 1.0000)(color #000000)(lineStyle solid)(lineCapStart arrowhead)(lineCapEnd none))
+                (text _"Nothing possible here!" (style "Normal text") dx:61.2775 dy:121.1107)
+             )
+             (n -b4 w v1)
+             (barline simple noVisible)
+    )))
+</ldpmusic>
+
+
+
+
+<section level="2">Chromatic scales</section>
+<!-- =================================================================== -->
+
+<para>
+A chromatic scale has the twelve notes, and each step of the scale is a semitone.
+Let's return to the piano keyboard. If you start on a C key
+and play every available key, black and white, until you arrive at the next C, you have played a
+chromatic scale:
+</para>
+
+<!-- score: "Chromatic scale starting on C" -->
+<ldpmusic id="score3">
+    (score
+       (vers 1.6)
+       (opt Render.SpacingMethod 1)
+       (opt Render.SpacingValue 40)
+       (instrument
+          (staves 1)
+          (staff 1 (staffType regular)(staffLines 5)(staffSpacing 180.00)(staffDistance 2000.00)(lineThickness 15.00))
+          (infoMIDI 0 1)
+          (musicData
+             (clef G)
+             (key C)
+             (n c4 w v1)
+             (n +c4 w v1)
+             (n d4 w v1)
+             (n +d4 w v1)
+             (n e4 w v1)
+             (n f4 w v1)
+             (n +f4 w v1)
+             (n g4 w v1)
+             (n +g4 w v1)
+             (n a4 w v1)
+             (n +a4 w v1)
+             (n b4 w v1)
+             (n +b4 w v1)
+             (n c5 w v1)
+             (barline simple noVisible)
+    )))
+</ldpmusic>
+
+<scorePlayer target="score3">
+    <control_play></control_play>
+    <metronome>320</metronome>
+</scorePlayer>
+
+<para>There are no different types of chromatic scales. Either, we don't talk about chromatic scales as being in a particular key; we just talk about the note they start on - and they can start on any note.</para>
+
+<para>
+Here is an ascending chromatic scale starting on B flat:
+</para>
+
+<!-- score: "Chromatic scale starting on B flat" -->
+<ldpmusic id="score4">
+    (score
+       (vers 1.6)
+       (opt Render.SpacingMethod 1)
+       (opt Render.SpacingValue 40)
+       (instrument
+          (staves 1)
+          (staff 1 (staffType regular)(staffLines 5)(staffSpacing 180.00)(staffDistance 2000.00)(lineThickness 15.00))
+          (infoMIDI 0 1)
+          (musicData
+             (clef G)
+             (key C)
+             (n -b3 w v1)
+             (n =b3 w v1)
+             (n c4 w v1)
+             (n -d4 w v1)
+             (n =d4 w v1)
+             (n -e4 w v1)
+             (n =e4 w v1)
+             (n f4 w v1)
+             (n -g4 w v1)
+             (n =g4 w v1)
+             (n -a4 w v1)
+             (n =a4 w v1)
+             (n -b4 w v1)
+             (barline simple noVisible)
+    )))
+</ldpmusic>
+
+<scorePlayer target="score4">
+    <control_play></control_play>
+    <metronome>320</metronome>
+</scorePlayer>
+
+<para>
+You need to be able to recognise chromatic scales, as well as
+sections of a chromatic scale within a piece of music.
+To find a section of a chromatic scale, just look for a series of notes that are
+all one semitone apart.
+</para>
+
+<!-- score: "Example: a section of a chromatic scale within a piece of music" -->
+
+
+
+<section level="2" style="credits">Credits</section>
+<!-- =================================================================== -->
+
+<para>
+This lesson is based on materials taken from:
+</para>
+
+<itemizedlist>
+
+    <listitem>Victoria K. Williams music theory lessons.
+    <link url="http://www.mymusictheory.com/">www.mymusictheory.com</link>.
+    Copyright © Victoria K. Williams. Used here with her permission.
+    </listitem>
+
+</itemizedlist>
+
+
+</content>
+</lenmusdoc>

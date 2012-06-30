@@ -46,12 +46,12 @@ IdAssigner::IdAssigner()
 //---------------------------------------------------------------------------------------
 void IdAssigner::reassign_ids(LdpElement* pElm)
 {
-    SpLdpTree tree(pElm);
+    LdpTree* tree(pElm);
     reassign_ids(tree);
 }
 
 //---------------------------------------------------------------------------------------
-void IdAssigner::reassign_ids(SpLdpTree pTree)
+void IdAssigner::reassign_ids(LdpTree* pTree)
 {
 
     long minId = find_min_id(pTree);
@@ -63,7 +63,7 @@ void IdAssigner::reassign_ids(SpLdpTree pTree)
 }
 
 //---------------------------------------------------------------------------------------
-void IdAssigner::shift_ids(SpLdpTree pTree, long shift)
+void IdAssigner::shift_ids(LdpTree* pTree, long shift)
 {
     long maxId = 0L;
     LdpTree::depth_first_iterator it;
@@ -80,7 +80,7 @@ void IdAssigner::shift_ids(SpLdpTree pTree, long shift)
 }
 
 //---------------------------------------------------------------------------------------
-long IdAssigner::find_min_id(SpLdpTree pTree)
+long IdAssigner::find_min_id(LdpTree* pTree)
 {
     long minId = -1L;
     bool fFirstId = true;
