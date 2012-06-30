@@ -462,21 +462,25 @@ set(MVC_FILES
 )
 
 set(PARSER_FILES
+    ${SRC_DIR}/parser/lomse_analyser.cpp
+    ${SRC_DIR}/parser/lomse_compiler.cpp
+    ${SRC_DIR}/parser/lomse_parser.cpp
     ${SRC_DIR}/parser/lomse_ldp_analyser.cpp
     ${SRC_DIR}/parser/lomse_ldp_compiler.cpp
     ${SRC_DIR}/parser/lomse_ldp_elements.cpp
     ${SRC_DIR}/parser/lomse_ldp_factory.cpp
+    ${SRC_DIR}/parser/lomse_ldp_parser.cpp
     ${SRC_DIR}/parser/lomse_linker.cpp
     ${SRC_DIR}/parser/lomse_model_builder.cpp
-    ${SRC_DIR}/parser/lomse_parser.cpp
     ${SRC_DIR}/parser/lomse_reader.cpp
     ${SRC_DIR}/parser/lomse_staffobjs_table.cpp
     ${SRC_DIR}/parser/lomse_tokenizer.cpp
 )
 
 set(LMD_FILES
-    ${SRC_DIR}/xml/lomse_lmd_analyser.cpp
-    ${SRC_DIR}/xml/lomse_lmd_parser.cpp
+    ${SRC_DIR}/parser/lmd/lomse_lmd_analyser.cpp
+    ${SRC_DIR}/parser/lmd/lomse_lmd_compiler.cpp
+    ${SRC_DIR}/parser/lmd/lomse_lmd_parser.cpp
 )
 
 set(RENDER_FILES
