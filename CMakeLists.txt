@@ -904,7 +904,7 @@ if(UNIX)
 
     set(CPACK_PACKAGE_FILE_NAME
         "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-linux-i386-32bits")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libfreetype6-dev, libpng12-dev (>=1.2.42), zlib1g (>= 1:1.2.1), boost-devel (>= 1.42.0), libboost-date-time (>= 1.42.0), libboost-thread (>= 1.42.0)" )
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libfreetype6-dev, libpng12-dev (>=1.2.42), zlib1g (>= 1:1.2.1), libboost-dev (>= 1.42.0), libboost-date-time1.42.0, libboost-thread1.42.0" )
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 
     # try to generate dependencies automatically
@@ -916,6 +916,7 @@ if(UNIX)
             set(MY_DEPENDENCIES "${MY_DEPENDENCIES}, ${dep} (>= ${PROJECT_VERSION})")
         endif()
     endforeach()
+    message ("project dependencies: '${${PROJECT_NAME}_DEPENDENCIES}'")
     message ("my dependencies: '${MY_DEPENDENCIES}'")
     message ("hard coded     : '${CPACK_DEBIAN_PACKAGE_DEPENDS}'")
 
