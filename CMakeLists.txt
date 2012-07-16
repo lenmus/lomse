@@ -121,15 +121,15 @@ message ("revision = '${LOMSE_REVISION}'")
 
 
 #build version string for installer name
-set(LOMSE_VERSION_STRING, "${LOMSE_VERSION_MAJOR}.${LOMSE_VERSION_MINOR}" )
+set(LOMSE_VERSION_STRING "${LOMSE_VERSION_MAJOR}.${LOMSE_VERSION_MINOR}" )
 if (NOT("${LOMSE_VERSION_TYPE}" STREQUAL ""))
-    set(LOMSE_VERSION_STRING, "${LOMSE_VERSION_STRING}.${LOMSE_VERSION_TYPE}{LOMSE_VERSION_PATCH}" )
+    set(LOMSE_VERSION_STRING "${LOMSE_VERSION_STRING}.${LOMSE_VERSION_TYPE}${LOMSE_VERSION_PATCH}" )
 else()
     if (NOT("${LOMSE_VERSION_PATCH}" STREQUAL "0"))
-        set(LOMSE_VERSION_STRING, "${LOMSE_VERSION_STRING}.{LOMSE_VERSION_PATCH}" )
+        set(LOMSE_VERSION_STRING "${LOMSE_VERSION_STRING}.${LOMSE_VERSION_PATCH}" )
     endif()
 endif()
-set(LOMSE_VERSION_STRING, "${LOMSE_VERSION_STRING}.(${LOMSE_REVISION})" )
+set(LOMSE_VERSION_STRING "${LOMSE_VERSION_STRING}.(${LOMSE_REVISION})" )
 message ("version string = '${LOMSE_VERSION_STRING}'") 
 
 
@@ -904,7 +904,7 @@ if(UNIX)
 
     set(CPACK_PACKAGE_FILE_NAME
         "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-linux-i386-32bits")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libfreetype6-dev, libpng12-dev (>=1.2.42), zlib1g (>= 1:1.2.1), libboost-dev (>= 1.42.0), libboost-date-time1.42.0, libboost-thread1.42.0" )
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libfreetype6-dev, libpng12-dev (>=1.2.42), zlib1g (>= 1:1.2.1), libboost-dev (>= 1.42.0)" )
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 
     # try to generate dependencies automatically
