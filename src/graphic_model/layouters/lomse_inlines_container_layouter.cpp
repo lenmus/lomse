@@ -162,12 +162,22 @@ void InlinesContainerLayouter::prepare_line()
     set_line_pos_and_width();
     initialize_line_references();
 
-    while(more_engrouters() && space_in_line())
+    if (more_engrouters())
     {
-        m_lineWidth += add_engrouter_to_line();
-        next_engrouter();
+        if (space_in_line())
+        {
+            while(more_engrouters() && space_in_line())
+            {
+                m_lineWidth += add_engrouter_to_line();
+                next_engrouter();
+            }
+            m_itEnd = m_itEngrouters;
+        }
+        else
+        {
+            //very long text: word doesn't fit in line width. Split it
+        }
     }
-    m_itEnd = m_itEngrouters;
 }
 
 //---------------------------------------------------------------------------------------

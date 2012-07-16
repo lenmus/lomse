@@ -368,6 +368,9 @@ protected:
     inline ImoObj* analyse_child() { return m_pAnalyser->analyse_node(m_pChildToAnalyse, NULL); }
     bool has_attribute(const string& name);
     string get_attribute(const string& name);
+    string get_mandatory_string_attribute(const string& name, const string& sDefault,
+                                          const string& element);
+    string get_optional_string_attribute(const string& name, const string& sDefault);
     int get_attribute_as_integer(const string& name, int nNumber);
 
     //building the model
@@ -2663,19 +2666,19 @@ public:
         ImoDocument* pImoDoc = NULL;
 
         // <vers>
-        if (has_attribute("vers"))
-        {
-            string version = get_attribute("vers");
-            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            pImoDoc = static_cast<ImoDocument*>(ImFactory::inject(k_imo_document, pDoc));
-            pImoDoc->set_version(version);
-            m_pAnalyser->save_root_imo_document(pImoDoc);
-            pDoc->set_imo_doc(pImoDoc);
-        }
-        else
-        {
-        //expected << "lenmusdoc: missing mandatory attribute 'vers'. Assumed '0.0'" << endl
-        }
+        string version = get_mandatory_string_attribute("vers", "0.0", "lenmusdoc");
+
+        //// <language>
+        //string language = get_mandatory_string_attribute("language", "en_US", "lenmusdoc");
+
+        //create document
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        pImoDoc = static_cast<ImoDocument*>(ImFactory::inject(k_imo_document, pDoc));
+        pImoDoc->set_version(version);
+        //pImoDoc->set_language(language);
+        m_pAnalyser->save_root_imo_document(pImoDoc);
+        pDoc->set_imo_doc(pImoDoc);
+
 
         //// [<settings>]
         //analyse_optional(k_settings, pImoDoc);
@@ -2811,11 +2814,7 @@ public:
         analyse_optional_style(pLink);
 
         // <url>
-        string url = "";
-        if (has_attribute("url"))
-            url = get_attribute("url");
-        if (url.empty())
-            error_msg("link: missing 'url'.");
+        string url = get_mandatory_string_attribute("url", "", "link");
         pLink->set_url(url);
 
         // <inlineObject>+
@@ -5376,6 +5375,34 @@ bool LmdElementAnalyser::has_attribute(const string& name)
 string LmdElementAnalyser::get_attribute(const string& name)
 {
     return get_attribute(m_pAnalysedNode, name);
+}
+
+//---------------------------------------------------------------------------------------
+string LmdElementAnalyser::get_mandatory_string_attribute(const string& name,
+                                  const string& sDefault, const string& element)
+{
+    string attrb = sDefault;
+    if (has_attribute(m_pAnalysedNode, name))
+        attrb = get_attribute(m_pAnalysedNode, name);
+    else if (sDefault.empty())
+        report_msg(get_line_number(m_pAnalysedNode),
+            element + ": Missing mandatory attribute '" + name + "'." );
+    else
+        report_msg(get_line_number(m_pAnalysedNode),
+            element + ": Missing mandatory attribute '" + name + "'. Value '" 
+            + sDefault + "' assumed.");
+
+    return attrb;
+}
+
+//---------------------------------------------------------------------------------------
+string LmdElementAnalyser::get_optional_string_attribute(const string& name,
+                                                         const string& sDefault)
+{
+    if (has_attribute(m_pAnalysedNode, name))
+        return get_attribute(m_pAnalysedNode, name);
+    else
+        return sDefault;
 }
 
 //---------------------------------------------------------------------------------------

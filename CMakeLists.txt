@@ -1,4 +1,4 @@
-#--------------------------------------------------------------------------------------
+﻿#--------------------------------------------------------------------------------------
 # This file is part of the Lomse library.
 # Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
 #
@@ -120,6 +120,20 @@ message ("patch = '${LOMSE_VERSION_PATCH}'")
 message ("revision = '${LOMSE_REVISION}'") 
 
 
+#build version string for installer name
+set(LOMSE_VERSION_STRING, "${LOMSE_VERSION_MAJOR}.${LOMSE_VERSION_MINOR}" )
+if (NOT("${LOMSE_VERSION_TYPE}" STREQUAL ""))
+    set(LOMSE_VERSION_STRING, "${LOMSE_VERSION_STRING}.${LOMSE_VERSION_TYPE}{LOMSE_VERSION_PATCH}" )
+else()
+    if (NOT("${LOMSE_VERSION_PATCH}" STREQUAL "0"))
+        set(LOMSE_VERSION_STRING, "${LOMSE_VERSION_STRING}.{LOMSE_VERSION_PATCH}" )
+    endif()
+endif()
+set(LOMSE_VERSION_STRING, "${LOMSE_VERSION_STRING}.(${LOMSE_REVISION})" )
+message ("version string = '${LOMSE_VERSION_STRING}'") 
+
+
+
 # build type
 set( LOMSE_USE_DLL "0")
 set( LOMSE_CREATE_DLL "0")
@@ -183,9 +197,13 @@ add_dependencies(test svnheader)
 endif()
 
 
-# Check for needed libraries and set all related includes, flags, etc. 
-#-------------------------------------------------------------------------
 
+##########################################################################
+#
+# Dependencies
+# Check for needed libraries and set all related includes, flags, etc. 
+#
+###############################################################################
 
 # Check for UnitTest++. Required for unit test
 if(WIN32)
@@ -200,7 +218,8 @@ link_directories( ${UNITTEST_LIBDIR} )
 
 # Check for Boost >= 1.42.0
 set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0"
-    "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0")
+    "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0""1.49" "1.49.0"
+    "1.50" "1.50.0" )
 #set(Boost_USE_STATIC_LIBS       OFF)
 #set(Boost_USE_MULTITHREADED     OFF)
 #set(Boost_USE_STATIC_RUNTIME    OFF)
@@ -339,9 +358,11 @@ include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 
 
-#////////////////////////////////////////////////////////////////////////
+###############################################################################
+#
 # Target: Lomse library
-#////////////////////////////////////////////////////////////////////////
+#
+###############################################################################
 
 
 # source files to compile
@@ -543,9 +564,11 @@ source_group( "packages"        FILES ${PACKAGES_FILES} )
 
 
 
-#////////////////////////////////////////////////////////////////////////
+###############################################################################
+#
 # Target: static library
-#////////////////////////////////////////////////////////////////////////
+#
+###############################################################################
 
 set(LOMSE  lomse)
 
@@ -576,9 +599,11 @@ get_target_property(VAR ${LOMSE} LINK_FLAGS)
 
 
 
-#////////////////////////////////////////////////////////////////////////
+###############################################################################
+#
 # Target: dynamic library 
-#////////////////////////////////////////////////////////////////////////
+#
+###############################################################################
 
 # Cannot have two targets with the same name so the dynamic version has
 # '-dyn' appended and then the name of the output file is changed
@@ -594,9 +619,11 @@ set_target_properties(${LOMSE_DYN}
 
 
 
-#////////////////////////////////////////////////////////////////////////
+###############################################################################
+#
 # Target: program for testing the library
-#////////////////////////////////////////////////////////////////////////
+#
+###############################################################################
 
 set (TESTLIB  testlib)
 
@@ -711,9 +738,11 @@ add_custom_command(
 
 
 
-#////////////////////////////////////////////////////////////////////////
+###############################################################################
+#
 # Target: Example_1
-#////////////////////////////////////////////////////////////////////////
+#
+###############################################################################
 
 
 set (EXAMPLE1 example_1)
@@ -772,8 +801,12 @@ add_dependencies(example_1 lomse)
 
 
 
-#///////////////////////////////////////////////////////////////////////////////
+###############################################################################
+#
 # library installation
+#
+###############################################################################
+
 # You can change the install location by running cmake like this:
 #
 #   cmake -DCMAKE_INSTALL_PREFIX=/new/install/prefix
@@ -781,7 +814,7 @@ add_dependencies(example_1 lomse)
 # By default, CMake uses the following prefix:
 #   - Linux: "/usr/local"
 #   - Windows: "C:\Program Files\lomse\"
-#///////////////////////////////////////////////////////////////////////////////
+#
 
 message("CMAKE_INSTALL_PREFIX = " ${CMAKE_INSTALL_PREFIX} )
 
@@ -841,45 +874,69 @@ elseif( WIN32 )
 endif()
 
 
-## Set the path of the application executable
-#if( MSVC )
-#    set( EXE_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/${TESTLIB}${CMAKE_EXECUTABLE_SUFFIX} )
-#else()
-#    set( EXE_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${TESTLIB}${CMAKE_EXECUTABLE_SUFFIX} )
-#endif()
 
-if(0)
-########### install source files ###############
-install(FILES  AUTHORS ChangeLog COPYING NEWS README THANKS 
-        DESTINATION ${DATADIR}/doc/${CMAKE_PROJECT_NAME}
-)
-
-install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
-        DESTINATION ${INCLUDEDIR}/${CMAKE_PROJECT_NAME}
-)
-endif(0)
-
-if(0)
-#///////////////////////////////////////////////////////////////////////////////
+###############################################################################
+#
 # CPack section: installers generation
-#///////////////////////////////////////////////////////////////////////////////
+#
+###############################################################################
+#
+# Currently it just builds the debian binary package.
+#
 
-set(CPACK_SOURCE_GENERATOR TGZ)
-set(CPACK_SOURCE_IGNORE_FILES
-    /[.]svn/ /.*[.]o$ /.*[.]o/ /autom4te[.]cache/ /[.].* /bootstrap 
-    /RELEASE /styles/ /papers/ /rpm.am /msi.am )
-set(CPACK_PACKAGE_VERSION ${PACKAGE_VERSION})
-set(CPACK_SOURCE_PACKAGE_FILE_NAME
-    ${CMAKE_PROJECT_NAME}-${CPACK_PACKAGE_VERSION})
-    
-set(CPACK_PACKAGE_VENDOR "LenMus")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Library to render music scores")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "lomse")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README")
- 
+set(CPACK_PACKAGE_VENDOR "LenMus Project")
+set(CPACK_PACKAGE_VERSION ${LOMSE_VERSION_STRING} )
+set(CPACK_PACKAGE_NAME "lomse")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Free open source library to render music scores")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${ROOT_DIR}/README")
+set(CPACK_PACKAGE_CONTACT "s.cecilio@gmail.com")
+
+set(CPACK_RESOURCE_FILE_LICENSE "${ROOT_DIR}/COPYING")
+set(CPACK_RESOURCE_FILE_README "${ROOT_DIR}/README")
+
+if(UNIX)
+    set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Cecilio Salmeron") #required
+    set(CPACK_DEBIAN_PACKAGE_NAME ${CPACK_PACKAGE_NAME} )
+    set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION} )
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386")
+
+    set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}\r\rLomse is a free open source project to provide software developers with\r a C++ library for rendering, editing and playing back music scores.\r With it, you can add capabilities to any program for displaying and\r editing music scores. It is witten in C++, it is platform independent.\r\rLomse website: http://www.lenmus.org/en/lomse/intro")
+
+    set(CPACK_PACKAGE_FILE_NAME
+        "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-linux-i386-32bits")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libfreetype6-dev, libpng12-dev (>=1.2.42), zlib1g (>= 1:1.2.1), boost-devel (>= 1.42.0), libboost-date-time (>= 1.42.0), libboost-thread (>= 1.42.0)" )
+    set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+
+    # try to generate dependencies automatically
+    set (MY_DEPENDENCIES, "")       #CPACK_DEBIAN_PACKAGE_DEPENDS
+    foreach(dep ${${PROJECT_NAME}_DEPENDENCIES})
+        if("${MY_DEPENDENCIES}" STREQUAL "")
+            set(MY_DEPENDENCIES "${dep} (>= ${PROJECT_VERSION})")
+        else()
+            set(MY_DEPENDENCIES "${MY_DEPENDENCIES}, ${dep} (>= ${PROJECT_VERSION})")
+        endif()
+    endforeach()
+    message ("my dependencies: '${MY_DEPENDENCIES}'")
+    message ("hard coded     : '${CPACK_DEBIAN_PACKAGE_DEPENDS}'")
+
+endif(UNIX)
+
+
+if(UNIX)
+    set(CPACK_GENERATOR "DEB")
+#else()
+#    set(CPACK_GENERATOR "NSIS")
+
+#    # There is a bug in NSI that does not handle full unix paths properly. Make
+#    # sure there is at least one set of four (4) backlasshes.
+#    SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
+#    SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\MyExecutable.exe")
+#    SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} My Famous Project")
+#    SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.my-project-home-page.org")
+#    SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.my-personal-home-page.com")
+#    SET(CPACK_NSIS_CONTACT "me@my-personal-home-page.com")
+#    SET(CPACK_NSIS_MODIFY_PATH ON)
+endif()
+
 include(CPack)
- 
-endif(0)
 

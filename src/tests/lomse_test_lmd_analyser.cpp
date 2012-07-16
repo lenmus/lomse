@@ -195,6 +195,28 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_missing_vers)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        expected << "Line 0. lenmusdoc: Missing mandatory attribute 'vers'. Value '0.0' assumed." << endl;
+        string src =
+            "<lenmusdoc><content><para>Hello world</para></content></lenmusdoc>";
+        parser.parse_text(src);
+        XmlNode* tree = parser.get_tree_root();
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        CHECK( errormsg.str() == expected.str() );
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( pIModel->get_root() != NULL );
+
+        delete pIModel;
+    }
+
 //    // helper ---------------------------------------------------------------------------
 
 //    TEST_FIXTURE(LmdAnalyserTestFixture, MissingMandatoryElement_NoElements)
@@ -7659,7 +7681,7 @@ SUITE(LmdAnalyserTest)
         Document doc(m_libraryScope);
         LmdParser parser;
         stringstream expected;
-        expected << "Line 0. link: missing 'url'." << endl;
+        expected << "Line 0. link: Missing mandatory attribute 'url'." << endl;
         parser.parse_text(
             "<link>Harmony exercise</link>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);

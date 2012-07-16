@@ -56,20 +56,20 @@ using namespace lomse;
 
 //---------------------------------------------------------------------------------------
 // helper, access to protected members
-class MyBoxContentLayouter : public InlinesContainerLayouter
+class MyInlinesContainerLayouter : public InlinesContainerLayouter
 {
 public:
-    MyBoxContentLayouter(ImoContentObj* pImo, GraphicModel* pGModel,
+    MyInlinesContainerLayouter(ImoContentObj* pImo, GraphicModel* pGModel,
                         LibraryScope& libraryScope, ImoStyles* pStyles)
         : InlinesContainerLayouter(pImo, NULL, pGModel, libraryScope, pStyles)
     {
     }
-    MyBoxContentLayouter(LibraryScope& libraryScope, LineReferences& refs)
+    MyInlinesContainerLayouter(LibraryScope& libraryScope, LineReferences& refs)
         : InlinesContainerLayouter(NULL, NULL, NULL, libraryScope, NULL)
     {
         m_lineRefs = refs;
     }
-    virtual ~MyBoxContentLayouter() {}
+    virtual ~MyInlinesContainerLayouter() {}
 
     GmoBox* my_get_main_box() { return m_pItemMainBox; }
     UPoint my_get_cursor() { return m_pageCursor; }
@@ -90,19 +90,19 @@ public:
 
 
 //---------------------------------------------------------------------------------------
-class BoxContentLayouterTestFixture
+class InlinesContainerLayouterTestFixture
 {
 public:
     LibraryScope m_libraryScope;
     std::string m_scores_path;
 
-    BoxContentLayouterTestFixture()   // setUp()
+    InlinesContainerLayouterTestFixture()   // setUp()
         : m_libraryScope(cout)
         , m_scores_path(LOMSE_TEST_SCORES_PATH)
     {
     }
 
-    ~BoxContentLayouterTestFixture()  // tearDown()
+    ~InlinesContainerLayouterTestFixture()  // tearDown()
     {
     }
 
@@ -114,12 +114,12 @@ public:
 };
 
 
-SUITE(BoxContentLayouterTest)
+SUITE(InlinesContainerLayouterTest)
 {
 
     // para -----------------------------------------------------------------------------
 
-    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_Measure)
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_Measure)
     {
         //The objective of this test is not to test something but to measure a
         //paragraph without margins, so that in following tests we can check
@@ -140,7 +140,7 @@ SUITE(BoxContentLayouterTest)
         GmoBoxDocPageContent box(NULL);
         box.set_owner_box(&page);
 
-        MyBoxContentLayouter lyt(pPara, &model, m_libraryScope, pStyles);
+        MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
         CHECK( lyt.my_is_first_line() == true );
         lyt.prepare_to_start_layout();
         lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 10000.0f, 20000.0f);
@@ -169,7 +169,7 @@ SUITE(BoxContentLayouterTest)
         CHECK( is_equal(pWord->get_top(), 0.0f) );
     }
 
-    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_TopMargin)
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_TopMargin)
     {
         Document doc(m_libraryScope);
         doc.create_empty();
@@ -187,7 +187,7 @@ SUITE(BoxContentLayouterTest)
         GmoBoxDocPageContent box(NULL);
         box.set_owner_box(&page);
 
-        MyBoxContentLayouter lyt(pPara, &model, m_libraryScope, pStyles);
+        MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
         lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 10000.0f, 20000.0f);
         lyt.layout_in_box();
@@ -215,7 +215,7 @@ SUITE(BoxContentLayouterTest)
         CHECK( is_equal(lyt.my_get_cursor().y, 1635.0f) );
     }
 
-    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_LeftMargin)
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_LeftMargin)
     {
         Document doc(m_libraryScope);
         doc.create_empty();
@@ -233,7 +233,7 @@ SUITE(BoxContentLayouterTest)
         GmoBoxDocPageContent box(NULL);
         box.set_owner_box(&page);
 
-        MyBoxContentLayouter lyt(pPara, &model, m_libraryScope, pStyles);
+        MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
         lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 10000.0f, 20000.0f);
         lyt.layout_in_box();
@@ -261,7 +261,7 @@ SUITE(BoxContentLayouterTest)
         CHECK( is_equal(lyt.my_get_cursor().y, 635.0f) );
     }
 
-    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_LeftBottomMargin)
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_LeftBottomMargin)
     {
         Document doc(m_libraryScope);
         doc.create_empty();
@@ -280,7 +280,7 @@ SUITE(BoxContentLayouterTest)
         GmoBoxDocPageContent box(NULL);
         box.set_owner_box(&page);
 
-        MyBoxContentLayouter lyt(pPara, &model, m_libraryScope, pStyles);
+        MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
         lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 10000.0f, 20000.0f);
         lyt.layout_in_box();
@@ -308,7 +308,7 @@ SUITE(BoxContentLayouterTest)
         CHECK( is_equal(lyt.my_get_cursor().y, 1635.0f) );
     }
 
-    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_FirstLineIndent)
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_FirstLineIndent)
     {
         Document doc(m_libraryScope);
         doc.create_empty();
@@ -326,7 +326,7 @@ SUITE(BoxContentLayouterTest)
         GmoBoxDocPageContent box(NULL);
         box.set_owner_box(&page);
 
-        MyBoxContentLayouter lyt(pPara, &model, m_libraryScope, pStyles);
+        MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
         lyt.my_set_first_line_indent(2000.0f);
         lyt.prepare_to_start_layout();
         lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 10000.0f, 20000.0f);
@@ -355,7 +355,7 @@ SUITE(BoxContentLayouterTest)
         CHECK( is_equal(lyt.my_get_cursor().y, 635.0f) );
     }
 
-    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_NotEnoughSpaceInPage)
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_NotEnoughSpaceInPage)
     {
         Document doc(m_libraryScope);
         doc.create_empty();
@@ -373,7 +373,7 @@ SUITE(BoxContentLayouterTest)
         GmoBoxDocPageContent box(NULL);
         box.set_owner_box(&page);
 
-        MyBoxContentLayouter lyt(pPara, &model, m_libraryScope, pStyles);
+        MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
         lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 10000.0f, 1300.0f);
         lyt.layout_in_box();
@@ -381,7 +381,7 @@ SUITE(BoxContentLayouterTest)
         CHECK( lyt.is_item_layouted() == false );
     }
 
-    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_EmptyParagraphHeight)
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_EmptyParagraphHeight)
     {
         //If the paragraph is empty, it is considered to contain a line with a
         //"strut" (an invisible glyph of zero width) with the current paragraph
@@ -402,7 +402,7 @@ SUITE(BoxContentLayouterTest)
         GmoBoxDocPageContent box(NULL);
         box.set_owner_box(&page);
 
-        MyBoxContentLayouter lyt(pPara, &model, m_libraryScope, pStyles);
+        MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
         lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 10000.0f, 20000.0f);
         lyt.layout_in_box();
@@ -425,12 +425,12 @@ SUITE(BoxContentLayouterTest)
         CHECK( is_equal(lyt.my_get_cursor().y, 1635.0f) );
     }
 
-    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_UpdateReferences_text_larger_up)
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_UpdateReferences_text_larger_up)
     {
         LineReferences line(100.0f, 300.0f, 400.0f, 600.0f); //top, middle, base, bottom
         LineReferences engr(120.0f, 350.0f, 500.0f, 650.0f); //top, middle, base, bottom
 
-        MyBoxContentLayouter lyt(m_libraryScope, line);
+        MyInlinesContainerLayouter lyt(m_libraryScope, line);
         LUnits shift = 400.0f - 500.0f;
         lyt.my_update_line_references(engr, shift, true /*text*/);
 
@@ -449,12 +449,12 @@ SUITE(BoxContentLayouterTest)
         CHECK( is_equal(refs.subLine, 500.0f) );        //engr.base
     }
 
-    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_UpdateReferences_text_smaller_down)
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_UpdateReferences_text_smaller_down)
     {
         LineReferences line(120.0f, 350.0f, 500.0f, 650.0f); //top, middle, base, bottom
         LineReferences engr(100.0f, 300.0f, 400.0f, 600.0f); //top, middle, base, bottom
 
-        MyBoxContentLayouter lyt(m_libraryScope, line);
+        MyInlinesContainerLayouter lyt(m_libraryScope, line);
         LUnits shift = 500.0f - 400.0f;
         lyt.my_update_line_references(engr, shift, true /*text*/);
 
@@ -473,12 +473,12 @@ SUITE(BoxContentLayouterTest)
         CHECK( is_equal(refs.subLine, 500.0f) );        //engr.base + shift
     }
 
-    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_UpdateReferences_notext_larger_down)
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_UpdateReferences_notext_larger_down)
     {
         LineReferences line(100.0f, 300.0f, 400.0f, 600.0f); //top, middle, base, bottom
         LineReferences engr(120.0f, 350.0f, 500.0f, 650.0f); //top, middle, base, bottom
 
-        MyBoxContentLayouter lyt(m_libraryScope, line);
+        MyInlinesContainerLayouter lyt(m_libraryScope, line);
         LUnits shift = 400.0f - 350.0f;     //i.e. sub align
         lyt.my_update_line_references(engr, shift, false /*text, no_baseline / no text*/);
 
@@ -497,12 +497,12 @@ SUITE(BoxContentLayouterTest)
         CHECK( is_equal(refs.subLine, 400.0f) );        //no change
     }
 
-    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_UpdateReferences_notext_smaller_up)
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_UpdateReferences_notext_smaller_up)
     {
         LineReferences line(120.0f, 350.0f, 500.0f, 650.0f); //top, middle, base, bottom
         LineReferences engr(100.0f, 300.0f, 400.0f, 600.0f); //top, middle, base, bottom
 
-        MyBoxContentLayouter lyt(m_libraryScope, line);
+        MyInlinesContainerLayouter lyt(m_libraryScope, line);
         LUnits shift = 120.0f - 300.0f;     //i.e. supper align
         lyt.my_update_line_references(engr, shift, false /*text, no_baseline / no text*/);
 
@@ -521,7 +521,7 @@ SUITE(BoxContentLayouterTest)
         CHECK( is_equal(refs.subLine, 500.0f) );        //no change
     }
 
-    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_AlignBaseline)
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_AlignBaseline)
     {
         Document doc(m_libraryScope);
         doc.create_empty();
@@ -542,7 +542,7 @@ SUITE(BoxContentLayouterTest)
         GmoBoxDocPageContent box(NULL);
         box.set_owner_box(&page);
 
-        MyBoxContentLayouter lyt(pPara, &model, m_libraryScope, pStyles);
+        MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
         lyt.prepare_to_start_layout();
         lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 10000.0f, 20000.0f);
         lyt.layout_in_box();
@@ -571,7 +571,7 @@ SUITE(BoxContentLayouterTest)
 //        CHECK( is_equal(pWord1->get_baseline(), pWord2->get_baseline()) );
     }
 
-////    //TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_TwoPagesCreated)
+////    //TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_TwoPagesCreated)
 ////    //{
 ////    //    Document doc(m_libraryScope);
 ////    //    doc.from_string("(lenmusdoc (version 0.0)(content "
@@ -587,7 +587,7 @@ SUITE(BoxContentLayouterTest)
 ////    //    CHECK( lyt.is_item_layouted() == false );
 ////    //}
 
-    TEST_FIXTURE(BoxContentLayouterTestFixture, Paragraph_MinHeight)
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Paragraph_MinHeight)
     {
         Document doc(m_libraryScope);
         doc.create_empty();
@@ -605,7 +605,7 @@ SUITE(BoxContentLayouterTest)
         GmoBoxDocPageContent box(NULL);
         box.set_owner_box(&page);
 
-        MyBoxContentLayouter lyt(pPara, &model, m_libraryScope, pStyles);
+        MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
         CHECK( lyt.my_is_first_line() == true );
         lyt.prepare_to_start_layout();
         lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 10000.0f, 20000.0f);
@@ -632,6 +632,90 @@ SUITE(BoxContentLayouterTest)
         CHECK( is_equal(pParaBox->get_size().height, 1200.0f) );
         CHECK( is_equal(pWord->get_left(), 0.0f) );
         CHECK( is_equal(pWord->get_top(), 0.0f) );
+    }
+
+
+    // split long texts without spaces (i.e. Chinese texts)
+
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Chinese_MeasureLongText)
+    {
+        //This test is just to measure a long text
+
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoStyle* pDefStyle = doc.get_default_style();
+        pDefStyle->vertical_align(ImoStyle::k_valign_top);
+        ImoStyle* pParaStyle = doc.create_style("para");
+        pParaStyle->margin_left(1000.0f);
+        ImoParagraph* pPara = doc.get_imodoc()->get_content()->add_paragraph(pParaStyle);
+        pPara->add_text_item("VeryLongTextWithoutSpaces", pDefStyle);
+
+        GraphicModel model;
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoStyles* pStyles = pDoc->get_styles();
+        GmoBoxDocPage page(NULL);
+        GmoBoxDocPageContent box(NULL);
+        box.set_owner_box(&page);
+
+        MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
+        lyt.my_set_first_line_indent(2000.0f);
+        lyt.prepare_to_start_layout();
+        lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 10000.0f, 20000.0f);
+        lyt.layout_in_box();
+        lyt.my_set_box_height();
+        lyt.my_add_end_margins();
+
+        GmoBox* pParaBox = lyt.my_get_main_box();
+        GmoShape* pWord = pParaBox->get_shape(0);
+        //cout << "box: org=(" << pParaBox->get_origin().x << ", "
+        //     << pParaBox->get_origin().y << ") size=("
+        //     << pParaBox->get_size().width << ", "
+        //     << pParaBox->get_size().height << ")"
+        //     << endl;
+        //cout << "cursor=(" << lyt.my_get_cursor().x << ", "
+        //     << lyt.my_get_cursor().y << ")" << endl;
+        //cout << "word: org=(" << pWord->get_left() << ", "
+        //     << pWord->get_top() << "), width=" << pWord->get_width() << endl;
+        CHECK( is_equal(pParaBox->get_origin().x, 0.0f) );
+        CHECK( is_equal(pParaBox->get_origin().y, 0.0f) );
+        CHECK( is_equal(pParaBox->get_size().width, 10000.0f) );
+        CHECK( is_equal(pParaBox->get_size().height, 635.0f) );
+        CHECK( is_equal(pWord->get_left(), 3000.0f) );
+        CHECK( is_equal(pWord->get_top(), 0.0f) );
+        CHECK( is_equal(pWord->get_width(), 5081.65f) );
+        CHECK( is_equal(lyt.my_get_cursor().x, 3000.0f) );
+        CHECK( is_equal(lyt.my_get_cursor().y, 635.0f) );
+    }
+
+    TEST_FIXTURE(InlinesContainerLayouterTestFixture, Chinese_LongTextDoesntFit)
+    {
+        // Page size is too short, so long text doesn't fit and can not be layouted
+
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoStyle* pDefStyle = doc.get_default_style();
+        pDefStyle->vertical_align(ImoStyle::k_valign_top);
+        ImoStyle* pParaStyle = doc.create_style("para");
+        pParaStyle->margin_left(1000.0f);
+        ImoParagraph* pPara = doc.get_imodoc()->get_content()->add_paragraph(pParaStyle);
+        pPara->add_text_item("VeryLongTextWithoutSpaces", pDefStyle);
+
+        GraphicModel model;
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoStyles* pStyles = pDoc->get_styles();
+        GmoBoxDocPage page(NULL);
+        GmoBoxDocPageContent box(NULL);
+        box.set_owner_box(&page);
+
+        MyInlinesContainerLayouter lyt(pPara, &model, m_libraryScope, pStyles);
+        lyt.my_set_first_line_indent(2000.0f);
+        lyt.prepare_to_start_layout();
+        lyt.create_main_box(&box, UPoint(0.0f, 0.0f), 4000.0f, 10000.0f);
+        lyt.layout_in_box();
+        lyt.my_set_box_height();
+        lyt.my_add_end_margins();
+
+        CHECK( lyt.is_item_layouted() == false );
     }
 
 };
