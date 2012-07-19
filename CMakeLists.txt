@@ -239,6 +239,7 @@ if(Boost_FOUND)
 #    message("Boost found: libraries: ${Boost_LIBRARIES}" )
 #    message("Boost found: include= ${Boost_INCLUDE_DIRS}" )
 #    message("Boost found: libdir= ${Boost_LIBRARY_DIRS}" )
+    message("Boost found: version= ${Boost_LIB_VERSION}" )
 else()
     message(SEND_ERROR "Boost package not found. Reason: ${Boost_ERROR_REASON}" )
 endif()
@@ -910,21 +911,11 @@ if(UNIX)
 
     set(CPACK_PACKAGE_FILE_NAME
         "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-linux-i386-32bits")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libfreetype6-dev, libpng12-dev (>=1.2.42), zlib1g (>= 1:1.2.1), libboost-dev (>= 1.42.0)" )
+    #even hardcoding dependencies, this doesn't work in my machine!
+    #set(CPACK_DEBIAN_PACKAGE_DEPENDS "libfreetype6, libpng12 (>=1.2.42), zlib1g (>= 1:1.2.1), libboost_date_time${Boost_LIB_VERSION}, libboost_thread${Boost_LIB_VERSION}" )
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-
-    # try to generate dependencies automatically
-    set (MY_DEPENDENCIES, "")       #CPACK_DEBIAN_PACKAGE_DEPENDS
-    foreach(dep ${${PROJECT_NAME}_DEPENDENCIES})
-        if("${MY_DEPENDENCIES}" STREQUAL "")
-            set(MY_DEPENDENCIES "${dep} (>= ${PROJECT_VERSION})")
-        else()
-            set(MY_DEPENDENCIES "${MY_DEPENDENCIES}, ${dep} (>= ${PROJECT_VERSION})")
-        endif()
-    endforeach()
-    message ("project dependencies: '${${PROJECT_NAME}_DEPENDENCIES}'")
-    message ("my dependencies: '${MY_DEPENDENCIES}'")
-    message ("hard coded     : '${CPACK_DEBIAN_PACKAGE_DEPENDS}'")
+    
+    #message ("dependencies: '${CPACK_DEBIAN_PACKAGE_DEPENDS}'")
 
 endif(UNIX)
 

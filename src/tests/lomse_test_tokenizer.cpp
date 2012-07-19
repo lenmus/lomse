@@ -115,9 +115,10 @@ SUITE(LdpTokenizerTest)
                 break;
         }
         //cout << "'" << token->get_value() << "'" << endl;
+        //cout << "num.tokens=" << numTokens << endl;
         CHECK( token->get_type() == tkString );
-        CHECK( numTokens == 59 );
-        CHECK( token->get_value() == "Текст на кирилица" );
+        CHECK( numTokens == 22 );
+        CHECK( token->get_value() == "音乐老师  Текст на кирилица" );
     }
 
     TEST_FIXTURE(LdpTokenizerTestFixture, TokenizerReadIntegerNumber)

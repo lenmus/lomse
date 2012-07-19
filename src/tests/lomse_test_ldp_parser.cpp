@@ -120,7 +120,10 @@ SUITE(LdpParserTest)
         parser.parse_file(m_scores_path + "00002-unicode-text.lms");
         LdpTree* score = parser.get_ldp_tree();
         //cout << score->get_root()->to_string() << endl;
-        CHECK( score->get_root()->to_string() == "(score (vers 1.6) (language en iso-8859-1) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData (clef G) (n c4 q) (text \"Текст на кирилица\" (dx 15) (dy -10) (font normal 10)))))" );
+        CHECK( score->get_root()->to_string() ==
+              "(score (vers 1.6) (instrument (musicData (clef G) "
+              "(n c4 q) (text \"音乐老师  Текст на кирилица\" (dx 15) "
+              "(dy -10)))))" );
         delete score->get_root();
     }
 
