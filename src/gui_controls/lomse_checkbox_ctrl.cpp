@@ -27,9 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_score_player_ctrl.h"
-
-#include "lomse_score_player.h"
+#include "lomse_checkbox_ctrl.h"
 #include "lomse_internal_model.h"
 #include "lomse_shapes.h"
 #include "lomse_document.h"
@@ -39,30 +37,48 @@
 #include "lomse_calligrapher.h"
 #include "lomse_events.h"
 #include "lomse_dyn_generator.h"
-#include "lomse_interactor.h"
-
 
 namespace lomse
 {
 
 //=======================================================================================
-// ScorePlayerCtrl implementation
+// CheckboxCtrl implementation
 //=======================================================================================
-ScorePlayerCtrl::ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner,
-                                 Document* pDoc)
-    : Control(NULL, pDoc)
-    , PlayerGui()
+
+Vertex m_tickVertices[] = {
+    { 384.0, 151.0, agg::path_cmd_move_to },
+    { 323.0, 196.0, agg::path_cmd_curve3 },
+    { 260.0, 279.0, agg::path_cmd_curve3 },    //on-curve
+    { 201.0, 357.0, agg::path_cmd_curve3 },
+    { 165.0, 431.0, agg::path_cmd_curve3 },    //on-curve
+    { 137.0, 450.0, agg::path_cmd_curve3 },
+    { 115.0, 467.0, agg::path_cmd_curve3 },    //on-curve
+    {  82.0, 357.0, agg::path_cmd_curve3 },
+    {  37.0, 339.0, agg::path_cmd_curve3 },    //on-curve
+    {  62.0, 310.0, agg::path_cmd_curve3 },
+    {  87.0, 310.0, agg::path_cmd_curve3 },    //on-curve
+    { 108.0, 310.0, agg::path_cmd_curve3 },
+    { 137.0, 380.0, agg::path_cmd_curve3 },    //on-curve
+    { 234.0, 219.0, agg::path_cmd_curve3 },
+    { 375.0, 138.0, agg::path_cmd_curve3 },    //on-curve
+};
+
+const int m_nNumVertices = sizeof(m_tickVertices)/sizeof(Vertex);
+
+//---------------------------------------------------------------------------------------
+CheckboxCtrl::CheckboxCtrl(LibraryScope& libScope, DynGenerator* pOwner,
+                             Document* pDoc, const string& label,
+                             LUnits width, LUnits height, ImoStyle* pStyle)
+    : Control(pOwner, pDoc)
     , m_libraryScope(libScope)
-    , m_pOwnerImo(pOwner)
-    , m_label( pOwner->get_play_label() )
+    , m_label(label)
+    , m_language()
     , m_pMainBox(NULL)
-    , m_style(NULL)
-    , m_width(-1.0f)
-    , m_height(-1.0f)
+    , m_style(pStyle)
+    , m_width(width)
+    , m_height(height)
     , m_hoverColor( Color(255, 0, 0) )      //red
-    , m_visitedColor( Color(0, 127, 0) )    //dark green
-    , m_visited(false)
-    , m_metronome(60)
+    , m_status(false)
 {
     if (!m_style)
         m_style = create_default_style();
@@ -71,21 +87,27 @@ ScorePlayerCtrl::ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner,
     m_prevColor = m_normalColor;
     m_currentColor = m_normalColor;
 
+    //default language
+    ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+    m_language = pImoDoc->get_language();
+
     measure();
+
+    pOwner->accept_control_ownership(this);
 }
 
 //---------------------------------------------------------------------------------------
-ImoStyle* ScorePlayerCtrl::create_default_style()
+ImoStyle* CheckboxCtrl::create_default_style()
 {
     ImoStyle* style = m_pDoc->create_private_style();
     style->border_width(0.0f)->padding(0.0f)->margin(0.0f);
-    style->color( Color(0,0,255) )->text_decoration(ImoTextStyle::k_decoration_underline);
+    style->color( Color(0,0,0) )->font_name("sans");
     style->text_align(ImoTextStyle::k_align_left);
     return style;
 }
 
 //---------------------------------------------------------------------------------------
-USize ScorePlayerCtrl::measure()
+USize CheckboxCtrl::measure()
 {
     if (m_width < 0.0f || m_height < 0.0f)
     {
@@ -100,7 +122,7 @@ USize ScorePlayerCtrl::measure()
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxControl* ScorePlayerCtrl::layout(LibraryScope& libraryScope, UPoint pos)
+GmoBoxControl* CheckboxCtrl::layout(LibraryScope& libraryScope, UPoint pos)
 {
     m_pos = pos;
     m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, m_style);
@@ -108,7 +130,7 @@ GmoBoxControl* ScorePlayerCtrl::layout(LibraryScope& libraryScope, UPoint pos)
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayerCtrl::handle_event(SpEventInfo pEvent)
+void CheckboxCtrl::handle_event(SpEventInfo pEvent)
 {
     if (m_fEnabled)
     {
@@ -119,44 +141,25 @@ void ScorePlayerCtrl::handle_event(SpEventInfo pEvent)
         }
         else if (pEvent->is_mouse_out_event())
         {
-            m_currentColor = m_prevColor;
+            m_currentColor = m_normalColor;
             m_pMainBox->set_dirty(true);
         }
         else if (pEvent->is_on_click_event())
         {
-            m_visited = true;
-            m_prevColor = m_visitedColor;
-
-            bool fPlay = (m_label == m_pOwnerImo->get_play_label() );
-            set_text( fPlay ? m_pOwnerImo->get_stop_label()
-                            : m_pOwnerImo->get_play_label() );
-
-            //TO_FIX: AS we create a new event here, processing of current event does
-            //not finish until this new event is processed. This prevents inmediate
-            //update of "Stop playing" / "Play" label
-
-            //create event for user app
-            SpEventMouse pEv( boost::static_pointer_cast<EventMouse>(pEvent) );
-            EEventType evType = (fPlay ? k_do_play_score_event : k_stop_playback_event); //k_pause_score_event);
-            Interactor* pIntor = pEv->get_interactor();
-            ImoScore* pScore = m_pOwnerImo->get_score();
-            SpEventPlayScore event(
-                    LOMSE_NEW EventPlayScore(evType, pIntor, pScore, this) );
-
-            //AWARE: we notify directly to user app. (to observers of Interactor)
-            pIntor->notify_observers(event, pIntor);
+            m_status = !m_status;
+            m_pMainBox->set_dirty(true);
+            //force to repaint inmediately
+            m_currentColor = m_normalColor;
+            m_pDoc->set_dirty();
+            m_pDoc->notify_if_document_modified();
         }
+
+        notify_observers(pEvent, this);
     }
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayerCtrl::on_end_of_playback()
-{
-    set_text( m_pOwnerImo->get_play_label() );
-}
-
-//---------------------------------------------------------------------------------------
-void ScorePlayerCtrl::set_text(const string& text)
+void CheckboxCtrl::set_text(const string& text)
 {
     m_label = text;
     if (m_pMainBox)
@@ -164,15 +167,14 @@ void ScorePlayerCtrl::set_text(const string& text)
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayerCtrl::change_label(const string& text)
+void CheckboxCtrl::change_label(const string& text)
 {
     set_text(text);
 }
 
 //---------------------------------------------------------------------------------------
-URect ScorePlayerCtrl::determine_text_position_and_size()
+URect CheckboxCtrl::determine_text_position_and_size()
 {
-    int align = m_style->text_align();
     URect pos;
 
     //select_font();    //AWARE: font already selected
@@ -180,63 +182,49 @@ URect ScorePlayerCtrl::determine_text_position_and_size()
     pos.width = meter.measure_width(m_label);
     pos.height = meter.get_font_height();
     pos.y = m_pos.y + (pos.height + m_height) / 2.0f;
+    pos.x = m_pos.x;
 
-    switch (align)
-    {
-        case ImoTextStyle::k_align_left:
-        {
-            pos.x = m_pos.x;
-            break;
-        }
-        case ImoTextStyle::k_align_right:
-        {
-            pos.x = m_pos.x + m_width - pos.width;
-            break;
-        }
-        case ImoTextStyle::k_align_center:
-        {
-            pos.x = m_pos.x + (m_width - pos.width) / 2.0f;
-            break;
-        }
-    }
     return pos;
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayerCtrl::set_tooltip(const string& text)
+void CheckboxCtrl::set_tooltip(const string& text)
 {
-    //TODO: method ScorePlayerCtrl::set_tooltip
+    //TODO: CheckboxCtrl::set_tooltip
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayerCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
+void CheckboxCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     select_font();
     Color color = (m_fEnabled ? m_currentColor : Color(192, 192, 192));
     pDrawer->set_text_color(color);
     URect pos = determine_text_position_and_size();
-    pDrawer->draw_text(pos.x, pos.y, m_label);
 
-    //text decoration
-    if (m_style->text_decoration() == ImoStyle::k_decoration_underline)
+    pDrawer->begin_path();
+    pDrawer->fill( Color(0,0,0,0) );
+    pDrawer->stroke(color);
+    pDrawer->stroke_width( pos.height * 0.075f );
+    pDrawer->rect(UPoint(m_pos.x, m_pos.y +100.0f), USize(400.0f, 400.0f), 50.0f);
+    pDrawer->end_path();
+
+    pDrawer->draw_text(pos.x + 600.0f, pos.y, m_label);
+
+    if (m_status)
     {
-        LUnits y = pos.y + pos.height * 0.12f;
+//        pDrawer->draw_text(pos.x + 50.0f, pos.y, "X");
         pDrawer->begin_path();
         pDrawer->fill(color);
-        pDrawer->stroke(color);
-        pDrawer->stroke_width( pos.height * 0.075f );
-        pDrawer->move_to(pos.x, y);
-        pDrawer->hline_to( pos.right() );
+        pDrawer->add_path(*this);
         pDrawer->end_path();
     }
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayerCtrl::select_font()
+void CheckboxCtrl::select_font()
 {
-    //TODO: language
     TextMeter meter(m_libraryScope);
-    meter.select_font("",   //no particular language
+    meter.select_font(m_language,
                       m_style->font_file(),
                       m_style->font_name(),
                       m_style->font_size(),
@@ -245,33 +233,15 @@ void ScorePlayerCtrl::select_font()
 }
 
 //---------------------------------------------------------------------------------------
-bool ScorePlayerCtrl::countoff_status()
+unsigned CheckboxCtrl::vertex(double* px, double* py)
 {
-    return false;
-}
+	if(m_nCurVertex >= m_nNumVertices)
+		return agg::path_cmd_stop;
 
-//---------------------------------------------------------------------------------------
-bool ScorePlayerCtrl::metronome_status()
-{
-    return false;
-}
+	*px = m_tickVertices[m_nCurVertex].ux_coord + m_pos.x;
+	*py = m_tickVertices[m_nCurVertex].uy_coord + m_pos.y;
 
-//---------------------------------------------------------------------------------------
-int ScorePlayerCtrl::get_play_mode()
-{
-    return k_play_normal_instrument;
-}
-
-//---------------------------------------------------------------------------------------
-int ScorePlayerCtrl::get_metronome_mm()
-{
-    return m_metronome;
-}
-
-//---------------------------------------------------------------------------------------
-Metronome* ScorePlayerCtrl::get_metronome()
-{
-    return m_libraryScope.get_global_metronome();
+	return m_tickVertices[m_nCurVertex++].cmd;
 }
 
 

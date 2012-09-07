@@ -32,8 +32,9 @@
 #include <TestReporterStdout.h>
 
 #include "lomse_build_options.h"
-#include "lomse_doorway.h"
+#include "lomse_injectors.h"
 
+#include <string.h>
 
 using namespace std;
 using namespace lomse;
@@ -53,7 +54,7 @@ int main(int argc, char** argv)
     //or single suite
     //  testlib suite MySuite
 
-    cout << "Lomse version " << LomseDoorway::get_version_string()
+    cout << "Lomse version " << LibraryScope::get_version_string()
          << ". Library tests runner." << endl << endl;
 
     int nErrors = 0;

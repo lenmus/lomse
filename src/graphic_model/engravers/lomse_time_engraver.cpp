@@ -151,7 +151,7 @@ void TimeEngraver::add_all_shapes_to_container()
 //---------------------------------------------------------------------------------------
 GmoShape* TimeEngraver::create_shape_common(ImoObj* pCreatorImo, UPoint uPos)
 {
-    //TODO
+    //TODO TimeEngraver::create_shape_common
 
     create_main_container_shape(uPos);
 
@@ -174,7 +174,7 @@ GmoShape* TimeEngraver::create_shape_common(ImoObj* pCreatorImo, UPoint uPos)
 //---------------------------------------------------------------------------------------
 GmoShape* TimeEngraver::create_shape_cut(ImoObj* pCreatorImo, UPoint uPos)
 {
-    //TODO
+    //TODO: TimeEngraver::create_shape_cut
 
     create_main_container_shape(uPos);
     return m_pTimeShape;

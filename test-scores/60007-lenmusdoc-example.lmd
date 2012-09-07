@@ -7,6 +7,7 @@
 <styles>
     <defineStyle>
         <name>credits</name>
+        <color>#00ff00</color>
     </defineStyle>
 </styles>
 

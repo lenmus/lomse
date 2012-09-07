@@ -27,88 +27,115 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_text_engraver.h"
-
-#include "lomse_internal_model.h"
-#include "lomse_calligrapher.h"
-#include "lomse_gm_basic.h"
-#include "lomse_shape_text.h"
+#include "lomse_events_dispatcher.h"
 
 
 namespace lomse
 {
 
+//TODO: For now, direct invocation without enqueuing the event in the thread.
+#define LOMSE_DIRECT_INVOCATION     1       //1=do not use events thread
+
 //=======================================================================================
-// TextEngraver implementation
+// EventsDispatcher implementation
 //=======================================================================================
-TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           const string& text, ImoStyle* pStyle)
-    : Engraver(libraryScope, pScoreMeter)
-    , m_text(text)
-    , m_pStyle(pStyle)
-    , m_pFontStorage( libraryScope.font_storage() )
+EventsDispatcher::EventsDispatcher()
+    : m_pThread(NULL)
+    , m_fStopLoop(false)
 {
 }
 
 //---------------------------------------------------------------------------------------
-TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           ImoScoreText* pText, ImoScore* pScore)
-    : Engraver(libraryScope, pScoreMeter)
-    , m_text(pText->get_text())
-    , m_pFontStorage( libraryScope.font_storage() )
-{
-    m_pStyle = pText->get_style();
-    if (!m_pStyle)
-        m_pStyle = pScore->get_default_style();
-}
-
-//---------------------------------------------------------------------------------------
-TextEngraver::~TextEngraver()
+EventsDispatcher::~EventsDispatcher()
 {
 }
 
 //---------------------------------------------------------------------------------------
-LUnits TextEngraver::measure_width()
+void EventsDispatcher::start_events_loop()
 {
-    //TODO: language
-    TextMeter meter(m_libraryScope);
-    meter.select_font("",   //no particular language
-                      m_pStyle->font_file(),
-                      m_pStyle->font_name(),
-                      m_pStyle->font_size() );
-    return meter.measure_width(m_text);
+    //Create the thread. It starts inmediately to execute the events loop (method
+    //run_events_loop())
+
+    //AWARE: this method is only intended to be invoked by Lomse, when the library is
+    //initialized. This method only returns when the stop_events_loop() method
+    //is invoked.
+
+#if (LOMSE_DIRECT_INVOCATION == 0)
+    delete m_pThread;
+    m_pThread = LOMSE_NEW EventsThread(&EventsDispatcher::thread_main, this);
+#endif
 }
 
 //---------------------------------------------------------------------------------------
-LUnits TextEngraver::measure_height()
+void EventsDispatcher::stop_events_loop()
 {
-    //TODO: language
-    TextMeter meter(m_libraryScope);
-    meter.select_font("",   //no particular language
-                      m_pStyle->font_file(),
-                      m_pStyle->font_name(),
-                      m_pStyle->font_size() );
-    return meter.get_font_height();
+    //stops the events dispatch loop
+
+    //AWARE: this method is only intended to be run by Lomse, when the
+    //Lomse LibraryScope object is destroyed.
+
+    m_fStopLoop = true;
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeText* TextEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUnits yTop)
+void EventsDispatcher::thread_main()
 {
-    UPoint pos(xLeft, yTop);
-    if (pCreatorImo && pCreatorImo->is_score_text())
-        add_user_shift(static_cast<ImoScoreText*>(pCreatorImo), &pos);
-
-    //TODO-LOG
-    //if (valign == k_center)
+#if (LOMSE_DIRECT_INVOCATION == 0)
+    try
     {
-        TextMeter meter(m_libraryScope);
-        yTop -= meter.get_descender();
+        run_events_loop();
+    }
+    catch (boost::thread_interrupted&)
+    {
+    }
+#endif
+}
+
+//---------------------------------------------------------------------------------------
+void EventsDispatcher::post_event(Observer* pObserver, SpEventInfo pEvent)
+{
+#if (LOMSE_DIRECT_INVOCATION == 1)
+    pObserver->notify(pEvent);
+#else
+    {
+        QueueLock lock(m_mutex);
+        m_events.push( make_pair(pEvent, pObserver));
+    }
+#endif
+}
+
+//---------------------------------------------------------------------------------------
+// Methods to be executed in the thread
+//---------------------------------------------------------------------------------------
+
+void EventsDispatcher::run_events_loop()
+{
+    boost::posix_time::milliseconds waitTime(5);   //5ms
+
+    while (!stop_event_received())
+    {
+        if (pending_events())
+            dispatch_next_event();
+        else
+            boost::this_thread::sleep(waitTime);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void EventsDispatcher::dispatch_next_event()
+{
+    pair<SpEventInfo, Observer*> event;
+
+    {
+        QueueLock lock(m_mutex);
+        event = m_events.front();
+        m_events.pop();
     }
 
-    int idx = 0;
-    return LOMSE_NEW GmoShapeText(pCreatorImo, idx, m_text, m_pStyle, pos.x, pos.y,
-                            m_libraryScope);
+    SpEventInfo pEvent = event.first;
+    Observer* pObserver = event.second;
+    pObserver->notify(pEvent);
 }
 
 
-}  //namespace lomse
+}   //namespace lomse

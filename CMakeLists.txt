@@ -395,6 +395,7 @@ set(DOCUMENT_FILES
 
 set(EXPORTERS_FILES
     ${SRC_DIR}/exporters/lomse_ldp_exporter.cpp
+    ${SRC_DIR}/exporters/lomse_lmd_exporter.cpp
 )
 
 set(FILE_SYSTEM_FILES
@@ -455,9 +456,11 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/layouters/lomse_staffobjs_cursor.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_system_layouter.cpp
     ${SRC_DIR}/graphic_model/layouters/lomse_table_layouter.cpp
+    ${SRC_DIR}/graphic_model/layouters/lomse_text_splitter.cpp
 )
 
 set(GUI_CONTROLS_FILES
+    ${SRC_DIR}/gui_controls/lomse_checkbox_ctrl.cpp
     ${SRC_DIR}/gui_controls/lomse_hyperlink_ctrl.cpp
     ${SRC_DIR}/gui_controls/lomse_score_player_ctrl.cpp
     ${SRC_DIR}/gui_controls/lomse_static_text_ctrl.cpp
@@ -474,6 +477,7 @@ set(INTERNAL_MODEL_FILES
 set(MODULE_FILES
     ${SRC_DIR}/module/lomse_doorway.cpp
     ${SRC_DIR}/module/lomse_events.cpp
+    ${SRC_DIR}/module/lomse_events_dispatcher.cpp
     ${SRC_DIR}/module/lomse_image.cpp
     ${SRC_DIR}/module/lomse_injectors.cpp
     ${SRC_DIR}/module/lomse_logger.cpp
@@ -492,7 +496,6 @@ set(MVC_FILES
 set(PARSER_FILES
     ${SRC_DIR}/parser/lomse_analyser.cpp
     ${SRC_DIR}/parser/lomse_compiler.cpp
-    ${SRC_DIR}/parser/lomse_parser.cpp
     ${SRC_DIR}/parser/lomse_ldp_analyser.cpp
     ${SRC_DIR}/parser/lomse_ldp_compiler.cpp
     ${SRC_DIR}/parser/lomse_ldp_elements.cpp
@@ -673,6 +676,7 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_list_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_lmd_analyser.cpp
         ${SRC_DIR}/tests/lomse_test_lmd_compiler.cpp
+        ${SRC_DIR}/tests/lomse_test_lmd_exporter.cpp
         ${SRC_DIR}/tests/lomse_test_lmd_parser.cpp
         ${SRC_DIR}/tests/lomse_test_midi_table.cpp
         ${SRC_DIR}/tests/lomse_test_model_builder.cpp
@@ -695,6 +699,7 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_system_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_table_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_text_engraver.cpp
+        ${SRC_DIR}/tests/lomse_test_text_splitter.cpp
         ${SRC_DIR}/tests/lomse_test_tokenizer.cpp
         ${SRC_DIR}/tests/lomse_test_tree.cpp
         ${SRC_DIR}/tests/lomse_test_tuplet_engraver.cpp

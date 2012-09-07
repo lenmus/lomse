@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -53,6 +53,7 @@ class ImoTextItem;
 class ImoStyle;
 class GraphicModel;
 class GmoBox;
+class TextSplitter;
 
 
 //---------------------------------------------------------------------------------------
@@ -101,9 +102,8 @@ protected:
     ImoContentObj* m_pCreatorImo;
     LibraryScope& m_libraryScope;
     ImoStyle* m_pStyle;
-
-    //relative: shift from m_org
-    LineReferences m_refLines;
+    LineReferences m_refLines;  //relative: shift from m_org
+    bool m_fBreakRequested;
 
 public:
     virtual ~Engrouter() {}
@@ -137,13 +137,19 @@ public:
     inline LUnits get_text_bottom() { return m_refLines.textBottom; }
     inline LUnits get_middle_line() { return m_refLines.middleline; }
 
+    //information to guide parent layouter
+    inline bool break_requested() { return m_fBreakRequested; }
+    inline void set_break_requested() { m_fBreakRequested = true; }
+
+    //for unit tests
+    inline ImoContentObj* get_creator_imo() { return m_pCreatorImo; }
 
 protected:
     Engrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope);
 };
 
 //---------------------------------------------------------------------------------------
-// Engrouter for Boxes
+// Engrouter for ImoInlineBox objects (imoLink, ImoInlinesWrapper)
 class BoxEngrouter : public Engrouter
 {
 protected:
@@ -156,14 +162,19 @@ public:
 
     void measure();
     GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
+    void layout_and_measure();
     void update_measures(LUnits lineHeight);
 
-    std::list<Engrouter*>& get_engrouters() { return m_engrouters; }
+    inline void add_engrouter(Engrouter* pEngr) { m_engrouters.push_back(pEngr); }
 
     UPoint get_content_org();
     LUnits get_content_width();
     LUnits get_total_bottom_spacing();
     LUnits get_total_right_spacing();
+
+
+    //only for unit tests
+    inline std::list<Engrouter*>& get_engrouters() { return m_engrouters; }
 
 
 protected:
@@ -198,25 +209,23 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-//Engrouter for a word of text
+//Engrouter for a chunk of text
 class WordEngrouter : public Engrouter
 {
 protected:
-    string m_word;
+    wstring m_text;
+    string m_language;
     LUnits m_descent;
     LUnits m_ascent;
     LUnits m_halfLeading;
 
 public:
     WordEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope,
-                  const std::string& word)
-        : Engrouter(pCreatorImo, libraryScope)
-        , m_word(word)
-    {
-    }
+                  const wstring& text);
     virtual ~WordEngrouter() {}
 
-    inline const string& get_text() { return m_word; }
+    //used only for tests
+    inline const wstring& get_text() { return m_text; }
 
     void measure();
     GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
@@ -247,20 +256,20 @@ protected:
     void add_engrouter_shape(GmoObj* pGmo, GmoBox* pBox);
 };
 
-//---------------------------------------------------------------------------------------
-// Container for an InlineBox
-class InlineBoxEngrouter : public InlineWrapperEngrouter
-{
-protected:
-    ImoInlineWrapper* m_pBox;
-
-public:
-    InlineBoxEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope);
-    virtual ~InlineBoxEngrouter() {}
-
-    void measure();
-    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
-};
+////---------------------------------------------------------------------------------------
+//// Container for an InlineBox
+//class InlineBoxEngrouter : public InlineWrapperEngrouter
+//{
+//protected:
+//    ImoInlineWrapper* m_pBox;
+//
+//public:
+//    InlineBoxEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope);
+//    virtual ~InlineBoxEngrouter() {}
+//
+//    void measure();
+//    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
+//};
 
 
 //----------------------------------------------------------------------------------
@@ -279,34 +288,22 @@ public:
     GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
 };
 
-////---------------------------------------------------------------------------------------
-////Engrouter for BoxContent prefix
-//class PrefixEngrouter : public Engrouter
-//{
-//protected:
-//    string m_prefix;
-//    LUnits m_descent;
-//    LUnits m_ascent;
-//    LUnits m_halfLeading;
-//
-//public:
-//    PrefixEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope,
-//                    const std::string& prefix)
-//        : Engrouter(pCreatorImo, libraryScope)
-//        , m_prefix(prefix)
-//    {
-//    }
-//    virtual ~PrefixEngrouter() {}
-//
-//    inline const string& get_text() { return m_word; }
-//
-//    void measure();
-//    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
-//
-//    //info
-//    inline LUnits get_descent() { return m_descent; }
-//    inline LUnits get_ascent() { return m_ascent; }
-//};
+
+//----------------------------------------------------------------------------------
+// NullEngrouter: doesn't create any Gmo object
+class NullEngrouter : public Engrouter
+{
+public:
+    NullEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope)
+        : Engrouter(pCreatorImo, libraryScope)
+    {
+    }
+    virtual ~NullEngrouter() {}
+
+    //implementation of Engrouter virtual pure methods
+    void measure() {}
+    GmoObj* create_gm_object(UPoint pos, LineReferences& refs) { return NULL; }
+};
 
 
 //---------------------------------------------------------------------------------------
@@ -315,24 +312,36 @@ public:
 class EngroutersCreator
 {
 protected:
-    std::list<Engrouter*>& m_engrouters;
     LibraryScope& m_libraryScope;
-    UPoint m_cursor;                //current position. Relative to BoxDocPage
+    TreeNode<ImoObj>::children_iterator m_itCurContent;
+    TreeNode<ImoObj>::children_iterator m_itEndContent;
+
+    //helper:
+    ImoTextItem* m_pCurText;    //current text item being processed
+    Engrouter* m_pCurEngrouter;
+    TextSplitter* m_pTextSplitter;
 
 public:
-    EngroutersCreator(std::list<Engrouter*>& engrouters, LibraryScope& libraryScope);
+    EngroutersCreator(LibraryScope& libraryScope,
+                      TreeNode<ImoObj>::children_iterator itStart,
+                      TreeNode<ImoObj>::children_iterator itEnd);
     virtual ~EngroutersCreator();
 
-    void create_engrouters(ImoInlineLevelObj* pImo);
-    void create_prefix_engrouter(ImoInlinesContainer* pBoxContent, const string& prefix);
+    Engrouter* create_next_engrouter(LUnits maxSpace);
+    bool more_content();
+
+    Engrouter* create_prefix_engrouter(ImoInlinesContainer* pBoxContent,
+                                       const wstring& prefix);
 
 protected:
-    BoxEngrouter* create_wrapper_engrouterbox_for(ImoBoxInline* pImo);
-    void create_and_measure_engrouters(ImoBoxInline* pImo, BoxEngrouter* pBox);
+    Engrouter* create_engrouter_for(ImoInlineLevelObj* pImo);
+    Engrouter* create_next_text_engrouter_for(ImoTextItem* pText, LUnits maxSpace);
+    Engrouter* first_text_engrouter_for(ImoTextItem* pText, LUnits maxSpace);
+    Engrouter* next_text_engouter(LUnits maxSpace);
+    Engrouter* create_wrapper_engrouter_for(ImoBoxInline* pIB, LUnits maxSpace);
+    void create_engrouters_for_box_content(ImoBoxInline* pImo, BoxEngrouter* pBox);
     void layout_engrouters_in_engrouterbox_and_measure(BoxEngrouter* pBox);
-
-    void create_text_item_engrouters(ImoTextItem* pText);
-    void measure_engrouters();
+    TextSplitter* create_text_splitter_for(ImoTextItem* pText);
 
 };
 

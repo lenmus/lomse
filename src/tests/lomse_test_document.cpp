@@ -41,6 +41,7 @@
 #include "lomse_events.h"
 #include "lomse_document_iterator.h"
 
+#include <exception>
 using namespace UnitTest;
 using namespace std;
 using namespace lomse;
@@ -89,8 +90,7 @@ SUITE(DocumentTest)
         CHECK( pImoDoc != NULL );
         CHECK( pImoDoc->get_owner() == &doc );
         CHECK( doc.is_dirty() == true );
-        //cout << doc.to_string() << endl;
-        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content))" );
+        CHECK( pImoDoc->get_content_item(0) == NULL );
     }
 
     TEST_FIXTURE(DocumentTestFixture, DocumentFromFile)
@@ -123,6 +123,7 @@ SUITE(DocumentTest)
         ImoDocument* pImoDoc = doc.get_imodoc();
         CHECK( pImoDoc != NULL );
         CHECK( pImoDoc->get_owner() == &doc );
+        CHECK( pImoDoc->get_language() == "en" );
         CHECK( doc.is_dirty() == true );
 //        cout << doc.to_string() << endl;
 //        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
@@ -178,7 +179,7 @@ SUITE(DocumentTest)
         {
             doc.create_empty();
         }
-        catch(exception& e)
+        catch(std::exception& e)
         {
             //cout << e.what() << endl;
             e.what();
@@ -197,7 +198,7 @@ SUITE(DocumentTest)
             doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
                 "(instrument (musicData (n c4 q))))))");
         }
-        catch(exception& e)
+        catch(std::exception& e)
         {
             //cout << e.what() << endl;
             e.what();
@@ -215,7 +216,7 @@ SUITE(DocumentTest)
         {
             doc.from_file(m_scores_path + "00011-empty-fill-page.lms");
         }
-        catch(exception& e)
+        catch(std::exception& e)
         {
             //cout << e.what() << endl;
             e.what();
@@ -233,7 +234,7 @@ SUITE(DocumentTest)
         {
             doc.create_with_empty_score();
         }
-        catch(exception& e)
+        catch(std::exception& e)
         {
             //cout << e.what() << endl;
             e.what();

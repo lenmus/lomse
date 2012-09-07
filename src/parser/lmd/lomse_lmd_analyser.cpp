@@ -984,14 +984,20 @@ protected:
 
 class NullLmdAnalyser : public LmdElementAnalyser
 {
+protected:
+    const string m_tag;
+
 public:
-    NullLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope) {}
+    NullLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                    const string& tag)
+        : LmdElementAnalyser(pAnalyser, reporter, libraryScope)
+        , m_tag(tag)
+        {
+        }
 
     ImoObj* do_analysis()
     {
-        string name = m_pLdpFactory->get_name( get_type(m_pAnalysedNode) );
-        cout << "Missing analyser for element '" << name << "'. Node ignored." << endl;
+        cout << "Missing analyser for element '" << m_tag << "'. Node ignored." << endl;
         return NULL;
     }
 };
@@ -1140,8 +1146,7 @@ public:
 
     ImoObj* do_analysis()
     {
-        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoBeamDto* pInfo = NULL;   //TODO_X    LOMSE_NEW ImoBeamDto( m_pAnalysedNode );
+        ImoBeamDto* pInfo = NULL;
 
         // num
         if (get_optional(k_number))
@@ -1161,7 +1166,7 @@ public:
             return NULL;
         }
 
-        return pInfo;   //set_imo(m_pAnalysedNode, pInfo);
+        return pInfo;
     }
 
 protected:
@@ -1559,14 +1564,7 @@ public:
     }
 };
 
-//@--------------------------------------------------------------------------------------
-//@ <defineStyle> = (defineStyle <syleName> <styleProperty>* )
-//@ <styleProperty> = (property-tag value)
-//@
-//@ font-style :  { "normal" | "italic" }
-//@ font-weight : { "normal" | "bold" }
-//@
-
+//---------------------------------------------------------------------------------------
 class DefineStyleLmdAnalyser : public LmdElementAnalyser
 {
 public:
@@ -1584,29 +1582,37 @@ public:
             name = get_string_value();
         else
             return NULL;
-
-        //TODO <inherits>
         string parent = (name == "Default style" ? "" : "Default style");
 
         pStyle = create_style(name, parent);
 
+        bool fHasFontFile = false;
         while (more_children_to_analyse())
         {
             // color and background
             if (get_optional(k_color))
-                pStyle->set_color_property(ImoStyle::k_color, get_color_value() );
+                pStyle->color( get_color_value() );
             else if (get_optional(k_background_color))
-                pStyle->set_color_property(ImoStyle::k_background_color, get_color_value() );
+                pStyle->background_color( get_color_value() );
 
             // font
+            else if (get_optional("font-file"))
+            {
+                pStyle->font_file( get_string_value() );
+                fHasFontFile = true;
+            }
             else if (get_optional(k_font_name))
-                pStyle->set_string_property(ImoStyle::k_font_name, get_string_value() );
+            {
+                pStyle->font_name( get_string_value() );
+                if (!fHasFontFile)
+                    pStyle->font_file("");
+            }
             else if (get_optional(k_font_size))
-                pStyle->set_float_property(ImoStyle::k_font_size, get_font_size_value() );
+                pStyle->font_size( get_font_size_value() );
             else if (get_optional(k_font_style))
-                pStyle->set_int_property(ImoStyle::k_font_style, get_font_style() );
+                pStyle->font_style( get_font_style() );
             else if (get_optional(k_font_weight))
-                pStyle->set_int_property(ImoStyle::k_font_weight, get_font_weight() );
+                pStyle->font_weight( get_font_weight() );
 
 //                // border
 //                else if (get_optional(k_border))
@@ -1622,67 +1628,67 @@ public:
 
             // border width
             else if (get_optional(k_border_width))
-                pStyle->set_border_width_property( get_lenght_child() );
+                pStyle->border_width( get_lenght_child() );
             else if (get_optional(k_border_width_top))
-                pStyle->set_lunits_property(ImoStyle::k_border_width_top, get_lenght_child() );
+                pStyle->border_width_top( get_lenght_child() );
             else if (get_optional(k_border_width_right))
-                pStyle->set_lunits_property(ImoStyle::k_border_width_right, get_lenght_child() );
+                pStyle->border_width_right( get_lenght_child() );
             else if (get_optional(k_border_width_bottom))
-                pStyle->set_lunits_property(ImoStyle::k_border_width_bottom, get_lenght_child() );
+                pStyle->border_width_bottom( get_lenght_child() );
             else if (get_optional(k_border_width_left))
-                pStyle->set_lunits_property(ImoStyle::k_border_width_left, get_lenght_child() );
+                pStyle->border_width_left( get_lenght_child() );
 
             // margin
             else if (get_optional(k_margin))
-                pStyle->set_margin_property( get_lenght_child() );
+                pStyle->margin( get_lenght_child() );
             else if (get_optional(k_margin_top))
-                pStyle->set_lunits_property(ImoStyle::k_margin_top, get_lenght_child() );
+                pStyle->margin_top( get_lenght_child() );
             else if (get_optional(k_margin_right))
-                pStyle->set_lunits_property(ImoStyle::k_margin_right, get_lenght_child() );
+                pStyle->margin_right( get_lenght_child() );
             else if (get_optional(k_margin_bottom))
-                pStyle->set_lunits_property(ImoStyle::k_margin_bottom, get_lenght_child() );
+                pStyle->margin_bottom( get_lenght_child() );
             else if (get_optional(k_margin_left))
-                pStyle->set_lunits_property(ImoStyle::k_margin_left, get_lenght_child() );
+                pStyle->margin_left( get_lenght_child() );
 
             // padding
             else if (get_optional(k_padding))
-                pStyle->set_padding_property( get_lenght_child() );
+                pStyle->padding( get_lenght_child() );
             else if (get_optional(k_padding_top))
-                pStyle->set_lunits_property(ImoStyle::k_padding_top, get_lenght_child() );
+                pStyle->padding_top( get_lenght_child() );
             else if (get_optional(k_padding_right))
-                pStyle->set_lunits_property(ImoStyle::k_padding_right, get_lenght_child() );
+                pStyle->padding_right( get_lenght_child() );
             else if (get_optional(k_padding_bottom))
-                pStyle->set_lunits_property(ImoStyle::k_padding_bottom, get_lenght_child() );
+                pStyle->padding_bottom( get_lenght_child() );
             else if (get_optional(k_padding_left))
-                pStyle->set_lunits_property(ImoStyle::k_padding_left, get_lenght_child() );
+                pStyle->padding_left( get_lenght_child() );
 
             //text
             else if (get_optional(k_text_decoration))
-                pStyle->set_int_property(ImoStyle::k_text_decoration, get_text_decoration() );
+                pStyle->text_decoration( get_text_decoration() );
             else if (get_optional(k_vertical_align))
-                pStyle->set_int_property(ImoStyle::k_vertical_align, get_valign() );
+                pStyle->vertical_align( get_valign() );
             else if (get_optional(k_text_align))
-                pStyle->set_int_property(ImoStyle::k_text_align, get_text_align() );
+                pStyle->text_align( get_text_align() );
             else if (get_optional(k_line_height))
-                pStyle->set_float_property(ImoStyle::k_line_height, get_float_child(1.5f) );
+                pStyle->line_height( get_float_child(1.5f) );
 
             //size
             else if (get_optional(k_min_height))
-                pStyle->set_lunits_property(ImoStyle::k_min_height, get_lenght_child() );
+                pStyle->min_height( get_lenght_child() );
             else if (get_optional(k_min_width))
-                pStyle->set_lunits_property(ImoStyle::k_min_width, get_lenght_child() );
+                pStyle->min_width( get_lenght_child() );
             else if (get_optional(k_max_height))
-                pStyle->set_lunits_property(ImoStyle::k_max_height, get_lenght_child() );
+                pStyle->max_height( get_lenght_child() );
             else if (get_optional(k_max_width))
-                pStyle->set_lunits_property(ImoStyle::k_max_width, get_lenght_child() );
+                pStyle->max_width( get_lenght_child() );
             else if (get_optional(k_height))
-                pStyle->set_lunits_property(ImoStyle::k_height, get_lenght_child() );
+                pStyle->height( get_lenght_child() );
             else if (get_optional(k_width))
-                pStyle->set_lunits_property(ImoStyle::k_width, get_lenght_child() );
+                pStyle->width( get_lenght_child() );
 
             //table
             else if (get_optional(k_table_col_width))
-                pStyle->set_lunits_property(ImoStyle::k_table_col_width, get_lenght_child() );
+                pStyle->table_col_width( get_lenght_child() );
 
             else
             {
@@ -2668,14 +2674,14 @@ public:
         // <vers>
         string version = get_mandatory_string_attribute("vers", "0.0", "lenmusdoc");
 
-        //// <language>
-        //string language = get_mandatory_string_attribute("language", "en_US", "lenmusdoc");
+        // <language>
+        string language = get_optional_string_attribute("language", "en");
 
         //create document
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         pImoDoc = static_cast<ImoDocument*>(ImFactory::inject(k_imo_document, pDoc));
         pImoDoc->set_version(version);
-        //pImoDoc->set_language(language);
+        pImoDoc->set_language(language);
         m_pAnalyser->save_root_imo_document(pImoDoc);
         pDoc->set_imo_doc(pImoDoc);
 
@@ -4466,9 +4472,6 @@ public:
 
         error_if_more_elements();
 
-        //TODO:
-        //ensure_default_style_exists(pStyles);
-
         add_to_model(pStyles);
         return pStyles;
     }
@@ -5041,9 +5044,9 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <timeSignature> = (time <beats><beatType>[<visible>][<location>])
-//@ <beats> = <num>
-//@ <beatType> = <num>
+//@ <timeSignature> = (time <top><bottom>[<visible>][<location>])
+//@ <top> = <num>
+//@ <bottom> = <num>
 
 class TimeSignatureLmdAnalyser : public LmdElementAnalyser
 {
@@ -5058,13 +5061,13 @@ public:
         ImoTimeSignature* pTime = static_cast<ImoTimeSignature*>(
                                     ImFactory::inject(k_imo_time_signature, pDoc) );
 
-        // <beats> (num)
+        // <top> (num)
         if (get_mandatory(k_number))
-            pTime->set_beats( get_integer_value(2) );
+            pTime->set_top_number( get_integer_value(2) );
 
-        // <beatType> (num)
+        // <bottom> (num)
         if (get_mandatory(k_number))
-            pTime->set_beat_type( get_integer_value(4) );
+            pTime->set_bottom_number( get_integer_value(4) );
 
         // [<visible>][<location>]
         analyse_staffobjs_options(pTime);
@@ -5345,8 +5348,7 @@ ImoObj* LmdElementAnalyser::analyse_node(XmlNode* pNode)
 //---------------------------------------------------------------------------------------
 bool LmdElementAnalyser::error_missing_element(ELdpElement type)
 {
-    const string& parentName =
-        m_pLdpFactory->get_name( get_type(m_pAnalysedNode) );
+    string parentName = get_name(m_pAnalysedNode);
     const string& name = m_pLdpFactory->get_name(type);
     report_msg(get_line_number(m_pAnalysedNode),
                parentName + ": missing mandatory element '" + name + "'.");
@@ -5389,7 +5391,7 @@ string LmdElementAnalyser::get_mandatory_string_attribute(const string& name,
             element + ": Missing mandatory attribute '" + name + "'." );
     else
         report_msg(get_line_number(m_pAnalysedNode),
-            element + ": Missing mandatory attribute '" + name + "'. Value '" 
+            element + ": Missing mandatory attribute '" + name + "'. Value '"
             + sDefault + "' assumed.");
 
     return attrb;
@@ -5518,7 +5520,7 @@ void LmdElementAnalyser::analyse_one_or_more(ELdpElement* pValid, int nValid)
         }
         else
         {
-            string name = m_pLdpFactory->get_name(type);
+            string name = get_name(m_pChildToAnalyse);
             report_msg(get_line_number(m_pChildToAnalyse),
                 "Element '" + name + "' unknown or not possible here. Ignored.");
         }
@@ -5537,8 +5539,7 @@ bool LmdElementAnalyser::contains(ELdpElement type, ELdpElement* pValid, int nVa
 //---------------------------------------------------------------------------------------
 void LmdElementAnalyser::error_invalid_child()
 {
-    ELdpElement type = get_type(m_pChildToAnalyse);
-    string name = m_pLdpFactory->get_name(type);
+    string name = get_name(m_pChildToAnalyse);
     if (name == "label")
         name += ":" + get_value(m_pChildToAnalyse);
     report_msg(get_line_number(m_pChildToAnalyse),
@@ -5556,8 +5557,7 @@ void LmdElementAnalyser::error_if_more_elements()
 {
     if (more_children_to_analyse())
     {
-        ELdpElement type = get_type(m_pChildToAnalyse);
-        string name = m_pLdpFactory->get_name(type);
+        string name = get_name(m_pChildToAnalyse);
         if (name == "label")
             name += ":" + get_value(m_pChildToAnalyse);
         report_msg(get_line_number(m_pAnalysedNode),
@@ -6102,7 +6102,7 @@ LmdElementAnalyser* LmdAnalyser::new_analyser(const string& name, ImoObj* pAncho
 ////        case k_tag_undoData:        return LOMSE_NEW XxxxxxxLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 
         default:
-            return LOMSE_NEW NullLmdAnalyser(this, m_reporter, m_libraryScope);
+            return LOMSE_NEW NullLmdAnalyser(this, m_reporter, m_libraryScope, name);
     }
 }
 
@@ -6244,8 +6244,8 @@ void OldLmdTiesBuilder::create_tie_if_old_syntax_tie_pending(ImoNote* pEndNote)
         error_invalid_tie_old_syntax( 0 );  //TODO_X    get_line_number(m_pOldTieParam) );
         m_pStartNoteTieOld = NULL;
     }
-    //else
-    //  wait to see if it is possible to tie with next note
+    else
+        ;   //  wait to see if it is possible to tie with next note
 }
 
 //---------------------------------------------------------------------------------------

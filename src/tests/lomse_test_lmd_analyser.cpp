@@ -150,6 +150,7 @@ SUITE(LmdAnalyserTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         CHECK( pDoc != NULL );
         CHECK( pDoc->get_num_content_items() == 0 );
+        CHECK( pDoc->get_language() == "en" );
 
         delete pIModel;
     }
@@ -213,6 +214,30 @@ SUITE(LmdAnalyserTest)
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( pIModel->get_root() != NULL );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_language)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("<lenmusdoc vers='0.0' language='zn_CN'><content/></lenmusdoc>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 0 );
+        CHECK( pDoc->get_language() == "zn_CN" );
 
         delete pIModel;
     }
@@ -5812,9 +5837,9 @@ SUITE(LmdAnalyserTest)
 //        delete tree->get_root();
 //        delete pIModel;
 //    }
-//
-//    // defineStyle ----------------------------------------------------------------------
-//
+
+    // defineStyle ----------------------------------------------------------------------
+
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_DefineStyle)
 //    {
 //        stringstream errormsg;
@@ -5834,11 +5859,11 @@ SUITE(LmdAnalyserTest)
 //        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
 //        CHECK( pStyle != NULL );
 //        CHECK( pStyle->get_name() == "Composer" );
-//        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
-//        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
-//        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
-//        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
-//        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 14 );
+//        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
+//        CHECK( pStyle->font_name() == "Times New Roman" );
+//        CHECK( pStyle->font_style() == ImoStyle::k_italic );
+//        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+//        CHECK( pStyle->font_size() == 14 );
 //
 //        delete tree->get_root();
 //        delete pIModel;
@@ -5864,11 +5889,11 @@ SUITE(LmdAnalyserTest)
 //        ImoStyle* pStyle = pScore->find_style("Header1");
 //        CHECK( pStyle != NULL );
 //        CHECK( pStyle->get_name() == "Header1" );
-//        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
-//        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
-//        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
-//        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
-//        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 14 );
+//        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
+//        CHECK( pStyle->font_name() == "Times New Roman" );
+//        CHECK( pStyle->font_style() == ImoStyle::k_italic );
+//        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+//        CHECK( pStyle->font_size() == 14 );
 //
 //        delete tree->get_root();
 //        delete pIModel;
@@ -5893,42 +5918,50 @@ SUITE(LmdAnalyserTest)
 //        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
 //        CHECK( pStyle != NULL );
 //        CHECK( pStyle->get_name() == "Composer" );
-//        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
-//        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_bottom) == 2.0f );
+//        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
+//        CHECK( pStyle->margin_bottom() == 2.0f );
 //
 //        delete tree->get_root();
 //        delete pIModel;
 //    }
-//
-//    TEST_FIXTURE(LmdAnalyserTestFixture, DefineStyle_FontProperties)
-//    {
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        LmdParser parser;
-//        stringstream expected;
-//        //expected << "Line 0. " << endl;
-//        parser.parse_text("<defineStyle><name>Composer\" "
-//            "(font-name \"Arial\")(font-size 14pt)"
-//            "(font-style italic)(font-weight bold) )" );
-//        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//
-////        cout << "[" << errormsg.str() << "]" << endl;
-////        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//
-//        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
-//        CHECK( pStyle != NULL );
-//        CHECK( pStyle->get_name() == "Composer" );
-//        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Arial" );
-//        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 14 );
-//        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
-//        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
-//
-//        delete tree->get_root();
-//        delete pIModel;
-//    }
-//
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, DefineStyle_FontProperties)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        string src =
+            "<defineStyle>"
+                "<name>Composer</name>"
+                "<font-name>Arial</font-name>"
+                "<font-size>14pt</font-size>"
+                "<font-style>italic</font-style>"
+                "<font-weight>bold</font-weight>"
+                "<font-file>FreeSans.ttf</font-file>"
+            "</defineStyle>";
+        parser.parse_text(src);
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
+        CHECK( pStyle != NULL );
+        CHECK( pStyle->get_name() == "Composer" );
+        CHECK( pStyle->font_name() == "Arial" );
+        CHECK( pStyle->font_file() == "FreeSans.ttf" );
+        CHECK( pStyle->font_size() == 14 );
+        CHECK( pStyle->font_style() == ImoStyle::k_italic );
+        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+
+        delete pIModel;
+    }
+
 //    TEST_FIXTURE(LmdAnalyserTestFixture, DefineStyle_MarginProperties)
 //    {
 //        stringstream errormsg;
@@ -5948,10 +5981,10 @@ SUITE(LmdAnalyserTest)
 //        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
 //        CHECK( pStyle != NULL );
 //        CHECK( pStyle->get_name() == "Composer" );
-//        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_top) == 3.0f );
-//        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_bottom) == 2.0f );
-//        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_left) == 5.0f );
-//        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_right) == 7.0f );
+//        CHECK( pStyle->margin_top() == 3.0f );
+//        CHECK( pStyle->margin_bottom() == 2.0f );
+//        CHECK( pStyle->margin_left() == 5.0f );
+//        CHECK( pStyle->margin_right() == 7.0f );
 //
 //        delete tree->get_root();
 //        delete pIModel;
@@ -5976,10 +6009,10 @@ SUITE(LmdAnalyserTest)
 //        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
 //        CHECK( pStyle != NULL );
 //        CHECK( pStyle->get_name() == "Composer" );
-//        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_top) == 0.5f );
-//        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_bottom) == 0.5f );
-//        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_left) == 0.5f );
-//        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_right) == 0.5f );
+//        CHECK( pStyle->margin_top() == 0.5f );
+//        CHECK( pStyle->margin_bottom() == 0.5f );
+//        CHECK( pStyle->margin_left() == 0.5f );
+//        CHECK( pStyle->margin_right() == 0.5f );
 //
 //        delete tree->get_root();
 //        delete pIModel;
@@ -6004,7 +6037,7 @@ SUITE(LmdAnalyserTest)
 //        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
 //        CHECK( pStyle != NULL );
 //        CHECK( pStyle->get_name() == "Composer" );
-//        CHECK( pStyle->get_float_property(ImoStyle::k_line_height) == 1.2f );
+//        CHECK( pStyle->line_height() == 1.2f );
 //
 //        delete tree->get_root();
 //        delete pIModel;
@@ -6161,11 +6194,11 @@ SUITE(LmdAnalyserTest)
 //        ImoStyle* pStyle = pTitle->get_style();
 //        CHECK( pStyle != NULL );
 //        CHECK( pStyle->get_name() == "Header1" );
-//        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
-//        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
-//        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
-//        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
-//        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 14 );
+//        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
+//        CHECK( pStyle->font_name() == "Times New Roman" );
+//        CHECK( pStyle->font_style() == ImoStyle::k_italic );
+//        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+//        CHECK( pStyle->font_size() == 14 );
 //
 //        delete tree->get_root();
 //        delete pIModel;
@@ -7317,11 +7350,11 @@ SUITE(LmdAnalyserTest)
 
         ImoStyle* pStyle = pStyles->find_style("Header1");
         CHECK( pStyle->get_name() == "Header1" );
-        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
-        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
-        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 14 );
+        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
+        CHECK( pStyle->font_name() == "Times New Roman" );
+        CHECK( pStyle->font_style() == ImoStyle::k_italic );
+        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+        CHECK( pStyle->font_size() == 14 );
 
         delete pIModel;
     }
@@ -7391,42 +7424,42 @@ SUITE(LmdAnalyserTest)
         ImoStyle* pStyle = pStyles->find_style("Header1");
         CHECK( pStyle->get_name() == "Header1" );
             // color and background
-        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
-        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_background_color), Color(0, 252 ,12, 124)) );
+        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
+        CHECK( is_equal(pStyle->background_color(), Color(0, 252 ,12, 124)) );
             // font
-        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
-        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 14 );
+        CHECK( pStyle->font_name() == "Times New Roman" );
+        CHECK( pStyle->font_style() == ImoStyle::k_italic );
+        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+        CHECK( pStyle->font_size() == 14 );
             // border width
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_border_width_top) == 20.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_border_width_right) == 21.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_border_width_bottom) == 22.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_border_width_left) == 23.0f );
+        CHECK( pStyle->border_width_top() == 20.0f );
+        CHECK( pStyle->border_width_right() == 21.0f );
+        CHECK( pStyle->border_width_bottom() == 22.0f );
+        CHECK( pStyle->border_width_left() == 23.0f );
             // margin
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_top) == 24.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_right) == 25.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_bottom) == 26.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_left) == 27.0f );
+        CHECK( pStyle->margin_top() == 24.0f );
+        CHECK( pStyle->margin_right() == 25.0f );
+        CHECK( pStyle->margin_bottom() == 26.0f );
+        CHECK( pStyle->margin_left() == 27.0f );
             // padding
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_padding_top) == 28.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_padding_right) == 29.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_padding_bottom) == 30.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_padding_left) == 31.0f );
+        CHECK( pStyle->padding_top() == 28.0f );
+        CHECK( pStyle->padding_right() == 29.0f );
+        CHECK( pStyle->padding_bottom() == 30.0f );
+        CHECK( pStyle->padding_left() == 31.0f );
             //text
-        CHECK( pStyle->get_int_property(ImoStyle::k_text_decoration) == ImoStyle::k_decoration_overline );
-        CHECK( pStyle->get_int_property(ImoStyle::k_vertical_align) == ImoStyle::k_valign_text_top );
-        CHECK( pStyle->get_int_property(ImoStyle::k_text_align) == ImoStyle::k_align_center );
-        CHECK( pStyle->get_float_property(ImoStyle::k_line_height) == 77.0f );
+        CHECK( pStyle->text_decoration() == ImoStyle::k_decoration_overline );
+        CHECK( pStyle->vertical_align() == ImoStyle::k_valign_text_top );
+        CHECK( pStyle->text_align() == ImoStyle::k_align_center );
+        CHECK( pStyle->line_height() == 77.0f );
             //size
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_min_height) == 32.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_min_width) == 33.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_max_height) == 34.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_max_width) == 35.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_height) == 36.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_width) == 37.0f );
+        CHECK( pStyle->min_height() == 32.0f );
+        CHECK( pStyle->min_width() == 33.0f );
+        CHECK( pStyle->max_height() == 34.0f );
+        CHECK( pStyle->max_width() == 35.0f );
+        CHECK( pStyle->height() == 36.0f );
+        CHECK( pStyle->width() == 37.0f );
             //table
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_table_col_width) == 38.0f );
+        CHECK( pStyle->table_col_width() == 38.0f );
 
         delete pIModel;
     }
@@ -7462,20 +7495,20 @@ SUITE(LmdAnalyserTest)
         ImoStyle* pStyle = pStyles->find_style("Header1");
         CHECK( pStyle->get_name() == "Header1" );
             // border width
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_border_width_top) == 22.33f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_border_width_right) == 22.33f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_border_width_bottom) == 22.33f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_border_width_left) == 22.33f );
+        CHECK( pStyle->border_width_top() == 22.33f );
+        CHECK( pStyle->border_width_right() == 22.33f );
+        CHECK( pStyle->border_width_bottom() == 22.33f );
+        CHECK( pStyle->border_width_left() == 22.33f );
             // margin
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_top) == 15.5f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_right) == 15.5f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_bottom) == 15.5f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_left) == 15.5f );
+        CHECK( pStyle->margin_top() == 15.5f );
+        CHECK( pStyle->margin_right() == 15.5f );
+        CHECK( pStyle->margin_bottom() == 15.5f );
+        CHECK( pStyle->margin_left() == 15.5f );
             // padding
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_padding_top) == 12.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_padding_right) == 12.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_padding_bottom) == 12.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_padding_left) == 12.0f );
+        CHECK( pStyle->padding_top() == 12.0f );
+        CHECK( pStyle->padding_right() == 12.0f );
+        CHECK( pStyle->padding_bottom() == 12.0f );
+        CHECK( pStyle->padding_left() == 12.0f );
 
         delete pIModel;
     }

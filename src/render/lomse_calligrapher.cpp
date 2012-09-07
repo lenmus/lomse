@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -69,22 +69,29 @@ Calligrapher::~Calligrapher()
 int Calligrapher::draw_text(double x, double y, const std::string& str, Color color,
                             double scale)
 {
-    //returns the number of chars drawn
-
-   if (!m_pFonts->is_font_valid())
-        return 0;
-
-   set_scale(scale);
-
     //convert to utf-32
     const char* utf8str = str.c_str();
-    std::vector<unsigned int> utf32result;
+    wstring utf32result;
     utf8::utf8to32(utf8str, utf8str + strlen(utf8str), std::back_inserter(utf32result));
+
+    return draw_text(x, y, utf32result, color, scale);
+}
+
+//---------------------------------------------------------------------------------------
+int Calligrapher::draw_text(double x, double y, const wstring& str, Color color,
+                            double scale)
+{
+    //returns the number of chars drawn
+
+    if (!m_pFonts->is_font_valid())
+        return 0;
+
+    set_scale(scale);
 
     //loop to render glyphs
     int num_glyphs = 0;
-    std::vector<unsigned int>::iterator it;
-    for (it = utf32result.begin(); it != utf32result.end(); ++it)
+    wstring::const_iterator it;
+    for (it = str.begin(); it != str.end(); ++it)
     {
         const lomse::glyph_cache* glyph = m_pFonts->get_glyph_cache(*it);
         if(glyph)
@@ -163,26 +170,56 @@ TextMeter::~TextMeter()
 //---------------------------------------------------------------------------------------
 LUnits TextMeter::measure_width(const std::string& str)
 {
+    //convert to utf-32
+    const char* utf8str = str.c_str();
+    wstring utf32result;
+    utf8::utf8to32(utf8str, utf8str + strlen(utf8str), std::back_inserter(utf32result));
+
+    return measure_width(utf32result);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits TextMeter::measure_width(const wstring& str)
+{
    if (!m_pFonts->is_font_valid())
         return 0.0f;
 
     set_transform();
 
-    //convert to utf-32
-    const char* utf8str = str.c_str();
-    std::vector<unsigned int> utf32result;
-    utf8::utf8to32(utf8str, utf8str + strlen(utf8str), std::back_inserter(utf32result));
-
     //loop to measure glyphs
     LUnits width = 0.0f;
-    std::vector<unsigned int>::iterator it;
-    for (it = utf32result.begin(); it != utf32result.end(); ++it)
+    wstring::const_iterator it;
+    for (it = str.begin(); it != str.end(); ++it)
     {
         const lomse::glyph_cache* glyph = m_pFonts->get_glyph_cache(*it);
         if(glyph)
             width += static_cast<LUnits>( glyph->advance_x );
     }
     return width;
+}
+
+//---------------------------------------------------------------------------------------
+void TextMeter::measure_glyphs(wstring* glyphs, std::vector<LUnits>& glyphWidths)
+{
+    if (!m_pFonts->is_font_valid())
+    {
+        string msg("[TextMeter::measure_glyphs] Not valid font");
+        cout << "Throw: " << msg << endl;
+        throw std::runtime_error(msg);
+    }
+
+    set_transform();
+
+    //loop to measure glyphs
+    wstring::iterator it;
+    for (it = glyphs->begin(); it != glyphs->end(); ++it)
+    {
+        const lomse::glyph_cache* glyph = m_pFonts->get_glyph_cache(*it);
+        if(glyph)
+            glyphWidths.push_back( static_cast<LUnits>( glyph->advance_x ) );
+        else
+            glyphWidths.push_back( 0.0f );
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -229,7 +266,7 @@ URect TextMeter::bounding_rectangle(unsigned int ch)
 
     //set_transform();
     agg::trans_affine mtx;
-    mtx *= agg::trans_affine_scaling(1.0 / m_scale);   //TODO why 110 instead of 96 ?
+    mtx *= agg::trans_affine_scaling(1.0 / m_scale);
     m_pFonts->set_transform(mtx);
 
     const lomse::glyph_cache* glyph = m_pFonts->get_glyph_cache(ch);
@@ -249,24 +286,32 @@ URect TextMeter::bounding_rectangle(unsigned int ch)
 }
 
 //---------------------------------------------------------------------------------------
-bool TextMeter::select_font(const std::string& fontName, double height,
-                               bool fBold, bool fItalic)
+bool TextMeter::select_font(const std::string& language,
+                            const std::string& fontFile,
+                            const std::string& fontName, double height,
+                            bool fBold, bool fItalic)
 {
-    return m_pFonts->select_font(fontName, height, fBold, fItalic);
+    return m_pFonts->select_font(language, fontFile, fontName, height, fBold, fItalic);
 }
 
 //---------------------------------------------------------------------------------------
-bool TextMeter::select_raster_font(const std::string& fontName, double height,
-                                      bool fBold, bool fItalic)
+bool TextMeter::select_raster_font(const std::string& language,
+                                   const std::string& fontFile,
+                                   const std::string& fontName, double height,
+                                   bool fBold, bool fItalic)
 {
-    return m_pFonts->select_raster_font(fontName, height, fBold, fItalic);
+    return m_pFonts->select_raster_font(language, fontFile, fontName,
+                                         height, fBold, fItalic);
 }
 
 //---------------------------------------------------------------------------------------
-bool TextMeter::select_vector_font(const std::string& fontName, double height,
-                                      bool fBold, bool fItalic)
+bool TextMeter::select_vector_font(const std::string& language,
+                                   const std::string& fontFile,
+                                   const std::string& fontName, double height,
+                                   bool fBold, bool fItalic)
 {
-    return m_pFonts->select_vector_font(fontName, height, fBold, fItalic);
+    return m_pFonts->select_vector_font(language, fontFile, fontName,
+                                         height, fBold, fItalic);
 }
 
 

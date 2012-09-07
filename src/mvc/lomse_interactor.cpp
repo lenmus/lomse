@@ -56,7 +56,7 @@ namespace lomse
 //=======================================================================================
 Interactor::Interactor(LibraryScope& libraryScope, Document* pDoc, View* pView)      //UserCommandExecuter* pExec)
     : EventHandler()
-    , EventNotifier()
+    , EventNotifier(libraryScope.get_events_dispatcher())
     , Observable()
     , m_libScope(libraryScope)
     , m_pDoc(pDoc)
@@ -116,7 +116,7 @@ void Interactor::on_document_reloaded()
 {
     delete_graphic_model();
     create_graphic_model();
-    //TODO
+    //TODO: Interactor::on_document_reloaded. Update cursor
     //DocCursor cursor(m_pDoc);
     //m_cursor = cursor;
 }

@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -55,7 +55,7 @@ GmoShapeGlyph::GmoShapeGlyph(ImoObj* pCreatorImo, int type, int idx, unsigned in
 //---------------------------------------------------------------------------------------
 void GmoShapeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    pDrawer->select_font("LenMus basic", m_fontHeight);
+    pDrawer->select_font("any", "lmbasic2.ttf","LenMus basic", m_fontHeight);
     pDrawer->set_text_color( determine_color_to_use(opt) );
     LUnits x = m_shiftToDraw.width + m_origin.x;
     LUnits y = m_shiftToDraw.height + m_origin.y;
@@ -70,7 +70,7 @@ void GmoShapeGlyph::compute_size_origin(double fontHeight, UPoint pos)
     m_fontHeight = fontHeight;
 
     TextMeter meter(m_libraryScope);
-    meter.select_font("LenMus basic", m_fontHeight);
+    meter.select_font("any", "lmbasic2.ttf", "LenMus basic", m_fontHeight);
     URect bbox = meter.bounding_rectangle(m_glyph);
 
     m_origin.x = pos.x + bbox.x;
@@ -154,8 +154,10 @@ void GmoShapeButton::select_font()
 {
     ImoStyle* pStyle = m_pButton->get_style();
     TextMeter meter(m_libraryScope);
-    meter.select_font(pStyle->get_string_property(ImoStyle::k_font_name),
-                      pStyle->get_float_property(ImoStyle::k_font_size),
+    meter.select_font(m_pButton->get_language(),
+                      pStyle->font_file(),
+                      pStyle->font_name(),
+                      pStyle->font_size(),
                       pStyle->is_bold(),
                       pStyle->is_italic() );
 }

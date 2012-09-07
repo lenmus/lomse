@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -50,6 +50,7 @@ HyperlinkCtrl::HyperlinkCtrl(LibraryScope& libScope, DynGenerator* pOwner,
     : Control(pOwner, pDoc)
     , m_libraryScope(libScope)
     , m_label(label)
+    , m_language()
     , m_pMainBox(NULL)
     , m_style(pStyle)
     , m_width(width)
@@ -61,9 +62,13 @@ HyperlinkCtrl::HyperlinkCtrl(LibraryScope& libScope, DynGenerator* pOwner,
     if (!m_style)
         m_style = create_default_style();
 
-    m_normalColor = m_style->get_color_property(ImoStyle::k_color);
+    m_normalColor = m_style->color();
     m_prevColor = m_normalColor;
     m_currentColor = m_normalColor;
+
+    //default language
+    ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+    m_language = pImoDoc->get_language();
 
     measure();
 
@@ -76,7 +81,7 @@ ImoStyle* HyperlinkCtrl::create_default_style()
     ImoStyle* style = m_pDoc->create_private_style();
     style->border_width(0.0f)->padding(0.0f)->margin(0.0f);
     style->color( Color(0,0,255) )->text_decoration(ImoTextStyle::k_decoration_underline);
-    style->text_align(ImoTextStyle::k_align_left);
+    style->text_align(ImoTextStyle::k_align_left)->font_name("sans");;
     return style;
 }
 
@@ -145,7 +150,7 @@ void HyperlinkCtrl::change_label(const string& text)
 //---------------------------------------------------------------------------------------
 URect HyperlinkCtrl::determine_text_position_and_size()
 {
-    int align = m_style->get_int_property(ImoStyle::k_text_align);
+    int align = m_style->text_align();
     URect pos;
 
     //select_font();    //AWARE: font already selected
@@ -178,7 +183,7 @@ URect HyperlinkCtrl::determine_text_position_and_size()
 //---------------------------------------------------------------------------------------
 void HyperlinkCtrl::set_tooltip(const string& text)
 {
-    //TODO
+    //TODO: HyperlinkCtrl::set_tooltip
 }
 
 //---------------------------------------------------------------------------------------
@@ -191,9 +196,10 @@ void HyperlinkCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->draw_text(pos.x, pos.y, m_label);
 
     //text decoration
-    if (m_style->get_int_property(ImoStyle::k_text_decoration) == ImoStyle::k_decoration_underline)
+    if (m_style->text_decoration() == ImoStyle::k_decoration_underline)
     {
-        LUnits y = pos.y + pos.height * 0.12f;
+        float factor = (m_language == "zn_CN" ? 0.30f : 0.12f);
+        LUnits y = pos.y + pos.height * factor;
         pDrawer->begin_path();
         pDrawer->fill(color);
         pDrawer->stroke(color);
@@ -208,8 +214,10 @@ void HyperlinkCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
 void HyperlinkCtrl::select_font()
 {
     TextMeter meter(m_libraryScope);
-    meter.select_font(m_style->get_string_property(ImoStyle::k_font_name),
-                      m_style->get_float_property(ImoStyle::k_font_size),
+    meter.select_font(m_language,
+                      m_style->font_file(),
+                      m_style->font_name(),
+                      m_style->font_size(),
                       m_style->is_bold(),
                       m_style->is_italic() );
 }

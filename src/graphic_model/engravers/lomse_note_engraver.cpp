@@ -103,8 +103,8 @@ void NoteEngraver::determine_stem_direction()
             m_fStemDown = (m_nPosOnStaff >= 6);
             break;
         case k_stem_double:
-//            TODO
-//            I understand that "STEM_double" means two stems: one up and one down.
+//            TODO: NoteEngraver stem_double
+//            I understand that "stem double" means two stems: one up and one down.
 //            This is not yet implemented and is treated as stem default.
             m_fStemDown = (m_nPosOnStaff >= 6);
             break;
@@ -322,7 +322,7 @@ int NoteEngraver::pitch_to_pos_on_staff(int clefType)
         case k_clef_G2_15:       //15 below
         case k_clef_15_F4:       //15 above
         case k_clef_F4_15:       //15 below
-            //TODO
+            //TODO: NoteEngraver::pitch_to_pos_on_staff. clefs with 8ve
             return 2;
         default:
             //LogMessage("NoteEngraver::pitch_to_pos_on_staff", "Case %d not treated in switch statement", nClef);

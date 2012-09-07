@@ -132,7 +132,7 @@ LUnits Layouter::set_box_height()
     LUnits height = m_pageCursor.y - start;
     ImoStyle* pStyle = m_pItem->get_style();
     if (pStyle)
-        height = max(pStyle->get_lunits_property(ImoStyle::k_min_height), height);
+        height = max(pStyle->min_height(), height);
     m_pItemMainBox->set_height(height);
     return height;
 }
@@ -143,9 +143,9 @@ void Layouter::add_end_margins()
     ImoStyle* pStyle = m_pItem->get_style();
     if (pStyle && m_pItemMainBox)   //NullLayouter doesn't have main box
     {
-        LUnits space = pStyle->get_lunits_property(ImoStyle::k_margin_bottom)
-                       + pStyle->get_lunits_property(ImoStyle::k_border_width_bottom)
-                       + pStyle->get_lunits_property(ImoStyle::k_padding_bottom);
+        LUnits space = pStyle->margin_bottom()
+                       + pStyle->border_width_bottom()
+                       + pStyle->padding_bottom();
         m_pItemMainBox->set_height( m_pItemMainBox->get_height() + space );
         m_pageCursor.y += space;
     }
@@ -173,9 +173,6 @@ Layouter* LayouterFactory::create_layouter(ImoContentObj* pItem, Layouter* pPare
 
     switch (pItem->get_obj_type())
     {
-//        case k_imo_control:
-//            return LOMSE_NEW ControlLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
-
         //blocks container objects
         case k_imo_dynamic:
         case k_imo_content:
@@ -209,11 +206,7 @@ Layouter* LayouterFactory::create_layouter(ImoContentObj* pItem, Layouter* pPare
         case k_imo_para:
         case k_imo_heading:
             return LOMSE_NEW InlinesContainerLayouter(pItem, pParent, pGModel, libraryScope,
-                                                      pStyles, fAddShapesToModel);
-
-        case k_imo_score_player:
-            return LOMSE_NEW ScorePlayerLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
-
+                                                      pStyles, true);   //fAddShapesToModel);
 
         default:
             return LOMSE_NEW NullLayouter(pItem, pParent, pGModel, libraryScope);

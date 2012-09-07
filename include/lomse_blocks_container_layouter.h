@@ -104,24 +104,6 @@ protected:
 
 };
 
-////----------------------------------------------------------------------------------
-//// ControlLayouter: layout algorithm for a gui control
-//class ControlLayouter : public Layouter
-//{
-//protected:
-//    ImoControl* m_pControl;
-//
-//public:
-//    ControlLayouter(ImoContentObj* pItem, Layouter* pParent, GraphicModel* pGModel,
-//                  LibraryScope& libraryScope, ImoStyles* pStyles);
-//    virtual ~ControlLayouter() {}
-//
-//    //implementation of Layouter virtual methods
-//    void layout_in_box();
-//    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
-//
-//};
-
 //---------------------------------------------------------------------------------------
 // BlocksContainerLayouter: layouts a blocks container item
 class BlocksContainerLayouter : public Layouter
@@ -168,24 +150,6 @@ public:
     virtual ~ListItemLayouter() {}
 
     bool is_first_content_item(ImoContentObj* pImo);
-};
-
-//----------------------------------------------------------------------------------
-// ScorePlayerLayouter: layout algorithm for scorePlayer objects.
-class ScorePlayerLayouter : public Layouter
-{
-protected:
-    ImoScorePlayer* m_pPlayer;
-
-public:
-    ScorePlayerLayouter(ImoContentObj* pItem, Layouter* pParent,
-                        GraphicModel* pGModel, LibraryScope& libraryScope,
-                        ImoStyles* pStyles);
-    virtual ~ScorePlayerLayouter() {}
-
-    //implementation of Layouter virtual methods
-    void layout_in_box();
-    void create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width, LUnits height);
 };
 
 

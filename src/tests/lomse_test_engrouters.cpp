@@ -41,7 +41,9 @@
 #include "lomse_im_factory.h"
 #include "lomse_calligrapher.h"
 #include "lomse_shape_text.h"
+#include "lomse_text_splitter.h"
 
+#include "utf8.h"
 #include <cmath>
 
 using namespace UnitTest;
@@ -58,19 +60,14 @@ using namespace lomse;
 class MyEngroutersCreator : public EngroutersCreator
 {
 public:
-    MyEngroutersCreator(std::list<Engrouter*>& engrouters, LibraryScope& libraryScope)
-        : EngroutersCreator(engrouters, libraryScope)
+    MyEngroutersCreator(ImoInlinesContainer* pPara, LibraryScope& libraryScope)
+        : EngroutersCreator(libraryScope, pPara->begin(), pPara->end())
     {
     }
     virtual ~MyEngroutersCreator() {}
 
-    void my_create_text_item_engrouters(ImoTextItem* pText) { create_text_item_engrouters(pText); }
-    void my_measure_engrouters() { measure_engrouters(); }
-
-    void my_delete_engrouters() {
-        std::list<Engrouter*>::iterator it;
-        for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
-            delete *it;
+    inline TextSplitter* my_create_text_splitter_for(ImoTextItem* pText) {
+        return create_text_splitter_for(pText);
     }
 
 };
@@ -97,410 +94,469 @@ public:
         return (fabs(x - y) < 0.1f);
     }
 
+    string to_str(const wstring& wtext)
+    {
+        string utf8result;
+        utf8::utf32to8(wtext.begin(), wtext.end(), back_inserter(utf8result));
+        return utf8result;
+    }
+
 };
 
 
 SUITE(EngroutersCreatorTest)
 {
 
-    TEST_FIXTURE(EngroutersCreatorTestFixture, CreateEngrouters_AtomicEngrouter)
+    TEST_FIXTURE(EngroutersCreatorTestFixture, default_text_splitter)
     {
         Document doc(m_libraryScope);
-        ImoButton* pImo = static_cast<ImoButton*>(
-                                ImFactory::inject(k_imo_button, &doc) );
-        pImo->set_label("Click me!");
-        pImo->set_size(USize(2000.0f, 600.0f));
-        std::list<Engrouter*> engrouters;
-        MyEngroutersCreator creator(engrouters, m_libraryScope);
-        creator.create_engrouters(pImo);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        ImoTextItem* pText = pPara->add_text_item("Hello world!");
+        MyEngroutersCreator creator(pPara, m_libraryScope);
 
-        CHECK( engrouters.size() == 1 );
-        ButtonEngrouter* pEngrouter = dynamic_cast<ButtonEngrouter*>( engrouters.front() );
+        TextSplitter* pSplitter = creator.my_create_text_splitter_for(pText);
+
+        CHECK( dynamic_cast<DefaultTextSplitter*>( pSplitter ) != NULL );
+    }
+
+    TEST_FIXTURE(EngroutersCreatorTestFixture, chinesse_text_splitter)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoDocument* pDoc = doc.get_imodoc();
+        pDoc->set_language("zn_CN");
+        ImoParagraph* pPara = doc.add_paragraph();
+        ImoTextItem* pText = pPara->add_text_item("编辑名称，缩写，MIDI设置和其他特性");
+        MyEngroutersCreator creator(pPara, m_libraryScope);
+
+        TextSplitter* pSplitter = creator.my_create_text_splitter_for(pText);
+
+        CHECK( dynamic_cast<ChineseTextSplitter*>( pSplitter ) != NULL );
+    }
+
+    TEST_FIXTURE(EngroutersCreatorTestFixture, no_content)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        MyEngroutersCreator creator(pPara, m_libraryScope);
+
+        CHECK( creator.more_content() == false );
+
+        LUnits availableWidth = 3000.0f;
+        Engrouter* pEngr = creator.create_next_engrouter(availableWidth);
+
+        CHECK( pEngr == NULL );
+    }
+
+    TEST_FIXTURE(EngroutersCreatorTestFixture, one_atomic_item)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        pPara->add_button("Click me!", USize(2000.0f, 600.0f));
+        MyEngroutersCreator creator(pPara, m_libraryScope);
+
+        CHECK( creator.more_content() == true );
+
+        LUnits availableWidth = 3000.0f;
+        Engrouter* pEngr = creator.create_next_engrouter(availableWidth);
+
+        CHECK( pEngr != NULL );
+        ButtonEngrouter* pEngrouter = dynamic_cast<ButtonEngrouter*>( pEngr );
         CHECK( pEngrouter != NULL );
 
-        creator.my_delete_engrouters();
-        delete pImo;
+//        CHECK( creator.more_content() == false );
+
+        delete pEngr;
+    }
+
+    TEST_FIXTURE(EngroutersCreatorTestFixture, one_atomic_item_no_space)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        pPara->add_button("Click me!", USize(2000.0f, 600.0f));
+        MyEngroutersCreator creator(pPara, m_libraryScope);
+
+        LUnits availableWidth = 1500.0f;
+        Engrouter* pEngr = creator.create_next_engrouter(availableWidth);
+
+        CHECK( pEngr == NULL );
+
+        CHECK( creator.more_content() == true );
+    }
+
+    TEST_FIXTURE(EngroutersCreatorTestFixture, return_saved_engrouter)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        pPara->add_button("Click me!", USize(2000.0f, 600.0f));
+        MyEngroutersCreator creator(pPara, m_libraryScope);
+        LUnits availableWidth = 1500.0f;
+        Engrouter* pEngr = creator.create_next_engrouter(availableWidth);
+        CHECK( pEngr == NULL );
+
+        CHECK( creator.more_content() == true );
+
+        availableWidth = 3000.0f;
+        pEngr = creator.create_next_engrouter(availableWidth);
+
+        CHECK( pEngr != NULL );
+        ButtonEngrouter* pEngrouter = dynamic_cast<ButtonEngrouter*>( pEngr );
+        CHECK( pEngrouter != NULL );
+
+        CHECK( creator.more_content() == false );
+
+        delete pEngr;
+    }
+
+    TEST_FIXTURE(EngroutersCreatorTestFixture, two_atomic_items)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        pPara->add_button("Accept", USize(2000.0f, 600.0f));
+        pPara->add_button("Cancel", USize(2000.0f, 600.0f));
+        MyEngroutersCreator creator(pPara, m_libraryScope);
+
+        LUnits availableWidth = 2000.0f;
+        Engrouter* pEngr1 = creator.create_next_engrouter(availableWidth);
+        CHECK( pEngr1 != NULL );
+        ButtonEngrouter* pBtEngr1 = dynamic_cast<ButtonEngrouter*>( pEngr1 );
+        CHECK( pBtEngr1 != NULL );
+
+        availableWidth = 2000.0f;
+        Engrouter* pEngr2 = creator.create_next_engrouter(availableWidth);
+        CHECK( pEngr2 != NULL );
+        ButtonEngrouter* pBtEngr2 = dynamic_cast<ButtonEngrouter*>( pEngr2 );
+        CHECK( pBtEngr2 != NULL );
+
+        CHECK( pEngr1->get_creator_imo() != pEngr2->get_creator_imo() );
+
+        CHECK( creator.more_content() == false );
+
+        delete pEngr1;
+        delete pEngr2;
+    }
+
+    TEST_FIXTURE(EngroutersCreatorTestFixture, text_engrouter)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        pPara->add_text_item("Hello world!");
+        MyEngroutersCreator creator(pPara, m_libraryScope);
+
+        LUnits availableWidth = 1000.0f;
+        Engrouter* pEngr = creator.create_next_engrouter(availableWidth);
+
+        CHECK( pEngr != NULL );
+        WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
+        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter->get_text() == L"Hello" );
+//        cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
+//        cout << "size = " << pEngrouter->get_width() << endl;
+        CHECK( pEngr->break_requested() == true );
+        CHECK( creator.more_content() == true );
+
+        delete pEngr;
+    }
+
+    TEST_FIXTURE(EngroutersCreatorTestFixture, text_engrouter_no_more_text)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        pPara->add_text_item("Hello");
+        MyEngroutersCreator creator(pPara, m_libraryScope);
+
+        LUnits availableWidth = 2000.0f;
+        Engrouter* pEngr = creator.create_next_engrouter(availableWidth);
+
+        CHECK( pEngr != NULL );
+        WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
+        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter->get_text() == L"Hello" );
+        CHECK( pEngr->break_requested() == false );
+
+        CHECK( creator.more_content() == false );
+
+        delete pEngr;
+    }
+
+    TEST_FIXTURE(EngroutersCreatorTestFixture, text_engrouter_two_chunks)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        pPara->add_text_item("This is a paragraph");
+        MyEngroutersCreator creator(pPara, m_libraryScope);
+
+        LUnits availableWidth = 1000.0f;
+        Engrouter* pEngr = creator.create_next_engrouter(availableWidth);
+
+        CHECK( pEngr != NULL );
+        WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
+        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter->get_text() == L"This" );
+        CHECK( creator.more_content() == true );
+        CHECK( pEngr->break_requested() == true );
+        delete pEngr;
+
+        pEngr = creator.create_next_engrouter(5000.0f);
+
+        CHECK( pEngr != NULL );
+        pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
+        CHECK( pEngrouter != NULL );
+        CHECK( pEngrouter->get_text() == L"is a paragraph" );
+        CHECK( creator.more_content() == false );
+        CHECK( pEngr->break_requested() == false );
+        delete pEngr;
+    }
+
+    TEST_FIXTURE(EngroutersCreatorTestFixture, next_item_after_text)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        pPara->add_text_item("This is a paragraph");
+        pPara->add_button("Click me!", USize(2000.0f, 600.0f));
+        MyEngroutersCreator creator(pPara, m_libraryScope);
+
+        Engrouter* pEngr = creator.create_next_engrouter(1000.0f);
+        CHECK( pEngr != NULL );
+        delete pEngr;
+
+        pEngr = creator.create_next_engrouter(5000.0f);
+        CHECK( pEngr != NULL );
+        CHECK( creator.more_content() == true );
+        CHECK( pEngr->break_requested() == false );
+        delete pEngr;
+
+        pEngr = creator.create_next_engrouter(3000.0f);
+        CHECK( pEngr != NULL );
+        ButtonEngrouter* pEngrouter = dynamic_cast<ButtonEngrouter*>( pEngr );
+        CHECK( pEngrouter != NULL );
+        CHECK( creator.more_content() == false );
+        CHECK( pEngr->break_requested() == false );
+        delete pEngr;
+    }
+
+    TEST_FIXTURE(EngroutersCreatorTestFixture, skip_empty_text)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        pPara->add_text_item("");
+        pPara->add_button("Click me!", USize(2000.0f, 600.0f));
+        MyEngroutersCreator creator(pPara, m_libraryScope);
+
+        Engrouter* pEngr = creator.create_next_engrouter(1000.0f);
+        CHECK( pEngr != NULL );
+        NullEngrouter* pEngr1 = dynamic_cast<NullEngrouter*>( pEngr );
+        CHECK( pEngr1 != NULL );
+        CHECK( creator.more_content() == true );
+        CHECK( pEngr->break_requested() == false );
+        delete pEngr;
+
+        pEngr = creator.create_next_engrouter(3000.0f);
+        CHECK( pEngr != NULL );
+        ButtonEngrouter* pEngr2 = dynamic_cast<ButtonEngrouter*>( pEngr );
+        CHECK( pEngr2 != NULL );
+        CHECK( creator.more_content() == false );
+        CHECK( pEngr->break_requested() == false );
+        delete pEngr;
     }
 
     TEST_FIXTURE(EngroutersCreatorTestFixture, WrapperEngrouterCreatesBox)
     {
         Document doc(m_libraryScope);
-        ImoInlineWrapper* pImo = static_cast<ImoInlineWrapper*>(
-                                    ImFactory::inject(k_imo_inline_wrapper, &doc) );
-        std::list<Engrouter*> engrouters;
-        MyEngroutersCreator creator(engrouters, m_libraryScope);
-        creator.create_engrouters(pImo);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        pPara->add_inline_box();
+        MyEngroutersCreator creator(pPara, m_libraryScope);
 
-        CHECK( engrouters.size() == 1 );
-        BoxEngrouter* pEngrouter = dynamic_cast<BoxEngrouter*>( engrouters.front() );
+        LUnits availableWidth = 2000.0f;
+        Engrouter* pEngr = creator.create_next_engrouter(availableWidth);
+
+        CHECK( pEngr != NULL );
+        BoxEngrouter* pEngrouter = dynamic_cast<BoxEngrouter*>( pEngr );
         CHECK( pEngrouter != NULL );
 
-        creator.my_delete_engrouters();
-        delete pImo;
+        delete pEngr;
     }
 
     TEST_FIXTURE(EngroutersCreatorTestFixture, WrapperEngrouterContentAddedToBox)
     {
         Document doc(m_libraryScope);
-        ImoInlineWrapper* pImo = static_cast<ImoInlineWrapper*>(
-                                    ImFactory::inject(k_imo_inline_wrapper, &doc) );
-        ImoButton* pBt1 = static_cast<ImoButton*>(
-                                    ImFactory::inject(k_imo_button, &doc));
-        pBt1->set_label("Accept");
-        pBt1->set_size(USize(2000.0f, 600.0f));
-        pImo->append_child_imo(pBt1);
-        ImoButton* pBt2 = static_cast<ImoButton*>(
-                                    ImFactory::inject(k_imo_button, &doc));
-        pBt2->set_label("Cancel");
-        pBt2->set_size(USize(2000.0f, 600.0f));
-        pImo->append_child_imo(pBt2);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        ImoInlineWrapper* pWp = pPara->add_inline_box();
+        pWp->add_button("Accept", USize(2000.0f, 600.0f));
+        pWp->add_button("Cancel", USize(2000.0f, 600.0f));
+        MyEngroutersCreator creator(pPara, m_libraryScope);
 
-        std::list<Engrouter*> engrouters;
-        MyEngroutersCreator creator(engrouters, m_libraryScope);
-        creator.create_engrouters(pImo);
+        LUnits availableWidth = 8000.0f;
+        Engrouter* pEngr = creator.create_next_engrouter(availableWidth);
 
-        CHECK( engrouters.size() == 1 );
-        BoxEngrouter* pEngrouter = dynamic_cast<BoxEngrouter*>( engrouters.front() );
+        CHECK( pEngr != NULL );
+        BoxEngrouter* pEngrouter = dynamic_cast<BoxEngrouter*>( pEngr );
         CHECK( pEngrouter != NULL );
 
         std::list<Engrouter*>& children = pEngrouter->get_engrouters();
         std::list<Engrouter*>::iterator it = children.begin();
         CHECK( children.size() == 2 );
+//        cout << children.size() << endl;
         CHECK( dynamic_cast<ButtonEngrouter*>(*it) != NULL );
         ++it;
         CHECK( dynamic_cast<ButtonEngrouter*>(*it) != NULL );
 
-        creator.my_delete_engrouters();
-        delete pImo;
+        delete pEngr;
     }
 
     TEST_FIXTURE(EngroutersCreatorTestFixture, WrapperBoxEngrouterHasSize_Linear)
     {
         Document doc(m_libraryScope);
-        ImoInlineWrapper* pImo = static_cast<ImoInlineWrapper*>(
-                                    ImFactory::inject(k_imo_inline_wrapper, &doc) );
-        ImoButton* pBt1 = static_cast<ImoButton*>(
-                                    ImFactory::inject(k_imo_button, &doc));
-        pBt1->set_label("Accept");
-        pBt1->set_size(USize(2000.0f, 600.0f));
-        pImo->append_child_imo(pBt1);
-        ImoButton* pBt2 = static_cast<ImoButton*>(
-                                    ImFactory::inject(k_imo_button, &doc));
-        pBt2->set_label("Cancel");
-        pBt2->set_size(USize(2000.0f, 600.0f));
-        pImo->append_child_imo(pBt2);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        ImoInlineWrapper* pWp = pPara->add_inline_box();
+        pWp->add_button("Accept", USize(2000.0f, 600.0f));
+        pWp->add_button("Cancel", USize(2000.0f, 600.0f));
+        MyEngroutersCreator creator(pPara, m_libraryScope);
 
-        std::list<Engrouter*> engrouters;
-        MyEngroutersCreator creator(engrouters, m_libraryScope);
-        creator.create_engrouters(pImo);
+        LUnits availableWidth = 8000.0f;
+        Engrouter* pEngr = creator.create_next_engrouter(availableWidth);
 
-        CHECK( engrouters.size() == 1 );
-        BoxEngrouter* pEngrouter = dynamic_cast<BoxEngrouter*>( engrouters.front() );
+        CHECK( pEngr != NULL );
+        BoxEngrouter* pEngrouter = dynamic_cast<BoxEngrouter*>( pEngr );
         CHECK( pEngrouter != NULL );
+
+//        cout << "box width = " << pEngrouter->get_width() << endl;
+//        cout << "box height = " << pEngrouter->get_height() << endl;
         CHECK( pEngrouter->get_width() == 4000.0f );
         CHECK( pEngrouter->get_height() == 600.0f );
         std::list<Engrouter*>& children = pEngrouter->get_engrouters();
         std::list<Engrouter*>::iterator it = children.begin();
         CHECK( children.size() == 2 );
         CHECK( (*it)->get_position() == UPoint(0.0f, 0.0f) );
+//        cout << "first button pos = (" << (*it)->get_position().x << ", "
+//              << (*it)->get_position().y << ")" << endl;
         ++it;
         CHECK( (*it)->get_position() == UPoint(2000.0f, 0.0f) );
+//        cout << "2nd button pos = (" << (*it)->get_position().x << ", "
+//              << (*it)->get_position().y << ")" << endl;
 
-        creator.my_delete_engrouters();
-        delete pImo;
+        delete pEngr;
     }
 
-    TEST_FIXTURE(EngroutersCreatorTestFixture, WrapperBoxEngrouterHasSize_Constrained)
-    {
-        Document doc(m_libraryScope);
-        ImoInlineWrapper* pImo = static_cast<ImoInlineWrapper*>(
-                                    ImFactory::inject(k_imo_inline_wrapper, &doc) );
-        pImo->set_width(3000.0f);
-        ImoButton* pBt1 = static_cast<ImoButton*>(
-                                    ImFactory::inject(k_imo_button, &doc));
-        pBt1->set_label("Accept");
-        pBt1->set_size(USize(2000.0f, 600.0f));
-        pImo->append_child_imo(pBt1);
-        ImoButton* pBt2 = static_cast<ImoButton*>(
-                                    ImFactory::inject(k_imo_button, &doc));
-        pBt2->set_label("Cancel");
-        pBt2->set_size(USize(2000.0f, 600.0f));
-        pImo->append_child_imo(pBt2);
-
-        std::list<Engrouter*> engrouters;
-        MyEngroutersCreator creator(engrouters, m_libraryScope);
-        creator.create_engrouters(pImo);
-
-        CHECK( engrouters.size() == 1 );
-        BoxEngrouter* pEngrouter = dynamic_cast<BoxEngrouter*>( engrouters.front() );
-        CHECK( pEngrouter != NULL );
-        CHECK( pEngrouter->get_width() == 3000.0f );
-        CHECK( pEngrouter->get_height() == 1200.0f );
-        std::list<Engrouter*>& children = pEngrouter->get_engrouters();
-        std::list<Engrouter*>::iterator it = children.begin();
-        CHECK( children.size() == 2 );
-        CHECK( (*it)->get_position() == UPoint(0.0f, 0.0f) );
-        ++it;
-        CHECK( (*it)->get_position() == UPoint(0.0f, 600.0f) );
-
-        creator.my_delete_engrouters();
-        delete pImo;
-    }
-
-    TEST_FIXTURE(EngroutersCreatorTestFixture, SplitTextItem_InitialSpaces)
-    {
-        Document doc(m_libraryScope);
-        ImoTextItem* pText = static_cast<ImoTextItem*>(
-                                ImFactory::inject(k_imo_text_item, &doc) );
-        pText->set_text(" This is a paragraph");
-        std::list<Engrouter*> engrouters;
-        MyEngroutersCreator creator(engrouters, m_libraryScope);
-        creator.my_create_text_item_engrouters(pText);
-
-        WordEngrouter *pEngrouter = dynamic_cast<WordEngrouter*>( engrouters.front() );
-        CHECK( pEngrouter->get_text() == " " );
-
-        creator.my_delete_engrouters();
-        delete pText;
-    }
-
-    TEST_FIXTURE(EngroutersCreatorTestFixture, SplitTextItem_FirstWordAfterInitialSpaces)
-    {
-        Document doc(m_libraryScope);
-        ImoTextItem* pText = static_cast<ImoTextItem*>(
-                                ImFactory::inject(k_imo_text_item, &doc) );
-        pText->set_text(" This is a paragraph");
-        std::list<Engrouter*> engrouters;
-        MyEngroutersCreator creator(engrouters, m_libraryScope);
-        creator.my_create_text_item_engrouters(pText);
-
-        CHECK( engrouters.size() == 5 );
-        std::list<Engrouter*>::iterator it = engrouters.begin();
-        WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>(*it);
-        CHECK( pEngrouter->get_text() == " " );
-        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-        CHECK( pEngrouter->get_text() == "This " );
-        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-        CHECK( pEngrouter->get_text() == "is " );
-        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-        CHECK( pEngrouter->get_text() == "a " );
-        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-        CHECK( pEngrouter->get_text() == "paragraph" );
-
-        creator.my_delete_engrouters();
-        delete pText;
-    }
-
-    TEST_FIXTURE(EngroutersCreatorTestFixture, SplitTextItem_SpacesCompressed)
-    {
-        Document doc(m_libraryScope);
-        ImoTextItem* pText = static_cast<ImoTextItem*>(
-                                ImFactory::inject(k_imo_text_item, &doc) );
-        pText->set_text("  This   is   a   paragraph");
-        std::list<Engrouter*> engrouters;
-        MyEngroutersCreator creator(engrouters, m_libraryScope);
-        creator.my_create_text_item_engrouters(pText);
-
-        CHECK( engrouters.size() == 5 );
-        std::list<Engrouter*>::iterator it = engrouters.begin();
-        WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>(*it);
-        CHECK( pEngrouter->get_text() == " " );
-        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-        CHECK( pEngrouter->get_text() == "This " );
-        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-        CHECK( pEngrouter->get_text() == "is " );
-        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-        CHECK( pEngrouter->get_text() == "a " );
-        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
-        CHECK( pEngrouter->get_text() == "paragraph" );
-
-        creator.my_delete_engrouters();
-        delete pText;
-    }
-
-    TEST_FIXTURE(EngroutersCreatorTestFixture, SplitTextItem_OneWord)
-    {
-        Document doc(m_libraryScope);
-        ImoTextItem* pText = static_cast<ImoTextItem*>(
-                                ImFactory::inject(k_imo_text_item, &doc) );
-        pText->set_text("Hello!");
-        std::list<Engrouter*> engrouters;
-        MyEngroutersCreator creator(engrouters, m_libraryScope);
-        creator.my_create_text_item_engrouters(pText);
-
-        WordEngrouter *pEngrouter = dynamic_cast<WordEngrouter*>( engrouters.front() );
-        CHECK( engrouters.size() == 1 );
-        CHECK( pEngrouter->get_text() == "Hello!" );
-
-        creator.my_delete_engrouters();
-        delete pText;
-    }
-
-    TEST_FIXTURE(EngroutersCreatorTestFixture, SplitTextItem_OneWordSpaces)
-    {
-        Document doc(m_libraryScope);
-        ImoTextItem* pText = static_cast<ImoTextItem*>(
-                                ImFactory::inject(k_imo_text_item, &doc) );
-        pText->set_text("Hello!   ");
-        std::list<Engrouter*> engrouters;
-        MyEngroutersCreator creator(engrouters, m_libraryScope);
-        creator.my_create_text_item_engrouters(pText);
-
-        WordEngrouter *pEngrouter = dynamic_cast<WordEngrouter*>( engrouters.front() );
-        CHECK( engrouters.size() == 1 );
-        CHECK( pEngrouter->get_text() == "Hello! " );
-
-        creator.my_delete_engrouters();
-        delete pText;
-    }
-
-    TEST_FIXTURE(EngroutersCreatorTestFixture, WordEngrouterHasStyle)
-    {
-        Document doc(m_libraryScope);
-        ImoStyle* pStyle = static_cast<ImoStyle*>(
-                                ImFactory::inject(k_imo_style, &doc) );
-        pStyle->set_name("test");
-        ImoTextItem* pText = static_cast<ImoTextItem*>(
-                                ImFactory::inject(k_imo_text_item, &doc) );
-        pText->set_text("Hello!");
-        pText->set_style(pStyle);
-        std::list<Engrouter*> engrouters;
-        MyEngroutersCreator creator(engrouters, m_libraryScope);
-        creator.my_create_text_item_engrouters(pText);
-
-        WordEngrouter *pEngrouter = dynamic_cast<WordEngrouter*>( engrouters.front() );
-        CHECK( pEngrouter->get_style() != NULL );
-
-        creator.my_delete_engrouters();
-        delete pText;
-        delete pStyle;
-    }
-
-    TEST_FIXTURE(EngroutersCreatorTestFixture, WordEngrouterMeasurements)
-    {
-        Document doc(m_libraryScope);
-        doc.create_empty();
-        ImoStyle* pStyle = doc.get_default_style();
-        ImoTextItem* pText = static_cast<ImoTextItem*>(
-                                ImFactory::inject(k_imo_text_item, &doc) );
-        pText->set_text("Hello!");
-        pText->set_style(pStyle);
-        std::list<Engrouter*> engrouters;
-        MyEngroutersCreator creator(engrouters, m_libraryScope);
-        creator.my_create_text_item_engrouters(pText);
-        creator.my_measure_engrouters();
-
+//    TEST_FIXTURE(EngroutersCreatorTestFixture, SplitTextItem_InitialSpaces)
+//    {
+//        Document doc(m_libraryScope);
+//        ImoTextItem* pText = static_cast<ImoTextItem*>(
+//                                ImFactory::inject(k_imo_text_item, &doc) );
+//        pText->set_text(" This is a paragraph");
+//        std::list<Engrouter*> engrouters;
+//        MyEngroutersCreator creator(engrouters, m_libraryScope);
+//        creator.my_create_text_item_engrouters(pText);
+//
 //        WordEngrouter *pEngrouter = dynamic_cast<WordEngrouter*>( engrouters.front() );
-//        cout << "ascent = " << pEngrouter->get_ascent() << endl;
-//        cout << "descent = " << pEngrouter->get_descent() << endl;
-//        cout << "height = " << pEngrouter->get_height() << endl;
-
-        creator.my_delete_engrouters();
-        delete pText;
-    }
-
-    // shapes creation ------------------------------------------------------------------
-
-//    TEST_FIXTURE(EngroutersCreatorTestFixture, CreateGmo_AtomicEngrouter)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.create_empty();
-//        ImoButton* pImo = static_cast<ImoButton*>(
-//                                ImFactory::inject(k_imo_button, &doc) );
-//        pImo->set_label("Click me!");
-//        pImo->set_size(USize(2000.0f, 600.0f));
-//        std::list<Engrouter*> engrouters;
-//        MyEngroutersCreator creator(engrouters, m_libraryScope);
-//        creator.create_engrouters(pImo);
-//        Engrouter* pEngrouter = engrouters.front();
-//        UPoint pos(1500.0f, 2700.0f);
-//        ImoStyle* pStyle = doc.get_default_style();
-//        pImo->set_style(pStyle);
-//                        //  top     middle  base    bottom)
-//        LineReferences refs(100.0f, 300.0f, 400.0f, 600.0f);
-//        GmoObj* pGmo = pEngrouter->create_gm_object(pos, refs);
-//
-//        CHECK( pGmo != NULL );
-//        CHECK( pGmo->is_shape_button() == true );
-//        CHECK( pGmo->get_origin() == UPoint(1500.0f, 2700.0f + 100.0f) );
+//        CHECK( pEngrouter->get_text() == " " );
 //
 //        creator.my_delete_engrouters();
-//        delete pGmo;
-//        delete pImo;
+//        delete pText;
 //    }
-
-//    TEST_FIXTURE(EngroutersCreatorTestFixture, CreateGmo_BoxNoContent)
+//
+//    TEST_FIXTURE(EngroutersCreatorTestFixture, SplitTextItem_FirstWordAfterInitialSpaces)
 //    {
 //        Document doc(m_libraryScope);
-//        ImoInlineWrapper* pImo = static_cast<ImoInlineWrapper*>(
-//                                    ImFactory::inject(k_imo_inline_wrapper, &doc) );
-//        USize size(500.0f, 600.0f);
-//        pImo->set_size(size);
+//        ImoTextItem* pText = static_cast<ImoTextItem*>(
+//                                ImFactory::inject(k_imo_text_item, &doc) );
+//        pText->set_text(" This is a paragraph");
 //        std::list<Engrouter*> engrouters;
 //        MyEngroutersCreator creator(engrouters, m_libraryScope);
-//        creator.create_engrouters(pImo);
-//        Engrouter* pEngrouter = engrouters.front();
-//        UPoint pos(1500.0f, 2700.0f);
-//                        //  top     middle  base    bottom)
-//        LineReferences refs(100.0f, 300.0f, 400.0f, 600.0f);
-//        GmoObj* pGmo = pEngrouter->create_gm_object(pos, refs);    //(800-0)/2 = 400 valign
+//        creator.my_create_text_item_engrouters(pText);
 //
-//        //cout << "box size = (" << pGmo->get_size().width << ", "
-//        //     << pGmo->get_size().height << ")" << endl;
-//        //cout << "box pos = (" << pGmo->get_origin().x << ", "
-//        //     << pGmo->get_origin().y << ")" << endl;
-//        CHECK( pGmo != NULL );
-//        CHECK( pGmo->is_box_inline() == true );
-//        CHECK( pGmo->get_origin() == UPoint(1500.0f, 2700.0f + 400.0f) );
-//        CHECK( pGmo->get_size() == USize(500.0f, 0.0f) );
+//        CHECK( engrouters.size() == 5 );
+//        std::list<Engrouter*>::iterator it = engrouters.begin();
+//        WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>(*it);
+//        CHECK( pEngrouter->get_text() == " " );
+//        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
+//        CHECK( pEngrouter->get_text() == "This " );
+//        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
+//        CHECK( pEngrouter->get_text() == "is " );
+//        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
+//        CHECK( pEngrouter->get_text() == "a " );
+//        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
+//        CHECK( pEngrouter->get_text() == "paragraph" );
 //
 //        creator.my_delete_engrouters();
-//        delete pGmo;
-//        delete pImo;
+//        delete pText;
 //    }
-
-//    TEST_FIXTURE(EngroutersCreatorTestFixture, CreateGmo_BoxContent)
+//
+//    TEST_FIXTURE(EngroutersCreatorTestFixture, SplitTextItem_SpacesCompressed)
 //    {
 //        Document doc(m_libraryScope);
-//        ImoInlineWrapper* pImo = static_cast<ImoInlineWrapper*>(
-//                                    ImFactory::inject(k_imo_inline_wrapper, &doc) );
-//        ImoButton* pBt1 = static_cast<ImoButton*>(
-//                                    ImFactory::inject(k_imo_button, &doc));
-//        pBt1->set_label("Accept");
-//        pBt1->set_size(USize(2000.0f, 600.0f));
-//        pImo->append_child_imo(pBt1);
-//        ImoButton* pBt2 = static_cast<ImoButton*>(
-//                                    ImFactory::inject(k_imo_button, &doc));
-//        pBt2->set_label("Cancel");
-//        pBt2->set_size(USize(2000.0f, 600.0f));
-//        pImo->append_child_imo(pBt2);
-//
-//        doc.create_empty();
-//        ImoStyle* pStyle = doc.get_default_style();
-//        pBt1->set_style(pStyle);
-//        pBt2->set_style(pStyle);
+//        ImoTextItem* pText = static_cast<ImoTextItem*>(
+//                                ImFactory::inject(k_imo_text_item, &doc) );
+//        pText->set_text("  This   is   a   paragraph");
 //        std::list<Engrouter*> engrouters;
 //        MyEngroutersCreator creator(engrouters, m_libraryScope);
-//        creator.create_engrouters(pImo);
-//        Engrouter* pEngrouter = engrouters.front();
-//        UPoint pos(1500.0f, 2700.0f);
-//                        //  top     middle  base    bottom)
-//        LineReferences refs(100.0f, 300.0f, 400.0f, 600.0f);
-//        GmoObj* pGmo = pEngrouter->create_gm_object(pos, refs);    //(800-600)/2 = 100 valign
+//        creator.my_create_text_item_engrouters(pText);
 //
-//        //cout << "box size = (" << pGmo->get_size().width << ", "
-//        //     << pGmo->get_size().height << ")" << endl;
-//        //cout << "box pos = (" << pGmo->get_origin().x << ", "
-//        //     << pGmo->get_origin().y << ")" << endl;
-//        CHECK( pGmo != NULL );
-//        CHECK( pGmo->is_box_inline() == true );
-//        CHECK( pGmo->get_origin() == UPoint(1500.0f, 2700.0f + 100.0f) );
-//        CHECK( pGmo->get_size() == USize(4000.0f, 600.0f) );
+//        CHECK( engrouters.size() == 5 );
+//        std::list<Engrouter*>::iterator it = engrouters.begin();
+//        WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>(*it);
+//        CHECK( pEngrouter->get_text() == " " );
+//        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
+//        CHECK( pEngrouter->get_text() == "This " );
+//        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
+//        CHECK( pEngrouter->get_text() == "is " );
+//        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
+//        CHECK( pEngrouter->get_text() == "a " );
+//        pEngrouter = dynamic_cast<WordEngrouter*>(*(++it));
+//        CHECK( pEngrouter->get_text() == "paragraph" );
 //
 //        creator.my_delete_engrouters();
-//        delete pGmo;
-//        delete pImo;
+//        delete pText;
 //    }
-
+//
+//    TEST_FIXTURE(EngroutersCreatorTestFixture, SplitTextItem_OneWord)
+//    {
+//        Document doc(m_libraryScope);
+//        ImoTextItem* pText = static_cast<ImoTextItem*>(
+//                                ImFactory::inject(k_imo_text_item, &doc) );
+//        pText->set_text("Hello!");
+//        std::list<Engrouter*> engrouters;
+//        MyEngroutersCreator creator(engrouters, m_libraryScope);
+//        creator.my_create_text_item_engrouters(pText);
+//
+//        WordEngrouter *pEngrouter = dynamic_cast<WordEngrouter*>( engrouters.front() );
+//        CHECK( engrouters.size() == 1 );
+//        CHECK( pEngrouter->get_text() == "Hello!" );
+//
+//        creator.my_delete_engrouters();
+//        delete pText;
+//    }
+//
+//    TEST_FIXTURE(EngroutersCreatorTestFixture, SplitTextItem_OneWordSpaces)
+//    {
+//        Document doc(m_libraryScope);
+//        ImoTextItem* pText = static_cast<ImoTextItem*>(
+//                                ImFactory::inject(k_imo_text_item, &doc) );
+//        pText->set_text("Hello!   ");
+//        std::list<Engrouter*> engrouters;
+//        MyEngroutersCreator creator(engrouters, m_libraryScope);
+//        creator.my_create_text_item_engrouters(pText);
+//
+//        WordEngrouter *pEngrouter = dynamic_cast<WordEngrouter*>( engrouters.front() );
+//        CHECK( engrouters.size() == 1 );
+//        CHECK( pEngrouter->get_text() == "Hello! " );
+//
+//        creator.my_delete_engrouters();
+//        delete pText;
+//    }
 
 };

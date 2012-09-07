@@ -112,6 +112,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_figuredBass] = "figuredBass";
     m_TypeToName[k_file] = "file";
     m_TypeToName[k_font] = "font";
+    m_TypeToName[k_font_file] = "font-file";
     m_TypeToName[k_font_name] = "font-name";
     m_TypeToName[k_font_size] = "font-size";
     m_TypeToName[k_font_style] = "font-style";
@@ -289,6 +290,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["figuredBass"] = LOMSE_NEW LdpElementFunctor<k_figuredBass>;
     m_NameToFunctor["file"] = LOMSE_NEW LdpElementFunctor<k_file>;
     m_NameToFunctor["font"] = LOMSE_NEW LdpElementFunctor<k_font>;
+    m_NameToFunctor["font-file"] = LOMSE_NEW LdpElementFunctor<k_font_file>;
     m_NameToFunctor["font-name"] = LOMSE_NEW LdpElementFunctor<k_font_name>;
     m_NameToFunctor["font-size"] = LOMSE_NEW LdpElementFunctor<k_font_size>;
     m_NameToFunctor["font-style"] = LOMSE_NEW LdpElementFunctor<k_font_style>;

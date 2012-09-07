@@ -141,6 +141,7 @@ enum ELdpElement
     k_fbline,
     k_file,
     k_font,
+    k_font_file,
     k_font_name,
     k_font_size,
     k_font_style,

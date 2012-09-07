@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -31,6 +31,7 @@
 #define __LOMSE__LDP_EXPORTER_H__
 
 #include "lomse_basic.h"
+#include "lomse_injectors.h"
 
 #include <sstream>
 using namespace std;
@@ -41,7 +42,6 @@ namespace lomse
 //forward declarations
 class ImoObj;
 class LdpGenerator;
-//struct Color;
 
 
 // LdpExporter: Generates LDP source code for a basic model object
@@ -49,28 +49,36 @@ class LdpGenerator;
 class LdpExporter
 {
 protected:
+    LibraryScope* m_pLibraryScope;
+    string m_version;
     int m_nIndent;
     bool m_fAddId;
 
 public:
     LdpExporter();
+    LdpExporter(LibraryScope* pLibraryScope);
     virtual ~LdpExporter();
 
     //settings
-    void set_indent(int value) { m_nIndent = value; }
-    void set_add_id(bool value) { m_fAddId = value; }
+    inline void set_indent(int value) { m_nIndent = value; }
+    inline void increment_indent() { ++m_nIndent; }
+    inline void decrement_indent() { --m_nIndent; }
+    inline void set_add_id(bool value) { m_fAddId = value; }
 
     //getters for settings
     inline int get_indent() { return m_nIndent; }
     inline bool get_add_id() { return m_fAddId; }
 
     //the main method
-    std::string get_source(ImoObj* pImo);
+    string get_source(ImoObj* pImo, ImoObj* pParent=NULL);
 
     //static methods for ldp names to types conversion
-    static std::string clef_type_to_ldp(int clefType);
-    static std::string color_to_ldp(Color color);
-    static std::string float_to_string(float num);
+    static string clef_type_to_ldp(int clefType);
+    static string color_to_ldp(Color color);
+    static string float_to_string(float num);
+
+    //other methods
+    string& get_library_version() { return m_version; }
 
 protected:
     LdpGenerator* new_generator(ImoObj* pImo);

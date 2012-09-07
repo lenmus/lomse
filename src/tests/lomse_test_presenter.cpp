@@ -86,7 +86,8 @@ SUITE(PresenterTest)
         Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
         CHECK( pPresenter != NULL );
         Document* pDoc = pPresenter->get_document();
-        CHECK( pDoc->to_string() == "(lenmusdoc (vers 0.0) (content))" );
+        ImoDocument* pImoDoc = pDoc->get_imodoc();
+        CHECK( pImoDoc->get_content_item(0) == NULL );
         CHECK( pPresenter->get_num_interactors() == 1 );
         Interactor* pIntor = pPresenter->get_interactor(0);
         CHECK( pIntor != NULL );

@@ -154,7 +154,7 @@ SUITE(MultiColumnLayouterTest)
     //    doc.create_empty();
     //    ImoStyle* pDefStyle = doc.get_default_style();
     //    ImoStyle* pParaStyle = doc.create_style("para");
-    //    pParaStyle->set_lunits_property(ImoStyle::k_margin_top, 1000.0f);
+    //    pParaStyle->margin_top( 1000.0f);
     //    ImoParagraph* pPara = doc.get_imodoc()->get_content()->add_paragraph(pParaStyle);
     //    pPara->add_text_item("Exercise options", pDefStyle);
 
@@ -199,7 +199,7 @@ SUITE(MultiColumnLayouterTest)
     //    doc.create_empty();
     //    ImoStyle* pDefStyle = doc.get_default_style();
     //    ImoStyle* pParaStyle = doc.create_style("para");
-    //    pParaStyle->set_lunits_property(ImoStyle::k_margin_left, 1000.0f);
+    //    pParaStyle->margin_left( 1000.0f);
     //    ImoParagraph* pPara = doc.get_imodoc()->get_content()->add_paragraph(pParaStyle);
     //    pPara->add_text_item("Exercise options", pDefStyle);
 
@@ -244,8 +244,8 @@ SUITE(MultiColumnLayouterTest)
     //    doc.create_empty();
     //    ImoStyle* pDefStyle = doc.get_default_style();
     //    ImoStyle* pParaStyle = doc.create_style("para");
-    //    pParaStyle->set_lunits_property(ImoStyle::k_margin_left, 1000.0f);
-    //    pParaStyle->set_lunits_property(ImoStyle::k_margin_bottom, 1000.0f);
+    //    pParaStyle->margin_left( 1000.0f);
+    //    pParaStyle->margin_bottom( 1000.0f);
     //    ImoParagraph* pPara = doc.get_imodoc()->get_content()->add_paragraph(pParaStyle);
     //    pPara->add_text_item("Exercise options", pDefStyle);
 
@@ -290,7 +290,7 @@ SUITE(MultiColumnLayouterTest)
     //    doc.create_empty();
     //    ImoStyle* pDefStyle = doc.get_default_style();
     //    ImoStyle* pParaStyle = doc.create_style("para");
-    //    pParaStyle->set_lunits_property(ImoStyle::k_margin_top, 1000.0f);
+    //    pParaStyle->margin_top( 1000.0f);
     //    ImoParagraph* pPara = doc.get_imodoc()->get_content()->add_paragraph(pParaStyle);
     //    pPara->add_text_item("Exercise options", pDefStyle);
 

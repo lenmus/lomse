@@ -36,9 +36,11 @@
 #include "lomse_shape_text.h"
 #include "lomse_shapes.h"
 #include "lomse_calligrapher.h"
+#include "lomse_text_splitter.h"
 
 //other
 #include <boost/format.hpp>
+#include "utf8.h"
 
 namespace lomse
 {
@@ -46,193 +48,194 @@ namespace lomse
 //=======================================================================================
 // EngroutersCreator implementation
 //=======================================================================================
-EngroutersCreator::EngroutersCreator(std::list<Engrouter*>& engrouters, LibraryScope& libraryScope)
-    : m_engrouters(engrouters)
-    , m_libraryScope(libraryScope)
+EngroutersCreator::EngroutersCreator(LibraryScope& libraryScope,
+                                     TreeNode<ImoObj>::children_iterator itStart,
+                                     TreeNode<ImoObj>::children_iterator itEnd)
+    : m_libraryScope(libraryScope)
+    , m_itCurContent(itStart)
+    , m_itEndContent(itEnd)
+    , m_pCurText(NULL)
+    , m_pCurEngrouter(NULL)
+    , m_pTextSplitter(NULL)
 {
 }
 
 //---------------------------------------------------------------------------------------
 EngroutersCreator::~EngroutersCreator()
 {
+    delete m_pCurEngrouter;
+    delete m_pTextSplitter;
 }
 
 //---------------------------------------------------------------------------------------
-void EngroutersCreator::create_engrouters(ImoInlineLevelObj* pImo)
+bool EngroutersCreator::more_content()
+{
+    return m_itCurContent != m_itEndContent || m_pCurEngrouter != NULL;
+}
+
+//---------------------------------------------------------------------------------------
+Engrouter* EngroutersCreator::create_next_engrouter(LUnits maxSpace)
+{
+    if (!more_content())
+        return NULL;
+
+    if (!m_pCurEngrouter)
+    {
+        ImoInlineLevelObj* pImo = static_cast<ImoInlineLevelObj*>( *m_itCurContent );
+
+        //composite content objects
+        if (pImo->is_text_item())
+        {
+            ImoTextItem* pText = static_cast<ImoTextItem*>(pImo);
+            m_pCurEngrouter = create_next_text_engrouter_for(pText, maxSpace);
+        }
+        else if (pImo->is_box_inline())
+        {
+            ImoBoxInline* pIB = static_cast<ImoBoxInline*>(pImo);
+            m_pCurEngrouter = create_wrapper_engrouter_for(pIB, maxSpace);
+        }
+
+        //atomic content objects
+        else
+        {
+            m_pCurEngrouter = create_engrouter_for(pImo);
+            ++m_itCurContent;
+        }
+
+        if (m_pCurEngrouter)
+            m_pCurEngrouter->measure();
+    }
+
+    if (m_pCurEngrouter)
+    {
+        LUnits width = m_pCurEngrouter->get_width();
+
+        if (width <= maxSpace)
+        {
+            Engrouter* pEngr = m_pCurEngrouter;
+            m_pCurEngrouter = NULL;
+            return pEngr;
+        }
+    }
+
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+Engrouter* EngroutersCreator::create_engrouter_for(ImoInlineLevelObj* pImo)
 {
     //factory method to create engrouters and measure the ocupied space
 
-    if (pImo->is_text_item())
-    {
-        create_text_item_engrouters(dynamic_cast<ImoTextItem*>(pImo));
-        measure_engrouters();
-    }
-    else if (pImo->is_button())
+    if (pImo->is_button())
     {
         Engrouter* pEngrouter = LOMSE_NEW ButtonEngrouter(pImo, m_libraryScope);
         pEngrouter->measure();
-        m_engrouters.push_back(pEngrouter);
+        return pEngrouter;
     }
     else if (pImo->is_image())
     {
         Engrouter* pEngrouter = LOMSE_NEW ImageEngrouter(pImo, m_libraryScope);
         pEngrouter->measure();
-        m_engrouters.push_back(pEngrouter);
+        return pEngrouter;
     }
     else if (pImo->is_control())
     {
         Engrouter* pEngrouter = LOMSE_NEW ControlEngrouter(pImo, m_libraryScope);
         pEngrouter->measure();
-        m_engrouters.push_back(pEngrouter);
-    }
-    else if (pImo->is_box_inline())
-    {
-        ImoBoxInline* pIB = static_cast<ImoBoxInline*>(pImo);
-        BoxEngrouter* pBox = create_wrapper_engrouterbox_for(pIB);
-        create_and_measure_engrouters(pIB, pBox);
-        layout_engrouters_in_engrouterbox_and_measure(pBox);
-        m_engrouters.push_back(pBox);
+        return pEngrouter;
     }
     else
     {
         string msg = str( boost::format(
-                            "[EngroutersCreator::create_engrouters] invalid object %d")
+                            "[EngroutersCreator::create_engrouter_for] invalid object %d")
                             % pImo->get_obj_type() );
         cout << "Throw: " << msg << endl;
         throw std::runtime_error(msg);
     }
 }
+
 //---------------------------------------------------------------------------------------
-void EngroutersCreator::create_prefix_engrouter(ImoInlinesContainer* pBoxContent,
-                                                const string& prefix)
+Engrouter* EngroutersCreator::create_wrapper_engrouter_for(ImoBoxInline* pIB,
+                                                           LUnits maxSpace)
 {
-    m_engrouters.push_back( LOMSE_NEW WordEngrouter(pBoxContent, m_libraryScope, prefix) );
+    BoxEngrouter* pBoxEngr = LOMSE_NEW BoxEngrouter(pIB, m_libraryScope);
+
+    //create engrouters for its content. Assume all contents fits in box
+    create_engrouters_for_box_content(pIB, pBoxEngr);
+
+    pBoxEngr->measure();
+    ++m_itCurContent;
+    return pBoxEngr;
 }
 
 //---------------------------------------------------------------------------------------
-void EngroutersCreator::create_and_measure_engrouters(ImoBoxInline* pImo,
-                                                      BoxEngrouter* pBox)
+void EngroutersCreator::create_engrouters_for_box_content(ImoBoxInline* pImo,
+                                                           BoxEngrouter* pBoxEngr)
 {
-    EngroutersCreator creator(pBox->get_engrouters(), m_libraryScope);
+    //recursive. Need to create a new EngroutersCreator
 
-    TreeNode<ImoObj>::children_iterator it;
-    for (it = pImo->begin(); it != pImo->end(); ++it)
+    EngroutersCreator creator(m_libraryScope, pImo->begin(), pImo->end());
+
+    while (creator.more_content())
     {
-        creator.create_engrouters( dynamic_cast<ImoInlineLevelObj*>(*it) );
+        Engrouter* pEngr = creator.create_next_engrouter(10000000.0f /*a lot of available space so that all contents fit in box */);
+        if (pEngr)
+            pBoxEngr->add_engrouter(pEngr);
     }
+
+    pBoxEngr->layout_and_measure();
 }
 
 //---------------------------------------------------------------------------------------
-BoxEngrouter* EngroutersCreator::create_wrapper_engrouterbox_for(ImoBoxInline* pImo)
+Engrouter* EngroutersCreator::create_next_text_engrouter_for(ImoTextItem* pText,
+                                                             LUnits maxSpace)
 {
-    BoxEngrouter* pBox = LOMSE_NEW BoxEngrouter(pImo, m_libraryScope);
-    pBox->measure();
-    return pBox;
-}
-
-//---------------------------------------------------------------------------------------
-void EngroutersCreator::layout_engrouters_in_engrouterbox_and_measure(BoxEngrouter* pBox)
-{
-    UPoint cursor = pBox->get_content_org();
-    LUnits left = cursor.x;
-    LUnits lineWidth = pBox->get_content_width();
-    LUnits lineHeight = 0.0f;
-    LUnits availableWidth = lineWidth;
-
-    std::list<Engrouter*>& engrouters = pBox->get_engrouters();
-    std::list<Engrouter*>::iterator it;
-    for (it = engrouters.begin(); it != engrouters.end(); ++it)
-    {
-        Engrouter* pEngrouter = *it;
-        if (pEngrouter)
-        {
-            LUnits width = pEngrouter->get_width();
-            if (availableWidth < width)
-            {
-                availableWidth = lineWidth;
-                cursor.x = left;
-                cursor.y += lineHeight;
-                lineHeight = 0.0f;
-
-                if (availableWidth < width)
-                    break; // engrouter doesn't fit
-            }
-
-            pEngrouter->set_position(cursor);
-            lineHeight = max(lineHeight, pEngrouter->get_line_height());
-
-            cursor.x += width;
-            availableWidth -= width;
-        }
-    }
-    cursor.y += lineHeight;
-    cursor.y += pBox->get_total_bottom_spacing();
-    cursor.x += pBox->get_total_right_spacing();
-
-    //set box size
-    if (pBox->get_width() > 0.0f)
-        pBox->set_height(cursor.y);
+    if (m_pCurText != pText)
+        return first_text_engrouter_for(pText, maxSpace);
     else
-        pBox->set_size(cursor.x, cursor.y);
-
-    pBox->update_measures(cursor.y);
+        return next_text_engouter(maxSpace);
 }
 
 //---------------------------------------------------------------------------------------
-void EngroutersCreator::create_text_item_engrouters(ImoTextItem* pText)
+Engrouter* EngroutersCreator::first_text_engrouter_for(ImoTextItem* pText,
+                                                       LUnits maxSpace)
 {
-    string& text = pText->get_text();
-    size_t n = text.length();
-    if (n == 0)
-        return;
-
-    //initial spaces
-    size_t start = 0;
-    size_t length = 1;
-    size_t spaces = 0;
-    if (text[0] == ' ')
-    {
-        m_engrouters.push_back( LOMSE_NEW WordEngrouter(pText, m_libraryScope, " "));
-        start = text.find_first_not_of(" ");
-    }
-
-    //words, including trailing spaces
-    while (start >= 0 && start < n)
-    {
-        size_t stop = text.find_first_of(" ", start);
-        if (stop < 0 || stop > n)
-            length = n;
-        else
-        {
-            spaces = text.find_first_not_of(" ", stop) - stop;
-            if (spaces < 0)
-                spaces = n;
-            length = (spaces >= 1 ? stop - start + 1 : stop - start);
-        }
-        m_engrouters.push_back( LOMSE_NEW WordEngrouter(pText, m_libraryScope,
-                                        text.substr(start, length)) );
-        start += length + (spaces > 1 ? spaces - 1 : 0);
-    }
+    m_pCurText = pText;
+    delete m_pTextSplitter;
+    m_pTextSplitter = create_text_splitter_for(pText);
+    return next_text_engouter(maxSpace);
 }
-
-////---------------------------------------------------------------------------------------
-//void EngroutersCreator::create_item_engrouter(ImoObj* pImo)
-//{
-//    if (pImo->is_button())
-//        m_engrouters.push_back( LOMSE_NEW ButtonEngrouter(pImo, m_libraryScope) );
-//    else if (pImo->is_box_inline())
-//        m_engrouters.push_back( LOMSE_NEW InlineBoxEngrouter(pImo, m_libraryScope) );
-//}
 
 //---------------------------------------------------------------------------------------
-void EngroutersCreator::measure_engrouters()
+Engrouter* EngroutersCreator::next_text_engouter(LUnits maxSpace)
 {
-    std::list<Engrouter*>::iterator it;
-    for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
-    {
-        (*it)->measure();
-    }
+    Engrouter* pEngr = m_pTextSplitter->get_next_text_engrouter(maxSpace);
+    if (!m_pTextSplitter->more_text())
+        ++m_itCurContent;
+    return pEngr;
 }
+
+//---------------------------------------------------------------------------------------
+TextSplitter* EngroutersCreator::create_text_splitter_for(ImoTextItem* pText)
+{
+    //factory method to create a TextSplitter suitable for current language
+
+    string& lang = pText->get_language();
+    if (lang == "zn_CN")   //Chinese
+        return LOMSE_NEW ChineseTextSplitter(pText, m_libraryScope);
+    else
+        return LOMSE_NEW DefaultTextSplitter(pText, m_libraryScope);
+}
+
+//---------------------------------------------------------------------------------------
+Engrouter* EngroutersCreator::create_prefix_engrouter(ImoInlinesContainer* pBoxContent,
+                                                      const wstring& prefix)
+{
+    Engrouter* pEngr = LOMSE_NEW WordEngrouter(pBoxContent, m_libraryScope, prefix);
+    pEngr->measure();
+    return pEngr;
+}
+
 
 
 //=======================================================================================
@@ -243,6 +246,7 @@ Engrouter::Engrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope)
     , m_libraryScope(libraryScope)
     , m_pStyle( pCreatorImo->get_style() )
     , m_refLines()
+    , m_fBreakRequested(false)
 {
 }
 
@@ -252,32 +256,32 @@ LUnits Engrouter::shift_for_vertical_alignment(LineReferences& refs)
     if (refs.lineHeight == 0.0f)
         return 0.0f;
 
-    int valign = k_valign_top;  //m_pStyle->get_int_property(ImoStyle::k_vertical_align);
+    int valign = k_valign_top;  //m_pStyle->vertical_align();
     switch (valign)
     {
         case ImoStyle::k_valign_baseline:
             return refs.baseline - m_refLines.baseline;
 
         case ImoStyle::k_valign_sub:
-            return 0.0f;    //TODO
+            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
 
         case ImoStyle::k_valign_super:
-            return 0.0f;    //TODO
+            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
 
         case ImoStyle::k_valign_top:
             return 0.0f;
 
         case ImoStyle::k_valign_text_top:
-            return 0.0f;    //TODO
+            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
 
         case ImoStyle::k_valign_middle:
-            return 0.0f;    //TODO
+            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
 
         case ImoStyle::k_valign_bottom:
-            return 0.0f;    //TODO
+            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
 
         case ImoStyle::k_valign_text_bottom:
-            return 0.0f;    //TODO
+            return 0.0f;    //TODO: Engrouter::shift_for_vertical_alignment
 
         default:
             return 0.0f;
@@ -361,13 +365,13 @@ UPoint BoxEngrouter::get_content_org()
     UPoint org(0.0f, 0.0f);
     if (m_pStyle)
     {
-        org.x = m_pStyle->get_lunits_property(ImoStyle::k_margin_left);
-        org.x += m_pStyle->get_lunits_property(ImoStyle::k_border_width_left);
-        org.x += m_pStyle->get_lunits_property(ImoStyle::k_padding_left);
+        org.x = m_pStyle->margin_left();
+        org.x += m_pStyle->border_width_left();
+        org.x += m_pStyle->padding_left();
 
-        org.y = m_pStyle->get_lunits_property(ImoStyle::k_margin_top);
-        org.y += m_pStyle->get_lunits_property(ImoStyle::k_border_width_top);
-        org.y += m_pStyle->get_lunits_property(ImoStyle::k_padding_top);
+        org.y = m_pStyle->margin_top();
+        org.y += m_pStyle->border_width_top();
+        org.y += m_pStyle->padding_top();
     }
     return org;
 }
@@ -379,10 +383,10 @@ LUnits BoxEngrouter::get_content_width()
 
     if (m_pStyle)
     {
-        lineWidth -= m_pStyle->get_lunits_property(ImoStyle::k_border_width_left);
-        lineWidth -= m_pStyle->get_lunits_property(ImoStyle::k_padding_left);
-        lineWidth -= m_pStyle->get_lunits_property(ImoStyle::k_border_width_right);
-        lineWidth -= m_pStyle->get_lunits_property(ImoStyle::k_padding_right);
+        lineWidth -= m_pStyle->border_width_left();
+        lineWidth -= m_pStyle->padding_left();
+        lineWidth -= m_pStyle->border_width_right();
+        lineWidth -= m_pStyle->padding_right();
     }
     return lineWidth;
 }
@@ -394,9 +398,9 @@ LUnits BoxEngrouter::get_total_bottom_spacing()
 
     if (m_pStyle)
     {
-        space = m_pStyle->get_lunits_property(ImoStyle::k_margin_bottom);
-        space += m_pStyle->get_lunits_property(ImoStyle::k_border_width_bottom);
-        space += m_pStyle->get_lunits_property(ImoStyle::k_padding_bottom);
+        space = m_pStyle->margin_bottom();
+        space += m_pStyle->border_width_bottom();
+        space += m_pStyle->padding_bottom();
     }
     return space;
 }
@@ -408,63 +412,60 @@ LUnits BoxEngrouter::get_total_right_spacing()
 
     if (m_pStyle)
     {
-        space = m_pStyle->get_lunits_property(ImoStyle::k_margin_right);
-        space += m_pStyle->get_lunits_property(ImoStyle::k_border_width_right);
-        space += m_pStyle->get_lunits_property(ImoStyle::k_padding_right);
+        space = m_pStyle->margin_right();
+        space += m_pStyle->border_width_right();
+        space += m_pStyle->padding_right();
     }
     return space;
 }
 
-////---------------------------------------------------------------------------------------
-//LUnits BoxEngrouter::add_engrouters_to_box(GmoBox* pBox)
-//{
-//    LUnits lineHeight = 0.0f;
-//    LUnits availableWidth = m_size.width;
-//    UPoint cursor;
-//
-//    std::list<Engrouter*>::iterator it;
-//    for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
-//    {
-//        Engrouter* pEngrouter = *it;
+//---------------------------------------------------------------------------------------
+void BoxEngrouter::layout_and_measure()
+{
+    UPoint cursor = get_content_org();
+    LUnits lineHeight = 0.0f;
+
+    std::list<Engrouter*>::iterator it;
+    for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
+    {
+        Engrouter* pEngrouter = *it;
 //        if (pEngrouter)
-//        {
-//            LUnits width = pEngrouter->get_width();
-//            if (availableWidth < width)
-//            {
-//                availableWidth = m_size.width;
-//                cursor.x = 0.0f;
-//                cursor.y += lineHeight;
-//                lineHeight = 0.0f;
-//
-//                if (availableWidth < width)
-//                    break; // engrouter doesn't fit
-//            }
-//
-//            GmoObj* pGmo = pEngrouter->create_gm_object(cursor, lineHeight);
-//            add_engrouter_shape(pGmo, pBox);
-//            lineHeight = max(lineHeight, pEngrouter->get_height());
-//
-//            cursor.x += width;
-//            availableWidth -= width;
-//        }
-//    }
-//
-//    m_size.height = cursor.y + lineHeight;
-//    return m_size.height;
-//}
+        {
+            LUnits width = pEngrouter->get_width();
+            pEngrouter->set_position(cursor);
+            lineHeight = max(lineHeight, pEngrouter->get_line_height());
+
+            cursor.x += width;
+        }
+    }
+    cursor.y += lineHeight;
+    cursor.y += get_total_bottom_spacing();
+    cursor.x += get_total_right_spacing();
+
+    //set box size
+    if (get_width() > 0.0f)
+        set_height(cursor.y);
+    else
+        set_size(cursor.x, cursor.y);
+
+    update_measures(cursor.y);
+}
 
 //---------------------------------------------------------------------------------------
 void BoxEngrouter::add_engrouter_shape(GmoObj* pGmo, GmoBox* pBox)
 {
-    if (pGmo->is_shape())
+    if (pGmo)
     {
-        GmoShape* pShape = dynamic_cast<GmoShape*>(pGmo);
-        pBox->add_shape(pShape, GmoShape::k_layer_staff);
-    }
-    else if (pGmo->is_box())
-    {
-        GmoBox* pChildBox = dynamic_cast<GmoBox*>(pGmo);
-        pBox->add_child_box(pChildBox);
+        if (pGmo->is_shape())
+        {
+            GmoShape* pShape = dynamic_cast<GmoShape*>(pGmo);
+            pBox->add_shape(pShape, GmoShape::k_layer_staff);
+        }
+        else if (pGmo->is_box())
+        {
+            GmoBox* pChildBox = dynamic_cast<GmoBox*>(pGmo);
+            pBox->add_child_box(pChildBox);
+        }
     }
 }
 
@@ -532,17 +533,35 @@ void ImageEngrouter::measure()
 //=======================================================================================
 // WordEngrouter implementation
 //=======================================================================================
+WordEngrouter::WordEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope,
+                             const wstring& text)
+    : Engrouter(pCreatorImo, libraryScope)
+    , m_text(text)
+{
+    ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pCreatorImo );
+    if (pText)
+        m_language = pText->get_language();
+    else
+    {
+        ImoDocument* pDoc = pCreatorImo->get_document();
+        m_language = pDoc->get_language();
+    }
+}
+
+//---------------------------------------------------------------------------------------
 void WordEngrouter::measure()
 {
     TextMeter meter(m_libraryScope);
-    meter.select_font(m_pStyle->get_string_property(ImoStyle::k_font_name)
-                      , m_pStyle->get_float_property(ImoStyle::k_font_size)
-                      , m_pStyle->is_bold()
-                      , m_pStyle->is_italic() );
+    meter.select_font(m_language,
+                      m_pStyle->font_file(),
+                      m_pStyle->font_name(),
+                      m_pStyle->font_size(),
+                      m_pStyle->is_bold(),
+                      m_pStyle->is_italic() );
 
     LUnits fontHeight = meter.get_font_height();
 
-    float lineHeight = m_pStyle->get_float_property(ImoStyle::k_line_height);
+    float lineHeight = m_pStyle->line_height();
     m_refLines.lineHeight = (lineHeight == 0.0f ?
                              fontHeight : fontHeight * LUnits(lineHeight));
 
@@ -559,7 +578,7 @@ void WordEngrouter::measure()
     m_refLines.subLine = m_refLines.baseline;
 
     m_size.height = m_refLines.lineHeight;
-    m_size.width = meter.measure_width(m_word);
+    m_size.width = meter.measure_width(m_text);
 
     m_descent = meter.get_descender();
     m_ascent = meter.get_ascender();
@@ -574,8 +593,8 @@ GmoObj* WordEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
     pos.x += m_org.x;
     pos.y += m_org.y;
 
-    return LOMSE_NEW GmoShapeWord(m_pCreatorImo, 0, m_word, m_pStyle,
-                            pos.x, pos.y, m_halfLeading, m_libraryScope);
+    return LOMSE_NEW GmoShapeWord(m_pCreatorImo, 0, m_text, m_pStyle,
+                            m_language, pos.x, pos.y, m_halfLeading, m_libraryScope);
 }
 
 
@@ -594,30 +613,8 @@ GmoObj* InlineWrapperEngrouter::create_gm_object(UPoint pos, LineReferences& ref
 {
     //create box
     GmoBoxInline* pBox = LOMSE_NEW GmoBoxInline(m_pCreatorImo);
-
-    ////create shapes and add them to box
-    //EngroutersCreator creator(m_engrouters, m_libraryScope);
-    //std::list<ImoInlineLevelObj*>& items = m_pWrapper->get_items();
-    //std::list<ImoInlineLevelObj*>::iterator it;
-    //for (it = items.begin(); it != items.end(); ++it)
-    //    creator.create_engrouters(*it);
-
-    //LUnits boxHeight = add_engrouters_to_box(pBox);
-    //pBox->set_height( boxHeight );
-    //pBox->set_width( m_size.width );
-
-    //return box
     return pBox;
 }
-
-////---------------------------------------------------------------------------------------
-//void InlineWrapperEngrouter::measure()
-//{
-//    //EngroutersCreator creator(m_engrouters, m_libraryScope);
-//    //creator.measure_engrouters();
-//
-//    m_size = m_pWrapper->get_size();
-//}
 
 //---------------------------------------------------------------------------------------
 LUnits InlineWrapperEngrouter::add_engrouters_to_box(GmoBox* pBox, LineReferences& refs)
@@ -673,50 +670,37 @@ void InlineWrapperEngrouter::add_engrouter_shape(GmoObj* pGmo, GmoBox* pBox)
 }
 
 
-//=======================================================================================
-// InlineBoxEngrouter implementation
-//=======================================================================================
-InlineBoxEngrouter::InlineBoxEngrouter(ImoContentObj* pCreatorImo,
-                                       LibraryScope& libraryScope)
-    : InlineWrapperEngrouter(pCreatorImo, libraryScope)
-{
-    m_pBox = dynamic_cast<ImoInlineWrapper*>( pCreatorImo );
-}
-
-//---------------------------------------------------------------------------------------
-GmoObj* InlineBoxEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
-{
-    //create box
-    GmoBoxInline* pBox = LOMSE_NEW GmoBoxInline(m_pCreatorImo);
-
-    //create shapes
-    EngroutersCreator creator(m_engrouters, m_libraryScope);
-    TreeNode<ImoObj>::children_iterator it;
-    for (it = m_pBox->begin(); it != m_pBox->end(); ++it)
-        creator.create_engrouters( dynamic_cast<ImoInlineLevelObj*>(*it) );
-
-    //add shapes to box
-    LUnits boxHeight = add_engrouters_to_box(pBox, refs);
-    pBox->set_height( boxHeight );
-    pBox->set_width( m_size.width );
-
-    //return box
-    return pBox;
-}
-
-//---------------------------------------------------------------------------------------
-void InlineBoxEngrouter::measure()
-{
-    m_size = m_pBox->get_size();
-
-    m_refLines.lineHeight = m_size.height;
-    m_refLines.baseline = m_size.height;
-    m_refLines.textTop = 0.0f;
-    m_refLines.textBottom = m_size.height;
-    m_refLines.middleline = m_size.height / 2.0f;
-    m_refLines.supperLine = m_refLines.textTop;
-    m_refLines.subLine = m_refLines.baseline;
-}
+////=======================================================================================
+//// InlineBoxEngrouter implementation
+////=======================================================================================
+//InlineBoxEngrouter::InlineBoxEngrouter(ImoContentObj* pCreatorImo,
+//                                       LibraryScope& libraryScope)
+//    : InlineWrapperEngrouter(pCreatorImo, libraryScope)
+//{
+//    m_pBox = dynamic_cast<ImoInlineWrapper*>( pCreatorImo );
+//}
+//
+////---------------------------------------------------------------------------------------
+//GmoObj* InlineBoxEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
+//{
+//    //create box
+//    GmoBoxInline* pBox = LOMSE_NEW GmoBoxInline(m_pCreatorImo);
+//    return pBox;
+//}
+//
+////---------------------------------------------------------------------------------------
+//void InlineBoxEngrouter::measure()
+//{
+//    m_size = m_pBox->get_size();
+//
+//    m_refLines.lineHeight = m_size.height;
+//    m_refLines.baseline = m_size.height;
+//    m_refLines.textTop = 0.0f;
+//    m_refLines.textBottom = m_size.height;
+//    m_refLines.middleline = m_size.height / 2.0f;
+//    m_refLines.supperLine = m_refLines.textTop;
+//    m_refLines.subLine = m_refLines.baseline;
+//}
 
 
 

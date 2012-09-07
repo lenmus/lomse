@@ -196,39 +196,6 @@ void MultiColumnLayouter::layout_column(Layouter* pColLayouter, GmoBox* pParentB
 }
 
 
-////=======================================================================================
-//// ControlLayouter implementation
-////=======================================================================================
-//ControlLayouter::ControlLayouter(ImoContentObj* pItem, Layouter* pParent,
-//                             GraphicModel* pGModel, LibraryScope& libraryScope,
-//                             ImoStyles* pStyles)
-//    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles)
-//    , m_pControl( dynamic_cast<ImoControl*>(pItem) )
-//{
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ControlLayouter::layout_in_box()
-//{
-//    //Control was layouted when method create_main_box() was invoked. Therefore, the
-//    //only thing to do is to update cursor position
-//
-//    m_pageCursor.x = m_pItemMainBox->get_right();
-//    m_pageCursor.y = m_pItemMainBox->get_bottom();
-//
-//    set_layout_is_finished(true);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ControlLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
-//                                    LUnits height)
-//{
-//    m_pItemMainBox = m_pControl->layout(m_libraryScope, pos);
-//    pParentBox->add_child_box(m_pItemMainBox);
-//}
-
-
-
 //=======================================================================================
 // ListLayouter implementation
 //=======================================================================================
@@ -312,56 +279,6 @@ bool ListItemLayouter::is_first_content_item(ImoContentObj* pImo)
     ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pItem);
     ImoContent* pContent = pBlock->get_content();
     return (pImo == pContent->get_first_content_item());
-}
-
-
-
-//=======================================================================================
-// ScorePlayerLayouter implementation
-//=======================================================================================
-ScorePlayerLayouter::ScorePlayerLayouter(ImoContentObj* pItem, Layouter* pParent,
-                                 GraphicModel* pGModel, LibraryScope& libraryScope,
-                                 ImoStyles* pStyles)
-    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles, true)
-    , m_pPlayer( dynamic_cast<ImoScorePlayer*>(pItem) )
-{
-}
-
-//---------------------------------------------------------------------------------------
-void ScorePlayerLayouter::layout_in_box()
-{
-    set_cursor_and_available_space();
-
-
-    //WordEngrouter engrouter(m_pPlayer, m_libraryScope, "Play");
-    //LineReferences refs;
-
-    //GmoShape* pShape = dynamic_cast<GmoShape*>(
-    //                        engrouter.create_gm_object(m_pageCursor, refs) );
-    //m_pItemMainBox->add_shape(pShape, GmoShape::k_layer_staff);
-    //m_pageCursor.x += pShape->get_width();
-    //m_pageCursor.y += pShape->get_height() + 500.0f;
-
-    Control* pControl = m_pPlayer->get_player();
-    pControl->measure();
-    GmoBoxControl* pBox = pControl->layout(m_libraryScope, m_pageCursor);
-    m_pItemMainBox->add_child_box(pBox);
-    m_pageCursor.x += pBox->get_width();
-    m_pageCursor.y += pBox->get_height() + 500.0f;
-
-    set_layout_is_finished(true);
-}
-
-//---------------------------------------------------------------------------------------
-void ScorePlayerLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
-                                   LUnits height)
-{
-    m_pItemMainBox = LOMSE_NEW GmoBoxDocPageContent(m_pPlayer);
-    pParentBox->add_child_box(m_pItemMainBox);
-
-    m_pItemMainBox->set_origin(pos.x, pos.y);
-    m_pItemMainBox->set_width(width);
-    m_pItemMainBox->set_height(height);
 }
 
 

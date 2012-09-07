@@ -54,37 +54,42 @@ InlinesContainerLayouter::InlinesContainerLayouter(ImoContentObj* pItem, Layoute
     , m_libraryScope(libraryScope)
     , m_pPara( dynamic_cast<ImoInlinesContainer*>(pItem) )
     , m_fFirstLine(true)
+    , m_pEngrCreator(NULL)
     , m_firstLineIndent(0.0f)
-    , m_firstLinePrefix("")
+    , m_firstLinePrefix(L"")
 {
 }
 
 //---------------------------------------------------------------------------------------
 InlinesContainerLayouter::~InlinesContainerLayouter()
 {
-    std::list<Engrouter*>::iterator it;
-    for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
-        delete *it;
+    delete m_pEngrCreator;
+//    std::list<Engrouter*>::iterator it;
+//    for (it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
+//        delete *it;
 }
 
 //---------------------------------------------------------------------------------------
 void InlinesContainerLayouter::prepare_to_start_layout()
 {
     Layouter::prepare_to_start_layout();
-    set_bullet_info_if_necessary();
-    create_engrouters();
-    point_to_first_engrouter();
-    initialize_lines();
+    m_pEngrCreator =
+        LOMSE_NEW EngroutersCreator(m_libraryScope, m_pPara->begin(), m_pPara->end());
+    get_indent_and_bullet_info();
 }
 
 //---------------------------------------------------------------------------------------
-void InlinesContainerLayouter::set_bullet_info_if_necessary()
+void InlinesContainerLayouter::get_indent_and_bullet_info()
 {
+    //TODO: Appart from bullet points, first line indent is a property of
+    //      the paragraph style
+
+    //Bullet and indent is only set if this InlinesContainer is a ListItem
     ListItemLayouter* pList = dynamic_cast<ListItemLayouter*>(m_pParentLayouter);
     if (pList && pList->is_first_content_item(m_pItem))
     {
         m_firstLineIndent = -500.0f;
-        m_firstLinePrefix = "*  ";
+        m_firstLinePrefix = L"*  ";
     }
 }
 
@@ -107,18 +112,49 @@ void InlinesContainerLayouter::layout_in_box()
         //empty paragraph
         advance_current_line_space(m_pageCursor.x);
     }
-
-    while(is_line_ready() && enough_space_in_box())
+    else
     {
-        add_line();
-        prepare_line();
+        while(is_line_ready() && enough_space_in_box())
+        {
+            add_line();
+            prepare_line();
+        }
     }
 
-    bool fMoreText = is_line_ready();
+    bool fMoreText = more_content() || is_line_ready();
     if (m_fAddShapesToModel && !fMoreText)
         m_pItemMainBox->add_shapes_to_tables();
 
     set_layout_is_finished( !fMoreText );
+}
+
+//---------------------------------------------------------------------------------------
+void InlinesContainerLayouter::prepare_line()
+{
+    set_line_pos_and_width();
+    initialize_line_references();
+
+    if (m_fFirstLine)
+        add_bullet();
+
+    bool fBreak = false;
+    while (space_in_line() && !fBreak)
+    {
+        Engrouter* pEngr = create_next_engrouter();
+        if (pEngr)
+        {
+            add_engrouter_to_line(pEngr);
+            fBreak = pEngr->break_requested();
+        }
+        else
+            break;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+Engrouter* InlinesContainerLayouter::create_next_engrouter()
+{
+    return m_pEngrCreator->create_next_engrouter(m_availableSpace);
 }
 
 //---------------------------------------------------------------------------------------
@@ -134,55 +170,20 @@ void InlinesContainerLayouter::create_main_box(GmoBox* pParentBox, UPoint pos,
 }
 
 //---------------------------------------------------------------------------------------
-void InlinesContainerLayouter::create_engrouters()
+void InlinesContainerLayouter::add_bullet()
 {
-    EngroutersCreator creator(m_engrouters, m_libraryScope);
-
-    string prefix = get_first_line_prefix();
+    wstring prefix = get_first_line_prefix();
     if (!prefix.empty())
-        creator.create_prefix_engrouter(m_pPara, prefix);
-
-    TreeNode<ImoObj>::children_iterator it;
-    for (it = m_pPara->begin(); it != m_pPara->end(); ++it)
-        creator.create_engrouters( dynamic_cast<ImoInlineLevelObj*>( *it ) );
-}
-
-//---------------------------------------------------------------------------------------
-void InlinesContainerLayouter::prepare_line()
-{
-    //After execution:
-    //  m_itStart - will point to first engrouter to include or m_engrouters.end()
-    //              if no more engrouters
-    //  m_itEnd - will point to after last engrouter to include
-    //  m_lineHeight and other reference points will be updated to final data
-
-    m_itStart = more_engrouters() ? m_itEngrouters :  m_engrouters.end();
-    m_itEnd = m_engrouters.end();
-
-    set_line_pos_and_width();
-    initialize_line_references();
-
-    if (more_engrouters())
     {
-        if (space_in_line())
-        {
-            while(more_engrouters() && space_in_line())
-            {
-                m_lineWidth += add_engrouter_to_line();
-                next_engrouter();
-            }
-            m_itEnd = m_itEngrouters;
-        }
-        else
-        {
-            //very long text: word doesn't fit in line width. Split it
-        }
+        Engrouter* pEngr = m_pEngrCreator->create_prefix_engrouter(m_pPara, prefix);
+        add_engrouter_to_line(pEngr);
     }
 }
 
 //---------------------------------------------------------------------------------------
 void InlinesContainerLayouter::set_line_pos_and_width()
 {
+    //TODO: lineStart will depend on block-progression property
     m_xLineStart = m_pItemMainBox->get_content_left();
     m_lineWidth = 0.0f;
 
@@ -193,6 +194,12 @@ void InlinesContainerLayouter::set_line_pos_and_width()
         m_lineWidth = indent;
         m_availableSpace -= indent;
     }
+
+
+    //TODO: For left-to-right (ltr) and right-to-left (rtl) m_availableSpace is
+    //the available width. But for top-to-bottom (ttb) and bottom-to-top (btt) it
+    //should be the available height.
+
 }
 
 //---------------------------------------------------------------------------------------
@@ -203,7 +210,7 @@ void InlinesContainerLayouter::add_line()
 
     //horizontal alignment
     ImoStyle* pStyle = m_pPara->get_style();
-    switch (pStyle->get_int_property(ImoStyle::k_text_align))
+    switch (pStyle->text_align())
     {
         case ImoStyle::k_align_left:
             break;
@@ -222,10 +229,13 @@ void InlinesContainerLayouter::add_line()
     }
 
     std::list<Engrouter*>::iterator it;
-    for(it = m_itStart; it != m_itEnd; ++it)
+    for(it = m_engrouters.begin(); it != m_engrouters.end(); ++it)
     {
         add_engrouter_shape(*it, m_lineRefs.lineHeight);
+        delete *it;
     }
+    m_engrouters.clear();
+
     advance_current_line_space(left);
     m_fFirstLine = false;
 }
@@ -241,31 +251,29 @@ void InlinesContainerLayouter::advance_current_line_space(LUnits left)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits InlinesContainerLayouter::add_engrouter_to_line()
+void InlinesContainerLayouter::add_engrouter_to_line(Engrouter* pEngrouter)
 {
-    //Current engrouter is going to be included in current line. Here we proceed to do
-    //vertical alignement of the engrouter.
-    //This could imply changes in the reference lines for the line. But as engrouters
-    //are not yet engraved, these changes doesn't matter: we are only computing the
-    //final reference lines for the line. Later, when the engrouters are engraved, they will
-    //be properlly positioned on final reference lines.
-    //Returns: width of added item
+    //add engrouter to the list of engrouters for current line.
+    m_engrouters.push_back( pEngrouter );
 
-    Engrouter* pEngrouter = get_current_engrouter();
-
+    //do  vertical alignement of the engrouter.
     LUnits shift = pEngrouter->shift_for_vertical_alignment(m_lineRefs);
+
+    //if it is a WordEngrouter, vertival alignment could imply changes in the
+    //reference lines for the line.
     bool fUpdateText = dynamic_cast<WordEngrouter*>(pEngrouter) != NULL;
     if (fUpdateText)
     {
-        int valign = pEngrouter->get_style()->get_int_property(ImoStyle::k_vertical_align);
+        int valign = pEngrouter->get_style()->vertical_align();
         fUpdateText = valign == ImoStyle::k_valign_baseline;
     }
     update_line_references(pEngrouter->get_reference_lines(), shift, fUpdateText);
 
+    //discount space ocuppied by the engrouter's shape
     LUnits width = pEngrouter->get_width();
     m_pageCursor.x += width;
     m_availableSpace -= width;
-    return width;
+    m_lineWidth += width;
 }
 
 //---------------------------------------------------------------------------------------
@@ -275,13 +283,15 @@ void InlinesContainerLayouter::initialize_line_references()
     ImoStyle* pStyle = m_pPara->get_style();
 
     TextMeter meter(m_libraryScope);
-    meter.select_font(pStyle->get_string_property(ImoStyle::k_font_name)
-                      , pStyle->get_float_property(ImoStyle::k_font_size)
-                      , pStyle->is_bold()
-                      , pStyle->is_italic() );
+    meter.select_font( "",      //no particular language
+                       pStyle->font_file(),
+                       pStyle->font_name(),
+                       pStyle->font_size(),
+                       pStyle->is_bold(),
+                       pStyle->is_italic() );
     LUnits fontHeight = meter.get_font_height();
 
-    float lineHeight = pStyle->get_float_property(ImoStyle::k_line_height);
+    float lineHeight = pStyle->line_height();
     m_lineRefs.lineHeight = fontHeight * LUnits(lineHeight);
 
     //half-leading
@@ -356,17 +366,20 @@ void InlinesContainerLayouter::add_engrouter_shape(Engrouter* pEngrouter, LUnits
 {
     GmoObj* pGmo = pEngrouter->create_gm_object(m_pageCursor, get_line_refs());
 
-    if (pGmo->is_shape())
+    if (pGmo)
     {
-        GmoShape* pShape = dynamic_cast<GmoShape*>(pGmo);
-        m_pItemMainBox->add_shape(pShape, GmoShape::k_layer_staff);
-        m_pageCursor.x += pShape->get_width();
-    }
-    else if (pGmo->is_box())
-    {
-        GmoBox* pBox = dynamic_cast<GmoBox*>(pGmo);
-        m_pItemMainBox->add_child_box(pBox);
-        m_pageCursor.x += pBox->get_width();
+        if (pGmo->is_shape())
+        {
+            GmoShape* pShape = dynamic_cast<GmoShape*>(pGmo);
+            m_pItemMainBox->add_shape(pShape, GmoShape::k_layer_staff);
+            m_pageCursor.x += pShape->get_width();
+        }
+        else if (pGmo->is_box())
+        {
+            GmoBox* pBox = dynamic_cast<GmoBox*>(pGmo);
+            m_pItemMainBox->add_child_box(pBox);
+            m_pageCursor.x += pBox->get_width();
+        }
     }
 }
 
@@ -378,8 +391,8 @@ void InlinesContainerLayouter::page_initializations(GmoBox* pMainBox)
     //no height until content added
     ImoStyle* pStyle = m_pPara->get_style();
     if (pStyle)
-        m_pItemMainBox->set_height( pStyle->get_lunits_property(ImoStyle::k_margin_top) + pStyle->get_lunits_property(ImoStyle::k_border_width_top)
-                                    + pStyle->get_lunits_property(ImoStyle::k_padding_top) );
+        m_pItemMainBox->set_height( pStyle->margin_top() + pStyle->border_width_top()
+                                    + pStyle->padding_top() );
     else
         m_pItemMainBox->set_height(0.0f);
 

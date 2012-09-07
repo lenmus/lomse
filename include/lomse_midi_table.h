@@ -90,7 +90,7 @@ public:
     union {
         int     NotePitch;      //MIDI pitch
         int     Instrument;     //MIDI instrument for ProgInstr events
-        int     NumBeats;       //for RhythmChange events
+        int     TopNumber;      //for RhythmChange events
     };
     union {
         int     Volume;         //for notes
@@ -98,7 +98,7 @@ public:
     };
     union {
         int     NoteStep;       //Note step 0..6 : 0-Do, 1-Re, ... 6-Si
-        int     BeatDuration;   //for RhythmChange events. In LDP duration units
+        int     RefNoteDuration;   //for RhythmChange events. In LDP duration units
     };
     ImoStaffObj*    pSO;        //staffobj who originated the event (for visual highlight)
     int             Measure;    //measure number containing this staffobj

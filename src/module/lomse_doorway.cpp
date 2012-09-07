@@ -28,11 +28,9 @@
 //---------------------------------------------------------------------------------------
 
 #include "lomse_doorway.h"
-#include "lomse_config.h"
 
 #include "lomse_injectors.h"
 #include "lomse_presenter.h"
-#include "lomse_version.h"
 
 #include <sstream>
 using namespace std;
@@ -115,6 +113,12 @@ void LomseDoorway::set_request_callback(void* pThis,
 }
 
 //---------------------------------------------------------------------------------------
+void LomseDoorway::set_default_fonts_path(const string& fontsPath)
+{
+    m_pLibraryScope->set_default_fonts_path(fontsPath);
+}
+
+//---------------------------------------------------------------------------------------
 void LomseDoorway::null_notify_function(void* pObj, SpEventInfo event)
 {
     //This is just a mock method to avoid crashes when using the libary without
@@ -129,46 +133,45 @@ void LomseDoorway::null_request_function(void* pObj, Request* pRequest)
 }
 
 //---------------------------------------------------------------------------------------
-int LomseDoorway::get_version_major() { return LOMSE_VERSION_MAJOR; }
+int LomseDoorway::get_version_major()
+{
+    return m_pLibraryScope->get_version_major();
+}
 
 //---------------------------------------------------------------------------------------
-int LomseDoorway::get_version_minor() { return LOMSE_VERSION_MINOR; }
+int LomseDoorway::get_version_minor()
+{
+    return m_pLibraryScope->get_version_minor();
+}
 
 //---------------------------------------------------------------------------------------
-int LomseDoorway::get_version_patch() { return LOMSE_VERSION_PATCH; }
+int LomseDoorway::get_version_patch()
+{
+    return m_pLibraryScope->get_version_patch();
+}
 
 //---------------------------------------------------------------------------------------
-char LomseDoorway::get_version_type() { return LOMSE_VERSION_TYPE; }
+char LomseDoorway::get_version_type()
+{
+    return m_pLibraryScope->get_version_type();
+}
 
 //---------------------------------------------------------------------------------------
 string LomseDoorway::get_version_string()
 {
-    //i.e. "0.7 (rev.48)", "0.7 beta 48 (rev.56)", "1.0 (rev.75)", "1.0.2 (rev.77)"
-
-    stringstream s;
-    s << get_version_major() << "." << get_version_minor();
-    if (get_version_type() != ' ')
-    {
-        if (get_version_type() == 'a')
-            s << " alpha ";
-        else
-            s << " beta ";
-        s << get_version_patch();
-    }
-    else
-    {
-        if (get_version_patch() > 0)
-            s << "." << get_version_patch();
-    }
-
-    s << " (rev." << get_revision() << ")";
-    return s.str();
+    return m_pLibraryScope->get_version_string();
 }
 
 //---------------------------------------------------------------------------------------
 ScorePlayer* LomseDoorway::create_score_player(MidiServerBase* pSoundServer)
 {
     return Injector::inject_ScorePlayer(*m_pLibraryScope, pSoundServer);
+}
+
+//---------------------------------------------------------------------------------------
+void LomseDoorway::set_global_metronome_and_replace_local(Metronome* pMtr)
+{
+    m_pLibraryScope->set_global_metronome_and_replace_local(pMtr);
 }
 
 

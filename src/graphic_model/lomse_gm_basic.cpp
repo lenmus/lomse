@@ -197,7 +197,7 @@ void GraphicModel::add_to_map_imo_gmo(GmoBox* child)
 //---------------------------------------------------------------------------------------
 GmoShape* GraphicModel::get_shape_for(ImoObj* pImo, int id)
 {
-    //TODO
+    //TODO: GraphicModel::get_shape_for
     return NULL;
 }
 
@@ -570,19 +570,19 @@ void GmoBox::draw_shapes(Drawer* pDrawer, RenderOptions& opt)
 void GmoBox::draw_border(Drawer* pDrawer, RenderOptions& opt)
 {
     ImoStyle* pStyle = get_style();
-    if (pStyle && (pStyle->get_lunits_property(ImoStyle::k_border_width_top) > 0.0f
-                    || pStyle->get_lunits_property(ImoStyle::k_border_width_bottom) > 0.0f
-                    || pStyle->get_lunits_property(ImoStyle::k_border_width_left) > 0.0f
-                    || pStyle->get_lunits_property(ImoStyle::k_border_width_right) > 0.0f) )
+    if (pStyle && (pStyle->border_width_top() > 0.0f
+                    || pStyle->border_width_bottom() > 0.0f
+                    || pStyle->border_width_left() > 0.0f
+                    || pStyle->border_width_right() > 0.0f) )
     {
         double xLeft = double(m_origin.x
-                        + pStyle->get_lunits_property(ImoStyle::k_margin_left));
+                        + pStyle->margin_left());
         double yTop = double(m_origin.y
-                        + pStyle->get_lunits_property(ImoStyle::k_margin_top));
+                        + pStyle->margin_top());
         double xRight = double(get_right()
-                        - pStyle->get_lunits_property(ImoStyle::k_margin_right));
+                        - pStyle->margin_right());
         double yBottom = double(get_bottom()
-                            - pStyle->get_lunits_property(ImoStyle::k_margin_bottom));
+                            - pStyle->margin_bottom());
 
         pDrawer->begin_path();
         pDrawer->fill( Color(255, 255, 255, 0) );     //background white transparent
@@ -590,36 +590,36 @@ void GmoBox::draw_border(Drawer* pDrawer, RenderOptions& opt)
         pDrawer->move_to(xLeft, yTop);
 
         //top border
-        if (pStyle->get_lunits_property(ImoStyle::k_border_width_top) > 0.0f)
+        if (pStyle->border_width_top() > 0.0f)
         {
-            pDrawer->stroke_width( pStyle->get_lunits_property(ImoStyle::k_border_width_top) );
+            pDrawer->stroke_width( pStyle->border_width_top() );
             pDrawer->hline_to(xRight);
         }
         else
             pDrawer->move_to(xRight, yTop);
 
         //right border
-        if (pStyle->get_lunits_property(ImoStyle::k_border_width_right) > 0.0f)
+        if (pStyle->border_width_right() > 0.0f)
         {
-            pDrawer->stroke_width( pStyle->get_lunits_property(ImoStyle::k_border_width_right) );
+            pDrawer->stroke_width( pStyle->border_width_right() );
             pDrawer->vline_to(yBottom);
         }
         else
             pDrawer->move_to(xRight, yBottom);
 
         //bottom border
-        if (pStyle->get_lunits_property(ImoStyle::k_border_width_bottom) > 0.0f)
+        if (pStyle->border_width_bottom() > 0.0f)
         {
-            pDrawer->stroke_width( pStyle->get_lunits_property(ImoStyle::k_border_width_bottom) );
+            pDrawer->stroke_width( pStyle->border_width_bottom() );
             pDrawer->hline_to(xLeft);
         }
         else
             pDrawer->move_to(xLeft, yBottom);
 
         //left border
-        if (pStyle->get_lunits_property(ImoStyle::k_border_width_left) > 0.0f)
+        if (pStyle->border_width_left() > 0.0f)
         {
-            pDrawer->stroke_width( pStyle->get_lunits_property(ImoStyle::k_border_width_left) );
+            pDrawer->stroke_width( pStyle->border_width_left() );
             pDrawer->vline_to(yTop);
         }
 
@@ -735,9 +735,9 @@ LUnits GmoBox::get_content_top()
 {
     ImoStyle* pStyle = get_style();
     if (pStyle)
-        return get_top() + pStyle->get_lunits_property(ImoStyle::k_margin_top)
-                + pStyle->get_lunits_property(ImoStyle::k_border_width_top)
-                + pStyle->get_lunits_property(ImoStyle::k_padding_top);
+        return get_top() + pStyle->margin_top()
+                + pStyle->border_width_top()
+                + pStyle->padding_top();
     else
         return get_top();
 }
@@ -747,9 +747,9 @@ LUnits GmoBox::get_content_left()
 {
     ImoStyle* pStyle = get_style();
     if (pStyle)
-        return get_left() + pStyle->get_lunits_property(ImoStyle::k_margin_left)
-                + pStyle->get_lunits_property(ImoStyle::k_border_width_left)
-                + pStyle->get_lunits_property(ImoStyle::k_padding_left);
+        return get_left() + pStyle->margin_left()
+                + pStyle->border_width_left()
+                + pStyle->padding_left();
     else
         return get_left();
 }
@@ -759,12 +759,12 @@ LUnits GmoBox::get_content_width()
 {
     ImoStyle* pStyle = get_style();
     if (pStyle)
-        return get_width() - pStyle->get_lunits_property(ImoStyle::k_margin_left)
-                - pStyle->get_lunits_property(ImoStyle::k_border_width_left)
-                - pStyle->get_lunits_property(ImoStyle::k_padding_left)
-                - pStyle->get_lunits_property(ImoStyle::k_margin_right)
-                - pStyle->get_lunits_property(ImoStyle::k_border_width_right)
-                - pStyle->get_lunits_property(ImoStyle::k_padding_right);
+        return get_width() - pStyle->margin_left()
+                - pStyle->border_width_left()
+                - pStyle->padding_left()
+                - pStyle->margin_right()
+                - pStyle->border_width_right()
+                - pStyle->padding_right();
     else
         return get_width();
 }
@@ -774,12 +774,12 @@ LUnits GmoBox::get_content_height()
 {
     ImoStyle* pStyle = get_style();
     if (pStyle)
-        return get_height() - pStyle->get_lunits_property(ImoStyle::k_margin_top)
-                - pStyle->get_lunits_property(ImoStyle::k_border_width_top)
-                - pStyle->get_lunits_property(ImoStyle::k_padding_top)
-                - pStyle->get_lunits_property(ImoStyle::k_margin_bottom)
-                - pStyle->get_lunits_property(ImoStyle::k_border_width_bottom)
-                - pStyle->get_lunits_property(ImoStyle::k_padding_bottom);
+        return get_height() - pStyle->margin_top()
+                - pStyle->border_width_top()
+                - pStyle->padding_top()
+                - pStyle->margin_bottom()
+                - pStyle->border_width_bottom()
+                - pStyle->padding_bottom();
     else
         return get_height();
 }
@@ -1139,7 +1139,7 @@ void GmoBoxLink::notify_event(SpEventInfo pEvent)
     }
     else if (pEvent->is_on_click_event())
     {
-        //TODO
+        //TODO: GmoBoxLink::notify_event, on_click_event
 //        m_visited = true;
 //        m_prevColor = m_visitedColor;
     }

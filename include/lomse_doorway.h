@@ -102,12 +102,20 @@ public:
 
     enum EViewType { k_view_simple=0, k_view_vertical_book, k_view_horizontal_book, };
 
+    //library initialization and configuration
     void init_library(int pixel_format, int ppi, bool reverse_y_axis,
                       ostream& reporter=cout);
     void set_notify_callback(void* pThis, void (*pt2Func)(void*, SpEventInfo));
     void set_request_callback(void* pThis, void (*pt2Func)(void*, Request*));
+    void set_default_fonts_path(const string& fontsPath);
+        //configuration of ScorePlayerCtrol
+    void set_global_metronome_and_replace_local(Metronome* pMtr);
+    //void set_global_metronome_and_duplicate_local(Metronome* pMtr);
 
+    //access to global objects
     inline LibraryScope* get_library_scope() { return m_pLibraryScope; }
+
+    //communication with user application
     inline void post_event(SpEventInfo pEvent) { m_pFunc_notify(m_pObj_notify, pEvent); }
     inline void post_request(Request* pRequest) { m_pFunc_request(m_pObj_request, pRequest); }
 
@@ -115,7 +123,7 @@ public:
     inline double get_screen_ppi() { return m_platform.screen_ppi; }
     inline int get_pixel_format() { return m_platform.pixel_format; }
 
-    //common operations
+    //common operations on documents
     Presenter* new_document(int viewType);
     Presenter* new_document(int viewType, const string& ldpSource,
                             ostream& reporter = cout);
@@ -130,13 +138,12 @@ public:
     static void null_request_function(void* pObj, Request* event);
 
     //library info
-    static string get_version_string();
-    static int get_version_major();
-    static int get_version_minor();
-    static int get_version_patch();
-    static char get_version_type();
-    static long get_revision() { return LOMSE_REVISION; }
-
+    string get_version_string();
+    int get_version_major();
+    int get_version_minor();
+    int get_version_patch();
+    char get_version_type();
+    long get_revision() { return LOMSE_REVISION; }
 
 };
 

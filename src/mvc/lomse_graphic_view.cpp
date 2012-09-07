@@ -943,7 +943,7 @@ void SimpleView::set_viewport_for_page_fit_full(Pixels screenWidth)
 //---------------------------------------------------------------------------------------
 void SimpleView::get_view_size(Pixels* xWidth, Pixels* yHeight)
 {
-    //TODO
+    //TODO: SimpleView::get_view_size
 }
 
 

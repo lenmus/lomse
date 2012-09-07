@@ -28,8 +28,8 @@
 //---------------------------------------------------------------------------------------
 
 #include "lomse_injectors.h"
+#include "lomse_version.h"
 
-#include <sstream>
 #include "lomse_ldp_parser.h"
 #include "lomse_ldp_analyser.h"
 #include "lomse_ldp_compiler.h"
@@ -49,7 +49,10 @@
 #include "lomse_tasks.h"
 #include "lomse_events.h"
 #include "lomse_score_player.h"
+#include "lomse_metronome.h"
+#include "lomse_events_dispatcher.h"
 
+#include <sstream>
 using namespace std;
 
 namespace lomse
@@ -64,9 +67,13 @@ LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
     , m_pNullDoorway(NULL)
     , m_pLdpFactory(NULL)       //lazzy instantiation. Singleton scope.
     , m_pFontStorage(NULL)      //lazzy instantiation. Singleton scope.
+    , m_sFontsPath(LOMSE_FONTS_PATH)
+    , m_pGlobalMetronome(NULL)
+    , m_pDispatcher(NULL)
     , m_fJustifySystems(true)
     , m_fDumpColumnTables(false)
     , m_fDrawAnchors(false)
+    , m_fReplaceLocalMetronome(false)
 {
     if (!m_pDoorway)
     {
@@ -82,6 +89,11 @@ LibraryScope::~LibraryScope()
     delete m_pLdpFactory;
     delete m_pFontStorage;
     delete m_pNullDoorway;
+    if (m_pDispatcher)
+    {
+        m_pDispatcher->stop_events_loop();
+        delete m_pDispatcher;
+    }
 //    delete m_pMusicGlyphs;
 }
 
@@ -99,6 +111,17 @@ FontStorage* LibraryScope::font_storage()
     if (!m_pFontStorage)
         m_pFontStorage = LOMSE_NEW FontStorage(this);
     return m_pFontStorage;
+}
+
+//---------------------------------------------------------------------------------------
+EventsDispatcher* LibraryScope::get_events_dispatcher()
+{
+    if (!m_pDispatcher)
+    {
+        m_pDispatcher = LOMSE_NEW EventsDispatcher();
+        m_pDispatcher->start_events_loop();
+    }
+    return m_pDispatcher;
 }
 
 //---------------------------------------------------------------------------------------
@@ -131,6 +154,46 @@ std::string LibraryScope::get_font(const string& name, bool fBold, bool fItalic)
     RequestFont request(name, fBold, fItalic);
     post_request(&request);
     return request.get_font_fullname();
+}
+
+//---------------------------------------------------------------------------------------
+int LibraryScope::get_version_major() { return LOMSE_VERSION_MAJOR; }
+
+//---------------------------------------------------------------------------------------
+int LibraryScope::get_version_minor() { return LOMSE_VERSION_MINOR; }
+
+//---------------------------------------------------------------------------------------
+int LibraryScope::get_version_patch() { return LOMSE_VERSION_PATCH; }
+
+//---------------------------------------------------------------------------------------
+char LibraryScope::get_version_type() { return LOMSE_VERSION_TYPE; }
+
+//---------------------------------------------------------------------------------------
+long LibraryScope::get_revision() { return LOMSE_REVISION; }
+
+//---------------------------------------------------------------------------------------
+string LibraryScope::get_version_string()
+{
+    //i.e. "0.7 (rev.48)", "0.7 beta 48 (rev.56)", "1.0 (rev.75)", "1.0.2 (rev.77)"
+
+    stringstream s;
+    s << get_version_major() << "." << get_version_minor();
+    if (get_version_type() != ' ')
+    {
+        if (get_version_type() == 'a')
+            s << " alpha ";
+        else
+            s << " beta ";
+        s << get_version_patch();
+    }
+    else
+    {
+        if (get_version_patch() > 0)
+            s << "." << get_version_patch();
+    }
+
+    s << " (rev." << get_revision() << ")";
+    return s.str();
 }
 
 

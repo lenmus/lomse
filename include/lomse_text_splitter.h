@@ -27,42 +27,87 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_PARSER_H__
-#define __LOMSE_PARSER_H__
+#ifndef __LOMSE_TEXT_SPLITTER_H__
+#define __LOMSE_TEXT_SPLITTER_H__
 
-#include <ostream>
-using namespace std;
+#include "lomse_injectors.h"
+#include "lomse_basic.h"
+
 
 namespace lomse
 {
 
+//forward declarations
+class Engrouter;
+class ImoTextItem;
+
+
 //---------------------------------------------------------------------------------------
-// Parser: base class for any parser
-class Parser
+// TextSplitter: encapsulates the algorithms for text hyphenation and splitting.
+//    This is an abstract class. Specific spltters has to be created for each
+//    language.
+class TextSplitter
 {
 protected:
-    ostream& m_reporter;
-    int m_numErrors;        //number of errors found during parsing
-    long m_nMaxId;          //maximum ID found
+    ImoTextItem* m_pText;
+    string m_language;
+    LibraryScope& m_libraryScope;
+    wstring m_glyphs;
+    std::vector<LUnits> m_glyphWidths;
+    size_t m_totalGlyphs;
 
-    Parser(ostream& reporter) : m_reporter(reporter) {}
+    TextSplitter(ImoTextItem* pText, LibraryScope& libraryScope);
 
 public:
-    virtual ~Parser() {}
+    virtual ~TextSplitter() {}
 
-//    //setings and options
-//    inline void SetIgnoreList(std::set<long>* pSet) { m_pIgnoreSet = pSet; }
+    virtual Engrouter* get_next_text_engrouter(LUnits maxSpace) = 0;
+    virtual bool more_text() = 0;
 
-    virtual void parse_file(const std::string& filename, bool fErrorMsg = true) = 0;
-    virtual void parse_text(const std::string& sourceText) = 0;
-    //virtual void parse_input(LdpReader& reader) = 0;
+protected:
+    void measure_glyphs();
 
-    inline int get_num_errors() { return m_numErrors; }
-    inline long get_max_id() { return m_nMaxId; }
+};
+
+//---------------------------------------------------------------------------------------
+// DefaultTextSplitter: splits at spaces, no hyphenation
+class DefaultTextSplitter : public TextSplitter
+{
+protected:
+    size_t m_start;
+    size_t m_length;
+    size_t m_spaces;
+
+public:
+    DefaultTextSplitter(ImoTextItem* pText, LibraryScope& libraryScope);
+    ~DefaultTextSplitter() {}
+
+    Engrouter* get_next_text_engrouter(LUnits maxSpace);
+    bool more_text();
+
+protected:
+
+};
+
+//---------------------------------------------------------------------------------------
+// ChineseTextSplitter:
+class ChineseTextSplitter : public TextSplitter
+{
+protected:
+    size_t m_start;
+    size_t m_length;
+    size_t m_spaces;
+
+public:
+    ChineseTextSplitter(ImoTextItem* pText, LibraryScope& libraryScope);
+    ~ChineseTextSplitter() {}
+
+    Engrouter* get_next_text_engrouter(LUnits maxSpace);
+    bool more_text();
 
 };
 
 
-} //namespace lomse
+}   //namespace lomse
 
-#endif    //__LOMSE_PARSER_H__
+#endif      //__LOMSE_TEXT_SPLITTER_H__

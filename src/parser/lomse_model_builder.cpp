@@ -169,29 +169,29 @@ void PitchAssigner::update_context_accidentals(ImoNote* pNote)
             m_accidentals[step] = 0;
             break;
         case k_flat:
-            //lower one semitone
-            m_accidentals[step] -= 1;
+            //Force one flat
+            m_accidentals[step] = -1;
             break;
         case k_natural_flat:
             //Force one flat
             m_accidentals[step] = -1;
             break;
         case k_sharp:
-            //raise one semitone
-            m_accidentals[step] += 1;
+            //force one sharp
+            m_accidentals[step] = 1;
             break;
         case k_natural_sharp:
             //force one sharp
             m_accidentals[step] = 1;
             break;
         case k_flat_flat:
-            //lower two semitones
-            m_accidentals[step] -= 2;
+            //Force two flats
+            m_accidentals[step] = -2;
             break;
         case k_sharp_sharp:
         case k_double_sharp:
-            //raise two semitones
-            m_accidentals[step] += 2;
+            //force two sharps
+            m_accidentals[step] = 2;
             break;
         default:
             ;

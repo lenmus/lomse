@@ -27,42 +27,67 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_PARSER_H__
-#define __LOMSE_PARSER_H__
+#ifndef __LOMSE__LMD_EXPORTER_H__        //to avoid nested includes
+#define __LOMSE__LMD_EXPORTER_H__
 
-#include <ostream>
+#include "lomse_basic.h"
+
+#include <sstream>
 using namespace std;
 
 namespace lomse
 {
 
-//---------------------------------------------------------------------------------------
-// Parser: base class for any parser
-class Parser
+//forward declarations
+class ImoObj;
+class LmdGenerator;
+
+
+// LmdExporter: Generates LMD source code for a basic model object
+//----------------------------------------------------------------------------------
+class LmdExporter
 {
 protected:
-    ostream& m_reporter;
-    int m_numErrors;        //number of errors found during parsing
-    long m_nMaxId;          //maximum ID found
-
-    Parser(ostream& reporter) : m_reporter(reporter) {}
+    int m_nIndent;
+    bool m_fAddId;
+    int m_scoreFormat;
 
 public:
-    virtual ~Parser() {}
+    LmdExporter();
+    virtual ~LmdExporter();
 
-//    //setings and options
-//    inline void SetIgnoreList(std::set<long>* pSet) { m_pIgnoreSet = pSet; }
+    //formats for scores
+    enum {
+        k_format_ldp = 0, k_format_lmd, k_format_musicxml,
+    };
 
-    virtual void parse_file(const std::string& filename, bool fErrorMsg = true) = 0;
-    virtual void parse_text(const std::string& sourceText) = 0;
-    //virtual void parse_input(LdpReader& reader) = 0;
+    //settings
+    inline void set_indent(int value) { m_nIndent = value; }
+    inline void increment_indent() { ++m_nIndent; }
+    inline void decrement_indent() { --m_nIndent; }
+    inline void set_add_id(bool value) { m_fAddId = value; }
+    inline void set_score_format(int value) { m_scoreFormat = value; }
 
-    inline int get_num_errors() { return m_numErrors; }
-    inline long get_max_id() { return m_nMaxId; }
+    //getters for settings
+    inline int get_indent() { return m_nIndent; }
+    inline bool get_add_id() { return m_fAddId; }
+    inline int get_score_format() { return m_scoreFormat; }
+
+    //the main method
+    string get_source(ImoObj* pImo);
+
+    //static methods for ldp names to types conversion
+    static string clef_type_to_ldp(int clefType);
+    static string color_to_ldp(Color color);
+    static string float_to_string(float num);
+
+protected:
+    LmdGenerator* new_generator(ImoObj* pImo);
 
 };
 
 
-} //namespace lomse
+}   //namespace lomse
 
-#endif    //__LOMSE_PARSER_H__
+#endif    // __LOMSE__LMD_EXPORTER_H__
+

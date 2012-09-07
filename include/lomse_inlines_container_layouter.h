@@ -63,13 +63,14 @@ class InlinesContainerLayouter : public Layouter
 protected:
     LibraryScope& m_libraryScope;
     ImoInlinesContainer* m_pPara;
-    std::list<Engrouter*> m_engrouters;
+    std::list<Engrouter*> m_engrouters;     //for a line
     bool m_fFirstLine;
     LUnits m_xLineStart;
+    EngroutersCreator* m_pEngrCreator;
 
     //bullets
     LUnits m_firstLineIndent;
-    string m_firstLinePrefix;
+    wstring m_firstLinePrefix;
 
 public:
     InlinesContainerLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
@@ -87,38 +88,31 @@ public:
 
 protected:
     void page_initializations(GmoBox* pMainBox);
-    void create_engrouters();
+//    void create_engrouters();
 
+    Engrouter* create_next_engrouter();
     bool enough_space_in_box();
-    LUnits add_engrouter_to_line();
+    void add_engrouter_to_line(Engrouter* pEngrouter);
     void add_engrouter_shape(Engrouter* pEngrouter, LUnits height);
 
     //bullet points
-    void set_bullet_info_if_necessary();
-    LUnits get_first_line_indent() { return m_firstLineIndent; }
-    string get_first_line_prefix() { return m_firstLinePrefix; }
-
-    //helper: engrouters traversing
-    std::list<Engrouter*>::iterator m_itEngrouters;
-    inline void point_to_first_engrouter() { m_itEngrouters = m_engrouters.begin(); }
-    inline bool more_engrouters() { return m_itEngrouters != m_engrouters.end(); }
-    inline void next_engrouter() { ++m_itEngrouters; }
-    inline Engrouter* get_current_engrouter() { return *m_itEngrouters; };
+    void get_indent_and_bullet_info();
+    inline LUnits get_first_line_indent() { return m_firstLineIndent; }
+    inline wstring get_first_line_prefix() { return m_firstLinePrefix; }
+    void add_bullet();
 
     //helper: space in current line
     LUnits m_availableSpace;
-    inline bool space_in_line() { return m_availableSpace > (*m_itEngrouters)->get_width(); }
+    inline bool space_in_line() { return m_availableSpace > 0.0f; }
 
     //helper: info about next line to add to paragraph
-    std::list<Engrouter*>::iterator m_itStart;       //first engrouter for this line
-    std::list<Engrouter*>::iterator m_itEnd;         //first engrouter for next line
-    LineReferences m_lineRefs;                       //reference lines
+    LineReferences m_lineRefs;      //reference lines
     LUnits m_lineWidth;
 
     //other
     inline bool is_first_line() { return m_fFirstLine; }
-    inline void initialize_lines() { m_itStart = m_engrouters.end(); }
-    inline bool is_line_ready() { return m_itStart != m_engrouters.end(); }
+    inline bool more_content() { return m_pEngrCreator->more_content(); }
+    inline bool is_line_ready() { return m_engrouters.size() > 0; }
     void prepare_line();
     void add_line();
     void advance_current_line_space(LUnits left);

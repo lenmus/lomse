@@ -48,13 +48,12 @@ using namespace std;
 namespace lomse
 {
 
-
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // Document implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 Document::Document(LibraryScope& libraryScope, ostream& reporter)
     : BlockLevelCreatorApi()
-    , EventNotifier()
+    , EventNotifier(libraryScope.get_events_dispatcher())
     , Observable()
     , m_libraryScope(libraryScope)
     , m_reporter(reporter)
@@ -185,7 +184,7 @@ Compiler* Document::get_compiler_for_format(int format)
 {
     switch(format)
     {
-        case k_format_ldp: 
+        case k_format_ldp:
             return Injector::inject_LdpCompiler(m_libraryScope, this);
 
         case k_format_lmd:

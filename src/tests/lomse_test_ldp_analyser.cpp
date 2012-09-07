@@ -2832,8 +2832,8 @@ SUITE(LdpAnalyserTest)
         CHECK( pIModel->get_root()->is_time_signature() == true );
         ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
         CHECK( pTimeSignature != NULL );
-        CHECK( pTimeSignature->get_beats() == 6 );
-        CHECK( pTimeSignature->get_beat_type() == 8 );
+        CHECK( pTimeSignature->get_top_number() == 6 );
+        CHECK( pTimeSignature->get_bottom_number() == 8 );
 
         delete tree->get_root();
         delete pIModel;
@@ -2855,8 +2855,8 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
         CHECK( pTimeSignature != NULL );
-        CHECK( pTimeSignature->get_beats() == 2 );
-        CHECK( pTimeSignature->get_beat_type() == 4 );
+        CHECK( pTimeSignature->get_top_number() == 2 );
+        CHECK( pTimeSignature->get_bottom_number() == 4 );
 
         delete tree->get_root();
         delete pIModel;
@@ -2872,8 +2872,8 @@ SUITE(LdpAnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
         CHECK( pTimeSignature != NULL );
-        CHECK( pTimeSignature->get_beats() == 3 );
-        CHECK( pTimeSignature->get_beat_type() == 4 );
+        CHECK( pTimeSignature->get_top_number() == 3 );
+        CHECK( pTimeSignature->get_bottom_number() == 4 );
         CHECK( pTimeSignature->is_visible() );
         CHECK( pTimeSignature->get_user_location_x() == 70.0f );
         CHECK( pTimeSignature->get_user_location_y() == 0.0f );
@@ -2892,8 +2892,8 @@ SUITE(LdpAnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoTimeSignature* pTimeSignature = dynamic_cast<ImoTimeSignature*>( pIModel->get_root() );
         CHECK( pTimeSignature != NULL );
-        CHECK( pTimeSignature->get_beats() == 6 );
-        CHECK( pTimeSignature->get_beat_type() == 8 );
+        CHECK( pTimeSignature->get_top_number() == 6 );
+        CHECK( pTimeSignature->get_bottom_number() == 8 );
         CHECK( pTimeSignature->get_user_location_x() == 0.0f );
         CHECK( pTimeSignature->get_user_location_y() == 0.0f );
         CHECK( pTimeSignature->is_visible() == false );
@@ -3869,6 +3869,29 @@ SUITE(LdpAnalyserTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         CHECK( pDoc != NULL );
         CHECK( pDoc->get_num_content_items() == 0 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Lenmusdoc_language)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(lenmusdoc (vers 0.0)(language \"zn_CN\")(content ))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        //cout << "language='" << pDoc->get_language() << "'" << endl;
+        CHECK( pDoc->get_language() == "zn_CN" );
 
         delete tree->get_root();
         delete pIModel;
@@ -6125,11 +6148,11 @@ SUITE(LdpAnalyserTest)
         ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Composer" );
-        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
-        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
-        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 14 );
+        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
+        CHECK( pStyle->font_name() == "Times New Roman" );
+        CHECK( pStyle->font_style() == ImoStyle::k_italic );
+        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+        CHECK( pStyle->font_size() == 14 );
 
         delete tree->get_root();
         delete pIModel;
@@ -6156,11 +6179,11 @@ SUITE(LdpAnalyserTest)
         ImoStyle* pStyle = pScore->find_style("Header1");
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Header1" );
-        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
-        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
-        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 14 );
+        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
+        CHECK( pStyle->font_name() == "Times New Roman" );
+        CHECK( pStyle->font_style() == ImoStyle::k_italic );
+        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+        CHECK( pStyle->font_size() == 14 );
 
         delete tree->get_root();
         delete pIModel;
@@ -6186,8 +6209,8 @@ SUITE(LdpAnalyserTest)
         ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Composer" );
-        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_bottom) == 2.0f );
+        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
+        CHECK( pStyle->margin_bottom() == 2.0f );
 
         delete tree->get_root();
         delete pIModel;
@@ -6214,10 +6237,42 @@ SUITE(LdpAnalyserTest)
         ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Composer" );
-        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Arial" );
-        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 14 );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
+        CHECK( pStyle->font_name() == "Arial" );
+        CHECK( pStyle->font_size() == 14 );
+        CHECK( pStyle->font_style() == ImoStyle::k_italic );
+        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, DefineStyle_FontFile)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text("(defineStyle \"Composer\" "
+            "(font-file \"wqy-zenhei.ttc\")"
+            "(font-name \"Arial\")(font-size 14pt)"
+            "(font-style italic)(font-weight bold) )" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
+        CHECK( pStyle != NULL );
+        CHECK( pStyle->get_name() == "Composer" );
+        CHECK( pStyle->font_file() == "wqy-zenhei.ttc" );
+        CHECK( pStyle->font_name() == "Arial" );
+        CHECK( pStyle->font_size() == 14 );
+        CHECK( pStyle->font_style() == ImoStyle::k_italic );
+        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
 
         delete tree->get_root();
         delete pIModel;
@@ -6243,10 +6298,10 @@ SUITE(LdpAnalyserTest)
         ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Composer" );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_top) == 3.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_bottom) == 2.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_left) == 5.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_right) == 7.0f );
+        CHECK( pStyle->margin_top() == 3.0f );
+        CHECK( pStyle->margin_bottom() == 2.0f );
+        CHECK( pStyle->margin_left() == 5.0f );
+        CHECK( pStyle->margin_right() == 7.0f );
 
         delete tree->get_root();
         delete pIModel;
@@ -6272,10 +6327,10 @@ SUITE(LdpAnalyserTest)
         ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Composer" );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_top) == 0.5f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_bottom) == 0.5f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_left) == 0.5f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_margin_right) == 0.5f );
+        CHECK( pStyle->margin_top() == 0.5f );
+        CHECK( pStyle->margin_bottom() == 0.5f );
+        CHECK( pStyle->margin_left() == 0.5f );
+        CHECK( pStyle->margin_right() == 0.5f );
 
         delete tree->get_root();
         delete pIModel;
@@ -6301,7 +6356,7 @@ SUITE(LdpAnalyserTest)
         ImoStyle* pStyle = dynamic_cast<ImoStyle*>( pIModel->get_root() );
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Composer" );
-        CHECK( pStyle->get_float_property(ImoStyle::k_line_height) == 1.2f );
+        CHECK( pStyle->line_height() == 1.2f );
 
         delete tree->get_root();
         delete pIModel;
@@ -6464,11 +6519,11 @@ SUITE(LdpAnalyserTest)
         ImoStyle* pStyle = pTitle->get_style();
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Header1" );
-        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
-        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
-        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 14 );
+        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
+        CHECK( pStyle->font_name() == "Times New Roman" );
+        CHECK( pStyle->font_style() == ImoStyle::k_italic );
+        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+        CHECK( pStyle->font_size() == 14 );
 
         delete tree->get_root();
         delete pIModel;
@@ -7615,11 +7670,11 @@ SUITE(LdpAnalyserTest)
 
         ImoStyle* pStyle = pStyles->find_style("Header1");
         CHECK( pStyle->get_name() == "Header1" );
-        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
-        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
-        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 14 );
+        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
+        CHECK( pStyle->font_name() == "Times New Roman" );
+        CHECK( pStyle->font_style() == ImoStyle::k_italic );
+        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+        CHECK( pStyle->font_size() == 14 );
 
         delete tree->get_root();
         delete pIModel;
@@ -7652,11 +7707,11 @@ SUITE(LdpAnalyserTest)
         ImoStyle* pStyle = pDoc->find_style("Header1");
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Header1" );
-        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0, 254,15, 127)) );
-        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Times New Roman" );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_italic );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_bold );
-        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 14 );
+        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
+        CHECK( pStyle->font_name() == "Times New Roman" );
+        CHECK( pStyle->font_style() == ImoStyle::k_italic );
+        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+        CHECK( pStyle->font_size() == 14 );
 
         delete tree->get_root();
         delete pIModel;

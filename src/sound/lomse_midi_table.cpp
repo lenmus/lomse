@@ -247,12 +247,12 @@ void SoundEventsTable::add_rythm_change(StaffObjsCursor& cursor, int measure,
     //TODO Deal with non-standard time signatures
 
     float rTime = cursor.time() + cursor.anacrusis_missing_time();
-    int beatDuration = int( pTS->get_beat_duration() );
-    int beats = pTS->get_beats();
-    int numPulses = pTS->get_num_pulses();
+    int refNoteDuration = int( pTS->get_ref_note_duration() );
+    int topNum = pTS->get_top_number();
+    int numBeats = pTS->get_num_pulses();
 
-    store_event(rTime, SoundEvent::k_rhythm_change, 0, beats, numPulses,
-                beatDuration, pTS, measure);
+    store_event(rTime, SoundEvent::k_rhythm_change, 0, topNum, numBeats,
+                refNoteDuration, pTS, measure);
 }
 
 //---------------------------------------------------------------------------------------

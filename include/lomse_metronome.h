@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -27,44 +27,60 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_WRAPPER_BOX_LAYOUTER_H__        //to avoid nested includes
-#define __LOMSE_WRAPPER_BOX_LAYOUTER_H__
+#ifndef __LOMSE_METRONOME_H__        //to avoid nested includes
+#define __LOMSE_METRONOME_H__
 
-#include "lomse_injectors.h"
-#include "lomse_content_layouter.h"
-#include <sstream>
 
-using namespace std;
 
 namespace lomse
 {
 
-//forward declarations
-class ImoContentObj;
-class ImoStyles;
-class ImoStyle;
-class GraphicModel;
-class GmoBox;
-class ContentLayouter;
-
 //---------------------------------------------------------------------------------------
-// WrapperBoxLayouter: layouts a paragraph
-class WrapperBoxLayouter : public ContentLayouter
+// Abstract class defining the interface for any Metronome
+class Metronome
 {
 protected:
-    LibraryScope& m_libraryScope;
-    ImoStyles* m_pStyles;
-    GmoBox* m_pMainBox;
+    long        m_nMM;          //metronome frequency: beats per minute
+    long        m_nInterval;    //metronome period: milliseconds between beats
+    bool        m_fMuted;       //metronome sound is muted
+    bool        m_fRunning;     //true if start() invoked
+
+    Metronome(long nMM)
+        : m_fMuted(true)
+        , m_fRunning(false)
+    {
+        set_mm(60L);
+    }
 
 public:
-    WrapperBoxLayouter(ImoContentObj* pImo, GraphicModel* pGModel,
-                       LibraryScope& libraryScope, ImoStyles* pStyles);
-    virtual ~WrapperBoxLayouter();
+    virtual ~Metronome() {}
 
+    // setting speed. Two options:
+    void set_mm(long nMM)
+    {
+        m_nInterval = (60000 / nMM);
+        m_nMM = nMM;
+    }
+    void set_interval(long milliseconds)
+    {
+        m_nInterval = milliseconds;
+        m_nMM = (long)((60000.0 / (float)milliseconds)+ 0.5);;
+    }
+
+    // accessors
+    inline long get_mm() { return m_nMM; }
+    inline long get_interval() { return m_nInterval; }
+    inline bool is_muted() { return m_fMuted; }
+    inline bool is_running() { return m_fRunning; }
+
+    // commands
+    virtual void start() = 0;
+    virtual void stop() = 0;
+    inline void mute(bool value) { m_fMuted = value; }
 };
 
 
-}   //namespace lomse
+}   // namespace lenmus
 
-#endif    // __LOMSE_WRAPPER_BOX_LAYOUTER_H__
+#endif    // __LOMSE_METRONOME_H__
 

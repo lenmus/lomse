@@ -206,7 +206,7 @@ void TableLayouter::determine_width_for_columns()
     int iCol = 0;
     for (it = cols.begin(); it != cols.end(); ++it, ++iCol)
     {
-        m_columnsWidth[iCol] = (*it)->get_lunits_property(ImoStyle::k_table_col_width);
+        m_columnsWidth[iCol] = (*it)->table_col_width();
         m_tableWidth += m_columnsWidth[iCol];
     }
 }
@@ -259,7 +259,7 @@ void TableLayouter::prepare_body_row()
 //---------------------------------------------------------------------------------------
 bool TableLayouter::enough_space_in_box()
 {
-    return true;        //TODO
+    return true;        //TODO: TableLayouter::enough_space_in_box
 }
 
 

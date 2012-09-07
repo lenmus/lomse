@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -38,8 +38,6 @@
 namespace lomse
 {
 
-#define lml_LDP_INDENT_STEP  3
-
 //=======================================================================================
 // LdpGenerator
 //=======================================================================================
@@ -52,24 +50,40 @@ protected:
 public:
     LdpGenerator(LdpExporter* pExporter) : m_pExporter(pExporter) {}
 
-    virtual std::string generate_source() = 0;
+    virtual string generate_source(ImoObj* pParent=NULL) = 0;
 
 protected:
-    void start_element();
-    void end_element();
-    void add_indent_spaces();
-    void add_element_name(const std::string& name, ImoObj* pImo);
+    void start_element(const string& name, int id, bool fInNewLine=true);
+    void end_element(bool fStartLine = true);
+    void start_comment();
+    void end_comment();
+    void empty_line();
+    void new_line_and_indent_spaces(bool fStartLine = true);
     void add_source_for(ImoObj* pImo);
     void source_for_base_staffobj(ImoObj* pImo);
     void source_for_base_scoreobj(ImoObj* pImo);
     void source_for_base_contentobj(ImoObj* pImo);
     void source_for_base_imobj(ImoObj* pImo);
     void source_for_auxobj(ImoObj* pImo);
+    void source_for_relobj(ImoObj* pImo, ImoObj* pParent);
+
     void increment_indent();
     void decrement_indent();
 
+    void add_duration(stringstream& source, int noteType, int dots);
+    void add_visible(bool fVisible);
+    void add_color_if_not_black(Color color);
+    void add_location_if_not_zero(Tenths x, Tenths y);
+    void add_location(TPoint pt);
+    void add_width_if_not_default(Tenths width, Tenths def);
+
+
 };
 
+#define k_in_same_line      false
+#define k_in_new_line       true
+#define k_no_id             -1
+#define k_indent_step       3
 
 
 //=======================================================================================
@@ -89,15 +103,13 @@ public:
         //m_pObj = static_cast<ImoXXXXX*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
-        start_element();
-        //add_element_name("xxxxx", m_pObj);
+        //start_element("xxxxx", m_pObj->get_id());
         end_element();
         return m_source.str();
     }
 };
-
 
 //---------------------------------------------------------------------------------------
 class BarlineLdpGenerator : public LdpGenerator
@@ -111,17 +123,127 @@ public:
         m_pObj = static_cast<ImoBarline*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
-        start_element();
-        add_element_name("barline", m_pObj);
-//        add_barline_type();
+        start_element("barline", m_pObj->get_id());
+        add_barline_type();
         source_for_base_staffobj(m_pObj);
-        end_element();
+        end_element(k_in_same_line);
         return m_source.str();
     }
+
+protected:
+
+    void add_barline_type()
+    {
+        int type = m_pObj->get_type();
+        switch(type)
+        {
+            case ImoBarline::k_simple:
+                m_source << "simple";
+                break;
+            case ImoBarline::k_double:
+                m_source << "double";
+                break;
+            case ImoBarline::k_start:
+                m_source << "start";
+                break;
+            case ImoBarline::k_end:
+                m_source << "end";
+                break;
+            case ImoBarline::k_end_repetition:
+                m_source << "endRepetition";
+                break;
+            case ImoBarline::k_start_repetition:
+                m_source << "startRepetition";
+                break;
+            case ImoBarline::k_double_repetition:
+                m_source << "doubleRepetition";
+                break;
+            default:
+            {
+                stringstream s;
+                s << "[BarlineLdpGenerator::add_barline_type] Invalid barline type. Value="
+                  << type;
+                throw std::runtime_error(s.str());
+            }
+        }
+    }
+
 };
 
+//---------------------------------------------------------------------------------------
+class BeamLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoRelObj* m_pRO;
+    ImoNoteRest* m_pNR;
+
+public:
+    BeamLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pRO = static_cast<ImoRelObj*>(pImo);
+    }
+
+    string generate_source(ImoObj* pParent=NULL)
+    {
+        m_pNR = static_cast<ImoNoteRest*>( pParent );
+        if ( m_pNR == m_pRO->get_start_object() )
+            return source_for_first();
+        else if ( m_pNR == m_pRO->get_end_object() )
+            return source_for_last();
+        else
+            return source_for_middle();
+    }
+
+protected:
+
+    string source_for_first()
+    {
+        start_element("beam", k_no_id, k_in_same_line);
+        add_beam_number();
+        add_segments_info();
+        end_element(k_in_same_line);
+        return m_source.str();
+    }
+
+    string source_for_middle()
+    {
+        return source_for_first();
+    }
+
+    string source_for_last()
+    {
+        return source_for_first();
+    }
+
+    void add_beam_number()
+    {
+        m_source << m_pRO->get_id();
+    }
+
+    void add_segments_info()
+    {
+        m_source << " ";
+        for (int i=0; i < 6; ++i)
+        {
+            int type = m_pNR->get_beam_type(i);
+            if (type == ImoBeam::k_none)
+                break;
+            else if (type == ImoBeam::k_begin)
+                m_source << "+";
+            else if (type == ImoBeam::k_continue)
+                m_source << "=";
+            else if (type == ImoBeam::k_end)
+                m_source << "-";
+            else if (type == ImoBeam::k_forward)
+                m_source << "f";
+            else if (type == ImoBeam::k_backward)
+                m_source << "b";
+        }
+    }
+
+};
 
 //---------------------------------------------------------------------------------------
 class ClefLdpGenerator : public LdpGenerator
@@ -135,13 +257,12 @@ public:
         m_pObj = static_cast<ImoClef*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
-        start_element();
-        add_element_name("clef", m_pObj);
+        start_element("clef", m_pObj->get_id());
         add_type();
         source_for_base_staffobj(m_pObj);
-        end_element();
+        end_element(k_in_same_line);
         return m_source.str();
     }
 
@@ -167,7 +288,7 @@ public:
         m_pObj = static_cast<ImoContentObj*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
         add_user_location();
         add_attachments();
@@ -192,73 +313,73 @@ protected:
     {
         if (m_pObj->get_num_attachments() > 0)
         {
-            increment_indent();
-//            std::list<ImoAuxObj*>& attachments = m_pObj->get_attachments();
-//            std::list<ImoAuxObj*>::iterator it;
-//            for (it = attachments.begin(); it != attachments.end(); ++it)
-//            {
-//                ImoAuxObj* pAuxObj = *it;
-//                if ( pAuxObj->is_relobj() )
-//                {
-//                    ImRelObj* pRO = dynamic_cast<ImRelObj*)>(pAuxObj);
-//
-//                    //exclude beams, as source code for them is generted in ImoNote.
-//                    //AWARE. This is necessary because LDP parser needs to have beam
-//                    //info to crete the note, before it can process any other attachment.
-//                    //Therefore, it was decided to generate beam tag before generating
-//                    //attachment tags.
-//                    if (!pRO->IsBeam())
-//                    {
-//                        if ( pRO->GetStartNoteRest() == (lmNoteRest*)this )
-//                            m_source += pRO->SourceLDP_First(nIndent, fUndoData, (lmNoteRest*)this);
-//                        else if ( pRO->GetEndNoteRest() == (lmNoteRest*)this )
-//                            m_source += pRO->SourceLDP_Last(nIndent, fUndoData, (lmNoteRest*)this);
-//                        else
-//                            m_source += pRO->SourceLDP_Middle(nIndent, fUndoData, (lmNoteRest*)this);
-//                    }
-//                }
-//                else if ( pAuxObj->IsRelObX() )
-//                {
-//                    lmRelObX* pRO = (lmRelObX*)pAuxObj;
-//
-//                    //exclude beams, as source code for them is generted in ImoNote.
-//                    //AWARE. This is necessary because LDP parser needs to have beam
-//                    //info to crete the note, before it can process any other attachment.
-//                    //Therefore, it was decided to generate beam tag before generating
-//                    //attachment tags.
-//                    if (!pRO->IsBeam())
-//                    {
-//                        if (pRO->GetStartSO() == this)
-//                            m_source += pRO->SourceLDP_First(nIndent, fUndoData, this);
-//                        else if (pRO->GetEndSO() == this)
-//                            m_source += pRO->SourceLDP_Last(nIndent, fUndoData, this);
-//                        else
-//                            m_source += pRO->SourceLDP_Middle(nIndent, fUndoData, this);
-//                    }
-//                }
-//                else
-//                    source_for_auxobj(pAuxObj);
-//            }
-            decrement_indent();
+            ImoAttachments* pAuxObjs = m_pObj->get_attachments();
+            int size = pAuxObjs->get_num_items();
+            for (int i=0; i < size; ++i)
+            {
+                ImoAuxObj* pAO = static_cast<ImoAuxObj*>( pAuxObjs->get_item(i) );
+                source_for_auxobj(pAO);
+            }
         }
     }
 };
 
-
 //---------------------------------------------------------------------------------------
 class ErrorLdpGenerator : public LdpGenerator
 {
-public:
-    ErrorLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter) {}
+protected:
+    ImoObj* m_pImo;
 
-    std::string generate_source()
+public:
+    ErrorLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
+        , m_pImo(pImo)
     {
-        m_source.clear();
-        m_source << "(TODO: Add this element to LdpExporter::new_generator)";
+    }
+
+    string generate_source(ImoObj* pParent=NULL)
+    {
+        start_element("TODO: ", m_pImo->get_id());
+        m_source << m_pImo->get_name() << "   type=" << m_pImo->get_obj_type()
+                 << ", id=" << m_pImo->get_id();
+        end_element(k_in_same_line);
         return m_source.str();
     }
 };
 
+//---------------------------------------------------------------------------------------
+class FermataLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoFermata* m_pObj;
+
+public:
+    FermataLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoFermata*>(pImo);
+    }
+
+    string generate_source(ImoObj* pParent=NULL)
+    {
+        start_element("fermata", m_pObj->get_id());
+        add_placement();
+        source_for_base_scoreobj(m_pObj);
+        end_element(k_in_same_line);
+        return m_source.str();
+    }
+
+protected:
+    void add_placement()
+    {
+        int placement = m_pObj->get_placement();
+        if (placement == k_placement_default)
+            m_source << ")";
+        else if (placement == k_placement_above)
+            m_source << " above";
+        else
+            m_source << " below";
+    }
+};
 
 //---------------------------------------------------------------------------------------
 class ImObjLdpGenerator : public LdpGenerator
@@ -272,12 +393,53 @@ public:
         m_pObj = pImo;
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
         return m_source.str();
     }
 };
 
+//---------------------------------------------------------------------------------------
+class GoBackFwdLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoGoBackFwd* m_pObj;
+
+public:
+    GoBackFwdLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoGoBackFwd*>(pImo);
+    }
+
+    string generate_source(ImoObj* pParent=NULL)
+    {
+        empty_line();
+        bool fFwd = m_pObj->is_forward();
+        start_element((fFwd ? "goFwd" : "goBack"), m_pObj->get_id());
+        add_time(fFwd);
+        source_for_base_staffobj(m_pObj);
+        end_element(k_in_same_line);
+        return m_source.str();
+    }
+
+protected:
+
+    void add_time(bool fFwd)
+    {
+        if (m_pObj->is_to_start())
+            m_source << "start";
+        else if (m_pObj->is_to_end())
+            m_source << "end";
+        else
+        {
+            if (fFwd)
+                m_source << m_pObj->get_time_shift();
+            else
+                m_source << - m_pObj->get_time_shift();
+
+        }
+    }
+};
 
 //---------------------------------------------------------------------------------------
 class InstrumentLdpGenerator : public LdpGenerator
@@ -291,16 +453,14 @@ public:
         m_pObj = static_cast<ImoInstrument*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
-        start_element();
-        add_element_name("instrument", m_pObj);
+        start_element("instrument", m_pObj->get_id());
 
         add_num_staves();
         add_midi_info();
         add_name_abbreviation();
         add_music_data();
-
         end_element();
         return m_source.str();
     }
@@ -357,14 +517,13 @@ public:
         m_pObj = static_cast<ImoKeySignature*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
-        start_element();
-        add_element_name("key", m_pObj);
+        start_element("key", m_pObj->get_id());
 
         add_key_type();
 
-        end_element();
+        end_element(k_in_same_line);
         return m_source.str();
     }
 
@@ -423,10 +582,9 @@ public:
         m_pObj = static_cast<ImoDocument*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
-        start_element();
-        add_element_name("lenmusdoc", m_pObj);
+        start_element("lenmusdoc", m_pObj->get_id());
         add_version();
         add_comment();
         add_content();
@@ -438,30 +596,34 @@ protected:
 
     void add_version()
     {
-        m_source << "(vers ";
+        start_element("vers", m_pObj->get_id());
         m_source << m_pObj->get_version();
-        m_source << ") ";
+        end_element(k_in_same_line);
     }
 
     void add_comment()
     {
-        //m_source << "   //LDP file generated by LenMus, version ";
-        //m_source << wxGetApp().GetVersionNumber();
-        //m_source << ". Date: ";
-        //m_source << (wxDateTime::Now()).Format(_T("%Y-%m-%d"));
-        //m_source << _T("\n");
+        start_comment();
+        m_source << "LDP file generated by Lomse";
+        string& version = m_pExporter->get_library_version();
+        if (!version.empty())
+            m_source << ", version " << version;
+        m_source << ". Date: ";
+//        m_source << (wxDateTime::Now()).Format(_T("%Y-%m-%d"));
+        end_comment();
     }
 
     void add_content()
     {
-        m_source << "(content";
+        ImoContent* pContent = m_pObj->get_content();
+        start_element("content", pContent->get_id());
         int numItems = m_pObj->get_num_content_items();
         for (int i=0; i < numItems; i++)
         {
             m_source << " ";
             add_source_for( m_pObj->get_content_item(i) );
         }
-        m_source << ")";
+        end_element();
     }
 
 };
@@ -479,13 +641,10 @@ public:
         m_pObj = static_cast<ImoMusicData*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
-        start_element();
-        add_element_name("musicData", m_pObj);
-
+        start_element("musicData", m_pObj->get_id());
         add_staffobjs();
-
         end_element();
         return m_source.str();
     }
@@ -495,9 +654,21 @@ protected:
     void add_staffobjs()
     {
         ImoObj::children_iterator it = m_pObj->begin();
+        bool fNewMeasure = true;
+        int nMeasure = 1;
         while (it != m_pObj->end())
         {
+            if (fNewMeasure)
+            {
+                empty_line();
+                start_comment();
+                m_source << "measure " << nMeasure++;
+                end_comment();
+                fNewMeasure = false;
+            }
+
             add_source_for(*it);
+            fNewMeasure = (*it)->is_barline();
             ++it;
         }
       //  //iterate over the collection of StaffObjs, ordered by voice.
@@ -589,6 +760,68 @@ protected:
 
 };
 
+//---------------------------------------------------------------------------------------
+class MetronomeLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoMetronomeMark* m_pImo;
+
+public:
+    MetronomeLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
+    {
+        m_pImo = static_cast<ImoMetronomeMark*>( pImo );
+    }
+
+    string generate_source(ImoObj* pParent=NULL)
+    {
+        start_element("metronome", m_pImo->get_id());
+        add_marks();
+        source_for_base_staffobj(m_pImo);
+        end_element(k_in_same_line);
+        return m_source.str();
+    }
+
+protected:
+
+    void add_marks()
+    {
+        int type = m_pImo->get_mark_type();
+        switch (type)
+        {
+            case ImoMetronomeMark::k_note_value:
+                m_source << m_pImo->get_ticks_per_minute();
+                break;
+            case ImoMetronomeMark::k_note_note:
+                add_duration(m_source, m_pImo->get_left_note_type(),
+                             m_pImo->get_left_dots());
+                m_source << " ";
+                add_duration(m_source, m_pImo->get_right_note_type(),
+                             m_pImo->get_right_dots());
+                break;
+            case ImoMetronomeMark::k_value:
+                add_duration(m_source, m_pImo->get_left_note_type(),
+                             m_pImo->get_left_dots());
+                m_source << " ";
+                m_source <<  m_pImo->get_ticks_per_minute();
+                break;
+            default:
+            {
+                stringstream s;
+                s << "[MetronomeLdpGenerator::add_marks] Invalid type. Value=" << type;
+                throw std::runtime_error(s.str());
+            }
+        }
+
+    }
+
+    void add_parenthesis()
+    {
+        if (m_pImo->has_parenthesis())
+            m_source << " parentheses";
+    }
+
+};
 
 //---------------------------------------------------------------------------------------
 class NoteLdpGenerator : public LdpGenerator
@@ -602,14 +835,21 @@ public:
         m_pObj = static_cast<ImoNote*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
-        start_element();
-        add_element_name("n", m_pObj);
+        if (m_pObj->is_start_of_chord())
+            start_element("chord", k_no_id);
+
+        start_element("n", m_pObj->get_id());
         add_pitch();
-        add_duration();
+        add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
+        add_stem();
         source_for_base_staffobj(m_pObj);
-        end_element();
+        end_element(k_in_same_line);
+
+        if (m_pObj->is_end_of_chord())
+            end_element();
+
         return m_source.str();
     }
 
@@ -648,31 +888,32 @@ protected:
         m_source << " ";
     }
 
-    void add_duration()
+    void add_stem()
     {
-        switch(m_pObj->get_note_type())
+        int stem = m_pObj->get_stem_direction();
+        switch(stem)
         {
-            case k_longa:   m_source << "l";  break;
-            case k_breve:   m_source << "b";  break;
-            case k_whole:   m_source << "w";  break;
-            case k_half:    m_source << "h";  break;
-            case k_quarter: m_source << "q";  break;
-            case k_eighth:  m_source << "e";  break;
-            case k_16th:    m_source << "s";  break;
-            case k_32th:    m_source << "t";  break;
-            case k_64th:    m_source << "i";  break;
-            case k_128th:   m_source << "o";  break;
-            case k_256th:   m_source << "f";  break;
-            default:                          break;
+            case k_stem_default:
+                break;
+            case k_stem_up:
+                m_source << " (stem up)";
+                break;
+            case k_stem_down:
+                m_source << " (stem down)";
+                break;
+            case k_stem_none:
+                m_source << " (stem none)";
+                break;
+            case k_stem_double:
+                m_source << " (stem double)";
+                break;
+            default:
+            {
+                stringstream s;
+                s << "[NoteLdpGenerator::add_stem] Invalid stem. Value=" << stem;
+                throw std::runtime_error(s.str());
+            }
         }
-
-        int dots = m_pObj->get_dots();
-        while (dots > 0)
-        {
-            m_source << ".";
-            --dots;
-        }
-
     }
 
 };
@@ -690,21 +931,13 @@ public:
         m_pObj = static_cast<ImoRest*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
-        start_element();
-        add_element_name("r", m_pObj);
-        add_duration();
+        start_element("r", m_pObj->get_id());
+        add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
         source_for_base_staffobj(m_pObj);
-        end_element();
+        end_element(k_in_same_line);
         return m_source.str();
-    }
-
-protected:
-
-    void add_duration()
-    {
-        m_source << " (TODO: duration)";
     }
 
 };
@@ -722,11 +955,9 @@ public:
         m_pObj = static_cast<ImoScore*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
-        start_element();
-        add_element_name("score", m_pObj);
-
+        start_element("score", m_pObj->get_id());
         add_version();
         add_undo_data();
         add_creation_mode();
@@ -737,7 +968,6 @@ public:
         add_cursor();
         add_options();
         add_instruments_and_groups();
-
         end_element();
         return m_source.str();
     }
@@ -873,6 +1103,118 @@ protected:
 
 };
 
+//---------------------------------------------------------------------------------------
+class ScoreLineLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoScoreLine* m_pObj;
+
+public:
+    ScoreLineLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoScoreLine*>(pImo);
+    }
+
+    string generate_source(ImoObj* pParent=NULL)
+    {
+        start_element("line", m_pObj->get_id());
+        add_start_point();
+        add_end_point();
+        add_width_if_not_default( m_pObj->get_line_width(), 1.0f);
+        add_color_if_not_black( m_pObj->get_color() );
+        add_line_style();
+        add_cap("lineCapStart", m_pObj->get_start_cap());
+        add_cap("lineCapEnd", m_pObj->get_end_cap());
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_start_point()
+    {
+        start_element("startPoint", k_no_id, k_in_same_line);
+        add_location(m_pObj->get_start_point());
+        end_element(k_in_same_line);
+    }
+
+    void add_end_point()
+    {
+        start_element("endPoint", k_no_id, k_in_same_line);
+        add_location(m_pObj->get_end_point());
+        end_element(k_in_same_line);
+    }
+
+    void add_line_style()
+    {
+        int type = m_pObj->get_line_style();
+        if (type == k_line_none)
+            return;
+
+        start_element("lineStyle", k_no_id, k_in_same_line);
+        switch(type)
+        {
+            case k_line_solid:
+                m_source << "solid";
+                break;
+            case k_line_long_dash:
+                m_source << "longDash";
+                break;
+            case k_line_short_dash:
+                m_source << "shortDash";
+                break;
+            case k_line_dot:
+                m_source << "dot";
+                break;
+            case k_line_dot_dash:
+                m_source << "dotDash";
+                break;
+            default:
+            {
+                stringstream s;
+                s << "[ScoreLineLdpGenerator::add_line_style] Invalid line style. Value="
+                  << type;
+                throw std::runtime_error(s.str());
+            }
+        }
+        end_element(k_in_same_line);
+    }
+
+    void add_cap(const string& tag, int type)
+    {
+        if (type == k_cap_none)
+            return;
+
+        start_element(tag, k_no_id, k_in_same_line);
+        switch(type)
+        {
+            case k_cap_arrowhead:
+                m_source << "arrowhead";
+                break;
+            case k_cap_arrowtail:
+                m_source << "arrowtail";
+                break;
+            case k_cap_circle:
+                m_source << "circle";
+                break;
+            case k_cap_square:
+                m_source << "square";
+                break;
+            case k_cap_diamond:
+                m_source << "diamond";
+                break;
+            default:
+            {
+                stringstream s;
+                s << "[ScoreLineLdpGenerator::add_cap] Invalid line cap. Value="
+                  << type;
+                throw std::runtime_error(s.str());
+            }
+        }
+        end_element(k_in_same_line);
+    }
+
+};
 
 //---------------------------------------------------------------------------------------
 class ScoreObjLdpGenerator : public LdpGenerator
@@ -887,31 +1229,54 @@ public:
         m_pObj = static_cast<ImoScoreObj*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
-        add_visible();
-        add_color();
+        add_visible( m_pObj->is_visible() );
+        add_color_if_not_black( m_pObj->get_color() );
         source_for_base_contentobj(m_pObj);
+        return m_source.str();
+    }
+
+};
+
+//---------------------------------------------------------------------------------------
+class ScoreTextLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoScoreText* m_pObj;
+
+public:
+    ScoreTextLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoScoreText*>(pImo);
+    }
+
+    string generate_source(ImoObj* pParent=NULL)
+    {
+        start_element("text", m_pObj->get_id());
+        add_text();
+        add_style();
+        add_location_if_not_zero(m_pObj->get_user_location_x(),
+                                 m_pObj->get_user_location_y());
+        end_element();
         return m_source.str();
     }
 
 protected:
 
-    void add_visible()
+    void add_text()
     {
-        if (!m_pObj->is_visible())
-            m_source << " (visible no)";
+        m_source << "\"" << m_pObj->get_text() << "\"";
     }
 
-    void add_color()
+    void add_style()
     {
-        //color (if not black)
-        Color color = m_pObj->get_color();
-        if (color.r != 0 || color.g != 0  || color.b != 0 || color.a != 255)
-            m_source << " (color " << LdpExporter::color_to_ldp(color) << ")";
+        start_element("style", k_no_id);
+        m_source << "\"" << m_pObj->get_style()->get_name() << "\"";
+        end_element(k_in_same_line);
     }
+
 };
-
 
 //---------------------------------------------------------------------------------------
 class StaffObjLdpGenerator : public LdpGenerator
@@ -925,9 +1290,10 @@ public:
         m_pObj = static_cast<ImoStaffObj*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
         add_staff_num();
+        add_relobjs();
         source_for_base_scoreobj(m_pObj);
         return m_source.str();
     }
@@ -938,14 +1304,57 @@ protected:
     {
         if (!m_pObj->is_key_signature()            //KS, TS & barlines are common to all staves.
             && !m_pObj->is_time_signature()
-            && !m_pObj->is_barline() )
+            && !m_pObj->is_barline()
+            && !m_pObj->is_go_back_fwd() )
         {
-            m_source << " p" << (m_pObj->get_staff() + 1);
+            m_source << " ";
+            start_element("staffNum", k_no_id, k_in_same_line);
+            m_source << (m_pObj->get_staff() + 1);
+            end_element(k_in_same_line);
+        }
+    }
+
+    void add_relobjs()
+    {
+        if (m_pObj->get_num_relations() > 0)
+        {
+            ImoRelations* pRelObjs = m_pObj->get_relations();
+            int size = pRelObjs->get_num_items();
+            for (int i=0; i < size; ++i)
+            {
+                ImoRelObj* pRO = pRelObjs->get_item(i);
+                if (!pRO->is_chord())
+                {
+                    //AWARE: chords are excluded because they are generated
+                    //in NoteLdpGenerator
+                    source_for_relobj(pRO, m_pObj);
+                }
+            }
         }
     }
 
 };
 
+//---------------------------------------------------------------------------------------
+class SystemBreakLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoSystemBreak* m_pImo;
+
+public:
+    SystemBreakLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
+    {
+        m_pImo = static_cast<ImoSystemBreak*>( pImo );
+    }
+
+    string generate_source(ImoObj* pParent=NULL)
+    {
+        start_element("newSystem", m_pImo->get_id());
+        end_element(k_in_same_line);
+        return m_source.str();
+    }
+};
 
 //---------------------------------------------------------------------------------------
 class SpacerLdpGenerator : public LdpGenerator
@@ -959,53 +1368,291 @@ public:
         m_pObj = static_cast<ImoSpacer*>(pImo);
     }
 
-    std::string generate_source()
+    string generate_source(ImoObj* pParent=NULL)
     {
-        start_element();
-        add_element_name("spacer", m_pObj);
-        //TODO: details
-        end_element();
+        start_element("spacer", m_pObj->get_id());
+        add_space_width();
+        source_for_base_staffobj(m_pObj);
+        end_element(k_in_same_line);
         return m_source.str();
     }
+
+protected:
+
+    void add_space_width()
+    {
+        m_source << m_pObj->get_width();
+    }
+
 };
 
+//---------------------------------------------------------------------------------------
+class TieLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoTie* m_pTie;
+    ImoNote* m_pNote;
+
+public:
+    TieLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pTie = static_cast<ImoTie*>(pImo);
+    }
+
+    string generate_source(ImoObj* pParent=NULL)
+    {
+        m_pNote = static_cast<ImoNote*>( pParent );
+
+        start_element("tie", m_pTie->get_id());
+        add_tie_number();
+        bool fStart = (m_pNote == m_pTie->get_start_note());
+        add_tie_type(fStart);
+        add_bezier_info(fStart);
+        end_element(k_in_same_line);
+        return m_source.str();
+    }
+
+protected:
+
+    void add_tie_number()
+    {
+        m_source << m_pTie->get_tie_number();
+    }
+
+    void add_tie_type(bool fStart)
+    {
+        m_source << (fStart ? " start" : " stop");
+    }
+
+    void add_bezier_info(bool fStart)
+    {
+        ImoBezierInfo* pInfo = (fStart ? m_pTie->get_start_bezier()
+                                       : m_pTie->get_stop_bezier() );
+        if (pInfo)
+        {
+            start_element("bezier", k_no_id);
+
+            static string sPointNames[4] = { "start", "end", "ctrol1", "ctrol2" };
+
+            for (int i=0; i < 4; i++)
+            {
+                TPoint& pt = pInfo->get_point(i);
+
+                if (pt.x != 0.0f || pt.y != 0.0f)
+                {
+                    if (pt.x != 0.0f)
+                    {
+                        start_element( sPointNames[i] + "-x", k_no_id, k_in_same_line);
+                        m_source << pt.x;
+                        end_element(k_in_same_line);
+                    }
+                    if (pt.y != 0.0f)
+                    {
+                        start_element( sPointNames[i] + "-y", k_no_id, k_in_same_line);
+                        m_source << pt.y;
+                        end_element(k_in_same_line);
+                    }
+                }
+            }
+            end_element();
+        }
+    }
+
+};
+
+//---------------------------------------------------------------------------------------
+class TimeSignatureLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoTimeSignature* m_pObj;
+
+public:
+    TimeSignatureLdpGenerator(ImoObj* pImo, LdpExporter* pExporter)
+        : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoTimeSignature*>(pImo);
+    }
+
+    string generate_source(ImoObj* pParent=NULL)
+    {
+        start_element("time", m_pObj->get_id());
+        add_type();
+        source_for_base_staffobj(m_pObj);
+        end_element(k_in_same_line);
+        return m_source.str();
+    }
+
+protected:
+
+    void add_type()
+    {
+        m_source << m_pObj->get_top_number() << " " << m_pObj->get_bottom_number();
+    }
+
+};
+
+//---------------------------------------------------------------------------------------
+class TupletLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoTuplet* m_pTuplet;
+    ImoNoteRest* m_pNR;
+
+public:
+    TupletLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pTuplet = static_cast<ImoTuplet*>(pImo);
+    }
+
+    string generate_source(ImoObj* pParent=NULL)
+    {
+        m_pNR = static_cast<ImoNoteRest*>( pParent );
+
+        if (m_pNR == m_pTuplet->get_start_object())
+        {
+            start_element("t", m_pTuplet->get_id());
+            //add_tuplet_number();      //TODO: For now not generated
+            add_tuplet_type(true);
+            add_actual_notes();
+            add_normal_notes();
+            add_tuplet_options();
+            end_element(k_in_same_line);
+        }
+        else if (m_pNR == m_pTuplet->get_end_object())
+        {
+            start_element("t", m_pTuplet->get_id());
+            //add_tuplet_number();      //TODO: For now not generated
+            add_tuplet_type(false);
+            end_element(k_in_same_line);
+        }
+        else
+        {
+            m_source.clear();
+        }
+        return m_source.str();
+    }
+
+protected:
+
+    inline void add_tuplet_number()
+    {
+        m_source << m_pTuplet->get_id();
+    }
+
+    inline void add_tuplet_type(bool fStart)
+    {
+        m_source << (fStart ? "+" : "-");
+    }
+
+    inline void add_actual_notes()
+    {
+        m_source << " " << m_pTuplet->get_actual_number();
+    }
+
+    inline void add_normal_notes()
+    {
+        m_source << " " << m_pTuplet->get_normal_number();
+    }
+
+    inline void add_tuplet_options()
+    {
+        add_bracket_type();
+        add_display_bracket();
+        add_display_number();
+    }
+
+    void add_bracket_type()
+    {
+    }
+
+    void add_display_bracket()
+    {
+        int opt = m_pTuplet->get_show_bracket();
+        if (opt == k_yesno_no)
+            m_source << " noBracket";
+    }
+
+    void add_display_number()
+    {
+        int number = m_pTuplet->get_show_number();
+        if (number == ImoTuplet::k_number_actual)
+            return;     //default option
+
+        m_source << " ";
+        start_element("displayNumber", k_no_id, k_in_same_line);
+
+        if (number == ImoTuplet::k_number_both)
+            m_source << "both";
+        else if (number == ImoTuplet::k_number_none)
+            m_source << "none";
+        else
+        {
+            stringstream s;
+            s << "[TupletLdpGenerator::add_display_number] Invalid option. Value="
+              << number;
+            throw std::runtime_error(s.str());
+        }
+
+        end_element(k_in_same_line);
+    }
+
+};
 
 
 //=======================================================================================
 // LdpGenerator implementation
 //=======================================================================================
-void LdpGenerator::start_element()
+void LdpGenerator::start_element(const string& name, int id, bool fInNewLine)
 {
-    add_indent_spaces();
+    if (fInNewLine)
+        new_line_and_indent_spaces();
+
+    m_source << "(" << name;
+    if (m_pExporter->get_add_id() && id != k_no_id)
+        m_source << "#" << std::dec << id;
+    m_source << " ";
+    increment_indent();
 }
 
 //---------------------------------------------------------------------------------------
-void LdpGenerator::end_element()
+void LdpGenerator::end_element(bool fStartLine)
 {
+    decrement_indent();
+    if (fStartLine)
+        new_line_and_indent_spaces(fStartLine);
     m_source << ")";
-    if (m_pExporter->get_indent() > 0)
-        m_source << endl;
 }
 
 //---------------------------------------------------------------------------------------
-void LdpGenerator::add_indent_spaces()
+void LdpGenerator::start_comment()
+{
+    new_line_and_indent_spaces();
+    m_source << "// ";
+}
+
+//---------------------------------------------------------------------------------------
+void LdpGenerator::end_comment()
+{
+}
+
+//---------------------------------------------------------------------------------------
+void LdpGenerator::empty_line()
 {
     m_source.clear();
-    int indent = m_pExporter->get_indent() * lml_LDP_INDENT_STEP;
+    m_source << endl;
+}
+//---------------------------------------------------------------------------------------
+void LdpGenerator::new_line_and_indent_spaces(bool fStartLine)
+{
+    m_source.clear();
+    if (fStartLine)
+        m_source << endl;
+    int indent = m_pExporter->get_indent() * k_indent_step;
     while (indent > 0)
     {
         m_source << " ";
         indent--;
     }
-}
-
-//---------------------------------------------------------------------------------------
-void LdpGenerator::add_element_name(const std::string& name, ImoObj* pImo)
-{
-    m_source << "(" << name;
-    if (m_pExporter->get_add_id())
-        m_source << "#" << std::dec << pImo->get_id();
-    m_source << " ";
 }
 
 //---------------------------------------------------------------------------------------
@@ -1038,8 +1685,10 @@ void LdpGenerator::source_for_base_contentobj(ImoObj* pImo)
 //---------------------------------------------------------------------------------------
 void LdpGenerator::source_for_base_imobj(ImoObj* pImo)
 {
+    increment_indent();
     ImObjLdpGenerator gen(pImo, m_pExporter);
     m_source << gen.generate_source();
+    decrement_indent();
 }
 
 //---------------------------------------------------------------------------------------
@@ -1049,24 +1698,122 @@ void LdpGenerator::source_for_auxobj(ImoObj* pImo)
 }
 
 //---------------------------------------------------------------------------------------
+void LdpGenerator::source_for_relobj(ImoObj* pRO, ImoObj* pParent)
+{
+    m_source <<  m_pExporter->get_source(pRO, pParent);
+}
+
+//---------------------------------------------------------------------------------------
 void LdpGenerator::increment_indent()
 {
-    //TODO
+    m_pExporter->increment_indent();
 }
 
 //---------------------------------------------------------------------------------------
 void LdpGenerator::decrement_indent()
 {
-    //TODO
+    m_pExporter->decrement_indent();
 }
 
+//---------------------------------------------------------------------------------------
+void LdpGenerator::add_duration(stringstream& source, int noteType, int dots)
+{
+    switch(noteType)
+    {
+        case k_longa:   source << "l";  break;
+        case k_breve:   source << "b";  break;
+        case k_whole:   source << "w";  break;
+        case k_half:    source << "h";  break;
+        case k_quarter: source << "q";  break;
+        case k_eighth:  source << "e";  break;
+        case k_16th:    source << "s";  break;
+        case k_32th:    source << "t";  break;
+        case k_64th:    source << "i";  break;
+        case k_128th:   source << "o";  break;
+        case k_256th:   source << "f";  break;
+        default:                        break;
+    }
 
+    while (dots > 0)
+    {
+        source << ".";
+        --dots;
+    }
+
+}
+
+//---------------------------------------------------------------------------------------
+void LdpGenerator::add_visible(bool fVisible)
+{
+    if (!fVisible)
+        m_source << " (visible no)";
+}
+
+//---------------------------------------------------------------------------------------
+void LdpGenerator::add_color_if_not_black(Color color)
+{
+    if (color.r != 0 || color.g != 0  || color.b != 0 || color.a != 255)
+        m_source << "(color " << LdpExporter::color_to_ldp(color) << ")";
+}
+
+//---------------------------------------------------------------------------------------
+void LdpGenerator::add_width_if_not_default(Tenths width, Tenths def)
+{
+    if (width != def)
+    {
+        start_element("width", k_no_id, k_in_same_line);
+        m_source << width;
+        end_element(k_in_same_line);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void LdpGenerator::add_location_if_not_zero(Tenths x, Tenths y)
+{
+    if (x != 0.0f || y != 0.0f)
+    {
+        if (x != 0.0f)
+        {
+            start_element("dx", k_no_id, k_in_same_line);
+            m_source << x;
+            end_element(k_in_same_line);
+        }
+        if (y != 0.0f)
+        {
+            start_element("dy", k_no_id, k_in_same_line);
+            m_source << y;
+            end_element(k_in_same_line);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void LdpGenerator::add_location(TPoint pt)
+{
+    start_element("dx", k_no_id, k_in_same_line);
+    m_source << pt.x;
+    end_element(k_in_same_line);
+
+    start_element("dy", k_no_id, k_in_same_line);
+    m_source << pt.y;
+    end_element(k_in_same_line);
+}
 
 //=======================================================================================
 // LdpExporter implementation
 //=======================================================================================
+LdpExporter::LdpExporter(LibraryScope* pLibraryScope)
+    : m_pLibraryScope(pLibraryScope)
+    , m_version( pLibraryScope->get_version_string() )
+    , m_nIndent(0)
+    , m_fAddId(false)
+{
+}
+
 LdpExporter::LdpExporter()
-    : m_nIndent(0)
+    : m_pLibraryScope(NULL)
+    , m_version()
+    , m_nIndent(0)
     , m_fAddId(false)
 {
 }
@@ -1077,10 +1824,10 @@ LdpExporter::~LdpExporter()
 }
 
 //---------------------------------------------------------------------------------------
-std::string LdpExporter::get_source(ImoObj* pImo)
+string LdpExporter::get_source(ImoObj* pImo, ImoObj* pParent)
 {
     LdpGenerator* pGen = new_generator(pImo);
-    std::string source = pGen->generate_source();
+    string source = pGen->generate_source(pParent);
     delete pGen;
     return source;
 }
@@ -1093,37 +1840,29 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
     switch(pImo->get_obj_type())
     {
         case k_imo_barline:         return LOMSE_NEW BarlineLdpGenerator(pImo, this);
-//        case k_imo_beam_dto:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_bezier_info:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_beam:            return LOMSE_NEW BeamLdpGenerator(pImo, this);
         case k_imo_clef:            return LOMSE_NEW ClefLdpGenerator(pImo, this);
-//        case k_imo_color_dto:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
 //        case k_imo_instr_group:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_midi_info:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
 //        case k_imo_option:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
 //        case k_imo_system_info:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_tie_dto:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_tuplet_dto:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
         case k_imo_document:        return LOMSE_NEW LenmusdocLdpGenerator(pImo, this);
-//        case k_imo_content:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_fermata:         return LOMSE_NEW FermataLdpGenerator(pImo, this);
+//        case k_imo_figured_bass:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_go_back_fwd:     return LOMSE_NEW GoBackFwdLdpGenerator(pImo, this);
         case k_imo_instrument:      return LOMSE_NEW InstrumentLdpGenerator(pImo, this);
-//        case k_imo_score:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
         case k_imo_key_signature:   return LOMSE_NEW KeySignatureLdpGenerator(pImo, this);
-//        case k_imo_time_signature:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_metronome_mark:  return LOMSE_NEW MetronomeLdpGenerator(pImo, this);
         case k_imo_music_data:      return LOMSE_NEW MusicDataLdpGenerator(pImo, this);
         case k_imo_note:            return LOMSE_NEW NoteLdpGenerator(pImo, this);
         case k_imo_rest:            return LOMSE_NEW RestLdpGenerator(pImo, this);
-//        case k_imo_go_back_fwd:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_metronome_mark:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_system_break:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_spacer:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_figured_bass:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_system_break:    return LOMSE_NEW SystemBreakLdpGenerator(pImo, this);
         case k_imo_score:           return LOMSE_NEW ScoreLdpGenerator(pImo, this);
+        case k_imo_score_text:      return LOMSE_NEW ScoreTextLdpGenerator(pImo, this);
+        case k_imo_score_line:      return LOMSE_NEW ScoreLineLdpGenerator(pImo, this);
         case k_imo_spacer:          return LOMSE_NEW SpacerLdpGenerator(pImo, this);
-//        case k_imo_score_text:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_fermata:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_tie:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_beam:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
-//        case k_imo_tuplet:         return LOMSE_NEW XxxxxxxLdpGenerator(pImo, this);
+        case k_imo_time_signature:  return LOMSE_NEW TimeSignatureLdpGenerator(pImo, this);
+        case k_imo_tie:             return LOMSE_NEW TieLdpGenerator(pImo, this);
+        case k_imo_tuplet:          return LOMSE_NEW TupletLdpGenerator(pImo, this);
         default:
             return new ErrorLdpGenerator(pImo, this);
     }
@@ -1134,10 +1873,10 @@ LdpGenerator* LdpExporter::new_generator(ImoObj* pImo)
 // static methods
 
 //---------------------------------------------------------------------------------------
-std::string LdpExporter::clef_type_to_ldp(int clefType)
+string LdpExporter::clef_type_to_ldp(int clefType)
 {
     //AWARE: indexes in correspondence with enum k_clef__type
-    static const std::string name[] = {
+    static const string name[] = {
         "G",
         "F4",
         "F3",
@@ -1158,7 +1897,7 @@ std::string LdpExporter::clef_type_to_ldp(int clefType)
         "15_F4",   //15 above
         "F4_15",   //15 below
     };
-    static const std::string undefined = "undefined";
+    static const string undefined = "undefined";
 
 
     if (clefType == k_clef_undefined)
@@ -1168,7 +1907,7 @@ std::string LdpExporter::clef_type_to_ldp(int clefType)
 }
 
 //---------------------------------------------------------------------------------------
-std::string LdpExporter::color_to_ldp(Color color)
+string LdpExporter::color_to_ldp(Color color)
 {
     stringstream source;
     source << "#";
@@ -1184,7 +1923,7 @@ std::string LdpExporter::color_to_ldp(Color color)
 }
 
 //---------------------------------------------------------------------------------------
-std::string LdpExporter::float_to_string(float num)
+string LdpExporter::float_to_string(float num)
 {
     return "(TODO: float_to_string)";
 }

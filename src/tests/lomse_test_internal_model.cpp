@@ -915,15 +915,16 @@ SUITE(InternalModelTest)
 
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Default style" );
-        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0,0,0,255)) );
-        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Liberation serif" );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_font_normal );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_font_normal );
-        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 12.0f );
-        CHECK( pStyle->get_float_property(ImoStyle::k_line_height) == 1.5f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_min_height) == 0.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_max_height) == 0.0f );
-        CHECK( pStyle->get_lunits_property(ImoStyle::k_height) == 0.0f );
+        CHECK( is_equal(pStyle->color(), Color(0,0,0,255)) );
+        CHECK( pStyle->font_file() == "" );
+        CHECK( pStyle->font_name() == "Liberation serif" );
+        CHECK( pStyle->font_style() == ImoStyle::k_font_normal );
+        CHECK( pStyle->font_weight() == ImoStyle::k_font_normal );
+        CHECK( pStyle->font_size() == 12.0f );
+        CHECK( pStyle->line_height() == 1.5f );
+        CHECK( pStyle->min_height() == 0.0f );
+        CHECK( pStyle->max_height() == 0.0f );
+        CHECK( pStyle->height() == 0.0f );
 
         delete pScore;
     }
@@ -934,11 +935,11 @@ SUITE(InternalModelTest)
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
 	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, &doc));
         pStyle->set_name("Test style");
-	    pStyle->set_string_property(ImoStyle::k_font_name, "Callamet");
-        pStyle->set_float_property(ImoStyle::k_font_size, 12.0f);
-        pStyle->set_int_property(ImoStyle::k_font_style, ImoStyle::k_font_normal);
-        pStyle->set_int_property(ImoStyle::k_font_weight, ImoStyle::k_bold);
-        pStyle->set_color_property(ImoStyle::k_color, Color(15,16,27,132) );
+	    pStyle->font_name( "Callamet");
+        pStyle->font_size( 12.0f);
+        pStyle->font_style( ImoStyle::k_font_normal);
+        pStyle->font_weight( ImoStyle::k_bold);
+        pStyle->color( Color(15,16,27,132) );
         pScore->add_style(pStyle);
 
         ImoStyle* pStyle2 = pScore->find_style("Test style");
@@ -955,11 +956,11 @@ SUITE(InternalModelTest)
 
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Default style" );
-        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0,0,0,255)) );
-        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Liberation serif" );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_font_normal );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_font_normal );
-        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 12.0f );
+        CHECK( is_equal(pStyle->color(), Color(0,0,0,255)) );
+        CHECK( pStyle->font_name() == "Liberation serif" );
+        CHECK( pStyle->font_style() == ImoStyle::k_font_normal );
+        CHECK( pStyle->font_weight() == ImoStyle::k_font_normal );
+        CHECK( pStyle->font_size() == 12.0f );
     }
 
     TEST_FIXTURE(InternalModelTestFixture, ObjectInheritsParentStyle)
@@ -975,11 +976,11 @@ SUITE(InternalModelTest)
         ImoStyle* pStyle = pImo->get_style();
         CHECK( pStyle != NULL );
         CHECK( pStyle->get_name() == "Default style" );
-        CHECK( is_equal(pStyle->get_color_property(ImoStyle::k_color), Color(0,0,0,255)) );
-        CHECK( pStyle->get_string_property(ImoStyle::k_font_name) == "Liberation serif" );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_style) == ImoStyle::k_font_normal );
-        CHECK( pStyle->get_int_property(ImoStyle::k_font_weight) == ImoStyle::k_font_normal );
-        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 12.0f );
+        CHECK( is_equal(pStyle->color(), Color(0,0,0,255)) );
+        CHECK( pStyle->font_name() == "Liberation serif" );
+        CHECK( pStyle->font_style() == ImoStyle::k_font_normal );
+        CHECK( pStyle->font_weight() == ImoStyle::k_font_normal );
+        CHECK( pStyle->font_size() == 12.0f );
     }
 
     TEST_FIXTURE(InternalModelTestFixture, ObjectInheritsParentStyleAttributes)
@@ -1010,10 +1011,10 @@ SUITE(InternalModelTest)
         ImoStyle* pStyle = pDoc->create_private_style();
 
         CHECK( pStyle != NULL );
-        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 12.0f );
+        CHECK( pStyle->font_size() == 12.0f );
 
-        pStyle->set_float_property(ImoStyle::k_font_size, 21.0f) ;
-        CHECK( pStyle->get_float_property(ImoStyle::k_font_size) == 21.0f );
+        pStyle->font_size( 21.0f) ;
+        CHECK( pStyle->font_size() == 21.0f );
     }
 
     // API ------------------------------------------------------------------------------
@@ -1239,6 +1240,20 @@ SUITE(InternalModelTest)
         CHECK( pScore->are_children_dirty() == true );
         CHECK( pScore->are_children_dirty() == true );
         CHECK( doc.is_dirty() == true );
+    }
+
+    // ImoTextItem ----------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, TextItem_default_language)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoDocument* pDoc = doc.get_imodoc();
+        pDoc->set_language("zn_CN");
+        ImoParagraph* pPara = doc.add_paragraph();
+        ImoTextItem* pText = pPara->add_text_item("编辑名称，缩写，MIDI设置和其他特性");
+
+        CHECK( pText->get_language() == "zn_CN" );
     }
 
 }

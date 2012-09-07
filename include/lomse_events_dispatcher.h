@@ -27,42 +27,65 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_PARSER_H__
-#define __LOMSE_PARSER_H__
+#ifndef __LOMSE_EVENTS_DISPATCHER_H__
+#define __LOMSE_EVENTS_DISPATCHER_H__
 
-#include <ostream>
+#include "lomse_build_options.h"
+#include "lomse_injectors.h"
+#include "lomse_events.h"
+
+#include <boost/shared_ptr.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/thread/condition_variable.hpp>
+using namespace boost;
+
+#include <queue>
 using namespace std;
 
 namespace lomse
 {
 
+//forward declarations
+
+
 //---------------------------------------------------------------------------------------
-// Parser: base class for any parser
-class Parser
+typedef boost::thread EventsThread;
+typedef boost::mutex QueueMutex;
+typedef boost::unique_lock<boost::mutex> QueueLock;
+
+
+
+//=======================================================================================
+// EventsDispatcher
+//  Class to manage the event-dispatch loop.
+//  This class is a singleton maintained in Lomse LibraryScope object
+class EventsDispatcher
 {
 protected:
-    ostream& m_reporter;
-    int m_numErrors;        //number of errors found during parsing
-    long m_nMaxId;          //maximum ID found
-
-    Parser(ostream& reporter) : m_reporter(reporter) {}
+    EventsThread* m_pThread;        //execution thread
+    QueueMutex m_mutex;             //to control queue access
+    bool m_fStopLoop;
+    queue< pair<SpEventInfo, Observer*> > m_events;
 
 public:
-    virtual ~Parser() {}
+    EventsDispatcher();
+    ~EventsDispatcher();
 
-//    //setings and options
-//    inline void SetIgnoreList(std::set<long>* pSet) { m_pIgnoreSet = pSet; }
+    void start_events_loop();
+    void stop_events_loop();
 
-    virtual void parse_file(const std::string& filename, bool fErrorMsg = true) = 0;
-    virtual void parse_text(const std::string& sourceText) = 0;
-    //virtual void parse_input(LdpReader& reader) = 0;
+    void post_event(Observer* pObserver, SpEventInfo pEvent);
 
-    inline int get_num_errors() { return m_numErrors; }
-    inline long get_max_id() { return m_nMaxId; }
+protected:
+    inline bool stop_event_received() { return m_fStopLoop; }
+    void run_events_loop();
+    void thread_main();
+    inline bool pending_events() { return !m_events.empty(); }
+    void dispatch_next_event();
 
 };
 
 
-} //namespace lomse
+}   //namespace lomse
 
-#endif    //__LOMSE_PARSER_H__
+#endif      //__LOMSE_EVENTS_DISPATCHER_H__

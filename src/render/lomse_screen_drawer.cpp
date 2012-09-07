@@ -800,24 +800,32 @@ void ScreenDrawer::gsv_text(double x, double y, const char* str)
 }
 
 //---------------------------------------------------------------------------------------
-bool ScreenDrawer::select_font(const std::string& fontName, double height,
+bool ScreenDrawer::select_font(const std::string& language,
+                               const std::string& fontFile,
+                               const std::string& fontName, double height,
                                bool fBold, bool fItalic)
 {
-    return m_pFonts->select_font(fontName, height, fBold, fItalic);
+    return m_pFonts->select_font(language, fontFile, fontName, height, fBold, fItalic);
 }
 
 //---------------------------------------------------------------------------------------
-bool ScreenDrawer::select_raster_font(const std::string& fontName, double height,
+bool ScreenDrawer::select_raster_font(const std::string& language,
+                                      const std::string& fontFile,
+                                      const std::string& fontName, double height,
                                       bool fBold, bool fItalic)
 {
-    return m_pFonts->select_raster_font(fontName, height, fBold, fItalic);
+    return m_pFonts->select_raster_font(language, fontFile, fontName,
+                                         height, fBold, fItalic);
 }
 
 //---------------------------------------------------------------------------------------
-bool ScreenDrawer::select_vector_font(const std::string& fontName, double height,
+bool ScreenDrawer::select_vector_font(const std::string& language,
+                                      const std::string& fontFile,
+                                      const std::string& fontName, double height,
                                       bool fBold, bool fItalic)
 {
-    return m_pFonts->select_vector_font(fontName, height, fBold, fItalic);
+    return m_pFonts->select_vector_font(language, fontFile, fontName,
+                                         height, fBold, fItalic);
 }
 
 //---------------------------------------------------------------------------------------
@@ -832,6 +840,18 @@ void ScreenDrawer::draw_glyph(double x, double y, unsigned int ch)
 
 //---------------------------------------------------------------------------------------
 int ScreenDrawer::draw_text(double x, double y, const std::string& str)
+{
+    //returns the number of chars drawn
+
+    render_existing_paths();
+
+    TransAffine& mtx = m_pRenderer->get_transform();
+    mtx.transform(&x, &y);
+    return m_pCalligrapher->draw_text(x, y, str, m_textColor, m_pRenderer->get_scale());
+}
+
+//---------------------------------------------------------------------------------------
+int ScreenDrawer::draw_text(double x, double y, const wstring& str)
 {
     //returns the number of chars drawn
 

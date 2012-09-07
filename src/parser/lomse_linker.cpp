@@ -517,10 +517,11 @@ ImoObj* Linker::add_font_style(ImoFontStyleDto* pDto)
     if (m_pParent && m_pParent->is_style())
     {
         ImoStyle* pStyle = static_cast<ImoStyle*>(m_pParent);
-        pStyle->set_float_property(ImoStyle::k_font_size, pDto->size);
-        pStyle->set_int_property(ImoStyle::k_font_weight, pDto->weight);
-        pStyle->set_int_property(ImoStyle::k_font_style, pDto->style);
-        pStyle->set_string_property(ImoStyle::k_font_name, pDto->name);
+        pStyle->font_size( pDto->size);
+        pStyle->font_weight( pDto->weight);
+        pStyle->font_style( pDto->style);
+        pStyle->font_name( pDto->name);
+        pStyle->font_file("");
         delete pDto;
         return NULL;
     }

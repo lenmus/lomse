@@ -27,29 +27,24 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef _LOMSE_SCORE_PLAYER_CTRL_H__
-#define _LOMSE_SCORE_PLAYER_CTRL_H__
+#ifndef _LOMSE_CHECKBOX_CTRL_H__
+#define _LOMSE_CHECKBOX_CTRL_H__
 
 #include "lomse_control.h"
-#include "lomse_player_gui.h"
 
+#include "lomse_vertex_source.h"
 
 namespace lomse
 {
 
-//forward declarations
-class ImoScorePlayer;
-class Metronome;
-
-
 //---------------------------------------------------------------------------------------
-// A Control containing a static text element and/or and image which links to an URL
-class ScorePlayerCtrl : public Control, public PlayerGui
+// A checkable box plus a static text element and/or and image.
+class CheckboxCtrl : public Control, public VertexSource
 {
 protected:
     LibraryScope& m_libraryScope;
-    ImoScorePlayer* m_pOwnerImo;
     string m_label;
+    string m_language;
     GmoBoxControl* m_pMainBox;
     ImoStyle* m_style;
     UPoint  m_pos;
@@ -60,16 +55,18 @@ protected:
 
     Color   m_normalColor;
     Color   m_hoverColor;
-    Color   m_visitedColor;
     Color   m_prevColor;
     Color   m_currentColor;
-    bool    m_visited;
 
-    int     m_metronome;
+private:
+    bool    m_status;
+    int     m_nCurVertex;   //index to current vertex
 
 public:
-    ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner, Document* pDoc);
-    virtual ~ScorePlayerCtrl() {}
+    CheckboxCtrl(LibraryScope& libScope, DynGenerator* pOwner, Document* pDoc,
+                  const string& label, LUnits width=-1.0f, LUnits height=-1.0f,
+                  ImoStyle* pStyle=NULL);
+    virtual ~CheckboxCtrl() {}
 
     //Control mandatory overrides
     USize measure();
@@ -83,19 +80,16 @@ public:
     LUnits left() { return m_pos.x; }
     LUnits right() { return m_pos.x + m_width; }
 
-    //PlayerGui mandatory overrides
-    void on_end_of_playback();
-    int get_play_mode();
-    int get_metronome_mm();
-    Metronome* get_metronome();
-    bool countoff_status();
-    bool metronome_status();
-
     //specific methods
     void set_text(const string& text);
     void set_tooltip(const string& text);
     void change_label(const string& text);
-    inline void set_metronome_mm(int value) { m_metronome = value; }
+    inline bool is_checked() { return m_status; }
+    inline void set_checked(bool value) { m_status = value; }
+
+    //VertexSource mandatory methods
+    unsigned vertex(double* px, double* py);
+    void rewind(int pathId = 0) { m_nCurVertex = 0; }
 
 protected:
     void select_font();
@@ -107,4 +101,4 @@ protected:
 
 } //namespace lomse
 
-#endif    //_LOMSE_SCORE_PLAYER_CTRL_H__
+#endif    //_LOMSE_CHECKBOX_CTRL_H__

@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -30,6 +30,7 @@
 #include "lomse_events.h"
 #include "lomse_internal_model.h"
 #include "lomse_gm_basic.h"
+#include "lomse_events_dispatcher.h"
 
 namespace lomse
 {
@@ -213,7 +214,8 @@ void EventNotifier::notify_observers(SpEventInfo pEvent, Observable* target)
         }
         if (fNotify)
         {
-            (*it)->notify(pEvent);
+            m_pDispatcher->post_event((*it), pEvent);
+//            (*it)->notify(pEvent);
             return;
             //TODO: remove 'return' when following problem is fixed:
             //    Object receiving notification might modify the document (i.e. link

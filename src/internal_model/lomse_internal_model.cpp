@@ -91,7 +91,9 @@ ImoButton* InlineLevelCreatorApi::add_button(const string& label, const USize& s
 {
     Document* pDoc = m_pParent->get_the_document();
     ImoButton* pImo = static_cast<ImoButton*>(ImFactory::inject(k_imo_button, pDoc));
+    ImoDocument* pImoDoc = pDoc->get_imodoc();
     pImo->set_label(label);
+    pImo->set_language( pImoDoc->get_language() );
     pImo->set_size(size);
     pImo->set_style(pStyle);
     m_pParent->append_child_imo(pImo);
@@ -291,6 +293,7 @@ ImoObj::ImoObj(int objtype, long id)
 
         // Special collections
         m_TypeToName[k_imo_attachments] = "attachments";
+        m_TypeToName[k_imo_relations] = "relations";
 
         // ImoContainerObj (A)
         m_TypeToName[k_imo_instrument] = "instrument";
@@ -849,6 +852,17 @@ void ImoBlocksContainer::append_content_item(ImoContentObj* pItem)
 
 
 //=======================================================================================
+// ImoButton implementation
+//=======================================================================================
+ImoButton::ImoButton()
+    : ImoInlineLevelObj(k_imo_button)
+    , m_bgColor( Color(255,255,255) )
+    , m_fEnabled(true)
+{
+}
+
+
+//=======================================================================================
 // ImoColorDto implementation
 //=======================================================================================
 ImoColorDto::ImoColorDto(Int8u r, Int8u g, Int8u b, Int8u a)
@@ -1329,6 +1343,7 @@ ImoDocument::ImoDocument(Document* owner, const std::string& version)
     : ImoBlocksContainer(k_imo_document)
     , m_pOwner(owner)
     , m_version(version)
+    , m_language("en")
     , m_pageInfo()
 {
 }
@@ -1658,14 +1673,14 @@ ImoSpacer* ImoInstrument::add_spacer(Tenths space)
 }
 
 //---------------------------------------------------------------------------------------
-ImoTimeSignature* ImoInstrument::add_time_signature(int beats, int beatType,
+ImoTimeSignature* ImoInstrument::add_time_signature(int top, int bottom,
                                                     bool fVisible)
 {
     ImoMusicData* pMD = get_musicdata();
     ImoTimeSignature* pImo = static_cast<ImoTimeSignature*>(
                                 ImFactory::inject(k_imo_time_signature, m_pDoc) );
-    pImo->set_beats(beats);
-    pImo->set_beat_type(beatType);
+    pImo->set_top_number(top);
+    pImo->set_bottom_number(bottom);
     pImo->set_visible(fVisible);
     pMD->append_child_imo(pImo);
     return pImo;
@@ -1752,9 +1767,27 @@ int ImoInstrGroup::get_num_instruments()
 
 
 //=======================================================================================
+// ImoLink implementation
+//=======================================================================================
+string& ImoLink::get_language()
+{
+    if (!m_language.empty())
+        return m_language;
+    else
+    {
+        ImoDocument* pDoc = get_document();
+        if (pDoc)
+            return pDoc->get_language();
+        else
+            throw std::runtime_error("[ImoLink::get_language] No owner Document.");
+    }
+}
+
+
+//=======================================================================================
 // ImoList implementation
 //=======================================================================================
-ImoList::ImoList(Document* pDoc) 
+ImoList::ImoList(Document* pDoc)
     : ImoBlocksContainer(k_imo_list)
     , m_listType(k_itemized)
 {
@@ -1776,7 +1809,7 @@ ImoListItem* ImoList::add_listitem(ImoStyle* pStyle)
 //=======================================================================================
 // ImoListItem implementation
 //=======================================================================================
-ImoListItem::ImoListItem(Document* pDoc) 
+ImoListItem::ImoListItem(Document* pDoc)
     : ImoBlocksContainer(k_imo_listitem)
 {
     create_content_container(pDoc);
@@ -1823,7 +1856,7 @@ void ImoMultiColumn::create_columns(int numCols, Document* pDoc)
     float width = 100.0f / float(numCols);
     for (int i=numCols; i > 0; i--)
     {
-        append_content_item( 
+        append_content_item(
             static_cast<ImoContentObj*>( ImFactory::inject(k_imo_content, pDoc) ));
         m_widths.push_back(width);
     }
@@ -2256,48 +2289,49 @@ ImoStyle* ImoScore::create_default_style()
     pDefStyle->set_name("Default style");
 
         //font properties
-    pDefStyle->set_string_property(ImoStyle::k_font_name, "Liberation serif");
-    pDefStyle->set_float_property(ImoStyle::k_font_size, 12.0f);
-    pDefStyle->set_int_property(ImoStyle::k_font_style, ImoStyle::k_font_normal);
-    pDefStyle->set_int_property(ImoStyle::k_font_weight, ImoStyle::k_font_normal);
+    pDefStyle->font_file( "");
+    pDefStyle->font_name( "Liberation serif");
+    pDefStyle->font_size( 12.0f);
+    pDefStyle->font_style( ImoStyle::k_font_normal);
+    pDefStyle->font_weight( ImoStyle::k_font_normal);
         //text
-    pDefStyle->set_int_property(ImoStyle::k_word_spacing, ImoStyle::k_spacing_normal);
-    pDefStyle->set_int_property(ImoStyle::k_text_decoration, ImoStyle::k_decoration_none);
-    pDefStyle->set_int_property(ImoStyle::k_vertical_align, ImoStyle::k_valign_baseline);
-    pDefStyle->set_int_property(ImoStyle::k_text_align, ImoStyle::k_align_left);
-    pDefStyle->set_lunits_property(ImoStyle::k_text_indent_length, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_word_spacing_length, 0.0f);   //not applicable
-    pDefStyle->set_float_property(ImoStyle::k_line_height, 1.5f);
+    pDefStyle->word_spacing( ImoStyle::k_spacing_normal);
+    pDefStyle->text_decoration( ImoStyle::k_decoration_none);
+    pDefStyle->vertical_align( ImoStyle::k_valign_baseline);
+    pDefStyle->text_align( ImoStyle::k_align_left);
+    pDefStyle->text_indent_length( 0.0f);
+    pDefStyle->word_spacing_length( 0.0f);   //not applicable
+    pDefStyle->line_height( 1.5f);
         //color and background
-    pDefStyle->set_color_property(ImoStyle::k_color, Color(0,0,0));
-    pDefStyle->set_color_property(ImoStyle::k_background_color, Color(255,255,255));
+    pDefStyle->color( Color(0,0,0));
+    pDefStyle->background_color( Color(255,255,255));
         //margin
-    pDefStyle->set_lunits_property(ImoStyle::k_margin_top, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_margin_bottom, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_margin_left, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_margin_right, 0.0f);
+    pDefStyle->margin_top( 0.0f);
+    pDefStyle->margin_bottom( 0.0f);
+    pDefStyle->margin_left( 0.0f);
+    pDefStyle->margin_right( 0.0f);
         //padding
-    pDefStyle->set_lunits_property(ImoStyle::k_padding_top, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_padding_bottom, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_padding_left, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_padding_right, 0.0f);
+    pDefStyle->padding_top( 0.0f);
+    pDefStyle->padding_bottom( 0.0f);
+    pDefStyle->padding_left( 0.0f);
+    pDefStyle->padding_right( 0.0f);
         ////border
     //pDefStyle->set_lunits_property(ImoStyle::k_border_top, 0.0f);
     //pDefStyle->set_lunits_property(ImoStyle::k_border_bottom, 0.0f);
     //pDefStyle->set_lunits_property(ImoStyle::k_border_left, 0.0f);
     //pDefStyle->set_lunits_property(ImoStyle::k_border_right, 0.0f);
         //border width
-    pDefStyle->set_lunits_property(ImoStyle::k_border_width_top, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_border_width_bottom, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_border_width_left, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_border_width_right, 0.0f);
+    pDefStyle->border_width_top( 0.0f);
+    pDefStyle->border_width_bottom( 0.0f);
+    pDefStyle->border_width_left( 0.0f);
+    pDefStyle->border_width_right( 0.0f);
         //size
-    pDefStyle->set_lunits_property(ImoStyle::k_min_height, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_max_height, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_height, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_min_width, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_max_width, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_width, 0.0f);
+    pDefStyle->min_height( 0.0f);
+    pDefStyle->max_height( 0.0f);
+    pDefStyle->height( 0.0f);
+    pDefStyle->min_width( 0.0f);
+    pDefStyle->max_width( 0.0f);
+    pDefStyle->width( 0.0f);
 
     m_nameToStyle[pDefStyle->get_name()] = pDefStyle;
     add_style(pDefStyle);
@@ -2315,10 +2349,10 @@ void ImoScore::add_required_text_styles()
 	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
         pStyle->set_name("Tuplet numbers");
         pStyle->set_parent_style(pDefStyle);
-	    pStyle->set_string_property(ImoStyle::k_font_name, "Liberation serif");
-	    pStyle->set_float_property(ImoStyle::k_font_size, 11.0f);
-        pStyle->set_int_property(ImoStyle::k_font_style, ImoStyle::k_italic);
-        pStyle->set_int_property(ImoStyle::k_font_weight, ImoStyle::k_font_normal);
+	    pStyle->font_name( "Liberation serif");
+	    pStyle->font_size( 11.0f);
+        pStyle->font_style( ImoStyle::k_italic);
+        pStyle->font_weight( ImoStyle::k_font_normal);
         add_style(pStyle);
     }
 
@@ -2328,8 +2362,8 @@ void ImoScore::add_required_text_styles()
 	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
         pStyle->set_name("Instrument names");
         pStyle->set_parent_style(pDefStyle);
-	    pStyle->set_string_property(ImoStyle::k_font_name, "Liberation serif");
-	    pStyle->set_float_property(ImoStyle::k_font_size, 14.0f);
+	    pStyle->font_name( "Liberation serif");
+	    pStyle->font_size( 14.0f);
         add_style(pStyle);
     }
 
@@ -2429,6 +2463,14 @@ void ImoScorePlayer::set_metronome_mm(int value)
 }
 
 //---------------------------------------------------------------------------------------
+void ImoScorePlayer::set_play_label(const string& value)
+{
+    m_playLabel = value;
+    if (m_pPlayer)
+        m_pPlayer->set_text(value);
+}
+
+//---------------------------------------------------------------------------------------
 int ImoScorePlayer::get_metronome_mm()
 {
     if (m_pPlayer)
@@ -2518,48 +2560,49 @@ ImoStyle* ImoStyles::create_default_styles()
     pDefStyle->set_name("Default style");
 
         //font properties
-    pDefStyle->set_string_property(ImoStyle::k_font_name, "Liberation serif");
-    pDefStyle->set_float_property(ImoStyle::k_font_size, 12.0f);
-    pDefStyle->set_int_property(ImoStyle::k_font_style, ImoStyle::k_font_normal);
-    pDefStyle->set_int_property(ImoStyle::k_font_weight, ImoStyle::k_font_normal);
+    pDefStyle->font_file("");
+    pDefStyle->font_name("Liberation serif");
+    pDefStyle->font_size(12.0f);
+    pDefStyle->font_style(ImoStyle::k_font_normal);
+    pDefStyle->font_weight(ImoStyle::k_font_normal);
         //text
-    pDefStyle->set_int_property(ImoStyle::k_word_spacing, ImoStyle::k_spacing_normal);
-    pDefStyle->set_int_property(ImoStyle::k_text_decoration, ImoStyle::k_decoration_none);
-    pDefStyle->set_int_property(ImoStyle::k_vertical_align, ImoStyle::k_valign_baseline);
-    pDefStyle->set_int_property(ImoStyle::k_text_align, ImoStyle::k_align_left);
-    pDefStyle->set_lunits_property(ImoStyle::k_text_indent_length, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_word_spacing_length, 0.0f);   //not applicable
-    pDefStyle->set_float_property(ImoStyle::k_line_height, 1.5f);
+    pDefStyle->word_spacing(ImoStyle::k_spacing_normal);
+    pDefStyle->text_decoration(ImoStyle::k_decoration_none);
+    pDefStyle->vertical_align(ImoStyle::k_valign_baseline);
+    pDefStyle->text_align(ImoStyle::k_align_left);
+    pDefStyle->text_indent_length(0.0f);
+    pDefStyle->word_spacing_length(0.0f);   //not applicable
+    pDefStyle->line_height(1.5f);
         //color and background
-    pDefStyle->set_color_property(ImoStyle::k_color, Color(0,0,0));
-    pDefStyle->set_color_property(ImoStyle::k_background_color, Color(255,255,255));
+    pDefStyle->color( Color(0,0,0) );
+    pDefStyle->background_color( Color(255,255,255));
         //margin
-    pDefStyle->set_lunits_property(ImoStyle::k_margin_top, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_margin_bottom, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_margin_left, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_margin_right, 0.0f);
+    pDefStyle->margin_top(0.0f);
+    pDefStyle->margin_bottom(0.0f);
+    pDefStyle->margin_left(0.0f);
+    pDefStyle->margin_right(0.0f);
         //padding
-    pDefStyle->set_lunits_property(ImoStyle::k_padding_top, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_padding_bottom, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_padding_left, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_padding_right, 0.0f);
+    pDefStyle->padding_top(0.0f);
+    pDefStyle->padding_bottom(0.0f);
+    pDefStyle->padding_left(0.0f);
+    pDefStyle->padding_right(0.0f);
         ////border
     //pDefStyle->set_lunits_property(ImoStyle::k_border_top, 0.0f);
     //pDefStyle->set_lunits_property(ImoStyle::k_border_bottom, 0.0f);
     //pDefStyle->set_lunits_property(ImoStyle::k_border_left, 0.0f);
     //pDefStyle->set_lunits_property(ImoStyle::k_border_right, 0.0f);
         //border width
-    pDefStyle->set_lunits_property(ImoStyle::k_border_width_top, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_border_width_bottom, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_border_width_left, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_border_width_right, 0.0f);
+    pDefStyle->border_width_top(0.0f);
+    pDefStyle->border_width_bottom(0.0f);
+    pDefStyle->border_width_left(0.0f);
+    pDefStyle->border_width_right(0.0f);
         //size
-    pDefStyle->set_lunits_property(ImoStyle::k_min_height, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_max_height, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_height, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_min_width, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_max_width, 0.0f);
-    pDefStyle->set_lunits_property(ImoStyle::k_width, 0.0f);
+    pDefStyle->min_height(0.0f);
+    pDefStyle->max_height(0.0f);
+    pDefStyle->height(0.0f);
+    pDefStyle->min_width(0.0f);
+    pDefStyle->max_width(0.0f);
+    pDefStyle->width(0.0f);
 
     m_nameToStyle[pDefStyle->get_name()] = pDefStyle;
 
@@ -2745,37 +2788,71 @@ ImoTableRow::ImoTableRow(Document* pDoc)
     create_content_container(pDoc);
 }
 
+//---------------------------------------------------------------------------------------
+ImoDocument* ImoTableRow::get_document()
+{
+    ImoObj* pParent = get_parent();
+    if (pParent && pParent->is_collection())
+    {
+        pParent = pParent->get_parent();
+        if (pParent && pParent->is_table())
+            return (static_cast<ImoContentObj*>(pParent))->get_document();
+        else
+            throw std::runtime_error("[ImoTableRow::get_document] No parent or table row not in table!");
+    }
+    else
+        throw std::runtime_error("[ImoTableRow::get_document] No parent or table row not in table!");
+}
+
 
 //=======================================================================================
 // ImoTextInfo implementation
 //=======================================================================================
 const std::string& ImoTextInfo::get_font_name()
 {
-    return m_pStyle->get_string_property(ImoStyle::k_font_name);
+    return m_pStyle->font_name();
 }
 
 //---------------------------------------------------------------------------------------
 float ImoTextInfo::get_font_size()
 {
-    return m_pStyle->get_float_property(ImoStyle::k_font_size);
+    return m_pStyle->font_size();
 }
 
 //---------------------------------------------------------------------------------------
 int ImoTextInfo::get_font_style()
 {
-    return m_pStyle->get_int_property(ImoStyle::k_font_style);
+    return m_pStyle->font_style();
 }
 
 //---------------------------------------------------------------------------------------
 int ImoTextInfo::get_font_weight()
 {
-    return m_pStyle->get_int_property(ImoStyle::k_font_weight);
+    return m_pStyle->font_weight();
 }
 
 //---------------------------------------------------------------------------------------
 Color ImoTextInfo::get_color()
 {
-    return m_pStyle->get_color_property(ImoStyle::k_color);
+    return m_pStyle->color();
+}
+
+
+//=======================================================================================
+// ImoTextItem implementation
+//=======================================================================================
+string& ImoTextItem::get_language()
+{
+    if (!m_language.empty())
+        return m_language;
+    else
+    {
+        ImoDocument* pDoc = get_document();
+        if (pDoc)
+            return pDoc->get_language();
+        else
+            throw std::runtime_error("[ImoTextItem::get_language] No owner Document.");
+    }
 }
 
 
@@ -2854,15 +2931,15 @@ int ImoTimeSignature::get_num_pulses()
 {
     //returns the number of pulses (metronome pulses) implied by this TS
 
-    return (is_compound_meter() ? m_beats / 3 : m_beats);
+    return (is_compound_meter() ? m_top / 3 : m_top);
 }
 
 //---------------------------------------------------------------------------------------
-float ImoTimeSignature::get_beat_duration()
+float ImoTimeSignature::get_ref_note_duration()
 {
     // returns beat duration (in LDP notes duration units)
 
-    switch(m_beatType)
+    switch(m_bottom)
     {
         case 1:
             return pow(2.0f, (10 - k_whole));
@@ -2882,7 +2959,7 @@ float ImoTimeSignature::get_beat_duration()
 //---------------------------------------------------------------------------------------
 float ImoTimeSignature::get_measure_duration()
 {
-    return m_beats * get_beat_duration();
+    return m_top * get_ref_note_duration();
 }
 
 

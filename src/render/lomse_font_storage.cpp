@@ -41,6 +41,8 @@
 
 #include "lomse_build_options.h"
 
+#include <boost/algorithm/string.hpp>   //to upper conversion
+
 using namespace agg;
 
 namespace lomse
@@ -50,7 +52,7 @@ namespace lomse
 // FontStorage implementation
 //=======================================================================================
 FontStorage::FontStorage(LibraryScope* pLibScope)
-    : m_fontEngine()
+    : m_fontEngine(1000)        //1000 = number of faces in cache
     , m_fontCacheManager(m_fontEngine)
     , m_pLibScope(pLibScope)
     , m_fontHeight(14.0)
@@ -72,13 +74,14 @@ FontStorage::FontStorage(LibraryScope* pLibScope)
     //if I finally use FreeType for all fonts.
 
     //font settings
-    m_fontEngine.resolution(96);    //96 dpi
+    unsigned ppi = unsigned(pLibScope->get_screen_ppi());
+    m_fontEngine.resolution(ppi);
     m_fontEngine.gamma(agg::gamma_none());
     m_fontEngine.hinting(m_fHinting);
     m_fontEngine.flip_y(m_fFlip_y);
 
     //load music font
-    string fullname = LOMSE_FONTS_PATH;
+    string fullname = m_pLibScope->fonts_path();
     fullname += "lmbasic2.ttf";
     set_font(fullname, 24.0);
 }
@@ -136,100 +139,79 @@ void FontStorage::set_font_width(double rPoints)
 }
 
 //---------------------------------------------------------------------------------------
-bool FontStorage::select_font(const std::string& fontName, double height,
+bool FontStorage::select_font(const std::string& language,
+                               const std::string& fontFile,
+                               const std::string& fontName, double height,
                                bool fBold, bool fItalic)
 {
-    return select_raster_font(fontName, height, fBold, fItalic);
+    return select_raster_font(language, fontFile, fontName, height, fBold, fItalic);
 }
 
 //---------------------------------------------------------------------------------------
-bool FontStorage::select_raster_font(const std::string& fontName, double height,
+bool FontStorage::select_raster_font(const std::string& language,
+                                      const std::string& fontFile,
+                                      const std::string& fontName, double height,
                                       bool fBold, bool fItalic)
 {
     //Returns true if any error
     FontSelector fs(m_pLibScope);
-    string fontFile = fs.find_font(fontName, fBold, fItalic);
-    return set_font(fontFile, height, k_raster_font_cache);
+    string fullFile = fs.find_font(language, fontFile, fontName, fBold, fItalic);
+    return set_font(fullFile, height, k_raster_font_cache);
 }
 
 //---------------------------------------------------------------------------------------
-bool FontStorage::select_vector_font(const std::string& fontName, double height,
+bool FontStorage::select_vector_font(const std::string& language,
+                                      const std::string& fontFile,
+                                      const std::string& fontName, double height,
                                       bool fBold, bool fItalic)
 {
     //Returns true if any error
     FontSelector fs(m_pLibScope);
-    string fontFile = fs.find_font(fontName, fBold, fItalic);
-    return set_font(fontFile, height, k_vector_font_cache);
+    string fullFile = fs.find_font(language, fontFile, fontName, fBold, fItalic);
+    return set_font(fullFile, height, k_vector_font_cache);
 }
 
-////---------------------------------------------------------------------------------------
-//int FontStorage::draw_text(double x, double y, const std::string& str, double scale)
-//{
-//    //returns the number of chars drawn
-//
-//   if (!is_font_valid())
-//        return 0;
-//
-//    //set scaling factor
-//    agg::trans_affine mtx;
-//    mtx *= agg::trans_affine_scaling(scale);
-//    m_fontEngine.transform(mtx);
-//
-//    //convert to utf-32
-//    const char* utf8str = str.c_str();
-//    std::vector<unsigned int> utf32result;
-//    utf8::utf8to32(utf8str, utf8str + strlen(utf8str), std::back_inserter(utf32result));
-//
-//    //loop to render glyphs
-//    int num_glyphs = 0;
-//    std::vector<unsigned int>::iterator it;
-//    for (it = utf32result.begin(); it != utf32result.end(); ++it)
-//    {
-//        const agg::glyph_cache* glyph = get_glyph_cache(*it);
-//        if(glyph)
-//        {
-//            if(m_fKerning)
-//                add_kerning(&x, &y);
-//
-//            init_adaptors(glyph, x, y);
-//
-//            //render the glyph using method agg::glyph_ren_agg_gray8
-//            m_pRenderer->render(m_fontCacheManager.gray8_adaptor(),
-//                              m_fontCacheManager.gray8_scanline() );
-//
-//            // increment pen position
-//            x += glyph->advance_x;
-//            ++num_glyphs;
-//        }
-//    }
-//    return num_glyphs;
-//}
 
 
 
 //=======================================================================================
 // FontSelector implementation
 //=======================================================================================
-std::string FontSelector::find_font(const std::string& name, bool fBold, bool fItalic)
+std::string FontSelector::find_font(const std::string& language,
+                                     const std::string& fontFile,
+                                     const std::string& name,
+                                     bool fBold, bool fItalic)
 {
     //Returns the font filename, including its full path.
-    //As this is platform specific, it has been implemented by invoking a
-    //platform service (via callback).
-    //For default fonts, hardcoded path is returned
+    //Priority is given to font file.
+    //For generic families (i.e.: sans, serif, monospace, ...) priority is given to
+    //language
 
-    string fullpath = LOMSE_FONTS_PATH;
+    string fullpath = m_pLibScope->fonts_path();
 
-    if (name == "LenMus basic")
+    if (!fontFile.empty())
+        return fullpath + fontFile;
+
+    //transform name to capital letters for comparisons
+    string fontname = boost::to_upper_copy(name);
+
+    //music font
+    if (fontname == "LENMUS BASIC")
     {
         fullpath += "lmbasic2.ttf";
         return fullpath;
     }
-//    else
-//        fullpath = "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc";
-//        return fullpath;
+
+    //Chinese fonts
+    if (language == "zn_CN")
+    {
+        fullpath += "wqy-zenhei.ttc";
+        return fullpath;
+    }
 
 
-    else if (name == "Liberation serif")
+    if (fontname == "LIBERATION SERIF" || fontname == "SERIF"
+             || fontname == "TIMES NEW ROMAN")
     {
         if (fBold && fItalic)
             fullpath += "LiberationSerif-BoldItalic.ttf";
@@ -242,7 +224,8 @@ std::string FontSelector::find_font(const std::string& name, bool fBold, bool fI
         return fullpath;
     }
 
-    else if (name == "Liberation sans")
+    else if (fontname == "LIBERATION SANS" || fontname == "SANS-SERIF" || fontname == "SANS"
+             || fontname == "HELVETICA")
     {
         if (fBold && fItalic)
             fullpath += "LiberationSans-BoldItalic.ttf";
@@ -255,8 +238,31 @@ std::string FontSelector::find_font(const std::string& name, bool fBold, bool fI
         return fullpath;
     }
 
+#if (0)
+    //else if (fontname == "MONOSPACE" || fontname == "DEJAVU SANS MONO")
+    else if (fontname == "MONOSPACE" || fontname == "COURIER")
+    {
+        if (italic && bold)
+            fullpath += "FreeMonoBoldOblique.ttf";
+        else if (italic)
+            fullpath += "FreeMonoOblique.ttf";
+        else if (bold)
+            fullpath += "FreeMonoBold.ttf";
+        else
+            fullpath += "FreeMono.ttf";
+        return fullpath;
+    }
+
+    else if (fontname == "HANDWRITTEN" || fontname == "CURSIVE")
+    {
+        fullpath += "DejaVuSans-Oblique.ttf";
+        return fullpath;
+    }
+#endif
+
     else
         return m_pLibScope->get_font(name, fBold, fItalic);
+
 }
 
 

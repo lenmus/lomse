@@ -50,6 +50,16 @@ class ImoTimeSignature;
 
 //---------------------------------------------------------------------------------------
 // Time signature related functions
+// 
+//  measure -> duration of a whole measure
+//
+//  ref_note -> the note implied by bottom number
+//
+//  num_beats (num_pulses) -> number of beats (metronome pulses) per measure. This is the top
+//                            number for simple meters, or top/3 for compound meters.
+//
+//  beat_duration -> duration of a beat. This is the ref_note duration for simple meters, or
+//                   3 times the ref_note duration for compound meters.
 
     //-----------------------------------------------------------------------------------
     // Determines if a timePos is in on-beat, off-beat position
@@ -57,8 +67,8 @@ class ImoTimeSignature;
     extern int get_beat_position(float timePos, ImoTimeSignature* pTS);
 
     //-----------------------------------------------------------------------------------
-    // returns beat duration (in LDP notes duration units)
-    extern float get_beat_duration_for(int nBeatType);
+    // returns ref.note duration (in LDP notes duration units)
+    extern float get_duration_for_ref_note(int bottomNumber);
 
 
 //---------------------------------------------------------------------------------------

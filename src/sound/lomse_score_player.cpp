@@ -35,6 +35,7 @@
 #include "lomse_events.h"
 #include "lomse_interactor.h"
 #include "lomse_player_gui.h"
+#include "lomse_metronome.h"
 
 #include <algorithm>    //max(), min()
 #include <ctime>        //clock()
@@ -52,6 +53,8 @@ ScorePlayer::ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi)
     , m_fShouldStop(false)
     , m_fPlaying(false)
     , m_fPostEvents(true)
+    , m_fQuit(false)
+    , m_fFinalEventSent(false)
     , m_pScore(NULL)
     , m_pTable(NULL)
     , m_MtrChannel(9)
@@ -59,11 +62,10 @@ ScorePlayer::ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi)
     , m_MtrTone1(60)
     , m_MtrTone2(77)
     , m_fVisualTracking(false)
-    , m_fCountOff(false)
-    , m_playMode(k_play_normal_instrument)
     , m_nMM(60)
     , m_pInteractor(NULL)
     , m_pPlayerGui(NULL)
+    , m_pMtr(NULL)
 {
 }
 
@@ -86,19 +88,17 @@ void ScorePlayer::load_score(ImoScore* pScore, PlayerGui* pPlayerGui,
     m_MtrInstr = metronomeInstr;
     m_MtrTone1 = tone1;
     m_MtrTone2 = tone2;
+    m_pMtr = m_pPlayerGui->get_metronome();
 
     m_pTable = m_pScore->get_midi_table();
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayer::play(bool fVisualTracking, bool fCountOff,
-                       int playMode, long nMM, Interactor* pInteractor)
+void ScorePlayer::play(bool fVisualTracking, long nMM, Interactor* pInteractor)
 {
 	//play all the score
 
     m_fVisualTracking = fVisualTracking;
-    m_fCountOff = fCountOff;
-    m_playMode = playMode;
     m_nMM = nMM;
     m_pInteractor = pInteractor;
 
@@ -110,13 +110,11 @@ void ScorePlayer::play(bool fVisualTracking, bool fCountOff,
 
 //---------------------------------------------------------------------------------------
 void ScorePlayer::play_measure(int nMeasure, bool fVisualTracking,
-                               int playMode, long nMM, Interactor* pInteractor)
+                               long nMM, Interactor* pInteractor)
 {
     // Play back measure n (n = 1 ... num_measures)
 
     m_fVisualTracking = fVisualTracking;
-    m_fCountOff = false;
-    m_playMode = playMode;
     m_nMM = nMM;
     m_pInteractor = pInteractor;
 
@@ -130,14 +128,12 @@ void ScorePlayer::play_measure(int nMeasure, bool fVisualTracking,
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayer::play_from_measure(int nMeasure, bool fVisualTracking, bool fCountOff,
-                                    int playMode, long nMM, Interactor* pInteractor)
+void ScorePlayer::play_from_measure(int nMeasure, bool fVisualTracking,
+                                    long nMM, Interactor* pInteractor)
 {
     // Play back from measure n (n = 1 ... num_measures) to end
 
     m_fVisualTracking = fVisualTracking;
-    m_fCountOff = fCountOff;
-    m_playMode = playMode;
     m_nMM = nMM;
     m_pInteractor = pInteractor;
 
@@ -163,17 +159,19 @@ void ScorePlayer::play_from_measure(int nMeasure, bool fVisualTracking, bool fCo
 //---------------------------------------------------------------------------------------
 void ScorePlayer::play_segment(int nEvStart, int nEvEnd)
 {
+    m_fQuit = false;
+    m_fFinalEventSent = false;
+
     //Create a new thread. It starts inmediately to execute do_play()
     delete m_pThread;
     m_pThread = LOMSE_NEW SoundThread(&ScorePlayer::thread_main, this,
-                                nEvStart, nEvEnd, m_playMode, m_fVisualTracking,
-                                m_fCountOff, m_nMM, m_pInteractor);
+                                nEvStart, nEvEnd, m_fVisualTracking,
+                                m_nMM, m_pInteractor);
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayer::thread_main(int nEvStart, int nEvEnd, int playMode,
-                              bool fVisualTracking, bool fCountOff, long nMM,
-                              Interactor* pInteractor)
+void ScorePlayer::thread_main(int nEvStart, int nEvEnd, bool fVisualTracking,
+                              long nMM, Interactor* pInteractor)
 {
     try
     {
@@ -186,7 +184,7 @@ void ScorePlayer::thread_main(int nEvStart, int nEvEnd, int playMode,
         if (pInteractor && !m_fPostEvents)
             pInteractor->enable_view_updates(false);
         fVisualTracking &= (pInteractor != NULL);
-        do_play(nEvStart, nEvEnd, playMode, fVisualTracking, fCountOff, nMM, pInteractor);
+        do_play(nEvStart, nEvEnd, fVisualTracking, nMM, pInteractor);
     }
     catch (boost::thread_interrupted&)
     {
@@ -217,6 +215,16 @@ void ScorePlayer::stop()
 }
 
 //---------------------------------------------------------------------------------------
+void ScorePlayer::quit()
+{
+    //when the user application quits, it is necessary to stop the player without
+    //generating repaint or other events. That's the purpose of this method.
+
+    m_fQuit = true;
+    stop();
+}
+
+//---------------------------------------------------------------------------------------
 void ScorePlayer::pause()
 {
     if (!m_pThread) return;
@@ -241,25 +249,24 @@ void ScorePlayer::wait_for_termination()
         m_pThread = NULL;
     }
     //m_fShouldStop = false;
-    //boost::this_thread::sleep(boost::posix_time::seconds(1)); 
+    //boost::this_thread::sleep(boost::posix_time::seconds(1));
 }
 
 //---------------------------------------------------------------------------------------
 // Methods to be executed in the thread
 //---------------------------------------------------------------------------------------
 
-void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
-                              bool fVisualTracking, bool fCountOff,
-                              long nMM, Interactor* pInteractor)
+void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
+                          long nMM, Interactor* pInteractor)
 {
     // This is the real method doing the work. It is executed inside a
     // different thread.
 
-    // if no MIDI server terminate or not inside a thread, return
+    // if no MIDI server or not inside a thread, return
     if (!m_pMidi || !m_pThread)
         return;
 
-//    //TODO All issues related to sol-fa voice
+    //TODO All issues related to sol-fa voice playback
 
     std::vector<SoundEvent*>& events = m_pTable->get_events();
     if (events.size() == 0)
@@ -269,11 +276,14 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
     #define k_SOLFA_NOTE        60        //pitch for sight reading with percussion sound
     int nPercussionChannel = m_MtrChannel;        //channel to use for percussion
 
-//    //prepare metronome settings
-//TODO    lmMetronome* pMtr = g_pMainFrame->GetMetronome();
-    bool fPlayWithMetronome = false;    //TODO pMtr->IsRunning();
-    //TODO bool fMetronomeEnabled = pMtr->IsEnabled();
-//TODO    pMtr->Enable(false);    //mute sound
+    //options
+    bool fCountOff = m_pPlayerGui->countoff_status();
+    int playMode = m_pPlayerGui->get_play_mode();
+    bool fPlayWithMetronome = m_pPlayerGui->metronome_status();
+
+    //mute general metronome
+    if (m_pMtr)
+        m_pMtr->mute(true);
 
     //Prepare instrument for metronome. Instruments for music voices
     //are prepared by events of type ProgInstr
@@ -330,7 +340,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
         else if (events[i]->EventType == SoundEvent::k_rhythm_change)
         {
             //set up new beat and metronome information
-            nMeasureDuration = events[i]->BeatDuration * events[i]->NumBeats;
+            nMeasureDuration = events[i]->RefNoteDuration * events[i]->TopNumber;
             nMtrNumPulses = events[i]->NumPulses;
             m_nMtrPulseDuration = nMeasureDuration / nMtrNumPulses;       //a pulse duration, in TU
             nMtrIntvalOff = min(7L, m_nMtrPulseDuration / 4L);            //click sound duration (interval to click off), in TU
@@ -353,8 +363,15 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
 	if (nEvStart > 1)
 		curTime = delta_to_milliseconds( events[nEvStart]->DeltaTime );
 
-    // metronome interval duration, in milliseconds
-    m_nMtrClickIntval = (nMM == 0 ? 1000L : 60000L/nMM);
+    // get metronome interval duration, in milliseconds
+    //Tempo speed for all play methods is controlled by the metronome (PlayerGui) that
+    //was specified in method load_score(). Nevertheless, metronome speed can be
+    //overriden to force a predefined speed by specifying a non-zero value for
+    //parameter nMM.
+    if (nMM == 0)
+        m_nMtrClickIntval = 60000L / m_pPlayerGui->get_metronome_mm();
+    else
+        m_nMtrClickIntval = (nMM == 0 ? 1000L : 60000L/nMM);
 
     //determine last metronome pulse before first note to play.
     //First note could be syncopated or an off-beat note. Round time to nearest
@@ -626,7 +643,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
             else if (events[i]->EventType == SoundEvent::k_rhythm_change)
             {
                 //set up new beat and metronome information
-                nMeasureDuration = events[i]->BeatDuration * events[i]->NumBeats;
+                nMeasureDuration = events[i]->RefNoteDuration * events[i]->TopNumber;
                 nMtrNumPulses = events[i]->NumPulses;
                 m_nMtrPulseDuration = nMeasureDuration / nMtrNumPulses;        //a pulse duration
                 nMtrIntvalOff = min(7L, m_nMtrPulseDuration / 4L);            //click duration (interval to click off)
@@ -662,6 +679,20 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
             i++;
         }
 
+        //update metronome information, just in case metronome was updated
+        if (nMM == 0)
+        {
+            //BUG_BYPASS
+            // While clicking in metronome combo, method m_pPlayerGui->get_metronome_mm()
+            // returns spurious low values that freeze playback for a few seconds. So it is
+            // necessary to ensure a smooth downwards MM decrease rate.
+            long maxIntval = m_nMtrClickIntval + 5000L;     // max MM decrease: 5 MM per click
+            m_nMtrClickIntval = 60000L / m_pPlayerGui->get_metronome_mm();
+            if (m_nMtrClickIntval > maxIntval)
+                m_nMtrClickIntval = maxIntval;
+        }
+        fPlayWithMetronome = m_pPlayerGui->metronome_status();
+
         //check if the thread should be paused or stopped
         //boost::this_thread::interruption_point();
         {
@@ -678,9 +709,10 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
 
     } while (i <= nEvEnd);
 
-    //ensure that all visual highlight is removed
-    if (fVisualTracking)
+    ////ensure that all visual highlight is removed
+    if (fVisualTracking && !m_fQuit)
     {
+        m_fFinalEventSent = true;
         SpEventScoreHighlight pEvent(
             LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id()) );
         pEvent->add_item(k_end_of_higlight_event, NULL);
@@ -695,25 +727,37 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, int playMode,
 void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
                                                Interactor* pInteractor)
 {
-    ////ensure that all visual highlight is removed
-    //if (fVisualTracking)
-    //{
-    //    SpEventScoreHighlight pEvent(
-    //        LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id()) );
-    //    pEvent->add_item(k_end_of_higlight_event, NULL);
-    //    if (m_fPostEvents)
-    //        m_libScope.post_event(pEvent);
-    //    else if (pInteractor)
-    //        pInteractor->handle_event(pEvent);
-    //}
+    m_fPlaying = false;
+
+    //ensure that all visual highlight is removed
+    if (fVisualTracking && !m_fQuit && !m_fFinalEventSent)
+    {
+        m_fFinalEventSent = true;
+        SpEventScoreHighlight pEvent(
+            LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id()) );
+        pEvent->add_item(k_end_of_higlight_event, NULL);
+        if (m_fPostEvents)
+            m_libScope.post_event(pEvent);
+        else if (pInteractor)
+            pInteractor->handle_event(pEvent);
+    }
 
     //ensure that all sounds are off
     m_pMidi->all_sounds_off();
+
+    //do not generate events if quit
+    if (m_fQuit)
+        return;
+
+    //enable again the general metronome
+    if (m_pMtr)
+        m_pMtr->mute(false);
 
     // allow view updates
     if (pInteractor)
         pInteractor->enable_view_updates(true);
 
+    //update player gui
     if (m_pPlayerGui)
     {
         SpEventPlayScore event(
@@ -724,8 +768,6 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
         else if (pInteractor)
             pInteractor->handle_event(event);
     }
-
-    m_fPlaying = false;
 }
 
 

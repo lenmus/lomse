@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -136,11 +136,17 @@ public:
 
 
     // current font
-    bool select_font(const std::string& fontName, double height,
+    bool select_font(const std::string& language,
+                     const std::string& fontFile,
+                     const std::string& fontName, double height,
                      bool fBold=false, bool fItalic=false);
-    bool select_raster_font(const std::string& fontName, double height,
+    bool select_raster_font(const std::string& language,
+                            const std::string& fontFile,
+                            const std::string& fontName, double height,
                             bool fBold=false, bool fItalic=false);
-    bool select_vector_font(const std::string& fontName, double height,
+    bool select_vector_font(const std::string& language,
+                            const std::string& fontFile,
+                            const std::string& fontName, double height,
                             bool fBold=false, bool fItalic=false);
 
     //inline void FtSetFontSize(double rPoints) { return m_pMFM->SetFontSize(rPoints); }
@@ -164,6 +170,7 @@ public:
     // text rederization
     void gsv_text(double x, double y, const char* str);
     int draw_text(double x, double y, const std::string& str);
+    int draw_text(double x, double y, const wstring& str);
     void draw_glyph(double x, double y, unsigned int ch);
 
     //void FtSetTextPosition(lmLUnits uxPos, lmLUnits uyPos);
@@ -188,7 +195,7 @@ public:
 
     //SVG line with start/end markers
     //-----------------------
-    void line_with_markers(UPoint start, UPoint end, LUnits width, 
+    void line_with_markers(UPoint start, UPoint end, LUnits width,
                            ELineCap startCap, ELineCap endCap);
 
 

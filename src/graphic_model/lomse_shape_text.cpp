@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -62,14 +62,14 @@ GmoShapeText::GmoShapeText(ImoObj* pCreatorImo, int idx, const std::string& text
 
     //color
     if (m_pStyle)
-        m_color = m_pStyle->get_color_property(ImoStyle::k_color);
+        m_color = m_pStyle->color();
 }
 
 //---------------------------------------------------------------------------------------
 Color GmoShapeText::get_normal_color()
 {
     if (m_pStyle)
-        return m_pStyle->get_color_property(ImoStyle::k_color);
+        return m_pStyle->color();
     else
         return m_color;
 }
@@ -92,13 +92,16 @@ void GmoShapeText::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //---------------------------------------------------------------------------------------
 void GmoShapeText::select_font()
 {
+    //TODO: language for text
     //FIXME: if no style, must use score default style
     TextMeter meter(m_libraryScope);
     if (!m_pStyle)
-        meter.select_font("Times New Roman", 18.0);
+        meter.select_font("", "", "Liberation serif", 12.0);
     else
-        meter.select_font(m_pStyle->get_string_property(ImoStyle::k_font_name),
-                          m_pStyle->get_float_property(ImoStyle::k_font_size),
+        meter.select_font("",   //no particular language
+                          m_pStyle->font_file(),
+                          m_pStyle->font_name(),
+                          m_pStyle->font_size(),
                           m_pStyle->is_bold(),
                           m_pStyle->is_italic() );
 }
@@ -118,11 +121,13 @@ void GmoShapeText::set_text(const std::string& text)
 //=======================================================================================
 // GmoShapeWord implementation
 //=======================================================================================
-GmoShapeWord::GmoShapeWord(ImoObj* pCreatorImo, int idx, const std::string& text,
-                           ImoStyle* pStyle, LUnits x, LUnits y, LUnits halfLeading,
+GmoShapeWord::GmoShapeWord(ImoObj* pCreatorImo, int idx, const wstring& text,
+                           ImoStyle* pStyle, const string& language,
+                           LUnits x, LUnits y, LUnits halfLeading,
                            LibraryScope& libraryScope)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_word, idx, Color(0,0,0))
     , m_text(text)
+    , m_language(language)
     , m_pStyle(pStyle)
     , m_pFontStorage( libraryScope.font_storage() )
     , m_libraryScope(libraryScope)
@@ -139,7 +144,7 @@ GmoShapeWord::GmoShapeWord(ImoObj* pCreatorImo, int idx, const std::string& text
     m_origin.y = y;
 
     //other
-    m_color = m_pStyle->get_color_property(ImoStyle::k_color);
+    m_color = m_pStyle->color();
     m_baseline = m_halfLeading + meter.get_ascender();          //relative to m_origin.y
 }
 
@@ -164,7 +169,7 @@ void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //    pDrawer->draw_text(pos.x, pos.y, m_label);
 
     //text decoration
-    if (m_pStyle->get_int_property(ImoStyle::k_text_decoration) == ImoStyle::k_decoration_underline)
+    if (m_pStyle->text_decoration() == ImoStyle::k_decoration_underline)
     {
         LUnits xStart = m_origin.x;
         LUnits xEnd = m_origin.x + m_size.width;
@@ -245,8 +250,10 @@ void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
 void GmoShapeWord::select_font()
 {
     TextMeter meter(m_libraryScope);
-    meter.select_font(m_pStyle->get_string_property(ImoStyle::k_font_name),
-                      m_pStyle->get_float_property(ImoStyle::k_font_size),
+    meter.select_font(m_language,
+                      m_pStyle->font_file(),
+                      m_pStyle->font_name(),
+                      m_pStyle->font_size(),
                       m_pStyle->is_bold(),
                       m_pStyle->is_italic() );
 }

@@ -161,9 +161,9 @@ void ScoreLayouter::layout_in_box()
         ImoStyle* pStyle = m_pScore->get_style();
         if (pStyle)
         {
-            yBottom += pStyle->get_lunits_property(ImoStyle::k_margin_bottom);
-            yBottom += pStyle->get_lunits_property(ImoStyle::k_border_width_bottom);
-            yBottom += pStyle->get_lunits_property(ImoStyle::k_padding_bottom);
+            yBottom += pStyle->margin_bottom();
+            yBottom += pStyle->border_width_bottom();
+            yBottom += pStyle->padding_bottom();
         }
         m_pCurBoxPage->set_height( yBottom - m_pCurBoxPage->get_top());
         m_cursor.y = m_pCurBoxPage->get_bottom();
@@ -309,7 +309,7 @@ void ScoreLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width
 //---------------------------------------------------------------------------------------
 bool ScoreLayouter::enough_space_in_page()
 {
-    //TODO ************
+    //TODO: ScoreLayouter::enough_space_in_page
     //  If paper height is smaller than system height it is impossible to fit
     //  one system in a page. We have to split system horizontally (some staves in
     //  one page and the others in next page).
@@ -336,14 +336,14 @@ void ScoreLayouter::move_cursor_to_top_left_corner()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::add_score_titles()
 {
-    //TODO
+    //TODO: ScoreLayouter::add_score_titles
     //m_pScore->LayoutAttachedObjects(m_pStubScore->GetCurrentPage(), m_pPaper);
 }
 
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::move_cursor_after_headers()
 {
-    //TODO
+    //TODO: ScoreLayouter::move_cursor_after_headers
     move_cursor_to_top_left_corner();
     //m_cursor.y += m_pScore->GetHeadersHeight();
 }
@@ -1109,8 +1109,8 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
         case k_imo_time_signature:
         {
             ImoTimeSignature* pImo = static_cast<ImoTimeSignature*>(pSO);
-            int beats = pImo->get_beats();
-            int beat_type = pImo->get_beat_type();
+            int beats = pImo->get_top_number();
+            int beat_type = pImo->get_bottom_number();
             TimeEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
             return engrv.create_shape_normal(pImo, pos, beats, beat_type);
         }

@@ -251,11 +251,17 @@ public:
     virtual void add_path(VertexSource& vs, unsigned path_id = 0, bool solid_path = true) = 0;
 
     // current font
-    virtual bool select_font(const std::string& fontName, double height,
+    virtual bool select_font(const std::string& language,
+                             const std::string& fontFile,
+                             const std::string& fontName, double height,
                              bool fBold=false, bool fItalic=false) = 0;
-    virtual bool select_raster_font(const std::string& fontName, double height,
+    virtual bool select_raster_font(const std::string& language,
+                                    const std::string& fontFile,
+                                    const std::string& fontName, double height,
                                     bool fBold=false, bool fItalic=false) = 0;
-    virtual bool select_vector_font(const std::string& fontName, double height,
+    virtual bool select_vector_font(const std::string& language,
+                                    const std::string& fontFile,
+                                    const std::string& fontName, double height,
                                     bool fBold=false, bool fItalic=false) = 0;
 
     // text attributes
@@ -263,6 +269,7 @@ public:
 
     // text rederization
     virtual int draw_text(double x, double y, const std::string& str) = 0;
+    virtual int draw_text(double x, double y, const wstring& str) = 0;
     virtual void draw_glyph(double x, double y, unsigned int ch) = 0;
 
     //copy/blend a bitmap

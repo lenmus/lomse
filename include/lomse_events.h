@@ -33,6 +33,7 @@
 #include "lomse_build_options.h"
 
 #include <boost/shared_ptr.hpp>
+using namespace boost;
 
 #include <list>
 #include <string>
@@ -61,6 +62,8 @@ class Observer;
 class Observable;
 class EventHandler;
 class EventCallback;
+class EventsDispatcher;
+
 
 //---------------------------------------------------------------------------------------
 // enum for even types
@@ -86,6 +89,7 @@ enum EEventType
         k_play_score_event,         //score playback (sound)
             k_do_play_score_event,          //start/resume playback
             k_pause_score_event,            //pause playback
+            k_stop_playback_event,          //stop playback
             k_end_of_playback_event,        //end of playback
 
     k_doc_level_event = 1000,
@@ -135,6 +139,7 @@ public:
     inline bool is_end_of_playback_event() { return m_type == k_end_of_playback_event; }
     inline bool is_do_play_score_event() { return m_type == k_do_play_score_event; }
     inline bool is_pause_score_event() { return m_type == k_pause_score_event; }
+    inline bool is_stop_playback_event() { return m_type == k_stop_playback_event; }
 
         //document level events
     inline bool is_doc_level_event() { return m_type >= k_doc_level_event; }
@@ -476,10 +481,11 @@ public:
 class EventNotifier
 {
 protected:
+    EventsDispatcher* m_pDispatcher;
     std::list<Observer*> m_observers;
 
 public:
-    EventNotifier() {}
+    EventNotifier(EventsDispatcher* dispatcher) : m_pDispatcher(dispatcher) {}
     virtual ~EventNotifier();
 
     //Event notification

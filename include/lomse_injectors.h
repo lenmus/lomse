@@ -67,6 +67,7 @@ class Task;
 class Request;
 class ScorePlayer;
 class MidiServerBase;
+class Metronome;
 
 //---------------------------------------------------------------------------------------
 class LOMSE_EXPORT LibraryScope
@@ -77,12 +78,16 @@ protected:
     LomseDoorway* m_pNullDoorway;
     LdpFactory* m_pLdpFactory;
     FontStorage* m_pFontStorage;
+    string m_sFontsPath;
     //MusicGlyphs* m_pMusicGlyphs;
+    Metronome* m_pGlobalMetronome;
+    EventsDispatcher* m_pDispatcher;
 
     //options
     bool m_fJustifySystems;
     bool m_fDumpColumnTables;
     bool m_fDrawAnchors;
+    bool m_fReplaceLocalMetronome;
 
 
 public:
@@ -93,6 +98,8 @@ public:
     inline LomseDoorway* platform_interface() { return m_pDoorway; }
     LdpFactory* ldp_factory();
     FontStorage* font_storage();
+    inline string& fonts_path() { return m_sFontsPath; }
+    EventsDispatcher* get_events_dispatcher();
 
     //callbacks
     void post_event(SpEventInfo pEvent);
@@ -102,6 +109,25 @@ public:
     double get_screen_ppi() const;
     int get_pixel_format() const;
     //MusicGlyphs* music_glyphs();
+
+    //library info
+    static string get_version_string();
+    static int get_version_major();
+    static int get_version_minor();
+    static int get_version_patch();
+    static char get_version_type();
+    static long get_revision();
+
+    //global options
+    inline void set_default_fonts_path(const string& fontsPath) {
+        m_sFontsPath = fontsPath;
+    }
+    inline void set_global_metronome_and_replace_local(Metronome* pMtr) {
+        m_pGlobalMetronome = pMtr;
+        m_fReplaceLocalMetronome = true;
+    }
+    inline Metronome* get_global_metronome() { return m_pGlobalMetronome; }
+    inline bool global_metronome_replaces_local() { return m_fReplaceLocalMetronome; }
 
     //global options, mainly for debug
     inline void set_justify_systems(bool value) { m_fJustifySystems = value; }

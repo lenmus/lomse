@@ -552,6 +552,8 @@ public:
                                && m_objtype < k_imo_dto_last; }
     inline bool is_simpleobj() { return m_objtype > k_imo_simpleobj
                                      && m_objtype < k_imo_simpleobj_last; }
+    inline bool is_collection() { return m_objtype > k_imo_collection
+                                     && m_objtype < k_imo_collection_last; }
     inline bool is_reldataobj() { return m_objtype > k_imo_reldataobj
                                       && m_objtype < k_imo_reldataobj_last; }
     inline bool is_containerobj() { return m_objtype > k_imo_containerobj
@@ -788,19 +790,6 @@ protected:
 public:
     ~ImoStyle() {}
 
-//    //copy constructor
-//    ImoStyle(ImoStyle* pStyle)
-//        : ImoSimpleObj(k_imo_style)
-//    {
-//        m_name = "undefined";
-//        m_pParent = pStyle->m_pParent;
-//        m_lunitsProps = pStyle->m_lunitsProps;
-//        m_floatProps = pStyle->m_floatProps;
-//        m_stringProps = pStyle->m_stringProps;
-//        m_intProps = pStyle->m_intProps;
-//        m_colorProps = pStyle->m_colorProps;
-//    }
-
     //text style
     enum { k_spacing_normal=0, k_length, };
     enum { k_decoration_none=0, k_decoration_underline, k_decoration_overline,
@@ -816,6 +805,7 @@ public:
     //style properties
     enum {
         //font
+        k_font_file,
         k_font_name,
         k_font_size,
         k_font_style,
@@ -878,6 +868,262 @@ public:
     inline bool is_bold() { return get_int_property(ImoStyle::k_font_weight) == k_bold; }
     inline bool is_italic() { return get_int_property(ImoStyle::k_font_style) == k_italic; }
 
+    //utility getters/setters to avoid stupid mistakes and to simplify source code
+        //font
+    inline const string& font_file() {
+	    return get_string_property(ImoStyle::k_font_file);
+    }
+    inline ImoStyle* font_file(const string& filename) {
+	    set_string_property(ImoStyle::k_font_file, filename);
+        return this;
+    }
+    inline const string& font_name() {
+	    return get_string_property(ImoStyle::k_font_name);
+    }
+    inline ImoStyle* font_name(const string& name) {
+	    set_string_property(ImoStyle::k_font_name, name);
+        return this;
+    }
+    inline float font_size() {
+	    return get_float_property(ImoStyle::k_font_size);
+    }
+    inline ImoStyle* font_size(float value) {
+	    set_float_property(ImoStyle::k_font_size, value);
+        return this;
+    }
+    inline int font_style() {
+        return get_int_property(ImoStyle::k_font_style);
+    }
+    inline ImoStyle* font_style(int value) {
+        set_int_property(ImoStyle::k_font_style, value);
+        return this;
+    }
+    inline int font_weight() {
+        return get_int_property(ImoStyle::k_font_weight);
+    }
+    inline ImoStyle* font_weight(int value) {
+        set_int_property(ImoStyle::k_font_weight, value);
+        return this;
+    }
+        //text
+    inline int word_spacing() {
+        return get_int_property(ImoStyle::k_word_spacing);
+    }
+    inline ImoStyle* word_spacing(int value) {
+        set_int_property(ImoStyle::k_word_spacing, value);
+        return this;
+    }
+    inline int text_decoration() {
+        return get_int_property(ImoStyle::k_text_decoration);
+    }
+    inline ImoStyle* text_decoration(int value) {
+        set_int_property(ImoStyle::k_text_decoration, value);
+        return this;
+    }
+    inline int vertical_align() {
+        return get_int_property(ImoStyle::k_vertical_align);
+    }
+    inline ImoStyle* vertical_align(int value) {
+        set_int_property(ImoStyle::k_vertical_align, value);
+        return this;
+    }
+    inline int text_align() {
+        return get_int_property(ImoStyle::k_text_align);
+    }
+    inline ImoStyle* text_align(int value) {
+        set_int_property(ImoStyle::k_text_align, value);
+        return this;
+    }
+    inline LUnits text_indent_length() {
+        return get_lunits_property(ImoStyle::k_text_indent_length);
+    }
+    inline ImoStyle* text_indent_length(LUnits value) {
+        set_lunits_property(ImoStyle::k_text_indent_length, value);
+        return this;
+    }
+    inline LUnits word_spacing_length() {
+        return get_lunits_property(ImoStyle::k_word_spacing_length);
+    }
+    inline ImoStyle* word_spacing_length(LUnits value) {
+        set_lunits_property(ImoStyle::k_word_spacing_length, value);
+        return this;
+    }
+    inline float line_height() {
+        return get_float_property(ImoStyle::k_line_height);
+    }
+    inline ImoStyle* line_height(float value) {
+        set_float_property(ImoStyle::k_line_height, value);
+        return this;
+    }
+        //color and background
+    inline Color color() {
+        return get_color_property(ImoStyle::k_color);
+    }
+    inline ImoStyle* color(Color color) {
+        set_color_property(ImoStyle::k_color, color);
+        return this;
+    }
+    inline Color background_color() {
+        return get_color_property(ImoStyle::k_background_color);
+    }
+    inline ImoStyle* background_color(Color color) {
+        set_color_property(ImoStyle::k_background_color, color);
+        return this;
+    }
+       //border-width
+    inline ImoStyle* border_width(LUnits value) {
+        set_border_width_property(value);
+        return this;
+    }
+    inline LUnits border_width_top() {
+        return get_lunits_property(ImoStyle::k_border_width_top);
+    }
+    inline ImoStyle* border_width_top(LUnits value) {
+        set_lunits_property(ImoStyle::k_border_width_top, value);
+        return this;
+    }
+    inline LUnits border_width_bottom() {
+        return get_lunits_property(ImoStyle::k_border_width_bottom);
+    }
+    inline ImoStyle* border_width_bottom(LUnits value) {
+        set_lunits_property(ImoStyle::k_border_width_bottom, value);
+        return this;
+    }
+    inline LUnits border_width_left() {
+        return get_lunits_property(ImoStyle::k_border_width_left);
+    }
+    inline ImoStyle* border_width_left(LUnits value) {
+        set_lunits_property(ImoStyle::k_border_width_left, value);
+        return this;
+    }
+    inline LUnits border_width_right() {
+        return get_lunits_property(ImoStyle::k_border_width_right);
+    }
+    inline ImoStyle* border_width_right(LUnits value) {
+        set_lunits_property(ImoStyle::k_border_width_right, value);
+        return this;
+    }
+        //padding
+    inline ImoStyle* padding(LUnits value) {
+        set_padding_property(value);
+        return this;
+    }
+    inline LUnits padding_top() {
+        return get_lunits_property(ImoStyle::k_padding_top);
+    }
+    inline ImoStyle* padding_top(LUnits value) {
+        set_lunits_property(ImoStyle::k_padding_top, value);
+        return this;
+    }
+    inline LUnits padding_bottom() {
+        return get_lunits_property(ImoStyle::k_padding_bottom);
+    }
+    inline ImoStyle* padding_bottom(LUnits value) {
+        set_lunits_property(ImoStyle::k_padding_bottom, value);
+        return this;
+    }
+    inline LUnits padding_left() {
+        return get_lunits_property(ImoStyle::k_padding_left);
+    }
+    inline ImoStyle* padding_left(LUnits value) {
+        set_lunits_property(ImoStyle::k_padding_left, value);
+        return this;
+    }
+    inline LUnits padding_right() {
+        return get_lunits_property(ImoStyle::k_padding_right);
+    }
+    inline ImoStyle* padding_right(LUnits value) {
+        set_lunits_property(ImoStyle::k_padding_right, value);
+        return this;
+    }
+        //margin
+    inline ImoStyle* margin(LUnits value) {
+        set_margin_property(value);
+        return this;
+    }
+    inline LUnits margin_top() {
+        return get_lunits_property(ImoStyle::k_margin_top);
+    }
+    inline ImoStyle* margin_top(LUnits value) {
+        set_lunits_property(ImoStyle::k_margin_top, value);
+        return this;
+    }
+    inline LUnits margin_bottom() {
+        return get_lunits_property(ImoStyle::k_margin_bottom);
+    }
+    inline ImoStyle* margin_bottom(LUnits value) {
+        set_lunits_property(ImoStyle::k_margin_bottom, value);
+        return this;
+    }
+    inline LUnits margin_left() {
+        return get_lunits_property(ImoStyle::k_margin_left);
+    }
+    inline ImoStyle* margin_left(LUnits value) {
+        set_lunits_property(ImoStyle::k_margin_left, value);
+        return this;
+    }
+    inline LUnits margin_right() {
+        return get_lunits_property(ImoStyle::k_margin_right);
+    }
+    inline ImoStyle* margin_right(LUnits value) {
+        set_lunits_property(ImoStyle::k_margin_right, value);
+        return this;
+    }
+        //size
+    inline LUnits width() {
+        return get_lunits_property(ImoStyle::k_width);
+    }
+    inline ImoStyle* width(LUnits value) {
+        set_lunits_property(ImoStyle::k_width, value);
+        return this;
+    }
+    inline LUnits height() {
+        return get_lunits_property(ImoStyle::k_height);
+    }
+    inline ImoStyle* height(LUnits value) {
+        set_lunits_property(ImoStyle::k_height, value);
+        return this;
+    }
+    inline LUnits min_width() {
+        return get_lunits_property(ImoStyle::k_min_width);
+    }
+    inline ImoStyle* min_width(LUnits value) {
+        set_lunits_property(ImoStyle::k_min_width, value);
+        return this;
+    }
+    inline LUnits min_height() {
+        return get_lunits_property(ImoStyle::k_min_height);
+    }
+    inline ImoStyle* min_height(LUnits value) {
+        set_lunits_property(ImoStyle::k_min_height, value);
+        return this;
+    }
+    inline LUnits max_width() {
+        return get_lunits_property(ImoStyle::k_max_width);
+    }
+    inline ImoStyle* max_width(LUnits value) {
+        set_lunits_property(ImoStyle::k_max_width, value);
+        return this;
+    }
+    inline LUnits max_height() {
+        return get_lunits_property(ImoStyle::k_max_height);
+    }
+    inline ImoStyle* max_height(LUnits value) {
+        set_lunits_property(ImoStyle::k_max_height, value);
+        return this;
+    }
+
+            //table
+    inline LUnits table_col_width() {
+        return get_lunits_property(ImoStyle::k_table_col_width);
+    }
+    inline ImoStyle* table_col_width(LUnits value) {
+        set_lunits_property(ImoStyle::k_table_col_width, value);
+        return this;
+    }
+
+protected:
+
     //setters
 	void set_string_property(int prop, const string& value)
 	{
@@ -899,6 +1145,7 @@ public:
 	{
 	    m_colorProps[prop] = value;
 	}
+
 	//special setters
 	void set_margin_property(LUnits value)
 	{
@@ -921,158 +1168,6 @@ public:
 	    set_lunits_property(ImoStyle::k_border_width_right, value);
 	    set_lunits_property(ImoStyle::k_border_width_bottom, value);
 	}
-
-    //utility setters to avoid stupid mistakes and to simplify user source code
-        //font
-    inline ImoStyle* font_name(const string& name) {
-	    set_string_property(ImoStyle::k_font_name, name);
-        return this;
-    }
-    inline ImoStyle* font_size(float value) {
-	    set_float_property(ImoStyle::k_font_size, value);
-        return this;
-    }
-    inline ImoStyle* font_style(int value) {
-        set_int_property(ImoStyle::k_font_style, value);
-        return this;
-    }
-    inline ImoStyle* font_weight(int value) {
-        set_int_property(ImoStyle::k_font_weight, value);
-        return this;
-    }
-        //text
-    inline ImoStyle* word_spacing(int value) {
-        set_int_property(ImoStyle::k_word_spacing, value);
-        return this;
-    }
-    inline ImoStyle* text_decoration(int value) {
-        set_int_property(ImoStyle::k_text_decoration, value);
-        return this;
-    }
-    inline ImoStyle* vertical_align(int value) {
-        set_int_property(ImoStyle::k_vertical_align, value);
-        return this;
-    }
-    inline ImoStyle* text_align(int value) {
-        set_int_property(ImoStyle::k_text_align, value);
-        return this;
-    }
-    inline ImoStyle* text_indent_length(LUnits value) {
-        set_lunits_property(ImoStyle::k_text_indent_length, value);
-        return this;
-    }
-    inline ImoStyle* word_spacing_length(LUnits value) {
-        set_lunits_property(ImoStyle::k_word_spacing_length, value);
-        return this;
-    }
-    inline ImoStyle* line_height(float value) {
-        set_float_property(ImoStyle::k_line_height, value);
-        return this;
-    }
-        //color and background
-    inline ImoStyle* color(Color color) {
-        set_color_property(ImoStyle::k_color, color);
-        return this;
-    }
-    inline ImoStyle* background_color(Color color) {
-        set_color_property(ImoStyle::k_background_color, color);
-        return this;
-    }
-       //border-width
-    inline ImoStyle* border_width(LUnits value) {
-        set_border_width_property(value);
-        return this;
-    }
-    inline ImoStyle* border_width_top(LUnits value) {
-        set_lunits_property(ImoStyle::k_border_width_top, value);
-        return this;
-    }
-    inline ImoStyle* border_width_bottom(LUnits value) {
-        set_lunits_property(ImoStyle::k_border_width_bottom, value);
-        return this;
-    }
-    inline ImoStyle* border_width_left(LUnits value) {
-        set_lunits_property(ImoStyle::k_border_width_left, value);
-        return this;
-    }
-    inline ImoStyle* border_width_right(LUnits value) {
-        set_lunits_property(ImoStyle::k_border_width_right, value);
-        return this;
-    }
-        //padding
-    inline ImoStyle* padding(LUnits value) {
-        set_padding_property(value);
-        return this;
-    }
-    inline ImoStyle* padding_top(LUnits value) {
-        set_lunits_property(ImoStyle::k_padding_top, value);
-        return this;
-    }
-    inline ImoStyle* padding_bottom(LUnits value) {
-        set_lunits_property(ImoStyle::k_padding_bottom, value);
-        return this;
-    }
-    inline ImoStyle* padding_left(LUnits value) {
-        set_lunits_property(ImoStyle::k_padding_left, value);
-        return this;
-    }
-    inline ImoStyle* padding_right(LUnits value) {
-        set_lunits_property(ImoStyle::k_padding_right, value);
-        return this;
-    }
-        //margin
-    inline ImoStyle* margin(LUnits value) {
-        set_margin_property(value);
-        return this;
-    }
-    inline ImoStyle* margin_top(LUnits value) {
-        set_lunits_property(ImoStyle::k_margin_top, value);
-        return this;
-    }
-    inline ImoStyle* margin_bottom(LUnits value) {
-        set_lunits_property(ImoStyle::k_margin_bottom, value);
-        return this;
-    }
-    inline ImoStyle* margin_left(LUnits value) {
-        set_lunits_property(ImoStyle::k_margin_left, value);
-        return this;
-    }
-    inline ImoStyle* margin_right(LUnits value) {
-        set_lunits_property(ImoStyle::k_margin_right, value);
-        return this;
-    }
-        //size
-    inline ImoStyle* width(LUnits value) {
-        set_lunits_property(ImoStyle::k_width, value);
-        return this;
-    }
-    inline ImoStyle* height(LUnits value) {
-        set_lunits_property(ImoStyle::k_height, value);
-        return this;
-    }
-    inline ImoStyle* min_width(LUnits value) {
-        set_lunits_property(ImoStyle::k_min_width, value);
-        return this;
-    }
-    inline ImoStyle* min_height(LUnits value) {
-        set_lunits_property(ImoStyle::k_min_height, value);
-        return this;
-    }
-    inline ImoStyle* max_width(LUnits value) {
-        set_lunits_property(ImoStyle::k_max_width, value);
-        return this;
-    }
-    inline ImoStyle* max_height(LUnits value) {
-        set_lunits_property(ImoStyle::k_max_height, value);
-        return this;
-    }
-
-            //table
-    inline ImoStyle* table_col_width(LUnits value) {
-        set_lunits_property(ImoStyle::k_table_col_width, value);
-        return this;
-    }
-
 
     //getters
     float get_float_property(int prop)
@@ -1160,7 +1255,7 @@ public:
     inline void set_visible(bool visible) { m_fVisible = visible; }
 
     //root
-    ImoDocument* get_document();
+    virtual ImoDocument* get_document();
     Document* get_the_document();
 
     //attachments (first child)
@@ -1185,99 +1280,21 @@ public:
     ImoStyle* copy_style_as(const std::string& name);
     void set_style(ImoStyle* pStyle);
 
-//    //general
-//    inline const std::string& get_name() { return m_name; }
-//    inline void set_name(const std::string& value) { m_name = value; }
-//
-//    //utility
-//    LUnits em_to_LUnits(float em) {
-//        return pt_to_LUnits( font_size() * em );
-//    }
-
     //font
     inline const std::string font_name() {
         ImoStyle* pStyle = get_style();
-        return pStyle ? pStyle->get_string_property(ImoStyle::k_font_name) : "";
+        return pStyle ? pStyle->font_name() : "";
     }
-//    inline float font_size() { return m_font.size; }
-//    inline int font_style() { return m_font.style; }
-//    inline int font_weight() { return m_font.weight; }
-//    inline bool is_bold() { return font_weight() == ImoStyle::k_bold; }
-//    inline bool is_italic() { return font_style() == ImoStyle::k_italic; }
-//    inline void font_name(const std::string& value) { m_font.name = value; }
-//    inline void font_size(float points) { m_font.size = points; }
-//    inline void font_style(int value) { m_font.style = value; }
-//    inline void font_weight(int value) { m_font.weight = value; }
-//
-//    //text
-//    inline int word_spacing() { return m_text.word_spacing; }
-//    inline int text_decoration() { return m_text.text_decoration; }
-//    inline int vertical_align() { return m_text.vertical_align; }
-//    inline int text_align() { return m_text.text_align; }
-//    inline LUnits text_indent_length() { return m_text.text_indent_length; }
-//    inline LUnits word_spacing_length() { return m_text.word_spacing_length; }
-//    inline void word_spacing(int value) { m_text.word_spacing = value; }
-//    inline void text_decoration(int value) { m_text.text_decoration = value; }
-//    inline void vertical_align(int value) { m_text.vertical_align = value; }
-//    inline void text_align(int value) { m_text.text_align = value; }
-//    inline void text_indent_length(LUnits value) { m_text.text_indent_length = value; }
-//    inline void word_spacing_length(LUnits value) { m_text.word_spacing_length = value; }
-//
-//    //color and background
-//    inline Color color() { return m_color; }
-//    inline void color(Color value) { m_color = value; }
-//    inline Color background_color() { return m_bgcolor; }
-//    inline void background_color(Color value) { m_bgcolor = value; }
 
     //margin
     inline LUnits margin_top() {
         ImoStyle* pStyle = get_style();
-        return pStyle ? pStyle->get_lunits_property(ImoStyle::k_margin_top) : 0.0f;
+        return pStyle ? pStyle->margin_top() : 0.0f;
     }
     inline LUnits margin_bottom() {
         ImoStyle* pStyle = get_style();
-        return pStyle ? pStyle->get_lunits_property(ImoStyle::k_margin_bottom) : 0.0f;
+        return pStyle ? pStyle->margin_bottom() : 0.0f;
     }
-//    inline LUnits get_lunits_property(ImoStyle::k_margin_left) { return m_box.margin_left; }
-//    inline LUnits get_lunits_property(ImoStyle::k_margin_right) { return m_box.margin_right; }
-//    inline void margin(LUnits value) { m_box.margin(value); }
-//    inline void margin_top(LUnits value) { m_box.margin_top = value; }
-//    inline void margin_bottom(LUnits value) { m_box.margin_bottom = value; }
-//    inline void margin_left(LUnits value) { m_box.margin_left = value; }
-//    inline void margin_right(LUnits value) { m_box.margin_right = value; }
-//
-//    //padding
-//    inline LUnits get_lunits_property(ImoStyle::k_padding_top) { return m_box.padding_top; }
-//    inline LUnits get_lunits_property(ImoStyle::k_padding_bottom) { return m_box.padding_bottom; }
-//    inline LUnits get_lunits_property(ImoStyle::k_padding_left) { return m_box.padding_left; }
-//    inline LUnits get_lunits_property(ImoStyle::k_padding_right) { return m_box.padding_right; }
-//    inline void padding(LUnits value) { m_box.padding(value); }
-//    inline void padding_top(LUnits value) { m_box.padding_top = value; }
-//    inline void padding_bottom(LUnits value) { m_box.padding_bottom = value; }
-//    inline void padding_left(LUnits value) { m_box.padding_left = value; }
-//    inline void padding_right(LUnits value) { m_box.padding_right = value; }
-//
-//    ////border
-//    //inline LUnits border_top() { return m_box.border_top; }
-//    //inline LUnits border_bottom() { return m_box.border_bottom; }
-//    //inline LUnits border_left() { return m_box.border_left; }
-//    //inline LUnits border_right() { return m_box.border_right; }
-//    //inline void border(LUnits value) { m_box.border(value); }
-//    //inline void border_top(LUnits value) { m_box.border_top = value; }
-//    //inline void border_bottom(LUnits value) { m_box.border_bottom = value; }
-//    //inline void border_left(LUnits value) { m_box.border_left = value; }
-//    //inline void border_right(LUnits value) { m_box.border_right = value; }
-//
-//    //border width
-//    inline LUnits get_lunits_property(ImoStyle::k_border_width_top) { return m_box.border_width_top; }
-//    inline LUnits get_lunits_property(ImoStyle::k_border_width_bottom) { return m_box.border_width_bottom; }
-//    inline LUnits get_lunits_property(ImoStyle::k_border_width_left) { return m_box.border_width_left; }
-//    inline LUnits get_lunits_property(ImoStyle::k_border_width_right) { return m_box.border_width_right; }
-//    inline void border_width(LUnits value) { m_box.border_width(value); }
-//    inline void border_width_top(LUnits value) { m_box.border_width_top = value; }
-//    inline void border_width_bottom(LUnits value) { m_box.border_width_bottom = value; }
-//    inline void border_width_left(LUnits value) { m_box.border_width_left = value; }
-//    inline void border_width_right(LUnits value) { m_box.border_width_right = value; }
 
 };
 
@@ -1513,6 +1530,7 @@ class ImoLink : public ImoBoxInline
 {
 private:
     string m_url;
+    string m_language;
 
     friend class ImFactory;
     ImoLink() : ImoBoxInline(k_imo_link) {}
@@ -1523,6 +1541,9 @@ public:
     //url
     inline string& get_url() { return m_url; }
     inline void set_url(const string& url) { m_url = url; }
+    string& get_language();
+    void set_language(const string& value) { m_language = value; }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -2152,23 +2173,20 @@ class ImoButton : public ImoInlineLevelObj
 {
 protected:
     string m_text;
+    string m_language;
     USize m_size;
     Color m_bgColor;
     bool m_fEnabled;
 
     friend class ImFactory;
-    ImoButton()
-        : ImoInlineLevelObj(k_imo_button)
-        , m_bgColor( Color(255,255,255) )
-        , m_fEnabled(true)
-    {
-    }
+    ImoButton();
 
 public:
     ~ImoButton() {}
 
     //getters
     inline string& get_label() { return m_text; }
+    inline string& get_language() { return m_language; }
     inline USize get_size() { return m_size; }
     inline LUnits get_width() { return m_size.width; }
     inline LUnits get_height() { return m_size.height; }
@@ -2178,10 +2196,11 @@ public:
     inline void set_style(ImoStyle* pStyle) {
         ImoContentObj::set_style(pStyle);
         if (pStyle)
-            m_bgColor = pStyle->get_color_property(ImoStyle::k_background_color);
+            m_bgColor = pStyle->background_color();
     }
     inline void set_bg_color(Color color) { m_bgColor = color; }
     inline void set_label(const string& text) { m_text = text; }
+    inline void set_language(const string& value) { m_language = value; }
     inline void set_size(const USize& size) { m_size = size; }
     inline void set_width(LUnits value) { m_size.width = value; }
     inline void set_height(LUnits value) { m_size.height = value; }
@@ -2316,6 +2335,7 @@ class ImoDocument : public ImoBlocksContainer  //ImoContainerObj
 protected:
     Document* m_pOwner;
     string m_version;
+    string m_language;
     ImoPageInfo m_pageInfo;
     std::list<ImoStyle*> m_privateStyles;
 
@@ -2329,6 +2349,8 @@ public:
     inline std::string& get_version() { return m_version; }
     inline void set_version(const string& version) { m_version = version; }
     inline Document* get_owner() { return m_pOwner;; }
+    inline std::string& get_language() { return m_language; }
+    inline void set_language(const string& language) { m_language = language; }
 
     ////content
     //ImoContentObj* get_content_item(int iItem);
@@ -2361,7 +2383,7 @@ public:
 
 
     //cursor
-    //TODO
+    //TODO: method add_cursor_info
     void add_cursor_info(ImoCursorInfo* pCursor) {};
 
 protected:
@@ -2606,7 +2628,7 @@ public:
     ImoBarline* add_barline(int type, bool fVisible=true);
     ImoClef* add_clef(int type, int nStaff=1);
     ImoKeySignature* add_key_signature(int type);
-    ImoTimeSignature* add_time_signature(int beats, int beatType, bool fVisible=true);
+    ImoTimeSignature* add_time_signature(int top, int bottom, bool fVisible=true);
     ImoSpacer* add_spacer(Tenths space);
     ImoObj* add_object(const string& ldpsource);
     void add_staff_objects(const string& ldpsource);
@@ -3022,7 +3044,7 @@ protected:
     inline void attach_score(ImoScore* pScore) { m_pScore = pScore; }
     void attach_player(ScorePlayerCtrl* pPlayer);
     void set_metronome_mm(int value);
-    inline void set_play_label(const string& value) { m_playLabel = value; }
+    void set_play_label(const string& value);
     inline void set_stop_label(const string& value) { m_stopLabel = value; }
 
 public:
@@ -3396,6 +3418,10 @@ public:
         return dynamic_cast<ImoTableCell*>( get_content_item(iItem) );
     }
 
+    //overrides: as ImoTableRow is stored in an ImoCollection, general method
+    //to get document doesn't work
+    ImoDocument* get_document();
+
 protected:
     friend class BlockLevelCreatorApi;
 
@@ -3443,6 +3469,7 @@ class ImoTextItem : public ImoInlineLevelObj
 {
 private:
     string m_text;
+    string m_language;
 
 protected:
     friend class ImFactory;
@@ -3456,9 +3483,11 @@ public:
 
     //getters
     inline string& get_text() { return m_text; }
+    string& get_language();
 
     //setters
     inline void set_text(const string& text) { m_text = text; }
+    inline void set_language(const string& value) { m_language = value; }
 
 };
 
@@ -3555,28 +3584,28 @@ public:
 class ImoTimeSignature : public ImoStaffObj
 {
 protected:
-    int     m_beats;
-    int     m_beatType;
+    int     m_top;
+    int     m_bottom;
 
     friend class ImFactory;
-    ImoTimeSignature() : ImoStaffObj(k_imo_time_signature), m_beats(2), m_beatType(4) {}
+    ImoTimeSignature() : ImoStaffObj(k_imo_time_signature), m_top(2), m_bottom(4) {}
 
 public:
     ~ImoTimeSignature() {}
 
     //getters and setters
-    inline int get_beats() { return m_beats; }
-    inline void set_beats(int beats) { m_beats = beats; }
-    inline int get_beat_type() { return m_beatType; }
-    inline void set_beat_type(int beatType) { m_beatType = beatType; }
+    inline int get_top_number() { return m_top; }
+    inline void set_top_number(int num) { m_top = num; }
+    inline int get_bottom_number() { return m_bottom; }
+    inline void set_bottom_number(int num) { m_bottom = num; }
 
     //overrides: time signatures always in staff 0
     void set_staff(int staff) { m_staff = 0; }
 
     //other
-    inline bool is_compound_meter() { return (m_beats==6 || m_beats==9 || m_beats==12); }
+    inline bool is_compound_meter() { return (m_top==6 || m_top==9 || m_top==12); }
     int get_num_pulses();
-    float get_beat_duration();
+    float get_ref_note_duration();
     float get_measure_duration();
 
 };

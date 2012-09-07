@@ -116,7 +116,7 @@ InternalModel* LmdCompiler::create_with_empty_score()
 //    m_pFinalTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6)(instrument (musicData)))))");
 //    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
 //    return compile_parsed_tree(m_pFinalTree);
-    return NULL;    //TODO
+    return NULL;    //TODO: Probably this method is not needed
 }
 
 //---------------------------------------------------------------------------------------

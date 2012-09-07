@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -160,9 +160,9 @@ const GlyphData glyphs_lmbasic2[] =
     GlyphData('%',  10,     40,     27,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Flat accidental"
     GlyphData('$',  10,     54,     11,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Double sharp accidental"
     GlyphData('&',  10,     40,     27,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "Double flat accidental"
-    //TODO
-    GlyphData('&',  10,     40,     27,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "open_cautionary_accidental," //TODO
-    GlyphData('&',  10,     40,     27,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "close_cautionary_accidental" //TODO
+    //TODO: glyph data for "open_cautionary_accidental" and "close_cautionary_accidental"
+    GlyphData('&',  10,     40,     27,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "open_cautionary_accidental,"
+    GlyphData('&',  10,     40,     27,   0,      0,      0,      0,      0,      0,      0,      0 ),    // "close_cautionary_accidental"
 
 
 //clefs

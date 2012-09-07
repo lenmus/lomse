@@ -48,12 +48,15 @@ class SoundEvent;
 class Interactor;
 class LibraryScope;
 class PlayerGui;
+class Metronome;
 
 //some constants for greater code legibility
 #define k_no_visual_tracking    false
 #define k_do_visual_tracking    true
 #define k_no_countoff           false
 #define k_do_countoff           true
+#define k_no_metronome          false
+#define k_play_metronome        true
 
 //---------------------------------------------------------------------------------------
 typedef boost::thread SoundThread;
@@ -61,15 +64,6 @@ typedef boost::mutex SoundMutex;
 typedef boost::unique_lock<boost::mutex> SoundLock;
 typedef boost::condition_variable SoundFlag;
 
-//---------------------------------------------------------------------------------------
-// play modes
-enum
-{
-    k_play_normal_instrument = 0,   //normal, (pitched instrument)
-    k_play_rhythm_instrument,       //only rhythm (instrument, single pitch)
-    k_play_rhythm_percussion,       //only rhythm (percussion, single pitch)
-    k_play_rhythm_human_voice,      //only rhythm (solfege, human voice)
-};
 
 
 //---------------------------------------------------------------------------------------
@@ -100,6 +94,8 @@ protected:
     bool                m_fShouldStop;  //request to stop playback
     bool                m_fPlaying;     //playing (control in do_play loop)
     bool                m_fPostEvents;  //post events to application events loop
+    bool                m_fQuit;        //the request to stop is for application quit
+    bool                m_fFinalEventSent;      //to avoid duplicating final event
     ImoScore*           m_pScore;       //score to play
     SoundEventsTable*   m_pTable;
     SoundMutex          m_mutex;        //for pause/continue play back
@@ -113,11 +109,10 @@ protected:
 
     //current play parameters
     bool            m_fVisualTracking;
-    bool            m_fCountOff;
-    int             m_playMode;
     long            m_nMM;
     Interactor*     m_pInteractor;
     PlayerGui*      m_pPlayerGui;
+    Metronome*      m_pMtr;
 
     friend class Injector;
     ScorePlayer(LibraryScope& libScope, MidiServerBase* pMidi);
@@ -132,35 +127,34 @@ public:
     inline void post_highlight_events(bool value) { m_fPostEvents = value; }
 
     // playing
+    //Tempo speed for all play methods is controlled by the metronome (PlayerGui) that
+    //was specified in method load_score(). Nevertheless, metronome speed can be
+    //overriden to force a predefined speed by specifying a non-zero value for
+    //parameter nMM.
     void play(bool fVisualTracking = k_no_visual_tracking,
-              bool fCountOff = k_no_countoff,
-              int playMode = k_play_normal_instrument,
               long nMM = 0,
               Interactor* pInteractor = NULL);
 
     void play_measure(int nMeasure, bool fVisualTracking = k_no_visual_tracking,
-                      int playMode = k_play_normal_instrument,
                       long nMM = 0,
                       Interactor* pInteractor = NULL);
 
     void play_from_measure(int nMeasure, bool fVisualTracking = k_no_visual_tracking,
-                           bool fCountOff = k_no_countoff,
-                           int playMode = k_play_normal_instrument,
                            long nMM = 0,
 						   Interactor* pInteractor = NULL);
     void stop();
     void pause();
+    void quit();
 
     inline bool is_playing() { return m_fPlaying; }
 
     //only to be used by SoundThread
-    void do_play(int nEvStart, int nEvEnd, int playMode, bool fVisualTracking,
-                 bool fCountOff, long nMM, Interactor* pInteractor );
+    void do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
+                 long nMM, Interactor* pInteractor );
 
 protected:
     virtual void play_segment(int nEvStart, int nEvEnd);
-    void thread_main(int nEvStart, int nEvEnd, int playMode,
-                     bool fVisualTracking, bool fCountOff, long nMM,
+    void thread_main(int nEvStart, int nEvEnd, bool fVisualTracking, long nMM,
                      Interactor* pInteractor);
     void wait_for_termination();
     void end_of_playback_housekeeping(bool fVisualTracking, Interactor* pInteractor);
@@ -169,10 +163,6 @@ protected:
     //-----------------------------------------------------------------------------------
     long m_nMtrClickIntval;     //metronome interval duration, in milliseconds
     long m_nMtrPulseDuration;   //a beat duration, in DeltaTime units
-//    long nMtrIntvalOff = min(7L, nMtrPulseDuration / 4L);            //click sound duration, in TU
-//    long nMtrIntvalNextClick = nMtrPulseDuration - nMtrIntvalOff;    //interval from click off to next click
-//    long nMeasureDuration = nMtrPulseDuration * 4;                   //in TU. Assume 4/4 time signature
-//    long nMtrNumPulses = 4;                                          //assume 4/4 time signature
 
     inline long delta_to_milliseconds(long deltaTime) {
         return deltaTime * m_nMtrClickIntval / m_nMtrPulseDuration;

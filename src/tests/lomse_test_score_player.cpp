@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -77,8 +77,6 @@ public:
                     bool fCountOff, long nMM, Interactor* pInteractor )
     {
         m_fVisualTracking = fVisualTracking;
-        m_fCountOff = fCountOff;
-        m_playMode = playMode;
         m_nMM = nMM;
         m_pInteractor = pInteractor;
         ScorePlayer::play_segment(nEvStart, nEvEnd);
@@ -114,19 +112,6 @@ public:
     }
 
     void my_wait_for_termination() { wait_for_termination(); }
-};
-
-//---------------------------------------------------------------------------------------
-//Helper, mock class
-class MyPlayerGui : public PlayerGui
-{
-public:
-    MyPlayerGui() : PlayerGui() {}
-
-    void on_end_of_playback() {}
-    bool get_countoff() { return false; }
-    int get_play_mode() { return k_play_normal_instrument; }
-    int get_metronome_mm() { return 60; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -222,7 +207,8 @@ SUITE(ScorePlayerTest)
         ImoScore* pScore = doc.get_score(0);
         MidiServerBase midi;
         MyScorePlayer player(m_libraryScope, &midi);
-        player.load_score(pScore, NULL);
+        PlayerNoGui gui;
+        player.load_score(pScore, &gui);
 
         SoundEventsTable* pTable = player.my_get_table();
 
@@ -238,7 +224,8 @@ SUITE(ScorePlayerTest)
         ImoScore* pScore = doc.get_score(0);
         MidiServerBase midi;
         MyScorePlayer player(m_libraryScope, &midi);
-        player.load_score(pScore, NULL);
+        PlayerNoGui gui;
+        player.load_score(pScore, &gui);
         player.play();
         player.my_wait_for_termination();
 
@@ -254,9 +241,9 @@ SUITE(ScorePlayerTest)
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
         ImoScore* pScore = doc.get_score(0);
         MyScorePlayer player(m_libraryScope, NULL);
-        player.load_score(pScore, NULL);
-        player.do_play(0, 3, k_play_normal_instrument, k_no_visual_tracking,
-                       k_no_countoff, 60L, NULL);
+        PlayerNoGui gui;
+        player.load_score(pScore, &gui);
+        player.do_play(0, 3, k_no_visual_tracking, 60L, NULL);
 
         CHECK( m_notifications.size() == 0 );
     }
@@ -271,7 +258,7 @@ SUITE(ScorePlayerTest)
         ImoScore* pScore = doc.get_score(0);
         MyMidiServer midi;
         MyScorePlayer player(m_libraryScope, &midi);
-        MyPlayerGui playGui;
+        PlayerNoGui playGui;
         player.load_score(pScore, &playGui);
         int nEvMax = player.my_get_table()->num_events() - 1;
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_no_visual_tracking,
@@ -305,7 +292,7 @@ SUITE(ScorePlayerTest)
         ImoScore* pScore = doc.get_score(0);
         MyMidiServer midi;
         MyScorePlayer player(m_libraryScope, &midi);
-        MyPlayerGui playGui;
+        PlayerNoGui playGui;
         player.load_score(pScore, &playGui);
         int nEvMax = player.my_get_table()->num_events() - 1;
         Interactor inter(m_libraryScope, &doc, NULL);
@@ -373,7 +360,7 @@ SUITE(ScorePlayerTest)
         ImoScore* pScore = doc.get_score(0);
         MyMidiServer midi;
         MyScorePlayer player(m_libraryScope, &midi);
-        MyPlayerGui playGui;
+        PlayerNoGui playGui;
         player.load_score(pScore, &playGui);
         int nEvMax = player.my_get_table()->num_events() - 1;
         Interactor inter(m_libraryScope, &doc, NULL);
@@ -454,10 +441,9 @@ SUITE(ScorePlayerTest)
         MyScorePlayer2 player(m_libraryScope, &midi);
 
         CHECK( handler.event_received() == false );
-        MyPlayerGui playGui;
+        PlayerNoGui playGui;
         player.load_score(pScore, &playGui);
-        player.play(k_no_visual_tracking, k_no_countoff, k_play_normal_instrument,
-                    60L, NULL);
+        player.play(k_no_visual_tracking, 60L, NULL);
         player.my_wait_for_termination(); //AWARE: need to wait. Otherwise events arrive *after* CHECKs
 
         CHECK( handler.event_received() == true );

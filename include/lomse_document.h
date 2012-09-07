@@ -113,11 +113,13 @@ public:
     enum {
         k_format_ldp = 0,   //Lenguaje De Partituras (LDP, LISP like syntax)
         k_format_lmd,       //LenMus Document (LMD, XML syntax)
-        k_format_mxl,       //MusicXML 
+        k_format_mxl,       //MusicXML
+        k_format_unknown,
     };
 
     //scope access
     inline DocumentScope& get_scope() { return m_docScope; }
+    inline LibraryScope& get_library_scope() { return m_libraryScope; }
 
     //creation
     int from_file(const std::string& filename, int format=k_format_ldp);

@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -208,9 +208,8 @@ void GmoShapeBarline::draw_thick_line(Drawer* pDrawer, LUnits xLeft, LUnits uyTo
 //---------------------------------------------------------------------------------------
 void GmoShapeBarline::draw_two_dots(Drawer* pDrawer, LUnits uxPos, LUnits uyPos)
 {
-    //TODO
-    LUnits uShift1 = m_uSpacing * 3.0f;   //((lmStaffObj*)m_pOwner)->TenthsToLogical(15);	// 1.5 lines
-    LUnits uShift2 = m_uSpacing * 5.0f;   //((lmStaffObj*)m_pOwner)->TenthsToLogical(25); // 2.5 lines
+    LUnits uShift1 = m_uSpacing * 3.0f;
+    LUnits uShift2 = m_uSpacing * 5.0f;
     pDrawer->begin_path();
     pDrawer->circle(uxPos, uyPos + uShift1, m_uRadius);
     pDrawer->circle(uxPos, uyPos + uShift2, m_uRadius);

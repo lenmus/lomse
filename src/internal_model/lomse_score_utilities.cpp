@@ -54,7 +54,7 @@ int get_beat_position(float timePos, ImoTimeSignature* pTS)
     // and returns the type of beat: either an integer positive value 0..n, meaning
     // 'on-beat', where n is the beat number, or -1 meaning 'off-beat'
 
-    int beatType = pTS->get_beat_type();
+    int beatType = pTS->get_bottom_number();
 
     // coumpute beat duration
     int beatDuration;
@@ -85,11 +85,11 @@ int get_beat_position(float timePos, ImoTimeSignature* pTS)
 }
 
 //---------------------------------------------------------------------------------------
-float get_beat_duration_for(int nBeatType)
+float get_duration_for_ref_note(int bottomNumber)
 {
     // returns beat duration (in LDP notes duration units)
 
-    switch(nBeatType) {
+    switch(bottomNumber) {
         case 1:
             return pow(2.0f, (10 - k_whole));
         case 2:
@@ -106,8 +106,8 @@ float get_beat_duration_for(int nBeatType)
             return pow(2.0f, (10 - k_64th));
         default:
             string msg = str( boost::format(
-                                "[get_beat_duration_for] Invalid beat type %d")
-                                % nBeatType );
+                                "[get_duration_for_ref_note] Invalid bottom number %d")
+                                % bottomNumber );
             throw std::runtime_error(msg);
     }
 }

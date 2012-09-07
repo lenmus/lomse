@@ -5,14 +5,14 @@
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -67,6 +67,8 @@ public:
 
     int draw_text(double x, double y, const std::string& str, Color color,
                   double scale=1.0);
+    int draw_text(double x, double y, const wstring& str, Color color,
+                  double scale=1.0);
     void draw_glyph(double x, double y, unsigned int ch, Color color, double scale);
 
 protected:
@@ -90,16 +92,24 @@ public:
     ~TextMeter();
 
     LUnits measure_width(const std::string& str);
+    LUnits measure_width(const wstring& str);
     LUnits get_ascender();
     LUnits get_descender();
     LUnits get_font_height();
     URect bounding_rectangle(unsigned int ch);
+    void measure_glyphs(wstring* glyphs, std::vector<LUnits>& glyphWidths);
 
-    bool select_font(const std::string& fontName, double height,
+    bool select_font(const std::string& language,
+                     const std::string& fontFile,
+                     const std::string& fontName, double height,
                      bool fBold=false, bool fItalic=false);
-    bool select_raster_font(const std::string& fontName, double height,
+    bool select_raster_font(const std::string& language,
+                            const std::string& fontFile,
+                            const std::string& fontName, double height,
                             bool fBold=false, bool fItalic=false);
-    bool select_vector_font(const std::string& fontName, double height,
+    bool select_vector_font(const std::string& language,
+                            const std::string& fontFile,
+                            const std::string& fontName, double height,
                             bool fBold=false, bool fItalic=false);
 
 protected:
