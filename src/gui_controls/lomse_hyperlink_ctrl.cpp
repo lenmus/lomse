@@ -198,7 +198,7 @@ void HyperlinkCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
     //text decoration
     if (m_style->text_decoration() == ImoStyle::k_decoration_underline)
     {
-        float factor = (m_language == "zn_CN" ? 0.30f : 0.12f);
+        float factor = (m_language == "zh_CN" ? 0.30f : 0.12f);
         LUnits y = pos.y + pos.height * factor;
         pDrawer->begin_path();
         pDrawer->fill(color);

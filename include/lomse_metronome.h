@@ -46,7 +46,7 @@ protected:
     bool        m_fRunning;     //true if start() invoked
 
     Metronome(long nMM)
-        : m_fMuted(true)
+        : m_fMuted(false)
         , m_fRunning(false)
     {
         set_mm(60L);

@@ -203,7 +203,7 @@ std::string FontSelector::find_font(const std::string& language,
     }
 
     //Chinese fonts
-    if (language == "zn_CN")
+    if (language == "zh_CN")
     {
         fullpath += "wqy-zenhei.ttc";
         return fullpath;

@@ -221,7 +221,7 @@ TextSplitter* EngroutersCreator::create_text_splitter_for(ImoTextItem* pText)
     //factory method to create a TextSplitter suitable for current language
 
     string& lang = pText->get_language();
-    if (lang == "zn_CN")   //Chinese
+    if (lang == "zh_CN")   //Chinese
         return LOMSE_NEW ChineseTextSplitter(pText, m_libraryScope);
     else
         return LOMSE_NEW DefaultTextSplitter(pText, m_libraryScope);
