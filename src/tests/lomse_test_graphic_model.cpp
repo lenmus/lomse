@@ -130,6 +130,7 @@ SUITE(GraphicModelTest)
     {
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
@@ -167,6 +168,7 @@ SUITE(GraphicModelTest)
     {
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
@@ -190,6 +192,7 @@ SUITE(GraphicModelTest)
     {
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
@@ -229,6 +232,7 @@ SUITE(GraphicModelTest)
     {
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G))))))" );
@@ -264,6 +268,7 @@ SUITE(GraphicModelTest)
     {
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document doc(libraryScope);
         //doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
         //    "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
@@ -300,6 +305,7 @@ SUITE(GraphicModelTest)
     {
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
@@ -323,6 +329,7 @@ SUITE(GraphicModelTest)
     {
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
@@ -362,6 +369,7 @@ SUITE(GraphicModelTest)
     {
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
@@ -403,6 +411,7 @@ SUITE(GraphicModelTest)
     {
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
 
         //build document, in steps, for easier access to ImObjs
         Document doc(libraryScope);
@@ -433,6 +442,7 @@ SUITE(GraphicModelTest)
     {
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
@@ -471,6 +481,7 @@ SUITE(GraphicModelTest)
     {
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
@@ -537,6 +548,7 @@ SUITE(GraphicModelTest)
     {
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );

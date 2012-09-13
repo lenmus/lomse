@@ -231,6 +231,7 @@ SUITE(InteractorTest)
         //as coordinates conversion is involved, the View must be rendered
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
@@ -270,6 +271,7 @@ SUITE(InteractorTest)
         //AWARE: as coordinates conversion is involved, the View must be rendered
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document doc(libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
@@ -358,6 +360,7 @@ SUITE(InteractorTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document* pDoc= LOMSE_NEW Document(libraryScope);
         pDoc->create_empty();
         View* pView = Injector::inject_View(libraryScope, ViewFactory::k_view_simple,
@@ -387,6 +390,7 @@ SUITE(InteractorTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
@@ -407,6 +411,7 @@ SUITE(InteractorTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
@@ -431,6 +436,7 @@ SUITE(InteractorTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
@@ -451,6 +457,7 @@ SUITE(InteractorTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
@@ -475,6 +482,7 @@ SUITE(InteractorTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
@@ -499,6 +507,7 @@ SUITE(InteractorTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
@@ -519,6 +528,7 @@ SUITE(InteractorTest)
     {
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
+        libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
