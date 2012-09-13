@@ -1,0 +1,14 @@
+(score
+   (vers 1.5)(language en iso-8859-1)
+   (opt Render.SpacingMethod 1)
+   (opt Render.SpacingValue 30)
+   (instrument
+      (musicData
+         (clef treble)
+         (key C)
+         (r l)(r d)(r w)(r h)(r q)(r e)(r s)(r t)(r i)(r o)(r f)
+         (barline)
+      )
+   )
+)
+

@@ -1,0 +1,12 @@
+(score
+   (vers 1.6)
+   (instrument
+      (musicData
+         (clef G)
+         (spacer 100)
+         (n f4 q)
+         (barline)
+      )
+   )
+)
+

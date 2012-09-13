@@ -1,0 +1,17 @@
+(score
+   (vers 1.6)
+   (instrument (staves 1)
+      (musicData
+         (clef G)
+         (n c4 h)
+         (barline)
+         
+         (n e4 q v1 (tie 3 start (bezier (start-x 30)) ))
+         (barline)
+         (newSystem)
+
+         (n e4 q v1 (tie 3 stop (bezier (start-y 30)) ))
+         (barline end)
+      )
+   )
+)

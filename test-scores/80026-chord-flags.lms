@@ -1,0 +1,43 @@
+(score
+   (vers 1.6)
+   (opt Render.SpacingMethod 1)
+   (opt Render.SpacingValue 20)
+   (instrument
+      (musicData
+         (clef G)
+         (key C)
+         
+         //stems down
+         (chord (n c5 e)(n e5 e)(n g5 e))
+         (n c5 e)
+         (chord (n c5 s)(n e5 s)(n g5 s))
+         (n c5 s)
+         (chord (n c5 t)(n e5 t)(n g5 t))
+         (n c5 t)
+         (chord (n c5 i)(n e5 i)(n g5 i))
+         (n c5 i)
+         (chord (n c5 o)(n e5 o)(n g5 o))
+         (n c5 o)
+         (chord (n c5 f)(n e5 f)(n g5 f))
+         (n c5 f)
+         (barline)
+         
+         //two notes. stems up
+         (chord (n c4 e)(n e4 e)(n c5 e))
+         (n c5 e (stem up))
+         (chord (n c4 s)(n e4 s)(n c5 s))
+         (n c5 s (stem up))
+         (chord (n c4 t)(n e4 t)(n c5 t))
+         (n c5 t (stem up))
+         (chord (n c4 i)(n e4 i)(n c5 i))
+         (n c5 i (stem up))
+         (chord (n c4 o)(n e4 o)(n c5 o))
+         (n c5 o (stem up))
+         (chord (n c4 f)(n e4 f)(n c5 f))
+         (n c5 f (stem up))
+         (barline end)
+         
+      )
+   )
+)
+

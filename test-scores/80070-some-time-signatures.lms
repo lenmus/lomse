@@ -1,0 +1,13 @@
+(score
+   (vers 1.5)(language en iso-8859-1)
+   (instrument
+      (musicData
+         (clef treble)
+         (time 2 4)(n c4 q)(barline)
+         (time 6 8)(n c4 q)(barline)
+         (time 12 8)(n c4 q)(barline)
+         //(time 4 16)(n c4 q)(barline end)
+      )
+   )
+)
+

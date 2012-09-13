@@ -1,0 +1,10 @@
+(score
+   (vers 1.6)(language en iso-8859-1)
+   (instrument
+      (musicData
+         (clef G)
+         (chord (n c4 w)(n d4 w)(n g4 w))
+      )
+   )
+)
+

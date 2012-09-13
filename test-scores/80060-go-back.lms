@@ -1,0 +1,21 @@
+(score
+   (vers 1.5)(language en iso-8859-1)
+   (instrument
+      (musicData 
+        (clef bass)
+        (key e)
+        (time 4 4)
+        (n g3 q)
+        (n a3 q)
+        (n g3 q)
+        (n e3 q)
+        //go back for second voice
+        (goBack 128)
+        (n e4 e. (stem up))
+        (n d4 s)
+        (goFwd 64)
+        (barline)
+      )
+   )
+)
+

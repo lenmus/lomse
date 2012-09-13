@@ -1,0 +1,10 @@
+(score (vers 1.6)
+ (instrument
+  (musicData (clef G)(key C)
+    (spacer 30)
+    (n g4  q (fermata above))
+    (n g4  q (fermata below))
+    (r q (fermata above))
+    (r q (fermata below))
+    (barline end)
+)))

@@ -1,0 +1,33 @@
+(score
+   (vers 1.6)(language en utf-8)
+   (pageLayout (pageSize 21000 29700)(pageMargins 2000 2000 1500 2000 0) portrait)
+   (instrument (staves 2) (infoMIDI 0 0)
+      (musicData
+
+         //Measure 1
+         (clef G p1)
+         (clef F p2)
+         (key C)
+         (time 2 4)
+         (figuredBass "6 +")
+         (n a2 q (stem down) v4 p2)
+         (figuredBass "(5) 3")
+         (n c3 q (stem down) v4 p2)
+         (barline simple)
+
+         //Measure 2
+         (figuredBass "6 #4 2")
+         (n c3 q (stem down) v4 p2)
+         (figuredBass "7/")
+         (n b3 q (stem down) v4 p2)
+         (barline simple)
+         
+         //Measure 3
+         (figuredBass "6 (3) 2+")
+         (n c3 q (stem down) v4 p2)
+         (figuredBass "5")
+         (n b3 q (stem down) v4 p2)
+         (barline end)
+      )
+   )
+)

@@ -1,0 +1,10 @@
+(score (vers 1.5)(language en iso-8859-1)
+ (instrument
+  (musicData (clef G)(key C)
+    (spacer 50)
+    (text ''text1'' dx:0 dy:0 left (font normal 10))
+    (spacer 50)(barline simple)
+    (text ''text2'' dx:15 dy:-20 left (font normal 10))
+    (spacer 50)
+    (barline end)
+)))

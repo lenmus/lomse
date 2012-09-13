@@ -1,0 +1,26 @@
+//Score ID: 1
+
+(score
+   (vers 1.5)(language en iso-8859-1)
+   (instrument
+      (musicData
+         (clef G)
+         (barline simple)
+         (clef F)
+         (barline simple)
+         (clef F3)
+         (barline simple)
+         (clef C1)
+         (barline simple)
+         (clef C2)
+         (barline simple)
+         (clef C3)
+         (barline simple)
+         (clef C4)
+         (barline simple)
+         (clef G)
+         (barline simple)
+
+      )
+   )
+)

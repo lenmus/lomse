@@ -1,0 +1,23 @@
+(score (vers 1.6)(language en iso-8859-1)
+ (instrument
+  (musicData (clef G)(key C)
+    (spacer 50)(barline simple)
+    (spacer 0
+        (line (startPoint dx:-20.0 dy:-5.0)(endPoint dx:10.0 dy:-20.0)(width 1.0)(color #000000)(lineStyle solid)(lineCapStart arrowhead)(lineCapEnd none)))
+    (text ''simple barline'' dx:15 dy:-20 left (font normal 10))
+    (spacer 50)(barline simple)
+    (spacer 50)(barline simple)
+    (spacer 50)
+    (barline double)
+    (spacer 0
+        (line (startPoint dx:-20.0 dy:45.0)(endPoint dx:10.0 dy:60.0)(width 1.0)(color #000000)(lineStyle solid)(lineCapStart arrowhead)(lineCapEnd none)))
+    (text ''double barline'' dx:15 dy:80)
+    (spacer 50)(barline simple)
+    (spacer 50)(barline simple)
+    (spacer 50)(barline simple)
+    (spacer 50)
+    (spacer 0
+        (line (startPoint dx:0.0 dy:-5.0)(endPoint dx:-30.0 dy:-20.0)(width 1.0)(color #000000)(lineStyle solid)(lineCapStart arrowhead)(lineCapEnd none)))
+    (text ''final barline'' dx:-35 dy:-20 right)
+    (barline end)
+)))

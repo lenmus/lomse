@@ -1,0 +1,8 @@
+(score (vers 1.6)(language en iso-8859-1)
+    (instrument
+        (musicData (clef G)(key C)
+            (figuredBass "6 b4 2")
+            (n g4 q)
+        )
+    )
+)

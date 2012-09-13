@@ -1,0 +1,33 @@
+(score
+   (vers 1.5)(language en iso-8859-1)
+
+   (title center "One instrument, two staves" (font bold 14))
+   (title center "Single voice across both staves" (font italic 12))
+
+   (instrument (staves 2)
+      (musicData 
+            (clef treble p1)   //sol clef in staff 1
+            (clef bass p2)     //fa4 clef in staff 2
+            (key A-)
+            (time 2 4)
+            (n g2 e g+ p2)(n d3 e)(n g3 e)(n b3 e g-)   //first note in staff 2. All coming notes also in staff 1 while not changed
+            (barline)
+            
+            (n d4 e g+ p1)(n g4 e)(n d4 e)(n b3 e g-)   //in first note change to staff 1
+            (barline)
+            
+            (n g2 e g+ p2)(n d3 e)(n g3 e)(n b3 e g-)   //in first note change to staff 2
+            (barline)
+            
+            (n d4 e g+ p1)(n g4 e)(n d4 e)(n b3 e g-)   //in first note change to staff 1
+            (barline)
+
+            (n g3 e g+ p2)(n b3 e)(n d4 e p1)(n g4 e g-)   //group across both staves
+            (barline)
+
+            (n f4 q)(n c5 q)   //continues in staff 2
+            (barline end)
+     )
+   )
+)
+

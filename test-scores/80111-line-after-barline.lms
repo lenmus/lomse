@@ -1,0 +1,14 @@
+(score (vers 1.5)(language en utf-8)
+  (instrument
+    (musicData
+      (clef G)(key C)(time 2 4)
+      (n c4 q)
+      (barline) 
+      (spacer 0
+        (line (startPoint dx:5.0 dy:5.0)(endPoint dx:80.0 dy:-10.0)(width 1.0)(color #000000)(lineStyle solid)(lineCapStart arrowhead)(lineCapEnd none)))
+      (text "final barline" dx:80 dy:-10)
+      (barline end)
+    )
+  )
+)
+    

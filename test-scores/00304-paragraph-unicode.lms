@@ -1,0 +1,17 @@
+(lenmusdoc (vers 0.0)
+  (styles
+    (defineStyle "texts"
+      (font-size 10pt)
+      (font-name "Tahoma")
+      (font-style normal)
+      (font-weight normal)
+      (color #000000)
+    )
+  )
+
+  (content
+    (para (style "texts")
+        (txt (style "texts") "音乐老师  Текст на кирилица Glyph code 38899")
+    )
+))
+
