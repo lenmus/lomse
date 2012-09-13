@@ -173,7 +173,8 @@ set( TESTLIB_FONTS_PATH      "\"${ROOT_DIR}/fonts/\"" )
 
 # path to fonts (will be hardcoded in lomse library, so *MUST* be the
 # path in which Lomse standard fonts will be installed)
-set( LOMSE_FONTS_PATH   "\"${CMAKE_INSTALL_PREFIX}/share/lomse/fonts\"" )
+set( FONTS_PATH   "${CMAKE_INSTALL_PREFIX}/share/lomse/fonts" )
+set( LOMSE_FONTS_PATH   "\"${FONTS_PATH}\"" )
 
 
 # check that compiler supports namespace sdt
@@ -865,7 +866,7 @@ if( UNIX )
 
     #copy fonts
     install(DIRECTORY  "${ROOT_DIR}/fonts" 
-            DESTINATION ${LOMSE_FONTS_PATH} )
+            DESTINATION ${FONTS_PATH} )
 
 elseif( WIN32 )
 #-------------------------------------------------------------
@@ -893,7 +894,7 @@ elseif( WIN32 )
 
     #copy fonts
     install(DIRECTORY  "${ROOT_DIR}/fonts" 
-            DESTINATION ${LOMSE_FONTS_PATH} )
+            DESTINATION ${FONTS_PATH} )
 
 endif()
 
