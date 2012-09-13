@@ -174,7 +174,7 @@ set( TESTLIB_FONTS_PATH      "\"${ROOT_DIR}/fonts/\"" )
 # path to fonts (will be hardcoded in lomse library, so *MUST* be the
 # path in which Lomse standard fonts will be installed)
 set( FONTS_PATH   "${CMAKE_INSTALL_PREFIX}/share/lomse/fonts" )
-set( LOMSE_FONTS_PATH   "\"${FONTS_PATH}\"" )
+set( LOMSE_FONTS_PATH   "\"${FONTS_PATH}/\"" )
 
 
 # check that compiler supports namespace sdt
@@ -851,25 +851,29 @@ if( UNIX )
     install(DIRECTORY ${INCLUDES_LOMSE}/
             DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse"
             FILES_MATCHING PATTERN "*.h"
-            PATTERN ".svn" EXCLUDE
-            PATTERN "platform" EXCLUDE )
+                           PATTERN ".svn" EXCLUDE
+                           PATTERN "platform" EXCLUDE )
 
     # copy agg includes
     install(DIRECTORY "${INCLUDES_AGG}/"
             DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse"
             FILES_MATCHING PATTERN "*.h"
-            PATTERN ".svn" EXCLUDE )
+                           PATTERN ".svn" EXCLUDE )
 
     # copy also lomse_config.h
     install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
             DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse" )
 
     #copy fonts
-    install(DIRECTORY  "${ROOT_DIR}/fonts" 
-            DESTINATION ${FONTS_PATH} )
+    install(DIRECTORY  "${ROOT_DIR}/fonts/"
+            DESTINATION ${FONTS_PATH}
+            FILES_MATCHING PATTERN "*.ttf" 
+                           PATTERN "*.ttc"
+                           PATTERN ".svn" EXCLUDE )
 
 elseif( WIN32 )
 #-------------------------------------------------------------
+
 
     # copy generated libraries
     install( TARGETS ${LOMSE} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
@@ -879,22 +883,25 @@ elseif( WIN32 )
     install(DIRECTORY ${INCLUDES_LOMSE}/
             DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse"
             FILES_MATCHING PATTERN "*.h"
-            PATTERN ".svn" EXCLUDE
-            PATTERN "platform" EXCLUDE )
+                           PATTERN ".svn" EXCLUDE
+                           PATTERN "platform" EXCLUDE )
 
     # copy agg includes
     install(DIRECTORY "${INCLUDES_AGG}/"
             DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse"
             FILES_MATCHING PATTERN "*.h"
-            PATTERN ".svn" EXCLUDE )
+                           PATTERN ".svn" EXCLUDE )
 
     # copy also lomse_config.h
     install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
             DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse" )
 
     #copy fonts
-    install(DIRECTORY  "${ROOT_DIR}/fonts" 
-            DESTINATION ${FONTS_PATH} )
+    install(DIRECTORY  "${ROOT_DIR}/fonts/"
+            DESTINATION ${FONTS_PATH}
+            FILES_MATCHING PATTERN "*.ttf" 
+                           PATTERN "*.ttc"
+                           PATTERN ".svn" EXCLUDE )
 
 endif()
 
