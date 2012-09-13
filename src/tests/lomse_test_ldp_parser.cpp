@@ -47,7 +47,7 @@ public:
     LdpParserTestFixture()     //SetUp fixture
     {
         m_pLibraryScope = LOMSE_NEW LibraryScope(cout);
-        m_scores_path = LOMSE_TEST_SCORES_PATH;
+        m_scores_path = TESTLIB_SCORES_PATH;
     }
 
     ~LdpParserTestFixture()    //TearDown fixture

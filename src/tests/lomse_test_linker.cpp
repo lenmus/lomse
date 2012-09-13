@@ -50,6 +50,7 @@ public:
     LinkerTestFixture()     //SetUp fixture
     {
         m_pLibraryScope = LOMSE_NEW LibraryScope(cout);
+        m_pLibraryScope->set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~LinkerTestFixture()    //TearDown fixture

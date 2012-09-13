@@ -72,6 +72,7 @@ public:
         , m_pShape3(NULL)
         , m_pStorage(NULL)
     {
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~NoteEngraverTestFixture()    //TearDown fixture

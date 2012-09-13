@@ -167,10 +167,14 @@ elseif(CMAKE_COMPILER_IS_GNUCC)
 endif()
 
 
-# path to scores for tests and for fonts
-set( LOMSE_TEST_SCORES_PATH    "\"${ROOT_DIR}/test-scores/\"" )
-set( LOMSE_FONTS_PATH          "\"${ROOT_DIR}/fonts/\"" )
- 
+# paths for tests
+set( TESTLIB_SCORES_PATH     "\"${ROOT_DIR}/test-scores/\"" )
+set( TESTLIB_FONTS_PATH      "\"${ROOT_DIR}/fonts/\"" )
+
+# path to fonts (will be hardcoded in lomse library, so *MUST* be the
+# path in which Lomse standard fonts will be installed)
+set( LOMSE_FONTS_PATH   "\"${CMAKE_INSTALL_PREFIX}/share/lomse/fonts\"" )
+
 
 # check that compiler supports namespace sdt
 include(TestForSTDNamespace)
@@ -739,8 +743,8 @@ else()
 endif()
 
 #copy test scores and fonts
-file(COPY ${ROOT_DIR}/test-scores DESTINATION ${OUTDIR})
-file(COPY ${ROOT_DIR}/fonts DESTINATION ${OUTDIR})
+#file(COPY ${ROOT_DIR}/test-scores DESTINATION ${OUTDIR})
+#file(COPY ${ROOT_DIR}/fonts DESTINATION ${OUTDIR})
 
 add_custom_command(
     TARGET ${TESTLIB} POST_BUILD
@@ -859,6 +863,10 @@ if( UNIX )
     install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
             DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse" )
 
+    #copy fonts
+    install(DIRECTORY  "${ROOT_DIR}/fonts" 
+            DESTINATION ${LOMSE_FONTS_PATH} )
+
 elseif( WIN32 )
 #-------------------------------------------------------------
 
@@ -882,6 +890,10 @@ elseif( WIN32 )
     # copy also lomse_config.h
     install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
             DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse" )
+
+    #copy fonts
+    install(DIRECTORY  "${ROOT_DIR}/fonts" 
+            DESTINATION ${LOMSE_FONTS_PATH} )
 
 endif()
 

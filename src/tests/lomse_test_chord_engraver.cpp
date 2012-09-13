@@ -97,6 +97,7 @@ public:
         , m_pStorage(NULL)
         , m_pChordEngrv(NULL)
     {
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~ChordEngraverTestFixture()    //TearDown fixture

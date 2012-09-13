@@ -64,6 +64,7 @@ public:
         , m_fRequestReceived(false)
         , m_pDoc(NULL)
     {
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~LdpAnalyserTestFixture()    //TearDown fixture
@@ -3881,7 +3882,7 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(lenmusdoc (vers 0.0)(language \"zn_CN\")(content ))");
+        parser.parse_text("(lenmusdoc (vers 0.0)(language \"zh_CN\")(content ))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -3891,7 +3892,7 @@ SUITE(LdpAnalyserTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         CHECK( pDoc != NULL );
         //cout << "language='" << pDoc->get_language() << "'" << endl;
-        CHECK( pDoc->get_language() == "zn_CN" );
+        CHECK( pDoc->get_language() == "zh_CN" );
 
         delete tree->get_root();
         delete pIModel;

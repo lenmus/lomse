@@ -51,6 +51,7 @@ public:
     DocLocatorTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
     {
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~DocLocatorTestFixture()    //TearDown fixture
@@ -165,6 +166,7 @@ public:
     LmbDocLocatorTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
     {
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~LmbDocLocatorTestFixture()    //TearDown fixture

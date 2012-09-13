@@ -78,6 +78,7 @@ public:
         , m_fRequestReceived(false)
         , m_pDoc(NULL)
     {
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~LmdAnalyserTestFixture()    //TearDown fixture
@@ -225,7 +226,7 @@ SUITE(LmdAnalyserTest)
         LmdParser parser;
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("<lenmusdoc vers='0.0' language='zn_CN'><content/></lenmusdoc>");
+        parser.parse_text("<lenmusdoc vers='0.0' language='zh_CN'><content/></lenmusdoc>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -237,7 +238,7 @@ SUITE(LmdAnalyserTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         CHECK( pDoc != NULL );
         CHECK( pDoc->get_num_content_items() == 0 );
-        CHECK( pDoc->get_language() == "zn_CN" );
+        CHECK( pDoc->get_language() == "zh_CN" );
 
         delete pIModel;
     }

@@ -70,6 +70,7 @@ public:
     DefaultTextSplitterTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
     {
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~DefaultTextSplitterTestFixture()    //TearDown fixture
@@ -281,6 +282,7 @@ public:
     ChineseTextSplitterTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
     {
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~ChineseTextSplitterTestFixture()    //TearDown fixture

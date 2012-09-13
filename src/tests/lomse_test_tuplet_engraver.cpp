@@ -96,6 +96,7 @@ public:
         , m_pTupletEngrv(NULL)
         , m_pTupletShape(NULL)
     {
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~TupletEngraverTestFixture()    //TearDown fixture

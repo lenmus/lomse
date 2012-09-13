@@ -52,7 +52,8 @@ public:
     LmdCompilerTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
     {
-        m_scores_path = LOMSE_TEST_SCORES_PATH;
+        m_scores_path = TESTLIB_SCORES_PATH;
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~LmdCompilerTestFixture()    //TearDown fixture
@@ -77,7 +78,7 @@ SUITE(LmdCompilerTest)
     {
         Document doc(m_libraryScope);
         LmdCompiler compiler(m_libraryScope, &doc);
-        string src = 
+        string src =
             "<lenmusdoc vers='0.0'>"
                 "<content>"
                     "<ldpmusic>"

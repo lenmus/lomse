@@ -56,7 +56,8 @@ public:
     ImageReaderTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
     {
-        m_scores_path = LOMSE_TEST_SCORES_PATH;
+        m_scores_path = TESTLIB_SCORES_PATH;
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~ImageReaderTestFixture()    //TearDown fixture

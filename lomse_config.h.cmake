@@ -39,7 +39,8 @@
 //---------------------------------------------------------------------------------------
 // paths, for test scores and for fonts
 //---------------------------------------------------------------------------------------
-#define LOMSE_TEST_SCORES_PATH      @LOMSE_TEST_SCORES_PATH@
+#define TESTLIB_SCORES_PATH         @TESTLIB_SCORES_PATH@
+#define TESTLIB_FONTS_PATH          @TESTLIB_FONTS_PATH@
 #define LOMSE_FONTS_PATH            @LOMSE_FONTS_PATH@
 
 

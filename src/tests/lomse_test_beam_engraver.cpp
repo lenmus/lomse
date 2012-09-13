@@ -93,6 +93,7 @@ public:
         , m_pBeamEngrv(NULL)
         , m_pBeamShape(NULL)
     {
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~BeamEngraverTestFixture()    //TearDown fixture

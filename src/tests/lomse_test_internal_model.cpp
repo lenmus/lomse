@@ -55,7 +55,8 @@ public:
     InternalModelTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
     {
-        m_scores_path = LOMSE_TEST_SCORES_PATH;
+        m_scores_path = TESTLIB_SCORES_PATH;
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~InternalModelTestFixture()    //TearDown fixture
@@ -1249,11 +1250,11 @@ SUITE(InternalModelTest)
         Document doc(m_libraryScope);
         doc.create_empty();
         ImoDocument* pDoc = doc.get_imodoc();
-        pDoc->set_language("zn_CN");
+        pDoc->set_language("zh_CN");
         ImoParagraph* pPara = doc.add_paragraph();
         ImoTextItem* pText = pPara->add_text_item("编辑名称，缩写，MIDI设置和其他特性");
 
-        CHECK( pText->get_language() == "zn_CN" );
+        CHECK( pText->get_language() == "zh_CN" );
     }
 
 }

@@ -52,6 +52,7 @@ public:
     {
         m_pLibraryScope = LOMSE_NEW LibraryScope(cout);
         m_pLdpFactory = m_pLibraryScope->ldp_factory();
+        m_pLibraryScope->set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
     ~LdpElementsTestFixture()    //TearDown fixture

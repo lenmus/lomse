@@ -47,7 +47,7 @@ public:
 
     LdpTokenizerTestFixture()     //SetUp fixture
     {
-        m_scores_path = LOMSE_TEST_SCORES_PATH;
+        m_scores_path = TESTLIB_SCORES_PATH;
     }
 
     ~LdpTokenizerTestFixture()    //TearDown fixture
