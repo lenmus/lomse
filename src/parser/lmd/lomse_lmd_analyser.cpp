@@ -2410,8 +2410,10 @@ protected:
 //@ <image> = (image [<style>] <file>)
 //@ <file> = (file <string>)
 //@
-//@
-//@
+//
+// <image [style='']>
+//      <file>xxx</file>
+// </image>
 
 class ImageLmdAnalyser : public LmdElementAnalyser
 {
@@ -3914,6 +3916,8 @@ public:
 // <param> = (param <name> [<value>])
 // <name> = <label>
 // <value> = <string>
+//
+// <param name='name'>value</param>
 
 class ParamLmdAnalyser : public LmdElementAnalyser
 {

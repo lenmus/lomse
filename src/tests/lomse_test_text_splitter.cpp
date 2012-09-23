@@ -321,11 +321,11 @@ SUITE(ChineseTextSplitterTest)
         CHECK( widths.size() == 19 );
         CHECK( splitter.more_text() == true );
 
-//        //to prepare some texts
-//        LUnits widthFirst = 0.0f;
-//        for (int i=0; i < 6; ++i)
-//            widthFirst += widths[i];
-//        cout << "First chunk width = " << widthFirst << endl;       //2540.0f
+        ////to prepare some texts
+        //LUnits widthFirst = 0.0f;
+        //for (int i=0; i < 6; ++i)
+        //    widthFirst += widths[i];
+        //cout << "First chunk width = " << widthFirst << endl;       //2540.0f
     }
 
     TEST_FIXTURE(ChineseTextSplitterTestFixture, first_chunk)
@@ -339,9 +339,10 @@ SUITE(ChineseTextSplitterTest)
         CHECK( pEngr != NULL );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != NULL );
-        CHECK( pEngrouter->get_text() == L"编辑名称，缩" );
-//        cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
-//        cout << "size = " << pEngrouter->get_width() << endl;
+        CHECK( to_str( pEngrouter->get_text() ) == "编辑名称，缩" );
+            //CHECK( pEngrouter->get_text() == L"编辑名称，缩" );  <-- this fails in Windows. why?
+        //cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
+        //cout << "size = " << pEngrouter->get_width() << endl;
         CHECK( splitter.more_text() == true );
 
         delete pEngr;
@@ -361,9 +362,9 @@ SUITE(ChineseTextSplitterTest)
         CHECK( pEngr != NULL );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != NULL );
-        CHECK( pEngrouter->get_text() == L"写，MIDI设置和其他特性" );
-//        cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
-//        cout << "size = " << pEngrouter->get_width() << endl;
+        CHECK( to_str( pEngrouter->get_text() ) == "写，MIDI设置和其他特性" );
+        //cout << "chunk = '" << to_str( pEngrouter->get_text() ) << "'" << endl;
+        //cout << "size = " << pEngrouter->get_width() << endl;
         CHECK( splitter.more_text() == false );
 
         delete pEngr;
