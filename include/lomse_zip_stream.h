@@ -92,7 +92,7 @@ protected:
 
     void* m_uzFile;
     bool m_fIsLastBuffer;
-    int m_remainingBytes;
+    long m_remainingBytes;
     char m_buffer[k_buffersize];
     char* m_pNextChar;
     ZipEntryInfo m_curEntry;
@@ -102,12 +102,15 @@ public:
 	ZipInputStream(const std::string& filelocator);
 	virtual ~ZipInputStream();
 
-    //mandatory overrides
+    //mandatory overrides inherited from InputStream
     char get_char();
     void unget();
     bool is_open();
     bool eof();
-    int read(unsigned char* pDestBuffer, int nBytesToRead);
+    long read(unsigned char* pDestBuffer, long nBytesToRead);
+
+    //operations
+    unsigned char* get_as_string();
 
 	//positioning
 	bool move_to_first_entry();
@@ -120,6 +123,9 @@ public:
     //info
     int get_num_entries();
     bool get_current_entry_info(ZipEntryInfo& info);
+
+    //current entry info
+    long get_size();
 
 
 protected:

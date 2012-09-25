@@ -136,6 +136,10 @@ public:
     bool is_row_ready();
     void prepare_row();
 
+    //only for tests
+    inline vector<TableCellLayouter*>& dbg_get_cell_layouters() { return m_cellLayouters; }
+
+
 protected:
     void create_cell_layouters();
 };

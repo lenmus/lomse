@@ -57,7 +57,7 @@ public:
 
         string ext = fullpath.substr(length - 4);
         if (ext == ".lms")
-            return Document::k_format_ldp;
+            return Document::k_format_lms;
         else if (ext == ".lmd")
             return Document::k_format_lmd;
         else

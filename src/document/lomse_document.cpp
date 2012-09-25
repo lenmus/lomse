@@ -83,6 +83,7 @@ void Document::initialize()
             "[Document::create] Attempting to create already created document");
 
     m_flags = k_dirty;
+    m_pImoDoc = NULL;
 }
 
 //---------------------------------------------------------------------------------------
@@ -99,9 +100,14 @@ int Document::from_file(const std::string& filename, int format)
     Compiler* pCompiler = get_compiler_for_format(format);
     //m_pIdAssigner = m_docScope.id_assigner();
     m_pIModel = pCompiler->compile_file(filename);
-    m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
     int numErrors = pCompiler->get_num_errors();
     delete pCompiler;
+
+    if (m_pIModel)
+        m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
+    else
+        create_empty();
+
     return numErrors;
 }
 
@@ -184,7 +190,7 @@ Compiler* Document::get_compiler_for_format(int format)
 {
     switch(format)
     {
-        case k_format_ldp:
+        case k_format_lms:
             return Injector::inject_LdpCompiler(m_libraryScope, this);
 
         case k_format_lmd:

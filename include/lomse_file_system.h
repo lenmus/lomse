@@ -103,6 +103,9 @@ public:
     //operations
     string get_locator_for_image(const string& imagename);
 
+    //TODO: remove after moving eBooks to new LMB format with LMD files
+    string get_locator_for_image_lms_format(const string& imagename);
+
 };
 
 //-------------------------------------------------------------------------------------
@@ -128,7 +131,7 @@ public:
     virtual void unget() = 0;
     virtual bool is_open() = 0;
     virtual bool eof() = 0;
-    virtual int read(unsigned char* pDestBuffer, int nBytesToRead) = 0;
+    virtual long read(unsigned char* pDestBuffer, long nBytesToRead) = 0;
 
 protected:
 	InputStream() {}
@@ -150,7 +153,7 @@ public:
     void unget();
     bool is_open();
     bool eof();
-    int read(unsigned char* pDestBuffer, int nBytesToRead);
+    long read(unsigned char* pDestBuffer, long nBytesToRead);
 };
 
 

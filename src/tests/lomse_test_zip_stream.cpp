@@ -53,7 +53,7 @@ public:
 
 	bool my_read_buffer() { return read_buffer(); }
     bool my_open_current_entry() { return open_current_entry(); }
-    int my_bytes_pending() { return m_remainingBytes; }
+    long my_bytes_pending() { return m_remainingBytes; }
     bool my_is_last_buffer() { return m_fIsLastBuffer; }
 
 };
@@ -96,7 +96,7 @@ public:
 SUITE(ZipInputStreamTest)
 {
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_can_open_1)
+    TEST_FIXTURE(ZipInputStreamTestFixture, can_open_1)
     {
         string path = m_scores_path + "90101-read-png-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -107,7 +107,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_can_open_2)
+    TEST_FIXTURE(ZipInputStreamTestFixture, can_open_2)
     {
         string path = m_scores_path + "90101-does-not-exits.zip#zip:";
         bool fThrows = false;
@@ -122,7 +122,7 @@ SUITE(ZipInputStreamTest)
         CHECK( fThrows == true );
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_can_open_3)
+    TEST_FIXTURE(ZipInputStreamTestFixture, can_open_3)
     {
         string path = m_scores_path + "90102-source-and-image.zip#zip:test-image-1.png";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -134,7 +134,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_get_file_count_2)
+    TEST_FIXTURE(ZipInputStreamTestFixture, get_file_count_2)
     {
         string path = m_scores_path + "90102-source-and-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -145,7 +145,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_get_file_info_1)
+    TEST_FIXTURE(ZipInputStreamTestFixture, get_file_info_1)
     {
         string path = m_scores_path + "90101-read-png-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -170,7 +170,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_move_to_next_entry_1)
+    TEST_FIXTURE(ZipInputStreamTestFixture, move_to_next_entry_1)
     {
         string path = m_scores_path + "90102-source-and-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -184,7 +184,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_move_to_entry_1)
+    TEST_FIXTURE(ZipInputStreamTestFixture, move_to_entry_1)
     {
         string path = m_scores_path + "90102-source-and-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -196,7 +196,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_open_current_entry_1)
+    TEST_FIXTURE(ZipInputStreamTestFixture, open_current_entry_1)
     {
         string path = m_scores_path + "90101-read-png-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -206,7 +206,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_read_buffer_1)
+    TEST_FIXTURE(ZipInputStreamTestFixture, read_buffer_1)
     {
         string path = m_scores_path + "90101-read-png-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -217,7 +217,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_read_1)
+    TEST_FIXTURE(ZipInputStreamTestFixture, read_1)
     {
         string path = m_scores_path + "90101-read-png-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -231,7 +231,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_read_3)
+    TEST_FIXTURE(ZipInputStreamTestFixture, read_3)
     {
         string path = m_scores_path + "90101-read-png-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -247,7 +247,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_read_4)
+    TEST_FIXTURE(ZipInputStreamTestFixture, read_4)
     {
         string path = m_scores_path + "90102-source-and-image.zip#zip:test-image-1.png";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -270,7 +270,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_get_char_1)
+    TEST_FIXTURE(ZipInputStreamTestFixture, get_char_1)
     {
         string path = m_scores_path + "90101-read-png-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -282,7 +282,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_get_char_2)
+    TEST_FIXTURE(ZipInputStreamTestFixture, get_char_2)
     {
         string path = m_scores_path + "90101-read-png-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -301,7 +301,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_get_char_3)
+    TEST_FIXTURE(ZipInputStreamTestFixture, get_char_3)
     {
         string path = m_scores_path + "90102-source-and-image.zip#zip:test-image-1.png";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -315,7 +315,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_get_char_4)
+    TEST_FIXTURE(ZipInputStreamTestFixture, get_char_4)
     {
         string path = m_scores_path + "90103-src-img-txt4096.zip#zip:test-text-4096.txt";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -330,7 +330,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_unget_middle)
+    TEST_FIXTURE(ZipInputStreamTestFixture, unget_middle)
     {
         string path = m_scores_path + "90103-src-img-txt4096.zip#zip:test-text-4096.txt";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -349,7 +349,7 @@ SUITE(ZipInputStreamTest)
         delete file;
     }
 
-    TEST_FIXTURE(ZipInputStreamTestFixture, ZipInputStream_unget_last_1)
+    TEST_FIXTURE(ZipInputStreamTestFixture, unget_last_1)
     {
         string path = m_scores_path + "90101-read-png-image.zip#zip:";
         InputStream* file = FileSystem::open_input_stream(path);
@@ -372,6 +372,31 @@ SUITE(ZipInputStreamTest)
         CHECK( zs->get_char() == '\n' );
         CHECK( zs->eof() == true );
         delete file;
+    }
+
+    TEST_FIXTURE(ZipInputStreamTestFixture, get_size)
+    {
+        string path = m_scores_path + "90104-compressed-flat-lmd.zip#zip:lenmusdoc-example.lmd";
+        InputStream* file = FileSystem::open_input_stream(path);
+        ZipInputStream* zs  = dynamic_cast<ZipInputStream*>(file);
+        ZipEntryInfo info;
+        zs->get_current_entry_info(info);
+        CHECK( info.filename == "lenmusdoc-example.lmd" );
+        cout << "size=" << info.dwUncompressedSize << endl;
+        CHECK( zs->get_size() == 8364L );
+        delete file;
+    }
+
+    TEST_FIXTURE(ZipInputStreamTestFixture, get_as_string)
+    {
+        string path = m_scores_path + "90104-compressed-flat-lmd.zip#zip:lenmusdoc-example.lmd";
+        InputStream* file = FileSystem::open_input_stream(path);
+        ZipInputStream* zs  = dynamic_cast<ZipInputStream*>(file);
+        unsigned char* data = zs->get_as_string();
+        ////cout << data << endl;
+        CHECK( strlen( (char*)data ) == zs->get_size() );
+        delete file;
+        free(data);
     }
 
 }

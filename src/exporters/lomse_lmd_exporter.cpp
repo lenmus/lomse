@@ -717,7 +717,7 @@ public:
         int format = m_pExporter->get_score_format();
         switch(format)
         {
-            case LmdExporter::k_format_ldp:
+            case LmdExporter::k_format_lms:
                 return generate_ldp();
             case LmdExporter::k_format_lmd:
                 return generate_lmd();

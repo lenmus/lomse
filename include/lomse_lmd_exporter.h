@@ -58,7 +58,7 @@ public:
 
     //formats for scores
     enum {
-        k_format_ldp = 0, k_format_lmd, k_format_musicxml,
+        k_format_lms = 0, k_format_lmd, k_format_musicxml,
     };
 
     //settings

@@ -36,6 +36,8 @@
 #include "lomse_injectors.h"
 #include "lomse_internal_model.h"
 #include "lomse_document.h"
+#include "lomse_file_system.h"
+#include "lomse_zip_stream.h"
 
 
 using namespace std;
@@ -79,9 +81,27 @@ LmdCompiler::~LmdCompiler()
 InternalModel* LmdCompiler::compile_file(const std::string& filename)
 {
     m_fileLocator = filename;
-    m_pParser->parse_file(filename);
+    DocLocator locator(m_fileLocator);
+    if (locator.get_inner_protocol() == DocLocator::k_zip)
+    {
+        InputStream* pFile = FileSystem::open_input_stream(m_fileLocator);
+        ZipInputStream* zip  = static_cast<ZipInputStream*>(pFile);
+
+        unsigned char* buffer = zip->get_as_string();
+        m_pLmdParser->parse_text( (char *)buffer );
+
+        delete pFile;
+        delete buffer;
+    }
+    else //k_file
+        m_pParser->parse_file(filename);
+
     m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
-    return compile_parsed_tree( m_pLmdParser->get_tree_root() );
+    XmlNode* root = m_pLmdParser->get_tree_root();
+    if (root)
+        return compile_parsed_tree(root);
+    else
+        return NULL;
 }
 
 //---------------------------------------------------------------------------------------
@@ -122,9 +142,10 @@ InternalModel* LmdCompiler::create_with_empty_score()
 //---------------------------------------------------------------------------------------
 InternalModel* LmdCompiler::compile_parsed_tree(XmlNode* root)
 {
-    InternalModel* IModel = m_pLmdAnalyser->analyse_tree(root, m_fileLocator);
-    m_pModelBuilder->build_model(IModel);
-    return IModel;
+    InternalModel* pIModel = m_pLmdAnalyser->analyse_tree(root, m_fileLocator);
+    if (pIModel)
+        m_pModelBuilder->build_model(pIModel);
+    return pIModel;
 }
 
 ////---------------------------------------------------------------------------------------

@@ -65,6 +65,12 @@ void LmdParser::parse_text(const std::string& sourceText)
 }
 
 //---------------------------------------------------------------------------------------
+void LmdParser::parse_text(char* sourceText)
+{
+    parse_char_string(sourceText);
+}
+
+//---------------------------------------------------------------------------------------
 void LmdParser::parse_file(const std::string& filename, bool fErrorMsg)
 {
     delete m_file;

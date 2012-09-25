@@ -70,6 +70,8 @@ public:
 
     void parse_file(const std::string& filename, bool fErrorMsg = true);
     void parse_text(const std::string& sourceText);
+    void parse_text(char* sourceText);
+
 //    XmlNode* parse_input(LdpReader& reader);
     inline const string& get_error() { return m_error; }
 

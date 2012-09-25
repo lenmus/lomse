@@ -52,8 +52,7 @@ SpImage ImageReader::load_image(const string& locator)
     InputStream* pFile = NULL;
     try
     {
-        pFile = FileSystem::open_input_stream(locator)
-        ;
+        pFile = FileSystem::open_input_stream(locator);
         //find a reader that can decode the file
         {
             //PNG Format
@@ -114,7 +113,7 @@ SpImage ImageReader::load_image(const string& locator)
 //=======================================================================================
 void read_callback(png_structp png, png_bytep data, png_size_t length)
 {
-    static_cast<InputStream*>( png_get_io_ptr(png) )->read(data, int(length));
+    static_cast<InputStream*>( png_get_io_ptr(png) )->read(data, long(length));
 }
 
 //---------------------------------------------------------------------------------------

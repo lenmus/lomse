@@ -80,8 +80,11 @@ public:
     int my_get_num_cols() { return m_numCols; }
 //    std::vector<TableCellLayouter*>& my_get_body_layouters() { return m_bodyLayouters; }
 //    std::vector<TableCellLayouter*>& my_get_head_layouters() { return m_headLayouters; }
-//    LUnits my_get_column_width(int iCol) { return m_columnWidth[iCol]; }
+    LUnits my_get_column_width(int iCol) { return m_columnsWidth[iCol]; }
+    LUnits my_get_table_width() { return m_tableWidth; }
 //    std::vector<int>& my_get_body_row_start() { return m_bodyRowStart; }
+    SectionLayouter* my_get_head_layouter() { return m_headLayouter; }
+    SectionLayouter* my_get_body_layouter() { return m_bodyLayouter; }
 
 };
 
@@ -107,6 +110,83 @@ public:
     bool is_equal(float x, float y)
     {
         return (fabs(x - y) < 0.1f);
+    }
+
+    void create_doc_1(Document* pDoc)
+    {
+        //     50  40  25  15
+        //    +---+---+---+---+
+        //    | 0 |       | 3 |
+        //    +---+   1   +---+
+        //    | 4 |       | 7 |
+        //    +---+---+---+---+
+
+        pDoc->from_string("(lenmusdoc (vers 0.0) "
+            "(styles"
+                "(defineStyle \"table1-col1\" (table-col-width 5000))"
+                "(defineStyle \"table1-col2\" (table-col-width 4000))"
+                "(defineStyle \"table1-col3\" (table-col-width 2500))"
+                "(defineStyle \"table1-col4\" (table-col-width 1500))"
+            ")"
+            "(content (table "
+                "(tableColumn (style \"table1-col1\"))"
+                "(tableColumn (style \"table1-col2\"))"
+                "(tableColumn (style \"table1-col3\"))"
+                "(tableColumn (style \"table1-col4\"))"
+                "(tableBody"
+                    "(tableRow"
+                        "(tableCell (txt \"0\") )"
+                        "(tableCell (rowspan 2)(colspan 2)(txt \"1+(2,5,6)\") )"
+                        "(tableCell (txt \"3\") )"
+                    ")"
+                    "(tableRow"
+                        "(tableCell (txt \"4\") )"
+                        "(tableCell (txt \"7\") )"
+                    ")"
+                ")"
+            ")"
+            "))");
+    }
+
+    void create_doc_2(Document* pDoc)
+    {
+        //   50  40  25  15  20
+        //  +---+---+---+---+---+
+        //  | 0 |   1   |   3   |
+        //  +---+---+---+---+---+
+        //  | 5 | 6 | 7 | 8 | 9 +
+        //  +---+---+---+---+---+
+
+        pDoc->from_string("(lenmusdoc (vers 0.0) "
+            "(styles"
+                "(defineStyle \"table1-col1\" (table-col-width 5000))"
+                "(defineStyle \"table1-col2\" (table-col-width 4000))"
+                "(defineStyle \"table1-col3\" (table-col-width 2500))"
+                "(defineStyle \"table1-col4\" (table-col-width 1500))"
+                "(defineStyle \"table1-col5\" (table-col-width 2000))"
+            ")"
+            "(content (table "
+                "(tableColumn (style \"table1-col1\"))"
+                "(tableColumn (style \"table1-col2\"))"
+                "(tableColumn (style \"table1-col3\"))"
+                "(tableColumn (style \"table1-col4\"))"
+                "(tableColumn (style \"table1-col5\"))"
+                "(tableBody"
+                    "(tableRow"
+                        "(tableCell (txt \"0\") )"
+                        "(tableCell (colspan 2)(txt \"1+(2)\") )"
+                        "(tableCell (txt \"3\") )"      //implicit colspan=2
+                    ")"
+                    "(tableRow"
+                        "(tableCell (txt \"5\") )"
+                        "(tableCell (txt \"6\") )"
+                        "(tableCell (txt \"7\") )"
+                        "(tableCell (txt \"8\") )"
+                        "(tableCell (txt \"9\") )"
+                    ")"
+                ")"
+            ")"
+            "))");
     }
 
 };
@@ -239,88 +319,160 @@ SUITE(TableLayouterTest)
         CHECK( lyt.my_get_num_cols() == 4 );
     }
 
-//    TEST_FIXTURE(TableLayouterTestFixture, table_create_layouters_1)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) "
-//            "(content (table "
-//                "(tableBody"
-//                    "(tableRow"
-//                        "(tableCell (txt \"0\") )"
-//                        "(tableCell (rowspan 2)(colspan 2)(txt \"1+(2,5,6)\") )"
-//                        "(tableCell (txt \"3\") )"
-//                    ")"
-//                    "(tableRow"
-//                        "(tableCell (txt \"4\") )"
-//                        "(tableCell (txt \"7\") )"
-//                    ")"
-//                ")"
-//            ")"
-//            "))");
-//        ImoDocument* pDoc = doc.get_imodoc();
-//        ImoStyles* pStyles = pDoc->get_styles();
-//        ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-//        GraphicModel model;
-//        MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
-//        lyt.prepare_to_start_layout();
-//
-//        std::vector<TableCellLayouter*>& layouters = lyt.my_get_body_layouters();
-//        //cout << "size=" <<  layouters.size() << endl;
-//        CHECK( layouters.size() == 8 );
-//        CHECK( layouters[0] != NULL );      // cell 0
-//        CHECK( layouters[1] != NULL );      // cell 1      +---+---+---+---+
-//        CHECK( layouters[2] == NULL );      // -           | 0 |       | 3 |
-//        CHECK( layouters[3] != NULL );      // cell 3      +---+   1   +---+
-//        //                                                 | 4 |       | 7 |
-//        CHECK( layouters[4] != NULL );      // cell 4      +---+---+---+---+
-//        CHECK( layouters[5] == NULL );      // -
-//        CHECK( layouters[6] == NULL );      // -
-//        CHECK( layouters[7] != NULL );      // cell 7
-//    }
+    TEST_FIXTURE(TableLayouterTestFixture, table_determine_widths_1)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) "
+            "(styles"
+                "(defineStyle \"table1-col1\" (table-col-width 5000))"
+                "(defineStyle \"table1-col2\" (table-col-width 4000))"
+                "(defineStyle \"table1-col3\" (table-col-width 2500))"
+            ")"
+            "(content (table "
+                "(tableColumn (style \"table1-col1\"))"
+                "(tableColumn (style \"table1-col2\"))"
+                "(tableColumn (style \"table1-col3\"))"
+                "(tableBody"
+                    "(tableRow"
+                        "(tableCell (txt \"0\") )"
+                        "(tableCell (txt \"1+(2,5,6)\") )"
+                        "(tableCell (txt \"3\") )"
+                    ")"
+                    "(tableRow"
+                        "(tableCell (txt \"4\") )"
+                        "(tableCell (txt \"7\") )"
+                        "(tableCell (txt \"8\") )"
+                    ")"
+                ")"
+            ")"
+            "))");
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoStyles* pStyles = pDoc->get_styles();
+        ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
+        GraphicModel model;
+        MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
+        lyt.prepare_to_start_layout();
 
-//    TEST_FIXTURE(TableLayouterTestFixture, table_create_layouters_2)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) "
-//            "(content (table "
-//                "(tableBody"
-//                    "(tableRow"
-//                        "(tableCell (txt \"0\") )"
-//                        "(tableCell (colspan 2)(txt \"1+(2)\") )"
-//                        "(tableCell (txt \"3\") )"      //implicit colspan=2
-//                    ")"
-//                    "(tableRow"
-//                        "(tableCell (txt \"5\") )"
-//                        "(tableCell (txt \"6\") )"
-//                        "(tableCell (txt \"7\") )"
-//                        "(tableCell (txt \"8\") )"
-//                        "(tableCell (txt \"9\") )"
-//                    ")"
-//                ")"
-//            ")"
-//            "))");
-//        ImoDocument* pDoc = doc.get_imodoc();
-//        ImoStyles* pStyles = pDoc->get_styles();
-//        ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
-//        GraphicModel model;
-//        MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
-//        lyt.prepare_to_start_layout();
-//
-//        std::vector<TableCellLayouter*>& layouters = lyt.my_get_body_layouters();
-//        //cout << "size=" <<  layouters.size() << endl;
-//        CHECK( layouters.size() == 10 );
-//        CHECK( layouters[0] != NULL );      // cell 0
-//        CHECK( layouters[1] != NULL );      // cell 1      +---+---+---+---+---+
-//        CHECK( layouters[2] == NULL );      // -           | 0 |   1   |   3   |
-//        CHECK( layouters[3] != NULL );      // cell 3      +---+---+---+---+---+
-//        CHECK( layouters[4] == NULL );      // -           | 5 | 6 | 7 | 8 | 9 +
-//        //                                                 +---+---+---+---+---+
-//        CHECK( layouters[5] != NULL );      // cell 5
-//        CHECK( layouters[6] != NULL );      // cell 6
-//        CHECK( layouters[7] != NULL );      // cell 7
-//        CHECK( layouters[8] != NULL );      // cell 8
-//        CHECK( layouters[9] != NULL );      // cell 9
-//    }
+        CHECK( lyt.my_get_num_cols() == 3 );
+        CHECK( lyt.my_get_column_width(0) == 5000.0f );
+        CHECK( lyt.my_get_column_width(1) == 4000.0f );
+        CHECK( lyt.my_get_column_width(2) == 2500.0f );
+        CHECK( lyt.my_get_table_width() == 11500.0f );
+    }
+
+    TEST_FIXTURE(TableLayouterTestFixture, table_determine_widths_2)
+    {
+        Document doc(m_libraryScope);
+        create_doc_1(&doc);
+        //    +---+---+---+---+
+        //    | 0 |       | 3 |
+        //    +---+   1   +---+
+        //    | 4 |       | 7 |
+        //    +---+---+---+---+
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoStyles* pStyles = pDoc->get_styles();
+        ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
+        GraphicModel model;
+        MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
+        lyt.prepare_to_start_layout();
+
+        CHECK( lyt.my_get_num_cols() == 4 );
+        CHECK( lyt.my_get_column_width(0) == 5000.0f );
+        CHECK( lyt.my_get_column_width(1) == 4000.0f );
+        CHECK( lyt.my_get_column_width(2) == 2500.0f );
+        CHECK( lyt.my_get_column_width(3) == 1500.0f );
+        CHECK( lyt.my_get_table_width() == 13000.0f );
+    }
+
+    TEST_FIXTURE(TableLayouterTestFixture, body_layouter_created_1)
+    {
+        Document doc(m_libraryScope);
+        create_doc_1(&doc);
+        //    +---+---+---+---+
+        //    | 0 |       | 3 |
+        //    +---+   1   +---+
+        //    | 4 |       | 7 |
+        //    +---+---+---+---+
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoStyles* pStyles = pDoc->get_styles();
+        ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
+        GraphicModel model;
+        MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
+        lyt.prepare_to_start_layout();
+
+        CHECK( lyt.my_get_head_layouter() == NULL );
+        SectionLayouter* pSL = lyt.my_get_body_layouter();
+        CHECK( pSL != NULL );
+    }
+
+    TEST_FIXTURE(TableLayouterTestFixture, create_cell_layouters_1)
+    {
+        Document doc(m_libraryScope);
+        create_doc_1(&doc);
+        //    +---+---+---+---+
+        //    | 0 |       | 3 |
+        //    +---+   1   +---+
+        //    | 4 |       | 7 |
+        //    +---+---+---+---+
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoStyles* pStyles = pDoc->get_styles();
+        ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
+        GraphicModel model;
+        MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
+        lyt.prepare_to_start_layout();
+
+        CHECK( lyt.my_get_head_layouter() == NULL );
+        SectionLayouter* pSL = lyt.my_get_body_layouter();
+        CHECK( pSL != NULL );
+        vector<TableCellLayouter*>& cellLyt = pSL->dbg_get_cell_layouters();
+        CHECK( cellLyt.size() == 8 );
+                                                            //   50  40  25  15
+        CHECK( cellLyt[0]->get_cell_width() == 5000.0f );   //  +---+---+---+---+
+        CHECK( cellLyt[1]->get_cell_width() == 6500.0f );   //  | 0 |       | 3 |
+        CHECK( cellLyt[2] == NULL );                        //  +---+   1   +---+
+        CHECK( cellLyt[3]->get_cell_width() == 1500.0f );   //  | 4 |       | 7 |
+        CHECK( cellLyt[4]->get_cell_width() == 5000.0f );   //  +---+---+---+---+
+        CHECK( cellLyt[5] == NULL ); 
+        CHECK( cellLyt[6] == NULL );
+        CHECK( cellLyt[7]->get_cell_width() == 1500.0f );
+    }
+
+    TEST_FIXTURE(TableLayouterTestFixture, table_create_layouters_2)
+    {
+        Document doc(m_libraryScope);
+        create_doc_2(&doc);
+            //   50  40  25  15  20
+            //  +---+---+---+---+---+
+            //  | 0 |   1   |   3   |
+            //  +---+---+---+---+---+
+            //  | 5 | 6 | 7 | 8 | 9 +
+            //  +---+---+---+---+---+
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoStyles* pStyles = pDoc->get_styles();
+        ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
+        GraphicModel model;
+        MyTableLayouter lyt(pTable, &model, m_libraryScope, pStyles);
+        lyt.prepare_to_start_layout();
+
+        CHECK( lyt.my_get_head_layouter() == NULL );
+        SectionLayouter* pSL = lyt.my_get_body_layouter();
+        CHECK( pSL != NULL );
+        vector<TableCellLayouter*>& cellLyt = pSL->dbg_get_cell_layouters();
+        CHECK( cellLyt.size() == 10 );
+
+        CHECK( cellLyt[0]->get_cell_width() == 5000.0f );   //   50  40  25  15  20
+        CHECK( cellLyt[1]->get_cell_width() == 6500.0f );   //  +---+---+---+---+---+
+        CHECK( cellLyt[2] == NULL );                        //  | 0 |   1   |   3   |
+        CHECK( cellLyt[3]->get_cell_width() == 3500.0f );   //  +---+---+---+---+---+
+        cout << cellLyt[3]->get_cell_width() << endl;
+        CHECK( cellLyt[4] == NULL );                        //  | 5 | 6 | 7 | 8 | 9 +
+        //                                                  //  +---+---+---+---+---+
+        CHECK( cellLyt[5]->get_cell_width() == 5000.0f );
+        CHECK( cellLyt[6]->get_cell_width() == 4000.0f );
+        CHECK( cellLyt[7]->get_cell_width() == 2500.0f );
+        CHECK( cellLyt[8]->get_cell_width() == 1500.0f );
+        CHECK( cellLyt[9]->get_cell_width() == 2000.0f );
+    }
 
 //    TEST_FIXTURE(TableLayouterTestFixture, table_determine_widths_1)
 //    {
@@ -418,31 +570,31 @@ SUITE(TableLayouterTest)
 //        std::vector<TableCellLayouter*>& layouters = lyt.my_get_head_layouters();
 ////        cout << "size=" <<  layouters.size() << endl;
 //        CHECK( layouters.size() == 8 );
-////        cout << "head cell 0 width: " << layouters[0]->get_cell_width() << endl;
-////        cout << "head cell 1 width: " << layouters[1]->get_cell_width() << endl;
-////        cout << "head cell 3 width: " << layouters[3]->get_cell_width() << endl;
-////        cout << "head cell 5 width: " << layouters[5]->get_cell_width() << endl;
-////        cout << "head cell 6 width: " << layouters[6]->get_cell_width() << endl;
-//        CHECK( is_equal(layouters[0]->get_cell_width(), 70.0f) );
-//        CHECK( is_equal(layouters[1]->get_cell_width(), 170.0f) );
-//        CHECK( layouters[2] == NULL );
-//        CHECK( is_equal(layouters[3]->get_cell_width(), 70.0f) );
-//        CHECK( layouters[4] == NULL );
-//        CHECK( is_equal(layouters[5]->get_cell_width(), 80.0f) );
-//        CHECK( is_equal(layouters[6]->get_cell_width(), 90.0f) );
-//        CHECK( layouters[7] == NULL );
+////        cout << "head cell 0 width: " << cellLyt[0]->get_cell_width() << endl;
+////        cout << "head cell 1 width: " << cellLyt[1]->get_cell_width() << endl;
+////        cout << "head cell 3 width: " << cellLyt[3]->get_cell_width() << endl;
+////        cout << "head cell 5 width: " << cellLyt[5]->get_cell_width() << endl;
+////        cout << "head cell 6 width: " << cellLyt[6]->get_cell_width() << endl;
+//        CHECK( is_equal(cellLyt[0]->get_cell_width(), 70.0f) );
+//        CHECK( is_equal(cellLyt[1]->get_cell_width(), 170.0f) );
+//        CHECK( cellLyt[2] == NULL );
+//        CHECK( is_equal(cellLyt[3]->get_cell_width(), 70.0f) );
+//        CHECK( cellLyt[4] == NULL );
+//        CHECK( is_equal(cellLyt[5]->get_cell_width(), 80.0f) );
+//        CHECK( is_equal(cellLyt[6]->get_cell_width(), 90.0f) );
+//        CHECK( cellLyt[7] == NULL );
 //
 //        layouters = lyt.my_get_body_layouters();
 ////        cout << "size=" <<  layouters.size() << endl;
 //        CHECK( layouters.size() == 8 );
-//        CHECK( is_equal(layouters[0]->get_cell_width(), 70.0f) );
-//        CHECK( is_equal(layouters[1]->get_cell_width(), 80.0f) );
-//        CHECK( is_equal(layouters[2]->get_cell_width(), 90.0f) );
-//        CHECK( is_equal(layouters[3]->get_cell_width(), 70.0f) );
-//        CHECK( is_equal(layouters[4]->get_cell_width(), 70.0f) );
-//        CHECK( is_equal(layouters[5]->get_cell_width(), 80.0f) );
-//        CHECK( is_equal(layouters[6]->get_cell_width(), 90.0f) );
-//        CHECK( layouters[7] == NULL );
+//        CHECK( is_equal(cellLyt[0]->get_cell_width(), 70.0f) );
+//        CHECK( is_equal(cellLyt[1]->get_cell_width(), 80.0f) );
+//        CHECK( is_equal(cellLyt[2]->get_cell_width(), 90.0f) );
+//        CHECK( is_equal(cellLyt[3]->get_cell_width(), 70.0f) );
+//        CHECK( is_equal(cellLyt[4]->get_cell_width(), 70.0f) );
+//        CHECK( is_equal(cellLyt[5]->get_cell_width(), 80.0f) );
+//        CHECK( is_equal(cellLyt[6]->get_cell_width(), 90.0f) );
+//        CHECK( cellLyt[7] == NULL );
 //    }
 
 //    TEST_FIXTURE(TableLayouterTestFixture, table_logical_rows_1)

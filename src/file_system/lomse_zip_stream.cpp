@@ -321,7 +321,7 @@ char ZipInputStream::get_char()
 }
 
 //---------------------------------------------------------------------------------------
-int ZipInputStream::read(unsigned char* pDestBuffer, int nBytesToRead)
+long ZipInputStream::read(unsigned char* pDestBuffer, long nBytesToRead)
 {
     if (!m_curEntry.fIsOpen)
         throw std::logic_error("Invoking read() in closed ZipInputStream entry");
@@ -332,7 +332,7 @@ int ZipInputStream::read(unsigned char* pDestBuffer, int nBytesToRead)
     if (m_remainingBytes <= 0)
         throw std::logic_error("Invoking read() with empty buffer in ZipInputStream entry");
 
-    int bytesRead = min(m_remainingBytes, nBytesToRead);
+    long bytesRead = min(m_remainingBytes, nBytesToRead);
     memcpy(pDestBuffer, m_pNextChar, bytesRead);
     m_remainingBytes -= bytesRead;
     m_pNextChar += bytesRead;
@@ -354,6 +354,32 @@ int ZipInputStream::read(unsigned char* pDestBuffer, int nBytesToRead)
         bytesRead += read(pDestBuffer, nBytesToRead - bytesRead);
 
     return bytesRead;
+}
+
+//---------------------------------------------------------------------------------------
+long ZipInputStream::get_size()
+{
+    if (!m_curEntry.fIsOpen)
+        throw std::logic_error("[ZipInputStream::get_size] Invoking get_size() in closed ZipInputStream entry");
+
+    return long(m_curEntry.dwUncompressedSize);
+}
+
+//---------------------------------------------------------------------------------------
+unsigned char* ZipInputStream::get_as_string()
+{
+    unsigned char* buffer;
+    long size = get_size();
+    if ((buffer = LOMSE_NEW unsigned char[size+1]) == NULL)
+    {
+        throw std::bad_alloc("[ZipInputStream::get_as_string] error allocating memory for file");
+    }
+    else
+    {
+        long i = read(buffer, size);
+        buffer[i] = 0;
+    }
+    return buffer;
 }
 
 

@@ -8380,6 +8380,45 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LmdAnalyserTestFixture, table_added_to_content)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        string src =
+            "<lenmusdoc vers='0.0'>"
+                "<styles>"
+                    "<defineStyle><name>table1-col1</name><width>70</width></defineStyle>"
+                    "<defineStyle><name>table1-col2</name><width>80</width></defineStyle>"
+                "</styles>"
+                "<content>"
+                    "<table>"
+                        "<tableColumn style='table1-col1' />"
+                        "<tableColumn style='table1-col2' />"
+                        "<tableBody>"
+                            "<tableRow><tableCell>This is a cell</tableCell></tableRow>"
+                        "</tableBody>"
+                    "</table>"
+                "</content>"
+            "</lenmusdoc>";
+        parser.parse_text(src);
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoTable* pTable = dynamic_cast<ImoTable*>( pDoc->get_content_item(0) );
+        CHECK( pTable != NULL );
+
+        delete pIModel;
+    }
+
     // ldpmusic -------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, ldpmusic_ok)

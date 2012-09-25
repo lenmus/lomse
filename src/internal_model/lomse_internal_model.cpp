@@ -2804,6 +2804,27 @@ ImoDocument* ImoTableRow::get_document()
         throw std::runtime_error("[ImoTableRow::get_document] No parent or table row not in table!");
 }
 
+//---------------------------------------------------------------------------------------
+ImoStyle* ImoTableRow::get_style()
+{
+    if (m_pStyle)
+        return m_pStyle;
+    else
+    {
+        ImoObj* pParent = get_parent();
+        if (pParent && pParent->is_collection())
+        {
+            pParent = pParent->get_parent();
+            if (pParent && pParent->is_table())
+                return (static_cast<ImoContentObj*>(pParent))->get_style();
+            else
+                throw std::runtime_error("[ImoTableRow::get_style] No parent or table row not in table!");
+        }
+        else
+            throw std::runtime_error("[ImoTableRow::get_style] No parent or table row not in table!");
+    }
+}
+
 
 //=======================================================================================
 // ImoTextInfo implementation

@@ -104,9 +104,13 @@ void Interactor::create_graphic_model()
 {
     start_timer();
 
-    DocLayouter layouter( m_pDoc->get_im_model(), m_libScope);
-    layouter.layout_document();
-    m_pGraphicModel = layouter.get_gm_model();
+    InternalModel* pIModel = m_pDoc->get_im_model();
+    if (pIModel)
+    {
+        DocLayouter layouter(pIModel, m_libScope);
+        layouter.layout_document();
+        m_pGraphicModel = layouter.get_gm_model();
+    }
 
     m_gmodelBuildTime = get_elapsed_time();
 }

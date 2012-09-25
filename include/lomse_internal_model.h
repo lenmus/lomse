@@ -1276,7 +1276,7 @@ public:
 	EventNotifier* get_event_notifier();
 
     //style
-    ImoStyle* get_style();
+    virtual ImoStyle* get_style();
     ImoStyle* copy_style_as(const std::string& name);
     void set_style(ImoStyle* pStyle);
 
@@ -3418,9 +3418,10 @@ public:
         return dynamic_cast<ImoTableCell*>( get_content_item(iItem) );
     }
 
-    //overrides: as ImoTableRow is stored in an ImoCollection, general method
-    //to get document doesn't work
+    //overrides: as ImoTableRow is stored in an ImoCollection, some general methods
+    //doesn't work and must be overrinden
     ImoDocument* get_document();
+    ImoStyle* get_style();
 
 protected:
     friend class BlockLevelCreatorApi;

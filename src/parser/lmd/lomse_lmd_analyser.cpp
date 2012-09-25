@@ -71,6 +71,7 @@ enum ELmdTag
     k_tag_color,
     k_tag_defineStyle,
     k_tag_dynamic,
+    k_tag_image,
     k_tag_itemizedlist,
     k_tag_ldpmusic,
     k_tag_lenmusdoc,
@@ -2407,12 +2408,8 @@ protected:
 
 
 //@--------------------------------------------------------------------------------------
-//@ <image> = (image [<style>] <file>)
-//@ <file> = (file <string>)
-//@
-//
 // <image [style='']>
-//      <file>xxx</file>
+//      <file>xxx</file>  <!-- name & ext. no path -->
 // </image>
 
 class ImageLmdAnalyser : public LmdElementAnalyser
@@ -2432,10 +2429,7 @@ public:
 
         // <file>
         if (get_mandatory(k_file))
-        {
-            XmlNode* pValue = get_first_child(m_pChildToAnalyse);
-            load_image(pImg, get_value(pValue), get_document_locator());
-        }
+            load_image(pImg, get_value(m_pChildToAnalyse), get_document_locator());
 
         add_to_model(pImg);
         return pImg;
@@ -2852,11 +2846,11 @@ public:
 
     ImoObj* do_analysis()
     {
-        ELdpElement type = get_type(m_pAnalysedNode);
+        string type = m_pAnalysedNode->name();
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoList* pList = static_cast<ImoList*>(ImFactory::inject(k_imo_list, pDoc) );
-        pList->set_list_type(type == k_itemizedlist ? ImoList::k_itemized
+        pList->set_list_type(type == "itemizedlist" ? ImoList::k_itemized
                                                     : ImoList::k_ordered);
 
         // [<style>]
@@ -4636,6 +4630,7 @@ public:
 //@ <rowspan> = (rowspan <num>)
 //@ <colspan> = (colspan <num>)
 //@
+// <tableCell><rowspan>2</rowspan>This is a cell</tableCell>
 
 class TableCellLmdAnalyser : public LmdElementAnalyser
 {
@@ -4653,12 +4648,12 @@ public:
         analyse_optional_style(pImo);
 
         //[<rowspan>]
-        if (get_optional(k_rowspan))
-            pImo->set_rowspan( get_integer_value(1) );
+        if (has_attribute("rowspan"))
+            pImo->set_rowspan( get_attribute_as_integer("rowspan", 1) );
 
         //[<colspan>]
-        if (get_optional(k_colspan))
-            pImo->set_colspan( get_integer_value(1) );
+        if (has_attribute("colspan"))
+            pImo->set_colspan( get_attribute_as_integer("colspan", 1) );
 
         // {<inlineObject> | <blockObject>}*
         analyse_inline_or_block_objects(pImo);
@@ -5685,6 +5680,7 @@ LmdAnalyser::LmdAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToTag["color"] = k_tag_color;
     m_NameToTag["defineStyle"] = k_tag_defineStyle;
     m_NameToTag["dynamic"] = k_tag_dynamic;
+    m_NameToTag["image"] = k_tag_image;
     m_NameToTag["itemizedlist"] = k_tag_itemizedlist;
     m_NameToTag["ldpmusic"] = k_tag_ldpmusic;
     m_NameToTag["lenmusdoc"] = k_tag_lenmusdoc;
@@ -6052,7 +6048,7 @@ LmdElementAnalyser* LmdAnalyser::new_analyser(const string& name, ImoObj* pAncho
 //        case k_tag_goBack:          return LOMSE_NEW GoBackFwdLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_tag_goFwd:           return LOMSE_NEW GoBackFwdLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_tag_group:           return LOMSE_NEW GroupLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_image:           return LOMSE_NEW ImageLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_tag_image:           return LOMSE_NEW ImageLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_tag_itemizedlist:    return LOMSE_NEW ListLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_tag_infoMIDI:        return LOMSE_NEW InfoMidiLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_tag_instrument:      return LOMSE_NEW InstrumentLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -6069,7 +6065,7 @@ LmdElementAnalyser* LmdAnalyser::new_analyser(const string& name, ImoObj* pAncho
 //        case k_tag_newSystem:       return LOMSE_NEW ControlLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_tag_note:            return LOMSE_NEW NoteRestLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_tag_opt:             return LOMSE_NEW OptLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_orderedlist:     return LOMSE_NEW ListLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_tag_orderedlist:     return LOMSE_NEW ListLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_tag_pageLayout:      return LOMSE_NEW PageLayoutLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_tag_pageMargins:     return LOMSE_NEW PageMarginsLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_tag_pageSize:        return LOMSE_NEW PageSizeLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);

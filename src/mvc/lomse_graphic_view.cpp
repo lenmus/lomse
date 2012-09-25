@@ -992,19 +992,22 @@ void VerticalBookView::get_view_size(Pixels* xWidth, Pixels* yHeight)
     LUnits height = 0.0f;
 
     GraphicModel* pGModel = get_graphic_model();
-    for (int i=0; i < pGModel->get_num_pages(); i++)
+    if (pGModel)
     {
-        if (i > 0)
-            height += 1000.0f;
-        GmoBoxDocPage* pPage = pGModel->get_page(i);
-        URect rect = pPage->get_bounds();
-        width = max(width, rect.width);
-        height += rect.height;
-    }
-    LUnits margin = 0.05f * width;      //5% margin, 2.5 at each side
+        for (int i=0; i < pGModel->get_num_pages(); i++)
+        {
+            if (i > 0)
+                height += 1000.0f;
+            GmoBoxDocPage* pPage = pGModel->get_page(i);
+            URect rect = pPage->get_bounds();
+            width = max(width, rect.width);
+            height += rect.height;
+        }
+        LUnits margin = 0.05f * width;      //5% margin, 2.5 at each side
 
-    *xWidth = m_pDrawer->LUnits_to_Pixels(width + margin);
-    *yHeight = m_pDrawer->LUnits_to_Pixels(height + margin);
+        *xWidth = m_pDrawer->LUnits_to_Pixels(width + margin);
+        *yHeight = m_pDrawer->LUnits_to_Pixels(height + margin);
+    }
 }
 
 

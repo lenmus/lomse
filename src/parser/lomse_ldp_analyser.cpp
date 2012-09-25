@@ -2402,7 +2402,7 @@ protected:
     void load_image(ImoImage* pImg, string imagename, string locator)
     {
         LmbDocLocator loc(locator);
-        SpImage img = ImageReader::load_image( loc.get_locator_for_image(imagename) );
+        SpImage img = ImageReader::load_image( loc.get_locator_for_image_lms_format(imagename) );
         pImg->set_content(img);
         if (!img->is_ok())
             report_msg(m_pAnalysedNode->get_line_number(), "Error loading image. " + img->get_error_msg());

@@ -160,6 +160,25 @@ string LmbDocLocator::get_locator_for_image(const string& imagename)
 
     }
     //normal behaviour: zip assumed
+    return get_protocol_string() + get_path() + "#zip:images/" + imagename;
+}
+
+//---------------------------------------------------------------------------------------
+string LmbDocLocator::get_locator_for_image_lms_format(const string& imagename)
+{
+    if (m_innerProtocol != k_zip)
+    {
+        //support for tests (win & Linux): images in the same folder than lms file
+
+        //remove lms file from path
+        int iMax = int( m_path.length() );
+        int i = iMax-1;
+        for (; i >=0 && !(m_path[i] == '/' || m_path[i] == '\\'); --i);
+        if (i >= 0)
+            return m_path.substr(0, i+1) + imagename;
+
+    }
+    //normal behaviour: zip assumed
     return get_protocol_string() + get_path() + "#zip:" + imagename;
 }
 
@@ -234,7 +253,7 @@ bool LocalInputStream::eof()
 }
 
 //---------------------------------------------------------------------------------------
-int LocalInputStream::read (unsigned char* pDestBuffer, int nBytesToRead)
+long LocalInputStream::read (unsigned char* pDestBuffer, long nBytesToRead)
 {
     //reads the specified number of bytes from the stream into the dest. buffer.
     //Invoker should allocate a buffer large enough, as this method does not
