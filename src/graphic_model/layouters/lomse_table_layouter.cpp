@@ -41,8 +41,8 @@ namespace lomse
 //=======================================================================================
 TableLayouter::TableLayouter(ImoContentObj* pItem, Layouter* pParent,
                              GraphicModel* pGModel, LibraryScope& libraryScope,
-                             ImoStyles* pStyles)
-    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles, true)
+                             ImoStyles* pStyles, bool fAddShapesToModel)
+    : Layouter(pItem, pParent, pGModel, libraryScope, pStyles, fAddShapesToModel)
     , m_libraryScope(libraryScope)
     , m_pTable( static_cast<ImoTable*>(pItem) )
     , m_headLayouter(NULL)
@@ -73,16 +73,18 @@ void TableLayouter::create_sections_layouters()
     if (m_numHeadRows > 0)
     {
         ImoTableHead* pHead = m_pTable->get_head();
-        m_headLayouter = LOMSE_NEW SectionLayouter(m_pTable, this, pHead, m_numHeadRows,
-                                                   m_numCols, m_tableWidth, m_columnsWidth);
+        m_headLayouter = LOMSE_NEW TableSectionLayouter(m_pTable, this, pHead, m_numHeadRows,
+                                                   m_numCols, m_tableWidth, m_columnsWidth,
+                                                   m_fAddShapesToModel);
         m_headLayouter->prepare_to_start_layout();
     }
 
     if (m_numBodyRows > 0)
     {
         ImoTableBody* pBody = m_pTable->get_body();
-        m_bodyLayouter = LOMSE_NEW SectionLayouter(m_pTable, this, pBody, m_numBodyRows,
-                                                   m_numCols, m_tableWidth, m_columnsWidth);
+        m_bodyLayouter = LOMSE_NEW TableSectionLayouter(m_pTable, this, pBody, m_numBodyRows,
+                                                   m_numCols, m_tableWidth, m_columnsWidth,
+                                                   m_fAddShapesToModel);
         m_bodyLayouter->prepare_to_start_layout();
     }
 }
@@ -265,14 +267,15 @@ bool TableLayouter::enough_space_in_box()
 
 
 //=======================================================================================
-// SectionLayouter implementation
+// TableSectionLayouter implementation
 //=======================================================================================
-SectionLayouter::SectionLayouter(ImoContentObj* pItem, Layouter* pParent,
+TableSectionLayouter::TableSectionLayouter(ImoContentObj* pItem, Layouter* pParent,
                                  ImoTableSection* pSection, int numRows,
                                  int numCols, LUnits tableWidth,
-                                 vector<LUnits>& columnsWidth)
+                                 vector<LUnits>& columnsWidth,
+                                 bool fAddShapesToModel)
     : Layouter(pItem, pParent, pParent->get_graphic_model(),
-               pParent->get_library_scope(), pParent->get_styles(), true )
+               pParent->get_library_scope(), pParent->get_styles(), fAddShapesToModel )
     , m_pTable( static_cast<ImoTable*>(pItem) )
     , m_pSection(pSection)
     , m_columnsWidth(columnsWidth)
@@ -284,7 +287,7 @@ SectionLayouter::SectionLayouter(ImoContentObj* pItem, Layouter* pParent,
 }
 
 //---------------------------------------------------------------------------------------
-SectionLayouter::~SectionLayouter()
+TableSectionLayouter::~TableSectionLayouter()
 {
     delete m_pRowLayouter;
 
@@ -295,7 +298,7 @@ SectionLayouter::~SectionLayouter()
 }
 
 //---------------------------------------------------------------------------------------
-void SectionLayouter::prepare_to_start_layout()
+void TableSectionLayouter::prepare_to_start_layout()
 {
     Layouter::prepare_to_start_layout();
     create_cell_layouters();
@@ -303,14 +306,14 @@ void SectionLayouter::prepare_to_start_layout()
 }
 
 //---------------------------------------------------------------------------------------
-void SectionLayouter::layout_in_box(){}
-void SectionLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
+void TableSectionLayouter::layout_in_box(){}
+void TableSectionLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
                                       LUnits height)
 {
 }
 
 //---------------------------------------------------------------------------------------
-void SectionLayouter::create_cell_layouters()
+void TableSectionLayouter::create_cell_layouters()
 {
     //AWARE: This method is a lier. It does many things:
     // - creates the m_rowsStart table, that splits the section into logical rows
@@ -324,6 +327,7 @@ void SectionLayouter::create_cell_layouters()
     freeCell.assign(numCells, true);
 
     TreeNode<ImoObj>::children_iterator itRow;
+    int iLastCell;
     int iRow = 0;
     int iNextLogicalRow = 0;
     LUnits xPos = 0.0f;     //position relative to section top-left corner
@@ -334,6 +338,7 @@ void SectionLayouter::create_cell_layouters()
 
         ImoTableRow* pRow = static_cast<ImoTableRow*>( *itRow );
         int iCell = iRow*m_numTableColumns;
+        iLastCell = iCell;
         ImoContent* pWrapper = pRow->get_content();
         TreeNode<ImoObj>::children_iterator itCell;
         int iCol = 0;
@@ -343,6 +348,7 @@ void SectionLayouter::create_cell_layouters()
                 ++iCell, ++iCol;
 
             ImoTableCell* pCell = static_cast<ImoTableCell*>( *itCell );
+            iLastCell = iCell;
             m_cellLayouters[iCell] = static_cast<TableCellLayouter*>(
                                         LayouterFactory::create_layouter(pCell, this) );
             xPos += m_cellLayouters[iCell]->set_cell_width_and_position(iRow, iCol, xPos,
@@ -359,16 +365,31 @@ void SectionLayouter::create_cell_layouters()
             iNextLogicalRow = max(iNextLogicalRow, iRow + pCell->get_rowspan());
         }
 
-        //if last cell doesn't fill row, assume last cell has implicit colspan
+        //if last processed cell doesn't fill row and next cell is not used, assume last
+        //processed cell has implicit colspan
         iRow++;
-        int iStartNextCol = iRow * m_numTableColumns;
-        while( iCell < numCells && iCell < iStartNextCol)
-            freeCell[iCell++] = false;
+        if (freeCell[iCell])
+        {
+            int colSpan = 0;
+            int iStart = iCell;
+            int iStartNextCol = iRow * m_numTableColumns;
+            while( iStart < numCells && iStart < iStartNextCol)
+            {
+                freeCell[iStart++] = false;
+                colSpan++;
+            }
+            if (colSpan > 0)
+            {
+                int iCol = iLastCell % m_numTableColumns;
+                m_cellLayouters[iLastCell]->increment_colspan(colSpan, iCell, iCol,
+                                                              m_columnsWidth);
+            }
+        }
     }
 }
 
 //---------------------------------------------------------------------------------------
-LUnits SectionLayouter::add_row(GmoBox* pParentMainBox)
+LUnits TableSectionLayouter::add_row(GmoBox* pParentMainBox)
 {
     GmoBox* pRowBox = m_pRowLayouter->get_item_main_box();
     pParentMainBox->add_child_box(pRowBox);
@@ -384,13 +405,13 @@ LUnits SectionLayouter::add_row(GmoBox* pParentMainBox)
 }
 
 //---------------------------------------------------------------------------------------
-bool SectionLayouter::is_row_ready()
+bool TableSectionLayouter::is_row_ready()
 {
     return (m_pRowLayouter != NULL);
 }
 
 //---------------------------------------------------------------------------------------
-void SectionLayouter::prepare_row()
+void TableSectionLayouter::prepare_row()
 {
     //layouts a logical row. Result is not added to graphical model.
 
@@ -404,7 +425,7 @@ void SectionLayouter::prepare_row()
 
     m_pRowLayouter = LOMSE_NEW TableRowLayouter(m_pTable, this, m_cellLayouters,
                                                 m_columnsWidth, iFirstRow, numRows,
-                                                m_numTableColumns);
+                                                m_numTableColumns, m_fAddShapesToModel);
 
     GmoBox* pParentMainBox = m_pParentLayouter->get_item_main_box();
     m_pRowLayouter->create_main_box(pParentMainBox, m_pageCursor, m_tableWidth,
@@ -459,6 +480,17 @@ int TableCellLayouter::get_rowspan()
     return m_pCell->get_rowspan();
 }
 
+//---------------------------------------------------------------------------------------
+void TableCellLayouter::increment_colspan(int incrColSpan, int iCell, int iCol,
+                                          vector<LUnits>& colWidths)
+{
+    m_width = 0.0f;
+    int colspan = m_pCell->get_colspan() + incrColSpan;
+    m_pCell->set_colspan(colspan);
+    for (int i=0; i < colspan; ++i, ++iCol)
+        m_width += colWidths[iCol];
+}
+
 
 
 //=======================================================================================
@@ -467,9 +499,10 @@ int TableCellLayouter::get_rowspan()
 TableRowLayouter::TableRowLayouter(ImoContentObj* pItem, Layouter* pParent,
                                    vector<TableCellLayouter*>& cells,
                                    vector<LUnits>& columnsWidth,
-                                   int iFirstRow, int numRows, int numColumns)
+                                   int iFirstRow, int numRows, int numColumns,
+                                   bool fAddShapesToModel)
     : Layouter(pItem, pParent, pParent->get_graphic_model(),
-               pParent->get_library_scope(), pParent->get_styles(), true )
+               pParent->get_library_scope(), pParent->get_styles(), fAddShapesToModel)
     , m_pTable( static_cast<ImoTable*>(pItem) )
     , m_cellLayouters(cells)
     , m_columnsWidth(columnsWidth)

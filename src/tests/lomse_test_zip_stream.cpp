@@ -382,7 +382,7 @@ SUITE(ZipInputStreamTest)
         ZipEntryInfo info;
         zs->get_current_entry_info(info);
         CHECK( info.filename == "lenmusdoc-example.lmd" );
-        cout << "size=" << info.dwUncompressedSize << endl;
+        //cout << "size=" << info.dwUncompressedSize << endl;
         CHECK( zs->get_size() == 8364L );
         delete file;
     }
@@ -394,7 +394,7 @@ SUITE(ZipInputStreamTest)
         ZipInputStream* zs  = dynamic_cast<ZipInputStream*>(file);
         unsigned char* data = zs->get_as_string();
         ////cout << data << endl;
-        CHECK( strlen( (char*)data ) == zs->get_size() );
+        CHECK( int(strlen( (char*)data )) == zs->get_size() );
         delete file;
         free(data);
     }

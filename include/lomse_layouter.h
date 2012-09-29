@@ -115,6 +115,10 @@ public:
     ~LayouterFactory() {}
 
     static Layouter* create_layouter(ImoContentObj* pImo, Layouter* pParent);
+
+private:
+    static bool compute_value_for_add_shapes_flag(ImoContentObj* pItem,
+                                                  bool fInheritedValue);
 };
 
 

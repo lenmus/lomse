@@ -65,7 +65,7 @@ void LmdParser::parse_text(const std::string& sourceText)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdParser::parse_text(char* sourceText)
+void LmdParser::parse_cstring(char* sourceText)
 {
     parse_char_string(sourceText);
 }

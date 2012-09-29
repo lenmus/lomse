@@ -4647,13 +4647,21 @@ public:
         //[<style>]
         analyse_optional_style(pImo);
 
+        ////[<rowspan>]
+        //if (has_attribute("rowspan"))
+        //    pImo->set_rowspan( get_attribute_as_integer("rowspan", 1) );
+
+        ////[<colspan>]
+        //if (has_attribute("colspan"))
+        //    pImo->set_colspan( get_attribute_as_integer("colspan", 1) );
+
         //[<rowspan>]
-        if (has_attribute("rowspan"))
-            pImo->set_rowspan( get_attribute_as_integer("rowspan", 1) );
+        if (get_optional("rowspan"))
+            pImo->set_rowspan( get_integer_value(1) );
 
         //[<colspan>]
-        if (has_attribute("colspan"))
-            pImo->set_colspan( get_attribute_as_integer("colspan", 1) );
+        if (get_optional("colspan"))
+            pImo->set_colspan( get_integer_value(1) );
 
         // {<inlineObject> | <blockObject>}*
         analyse_inline_or_block_objects(pImo);

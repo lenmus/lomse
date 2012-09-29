@@ -169,7 +169,8 @@ Layouter* LayouterFactory::create_layouter(ImoContentObj* pItem, Layouter* pPare
     GraphicModel* pGModel = pParent->get_graphic_model();
     LibraryScope& libraryScope = pParent->get_library_scope();
     ImoStyles* pStyles = pParent->get_styles();
-    bool fAddShapesToModel = pParent->must_add_shapes_to_model();
+    bool fAddShapesToModel 
+        = compute_value_for_add_shapes_flag(pItem, pParent->must_add_shapes_to_model());
 
     switch (pItem->get_obj_type())
     {
@@ -193,24 +194,43 @@ Layouter* LayouterFactory::create_layouter(ImoContentObj* pItem, Layouter* pPare
 
         case k_imo_table_cell:
             return LOMSE_NEW TableCellLayouter(pItem, pParent, pGModel, libraryScope,
-                                               pStyles);
+                                               pStyles);    //never adds shapes, until row ready
 
         case k_imo_score:
             return LOMSE_NEW ScoreLayouter(pItem, pParent, pGModel, libraryScope);
 
         case k_imo_table:
-            return LOMSE_NEW TableLayouter(pItem, pParent, pGModel, libraryScope, pStyles);
+            return LOMSE_NEW TableLayouter(pItem, pParent, pGModel, libraryScope,
+                                           pStyles, fAddShapesToModel);
 
         // inlines container objects
         case k_imo_anonymous_block:
         case k_imo_para:
         case k_imo_heading:
             return LOMSE_NEW InlinesContainerLayouter(pItem, pParent, pGModel, libraryScope,
-                                                      pStyles, true);   //fAddShapesToModel);
+                                                      pStyles, fAddShapesToModel);
 
         default:
             return LOMSE_NEW NullLayouter(pItem, pParent, pGModel, libraryScope);
     }
+}
+
+//---------------------------------------------------------------------------------------
+bool LayouterFactory::compute_value_for_add_shapes_flag(ImoContentObj* pItem,
+                                                        bool fInheritedValue)
+{
+    //children of main content block always add shapes
+    ImoObj* pParent = pItem->get_parent_imo();
+    if (pParent->is_content() && pParent->get_parent_imo()->is_document())
+        return true;
+
+    //objects inside a table cell never add shapes. Table cell shapes wiil
+    //be added when the table row is fully layouted.
+    if (pParent->is_table_cell())
+        return false;
+
+    //otherwise inherit from parent
+        return fInheritedValue;
 }
 
 

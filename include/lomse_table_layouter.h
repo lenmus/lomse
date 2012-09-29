@@ -56,7 +56,7 @@ class GmoBox;
 class TableCellLayouter;
 class ImoTableSection;
 class TableRowLayouter;
-class SectionLayouter;
+class TableSectionLayouter;
 
 
 //---------------------------------------------------------------------------------------
@@ -69,8 +69,8 @@ protected:
     vector<LUnits> m_columnsWidth;
 
     //helper layouters
-    SectionLayouter* m_headLayouter;
-    SectionLayouter* m_bodyLayouter;
+    TableSectionLayouter* m_headLayouter;
+    TableSectionLayouter* m_bodyLayouter;
 
     //table size
     int m_numHeadRows;
@@ -82,7 +82,7 @@ protected:
 
 public:
     TableLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
-                  LibraryScope& libraryScope, ImoStyles* pStyles);
+                  LibraryScope& libraryScope, ImoStyles* pStyles, bool fAddShapesToModel);
     virtual ~TableLayouter();
 
     //mandatory overrides
@@ -104,8 +104,8 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-// SectionLayouter: helper layouter for a table section (head or body)
-class SectionLayouter : public Layouter
+// TableSectionLayouter: helper layouter for a table section (head or body)
+class TableSectionLayouter : public Layouter
 {
 protected:
     ImoTable* m_pTable;
@@ -121,9 +121,10 @@ protected:
     int m_nextLogicalRow;
 
 public:
-    SectionLayouter(ImoContentObj* pImo, Layouter* pParent, ImoTableSection* pSection,
-                    int numRows, int numCols, LUnits tableWidth, vector<LUnits>& columnsWidth);
-    virtual ~SectionLayouter();
+    TableSectionLayouter(ImoContentObj* pImo, Layouter* pParent, ImoTableSection* pSection,
+                    int numRows, int numCols, LUnits tableWidth, vector<LUnits>& columnsWidth,
+                    bool fAddShapesToModel);
+    virtual ~TableSectionLayouter();
 
     //mandatory overrides
     void layout_in_box();
@@ -138,6 +139,7 @@ public:
 
     //only for tests
     inline vector<TableCellLayouter*>& dbg_get_cell_layouters() { return m_cellLayouters; }
+    inline vector<int>& dbg_get_row_start() { return m_rowsStart; }
 
 
 protected:
@@ -160,7 +162,8 @@ public:
     TableRowLayouter(ImoContentObj* pItem, Layouter* pParent,
                      vector<TableCellLayouter*>& cells,
                      vector<LUnits>& columnsWidth,
-                     int iFirstRow, int numRows, int numCols);
+                     int iFirstRow, int numRows, int numCols,
+                     bool fAddShapesToModel);
     virtual ~TableRowLayouter();
 
     //implementation of Layouter virtual methods
@@ -193,9 +196,11 @@ public:
 
 protected:
     friend class TableLayouter;
-    friend class SectionLayouter;
+    friend class TableSectionLayouter;
     LUnits set_cell_width_and_position(int iRow, int iCol, LUnits xPos,
                                        vector<LUnits>& colWidths);
+    void increment_colspan(int incrColSpan, int iCell, int iCol,
+                           vector<LUnits>& colWidths);
 };
 
 //---------------------------------------------------------------------------------------

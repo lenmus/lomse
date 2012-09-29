@@ -88,7 +88,7 @@ InternalModel* LmdCompiler::compile_file(const std::string& filename)
         ZipInputStream* zip  = static_cast<ZipInputStream*>(pFile);
 
         unsigned char* buffer = zip->get_as_string();
-        m_pLmdParser->parse_text( (char *)buffer );
+        m_pLmdParser->parse_cstring( (char *)buffer );
 
         delete pFile;
         delete buffer;
