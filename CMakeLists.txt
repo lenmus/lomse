@@ -138,7 +138,10 @@ else()
         set(LOMSE_VERSION_STRING "${LOMSE_VERSION_STRING}.${LOMSE_VERSION_PATCH}" )
     endif()
 endif()
-set(LOMSE_VERSION_STRING "${LOMSE_VERSION_STRING}.${LOMSE_REVISION}" )
+set(LOMSE_VERSION "${LOMSE_VERSION_STRING}" )
+message ("version = '${LOMSE_VERSION}'") 
+
+#set(LOMSE_VERSION_STRING "${LOMSE_VERSION_STRING}.${LOMSE_REVISION}" )
 message ("version string = '${LOMSE_VERSION_STRING}'") 
 
 
@@ -220,6 +223,7 @@ endif()
 ###############################################################################
 
 # Check for UnitTest++. Required for unit test
+if (0)
 if(WIN32)
     set( UNITTEST_LIBDIR  ${ROOT_DIR}/packages/UnitTest++/lib )
     set( UNITTEST_INCLUDE_DIRS  ${ROOT_DIR}/packages/UnitTest++/src )
@@ -228,7 +232,7 @@ else()
     pkg_check_modules(UNITTEST REQUIRED unittest++)
 endif()
 link_directories( ${UNITTEST_LIBDIR} )
-
+endif(0)
 
 # Check for Boost >= 1.42.0
 set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0"
@@ -244,9 +248,9 @@ if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
     link_libraries( ${Boost_LIBRARIES} )
     link_directories( ${Boost_LIBRARY_DIRS} )
-#    message("Boost found: libraries: ${Boost_LIBRARIES}" )
-#    message("Boost found: include= ${Boost_INCLUDE_DIRS}" )
-#    message("Boost found: libdir= ${Boost_LIBRARY_DIRS}" )
+    message("Boost found: libraries: ${Boost_LIBRARIES}" )
+    message("Boost found: include= ${Boost_INCLUDE_DIRS}" )
+    message("Boost found: libdir= ${Boost_LIBRARY_DIRS}" )
     message("Boost found: version= ${Boost_LIB_VERSION}" )
 else()
     message(SEND_ERROR "Boost package not found. Reason: ${Boost_ERROR_REASON}" )
@@ -259,9 +263,9 @@ if( FREETYPE_FOUND )
     include_directories( ${FREETYPE_INCLUDE_DIRS} )
     link_libraries( ${FREETYPE_LIBRARIES} )
     link_directories( ${FREETYPE_LINK_DIR} )        
-#    message("Freetype found: libraries= ${FREETYPE_LIBRARIES}" )
-#    message("Freetype found: include= ${FREETYPE_INCLUDE_DIRS}" )
-#    message("Freetype found: libdir= ${FREETYPE_LINK_DIR}" )
+    message("Freetype found: libraries= ${FREETYPE_LIBRARIES}" )
+    message("Freetype found: include= ${FREETYPE_INCLUDE_DIRS}" )
+    message("Freetype found: libdir= ${FREETYPE_LINK_DIR}" )
 else()
     message(SEND_ERROR "FreeType package not found.")
 endif()
@@ -273,9 +277,9 @@ if( PNG_FOUND )
     include_directories( ${PNG_INCLUDE_DIRS} )
     link_libraries( ${PNG_LIBRARIES} )
     link_directories( ${PNG_LINK_DIR} )        
-#    message("libpng found: libraries= ${PNG_LIBRARIES}" )
-#    message("libpng found: include= ${PNG_INCLUDE_DIRS}" )
-#    message("libpng found: libdir= ${PNG_LINK_DIR}" )
+    message("libpng found: libraries= ${PNG_LIBRARIES}" )
+    message("libpng found: include= ${PNG_INCLUDE_DIRS}" )
+    message("libpng found: libdir= ${PNG_LINK_DIR}" )
 else()
     message(SEND_ERROR "libpng package not found.")
 endif()
@@ -287,9 +291,9 @@ if( ZLIB_FOUND )
     include_directories( ${ZLIB_INCLUDE_DIR} )
     link_libraries( ${ZLIB_LIBRARIES} )
     link_directories( ${ZLIB_LINK_DIR} )        
-#    message("zlib found: libraries= ${ZLIB_LIBRARIES}" )
-#    message("zlib found: include= ${ZLIB_INCLUDE_DIRS}" )
-#    message("zlib found: libdir= ${ZLIB_LINK_DIR}" )
+    message("zlib found: libraries= ${ZLIB_LIBRARIES}" )
+    message("zlib found: include= ${ZLIB_INCLUDE_DIRS}" )
+    message("zlib found: libdir= ${ZLIB_LINK_DIR}" )
 else()
     message(SEND_ERROR "zlib package not found.")
 endif()
@@ -590,11 +594,9 @@ source_group( "packages"        FILES ${PACKAGES_FILES} )
 
 set(LOMSE  lomse)
 
-set(LOMSE_VERSION "${LOMSE_VERSION_MAJOR}.${LOMSE_VERSION_MINOR}" )
-
 add_library( ${LOMSE} STATIC ${ALL_SOURCES} )
 set_target_properties(${LOMSE} PROPERTIES VERSION ${LOMSE_VERSION}
-                                          SOVERSION ${LOMSE_VERSION_MAJOR} )
+                                          SOVERSION ${LOMSE_VERSION} )
 
 
 # hack to remove 'Debug' subdirectory from output path. -------------
@@ -631,7 +633,7 @@ set(LOMSE_DYN  lomse-dyn)
 add_library( ${LOMSE_DYN} SHARED ${ALL_SOURCES} )
 set_target_properties(${LOMSE_DYN} 
                       PROPERTIES VERSION ${LOMSE_VERSION}
-                                 SOVERSION ${LOMSE_VERSION_MAJOR}
+                                 SOVERSION ${LOMSE_VERSION}
                                  OUTPUT_NAME "lomse"
                                  RUNTIME_OUTPUT_DIRECTORY  ${ROOT_DIR}/bin )
 
@@ -642,6 +644,7 @@ set_target_properties(${LOMSE_DYN}
 # Target: program for testing the library
 #
 ###############################################################################
+if(0)
 
 set (TESTLIB  testlib)
 
@@ -819,7 +822,7 @@ endif()
 # dependencies
 add_dependencies(example_1 lomse)
 
-
+endif(0)
 
 ###############################################################################
 #
@@ -848,7 +851,13 @@ if( UNIX )
 
     # copy generated libraries
     install( TARGETS ${LOMSE} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
-    install( TARGETS ${LOMSE_DYN} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
+    install( TARGETS ${LOMSE_DYN} LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
+
+    #create symlink to library
+	install( CODE
+        "EXECUTE_PROCESS(COMMAND ln -fs ${CMAKE_INSTALL_PREFIX}/lib/${LOMSE_DYN} 
+                                        ${CMAKE_INSTALL_PREFIX}/lib/liblomse.so )" 
+    )
 
     # copy lomse includes
     install(DIRECTORY ${INCLUDES_LOMSE}/

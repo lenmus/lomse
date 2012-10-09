@@ -2650,8 +2650,10 @@ public:
         LdpAnalyser a(m_reporter, m_libraryScope, pDoc);
         ImoObj* pScore =  a.analyse_tree_and_get_object(tree);
         delete tree->get_root();
+        m_pAnalyser->score_analysis_begin( static_cast<ImoScore*>(pScore) );
 
         add_to_model(pScore);
+        m_pAnalyser->score_analysis_end();
         return pScore;
     }
 };
@@ -3907,10 +3909,6 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-// <param> = (param <name> [<value>])
-// <name> = <label>
-// <value> = <string>
-//
 // <param name='name'>value</param>
 
 class ParamLmdAnalyser : public LmdElementAnalyser
@@ -3922,24 +3920,14 @@ public:
 
     ImoObj* do_analysis()
     {
-        string name;
-        string value = "";
-
-        // <name>
-        if (get_optional(k_name))
-            name = get_string_value();
-        else
+        if (!has_attribute("name"))
         {
             error_msg("Missing name for element 'param'. Element ignored.");
             return NULL;
         }
 
-        //<value>
-        if (get_optional(k_value))
-            value = get_string_value();
-
-        error_if_more_elements();
-
+        string name = get_attribute("name");
+        string value = get_value(m_pAnalysedNode);
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoParamInfo* pParam = static_cast<ImoParamInfo*>(
