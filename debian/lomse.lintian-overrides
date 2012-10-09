@@ -1,0 +1,18 @@
+# For now, ttf files are installed as part of lomse packakge
+lomse: duplicate-font-file usr/share/lomse/fonts/LiberationSans-Bold.ttf also in ttf-liberation
+lomse: duplicate-font-file usr/share/lomse/fonts/LiberationSans-BoldItalic.ttf also in ttf-liberation
+lomse: duplicate-font-file usr/share/lomse/fonts/LiberationSans-Italic.ttf also in ttf-liberation
+lomse: duplicate-font-file usr/share/lomse/fonts/LiberationSans-Regular.ttf also in ttf-liberation
+lomse: duplicate-font-file usr/share/lomse/fonts/LiberationSerif-Bold.ttf also in ttf-liberation
+lomse: duplicate-font-file usr/share/lomse/fonts/LiberationSerif-BoldItalic.ttf also in ttf-liberation
+lomse: duplicate-font-file usr/share/lomse/fonts/LiberationSerif-Italic.ttf also in ttf-liberation
+lomse: duplicate-font-file usr/share/lomse/fonts/LiberationSerif-Regular.ttf also in ttf-liberation
+
+#Policy allows small packages to include both the runtime and the development libraries
+lomse: non-dev-pkg-with-shlib-symlink usr/lib/liblomse.so.0.12 usr/lib/liblomse.so
+
+#Volume is NTFS and execution permission can not be removed
+lomse source: package-file-is-executable debian/changelog
+lomse source: package-file-is-executable debian/control
+lomse source: package-file-is-executable debian/copyright
+

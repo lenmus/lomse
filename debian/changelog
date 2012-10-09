@@ -1,0 +1,7 @@
+lomse (0.12.4) precise; urgency=low
+
+  * New upstream release required for LenMus 5.2:
+    - Library can now process files in new LMD format, both plain and zipped.
+    - Fixed Chinese ISO language code
+
+ -- Cecilio Salmeron <s.cecilio@gmail.com>  Tue, 02 Oct 2012 16:41:35 +0200

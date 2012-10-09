@@ -1,0 +1,32 @@
+Source: lomse
+Section: libs
+Priority: optional
+Maintainer: Cecilio Salmeron <s.cecilio@gmail.com>
+Standards-Version: 3.9.3
+Build-Depends: debhelper (>= 8.0.0), cdbs, cmake (>= 2.8.0),
+    pkg-config,
+    libfreetype6-dev, zlib1g (>= 1:1.1.4), libpng-dev, 
+    libboost-date-time-dev, libboost-thread-dev
+Homepage: http://www.lenmus.org/en/lomse/intro
+
+Package: lomse
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: music scores rendering/edition library
+ Lomse is a project designed to provide software 
+ developers with a library to add capabilities to any 
+ program for rendering, editing and playing back music
+ scores.
+ .
+ Lomse library hopes to boundle all stuff needed
+ for rendering, editing and playing back scores, and to
+ be simple enough for newbie programmers but 
+ sophisticated enough to create great applications for
+ musicians. It is platform independent.
+ .
+ Lomse stands for "Lenmus Open Music Score Edition" 
+ library. 
+ -
+ You can find more information at 
+ http://www.lenmus.org/en/lomse/intro
+
