@@ -4,4 +4,4 @@ lomse (0.12.4) precise; urgency=low
     - Library can now process files in new LMD format, both plain and zipped.
     - Fixed Chinese ISO language code
 
- -- Cecilio Salmeron <s.cecilio@gmail.com>  Tue, 02 Oct 2012 16:41:35 +0200
+ -- Cecilio Salmeron <s.cecilio@gmail.com>  Tue, 22 Oct 2012 16:41:35 +0200

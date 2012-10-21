@@ -54,6 +54,7 @@ protected:
 
 public:
     LmdGenerator(LmdExporter* pExporter);
+    virtual ~LmdGenerator() {}
 
     virtual string generate_source() = 0;
 

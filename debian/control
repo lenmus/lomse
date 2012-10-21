@@ -1,4 +1,4 @@
-Source: lomse
+Source: liblomse
 Section: libs
 Priority: optional
 Maintainer: Cecilio Salmeron <s.cecilio@gmail.com>
@@ -9,7 +9,7 @@ Build-Depends: debhelper (>= 8.0.0), cdbs, cmake (>= 2.8.0),
     libboost-date-time-dev, libboost-thread-dev
 Homepage: http://www.lenmus.org/en/lomse/intro
 
-Package: lomse
+Package: liblomse
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: music scores rendering/edition library

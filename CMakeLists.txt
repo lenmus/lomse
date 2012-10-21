@@ -930,7 +930,7 @@ endif()
 
 set(CPACK_PACKAGE_VENDOR "LenMus Project")
 set(CPACK_PACKAGE_VERSION ${LOMSE_VERSION_STRING} )
-set(CPACK_PACKAGE_NAME "lomse")
+set(CPACK_PACKAGE_NAME "liblomse")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Free open source library to render music scores")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${ROOT_DIR}/README")
 set(CPACK_PACKAGE_CONTACT "s.cecilio@gmail.com")
@@ -947,7 +947,7 @@ if(UNIX)
     set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}\r\rLomse is a free open source project to provide software developers with\r a C++ library for rendering, editing and playing back music scores.\r With it, you can add capabilities to any program for displaying and\r editing music scores. It is witten in C++, it is platform independent.\r\rLomse website: http://www.lenmus.org/en/lomse/intro")
 
     set(CPACK_PACKAGE_FILE_NAME
-        "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-linux-i386-32bits")
+        "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-linux-i386")
     #even hardcoding dependencies, this doesn't work in my machine!
     #set(CPACK_DEBIAN_PACKAGE_DEPENDS "libfreetype6, libpng12 (>=1.2.42), zlib1g (>= 1:1.2.1), libboost_date_time${Boost_LIB_VERSION}, libboost_thread${Boost_LIB_VERSION}" )
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
