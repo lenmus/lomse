@@ -6,5 +6,5 @@
 #define LOMSE_VERSION_MAJOR    0
 #define LOMSE_VERSION_MINOR    12
 #define LOMSE_VERSION_TYPE     ' '
-#define LOMSE_VERSION_PATCH    4
+#define LOMSE_VERSION_PATCH    5
 

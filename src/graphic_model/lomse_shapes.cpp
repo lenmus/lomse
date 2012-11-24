@@ -180,6 +180,11 @@ GmoShapeImage::GmoShapeImage(ImoObj* pCreatorImo, SpImage image, UPoint pos, USi
     m_origin = pos;
     m_size = size;
 }
+//---------------------------------------------------------------------------------------
+void GmoShapeImage::set_image(SpImage image)
+{
+    m_image = image;
+}
 
 //---------------------------------------------------------------------------------------
 void GmoShapeImage::on_draw(Drawer* pDrawer, RenderOptions& opt)

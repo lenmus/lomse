@@ -394,7 +394,7 @@ protected:
                     ras.add_path(m_curved_trans_contour, attr.path_index);
                 }
 
-                color = attr.fill_color;
+                color = to_rgba(attr.fill_color);
                 color.opacity(color.opacity() * opacity);
                 ren.color(color);
                 agg::render_scanlines(ras, sl, ren);
@@ -469,7 +469,7 @@ protected:
                 ras.reset();
                 ras.filling_rule(fill_non_zero);
                 ras.add_path(m_curved_stroked_trans, attr.path_index);
-                color = attr.stroke_color;
+                color = to_rgba(attr.stroke_color);
                 color.opacity(color.opacity() * opacity);
                 ren.color(color);
                 agg::render_scanlines(ras, sl, ren);

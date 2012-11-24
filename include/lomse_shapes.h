@@ -122,6 +122,7 @@ protected:
     //friend class Control;
 public:
     GmoShapeImage(ImoObj* pCreatorImo, SpImage image, UPoint pos, USize size);
+    void set_image(SpImage image);
 
 public:
     void on_draw(Drawer* pDrawer, RenderOptions& opt);

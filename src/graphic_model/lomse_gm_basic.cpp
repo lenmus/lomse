@@ -585,7 +585,7 @@ void GmoBox::draw_border(Drawer* pDrawer, RenderOptions& opt)
                             - pStyle->margin_bottom());
 
         pDrawer->begin_path();
-        pDrawer->fill( Color(255, 255, 255, 0) );     //background white transparent
+        pDrawer->fill( pStyle->background_color() );
         pDrawer->stroke( Color(0,0,0) );            //TODO: border color
         pDrawer->move_to(xLeft, yTop);
 
@@ -1106,10 +1106,10 @@ GmoBoxControl::GmoBoxControl(Control* ctrl, const UPoint& origin, LUnits width,
 //---------------------------------------------------------------------------------------
 void GmoBoxControl::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
+    GmoBox::on_draw(pDrawer, opt);
+
     if (m_pControl)
         m_pControl->on_draw(pDrawer, opt);
-
-    GmoBox::on_draw(pDrawer, opt);
 }
 
 //---------------------------------------------------------------------------------------

@@ -65,12 +65,17 @@ Renderer* RendererFactory::create_renderer(LibraryScope& libraryScope,
 //        case k_pix_format_gray16:
 //            return LOMSE_NEW RendererTemplate<PixFormat_gray16>(libraryScope.get_screen_ppi(),
 //                                                         attr_storage, path);
-//        case k_pix_format_rgb555:
-//            return LOMSE_NEW RendererTemplate<PixFormat_rgb555>(libraryScope.get_screen_ppi(),
-//                                                         attr_storage, path);
-//        case k_pix_format_rgb565:
-//            return LOMSE_NEW RendererTemplate<PixFormat_rgb565>(libraryScope.get_screen_ppi(),
-//                                                         attr_storage, path);
+
+        case k_pix_format_rgb555:
+            return LOMSE_NEW RendererTemplate<PixFormat_rgb555,
+                                        PixFormat_rgb555::color_type>
+                            (libraryScope.get_screen_ppi(), attr_storage, path);
+
+        case k_pix_format_rgb565:
+            return LOMSE_NEW RendererTemplate<PixFormat_rgb565,
+                                        PixFormat_rgb565::color_type>
+                            (libraryScope.get_screen_ppi(), attr_storage, path);
+
 //        case k_pix_format_rgbAAA:
 //            return LOMSE_NEW RendererTemplate<PixFormat_rgbAAA>(libraryScope.get_screen_ppi(),
 //                                                         attr_storage, path);
@@ -83,28 +88,35 @@ Renderer* RendererFactory::create_renderer(LibraryScope& libraryScope,
 //        case k_pix_format_bgrABB:
 //            return LOMSE_NEW RendererTemplate<PixFormat_bgrABB>(libraryScope.get_screen_ppi(),
 //                                                         attr_storage, path);
+
         case k_pix_format_rgb24:
             return LOMSE_NEW RendererTemplate<PixFormat_rgb24,
                                         PixFormat_rgb24::color_type>
                             (libraryScope.get_screen_ppi(), attr_storage, path);
+
         //case k_pix_format_bgr24:
         //    return LOMSE_NEW RendererTemplate<PixFormat_bgr24,
         //                                PixFormat_bgr24::color_type>
         //                    (libraryScope.get_screen_ppi(), attr_storage, path);
+
         case k_pix_format_rgba32:
             return LOMSE_NEW RendererTemplate<agg::pixfmt_rgba32,
                                         agg::pixfmt_rgba32::color_type>
                             (libraryScope.get_screen_ppi(), attr_storage, path);
-        //case k_pix_format_argb32:
-        //    return LOMSE_NEW RendererTemplate<PixFormat_argb32>(libraryScope.get_screen_ppi(),
-        //                                                 attr_storage, path);
+
+        case k_pix_format_argb32:
+            return LOMSE_NEW RendererTemplate<agg::pixfmt_argb32,
+                                        agg::pixfmt_argb32::color_type>
+                            (libraryScope.get_screen_ppi(), attr_storage, path);
+
         //case k_pix_format_abgr32:
         //    return LOMSE_NEW RendererTemplate<PixFormat_abgr32>(libraryScope.get_screen_ppi(),
-        //                                                 attr_storage, path);
+
         case k_pix_format_bgra32:
             return LOMSE_NEW RendererTemplate<PixFormat_bgra32,
                                         PixFormat_bgra32::color_type>
                             (libraryScope.get_screen_ppi(), attr_storage, path);
+
         //case k_pix_format_rgb48:
         //    return LOMSE_NEW RendererTemplate<PixFormat_rgb48>(libraryScope.get_screen_ppi(),
         //                                                 attr_storage, path);

@@ -71,6 +71,7 @@ public:
             if (*it == control)
             {
                 delete *it;
+                m_controls.erase(it);
                 break;
             }
         }

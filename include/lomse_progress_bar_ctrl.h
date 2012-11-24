@@ -27,8 +27,8 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef _LOMSE_CHECKBOX_CTRL_H__
-#define _LOMSE_CHECKBOX_CTRL_H__
+#ifndef _LOMSE_PROGRESS_BAR_CTRL_H__
+#define _LOMSE_PROGRESS_BAR_CTRL_H__
 
 #include "lomse_control.h"
 
@@ -38,12 +38,13 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-// A checkable box plus a static text element and/or and image.
-class CheckboxCtrl : public Control, public VertexSource
+// A progress bar
+class ProgressBarCtrl : public Control
 {
 protected:
     LibraryScope& m_libraryScope;
     string m_label;
+    float m_maxValue;
     string m_language;
     GmoBoxControl* m_pMainBox;
     ImoStyle* m_style;
@@ -53,22 +54,18 @@ protected:
     LUnits  m_xCenter;
     LUnits  m_yCenter;
 
-    Color   m_normalColor;
-    Color   m_hoverColor;
-    Color   m_prevColor;
-    Color   m_currentColor;
+    Color   m_textColor;
+    Color   m_barColor;
 
-private:
-    bool    m_status;
-    int     m_nCurVertex;   //index to current vertex
-    static  Vertex m_tickVertices[];
-    static  const int m_nNumVertices;
+    float   m_curValue;
+    float   m_percent;
+    bool    m_fDisplayPercentage;
 
 public:
-    CheckboxCtrl(LibraryScope& libScope, DynGenerator* pOwner, Document* pDoc,
-                  const string& label, LUnits width=-1.0f, LUnits height=-1.0f,
-                  ImoStyle* pStyle=NULL);
-    virtual ~CheckboxCtrl() {}
+    ProgressBarCtrl(LibraryScope& libScope, DynGenerator* pOwner, Document* pDoc,
+                    float maxValue, LUnits width, LUnits height=-1.0f,
+                    ImoStyle* pStyle=NULL);
+    virtual ~ProgressBarCtrl() {}
 
     //Control mandatory overrides
     USize measure();
@@ -83,15 +80,15 @@ public:
     LUnits right() { return m_pos.x + m_width; }
 
     //specific methods
-    void set_text(const string& text);
-    void set_tooltip(const string& text);
-    void change_label(const string& text);
-    inline bool is_checked() { return m_status; }
-    inline void set_checked(bool value) { m_status = value; }
+    void set_value(float value);
+    inline float get_value() { return m_curValue; }
 
-    //VertexSource mandatory methods
-    unsigned vertex(double* px, double* py);
-    void rewind(int pathId = 0) { m_nCurVertex = 0; }
+    inline void set_percentage_mode(bool value) { m_fDisplayPercentage = value; }
+    inline bool is_in_percentage_mode() { return m_fDisplayPercentage; }
+
+    void set_tooltip(const string& text);
+    inline void set_bar_color(Color color) { m_barColor = color; }
+
 
 protected:
     void select_font();
@@ -103,4 +100,4 @@ protected:
 
 } //namespace lomse
 
-#endif    //_LOMSE_CHECKBOX_CTRL_H__
+#endif    //_LOMSE_PROGRESS_BAR_CTRL_H__
