@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -253,8 +253,8 @@ void Interactor::mouse_in_out(Pixels x, Pixels y)
         ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
         if (pGmo->is_box_control() || (pImo && pImo->is_visible()) )
         {
-            if (pImo)
-                cout << "mouse-in: " << pImo->get_obj_type() << endl;
+//            if (pImo)
+//                cout << "mouse-in: " << pImo->get_obj_type() << endl;
             send_mouse_in_event(pGmo);
             m_pLastMouseOverGmo = pGmo;
         }

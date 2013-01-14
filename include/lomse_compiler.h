@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -43,7 +43,6 @@ namespace lomse
 class ModelBuilder;
 class DocumentScope;
 class LibraryScope;
-class IdAssigner;
 class InternalModel;
 class ImoDocument;
 class Document;
@@ -57,14 +56,11 @@ protected:
     Parser*         m_pParser;
     Analyser*       m_pAnalyser;
     ModelBuilder*   m_pModelBuilder;
-    IdAssigner*     m_pIdAssigner;
     Document*       m_pDoc;
-//    SpLdpTree       m_pFinalTree;
     string         m_fileLocator;
 
     Compiler() {}
-    Compiler(Parser* p, Analyser* a, ModelBuilder* mb, IdAssigner* ida,
-             Document* pDoc);
+    Compiler(Parser* p, Analyser* a, ModelBuilder* mb, Document* pDoc);
 
 public:
     virtual ~Compiler();
@@ -72,18 +68,12 @@ public:
     //compilation
     virtual InternalModel* compile_file(const std::string& filename)=0;
     virtual InternalModel* compile_string(const std::string& source)=0;
-    //InternalModel* compile_input(LdpReader& reader);
     virtual InternalModel* create_empty()=0;
     virtual InternalModel* create_with_empty_score()=0;
 
     //info
     int get_num_errors();
     string get_file_locator() { return m_fileLocator; }
-
-//protected:
-//    InternalModel* compile_parsed_tree(SpLdpTree pParseTree);
-//    SpLdpTree wrap_score_in_lenmusdoc(SpLdpTree pParseTree);
-//    SpLdpTree parse_empty_doc();
 
 };
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -36,6 +36,7 @@
 #include "lomse_document.h"
 #include "lomse_internal_model.h"
 #include "lomse_events.h"
+#include "lomse_hyperlink_ctrl.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -157,9 +158,8 @@ SUITE(DocumentEventsTest)
 
         CHECK( handler.event_received() == false );
 
-        Observer* pObs = doc.my_get_first_observer();
         SpEventInfo ev( new MyEventOnClick(pButton) );
-        pObs->notify(ev);
+        doc.notify_observers(ev, ev->get_source() );
 
         CHECK( handler.event_received() == true );
     }
@@ -190,30 +190,47 @@ SUITE(DocumentEventsTest)
         pButton->add_event_handler(k_on_click_event, &handler);
         CHECK( handler.event_received() == false );
 
-        Observer* pObs = doc.my_get_first_observer();
         SpEventInfo ev( new MyEventOnClick(pButton) );
-        pObs->notify(ev);
+        doc.notify_observers(ev, ev->get_source() );
 
         CHECK( handler.event_received() == true );
     }
 
-//    TEST_FIXTURE(DocumentEventsTestFixture, ReplaceHandler)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.create_empty();
-//        ImoParagraph* pPara = doc.add_paragraph();
-//        ImoButton* pButton = pPara->add_button("Click me", USize(1000.0f, 600.0f));
-//
-//        MyObserver observer(pButton);
-//        MyEventHandler handler;
-//        observer.add_handler(k_on_click_event, &handler,
-//                             MyEventHandler::my_on_event_received_wrapper);
-//        MyEventHandler handler2;
-//        observer.add_handler(k_on_click_event, &handler2,
-//                             MyEventHandler::my_on_event_received_wrapper);
-//
-//        CHECK( observer.my_num_observers() == 1 );
-//    }
+    TEST_FIXTURE(DocumentEventsTestFixture, control)
+    {
+        MyDocument doc(m_libraryScope);
+        doc.create_empty();
+        ImoParagraph* pPara = doc.add_paragraph();
+        HyperlinkCtrl* pLink = new HyperlinkCtrl(m_libraryScope, NULL, &doc, "link");
+        pPara->add_control(pLink);
+        MyEventHandlerCPP handler;
+        pLink->add_event_handler(k_on_click_event, &handler);
+
+        CHECK( handler.event_received() == false );
+
+        SpEventInfo ev( new MyEventOnClick(pControl) );
+        pLink->handle_event(ev);
+
+        CHECK( handler.event_received() == true );
+    }
+
+////    TEST_FIXTURE(DocumentEventsTestFixture, ReplaceHandler)
+////    {
+////        Document doc(m_libraryScope);
+////        doc.create_empty();
+////        ImoParagraph* pPara = doc.add_paragraph();
+////        ImoButton* pButton = pPara->add_button("Click me", USize(1000.0f, 600.0f));
+////
+////        MyObserver observer(pButton);
+////        MyEventHandler handler;
+////        observer.add_handler(k_on_click_event, &handler,
+////                             MyEventHandler::my_on_event_received_wrapper);
+////        MyEventHandler handler2;
+////        observer.add_handler(k_on_click_event, &handler2,
+////                             MyEventHandler::my_on_event_received_wrapper);
+////
+////        CHECK( observer.my_num_observers() == 1 );
+////    }
 
 };
 

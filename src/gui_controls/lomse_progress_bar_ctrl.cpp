@@ -36,7 +36,6 @@
 #include "lomse_drawer.h"
 #include "lomse_calligrapher.h"
 #include "lomse_events.h"
-#include "lomse_dyn_generator.h"
 
 #include <boost/format.hpp>
 
@@ -46,10 +45,10 @@ namespace lomse
 //=======================================================================================
 // ProgressBarCtrl implementation
 //=======================================================================================
-ProgressBarCtrl::ProgressBarCtrl(LibraryScope& libScope, DynGenerator* pOwner,
+ProgressBarCtrl::ProgressBarCtrl(LibraryScope& libScope, Control* pParent,
                                  Document* pDoc, float maxValue,
                                  LUnits width, LUnits height, ImoStyle* pStyle)
-    : Control(pOwner, pDoc)
+    : Control(pDoc, pParent)
     , m_libraryScope(libScope)
     , m_label("0.0%")
     , m_maxValue(maxValue)
@@ -74,7 +73,8 @@ ProgressBarCtrl::ProgressBarCtrl(LibraryScope& libScope, DynGenerator* pOwner,
 
     measure();
 
-    pOwner->accept_control_ownership(this);
+    if (pParent)
+        pParent->take_ownership_of(this);
 }
 
 //---------------------------------------------------------------------------------------

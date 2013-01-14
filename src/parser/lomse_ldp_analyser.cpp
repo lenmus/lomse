@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -966,7 +966,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoBarline* pBarline = static_cast<ImoBarline*>(
-                                    ImFactory::inject(k_imo_barline, pDoc) );
+                                    ImFactory::inject(k_imo_barline, pDoc, get_node_id()) );
         pBarline->set_type(ImoBarline::k_simple);
 
         // <type> (label)
@@ -1110,7 +1110,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoBezierInfo* pBezier = static_cast<ImoBezierInfo*>(
-                                    ImFactory::inject(k_imo_bezier_info, pDoc));
+                ImFactory::inject(k_imo_bezier_info, pDoc, get_node_id()) );
 
         while (more_params_to_analyse())
         {
@@ -1215,7 +1215,8 @@ public:
     void do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoChord* pChord = static_cast<ImoChord*>( ImFactory::inject(k_imo_chord, pDoc) );
+        ImoChord* pChord = static_cast<ImoChord*>(
+                              ImFactory::inject(k_imo_chord, pDoc, get_node_id()) );
 
         // <note>*
         while (more_params_to_analyse())
@@ -1272,7 +1273,8 @@ public:
     void do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoClef* pClef = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, pDoc) );
+        ImoClef* pClef = static_cast<ImoClef*>(
+                            ImFactory::inject(k_imo_clef, pDoc, get_node_id()) );
 
         // <type> (label)
         if (get_optional(k_label))
@@ -1377,7 +1379,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoContent* pContent = static_cast<ImoContent*>(
-                                        ImFactory::inject(k_imo_content, pDoc) );
+                        ImFactory::inject(k_imo_content, pDoc, get_node_id()) );
 
         //node must be added to model before adding content to it, because
         //dynamic objects will generate requests to create other obejcts
@@ -1421,7 +1423,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoSystemBreak* pCtrl = static_cast<ImoSystemBreak*>(
-                                    ImFactory::inject(k_imo_system_break, pDoc) );
+                        ImFactory::inject(k_imo_system_break, pDoc, get_node_id()) );
         add_to_model(pCtrl);
     }
 };
@@ -1445,7 +1447,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoCursorInfo* pCursor = static_cast<ImoCursorInfo*>(
-                                    ImFactory::inject(k_imo_cursor_info, pDoc));
+                        ImFactory::inject(k_imo_cursor_info, pDoc, get_node_id()));
 
         // <instrNumber>
         if (get_mandatory(k_number))
@@ -1756,7 +1758,8 @@ protected:
                 pParent = pStyles->get_style_or_default(parent);
 
             Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, pDoc));
+            ImoStyle* pStyle = static_cast<ImoStyle*>(
+                                  ImFactory::inject(k_imo_style, pDoc, get_node_id()));
             pStyle->set_name(name);
             pStyle->set_parent_style(pParent);
             return pStyle;
@@ -1792,7 +1795,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoDynamic* pDyn = static_cast<ImoDynamic*>(
-                                    ImFactory::inject(k_imo_dynamic, pDoc) );
+                            ImFactory::inject(k_imo_dynamic, pDoc, get_node_id()) );
 
         // <classid>
         if (get_mandatory(k_classid))
@@ -1835,7 +1838,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoFermata* pImo = static_cast<ImoFermata*>(
-                                ImFactory::inject(k_imo_fermata, pDoc) );
+                                ImFactory::inject(k_imo_fermata, pDoc, get_node_id()) );
 
 
         // <placement>
@@ -2103,7 +2106,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoGoBackFwd* pImo = static_cast<ImoGoBackFwd*>(
-                                ImFactory::inject(k_imo_go_back_fwd, pDoc) );
+                                ImFactory::inject(k_imo_go_back_fwd, pDoc, get_node_id()) );
         bool fFwd = m_pAnalysedNode->is_type(k_goFwd);
         pImo->set_forward(fFwd);
 
@@ -2192,7 +2195,7 @@ public:
 //@    (graphic line 30 0  80 -20)
 //@    (graphic line 30 10 80 0)
 //@
-#if (LOMSE_COMPATIBILITY_1_5 == 1)
+#if LOMSE_COMPATIBILITY_LDP_1_5
 
 class GraphicAnalyser : public ElementAnalyser
 {
@@ -2217,7 +2220,7 @@ public:
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoScoreLine* pLine = static_cast<ImoScoreLine*>(
-                                    ImFactory::inject(k_imo_score_line, pDoc));
+                            ImFactory::inject(k_imo_score_line, pDoc, get_node_id()));
 
         //xStart
         if (get_mandatory(k_number))
@@ -2242,7 +2245,7 @@ public:
     }
 
 };
-#endif  //(LOMSE_COMPATIBILITY_1_5 == 1)
+#endif  //LOMSE_COMPATIBILITY_LDP_1_5
 
 //@--------------------------------------------------------------------------------------
 //@ <group> = (group [<grpName>][<grpAbbrev>]<grpSymbol>[<joinBarlines>]
@@ -2264,7 +2267,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
-                                    ImFactory::inject(k_imo_instr_group, pDoc));
+                        ImFactory::inject(k_imo_instr_group, pDoc, get_node_id()));
 
 
         // [<grpName>]
@@ -2350,7 +2353,7 @@ public:
         {
             Document* pDoc = m_pAnalyser->get_document_being_analysed();
             ImoHeading* pHeading = static_cast<ImoHeading*>(
-                                        ImFactory::inject(k_imo_heading, pDoc) );
+                            ImFactory::inject(k_imo_heading, pDoc, get_node_id()) );
             pHeading->set_level( get_integer_value(1) );
 
             // [<style>]
@@ -2382,7 +2385,8 @@ public:
     void do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoImage* pImg = static_cast<ImoImage*>( ImFactory::inject(k_imo_image, pDoc) );
+        ImoImage* pImg = static_cast<ImoImage*>(
+                                ImFactory::inject(k_imo_image, pDoc, get_node_id()) );
 
         // [<style>]
         analyse_optional_style(pImg);
@@ -2425,7 +2429,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoMidiInfo* pInfo = static_cast<ImoMidiInfo*>(
-                                    ImFactory::inject(k_imo_midi_info, pDoc) );
+                            ImFactory::inject(k_imo_midi_info, pDoc, get_node_id()) );
 
         // num_instr
         if (!get_optional(k_number) || !set_instrument(pInfo))
@@ -2490,7 +2494,7 @@ public:
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoInstrument* pInstrument = static_cast<ImoInstrument*>(
-                                        ImFactory::inject(k_imo_instrument, pDoc) );
+                            ImFactory::inject(k_imo_instrument, pDoc, get_node_id()) );
 
         // [<name>]
         analyse_optional(k_name, pInstrument);
@@ -2562,7 +2566,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoKeySignature* pKey = static_cast<ImoKeySignature*>(
-                                    ImFactory::inject(k_imo_key_signature, pDoc) );
+                            ImFactory::inject(k_imo_key_signature, pDoc, get_node_id()) );
 
         // <type> (label)
         if (get_optional(k_label))
@@ -2623,7 +2627,8 @@ public:
         {
             string version = get_version();
             Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            pImoDoc = static_cast<ImoDocument*>(ImFactory::inject(k_imo_document, pDoc));
+            pImoDoc = static_cast<ImoDocument*>(
+                                ImFactory::inject(k_imo_document, pDoc, get_node_id()));
             pImoDoc->set_version(version);
             m_pAnalyser->save_root_imo_document(pImoDoc);
             pDoc->set_imo_doc(pImoDoc);
@@ -2654,7 +2659,6 @@ public:
 
         error_if_more_elements();
 
-        pImoDoc->set_id( m_pAnalysedNode->get_id() );
         m_pAnalysedNode->set_imo(pImoDoc);
     }
 
@@ -2675,7 +2679,7 @@ protected:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         Linker linker(pDoc);
         ImoStyles* pStyles = static_cast<ImoStyles*>(
-                                    ImFactory::inject(k_imo_styles, pDoc));
+                        ImFactory::inject(k_imo_styles, pDoc, get_node_id()));
         linker.add_child_to_model(pImoDoc, pStyles, k_styles);
         ImoStyle* pDefStyle = pImoDoc->get_default_style();
         pImoDoc->set_style(pDefStyle);
@@ -2712,7 +2716,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoScoreLine* pLine = static_cast<ImoScoreLine*>(
-                                    ImFactory::inject(k_imo_score_line, pDoc) );
+                        ImFactory::inject(k_imo_score_line, pDoc, get_node_id()) );
 
         // <startPoint>
         if (get_mandatory(k_startPoint))
@@ -2765,7 +2769,8 @@ public:
     void do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoLink* pLink = static_cast<ImoLink*>( ImFactory::inject(k_imo_link, pDoc) );
+        ImoLink* pLink = static_cast<ImoLink*>(
+                           ImFactory::inject(k_imo_link, pDoc, get_node_id()) );
 
 
         // [<style>]
@@ -2815,7 +2820,8 @@ public:
         ELdpElement type = m_pAnalysedNode->get_type();
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoList* pList = static_cast<ImoList*>(ImFactory::inject(k_imo_list, pDoc) );
+        ImoList* pList = static_cast<ImoList*>(
+                           ImFactory::inject(k_imo_list, pDoc, get_node_id()) );
         pList->set_list_type(type == k_itemizedlist ? ImoList::k_itemized
                                                     : ImoList::k_ordered);
 
@@ -2844,7 +2850,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoListItem* pListItem = static_cast<ImoListItem*>(
-                                ImFactory::inject(k_imo_listitem, pDoc) );
+                        ImFactory::inject(k_imo_listitem, pDoc, get_node_id()) );
         // [<style>]
         analyse_optional_style(pListItem);
 
@@ -2878,7 +2884,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoMetronomeMark* pMtr = static_cast<ImoMetronomeMark*>(
-                                    ImFactory::inject(k_imo_metronome_mark, pDoc) );
+                    ImFactory::inject(k_imo_metronome_mark, pDoc, get_node_id()) );
 
         // { <NoteType><TicksPerMinute> | <NoteType><NoteType> | <TicksPerMinute> }
         if (get_optional(k_label))
@@ -2966,7 +2972,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoMusicData* pMD = static_cast<ImoMusicData*>(
-                                ImFactory::inject(k_imo_music_data, pDoc) );
+                    ImFactory::inject(k_imo_music_data, pDoc, get_node_id()) );
 
         // [{<xxxx>|<yyyy>|<zzzz>}*]    alternatives: zero or more
         while (more_params_to_analyse())
@@ -2985,7 +2991,7 @@ public:
                    || analyse_optional(k_time_signature, pMD)
                    || analyse_optional(k_goFwd, pMD)
                    || analyse_optional(k_goBack, pMD)
-#if (LOMSE_COMPATIBILITY_1_5 == 1)
+#if LOMSE_COMPATIBILITY_LDP_1_5
                    || analyse_optional(k_graphic, pMD)
                    || analyse_optional(k_line, pMD)
                    || analyse_optional(k_text, pMD)
@@ -3052,12 +3058,14 @@ public:
         ImoRest* pRest = NULL;
         if (fIsRest)
         {
-            pRest = static_cast<ImoRest*>(ImFactory::inject(k_imo_rest, pDoc));
+            pRest = static_cast<ImoRest*>(
+                          ImFactory::inject(k_imo_rest, pDoc, get_node_id()) );
             pNR = pRest;
         }
         else
         {
-            pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, pDoc));
+            pNote = static_cast<ImoNote*>(
+                          ImFactory::inject(k_imo_note, pDoc, get_node_id()) );
             pNR = pNote;
         }
 
@@ -3829,7 +3837,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoParagraph* pPara = static_cast<ImoParagraph*>(
-                                        ImFactory::inject(k_imo_para, pDoc) );
+                            ImFactory::inject(k_imo_para, pDoc, get_node_id()) );
         // [<style>]
         analyse_optional_style(pPara);
 
@@ -3877,7 +3885,7 @@ public:
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoParamInfo* pParam = static_cast<ImoParamInfo*>(
-                                    ImFactory::inject(k_imo_param_info, pDoc) );
+                        ImFactory::inject(k_imo_param_info, pDoc, get_node_id()) );
         pParam->set_name(name);
         pParam->set_value(value);
         add_to_model(pParam);
@@ -3950,7 +3958,8 @@ public:
     void do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, pDoc));
+        ImoScore* pScore = static_cast<ImoScore*>(
+                              ImFactory::inject(k_imo_score, pDoc, get_node_id()) );
         m_pAnalyser->score_analysis_begin(pScore);
 
         // <vers>
@@ -4072,7 +4081,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoScorePlayer* pSP = static_cast<ImoScorePlayer*>(
-                                    ImFactory::inject(k_imo_score_player, pDoc) );
+                    ImFactory::inject(k_imo_score_player, pDoc, get_node_id()) );
         ScorePlayerCtrl* pPlayer = LOMSE_NEW ScorePlayerCtrl(m_libraryScope, pSP, pDoc);
         pSP->attach_player(pPlayer);
         pSP->attach_score( m_pAnalyser->get_last_analysed_score() );
@@ -4216,7 +4225,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoSpacer* pSpacer = static_cast<ImoSpacer*>(
-                                    ImFactory::inject(k_imo_spacer, pDoc) );
+                    ImFactory::inject(k_imo_spacer, pDoc, get_node_id()) );
 
         // <width>
         if (get_optional(k_number))
@@ -4268,7 +4277,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
-                                    ImFactory::inject(k_imo_staff_info, pDoc) );
+                    ImFactory::inject(k_imo_staff_info, pDoc, get_node_id()) );
 
         // num_instr
         if (!get_optional(k_number) || !set_staff_number(pInfo))
@@ -4367,7 +4376,8 @@ public:
     void do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoStyles* pStyles = static_cast<ImoStyles*>(ImFactory::inject(k_imo_styles, pDoc));
+        ImoStyles* pStyles = static_cast<ImoStyles*>(
+                         ImFactory::inject(k_imo_styles, pDoc, get_node_id()) );
 
         // [<defineStyle>*]
         while (analyse_optional(k_defineStyle, pStyles));
@@ -4393,7 +4403,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoSystemInfo* pInfo = static_cast<ImoSystemInfo*>(
-                                        ImFactory::inject(k_imo_system_info, pDoc));
+                        ImFactory::inject(k_imo_system_info, pDoc, get_node_id()) );
 
         // {first | other} <label>
         if (get_mandatory(k_label))
@@ -4476,7 +4486,8 @@ public:
     void do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoTable* pTable= static_cast<ImoTable*>( ImFactory::inject(k_imo_table, pDoc) );
+        ImoTable* pTable= static_cast<ImoTable*>(
+                             ImFactory::inject(k_imo_table, pDoc, get_node_id()) );
 
         // [<style>]
         analyse_optional_style(pTable);
@@ -4511,7 +4522,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTableBody* pBody = static_cast<ImoTableBody*>(
-                                        ImFactory::inject(k_imo_table_body, pDoc) );
+                        ImFactory::inject(k_imo_table_body, pDoc, get_node_id()) );
 
         // <tableRow>*
         while( more_params_to_analyse() )
@@ -4541,7 +4552,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTableCell* pImo = static_cast<ImoTableCell*>(
-                                        ImFactory::inject(k_imo_table_cell, pDoc) );
+                    ImFactory::inject(k_imo_table_cell, pDoc, get_node_id()) );
         //[<style>]
         analyse_optional_style(pImo);
 
@@ -4609,7 +4620,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTableHead* pHead = static_cast<ImoTableHead*>(
-                                        ImFactory::inject(k_imo_table_head, pDoc) );
+                        ImFactory::inject(k_imo_table_head, pDoc, get_node_id()) );
 
         // <tableRow>*
         while( more_params_to_analyse() )
@@ -4636,7 +4647,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTableRow* pRow = static_cast<ImoTableRow*>(
-                                        ImFactory::inject(k_imo_table_row, pDoc) );
+                        ImFactory::inject(k_imo_table_row, pDoc, get_node_id()) );
 
         // [<style>]
         analyse_optional_style(pRow);
@@ -4707,7 +4718,7 @@ public:
         if (get_optional(k_border))
             set_box_border(box);
 
-        ImoTextBox* pTB = ImFactory::inject_text_box(pDoc, box);
+        ImoTextBox* pTB = ImFactory::inject_text_box(pDoc, box, get_node_id());
 
         // <text>
         if (get_mandatory(k_text))
@@ -4809,7 +4820,7 @@ public:
         {
             Document* pDoc = m_pAnalyser->get_document_being_analysed();
             ImoTextItem* pText = static_cast<ImoTextItem*>(
-                                        ImFactory::inject(k_imo_text_item, pDoc) );
+                        ImFactory::inject(k_imo_text_item, pDoc, get_node_id()) );
             pText->set_text( get_string_value() );
             pText->set_style(pStyle);
 
@@ -4859,7 +4870,7 @@ public:
         {
             Document* pDoc = m_pAnalyser->get_document_being_analysed();
             ImoScoreText* pText = static_cast<ImoScoreText*>(
-                                        ImFactory::inject(k_imo_score_text, pDoc));
+                        ImFactory::inject(k_imo_score_text, pDoc, get_node_id()));
             pText->set_text(get_string_value());
 
             // [<style>]
@@ -4920,7 +4931,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTieDto* pInfo = static_cast<ImoTieDto*>(
-                                ImFactory::inject(k_imo_tie_dto, pDoc));
+                    ImFactory::inject(k_imo_tie_dto, pDoc, get_node_id()));
 
         // num
         if (get_mandatory(k_number))
@@ -4975,7 +4986,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTimeSignature* pTime = static_cast<ImoTimeSignature*>(
-                                    ImFactory::inject(k_imo_time_signature, pDoc) );
+                    ImFactory::inject(k_imo_time_signature, pDoc, get_node_id()) );
 
         // <top> (num)
         if (get_mandatory(k_number))
@@ -5026,7 +5037,7 @@ public:
         {
             Document* pDoc = m_pAnalyser->get_document_being_analysed();
             ImoScoreTitle* pTitle = static_cast<ImoScoreTitle*>(
-                ImFactory::inject(k_imo_score_title, pDoc) );
+                ImFactory::inject(k_imo_score_title, pDoc, get_node_id()) );
             pTitle->set_text( get_string_value() );
             pTitle->set_h_align(nAlignment);
 
@@ -5470,7 +5481,6 @@ void ElementAnalyser::analyse_scoreobj_options(ImoScoreObj* pSO)
 void ElementAnalyser::add_to_model(ImoObj* pImo)
 {
     int ldpNodeType = m_pAnalysedNode->get_type();
-    //pImo->set_id(m_pAnalysedNode->get_id());        //transfer id
     Linker linker( m_pAnalyser->get_document_being_analysed() );
     ImoObj* pObj = linker.add_child_to_model(m_pAnchor, pImo, ldpNodeType);
     m_pAnalysedNode->set_imo(pObj);
@@ -5701,7 +5711,7 @@ int LdpAnalyser::ldp_name_to_clef_type(const string& value)
         return k_clef_15_F4;
     else if (value == "F4_15")
         return k_clef_F4_15;
-#if (LOMSE_COMPATIBILITY_1_5 == 1)
+#if LOMSE_COMPATIBILITY_LDP_1_5
     else if (value == "F" || value == "bass")
         return k_clef_F4;
     else if (value == "trebble")
@@ -5853,7 +5863,7 @@ ElementAnalyser* LdpAnalyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_font:            return LOMSE_NEW FontAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_goBack:          return LOMSE_NEW GoBackFwdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_goFwd:           return LOMSE_NEW GoBackFwdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-#if (LOMSE_COMPATIBILITY_1_5 == 1)
+#if LOMSE_COMPATIBILITY_LDP_1_5
         case k_graphic:         return LOMSE_NEW GraphicAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 #endif
         case k_group:           return LOMSE_NEW GroupAnalyser(this, m_reporter, m_libraryScope, pAnchor);

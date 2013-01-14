@@ -1,18 +1,18 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -30,35 +30,43 @@
 #ifndef __LOMSE_ID_ASSIGNER_H__
 #define __LOMSE_ID_ASSIGNER_H__
 
-#include "lomse_ldp_elements.h"
+#include <map>
+#include <string>
+using namespace std;
 
 namespace lomse
 {
 
 //forward declarations
 class ImoObj;
+class Control;
 
 //---------------------------------------------------------------------------------------
-//IdAssigner: responsible for assigning/re-assingning ids to ImoObj objects
+//IdAssigner: responsible for assigning/re-assingning ids to ImoObj and Control
+// objects and providing access to them by Id
 class IdAssigner
 {
 protected:
     long m_idCounter;
+    std::map<long, ImoObj*> m_idToImo;
+    std::map<long, Control*> m_idToControl;
 
 public:
     IdAssigner();
     ~IdAssigner() {}
 
-    void reassign_ids(LdpElement* pElm);
-    void reassign_ids(LdpTree* pTree);
-    inline void set_last_id(long id) { m_idCounter = id + 1L; }
-    inline long get_last_id() { return m_idCounter - 1L; }
+    void reset();
 
     void assign_id(ImoObj* pImo);
+    void assign_id(Control* pControl);
+    ImoObj* get_pointer_to_imo(long id) const;
+    Control* get_pointer_to_control(long id) const;
+    void remove(ImoObj* pImo);
+
+    //debug
+    string dump() const;
 
 protected:
-    long find_min_id(LdpTree* pTree);
-    void shift_ids(LdpTree* pTree, long shift);
 
 };
 

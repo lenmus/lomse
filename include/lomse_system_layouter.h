@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -330,7 +330,7 @@ public:
     inline LUnits get_end_of_column() { return m_uxFinal; }                 //XF
     LUnits get_main_width();                                                //main width
 
-    //adding shapes to graphic model
+    //adding shapes to graphical model
     void add_shapes(GmoBoxSliceInstr* pSliceInstrBox, int iInstr);
     void delete_shapes();
 

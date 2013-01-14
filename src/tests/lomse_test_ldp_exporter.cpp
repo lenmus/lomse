@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -308,9 +308,9 @@ SUITE(LdpExporterTest)
 //        //visual test to display the exported score
 //
 //        Document doc(m_libraryScope);
-////        doc.from_file(m_scores_path + "00205-multimetric.lms" );
+//        doc.from_file(m_scores_path + "00205-multimetric.lms" );
 ////        doc.from_file(m_scores_path + "80120-fermatas.lms" );
-//        doc.from_file(m_scores_path + "80051-tie-bezier.lms" );
+////        doc.from_file(m_scores_path + "80051-tie-bezier.lms" );
 ////        doc.from_file(m_scores_path + "00110-triplet-against-5-tuplet-4.14.lms" );
 ////        doc.from_file(m_scores_path + "80130-metronome.lms" );
 ////        doc.from_file(m_scores_path + "80180-new-system-tag.lms" );
@@ -319,26 +319,108 @@ SUITE(LdpExporterTest)
 //        ImoDocument* pRoot = doc.get_imodoc();
 //
 //        LdpExporter exporter(&m_libraryScope);
+//        exporter.set_add_id(true);
 //        string source = exporter.get_source(pRoot);
 //        cout << "----------------------------------------------------" << endl;
 //        cout << source << endl;
 //        cout << "----------------------------------------------------" << endl;
 //    }
 
-    // clef ------------------------------------------------------------------------------------
+    // ClefLdpGenerator -----------------------------------------------------------------
 
-//    TEST_FIXTURE(LdpExporterTestFixture, clef)
-//    {
-//        Document doc(m_libraryScope);
-//        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
-//        pClef->set_clef_type(k_clef_F4);
-//        LdpExporter exporter(&m_libraryScope);
-//        string source = exporter.get_source(pClef);
-//        //cout << "\"" << source << "\"" << endl;
-//        CHECK( source == "(clef F4 p1)" );
-//        delete pClef;
-//    }
-//
+    TEST_FIXTURE(LdpExporterTestFixture, clef)
+    {
+        //@ clef, type and base staffobj
+
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_F4);
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pClef);
+//        cout << "\"" << source << "\"" << endl;
+        CHECK( source == "(clef F4 p1 )" );
+        delete pClef;
+    }
+
+    TEST_FIXTURE(LdpExporterTestFixture, clef_id)
+    {
+        //@ clef & id, type and base staffobj
+
+        Document doc(m_libraryScope);
+        ImoClef* pClef = static_cast<ImoClef*>(ImFactory::inject(k_imo_clef, &doc));
+        pClef->set_clef_type(k_clef_F4);
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_add_id(true);
+        string source = exporter.get_source(pClef);
+//        cout << "\"" << source << "\"" << endl;
+        CHECK( source == "(clef#0 F4 p1 )" );
+        delete pClef;
+    }
+
+    // BarlineLdpGenerator --------------------------------------------------------------
+
+    TEST_FIXTURE(LdpExporterTestFixture, barline)
+    {
+        //@ barline, type
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6) (instrument (musicData (barline end))))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoBarline* pImo = static_cast<ImoBarline*>( pMD->get_child_of_type(k_imo_barline) );
+
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pImo);
+        //cout << "\"" << source << "\"" << endl;
+        CHECK( source == "(barline end)" );
+    }
+
+    TEST_FIXTURE(LdpExporterTestFixture, barline_id)
+    {
+        //@ barline, type, id
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6) (instrument (musicData (barline end))))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoBarline* pImo = static_cast<ImoBarline*>( pMD->get_child_of_type(k_imo_barline) );
+
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_remove_newlines(true);
+        exporter.set_add_id(true);
+        string source = exporter.get_source(pImo);
+        //cout << "\"" << source << "\"" << endl;
+        CHECK( source == "(barline#21 end)" );
+    }
+
+    // BeamLdpGenerator
+    // ContentObjLdpGenerator
+    // ErrorLdpGenerator
+    // FermataLdpGenerator
+    // ImObjLdpGenerator
+    // GoBackFwdLdpGenerator
+    // InstrumentLdpGenerator
+    // KeySignatureLdpGenerator
+    // LenmusdocLdpGenerator
+    // MusicDataLdpGenerator
+    // MetronomeLdpGenerator
+    // NoteLdpGenerator
+    // RestLdpGenerator
+    // ScoreLdpGenerator
+    // ScoreLineLdpGenerator
+    // ScoreObjLdpGenerator
+    // ScoreTextLdpGenerator
+    // StaffObjLdpGenerator
+    // SystemBreakLdpGenerator
+    // SpacerLdpGenerator
+    // TieLdpGenerator
+    // TimeSignatureLdpGenerator
+    // TupletLdpGenerator
 //    // lenmusdoc ----------------------------------------------------------------------------------
 //
 //    TEST_FIXTURE(LdpExporterTestFixture, lenmusdoc_empty)
@@ -379,7 +461,7 @@ SUITE(LdpExporterTest)
 //            "(lenmusdoc (vers 0.0) (content (score (vers 1.6)"
 //            "(instrument (musicData (clef G)(key D)(n c4 q)(barline) ))"
 //            ")))" );
-//        ImoScore* pScore = doc.get_score(0);
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 //        LdpExporter exporter(&m_libraryScope);
 //        string source = exporter.get_source(pScore);
 //        cout << "\"" << source << "\"" << endl;

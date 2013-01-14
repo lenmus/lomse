@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -125,7 +125,6 @@ void LdpParser::do_syntax_analysis(LdpReader& reader)
 
     m_pTokenizer = LOMSE_NEW LdpTokenizer(reader, m_reporter);
     m_pTokenizer->skip_utf_bom();
-    m_id = 0L;
     m_state = A0_WaitingForStartOfElement;
     PushNode(A0_WaitingForStartOfElement);      //start the tree with the root node
     bool fExitLoop = false;
@@ -157,7 +156,6 @@ void LdpParser::do_syntax_analysis(LdpReader& reader)
         if (m_pTk->get_type() == tkEndOfFile)
             fExitLoop = true;
     }
-    m_nMaxId = --m_id;
 
     // exit if error
     if (m_state == A5_ExitError)
@@ -202,21 +200,16 @@ void LdpParser::Do_WaitingForName()
             const std::string& tagname = m_pTk->get_value();
             std::string nodename = tagname;
             size_t i = tagname.find('#');
+            long id = -1L;
             if (i != string::npos)
             {
-                long id;
                 nodename = tagname.substr(0, i);
                 std::istringstream sid( tagname.substr(i+1) );
                 if (!(sid >> id))
+                {
                     m_reporter << "Line " << m_pTk->get_line_number()
                                << ". Bad id in name '" + tagname + "'." << endl;
-                else
-                {
-                    if (id < m_id)
-                        m_reporter << "Line " << m_pTk->get_line_number()
-                                << ". In '" + tagname + "'. Value for id already exists. Ignored." << endl;
-                    else
-                        m_id = id;
+                    id = -1L;
                 }
             }
 
@@ -225,7 +218,7 @@ void LdpParser::Do_WaitingForName()
             if (m_curNode->get_type() == k_undefined)
                 m_reporter << "Line " << m_pTk->get_line_number()
                            << ". Unknown tag '" + nodename + "'." << endl;
-            m_curNode->set_id(m_id++);
+            m_curNode->set_id(id);
             m_state = A2_WaitingForParameter;
             break;
         }
@@ -354,7 +347,6 @@ void LdpParser::replace_current_tag()
 
     //create the replacement node
     m_curNode = m_pLdpFactory->create(newname, m_pTk->get_line_number());
-    m_curNode->set_id(m_id++);
 
     //add parameter
     m_curNode->append_child( m_pLdpFactory->new_label("no",

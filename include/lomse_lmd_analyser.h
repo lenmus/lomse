@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -291,8 +291,11 @@ public:
     //-----------------------------------------------------------------------------------
     long get_node_id(XmlNode* node)
     {
-        //TODO_X
-        return 0L;
+        XmlAttribute* attr = node->first_attribute("id");
+        if (attr == NULL)
+            return -1L;
+        else
+            return std::atol( attr->value() );
     }
 
     //-----------------------------------------------------------------------------------

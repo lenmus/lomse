@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -45,7 +45,6 @@ class LdpAnalyser;
 class ModelBuilder;
 class DocumentScope;
 class LibraryScope;
-class IdAssigner;
 class InternalModel;
 class ImoDocument;
 class Document;
@@ -60,8 +59,7 @@ protected:
     LdpAnalyser* m_pLdpAnalyser;
 
 public:
-    LdpCompiler(LdpParser* p, LdpAnalyser* a, ModelBuilder* mb, IdAssigner* ida,
-                Document* pDoc);
+    LdpCompiler(LdpParser* p, LdpAnalyser* a, ModelBuilder* mb, Document* pDoc);
     virtual ~LdpCompiler();
 
     //constructor for testing: direct construction

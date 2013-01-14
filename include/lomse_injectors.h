@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -31,7 +31,6 @@
 #define __LOMSE_INJECTORS_H__
 
 #include "lomse_ldp_factory.h"
-#include "lomse_id_assigner.h"
 #include "lomse_build_options.h"
 #include "lomse_events.h"
 
@@ -68,6 +67,7 @@ class Request;
 class ScorePlayer;
 class MidiServerBase;
 class Metronome;
+class IdAssigner;
 
 //---------------------------------------------------------------------------------------
 class LOMSE_EXPORT LibraryScope
@@ -141,16 +141,16 @@ public:
 //---------------------------------------------------------------------------------------
 class DocumentScope
 {
-public:
-    DocumentScope(ostream& reporter=cout) : m_reporter(reporter) {}
-    ~DocumentScope() {}
-
-    ostream& default_reporter() { return m_reporter; }
-    IdAssigner* id_assigner() { return &m_idAssigner; }
-
 protected:
     ostream& m_reporter;
-    IdAssigner m_idAssigner;
+    IdAssigner* m_idAssigner;
+
+public:
+    DocumentScope(ostream& reporter=cout);
+    ~DocumentScope();
+
+    ostream& default_reporter() { return m_reporter; }
+    IdAssigner* id_assigner() { return m_idAssigner; }
 
 };
 

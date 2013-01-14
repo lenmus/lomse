@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -608,6 +608,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_musicData)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(musicData#12 (n#10 c4 q))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_music_data() == true );
+        ImoMusicData* pImo = static_cast<ImoMusicData*>( pIModel->get_root() );
+        CHECK( pImo->get_id() == 12L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     // note -----------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Note)
@@ -820,6 +842,28 @@ SUITE(LdpAnalyserTest)
         CHECK( pNote->get_note_type() == k_eighth );
         CHECK( pNote->get_octave() == 4 );
         CHECK( pNote->get_step() == k_step_C );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_note)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(n#10 c4 q)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_note() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
         delete pIModel;
@@ -1919,6 +1963,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_rest)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(r#10 q)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_rest() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Rest_Attachment)
     {
         stringstream errormsg;
@@ -1963,6 +2029,28 @@ SUITE(LdpAnalyserTest)
         ImoFermata* pFerm = dynamic_cast<ImoFermata*>( pIModel->get_root() );
         CHECK( pFerm != NULL );
         CHECK( pFerm->get_placement() == k_placement_below );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_fermata)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(fermata#10 below)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_fermata() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
         delete pIModel;
@@ -2092,6 +2180,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_goBack)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(goBack#10 start)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_go_back_fwd() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserGoBackEnd)
     {
         stringstream errormsg;
@@ -2152,6 +2262,28 @@ SUITE(LdpAnalyserTest)
         ImoGoBackFwd* pGBF = dynamic_cast<ImoGoBackFwd*>( pIModel->get_root() );
         CHECK( pGBF != NULL );
         CHECK( pGBF->is_to_end() );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_goFwd)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(goFwd#10 end)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_go_back_fwd() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
         delete pIModel;
@@ -2287,6 +2419,28 @@ SUITE(LdpAnalyserTest)
         ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
         CHECK( pClef != NULL );
         CHECK( pClef->get_clef_type() == k_clef_G2 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_clef)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(clef#10 G)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_clef() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
         delete pIModel;
@@ -2449,6 +2603,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_key)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(key#10 G)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_key_signature() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserKeyError)
     {
         stringstream errormsg;
@@ -2532,6 +2708,28 @@ SUITE(LdpAnalyserTest)
         CHECK( pInstrument != NULL );
         //cout << "num.staves=" << pInstrument->get_num_staves() << endl;
         CHECK( pInstrument->get_num_staves() == 2 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_instrument)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(instrument#10 (musicData))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_instrument() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
         delete pIModel;
@@ -2840,6 +3038,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_time_signature)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(time#10 2 4)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_time_signature() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_TimeSignature_Error)
     {
         stringstream errormsg;
@@ -3032,6 +3252,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score_text)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(text#10 \"This is a text\")");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_score_text() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserTextMissingText)
     {
         stringstream errormsg;
@@ -3130,6 +3372,28 @@ SUITE(LdpAnalyserTest)
         CHECK( pMM->get_ticks_per_minute() == 88 );
         CHECK( pMM->is_visible() == true );
         CHECK( pMM->has_parenthesis() == false );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_metronome)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(metronome#10 88)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_metronome_mark() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
         delete pIModel;
@@ -3689,6 +3953,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_spacer)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(spacer#10 88)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_spacer() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Spacer_MissingWidth)
     {
         stringstream errormsg;
@@ -3875,6 +4161,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_lenmusdoc)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(lenmusdoc#10 (vers 0.0)(content ))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Lenmusdoc_language)
     {
         stringstream errormsg;
@@ -3953,6 +4261,50 @@ SUITE(LdpAnalyserTest)
         ImoScoreText* pText = dynamic_cast<ImoScoreText*>( pDoc->get_content_item(1) );
         CHECK( pText != NULL );
         CHECK( pText->get_text() == "hello world" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(lenmusdoc#11 (vers 0.0)(content (score#10 (vers 1.6)(instrument (musicData))) ))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pImo = pDoc->get_content_item(0);
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_content)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(lenmusdoc#11 (vers 0.0)(content#10 (score#9 (vers 1.6)(instrument (musicData))) ))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoObj* pImo = pDoc->get_content();
+        CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
         delete pIModel;
@@ -5495,6 +5847,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_barline)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(barline#10)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_barline() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     // group ----------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Group_All)
@@ -6432,6 +6806,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score_title)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(title#10 center \"Moonlight sonata\")");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_score_title() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Title_AddedToScore)
     {
         stringstream errormsg;
@@ -6627,6 +7023,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score_line)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(line#10 (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0)))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_score_line() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_Line_NoColor)
     {
         stringstream errormsg;
@@ -6758,6 +7176,30 @@ SUITE(LdpAnalyserTest)
         CHECK( is_equal(pInfo->get_border_color(), Color(0,0,0,255)) );
         CHECK( pInfo->get_border_width() == 1.0f );
         CHECK( pInfo->get_border_style() == k_line_solid );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_text_box)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(textbox#10 (dx 50)(dy 5)"
+            "(size (width 300)(height 150))"
+            "(text \"This is a test of a textbox\" (style \"Textbox\")))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_text_box() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
         delete pIModel;
@@ -7211,6 +7653,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_text_item)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(txt#10 \"This is a text\")");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_text_item() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     //TEST_FIXTURE(LdpAnalyserTestFixture, TextItem_MissingText)
     //{
     //    stringstream errormsg;
@@ -7324,6 +7788,28 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root()->is_paragraph() == true );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_paragraph)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(para#10 (txt \"This is a paragraph\"))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_paragraph() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
         delete pIModel;
@@ -7509,6 +7995,28 @@ SUITE(LdpAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root()->is_heading() == true );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_heading)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(heading#10 1 (txt \"This is a header\"))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_heading() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
         delete pIModel;
@@ -7818,6 +8326,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_dynamic)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(dynamic#10 (classid test))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_dynamic() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LdpAnalyserTestFixture, Dynamic_AddedToContent)
     {
         Document doc(m_libraryScope);
@@ -7917,6 +8447,29 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_link)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "(link#10 (url \"#TheoryHarmony_ch3.lms\")(txt \"Harmony exercise\"))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_link() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LdpAnalyserTestFixture, Link_MissingUrl)
     {
         stringstream errormsg;
@@ -8002,6 +8555,29 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_listitem)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "(listitem#10 (txt \"This is the first item\"))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_listitem() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LdpAnalyserTestFixture, List_created)
     {
         stringstream errormsg;
@@ -8029,6 +8605,29 @@ SUITE(LdpAnalyserTest)
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pLI->get_content_item(0) );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
         CHECK( pText->get_text() == "This is the first item" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_list)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "(itemizedlist#10 (listitem (txt \"This is the first item\")))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_list() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
         delete pIModel;
@@ -8096,6 +8695,28 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_graphic_type)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(graphic#10 line 0.0 7.0 17.0 3.5)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_score_line() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LdpAnalyserTestFixture, graphic_is_anchored)
     {
         stringstream errormsg;
@@ -8155,6 +8776,30 @@ SUITE(LdpAnalyserTest)
         CHECK( pSP->is_score_player() == true );
         CHECK( pSP->get_metronome_mm() == 60 );
         //cout << "metronome mm = " << pSP->get_metronome_mm() << endl;
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_score_player)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+            "(scorePlayer#10) ))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
+        ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
+        CHECK( pSP->get_id() == 10L );
 
         delete tree->get_root();
         delete pIModel;
@@ -8243,6 +8888,29 @@ SUITE(LdpAnalyserTest)
         CHECK( pAB->get_num_items() == 1 );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
         CHECK( pText->get_text() == "This is a cell" );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_table_cell)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "(tableCell#10 (txt \"This is a cell\"))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_table_cell() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete tree->get_root();
         delete pIModel;
@@ -8338,6 +9006,32 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_table_row)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "(tableRow#10 (tableCell (txt \"This is cell 1\"))"
+            "          (tableCell (txt \"This is cell 2\"))"
+            ")");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_table_row() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+
     // tableHead ------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, tableHead_Creation)
@@ -8369,6 +9063,32 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_table_head)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "(tableHead#10 (tableRow (tableCell (txt \"This is a cell\")) )"
+            "           (tableRow (tableCell (txt \"This is a cell\")) )"
+            ")");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_table_head() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+
     // tableBody ------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, tableBody_Creation)
@@ -8398,6 +9118,32 @@ SUITE(LdpAnalyserTest)
         delete tree->get_root();
         delete pIModel;
     }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_table_body)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "(tableBody#10 (tableRow (tableCell (txt \"This is a cell\")) )"
+            "           (tableRow (tableCell (txt \"This is a cell\")) )"
+            ")");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_table_body() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
 
     // table ----------------------------------------------------------------------------
 
@@ -8431,6 +9177,30 @@ SUITE(LdpAnalyserTest)
         delete tree->get_root();
         delete pIModel;
     }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, id_in_table)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "(table#10 (tableBody (tableRow (tableCell (txt \"This is a cell\")) )))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_table() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
 
     // tableColumn ----------------------------------------------------------------------
 
@@ -8532,6 +9302,5 @@ SUITE(LdpAnalyserTest)
         delete tree->get_root();
         delete pIModel;
     }
-
 }
 

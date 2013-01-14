@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/03/03 -->
+<!-- $Updated: 2012/12/23 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -38,7 +38,6 @@ This is meant to be an introduction to using Lomse in a X11 program. Before star
 <li><a href="#open-document">Creating the score and the View</a></li>
 <li><a href="#main-loop">The main loop for handling events</a></li>
 <li><a href="#events">Handling Lomse events and painting the window</a></li>
-<li><a href="#requests">Other functions: Lomse requests</a></li>
 <li><a href="#close">Closing the application</a></li>
 <li><a href="#compile">Compiling your code and building</a></li>
 <li><a href="#conclusions">Conclusions</a></li>
@@ -336,14 +335,6 @@ bool create_rendering_buffer(unsigned width, unsigned height, unsigned flags)
     m_lomse.init_library(m_format, 96, m_flip_y);   //resolution=96 ppi
 </pre>
 
-<p>Next, we have to set up a callback method so that Lomse can ask for any platform dependent information that it could need. We will see this in detail much later. For now just learn that we need to set up this callback. Here is the code:
-</p>
-
-<pre class="code">
-    //set required callbacks
-    m_lomse.set_request_callback(NULL, on_lomse_request);
-</pre>
-
 <p>Finally, we will initialize the Lomse related variables that we defined at start. With this, we finish Lomse initialization. Here is the full code:
 </p>
 
@@ -353,9 +344,6 @@ void initialize_lomse()
     //initialize the Lomse library
     m_flip_y = false;               //y axis is not reversed
     m_lomse.init_library(m_format, 96, m_flip_y);   //resolution=96 ppi
-
-    //set required callbacks
-    m_lomse.set_request_callback(NULL, on_lomse_request);
 
     //initialize Lomse related variables
     m_pInteractor = NULL;
@@ -637,131 +625,7 @@ void update_window(SpEventInfo pEvent)
 
 
 
-
-<h2><a name="requests">10. Other functions: Lomse requests</a></h2>
-<!--====================================================-->
-
-<p>
-At this point, our sample application is practically finished. But I'd like to comment on a pending issue. Do you remember that at Lomse initialization we had to set up a callback method so that Lomse could ask for any platform dependent information that it could need?. Let me explain this in detail. Here is the code in which we set up the callback:
-</p>
-
-<pre class="code">
-void initialize_lomse()
-{
-    ...
-    m_lomse.set_request_callback(NULL, on_lomse_request);
-    ...
-}
-</pre>
-
-<p>
-Lomse library does not contains any platform dependent code. But, for certain tasks, Lomse needs specific platform dependent code or platform dependent information. As I was aware of these needs, I was solving them without including platform dependent code. But in any case, some platform dependent or application dependent information is always needed. For instance, the bitmap format to use or the screen resolution. In this cases the solution was to provide this information at appropriate places. For bitmap format this place was Lomse initialization. But for other information I didn't have clear ideas about how to proceed, so I decided to postpone any decision until the Lomse library development was more advanced, and solve any specific need by forwarding a 'request' for the needed information to the user application. And this is the purpose of the callback that we set up at Lomse initialization.
-</p>
-
-<p>
-Currently, the only request that Lomse will issue is when having to render texts. In these cases Lomse needs to get the files containing the fonts to use. As the location of these fonts is a platform dependent issue, Lomse delegates on the user application. Here is the code for serving Lomse requests:
-</p>
-
-<pre class="code">
-void on_lomse_request(void* pThis, Request* pRequest)
-{
-    int type = pRequest->get_request_type();
-    switch (type)
-    {
-        case k_get_font_filename:
-            get_font_filename( dynamic_cast<RequestFont*>(pRequest) );
-            break;
-
-        default:
-            fprintf(stderr, "on_lomse_request] Unknown request\n");
-    }
-}
-</pre>
-
-<p>In a real application, function <code>get_font_filename()</code> should
-use operating system services to find a suitable font. But in our demo application I just hard-coded some font files. Please, review this code as the hard coded paths could be different for your system. Here is the code:
-</p>
-
-<pre class="code">
-string get_font_filename(RequestFont* pRequest)
-{
-    //This is just a trivial example. In real applications you should
-    //use operating system services to find a suitable font
-
-    //notes on parameters received:
-    // - fontname can be either the face name (i.e. "Book Antiqua") or
-    //   the family name (i.e. "sans-serif")
-
-    const string& fontname = pRequest->get_fontname();
-    bool bold = pRequest->get_bold();
-    bool italic = pRequest->get_italic();
-
-    string path = "/usr/share/fonts/truetype/";
-
-    //if family name, choose a font name
-    string name = fontname;
-    if (name == "serif")
-        name = "Times New Roman";
-    else if (name == "sans-serif")
-        name = "Tahoma";
-    else if (name == "handwritten" || name == "cursive")
-        name = "Monotype Corsiva";
-    else if (name == "monospaced")
-        name = "Courier New";
-
-    //choose a suitable font file
-    string fontfile;
-    if (name == "Times New Roman")
-    {
-        if (italic && bold)
-            fontfile = "freefont/FreeSerifBoldItalic.ttf";
-        else if (italic)
-            fontfile = "freefont/FreeSerifItalic.ttf";
-        else if (bold)
-            fontfile = "freefont/FreeSerifBold.ttf";
-        else
-            fontfile = "freefont/FreeSerif.ttf";
-    }
-
-    else if (name == "Tahoma")
-    {
-        if (bold)
-            fontfile = "freefont/FreeSansOblique.ttf";
-        else
-            fontfile = "freefont/FreeSans.ttf";
-    }
-
-    else if (name == "Monotype Corsiva")
-    {
-        fontfile = "ttf-dejavu/DejaVuSans-Oblique.ttf";
-    }
-
-    else if (name == "Courier New")
-    {
-        if (italic && bold)
-            fontfile = "freefont/FreeMonoBoldOblique.ttf";
-        else if (italic)
-            fontfile = "freefont/FreeMonoOblique.ttf";
-        else if (bold)
-            fontfile = "freefont/FreeMonoBold.ttf";
-        else
-            fontfile = "freefont/FreeMono.ttf";
-    }
-
-    else
-        fontfile = "freefont/FreeSerif.ttf";
-
-
-   return path + fontfile;
-}
-</pre>
-
-<p>
-The issue of finding a good solution for locating font files is pending. Current solution of delegating on user application should be avoided as it creates a non-trivial burden on user applications. Probably, the best solution will be to create a Lomse helper library with all needed platform dependent code. But for now, this is the situation. If you would like to help with this you are welcome!
-</p>
-
-
-<h2><a name="close">11. Closing the application</a></h2>
+<h2><a name="close">10. Closing the application</a></h2>
 <!--====================================================-->
 
 <p>
@@ -781,7 +645,8 @@ In the next section we are going to build and run our sample.
 </p>
 
 
-<h2><a name="compile">12. Compiling your code and building</a></h2>
+
+<h2><a name="compile">11. Compiling your code and building</a></h2>
 <!--====================================================-->
 
 <p>
@@ -835,7 +700,7 @@ And now, execute your first program using Lomse:
 
 
 
-<h2><a name="conclusions">13. Conclusions</a></h2>
+<h2><a name="conclusions">12. Conclusions</a></h2>
 <!--====================================================-->
 
 <p>

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -296,14 +296,14 @@ string LmdParser::get_node_name_as_string(XmlNode* node)
 //                if (!(sid >> id))
 //                    m_reporter << "Line " << m_pTk->get_line_number()
 //                               << ". Bad id in name '" + tagname + "'." << endl;
-//                else
-//                {
-//                    if (id < m_id)
-//                        m_reporter << "Line " << m_pTk->get_line_number()
-//                                << ". In '" + tagname + "'. Value for id already exists. Ignored." << endl;
-//                    else
-//                        m_id = id;
-//                }
+////                else
+////                {
+////                    if (id < m_id)
+////                        m_reporter << "Line " << m_pTk->get_line_number()
+////                                << ". In '" + tagname + "'. Value for id already exists. Ignored." << endl;
+////                    else
+////                        m_id = id;
+////                }
 //            }
 //
 //            //create the node

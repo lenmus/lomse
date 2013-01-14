@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -1866,7 +1866,7 @@ public:
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoDynamic* pDyn = static_cast<ImoDynamic*>(
-                                    ImFactory::inject(k_imo_dynamic, pDoc) );
+                            ImFactory::inject(k_imo_dynamic, pDoc, get_node_id()) );
         pDyn->set_classid( get_attribute("classid") );
 
         // [<param>*]
@@ -2263,7 +2263,7 @@ public:
 //@    (graphic line 30 0  80 -20)
 //@    (graphic line 30 10 80 0)
 //@
-#if (LOMSE_COMPATIBILITY_1_5 == 1)
+#if LOMSE_COMPATIBILITY_LDP_1_5
 
 class GraphicLmdAnalyser : public LmdElementAnalyser
 {
@@ -2314,7 +2314,7 @@ public:
     }
 
 };
-#endif  //(LOMSE_COMPATIBILITY_1_5 == 1)
+#endif  //LOMSE_COMPATIBILITY_LDP_1_5
 
 //@--------------------------------------------------------------------------------------
 //@ <group> = (group [<grpName>][<grpAbbrev>]<grpSymbol>[<joinBarlines>]
@@ -2677,7 +2677,8 @@ public:
 
         //create document
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        pImoDoc = static_cast<ImoDocument*>(ImFactory::inject(k_imo_document, pDoc));
+        pImoDoc = static_cast<ImoDocument*>(
+                    ImFactory::inject(k_imo_document, pDoc, get_node_id()));
         pImoDoc->set_version(version);
         pImoDoc->set_language(language);
         m_pAnalyser->save_root_imo_document(pImoDoc);
@@ -2702,8 +2703,7 @@ public:
 
         error_if_more_elements();
 
-        pImoDoc->set_id( get_node_id(m_pAnalysedNode) );
-        return pImoDoc; //set_imo(m_pAnalysedNode, pImoDoc);
+        return pImoDoc;
     }
 
 protected:
@@ -2811,7 +2811,8 @@ public:
     ImoObj* do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoLink* pLink = static_cast<ImoLink*>( ImFactory::inject(k_imo_link, pDoc) );
+        ImoLink* pLink = static_cast<ImoLink*>(
+                               ImFactory::inject(k_imo_link, pDoc, get_node_id()) );
 
 
         // [<style>]
@@ -2851,7 +2852,8 @@ public:
         string type = m_pAnalysedNode->name();
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoList* pList = static_cast<ImoList*>(ImFactory::inject(k_imo_list, pDoc) );
+        ImoList* pList = static_cast<ImoList*>(
+                               ImFactory::inject(k_imo_list, pDoc, get_node_id()) );
         pList->set_list_type(type == "itemizedlist" ? ImoList::k_itemized
                                                     : ImoList::k_ordered);
 
@@ -2881,7 +2883,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoListItem* pListItem = static_cast<ImoListItem*>(
-                                ImFactory::inject(k_imo_listitem, pDoc) );
+                            ImFactory::inject(k_imo_listitem, pDoc, get_node_id()) );
         // [<style>]
         analyse_optional_style(pListItem);
 
@@ -3024,7 +3026,7 @@ public:
                    || analyse_optional(k_time_signature, pMD)
                    || analyse_optional(k_goFwd, pMD)
                    || analyse_optional(k_goBack, pMD)
-#if (LOMSE_COMPATIBILITY_1_5 == 1)
+#if LOMSE_COMPATIBILITY_LDP_1_5
                    || analyse_optional(k_graphic, pMD)
                    || analyse_optional(k_line, pMD)
                    || analyse_optional(k_text, pMD)
@@ -3896,7 +3898,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoParagraph* pPara = static_cast<ImoParagraph*>(
-                                        ImFactory::inject(k_imo_para, pDoc) );
+                                    ImFactory::inject(k_imo_para, pDoc, get_node_id()) );
         // [<style>]
         analyse_optional_style(pPara);
 
@@ -3992,7 +3994,7 @@ public:
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoHeading* pHeading = static_cast<ImoHeading*>(
-                                    ImFactory::inject(k_imo_heading, pDoc) );
+                        ImFactory::inject(k_imo_heading, pDoc, get_node_id()) );
         pHeading->set_level(level);
 
         // [<style>]
@@ -4164,7 +4166,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoScorePlayer* pSP = static_cast<ImoScorePlayer*>(
-                                    ImFactory::inject(k_imo_score_player, pDoc) );
+                        ImFactory::inject(k_imo_score_player, pDoc, get_node_id()) );
         ScorePlayerCtrl* pPlayer = LOMSE_NEW ScorePlayerCtrl(m_libraryScope, pSP, pDoc);
         pSP->attach_player(pPlayer);
         pSP->attach_score( m_pAnalyser->get_last_analysed_score() );
@@ -4563,7 +4565,8 @@ public:
     ImoObj* do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoTable* pTable= static_cast<ImoTable*>( ImFactory::inject(k_imo_table, pDoc) );
+        ImoTable* pTable= static_cast<ImoTable*>(
+                             ImFactory::inject(k_imo_table, pDoc, get_node_id()) );
 
         // [<style>]
         analyse_optional_style(pTable);
@@ -4599,7 +4602,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTableBody* pBody = static_cast<ImoTableBody*>(
-                                        ImFactory::inject(k_imo_table_body, pDoc) );
+                                ImFactory::inject(k_imo_table_body, pDoc, get_node_id()) );
 
         // <tableRow>*
         while( more_children_to_analyse() )
@@ -4631,7 +4634,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTableCell* pImo = static_cast<ImoTableCell*>(
-                                        ImFactory::inject(k_imo_table_cell, pDoc) );
+                                ImFactory::inject(k_imo_table_cell, pDoc, get_node_id()) );
         //[<style>]
         analyse_optional_style(pImo);
 
@@ -4702,7 +4705,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTableHead* pHead = static_cast<ImoTableHead*>(
-                                        ImFactory::inject(k_imo_table_head, pDoc) );
+                        ImFactory::inject(k_imo_table_head, pDoc, get_node_id()) );
 
         // <tableRow>*
         while( more_children_to_analyse() )
@@ -4730,7 +4733,7 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoTableRow* pRow = static_cast<ImoTableRow*>(
-                                        ImFactory::inject(k_imo_table_row, pDoc) );
+                        ImFactory::inject(k_imo_table_row, pDoc, get_node_id()) );
 
         // [<style>]
         analyse_optional_style(pRow);
@@ -4896,7 +4899,7 @@ public:
         {
             Document* pDoc = m_pAnalyser->get_document_being_analysed();
             ImoTextItem* pText = static_cast<ImoTextItem*>(
-                                        ImFactory::inject(k_imo_text_item, pDoc) );
+                            ImFactory::inject(k_imo_text_item, pDoc, get_node_id()) );
             pText->set_text(value);
             pText->set_style(pStyle);
 
@@ -5891,7 +5894,7 @@ int LmdAnalyser::ldp_name_to_clef_type(const string& value)
         return k_clef_15_F4;
     else if (value == "F4_15")
         return k_clef_F4_15;
-#if (LOMSE_COMPATIBILITY_1_5 == 1)
+#if LOMSE_COMPATIBILITY_LDP_1_5
     else if (value == "F" || value == "bass")
         return k_clef_F4;
     else if (value == "trebble")

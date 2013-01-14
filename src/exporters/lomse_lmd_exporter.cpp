@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -35,6 +35,16 @@
 #include "lomse_im_note.h"
 #include "lomse_ldp_exporter.h"
 
+#include <stack>
+#include <ctime>   //clock
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include "boost/date_time/local_time/local_time.hpp"
+
+using namespace std;
+using namespace boost::gregorian;
+using namespace boost::posix_time;
+using namespace boost::local_time;
 
 namespace lomse
 {
@@ -51,6 +61,7 @@ protected:
     stringstream m_source;
     string m_elementName;
     bool m_fTagOpen;
+    stack<string> m_openTags;
 
 public:
     LmdGenerator(LmdExporter* pExporter);
@@ -59,8 +70,7 @@ public:
     virtual string generate_source() = 0;
 
 protected:
-    void start_element_no_attribs(const string& name, ImoObj* pImo);
-    void start_element_with_attribs(const string& name, ImoObj* pImo);
+    void start_element(const string& name, ImoObj* pImo);
     void close_start_tag();
     void start_attrib(const string& name);
     void end_attrib();
@@ -70,22 +80,27 @@ protected:
     void end_comment();
     void empty_line();
     void new_line_and_indent_spaces(bool fStartLine = true);
+    void new_line();
     void add_source_for(ImoObj* pImo);
     void source_for_base_staffobj(ImoObj* pImo);
     void source_for_base_scoreobj(ImoObj* pImo);
     void source_for_base_contentobj(ImoObj* pImo);
     void source_for_base_imobj(ImoObj* pImo);
     void source_for_auxobj(ImoObj* pImo);
+    void source_for_inline_level_object(ImoInlineLevelObj* pImo,
+                                        bool fFirstItem, ImoStyle* pParentStyle);
     void increment_indent();
     void decrement_indent();
 
     void add_duration(stringstream& source, int noteType, int dots);
-
+    void add_optional_style(ImoContentObj* pObj);
 
 };
 
 #define k_in_same_line    false
 #define k_in_new_line     true
+#define k_no_id             -1
+#define k_indent_step       3
 
 //=======================================================================================
 // generators for specific elements
@@ -106,7 +121,8 @@ public:
 
     string generate_source()
     {
-        //start_element_no_attribs("xxxxx", m_pObj);
+        //start_element("xxxxx", m_pObj);
+        close_start_tag();
         end_element();
         return m_source.str();
     }
@@ -127,7 +143,8 @@ public:
 
     string generate_source()
     {
-        start_element_no_attribs("barline", m_pObj);
+        start_element("barline", m_pObj);
+        close_start_tag();
 //        add_barline_type();
         source_for_base_staffobj(m_pObj);
         end_element(k_in_same_line);
@@ -150,7 +167,8 @@ public:
 
     string generate_source()
     {
-        start_element_no_attribs("clef", m_pObj);
+        start_element("clef", m_pObj);
+        close_start_tag();
         add_type();
         source_for_base_staffobj(m_pObj);
         end_element();
@@ -258,6 +276,303 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
+class DefineStyleLmdGenerator : public LmdGenerator
+{
+protected:
+    ImoStyle* m_pObj;
+
+public:
+    DefineStyleLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoStyle*>(pImo);
+    }
+
+    string generate_source()
+    {
+        start_element("defineStyle", m_pObj);
+        close_start_tag();
+        add_name();
+        add_properties();
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_name()
+    {
+        start_element("name", NULL);
+        close_start_tag();
+        m_source << m_pObj->get_name();
+        end_element(k_in_same_line);
+    }
+
+    void add_properties()
+    {
+        string sValue;
+        LUnits uValue;
+        int iValue;
+        float rValue;
+        Color cValue;
+
+        //font properties
+        if (m_pObj->get_string_property(ImoStyle::k_font_file, &sValue))
+        {
+            if (!sValue.empty())     //font-file can be empty when font-name is set
+                create_string_element("font-file", sValue);
+        }
+
+        if (m_pObj->get_string_property(ImoStyle::k_font_name, &sValue))
+            create_string_element("font-name", sValue);
+
+        if (m_pObj->get_float_property(ImoStyle::k_font_size, &rValue))
+        {
+            start_element("font-size", NULL);
+            close_start_tag();
+            m_source << rValue << "pt";
+            end_element(k_in_same_line);
+        }
+
+        if (m_pObj->get_int_property(ImoStyle::k_font_style, &iValue))
+            create_font_style(iValue);
+
+        if (m_pObj->get_int_property(ImoStyle::k_font_weight, &iValue))
+            create_font_weight(iValue);
+
+        //text properties
+        if (m_pObj->get_int_property(ImoStyle::k_word_spacing, &iValue))
+            create_int_element("word-spacing", iValue);
+
+        if (m_pObj->get_int_property(ImoStyle::k_text_decoration, &iValue))
+            create_text_decoration(iValue);
+
+        if (m_pObj->get_int_property(ImoStyle::k_vertical_align, &iValue))
+            create_vertical_align(iValue);
+
+        if (m_pObj->get_int_property(ImoStyle::k_text_align, &iValue))
+            create_text_align(iValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_text_indent_length, &uValue))
+            create_lunits_element("", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_word_spacing_length, &uValue))
+            create_lunits_element("", uValue);
+
+        if (m_pObj->get_float_property(ImoStyle::k_line_height, &rValue))
+            create_float_element("line-height", rValue);
+
+        //color and background properties
+        if (m_pObj->get_color_property(ImoStyle::k_color, &cValue))
+            create_color_element("color", cValue);
+
+        if (m_pObj->get_color_property(ImoStyle::k_background_color, &cValue))
+            create_color_element("background-color", cValue);
+
+        //border-width  properties
+        if (m_pObj->get_lunits_property(ImoStyle::k_border_width_top, &uValue))
+            create_lunits_element("border-width-top", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_border_width_bottom, &uValue))
+            create_lunits_element("border-width-bottom", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_border_width_left, &uValue))
+            create_lunits_element("border-width-left", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_border_width_right, &uValue))
+            create_lunits_element("border-width-right", uValue);
+
+        //padding properties
+        if (m_pObj->get_lunits_property(ImoStyle::k_padding_top, &uValue))
+            create_lunits_element("padding-top", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_padding_bottom, &uValue))
+            create_lunits_element("padding-bottom", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_padding_left, &uValue))
+            create_lunits_element("padding-left", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_padding_right, &uValue))
+            create_lunits_element("padding-right", uValue);
+
+        //margin properties
+        if (m_pObj->get_lunits_property(ImoStyle::k_margin_top, &uValue))
+            create_lunits_element("margin-top", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_margin_bottom, &uValue))
+            create_lunits_element("margin-bottom", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_margin_left, &uValue))
+            create_lunits_element("margin-left", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_margin_right, &uValue))
+            create_lunits_element("margin-right", uValue);
+
+        //size properties
+        if (m_pObj->get_lunits_property(ImoStyle::k_width, &uValue))
+            create_lunits_element("width", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_height, &uValue))
+            create_lunits_element("height", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_min_width, &uValue))
+            create_lunits_element("min-width", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_min_height, &uValue))
+            create_lunits_element("min-height", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_max_width, &uValue))
+            create_lunits_element("max-width", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_max_height, &uValue))
+            create_lunits_element("max-height", uValue);
+
+        //table properties
+        if (m_pObj->get_lunits_property(ImoStyle::k_table_col_width, &uValue))
+            create_lunits_element("table-col-width", uValue);
+
+    }
+
+    void create_string_element(const string& tag, const string& value)
+    {
+        start_element(tag, NULL);
+        close_start_tag();
+        m_source << value;
+        end_element(k_in_same_line);
+    }
+
+    void create_float_element(const string& tag, float value)
+    {
+        start_element(tag, NULL);
+        close_start_tag();
+        m_source << value;
+        end_element(k_in_same_line);
+    }
+
+    void create_lunits_element(const string& tag, LUnits value)
+    {
+        start_element(tag, NULL);
+        close_start_tag();
+        m_source << value;
+        end_element(k_in_same_line);
+    }
+
+    void create_int_element(const string& tag, int value)
+    {
+        start_element(tag, NULL);
+        close_start_tag();
+        m_source << value;
+        end_element(k_in_same_line);
+    }
+
+    void create_color_element(const string& tag, Color color)
+    {
+        start_element(tag, NULL);
+        close_start_tag();
+
+        m_source << LmdExporter::color_to_ldp(color);
+
+        end_element(k_in_same_line);
+    }
+
+    void create_font_style(int value)
+    {
+        start_element("font-style", NULL);
+        close_start_tag();
+
+        if (value == ImoStyle::k_font_normal)
+            m_source << "normal";
+        else if (value == ImoStyle::k_italic)
+            m_source << "italic";
+        else
+            m_source << "invalid value " << value;
+
+        end_element(k_in_same_line);
+    }
+
+    void create_font_weight(int value)
+    {
+        start_element("font-weight", NULL);
+        close_start_tag();
+
+        if (value == ImoStyle::k_font_normal)
+            m_source << "normal";
+        else if (value == ImoStyle::k_bold)
+            m_source << "bold";
+        else
+            m_source << "invalid value " << value;
+
+        end_element(k_in_same_line);
+    }
+
+    void create_text_decoration(int value)
+    {
+        start_element("text-decoration", NULL);
+        close_start_tag();
+
+        if (value == ImoStyle::k_decoration_none)
+            m_source << "none";
+        else if (value == ImoStyle::k_decoration_underline)
+            m_source << "underline";
+        else if (value == ImoStyle::k_decoration_overline)
+            m_source << "overline";
+        else if (value == ImoStyle::k_decoration_line_through)
+            m_source << "line-through";
+        else
+            m_source << "invalid value " << value;
+
+        end_element(k_in_same_line);
+    }
+
+    void create_vertical_align(int value)
+    {
+        start_element("vertical-align", NULL);
+        close_start_tag();
+
+        if (value == ImoStyle::k_valign_baseline)
+            m_source << "baseline";
+        else if (value == ImoStyle::k_valign_sub)
+            m_source << "sub";
+        else if (value == ImoStyle::k_valign_super)
+            m_source << "super";
+        else if (value == ImoStyle::k_valign_top)
+            m_source << "top";
+        else if (value == ImoStyle::k_valign_text_top)
+            m_source << "text-top";
+        else if (value == ImoStyle::k_valign_middle)
+            m_source << "middle";
+        else if (value == ImoStyle::k_valign_bottom)
+            m_source << "bottom";
+        else if (value == ImoStyle::k_valign_text_bottom)
+            m_source << "text-bottom";
+        else
+            m_source << "invalid value " << value;
+
+        end_element(k_in_same_line);
+    }
+
+    void create_text_align(int value)
+    {
+        start_element("text-align", NULL);
+        close_start_tag();
+
+        if (value == ImoStyle::k_align_left)
+            m_source << "left";
+        else if (value == ImoStyle::k_align_right)
+            m_source << "right";
+        else if (value == ImoStyle::k_align_center)
+            m_source << "center";
+        else if (value == ImoStyle::k_align_justify)
+            m_source << "justify";
+        else
+            m_source << "invalid value " << value;
+
+        end_element(k_in_same_line);
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
 class ErrorLmdGenerator : public LmdGenerator
 {
 protected:
@@ -272,7 +587,8 @@ public:
 
     string generate_source()
     {
-        start_element_no_attribs("TODO: ", m_pImo);
+        start_element("TODO: ", m_pImo);
+        close_start_tag();
         m_source << m_pImo->get_name() << "   type=" << m_pImo->get_obj_type()
                  << ", id=" << m_pImo->get_id();
         end_element(k_in_same_line);
@@ -314,8 +630,8 @@ public:
 
     string generate_source()
     {
-        start_element_no_attribs("instrument", m_pObj);
-
+        start_element("instrument", m_pObj);
+        close_start_tag();
         add_num_staves();
         add_midi_info();
         add_name_abbreviation();
@@ -378,8 +694,8 @@ public:
 
     string generate_source()
     {
-        start_element_no_attribs("key", m_pObj);
-
+        start_element("key", m_pObj);
+        close_start_tag();
         add_key_type();
 
         end_element(k_in_same_line);
@@ -444,32 +760,48 @@ public:
     string generate_source()
     {
         m_source << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-        start_element_with_attribs("lenmusdoc", m_pObj);
+        start_element("lenmusdoc", m_pObj);
         add_attribute("vers", m_pObj->get_version());
         add_attribute("language", m_pObj->get_language());
         close_start_tag();
+
         add_comment();
+
+        // [<styles>]
+        add_styles();
+
+        // <content>
         add_content();
+
         end_element();
         return m_source.str();
     }
 
 protected:
 
+    void add_styles()
+    {
+        ImoObj* pStyles = m_pObj->get_child_of_type(k_imo_styles);
+        if (pStyles)
+            add_source_for(pStyles);
+    }
+
     void add_comment()
     {
-        start_comment();
-        m_source << "LMD file generated by Lomse, version ";
-//        m_source << wxGetApp().GetVersionNumber();
-//        m_source << ". Date: ";
-//        m_source << (wxDateTime::Now()).Format(_T("%Y-%m-%d"));
-        end_comment();
+        if (!m_pExporter->get_remove_newlines())
+        {
+            start_comment();
+            m_source << "LMD file generated by Lomse, version "
+                     << m_pExporter->get_version_and_time_string();
+            end_comment();
+        }
     }
 
     void add_content()
     {
         ImoContent* pContent = m_pObj->get_content();
-        start_element_no_attribs("content", pContent);
+        start_element("content", pContent);
+        close_start_tag();
         int numItems = m_pObj->get_num_content_items();
         for (int i=0; i < numItems; i++)
         {
@@ -496,7 +828,8 @@ public:
 
     string generate_source()
     {
-        start_element_no_attribs("musicData", m_pObj);
+        start_element("musicData", m_pObj);
+        close_start_tag();
         add_staffobjs();
         empty_line();
         end_element();
@@ -514,10 +847,13 @@ protected:
         {
             if (fNewMeasure)
             {
-                empty_line();
-                start_comment();
-                m_source << "measure " << nMeasure++;
-                end_comment();
+                if (!m_pExporter->get_remove_newlines())
+                {
+                    empty_line();
+                    start_comment();
+                    m_source << "measure " << nMeasure++;
+                    end_comment();
+                }
                 fNewMeasure = false;
             }
 
@@ -629,7 +965,8 @@ public:
 
     string generate_source()
     {
-        start_element_no_attribs("note", m_pObj);
+        start_element("note", m_pObj);
+        close_start_tag();
         add_pitch();
         add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
         source_for_base_staffobj(m_pObj);
@@ -641,7 +978,8 @@ protected:
 
     void add_pitch()
     {
-        start_element_no_attribs("pitch", NULL);
+        start_element("pitch", NULL);
+        close_start_tag();
         static const string sNoteName[7] = { "c",  "d", "e", "f", "g", "a", "b" };
         static const string sOctave[13] = { "0",  "1", "2", "3", "4", "5", "6",
                                             "7", "8", "9", "10", "11", "12"  };
@@ -678,6 +1016,47 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
+class ParagraphLmdGenerator : public LmdGenerator
+{
+protected:
+    ImoParagraph* m_pObj;
+
+public:
+    ParagraphLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoParagraph*>(pImo);
+    }
+
+    string generate_source()
+    {
+        start_element("para", m_pObj);
+        add_optional_style(m_pObj);
+        close_start_tag();
+
+        add_inline_objects();
+
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_inline_objects()
+    {
+        TreeNode<ImoObj>::children_iterator it = m_pObj->begin();
+        bool fFirstItem = true;
+        for (it = m_pObj->begin(); it != m_pObj->end(); ++it)
+        {
+            ImoInlineLevelObj* pImo = static_cast<ImoInlineLevelObj*>( *it );
+            source_for_inline_level_object(pImo, fFirstItem, m_pObj->get_style());
+            fFirstItem = false;
+        }
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
 class RestLmdGenerator : public LmdGenerator
 {
 protected:
@@ -691,7 +1070,8 @@ public:
 
     string generate_source()
     {
-        start_element_no_attribs("rest", m_pObj);
+        start_element("rest", m_pObj);
+        close_start_tag();
         add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
         source_for_base_staffobj(m_pObj);
         end_element();
@@ -718,7 +1098,7 @@ public:
         int format = m_pExporter->get_score_format();
         switch(format)
         {
-            case LmdExporter::k_format_lms:
+            case LmdExporter::k_format_ldp:
                 return generate_ldp();
             case LmdExporter::k_format_lmd:
                 return generate_lmd();
@@ -738,10 +1118,12 @@ protected:
 
     string generate_ldp()
     {
-        start_element_no_attribs("ldpmusic", m_pObj);
+        start_element("ldpmusic", NULL);
+        close_start_tag();
 
         LdpExporter exporter;
         exporter.set_indent( m_pExporter->get_indent() );
+        exporter.set_add_id( m_pExporter->get_add_id() );
         m_source << exporter.get_source(m_pObj);
 
         end_element();
@@ -750,7 +1132,8 @@ protected:
 
     string generate_musicxml()
     {
-//        start_element_no_attribs("musicxml", m_pObj);
+//        start_element("musicxml", m_pObj);
+//        close_start_tag();
 //
 //        MusicXmlExporter exporter;
 //        exporter.set_indent( m_pExporter->get_indent() );
@@ -759,14 +1142,16 @@ protected:
 //        end_element();
 
         //TODO: MusicXmlExporter
-        start_element_no_attribs("TODO: MusicXml exporter", m_pObj);
+        start_element("TODO: MusicXml exporter", m_pObj);
+        close_start_tag();
         end_element();
         return m_source.str();
     }
 
     string generate_lmd()
     {
-        start_element_no_attribs("score", m_pObj);
+        start_element("score", m_pObj);
+        close_start_tag();
         add_version();
         add_undo_data();
         add_creation_mode();
@@ -951,6 +1336,74 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
+class SectionLmdGenerator : public LmdGenerator
+{
+protected:
+    ImoHeading* m_pObj;
+
+public:
+    SectionLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoHeading*>(pImo);
+    }
+
+    string generate_source()
+    {
+        start_element("section", m_pObj);
+        add_level();
+        add_optional_style(m_pObj);
+        close_start_tag();
+        add_inline_objects();
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_level()
+    {
+        m_source << " level=\"" << m_pObj->get_level() << "\"";
+    }
+
+    void add_inline_objects()
+    {
+        TreeNode<ImoObj>::children_iterator it = m_pObj->begin();
+        bool fFirstItem = true;
+        for (it = m_pObj->begin(); it != m_pObj->end(); ++it)
+        {
+            ImoInlineLevelObj* pImo = static_cast<ImoInlineLevelObj*>( *it );
+            source_for_inline_level_object(pImo, fFirstItem, m_pObj->get_style());
+            fFirstItem = false;
+        }
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
+class SpacerLmdGenerator : public LmdGenerator
+{
+protected:
+    ImoSpacer* m_pObj;
+
+public:
+    SpacerLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoSpacer*>(pImo);
+    }
+
+    string generate_source()
+    {
+        start_element("spacer", m_pObj);
+        close_start_tag();
+        //TODO: details
+        end_element(k_in_same_line);
+        return m_source.str();
+    }
+};
+
+
+//---------------------------------------------------------------------------------------
 class StaffObjLmdGenerator : public LmdGenerator
 {
 protected:
@@ -979,7 +1432,8 @@ protected:
         {
 //            m_source << " p" << (m_pObj->get_staff() + 1);
             //m_source << "<staff>" << (m_pObj->get_staff() + 1) << "</staff>";
-            start_element_no_attribs("staff", NULL);
+            start_element("staff", NULL);
+            close_start_tag();
             m_source << (m_pObj->get_staff() + 1);
             end_element(k_in_same_line);
         }
@@ -989,24 +1443,42 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-class SpacerLmdGenerator : public LmdGenerator
+class StylesLmdGenerator : public LmdGenerator
 {
 protected:
-    ImoSpacer* m_pObj;
+    ImoStyles* m_pObj;
 
 public:
-    SpacerLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    StylesLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
     {
-        m_pObj = static_cast<ImoSpacer*>(pImo);
+        m_pObj = static_cast<ImoStyles*>(pImo);
     }
 
     string generate_source()
     {
-        start_element_no_attribs("spacer", m_pObj);
-        //TODO: details
-        end_element(k_in_same_line);
+        start_element("styles", m_pObj);
+        close_start_tag();
+        add_styles();
+        end_element();
+        empty_line();
         return m_source.str();
     }
+
+protected:
+
+    void add_styles()
+    {
+     	map<std::string, ImoStyle*>& styles = m_pObj->get_styles_collection();
+
+        map<std::string, ImoStyle*>::iterator it;
+        for(it = styles.begin(); it != styles.end(); ++it)
+        {
+            ImoStyle* pStyle = it->second;
+            if (pStyle->get_name() != "Default style")
+                add_source_for(pStyle);
+        }
+    }
+
 };
 
 
@@ -1021,19 +1493,13 @@ LmdGenerator::LmdGenerator(LmdExporter* pExporter)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdGenerator::start_element_no_attribs(const string& name, ImoObj* pImo)
-{
-    start_element_with_attribs(name, pImo);
-    close_start_tag();
-}
-
-//---------------------------------------------------------------------------------------
-void LmdGenerator::start_element_with_attribs(const string& name, ImoObj* pImo)
+void LmdGenerator::start_element(const string& name, ImoObj* pImo)
 {
     new_line_and_indent_spaces();
     m_source << "<" << name;
+    m_openTags.push(name);
     m_elementName = name;
-    if (m_pExporter->get_add_id())
+    if (pImo && m_pExporter->get_add_id())
         m_source << " id=\"" << std::dec << pImo->get_id() << "\"";
     increment_indent();
 }
@@ -1071,6 +1537,10 @@ void LmdGenerator::end_element(bool fInNewLine)
     if (fInNewLine)
         new_line_and_indent_spaces();
     m_source << "</" << m_elementName << ">";
+
+    m_openTags.pop();
+    if (m_openTags.size() > 0)
+        m_elementName = m_openTags.top();
 }
 
 //---------------------------------------------------------------------------------------
@@ -1090,20 +1560,30 @@ void LmdGenerator::end_comment()
 void LmdGenerator::empty_line()
 {
     m_source.clear();
-    m_source << endl;
+    new_line();
 }
 //---------------------------------------------------------------------------------------
 void LmdGenerator::new_line_and_indent_spaces(bool fStartLine)
 {
     m_source.clear();
-    if (fStartLine)
-        m_source << endl;
-    int indent = m_pExporter->get_indent() * lk_indent_step;
-    while (indent > 0)
+    if (!m_pExporter->get_remove_newlines())
     {
-        m_source << " ";
-        indent--;
+        if (fStartLine)
+            new_line();
+        int indent = m_pExporter->get_indent() * k_indent_step;
+        while (indent > 0)
+        {
+            m_source << " ";
+            indent--;
+        }
     }
+}
+
+//---------------------------------------------------------------------------------------
+void LmdGenerator::new_line()
+{
+    if (!m_pExporter->get_remove_newlines())
+        m_source << endl;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1149,6 +1629,50 @@ void LmdGenerator::source_for_auxobj(ImoObj* pImo)
 }
 
 //---------------------------------------------------------------------------------------
+void LmdGenerator::source_for_inline_level_object(ImoInlineLevelObj* pImo,
+                                                bool fFirstItem, ImoStyle* pParentStyle)
+{
+    //TODO: source code for these objects. This is just an skeleton
+
+    //composite content objects
+    if (pImo->is_text_item())
+    {
+        ImoTextItem* pText = static_cast<ImoTextItem*>(pImo);
+        ImoStyle* pStyle = pText->get_style();
+        if (pStyle && pStyle != pParentStyle)
+        {
+            start_element("txt", pImo);
+            if (pStyle && pStyle != pParentStyle)
+                add_optional_style(pText);
+            close_start_tag();
+            m_source << pText->get_text();
+            end_element();
+        }
+        else
+            m_source << pText->get_text();
+    }
+    else if (pImo->is_box_inline())
+    {
+        //ImoBoxInline* pIB = static_cast<ImoBoxInline*>(pImo);
+        m_source << " (box_inline)";
+    }
+
+    //atomic content objects
+    else
+    {
+        m_source << " (atomic content)";
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void LmdGenerator::add_optional_style(ImoContentObj* pObj)
+{
+    ImoStyle* pStyle = pObj->get_style();
+    if (pStyle)
+        m_source << " style=\"" << pStyle->get_name() << "\"";
+}
+
+//---------------------------------------------------------------------------------------
 void LmdGenerator::increment_indent()
 {
     m_pExporter->increment_indent();
@@ -1163,7 +1687,8 @@ void LmdGenerator::decrement_indent()
 //---------------------------------------------------------------------------------------
 void LmdGenerator::add_duration(stringstream& source, int noteType, int dots)
 {
-    start_element_no_attribs("type", NULL);
+    start_element("type", NULL);
+    close_start_tag();
     switch(noteType)
     {
         case k_longa:   source << "l";  break;
@@ -1192,16 +1717,33 @@ void LmdGenerator::add_duration(stringstream& source, int noteType, int dots)
 //=======================================================================================
 // LmdExporter implementation
 //=======================================================================================
-LmdExporter::LmdExporter()
-    : m_nIndent(0)
+LmdExporter::LmdExporter(LibraryScope& libScope)
+    : m_libraryScope(libScope)
+    , m_nIndent(0)
     , m_fAddId(false)
     , m_scoreFormat(k_format_lmd)
+    , m_fRemoveNewlines(false)
 {
+    m_lomseVersion = libScope.get_version_string();
+
+    boost::local_time::local_date_time currentTime(
+        boost::posix_time::second_clock::local_time(),
+        boost::local_time::time_zone_ptr());
+    m_exportTime = to_simple_string( currentTime.local_time() );
 }
 
 //---------------------------------------------------------------------------------------
 LmdExporter::~LmdExporter()
 {
+}
+
+//---------------------------------------------------------------------------------------
+string LmdExporter::get_version_and_time_string()
+{
+    string value = m_lomseVersion;
+    value.append(", date ");
+    value.append(m_exportTime);
+    return value;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1221,37 +1763,19 @@ LmdGenerator* LmdExporter::new_generator(ImoObj* pImo)
     switch(pImo->get_obj_type())
     {
         case k_imo_barline:         return LOMSE_NEW BarlineLmdGenerator(pImo, this);
-//        case k_imo_beam_dto:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_bezier_info:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
         case k_imo_clef:            return LOMSE_NEW ClefLmdGenerator(pImo, this);
-//        case k_imo_color_dto:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_instr_group:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_midi_info:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_option:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_system_info:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_tie_dto:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_tuplet_dto:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
         case k_imo_document:        return LOMSE_NEW LenmusdocLmdGenerator(pImo, this);
-//        case k_imo_content:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
+        case k_imo_heading:         return LOMSE_NEW SectionLmdGenerator(pImo, this);
         case k_imo_instrument:      return LOMSE_NEW InstrumentLmdGenerator(pImo, this);
-//        case k_imo_score:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
         case k_imo_key_signature:   return LOMSE_NEW KeySignatureLmdGenerator(pImo, this);
-//        case k_imo_time_signature:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
         case k_imo_music_data:      return LOMSE_NEW MusicDataLmdGenerator(pImo, this);
         case k_imo_note:            return LOMSE_NEW NoteLmdGenerator(pImo, this);
+        case k_imo_para:            return LOMSE_NEW ParagraphLmdGenerator(pImo, this);
         case k_imo_rest:            return LOMSE_NEW RestLmdGenerator(pImo, this);
-//        case k_imo_go_back_fwd:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_metronome_mark:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_system_break:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_spacer:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_figured_bass:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
         case k_imo_score:           return LOMSE_NEW ScoreLmdGenerator(pImo, this);
         case k_imo_spacer:          return LOMSE_NEW SpacerLmdGenerator(pImo, this);
-//        case k_imo_score_text:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_fermata:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_tie:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_beam:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
-//        case k_imo_tuplet:         return LOMSE_NEW XxxxxxxLmdGenerator(pImo, this);
+        case k_imo_style:           return LOMSE_NEW DefineStyleLmdGenerator(pImo, this);
+        case k_imo_styles:          return LOMSE_NEW StylesLmdGenerator(pImo, this);
         default:
             return new ErrorLmdGenerator(pImo, this);
     }

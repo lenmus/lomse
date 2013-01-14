@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -55,8 +55,7 @@ protected:
     LmdAnalyser* m_pLmdAnalyser;
 
 public:
-    LmdCompiler(LmdParser* p, LmdAnalyser* a, ModelBuilder* mb, IdAssigner* ida,
-                Document* pDoc);
+    LmdCompiler(LmdParser* p, LmdAnalyser* a, ModelBuilder* mb, Document* pDoc);
     ~LmdCompiler();
 
     //constructor for testing: direct construction

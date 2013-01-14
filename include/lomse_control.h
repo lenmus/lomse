@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -44,38 +44,62 @@ class ImoContent;
 class GmoBox;
 class Drawer;
 struct RenderOptions;
-class DynGenerator;
 
 
 //---------------------------------------------------------------------------------------
 // Base class for any GUI control
 class Control : public EventHandler
-              , public EventNotifier
               , public Observable
 {
 protected:
-    DynGenerator*   m_pOwner;
     Document*       m_pDoc;
+    Control*        m_pParent;
     ImoStyle*       m_pStyle;
     bool            m_fEnabled;
+    long            m_id;
+    list<Control*> m_controls;
 
-    Control(DynGenerator* pOwner, Document* pDoc)
+    Control(Document* pDoc, Control* pParent)
         : EventHandler()
-        , EventNotifier(pDoc->get_library_scope().get_events_dispatcher())
         , Observable()
-        , m_pOwner(pOwner)
         , m_pDoc(pDoc)
+        , m_pParent(pParent)
         , m_pStyle(NULL)
         , m_fEnabled(true)
+        , m_id(-1L)
     {
+        pDoc->assign_id(this);
     }
 
 public:
-    virtual ~Control() {}
+    virtual ~Control() {
+        list<Control*>::iterator it;
+        for (it = m_controls.begin(); it != m_controls.end(); ++it)
+            delete *it;
+        m_controls.clear();
+    }
 
-    ///Any Control must know its size or how to determine it. This method is always
-    ///invoked before layout() method.
+    //any control can be build by using other controls
+    void take_ownership_of(Control* control) {
+        m_controls.push_back(control);
+    }
+    void delete_child_control(Control* control) {
+        list<Control*>::iterator it;
+        for (it = m_controls.begin(); it != m_controls.end(); ++it)
+        {
+            if (*it == control)
+            {
+                delete *it;
+                m_controls.erase(it);
+                break;
+            }
+        }
+    }
+
+    //Any Control must know its size or how to determine it. This method is always
+    //invoked before layout() method.
     virtual USize measure() = 0;
+
     virtual LUnits width() = 0;
     virtual LUnits height() = 0;
     virtual LUnits top() = 0;
@@ -83,22 +107,39 @@ public:
     virtual LUnits left() = 0;
     virtual LUnits right() = 0;
 
-    ///Any Control must know how to generate its graphic model
+    //Any Control must know how to generate its graphical model
     virtual GmoBoxControl* layout(LibraryScope& libraryScope, UPoint pos) = 0;
     virtual void on_draw(Drawer* pDrawer, RenderOptions& opt) = 0;
     inline void set_style(ImoStyle* pStyle) { m_pStyle = pStyle; }
 
     //mandatory overrides from Observable
-    EventNotifier* get_event_notifier() { return this; }
+    EventNotifier* get_event_notifier() { return m_pDoc->get_event_notifier(); }
 
-    //other
-    inline DynGenerator* get_owner() { return m_pOwner; }
+    //overrides for Observable children
+    void add_event_handler(int eventType, EventHandler* pHandler)
+    {
+        m_pDoc->add_event_handler(Observable::k_control, m_id, eventType, pHandler);
+    }
+    void add_event_handler(int eventType, void* pThis,
+                           void (*pt2Func)(void* pObj, SpEventInfo event) )
+    {
+        m_pDoc->add_event_handler(Observable::k_control, m_id, eventType,
+                                  pThis, pt2Func);
+    }
+    void add_event_handler(int eventType, void (*pt2Func)(SpEventInfo event) )
+    {
+        m_pDoc->add_event_handler(Observable::k_control, m_id, eventType, pt2Func);
+    }
+
+    inline Control* get_parent() { return m_pParent; }
 
     //getters
     inline bool is_enabled() { return m_fEnabled; }
+    inline long get_id() { return m_id; }
 
     //setters
     inline void enable(bool value) { m_fEnabled = value; }
+    inline void set_id(long id) { m_id = id; }
 
 protected:
     ImoStyle* get_style() { return m_pStyle; }

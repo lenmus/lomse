@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -55,16 +55,14 @@ LdpCompiler::LdpCompiler(LibraryScope& libraryScope, Document* pDoc)
     m_pParser = m_pLdpParser;
     m_pAnalyser = m_pLdpAnalyser;
     m_pModelBuilder = Injector::inject_ModelBuilder(pDoc->get_scope());
-    m_pIdAssigner = pDoc->get_scope().id_assigner();
     m_pDoc = pDoc;
     m_fileLocator = "";
 }
 
 //---------------------------------------------------------------------------------------
 // constructor for unit tests: direct injection of components
-LdpCompiler::LdpCompiler(LdpParser* p, LdpAnalyser* a, ModelBuilder* mb, IdAssigner* ida,
-                         Document* pDoc)
-    : Compiler(p, a, mb, ida, pDoc)
+LdpCompiler::LdpCompiler(LdpParser* p, LdpAnalyser* a, ModelBuilder* mb, Document* pDoc)
+    : Compiler(p, a, mb, pDoc)
     , m_pLdpParser(p)
     , m_pLdpAnalyser(a)
 {
@@ -81,7 +79,6 @@ InternalModel* LdpCompiler::compile_file(const std::string& filename)
     m_fileLocator = filename;
     m_pParser->parse_file(filename);
     LdpTree* tree = m_pLdpParser->get_ldp_tree();
-    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile_parsed_tree(tree);
 }
 
@@ -91,7 +88,6 @@ InternalModel* LdpCompiler::compile_string(const std::string& source)
     m_fileLocator = "string:";
     m_pParser->parse_text(source);
     LdpTree* tree = m_pLdpParser->get_ldp_tree();
-    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile_parsed_tree(tree);
 }
 
@@ -101,7 +97,6 @@ InternalModel* LdpCompiler::compile_input(LdpReader& reader)
     m_fileLocator = reader.get_locator();
     m_pLdpParser->parse_input(reader);
     LdpTree* tree = m_pLdpParser->get_ldp_tree();
-    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile_parsed_tree(tree);
 }
 
@@ -110,7 +105,6 @@ InternalModel* LdpCompiler::create_empty()
 {
     parse_empty_doc();
     LdpTree* tree = m_pLdpParser->get_ldp_tree();
-    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile_parsed_tree(tree);
 }
 
@@ -119,7 +113,6 @@ InternalModel* LdpCompiler::create_with_empty_score()
 {
     m_pParser->parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6)(instrument (musicData)))))");
     LdpTree* tree = m_pLdpParser->get_ldp_tree();
-    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile_parsed_tree(tree);
 }
 
@@ -146,7 +139,6 @@ LdpTree* LdpCompiler::wrap_score_in_lenmusdoc(LdpTree* pParseTree)
     //now we can safely parse the empty document
     parse_empty_doc();
     LdpTree* pFinalTree = m_pLdpParser->get_ldp_tree();
-    m_pIdAssigner->reassign_ids(&auxTree);
 
     LdpTree::depth_first_iterator it = pFinalTree->begin();
     while (it != pFinalTree->end() && !(*it)->is_type(k_content))
@@ -161,7 +153,6 @@ LdpTree* LdpCompiler::wrap_score_in_lenmusdoc(LdpTree* pParseTree)
 void LdpCompiler::parse_empty_doc()
 {
     m_pParser->parse_text("(lenmusdoc (vers 0.0) (content ))");
-    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
 }
 
 

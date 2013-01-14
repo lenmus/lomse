@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -141,7 +141,7 @@ public:
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData ))) ))" );
         m_pGModel = LOMSE_NEW GraphicModel();
-        m_pScore = m_pDoc->get_score(0);
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
         m_pLyt = LOMSE_NEW MyScoreLayouter2(m_pScore, m_pGModel, m_libraryScope);
         m_pLyt->my_set_systems_sizes(15000.0f, 18000.0f);
     }

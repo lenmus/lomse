@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -475,7 +475,7 @@ ImoObj* Linker::add_attachment(ImoAuxObj* pAuxObj)
         ImoContentObj* pContentObj = static_cast<ImoContentObj*>(m_pParent);
         pContentObj->add_attachment(m_pDoc, pAuxObj);
     }
-#if (LOMSE_COMPATIBILITY_1_5 == 1)
+#if LOMSE_COMPATIBILITY_LDP_1_5
     //backwards compatibility with 1.5
     //Until v.1.5 included, it was ok to include AuxObj in a musicData element, and
     //the parser will create an anchor object for it. Since v1.6 the anchor object *must*
@@ -494,7 +494,7 @@ ImoObj* Linker::add_attachment(ImoAuxObj* pAuxObj)
         else
             return pAuxObj;
     }
-#endif  //(LOMSE_COMPATIBILITY_1_5 == 1)
+#endif  //LOMSE_COMPATIBILITY_LDP_1_5
 
     return pAuxObj;
 }

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -31,6 +31,7 @@
 #define __LOMSE__LMD_EXPORTER_H__
 
 #include "lomse_basic.h"
+#include "lomse_injectors.h"
 
 #include <sstream>
 using namespace std;
@@ -43,22 +44,25 @@ class ImoObj;
 class LmdGenerator;
 
 
-// LmdExporter: Generates LMD source code for a basic model object
-//----------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 class LmdExporter
 {
 protected:
+    LibraryScope& m_libraryScope;
     int m_nIndent;
     bool m_fAddId;
     int m_scoreFormat;
+    bool m_fRemoveNewlines;
+    string m_lomseVersion;
+    string m_exportTime;
 
 public:
-    LmdExporter();
+    LmdExporter(LibraryScope& libScope);
     virtual ~LmdExporter();
 
     //formats for scores
     enum {
-        k_format_lms = 0, k_format_lmd, k_format_musicxml,
+        k_format_ldp = 0, k_format_lmd, k_format_musicxml,
     };
 
     //settings
@@ -66,15 +70,20 @@ public:
     inline void increment_indent() { ++m_nIndent; }
     inline void decrement_indent() { --m_nIndent; }
     inline void set_add_id(bool value) { m_fAddId = value; }
+    inline void set_remove_newlines(bool value) { m_fRemoveNewlines = value; }
     inline void set_score_format(int value) { m_scoreFormat = value; }
 
     //getters for settings
     inline int get_indent() { return m_nIndent; }
     inline bool get_add_id() { return m_fAddId; }
     inline int get_score_format() { return m_scoreFormat; }
+    inline bool get_remove_newlines() { return m_fRemoveNewlines; }
 
     //the main method
     string get_source(ImoObj* pImo);
+
+    //auxiliary
+    string get_version_and_time_string();
 
     //static methods for ldp names to types conversion
     static string clef_type_to_ldp(int clefType);

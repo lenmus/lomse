@@ -62,7 +62,7 @@ protected:
     bool    m_fDisplayPercentage;
 
 public:
-    ProgressBarCtrl(LibraryScope& libScope, DynGenerator* pOwner, Document* pDoc,
+    ProgressBarCtrl(LibraryScope& libScope, Control* pParent, Document* pDoc,
                     float maxValue, LUnits width, LUnits height=-1.0f,
                     ImoStyle* pStyle=NULL);
     virtual ~ProgressBarCtrl() {}

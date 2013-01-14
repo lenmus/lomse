@@ -150,100 +150,6 @@ void copy_buffer_on_dc(HDC dc)
 }
 
 //---------------------------------------------------------------------------------------
-string get_font_filename(RequestFont* pRequest)
-{
-    //This is just a trivial example. In real applications you should 
-    //use operating system services to find a suitable font
-    
-    //notes on parameters received:
-    // - fontname can be either the face name (i.e. "Book Antiqua") or
-    //   the familly name (i.e. "sans-serif")
-
-    string fontname = pRequest->get_fontname();
-    bool bold = pRequest->get_bold();
-    bool italic = pRequest->get_italic();
-
-    string path = "C:\\WINNT\\Fonts\\";
-
-    //if family name, choose a font name
-    if (fontname == "serif")
-        fontname = "Times New Roman";
-    else if (fontname == "sans-serif")
-        fontname = "Tahoma";
-    else if (fontname == "handwritten")
-        fontname = "Lucida Handwriting";
-    else if (fontname == "cursive")
-        fontname = "Monotype Corsiva";
-    else if (fontname == "monospaced")
-        fontname = "Courier New";
-
-    //choose a suitable font file
-    string fontfile;
-    if (fontname == "Times New Roman")
-    {
-        if (italic && bold)
-            fontfile = "timesbi.ttf";
-        else if (italic)
-            fontfile = "timesi.ttf";
-        else if (bold)
-            fontfile = "timesbd.ttf";
-        else
-            fontfile = "times.ttf";
-    }
-
-    else if (fontname == "Tahoma")
-    {
-        if (bold)
-            fontfile = "tahomabd.ttf";
-        else
-            fontfile = "tahoma.ttf";
-    }
-
-    else if (fontname == "Lucida Handwriting")
-    {
-        fontfile = "lhandw.ttf";
-    }
-
-    else if (fontname == "Monotype Corsiva")
-    {
-        fontfile = "mtcorsva.ttf";
-    }
-
-    else if (fontname == "Courier New")
-    {
-        if (italic && bold)
-            fontfile = "courbi.ttf";
-        else if (italic)
-            fontfile = "couri.ttf";
-        else if (bold)
-            fontfile = "courbd.ttf";
-        else
-            fontfile = "cour.ttf";
-    }
-
-    else
-        fontfile = "times.ttf";
-
-    
-   return path + fontfile;
-}
-
-//---------------------------------------------------------------------------------------
-void on_lomse_request(void* pThis, Request* pRequest)
-{
-    int type = pRequest->get_request_type();
-    switch (type)
-    {
-        case k_get_font_filename:
-            get_font_filename( dynamic_cast<RequestFont*>(pRequest) );
-            break;
-
-        default:
-            fprintf(stderr, "on_lomse_request] Unknown request\n");
-    }
-}
-
-//---------------------------------------------------------------------------------------
 void open_test_document()
 {
     //Normally you will load the content of a file. But in this simple example we
@@ -305,11 +211,8 @@ void initialize_lomse()
         //For MS Windows the Lomse default behaviour is the right behaviour.
         bool reverse_y_axis = false;
 
-    //Now, initialize the Lomse library with these values
+    //initialize the Lomse library with these values
     m_lomse.init_library(pixel_format, resolution, reverse_y_axis);
-
-    //set required callbacks
-    m_lomse.set_request_callback(NULL, on_lomse_request);
 }
 
 //---------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/03/29 -->
+<!-- $Updated: 2012/12/29 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -29,7 +29,8 @@ In this third tutorial we are going to see how to add score playback capabilitie
 <li><a href="#testing-sound">Testing sound</a></li>
 <li><a href="#menu">Additional menu items</a></li>
 <li><a href="#score-player">Creating ScorePlayer object</a></li>
-<li><a href="#mycanvas">Modifications in MyCanvas for score playback</a></li>
+<li><a href="#mycanvas">Creating the player GUI object</a></li>
+<li><a href="#mycanvas">Other modifications in MyCanvas</a></li>
 <li><a href="#compile">Compiling your code and building</a></li>
 <li><a href="#sound-problems">Problems with MIDI sound in Linux</li></a>
 <li><a href="#conclusions">Conclusions</a></li>
@@ -43,14 +44,15 @@ In this third tutorial we are going to see how to add score playback capabilitie
 <!--====================================================-->
 
 <p>
-Lomse provides class <tt>ScorePlayer</tt>, that takes care of most of the work to do. By using it, playing an score is just two tasks:
+Lomse provides class <tt>ScorePlayer</tt>, that takes care of most of the work to do. By using it, playing an score is, basically, three tasks:
 </p>
 <ol>
     <li>Load the score to play in the <tt>ScorePlayer</tt> instance.</li>
-    <li>Ask <tt>ScorePlayer</tt> to play it, specifying the desired options (i.e. visual tracking, metronome settings, count-off, etc).</li>
+    <li>Create a class, derived from <tt>PlayerGui</tt> for controling and defining the playback options (i.e. visual tracking, metronome settings, tempo speed, count-off, etc).</li>
+    <li>Ask <tt>ScorePlayer</tt> to play it, using the desired options.</li>
 </ol>
 <p>
-This is an excerpt of the needed code:
+This is an excerpt of the needed code (more on it later):
 </p>
 
 <pre class="code">
@@ -60,26 +62,26 @@ This is an excerpt of the needed code:
     PlayerGui* pPlayerGui = ...
     pPlayer->load_score(pScore, pPlayerGui);
 
-    //step2: set play options and go on
+    //step2: go on
     bool fVisualTracking = true;
-    bool fCountOff = false;
-    int playMode = k_play_normal_instrument;
-    long nMM = 60;    //metronome = 60 beats per minute
-    pPlayer->play(fVisualTracking, fCountOff, playMode, nMM, m_pInteractor);
+    m_pPlayer->play(fVisualTracking, 0, m_pInteractor);
 </pre>
 
+<p><tt>PlayerGui</tt> is an interface between your application playback GUI controls and the Lomse library. By "playback GUI controls" I am referring to things such as a button, a menu item, or a link to ask for playing back the score, check boxes for specifying playback options, such as "generate metronome clicks" or "start with count off clicks", a slider for specifying tempo speed, etc. The simplest way for specifying an option (i.e. tempo speed for playing back the score) would be to pass its value directly to Lomse when asking to play the score. But this approach has a drawback: the chosen values can not be changed by the user while the score is being played. Therefore, instead of passing Lomse the values for options, the idea is to have an interface between Lomse and your application, so that Lomse can ask your application for these values when needed. More on this later.
+</p>
 
 <p>
-Invocation of <tt>play</tt> method will trigger all the playback machinery. But <b>Lomse will not generate any sounds</b>. Sound generation is always responsibility of your application. What Lomse will do is to generate <i>sound events</i>. Therefore, for playback, your application has two main responsibilities:
+The last line of previous code is invocation of <tt>play</tt> method- It will trigger all the playback machinery. But <b>Lomse will not generate any sounds</b>. Sound generation is always responsibility of your application. What Lomse will do is to generate <i>sound events</i>. Therefore, for playback, your application has three main responsibilities:
 </p>
 
 <ol>
-    <li>handle sound events</li>
-    <li>generate sound for each event</li>
+    <li>Create a class, derived from <tt>PlayerGui</tt> for defining the playback options.</li>
+    <li>Handle sound events</li>
+    <li>Generate sound for each sound event</li>
 </ol>
 
 <p>
-Both tasks are accomplished by creating, in your application, a class derived from <tt>MidiServerBase</tt>. This base class defines the interface for processing MIDI events. Your application has to define a derived class and implement the virtual methods. Your class will receive the sound events and will have the responsibility of generating the sounds. Lomse does not impose any restriction about sound generation other than low latency. Perhaps, the simpler method to generate sounds is to rely on the MIDI synthesizer of the PC sound card.  But any other alternatives are possible. By the way, I would like to modify Lomse library to add an interface to the JACK audio system (<a href="http://jackaudio.org/" target="_blank">
+Tasks 2 and 3 are accomplished by creating, in your application, a class derived from <tt>MidiServerBase</tt>. This base class defines the interface for processing MIDI events. Your application has to define a derived class and implement the virtual methods. Your class will receive the sound events and will have the responsibility of generating the sounds. Lomse does not impose any restriction about sound generation other than low latency. Perhaps, the simpler method to generate sounds is to rely on the MIDI synthesizer of the PC sound card.  But any other alternatives are possible. By the way, I would like to modify Lomse library to add an interface to the JACK audio system (<a href="http://jackaudio.org/" target="_blank">
 http://jackaudio.org/</a>). If you are interested in taking this task you are welcome. Please post me a message. Thank you!
 </p>
 
@@ -108,13 +110,15 @@ Finally, for controlling playback some GUI controls (buttons, menu items, etc. t
 </p>
 
 <ol>
-    <li>The first one is to create your own play/pause/stop control mechanism. For instance, you could use menu items, buttons in the toolbar, etc.</li>
+    <li>The first one is to create your own play/pause/stop control mechanism. For instance, you could use menu items, buttons in the toolbar, etc. For linkinf these controls to Lomse you will have to define a class derived from <tt>PlayerGui</tt>. We will see how to do it later in this tutorial.</li>
     <li>The other alternative is to display, embedded the document, near the score, a <i>player control</i> widget (the typical play/stop buttons, plus playback information that we see in many media players). Lomse has such control (class </tt>ScorePlayerCtrl</tt>) but this is an advanced topic that requires knowledge of Lomse controls and dynamic content creation. So, I will explain nothing about it in this tutorial.</li>
 </ol>
 
 <p>
 So, as you can see, implementing score playback is simple, and the only burden for your application is coding a <tt>MidiServer</tt> class for generating the sounds.
 </p>
+
+
 
 
 <h2><a name="specifications">2. Specifications</h2></a>
@@ -148,10 +152,9 @@ We are going to use the <a href="../../examples/example_2_wxwidgets.cpp">code fr
     <li>Initial dialog for Midi settings.</li>
     <li>Menu items for displaying dialog and for score playback: play, pause, stop.</li>
     <li>Modifications in <tt>MyFrame</tt> for displaying dialog at start up.</li>
-
     <li>Modifications in <tt>MyFrame</tt> for creating <tt>MidiServer</tt> and <tt>ScorePlayer</tt>.</li>
     <li>Modifications in <tt>MyFrame</tt> for dealing with 'Play', 'Pause' and 'Stop' menu items.</li>
-    <li>Modifications in <tt>MyCanvas</tt> for score playback.</li>
+    <li>Modifications in <tt>MyCanvas</tt> for score playback and for defining the player GUI.</li>
 </ol>
 
 <p>
@@ -180,13 +183,16 @@ tutorial-3
 
 
 <p>
-Before compiling our example, take into account that it is necessary to install and link with PortMidi library. Perhaps this is the right time to ensure that you have PortMidi installed in your system. See wxMidi install instructions, included in the wxMidi package.
+Before compiling our example, take into account that it is necessary to install the PortMidi library and link with it. Perhaps this is the right time to ensure that you have PortMidi installed in your system. See wxMidi install instructions, included in the wxMidi package.
 </p>
 
-<p>Now, let's start modifying code from tutorial 2 by adding <tt>wxMidi</tt> headers:
+<p>Now, let's start modifying code from tutorial 2 by adding <tt>wxMidi</tt> headers and a couple of additional Lomse headers:
 </p>
 
 <pre class="code">
+#include &lt;lomse_player_gui.h&gt;
+#include &lt;lomse_score_player.h&gt;
+
 //wxMidi headers
 #include &lt;wxMidi.h&gt;
 </pre>
@@ -281,7 +287,7 @@ MidiServer::~MidiServer()
 </pre>
 
 <p>
-Apart of the mandatory virtual methods, I have added three new methods. First one, <tt>count_devices</tt> is getting the number of Midi devices installed in your PC. We need it for the Midi settings dialog. This is the code:
+Apart from the mandatory virtual methods, I have added three new methods. First one, <tt>count_devices</tt> is getting the number of Midi devices installed in your PC. We need it for the Midi settings dialog. This is the code:
 </p>
 
 <pre class="code">
@@ -353,7 +359,7 @@ void MidiServer::set_out_device(int nOutDevId)
 </pre>
 
 <p>
-Finally, I have added a test method for generating some sounds, to be used for checking that Midi settings are valid and the Midi interface works. This is useful for checking the Midi system if score playback doesn't produce sounds!. Here is the code:
+Finally, I have added a test method for generating some sounds, to be used for checking that Midi settings are valid and the Midi interface works. This is useful for checking the Midi system if score playback doesn't produce sounds. Here is the code:
 </p>
 
 <pre class="code">
@@ -415,7 +421,10 @@ void MidiServer::all_sounds_off()
 }
 </pre>
 
-<p>With this we have finished our sound generator based on <tt>wxMidi</tt>. Now we have to modify <tt>MyFrame</tt> class for using it. We will modify <tt>MyFrame</tt> definition by adding a pointer to <tt>MidiServer</tt> instance and an accessor method for creating the instance, if not created, and returning it. First, changes in <tt>MyFrame</tt> definition:
+<p>With this we have finished the longest part: creating our sound generator based on <tt>wxMidi</tt>. Now we have to modify <tt>MyFrame</tt> class for using it. We will modify <tt>MyFrame</tt> definition by adding a pointer to <tt>MidiServer</tt> instance and an accessor method for creating the instance, if not created, and returning it.</p>
+
+<p>
+First, changes in <tt>MyFrame</tt> definition:
 </p>
 
 <pre class="code">
@@ -635,7 +644,7 @@ void MyFrame::on_play_pause(wxCommandEvent& WXUNUSED(event))
 <!--====================================================-->
 
 <p>
-before coding the necessary changes in <tt>MyCanvas</tt> it is necessary to create the <tt>ScorePlayer</tt> object. It should be a global object, accessible from any point at which it is necessary to play an score. In our simple example, I will put this object as member of <tt>MyFrame</tt> and will pass it to <tt>MyCanvas</tt> in the constructor. Therefore, I will change <tt>MyFrame</tt> declaration to define a member variable and a getter method:
+Before coding the necessary changes in <tt>MyCanvas</tt> it is necessary to create the <tt>ScorePlayer</tt> object. It should be a global object, accessible from any point at which it is necessary to play an score. In our simple example, I will put this object as member of <tt>MyFrame</tt> and will pass it to <tt>MyCanvas</tt> in the constructor. Therefore, I will change <tt>MyFrame</tt> declaration to define a member variable and a getter method:
 </p>
 
 <pre class="code">
@@ -720,18 +729,125 @@ With this, we have finished with the modifications required for <tt>MyFrame</tt>
 </p>
 
 
-<h2><a name="mycanvas">9. Modifications in MyCanvas for score playback</h2></a>
+
+<h2><a name="mycanvas">9. Creating the player GUI object</h2></a>
+<!--====================================================-->
+
+<p>I have defined  some items for score playback: 'Play', 'Pause' and 'Stop', in the 'Sound' submenu. But, as I would like to keep this tutorial simple, I have not created other GUI widgets for controlling playback. In a real application you, probably, would like to have additional feautures, such as checkboxes for deciding wether to have metronome clicks enabled, to produce some coount off metronome clicks, to have volume and tempo sliders, etc.
+</p>
+
+<p>To inform Lomse about these controls and about the options fof playback you have to define a class, derived from <tt>PlayerGui</tt>, and implement its virtual methods. Let's see the definition of class <tt>PlayerGui</tt>:
+
+
+<pre class="code">
+class PlayerGui
+{
+protected:
+    PlayerGui() {}
+
+public:
+    virtual ~PlayerGui() {}
+
+    //mandatory overrides
+    virtual void on_end_of_playback() = 0;
+    virtual int get_play_mode() = 0;
+    virtual int get_metronome_mm() = 0;
+    virtual Metronome* get_metronome() = 0;
+    virtual bool countoff_status() = 0;
+    virtual bool metronome_status() = 0;
+
+};
+</pre>
+
+<p>As you can see, it is just a few methods that will be invoked by Lomse to get the desired playback options. Let's explain the purpose of each method:
+</p>
+
+<p><tt>metronome_status()</tt> must return a boolean to indicate if the metronome is swicthed on or off. This method will be used by Lomse to determine if metronome clicks should be generated. As user can turn metronome on and off while the playback is taken place, this method will be invoked many times by Lomse during playback for pulling metronome state. For coding this method you could, for instance, access your application GUI control (i.e. the checkbox controlling the metronome status) and return its value. Or could always return <tt>false</tt> if your application doesn't require metronome sounds.
+</p> 
+
+<p><tt>countoff_status()</tt> must return a bolean to indicate if playback will start with some metronome clicks for count off or not. This method will be invoked by Lomse only once, just before starting playback. Again, in your application you can code this method as it best suits your needs: return a fixed value, true o false; accsess a GUI control and return its status; or any other solution you would like.
+</p>
+
+<p><tt>get_metronome_mm()</tt> must return the tempo speed (in beats per minute) you would like for playback. Again, as tempo can be changed by the user while playback is taking place, this method will be invoked constantly by Lomse during playback.
+</p>
+
+<p><tt>get_play_mode()</tt> must return one of the following values defined in <tt>lomse_player_gui.h</tt> header file:
+</p>
+
+<pre class="code">
+enum
+{
+    k_play_normal_instrument = 0,   //normal, (pitched instrument)
+    k_play_rhythm_instrument,       //only rhythm (instrument, single pitch)
+    k_play_rhythm_percussion,       //only rhythm (percussion, single pitch)
+    k_play_rhythm_human_voice,      //only rhythm (solfege, human voice)
+};
+</pre>
+
+<p>The returned value will be, for now, ignored by Lomse as only normal playback using a musical instrument is currently implemented.
+</p>
+
+<p><tt>on_end_of_playback()</tt> is a method that will be invoked by Lomse when playback has finished, either because the last note has been played or because the user stopped the playback. In this method your application should do whatever you need, and it is mainly intended for ensuring GUI coherence with playback status. For instance, imagine an application having a "Play" button for starting playback. When the user clicks on it, the application will render the button as 'pushed' and invokes the Lomse <tt>play</tt> method. The "Play" button will remain pushed forever and the application could use the <tt>on_end_of_playback()</tt> for render again the button as 'released'.
+</p>
+
+<p>I will not comment on the purpose of method <tt>Metronome* get_metronome()</tt> as it is intended for more advanced uses. So, for now, just code a method returning <tt>NULL</tt>.
+</p>
+
+<p>Now that we understand the purpose of <tt>PlayerGui</tt> interface it is time for deciding how to do it in our sample application. As I wouldn't like to create a complex tutorial, the only GUI controls for controlling playback are the menu items 'Play', 'Pause' and 'Stop', in the 'Sound' submenu. Therefore, there are no ways for the user to decide on options. Instead, the application has a fized set of values that the user can not change. Let's decide the following values for the options:
+</p>
+
+<ul>
+<li>Always play with metronome clicks enabled.</li>
+<li>Always start playback with count off clicks.</li>
+<li>Tempo speed will always be 60 beats per minute.</li>
+</ul>
+
+<p>Having decided this, it would be simple to code the required methods as it is just returning a fixed value. But for application using fixed values, such as this sample, Lomse provides a derived class <tt>PlayerNoGui</tt> that receives the desired fixed values in the constructor and implements the required methods.
+</p>
+
+<p>A last important issue: the PlayerGui object need to be available while score is beign played. Therefore, it can not be a local object defined in the method invoking the Lomse <tt>play</tt>. In this sample, we will just derive <tt>MyCanvas</TT> from <tt>PlayerNoGui</tt>. So, lets start with the modifications:
+</p>
+
+<p>Firts, the definition of <tt>MyCanvas</tt> class, for deriving from <tt>PlayerNoGui</tt>:
+</p>
+
+<pre class="code">
+class MyCanvas : public wxWindow, public PlayerNoGui
+</pre>
+
+<p>Next, in the implementation we add a line to initialize <tt>PlayerNoGui</tt>:
+</p>
+
+<pre class="code">
+MyCanvas::MyCanvas(wxFrame *frame, LomseDoorway& lomse, ScorePlayer* pPlayer)
+    : wxWindow(frame, wxID_ANY)
+    , PlayerNoGui(60L /*tempo 60 MM*/, true /*count off*/, true /*metronome clicks*/)
+    , m_lomse(lomse)
+	, m_pPresenter(NULL)
+	, m_pInteractor(NULL)
+	, m_buffer(NULL)
+	, m_pPlayer(pPlayer)
+	, m_view_needs_redraw(true)
+{
+}
+</pre>
+
+<p>With these changes, our the player GUI object is created and initialized.
+</p>
+
+
+<h2><a name="mycanvas">10. Other modifications in MyCanvas</h2></a>
 <!--====================================================-->
 
 <p>In <tt>MyFrame</tt> we delegated all playback operations on <tt>MyCanvas</tt>. Therefore, we have now to code these new methods. The first one <tt>play_start</tt> has to load the score in the <tt>ScorePlayer</tt> object (received in constructor) and invoke its <tt>play</tt> method, as was explained in section <a href="tutorial-3-wx.htm#playback-intro">"How lomse playback works"</a>.
 </p>
 
 <p>
-The main doubt you should have is how to get the score to play. In these tutorials I never explained how access parts of a document, such as a paragraph or a score. In a future tutorial I will explain this in detail but, for now, you should learn that <tt>Document</tt> class has member methods for traversing the document and accessing its components. One of these methods is <tt>get_score(int index)</tt> that takes as argument the index to the desired score. Index 0 is the first score in the document, index 1 the second score, and so on. Therefore, if we assume that the document only contains one score, getting the score to play is just getting the document and invoking <tt>get_score</tt> method:
+The main doubt you should have is how to get the score to play. In these tutorials I never explained how access parts of a document, such as a paragraph or a score. In a future tutorial I will explain this in detail but, for now, you should learn that <tt>Document</tt> class has member methods for traversing the document and accessing its components. One of these methods is <tt>get_content_item(int index)</tt> that takes as argument the index to the desired content item. Index 0 is the first item in the document, index 1 the second one, and so on. Therefore, as we know that the document only contains one score, getting the score to play is just getting the document and invoking <tt>get_content_item(0)</tt> method:
 </p>
 <pre class="code">
     Document* pDoc = m_pPresenter->get_document();
-    ImoScore* pScore = pDoc->get_score(0);
+    ImoScore* pScore = static_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
 </pre>
 
 <p>
@@ -742,14 +858,12 @@ With this knowledge we can now code the <tt>play_start</tt> method:
 void MyCanvas::play_start()
 {
     Document* pDoc = m_pPresenter->get_document();
-    ImoScore* pScore = pDoc->get_score(0);
-    m_pPlayer->load_score(pScore, NULL);
+    ImoScore* pScore = pDoc->static_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
+    m_pPlayer->load_score(pScore, this);
 
-    bool fVisualTracking = true;
-    bool fCountOff = false;
-    int playMode = k_play_normal_instrument;
-    long nMM = 60;
-    m_pPlayer->play(fVisualTracking, fCountOff, playMode, nMM, m_pInteractor);
+    bool fVisualTracking = false;
+    m_pPlayer->play(fVisualTracking, 0, m_pInteractor);
+
 }
 </pre>
 
@@ -777,7 +891,7 @@ And this is all. Our code is now finished and our application is ready for build
 
 
 
-<h2><a name="compile">10. Compiling your code and building</a></h2>
+<h2><a name="compile">11. Compiling your code and building</a></h2>
 <!--====================================================-->
 
 <p>
@@ -836,7 +950,7 @@ Click on the 'Sound > Midi test' menu item, and check that sounds are produced. 
 </p>
 
 
-<h2><a name="sound-problems">11. Problems with MIDI sound in Linux</a></h2>
+<h2><a name="sound-problems">12. Problems with MIDI sound in Linux</a></h2>
 <!--====================================================-->
 
 <p>
@@ -855,7 +969,7 @@ http://timidity.sourceforge.net/#info</a><br />
 </p>
 
 
-<h2><a name="conclusions">12. Conclusions</a></h2>
+<h2><a name="conclusions">13. Conclusions</a></h2>
 <!--====================================================-->
 
 <p>

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -58,7 +58,7 @@ ImoDocument* ModelBuilder::build_model(InternalModel* IModel)
 //void ModelBuilder::update_model(InternalModel* IModel)
 //{
 //    m_pTree = pTree;
-//    DocIterator it(m_pTree);
+//    DocIterator it(m_pTree);  //replace by tree iterator- DocIterator has been removed
 //    for (it.start_of_content(); *it != NULL; ++it)
 //    {
 //        //Factory method ?

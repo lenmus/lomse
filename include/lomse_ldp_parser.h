@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -69,11 +69,10 @@ public:
     inline void release_last_tree_ownership() {
         m_tree->set_root(NULL);
         delete m_tree;
-        m_tree = NULL; 
+        m_tree = NULL;
     }
 
 //    inline int get_num_errors() { return m_numErrors; }
-    inline long get_max_id() { return m_nMaxId; }
 
 protected:
     enum EParsingState
@@ -102,20 +101,15 @@ protected:
     void report_error(EParsingState nState, LdpToken* pTk);
     void report_error(const std::string& msg);
 
-//    long GetNodeId(SpLdpElement pNode);
-//
-
     LdpFactory*     m_pLdpFactory;
     LdpTokenizer*   m_pTokenizer;
     LdpToken*       m_pTk;              // current token
     EParsingState   m_state;            // current automata state
-    long            m_id;
     std::stack<pair<EParsingState, LdpElement*> >  m_stack;    // To save current automata state and node
     LdpElement*     m_curNode;             //node in process
 
     // parsing control, options and error variables
 //    bool            m_fDebugMode;
-    long           m_nMaxId;        //maximun ID found
 //    std::set<long>*         m_pIgnoreSet;   //set with elements to ignore
 };
 

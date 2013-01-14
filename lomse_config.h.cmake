@@ -77,7 +77,7 @@
 #define LOMSE_DEBUG                 @LOMSE_DEBUG@ 
 
 // 1 - Accept without warning/error LDP v1.5 syntax
-#define LOMSE_COMPATIBILITY_1_5     @LOMSE_COMPATIBILITY_1_5@
+#define LOMSE_COMPATIBILITY_LDP_1_5     @LOMSE_COMPATIBILITY_LDP_1_5@
 
 
 #endif  // __LOMSE_CONFIG_H__

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -205,7 +205,7 @@ SUITE(ScorePlayerTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
-        ImoScore* pScore = doc.get_score(0);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         MidiServerBase midi;
         MyScorePlayer player(m_libraryScope, &midi);
         PlayerNoGui gui;
@@ -222,7 +222,7 @@ SUITE(ScorePlayerTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
-        ImoScore* pScore = doc.get_score(0);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         MidiServerBase midi;
         MyScorePlayer player(m_libraryScope, &midi);
         PlayerNoGui gui;
@@ -240,7 +240,7 @@ SUITE(ScorePlayerTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
-        ImoScore* pScore = doc.get_score(0);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         MyScorePlayer player(m_libraryScope, NULL);
         PlayerNoGui gui;
         player.load_score(pScore, &gui);
@@ -256,7 +256,7 @@ SUITE(ScorePlayerTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
-        ImoScore* pScore = doc.get_score(0);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         MyMidiServer midi;
         MyScorePlayer player(m_libraryScope, &midi);
         PlayerNoGui playGui;
@@ -290,7 +290,7 @@ SUITE(ScorePlayerTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(n c4 q) )) )))" );
-        ImoScore* pScore = doc.get_score(0);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         MyMidiServer midi;
         MyScorePlayer player(m_libraryScope, &midi);
         PlayerNoGui playGui;
@@ -358,7 +358,7 @@ SUITE(ScorePlayerTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(chord (n c4 q)(n e4 q)(n g4 q)) )) )))" );
-        ImoScore* pScore = doc.get_score(0);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         MyMidiServer midi;
         MyScorePlayer player(m_libraryScope, &midi);
         PlayerNoGui playGui;
@@ -437,7 +437,7 @@ SUITE(ScorePlayerTest)
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(chord (n c4 q)(n e4 q)(n g4 q)) )) )))" );
-        ImoScore* pScore = doc.get_score(0);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         MyMidiServer midi;
         MyScorePlayer2 player(m_libraryScope, &midi);
 
@@ -459,7 +459,7 @@ SUITE(ScorePlayerTest)
 //        Document doc(m_libraryScope);
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
 //            "(instrument (musicData (clef G)(n c4 q) )) )))" );
-//        ImoScore* pScore = doc.get_score(0);
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 //        MyMidiServer midi;
 //        MyScorePlayer player(m_libraryScope, &midi);
 //        player.load_score(pScore, NULL);

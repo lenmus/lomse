@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -54,7 +54,6 @@ namespace lomse
 class ColStaffObjs;
 class LdpElement;
 class SoundEventsTable;
-class DynGenerator;
 class Document;
 class EventHandler;
 class Control;
@@ -380,9 +379,10 @@ class DtoObj;
 
                 // ImoInlineLevelObj
                 k_imo_inline_level_obj,
-                    k_imo_button, k_imo_image, k_imo_text_item,
+                    k_imo_image, k_imo_text_item,
                     k_imo_control,
                         k_imo_score_player,
+                        k_imo_button,
                     k_imo_control_end,
 
                     // ImoBoxInline (A)
@@ -429,7 +429,8 @@ public:
 
     //API
     ImoTextItem* add_text_item(const string& text, ImoStyle* pStyle=NULL);
-    ImoButton* add_button(const string& label, const USize& size, ImoStyle* pStyle=NULL);
+    ImoButton* add_button(LibraryScope& libScope, const string& label,
+                          const USize& size, ImoStyle* pStyle=NULL);
     ImoInlineWrapper* add_inline_box(LUnits width=0.0f, ImoStyle* pStyle=NULL);
     ImoLink* add_link(const string& url, ImoStyle* pStyle=NULL);
     ImoImage* add_image(unsigned char* imgbuf, VSize bmpSize, EPixelFormat format,
@@ -483,6 +484,7 @@ public:
 
     //getters
     inline ImoObj* get_root() { return m_pRoot; }
+    ImoObj* get_pointer_to_imo(long id);
 
 };
 
@@ -538,6 +540,8 @@ public:
     virtual ImoObj* get_parent_imo() { return static_cast<ImoObj*>(get_parent()); }
     void append_child_imo(ImoObj* pImo);
     void remove_child_imo(ImoObj* pImo);
+    Document* get_the_document();
+    ImoDocument* get_document();
 
     //Get the name from object type
     static const string& get_name(int type);
@@ -652,6 +656,7 @@ public:
     inline bool is_text_item() { return m_objtype == k_imo_text_item; }
     inline bool is_text_style() { return m_objtype == k_imo_text_style; }
     inline bool is_textblock_info() { return m_objtype == k_imo_textblock_info; }
+    inline bool is_text_box() { return m_objtype == k_imo_text_box; }
     inline bool is_tie() { return m_objtype == k_imo_tie; }
     inline bool is_tie_data() { return m_objtype == k_imo_tie_data; }
     inline bool is_tie_dto() { return m_objtype == k_imo_tie_dto; }
@@ -1169,7 +1174,70 @@ protected:
 	    set_lunits_property(ImoStyle::k_border_width_bottom, value);
 	}
 
-    //getters
+    friend class DefineStyleLmdGenerator;
+
+    //getters non-inheriting from parent. Returns true if property exists
+    bool get_float_property(int prop, float* value)
+    {
+        map<int, float>::const_iterator it = m_floatProps.find(prop);
+        if (it != m_floatProps.end())
+        {
+            *value = it->second;
+            return true;
+        }
+        else
+            return false;
+    }
+
+    bool get_lunits_property(int prop, LUnits* value)
+    {
+        map<int, LUnits>::const_iterator it = m_lunitsProps.find(prop);
+        if (it != m_lunitsProps.end())
+        {
+            *value = it->second;
+            return true;
+        }
+        else
+            return false;
+    }
+
+    bool get_string_property(int prop, string* value)
+    {
+        map<int, string>::const_iterator it = m_stringProps.find(prop);
+        if (it != m_stringProps.end())
+        {
+            *value = it->second;
+            return true;
+        }
+        else
+            return false;
+    }
+
+    bool get_int_property(int prop, int* value)
+    {
+        map<int, int>::const_iterator it = m_intProps.find(prop);
+        if (it != m_intProps.end())
+        {
+            *value = it->second;
+            return true;
+        }
+        else
+            return false;
+    }
+
+    bool get_color_property(int prop, Color* value)
+    {
+        map<int, Color>::const_iterator it = m_colorProps.find(prop);
+        if (it != m_colorProps.end())
+        {
+            *value = it->second;
+            return true;
+        }
+        else
+            return false;
+    }
+
+    //getters. If value not stored, inherites from parent
     float get_float_property(int prop)
     {
         map<int, float>::const_iterator it = m_floatProps.find(prop);
@@ -1229,7 +1297,8 @@ protected:
 
 //---------------------------------------------------------------------------------------
 // Any object for the renderizable content of a document
-class ImoContentObj : public ImoObj, public Observable
+class ImoContentObj : public ImoObj
+                    , public Observable
 {
 protected:
     ImoStyle* m_pStyle;
@@ -1255,7 +1324,6 @@ public:
     inline void set_visible(bool visible) { m_fVisible = visible; }
 
     //root
-    virtual ImoDocument* get_document();
     Document* get_the_document();
 
     //attachments (first child)
@@ -1267,13 +1335,13 @@ public:
     void remove_attachment(ImoAuxObj* pAO);
     ImoAuxObj* find_attachment(int type);
 
-//    //API: handling events
-//    void add_event_handler(int eventType, EventHandler* pHandler);
-//    void add_event_handler(int eventType, void* pThis,
-//                           void (*pt2Func)(void* pObj, SpEventInfo event) );
-
-    //mandatory overrides from Observable
+    //overrides for Observable children
 	EventNotifier* get_event_notifier();
+    void add_event_handler(int eventType, EventHandler* pHandler);
+    void add_event_handler(int eventType, void* pThis,
+                           void (*pt2Func)(void* pObj, SpEventInfo event) );
+    void add_event_handler(int eventType,
+                           void (*pt2Func)(SpEventInfo event) );
 
     //style
     virtual ImoStyle* get_style();
@@ -1599,6 +1667,9 @@ public:
 
     //setters
     virtual void set_staff(int staff) { m_staff = staff; }
+
+    //other
+    ImoInstrument* get_instrument();
 };
 
 //---------------------------------------------------------------------------------------
@@ -2169,7 +2240,35 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ImoButton : public ImoInlineLevelObj
+// ImoControl: An inline wrapper for defining GUI controls (GUI interactive component).
+class ImoControl : public ImoInlineLevelObj
+{
+protected:
+    Control* m_ctrol;
+
+    friend class ImFactory;
+    ImoControl(Control* ctrol) : ImoInlineLevelObj(k_imo_control), m_ctrol(ctrol) {}
+    ImoControl(int type) : ImoInlineLevelObj(type), m_ctrol(NULL) {}
+
+    friend class InlineLevelCreatorApi;
+    inline void attach_control(Control* ctrol) { m_ctrol = ctrol; }
+
+public:
+    virtual ~ImoControl() {}
+
+    //Any control must know its size or knows how to compute it, even before layouting
+    USize measure();
+
+    //Any ImoControl must know how to generate its graphical model
+    GmoBoxControl* layout(LibraryScope& libraryScope, UPoint pos);
+
+    //other
+    inline Control* get_control() { return m_ctrol; }
+
+};
+
+//---------------------------------------------------------------------------------------
+class ImoButton : public ImoControl
 {
 protected:
     string m_text;
@@ -2210,30 +2309,6 @@ public:
 
     //setters
     inline void enable(bool value) { m_fEnabled = value; }
-};
-
-//---------------------------------------------------------------------------------------
-// ImoControl: An inline wrapper for defining GUI controls (GUI interactive component).
-class ImoControl : public ImoInlineLevelObj
-{
-protected:
-    Control* m_ctrol;
-
-    friend class ImFactory;
-    ImoControl(Control* ctrol) : ImoInlineLevelObj(k_imo_control), m_ctrol(ctrol) {}
-    ImoControl(int type) : ImoInlineLevelObj(type), m_ctrol(NULL) {}
-
-    friend class ImoScorePlayer;
-    inline void attach_control(Control* ctrol) { m_ctrol = ctrol; }
-
-public:
-    virtual ~ImoControl() {}
-
-    //Any control must know its size or knows how to compute it, even before layouting
-    USize measure();
-
-    //Any ImoControl must know how to generate its graphic model
-    GmoBoxControl* layout(LibraryScope& libraryScope, UPoint pos);
 };
 
 //---------------------------------------------------------------------------------------
@@ -2296,10 +2371,9 @@ class ImoDynamic : public ImoContent
 protected:
     string m_classid;
     std::list<ImoParamInfo*> m_params;
-    DynGenerator* m_generator;
 
     friend class ImFactory;
-    ImoDynamic() : ImoContent(k_imo_dynamic), m_classid(""), m_generator(NULL) {}
+    ImoDynamic() : ImoContent(k_imo_dynamic), m_classid("") {}
 
 public:
     virtual ~ImoDynamic();
@@ -2307,12 +2381,10 @@ public:
     //construction
     inline void set_classid(const string& value) { m_classid = value; }
     inline void add_param(ImoParamInfo* pParam) { m_params.push_back(pParam); }
-    void set_generator(DynGenerator* pGenerator);
 
     //accessors
     inline string& get_classid() { return m_classid; }
     inline std::list<ImoParamInfo*>& get_params() { return m_params; }
-    inline DynGenerator* get_generator() { return m_generator; }
 
 };
 
@@ -2325,12 +2397,10 @@ protected:
 
 public:
     ~ImoSystemBreak() {}
-
-    //getters & setters
 };
 
 //---------------------------------------------------------------------------------------
-class ImoDocument : public ImoBlocksContainer  //ImoContainerObj
+class ImoDocument : public ImoBlocksContainer
 {
 protected:
     Document* m_pOwner;
@@ -2352,12 +2422,6 @@ public:
     inline std::string& get_language() { return m_language; }
     inline void set_language(const string& language) { m_language = language; }
 
-    ////content
-    //ImoContentObj* get_content_item(int iItem);
-    //int get_num_content_items();
-    //ImoContent* get_content();
-    //void append_content_item(ImoContentObj* pItem);
-
     //document intended paper size
     void add_page_info(ImoPageInfo* pPI);
     inline ImoPageInfo* get_page_info() { return &m_pageInfo; }
@@ -2375,6 +2439,9 @@ public:
     ImoStyle* create_style(const string& name, const string& parent="Default style");
     ImoStyle* create_private_style(const string& parent="Default style");
 
+    //support for edition commands
+    void insert_block_level_obj(ImoBlockLevelObj* pAt, ImoBlockLevelObj* pImoNew);
+
 //        //factory methods for ImoObj objects
 //    ImoButton* create_button(long id, const string& label, const USize& size,
 //                             ImoStyle* pStyle=NULL);
@@ -2388,9 +2455,6 @@ public:
 
 protected:
     void add_private_style(ImoStyle* pStyle);
-
-    ////mandatory overrides
-    //ImoContentObj* get_container_node() { return get_content(); }
 
 };
 
@@ -2632,6 +2696,9 @@ public:
     ImoSpacer* add_spacer(Tenths space);
     ImoObj* add_object(const string& ldpsource);
     void add_staff_objects(const string& ldpsource);
+
+    void delete_staffobj(ImoStaffObj* pImo);
+
 
 protected:
 
@@ -3345,6 +3412,9 @@ protected:
     void delete_text_styles();
     ImoStyle* create_default_styles();
 
+ 	friend class StylesLmdGenerator;
+ 	inline std::map<std::string, ImoStyle*>& get_styles_collection() { return m_nameToStyle; }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -3420,7 +3490,6 @@ public:
 
     //overrides: as ImoTableRow is stored in an ImoCollection, some general methods
     //doesn't work and must be overrinden
-    ImoDocument* get_document();
     ImoStyle* get_style();
 
 protected:

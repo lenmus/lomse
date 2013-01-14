@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -57,7 +57,7 @@ public:
 
         string ext = fullpath.substr(length - 4);
         if (ext == ".lms")
-            return Document::k_format_lms;
+            return Document::k_format_ldp;
         else if (ext == ".lmd")
             return Document::k_format_lmd;
         else

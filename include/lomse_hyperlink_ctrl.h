@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -59,7 +59,7 @@ protected:
     bool    m_visited;
 
 public:
-    HyperlinkCtrl(LibraryScope& libScope, DynGenerator* pOwner, Document* pDoc,
+    HyperlinkCtrl(LibraryScope& libScope, Control* pParent, Document* pDoc,
                   const string& label, LUnits width=-1.0f, LUnits height=-1.0f,
                   ImoStyle* pStyle=NULL);
     virtual ~HyperlinkCtrl() {}

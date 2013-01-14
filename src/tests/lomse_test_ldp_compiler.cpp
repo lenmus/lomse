@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -91,24 +91,6 @@ SUITE(LdpCompilerTest)
         delete pIModel;
     }
 
-    //TEST_FIXTURE(LdpCompilerTestFixture, LdpCompilerScoreIdsFixed)
-    //{
-    //    Document doc(m_libraryScope);
-    //    LdpCompiler compiler(m_libraryScope, &doc);
-    //    InternalModel* pIModel = compiler.compile_string("(score (vers 1.6) (language en iso-8859-1) (systemLayout first (systemMargins 0 0 0 2000)) (systemLayout other (systemMargins 0 0 1200 2000)) (opt Score.FillPageWithEmptyStaves true) (opt StaffLines.StopAtFinalBarline false) (instrument (musicData )))" );
-    //    ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
-    //    CHECK( pDoc->get_version() == "0.0" );
-    //    CHECK( pDoc->get_num_content_items() == 1 );
-    //    ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-    //    CHECK( pScore != NULL );
-    //    //cout << "id=" << pScore->get_id() << endl;
-    //    CHECK( pScore->get_id() == 3L );
-    //    CHECK( pScore->get_num_instruments() == 1 );
-    //    ImoInstrument* pInstr = pScore->get_instrument(0);
-    //    CHECK( pInstr->get_id() == 12L );
-    //    delete pIModel;
-    //}
-
     TEST_FIXTURE(LdpCompilerTestFixture, LdpCompilerFromFile)
     {
         Document doc(m_libraryScope);
@@ -121,10 +103,7 @@ SUITE(LdpCompilerTest)
         CHECK( pDoc->get_num_content_items() == 1 );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         CHECK( pScore != NULL );
-    //    CHECK( pScore->get_id() == 3L );
         CHECK( pScore->get_num_instruments() == 1 );
-    //    ImoInstrument* pInstr = pScore->get_instrument(0);
-    //    CHECK( pInstr->get_id() == 11L );
         delete pIModel;
     }
 
@@ -136,15 +115,12 @@ SUITE(LdpCompilerTest)
         LdpFileReader reader(path);
         InternalModel* pIModel = compiler.compile_input(reader);
         CHECK( compiler.get_file_locator() == path );
-    //    ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
-    //    CHECK( pDoc->get_version() == "0.0" );
-    //    CHECK( pDoc->get_num_content_items() == 1 );
-    //    ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-    //    CHECK( pScore != NULL );
-    //    CHECK( pScore->get_id() == 3L );
-    //    CHECK( pScore->get_num_instruments() == 1 );
-    //    ImoInstrument* pInstr = pScore->get_instrument(0);
-    //    CHECK( pInstr->get_id() == 11L );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
+        CHECK( pDoc->get_version() == "0.0" );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 1 );
         delete pIModel;
     }
 

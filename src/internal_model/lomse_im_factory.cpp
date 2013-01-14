@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -46,7 +46,7 @@ ImoObj* ImFactory::inject(Document* pDoc, const std::string& ldpSource)
 }
 
 //---------------------------------------------------------------------------------------
-ImoObj* ImFactory::inject(int type, Document* pDoc)
+ImoObj* ImFactory::inject(int type, Document* pDoc, long id)
 {
     ImoObj* pObj = NULL;
     switch(type)
@@ -131,7 +131,10 @@ ImoObj* ImFactory::inject(int type, Document* pDoc)
             throw std::runtime_error("[ImFactory::inject] invalid type.");
     }
     if (!pObj->is_dto())
-        pObj->set_id( pDoc->new_id() );
+    {
+        pObj->set_id(id);
+        pDoc->assign_id(pObj);
+    }
     return pObj;
 }
 
@@ -139,7 +142,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc)
 ImoBeamData* ImFactory::inject_beam_data(Document* pDoc, ImoBeamDto* pDto)
 {
     ImoBeamData* pObj = LOMSE_NEW ImoBeamData(pDto);
-    pObj->set_id( pDoc->new_id() );
+    pDoc->assign_id(pObj);
     return pObj;
 }
 
@@ -147,7 +150,7 @@ ImoBeamData* ImFactory::inject_beam_data(Document* pDoc, ImoBeamDto* pDto)
 ImoTieData* ImFactory::inject_tie_data(Document* pDoc, ImoTieDto* pDto)
 {
     ImoTieData* pObj = LOMSE_NEW ImoTieData(pDto);
-    pObj->set_id( pDoc->new_id() );
+    pDoc->assign_id(pObj);
     return pObj;
 }
 
@@ -155,7 +158,7 @@ ImoTieData* ImFactory::inject_tie_data(Document* pDoc, ImoTieDto* pDto)
 ImoTupletData* ImFactory::inject_tuplet_data(Document* pDoc, ImoTupletDto* pDto)
 {
     ImoTupletData* pObj = LOMSE_NEW ImoTupletData(pDto);
-    pObj->set_id( pDoc->new_id() );
+    pDoc->assign_id(pObj);
     return pObj;
 }
 
@@ -163,7 +166,7 @@ ImoTupletData* ImFactory::inject_tuplet_data(Document* pDoc, ImoTupletDto* pDto)
 ImoSlurData* ImFactory::inject_slur_data(Document* pDoc, ImoSlurDto* pDto)
 {
     ImoSlurData* pObj = LOMSE_NEW ImoSlurData(pDto);
-    pObj->set_id( pDoc->new_id() );
+    pDoc->assign_id(pObj);
     return pObj;
 }
 
@@ -171,15 +174,16 @@ ImoSlurData* ImFactory::inject_slur_data(Document* pDoc, ImoSlurDto* pDto)
 ImoTuplet* ImFactory::inject_tuplet(Document* pDoc, ImoTupletDto* pDto)
 {
     ImoTuplet* pObj = LOMSE_NEW ImoTuplet(pDto);
-    pObj->set_id( pDoc->new_id() );
+    pDoc->assign_id(pObj);
     return pObj;
 }
 
 //---------------------------------------------------------------------------------------
-ImoTextBox* ImFactory::inject_text_box(Document* pDoc, ImoTextBlockInfo& dto)
+ImoTextBox* ImFactory::inject_text_box(Document* pDoc, ImoTextBlockInfo& dto, long id)
 {
     ImoTextBox* pObj = LOMSE_NEW ImoTextBox(dto);
-    pObj->set_id( pDoc->new_id() );
+    pObj->set_id(id);
+    pDoc->assign_id(pObj);
     return pObj;
 }
 
@@ -190,7 +194,7 @@ ImoNote* ImFactory::inject_note(Document* pDoc, int step, int octave,
 {
     ImoNote* pObj = LOMSE_NEW ImoNote(step, octave, noteType, accidentals, dots,
                                 staff, voice, stem);
-    pObj->set_id( pDoc->new_id() );
+    pDoc->assign_id(pObj);
     return pObj;
 }
 
@@ -198,7 +202,7 @@ ImoNote* ImFactory::inject_note(Document* pDoc, int step, int octave,
 ImoMultiColumn* ImFactory::inject_multicolumn(Document* pDoc)
 {
     ImoMultiColumn* pObj = LOMSE_NEW ImoMultiColumn(pDoc);
-    pObj->set_id( pDoc->new_id() );
+    pDoc->assign_id(pObj);
     return pObj;
 }
 
@@ -207,7 +211,7 @@ ImoImage* ImFactory::inject_image(Document* pDoc, unsigned char* imgbuf, VSize b
                                   EPixelFormat format, USize imgSize)
 {
     ImoImage* pObj = LOMSE_NEW ImoImage(imgbuf, bmpSize, format, imgSize);
-    pObj->set_id( pDoc->new_id() );
+    pDoc->assign_id(pObj);
     return pObj;
 }
 
@@ -215,7 +219,7 @@ ImoImage* ImFactory::inject_image(Document* pDoc, unsigned char* imgbuf, VSize b
 ImoControl* ImFactory::inject_control(Document* pDoc, Control* ctrol)
 {
     ImoControl* pObj = LOMSE_NEW ImoControl(ctrol);
-    pObj->set_id( pDoc->new_id() );
+    pDoc->assign_id(pObj);
     return pObj;
 }
 

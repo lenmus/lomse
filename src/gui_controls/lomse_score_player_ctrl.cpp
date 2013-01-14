@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -38,7 +38,6 @@
 #include "lomse_drawer.h"
 #include "lomse_calligrapher.h"
 #include "lomse_events.h"
-#include "lomse_dyn_generator.h"
 #include "lomse_interactor.h"
 
 
@@ -50,7 +49,7 @@ namespace lomse
 //=======================================================================================
 ScorePlayerCtrl::ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner,
                                  Document* pDoc)
-    : Control(NULL, pDoc)
+    : Control(pDoc, NULL)
     , PlayerGui()
     , m_libraryScope(libScope)
     , m_pOwnerImo(pOwner)

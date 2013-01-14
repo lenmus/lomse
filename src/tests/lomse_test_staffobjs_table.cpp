@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -147,7 +147,7 @@ SUITE(ColStaffObjsTest)
         ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
         ColStaffObjs::iterator it = pColStaffObjs->begin();
 
-        //(*it)->dump();
+       // (*it)->dump();
         //cout << (*it)->to_string() << endl;
         //CHECK( (*it)->to_string() == "(n c4 q)" );
         CHECK( (*it)->imo_object()->is_note() == true );
@@ -158,7 +158,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsChangeSegment)
+    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsChangeMeasure)
     {
         LdpParser parser(cout, m_pLdpFactory);
         parser.parse_text("(lenmusdoc (vers 0.0) (content "
@@ -173,7 +173,7 @@ SUITE(ColStaffObjsTest)
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
         ColStaffObjs::iterator it = pColStaffObjs->begin();
-        //(*it)->dump();
+       // (*it)->dump();
         CHECK( pColStaffObjs->num_entries() == 5 );
         CHECK( pColStaffObjs->num_lines() == 1 );
 
@@ -600,7 +600,7 @@ SUITE(ColStaffObjsTest)
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_lines() == 2 );
         CHECK( pColStaffObjs->num_entries() == 10 );
-                    //(clef G p1)
+                   // (clef G p1)
         ++it;       //(clef F4 p2)
         ++it;       //(key D)
         ++it;       //(key D)
@@ -639,7 +639,7 @@ SUITE(ColStaffObjsTest)
         CHECK( pColStaffObjs->is_anacrusis_start() == true );
         CHECK( is_equal_time( pColStaffObjs->anacrusis_missing_time(), 128.0f) == true );
 
-                    //(clef G)
+                   // (clef G)
         ++it;       //(time 2 4)
         CHECK( (*it)->imo_object()->is_time_signature() == true );
         CHECK( (*it)->line() == 0 );
@@ -935,7 +935,7 @@ SUITE(ColStaffObjsTest)
         CHECK( pColStaffObjs->is_anacrusis_start() == false );
         //pColStaffObjs->dump();
         ColStaffObjs::iterator it = pColStaffObjs->begin();
-                    //(clef G p1)
+                   // (clef G p1)
         CHECK( (*it)->imo_object()->is_clef() == true );
         CHECK( (*it)->line() == 0 );
         ++it;       //(key C)
@@ -1052,25 +1052,25 @@ SUITE(ColStaffObjsTest)
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 4 );
 
-        //(clef G)
+       // (clef G)
         CHECK( (*it)->imo_object()->is_clef() == true );
         CHECK( (*it)->measure() == 0 );
         CHECK( is_equal_time((*it)->time(), 0.0f) );
         ++it;
 
-        //(n c4 q)
+       // (n c4 q)
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( (*it)->measure() == 0 );
         CHECK( is_equal_time((*it)->time(), 0.0f) );
         ++it;
 
-        //(n e4 q)
+       // (n e4 q)
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( (*it)->measure() == 0 );
         CHECK( is_equal_time((*it)->time(), 0.0f) );
         ++it;
 
-        //(n g4 q)
+       // (n g4 q)
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( (*it)->measure() == 0 );
         CHECK( is_equal_time((*it)->time(), 0.0f) );

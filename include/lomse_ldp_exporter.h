@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -53,6 +53,7 @@ protected:
     string m_version;
     int m_nIndent;
     bool m_fAddId;
+    bool m_fRemoveNewlines;
 
 public:
     LdpExporter();
@@ -64,10 +65,12 @@ public:
     inline void increment_indent() { ++m_nIndent; }
     inline void decrement_indent() { --m_nIndent; }
     inline void set_add_id(bool value) { m_fAddId = value; }
+    inline void set_remove_newlines(bool value) { m_fRemoveNewlines = value; }
 
     //getters for settings
     inline int get_indent() { return m_nIndent; }
     inline bool get_add_id() { return m_fAddId; }
+    inline bool get_remove_newlines() { return m_fRemoveNewlines; }
 
     //the main method
     string get_source(ImoObj* pImo, ImoObj* pParent=NULL);

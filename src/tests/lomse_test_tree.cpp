@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -612,6 +612,106 @@ SUITE(TreeTest)
         ++it;   //I
         Element elm("(NEW)");
         Tree<Element>::depth_first_iterator itNext = m_tree.insert(it, &elm);
+
+        stringstream path;
+        for (it=m_tree.begin(); it != m_tree.end(); ++it)
+            path << (*it)->m_value;
+        //cout << path.str() << endl;
+        CHECK( path.str() == "ABCDEFGH(NEW)IJKLMNOPQRST" );
+        Element* newNode = *itNext;
+        //cout << newNode->m_value << endl;
+        CHECK( newNode->m_value == "(NEW)" );
+        Element* parent = newNode->get_parent();
+        CHECK( parent->m_value == "A" );
+        CHECK( parent->get_first_child()->m_value == "B" );
+        CHECK( parent->get_last_child()->m_value == "I" );
+        Element* prevSibling = newNode->get_prev_sibling();
+        Element* nextSibling = newNode->get_next_sibling();
+        CHECK( prevSibling->m_value == "D" );
+        CHECK( nextSibling->m_value == "I" );
+        CHECK( nextSibling->get_prev_sibling()->m_value == "(NEW)" );
+
+        DeleteTestData();
+    }
+
+    TEST_FIXTURE(TreeTestFixture, TreeInsertNodeAtMiddle_no_iterator)
+    {
+        CreateTree();
+        Tree<Element>::depth_first_iterator it = m_tree.begin();
+        ++it;   //B
+        ++it;   //C
+        ++it;   //D
+        Element elm("(NEW)");
+
+        Tree<Element>::depth_first_iterator itNext = m_tree.insert(*it, &elm);
+
+        stringstream path;
+        for (it=m_tree.begin(); it != m_tree.end(); ++it)
+            path << (*it)->m_value;
+        //cout << path.str() << endl;
+        CHECK( path.str() == "ABC(NEW)DEFGHIJKLMNOPQRST" );
+        Element* newNode = *itNext;
+        //cout << newNode->m_value << endl;
+        CHECK( newNode->m_value == "(NEW)" );
+        Element* parent = newNode->get_parent();
+        CHECK( parent->m_value == "A" );
+        CHECK( parent->get_first_child()->m_value == "B" );
+        CHECK( parent->get_last_child()->m_value == "I" );
+        Element* prevSibling = newNode->get_prev_sibling();
+        Element* nextSibling = newNode->get_next_sibling();
+        CHECK( prevSibling->m_value == "B" );
+        CHECK( nextSibling->m_value == "D" );
+        CHECK( prevSibling->get_next_sibling()->m_value == "(NEW)" );
+        CHECK( nextSibling->get_prev_sibling()->m_value == "(NEW)" );
+
+        DeleteTestData();
+    }
+
+    TEST_FIXTURE(TreeTestFixture, TreeInsertNodeAtStart_no_iterator)
+    {
+        CreateTree();
+        Tree<Element>::depth_first_iterator it = m_tree.begin();
+        ++it;   //B
+        Element elm("(NEW)");
+
+        Tree<Element>::depth_first_iterator itNext = m_tree.insert(*it, &elm);
+
+        stringstream path;
+        for (it=m_tree.begin(); it != m_tree.end(); ++it)
+            path << (*it)->m_value;
+        //cout << path.str() << endl;
+        CHECK( path.str() == "A(NEW)BCDEFGHIJKLMNOPQRST" );
+        Element* newNode = *itNext;
+        //cout << newNode->m_value << endl;
+        CHECK( newNode->m_value == "(NEW)" );
+        Element* parent = newNode->get_parent();
+        CHECK( parent->m_value == "A" );
+        CHECK( parent->get_first_child()->m_value == "(NEW)" );
+        CHECK( parent->get_last_child()->m_value == "I" );
+        Element* prevSibling = newNode->get_prev_sibling();
+        Element* nextSibling = newNode->get_next_sibling();
+        CHECK( prevSibling == NULL );
+        CHECK( nextSibling->m_value == "B" );
+        CHECK( nextSibling->get_prev_sibling()->m_value == "(NEW)" );
+
+        DeleteTestData();
+    }
+
+    TEST_FIXTURE(TreeTestFixture, TreeInsertNodeAtEnd_no_iterator)
+    {
+        CreateTree();
+        Tree<Element>::depth_first_iterator it = m_tree.begin();
+        ++it;   //B
+        ++it;   //C
+        ++it;   //D
+        ++it;   //E
+        ++it;   //F
+        ++it;   //G
+        ++it;   //H
+        ++it;   //I
+        Element elm("(NEW)");
+
+        Tree<Element>::depth_first_iterator itNext = m_tree.insert(*it, &elm);
 
         stringstream path;
         for (it=m_tree.begin(); it != m_tree.end(); ++it)

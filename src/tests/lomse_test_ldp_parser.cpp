@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -68,7 +68,6 @@ SUITE(LdpParserTest)
         LdpTree* score = parser.get_ldp_tree();
         //cout << score->get_root()->to_string() << endl;
         CHECK( score->get_root()->to_string() == "(score (vers 1.7))" );
-            //"(score (vers 1.6) (language en utf-8) (instrument (musicData )))" );
         delete score->get_root();
     }
 
@@ -135,7 +134,6 @@ SUITE(LdpParserTest)
         //cout << score->get_root()->to_string() << endl;
         CHECK( score->get_root()->to_string() == "(clef G)" );
         CHECK( score->get_root()->get_id() == 27L );
-        CHECK( parser.get_max_id() == 27L );
         delete score->get_root();
     }
 
@@ -146,32 +144,7 @@ SUITE(LdpParserTest)
         LdpTree* score = parser.get_ldp_tree();
         //cout << score->get_root()->to_string() << endl;
         CHECK( score->get_root()->to_string() == "(clef G)" );
-        CHECK( score->get_root()->get_id() == 0L );
-        CHECK( parser.get_max_id() == 0L );
-        delete score->get_root();
-    }
-
-    TEST_FIXTURE(LdpParserTestFixture, ParserIdsInSequence)
-    {
-        LdpParser parser(cout, m_pLibraryScope->ldp_factory());
-        parser.parse_file(m_scores_path + "00011-empty-fill-page.lms");
-        LdpTree* score = parser.get_ldp_tree();
-        LdpElement* elm = score->get_root();
-        //cout << score->get_root()->to_string() << endl;
-        //cout << elm->get_name() << ". Id = " << elm->get_id() << endl;
-        CHECK( elm->get_id() == 0L );
-        elm = elm->get_first_child();   //vers
-        CHECK( elm->get_id() == 1L );
-        elm = elm->get_next_sibling();  //systemLayout + systemMargins
-        CHECK( elm->get_id() == 2L );
-        elm = elm->get_next_sibling();  //systemLayout + systemMargins
-        CHECK( elm->get_id() == 4L );
-        elm = elm->get_next_sibling();  //opt
-        CHECK( elm->get_id() == 6L );
-        elm = elm->get_next_sibling();  //opt
-        CHECK( elm->get_id() == 7L );
-        elm = elm->get_next_sibling();  //instrument
-        CHECK( elm->get_id() == 8L );
+        CHECK( score->get_root()->get_id() == -1L );
         delete score->get_root();
     }
 
@@ -186,8 +159,7 @@ SUITE(LdpParserTest)
         //cout << errormsg.str();
         //cout << expected.str();
         CHECK( score->get_root()->to_string() == "(clef G)" );
-        CHECK( score->get_root()->get_id() == 0L );
-        CHECK( parser.get_max_id() == 0L );
+        CHECK( score->get_root()->get_id() == -1L );
         CHECK( errormsg.str() == expected.str() );
         delete score->get_root();
     }
@@ -203,33 +175,8 @@ SUITE(LdpParserTest)
         cout << errormsg.str();
         cout << expected.str();
         CHECK( score->get_root()->to_string() == "(t -)" );
-        CHECK( score->get_root()->get_id() == 0L );
-        CHECK( parser.get_max_id() == 0L );
+        CHECK( score->get_root()->get_id() == -1L );
         CHECK( errormsg.str() == expected.str() );
-        delete score->get_root();
-    }
-
-    TEST_FIXTURE(LdpParserTestFixture, ParserElementWithLowId)
-    {
-        stringstream errormsg;
-        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
-        stringstream expected;
-        expected << "Line 0. In 'key#1'. Value for id already exists. Ignored." << endl;
-        parser.parse_text("(musicData (clef G) (key#1 D))");
-        LdpTree* score = parser.get_ldp_tree();
-        //cout << errormsg.str();
-        //cout << expected.str();
-        LdpElement* elm = score->get_root();
-        CHECK( elm->to_string() == "(musicData (clef G) (key D))" );
-        CHECK( elm->get_id() == 0L );    //musicData
-        elm = elm->get_first_child();   //clef
-        CHECK( elm->to_string() == "(clef G)" );
-        CHECK( elm->get_id() == 1L );
-        elm = elm->get_next_sibling();  //key
-        CHECK( elm->to_string() == "(key D)" );
-        CHECK( elm->get_id() == 2L );
-        CHECK( errormsg.str() == expected.str() );
-        CHECK( parser.get_max_id() == 2L );
         delete score->get_root();
     }
 
@@ -244,13 +191,12 @@ SUITE(LdpParserTest)
         //cout << errormsg.str();
         //cout << expected.str();
         LdpElement* elm = score->get_root();
-        CHECK( elm->get_id() == 0L );    //musicData
+        CHECK( elm->get_id() == -1L );    //musicData
         elm = elm->get_first_child();   //clef
         CHECK( elm->get_id() == 3L );
         elm = elm->get_next_sibling();  //key
-        CHECK( elm->get_id() == 4L );
+        CHECK( elm->get_id() == -1L );
         CHECK( errormsg.str() == expected.str() );
-        CHECK( parser.get_max_id() == 4L );
         delete score->get_root();
     }
 

@@ -1,18 +1,18 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -55,7 +55,7 @@ public:
     ~ImFactory() {}
 
     //factory injector, from type
-    static ImoObj* inject(int type, Document* pDoc);
+    static ImoObj* inject(int type, Document* pDoc, long id=-1L);
 
     //factory injector, from LDP source code
     static ImoObj* inject(Document* pDoc, const std::string& ldpSource);
@@ -71,7 +71,7 @@ public:
     static ImoTupletData* inject_tuplet_data(Document* pDoc, ImoTupletDto* pDto);
     static ImoSlurData* inject_slur_data(Document* pDoc, ImoSlurDto* pDto);
     static ImoTuplet* inject_tuplet(Document* pDoc, ImoTupletDto* pDto);
-    static ImoTextBox* inject_text_box(Document* pDoc, ImoTextBlockInfo& dto);
+    static ImoTextBox* inject_text_box(Document* pDoc, ImoTextBlockInfo& dto, long id=-1L);
     static ImoMultiColumn* inject_multicolumn(Document* pDoc);
     static ImoImage* inject_image(Document* pDoc, unsigned char* imgbuf,
                                   VSize bmpSize, EPixelFormat format, USize imgSize);

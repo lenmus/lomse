@@ -1,18 +1,18 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -39,22 +39,23 @@ namespace lomse
 {
 
 //forward declarations
-//class Document;
 class ColStaffObjs;
 
 
-// ScoreIterator: A cursor to traverse the ColStaffObjs
 //---------------------------------------------------------------------------------------
-class ScoreIterator
+// StaffObjsIterator: An iterator to traverse the ColStaffObjs. It is is just a wrapper
+// for a ColStaffObjs::iterator.
+// Really needed? Replace by a typedef for ColStaffObjs::iterator?
+class StaffObjsIterator
 {
 protected:
     ColStaffObjs*              m_pColStaffObjs;
     ColStaffObjs::iterator     m_it;
 
 public:
-    ScoreIterator(ColStaffObjs* pColStaffObjs);
-    ScoreIterator(const ScoreIterator& it);
-    ~ScoreIterator();
+    StaffObjsIterator(ColStaffObjs* pColStaffObjs);
+    StaffObjsIterator(const StaffObjsIterator& it);
+    ~StaffObjsIterator();
 
 
     inline bool is_first() { return m_it == m_pColStaffObjs->begin(); }
@@ -66,7 +67,7 @@ public:
 
  //   inline bool ChangeOfMeasure() { return m_fChangeOfMeasure; }
 	//inline lmStaffObj* GetCurrent() { return m_pSO; }
- //   inline int GetNumSegment() { return (m_pSO ? m_pSO->GetSegment()->GetNumSegment()
+ //   inline int GetNumMeasure() { return (m_pSO ? m_pSO->GetSegment()->GetNumMeasure()
  //                                              : m_pColStaffObjs->GetNumSegments()-1 ); }
  //   inline void ResetFlags() { m_fChangeOfMeasure = false; }
  //   inline bool IsManagingCollection(lmColStaffObjs* pCSO) {

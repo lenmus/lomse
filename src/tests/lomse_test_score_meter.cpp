@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -70,7 +70,7 @@ SUITE(ScoreMeterTest)
             "(instrument (staves 2)(musicData ))"
             "(instrument (staves 3)(musicData ))"
             ")))" );
-        ImoScore* pScore = doc.get_score(0);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ScoreMeter meter(pScore);
 
         CHECK( meter.num_instruments() == 2 );

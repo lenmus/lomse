@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -169,7 +169,7 @@ Layouter* LayouterFactory::create_layouter(ImoContentObj* pItem, Layouter* pPare
     GraphicModel* pGModel = pParent->get_graphic_model();
     LibraryScope& libraryScope = pParent->get_library_scope();
     ImoStyles* pStyles = pParent->get_styles();
-    bool fAddShapesToModel 
+    bool fAddShapesToModel
         = compute_value_for_add_shapes_flag(pItem, pParent->must_add_shapes_to_model());
 
     switch (pItem->get_obj_type())

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -1255,6 +1255,19 @@ SUITE(InternalModelTest)
         ImoTextItem* pText = pPara->add_text_item("编辑名称，缩写，MIDI设置和其他特性");
 
         CHECK( pText->get_language() == "zh_CN" );
+    }
+
+    // ImoStaffObj ----------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, staffobj_has_instrument)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoScore* pScore = doc.add_score();
+        ImoInstrument* pInstr = pScore->add_instrument();
+        ImoClef* pClef = pInstr->add_clef(k_clef_G2);
+
+        CHECK( pClef->get_instrument() == pInstr );
     }
 
 }

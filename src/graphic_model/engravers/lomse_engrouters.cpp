@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -126,13 +126,14 @@ Engrouter* EngroutersCreator::create_engrouter_for(ImoInlineLevelObj* pImo)
 {
     //factory method to create engrouters and measure the ocupied space
 
-    if (pImo->is_button())
-    {
-        Engrouter* pEngrouter = LOMSE_NEW ButtonEngrouter(pImo, m_libraryScope);
-        pEngrouter->measure();
-        return pEngrouter;
-    }
-    else if (pImo->is_image())
+//    if (pImo->is_button())
+//    {
+//        Engrouter* pEngrouter = LOMSE_NEW ButtonEngrouter(pImo, m_libraryScope);
+//        pEngrouter->measure();
+//        return pEngrouter;
+//    }
+//    else if (pImo->is_image())
+    if (pImo->is_image())
     {
         Engrouter* pEngrouter = LOMSE_NEW ImageEngrouter(pImo, m_libraryScope);
         pEngrouter->measure();
@@ -471,34 +472,34 @@ void BoxEngrouter::add_engrouter_shape(GmoObj* pGmo, GmoBox* pBox)
 
 
 
-//=======================================================================================
-// ButtonEngrouter implementation
-//=======================================================================================
-GmoObj* ButtonEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
-{
-    pos.y += shift_for_vertical_alignment(refs);
-
-    ////add engrouter origin
-    //pos.x += m_org.x;
-    //pos.y += m_org.y;
-
-    return LOMSE_NEW GmoShapeButton(m_pCreatorImo, pos, m_size, m_libraryScope);
-}
-
-//---------------------------------------------------------------------------------------
-void ButtonEngrouter::measure()
-{
-    ImoButton* pButton = static_cast<ImoButton*>(m_pCreatorImo);
-    m_size = pButton->get_size();
-
-    m_refLines.lineHeight = m_size.height;
-    m_refLines.baseline = m_size.height;
-    m_refLines.textTop = 0.0f;
-    m_refLines.textBottom = m_size.height;
-    m_refLines.middleline = m_size.height / 2.0f;
-    m_refLines.supperLine = m_refLines.textTop;
-    m_refLines.subLine = m_refLines.baseline;
-}
+////=======================================================================================
+//// ButtonEngrouter implementation
+////=======================================================================================
+//GmoObj* ButtonEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
+//{
+//    pos.y += shift_for_vertical_alignment(refs);
+//
+//    ////add engrouter origin
+//    //pos.x += m_org.x;
+//    //pos.y += m_org.y;
+//
+//    return LOMSE_NEW GmoShapeButton(m_pCreatorImo, pos, m_size, m_libraryScope);
+//}
+//
+////---------------------------------------------------------------------------------------
+//void ButtonEngrouter::measure()
+//{
+//    ImoButton* pButton = static_cast<ImoButton*>(m_pCreatorImo);
+//    m_size = pButton->get_size();
+//
+//    m_refLines.lineHeight = m_size.height;
+//    m_refLines.baseline = m_size.height;
+//    m_refLines.textTop = 0.0f;
+//    m_refLines.textBottom = m_size.height;
+//    m_refLines.middleline = m_size.height / 2.0f;
+//    m_refLines.supperLine = m_refLines.textTop;
+//    m_refLines.subLine = m_refLines.baseline;
+//}
 
 
 

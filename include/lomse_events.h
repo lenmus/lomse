@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -51,7 +51,6 @@ class ImoScore;
 class ImoStaffObj;
 class Interactor;
 class GmoObj;
-class DynGenerator;
 class Document;
 class GraphicModel;
 class PlayerGui;
@@ -197,7 +196,6 @@ class EventMouse : public EventView
 protected:
     GmoObj* m_pGmo;
     ImoContentObj* m_pImo;
-    DynGenerator* m_pGenerator;
     GraphicModel* m_pGModel;
 
     EventMouse(EEventType type) : EventView(type, NULL) {}    //for unit tests
@@ -208,7 +206,6 @@ public:
         : EventView(type, pInteractor)
         , m_pGmo(pGmo)
         , m_pImo( find_originator_imo(pGmo) )
-        , m_pGenerator( find_generator(pGmo) )
         , m_pGModel(pGModel)
     {
     }
@@ -216,13 +213,11 @@ public:
     // accessors
     inline GmoObj* get_gm_object() { return m_pGmo; }
     inline ImoContentObj* get_imo_object() { return m_pImo; }
-    inline DynGenerator* get_generator() { return m_pGenerator; }
     Observable* get_source();
     inline GraphicModel* get_gmodel() { return m_pGModel; }
 
 
 protected:
-    DynGenerator* find_generator(GmoObj* pGmo);
     ImoContentObj* find_originator_imo(GmoObj* pGmo);
 
 };
@@ -417,7 +412,7 @@ public:
 //=======================================================================================
 // Observer
 //  Auxiliary object responsible for keeping information about an Observable object
-//  beign observed, the events to listen to and the methods that must invoke to
+//  being observed, the events to listen to and the methods that must invoke to
 //  distpatch each event. It is also responsible for doing this dispatch when
 //  requested.
 //=======================================================================================
@@ -425,21 +420,27 @@ class Observer
 {
 protected:
     Observable* m_target;
+    int m_type;
+    long m_id;
     std::list<EventCallback*> m_handlers;
 
     friend class EventNotifier;
-    Observer(Observable* target) : m_target(target) {}
+    Observer(Observable* target);
+    Observer(Observable* root, int childType, long childId);
 
 public:
     virtual ~Observer();
 
-    inline Observable* target() { return m_target; }
+    Observable* target();
     void notify(SpEventInfo pEvent);
     void add_handler(int eventType, void (*pt2Func)(SpEventInfo event) );
     void add_handler(int eventType, void* pThis,
                      void (*pt2Func)(void* pObj, SpEventInfo event) );
     void add_handler(int eventType, EventHandler* pHandler);
+    void add_handler(int eventType, int childType, long childId, EventHandler* pHandler);
     void remove_handler(int evtType);
+
+    inline int get_observable_type() { return m_type; }
 
 protected:
     std::list<EventCallback*>::iterator find_handler(int eventType);
@@ -453,11 +454,10 @@ protected:
 //  Any object generating events must derive from Observable and must implement
 //  method "get_event_notifier()".
 //
-//  Objects generating events can be part of a hierarchy (i.e. ImoObjs in a Document).
-//  In order to allow for diferento event management models, responsibilities for
+//  In order to allow for diferent event management models, responsibilities for
 //  event generation and event dispatching are decoupled. For this, the Observable
 //  pattern is splitted into two objects: the Observable itself is just a facade
-//  object providing the interface for addind/removing observers, and delegates in
+//  object providing the interface for adding/removing observers, and delegates in
 //  the EventNotifier object for doing the real work and event dispatching.
 //=======================================================================================
 class Observable
@@ -467,10 +467,23 @@ public:
 
 	virtual EventNotifier* get_event_notifier() = 0;
 
-    void add_event_handler(int eventType, EventHandler* pHandler);
-    void add_event_handler(int eventType, void* pThis,
+    virtual void add_event_handler(int eventType, EventHandler* pHandler);
+    virtual void add_event_handler(int eventType, void* pThis,
+                                   void (*pt2Func)(void* pObj, SpEventInfo event) );
+    virtual void add_event_handler(int eventType, void (*pt2Func)(SpEventInfo event) );
+
+    //observing children
+    enum { k_root=0, k_control, k_gmo, k_imo, };    //child type
+
+    void add_event_handler(int childType, long childId, int eventType,
+                           EventHandler* pHandler);
+    void add_event_handler(int childType, long childId, int eventType, void* pThis,
                            void (*pt2Func)(void* pObj, SpEventInfo event) );
-    void add_event_handler(int eventType, void (*pt2Func)(SpEventInfo event) );
+    void add_event_handler(int childType, long childId, int eventType,
+                           void (*pt2Func)(SpEventInfo event) );
+
+    virtual Observable* get_observable_child(int childType, long childId) { return NULL; }
+
 };
 
 
@@ -492,15 +505,23 @@ public:
     void notify_observers(SpEventInfo pEvent, Observable* target);
     void remove_observer(Observer* observer);
     Observer* add_observer_for(Observable* target);
+    Observer* add_observer_for_child(Observable* parent, int childType, long childId);
 
 protected:
     friend class Observable;
-
     void add_handler(Observable* target, int eventType, EventHandler* pHandler);
     void add_handler(Observable* target, int eventType, void* pThis,
                      void (*pt2Func)(void* pObj, SpEventInfo event) );
     void add_handler(Observable* target, int eventType,
                      void (*pt2Func)(SpEventInfo event) );
+
+    void add_handler_for_child(Observable* parent, int childType, long childId,
+                               int eventType, EventHandler* pHandler);
+    void add_handler_for_child(Observable* parent, int childType, long childId,
+                               int eventType, void (*pt2Func)(SpEventInfo event) );
+    void add_handler_for_child(Observable* parent, int childType, long childId,
+                               int eventType, void* pThis,
+                               void (*pt2Func)(void* pObj, SpEventInfo event) );
 
 protected:
     void delete_observers();

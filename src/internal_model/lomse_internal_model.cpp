@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -34,12 +34,12 @@
 #include "lomse_staffobjs_table.h"
 #include "lomse_im_note.h"
 #include "lomse_midi_table.h"
-#include "lomse_dyn_generator.h"
 #include "lomse_ldp_elements.h"
 #include "lomse_im_factory.h"
 #include "lomse_model_builder.h"
 #include "lomse_control.h"
 #include "lomse_score_player_ctrl.h"
+#include "lomse_button_ctrl.h"
 
 using namespace std;
 
@@ -86,8 +86,8 @@ ImoTextItem* InlineLevelCreatorApi::add_text_item(const string& text, ImoStyle* 
 }
 
 //---------------------------------------------------------------------------------------
-ImoButton* InlineLevelCreatorApi::add_button(const string& label, const USize& size,
-                                    ImoStyle* pStyle)
+ImoButton* InlineLevelCreatorApi::add_button(LibraryScope& libScope, const string& label,
+                                             const USize& size, ImoStyle* pStyle)
 {
     Document* pDoc = m_pParent->get_the_document();
     ImoButton* pImo = static_cast<ImoButton*>(ImFactory::inject(k_imo_button, pDoc));
@@ -96,7 +96,13 @@ ImoButton* InlineLevelCreatorApi::add_button(const string& label, const USize& s
     pImo->set_language( pImoDoc->get_language() );
     pImo->set_size(size);
     pImo->set_style(pStyle);
+
+    ButtonCtrl* pCtrol = LOMSE_NEW ButtonCtrl(libScope, NULL, pDoc, label,
+                                              size.width, size.height, pStyle);
+    pImo->attach_control(pCtrol);
+
     m_pParent->append_child_imo(pImo);
+
     return pImo;
 }
 
@@ -140,6 +146,7 @@ ImoControl* InlineLevelCreatorApi::add_control(Control* pCtrol)
 {
     Document* pDoc = m_pParent->get_the_document();
     ImoControl* pImo = ImFactory::inject_control(pDoc, pCtrol);
+    pImo->attach_control(pCtrol);
     m_pParent->append_child_imo(pImo);
     return pImo;
 }
@@ -207,7 +214,6 @@ void BlockLevelCreatorApi::add_to_model(ImoBlockLevelObj* pImo, ImoStyle* pStyle
                     : m_pParent;
     pNode->append_child_imo(pImo);
 }
-
 
 
 //=======================================================================================
@@ -327,6 +333,10 @@ ImoObj::~ImoObj()
         ++it;
 	    delete child;
     }
+
+    Document* pDoc = get_the_document();
+    if (pDoc)
+        pDoc->removed_from_model(this);
 }
 
 //---------------------------------------------------------------------------------------
@@ -344,6 +354,22 @@ const string& ImoObj::get_name(int type)
 const string& ImoObj::get_name() const
 {
 	return ImoObj::get_name( m_objtype );
+}
+
+//---------------------------------------------------------------------------------------
+Document* ImoObj::get_the_document()
+{
+    if (is_document())
+        return static_cast<ImoDocument*>(this)->get_owner();
+    else
+    {
+        ImoObj* pImo = get_parent();
+        if (pImo)
+            return pImo->get_the_document();
+        else
+            return NULL;
+//            throw std::runtime_error("[ImoObj::get_the_document] No owner Document.");
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -379,6 +405,21 @@ ImoObj* ImoObj::get_child_of_type(int objtype)
             return pChild;
     }
     return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+ImoDocument* ImoObj::get_document()
+{
+    if (is_document())
+        return static_cast<ImoDocument*>(this);
+    else
+    {
+        ImoObj* pParent = get_parent();
+        if (pParent)
+            return (static_cast<ImoContentObj*>(pParent))->get_document();
+        else
+            throw std::runtime_error("[ImoObj::get_document] No parent!");
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -427,6 +468,7 @@ void ImoObj::append_child_imo(ImoObj* pImo)
 //---------------------------------------------------------------------------------------
 void ImoObj::remove_child_imo(ImoObj* pImo)
 {
+    //AWARE: removes child but does not delete it
     remove_child(pImo);
     set_dirty(true);
 }
@@ -586,6 +628,12 @@ ImoRelObj* ImoStaffObj::find_relation(int type)
         return pRelObjs->find_item_of_type(type);
 }
 
+//---------------------------------------------------------------------------------------
+ImoInstrument* ImoStaffObj::get_instrument()
+{
+    ImoObj* pParent = this->get_parent_imo();   //musicData
+    return static_cast<ImoInstrument*>( pParent->get_parent_imo() );
+}
 
 
 //=======================================================================================
@@ -855,7 +903,7 @@ void ImoBlocksContainer::append_content_item(ImoContentObj* pItem)
 // ImoButton implementation
 //=======================================================================================
 ImoButton::ImoButton()
-    : ImoInlineLevelObj(k_imo_button)
+    : ImoControl(k_imo_button)
     , m_bgColor( Color(255,255,255) )
     , m_fEnabled(true)
 {
@@ -1256,21 +1304,6 @@ void ImoContentObj::set_style(ImoStyle* pStyle)
 }
 
 //---------------------------------------------------------------------------------------
-ImoDocument* ImoContentObj::get_document()
-{
-    if (is_document())
-        return static_cast<ImoDocument*>(this);
-    else
-    {
-        ImoObj* pParent = get_parent();
-        if (pParent && pParent->is_contentobj())
-            return (static_cast<ImoContentObj*>(pParent))->get_document();
-        else
-            throw std::runtime_error("[ImoContentObj::get_document] No parent!");
-    }
-}
-
-//---------------------------------------------------------------------------------------
 Document* ImoContentObj::get_the_document()
 {
     if (is_document())
@@ -1287,20 +1320,28 @@ Document* ImoContentObj::get_the_document()
     }
 }
 
-////---------------------------------------------------------------------------------------
-//void ImoContentObj::add_event_handler(int eventType, EventHandler* pHandler)
-//{
-//    Document* pDoc = get_the_document();
-//    pDoc->add_event_handler(this, eventType, pHandler);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void ImoContentObj::add_event_handler(int eventType, void* pThis,
-//                                      void (*pt2Func)(void* pObj, SpEventInfo event) )
-//{
-//    Document* pDoc = get_the_document();
-//    pDoc->add_event_handler(this, eventType, pThis, pt2Func);
-//}
+//---------------------------------------------------------------------------------------
+void ImoContentObj::add_event_handler(int eventType, EventHandler* pHandler)
+{
+    Document* pDoc = get_the_document();
+    pDoc->add_event_handler(Observable::k_imo, get_id(), eventType, pHandler);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoContentObj::add_event_handler(int eventType, void* pThis,
+                                      void (*pt2Func)(void* pObj, SpEventInfo event) )
+{
+    Document* pDoc = get_the_document();
+    pDoc->add_event_handler(Observable::k_imo, get_id(), eventType, pThis, pt2Func);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoContentObj::add_event_handler(int eventType,
+                                      void (*pt2Func)(SpEventInfo event) )
+{
+    Document* pDoc = get_the_document();
+    pDoc->add_event_handler(Observable::k_imo, get_id(), eventType, pt2Func);
+}
 
 //---------------------------------------------------------------------------------------
 EventNotifier* ImoContentObj::get_event_notifier()
@@ -1448,12 +1489,21 @@ ImoStyle* ImoDocument::create_private_style(const string& parent)
     add_private_style(pStyle);
     return pStyle;
 }
-//
-////---------------------------------------------------------------------------------------
-//void ImoDocument::append_content_item(ImoContentObj* pItem)
-//{
-//    get_content()->append_child_imo(pItem);
-//}
+
+//---------------------------------------------------------------------------------------
+void ImoDocument::insert_block_level_obj(ImoBlockLevelObj* pAt,
+                                         ImoBlockLevelObj* pImoNew)
+{
+    if (pAt)
+        insert(pAt, pImoNew);
+    else
+    {
+        ImoObj* pNode = get_child_of_type(k_imo_content);
+        pNode->append_child(pImoNew);
+    }
+
+    pImoNew->set_dirty(true);
+}
 
 
 //=======================================================================================
@@ -1465,15 +1515,6 @@ ImoDynamic::~ImoDynamic()
     for (it = m_params.begin(); it != m_params.end(); ++it)
         delete *it;
     m_params.clear();
-
-    delete m_generator;
-}
-
-//---------------------------------------------------------------------------------------
-void ImoDynamic::set_generator(DynGenerator* pGenerator)
-{
-    delete m_generator;
-    m_generator = pGenerator;
 }
 
 
@@ -1700,6 +1741,95 @@ void ImoInstrument::add_staff_objects(const string& ldpsource)
 {
     ImoMusicData* pMD = get_musicdata();
     m_pDoc->add_staff_objects(ldpsource, pMD);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoInstrument::delete_staffobj(ImoStaffObj* pImo)
+{
+    ImoDocument* pImoDoc = pImo->get_document();
+    TreeNode<ImoObj>::iterator it(pImo);
+    pImoDoc->erase(it);
+
+
+
+//    //returns true if deletion error
+//
+//    //Delete the object
+//    m_cStaffObjs.Delete(pSO);
+//
+//    //wxLogMessage(this->Dump());
+//    return false;       //false->deletion OK
+
+
+
+//    void lmColStaffObjs::Delete(lmStaffObj* pSO, bool fClefKeepPosition, bool fKeyKeepPitch)
+//    {
+//        // Delete the StaffObj pointed by pSO.
+//        // - Flags fClefKeepPosition and fKeyKeepPitch are only meaninful when Delete() is invoked
+//        // to undo an 'insert clef' or 'insert key' command.
+//
+//        //Algorithm:
+//        //  - get segment and find object to remove
+//        //  - get all needed information from object to delete, before doing it
+//        //  - remove the staffobj from the colection
+//        //  - if removed object was a note not in chord:
+//        //      Shift left all note/rests in this voice and sort the collection
+//        //  - if it was a barline:
+//        //      merge current segment with next one
+//        //      Adjust timepos of all moved objects
+//        //      Update segment pointer in all moved objects
+//        //      remove next segment and renumber segments
+//        //  - delete the removed staffobj
+//
+//
+//        //leave cursor positioned on object after object to remove
+//        MoveCursorToObject(pSO);
+//        MoveCursorRight(true);      //true: stop in all chord notes
+//        lmStaffObj* pCursorSO = GetCursorStaffObj();
+//        lmCursorState oVCState = GetCursor()->GetState();
+//
+//        //get segment and remove object
+//        lmSegment* pSegment = pSO->GetSegment();
+//        pSegment->Remove(pSO, false, fClefKeepPosition, fKeyKeepPitch); //false -> do not delete object
+//
+//        //if removed object is a barline:
+//        //  - merge current segment with next one
+//        //  - Adjust timepos of all moved objects
+//        //  - Update segment pointer in all moved objects
+//        //  - remove next segment and renumber segments
+//        if (pSO->IsBarline())
+//        {
+//            //merge current segment with next one
+//            //As we are dealing with lists this is just to cut and append the lists
+//            lmSegment* pNextSegment = m_Segments[pSegment->GetNumSegment() + 1];
+//            float rTime = pSegment->JoinSegment(pNextSegment);
+//
+//            //remove next segment and renumber segments. Notice that if we removed last barline
+//            //there will be no next segment
+//            RemoveSegment( pNextSegment->GetNumSegment());
+//
+//            //As a consequence of joining segments, saved cursor information is no longer
+//            //valid. In particular we have to fix rTimePos.
+//            oVCState.IncrementTimepos(rTime);
+//        }
+//
+//        //after removing the staffobj, VCursor iterator is pointing to next staffobj but
+//        //other VCursor variables (rTimePos, in particular) are no longer valid and should be
+//        //updated.
+//        pSegment->UpdateDuration();     //ensure it is updated
+//        GetCursor()->SetState(&oVCState, true);  //true->update timepos with pSO timepos
+//
+//        //finally, invoke destructor for removed staffobj
+//        delete pSO;
+//
+//
+//        //wxLogMessage(_T("[lmColStaffObjs::Delete] Forcing a dump:");
+//        //wxLogMessage( Dump() );
+//        //#if defined(_LM_DEBUG_)
+//        //g_pLogger->LogTrace(_T("lmColStaffObjs::Delete"), Dump() );
+//        //#endif
+//    }
+
 }
 
 
@@ -2786,22 +2916,6 @@ ImoTableRow::ImoTableRow(Document* pDoc)
     : ImoBlocksContainer(k_imo_table_row)
 {
     create_content_container(pDoc);
-}
-
-//---------------------------------------------------------------------------------------
-ImoDocument* ImoTableRow::get_document()
-{
-    ImoObj* pParent = get_parent();
-    if (pParent && pParent->is_collection())
-    {
-        pParent = pParent->get_parent();
-        if (pParent && pParent->is_table())
-            return (static_cast<ImoContentObj*>(pParent))->get_document();
-        else
-            throw std::runtime_error("[ImoTableRow::get_document] No parent or table row not in table!");
-    }
-    else
-        throw std::runtime_error("[ImoTableRow::get_document] No parent or table row not in table!");
 }
 
 //---------------------------------------------------------------------------------------

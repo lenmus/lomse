@@ -152,7 +152,7 @@ set( LOMSE_CREATE_DLL "0")
 
 # build options
 set( LOMSE_DEBUG "0")
-set( LOMSE_COMPATIBILITY_1_5 "1")
+set( LOMSE_COMPATIBILITY_LDP_1_5 "1")
 
 # platform
 if(WIN32)
@@ -237,7 +237,7 @@ endif(0)
 # Check for Boost >= 1.42.0
 set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0"
     "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0""1.49" "1.49.0"
-    "1.50" "1.50.0" )
+    "1.50" "1.50.0" "1.51" "1.51.0" "1.52" "1.52.0" )
 #set(Boost_USE_STATIC_LIBS       OFF)
 #set(Boost_USE_MULTITHREADED     OFF)
 #set(Boost_USE_STATIC_RUNTIME    OFF)
@@ -400,7 +400,9 @@ set(AGG_FILES
 )
 
 set(DOCUMENT_FILES
+    ${SRC_DIR}/document/lomse_command.cpp
     ${SRC_DIR}/document/lomse_document.cpp
+    ${SRC_DIR}/document/lomse_document_cursor.cpp
     ${SRC_DIR}/document/lomse_document_iterator.cpp
     ${SRC_DIR}/document/lomse_id_assigner.cpp
 )
@@ -472,6 +474,7 @@ set(GRAPHIC_MODEL_FILES
 )
 
 set(GUI_CONTROLS_FILES
+    ${SRC_DIR}/gui_controls/lomse_button_ctrl.cpp
     ${SRC_DIR}/gui_controls/lomse_checkbox_ctrl.cpp
     ${SRC_DIR}/gui_controls/lomse_hyperlink_ctrl.cpp
     ${SRC_DIR}/gui_controls/lomse_score_player_ctrl.cpp
@@ -665,7 +668,9 @@ add_executable( ${TESTLIB}
         ${SRC_DIR}/tests/lomse_test_chord_engraver.cpp
         ${SRC_DIR}/tests/lomse_test_column_breaker.cpp
         ${SRC_DIR}/tests/lomse_test_column_layouter.cpp
+        ${SRC_DIR}/tests/lomse_test_command.cpp
         ${SRC_DIR}/tests/lomse_test_document.cpp
+        ${SRC_DIR}/tests/lomse_test_document_cursor.cpp
         ${SRC_DIR}/tests/lomse_test_document_iterator.cpp
         ${SRC_DIR}/tests/lomse_test_document_layouter.cpp
         ${SRC_DIR}/tests/lomse_test_elements.cpp

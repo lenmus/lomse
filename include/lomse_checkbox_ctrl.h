@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -39,7 +39,8 @@ namespace lomse
 
 //---------------------------------------------------------------------------------------
 // A checkable box plus a static text element and/or and image.
-class CheckboxCtrl : public Control, public VertexSource
+class CheckboxCtrl : public Control
+                   , public VertexSource
 {
 protected:
     LibraryScope& m_libraryScope;
@@ -65,9 +66,9 @@ private:
     static  const int m_nNumVertices;
 
 public:
-    CheckboxCtrl(LibraryScope& libScope, DynGenerator* pOwner, Document* pDoc,
-                  const string& label, LUnits width=-1.0f, LUnits height=-1.0f,
-                  ImoStyle* pStyle=NULL);
+    CheckboxCtrl(LibraryScope& libScope, Control* pParent, Document* pDoc,
+                 const string& label, LUnits width=-1.0f, LUnits height=-1.0f,
+                 ImoStyle* pStyle=NULL);
     virtual ~CheckboxCtrl() {}
 
     //Control mandatory overrides

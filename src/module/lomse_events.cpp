@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -92,12 +92,37 @@ public:
 //=======================================================================================
 // Observer implementation
 //=======================================================================================
+Observer::Observer(Observable* target)
+    : m_target(target)
+    , m_type(Observable::k_root)
+    , m_id(0L)
+{
+}
+
+//---------------------------------------------------------------------------------------
+Observer::Observer(Observable* root, int childType, long childId)
+    : m_target(root)
+    , m_type(childType)
+    , m_id(childId)
+{
+}
+
+//---------------------------------------------------------------------------------------
 Observer::~Observer()
 {
     std::list<EventCallback*>::iterator it;
     for (it = m_handlers.begin(); it != m_handlers.end(); ++it)
         delete *it;
     m_handlers.clear();
+}
+
+//---------------------------------------------------------------------------------------
+Observable* Observer::target()
+{
+    if (m_type == Observable::k_root)
+        return m_target;
+    else
+        return m_target->get_observable_child(m_type, m_id);
 }
 
 //---------------------------------------------------------------------------------------
@@ -183,6 +208,31 @@ void Observable::add_event_handler(int eventType, EventHandler* pHandler)
     pNotifier->add_handler(this, eventType, pHandler);
 }
 
+//---------------------------------------------------------------------------------------
+void Observable::add_event_handler(int childType, long childId, int eventType,
+                           EventHandler* pHandler)
+{
+    EventNotifier* pNotifier = get_event_notifier();
+    pNotifier->add_handler_for_child(this, childType, childId, eventType, pHandler);
+}
+
+//---------------------------------------------------------------------------------------
+void Observable::add_event_handler(int childType, long childId, int eventType, void* pThis,
+                           void (*pt2Func)(void* pObj, SpEventInfo event) )
+{
+    EventNotifier* pNotifier = get_event_notifier();
+    pNotifier->add_handler_for_child(this, childType, childId, eventType,
+                                     pThis, pt2Func);
+}
+
+//---------------------------------------------------------------------------------------
+void Observable::add_event_handler(int childType, long childId, int eventType,
+                           void (*pt2Func)(SpEventInfo event) )
+{
+    EventNotifier* pNotifier = get_event_notifier();
+    pNotifier->add_handler_for_child(this, childType, childId, eventType, pt2Func);
+}
+
 
 //=======================================================================================
 // EventNotifier implementation
@@ -198,20 +248,25 @@ void EventNotifier::notify_observers(SpEventInfo pEvent, Observable* target)
     std::list<Observer*>::iterator it;
     for (it = m_observers.begin(); it != m_observers.end(); ++it)
     {
-        bool fNotify = ((*it)->target() == target);
-        //event on target is also an event on its parents: bubbling phase
+        Observable* observedTarget = (*it)->target();
+        bool fNotify = (observedTarget == target);
+
+        //bubbling phase. This observer is not observing target but might be
+        //observing its parents
         if (!fNotify)
         {
             ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(target);
             if (pImo)
             {
-                while(pImo && pImo != (*it)->target())
+                while(pImo && pImo != observedTarget)
                 {
                     pImo = dynamic_cast<ImoContentObj*>( pImo->get_parent() );
                 }
-                fNotify = (pImo == (*it)->target());
+                fNotify = (pImo == observedTarget);
+                //TODO: do notification and continue bubbling.
             }
         }
+
         if (fNotify)
         {
             m_pDispatcher->post_event((*it), pEvent);
@@ -236,6 +291,23 @@ Observer* EventNotifier::add_observer_for(Observable* target)
     }
 
     Observer* observer = LOMSE_NEW Observer(target);
+    m_observers.push_back(observer);
+    return observer;
+}
+
+//---------------------------------------------------------------------------------------
+Observer* EventNotifier::add_observer_for_child(Observable* parent, int childType,
+                                                long childId)
+{
+    std::list<Observer*>::iterator it;
+    for (it = m_observers.begin(); it != m_observers.end(); ++it)
+    {
+        Observable* target = parent->get_observable_child(childType, childId);
+        if ((*it)->target() == target)
+            return *it;
+    }
+
+    Observer* observer = LOMSE_NEW Observer(parent, childType, childId);
     m_observers.push_back(observer);
     return observer;
 }
@@ -280,25 +352,37 @@ void EventNotifier::add_handler(Observable* pSource, int eventType,
     observer->add_handler(eventType, pt2Func);
 }
 
+//---------------------------------------------------------------------------------------
+void EventNotifier::add_handler_for_child(Observable* parent, int childType,
+                                          long childId, int eventType,
+                                          EventHandler* pHandler)
+{
+    Observer* observer = add_observer_for_child(parent, childType, childId);
+    observer->add_handler(eventType, pHandler);
+}
+
+//---------------------------------------------------------------------------------------
+void EventNotifier::add_handler_for_child(Observable* parent, int childType,
+                                          long childId, int eventType,
+                                          void (*pt2Func)(SpEventInfo event) )
+{
+    Observer* observer = add_observer_for_child(parent, childType, childId);
+    observer->add_handler(eventType, pt2Func);
+}
+
+//---------------------------------------------------------------------------------------
+void EventNotifier::add_handler_for_child(Observable* parent, int childType,
+                                          long childId, int eventType, void* pThis,
+                                          void (*pt2Func)(void* pObj, SpEventInfo event) )
+{
+    Observer* observer = add_observer_for_child(parent, childType, childId);
+    observer->add_handler(eventType, pThis, pt2Func);
+}
+
 
 //=======================================================================================
 // EventMouse implementation
 //=======================================================================================
-DynGenerator* EventMouse::find_generator(GmoObj* pGmo)
-{
-    ImoContentObj* pParent = m_pImo;
-    while (pParent && !pParent->is_dynamic())
-        pParent = dynamic_cast<ImoContentObj*>( pParent->get_parent() );
-    if (pParent && pParent->is_dynamic())
-    {
-        ImoDynamic* pDyn = dynamic_cast<ImoDynamic*>( pParent );
-        return pDyn->get_generator();
-    }
-    else
-        return NULL;
-}
-
-//---------------------------------------------------------------------------------------
 ImoContentObj* EventMouse::find_originator_imo(GmoObj* pGmo)
 {
     ImoContentObj* pParent = dynamic_cast<ImoContentObj*>( m_pGmo->get_creator_imo() );

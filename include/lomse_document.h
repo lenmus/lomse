@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -30,16 +30,15 @@
 #ifndef __LOMSE_DOCUMENT_H__
 #define __LOMSE_DOCUMENT_H__
 
-#include <sstream>
 #include "lomse_injectors.h"
 #include "lomse_observable.h"
 #include "lomse_ldp_elements.h"
-#include "lomse_stack.h"
 #include "lomse_basic.h"
 #include "lomse_internal_model.h"
 #include "lomse_events.h"
 #include "lomse_reader.h"
 
+#include <sstream>
 using namespace std;
 
 namespace lomse
@@ -49,7 +48,7 @@ namespace lomse
 class DocCommand;
 class DocCommandExecuter;
 class Compiler;
-//class IdAssigner;
+class IdAssigner;
 class Interactor;
 class InternalModel;
 class ImoDocument;
@@ -61,9 +60,6 @@ class ImoObj;
 class ImoButton;
 class ImoParagraph;
 class ImoTextItem;
-
-/// A class to manage the undo/redo stack
-typedef UndoableStack<DocCommand*>     UndoStack;
 
 
 //------------------------------------------------------------------------------------
@@ -86,14 +82,10 @@ protected:
     LibraryScope&   m_libraryScope;
     ostream&        m_reporter;
     DocumentScope   m_docScope;
-    //LdpCompiler*    m_pCompiler;
-    //IdAssigner*     m_pIdAssigner;
+    IdAssigner*     m_pIdAssigner;
     InternalModel*  m_pIModel;
     ImoDocument*    m_pImoDoc;
     unsigned int    m_flags;
-
-    //for assingning unique Id to this document ImoObj objects
-    long            m_idCounter;
 
 protected:
     friend class LenmusdocAnalyser;
@@ -111,7 +103,7 @@ public:
 
     //supported file formats
     enum {
-        k_format_lms = 0,   //Lenguaje De Partituras (LDP, LISP like syntax)
+        k_format_ldp = 0,   //Lenguaje De Partituras (LDP, LISP like syntax)
         k_format_lmd,       //LenMus Document (LMD, XML syntax)
         k_format_mxl,       //MusicXML
         k_format_unknown,
@@ -122,9 +114,10 @@ public:
     inline LibraryScope& get_library_scope() { return m_libraryScope; }
 
     //creation
-    int from_file(const std::string& filename, int format=k_format_lms);
-    int from_string(const std::string& source, int format=k_format_lms);
+    int from_file(const string& filename, int format=k_format_ldp);
+    int from_string(const string& source, int format=k_format_ldp);
     int from_input(LdpReader& reader);
+    int from_checkpoint(const string& data);
     void create_empty();
     void create_with_empty_score();
 
@@ -135,6 +128,8 @@ public:
     //internal model
     inline ImoDocument* get_imodoc() const { return m_pImoDoc; }
     inline InternalModel* get_im_model() const { return m_pIModel; }
+    ImoObj* get_pointer_to_imo(long id) const;
+    Control* get_pointer_to_control(long id) const;
 
 //    //a low level cursor for the document
 //    typedef LdpTree::depth_first_iterator iterator;
@@ -143,10 +138,14 @@ public:
 //	iterator end() { LdpTree::depth_first_iterator it = m_pTree->end(); return iterator(it); }
 //    iterator content();
 //
-//    std::string to_string(iterator& it) { return (*it)->to_string(); }
-    std::string to_string();    //for tests
-//    std::string to_string_with_ids(iterator& it) { return (*it)->to_string_with_ids(); }
-//    std::string to_string_with_ids() { return m_pTree->get_root()->to_string_with_ids(); }
+//    string to_string(iterator& it) { return (*it)->to_string(); }
+    #define k_save_ids      true
+    #define k_no_save_ids   false
+    string to_string(bool fWithIds = k_no_save_ids);
+    string get_checkpoint_data();
+
+//    string to_string_with_ids(iterator& it) { return (*it)->to_string_with_ids(); }
+//    string to_string_with_ids() { return m_pTree->get_root()->to_string_with_ids(); }
 
 //    //inserts param before the element at position referred by iterator 'it'.
 //    //Returns iterator pointing to the newly inserted element
@@ -189,6 +188,7 @@ public:
 
     //mandatory overrides from Observable
     EventNotifier* get_event_notifier() { return this; }
+    Observable* get_observable_child(int childType, long childId);
 
     /** Send doc-modified events
         To have more control about when to update views, the document doesn't
@@ -205,153 +205,23 @@ public:
     //protected as sson as buttons changed to controls
     inline void set_dirty() { m_flags |= k_dirty; }
 
+    //debug
+    string dump_ids() const;
+
 protected:
     void initialize();
     Compiler* get_compiler_for_format(int format);
 
     friend class ImFactory;
-    inline long new_id() { return ++m_idCounter; }
+    void assign_id(ImoObj* pImo);
+
+    friend class Control;
+    void assign_id(Control* pControl);
 
     friend class ImoObj;
-
-
-    //------------------------------------------------------------------
-    // Transitional, while moving from score to lenmusdoc
-    //------------------------------------------------------------------
-public:
-    //TODO Replace by     DocIterator it = document.find_by_type(k_score, i)
-    //                    fint element number i [0..n-1] (breath first search)
-    ImoScore* get_score(int i);
+    void removed_from_model(ImoObj* pImo);
 
 };
-
-
-//// A class to store data for a command
-////------------------------------------------------------------------
-//class DocCommand
-//{
-//protected:
-//    Document::iterator m_position;
-//    LdpElement* m_added;
-//    LdpElement* m_removed;
-//    bool m_applied;
-//
-//public:
-//    DocCommand(Document::iterator& it, LdpElement* added, LdpElement* removed)
-//        : m_position(it), m_added(added), m_removed(removed), m_applied(false) {}
-//
-//    virtual ~DocCommand() {}
-//
-//    //getters
-//    inline Document::iterator& get_position() { return m_position; }
-//    inline LdpElement* get_added() { return m_added; }
-//    inline LdpElement* get_removed() { return m_removed; }
-//
-//    //actions
-//    virtual void undo(Document* pDoc)=0;
-//    virtual void redo(Document* pDoc)=0;
-//};
-//
-//
-//class DocCommandInsert : public DocCommand
-//{
-//public:
-//    DocCommandInsert(Document::iterator& it, LdpElement* pNewElm);
-//    ~DocCommandInsert();
-//
-//    void undo(Document* pDoc);
-//    void redo(Document* pDoc);
-//
-//protected:
-//    Document::iterator m_itInserted;
-//};
-//
-//
-//class DocCommandPushBack : public DocCommand
-//{
-//public:
-//    DocCommandPushBack(Document::iterator& it, LdpElement* pNewElm);
-//    ~DocCommandPushBack();
-//
-//    void undo(Document* pDoc);
-//    void redo(Document* pDoc);
-//};
-//
-//
-//class DocCommandRemove : public DocCommand
-//{
-//public:
-//    DocCommandRemove(Document::iterator& it);
-//    ~DocCommandRemove();
-//
-//    void undo(Document* pDoc);
-//    void redo(Document* pDoc);
-//
-//protected:
-//    LdpElement*     m_parent;
-//    LdpElement*     m_nextSibling;
-//};
-//
-//
-////
-//class DocCommandExecuter
-//{
-//private:
-//    Document*   m_pDoc;
-//    UndoStack   m_stack;
-//
-//public:
-//    DocCommandExecuter(Document* target);
-//    virtual ~DocCommandExecuter() {}
-//    virtual void execute(DocCommand* pCmd);
-//    virtual void undo();
-//    virtual void redo();
-//
-//    virtual bool is_document_modified() { return m_pDoc->is_modified(); }
-//    virtual size_t undo_stack_size() { return m_stack.size(); }
-//};
-
-
-
-//// A class to store data for a command
-////--------------------------------------------------------------------------------------
-//class DocCommand
-//{
-//protected:
-//    DocIterator m_position;
-//    ImoObj* m_added;
-//    ImoObj* m_removed;
-//    bool m_applied;
-//
-//public:
-//    DocCommand(DocIterator& it, ImoObj* added, ImoObj* removed)
-//        : m_position(it), m_added(added), m_removed(removed), m_applied(false) {}
-//
-//    virtual ~DocCommand() {}
-//
-//    //getters
-//    inline DocIterator& get_position() { return m_position; }
-//    inline ImoObj* get_added() { return m_added; }
-//    inline ImoObj* get_removed() { return m_removed; }
-//
-//    //actions
-//    virtual void undo(Document* pDoc)=0;
-//    virtual void redo(Document* pDoc)=0;
-//};
-//
-//
-//class DocCommandInsert : public DocCommand
-//{
-//public:
-//    DocCommandInsert(DocIterator& it, ImoObj* pObj);
-//    ~DocCommandInsert();
-//
-//    void undo(Document* pDoc);
-//    void redo(Document* pDoc);
-//
-//protected:
-//    DocIterator m_itInserted;
-//};
 
 
 }   //namespace lomse

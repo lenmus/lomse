@@ -58,9 +58,9 @@
 #include <lomse_interactor.h>
 #include <lomse_presenter.h>
 #include <lomse_events.h>
-
 #include <lomse_score_player.h>
-//#include <lomse_player_ctrl.h>
+#include <lomse_player_gui.h>
+
 
 using namespace lomse;
 
@@ -142,7 +142,6 @@ public:
     void OnAbout(wxCommandEvent& event);
 
     //callback wrappers
-    static void on_lomse_request(void* pThis, Request* pRequest);
     static void wrapper_lomse_event(void* pThis, SpEventInfo pEvent);
 
 protected:
@@ -162,7 +161,6 @@ protected:
 
     //lomse related
     void initialize_lomse();
-    static void get_font_filename(RequestFont* pRequest);
 
     void create_menu();
     void show_midi_settings_dlg();
@@ -182,7 +180,7 @@ protected:
 
 //---------------------------------------------------------------------------------------
 // MyCanvas is a window on which we show the scores
-class MyCanvas : public wxWindow
+class MyCanvas : public wxWindow, public PlayerNoGui
 {
 public:
     MyCanvas(wxFrame *frame, LomseDoorway& lomse, ScorePlayer* pPlayer);
@@ -453,7 +451,6 @@ void MyFrame::initialize_lomse()
     m_lomse.init_library(pixel_format,resolution, reverse_y_axis);
 
     //set required callbacks
-    m_lomse.set_request_callback(NULL, on_lomse_request);
     m_lomse.set_notify_callback(this, wrapper_lomse_event);
 }
 
@@ -468,21 +465,6 @@ void MyFrame::open_test_document()
     // Following line is not needed for Windows (doen't hurt) but it is
     // necessary for Linux, in order to receive Key Up/Down events
     get_active_canvas()->SetFocus();
-}
-
-//---------------------------------------------------------------------------------------
-void MyFrame::on_lomse_request(void* pThis, Request* pRequest)
-{
-    int type = pRequest->get_request_type();
-    switch (type)
-    {
-        case k_get_font_filename:
-            get_font_filename( dynamic_cast<RequestFont*>(pRequest) );
-            break;
-
-        default:
-            fprintf(stderr, "on_lomse_request] Unknown request\n");
-    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -513,157 +495,6 @@ void MyFrame::on_lomse_event(SpEventInfo pEvent)
         default:
             ;
     }
-}
-
-//---------------------------------------------------------------------------------------
-void MyFrame::get_font_filename(RequestFont* pRequest)
-{
-    //This is just a trivial example. In real applications you should
-    //use operating system services to find a suitable font
-
-    //notes on parameters received:
-    // - fontname can be either the face name (i.e. "Book Antiqua") or
-    //   the family name (i.e. "sans-serif")
-
-    const string& fontname = pRequest->get_fontname();
-    bool bold = pRequest->get_bold();
-    bool italic = pRequest->get_italic();
-
-#if defined(__WXGTK__)
-
-    string path = "/usr/share/fonts/truetype/";
-
-    //if family name, choose a font name
-    string name = fontname;
-    if (name == "serif")
-        name = "Times New Roman";
-    else if (name == "sans-serif")
-        name = "Tahoma";
-    else if (name == "handwritten" || name == "cursive")
-        name = "Monotype Corsiva";
-    else if (name == "monospaced")
-        name = "Courier New";
-
-    //choose a suitable font file
-    string fontfile;
-    if (name == "Times New Roman")
-    {
-        if (italic && bold)
-            fontfile = "freefont/FreeSerifBoldItalic.ttf";
-        else if (italic)
-            fontfile = "freefont/FreeSerifItalic.ttf";
-        else if (bold)
-            fontfile = "freefont/FreeSerifBold.ttf";
-        else
-            fontfile = "freefont/FreeSerif.ttf";
-    }
-
-    else if (name == "Tahoma")
-    {
-        if (bold)
-            fontfile = "freefont/FreeSansOblique.ttf";
-        else
-            fontfile = "freefont/FreeSans.ttf";
-    }
-
-    else if (name == "Monotype Corsiva")
-    {
-        fontfile = "ttf-dejavu/DejaVuSans-Oblique.ttf";
-    }
-
-    else if (name == "Courier New")
-    {
-        if (italic && bold)
-            fontfile = "freefont/FreeMonoBoldOblique.ttf";
-        else if (italic)
-            fontfile = "freefont/FreeMonoOblique.ttf";
-        else if (bold)
-            fontfile = "freefont/FreeMonoBold.ttf";
-        else
-            fontfile = "freefont/FreeMono.ttf";
-    }
-
-    else
-        fontfile = "freefont/FreeSerif.ttf";
-
-
-    pRequest->set_font_fullname( path + fontfile );
-
-
-#elif defined(__WXMSW__)
-
-    pRequest->set_font_fullname("");
-
-    string path = "C:\\WINNT\\Fonts\\";
-
-    //if family name, choose a font name
-    string name = fontname;
-    if (name == "serif")
-        name = "Times New Roman";
-    else if (name == "sans-serif")
-        name = "Tahoma";
-    else if (name == "handwritten")
-        name = "Lucida Handwriting";
-    else if (name == "cursive")
-        name = "Monotype Corsiva";
-    else if (name == "monospaced")
-        name = "Courier New";
-
-    //choose a suitable font file
-    string fontfile;
-    if (name == "Times New Roman")
-    {
-        if (italic && bold)
-            fontfile = "timesbi.ttf";
-        else if (italic)
-            fontfile = "timesi.ttf";
-        else if (bold)
-            fontfile = "timesbd.ttf";
-        else
-            fontfile = "times.ttf";
-    }
-
-    else if (name == "Tahoma")
-    {
-        if (bold)
-            fontfile = "tahomabd.ttf";
-        else
-            fontfile = "tahoma.ttf";
-    }
-
-    else if (name == "Lucida Handwriting")
-    {
-        fontfile = "lhandw.ttf";
-    }
-
-    else if (name == "Monotype Corsiva")
-    {
-        fontfile = "mtcorsva.ttf";
-    }
-
-    else if (name == "Courier New")
-    {
-        if (italic && bold)
-            fontfile = "courbi.ttf";
-        else if (italic)
-            fontfile = "couri.ttf";
-        else if (bold)
-            fontfile = "courbd.ttf";
-        else
-            fontfile = "cour.ttf";
-    }
-
-    else
-        fontfile = "times.ttf";
-
-    pRequest->set_font_fullname( path + fontfile );
-
-
-#else
-
-    pRequest->set_font_fullname("");
-
-#endif
 }
 
 //---------------------------------------------------------------------------------------
@@ -800,6 +631,7 @@ END_EVENT_TABLE()
 //---------------------------------------------------------------------------------------
 MyCanvas::MyCanvas(wxFrame *frame, LomseDoorway& lomse, ScorePlayer* pPlayer)
     : wxWindow(frame, wxID_ANY)
+    , PlayerNoGui(60L /*tempo 60 MM*/, false /*no count off*/, false /*no metronome clicks*/)
     , m_lomse(lomse)
 	, m_pPresenter(NULL)
 	, m_pInteractor(NULL)
@@ -1128,14 +960,11 @@ void MyCanvas::OnMouseEvent(wxMouseEvent& event)
 void MyCanvas::play_start()
 {
     Document* pDoc = m_pPresenter->get_document();
-    ImoScore* pScore = pDoc->get_score(0);
-    m_pPlayer->load_score(pScore, NULL);
+    ImoScore* pScore = static_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
+    m_pPlayer->load_score(pScore, this);
 
     bool fVisualTracking = true;
-    bool fCountOff = false;
-    int playMode = k_play_normal_instrument;
-    long nMM = 60;
-    m_pPlayer->play(fVisualTracking, fCountOff, playMode, nMM, m_pInteractor);
+    m_pPlayer->play(fVisualTracking, 0, m_pInteractor);
 }
 
 //-------------------------------------------------------------------------

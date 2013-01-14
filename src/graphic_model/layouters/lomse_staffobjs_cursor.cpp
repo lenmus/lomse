@@ -1,18 +1,18 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -52,10 +52,10 @@ StaffObjsCursor::StaffObjsCursor(ImoScore* pScore)
 //    lmInstrument* pInstr = pScore->GetFirstInstrument();
 //    for (; pInstr; pInstr = pScore->GetNextInstrument())
 //    {
-//        ScoreIterator* pIT = pInstr->GetVStaff()->CreateIterator();
+//        StaffObjsIterator* pIT = pInstr->GetVStaff()->CreateIterator();
 //        pIT->AdvanceToMeasure(1);
 //        m_iterators.push_back(pIT);
-//        m_savedIterators.push_back( new ScoreIterator(pIT) );
+//        m_savedIterators.push_back( new StaffObjsIterator(pIT) );
 //    }
 //
 //    m_rBreakTime = _LOMSE_NO_BREAK_TIME;
@@ -64,7 +64,7 @@ StaffObjsCursor::StaffObjsCursor(ImoScore* pScore)
 //---------------------------------------------------------------------------------------
 StaffObjsCursor::~StaffObjsCursor()
 {
-//    std::vector<ScoreIterator*>::iterator it;
+//    std::vector<StaffObjsIterator*>::iterator it;
 //    for (it = m_iterators.begin(); it != m_iterators.end(); ++it)
 //        delete *it;
 //    m_iterators.clear();
@@ -278,7 +278,7 @@ void StaffObjsCursor::go_back_to_saved_position()
 //{
 //    //returns current absolute measure number (1..n) for VStaff
 //
-//    return m_iterators[iInstr]->GetNumSegment() + 1;
+//    return m_iterators[iInstr]->GetNumMeasure() + 1;
 //}
 //
 //---------------------------------------------------------------------------------------
@@ -292,7 +292,7 @@ void StaffObjsCursor::go_back_to_saved_position()
 //
 //    for (int i=0; i < (int)m_iterators.size(); ++i)
 //    {
-//        ScoreIterator* pIT = m_iterators[i];
+//        StaffObjsIterator* pIT = m_iterators[i];
 //        pIT->ResetFlags();
 //        while (!pIT->ChangeOfMeasure() && !pIT->EndOfCollection())
 //        {

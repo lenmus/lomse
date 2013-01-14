@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -82,7 +82,7 @@ SUITE(ScoreIteratorTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_entries() == 2 );
 
-        ScoreIterator sit(pTable);
+        StaffObjsIterator sit(pTable);
 
         CHECK( (*sit)->imo_object()->is_note() == true );
         CHECK( (*sit)->line() == 0 );
@@ -106,7 +106,7 @@ SUITE(ScoreIteratorTest)
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
         CHECK( pTable->num_entries() == 2 );
 
-        ScoreIterator sit(pTable);
+        StaffObjsIterator sit(pTable);
 
         CHECK( sit.is_first() == true );
         CHECK( sit.is_end() == false );
@@ -121,7 +121,7 @@ SUITE(ScoreIteratorTest)
         it.start_of_content();
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        ScoreIterator sit(pTable);
+        StaffObjsIterator sit(pTable);
 
         ++sit;
 
@@ -144,7 +144,7 @@ SUITE(ScoreIteratorTest)
         it.start_of_content();
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        ScoreIterator sit(pTable);
+        StaffObjsIterator sit(pTable);
 
         ++sit;
         ++sit;
@@ -162,7 +162,7 @@ SUITE(ScoreIteratorTest)
         it.start_of_content();
         ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
-        ScoreIterator sit(pTable);
+        StaffObjsIterator sit(pTable);
 
         ++sit;
         --sit;

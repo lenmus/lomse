@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -161,7 +161,6 @@ SUITE(LmdParserTest)
     //    //cout << score->get_root()->to_string() << endl;
     //    CHECK( score->get_root()->to_string() == "(clef G)" );
     //    CHECK( score->get_root()->get_id() == 27L );
-    //    CHECK( parser.get_max_id() == 27L );
     //    delete score->get_root();
     //}
 
@@ -173,7 +172,6 @@ SUITE(LmdParserTest)
     //    //cout << score->get_root()->to_string() << endl;
     //    CHECK( score->get_root()->to_string() == "(clef G)" );
     //    CHECK( score->get_root()->get_id() == 0L );
-    //    CHECK( parser.get_max_id() == 0L );
     //    delete score->get_root();
     //}
 
@@ -213,7 +211,6 @@ SUITE(LmdParserTest)
     //    //cout << expected.str();
     //    CHECK( score->get_root()->to_string() == "(clef G)" );
     //    CHECK( score->get_root()->get_id() == 0L );
-    //    CHECK( parser.get_max_id() == 0L );
     //    CHECK( errormsg.str() == expected.str() );
     //    delete score->get_root();
     //}
@@ -230,32 +227,7 @@ SUITE(LmdParserTest)
     //    cout << expected.str();
     //    CHECK( score->get_root()->to_string() == "(t -)" );
     //    CHECK( score->get_root()->get_id() == 0L );
-    //    CHECK( parser.get_max_id() == 0L );
     //    CHECK( errormsg.str() == expected.str() );
-    //    delete score->get_root();
-    //}
-
-    //TEST_FIXTURE(LmdParserTestFixture, ParserElementWithLowId)
-    //{
-    //    stringstream errormsg;
-    //    LmdParser parser(errormsg, m_pLibraryScope->ldp_factory());
-    //    stringstream expected;
-    //    expected << "Line 0. In 'key#1'. Value for id already exists. Ignored." << endl;
-    //    parser.parse_text("(musicData (clef G) (key#1 D))");
-    //    XmlNode* root = parser.get_tree_root();
-    //    //cout << errormsg.str();
-    //    //cout << expected.str();
-    //    LdpElement* elm = score->get_root();
-    //    CHECK( elm->to_string() == "(musicData (clef G) (key D))" );
-    //    CHECK( elm->get_id() == 0L );    //musicData
-    //    elm = elm->get_first_child();   //clef
-    //    CHECK( elm->to_string() == "(clef G)" );
-    //    CHECK( elm->get_id() == 1L );
-    //    elm = elm->get_next_sibling();  //key
-    //    CHECK( elm->to_string() == "(key D)" );
-    //    CHECK( elm->get_id() == 2L );
-    //    CHECK( errormsg.str() == expected.str() );
-    //    CHECK( parser.get_max_id() == 2L );
     //    delete score->get_root();
     //}
 
@@ -276,7 +248,6 @@ SUITE(LmdParserTest)
     //    elm = elm->get_next_sibling();  //key
     //    CHECK( elm->get_id() == 4L );
     //    CHECK( errormsg.str() == expected.str() );
-    //    CHECK( parser.get_max_id() == 4L );
     //    delete score->get_root();
     //}
 

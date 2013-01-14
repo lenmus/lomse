@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -48,9 +48,8 @@ namespace lomse
 //=======================================================================================
 // LmdCompiler implementation
 //=======================================================================================
-LmdCompiler::LmdCompiler(LmdParser* p, LmdAnalyser* a, ModelBuilder* mb, IdAssigner* ida,
-                         Document* pDoc)
-    : Compiler(p, a, mb, ida, pDoc)
+LmdCompiler::LmdCompiler(LmdParser* p, LmdAnalyser* a, ModelBuilder* mb, Document* pDoc)
+    : Compiler(p, a, mb, pDoc)
     , m_pLmdParser(p)
     , m_pLmdAnalyser(a)
 {
@@ -67,7 +66,6 @@ LmdCompiler::LmdCompiler(LibraryScope& libraryScope, Document* pDoc)
     m_pParser = m_pLmdParser;
     m_pAnalyser = m_pLmdAnalyser;
     m_pModelBuilder = Injector::inject_ModelBuilder(pDoc->get_scope());
-    m_pIdAssigner = pDoc->get_scope().id_assigner();
     m_pDoc = pDoc;
     m_fileLocator = "";
 }
@@ -96,7 +94,6 @@ InternalModel* LmdCompiler::compile_file(const std::string& filename)
     else //k_file
         m_pParser->parse_file(filename);
 
-    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     XmlNode* root = m_pLmdParser->get_tree_root();
     if (root)
         return compile_parsed_tree(root);
@@ -109,7 +106,6 @@ InternalModel* LmdCompiler::compile_string(const std::string& source)
 {
     m_fileLocator = "string:";
     m_pLmdParser->parse_text(source);
-    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile_parsed_tree( m_pLmdParser->get_tree_root() );
 }
 
@@ -118,7 +114,6 @@ InternalModel* LmdCompiler::compile_string(const std::string& source)
 //{
 //    m_fileLocator = reader.get_locator();
 //    m_pFinalTree = m_pParser->parse_input(reader);
-//    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
 //    return compile_parsed_tree(m_pFinalTree);
 //}
 
@@ -126,7 +121,6 @@ InternalModel* LmdCompiler::compile_string(const std::string& source)
 InternalModel* LmdCompiler::create_empty()
 {
     m_pParser->parse_text("<lenmusdoc vers='0.0'><content/></lenmusdoc>");
-    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
     return compile_parsed_tree( m_pLmdParser->get_tree_root() );
 }
 
@@ -134,7 +128,6 @@ InternalModel* LmdCompiler::create_empty()
 InternalModel* LmdCompiler::create_with_empty_score()
 {
 //    m_pFinalTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6)(instrument (musicData)))))");
-//    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
 //    return compile_parsed_tree(m_pFinalTree);
     return NULL;    //TODO: Probably this method is not needed
 }
@@ -152,7 +145,6 @@ InternalModel* LmdCompiler::compile_parsed_tree(XmlNode* root)
 //SpLdpTree LmdCompiler::wrap_score_in_lenmusdoc(SpLdpTree pParseTree)
 //{
 //    SpLdpTree pFinalTree = parse_empty_doc();
-//    m_pIdAssigner->reassign_ids(pParseTree);
 //
 //    LdpTree::depth_first_iterator it = pFinalTree->begin();
 //    while (it != pFinalTree->end() && !(*it)->is_type(k_content))
@@ -166,7 +158,6 @@ InternalModel* LmdCompiler::compile_parsed_tree(XmlNode* root)
 //SpLdpTree LmdCompiler::parse_empty_doc()
 //{
 //    SpLdpTree pTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content ))");
-//    m_pIdAssigner->set_last_id( m_pParser->get_max_id() );
 //    return pTree;
 //}
 

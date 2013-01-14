@@ -132,94 +132,6 @@ void update_window(SpEventInfo pEvent)
 }
 
 //---------------------------------------------------------------------------------------
-string get_font_filename(RequestFont* pRequest)
-{
-    //This is just a trivial example. In real applications you should
-    //use operating system services to find a suitable font
-
-    //notes on parameters received:
-    // - fontname can be either the face name (i.e. "Book Antiqua") or
-    //   the family name (i.e. "sans-serif")
-
-    const string& fontname = pRequest->get_fontname();
-    bool bold = pRequest->get_bold();
-    bool italic = pRequest->get_italic();
-
-    string path = "/usr/share/fonts/truetype/";
-
-    //if family name, choose a font name
-    string name = fontname;
-    if (name == "serif")
-        name = "Times New Roman";
-    else if (name == "sans-serif")
-        name = "Tahoma";
-    else if (name == "handwritten" || name == "cursive")
-        name = "Monotype Corsiva";
-    else if (name == "monospaced")
-        name = "Courier New";
-
-    //choose a suitable font file
-    string fontfile;
-    if (name == "Times New Roman")
-    {
-        if (italic && bold)
-            fontfile = "freefont/FreeSerifBoldItalic.ttf";
-        else if (italic)
-            fontfile = "freefont/FreeSerifItalic.ttf";
-        else if (bold)
-            fontfile = "freefont/FreeSerifBold.ttf";
-        else
-            fontfile = "freefont/FreeSerif.ttf";
-    }
-
-    else if (name == "Tahoma")
-    {
-        if (bold)
-            fontfile = "freefont/FreeSansOblique.ttf";
-        else
-            fontfile = "freefont/FreeSans.ttf";
-    }
-
-    else if (name == "Monotype Corsiva")
-    {
-        fontfile = "ttf-dejavu/DejaVuSans-Oblique.ttf";
-    }
-
-    else if (name == "Courier New")
-    {
-        if (italic && bold)
-            fontfile = "freefont/FreeMonoBoldOblique.ttf";
-        else if (italic)
-            fontfile = "freefont/FreeMonoOblique.ttf";
-        else if (bold)
-            fontfile = "freefont/FreeMonoBold.ttf";
-        else
-            fontfile = "freefont/FreeMono.ttf";
-    }
-
-    else
-        fontfile = "freefont/FreeSerif.ttf";
-
-
-   return path + fontfile;
-}
-
-//---------------------------------------------------------------------------------------
-void on_lomse_request(void* pThis, Request* pRequest)
-{
-    int type = pRequest->get_request_type();
-    switch (type)
-    {
-        case k_get_font_filename:
-            get_font_filename( dynamic_cast<RequestFont*>(pRequest) );
-            break;
-
-        default:
-            fprintf(stderr, "on_lomse_request] Unknown request\n");
-    }
-}
-
-//-------------------------------------------------------------------------
 void open_document()
 {
     //Normally you will load the content of a file. But in this
@@ -280,7 +192,7 @@ void open_document()
     m_pInteractor->add_event_handler(k_update_window_event, update_window);
 }
 
-//-------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 void update_view_content()
 {
     //request the view to re-draw the bitmap
@@ -289,28 +201,28 @@ void update_view_content()
     m_pInteractor->redraw_bitmap();
 }
 
-//-------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 void on_mouse_button_down(int x, int y, unsigned flags)
 {
     if (!m_pInteractor) return;
     m_pInteractor->on_mouse_button_down(x, y, flags);
 }
 
-//-------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 void on_mouse_move(int x, int y, unsigned flags)
 {
     if (!m_pInteractor) return;
     m_pInteractor->on_mouse_move(x, y, flags);
 }
 
-//-------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 void on_mouse_button_up(int x, int y, unsigned flags)
 {
     if (!m_pInteractor) return;
     m_pInteractor->on_mouse_button_up(x, y, flags);
 }
 
-//-------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
 void on_key(int x, int y, unsigned key, unsigned flags)
 {
     if (!m_pInteractor) return;
@@ -736,9 +648,6 @@ void initialize_lomse()
     //initialize the Lomse library
     m_flip_y = false;               //y axis is not reversed
     m_lomse.init_library(m_format, 96, m_flip_y);   //resolution=96 ppi
-
-    //set required callbacks
-    m_lomse.set_request_callback(NULL, on_lomse_request);
 
     //initialize lomse related variables
     m_pInteractor = NULL;

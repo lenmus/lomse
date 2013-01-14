@@ -1,18 +1,18 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -152,6 +152,10 @@ public:
     /// Insert a node as previous sibling of pointed node. Returns an iterator
     /// that points to the newly inserted element
     iterator insert(iterator position, T* newNode);
+
+    /// Insert a node newNode as previous sibling of given node curNode. Returns an
+    /// iterator that points to the newly inserted element
+    iterator insert(T* curNode, T* newNode);
 };
 
 
@@ -496,6 +500,18 @@ typename Tree<T>::depth_first_iterator Tree<T>::insert(depth_first_iterator posi
 {
     T* curNode = *position;
     if (curNode->is_root()) return position;
+
+    return insert(curNode, newNode);
+}
+
+
+//---------------------------------------------------------------------------------------
+/// Insert a node newNode as previous sibling of given node curNode. Returns an iterator
+/// that points to the newly inserted element
+template <class T>
+typename Tree<T>::depth_first_iterator Tree<T>::insert(T* curNode, T* newNode)
+{
+    if (curNode->is_root()) return curNode;
 
     //links in previous sibling
     if (curNode->get_prev_sibling())

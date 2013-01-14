@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -36,7 +36,6 @@
 #include "lomse_drawer.h"
 #include "lomse_calligrapher.h"
 #include "lomse_events.h"
-#include "lomse_dyn_generator.h"
 
 namespace lomse
 {
@@ -44,10 +43,10 @@ namespace lomse
 //=======================================================================================
 // StaticTextCtrl implementation
 //=======================================================================================
-StaticTextCtrl::StaticTextCtrl(LibraryScope& libScope, DynGenerator* pOwner,
+StaticTextCtrl::StaticTextCtrl(LibraryScope& libScope, Control* pParent,
                                Document* pDoc, const string& label,
                                LUnits width, LUnits height, ImoStyle* pStyle)
-    : Control(pOwner, pDoc)
+    : Control(pDoc, pParent)
     , m_libraryScope(libScope)
     , m_label(label)
     , m_pMainBox(NULL)
@@ -60,7 +59,8 @@ StaticTextCtrl::StaticTextCtrl(LibraryScope& libScope, DynGenerator* pOwner,
 
     measure();
 
-    pOwner->accept_control_ownership(this);
+    if (pParent)
+        pParent->take_ownership_of(this);
 }
 
 //---------------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ void StaticTextCtrl::handle_event(SpEventInfo pEvent)
 //    {
 //        wxLogMessage(_T("On Click at StaticTextCtrl"));
 //    }
-    notify_observers(pEvent, this);
+    m_pDoc->notify_observers(pEvent, this);
 }
 
 //---------------------------------------------------------------------------------------

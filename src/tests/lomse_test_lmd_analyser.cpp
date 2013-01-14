@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -152,6 +152,27 @@ SUITE(LmdAnalyserTest)
         CHECK( pDoc != NULL );
         CHECK( pDoc->get_num_content_items() == 0 );
         CHECK( pDoc->get_language() == "en" );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_lenmusdoc)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("<lenmusdoc vers='0.0' id='10'><content/></lenmusdoc>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete pIModel;
     }
@@ -6866,6 +6887,27 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_text_item)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("<txt id='10'>This is a text</txt>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_text_item() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LmdAnalyserTestFixture, TextItem_MissingText)
     {
         stringstream errormsg;
@@ -6947,6 +6989,27 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_paragraph)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("<para id='10'>This is a paragraph</para>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_paragraph() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LmdAnalyserTestFixture, Paragraph_TextItemAdded)
     {
         stringstream errormsg;
@@ -6994,6 +7057,28 @@ SUITE(LmdAnalyserTest)
         CHECK( pLink->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pLink->get_first_item() );
         CHECK( pItem->get_text() == "This is the link" );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_link)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "<link id='10' url='This is the url'>This is the link</link>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_link() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete pIModel;
     }
@@ -7130,6 +7215,27 @@ SUITE(LmdAnalyserTest)
         //cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
         CHECK( pIModel->get_root()->is_heading() == true );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_section)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("<section id='10' level='1'>This is a header</section>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_heading() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete pIModel;
     }
@@ -7549,7 +7655,7 @@ SUITE(LmdAnalyserTest)
     {
         Document doc(m_libraryScope);
         LmdParser parser;
-        parser.parse_text("<param><name>green</name><value>this is green</value></param>");
+        parser.parse_text("<param name='green'>this is green</param>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -7569,7 +7675,7 @@ SUITE(LmdAnalyserTest)
         LmdParser parser;
         stringstream expected;
         expected << "Line 0. Missing name for element 'param'. Element ignored." << endl;
-        parser.parse_text("<param><value>this is green</value></param>");
+        parser.parse_text("<param>this is green</param>");
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -7627,6 +7733,31 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_dynamic)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "<dynamic id='10' classid='test'>"
+                "<param name='play'>all notes</param>"
+            "</dynamic>"
+        );
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->is_dynamic() == true );
+        CHECK( pImo->get_id() == 10L );
+
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LmdAnalyserTestFixture, Dynamic_GeneratesRequest)
     {
         LomseDoorway* pDoorway = m_libraryScope.platform_interface();
@@ -7657,7 +7788,7 @@ SUITE(LmdAnalyserTest)
         //expected << "Line 0. " << endl;
         string src =
             "<dynamic classid='test'>"
-                "<param><name>play</name><value>all notes</value></param>"
+                "<param name='play'>all notes</param>"
             "</dynamic>";
         parser.parse_text(src);
         LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
@@ -7832,6 +7963,28 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_listitem)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "<listitem id='10'>This is the first item</listitem>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_listitem() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LmdAnalyserTestFixture, List_created)
     {
         stringstream errormsg;
@@ -7862,6 +8015,31 @@ SUITE(LmdAnalyserTest)
         ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pLI->get_content_item(0) );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
         CHECK( pText->get_text() == "This is the first item" );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_list)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "<itemizedlist id='10'>"
+                "<listitem>This is the first item</listitem>"
+                "<listitem>This is the second item</listitem>"
+            "</itemizedlist>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_list() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete pIModel;
     }
@@ -7989,6 +8167,31 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_score_player)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("<lenmusdoc vers='0.0'> <content>"
+            "<scorePlayer id='10'/></content></lenmusdoc>");
+        //parser.parse_text("<scorePlayer id='10' />");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pDoc->get_content_item(0) );
+        ImoScorePlayer* pSP = dynamic_cast<ImoScorePlayer*>( pAB->get_first_item() );
+        CHECK( pSP->is_score_player() == true );
+        CHECK( pSP->get_id() == 10L );
+
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LmdAnalyserTestFixture, scorePlayer_metronome)
     {
         stringstream errormsg;
@@ -8082,6 +8285,28 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_table_cell)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "<tableCell id='10'>This is a cell</tableCell>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_table_cell() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete pIModel;
+    }
+
     TEST_FIXTURE(LmdAnalyserTestFixture, tableCell_rowspan)
     {
         stringstream errormsg;
@@ -8171,6 +8396,31 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_table_row)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "<tableRow id='10'>"
+                "<tableCell>This is cell 1</tableCell>"
+                "<tableCell>This is cell 2</tableCell>"
+            "</tableRow>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_table_row() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete pIModel;
+    }
+
     // tableHead ------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, tableHead_Creation)
@@ -8199,6 +8449,31 @@ SUITE(LmdAnalyserTest)
         ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pHead->get_item(0) );
         CHECK( pRow->is_table_row() == true );
         CHECK( pRow->get_num_cells() == 1 );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_table_head)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "<tableHead id='10'>"
+                "<tableRow><tableCell>This is a cell</tableCell></tableRow>"
+                "<tableRow><tableCell>This is a cell</tableCell></tableRow>"
+            "</tableHead>" );
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_table_head() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete pIModel;
     }
@@ -8234,6 +8509,31 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_table_body)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "<tableBody id='10'>"
+                "<tableRow><tableCell>This is a cell</tableCell></tableRow>"
+                "<tableRow><tableCell>This is a cell</tableCell></tableRow>"
+            "</tableBody>" );
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_table_body() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
+
+        delete pIModel;
+    }
+
     // table ----------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, table_Creation)
@@ -8265,6 +8565,30 @@ SUITE(LmdAnalyserTest)
         CHECK( pBody->get_num_items() == 1 );
         ImoTableRow* pRow = dynamic_cast<ImoTableRow*>( pBody->get_item(0) );
         CHECK( pRow->is_table_row() == true );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, id_in_table)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LmdParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text(
+            "<table id='10'><tableBody>"
+                "<tableRow><tableCell>This is a cell</tableCell></tableRow>"
+            "</tableBody></table>" );
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_table() == true );
+        ImoObj* pImo = pIModel->get_root();
+        CHECK( pImo->get_id() == 10L );
 
         delete pIModel;
     }

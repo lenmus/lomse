@@ -1,18 +1,18 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
 //
-//    * Redistributions of source code must retain the above copyright notice, this 
+//    * Redistributions of source code must retain the above copyright notice, this
 //      list of conditions and the following disclaimer.
 //
 //    * Redistributions in binary form must reproduce the above copyright notice, this
 //      list of conditions and the following disclaimer in the documentation and/or
 //      other materials provided with the distribution.
 //
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
 // OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
 // SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
@@ -46,9 +46,9 @@ class ColStaffObjsEntry;
 
 //-----------------------------------------------------------------------------------------
 // StaffObjsCursor
-// A cursor for traversing the score by tiempos, all instruments in parallel. As the score
-// is traversed, StaffObjsCursor provides information about context (current clef, key and
-// time signature)
+// A cursor for traversing staff objects by timepos, all instruments in parallel. As the
+// score is traversed, StaffObjsCursor provides information about context (current clef,
+// key and time signature)
 //-----------------------------------------------------------------------------------------
 
 //#define _LOMSE_NO_BREAK_TIME  100000000000000.0f         //any too big value
@@ -57,8 +57,8 @@ class StaffObjsCursor
 {
 private:
     ColStaffObjs* m_pColStaffObjs;
-    ScoreIterator m_scoreIt;
-    ScoreIterator m_savedPos;
+    StaffObjsIterator m_scoreIt;
+    StaffObjsIterator m_savedPos;
     int m_numInstruments;
     int m_numLines;
     bool m_fScoreIsEmpty;
@@ -68,8 +68,8 @@ private:
     std::vector<ColStaffObjsEntry*> m_keys;
     std::vector<ColStaffObjsEntry*> m_times;
 
-    //std::vector<ScoreIterator*> m_iterators;
-    //std::vector<ScoreIterator*> m_savedIterators;
+    //std::vector<StaffObjsIterator*> m_iterators;
+    //std::vector<StaffObjsIterator*> m_savedIterators;
     //float m_rBreakTime;       //last time to include in current column
 
 public:
@@ -93,7 +93,7 @@ public:
     inline ImoObj* imo_object() { return (*m_scoreIt)->imo_object(); }
     ImoStaffObj* get_staffobj();
     inline bool is_empty_score() { return m_fScoreIsEmpty; }
-    inline float anacrusis_missing_time() { 
+    inline float anacrusis_missing_time() {
         return m_pColStaffObjs->anacrusis_missing_time();
     }
 
@@ -124,7 +124,7 @@ public:
 //    inline void SetBreakTime(float rBreakTime) { m_rBreakTime = rBreakTime; }
 //
     //iterators management
-//    inline ScoreIterator* get_iterator(int iInstr) { return m_iterators[iInstr]; }
+//    inline StaffObjsIterator* get_iterator(int iInstr) { return m_iterators[iInstr]; }
     void go_back_to_saved_position();
     void save_position();
 //    void AdvanceAfterTimepos(float rTimepos);

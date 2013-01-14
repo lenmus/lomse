@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -82,33 +82,33 @@ public: //TO_FIX: constructor used in tests.
     }
 };
 
-//---------------------------------------------------------------------------------------
-class GmoShapeButton : public GmoSimpleShape
-{
-protected:
-    FontStorage* m_pFontStorage;
-    LibraryScope& m_libraryScope;
-    ImoButton* m_pButton;
-    LUnits m_xLabel;
-    LUnits m_yLabel;
-    Color m_bgColor;
-
-    friend class ButtonEngrouter;
-    GmoShapeButton(ImoObj* pCreatorImo, UPoint pos, USize size,
-                   LibraryScope& libraryScope);
-
-public:
-    void on_draw(Drawer* pDrawer, RenderOptions& opt);
-
-    //modifiers
-    void change_color(Color color);
-
-protected:
-    void select_font();
-    void center_text();
-
-    //Color get_normal_color();
-};
+////---------------------------------------------------------------------------------------
+//class GmoShapeButton : public GmoSimpleShape
+//{
+//protected:
+//    FontStorage* m_pFontStorage;
+//    LibraryScope& m_libraryScope;
+//    ImoButton* m_pButton;
+//    LUnits m_xLabel;
+//    LUnits m_yLabel;
+//    Color m_bgColor;
+//
+//    friend class ButtonEngrouter;
+//    GmoShapeButton(ImoObj* pCreatorImo, UPoint pos, USize size,
+//                   LibraryScope& libraryScope);
+//
+//public:
+//    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+//
+//    //modifiers
+//    void change_color(Color color);
+//
+//protected:
+//    void select_font();
+//    void center_text();
+//
+//    //Color get_normal_color();
+//};
 
 //---------------------------------------------------------------------------------------
 class GmoShapeImage : public GmoSimpleShape

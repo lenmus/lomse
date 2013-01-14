@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -65,6 +65,7 @@ std::string ColStaffObjsEntry::to_string_with_ids()
 {
     LdpExporter exporter;
     exporter.set_add_id(true);
+    exporter.set_remove_newlines(true);
     return exporter.get_source(m_pImo);
 }
 
@@ -233,7 +234,7 @@ void ColStaffObjsBuilder::add_entry_for_staffobj(ImoObj* pImo, int nInstr)
         nVoice = pNR->get_voice();
     }
     int nLine = get_line_for(nVoice, nStaff);
-    m_pColStaffObjs->AddEntry(m_nCurSegment, rTime, nInstr, nLine, nStaff, pSO);
+    m_pColStaffObjs->AddEntry(m_nCurMeasure, rTime, nInstr, nLine, nStaff, pSO);
 }
 
 //---------------------------------------------------------------------------------------
@@ -247,7 +248,7 @@ void ColStaffObjsBuilder::add_entries_for_key_or_time_signature(ImoObj* pImo, in
     for (int nStaff=0; nStaff < numStaves; nStaff++)
     {
         int nLine = get_line_for(0, nStaff);
-        m_pColStaffObjs->AddEntry(m_nCurSegment, rTime, nInstr, nLine, nStaff, pSO);
+        m_pColStaffObjs->AddEntry(m_nCurMeasure, rTime, nInstr, nLine, nStaff, pSO);
     }
 }
 
@@ -267,7 +268,7 @@ void ColStaffObjsBuilder::sort_table(bool fSort)
 //---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::reset_counters()
 {
-    m_nCurSegment = 0;
+    m_nCurMeasure = 0;
     m_rCurTime = 0.0f;
     m_nCurStaff = 0;
     m_rMaxSegmentTime = 0.0f;
@@ -301,7 +302,7 @@ void ColStaffObjsBuilder::update_measure(ImoStaffObj* pSO)
 {
     if (pSO->is_barline())
     {
-        ++m_nCurSegment;
+        ++m_nCurMeasure;
         m_rMaxSegmentTime = 0.0f;
         m_rStartSegmentTime = m_rCurTime;
     }

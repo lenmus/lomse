@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -51,6 +51,7 @@
 #include "lomse_score_player.h"
 #include "lomse_metronome.h"
 #include "lomse_events_dispatcher.h"
+#include "lomse_id_assigner.h"
 
 #include <sstream>
 using namespace std;
@@ -221,7 +222,6 @@ LdpCompiler* Injector::inject_LdpCompiler(LibraryScope& libraryScope,
     return LOMSE_NEW LdpCompiler(inject_LdpParser(libraryScope, pDoc->get_scope()),
                            inject_LdpAnalyser(libraryScope, pDoc),
                            inject_ModelBuilder(pDoc->get_scope()),
-                           pDoc->get_scope().id_assigner(),
                            pDoc );
 }
 
@@ -248,7 +248,6 @@ LmdCompiler* Injector::inject_LmdCompiler(LibraryScope& libraryScope,
     return LOMSE_NEW LmdCompiler(pParser,
                                  inject_LmdAnalyser(libraryScope, pDoc, pParser),
                                  inject_ModelBuilder(pDoc->get_scope()),
-                                 pDoc->get_scope().id_assigner(),
                                  pDoc );
 }
 
@@ -349,6 +348,21 @@ ScorePlayer* Injector::inject_ScorePlayer(LibraryScope& libraryScope,
     return LOMSE_NEW ScorePlayer(libraryScope, pSoundServer);
 }
 
+
+//=======================================================================================
+// DocumentScope implementation
+//=======================================================================================
+DocumentScope::DocumentScope(ostream& reporter)
+    : m_reporter(reporter)
+{
+    m_idAssigner = LOMSE_NEW IdAssigner();
+}
+
+//---------------------------------------------------------------------------------------
+DocumentScope::~DocumentScope()
+{
+    delete m_idAssigner;
+}
 
 
 }  //namespace lomse
