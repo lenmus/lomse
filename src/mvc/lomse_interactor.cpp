@@ -230,8 +230,8 @@ void Interactor::click_at_screen_point(Pixels x, Pixels y, unsigned flags)
         ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
         if (pGmo->is_box_control() || (pImo && pImo->is_visible()) )
         {
-            SpEventMouse pEvent( LOMSE_NEW EventMouse(k_on_click_event, this, pGmo,
-                                                get_graphic_model()) );
+            long id = find_event_originator_imo(pGmo);
+            SpEventMouse pEvent( LOMSE_NEW EventMouse(k_on_click_event, this, id, m_pDoc) );
             notify_event(pEvent, pGmo);
         }
     }
@@ -262,6 +262,53 @@ void Interactor::mouse_in_out(Pixels x, Pixels y)
 
     update_view_if_needed();
 }
+
+//---------------------------------------------------------------------------------------
+long Interactor::find_event_originator_imo(GmoObj* pGmo)
+{
+    ImoContentObj* pParent = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
+    while (pParent && !pParent->is_link())
+        pParent = dynamic_cast<ImoContentObj*>( pParent->get_parent() );
+
+    if (pParent && pParent->is_link())
+        return pParent->get_id();
+    else
+    {
+        pParent = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
+        if (pParent)
+            return pParent->get_id();
+        else
+            return -1L; //TODO: throw ?
+    }
+}
+
+////---------------------------------------------------------------------------------------
+//Observable* Interactor::find_event_source(GmoObj* pGmo)
+//{
+//    ImoContentObj* pParent = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
+//
+//    //try link
+//    while (pParent && !pParent->is_link())
+//        pParent = dynamic_cast<ImoContentObj*>( pParent->get_parent() );
+//
+//    if (pParent && pParent->is_link())
+//        return pParent;
+//
+//    //try other Imo
+//    pParent = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
+//    if (pParent)
+//        return pParent;
+//
+//    //try Control
+//    if (pGmo->is_box_control())
+//    {
+//        GmoBoxControl* pGBC = static_cast<GmoBoxControl*>( pGmo );
+//        return pGBC->get_creator_control();
+//    }
+//
+//    //?????????? throw
+//    return NULL;
+//}
 
 //---------------------------------------------------------------------------------------
 void Interactor::update_view_if_gmodel_modified()
@@ -680,16 +727,16 @@ void Interactor::update_view_if_needed()
 //---------------------------------------------------------------------------------------
 void Interactor::send_mouse_out_event(GmoObj* pGmo)
 {
-    SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_out_event, this, pGmo,
-                                        get_graphic_model()) );
+    long id = find_event_originator_imo(pGmo);
+    SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_out_event, this, id, m_pDoc) );
     notify_event(pEvent, pGmo);
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::send_mouse_in_event(GmoObj* pGmo)
 {
-    SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_in_event, this, pGmo,
-                                        get_graphic_model()) );
+    long id = find_event_originator_imo(pGmo);
+    SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_in_event, this, id, m_pDoc) );
     notify_event(pEvent, pGmo);
 }
 

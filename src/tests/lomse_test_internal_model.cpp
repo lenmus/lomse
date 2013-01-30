@@ -166,6 +166,7 @@ SUITE(InternalModelTest)
                                 ImFactory::inject(k_imo_music_data, &doc) );
         pInstr->append_child_imo(pMD);
         CHECK( pInstr->get_musicdata() == pMD );
+        CHECK( pMD->get_instrument() == pInstr );
         delete pInstr;
     }
 

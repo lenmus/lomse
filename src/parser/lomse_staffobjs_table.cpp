@@ -48,8 +48,10 @@ namespace lomse
 string ColStaffObjsEntry::dump()
 {
     stringstream s;
-    s << m_measure << "\t" << m_time << "\t" << m_instr << "\t"
-      << m_line << "\t" << m_staff << "\t" << to_string_with_ids() << endl;
+//    s << m_measure << "\t" << m_time << "\t" << m_instr << "\t"
+//      << m_line << "\t" << m_staff << "\t" << to_string_with_ids() << endl;
+    s << m_instr << "\t" << m_staff << "\t" << m_measure << "\t" << m_time << "\t"
+      << m_line << "\t" << to_string_with_ids() << endl;
     return s.str();
 }
 
@@ -76,24 +78,52 @@ std::string ColStaffObjsEntry::to_string_with_ids()
 //=======================================================================================
 
 //auxiliary, for sort: by time, object type (barlines before objects in other lines),
-//line and staff
-bool is_lower_entry(ColStaffObjsEntry* a, ColStaffObjsEntry* b)
+//line and staff.
+//AWARE:
+//   Current order is first pA, then pB
+//   return TRUE to move pB before pA, FALSE to keep in current order
+
+bool is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
 {
-    if ( is_lower_time(a->time(), b->time()) )
+    //swap if B has lower time than A
+    if ( is_lower_time(b->time(), a->time()) )
         return true;
-    else if ( is_equal_time(a->time(), b->time()) )
+
+    //both have equal time
+    else if ( is_equal_time(b->time(), a->time()) )
     {
-        ImoObj* pA = a->imo_object();
-        ImoObj* pB = b->imo_object();
-        if (pA->is_barline() && !pB->is_barline() && a->line() != b->line())
+        ImoStaffObj* pB = b->imo_object();
+        ImoStaffObj* pA = a->imo_object();
+
+        //barline must go before all other objects at same measure
+        //TODO: not asking for measure but for line. Is this correct?
+        if (pB->is_barline() && !pA->is_barline() && b->line() != a->line())
             return true;
-        else if (pB->is_barline() && !pA->is_barline() && a->line() != b->line())
+        else if (pA->is_barline() && !pB->is_barline() && b->line() != a->line())
             return false;
-        //else continue
+
+////        //note/rest can not go before non-timed
+////        else if (pA->is_note_rest() && pB->get_duration() == 0.0f)
+////            return true;
+////        else if (pB->is_note_rest() && pA->get_duration() == 0.0f)
+////            return false;
+////
+////        //clef in other staff can not go after key or time signature
+////        else if (pB->is_clef() && (pA->is_key_signature() || pA->is_time_signature())
+////                 && b->staff() != a->staff())
+////            return true;
+////        else if (pA->is_clef() && (pB->is_key_signature() || pB->is_time_signature()))
+////            return false;
+//
+//        //else order by staff and line
+//        return (b->line() < a->line() || (b->line() == a->line()
+//                                          && b->staff() < a->staff()) );
+        //else, preserve definition order
+        return false;
     }
-    return (is_equal_time(a->time(), b->time()) && a->line() < b->line())
-            || (is_equal_time(a->time(), b->time())
-                && a->line() == b->line() && a->staff() < b->staff()) ;
+
+    //time(pB) > time(pA). They are correctly ordered
+    return false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -117,7 +147,8 @@ void ColStaffObjs::AddEntry(int measure, float time, int instr, int voice, int s
                             ImoObj* pImo)
 {
     ColStaffObjsEntry* pEntry =
-        LOMSE_NEW ColStaffObjsEntry(measure, time, instr, voice, staff, pImo);
+        LOMSE_NEW ColStaffObjsEntry(measure, time, instr, voice, staff,
+                                    static_cast<ImoStaffObj*>( pImo ) );
     m_table.push_back(pEntry);
 }
 
@@ -128,7 +159,8 @@ string ColStaffObjs::dump()
     std::vector<ColStaffObjsEntry*>::iterator it;
     s << "Num.entries = " << num_entries() << endl;
     //    +.......+.......+.......+.......+.......+.......+
-    s << "seg.    time    instr   line    staff   object" << endl;
+//    s << "seg.    time    instr   line    staff   object" << endl;
+    s << "instr   staff   meas.   time    line    object" << endl;
     s << "----------------------------------------------------------------" << endl;
     for (it=m_table.begin(); it != m_table.end(); ++it)
     {
@@ -353,14 +385,14 @@ ImoSpacer* ColStaffObjsBuilder::anchor_object(ImoAuxObj* pAux)
 //---------------------------------------------------------------------------------------
 void ColStaffObjsBuilder::collect_anacrusis_info()
 {
-    ColStaffObjs::iterator it = m_pColStaffObjs->begin();
+    ColStaffObjsIterator it = m_pColStaffObjs->begin();
     ImoTimeSignature* pTS = NULL;
     float rTime = -1.0f;
 
     //find time signature
     while(it != m_pColStaffObjs->end())
     {
-        ImoObj* pSO = (*it)->imo_object();
+        ImoStaffObj* pSO = (*it)->imo_object();
         if (pSO->is_time_signature())
         {
             pTS = static_cast<ImoTimeSignature*>( pSO );
@@ -377,7 +409,7 @@ void ColStaffObjsBuilder::collect_anacrusis_info()
     ++it;
     while(it != m_pColStaffObjs->end())
     {
-        ImoObj* pSO = (*it)->imo_object();
+        ImoStaffObj* pSO = (*it)->imo_object();
         if (pSO->is_barline())
         {
             rTime = (*it)->time();

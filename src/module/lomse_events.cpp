@@ -31,6 +31,8 @@
 #include "lomse_internal_model.h"
 #include "lomse_gm_basic.h"
 #include "lomse_events_dispatcher.h"
+#include "lomse_control.h"
+#include "lomse_document.h"
 
 namespace lomse
 {
@@ -383,22 +385,15 @@ void EventNotifier::add_handler_for_child(Observable* parent, int childType,
 //=======================================================================================
 // EventMouse implementation
 //=======================================================================================
-ImoContentObj* EventMouse::find_originator_imo(GmoObj* pGmo)
+ImoContentObj* EventMouse::get_imo_object()
 {
-    ImoContentObj* pParent = dynamic_cast<ImoContentObj*>( m_pGmo->get_creator_imo() );
-    while (pParent && !pParent->is_link())
-        pParent = dynamic_cast<ImoContentObj*>( pParent->get_parent() );
-
-    if (pParent && pParent->is_link())
-        return pParent;
-    else
-        return dynamic_cast<ImoContentObj*>( m_pGmo->get_creator_imo() );
+    return dynamic_cast<ImoContentObj*>( m_pDoc->get_pointer_to_imo(m_imoId) );
 }
 
 //---------------------------------------------------------------------------------------
 Observable* EventMouse::get_source()
 {
-    return m_pImo;
+    return static_cast<Observable*>( get_imo_object() );
 }
 
 

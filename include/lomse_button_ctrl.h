@@ -67,9 +67,9 @@ public:
     LUnits right() { return m_pos.x + m_width; }
 
     //specific methods
-    void set_text(const string& text);
+    void set_label(const string& text);
     void set_tooltip(const string& text);
-    inline void set_bg_color(Color color) { m_bgColor = color; }
+    void set_bg_color(Color color);
 
 protected:
     GmoBoxControl* m_pMainBox;
@@ -81,34 +81,6 @@ protected:
     void center_text();
 
 };
-
-////---------------------------------------------------------------------------------------
-//class GmoShapeButton : public GmoSimpleShape
-//{
-//protected:
-//    FontStorage* m_pFontStorage;
-//    LibraryScope& m_libraryScope;
-//    ImoButton* m_pButton;
-//    LUnits m_xLabel;
-//    LUnits m_yLabel;
-//    Color m_bgColor;
-//
-//    friend class ButtonEngrouter;
-//    GmoShapeButton(ImoObj* pCreatorImo, UPoint pos, USize size,
-//                   LibraryScope& libraryScope);
-//
-//public:
-//    void on_draw(Drawer* pDrawer, RenderOptions& opt);
-//
-//    //modifiers
-//    void change_color(Color color);
-//
-//protected:
-//    void select_font();
-//    void center_text();
-//
-//    //Color get_normal_color();
-//};
 
 
 } //namespace lomse

@@ -47,6 +47,20 @@ using namespace lomse;
 //=======================================================================================
 // DocContentCursor tests
 //=======================================================================================
+
+//---------------------------------------------------------------------------------------
+//derived class to have access to some protected methods
+class MyDocContentCursor : public DocContentCursor
+{
+public:
+    MyDocContentCursor(Document* pDoc) : DocContentCursor(pDoc) {}
+
+    //access to some protected methods
+    inline long my_get_prev_id() { return m_idPrev; }
+
+};
+
+//---------------------------------------------------------------------------------------
 class DocContentCursorTestFixture
 {
 public:
@@ -65,10 +79,17 @@ public:
 
     void create_document_1()
     {
+//        "(lenmusdoc#0 (vers 0.0) (content#3 "
+//            "(score#15 (vers 1.6) "
+//                "(instrument#19 (musicData#20 (clef#21 G)(key#22 C)"
+//                "(time#23 2 4)(n#24 c4 q)(r#25 q) )))"
+//            "(para#26 (txt#27 \"Hello world!\"))"
+//        "))"
+
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
             "(score (vers 1.6) "
-                "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q) )))"
+                "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q)(r q) )))"
             "(para (txt \"Hello world!\"))"
             "))" );
     }
@@ -88,143 +109,261 @@ SUITE(DocContentCursorTest)
 {
     TEST_FIXTURE(DocContentCursorTestFixture, points_to_start_of_content)
     {
-        //@ initialy points to first element in content
+        //1. initialy points to first element in content
         create_document_1();
-        DocContentCursor cursor(m_pDoc);
+        MyDocContentCursor cursor(m_pDoc);
         CHECK( (*cursor)->is_score() == true );
+        CHECK( cursor.my_get_prev_id() == k_cursor_before_start );
     }
 
     TEST_FIXTURE(DocContentCursorTestFixture, empty_doc_points_to_end_of_content)
     {
-        //@ if document is empty points to 'end-of-collection' value (NULL)
+        //2. if document is empty points to 'end-of-collection' value (NULL)
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content ))" );
-        DocContentCursor cursor(m_pDoc);
+        MyDocContentCursor cursor(m_pDoc);
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+        CHECK( cursor.my_get_prev_id() == k_cursor_before_start );
     }
 
     TEST_FIXTURE(DocContentCursorTestFixture, next)
     {
-        //@ next: advances until end of content
+        //3. next: advances to end of document
         create_document_1();
-        DocContentCursor cursor(m_pDoc);
+        MyDocContentCursor cursor(m_pDoc);
         CHECK( (*cursor)->is_score() == true );
         ++cursor;
         CHECK( (*cursor)->is_paragraph() == true );
         ++cursor;
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+        CHECK( cursor.my_get_prev_id() == 26L );
     }
 
     TEST_FIXTURE(DocContentCursorTestFixture, next_remains_at_end)
     {
-        //@ next: when at end of content remains there
+        //4. next: when at end of document remains there
         create_document_1();
-        DocContentCursor cursor(m_pDoc);
+        MyDocContentCursor cursor(m_pDoc);
         ++cursor;
         ++cursor;
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+        CHECK( cursor.my_get_prev_id() == 26L );
         ++cursor;
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+        CHECK( cursor.my_get_prev_id() == 26L );
     }
 
     TEST_FIXTURE(DocContentCursorTestFixture, prev)
     {
-        //@ prev: moves back to previous
+        //5. prev: moves back to previous
         create_document_1();
-        DocContentCursor cursor(m_pDoc);
+        MyDocContentCursor cursor(m_pDoc);
         ++cursor;
         CHECK( (*cursor)->is_paragraph() == true );
+        CHECK( cursor.my_get_prev_id() == 15L );
         --cursor;
         CHECK( (*cursor)->is_score() == true );
+        CHECK( cursor.my_get_prev_id() == k_cursor_before_start );
     }
 
     TEST_FIXTURE(DocContentCursorTestFixture, prev_before_first)
     {
-        //@ prev: when at start moves to end of content
+        //6. prev: when at p_start_cursor() remains there
         create_document_1();
-        DocContentCursor cursor(m_pDoc);
+        MyDocContentCursor cursor(m_pDoc);
         --cursor;
-        CHECK( *cursor == NULL );
+        CHECK( (*cursor)->is_score() == true );
+        CHECK( cursor.my_get_prev_id() == k_cursor_before_start );
     }
 
     TEST_FIXTURE(DocContentCursorTestFixture, prev_from_end)
     {
-        //@ prev: when at end, moves to last element
+        //7 prev: when at end, moves to last element
         create_document_1();
-        DocContentCursor cursor(m_pDoc);
+        MyDocContentCursor cursor(m_pDoc);
         ++cursor;
         ++cursor;
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+        CHECK( cursor.my_get_prev_id() == 26L );
         --cursor;
         CHECK( (*cursor)->is_paragraph() == true );
+        CHECK( cursor.my_get_prev_id() == 15L );
     }
 
     TEST_FIXTURE(DocContentCursorTestFixture, prev_from_end_in_empty_doc)
     {
-        //@ prev: when at end, in empty doc remains at end
+        //8 prev: when at end in empty doc, remains at end
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content ))" );
-        DocContentCursor cursor(m_pDoc);
+        MyDocContentCursor cursor(m_pDoc);
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+        CHECK( cursor.my_get_prev_id() == k_cursor_before_start );
         --cursor;
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+        CHECK( cursor.my_get_prev_id() == k_cursor_before_start );
     }
 
     TEST_FIXTURE(DocContentCursorTestFixture, direct_positioning_by_id)
     {
-        //@ point to, by id: goes to element if exists and it is top level
+        //9. point to, by id: goes to element if exists and is top level
         create_document_1();
-        DocContentCursor cursor(m_pDoc);
+        MyDocContentCursor cursor(m_pDoc);
         //cout << m_pDoc->to_string(k_save_ids) << endl;
-        cursor.point_to(25L);
+        cursor.point_to(26L);
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_paragraph() == true );
+        CHECK( cursor.my_get_prev_id() == 15L );
     }
 
     TEST_FIXTURE(DocContentCursorTestFixture, direct_positioning_by_id_not_found)
     {
-        //@ point to, by id: if not found go to end
+        //10. point to, by id: if not found go to end
         create_document_1();
-        DocContentCursor cursor(m_pDoc);
+        MyDocContentCursor cursor(m_pDoc);
         cursor.point_to(75L);
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+        CHECK( cursor.my_get_prev_id() == 26L );
     }
 
     TEST_FIXTURE(DocContentCursorTestFixture, direct_positioning_by_id_not_top_level)
     {
-        //@ point to, by id: if not top level go to end
+        //11 point to, by id: if not top level go to end
         create_document_1();
-        DocContentCursor cursor(m_pDoc);
-        cursor.point_to(23L);
+        MyDocContentCursor cursor(m_pDoc);
+        cursor.point_to(23L);       //time signature
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+        CHECK( cursor.my_get_prev_id() == 26L );
     }
 
-    TEST_FIXTURE(DocContentCursorTestFixture, direct_positioning_by_ptr)
+    TEST_FIXTURE(DocContentCursorTestFixture, direct_positioning_by_ptr_1)
     {
-        //@ point to, by ptr: goes to element
+        //12 point to, by ptr: goes to element if top level
         create_document_1();
-        DocContentCursor cursor(m_pDoc);
-        cursor.point_to(25L);
+        MyDocContentCursor cursor(m_pDoc);
+        cursor.point_to(26L);   //move to paragraph to get pointer to it
         ImoBlockLevelObj* pImo = static_cast<ImoBlockLevelObj*>( *cursor );
         cursor.point_to(100L);  //to end
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+        CHECK( cursor.my_get_prev_id() == 26L );
+
         cursor.point_to(pImo);
+
         CHECK( *cursor != NULL );
         CHECK( *cursor == pImo );
+        CHECK( cursor.get_pointee_id() == 26L );
+        CHECK( cursor.my_get_prev_id() == 15L );
+    }
+
+    TEST_FIXTURE(DocContentCursorTestFixture, direct_positioning_by_ptr_2)
+    {
+        //13 point to, by ptr: if not top level, go to end
+        create_document_1();
+        MyDocContentCursor cursor(m_pDoc);
+        ImoScore* pScore =  static_cast<ImoScore*>( *cursor );
+        ImoObj* pClef = pScore->get_instrument(0)->get_musicdata()->get_child(0);
+        CHECK( pClef->is_clef() == true );
+
+        cursor.point_to(pClef);  //to end
+
+        CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+        CHECK( cursor.my_get_prev_id() == 26L );
     }
 
     TEST_FIXTURE(DocContentCursorTestFixture, prev_when_added_object_to_empty_doc)
     {
-        //@ prev: ok when adding element to empty doc
+        //50. move prev ok when adding element to empty doc
         create_empty_document();
-        DocContentCursor cursor(m_pDoc);
-        CHECK( *cursor == NULL );
+        MyDocContentCursor cursor(m_pDoc);
         ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+
         pImoDoc->add_paragraph();
+
+        //cursor is not aware of changes
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+        CHECK( cursor.my_get_prev_id() == k_cursor_before_start );
+
+        //but moves backwards ok
         --cursor;
+
         CHECK( (*cursor)->is_paragraph() == true );
+        CHECK( cursor.my_get_prev_id() == k_cursor_before_start );
     }
+
+//    TEST_FIXTURE(DocContentCursorTestFixture, prev_when_added_object)
+//    {
+//        //51. move prev ok when adding element
+//        create_document_1();
+//        MyDocContentCursor cursor(m_pDoc);
+//        cursor.move_next();
+//        CHECK( cursor.get_pointee_id() == 26L );
+//        CHECK( cursor.my_get_prev_id() == 15L );
+//        ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+//
+//        ImoParagraph* pImo = pImoDoc->add_paragraph();
+//        long id = pImo->get_id();
+//        cout << "id=" << id << endl;
+//
+//        //cursor is not aware of changes
+//        CHECK( *cursor != NULL );
+//        CHECK( cursor.get_pointee_id() == 26L );
+//        CHECK( cursor.my_get_prev_id() == 15L );
+//
+//        //but moves backwards ok
+//        --cursor;
+//
+//        CHECK( cursor.get_pointee_id() == 15L );
+//        CHECK( cursor.my_get_prev_id() == k_cursor_before_start );
+//
+//        //and traverses ok the inserted element
+//        ++cursor;
+//
+//        CHECK( (*cursor)->is_paragraph() == true );
+//        CHECK( cursor.get_pointee_id() == id );
+//        CHECK( cursor.my_get_prev_id() == 15L );
+//        cout << "id=" << cursor.get_pointee_id() << endl;
+//
+//        ++cursor;
+//
+//        CHECK( cursor.get_pointee_id() == 26L );
+//        CHECK( cursor.my_get_prev_id() == id );
+//        cout << "id=" << cursor.my_get_prev_id() << endl;
+//    }
+
+//    TEST_FIXTURE(DocContentCursorTestFixture, update_after_deletion)
+//    {
+//        //@ moves to next object when current has been deleted
+//        create_document_1();
+//        MyDocContentCursor cursor(m_pDoc);
+//        cursor.point_to(15L);  //score
+////        CHECK( (*cursor)->is_paragraph() == true );
+//        CHECK (false);
+//    }
+//
+//    TEST_FIXTURE(DocContentCursorTestFixture, update_after_deletion_end)
+//    {
+////        //@ moves to end when current has been deleted and is last one
+////        create_empty_document();
+////        MyDocContentCursor cursor(m_pDoc);
+////        CHECK( *cursor == NULL );
+////        ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+////        pImoDoc->add_paragraph();
+////        CHECK( *cursor == NULL );
+////        --cursor;
+////        CHECK( (*cursor)->is_paragraph() == true );
+//        CHECK (false);
+//    }
 
 };
 
@@ -314,10 +453,17 @@ public:
 
     void create_document_1()
     {
+//        "(lenmusdoc#0 (vers 0.0) (content#3 "
+//            "(score#15 (vers 1.6) "
+//                "(instrument#19 (musicData#20 (clef#21 G)(key#22 C)"
+//                "(time#23 2 4)(n#24 c4 q)(r#25 q) )))"
+//            "(para#26 (txt#27 \"Hello world!\"))"
+//        "))"
+
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
             "(score (vers 1.6) "
-                "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q) )))"
+                "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q)(r q) )))"
             "(para (txt \"Hello world!\"))"
             "))" );
     }
@@ -350,6 +496,7 @@ SUITE(DocCursorTest)
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content ))" );
         MyDocCursor cursor(m_pDoc);
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, next)
@@ -361,13 +508,16 @@ SUITE(DocCursorTest)
         CHECK( (*cursor)->is_paragraph() == true );
         ++cursor;
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         ++cursor;
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, prev_at_top_level)
     {
-        //@ prev: when at top level traverses top level until end
+        //@ prev: when at top level traverses top level until trying to
+        //@   move before p_start_cursor(), that moves to end
         create_document_1();
         MyDocCursor cursor(m_pDoc);
         ++cursor;
@@ -376,6 +526,7 @@ SUITE(DocCursorTest)
         CHECK( (*cursor)->is_score() == true );
         --cursor;
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, prev_at_end)
@@ -386,6 +537,7 @@ SUITE(DocCursorTest)
         ++cursor;
         ++cursor;
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         --cursor;
         CHECK( (*cursor)->is_paragraph() == true );
     }
@@ -399,6 +551,7 @@ SUITE(DocCursorTest)
         ImoDocument* pImoDoc = m_pDoc->get_imodoc();
         pImoDoc->add_paragraph();
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         --cursor;
         CHECK( (*cursor)->is_paragraph() == true );
     }
@@ -419,7 +572,7 @@ SUITE(DocCursorTest)
         create_document_1();
         MyDocCursor cursor(m_pDoc);
         //cout << m_pDoc->to_string(k_save_ids) << endl;
-        cursor.point_to(25L);
+        cursor.point_to(26L);   //paragraph
         CHECK( cursor.my_is_delegating() == false );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_paragraph() == true );
@@ -434,7 +587,7 @@ SUITE(DocCursorTest)
         CHECK( cursor.my_is_delegating() == true );
         CHECK( (*cursor)->is_clef() == true );
 
-        cursor.point_to(25L);
+        cursor.point_to(26L);   //paragraph
         CHECK( cursor.my_is_delegating() == false );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_paragraph() == true );
@@ -448,6 +601,7 @@ SUITE(DocCursorTest)
         cursor.point_to(125L);
         CHECK( cursor.my_is_delegating() == false );
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, point_to_inner_element)
@@ -455,7 +609,7 @@ SUITE(DocCursorTest)
         //@ point to, by id. Positioning at inner element
         create_document_1();
         MyDocCursor cursor(m_pDoc);
-        cursor.point_to(24L);
+        cursor.point_to(24L);   //first note
         CHECK( cursor.my_is_delegating() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -467,9 +621,9 @@ SUITE(DocCursorTest)
         create_document_1();
         MyDocCursor cursor(m_pDoc);
 //        cout << m_pDoc->to_string(k_save_ids) << endl;
-        cursor.point_to(24L);
+        cursor.point_to(24L);   //first note
         CHECK( (*cursor)->is_note() == true );
-        cursor.point_to(22L);
+        cursor.point_to(22L);   //key signature
         CHECK( cursor.my_is_delegating() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_key_signature() == true );
@@ -507,18 +661,160 @@ SUITE(DocCursorTest)
         //@ when last top level pointed object is deleted, go to end
         create_document_1();
         MyDocCursor cursor(m_pDoc);
-        ++cursor;
+        ++cursor;   //paragraph
         ImoParagraph* pImo = static_cast<ImoParagraph*>( *cursor );
         ImoDocument* pImoDoc = pImo->get_document();
         pImoDoc->erase(pImo);
 
-        cursor.update_after_deletion();
+        cursor.update_after_deletion();     //should move to end
 
         CHECK( cursor.my_is_delegating() == false );
         CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
         --cursor;
         CHECK( (*cursor)->is_score() == true );
     }
+
+    TEST_FIXTURE(DocCursorTestFixture, to_start_not_delegating)
+    {
+        //@ to_start. Not delegating moves to first top level
+        create_document_1();
+        MyDocCursor cursor(m_pDoc);
+        cursor.point_to(26L);   //paragraph
+
+        cursor.to_start();
+
+        CHECK( cursor.my_is_delegating() == false );
+        CHECK( cursor.get_pointee_id() == 15L );
+    }
+
+    TEST_FIXTURE(DocCursorTestFixture, to_start_delegating)
+    {
+        //@ to_start. Delegating, stops delegation and moves to to first top level
+        create_document_1();
+        MyDocCursor cursor(m_pDoc);
+        cursor.point_to(24L);   //note
+
+        cursor.to_start();
+
+        CHECK( cursor.my_is_delegating() == false );
+        CHECK( cursor.get_pointee_id() == 15L );
+    }
+
+    TEST_FIXTURE(DocCursorTestFixture, get_state)
+    {
+        //@ get state. First level, pointing object
+        create_document_1();
+        MyDocCursor cursor(m_pDoc);
+        ++cursor;       //paragraph 26
+        DocCursorState state = cursor.get_state();
+        CHECK( state.get_top_level_id() == 26L );
+        CHECK( state.get_delegate_state() == NULL );
+    }
+
+    TEST_FIXTURE(DocCursorTestFixture, get_state_at_end)
+    {
+        //@ get state. First level at end
+        create_document_1();
+        MyDocCursor cursor(m_pDoc);
+        ++cursor;
+        ++cursor;
+        DocCursorState state = cursor.get_state();
+        CHECK( state.get_top_level_id() == k_cursor_at_end );
+        CHECK( state.get_delegate_state() == NULL );
+    }
+
+    TEST_FIXTURE(DocCursorTestFixture, get_state_delegating)
+    {
+        //@ get state. delegating
+        create_document_1();
+        MyDocCursor cursor(m_pDoc);
+        cursor.point_to(24L);   //first note
+        DocCursorState state = cursor.get_state();
+        CHECK( state.get_top_level_id() == 15L );     //score
+        CHECK( state.get_delegate_state() != NULL );
+        ScoreCursorState* pSCE = dynamic_cast<ScoreCursorState*>( state.get_delegate_state() );
+        CHECK( pSCE->id() == 24L );
+        CHECK( pSCE->instrument() == 0 );
+        CHECK( pSCE->measure() == 0 );
+        CHECK( pSCE->staff() == 0 );
+        CHECK( is_equal_time(pSCE->time(), 0.0f) );
+    }
+
+//    TEST_FIXTURE(DocCursorTestFixture, get_state_delegating_at_end)
+//    {
+//        //@ get state. delegating. At end of score
+//        create_document_1();
+//        MyDocCursor cursor(m_pDoc);
+//        cursor.point_to(25L);   //last rest
+//        ++cursor;
+//        CHECK( *cursor == NULL );
+//        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+//        DocCursorState state = cursor.get_state();
+//        CHECK( state.get_top_level_id() == 15L );     //score
+//        CHECK( state.get_delegate_state() != NULL );
+//        ScoreCursorState* pSCE = dynamic_cast<ScoreCursorState*>( state.get_delegate_state() );
+//        CHECK( pSCE->id() == 24L );
+//        CHECK( pSCE->instrument() == 0 );
+//        CHECK( pSCE->measure() == 0 );
+//        CHECK( pSCE->staff() == 0 );
+//        CHECK( is_equal_time(pSCE->time(), 0.0f) );
+//        cout << "top id=" << state.get_top_level_id()
+//             << "score state: id=" << pSCE->id()
+//             << ", instr=" << pSCE->instrument()
+//             << ", meas=" << pSCE->measure()
+//             << ", staff=" << pSCE->staff()
+//             << ", time=" << pSCE->time() << endl;
+//    }
+
+    TEST_FIXTURE(DocCursorTestFixture, RestoreState_NotDelegating)
+    {
+        //@ restore_state. Not delegating
+        create_document_1();
+        MyDocCursor cursor(m_pDoc);
+        ++cursor;       //paragraph 26
+        DocCursorState state = cursor.get_state();
+        CHECK( state.get_top_level_id() == 26L );
+        CHECK( state.get_delegate_state() == NULL );
+        cursor.to_start();      //move to antoher place
+        cursor.restore_state(state);
+        CHECK( cursor.get_pointee_id() == 26L );
+        CHECK( cursor.my_is_delegating() == false );
+    }
+
+    TEST_FIXTURE(DocCursorTestFixture, RestoreState_Delegating)
+    {
+        //@ restore_state. Delegating
+        create_document_1();
+        MyDocCursor cursor(m_pDoc);
+        cursor.point_to(24L);   //first note
+        DocCursorState state = cursor.get_state();
+        cursor.to_start();      //move to antoher place
+
+        cursor.restore_state(state);
+
+        CHECK( cursor.get_top_id() == 15L );
+        CHECK( cursor.get_pointee_id() == 24L );
+        CHECK( cursor.my_is_delegating() == true );
+    }
+
+//    TEST_FIXTURE(DocCursorTestFixture, DocCursor_RestoreStateAtEndOfCollection)
+//    {
+//        Document doc(m_libraryScope);
+//        doc.from_string("(lenmusdoc#0 (vers#1 0.0) (content#2 (score#3 (vers#4 1.6) (instrument#5 (musicData#6 (n#7 c4 q) (r#8 q)))) (text#9 \"this is text\")))" );
+//        DocCursor cursor(m_pDoc);
+//        ++cursor;
+//        ++cursor;
+//        DocCursorState* pState = cursor.get_state();
+//        cursor.to_start();      //move to antoher place
+//        cursor.restore(pState);
+//        CHECK( *cursor == NULL );
+//        --cursor;
+//        CHECK( (*cursor)->to_string() == "(text \"this is text\")" );
+//        delete pState;
+//    }
+//
+
 //
 //    TEST_FIXTURE(DocCursorTestFixture, DocCursorAtEndOfChild)
 //    {
@@ -620,7 +916,7 @@ SUITE(DocCursorTest)
 //        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (language en iso-8859-1) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
 //        MyDocCursor cursor(m_pDoc);
 //        ++cursor;
-//        LdpElement* pElm = cursor.get_top_level_element();
+//        LdpElement* pElm = cursor.get_top_object();
 //        cout << (*cursor)->to_string() << endl;
 //        CHECK( pElm->to_string() == "(text \"this is text\")" );
 //    }
@@ -633,7 +929,7 @@ SUITE(DocCursorTest)
 //        cursor.enter_element();
 //        ++cursor;
 //        CHECK( (*cursor)->to_string() == "(r q)" );
-//        LdpElement* pElm = cursor.get_top_level_element();
+//        LdpElement* pElm = cursor.get_top_object();
 //        cout << (*cursor)->to_string() << endl;
 //        CHECK( pElm->is_type(k_score) );
 //    }
@@ -664,77 +960,9 @@ SUITE(DocCursorTest)
 //        cursor.enter_element();
 //        ++cursor;
 //        CHECK( (*cursor)->to_string() == "(r q)" );
-//        cursor.start_of_content();
+//        cursor.to_start();
 //        CHECK( (*cursor)->to_string() == "(score (vers 1.6) (instrument (musicData (n c4 q) (r q))))" );
 //    }
-//
-//    TEST_FIXTURE(DocCursorTestFixture, DocCursor_GetState)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc#0 (vers#1 0.0) (content#2 (score#3 (vers#4 1.6) (instrument#5 (musicData#6 (n#7 c4 q) (r#8 q)))) (text#9 \"this is text\")))" );
-//        DocCursor cursor(m_pDoc);
-//        ++cursor;       //(text \"this is text\")
-//        DocCursorState* pState = cursor.get_state();
-//        CHECK( pState->get_id() == 9L );
-//        delete pState;
-//    }
-//
-//    TEST_FIXTURE(DocCursorTestFixture, DocCursor_GetStateAtEndOfCollection)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc#0 (vers#1 0.0) (content#2 (score#3 (vers#4 1.6) (instrument#5 (musicData#6 (n#7 c4 q) (r#8 q)))) (text#9 \"this is text\")))" );
-//        DocCursor cursor(m_pDoc);
-//        ++cursor;
-//        ++cursor;
-//        DocCursorState* pState = cursor.get_state();
-//        CHECK( pState->get_id() == -1L );
-//        delete pState;
-//    }
-//
-//    TEST_FIXTURE(DocCursorTestFixture, DocCursor_RestoreState_NotDelegating)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc#0 (vers#1 0.0) (content#2 (score#3 (vers#4 1.6) (instrument#5 (musicData#6 (n#7 c4 q) (r#8 q)))) (text#9 \"this is text\")))" );
-//        DocCursor cursor(m_pDoc);
-//        ++cursor;       //(text \"this is text\")
-//        DocCursorState* pState = cursor.get_state();
-//        cursor.start_of_content();      //move to antoher place
-//        cursor.restore(pState);
-//        CHECK( (*cursor)->to_string() == "(text \"this is text\")" );
-//        delete pState;
-//    }
-//
-//    TEST_FIXTURE(DocCursorTestFixture, DocCursor_RestoreState_Delegating)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (r q)))) (text \"this is text\")))" );
-//        DocCursor cursor(m_pDoc);
-//        cursor.enter_element();
-//        ++cursor;   //(r q)
-//        CHECK( (*cursor)->to_string() == "(r q)" );
-//        DocCursorState* pState = cursor.get_state();
-//        cursor.start_of_content();      //move to antoher place
-//        cursor.restore(pState);
-//        CHECK( (*cursor)->to_string() == "(r q)" );
-//        delete pState;
-//    }
-//
-//    TEST_FIXTURE(DocCursorTestFixture, DocCursor_RestoreStateAtEndOfCollection)
-//    {
-//        Document doc(m_libraryScope);
-//        doc.from_string("(lenmusdoc#0 (vers#1 0.0) (content#2 (score#3 (vers#4 1.6) (instrument#5 (musicData#6 (n#7 c4 q) (r#8 q)))) (text#9 \"this is text\")))" );
-//        DocCursor cursor(m_pDoc);
-//        ++cursor;
-//        ++cursor;
-//        DocCursorState* pState = cursor.get_state();
-//        cursor.start_of_content();      //move to antoher place
-//        cursor.restore(pState);
-//        CHECK( *cursor == NULL );
-//        --cursor;
-//        CHECK( (*cursor)->to_string() == "(text \"this is text\")" );
-//        delete pState;
-//    }
-//
 //    TEST_FIXTURE(DocCursorTestFixture, DocCursor_ResetAndPointTo_NonDelegating)
 //    {
 //        Document doc(m_libraryScope);

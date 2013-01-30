@@ -54,18 +54,22 @@ class Control : public EventHandler
 protected:
     Document*       m_pDoc;
     Control*        m_pParent;
+    long            m_ownerImoId;
     ImoStyle*       m_pStyle;
     bool            m_fEnabled;
+    bool            m_fVisible;
     long            m_id;
-    list<Control*> m_controls;
+    list<Control*>  m_controls;
 
     Control(Document* pDoc, Control* pParent)
         : EventHandler()
         , Observable()
         , m_pDoc(pDoc)
         , m_pParent(pParent)
+        , m_ownerImoId(-1L)
         , m_pStyle(NULL)
         , m_fEnabled(true)
+        , m_fVisible(true)
         , m_id(-1L)
     {
         pDoc->assign_id(this);
@@ -131,15 +135,29 @@ public:
         m_pDoc->add_event_handler(Observable::k_control, m_id, eventType, pt2Func);
     }
 
-    inline Control* get_parent() { return m_pParent; }
+    //accessors
+    inline Control* get_parent_control() { return m_pParent; }
 
     //getters
     inline bool is_enabled() { return m_fEnabled; }
+    inline bool is_visible() { return m_fVisible; }
     inline long get_id() { return m_id; }
+    inline long get_owner_imo_id() { return m_ownerImoId; }
+
+    ImoControl* get_owner_imo() {
+        if (m_ownerImoId != -1L)
+            return static_cast<ImoControl*>( m_pDoc->get_pointer_to_imo(m_ownerImoId) );
+        else if (m_pParent)
+            return m_pParent->get_owner_imo();
+        else
+            return NULL;
+    }
 
     //setters
     inline void enable(bool value) { m_fEnabled = value; }
+    inline void set_visible(bool value) { m_fVisible = value; }
     inline void set_id(long id) { m_id = id; }
+    inline void set_owner_imo(ImoControl* pImo) { m_ownerImoId = pImo->get_id(); }
 
 protected:
     ImoStyle* get_style() { return m_pStyle; }

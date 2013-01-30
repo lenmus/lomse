@@ -151,41 +151,40 @@ SUITE(SystemCursorTest)
         CHECK( cursor.get_num_instruments() == 2 );
 
         //start                   points to instr0 staff0   (clef G p1)
-        cursor.move_next();     //points to instr0 staff0   (key D)
-        cursor.move_next();     //points to instr0 staff0   (time 2 4)
+        cursor.move_next();     //points to instr0 staff0   (clef F4 p2)
 
-        CHECK( cursor.get_clef_type_for_instr_staff(0, 0) == k_clef_G2 );
         CHECK( cursor.get_clef_type_for_instr_staff(0, 0) == k_clef_G2 );
         CHECK( cursor.get_clef_type_for_instr_staff(0, 1) == k_clef_undefined );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 0) == k_clef_undefined );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 1) == k_clef_undefined );
+
+        cursor.move_next();     //points to instr0 staff0   (key D)
+        cursor.move_next();     //points to instr0 staff1   [(key D)]
+
         CHECK( cursor.get_key_type_for_instr_staff(0, 0) == k_key_D );
         CHECK( cursor.get_key_type_for_instr_staff(0, 1) == k_key_undefined );
         CHECK( cursor.get_key_type_for_instr_staff(1, 0) == k_key_undefined );
         CHECK( cursor.get_key_type_for_instr_staff(1, 1) == k_key_undefined );
 
+        cursor.move_next();     //points to instr0 staff1   (time 2 4)
+        cursor.move_next();     //points to instr0 staff1   [(time 2 4)]
         cursor.move_next();     //points to instr0 staff0   (n f4 w p1)
-        cursor.move_next();     //points to instr0 staff1   (clef F4 p2)
-        cursor.move_next();     //points to instr0 staff1   [(key D)]
 
         CHECK( cursor.get_clef_type_for_instr_staff(0, 0) == k_clef_G2 );
         CHECK( cursor.get_clef_type_for_instr_staff(0, 1) == k_clef_F4 );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 0) == k_clef_undefined );
         CHECK( cursor.get_clef_type_for_instr_staff(1, 1) == k_clef_undefined );
         CHECK( cursor.get_key_type_for_instr_staff(0, 0) == k_key_D );
-        CHECK( cursor.get_key_type_for_instr_staff(0, 1) == k_key_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(0, 1) == k_key_D );
         CHECK( cursor.get_key_type_for_instr_staff(1, 0) == k_key_undefined );
         CHECK( cursor.get_key_type_for_instr_staff(1, 1) == k_key_undefined );
 
-        cursor.move_next();     //points to instr0 staff1   [(time 2 4)]
         cursor.move_next();     //points to instr0 staff1   (n c3 e g+ p2)
-        CHECK( cursor.get_key_type_for_instr_staff(0, 1) == k_key_D );
         cursor.move_next();     //points to instr1 staff0   (clef G p1)
-        cursor.move_next();     //points to instr1 staff0   (key D)
-        cursor.move_next();     //points to instr1 staff0   (time 2 4)
-        cursor.move_next();     //points to instr1 staff0   (n f4 q. p1)
         cursor.move_next();     //points to instr1 staff1   (clef F4 p2)
+        cursor.move_next();     //points to instr1 staff0   (key D)
         cursor.move_next();     //points to instr1 staff1   [(key D)]
+        cursor.move_next();     //points to instr1 staff0   (time 2 4)
 
         CHECK( cursor.get_clef_type_for_instr_staff(0, 0) == k_clef_G2 );
         CHECK( cursor.get_clef_type_for_instr_staff(0, 1) == k_clef_F4 );
@@ -194,9 +193,10 @@ SUITE(SystemCursorTest)
         CHECK( cursor.get_key_type_for_instr_staff(0, 0) == k_key_D );
         CHECK( cursor.get_key_type_for_instr_staff(0, 1) == k_key_D );
         CHECK( cursor.get_key_type_for_instr_staff(1, 0) == k_key_D );
-        CHECK( cursor.get_key_type_for_instr_staff(1, 1) == k_key_undefined );
+        CHECK( cursor.get_key_type_for_instr_staff(1, 1) == k_key_D );
 
         cursor.move_next();     //points to instr1 staff1   [(time 2 4)]
+        cursor.move_next();     //points to instr1 staff0   (n f4 q. p1)
         cursor.move_next();     //points to instr1 staff1   (n c3 q p2)
         CHECK( cursor.get_key_type_for_instr_staff(1, 1) == k_key_D );
         cursor.move_next();     //points to instr0 staff1   (n c3 e g-)
@@ -240,33 +240,33 @@ SUITE(SystemCursorTest)
                         "(goBack h)(n c3 q p2)(n c3 e)(clef G p2)(clef F4 p2)"
                         "(n c3 e)(barline)))  )))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        //pScore->get_staffobjs_table()->dump();
+//        cout << pScore->get_staffobjs_table()->dump();
         StaffObjsCursor cursor(pScore);
 
         //start                   points to instr0 staff0   (clef G p1)
+        cursor.move_next();     //points to instr0 staff1   (clef F4 p2)
         cursor.move_next();     //points to instr0 staff0   (key D)
+        cursor.move_next();     //points to instr0 staff1   [(key D)]
         cursor.move_next();     //points to instr0 staff0   (time 2 4)
 
         CHECK( cursor.get_applicable_clef_type() == k_clef_G2 );
 
+        cursor.move_next();     //points to instr0 staff1   [(time 2 4)]
         cursor.move_next();     //points to instr0 staff0   (n f4 w p1)
-        cursor.move_next();     //points to instr0 staff1   (clef F4 p2)
-        cursor.move_next();     //points to instr0 staff1   [(key D)]
+        cursor.move_next();     //points to instr0 staff1   (n c3 e g+ p2)
 
         CHECK( cursor.get_applicable_clef_type() == k_clef_F4 );
 
-        cursor.move_next();     //points to instr0 staff1   [(time 2 4)]
-        cursor.move_next();     //points to instr0 staff1   (n c3 e g+ p2)
         cursor.move_next();     //points to instr1 staff0   (clef G p1)
+        cursor.move_next();     //points to instr1 staff1   (clef F4 p2)
         cursor.move_next();     //points to instr1 staff0   (key D)
+        cursor.move_next();     //points to instr1 staff1   [(key D)]
         cursor.move_next();     //points to instr1 staff0   (time 2 4)
+        cursor.move_next();     //points to instr0 staff1   [(time 2 4)]
+        cursor.move_next();     //points to instr1 staff0   (n f4 q. p1)
 
         CHECK( cursor.get_applicable_clef_type() == k_clef_G2 );
 
-        cursor.move_next();     //points to instr1 staff0   (n f4 q. p1)
-        cursor.move_next();     //points to instr1 staff1   (clef F4 p2)
-        cursor.move_next();     //points to instr1 staff1   [(key D)]
-        cursor.move_next();     //points to instr0 staff1   [(time 2 4)]
         cursor.move_next();     //points to instr1 staff1   (n c3 q p2)
         cursor.move_next();     //points to instr0 staff1   (n c3 e g-)
         cursor.move_next();     //points to instr0 staff1   (n d3 q)

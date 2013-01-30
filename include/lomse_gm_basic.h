@@ -594,7 +594,7 @@ protected:
 
 public:
     GmoBoxControl(Control* ctrl, const UPoint& origin, LUnits width, LUnits height,
-                 ImoStyle* style=NULL, ImoObj* pCreatorImo=NULL);
+                  ImoStyle* style=NULL);
 
     virtual ~GmoBoxControl() {}
 
@@ -603,6 +603,9 @@ public:
 
     //GmoBox override
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
+
+    //accessors
+    inline Control* get_creator_control() { return m_pControl; }
 
 protected:
     //overrides

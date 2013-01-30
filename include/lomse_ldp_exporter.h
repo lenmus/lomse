@@ -55,6 +55,9 @@ protected:
     bool m_fAddId;
     bool m_fRemoveNewlines;
 
+    //temporary
+    ImoScore* m_pCurrScore;     //current score being exported
+
 public:
     LdpExporter();
     LdpExporter(LibraryScope* pLibraryScope);
@@ -82,6 +85,8 @@ public:
 
     //other methods
     string& get_library_version() { return m_version; }
+    inline void set_current_score(ImoScore* pScore) { m_pCurrScore = pScore; }
+    inline ImoScore* get_current_score() { return m_pCurrScore; }
 
 protected:
     LdpGenerator* new_generator(ImoObj* pImo);

@@ -46,6 +46,15 @@ class ImoObj;
 class StaffObjsIterator;
 class ImoScore;
 
+//---------------------------------------------------------------------------------------
+// some constants for the ID of pointed object
+#define k_cursor_pos_undefined          -1L
+#define k_cursor_before_start           -2L
+#define k_cursor_at_end                 -3L
+#define k_cursor_at_end_of_child        -4L
+#define k_cursor_at_empty_place         -5L
+#define k_cursor_before_start_of_child  -6L
+#define k_cursor_at_end_of_staff        -7L
 
 //=======================================================================================
 // Helper classes to save cursor state
@@ -56,9 +65,9 @@ class ImoScore;
 class ElementCursorState
 {
 protected:
+    ElementCursorState() {}
 
 public:
-    ElementCursorState() {}
     virtual ~ElementCursorState() {}
 };
 
@@ -70,7 +79,8 @@ protected:
     int     m_staff;    //staff (0..n-1)
     int     m_measure;  //measure number (0..n-1)
 	float   m_time;     //timepos
-    long    m_id;       //id of pointed object or -1 if none
+    long    m_id;       //id of pointed object or k_cursor_at_empty_place if none
+    long    m_refId;    //id of ref.object or k_cursor_at_end_of_child if at end.
 
     //values representing "end of score" position
     #define k_at_end_of_score 1000000
@@ -81,9 +91,9 @@ protected:
     #define k_time_before_start_of_score -1.0f
 
 public:
-    ScoreCursorState(int instr, int staff, int measure, float time, long id)
+    ScoreCursorState(int instr, int staff, int measure, float time, long id, long refId)
         : ElementCursorState(), m_instr(instr), m_staff(staff), m_measure(measure)
-        , m_time(time), m_id(id)
+        , m_time(time), m_id(id), m_refId(refId)
     {
     }
     ScoreCursorState()
@@ -99,6 +109,7 @@ public:
     inline int measure() { return m_measure; }
     inline float time() { return m_time; }
     inline long id() { return m_id; }
+    inline long ref_obj_id() { return m_refId; }
 
     //setters
     inline void instrument(int instr) { m_instr = instr; }
@@ -106,12 +117,15 @@ public:
     inline void measure(int measure) { m_measure = measure; }
     inline void time(float time) { m_time = time; }
     inline void id(long id) { m_id = id; }
+    inline void ref_obj_id(long id) { m_refId = id; }
+
     inline void set_at_end_of_score() {
         m_instr = k_at_end_of_score;
         m_staff = k_at_end_of_score;
         m_measure = k_at_end_of_score;
         m_time = k_time_at_end_of_score;
-        m_id = -1L;
+        m_id = k_cursor_at_end_of_child;
+        m_refId = -1L;
     }
     inline void set_before_start_of_score()
     {
@@ -119,12 +133,17 @@ public:
         m_staff = k_before_start_of_score;
         m_measure = k_before_start_of_score;
         m_time = k_time_before_start_of_score;
-        m_id = -1L;
+        m_id = k_cursor_before_start_of_child;
+        m_refId = k_before_start_of_score;
     }
 
     //checking position
-    inline bool is_at_end_of_score() { return m_instr == k_at_end_of_score; }
-    inline bool is_before_start_of_score() { return m_instr == k_before_start_of_score; }
+    inline bool is_before_start_of_score() {
+                        return m_id == k_cursor_before_start_of_child;
+    }
+    inline bool is_at_end_of_staff() {
+                        return m_id == k_cursor_at_end_of_staff;
+    }
 };
 
 //---------------------------------------------------------------------------------------
@@ -141,6 +160,8 @@ public:
     {
     }
 
+    DocCursorState() : m_id(-1L) , m_pState(NULL) {}
+
     ~DocCursorState() {
         if (m_pState)
             delete m_pState;
@@ -149,74 +170,6 @@ public:
     inline bool is_delegating() { return m_pState != NULL; }
     inline long get_top_level_id() { return m_id; }
     inline ElementCursorState* get_delegate_state() { return m_pState; }
-
-    //ScoreCursorState interface
-    inline int instrument() {
-        ScoreCursorState* pState = dynamic_cast<ScoreCursorState*>(m_pState);
-        return (pState ? pState->instrument() : 0);
-    }
-
-    inline int measure() {
-        ScoreCursorState* pState = dynamic_cast<ScoreCursorState*>(m_pState);
-        return (pState ? pState->measure() : 0);
-    }
-
-    inline int staff() {
-        ScoreCursorState* pState = dynamic_cast<ScoreCursorState*>(m_pState);
-        return (pState ? pState->staff() : 0);
-    }
-
-    inline float time() {
-        ScoreCursorState* pState = dynamic_cast<ScoreCursorState*>(m_pState);
-        return (pState ? pState->time() : 0.0f);
-    }
-
-    inline long get_id() {
-        ScoreCursorState* pState = dynamic_cast<ScoreCursorState*>(m_pState);
-        return (pState ? pState->id() : m_id);
-    }
-
-    inline void set_time(float time) {
-        ScoreCursorState* pState = dynamic_cast<ScoreCursorState*>(m_pState);
-        if (pState)
-            pState->time(time);
-    }
-
-};
-
-
-//=======================================================================================
-// interfaces for traversing specific elements
-//=======================================================================================
-
-class ScoreCursorInterface
-{
-public:
-//    //// move to next object but with dfferent time than current one
-//    //virtual void move_next_new_time()=0;
-//    //// move to prev object but with dfferent time than current one
-//    //virtual void move_prev_new_time()=0;
-//    ////to first obj in instr nInstr
-//    //virtual void to_start_of_instrument(int nInstr)=0;
-//    ////to first obj in specified measure and staff
-//    //virtual void to_start_of_measure(int nMeasure, int nStaff)=0;
-//    //while pointing clef, key or time, move next
-//    virtual void skip_clef_key_time()=0;
-
-    //access to pointed position/object
-    virtual int instrument()=0;
-    virtual int measure()=0;
-    virtual int staff()=0;
-    virtual float time()=0;
-//    virtual bool is_pointing_object()=0;
-
-//    //direct positioning
-//    virtual void point_to_barline(long nId, int nStaff)=0;
-//    virtual void to_state(int nInstr, int nMeasure, int nStaff, float rTime)=0;
-//
-//    //ScoreCursorInterface: info
-//    virtual bool is_at_end()=0;
-//    virtual ImoObj* get_musicData_for_current_instrument()=0;
 
 };
 
@@ -232,27 +185,33 @@ class ElementCursor
 protected:
     Document*   m_pDoc;
 
-public:
     ElementCursor(Document* pDoc) : m_pDoc(pDoc) {}
+
+public:
     virtual ~ElementCursor() {}
 
-//    //positioning
-//    inline void operator ++() { move_next(); }
-//    inline void operator --() { move_prev(); }
+    //interface: all operations/info refers to logical traversing, that is, traversing
+    //following the logical,visual path that user would expect.
+
+    //positioning
+    inline void operator ++() { move_next(); }
+    inline void operator --() { move_prev(); }
     virtual void point_to(ImoObj* pImo)=0;
     virtual void point_to(long nId)=0;
 //    virtual ElementCursor* enter_element() { return this; }
     virtual void move_next()=0;
-//    virtual void move_prev()=0;
+    virtual void move_prev()=0;
 //    virtual void reset_and_point_to(long nId)=0;
-//
-//    //saving/restoring state
-//    virtual ElementCursorState* get_state()=0;
-//    virtual void restore(ElementCursorState* pState)=0;
-//
+
+    //saving/restoring state
+    virtual ElementCursorState* get_state()=0;
+    virtual void restore_state(ElementCursorState* pState)=0;
+
     //info
     virtual ImoObj* get_pointee()=0;
-//    virtual bool is_at_start()=0;
+    virtual long get_pointee_id()=0;
+    //virtual bool is_at_start()=0;
+    inline ImoObj* operator *() { return get_pointee(); }
 
     //special operations
     virtual void update_after_deletion()=0;
@@ -262,206 +221,212 @@ public:
 //---------------------------------------------------------------------------------------
 // DocContentCursor
 // A cursor to traverse the content (top level elements) of a document
-class DocContentCursor
+class DocContentCursor : public ElementCursor
 {
 protected:
-    Document* m_pDoc;
     ImoObj* m_pCurItem;
+    long m_idPrev;      //previous element
 
 public:
     DocContentCursor(Document* pDoc);
     virtual ~DocContentCursor() {}
 
-    //positioning
+    //positioning:
+        //mandatory overrides
+    void point_to(ImoObj* pImo);
+    void point_to(long nId);
+    void move_next();
+    void move_prev();
+        //specific
     void start_of_content();
     void last_of_content();
-    inline void operator ++() { next(); }
-    inline void operator --() { prev(); }
-    void point_to(ImoBlockLevelObj* pImo);
-    void point_to(long id);
-    void point_to(ImoObj* pImo);
-    inline void to_end() { m_pCurItem = NULL; }
+    void to_end();
 
+    //saving/restoring state: mandatory overrides
+    ElementCursorState* get_state();
+    void restore_state(ElementCursorState* pState);
 
-    //access to info
-    inline ImoObj* operator *() { return m_pCurItem; }
+    //special operations: mandatory overrides
+    void update_after_deletion();
+
+    //access to current position: mandatory overrides
+    ImoObj* get_pointee()  { return m_pCurItem; }
+    long get_pointee_id() { return m_pCurItem != NULL ? m_pCurItem->get_id()
+                                                      : k_cursor_at_end;
+    }
+
 
 protected:
-    void next();
-    void prev();
     void point_to_current();
+    void find_previous();
 
 };
 
 
 //---------------------------------------------------------------------------------------
-class ScoreCursor : public ElementCursor, public ScoreCursorInterface
+// ScoreCursor: A cursor for traversing a score
+class ScoreCursor : public ElementCursor
 {
 protected:
     long            m_scoreId;
     ColStaffObjs*   m_pColStaffObjs;
+    ImoScore*       m_pScore;
+    bool            m_fAutoRefresh;
 
     //state variables
     ScoreCursorState    m_currentState;
     ScoreCursorState    m_prevState;
-    ColStaffObjs::iterator  m_it;       //iterator pointing to ref.object
-    ColStaffObjs::iterator  m_itPrev;   //iterator for previous state
+    ColStaffObjsIterator  m_it;       //iterator pointing to ref.object
+    ColStaffObjsIterator  m_itPrev;   //iterator for previous state
 
 
 public:
     ScoreCursor(Document* pDoc, ImoScore* pScore);
     virtual ~ScoreCursor();
 
-
-        // ElementCursor interface ---
-
-    //ElementCursor interface: positioning
-    void point_to(long nId);
+    //positioning:
+        //mandatory overrides
     void point_to(ImoObj* pImo);
-    void move_next();       //move to next object. time doesn't matter
-    void move_prev();       //move to prev object. time doesn't matter
-//    void reset_and_point_to(long nId);
-//
-//    //ElementCursor interface: saving/restoring state
-//    ElementCursorState* get_state();
-//    void restore(ElementCursorState* pState);
-
-    //ElementCursor interface: info
-//    inline ImoObj* operator *() { return get_pointee(); }
-//    ImoObj* get_pointee();
-    inline ImoObj* operator *() { return staffobj(); }
-    inline ImoObj* get_pointee() { return staffobj(); }
-//    inline bool is_at_start() { return is_at_start_of_score(); }
-    void update_after_deletion();
-
-
-        //ScoreCursorInterface ---
-
-    //ScoreCursorInterface: access to pointed position/object
-    inline int instrument() { return is_at_end() ? -1 : m_currentState.instrument(); }
-    inline int measure() { return is_at_end() ? -1 : m_currentState.measure(); }
-    inline int staff() { return is_at_end() ? -1 : m_currentState.staff(); }
-    inline float time() { return is_at_end() ? -1.0f : m_currentState.time(); }
-    inline long id() { return is_at_end() ? -1.0f : m_currentState.id(); }
-    ImoObj* staffobj();
-    long staffobj_id();
-    inline bool is_empty_place() { return !is_pointing_object(); }
-    inline bool is_pointing_object() {
-        return there_is_ref_object()
-               && ref_object_is_on_instrument( m_currentState.instrument() )
-               && ref_object_is_on_measure( m_currentState.measure() )
-               && ref_object_is_on_time( m_currentState.time() )
-               && ref_object_is_on_staff( m_currentState.staff() );
-    }
-
-//    //ScoreCursorInterface: move cursor
+    void point_to(long nId);
+    void move_next();
+    void move_prev();
+        //specific
 //    //void move_next_new_time();
 //    //void move_prev_new_time();
 //    //void to_start_of_instrument(int nInstr);
 //    //void to_start_of_measure(int nMeasure, int nStaff);
 //    void skip_clef_key_time();
-//
-//    //ScoreCursorInterface: direct positioning
-//    void point_to_barline(long nId, int nStaff);
-    void to_state(int nInstr, int nMeasure, int nStaff, float rTime, long id);
+    void point_to_barline(long id, int staff);
+    void to_state(int nInstr, int nMeasure, int nStaff, float rTime, long id=-1L);
 
-    //ScoreCursorInterface: info
-    inline bool is_at_end_of_score() { return m_currentState.is_at_end_of_score(); }
-    bool is_at_end() { return m_it == m_pColStaffObjs->end(); }
+    //saving/restoring state: mandatory overrides
+    ElementCursorState* get_state();
+    void restore_state(ElementCursorState* pState);
+
+    //special operations: mandatory overrides
+    void update_after_deletion() {}
+    void set_auto_refresh(bool enable) { m_fAutoRefresh = enable; }
+    void refresh();
+
+    //specific: curent position info
+    inline int instrument() { return m_currentState.instrument(); }
+    inline int measure() { return m_currentState.measure(); }
+    inline int staff() { return m_currentState.staff(); }
+    inline float time() { return m_currentState.time(); }
+    inline long id() { return m_currentState.id(); }
+    ImoObj* staffobj();
+    inline long staffobj_id() { return m_currentState.id(); }
+        //helper boolean
+    inline bool is_empty_place() { return m_currentState.id() < 0L; }
+    bool is_at_end_of_score();
+    bool is_at_start_of_score();
 //    ImoObj* get_musicData_for_current_instrument();
+        //speciaL. access to internal reference object
+    ImoObj* staffobj_internal();
+    inline long staffobj_id_internal() { return m_currentState.ref_obj_id(); }
 
+
+        // ElementCursor: mandatory interface
+
+    //ElementCursor interface: info
+    inline ImoObj* operator *() { return staffobj(); }
+    inline ImoObj* get_pointee() { return staffobj(); }
+    inline long get_pointee_id() { return staffobj_id(); }
+//    inline bool is_at_start() { return is_at_start_of_score(); }
+
+    //debug
+    string dump_cursor();
 
 protected:
-    void start();
-    void move_iterator_to_next();
-    void move_iterator_to_prev();
-    void move_iterator_to(long id);
-    inline bool is_iterator_at_start_of_score() { return m_it == m_pColStaffObjs->begin(); }
-    void update_state_from_iterator();
-//    bool more_staves_in_instrument();
-//    void to_start_of_next_staff();
-//    bool more_instruments();
-//    void to_start_of_next_instrument();
-    void find_previous_state();
-    inline ScoreCursorState get_current_state() { return m_currentState; }
-    inline void set_previous_state(int instr, int staff, int measure, float time, long id)
-    {
-        m_prevState.instrument(instr);
-        m_prevState.staff(staff);
-        m_prevState.measure(measure);
-        m_prevState.time(time);
-        m_prevState.id(id);
-    }
-    inline void set_previous_state(ScoreCursorState& state) { m_prevState = state; }
-    inline void set_current_state(int instr, int staff, int measure, float time, long id)
-    {
-        m_currentState.instrument(instr);
-        m_currentState.staff(staff);
-        m_currentState.measure(measure);
-        m_currentState.time(time);
-        m_currentState.id(id);
-    }
-    inline void set_current_state(ScoreCursorState& state) { m_currentState = state; }
-    void save_current_state_as_previous_state();
+    void p_start_cursor();
+    void p_move_iterator_to_next();
+    void p_move_iterator_to_prev();
+    void p_move_iterator_to(long id);
+    inline bool p_is_iterator_at_start_of_score() { return m_it == m_pColStaffObjs->begin(); }
+    void p_update_state_from_iterator();
+    void p_update_pointed_objects();
+    void p_update_as_end_of_staff();
+    void p_update_as_end_of_score();
+    bool p_more_staves_in_instrument();
+    void p_to_start_of_next_staff();
+    bool p_more_instruments();
+    void p_to_start_of_next_instrument();
+    void p_find_previous_state();
+    void p_to_state(int nInstr, int nMeasure, int nStaff, float rTime, long id=-1L);
+    void p_point_to(long nId);
+    inline ScoreCursorState p_get_current_state() { return m_currentState; }
+    inline void p_set_previous_state(ScoreCursorState& state) { m_prevState = state; }
+    inline void p_set_current_state(ScoreCursorState& state) { m_currentState = state; }
+    void p_save_current_state_as_previous_state();
+    inline bool p_is_at_end_of_staff() { return m_currentState.id() == k_cursor_at_end_of_staff; }
+    bool p_is_at_end_of_score();
 
     //helper: dealing with ref.object
-    inline int ref_object_id() { return (*m_it)->element_id(); }
-    inline float ref_object_time() { return (*m_it)->time(); }
-    inline int ref_object_measure() { return (*m_it)->measure(); }
-    inline int ref_object_staff() { return (*m_it)->staff(); }
-    inline int ref_object_instrument() { return (*m_it)->num_instrument(); }
-    inline bool there_is_ref_object() { return m_it != m_pColStaffObjs->end() && (*m_it != NULL); }
-    inline bool there_is_not_ref_object() { return m_it != m_pColStaffObjs->end() || (*m_it == NULL); }
-    inline bool ref_object_is_on_measure(int measure) {
-        return ref_object_measure() == measure;
+    inline int p_iter_object_id() { return (*m_it)->element_id(); }
+    inline float p_iter_object_time() { return (*m_it)->time(); }
+    inline int p_iter_object_measure() { return (*m_it)->measure(); }
+    inline int p_iter_object_staff() { return (*m_it)->staff(); }
+    inline int p_iter_object_instrument() { return (*m_it)->num_instrument(); }
+    inline bool p_there_is_iter_object() { return m_it != m_pColStaffObjs->end() && (*m_it != NULL); }
+    inline bool p_there_is_not_iter_object() { return m_it != m_pColStaffObjs->end() || (*m_it == NULL); }
+    inline bool p_iter_is_at_end() { return m_it == m_pColStaffObjs->end(); }
+    inline bool p_iter_object_is_on_measure(int measure) {
+        return p_iter_object_measure() == measure;
     }
-    inline bool ref_object_is_on_staff(int staff) {
-        return ref_object_staff() == staff
-               || ref_object_is_barline();
+    inline bool p_iter_object_is_on_staff(int staff) {
+        return p_iter_object_staff() == staff
+               || p_iter_object_is_barline();
     }
-    inline bool ref_object_is_on_instrument(int instr) {
-        return ref_object_instrument() == instr;
+    inline bool p_iter_object_is_on_instrument(int instr) {
+        return p_iter_object_instrument() == instr;
     }
-    inline bool ref_object_is_on_time(float rTime) {
-        return is_equal_time(rTime, ref_object_time());
+    inline bool p_iter_object_is_on_time(float rTime) {
+        return is_equal_time(rTime, p_iter_object_time());
     }
-    float ref_object_duration();
-    bool ref_object_is_barline();
-    bool ref_object_is_clef();
-    bool ref_object_is_key();
-    bool ref_object_is_time();
-    bool is_pointing_barline() {
-        return is_pointing_object() && ref_object_is_barline();
-    }
+    float p_iter_object_duration();
+    bool p_iter_object_is_barline();
+    bool p_iter_object_is_clef();
+    bool p_iter_object_is_key();
+    bool p_iter_object_is_time();
 
     //helper: for move_next
-    void forward_to_next_time();
-    float determine_next_target_time();
-    int determine_next_target_measure();
-    void forward_to_instr_measure_with_time_not_lower_than(float rTargetTime);
-    void forward_to_current_staff();
-//    bool find_current_staff_at_current_ref_object_time();
-    void forward_to_state(int instr, int staff, int measure, float time);
-    bool try_next_at_same_time();
+    void p_forward_to_next_time();
+    int p_determine_next_target_measure();
+    void p_forward_to_instr_measure_with_time_not_lower_than(float rTargetTime);
+    void p_forward_to_current_staff();
+    bool p_find_current_staff_at_current_iter_object_time();
+    void p_forward_to_state(int instr, int staff, int measure, float time);
+    bool p_try_next_at_same_time();
+    void p_move_next();
 
     //helper: for move_prev
-//    inline bool is_first_staff_of_current_instrument() { return (m_nStaff == 0); }
-    void backward_to_prev_time();
-//    bool try_prev_at_same_time();
-//    bool is_at_start_of_staff();
-//    void to_end_of_prev_staff();
-//    inline bool is_first_instrument() { return m_nInstr == 0; }
-//    void to_end_of_prev_instrument();
-//    void to_end_of_staff();
+    inline bool p_is_first_staff_of_current_instrument() {
+                                    return m_currentState.staff() == 0; }
+    void p_iter_to_prev_time();
+    void p_iter_to_last_object_in_current_time();
+    bool p_try_prev_at_same_time();
+    bool p_is_at_start_of_staff();
+    void p_to_end_of_prev_staff();
+    inline bool p_is_first_instrument() { return m_currentState.instrument() == 0; }
+    void p_to_end_of_prev_instrument();
+    void p_to_end_of_staff();
+    void p_find_position_at_current_time();
+
+    //ensuring integrity after updates
+    inline void auto_refresh() { if (m_fAutoRefresh) refresh(); }
+    bool p_success_refreshing_prev();
+    bool p_success_refreshing_current();
+
 
 };
 
 
 //---------------------------------------------------------------------------------------
 // DocCursor
+// facade object to enclose all specific cursors for traversing a document
 //---------------------------------------------------------------------------------------
 
-class DocCursor //: public ScoreCursorInterface
+class DocCursor
 {
 protected:
     Document*       m_pDoc;
@@ -476,17 +441,23 @@ public:
     DocCursor(const DocCursor& cursor);
     DocCursor& operator= (DocCursor const& cursor);
 
+    //info
     inline ImoObj* operator *() { return get_pointee(); }
     ImoObj* get_pointee();
+    ImoObj* get_top_object();
+    long get_pointee_id();
+    long get_top_id();
 
-    //basic positioning
-    inline void operator ++() { next(); }
-    inline void operator --() { prev(); }
+    //positioning
+    inline void operator ++() { move_next(); }
+    inline void operator --() { move_prev(); }
+    void move_next();
+    void move_prev();
     void enter_element();
-////    void reset_and_point_to(long nId);
-//    void start_of_content();
+    ////void reset_and_point_to(long nId);
     void point_to(long nId);
     void point_to(ImoObj* pImo);
+    void to_start();
     void to_end();
 
     //special operations
@@ -494,15 +465,12 @@ public:
 
 ////	//info
 ////	inline bool is_at_end_of_child() { return is_delegating() && get_pointee() == NULL; }
-////    inline ImoObj* get_top_level_element() { return *m_topLevelCursor; }
 //    inline DocContentIterator get_iterator() { return m_topLevelCursor; }
-    inline long get_top_id() { return (*m_topLevelCursor)->get_id(); }
-    inline long get_inner_id() { return m_pInnerCursor->get_pointee()->get_id(); }
-////
-////    //saving/restoring state
-////    DocCursorState* get_state();
-////    void restore(DocCursorState* pState);
-//
+
+    //saving/restoring state
+    DocCursorState get_state();
+    void restore_state(DocCursorState& state);
+
 //    //ScoreCursorInterface
 //    int instrument() {
 //        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
@@ -585,8 +553,6 @@ public:
 //    }
 
 protected:
-    void next();
-    void prev();
     void start_delegation();
     void stop_delegation();
     inline bool is_delegating() { return m_pInnerCursor != NULL; }

@@ -131,34 +131,10 @@ public:
     ImoObj* get_pointer_to_imo(long id) const;
     Control* get_pointer_to_control(long id) const;
 
-//    //a low level cursor for the document
-//    typedef LdpTree::depth_first_iterator iterator;
-//
-//	iterator begin() { LdpTree::depth_first_iterator it = m_pTree->begin(); return iterator(it); }
-//	iterator end() { LdpTree::depth_first_iterator it = m_pTree->end(); return iterator(it); }
-//    iterator content();
-//
-//    string to_string(iterator& it) { return (*it)->to_string(); }
     #define k_save_ids      true
     #define k_no_save_ids   false
     string to_string(bool fWithIds = k_no_save_ids);
     string get_checkpoint_data();
-
-//    string to_string_with_ids(iterator& it) { return (*it)->to_string_with_ids(); }
-//    string to_string_with_ids() { return m_pTree->get_root()->to_string_with_ids(); }
-
-//    //inserts param before the element at position referred by iterator 'it'.
-//    //Returns iterator pointing to the newly inserted element
-//    iterator insert(iterator& it, LdpElement* node);
-//
-//    //push back a param to element referred by iterator 'it'.
-//    void add_param(iterator& it, LdpElement* node);
-//
-//    //removes element pointed by 'it'.
-//    LdpElement* remove(iterator& it);
-//
-//    //removes last param of element pointed by 'it'.
-//    void remove_last_param(iterator& it);
 
     //API: objects creation/modification
     void end_of_changes();
@@ -180,7 +156,7 @@ public:
     //API: adding first level onjects
     //These violate the Open/Close principle as it would require to modify the API
     //when a new first level item is created. Nevertheless it is an upwards
-    //compatible change. I will keep this t
+    //compatible change.
 //    ImoParagraph* add_paragraph(ImoStyle* pStyle=NULL);
 //    ImoTextItem* create_text_item(const string& text, ImoStyle* pStyle=NULL);
 //    ImoButton* create_button(const string& label, const USize& size,
@@ -202,7 +178,7 @@ public:
     void notify_if_document_modified();
 
     //TODO: public to be used by exercises (reconfigure buttons), To be changed to
-    //protected as sson as buttons changed to controls
+    //protected as soon as buttons changed to controls
     inline void set_dirty() { m_flags |= k_dirty; }
 
     //debug

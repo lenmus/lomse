@@ -58,6 +58,7 @@ class Document;
 class EventHandler;
 class Control;
 class ScorePlayerCtrl;
+class ButtonCtrl;
 
 class ImoAttachments;
 class ImoAuxObj;
@@ -429,7 +430,7 @@ public:
 
     //API
     ImoTextItem* add_text_item(const string& text, ImoStyle* pStyle=NULL);
-    ImoButton* add_button(LibraryScope& libScope, const string& label,
+    ButtonCtrl* add_button(LibraryScope& libScope, const string& label,
                           const USize& size, ImoStyle* pStyle=NULL);
     ImoInlineWrapper* add_inline_box(LUnits width=0.0f, ImoStyle* pStyle=NULL);
     ImoLink* add_link(const string& url, ImoStyle* pStyle=NULL);
@@ -2251,15 +2252,15 @@ protected:
     ImoControl(int type) : ImoInlineLevelObj(type), m_ctrol(NULL) {}
 
     friend class InlineLevelCreatorApi;
-    inline void attach_control(Control* ctrol) { m_ctrol = ctrol; }
+    void attach_control(Control* ctrol);
 
 public:
     virtual ~ImoControl() {}
 
-    //Any control must know its size or knows how to compute it, even before layouting
+    //delegates on its associated Control for determining its size
     USize measure();
 
-    //Any ImoControl must know how to generate its graphical model
+    //delegates on its associated Control for generating its graphical model
     GmoBoxControl* layout(LibraryScope& libraryScope, UPoint pos);
 
     //other
@@ -2441,6 +2442,7 @@ public:
 
     //support for edition commands
     void insert_block_level_obj(ImoBlockLevelObj* pAt, ImoBlockLevelObj* pImoNew);
+    void delete_block_level_obj(ImoBlockLevelObj* pAt);
 
 //        //factory methods for ImoObj objects
 //    ImoButton* create_button(long id, const string& label, const USize& size,
@@ -2696,8 +2698,8 @@ public:
     ImoSpacer* add_spacer(Tenths space);
     ImoObj* add_object(const string& ldpsource);
     void add_staff_objects(const string& ldpsource);
-
     void delete_staffobj(ImoStaffObj* pImo);
+    void insert_staffobj(ImoStaffObj* pPos, ImoStaffObj* pImo);
 
 
 protected:
@@ -2900,6 +2902,7 @@ protected:
 public:
     ~ImoMusicData() {}
 
+    ImoInstrument* get_instrument();
 };
 
 //---------------------------------------------------------------------------------------
@@ -3228,6 +3231,7 @@ public:
     ImoInstrument* get_instrument(int iInstr);   //0..n-1
     int get_num_instruments();
     ImoInstruments* get_instruments();
+    int get_instr_number_for(ImoInstrument* pInstr);
 
     //instrument groups
     void add_instruments_group(ImoInstrGroup* pGroup);

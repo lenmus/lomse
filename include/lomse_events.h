@@ -50,9 +50,7 @@ class ImoDocument;
 class ImoScore;
 class ImoStaffObj;
 class Interactor;
-class GmoObj;
 class Document;
-class GraphicModel;
 class PlayerGui;
 
 //observer pattern
@@ -194,31 +192,23 @@ typedef boost::shared_ptr<EventView>  SpEventView;
 class EventMouse : public EventView
 {
 protected:
-    GmoObj* m_pGmo;
-    ImoContentObj* m_pImo;
-    GraphicModel* m_pGModel;
+    Document* m_pDoc;
+    long m_imoId;
+    //Observable* m_source;
 
     EventMouse(EEventType type) : EventView(type, NULL) {}    //for unit tests
 
 public:
-    EventMouse(EEventType type, Interactor* pInteractor, GmoObj* pGmo,
-               GraphicModel* pGModel)
+    EventMouse(EEventType type, Interactor* pInteractor, long id, Document* pDoc)
         : EventView(type, pInteractor)
-        , m_pGmo(pGmo)
-        , m_pImo( find_originator_imo(pGmo) )
-        , m_pGModel(pGModel)
+        , m_pDoc(pDoc)
+        , m_imoId(id)
     {
     }
 
     // accessors
-    inline GmoObj* get_gm_object() { return m_pGmo; }
-    inline ImoContentObj* get_imo_object() { return m_pImo; }
+    ImoContentObj* get_imo_object();
     Observable* get_source();
-    inline GraphicModel* get_gmodel() { return m_pGModel; }
-
-
-protected:
-    ImoContentObj* find_originator_imo(GmoObj* pGmo);
 
 };
 

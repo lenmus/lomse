@@ -211,6 +211,7 @@ protected:
     void update_view_if_needed();
     void find_parent_link_box_and_notify_event(SpEventInfo pEvent, GmoObj* pGmo);
     void do_force_redraw();
+    long find_event_originator_imo(GmoObj* pGmo);
 
 };
 

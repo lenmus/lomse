@@ -32,6 +32,7 @@
 
 #include "lomse_stack.h"
 #include "lomse_internal_model.h"
+#include "lomse_document_cursor.h"
 
 #include <sstream>
 using namespace std;
@@ -41,7 +42,6 @@ namespace lomse
 
 //forward declarations
 class Document;
-class DocCursor;
 
 //---------------------------------------------------------------------------------------
 // interface for any command to modify the document
@@ -60,12 +60,13 @@ public:
     inline std::string get_name() { return m_name; }
 
     //actions
-    virtual void perform_action(Document* pDoc)=0;
-    virtual void undo_action(Document* pDoc);
+    virtual void perform_action(Document* pDoc, DocCursor* pCursor)=0;
+    virtual void undo_action(Document* pDoc, DocCursor* pCursor);
 
 protected:
     void create_checkpoint(Document* pDoc);
     void log_forensic_data();
+    void set_command_name(const string& name, ImoObj* pImo);
 
 };
 
@@ -81,8 +82,8 @@ public:
     virtual ~DocCmdSimple() {}
 
 //    //actions
-//    void undo_action(Document* pDoc) {}
-//    void perform_action(Document* pDoc) {}
+//    void undo_action(Document* pDoc, DocCursor* pCursor) {}
+//    void perform_action(Document* pDoc, DocCursor* pCursor) {}
 };
 
 //---------------------------------------------------------------------------------------
@@ -98,110 +99,6 @@ public:
 };
 
 
-////---------------------------------------------------------------------------------------
-//// a helper class to store information about execution of a user command
-//class DocCommandData
-//{
-//protected:
-//    int             m_startPos;
-//    int             m_endPos;
-//    bool            m_docModified;
-//
-//public:
-//    DocCommandData(const std::string& name, bool modified, int startPos)
-//        : m_name(name), m_startPos(startPos), m_endPos(0), m_docModified(modified) {}
-//    ~DocCommandData() {}
-//
-//    inline void set_end_pos(int n) { m_endPos = n; }
-//    inline int get_num_actions() { return m_endPos - m_startPos; }
-//    inline bool get_modified() { return m_docModified; }
-//};
-//
-//// A class to manage the undo/redo stack of user commands
-//typedef UndoableStack<DocCommandData*>     CmdDataUndoStack;
-
-
-
-////---------------------------------------------------------------------------------------
-//class UserCommandExecuter
-//{
-//private:
-//    Document*           m_pDoc;
-//    DocCommandExecuter  m_docCommandExecuter;
-//    ModelBuilder*       m_pModelBuilder;
-//    CmdDataUndoStack    m_stack;
-//
-//public:
-//    UserCommandExecuter(Document* pDoc, ModelBuilder* pBuilder);     //only for tests
-//    UserCommandExecuter(Document* pDoc);
-//
-//    virtual ~UserCommandExecuter();
-//    virtual void execute(DocCmdComposite& cmd);
-//    virtual void undo();
-//    virtual void redo();
-//
-//    virtual size_t undo_stack_size() { return m_stack.size(); }
-//
-//private:
-//    void update_model();
-//};
-
-
-
-////---------------------------------------------------------------------------------------
-//class DocCommandInsert : public DocCmdComposite
-//{
-//public:
-//    DocCommandInsert(Document::iterator& it, LdpElement* pNewElm);
-//    ~DocCommandInsert();
-//
-//    void undo(Document* pDoc);
-//    void redo(Document* pDoc);
-//
-//protected:
-//    Document::iterator m_itInserted;
-//};
-//
-//
-////---------------------------------------------------------------------------------------
-//class DocCommandPushBack : public DocCmdComposite
-//{
-//public:
-//    DocCommandPushBack(Document::iterator& it, LdpElement* pNewElm);
-//    ~DocCommandPushBack();
-//
-//    void undo(Document* pDoc);
-//    void redo(Document* pDoc);
-//};
-//
-//
-////---------------------------------------------------------------------------------------
-//class DocCommandRemove : public DocCmdComposite
-//{
-//public:
-//    DocCommandRemove(Document::iterator& it);
-//    ~DocCommandRemove();
-//
-//    void undo(Document* pDoc);
-//    void redo(Document* pDoc);
-//
-//protected:
-//    LdpElement*     m_parent;
-//    LdpElement*     m_nextSibling;
-//};
-
-
-////---------------------------------------------------------------------------------------
-//class CommandBuilder
-//{
-//private:
-//
-//public:
-//    CommandBuilder(Document* target);   //, CmdExecuter);
-//    //methods for creating commands
-//    DocCommand* new_cmd_delete_staffobj(DocCursor& cursor);
-//    DocCommand* new_cmd_insert_block_level_obj(DocCursor& cursor, int type);
-//};
 
 //---------------------------------------------------------------------------------------
 // A class to manage the undo/redo stack
@@ -214,10 +111,11 @@ class DocCommandExecuter
 {
 private:
     Document*   m_pDoc;
+    DocCursor*  m_pCursor;
     UndoStack   m_stack;
 
 public:
-    DocCommandExecuter(Document* target);
+    DocCommandExecuter(Document* target, DocCursor* pCursor);
     virtual ~DocCommandExecuter() {}
     virtual void execute(DocCommand* pCmd);
     virtual void undo();
@@ -228,63 +126,76 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class CmdDeleteStaffObj : public DocCmdSimple
+class CmdCursor : public DocCmdSimple
 {
 protected:
-    int m_idScore;
-    int m_idStaffobj;
+    int             m_operation;
+    long            m_targetId;
+    DocCursorState  m_curState;
 
 public:
-    CmdDeleteStaffObj(DocCursor& cursor);
+    CmdCursor(int cmd, long id=-1L);
+    virtual ~CmdCursor() {};
+
+    enum { k_move_next=0, k_move_prev, k_enter, k_exit, k_point_to, k_refresh, };
+
+    void perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+};
+
+//---------------------------------------------------------------------------------------
+class CmdDeleteBlockLevelObj : public DocCmdSimple
+{
+public:
+    CmdDeleteBlockLevelObj();
+    virtual ~CmdDeleteBlockLevelObj() {};
+
+    void perform_action(Document* pDoc, DocCursor* pCursor);
+};
+
+//---------------------------------------------------------------------------------------
+class CmdDeleteStaffObj : public DocCmdSimple
+{
+public:
+    CmdDeleteStaffObj();
     virtual ~CmdDeleteStaffObj() {};
 
-    void perform_action(Document* pDoc);
-
+    void perform_action(Document* pDoc, DocCursor* pCursor);
 };
 
 //---------------------------------------------------------------------------------------
 class CmdInsertBlockLevelObj : public DocCmdSimple
 {
 protected:
-//    Document::iterator  m_it;
-    DocCursor& m_cursor;
-    ImoBlockLevelObj* m_pImo;
+    long m_insertedId;
     int m_type;
-//    bool                m_fPushBack;
-//    LdpElement*         m_pGoBackElm;
-//    LdpElement*         m_pGoFwdElm;
-//    LdpCompiler*        m_pCompiler;
 
 public:
-//    CmdInsertBlockLevelObj(const string& name, DocCursor& cursor, ImoBlockLevelObj* pImo);
-    CmdInsertBlockLevelObj(DocCursor& cursor, int type);
+    CmdInsertBlockLevelObj(int type);
     virtual ~CmdInsertBlockLevelObj() {};
 
-    void undo_action(Document* pDoc);
-    void perform_action(Document* pDoc);
-
-//protected:
-//    bool do_actions(DocCommandExecuter* pExec);
-//    virtual LdpElement* determine_source_insertion_point(DocCursor& cursor, LdpElement* pElm);
-//    virtual LdpElement* determine_if_go_back_needed(DocCursor& cursor, LdpElement* pElm);
-//    virtual LdpElement* determine_if_go_fwd_needed(DocCursor& cursor, LdpElement* pElm);
-//    void execute_insert(DocCommandExecuter* pExec, Document::iterator& it, LdpElement* pNewElm);
-//
-
+    void perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
 };
 
-//        CmdInsertBlockLevelObj
-//            CmdInsertScore
-//            CmdInsertBlocksContainer
-//                CmdInsertTable
-//                CmdInsertList
-//                CmdInsertTableRow
-//                CmdInsertListItem
-//                CmdInsertTableCell
+////---------------------------------------------------------------------------------------
+//class CmdInsertStaffObj : public DocCmdSimple
+//{
+//protected:
+//    long m_cursorId;
+//    long m_insertedId;
+//    int m_type;
 //
-//            CmdInsertInlinesContainer
-//                CmdInsertParagraph
-//                CmdInsertHeading
+//public:
+//    CmdInsertStaffObj(DocCursor& cursor, int type);
+//    virtual ~CmdInsertStaffObj() {};
+////    lmCmdInsertRest(bool fNormalCmd,
+////                    const wxString& name, lmDocument *pDoc,
+////					lmENoteType nNoteType, float rDuration, int nDots, int nVoice);
+//
+//    void undo_action(Document* pDoc, DocCursor* pCursor);
+//    void perform_action(Document* pDoc, DocCursor* pCursor);
+//};
 
 
 }   //namespace lomse

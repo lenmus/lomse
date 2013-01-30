@@ -39,6 +39,7 @@
 #include "lomse_ldp_compiler.h"
 #include "lomse_document.h"
 #include "lomse_im_factory.h"
+#include "lomse_staffobjs_table.h"
 
 
 using namespace UnitTest;
@@ -298,6 +299,12 @@ public:
     {
     }
 
+    void dump_colection(ImoScore* pScore)
+    {
+        ColStaffObjs* pCol = pScore->get_staffobjs_table();
+        cout << pCol->dump();
+    }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -398,6 +405,169 @@ SUITE(LdpExporterTest)
         CHECK( source == "(barline#21 end)" );
     }
 
+    // MusicDataLdpGenerator ------------------------------------------------------------
+
+    TEST_FIXTURE(LdpExporterTestFixture, musicData_0)
+    {
+        //empty musicData
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)(instrument (musicData )))" );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        dump_colection(pScore);
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_current_score(pScore);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pMD);
+//        cout << "\"" << source << "\"" << endl;
+        CHECK( source == "(musicData )" );
+    }
+
+    TEST_FIXTURE(LdpExporterTestFixture, musicData_1)
+    {
+        //in time sequence ok
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)"
+            "(instrument (musicData (clef G)(r q)(barline)(n c4 q)) )"
+            ")");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        dump_colection(pScore);
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_current_score(pScore);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pMD);
+//        cout << "\"" << source << "\"" << endl;
+        CHECK( source == "(musicData (clef G p1 )(r q p1 )(barline simple)(n c4 q p1 ))" );
+    }
+
+    TEST_FIXTURE(LdpExporterTestFixture, musicData_2)
+    {
+        //skips instruments
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)"
+            "(instrument (musicData (clef G)(r q)(barline)(n c4 q)) )"
+            "(instrument (musicData (clef C3)(n f4 e)) )"
+            ")");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        dump_colection(pScore);
+        ImoInstrument* pInstr = pScore->get_instrument(1);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_current_score(pScore);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pMD);
+//        cout << "\"" << source << "\"" << endl;
+        CHECK( source == "(musicData (clef C3 p1 )(n f4 e p1 ))" );
+    }
+
+    TEST_FIXTURE(LdpExporterTestFixture, musicData_3)
+    {
+        //goBack to start
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)"
+            "(instrument (staves 2)(musicData (clef G)(n c4 q p1)(goBack 64)(n a3 e p2)"
+            "(n e4 e)) )"
+            ")");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        dump_colection(pScore);
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_current_score(pScore);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pMD);
+//        cout << "\"" << source << "\"" << endl;
+        CHECK( source ==
+            "(musicData (clef G p1 )(n c4 q p1 )(goBack start)(n a3 e p2 )(n e4 e p2 ))" );
+    }
+
+    TEST_FIXTURE(LdpExporterTestFixture, musicData_4)
+    {
+        //goFwd
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)"
+            "(instrument (musicData (clef G)(n c4 q p1)(goFwd 32)(n a3 e p1)) ))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        dump_colection(pScore);
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_current_score(pScore);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pMD);
+//        cout << "\"" << source << "\"" << endl;
+        CHECK( source ==
+            "(musicData (clef G p1 )(n c4 q p1 )(goFwd 32)(n a3 e p1 ))" );
+    }
+
+    TEST_FIXTURE(LdpExporterTestFixture, musicData_5)
+    {
+        //ordered by lines
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 1.6)"
+            "(instrument (staves 2)(musicData "
+            "(clef G p1)(clef F4 p2)(key C)(time 2 4)(n c4 e p1)"
+            "(goBack start)(n g2 e p2)(n c3 e)(n e3 e)(n g3 e)(barline)) ))");
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        dump_colection(pScore);
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_current_score(pScore);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pMD);
+//        cout << "\"" << source << "\"" << endl;
+        string expected =
+            "(musicData "
+            "(clef G p1 )(clef F4 p2 )(key C)(time 2 4)(n c4 e p1 )"
+            "(goBack start)(n g2 e p2 )(n c3 e p2 )(n e3 e p2 )(n g3 e p2 )(barline simple))";
+        CHECK( source == expected );
+    }
+//        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+//            "(score (vers 1.6) (instrument (musicData "
+//            "(n c4 q)(n d4 e.)(n d4 s)(goBack start)(n e4 q)(goFwd end)(barline)))) ))" );
+
+
+//    TEST_FIXTURE(LdpExporterTestFixture, musicData_6)
+//    {
+//        //ordered by lines
+//        Document doc(m_libraryScope);
+//        doc.from_string(
+//            "(score (vers 1.6) (instrument (staves 2)(musicData "
+//            "(clef G p1)(clef F4 p2)(key D)(n c4 q v2 p1)(n d4 e.)"
+//            "(n d4 s v3 p2)(n e4 h)) ))"
+//
+////            "(score (vers 1.6) (instrument (staves 2)(musicData "
+////            "(clef G p1)(clef F4 p2)(key D)(spacer 10 p1)(n c4 q p1)(n d4 e.)"
+////            "(goBack start)(spacer 10 p2)(n d4 e p2)(n e4 e)) ))"
+//
+////            "(score (vers 1.6) (instrument (staves 2)(musicData "
+////            "(clef G p1)(clef F4 p2)(key c)(time 4 4)(clef F4 p1)(n g3 q p1)"
+////            "(goBack start)(n e3 e p2)(barline) )))"
+//            );
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        dump_colection(pScore);
+////        ImoInstrument* pInstr = pScore->get_instrument(0);
+////        ImoMusicData* pMD = pInstr->get_musicdata();
+////
+////        LdpExporter exporter(&m_libraryScope);
+////        exporter.set_current_score(pScore);
+////        //exporter.set_remove_newlines(true);
+////        string source = exporter.get_source(pMD);
+////        cout << "\"" << source << "\"" << endl;
+////        CHECK( source ==
+////            "(musicData (clef G p1 )(n c4 q p1 )(goFwd 32)(n a3 e p1 ))" );
+//    }
+
     // BeamLdpGenerator
     // ContentObjLdpGenerator
     // ErrorLdpGenerator
@@ -407,7 +577,6 @@ SUITE(LdpExporterTest)
     // InstrumentLdpGenerator
     // KeySignatureLdpGenerator
     // LenmusdocLdpGenerator
-    // MusicDataLdpGenerator
     // MetronomeLdpGenerator
     // NoteLdpGenerator
     // RestLdpGenerator

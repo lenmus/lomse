@@ -182,19 +182,6 @@ protected:
 
 };
 
-////---------------------------------------------------------------------------------------
-//// Engrouter for a button
-//class ButtonEngrouter : public Engrouter
-//{
-//public:
-//    ButtonEngrouter(ImoContentObj* pCreatorImo, LibraryScope& libraryScope)
-//        : Engrouter(pCreatorImo, libraryScope) {}
-//    virtual ~ButtonEngrouter() {}
-//
-//    void measure();
-//    GmoObj* create_gm_object(UPoint pos, LineReferences& refs);
-//};
-
 //---------------------------------------------------------------------------------------
 // Engrouter for an image
 class ImageEngrouter : public Engrouter

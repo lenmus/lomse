@@ -94,6 +94,8 @@ public:
 SUITE(LdpAnalyserTest)
 {
 
+    // score ----------------------------------------------------------------------------
+
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserMissingMandatoryElementNoElements)
     {
         stringstream errormsg;
@@ -173,6 +175,96 @@ SUITE(LdpAnalyserTest)
         CHECK( pScore != NULL );
         CHECK( pScore->get_version() == "1.6" );
         CHECK( pScore->get_num_instruments() == 0 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserOneOrMoreMissingFirst)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. score: missing mandatory element 'instrument'." << endl;
+        parser.parse_text("(score (vers 1.6))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << score->get_root()->to_string() << endl;
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 0 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserOneOrMorePresentOne)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(score (vers 1.6)(instrument (musicData)))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore != NULL );
+        //CHECK( pScore->get_num_instruments() == 1 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserOneOrMorePresentMore)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(score (vers 1.6)(instrument (musicData))(instrument (musicData)))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore != NULL );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, score_get_instr_number)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(score (vers 1.6)(instrument (musicData))(instrument (musicData)))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(1);
+        CHECK( pScore->get_instr_number_for(pInstr) == 1 );
 
         delete tree->get_root();
         delete pIModel;
@@ -460,75 +552,6 @@ SUITE(LdpAnalyserTest)
         delete tree->get_root();
     }
 
-    //-----------------------------------------------------------------------------------
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserOneOrMoreMissingFirst)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        expected << "Line 0. score: missing mandatory element 'instrument'." << endl;
-        parser.parse_text("(score (vers 1.6))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        //cout << score->get_root()->to_string() << endl;
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
-        CHECK( pScore != NULL );
-        CHECK( pScore->get_num_instruments() == 0 );
-
-        delete tree->get_root();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserOneOrMorePresentOne)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        //expected << "" << endl;
-        parser.parse_text("(score (vers 1.6)(instrument (musicData)))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
-        CHECK( pScore != NULL );
-        //CHECK( pScore->get_num_instruments() == 1 );
-
-        delete tree->get_root();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserOneOrMorePresentMore)
-    {
-        stringstream errormsg;
-        Document doc(m_libraryScope);
-        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-        stringstream expected;
-        //expected << "" << endl;
-        parser.parse_text("(score (vers 1.6)(instrument (musicData))(instrument (musicData)))");
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        //cout << "[" << errormsg.str() << "]" << endl;
-        //cout << "[" << expected.str() << "]" << endl;
-        CHECK( errormsg.str() == expected.str() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
-        CHECK( pScore != NULL );
-        //CHECK( pScore->get_num_instruments() == 2 );
-
-        delete tree->get_root();
-        delete pIModel;
-    }
-
     // musicData ------------------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, AnalyserOneOrMoreOptionalAlternativesError)
@@ -625,6 +648,30 @@ SUITE(LdpAnalyserTest)
         CHECK( pIModel->get_root()->is_music_data() == true );
         ImoMusicData* pImo = static_cast<ImoMusicData*>( pIModel->get_root() );
         CHECK( pImo->get_id() == 12L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, musicData_access_to_instrument)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(instrument (musicData (n c4 q)(n d4 e)) )");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>( pIModel->get_root() );
+        CHECK( pInstr != NULL );
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        CHECK( pMD != NULL );
+        CHECK( pMD->get_instrument() == pInstr );
 
         delete tree->get_root();
         delete pIModel;

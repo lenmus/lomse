@@ -1092,9 +1092,9 @@ GmoBoxDocPageContent::GmoBoxDocPageContent(ImoObj* pCreatorImo)
 //=======================================================================================
 // GmoBoxControl
 //=======================================================================================
-GmoBoxControl::GmoBoxControl(Control* ctrl, const UPoint& origin, LUnits width,
-                           LUnits height, ImoStyle* style, ImoObj* pCreatorImo)
-    : GmoBox(GmoObj::k_box_control, pCreatorImo)
+GmoBoxControl::GmoBoxControl(Control* ctrl, const UPoint& origin,
+                             LUnits width, LUnits height, ImoStyle* style)
+    : GmoBox(GmoObj::k_box_control, ctrl->get_owner_imo() )
     , m_pStyle(style)
     , m_pControl(ctrl)
 {

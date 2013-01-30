@@ -62,11 +62,11 @@ protected:
     int                 m_instr;
     int                 m_line;
     int                 m_staff;
-    ImoObj*             m_pImo;
+    ImoStaffObj*        m_pImo;
 
 public:
     ColStaffObjsEntry(int measure, float time, int instr, int line, int staff,
-                      ImoObj* pImo)
+                      ImoStaffObj* pImo)
             : m_measure(measure), m_time(time), m_instr(instr), m_line(line)
             , m_staff(staff), m_pImo(pImo) {}
 
@@ -75,7 +75,7 @@ public:
     inline int num_instrument() const { return m_instr; }
     inline int line() const { return m_line; }
     inline int staff() const { return m_staff; }
-    inline ImoObj* imo_object() const { return m_pImo; }
+    inline ImoStaffObj* imo_object() const { return m_pImo; }
     inline long element_id() { return m_pImo == NULL ? -1L : m_pImo->get_id(); }
 
     //debug
@@ -92,6 +92,9 @@ protected:
 //---------------------------------------------------------------------------------------
 // ColStaffObjs: encapsulates the staff objects collection for a score
 //---------------------------------------------------------------------------------------
+
+typedef  vector<ColStaffObjsEntry*>::iterator      ColStaffObjsIterator;
+
 class ColStaffObjs
 {
 protected:
@@ -115,26 +118,32 @@ public:
     inline void set_total_lines(int number) { m_numLines = number; }
     inline void set_anacrusis_missing_time(float rTime) { m_rMissingTime = rTime; }
 
-    class iterator
-    {
-        protected:
-            friend class ColStaffObjs;
-            std::vector<ColStaffObjsEntry*>::iterator m_it;
+//    class iterator
+//    {
+//        protected:
+//            friend class ColStaffObjs;
+//            std::vector<ColStaffObjsEntry*>::iterator m_it;
+//
+//        public:
+//            iterator() {}
+//			iterator(std::vector<ColStaffObjsEntry*>::iterator& it) { m_it = it; }
+//            virtual ~iterator() {}
+//
+//            iterator& operator =(const iterator& it) { m_it = it.m_it; return *this; }
+//
+//	        ColStaffObjsEntry* operator *() const { return *m_it; }
+//            iterator& operator ++() { ++m_it; return *this; }
+//            iterator& operator --() { --m_it; return *this; }
+//		    bool operator ==(const iterator& it) const { return m_it == it.m_it; }
+//		    bool operator !=(const iterator& it) const { return m_it != it.m_it; }
+//    };
 
-        public:
-            iterator() {}
-			iterator(std::vector<ColStaffObjsEntry*>::iterator& it) { m_it = it; }
-            virtual ~iterator() {}
-
-	        ColStaffObjsEntry* operator *() const { return *m_it; }
-            iterator& operator ++() { ++m_it; return *this; }
-            iterator& operator --() { --m_it; return *this; }
-		    bool operator ==(const iterator& it) const { return m_it == it.m_it; }
-		    bool operator !=(const iterator& it) const { return m_it != it.m_it; }
-    };
-
-	iterator begin() { std::vector<ColStaffObjsEntry*>::iterator it = m_table.begin(); return iterator(it); }
-	iterator end() { std::vector<ColStaffObjsEntry*>::iterator it = m_table.end(); return iterator(it); }
+//	iterator begin() { std::vector<ColStaffObjsEntry*>::iterator it = m_table.begin(); return iterator(it); }
+//	iterator end() { std::vector<ColStaffObjsEntry*>::iterator it = m_table.end(); return iterator(it); }
+//    inline ColStaffObjsEntry* back() { return m_table.back(); }
+//    inline ColStaffObjsEntry* front() { return m_table.front(); }
+    ColStaffObjsIterator begin() { return m_table.begin(); }
+    ColStaffObjsIterator end() { return m_table.end(); }
     inline ColStaffObjsEntry* back() { return m_table.back(); }
     inline ColStaffObjsEntry* front() { return m_table.front(); }
 

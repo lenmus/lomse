@@ -82,34 +82,6 @@ public: //TO_FIX: constructor used in tests.
     }
 };
 
-////---------------------------------------------------------------------------------------
-//class GmoShapeButton : public GmoSimpleShape
-//{
-//protected:
-//    FontStorage* m_pFontStorage;
-//    LibraryScope& m_libraryScope;
-//    ImoButton* m_pButton;
-//    LUnits m_xLabel;
-//    LUnits m_yLabel;
-//    Color m_bgColor;
-//
-//    friend class ButtonEngrouter;
-//    GmoShapeButton(ImoObj* pCreatorImo, UPoint pos, USize size,
-//                   LibraryScope& libraryScope);
-//
-//public:
-//    void on_draw(Drawer* pDrawer, RenderOptions& opt);
-//
-//    //modifiers
-//    void change_color(Color color);
-//
-//protected:
-//    void select_font();
-//    void center_text();
-//
-//    //Color get_normal_color();
-//};
-
 //---------------------------------------------------------------------------------------
 class GmoShapeImage : public GmoSimpleShape
 {

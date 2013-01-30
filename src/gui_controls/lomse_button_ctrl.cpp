@@ -96,22 +96,23 @@ GmoBoxControl* ButtonCtrl::layout(LibraryScope& libraryScope, UPoint pos)
 //---------------------------------------------------------------------------------------
 void ButtonCtrl::handle_event(SpEventInfo pEvent)
 {
-//    if (pEvent->is_mouse_in_event())
-//        wxLogMessage(_T("Mouse In at ButtonCtrl"));
-//    else if (pEvent->is_mouse_out_event())
-//        wxLogMessage(_T("Mouse Out at ButtonCtrl"));
-//    else if (pEvent->is_on_click_event())
-//    {
-//        wxLogMessage(_T("On Click at ButtonCtrl"));
-//    }
     m_pDoc->notify_observers(pEvent, this);
 }
 
 //---------------------------------------------------------------------------------------
-void ButtonCtrl::set_text(const string& text)
+void ButtonCtrl::set_label(const string& text)
 {
     m_label = text;
-    m_pMainBox->set_dirty(true);
+    if (m_pMainBox)
+        m_pMainBox->set_dirty(true);
+}
+
+//---------------------------------------------------------------------------------------
+void ButtonCtrl::set_bg_color(Color color)
+{
+    m_bgColor = color;
+    if (m_pMainBox)
+        m_pMainBox->set_dirty(true);
 }
 
 //---------------------------------------------------------------------------------------
@@ -134,24 +135,21 @@ void ButtonCtrl::set_tooltip(const string& text)
 //---------------------------------------------------------------------------------------
 void ButtonCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-//    if (!m_pButton->is_visible())
-//        return;
+    if (!is_visible())
+        return;
 
-//    Color color = (m_fEnabled ? m_currentColor : Color(192, 192, 192));
-//    pDrawer->set_text_color(color);
-
-//    Color textColor = m_pButton->is_enabled() ? Color(0, 0, 0) : Color(128, 128, 128);
+    Color textColor = is_enabled() ? Color(0, 0, 0) : Color(128, 128, 128);
     Color strokeColor = Color(128, 128, 128);
 
     //draw button gradient and border
     pDrawer->begin_path();
-    pDrawer->fill( Color(70,70,70) );   //m_bgColor );
+    pDrawer->fill( m_bgColor );
     pDrawer->stroke( strokeColor );
     pDrawer->stroke_width(15.0);
     Color white(255, 255, 255);
-    Color dark(m_bgColor);    //dark(210, 210, 210);      //0.82
+    Color dark(m_bgColor);
     dark.a = 45;
-    Color light(dark);      //light(230, 230, 230);     //0.90
+    Color light(dark);
     light = light.gradient(white, 0.2);
     pDrawer->gradient_color(white, 0.0, 0.1);
     pDrawer->gradient_color(white, dark, 0.1, 0.7);
@@ -164,7 +162,7 @@ void ButtonCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
     //draw text
     select_font();
     center_text();
-    pDrawer->set_text_color( Color(0,0,0) );    //textColor );
+    pDrawer->set_text_color( textColor );
     LUnits x = m_pos.x + m_xLabel;
     LUnits y = m_pos.y + m_yLabel;
     pDrawer->draw_text(x, y, m_label);
@@ -182,92 +180,6 @@ void ButtonCtrl::select_font()
                       m_style->is_bold(),
                       m_style->is_italic() );
 }
-
-
-////=======================================================================================
-//// GmoShapeButton implementation: a clickable button
-////=======================================================================================
-//GmoShapeButton::GmoShapeButton(ImoObj* pCreatorImo, UPoint pos, USize size,
-//                               LibraryScope& libraryScope)
-//	: GmoSimpleShape(pCreatorImo, GmoObj::k_shape_button, 0, Color(0,0,0))
-//	, m_libraryScope(libraryScope)
-//{
-//    m_origin = pos;
-//    m_size = size;
-//    m_pButton = dynamic_cast<ImoButton*>( pCreatorImo );
-//    m_bgColor = m_pButton->get_bg_color();
-//
-//    center_text();
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeButton::center_text()
-//{
-//    select_font();
-//    TextMeter meter(m_libraryScope);
-//    LUnits height = meter.get_font_height();
-//    LUnits width = meter.measure_width(m_pButton->get_label());
-//
-//    m_xLabel = (m_size.width - width) / 2.0f;
-//    m_yLabel = (m_size.height + height) / 2.0f;     //reference is at text bottom
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeButton::on_draw(Drawer* pDrawer, RenderOptions& opt)
-//{
-//    if (!m_pButton->is_visible())
-//        return;
-//
-//    Color textColor = m_pButton->is_enabled() ? Color(0, 0, 0) : Color(128, 128, 128);
-//    Color strokeColor = Color(128, 128, 128);
-//
-//    //draw button gradient and border
-//    pDrawer->begin_path();
-//    pDrawer->fill( m_bgColor );
-//    pDrawer->stroke( strokeColor );
-//    pDrawer->stroke_width(15.0);
-//    Color white(255, 255, 255);
-//    Color dark(m_bgColor);    //dark(210, 210, 210);      //0.82
-//    //dark.a = 45;
-//    Color light(dark);      //light(230, 230, 230);     //0.90
-//    light = light.gradient(white, 0.2);
-//    pDrawer->gradient_color(white, 0.0, 0.1);
-//    pDrawer->gradient_color(white, dark, 0.1, 0.7);
-//    pDrawer->gradient_color(dark, light, 0.7, 1.0);
-//    pDrawer->fill_linear_gradient(m_origin.x, m_origin.y,
-//                                  m_origin.x, m_origin.y + m_size.height);
-//    pDrawer->rect(m_origin, m_size, 100.0f);
-//    pDrawer->end_path();
-//
-//    //draw text
-//    select_font();
-//    pDrawer->set_text_color( textColor );   //determine_color_to_use(opt) );
-//    LUnits x = m_origin.x + m_xLabel;
-//    LUnits y = m_origin.y + m_yLabel;
-//    pDrawer->draw_text(x, y, m_pButton->get_label());
-//
-//    GmoSimpleShape::on_draw(pDrawer, opt);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeButton::select_font()
-//{
-//    ImoStyle* pStyle = m_pButton->get_style();
-//    TextMeter meter(m_libraryScope);
-//    meter.select_font(m_pButton->get_language(),
-//                      pStyle->font_file(),
-//                      pStyle->font_name(),
-//                      pStyle->font_size(),
-//                      pStyle->is_bold(),
-//                      pStyle->is_italic() );
-//}
-//
-////---------------------------------------------------------------------------------------
-//void GmoShapeButton::change_color(Color color)
-//{
-//    m_bgColor = color;
-//    set_dirty(true);
-//}
 
 
 }   //namespace lomse

@@ -44,13 +44,13 @@ class ColStaffObjs;
 
 //---------------------------------------------------------------------------------------
 // StaffObjsIterator: An iterator to traverse the ColStaffObjs. It is is just a wrapper
-// for a ColStaffObjs::iterator.
-// Really needed? Replace by a typedef for ColStaffObjs::iterator?
+// for a ColStaffObjsIterator.
+// Really needed? Replace by a typedef for ColStaffObjsIterator?
 class StaffObjsIterator
 {
 protected:
     ColStaffObjs*              m_pColStaffObjs;
-    ColStaffObjs::iterator     m_it;
+    ColStaffObjsIterator     m_it;
 
 public:
     StaffObjsIterator(ColStaffObjs* pColStaffObjs);

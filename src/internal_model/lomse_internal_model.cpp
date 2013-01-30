@@ -86,7 +86,7 @@ ImoTextItem* InlineLevelCreatorApi::add_text_item(const string& text, ImoStyle* 
 }
 
 //---------------------------------------------------------------------------------------
-ImoButton* InlineLevelCreatorApi::add_button(LibraryScope& libScope, const string& label,
+ButtonCtrl* InlineLevelCreatorApi::add_button(LibraryScope& libScope, const string& label,
                                              const USize& size, ImoStyle* pStyle)
 {
     Document* pDoc = m_pParent->get_the_document();
@@ -103,7 +103,7 @@ ImoButton* InlineLevelCreatorApi::add_button(LibraryScope& libScope, const strin
 
     m_pParent->append_child_imo(pImo);
 
-    return pImo;
+    return pCtrol;   //pImo;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1033,6 +1033,28 @@ Color& ImoColorDto::set_from_string(const std::string& hex)
 
 
 //=======================================================================================
+// ImoControl implementation
+//=======================================================================================
+void ImoControl::attach_control(Control* ctrol)
+{
+    m_ctrol = ctrol;
+    ctrol->set_owner_imo(this);
+}
+
+//---------------------------------------------------------------------------------------
+GmoBoxControl* ImoControl::layout(LibraryScope& libraryScope, UPoint pos)
+{
+    return m_ctrol->layout(libraryScope, pos);
+}
+
+//---------------------------------------------------------------------------------------
+USize ImoControl::measure()
+{
+    return m_ctrol->measure();
+}
+
+
+//=======================================================================================
 // ImoRelations implementation
 //=======================================================================================
 ImoRelations::~ImoRelations()
@@ -1505,6 +1527,16 @@ void ImoDocument::insert_block_level_obj(ImoBlockLevelObj* pAt,
     pImoNew->set_dirty(true);
 }
 
+//---------------------------------------------------------------------------------------
+void ImoDocument::delete_block_level_obj(ImoBlockLevelObj* pAt)
+{
+
+    erase(pAt);
+    delete pAt;
+
+    set_dirty(true);
+}
+
 
 //=======================================================================================
 // ImoDynamic implementation
@@ -1749,6 +1781,8 @@ void ImoInstrument::delete_staffobj(ImoStaffObj* pImo)
     ImoDocument* pImoDoc = pImo->get_document();
     TreeNode<ImoObj>::iterator it(pImo);
     pImoDoc->erase(it);
+    delete pImo;
+    set_dirty(true);
 
 
 
@@ -1832,6 +1866,16 @@ void ImoInstrument::delete_staffobj(ImoStaffObj* pImo)
 
 }
 
+//---------------------------------------------------------------------------------------
+void ImoInstrument::insert_staffobj(ImoStaffObj* pPos, ImoStaffObj* pImo)
+{
+    //insert pImo before pPos
+
+    TreeNode<ImoObj>::iterator it(pPos);
+    ImoMusicData* pMD = get_musicdata();
+    pMD->insert(it, pImo);
+    set_dirty(true);
+}
 
 
 //=======================================================================================
@@ -1968,6 +2012,15 @@ ImoListItem::ImoListItem(Document* pDoc)
 //    else if (vObj)
 //        vObj->end_visit(this);
 //}
+
+
+//=======================================================================================
+// ImoMusicData implementation
+//=======================================================================================
+ImoInstrument* ImoMusicData::get_instrument()
+{
+    return dynamic_cast<ImoInstrument*>( get_parent() );
+}
 
 
 //=======================================================================================
@@ -2266,6 +2319,20 @@ ImoInstrument* ImoScore::get_instrument(int iInstr)    //iInstr = 0..n-1
 {
     ImoInstruments* pColInstr = get_instruments();
     return dynamic_cast<ImoInstrument*>( pColInstr->get_child(iInstr) );
+}
+
+//---------------------------------------------------------------------------------------
+int ImoScore::get_instr_number_for(ImoInstrument* pInstr)
+{
+    ImoInstruments* pColInstr = get_instruments();
+    int i=0;
+    ImoObj::children_iterator it;
+    for (it= pColInstr->begin(); it != pColInstr->end(); ++it, ++i)
+    {
+        if (*it == pInstr)
+            return i;
+    }
+    throw std::runtime_error("[ImoScore::get_instr_number_for] pInstr not found!");
 }
 
 //---------------------------------------------------------------------------------------
@@ -3159,21 +3226,6 @@ ImoTuplet::ImoTuplet(ImoTupletDto* dto)
     , m_nShowNumber(dto->get_show_number())
     , m_nPlacement(dto->get_placement())
 {
-}
-
-
-//=======================================================================================
-// ImoControl implementation
-//=======================================================================================
-GmoBoxControl* ImoControl::layout(LibraryScope& libraryScope, UPoint pos)
-{
-    return m_ctrol->layout(libraryScope, pos);
-}
-
-//---------------------------------------------------------------------------------------
-USize ImoControl::measure()
-{
-    return m_ctrol->measure();
 }
 
 

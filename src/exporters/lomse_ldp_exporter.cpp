@@ -33,6 +33,7 @@
 #include <iomanip>
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
+#include "lomse_staffobjs_table.h"
 
 
 namespace lomse
@@ -638,11 +639,13 @@ class MusicDataLdpGenerator : public LdpGenerator
 {
 protected:
     ImoMusicData* m_pObj;
+    ImoScore* m_pScore;
 
 public:
     MusicDataLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
     {
         m_pObj = static_cast<ImoMusicData*>(pImo);
+        m_pScore = pExporter->get_current_score();
     }
 
     string generate_source(ImoObj* pParent=NULL)
@@ -655,115 +658,194 @@ public:
 
 protected:
 
+    enum { k_max_num_lines = 16, };
+
     void add_staffobjs()
     {
-        ImoObj::children_iterator it = m_pObj->begin();
-        bool fNewMeasure = true;
-        int nMeasure = 1;
-        while (it != m_pObj->end())
+        ImoInstrument* pInstr = m_pObj->get_instrument();
+        m_iInstr = m_pScore->get_instr_number_for(pInstr);
+        m_pColStaffObjs = m_pScore->get_staffobjs_table();
+
+        if (m_pColStaffObjs->num_entries() < 1)
+            return;
+
+        m_lines.reserve(k_max_num_lines);
+        m_rCurTime = 0.0f;
+        ColStaffObjsIterator it = m_pColStaffObjs->begin();
+        while (it != m_pColStaffObjs->end())
         {
-            if (fNewMeasure)
-            {
-                if (!m_pExporter->get_remove_newlines())
-                {
-                    empty_line();
-                    start_comment();
-                    m_source << "measure " << nMeasure++;
-                    end_comment();
-                }
-                fNewMeasure = false;
-            }
-
-            add_source_for(*it);
-            fNewMeasure = (*it)->is_barline();
-            ++it;
+            m_itStartOfMeasure = it;
+            determine_how_many_lines_in_current_measure();
+            save_start_time_and_add_measure_comment();
+            add_non_timed_at_start_of_measure();
+            add_source_for_this_measure();
+            add_source_for_barline();
+            it = m_itEndOfMeasure;
         }
-      //  //iterate over the collection of StaffObjs, ordered by voice.
-      //  //Measures must be processed one by one
-      //  for (int nMeasure=1; nMeasure <= m_cStaffObjs.GetNumMeasures(); nMeasure++)
-      //  {
-      //      //add comment to separate measures
-      //      sSource += _T("\n");
-      //      sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
-      //      sSource += wxString::Format(_T("//Measure %d\n"), nMeasure);
-
-      //      int nNumVoices = m_cStaffObjs.GetNumVoicesInMeasure(nMeasure);
-      //      int nVoice = 1;
-      //      while (!m_cStaffObjs.IsVoiceUsedInMeasure(nVoice, nMeasure) &&
-      //          nVoice <= lmMAX_VOICE)
-      //      {
-      //          nVoice++;
-      //      }
-      //      int nVoicesProcessed = 1;   //voice 0 is automatically processed
-		    //lmBarline* pBL = (lmBarline*)NULL;
-      //      bool fGoBack = false;
-		    //float rTime = 0.0f;
-      //      while (true)
-      //      {
-      //          lmSOIterator* pIT = m_cStaffObjs.CreateIterator();
-      //          pIT->AdvanceToMeasure(nMeasure);
-      //          while(!pIT->ChangeOfMeasure() && !pIT->EndOfCollection())
-      //          {
-      //              lmStaffObj* pSO = pIT->GetCurrent();
-      //              //voice 0 staffobjs go with first voice if more than one voice
-				  //  if (!pSO->IsBarline())
-				  //  {
-					 //   if (nVoicesProcessed == 1)
-					 //   {
-						//    if (!pSO->IsNoteRest() || ((lmNoteRest*)pSO)->GetVoice() == nVoice)
-						//    {
-						//	    LDP_AddShitTimeTagIfNeeded(sSource, nIndent, lmGO_FWD, rTime, pSO);
-						//	    sSource += pSO->SourceLDP(nIndent, fUndoData);
-						//	    rTime = LDP_AdvanceTimeCounter(pSO);
-						//    }
-					 //   }
-					 //   else
-						//    if (pSO->IsNoteRest() && ((lmNoteRest*)pSO)->GetVoice() == nVoice)
-						//    {
-						//	    LDP_AddShitTimeTagIfNeeded(sSource, nIndent, lmGO_FWD, rTime, pSO);
-						//	    sSource += pSO->SourceLDP(nIndent, fUndoData);
-						//	    rTime = LDP_AdvanceTimeCounter(pSO);
-						//    }
-				  //  }
-				  //  else
-					 //   pBL = (lmBarline*)pSO;
-
-      //              pIT->MoveNext();
-      //          }
-      //          delete pIT;
-
-      //          //check if more voices
-      //          if (++nVoicesProcessed >= nNumVoices) break;
-      //          nVoice++;
-      //          while (!m_cStaffObjs.IsVoiceUsedInMeasure(nVoice, nMeasure) &&
-      //              nVoice <= lmMAX_VOICE)
-      //          {
-      //              nVoice++;
-      //          }
-      //          wxASSERT(nVoice <= lmMAX_VOICE);
-
-      //          //there are more voices. Add (goBak) tag
-      //          fGoBack = true;
-      //          sSource += _T("\n");
-      //          sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
-      //          sSource += _T("(goBack start)\n");
-      //          rTime = 0.0f;
-      //      }
-
-      //      //if goBack added, add a goFwd to ensure that we are at end of measure
-      //      if (fGoBack)
-      //      {
-      //          sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
-      //          sSource += _T("(goFwd end)\n");
-      //      }
-
-		    ////add barline, if present
-		    //if (pBL)
-			   // sSource += pBL->SourceLDP(nIndent, fUndoData);
-
-      //  }
-
     }
+
+    //-----------------------------------------------------------------------------------
+    void save_start_time_and_add_measure_comment()
+    {
+        m_rStartTime = (*m_itStartOfMeasure)->time();
+
+        if (!m_pExporter->get_remove_newlines())
+        {
+            empty_line();
+            start_comment();
+            m_source << "measure " << (m_curMeasure + 1);
+            end_comment();
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void determine_how_many_lines_in_current_measure()
+    {
+        m_lines.assign(k_max_num_lines, 0);
+        ColStaffObjsIterator it = m_itStartOfMeasure;
+        if (it != m_pColStaffObjs->end())
+        {
+            m_curMeasure = (*it)->measure();
+            while (it != m_pColStaffObjs->end() && (*it)->measure() == m_curMeasure)
+            {
+                m_lines[ (*it)->line() ] = 1;
+                if ((*it)->imo_object()->is_barline() && (*it)->num_instrument() == m_iInstr)
+                    break;
+                ++it;
+            }
+        }
+
+        m_itEndOfMeasure = it;
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_non_timed_at_start_of_measure()
+    {
+        ColStaffObjsIterator it;
+        for (it = m_itStartOfMeasure; it != m_itEndOfMeasure; ++it)
+        {
+            if ((*it)->num_instrument() == m_iInstr)
+            {
+                ImoStaffObj* pImo = (*it)->imo_object();
+                if (pImo->get_duration() > 0.0f)
+                {
+                    m_itStartOfMeasure = it;
+                    break;
+                }
+                if ((*it)->measure() == m_curMeasure)
+                {
+                    //skip key and time signatures not in line 0 (duplicates)
+                    if (!((pImo->is_key_signature() || pImo->is_time_signature())
+                          && (*it)->line() != 0) )
+                    {
+                        add_source_for(pImo);
+                    }
+                }
+            }
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_source_for_this_measure()
+    {
+        for (int i=0; i < k_max_num_lines; ++i)
+        {
+            if (m_lines[i] != 0)
+                add_source_for_line(i);
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_source_for_barline()
+    {
+        ColStaffObjsIterator it = m_itEndOfMeasure;
+        if (it != m_pColStaffObjs->end() && (*it)->imo_object()->is_barline()
+            && (*it)->num_instrument() == m_iInstr)
+        {
+            ImoStaffObj* pImo = (*it)->imo_object();
+            add_go_fwd_back_if_needed( (*it)->time() );
+            add_source_for(pImo);
+            ++m_itEndOfMeasure;
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_source_for_line(int line)
+    {
+        ColStaffObjsIterator it;
+        for (it = m_itStartOfMeasure; it != m_itEndOfMeasure; ++it)
+        {
+            ColStaffObjsEntry* pEntry = *it;
+            if (pEntry->num_instrument() == m_iInstr && pEntry->line() == line)
+            {
+                ImoStaffObj* pImo = pEntry->imo_object();
+                if (line == 0 || !(pImo->is_key_signature() || pImo->is_time_signature()) )
+                {
+                    add_go_fwd_back_if_needed( pEntry->time() );
+                    add_source_for(pImo);
+                    m_rCurTime = pEntry->time() + pImo->get_duration();
+                }
+            }
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_go_fwd_back_if_needed(float time)
+    {
+        if (!is_equal_time(time, m_rCurTime))
+        {
+            float shift = m_rCurTime - time;
+            if (shift > 0.0f)
+            {
+                start_element("goBack", -1L);
+                if (is_equal_time(time, m_rStartTime))
+                    m_source << "start";
+                else
+                    m_source << shift;
+            }
+            else
+            {
+                start_element("goFwd", -1L);
+                m_source << (-shift);
+            }
+            end_element(k_in_same_line);
+        }
+    }
+
+    int m_curMeasure;
+    int m_iInstr;
+    vector<int> m_lines;
+    ColStaffObjs* m_pColStaffObjs;
+    ColStaffObjsIterator m_itStartOfMeasure;
+    ColStaffObjsIterator m_itEndOfMeasure;
+    float m_rCurTime;
+    float m_rStartTime;
+
+
+//    //Old code exploring ImoTree
+//    void add_staffobjs()
+//    {
+//        ImoObj::children_iterator it = m_pObj->begin();
+//        bool fNewMeasure = true;
+//        int nMeasure = 1;
+//        while (it != m_pObj->end())
+//        {
+//            if (fNewMeasure)
+//            {
+//                if (!m_pExporter->get_remove_newlines())
+//                {
+//                    empty_line();
+//                    start_comment();
+//                    m_source << "measure " << nMeasure++;
+//                    end_comment();
+//                }
+//                fNewMeasure = false;
+//            }
+//
+//            add_source_for(*it);
+//            fNewMeasure = (*it)->is_barline();
+//            ++it;
+//        }
 
 };
 
@@ -960,6 +1042,7 @@ public:
     ScoreLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
     {
         m_pObj = static_cast<ImoScore*>(pImo);
+        pExporter->set_current_score(m_pObj);
     }
 
     string generate_source(ImoObj* pParent=NULL)
@@ -1828,6 +1911,7 @@ LdpExporter::LdpExporter(LibraryScope* pLibraryScope)
     , m_nIndent(0)
     , m_fAddId(false)
     , m_fRemoveNewlines(false)
+    , m_pCurrScore(NULL)
 {
 }
 
@@ -1837,6 +1921,7 @@ LdpExporter::LdpExporter()
     , m_nIndent(0)
     , m_fAddId(false)
     , m_fRemoveNewlines(false)
+    , m_pCurrScore(NULL)
 {
 }
 

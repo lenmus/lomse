@@ -145,7 +145,7 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
 
        // (*it)->dump();
         //cout << (*it)->to_string() << endl;
@@ -172,7 +172,7 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
        // (*it)->dump();
         CHECK( pColStaffObjs->num_entries() == 5 );
         CHECK( pColStaffObjs->num_lines() == 1 );
@@ -215,7 +215,7 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 4 );
         CHECK( pColStaffObjs->num_lines() == 1 );
@@ -263,7 +263,7 @@ SUITE(ColStaffObjsTest)
         CHECK( pColStaffObjs->num_lines() == 1 );
         //pColStaffObjs->dump();
 
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
         //CHECK( (*it)->to_string() == "(n c4 q)" );
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( (*it)->measure() == 0 );
@@ -313,7 +313,7 @@ SUITE(ColStaffObjsTest)
         CHECK( pColStaffObjs->num_lines() == 1 );
 //        pColStaffObjs->dump();
 
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
         //CHECK( (*it)->to_string() == "(n c4 q)" );
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( (*it)->measure() == 0 );
@@ -380,7 +380,7 @@ SUITE(ColStaffObjsTest)
         CHECK( pColStaffObjs->num_lines() == 1 );
         //pColStaffObjs->dump();
 
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
         //CHECK( (*it)->to_string() == "(n c4 q)" );
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( is_equal_time((*it)->time(), 0.0f) );
@@ -419,7 +419,7 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 4 );
 
@@ -457,7 +457,7 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 4 );
         CHECK( pColStaffObjs->num_lines() == 2 );
@@ -496,7 +496,7 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 5 );
         CHECK( pColStaffObjs->num_lines() == 2 );
@@ -540,7 +540,7 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 8 );
         CHECK( pColStaffObjs->num_lines() == 2 );
@@ -596,7 +596,7 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_lines() == 2 );
         CHECK( pColStaffObjs->num_entries() == 10 );
@@ -632,7 +632,7 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_lines() == 1 );
         CHECK( pColStaffObjs->num_entries() == 6 );
@@ -681,35 +681,14 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
-        //pColStaffObjs->dump();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+//        cout << pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_lines() == 4 );
         CHECK( pColStaffObjs->num_entries() == 26 );
         CHECK( pColStaffObjs->is_anacrusis_start() == false );
         CHECK( is_equal_time( pColStaffObjs->anacrusis_missing_time(), 0.0f) == true );
         //CHECK( (*it)->to_string() == "(clef G p1)" );
         CHECK( (*it)->imo_object()->is_clef() == true );
-        CHECK( (*it)->num_instrument() == 0 );
-        CHECK( is_equal_time((*it)->time(), 0.0f) );
-        CHECK( (*it)->line() == 0 );
-        CHECK( (*it)->staff() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(key D)" );
-        CHECK( (*it)->imo_object()->is_key_signature() == true );
-        CHECK( (*it)->num_instrument() == 0 );
-        CHECK( is_equal_time((*it)->time(), 0.0f) );
-        CHECK( (*it)->line() == 0 );
-        CHECK( (*it)->staff() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(time 2 4)" );
-        CHECK( (*it)->imo_object()->is_time_signature() == true );
-        CHECK( (*it)->num_instrument() == 0 );
-        CHECK( is_equal_time((*it)->time(), 0.0f) );
-        CHECK( (*it)->line() == 0 );
-        CHECK( (*it)->staff() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n f4 w p1)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( (*it)->num_instrument() == 0 );
         CHECK( is_equal_time((*it)->time(), 0.0f) );
         CHECK( (*it)->line() == 0 );
@@ -726,6 +705,13 @@ SUITE(ColStaffObjsTest)
         CHECK( (*it)->imo_object()->is_key_signature() == true );
         CHECK( (*it)->num_instrument() == 0 );
         CHECK( is_equal_time((*it)->time(), 0.0f) );
+        CHECK( (*it)->line() == 0 );
+        CHECK( (*it)->staff() == 0 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(key D)" );
+        CHECK( (*it)->imo_object()->is_key_signature() == true );
+        CHECK( (*it)->num_instrument() == 0 );
+        CHECK( is_equal_time((*it)->time(), 0.0f) );
         CHECK( (*it)->line() == 1 );
         CHECK( (*it)->staff() == 1 );
         ++it;
@@ -733,8 +719,22 @@ SUITE(ColStaffObjsTest)
         CHECK( (*it)->imo_object()->is_time_signature() == true );
         CHECK( (*it)->num_instrument() == 0 );
         CHECK( is_equal_time((*it)->time(), 0.0f) );
+        CHECK( (*it)->line() == 0 );
+        CHECK( (*it)->staff() == 0 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(time 2 4)" );
+        CHECK( (*it)->imo_object()->is_time_signature() == true );
+        CHECK( (*it)->num_instrument() == 0 );
+        CHECK( is_equal_time((*it)->time(), 0.0f) );
         CHECK( (*it)->line() == 1 );
         CHECK( (*it)->staff() == 1 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n f4 w p1)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->num_instrument() == 0 );
+        CHECK( is_equal_time((*it)->time(), 0.0f) );
+        CHECK( (*it)->line() == 0 );
+        CHECK( (*it)->staff() == 0 );
         ++it;
         //CHECK( (*it)->to_string() == "(n c3 e g+ p2)" );
         CHECK( (*it)->imo_object()->is_note() == true );
@@ -750,26 +750,6 @@ SUITE(ColStaffObjsTest)
         CHECK( (*it)->line() == 2 );
         CHECK( (*it)->staff() == 0 );
         ++it;
-        //CHECK( (*it)->to_string() == "(key D)" );
-        CHECK( (*it)->imo_object()->is_key_signature() == true );
-        CHECK( (*it)->num_instrument() == 1 );
-        CHECK( is_equal_time((*it)->time(), 0.0f) );
-        CHECK( (*it)->line() == 2 );
-        CHECK( (*it)->staff() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(time 2 4)" );
-        CHECK( (*it)->imo_object()->is_time_signature() == true );
-        CHECK( (*it)->num_instrument() == 1 );
-        CHECK( is_equal_time((*it)->time(), 0.0f) );
-        CHECK( (*it)->line() == 2 );
-        CHECK( (*it)->staff() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n f4 q. p1)" );
-        CHECK( (*it)->num_instrument() == 1 );
-        CHECK( is_equal_time((*it)->time(), 0.0f) );
-        CHECK( (*it)->line() == 2 );
-        CHECK( (*it)->staff() == 0 );
-        ++it;
         //CHECK( (*it)->to_string() == "(clef F4 p2)" );
         CHECK( (*it)->imo_object()->is_clef() == true );
         CHECK( (*it)->num_instrument() == 1 );
@@ -781,6 +761,13 @@ SUITE(ColStaffObjsTest)
         CHECK( (*it)->imo_object()->is_key_signature() == true );
         CHECK( (*it)->num_instrument() == 1 );
         CHECK( is_equal_time((*it)->time(), 0.0f) );
+        CHECK( (*it)->line() == 2 );
+        CHECK( (*it)->staff() == 0 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(key D)" );
+        CHECK( (*it)->imo_object()->is_key_signature() == true );
+        CHECK( (*it)->num_instrument() == 1 );
+        CHECK( is_equal_time((*it)->time(), 0.0f) );
         CHECK( (*it)->line() == 3 );
         CHECK( (*it)->staff() == 1 );
         ++it;
@@ -788,8 +775,21 @@ SUITE(ColStaffObjsTest)
         CHECK( (*it)->imo_object()->is_time_signature() == true );
         CHECK( (*it)->num_instrument() == 1 );
         CHECK( is_equal_time((*it)->time(), 0.0f) );
+        CHECK( (*it)->line() == 2 );
+        CHECK( (*it)->staff() == 0 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(time 2 4)" );
+        CHECK( (*it)->imo_object()->is_time_signature() == true );
+        CHECK( (*it)->num_instrument() == 1 );
+        CHECK( is_equal_time((*it)->time(), 0.0f) );
         CHECK( (*it)->line() == 3 );
         CHECK( (*it)->staff() == 1 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n f4 q. p1)" );
+        CHECK( (*it)->num_instrument() == 1 );
+        CHECK( is_equal_time((*it)->time(), 0.0f) );
+        CHECK( (*it)->line() == 2 );
+        CHECK( (*it)->staff() == 0 );
         ++it;
         //CHECK( (*it)->to_string() == "(n c3 q p2)" );
         CHECK( (*it)->imo_object()->is_note() == true );
@@ -886,7 +886,7 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 5 );
         ++it;   //(key C)
@@ -929,33 +929,26 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, true /*sort table*/);
-        //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_lines() == 2 );
         CHECK( pColStaffObjs->num_entries() == 11 );
         CHECK( pColStaffObjs->is_anacrusis_start() == false );
-        //pColStaffObjs->dump();
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+//        cout << pColStaffObjs->dump();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
                    // (clef G p1)
         CHECK( (*it)->imo_object()->is_clef() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;       //(key C)
-        CHECK( (*it)->imo_object()->is_key_signature() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;       //(time 2 4)
-        CHECK( (*it)->imo_object()->is_time_signature() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;       //(n e4 w p1)
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;       //(n c5 w p1)
-        CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( (*it)->line() == 0 );
         ++it;       //(clef F4 p2)
         CHECK( (*it)->imo_object()->is_clef() == true );
         CHECK( (*it)->line() == 1 );
         ++it;       //(key C)
         CHECK( (*it)->imo_object()->is_key_signature() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;       //(key C)
+        CHECK( (*it)->imo_object()->is_key_signature() == true );
         CHECK( (*it)->line() == 1 );
+        ++it;       //(time 2 4)
+        CHECK( (*it)->imo_object()->is_time_signature() == true );
+        CHECK( (*it)->line() == 0 );
         ++it;       //(time 2 4)
         CHECK( (*it)->imo_object()->is_time_signature() == true );
         CHECK( (*it)->line() == 1 );
@@ -965,6 +958,12 @@ SUITE(ColStaffObjsTest)
         ++it;       //(n g3 w p2)
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( (*it)->line() == 1 );
+        ++it;       //(n e4 w p1)
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;       //(n c5 w p1)
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 0 );
         ++it;       //(barline)
         CHECK( (*it)->imo_object()->is_barline() == true );
         CHECK( (*it)->line() == 0 );
@@ -974,7 +973,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-//Additional test for ColStaffObjs::iterator -------------------------------------
+//Additional test for ColStaffObjsIterator -------------------------------------
 
     TEST_FIXTURE(ColStaffObjsTestFixture, CSOIteratorAtEnd)
     {
@@ -991,7 +990,7 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 8 );
         //CHECK( (*it)->to_string() == "(clef G p1)" );
@@ -1047,7 +1046,7 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
 
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 4 );
@@ -1127,7 +1126,7 @@ SUITE(ColStaffObjsTest)
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore, true);    //true: do sort table
-        ColStaffObjs::iterator it = pColStaffObjs->begin();
+        ColStaffObjsIterator it = pColStaffObjs->begin();
 
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 11 );

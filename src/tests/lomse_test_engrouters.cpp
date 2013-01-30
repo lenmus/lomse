@@ -156,7 +156,7 @@ SUITE(EngroutersCreatorTest)
         Document doc(m_libraryScope);
         doc.create_empty();
         ImoParagraph* pPara = doc.add_paragraph();
-        pPara->add_button("Click me!", USize(2000.0f, 600.0f));
+        pPara->add_button(m_libraryScope, "Click me!", USize(2000.0f, 600.0f));
         MyEngroutersCreator creator(pPara, m_libraryScope);
 
         CHECK( creator.more_content() == true );
@@ -165,7 +165,7 @@ SUITE(EngroutersCreatorTest)
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth);
 
         CHECK( pEngr != NULL );
-        ButtonEngrouter* pEngrouter = dynamic_cast<ButtonEngrouter*>( pEngr );
+        ControlEngrouter* pEngrouter = dynamic_cast<ControlEngrouter*>( pEngr );
         CHECK( pEngrouter != NULL );
 
 //        CHECK( creator.more_content() == false );
@@ -178,7 +178,7 @@ SUITE(EngroutersCreatorTest)
         Document doc(m_libraryScope);
         doc.create_empty();
         ImoParagraph* pPara = doc.add_paragraph();
-        pPara->add_button("Click me!", USize(2000.0f, 600.0f));
+        pPara->add_button(m_libraryScope, "Click me!", USize(2000.0f, 600.0f));
         MyEngroutersCreator creator(pPara, m_libraryScope);
 
         LUnits availableWidth = 1500.0f;
@@ -194,7 +194,7 @@ SUITE(EngroutersCreatorTest)
         Document doc(m_libraryScope);
         doc.create_empty();
         ImoParagraph* pPara = doc.add_paragraph();
-        pPara->add_button("Click me!", USize(2000.0f, 600.0f));
+        pPara->add_button(m_libraryScope, "Click me!", USize(2000.0f, 600.0f));
         MyEngroutersCreator creator(pPara, m_libraryScope);
         LUnits availableWidth = 1500.0f;
         Engrouter* pEngr = creator.create_next_engrouter(availableWidth);
@@ -206,7 +206,7 @@ SUITE(EngroutersCreatorTest)
         pEngr = creator.create_next_engrouter(availableWidth);
 
         CHECK( pEngr != NULL );
-        ButtonEngrouter* pEngrouter = dynamic_cast<ButtonEngrouter*>( pEngr );
+        ControlEngrouter* pEngrouter = dynamic_cast<ControlEngrouter*>( pEngr );
         CHECK( pEngrouter != NULL );
 
         CHECK( creator.more_content() == false );
@@ -219,20 +219,20 @@ SUITE(EngroutersCreatorTest)
         Document doc(m_libraryScope);
         doc.create_empty();
         ImoParagraph* pPara = doc.add_paragraph();
-        pPara->add_button("Accept", USize(2000.0f, 600.0f));
-        pPara->add_button("Cancel", USize(2000.0f, 600.0f));
+        pPara->add_button(m_libraryScope, "Accept", USize(2000.0f, 600.0f));
+        pPara->add_button(m_libraryScope, "Cancel", USize(2000.0f, 600.0f));
         MyEngroutersCreator creator(pPara, m_libraryScope);
 
         LUnits availableWidth = 2000.0f;
         Engrouter* pEngr1 = creator.create_next_engrouter(availableWidth);
         CHECK( pEngr1 != NULL );
-        ButtonEngrouter* pBtEngr1 = dynamic_cast<ButtonEngrouter*>( pEngr1 );
+        ControlEngrouter* pBtEngr1 = dynamic_cast<ControlEngrouter*>( pEngr1 );
         CHECK( pBtEngr1 != NULL );
 
         availableWidth = 2000.0f;
         Engrouter* pEngr2 = creator.create_next_engrouter(availableWidth);
         CHECK( pEngr2 != NULL );
-        ButtonEngrouter* pBtEngr2 = dynamic_cast<ButtonEngrouter*>( pEngr2 );
+        ControlEngrouter* pBtEngr2 = dynamic_cast<ControlEngrouter*>( pEngr2 );
         CHECK( pBtEngr2 != NULL );
 
         CHECK( pEngr1->get_creator_imo() != pEngr2->get_creator_imo() );
@@ -324,7 +324,7 @@ SUITE(EngroutersCreatorTest)
         doc.create_empty();
         ImoParagraph* pPara = doc.add_paragraph();
         pPara->add_text_item("This is a paragraph");
-        pPara->add_button("Click me!", USize(2000.0f, 600.0f));
+        pPara->add_button(m_libraryScope, "Click me!", USize(2000.0f, 600.0f));
         MyEngroutersCreator creator(pPara, m_libraryScope);
 
         Engrouter* pEngr = creator.create_next_engrouter(1000.0f);
@@ -339,7 +339,7 @@ SUITE(EngroutersCreatorTest)
 
         pEngr = creator.create_next_engrouter(3000.0f);
         CHECK( pEngr != NULL );
-        ButtonEngrouter* pEngrouter = dynamic_cast<ButtonEngrouter*>( pEngr );
+        ControlEngrouter* pEngrouter = dynamic_cast<ControlEngrouter*>( pEngr );
         CHECK( pEngrouter != NULL );
         CHECK( creator.more_content() == false );
         CHECK( pEngr->break_requested() == false );
@@ -352,7 +352,7 @@ SUITE(EngroutersCreatorTest)
         doc.create_empty();
         ImoParagraph* pPara = doc.add_paragraph();
         pPara->add_text_item("");
-        pPara->add_button("Click me!", USize(2000.0f, 600.0f));
+        pPara->add_button(m_libraryScope, "Click me!", USize(2000.0f, 600.0f));
         MyEngroutersCreator creator(pPara, m_libraryScope);
 
         Engrouter* pEngr = creator.create_next_engrouter(1000.0f);
@@ -365,7 +365,7 @@ SUITE(EngroutersCreatorTest)
 
         pEngr = creator.create_next_engrouter(3000.0f);
         CHECK( pEngr != NULL );
-        ButtonEngrouter* pEngr2 = dynamic_cast<ButtonEngrouter*>( pEngr );
+        ControlEngrouter* pEngr2 = dynamic_cast<ControlEngrouter*>( pEngr );
         CHECK( pEngr2 != NULL );
         CHECK( creator.more_content() == false );
         CHECK( pEngr->break_requested() == false );
@@ -396,8 +396,8 @@ SUITE(EngroutersCreatorTest)
         doc.create_empty();
         ImoParagraph* pPara = doc.add_paragraph();
         ImoInlineWrapper* pWp = pPara->add_inline_box();
-        pWp->add_button("Accept", USize(2000.0f, 600.0f));
-        pWp->add_button("Cancel", USize(2000.0f, 600.0f));
+        pWp->add_button(m_libraryScope, "Accept", USize(2000.0f, 600.0f));
+        pWp->add_button(m_libraryScope, "Cancel", USize(2000.0f, 600.0f));
         MyEngroutersCreator creator(pPara, m_libraryScope);
 
         LUnits availableWidth = 8000.0f;
@@ -411,9 +411,9 @@ SUITE(EngroutersCreatorTest)
         std::list<Engrouter*>::iterator it = children.begin();
         CHECK( children.size() == 2 );
 //        cout << children.size() << endl;
-        CHECK( dynamic_cast<ButtonEngrouter*>(*it) != NULL );
+        CHECK( dynamic_cast<ControlEngrouter*>(*it) != NULL );
         ++it;
-        CHECK( dynamic_cast<ButtonEngrouter*>(*it) != NULL );
+        CHECK( dynamic_cast<ControlEngrouter*>(*it) != NULL );
 
         delete pEngr;
     }
@@ -424,8 +424,8 @@ SUITE(EngroutersCreatorTest)
         doc.create_empty();
         ImoParagraph* pPara = doc.add_paragraph();
         ImoInlineWrapper* pWp = pPara->add_inline_box();
-        pWp->add_button("Accept", USize(2000.0f, 600.0f));
-        pWp->add_button("Cancel", USize(2000.0f, 600.0f));
+        pWp->add_button(m_libraryScope, "Accept", USize(2000.0f, 600.0f));
+        pWp->add_button(m_libraryScope, "Cancel", USize(2000.0f, 600.0f));
         MyEngroutersCreator creator(pPara, m_libraryScope);
 
         LUnits availableWidth = 8000.0f;
