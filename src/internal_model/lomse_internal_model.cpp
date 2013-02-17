@@ -1584,6 +1584,7 @@ void ImoHeading::accept_visitor(BaseVisitor& v)
 ImoInstrument::ImoInstrument(Document* pDoc)
     : ImoContainerObj(k_imo_instrument)
     , m_pDoc(pDoc)
+    , m_pScore(NULL)
     , m_name()
     , m_abbrev()
     , m_midi()
@@ -1776,94 +1777,39 @@ void ImoInstrument::add_staff_objects(const string& ldpsource)
 }
 
 //---------------------------------------------------------------------------------------
-void ImoInstrument::delete_staffobj(ImoStaffObj* pImo)
+void ImoInstrument::delete_staffobj(ImoStaffObj* pSO)
 {
-    ImoDocument* pImoDoc = pImo->get_document();
-    TreeNode<ImoObj>::iterator it(pImo);
-    pImoDoc->erase(it);
-    delete pImo;
+    //high level method. Can not be used if ColStaffObjs not build
+    ColStaffObjs* pColStaffObjs = m_pScore->get_staffobjs_table();
+    if (!pColStaffObjs)
+        return;
+
+    //General houskeeping:
+
+        //recursively delete all attachments
+        //DONE: this is automatic: deleting ImoObj recursively deletes its attachments
+
+        //remove from all relations. Could imply deleting the relation.
+        //TODO
+
+        //if duration > 0 && ! is-noterest-in-chord shift back all staffobjs in that
+        //instr/staff. When a barline is found determine time implied by each staff
+        //and choose greater one. If barline time doesn't change stop shifting times.
+        //OPTIMIZATION: barlines should store time implied by each staff.
+        if (pSO->get_duration() > 0.0f)
+        {
+//            if (pSO->is_noterest() && )
+        }
+
+    //remove from ColStaffObjs
+    pColStaffObjs->delete_entry_for(pSO);
+
+    //remove from ImoTree
+    ImoMusicData* pMusicData = get_musicdata();
+    pMusicData->remove_child(pSO);
+    delete pSO;
+
     set_dirty(true);
-
-
-
-//    //returns true if deletion error
-//
-//    //Delete the object
-//    m_cStaffObjs.Delete(pSO);
-//
-//    //wxLogMessage(this->Dump());
-//    return false;       //false->deletion OK
-
-
-
-//    void lmColStaffObjs::Delete(lmStaffObj* pSO, bool fClefKeepPosition, bool fKeyKeepPitch)
-//    {
-//        // Delete the StaffObj pointed by pSO.
-//        // - Flags fClefKeepPosition and fKeyKeepPitch are only meaninful when Delete() is invoked
-//        // to undo an 'insert clef' or 'insert key' command.
-//
-//        //Algorithm:
-//        //  - get segment and find object to remove
-//        //  - get all needed information from object to delete, before doing it
-//        //  - remove the staffobj from the colection
-//        //  - if removed object was a note not in chord:
-//        //      Shift left all note/rests in this voice and sort the collection
-//        //  - if it was a barline:
-//        //      merge current segment with next one
-//        //      Adjust timepos of all moved objects
-//        //      Update segment pointer in all moved objects
-//        //      remove next segment and renumber segments
-//        //  - delete the removed staffobj
-//
-//
-//        //leave cursor positioned on object after object to remove
-//        MoveCursorToObject(pSO);
-//        MoveCursorRight(true);      //true: stop in all chord notes
-//        lmStaffObj* pCursorSO = GetCursorStaffObj();
-//        lmCursorState oVCState = GetCursor()->GetState();
-//
-//        //get segment and remove object
-//        lmSegment* pSegment = pSO->GetSegment();
-//        pSegment->Remove(pSO, false, fClefKeepPosition, fKeyKeepPitch); //false -> do not delete object
-//
-//        //if removed object is a barline:
-//        //  - merge current segment with next one
-//        //  - Adjust timepos of all moved objects
-//        //  - Update segment pointer in all moved objects
-//        //  - remove next segment and renumber segments
-//        if (pSO->IsBarline())
-//        {
-//            //merge current segment with next one
-//            //As we are dealing with lists this is just to cut and append the lists
-//            lmSegment* pNextSegment = m_Segments[pSegment->GetNumSegment() + 1];
-//            float rTime = pSegment->JoinSegment(pNextSegment);
-//
-//            //remove next segment and renumber segments. Notice that if we removed last barline
-//            //there will be no next segment
-//            RemoveSegment( pNextSegment->GetNumSegment());
-//
-//            //As a consequence of joining segments, saved cursor information is no longer
-//            //valid. In particular we have to fix rTimePos.
-//            oVCState.IncrementTimepos(rTime);
-//        }
-//
-//        //after removing the staffobj, VCursor iterator is pointing to next staffobj but
-//        //other VCursor variables (rTimePos, in particular) are no longer valid and should be
-//        //updated.
-//        pSegment->UpdateDuration();     //ensure it is updated
-//        GetCursor()->SetState(&oVCState, true);  //true->update timepos with pSO timepos
-//
-//        //finally, invoke destructor for removed staffobj
-//        delete pSO;
-//
-//
-//        //wxLogMessage(_T("[lmColStaffObjs::Delete] Forcing a dump:");
-//        //wxLogMessage( Dump() );
-//        //#if defined(_LM_DEBUG_)
-//        //g_pLogger->LogTrace(_T("lmColStaffObjs::Delete"), Dump() );
-//        //#endif
-//    }
-
 }
 
 //---------------------------------------------------------------------------------------
@@ -1883,6 +1829,7 @@ void ImoInstrument::insert_staffobj(ImoStaffObj* pPos, ImoStaffObj* pImo)
 //=======================================================================================
 ImoInstrGroup::ImoInstrGroup()
     : ImoSimpleObj(k_imo_instr_group)
+    , m_pScore(NULL)
     , m_fJoinBarlines(true)
     , m_symbol(k_brace)
     , m_name()
@@ -1931,6 +1878,7 @@ void ImoInstrGroup::add_instrument(ImoInstrument* pInstr)
 {
     m_instruments.push_back(pInstr);
     pInstr->set_in_group(this);
+    pInstr->set_owner_score(m_pScore);
 }
 
 //---------------------------------------------------------------------------------------
@@ -2338,6 +2286,7 @@ int ImoScore::get_instr_number_for(ImoInstrument* pInstr)
 //---------------------------------------------------------------------------------------
 void ImoScore::add_instrument(ImoInstrument* pInstr)
 {
+    pInstr->set_owner_score(this);
     ImoInstruments* pColInstr = get_instruments();
     return pColInstr->append_child_imo(pInstr);
 }
@@ -2428,6 +2377,7 @@ void ImoScore::add_instruments_group(ImoInstrGroup* pGroup)
         append_child_imo(pGroups);
     }
     pGroups->append_child_imo(pGroup);
+    pGroup->set_owner_score(this);
 
     for (int i=0; i < pGroup->get_num_instruments(); i++)
         add_instrument(pGroup->get_instrument(i));
@@ -2589,6 +2539,7 @@ ImoInstrument* ImoScore::add_instrument()
     ImoMusicData* pMD = static_cast<ImoMusicData*>(
                                 ImFactory::inject(k_imo_music_data, m_pDoc));
     pInstr->append_child_imo(pMD);
+    pInstr->set_owner_score(this);
     return pInstr;
 }
 

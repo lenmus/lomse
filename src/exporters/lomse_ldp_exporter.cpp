@@ -685,37 +685,46 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    void save_start_time_and_add_measure_comment()
-    {
-        m_rStartTime = (*m_itStartOfMeasure)->time();
-
-        if (!m_pExporter->get_remove_newlines())
-        {
-            empty_line();
-            start_comment();
-            m_source << "measure " << (m_curMeasure + 1);
-            end_comment();
-        }
-    }
-
-    //-----------------------------------------------------------------------------------
     void determine_how_many_lines_in_current_measure()
     {
         m_lines.assign(k_max_num_lines, 0);
         ColStaffObjsIterator it = m_itStartOfMeasure;
         if (it != m_pColStaffObjs->end())
         {
-            m_curMeasure = (*it)->measure();
-            while (it != m_pColStaffObjs->end() && (*it)->measure() == m_curMeasure)
+            while (it != m_pColStaffObjs->end() && (*it)->num_instrument() != m_iInstr)
+                ++it;
+            m_itStartOfMeasure = it;
+
+            if (it != m_pColStaffObjs->end())
+                m_curMeasure = (*it)->measure();
+
+            while (it != m_pColStaffObjs->end()
+                   && !((*it)->imo_object()->is_barline()
+                        && (*it)->num_instrument() == m_iInstr) )
             {
                 m_lines[ (*it)->line() ] = 1;
-                if ((*it)->imo_object()->is_barline() && (*it)->num_instrument() == m_iInstr)
-                    break;
                 ++it;
             }
         }
 
         m_itEndOfMeasure = it;
+    }
+
+    //-----------------------------------------------------------------------------------
+    void save_start_time_and_add_measure_comment()
+    {
+        if (m_itStartOfMeasure != m_pColStaffObjs->end())
+        {
+            m_rStartTime = (*m_itStartOfMeasure)->time();
+
+            if (!m_pExporter->get_remove_newlines())
+            {
+                empty_line();
+                start_comment();
+                m_source << "measure " << (m_curMeasure + 1);
+                end_comment();
+            }
+        }
     }
 
     //-----------------------------------------------------------------------------------
@@ -792,6 +801,9 @@ protected:
     //-----------------------------------------------------------------------------------
     void add_go_fwd_back_if_needed(float time)
     {
+        if (m_pExporter->is_processing_chord())
+            return;
+
         if (!is_equal_time(time, m_rCurTime))
         {
             float shift = m_rCurTime - time;
@@ -927,17 +939,24 @@ public:
     string generate_source(ImoObj* pParent=NULL)
     {
         if (m_pObj->is_start_of_chord())
+        {
             start_element("chord", k_no_id);
+            m_pExporter->set_processing_chord(true);
+        }
 
         start_element("n", m_pObj->get_id());
         add_pitch();
         add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
+        add_voice();
         add_stem();
         source_for_base_staffobj(m_pObj);
         end_element(k_in_same_line);
 
         if (m_pObj->is_end_of_chord())
+        {
             end_element();
+            m_pExporter->set_processing_chord(false);
+        }
 
         return m_source.str();
     }
@@ -1005,6 +1024,11 @@ protected:
         }
     }
 
+    void add_voice()
+    {
+        m_source << " v" << m_pObj->get_voice() << " ";
+    }
+
 };
 
 
@@ -1024,9 +1048,17 @@ public:
     {
         start_element("r", m_pObj->get_id());
         add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
+        add_voice();
         source_for_base_staffobj(m_pObj);
         end_element(k_in_same_line);
         return m_source.str();
+    }
+
+protected:
+
+    void add_voice()
+    {
+        m_source << " v" << m_pObj->get_voice() << " ";
     }
 
 };
@@ -1912,6 +1944,7 @@ LdpExporter::LdpExporter(LibraryScope* pLibraryScope)
     , m_fAddId(false)
     , m_fRemoveNewlines(false)
     , m_pCurrScore(NULL)
+    , m_fProcessingChord(false)
 {
 }
 
@@ -1922,6 +1955,7 @@ LdpExporter::LdpExporter()
     , m_fAddId(false)
     , m_fRemoveNewlines(false)
     , m_pCurrScore(NULL)
+    , m_fProcessingChord(false)
 {
 }
 

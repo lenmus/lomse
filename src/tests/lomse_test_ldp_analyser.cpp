@@ -9349,5 +9349,45 @@ SUITE(LdpAnalyserTest)
         delete tree->get_root();
         delete pIModel;
     }
+
+    // other test to fix detected errors ------------------------------------------------
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, staff_reset_when_new_instrument)
+    {
+        //current saved values (staff number reset when new instrument
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text(
+            "(score (vers 1.6)"
+            "(instrument (staves 2)(musicData "
+            "(clef G p1)(clef F4 p2)(key D)(time 4 4)(n c4 e p1)(n e4 s)(goBack start)"
+            "(n g3 q p2)(n e3 e)(goFwd 160)(barline)"
+            "))"
+            "(instrument (musicData (clef C3)(key D)(time 4 4)"
+            "(n c4 h.)(n e4 s)(goFwd 48)(barline)"
+            "))"
+            ")"
+        );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoInstrument* pInstr = pScore->get_instrument(1);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pMD->get_child(0) );
+        CHECK( pClef->get_clef_type() == k_clef_C3 );
+        CHECK( pClef->get_staff() == 0 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
 }
 

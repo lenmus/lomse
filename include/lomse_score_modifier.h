@@ -27,10 +27,10 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_MODEL_BUILDER_H__
-#define __LOMSE_MODEL_BUILDER_H__
+#ifndef __LOMSE_SCORE_MODIFIER_H__        //to avoid nested includes
+#define __LOMSE_SCORE_MODIFIER_H__
 
-#include <ostream>
+//#include "lomse_build_options.h"
 
 using namespace std;
 
@@ -38,52 +38,38 @@ namespace lomse
 {
 
 //forward declarations
-class InternalModel;
-class ImoDocument;
-class ImoKeySignature;
-class ImoNote;
-class ImoObj;
+class ColStaffObjs;
 class ImoScore;
-
-
-//---------------------------------------------------------------------------------------
-// ModelBuilder. Implements the final step of LDP compiler: code generation.
-// Traverses the parse tree and creates the internal model
-class ModelBuilder
-{
-public:
-    ModelBuilder() {}
-    virtual ~ModelBuilder() {}
-
-    ImoDocument* build_model(InternalModel* IModel);
-    void structurize(ImoObj* pImo);
-
-};
+class ImoStaffObj;
 
 //---------------------------------------------------------------------------------------
-// PitchAssigner. Implements the algorithm to traverse the score and assign pitch to
-// notes, based on notated pitch, and taking into account key signature and notated
-// accidentals introduced by previous notes on the same measure.
-class PitchAssigner
+class ScoreModifier
 {
 protected:
-    int m_accidentals[7];
+    ImoScore* m_pScore;
+    ColStaffObjs* m_pColStaffObjs;
+
 
 public:
-    PitchAssigner() {}
-    virtual ~PitchAssigner() {}
+    ScoreModifier(ImoScore* pScore);
+    virtual ~ScoreModifier() {}
 
-    void assign_pitch(ImoScore* pScore);
-
+    //score edition API
+    void delete_staffobj(ImoStaffObj* pImo);
+    void insert_staffobj(ImoStaffObj* pPos, ImoStaffObj* pSO);
 
 protected:
-    void reset_accidentals(ImoKeySignature* pKey);
-    void update_context_accidentals(ImoNote* pNote);
-    void compute_pitch(ImoNote* pNote);
+    void remove_object_from_all_relationships(ImoStaffObj* pSO);
+    bool is_necessary_to_shift_time_back_from(ImoStaffObj* pSO);
+    void shift_objects_back_in_time_from(ImoStaffObj* pSO);
+    void remove_object_from_imo_tree(ImoStaffObj* pSO);
+    void remove_object_from_staffobjs_table(ImoStaffObj* pSO);
+    void decrement_measure_number_from(ImoStaffObj* pSO);
 
 };
 
 
 }   //namespace lomse
 
-#endif      //__LOMSE_MODEL_BUILDER_H__
+#endif    // __LOMSE_SCORE_MODIFIER_H__
+

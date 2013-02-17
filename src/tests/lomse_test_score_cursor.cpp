@@ -127,7 +127,7 @@ public:
     {
         //An score with empty places in first staff (after 26L, an in second measure)
 //       (score#15 (vers 1.6)
-//       (instrument#10 (staves 2) (musicData#20
+//       (instrument#19 (staves 2) (musicData#20
 //       (clef#21 G p1)(clef#22 F4 p2)(key#23 C)(time#24 2 4)
 //       (n#25 e4 e g+ p1)(n#26 g4 e g-)(goBack#32 start)
 //       (n#33 c3 e g+ p2)(n#34 e3 e g-)(n#40 g3 e g+)(n#41 c4 e g-)
@@ -163,6 +163,28 @@ public:
                "(n a3 q p2)(n e3 q) )))"
             "))" );
         m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+    }
+
+    void create_document_4()
+    {
+        //As score with emptypositions defined by time grid
+        // (score#15 (vers 1.6)
+        //    (instrument#19 (staves 2) (musicData#20
+        //      (clef#21 G p1)(clef#22 F4 p2)(key#23 C)(time#24 2 4)
+        //      (n#25 e4 e g+ p1)(n#26 g4 e g-)(goBack start)
+        //      (n#33 c3 e g+ p2)(n#34 e3 e g-)(n#40 g3 q)
+        //      (barline#41) )))
+        m_pDoc = LOMSE_NEW Document(m_libraryScope);
+        m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 1.6)"
+               "(instrument (staves 2) (musicData "
+               "(clef G p1)(clef F4 p2)(key C)(time 2 4)"
+               "(n e4 e g+ p1)(n g4 e g-)(goBack start)"
+               "(n c3 e g+ p2)(n e3 e g-)(n g3 q)"
+               "(barline) )))"
+            "))" );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        cout << m_pDoc->to_string(k_save_ids) << endl;
     }
 
     void create_document_empty_score()
@@ -368,22 +390,24 @@ SUITE(ScoreCursorTest)
         //5. back from empty place to prev empty place
         //6. back from empty place to existing time
         //7. back from object to existing time. Skips objects in other staff
-        create_document_2();
+        create_document_4();
+//        cout << m_pDoc->to_string(k_save_ids) << endl;
+//        dump_score();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to_barline(47L, 0);   //4. prev.state: from object to empty place
+        cursor.point_to_barline(41L, 0);   //4. prev.state: from object to empty place
 
 //        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0f, 47L, 47L);
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0f, 41L, 41L);
         CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 96.0f, k_cursor_at_empty_place, 41L);
 
         cursor.move_prev();     //5. prev.state: from empty place to prev empty place
 //        cout << cursor.dump_cursor();
         CHECK_CURRENT_STATE(cursor, 0, 0, 0, 96.0f, k_cursor_at_empty_place, 41L);
-        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 40L);
+        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 41L);
 
         cursor.move_prev();     //6. prev.state: from empty place to existing time
 //        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 40L);
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 41L);
         CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 32.0f, 26L, 26L);
 
         cursor.move_prev();     //7. prev.state: skip objects in other staff
@@ -625,7 +649,7 @@ SUITE(ScoreCursorTest)
         CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 0.0f, 23L, 23L);
 
         cursor.move_next();
-        //cout << cursor.dump_cursor();
+//        cout << cursor.dump_cursor();
         CHECK( (*cursor)->is_rest() == true );
         CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0f, 25L, 25L);
         CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 0.0f, 24L, 24L);
@@ -688,7 +712,7 @@ SUITE(ScoreCursorTest)
     TEST_FIXTURE(ScoreCursorTestFixture, move_next_4)
     {
         //4. to next time. No object
-        create_document_2();
+        create_document_4();
         MyScoreCursor cursor(m_pDoc, m_pScore);
 //        dump_score();
         cursor.point_to(26L);   //second note firt staff
@@ -696,7 +720,7 @@ SUITE(ScoreCursorTest)
         cursor.move_next();
 
 //        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 40L);
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 41L);
         CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 32.0f, 26L, 26L);
     }
 
@@ -708,11 +732,15 @@ SUITE(ScoreCursorTest)
         cursor.point_to(26L);   //second note firt staff
         cursor.move_next();     //empty
 
+//        cout << cursor.dump_cursor();
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 47L);
+        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 32.0f, 26L, 26L);
+
         cursor.move_next();
 
 //        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 96.0f, k_cursor_at_empty_place, 41L);
-        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 40L);
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 96.0f, k_cursor_at_empty_place, 47L);
+        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 47L);
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_next_6)
@@ -728,7 +756,7 @@ SUITE(ScoreCursorTest)
 
 //        cout << cursor.dump_cursor();
         CHECK_CURRENT_STATE(cursor, 0, 0, 0, 128.0f, 47L, 47L);
-        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 96.0f, k_cursor_at_empty_place, 41L);
+        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 96.0f, k_cursor_at_empty_place, 47L);
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_next_7)
@@ -1041,7 +1069,7 @@ SUITE(ScoreCursorTest)
         ScoreCursorState* pState = static_cast<ScoreCursorState*>( cursor.get_state() );
 
 //        dump_cursor_state(pState);
-        CHECK_STATE(pState, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 40L);
+        CHECK_STATE(pState, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 47L);
         delete pState;
     }
 
@@ -1096,7 +1124,7 @@ SUITE(ScoreCursorTest)
 
 //        dump_cursor_state(pState);
 //        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 40L);
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 47L);
         CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 32.0f, 26L, 26L);
         delete pState;
     }
@@ -1114,13 +1142,12 @@ SUITE(ScoreCursorTest)
         ImoStaffObj* pImo = static_cast<ImoStaffObj*>( *cursor );
         ImoInstrument* pInstr = m_pScore->get_instrument(0);
         pInstr->delete_staffobj(pImo);
-        m_pScore->close();
+//        m_pScore->close();
         //dump_score();
 
-        cursor.set_auto_refresh(true);
-        CHECK( *cursor != NULL );       //force refresh
+        cursor.refresh();
 
-//        cout << cursor.dump_cursor();
+        cout << cursor.dump_cursor();
         CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0f, 25L, 25L);
         CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 0.0f, 23L, 23L);
     }
@@ -1182,25 +1209,25 @@ SUITE(ScoreCursorTest)
 //        CHECK_PREVIOUS_STATE_AT_END_OF_STAFF(cursor, 0, 0, 2, 256.0f);
 //    }
 
-    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_5)
-    {
-        //5. after deletion. next is end of score
-        create_document_3();
-        MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(49L);       //clef in staff 2
-        ImoStaffObj* pImo = static_cast<ImoStaffObj*>( *cursor );
-        ImoInstrument* pInstr = m_pScore->get_instrument(0);
-        pInstr->delete_staffobj(pImo);
-        m_pScore->close();
-        //dump_score();
-
-        cursor.refresh();
-
-//        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 1, 1, 192.0f);
-        CHECK( cursor.is_at_end_of_score() == true );
-        CHECK_PREVIOUS_STATE(cursor, 0, 1, 1, 128.0f, 48L, 48L);
-    }
+//    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_5)
+//    {
+//        //5. after deletion. next is end of score
+//        create_document_3();
+//        MyScoreCursor cursor(m_pDoc, m_pScore);
+//        cursor.point_to(49L);       //clef in staff 2
+//        ImoStaffObj* pImo = static_cast<ImoStaffObj*>( *cursor );
+//        ImoInstrument* pInstr = m_pScore->get_instrument(0);
+//        pInstr->delete_staffobj(pImo);
+//        m_pScore->close();
+//        //dump_score();
+//
+//        cursor.refresh();
+//
+////        cout << cursor.dump_cursor();
+//        CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 1, 1, 192.0f);
+//        CHECK( cursor.is_at_end_of_score() == true );
+//        CHECK_PREVIOUS_STATE(cursor, 0, 1, 1, 128.0f, 48L, 48L);
+//    }
 
     TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_6)
     {

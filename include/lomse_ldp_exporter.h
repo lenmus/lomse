@@ -57,6 +57,7 @@ protected:
 
     //temporary
     ImoScore* m_pCurrScore;     //current score being exported
+    bool m_fProcessingChord;
 
 public:
     LdpExporter();
@@ -87,6 +88,8 @@ public:
     string& get_library_version() { return m_version; }
     inline void set_current_score(ImoScore* pScore) { m_pCurrScore = pScore; }
     inline ImoScore* get_current_score() { return m_pCurrScore; }
+    inline void set_processing_chord(bool value) { m_fProcessingChord = value; }
+    inline bool is_processing_chord() { return m_fProcessingChord; }
 
 protected:
     LdpGenerator* new_generator(ImoObj* pImo);

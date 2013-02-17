@@ -1642,9 +1642,13 @@ class ImoStaffObj : public ImoScoreObj
 {
 protected:
     int m_staff;
+    int m_measure;
+    float m_time;
 
-    ImoStaffObj(int objtype) : ImoScoreObj(objtype), m_staff(0) {}
-    ImoStaffObj(long id, int objtype) : ImoScoreObj(id, objtype), m_staff(0) {}
+    ImoStaffObj(int objtype)
+        : ImoScoreObj(objtype), m_staff(0), m_measure(0), m_time(0.0f) {}
+    ImoStaffObj(long id, int objtype)
+        : ImoScoreObj(id, objtype), m_staff(0), m_measure(0), m_time(0.0f) {}
 
 public:
     virtual ~ImoStaffObj();
@@ -1663,11 +1667,15 @@ public:
     ImoRelObj* find_relation(int type);
 
     //getters
+    inline float get_time() { return m_time; }
     virtual float get_duration() { return 0.0f; }
     inline int get_staff() { return m_staff; }
+    inline int get_measure() { return m_measure; }
 
     //setters
     virtual void set_staff(int staff) { m_staff = staff; }
+    inline void set_time(float rTime) { m_time = rTime; }
+    inline void set_measure(int measure) { m_measure = measure; }
 
     //other
     ImoInstrument* get_instrument();
@@ -2610,6 +2618,7 @@ protected:
 class ImoInstrGroup : public ImoSimpleObj
 {
 protected:
+    ImoScore* m_pScore;
     bool m_fJoinBarlines;
     int m_symbol;           // enum k_none, k_default, k_brace, k_bracket, ...
     ImoScoreText m_name;
@@ -2618,6 +2627,9 @@ protected:
 
     friend class ImFactory;
     ImoInstrGroup();
+
+    friend class ImoScore;
+    inline void set_owner_score(ImoScore* pScore) { m_pScore = pScore; }
 
 public:
     ~ImoInstrGroup();
@@ -2649,6 +2661,7 @@ class ImoInstrument : public ImoContainerObj
 {
 protected:
     Document*       m_pDoc;
+    ImoScore*       m_pScore;
     ImoScoreText    m_name;
     ImoScoreText    m_abbrev;
     ImoMidiInfo     m_midi;
@@ -2657,6 +2670,10 @@ protected:
 
     friend class ImFactory;
     ImoInstrument(Document* pDoc);
+
+    friend class ImoScore;
+    friend class ImoInstrGroup;
+    inline void set_owner_score(ImoScore* pScore) { m_pScore = pScore; }
 
 public:
     ~ImoInstrument();
@@ -2690,7 +2707,7 @@ public:
     inline bool has_abbrev() { return m_abbrev.get_text() != ""; }
     LUnits tenths_to_logical(Tenths value, int iStaff=0);
 
-    //API
+    //direct creation API
     ImoBarline* add_barline(int type, bool fVisible=true);
     ImoClef* add_clef(int type, int nStaff=1);
     ImoKeySignature* add_key_signature(int type);
@@ -2698,6 +2715,8 @@ public:
     ImoSpacer* add_spacer(Tenths space);
     ImoObj* add_object(const string& ldpsource);
     void add_staff_objects(const string& ldpsource);
+
+    //score edition API
     void delete_staffobj(ImoStaffObj* pImo);
     void insert_staffobj(ImoStaffObj* pPos, ImoStaffObj* pImo);
 

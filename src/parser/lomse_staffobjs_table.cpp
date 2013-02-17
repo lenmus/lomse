@@ -48,9 +48,7 @@ namespace lomse
 string ColStaffObjsEntry::dump()
 {
     stringstream s;
-//    s << m_measure << "\t" << m_time << "\t" << m_instr << "\t"
-//      << m_line << "\t" << m_staff << "\t" << to_string_with_ids() << endl;
-    s << m_instr << "\t" << m_staff << "\t" << m_measure << "\t" << m_time << "\t"
+    s << m_instr << "\t" << m_staff << "\t" << m_measure << "\t" << time() << "\t"
       << m_line << "\t" << to_string_with_ids() << endl;
     return s.str();
 }
@@ -129,40 +127,41 @@ bool is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
 //---------------------------------------------------------------------------------------
 ColStaffObjs::ColStaffObjs()
     : m_numLines(0)
+    , m_numEntries(0)
     , m_rMissingTime(0.0f)
+    , m_pFirst(NULL)
+    , m_pLast(NULL)
 {
 }
 
 //---------------------------------------------------------------------------------------
 ColStaffObjs::~ColStaffObjs()
 {
-    std::vector<ColStaffObjsEntry*>::iterator it;
-    for (it=m_table.begin(); it != m_table.end(); ++it)
+    ColStaffObjs::iterator it;
+    for (it=begin(); it != end(); ++it)
         delete *it;
-    m_table.clear();
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjs::AddEntry(int measure, float time, int instr, int voice, int staff,
-                            ImoObj* pImo)
+void ColStaffObjs::add_entry(int measure, int instr, int voice, int staff,
+                             ImoStaffObj* pImo)
 {
     ColStaffObjsEntry* pEntry =
-        LOMSE_NEW ColStaffObjsEntry(measure, time, instr, voice, staff,
-                                    static_cast<ImoStaffObj*>( pImo ) );
-    m_table.push_back(pEntry);
+        LOMSE_NEW ColStaffObjsEntry(measure, instr, voice, staff, pImo);
+    add_entry_to_list(pEntry);
+    ++m_numEntries;
 }
 
 //---------------------------------------------------------------------------------------
 string ColStaffObjs::dump()
 {
     stringstream s;
-    std::vector<ColStaffObjsEntry*>::iterator it;
+    ColStaffObjs::iterator it;
     s << "Num.entries = " << num_entries() << endl;
     //    +.......+.......+.......+.......+.......+.......+
-//    s << "seg.    time    instr   line    staff   object" << endl;
     s << "instr   staff   meas.   time    line    object" << endl;
     s << "----------------------------------------------------------------" << endl;
-    for (it=m_table.begin(); it != m_table.end(); ++it)
+    for (it=begin(); it != end(); ++it)
     {
         s << (*it)->dump();
     }
@@ -170,9 +169,148 @@ string ColStaffObjs::dump()
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjs::sort()
+void ColStaffObjs::add_entry_to_list(ColStaffObjsEntry* pEntry)
 {
-    std::stable_sort(m_table.begin(), m_table.end(), is_lower_entry);
+//    if (!m_pFirst)
+//    {
+//        //first entry
+//        m_pFirst = pEntry;
+//        m_pLast = pEntry;
+//        pEntry->set_prev( NULL );
+//        pEntry->set_next( NULL );
+//        return;
+//    }
+//
+//    //insert in list in order
+//    ColStaffObjsEntry* pCurrent = m_pFirst;
+//    while (pCurrent != NULL)
+//    {
+//        if (is_lower_entry(pEntry, pCurrent))
+//        {
+//            pEntry->set_next( pCurrent );
+//            ColStaffObjsEntry* pPrev = pCurrent->get_prev();
+//            pEntry->set_prev( pPrev );
+//            pCurrent->set_prev( pEntry );
+//            if (pPrev == NULL)
+//                m_pFirst = pEntry;
+//            else
+//                pPrev->set_next( pEntry );
+//            return;
+//        }
+//        pCurrent = pCurrent->get_next();
+//    }
+//
+//    //is the higest
+//    pEntry->set_next( NULL );
+//    pEntry->set_prev( m_pLast );
+//    m_pLast->set_next( pEntry );
+//    m_pLast = pEntry;
+
+    if (!m_pFirst)
+    {
+        //first entry
+        m_pFirst = pEntry;
+        m_pLast = pEntry;
+        pEntry->set_prev( NULL );
+        pEntry->set_next( NULL );
+        return;
+    }
+
+    //insert in list in order
+    ColStaffObjsEntry* pCurrent = m_pLast;
+    while (pCurrent != NULL)
+    {
+        if (is_lower_entry(pEntry, pCurrent))
+            pCurrent = pCurrent->get_prev();
+        else
+        {
+            //insert after pCurrent
+            ColStaffObjsEntry* pNext = pCurrent->get_next();
+            pEntry->set_prev( pCurrent );
+            pEntry->set_next( pNext );
+            pCurrent->set_next( pEntry );
+            if (pNext == NULL)
+                m_pLast = pEntry;
+            else
+                pNext->set_prev( pEntry );
+            return;
+        }
+    }
+
+    //it is the first one
+    pEntry->set_prev( NULL );
+    pEntry->set_next( m_pFirst );
+    m_pFirst->set_prev( pEntry );
+    m_pFirst = pEntry;
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjs::delete_entry_for(ImoStaffObj* pSO)
+{
+    ColStaffObjsEntry* pEntry = find_entry_for(pSO);
+    if (!pEntry)
+        throw std::runtime_error("[ColStaffObjs::delete_entry_for] entry not found!");
+
+    ColStaffObjsEntry* pPrev = pEntry->get_prev();
+    ColStaffObjsEntry* pNext = pEntry->get_next();
+    if (pPrev == NULL)
+    {
+        //removing the head of the list
+        m_pFirst = pNext;
+        if (pNext)
+            pNext->set_prev(NULL);
+    }
+    else if (pNext == NULL)
+    {
+        //removing the tail of the list
+        m_pLast = pPrev;
+        pPrev->set_next(NULL);
+    }
+    else
+    {
+        //removing intermediate node
+        pPrev->set_next( pNext );
+        pNext->set_prev( pPrev );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+ColStaffObjsEntry* ColStaffObjs::find_entry_for(ImoStaffObj* pSO)
+{
+    ColStaffObjs::iterator it;
+    for (it=begin(); it != end(); ++it)
+    {
+        if ((*it)->imo_object() == pSO)
+            return *it;
+    }
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjs::sort_table()
+{
+    //The table is created with entries in order. But edition operations forces to
+    //reorder entries. The main requirement for the sort algorithm is:
+    // * stable (preserve order of elements with equal keys)
+    //The chosen algorithm is the insertion sort, that also has some advantages:
+    // * good performance when table is nearly ordered
+    // * simple to implement and musch better performance than other simple algorithms,
+    //   such as the bubble sort
+    // * in-place sort (does not require extra memory)
+
+    ColStaffObjsEntry* pUnsorted = m_pFirst;
+    m_pFirst = NULL;
+    m_pLast = NULL;
+
+    while (pUnsorted != NULL)
+    {
+        ColStaffObjsEntry* pCurrent = pUnsorted;
+
+        //get next here, as insertion could change next element
+        pUnsorted = pUnsorted->get_next();
+
+        add_entry_to_list(pCurrent);
+    }
 }
 
 
@@ -185,15 +323,12 @@ ColStaffObjsBuilder::ColStaffObjsBuilder()
 }
 
 //---------------------------------------------------------------------------------------
-ColStaffObjs* ColStaffObjsBuilder::build(ImoScore* pScore, bool fSort)
+ColStaffObjs* ColStaffObjsBuilder::build(ImoScore* pScore)
 {
-    //param fSort is to prevent sorting the table for unit tests
-
     m_pColStaffObjs = LOMSE_NEW ColStaffObjs();
     m_pImScore = pScore;
     create_table();
     set_num_lines();
-    sort_table(fSort);
     m_pImScore->set_staffobjs_table(m_pColStaffObjs);
     return m_pColStaffObjs;
 }
@@ -204,7 +339,7 @@ void ColStaffObjsBuilder::create_table()
     int nTotalInstruments = m_pImScore->get_num_instruments();
     for (int nInstr = 0; nInstr < nTotalInstruments; nInstr++)
     {
-        find_voices_per_staff(nInstr);
+        //find_voices_per_staff(nInstr);
         create_entries(nInstr);
         prepare_for_next_instrument();
     }
@@ -238,18 +373,21 @@ void ColStaffObjsBuilder::create_entries(int nInstr)
         {
             ImoGoBackFwd* pGBF = static_cast<ImoGoBackFwd*>(*it);
             update_time_counter(pGBF);
+            ++it;
+            delete_node(pGBF, pMusicData);
         }
         else if ((*it)->is_key_signature() || (*it)->is_time_signature())
         {
             add_entries_for_key_or_time_signature(*it, nInstr);
+            ++it;
         }
         else
         {
             ImoStaffObj* pSO = static_cast<ImoStaffObj*>(*it);
             add_entry_for_staffobj(pSO, nInstr);
             update_measure(pSO);
+            ++it;
         }
-        ++it;
     }
 }
 
@@ -257,7 +395,7 @@ void ColStaffObjsBuilder::create_entries(int nInstr)
 void ColStaffObjsBuilder::add_entry_for_staffobj(ImoObj* pImo, int nInstr)
 {
     ImoStaffObj* pSO = static_cast<ImoStaffObj*>(pImo);
-    float rTime = determine_timepos(pSO);
+    determine_timepos(pSO);
     int nStaff = pSO->get_staff();
     int nVoice = 0;
     if (pSO->is_note_rest())
@@ -266,7 +404,7 @@ void ColStaffObjsBuilder::add_entry_for_staffobj(ImoObj* pImo, int nInstr)
         nVoice = pNR->get_voice();
     }
     int nLine = get_line_for(nVoice, nStaff);
-    m_pColStaffObjs->AddEntry(m_nCurMeasure, rTime, nInstr, nLine, nStaff, pSO);
+    m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
 }
 
 //---------------------------------------------------------------------------------------
@@ -276,11 +414,11 @@ void ColStaffObjsBuilder::add_entries_for_key_or_time_signature(ImoObj* pImo, in
     int numStaves = pInstr->get_num_staves();
 
     ImoStaffObj* pSO = static_cast<ImoStaffObj*>(pImo);
-    float rTime = determine_timepos(pSO);
+    determine_timepos(pSO);
     for (int nStaff=0; nStaff < numStaves; nStaff++)
     {
         int nLine = get_line_for(0, nStaff);
-        m_pColStaffObjs->AddEntry(m_nCurMeasure, rTime, nInstr, nLine, nStaff, pSO);
+        m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
     }
 }
 
@@ -291,10 +429,10 @@ void ColStaffObjsBuilder::prepare_for_next_instrument()
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::sort_table(bool fSort)
+void ColStaffObjsBuilder::delete_node(ImoGoBackFwd* pGBF, ImoMusicData* pMusicData)
 {
-    if (fSort)
-        m_pColStaffObjs->sort();
+    pMusicData->remove_child(pGBF);
+    delete pGBF;
 }
 
 //---------------------------------------------------------------------------------------
@@ -302,7 +440,6 @@ void ColStaffObjsBuilder::reset_counters()
 {
     m_nCurMeasure = 0;
     m_rCurTime = 0.0f;
-    m_nCurStaff = 0;
     m_rMaxSegmentTime = 0.0f;
     m_rStartSegmentTime = 0.0f;
 }
@@ -314,9 +451,10 @@ int ColStaffObjsBuilder::get_line_for(int nVoice, int nStaff)
 }
 
 //---------------------------------------------------------------------------------------
-float ColStaffObjsBuilder::determine_timepos(ImoStaffObj* pSO)
+void ColStaffObjsBuilder::determine_timepos(ImoStaffObj* pSO)
 {
-    float rTime = m_rCurTime;
+    pSO->set_time(m_rCurTime);
+
     if (pSO->is_note())
     {
         ImoNote* pNote = static_cast<ImoNote*>(pSO);
@@ -326,7 +464,6 @@ float ColStaffObjsBuilder::determine_timepos(ImoStaffObj* pSO)
     else
         m_rCurTime += pSO->get_duration();
     m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_rCurTime);
-    return rTime;
 }
 
 //---------------------------------------------------------------------------------------
@@ -352,25 +489,6 @@ void ColStaffObjsBuilder::update_time_counter(ImoGoBackFwd* pGBF)
         m_rCurTime += pGBF->get_time_shift();
         m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_rCurTime);
     }
-}
-
-////---------------------------------------------------------------------------------------
-//void ColStaffObjsBuilder::update(LdpElement* pElmScore)
-//{
-//    ColStaffObjs* pOldColStaffObjs = m_pImScore->get_staffobjs_table();
-//    delete pOldColStaffObjs;
-//
-//    //For now, rebuild the table
-//    ImoScore* pScore = dynamic_cast<ImoScore*>( pElmScore->get_imobj() );
-//    this->build(pScore);
-//}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::update(ImoScore* pScore)
-{
-    //For now, rebuild the table
-    m_pImScore = pScore;
-    this->build(pScore);
 }
 
 //---------------------------------------------------------------------------------------
@@ -426,9 +544,9 @@ void ColStaffObjsBuilder::collect_anacrusis_info()
 }
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 // StaffVoiceLineTable implementation
-//---------------------------------------------------------------------------------------
+//=======================================================================================
 StaffVoiceLineTable::StaffVoiceLineTable()
     : m_lastAssignedLine(-1)
 {

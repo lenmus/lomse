@@ -49,6 +49,8 @@ class ImoAuxObj;
 class ImoSpacer;
 class ImoScore;
 class ImoTimeSignature;
+class ImoGoBackFwd;
+class ImoMusicData;
 
 
 //---------------------------------------------------------------------------------------
@@ -58,33 +60,53 @@ class ColStaffObjsEntry
 {
 protected:
     int                 m_measure;
-    float               m_time;
     int                 m_instr;
     int                 m_line;
     int                 m_staff;
     ImoStaffObj*        m_pImo;
 
-public:
-    ColStaffObjsEntry(int measure, float time, int instr, int line, int staff,
-                      ImoStaffObj* pImo)
-            : m_measure(measure), m_time(time), m_instr(instr), m_line(line)
-            , m_staff(staff), m_pImo(pImo) {}
+    ColStaffObjsEntry*  m_pNext;    //next entry in the collection
+    ColStaffObjsEntry*  m_pPrev;    //prev. entry in the collection
 
+public:
+    ColStaffObjsEntry(int measure, int instr, int line, int staff,
+                      ImoStaffObj* pImo)
+            : m_measure(measure), m_instr(instr), m_line(line)
+            , m_staff(staff), m_pImo(pImo), m_pNext(NULL), m_pPrev(NULL) {}
+
+    //getters
     inline int measure() const { return m_measure; }
-    inline float time() const { return m_time; }
+    inline float time() const { return m_pImo->get_time(); }
     inline int num_instrument() const { return m_instr; }
     inline int line() const { return m_line; }
     inline int staff() const { return m_staff; }
     inline ImoStaffObj* imo_object() const { return m_pImo; }
-    inline long element_id() { return m_pImo == NULL ? -1L : m_pImo->get_id(); }
+    inline long element_id() { return m_pImo->get_id(); }
+
+    //setters
+    inline void decrement_time(float timeShift) {
+        m_pImo->set_time( m_pImo->get_time() - timeShift );
+    }
+//    inline void measure() const { return m_measure; }
+//    inline void time() const { return m_pImo->get_time(); }
+//    inline void num_instrument() const { return m_instr; }
+//    inline int line() const { return m_line; }
+//    inline int staff() const { return m_staff; }
 
     //debug
     string dump();
     std::string to_string();
     std::string to_string_with_ids();
 
+    //list structure
+    inline ColStaffObjsEntry* get_next() { return m_pNext; }
+    inline ColStaffObjsEntry* get_prev() { return m_pPrev; }
 
 protected:
+    friend class ColStaffObjs;
+    inline void set_next(ColStaffObjsEntry* pEntry) { m_pNext = pEntry; }
+    inline void set_prev(ColStaffObjsEntry* pEntry) { m_pPrev = pEntry; }
+
 
 };
 
@@ -93,66 +115,82 @@ protected:
 // ColStaffObjs: encapsulates the staff objects collection for a score
 //---------------------------------------------------------------------------------------
 
-typedef  vector<ColStaffObjsEntry*>::iterator      ColStaffObjsIterator;
+//typedef  vector<ColStaffObjsEntry*>::iterator      ColStaffObjsIterator;
 
 class ColStaffObjs
 {
 protected:
-    std::vector<ColStaffObjsEntry*> m_table;
     int m_numLines;
+    int m_numEntries;
     float m_rMissingTime;
+
+    ColStaffObjsEntry* m_pFirst;
+    ColStaffObjsEntry* m_pLast;
 
 public:
     ColStaffObjs();
     ~ColStaffObjs();
 
     //table info
-    inline int num_entries() { return static_cast<int>(m_table.size()); }
+    inline int num_entries() { return m_numEntries; }
     inline int num_lines() { return m_numLines; }
     inline bool is_anacrusis_start() { return is_greater_time(m_rMissingTime, 0.0f); }
     inline float anacrusis_missing_time() { return m_rMissingTime; }
 
     //table management
-    void sort();
-    void AddEntry(int measure, float time, int instr, int voice, int staff, ImoObj* pImo);
+    void add_entry(int measure, int instr, int voice, int staff, ImoStaffObj* pImo);
     inline void set_total_lines(int number) { m_numLines = number; }
     inline void set_anacrusis_missing_time(float rTime) { m_rMissingTime = rTime; }
+    void delete_entry_for(ImoStaffObj* pSO);
+    void sort_table();
 
-//    class iterator
-//    {
-//        protected:
-//            friend class ColStaffObjs;
-//            std::vector<ColStaffObjsEntry*>::iterator m_it;
-//
-//        public:
-//            iterator() {}
-//			iterator(std::vector<ColStaffObjsEntry*>::iterator& it) { m_it = it; }
-//            virtual ~iterator() {}
-//
-//            iterator& operator =(const iterator& it) { m_it = it.m_it; return *this; }
-//
-//	        ColStaffObjsEntry* operator *() const { return *m_it; }
-//            iterator& operator ++() { ++m_it; return *this; }
-//            iterator& operator --() { --m_it; return *this; }
-//		    bool operator ==(const iterator& it) const { return m_it == it.m_it; }
-//		    bool operator !=(const iterator& it) const { return m_it != it.m_it; }
-//    };
+    //iterator related
+    class iterator
+    {
+        protected:
+            friend class ColStaffObjs;
+            ColStaffObjsEntry* m_pCurrent;
 
-//	iterator begin() { std::vector<ColStaffObjsEntry*>::iterator it = m_table.begin(); return iterator(it); }
-//	iterator end() { std::vector<ColStaffObjsEntry*>::iterator it = m_table.end(); return iterator(it); }
-//    inline ColStaffObjsEntry* back() { return m_table.back(); }
-//    inline ColStaffObjsEntry* front() { return m_table.front(); }
-    ColStaffObjsIterator begin() { return m_table.begin(); }
-    ColStaffObjsIterator end() { return m_table.end(); }
-    inline ColStaffObjsEntry* back() { return m_table.back(); }
-    inline ColStaffObjsEntry* front() { return m_table.front(); }
+        public:
+            iterator() {}
+			iterator(ColStaffObjsEntry* pEntry) { m_pCurrent = pEntry; }
+            virtual ~iterator() {}
+
+            iterator& operator =(const iterator& it) {
+                m_pCurrent = it.m_pCurrent; return *this;
+            }
+
+	        ColStaffObjsEntry* operator *() const { return m_pCurrent; }
+            iterator& operator ++() {
+                if (m_pCurrent)
+                    m_pCurrent = m_pCurrent->get_next();
+                return *this;
+            }
+            iterator& operator --() {
+                if (m_pCurrent)
+                    m_pCurrent = m_pCurrent->get_prev();
+                return *this;
+            }
+		    bool operator ==(const iterator& it) const { return m_pCurrent == it.m_pCurrent; }
+		    bool operator !=(const iterator& it) const { return m_pCurrent != it.m_pCurrent; }
+    };
+
+	inline iterator begin() { return iterator(m_pFirst); }
+	inline iterator end() { return iterator(NULL); }
+    inline ColStaffObjsEntry* back() { return m_pLast; }
+    inline ColStaffObjsEntry* front() { return m_pFirst; }
+    inline iterator find(ImoStaffObj* pSO) { return iterator(find_entry_for(pSO)); }
 
     //debug
     string dump();
 
 protected:
+    void add_entry_to_list(ColStaffObjsEntry* pEntry);
+    ColStaffObjsEntry* find_entry_for(ImoStaffObj* pSO);
 
 };
+
+typedef  ColStaffObjs::iterator      ColStaffObjsIterator;
 
 
 //---------------------------------------------------------------------------------------
@@ -186,17 +224,13 @@ class ColStaffObjsBuilder
 {
 protected:
     ColStaffObjs*   m_pColStaffObjs;
-    //LdpElement*     m_pScore;
     ImoScore*       m_pImScore;
 
 public:
     ColStaffObjsBuilder();
     ~ColStaffObjsBuilder() {}
 
-//    ColStaffObjs* build(LdpElement* pScore, bool fSort=true);
-    ColStaffObjs* build(ImoScore* pScore, bool fSort=true);
-    //void update(LdpElement* pScore);
-    void update(ImoScore* pScore);
+    ColStaffObjs* build(ImoScore* pScore);
 
 private:
     //global counters to assign measure, timepos and staff
@@ -204,24 +238,23 @@ private:
     float   m_rCurTime;
     float   m_rMaxSegmentTime;
     float   m_rStartSegmentTime;
-    int     m_nCurStaff;
     StaffVoiceLineTable m_lines;
 
     void create_table();
     void set_num_lines();
     void find_voices_per_staff(int nInstr);
     void create_entries(int nInstr);
-    void sort_table(bool fSort);
     void reset_counters();
     void prepare_for_next_instrument();
     int get_line_for(int nVoice, int nStaff);
-    float determine_timepos(ImoStaffObj* pSO);
+    void determine_timepos(ImoStaffObj* pSO);
     void update_measure(ImoStaffObj* pSO);
     void update_time_counter(ImoGoBackFwd* pGBF);
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
     void add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr);
     ImoSpacer* anchor_object(ImoAuxObj* pImo);
     void collect_anacrusis_info();
+    void delete_node(ImoGoBackFwd* pGBF, ImoMusicData* pMusicData);
 
 };
 

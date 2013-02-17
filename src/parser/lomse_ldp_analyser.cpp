@@ -2491,6 +2491,7 @@ public:
     void do_analysis()
     {
         m_pAnalyser->clear_pending_relations();
+        m_pAnalyser->reset_defaults_for_instrument();
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoInstrument* pInstrument = static_cast<ImoInstrument*>(
@@ -5520,6 +5521,14 @@ LdpAnalyser::LdpAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
 LdpAnalyser::~LdpAnalyser()
 {
     delete_relation_builders();
+}
+
+//---------------------------------------------------------------------------------------
+void LdpAnalyser::reset_defaults_for_instrument()
+{
+    m_curStaff = 0;
+    m_curVoice = 1;
+    m_pLastNote = NULL;
 }
 
 //---------------------------------------------------------------------------------------

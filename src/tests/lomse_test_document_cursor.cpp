@@ -514,20 +514,20 @@ SUITE(DocCursorTest)
         CHECK( cursor.get_pointee_id() == k_cursor_at_end );
     }
 
-    TEST_FIXTURE(DocCursorTestFixture, prev_at_top_level)
-    {
-        //@ prev: when at top level traverses top level until trying to
-        //@   move before p_start_cursor(), that moves to end
-        create_document_1();
-        MyDocCursor cursor(m_pDoc);
-        ++cursor;
-        CHECK( (*cursor)->is_paragraph() == true );
-        --cursor;
-        CHECK( (*cursor)->is_score() == true );
-        --cursor;
-        CHECK( *cursor == NULL );
-        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
-    }
+//    TEST_FIXTURE(DocCursorTestFixture, prev_at_top_level)
+//    {
+//        //@ prev: when at top level traverses top level until trying to
+//        //@   move before p_start_cursor(), that moves to end
+//        create_document_1();
+//        MyDocCursor cursor(m_pDoc);
+//        ++cursor;
+//        CHECK( (*cursor)->is_paragraph() == true );
+//        --cursor;
+//        CHECK( (*cursor)->is_score() == true );
+//        --cursor;
+//        CHECK( *cursor == NULL );
+//        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+//    }
 
     TEST_FIXTURE(DocCursorTestFixture, prev_at_end)
     {

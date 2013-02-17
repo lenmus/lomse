@@ -124,7 +124,10 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
+
+//        ColStaffObjsIterator it = pColStaffObjs->begin();
+//        cout << pColStaffObjs->dump();
 
         CHECK( pColStaffObjs->num_entries() == 2 );
         CHECK( pColStaffObjs->num_lines() == 1 );
@@ -144,10 +147,10 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
         ColStaffObjsIterator it = pColStaffObjs->begin();
 
-       // (*it)->dump();
+       //cout << (*it)->dump();
         //cout << (*it)->to_string() << endl;
         //CHECK( (*it)->to_string() == "(n c4 q)" );
         CHECK( (*it)->imo_object()->is_note() == true );
@@ -171,9 +174,9 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
         ColStaffObjsIterator it = pColStaffObjs->begin();
-       // (*it)->dump();
+//        cout << pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 5 );
         CHECK( pColStaffObjs->num_lines() == 1 );
 
@@ -214,9 +217,9 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
         ColStaffObjsIterator it = pColStaffObjs->begin();
-        //pColStaffObjs->dump();
+//        cout << pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 4 );
         CHECK( pColStaffObjs->num_lines() == 1 );
 
@@ -257,14 +260,19 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
 
         CHECK( pColStaffObjs->num_entries() == 5 );
         CHECK( pColStaffObjs->num_lines() == 1 );
-        //pColStaffObjs->dump();
+//        cout << pColStaffObjs->dump();
 
         ColStaffObjsIterator it = pColStaffObjs->begin();
         //CHECK( (*it)->to_string() == "(n c4 q)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->measure() == 0 );
+        CHECK( is_equal_time((*it)->time(), 0.0f) );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n e4 h)" );
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( (*it)->measure() == 0 );
         CHECK( is_equal_time((*it)->time(), 0.0f) );
@@ -278,11 +286,6 @@ SUITE(ColStaffObjsTest)
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( (*it)->measure() == 0 );
         CHECK( is_equal_time((*it)->time(), 112.0f) );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n e4 h)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->measure() == 0 );
-        CHECK( is_equal_time((*it)->time(), 0.0f) );
         ++it;
         //CHECK( (*it)->to_string() == "(n g4 q)" );
         CHECK( (*it)->imo_object()->is_note() == true );
@@ -307,7 +310,7 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
 
         CHECK( pColStaffObjs->num_entries() == 9 );
         CHECK( pColStaffObjs->num_lines() == 1 );
@@ -338,8 +341,16 @@ SUITE(ColStaffObjsTest)
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( (*it)->measure() == 1 );
         CHECK( is_equal_time((*it)->time(), 128.0f) );
+        ++it;   //(n b4 q)
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->measure() == 1 );
+        CHECK( is_equal_time((*it)->time(), 128.0f) );
         ++it;
         //CHECK( (*it)->to_string() == "(n g4 e.)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->measure() == 1 );
+        CHECK( is_equal_time((*it)->time(), 192.0f) );
+        ++it;   //(n g4 q)
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( (*it)->measure() == 1 );
         CHECK( is_equal_time((*it)->time(), 192.0f) );
@@ -348,14 +359,6 @@ SUITE(ColStaffObjsTest)
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( (*it)->measure() == 1 );
         CHECK( is_equal_time((*it)->time(), 240.0f) );
-        ++it;   //(n b4 q)
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->measure() == 1 );
-        CHECK( is_equal_time((*it)->time(), 128.0f) );
-        ++it;   //(n g4 q)
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->measure() == 1 );
-        CHECK( is_equal_time((*it)->time(), 192.0f) );
 
         delete tree->get_root();
         delete pIModel;
@@ -374,7 +377,7 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
 
         CHECK( pColStaffObjs->num_entries() == 5 );
         CHECK( pColStaffObjs->num_lines() == 1 );
@@ -385,6 +388,10 @@ SUITE(ColStaffObjsTest)
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( is_equal_time((*it)->time(), 0.0f) );
         ++it;
+        //CHECK( (*it)->to_string() == "(n e4 q)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( is_equal_time((*it)->time(), 0.0f) );
+        ++it;
         //CHECK( (*it)->to_string() == "(n d4 e.)" );
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( is_equal_time((*it)->time(), 64.0f) );
@@ -392,10 +399,6 @@ SUITE(ColStaffObjsTest)
         //CHECK( (*it)->to_string() == "(n d4 s)" );
         CHECK( (*it)->imo_object()->is_note() == true );
         CHECK( is_equal_time((*it)->time(), 112.0f) );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n e4 q)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( is_equal_time((*it)->time(), 0.0f) );
         ++it;
         //CHECK( (*it)->to_string() == "(barline )" );
         CHECK( (*it)->imo_object()->is_barline() == true );
@@ -418,7 +421,7 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
         ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 4 );
@@ -456,7 +459,7 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
         ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 4 );
@@ -495,7 +498,7 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
         ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 5 );
@@ -539,7 +542,7 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
         ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 8 );
@@ -595,7 +598,7 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
         ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_lines() == 2 );
@@ -631,7 +634,7 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
         ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_lines() == 1 );
@@ -928,7 +931,7 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, true /*sort table*/);
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
         CHECK( pColStaffObjs->num_lines() == 2 );
         CHECK( pColStaffObjs->num_entries() == 11 );
         CHECK( pColStaffObjs->is_anacrusis_start() == false );
@@ -989,7 +992,7 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
         ColStaffObjsIterator it = pColStaffObjs->begin();
         //pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 8 );
@@ -1045,7 +1048,7 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
         ColStaffObjsIterator it = pColStaffObjs->begin();
 
         //pColStaffObjs->dump();
@@ -1093,7 +1096,7 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, false);    //false: only creation, no sort
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
 
         //cout << "[" << errormsg.str() << "]" << endl;
         //cout << "[" << expected.str() << "]" << endl;
@@ -1125,10 +1128,10 @@ SUITE(ColStaffObjsTest)
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
         ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore, true);    //true: do sort table
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
         ColStaffObjsIterator it = pColStaffObjs->begin();
 
-        //pColStaffObjs->dump();
+//        cout << pColStaffObjs->dump();
         CHECK( pColStaffObjs->num_entries() == 11 );
         CHECK( pColStaffObjs->num_lines() == 2 );
 
@@ -1191,6 +1194,74 @@ SUITE(ColStaffObjsTest)
         delete tree->get_root();
         delete pIModel;
     }
+
+//    TEST_FIXTURE(ColStaffObjsTestFixture, fix_bug_1)
+//    {
+//        //Fix bug. Score with .....
+//        Document doc(m_libraryScope);
+//        LdpParser parser(cout, m_pLdpFactory);
+//        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+//            "(score (vers 1.6)"
+//               "(instrument (staves 2) (musicData "
+//               "(clef G p1)(clef F4 p2)(key C)(time 2 4)"
+//               "(n c5 e p1 v1 (stem up))(n e5 e (stem up))(n c5 e (stem up))(n e5 e (stem up))(goBack start)"
+//               "(n e4 e p1 v2 (stem down))(n g4 e (stem down))(n e4 e (stem down))(n g4 e (stem down))(goBack start)"
+//               "(n c3 e p2 v3 (stem up))(n e3 e (stem up))(n g3 q (stem up))(goBack start)"
+//               "(n g2 e p2 v4 (stem down))(n c3 e (stem down))(n c3 e (stem down))(n c3 e (stem down))(barline)"
+//               "(n c5 e p1 v1 (stem up))(n e5 e (stem up))(n c5 e (stem up))(n e5 e (stem up))(goBack start)"
+//               "(n e4 e p1 v2 (stem down))(n g4 e (stem down))(n e4 e (stem down))(n g4 e (stem down))(goBack start)"
+//               "(n c3 e p2 v3 (stem up))(n e3 e (stem up))(n g3 q (stem up))(goBack start)"
+//               "(n g2 e p2 v4 (stem down))(n c3 e (stem down))(n c3 e (stem down))(n c3 e (stem down))(barline)"
+//            ")) )))"
+//             );
+//        LdpTree* tree = parser.get_ldp_tree();
+//        LdpAnalyser a(cout, m_libraryScope, &doc);
+//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+//        ColStaffObjsBuilder builder;
+//        ColStaffObjs* pColStaffObjs = builder.build(pScore);
+//
+//        cout << pColStaffObjs->dump();
+//        CHECK( pColStaffObjs->num_entries() == 11 );
+//        CHECK( pColStaffObjs->num_lines() == 2 );
+//
+//        ColStaffObjsIterator it = pColStaffObjs->begin();
+//        //it        (n a3 w p1)
+//        CHECK( (*it)->imo_object()->is_note() == true );
+//        CHECK( (*it)->measure() == 0 );
+//        CHECK( is_equal_time((*it)->time(), 0.0f) );
+//        CHECK( (*it)->line() == 0 );
+//
+//        delete tree->get_root();
+//        delete pIModel;
+//    }
+
+//    //Code for displaying the ColStaffObjs for a score
+//    TEST_FIXTURE(ColStaffObjsTestFixture, display_colstaffobjs)
+//    {
+//        //For investigating problems
+//        Document doc(m_libraryScope);
+//        LdpParser parser(cout, m_pLdpFactory);
+//        parser.parse_text(
+//            "(score (vers 1.6)"
+//            "(instrument (staves 2)(musicData "
+//            "(clef G p1)(clef F4 p2)(key D)(time 4 4)(n c4 e p1)(n e4 s)(goBack start)"
+//            "(n g3 q p2)(n e3 e)(goFwd 160)(barline)"
+//            "))"
+//            "(instrument (musicData (clef G p1)(key D)(time 4 4)"
+//            "(n c4 h.)(n e4 s)(goFwd 48)(barline)"
+//            "))"
+//            ")"
+//        );
+//        LdpTree* tree = parser.get_ldp_tree();
+//        LdpAnalyser a(cout, m_libraryScope, &doc);
+//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+//        ColStaffObjsBuilder builder;
+//        ColStaffObjs* pColStaffObjs = builder.build(pScore);
+//        cout << pColStaffObjs->dump();
+//    }
 
 }
 

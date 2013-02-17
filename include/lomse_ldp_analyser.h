@@ -213,7 +213,9 @@ public:
     void analyse_node(LdpTree::iterator itNode);
     ImoObj* analyse_node(LdpElement* pNode, ImoObj* pAnchor=NULL);
 
-    //inherited and saved values setters & getters
+    //inherited and saved values. setters & getters
+    void reset_defaults_for_instrument();
+
     inline void set_current_staff(int nStaff) { m_curStaff = nStaff; }
     inline int get_current_staff() { return m_curStaff; }
 

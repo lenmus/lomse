@@ -91,13 +91,8 @@ void ModelBuilder::structurize(ImoObj* pImo)
 
 
 //=======================================================================================
-// ModelBuilder implementation
+// PitchAssigner implementation
 //=======================================================================================
-PitchAssigner::PitchAssigner()
-{
-}
-
-//---------------------------------------------------------------------------------------
 void PitchAssigner::assign_pitch(ImoScore* pScore)
 {
     StaffObjsCursor cursor(pScore);

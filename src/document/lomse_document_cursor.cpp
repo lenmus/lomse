@@ -447,7 +447,8 @@ ScoreCursor::ScoreCursor(Document* pDoc, ImoScore* pScore)
     , m_scoreId(pScore->get_id())
     , m_pColStaffObjs( pScore->get_staffobjs_table() )
     , m_pScore(pScore)
-    , m_fAutoRefresh(true)
+    , m_fAutoRefresh(false)
+    , m_timeStep( float(k_duration_eighth) )
 {
     p_start_cursor();
 }
@@ -473,7 +474,7 @@ void ScoreCursor::p_start_cursor()
 }
 
 //---------------------------------------------------------------------------------------
-ImoObj* ScoreCursor::staffobj()
+ImoStaffObj* ScoreCursor::staffobj()
 {
     auto_refresh();
 
@@ -631,8 +632,7 @@ void ScoreCursor::p_move_next()
     }
     else
     {
-        p_forward_to_next_time();
-        p_update_pointed_objects();
+        p_find_next_time_in_this_staff();
     }
 }
 
@@ -741,16 +741,6 @@ void ScoreCursor::p_to_start_of_next_instrument()
 {
     p_to_state(m_currentState.instrument()+1, 0, 0, 0.0f);
     p_update_pointed_objects();
-}
-
-//---------------------------------------------------------------------------------------
-void ScoreCursor::p_forward_to_next_time()
-{
-    float rTargetTime = p_iter_object_time() + p_iter_object_duration();
-    int nTargetMeasure = p_determine_next_target_measure();
-
-    p_forward_to_state(m_currentState.instrument(), m_currentState.staff(), nTargetMeasure,
-                     rTargetTime);
 }
 
 //---------------------------------------------------------------------------------------
@@ -920,8 +910,7 @@ void ScoreCursor::p_find_previous_state()
     }
     else
     {
-        p_iter_to_prev_time();
-        p_find_position_at_current_time();
+        p_find_prev_time_in_this_staff();
     }
 
 
@@ -940,17 +929,124 @@ void ScoreCursor::p_move_iterator_to_prev()
     if (m_it == m_pColStaffObjs->begin())
         m_it = m_pColStaffObjs->end();
     else
-        --m_it;
+    {
+        if (m_it != m_pColStaffObjs->end())
+            --m_it;
+        else
+            m_it = ColStaffObjsIterator( m_pColStaffObjs->back() );
+    }
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::p_iter_to_prev_time()
+void ScoreCursor::p_find_prev_time_in_this_staff()
 {
-    //back_to_different_time
-    float curTime = m_currentState.time();
+    ColStaffObjsIterator itSave = m_it;
+    float targetTime = m_currentState.time() - m_timeStep;
+    int staff = m_currentState.staff();
+    int instr = m_currentState.instrument();
+
+    //move to prev in this instr & staff
     p_move_iterator_to_prev();
-    while ( p_there_is_iter_object() && is_equal_time(p_iter_object_time(), curTime) )
+    while ( p_there_is_iter_object()
+            && !(p_iter_object_is_on_staff(staff)
+                 && instr == p_iter_object_instrument() ))
+    {
         p_move_iterator_to_prev();
+    }
+
+    //based on found object, determine position
+    if ( !p_there_is_iter_object()
+         || !p_iter_object_is_on_staff(staff)
+         || instr != p_iter_object_instrument()
+       )
+    {
+        //prev position is empty
+        m_currentState.time( targetTime );
+        m_currentState.id( k_cursor_at_empty_place );
+        m_it = itSave;
+    }
+    else if (!is_lower_time(p_iter_object_time(), targetTime))
+    {
+        p_update_state_from_iterator();
+        m_currentState.staff(staff);
+    }
+    else if (!is_greater_time(p_iter_object_time() + p_iter_object_duration(), targetTime))
+    {
+        //prev position is empty
+        m_currentState.time( targetTime );
+        m_currentState.id( k_cursor_at_empty_place );
+        m_it = itSave;
+    }
+    else
+    {
+        p_update_state_from_iterator();
+        m_currentState.staff(staff);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCursor::p_find_next_time_in_this_staff()
+{
+    float targetTime = m_currentState.time() + m_timeStep;
+    int measure = m_currentState.measure();
+    ImoStaffObj* pSO = staffobj();
+    if (pSO)
+    {
+        if (pSO->is_barline())
+        {
+            targetTime = m_currentState.time();
+            ++measure;
+        }
+        else
+            targetTime = max(targetTime, m_currentState.time() + pSO->get_duration());
+    }
+
+    int staff = m_currentState.staff();
+    int instr = m_currentState.instrument();
+
+    //move to next in this instr & staff
+    if (m_currentState.id() >= 0L)
+        p_move_iterator_to_next();
+    while ( p_there_is_iter_object()
+//            && is_lower_time(p_iter_object_time(), targetTime)
+            && !(p_iter_object_is_on_staff(staff)
+                 && instr == p_iter_object_instrument() ))
+    {
+        p_move_iterator_to_next();
+    }
+
+    //based on found object, determine position
+    if ( !p_there_is_iter_object() )
+    {
+        //next position is end of staff/score
+        m_currentState.time( targetTime );
+        m_currentState.measure(measure);
+        p_update_as_end_of_staff();
+    }
+    else if (!p_iter_object_is_on_staff(staff) || instr != p_iter_object_instrument())
+    {
+        //next position is empty
+        p_update_state_from_iterator();
+        m_currentState.time( targetTime );
+        m_currentState.id( k_cursor_at_empty_place );
+        m_currentState.staff(staff);
+        m_currentState.measure(measure);
+    }
+    else if (!is_greater_time(p_iter_object_time(), targetTime))
+    {
+        p_update_state_from_iterator();
+        m_currentState.staff(staff);
+        m_currentState.measure(measure);
+    }
+    else
+    {
+        //next position is empty
+        p_update_state_from_iterator();
+        m_currentState.time( targetTime );
+        m_currentState.id( k_cursor_at_empty_place );
+        m_currentState.staff(staff);
+        m_currentState.measure(measure);
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -1202,6 +1298,7 @@ void ScoreCursor::restore_state(ElementCursorState* pState)
     p_point_to(pSCS->ref_obj_id());
     m_currentState.staff( pSCS->staff() );  //fix staff when pointin to a barline
     m_currentState.id( pSCS->id() );
+    m_currentState.time( pSCS->time() );
 
     p_find_previous_state();
 }

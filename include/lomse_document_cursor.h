@@ -272,6 +272,7 @@ protected:
     ColStaffObjs*   m_pColStaffObjs;
     ImoScore*       m_pScore;
     bool            m_fAutoRefresh;
+    float           m_timeStep;
 
     //state variables
     ScoreCursorState    m_currentState;
@@ -314,7 +315,7 @@ public:
     inline int staff() { return m_currentState.staff(); }
     inline float time() { return m_currentState.time(); }
     inline long id() { return m_currentState.id(); }
-    ImoObj* staffobj();
+    ImoStaffObj* staffobj();
     inline long staffobj_id() { return m_currentState.id(); }
         //helper boolean
     inline bool is_empty_place() { return m_currentState.id() < 0L; }
@@ -325,6 +326,8 @@ public:
     ImoObj* staffobj_internal();
     inline long staffobj_id_internal() { return m_currentState.ref_obj_id(); }
 
+    //other
+    inline void set_time_grid_resolution(float step) { m_timeStep = step; }
 
         // ElementCursor: mandatory interface
 
@@ -390,7 +393,6 @@ protected:
     bool p_iter_object_is_time();
 
     //helper: for move_next
-    void p_forward_to_next_time();
     int p_determine_next_target_measure();
     void p_forward_to_instr_measure_with_time_not_lower_than(float rTargetTime);
     void p_forward_to_current_staff();
@@ -398,11 +400,11 @@ protected:
     void p_forward_to_state(int instr, int staff, int measure, float time);
     bool p_try_next_at_same_time();
     void p_move_next();
+    void p_find_next_time_in_this_staff();
 
     //helper: for move_prev
     inline bool p_is_first_staff_of_current_instrument() {
                                     return m_currentState.staff() == 0; }
-    void p_iter_to_prev_time();
     void p_iter_to_last_object_in_current_time();
     bool p_try_prev_at_same_time();
     bool p_is_at_start_of_staff();
@@ -411,6 +413,7 @@ protected:
     void p_to_end_of_prev_instrument();
     void p_to_end_of_staff();
     void p_find_position_at_current_time();
+    void p_find_prev_time_in_this_staff();
 
     //ensuring integrity after updates
     inline void auto_refresh() { if (m_fAutoRefresh) refresh(); }

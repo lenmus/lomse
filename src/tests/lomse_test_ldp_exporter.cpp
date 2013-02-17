@@ -536,8 +536,41 @@ SUITE(LdpExporterTest)
 //            "(score (vers 1.6) (instrument (musicData "
 //            "(n c4 q)(n d4 e.)(n d4 s)(goBack start)(n e4 q)(goFwd end)(barline)))) ))" );
 
+    TEST_FIXTURE(LdpExporterTestFixture, musicData_6)
+    {
+        //multimetrics
+        Document doc(m_libraryScope);
+        doc.from_string(
+            "(score (vers 1.6)(instrument (musicData "
+            "(clef G)(key G)(time 3 4)(chord (n g3 q)(n d4 q))(r e)(n g5 e)"
+            "(n g5 s g+)(n f5 s)(n g5 e g-)(barline)"
+            "(chord (n a4 q)(n e5 q))(r q)(chord (n d4 q)(n g4 q)(n f5 q))"
+            "(barline)))"
+            "(instrument (musicData (clef G)(key G)(time 2 4)"
+            "(n g4 q)(n d5 e g+)(n d5 e g-)(barline)"
+            "(n b5 e g+)(n a5 s)(n g5 s g-)(n g5 e g+)(n g5 e g-)(barline)"
+            "(n e5 e g+)(n d5 s)(n c5 s g-)(n e5 e g+)(n e5 e g-)(barline))) )"
+            );
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        dump_colection(pScore);
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
 
-//    TEST_FIXTURE(LdpExporterTestFixture, musicData_6)
+        LdpExporter exporter(&m_libraryScope);
+        exporter.set_current_score(pScore);
+        exporter.set_remove_newlines(true);
+        string source = exporter.get_source(pMD);
+//        cout << "\"" << source << "\"" << endl;
+        string expected =
+            "(musicData (clef G p1 )(key G)(time 3 4)(chord (n g3 q p1 )(n d4 q p1 ))"
+            "(r e p1 )(n g5 e p1 )(n g5 s p1 (beam 34 ++))(n f5 s p1 (beam 34 =-))"
+            "(n g5 e p1 (beam 34 -))(barline simple)"
+            "(chord (n a4 q p1 )(n e5 q p1 ))(r q p1 )"
+            "(chord (n d4 q p1 )(n g4 q p1 )(n f5 q p1 ))(barline simple))";
+        CHECK( source == expected );
+    }
+
+//    TEST_FIXTURE(LdpExporterTestFixture, musicData_7)
 //    {
 //        //ordered by lines
 //        Document doc(m_libraryScope);
