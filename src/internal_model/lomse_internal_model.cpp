@@ -2435,9 +2435,23 @@ ImoStyle* ImoScore::create_default_style()
 	ImoStyle* pDefStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
     pDefStyle->set_name("Default style");
 
-        //font properties
-    pDefStyle->font_file( "");
-    pDefStyle->font_name( "Liberation serif");
+            //font properties
+    pDefStyle->font_file("");
+    pDefStyle->font_name("Liberation serif");
+
+    //BUG_BYPASS: Default style should use the right font file / font name for the current
+    // document language. This block is a fix just for Chinese.language
+    {
+        //get document language
+        ImoDocument* pImoDoc = m_pDoc->get_imodoc();;
+        string& language = pImoDoc->get_language();
+        if (language == "zh_CN")
+        {
+            pDefStyle->font_file("wqy-zenhei.ttc");
+            pDefStyle->font_name("");
+        }
+    }
+
     pDefStyle->font_size( 12.0f);
     pDefStyle->font_style( ImoStyle::k_font_normal);
     pDefStyle->font_weight( ImoStyle::k_font_normal);

@@ -79,6 +79,7 @@ protected:
     int     m_staff;    //staff (0..n-1)
     int     m_measure;  //measure number (0..n-1)
 	float   m_time;     //timepos
+	float   m_refTime;  //timepos of ref.object or 0.0f if no ref obj
     long    m_id;       //id of pointed object or k_cursor_at_empty_place if none
     long    m_refId;    //id of ref.object or k_cursor_at_end_of_child if at end.
 
@@ -91,9 +92,10 @@ protected:
     #define k_time_before_start_of_score -1.0f
 
 public:
-    ScoreCursorState(int instr, int staff, int measure, float time, long id, long refId)
+    ScoreCursorState(int instr, int staff, int measure, float time, long id, long refId,
+                     float refTime)
         : ElementCursorState(), m_instr(instr), m_staff(staff), m_measure(measure)
-        , m_time(time), m_id(id), m_refId(refId)
+        , m_time(time), m_refTime(refTime), m_id(id), m_refId(refId)
     {
     }
     ScoreCursorState()
@@ -110,6 +112,7 @@ public:
     inline float time() { return m_time; }
     inline long id() { return m_id; }
     inline long ref_obj_id() { return m_refId; }
+    inline float ref_obj_time() { return m_refTime; }
 
     //setters
     inline void instrument(int instr) { m_instr = instr; }
@@ -118,6 +121,7 @@ public:
     inline void time(float time) { m_time = time; }
     inline void id(long id) { m_id = id; }
     inline void ref_obj_id(long id) { m_refId = id; }
+    inline void ref_obj_time(float time) { m_refTime = time; }
 
     inline void set_at_end_of_score() {
         m_instr = k_at_end_of_score;
@@ -126,6 +130,7 @@ public:
         m_time = k_time_at_end_of_score;
         m_id = k_cursor_at_end_of_child;
         m_refId = -1L;
+        m_refTime = 0.0f;
     }
     inline void set_before_start_of_score()
     {
@@ -135,6 +140,7 @@ public:
         m_time = k_time_before_start_of_score;
         m_id = k_cursor_before_start_of_child;
         m_refId = k_before_start_of_score;
+        m_refTime = 0.0f;
     }
 
     //checking position
@@ -212,6 +218,7 @@ public:
     virtual long get_pointee_id()=0;
     //virtual bool is_at_start()=0;
     inline ImoObj* operator *() { return get_pointee(); }
+    inline Document* get_document() { return m_pDoc; }
 
     //special operations
     virtual void update_after_deletion()=0;
@@ -317,17 +324,34 @@ public:
     inline long id() { return m_currentState.id(); }
     ImoStaffObj* staffobj();
     inline long staffobj_id() { return m_currentState.id(); }
-        //helper boolean
-    inline bool is_empty_place() { return m_currentState.id() < 0L; }
-    bool is_at_end_of_score();
-    bool is_at_start_of_score();
-//    ImoObj* get_musicData_for_current_instrument();
-        //speciaL. access to internal reference object
-    ImoObj* staffobj_internal();
     inline long staffobj_id_internal() { return m_currentState.ref_obj_id(); }
+    inline long ref_obj_time() { return m_currentState.ref_obj_time(); }
+    ImoObj* staffobj_internal();
+
+    //previous position info
+    //AWARE_ previous position is where move_prev() will be placed
+    long prev_pos_id() { return m_prevState.id(); }
+    float prev_pos_time() { return m_prevState.time(); }
+
+    //helper boolean
+    ///Score is not empty and cursor is pointing an staffobj
+    inline bool is_pointing_object() { return m_currentState.id() >= 0L; }
+    ///Cursor is between two staffobjs, on a free time position
+    inline bool is_at_empty_place() { return m_currentState.id() == k_cursor_at_empty_place; }
+    ///Cursor is at end of score but score is empty
+    bool is_at_end_of_empty_score();
+    ///Cursor is at end of a staff. There could be more staves (or not: end of score).
+    ///Score could be empty.
+    inline bool is_at_end_of_staff() { return m_currentState.id() == k_cursor_at_end_of_staff; }
+    ///Cursor is at end of last staff in score. Score could be empty.
+    bool is_at_end_of_score();
 
     //other
     inline void set_time_grid_resolution(float step) { m_timeStep = step; }
+    ColStaffObjsEntry* find_previous_imo();
+//    ImoObj* get_musicData_for_current_instrument();
+        //speciaL. access to internal reference object
+
 
         // ElementCursor: mandatory interface
 
@@ -335,7 +359,6 @@ public:
     inline ImoObj* operator *() { return staffobj(); }
     inline ImoObj* get_pointee() { return staffobj(); }
     inline long get_pointee_id() { return staffobj_id(); }
-//    inline bool is_at_start() { return is_at_start_of_score(); }
 
     //debug
     string dump_cursor();
@@ -441,7 +464,7 @@ public:
     DocCursor(Document* pDoc);
     virtual ~DocCursor();
 
-    DocCursor(const DocCursor& cursor);
+    DocCursor(const DocCursor* cursor);
     DocCursor& operator= (DocCursor const& cursor);
 
     //info
@@ -450,6 +473,10 @@ public:
     ImoObj* get_top_object();
     long get_pointee_id();
     long get_top_id();
+    inline bool is_delegating() { return m_pInnerCursor != NULL; }
+    inline bool is_at_top_level() { return m_pInnerCursor == NULL; }
+    inline Document* get_document() { return m_pDoc; }
+    inline ElementCursor* get_inner_cursor() { return m_pInnerCursor; }
 
     //positioning
     inline void operator ++() { move_next(); }
@@ -457,11 +484,13 @@ public:
     void move_next();
     void move_prev();
     void enter_element();
+    inline void exit_element() { stop_delegation(); }
     ////void reset_and_point_to(long nId);
     void point_to(long nId);
     void point_to(ImoObj* pImo);
     void to_start();
     void to_end();
+    void to_last_top_level();
 
     //special operations
     void update_after_deletion();
@@ -474,37 +503,8 @@ public:
     DocCursorState get_state();
     void restore_state(DocCursorState& state);
 
-//    //ScoreCursorInterface
-//    int instrument() {
-//        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//        return (pCursor ? pCursor->instrument() : 0);
-//    }
-//    int measure() {
-//        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//        return (pCursor ? pCursor->measure() : 0);
-//    }
-//    int staff() {
-//        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//        return (pCursor ? pCursor->staff() : 0);
-//    }
-//    float time() {
-//        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//        return (pCursor ? pCursor->time() : 0.0f);
-//    }
-//    bool is_pointing_object() {
-//        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//        return (pCursor ? pCursor->is_pointing_object() : true);
-//    }
-//    inline void move_next() {
-//        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//        if (pCursor)
-//            pCursor->move_next();
-//    }
-//    void move_prev() {
-//        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//        if (pCursor)
-//            pCursor->move_prev();
-//    }
+    //ScoreCursorInterface: methods for changing cursor position
+    //-----------------------------------------------------------------------------------
 //    //void move_next_new_time() {
 //    //    ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
 //    //    if (pCursor)
@@ -543,22 +543,10 @@ public:
 //        if (pCursor)
 //            pCursor->to_state(nInstr, nMeasure, nStaff, rTime);
 //    }
-//
-//    //ScoreCursorInterface: info
-//    bool is_at_end() {
-//        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//        return (pCursor ? pCursor->is_at_end() : false);
-//    }
-//
-//    ImoObj* get_musicData_for_current_instrument() {
-//        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//        return (pCursor ? pCursor->get_musicData_for_current_instrument() : NULL);
-//    }
 
 protected:
     void start_delegation();
     void stop_delegation();
-    inline bool is_delegating() { return m_pInnerCursor != NULL; }
     ImoBlockLevelObj* find_block_level_parent(ImoObj* pImo);
 
 };

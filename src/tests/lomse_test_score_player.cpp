@@ -296,7 +296,7 @@ SUITE(ScorePlayerTest)
         PlayerNoGui playGui;
         player.load_score(pScore, &playGui);
         int nEvMax = player.my_get_table()->num_events() - 1;
-        Interactor inter(m_libraryScope, &doc, NULL);
+        Interactor inter(m_libraryScope, &doc, NULL, NULL);
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_do_visual_tracking,
                           k_no_countoff, 60L, &inter);
         player.my_wait_for_termination();
@@ -364,7 +364,7 @@ SUITE(ScorePlayerTest)
         PlayerNoGui playGui;
         player.load_score(pScore, &playGui);
         int nEvMax = player.my_get_table()->num_events() - 1;
-        Interactor inter(m_libraryScope, &doc, NULL);
+        Interactor inter(m_libraryScope, &doc, NULL, NULL);
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_do_visual_tracking,
                           k_no_countoff, 60L, &inter);
         player.my_wait_for_termination();

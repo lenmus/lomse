@@ -35,6 +35,7 @@
 #include "lomse_selections.h"
 #include "lomse_time.h"
 #include "lomse_control.h"
+#include "lomse_box_system.h"
 
 #include <cstdlib>      //abs
 #include <iomanip>
@@ -171,6 +172,12 @@ void GraphicModel::store_in_map_imo_shape(ImoNoteRest* pNR, GmoShape* pShape)
 }
 
 //---------------------------------------------------------------------------------------
+void GraphicModel::store_in_map_imo_shape(long imoId, GmoShape* pShape)
+{
+    m_imoToShape[imoId] = pShape;
+}
+
+//---------------------------------------------------------------------------------------
 void GraphicModel::highlight_object(ImoStaffObj* pSO, bool value)
 {
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>( pSO );
@@ -195,20 +202,15 @@ void GraphicModel::add_to_map_imo_gmo(GmoBox* child)
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* GraphicModel::get_shape_for(ImoObj* pImo, int id)
+GmoShape* GraphicModel::get_shape_for_imo(long imoId, int shapeId)
 {
-    //TODO: GraphicModel::get_shape_for
-    return NULL;
+    return m_imoToShape[imoId];
 }
 
 //---------------------------------------------------------------------------------------
-GmoBox* GraphicModel::get_box_for(ImoObj* pImo)
+GmoBox* GraphicModel::get_box_for_imo(long id)
 {
-    GmoObj* pGmo = get_gmo_for(pImo, 0);
-    if (pGmo->is_box())
-        return static_cast<GmoBox*>(pGmo);
-
-    return NULL;
+    return m_imoToBox[id];
 }
 
 //---------------------------------------------------------------------------------------
@@ -222,6 +224,42 @@ GmoObj* GraphicModel::get_gmo_for(ImoObj* pImo, int id)
     return NULL;
 }
 
+//---------------------------------------------------------------------------------------
+void GraphicModel::build_main_boxes_table()
+{
+    if (m_root)
+    {
+        vector<GmoBox*>& pageBoxes = m_root->get_child_boxes();
+        vector<GmoBox*>::iterator itP;
+        for (itP=pageBoxes.begin(); itP != pageBoxes.end(); ++itP)
+        {
+            vector<GmoBox*>& contentBoxes = (*itP)->get_child_boxes();
+            vector<GmoBox*>::iterator itC;
+            for (itC=contentBoxes.begin(); itC != contentBoxes.end(); ++itC)
+            {
+                vector<GmoBox*>& childBoxes = (*itC)->get_child_boxes();
+                vector<GmoBox*>::iterator it;
+                for (it=childBoxes.begin(); it != childBoxes.end(); ++it)
+                {
+                    GmoBox* pBox = *it;
+                    ImoObj* pImo = pBox->get_creator_imo();
+                    long id = pImo->get_id();
+                    m_imoToBox[id] = pBox;
+                }
+            }
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+GmoShapeStaff* GraphicModel::get_shape_for_first_staff_in_first_system(long scoreId)
+{
+    GmoBoxScorePage* pBSP = static_cast<GmoBoxScorePage*>( get_box_for_imo(scoreId) );
+    GmoBoxSystem* pSystem = dynamic_cast<GmoBoxSystem*>(pBSP->get_child_box(0));
+    if (pSystem)
+        return pSystem->get_staff_shape(0);
+    return NULL;
+}
 
 
 //=======================================================================================
@@ -626,7 +664,15 @@ void GmoBox::draw_border(Drawer* pDrawer, RenderOptions& opt)
         pDrawer->end_path();
     }
 
-    if (must_draw_bounds(opt))
+    if (this->is_item_main_box() && opt.draw_focus_lines_on_boxes_flag == true)
+    {
+        double xorg = m_origin.x;
+        double yorg = m_origin.y;
+        Color color = opt.unfocussed_box_color;
+        draw_box_bounds(pDrawer, xorg, yorg, color);
+    }
+
+    else if (must_draw_bounds(opt))
     {
         double xorg = m_origin.x;
         double yorg = m_origin.y;
@@ -962,6 +1008,14 @@ void GmoBoxDocPage::add_to_tables(GmoShape* pShape)
 //---------------------------------------------------------------------------------------
 void GmoBoxDocPage::store_in_map_imo_shape(GmoShape* pShape)
 {
+    ImoObj* pImo = pShape->get_creator_imo();
+    if (pImo)
+    {
+        GraphicModel* pModel = get_graphic_model();
+        if (pModel)
+            pModel->store_in_map_imo_shape(pImo->get_id(), pShape);
+    }
+
     if (pShape->is_shape_note() || pShape->is_shape_rest())
     {
         ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>( pShape->get_creator_imo() );

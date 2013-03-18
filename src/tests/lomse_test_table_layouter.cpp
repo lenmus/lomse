@@ -973,7 +973,7 @@ SUITE(TableLayouterTest)
 
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         CHECK( pModel != NULL );

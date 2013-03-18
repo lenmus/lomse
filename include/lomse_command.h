@@ -115,9 +115,9 @@ private:
     UndoStack   m_stack;
 
 public:
-    DocCommandExecuter(Document* target, DocCursor* pCursor);
+    DocCommandExecuter(Document* target);
     virtual ~DocCommandExecuter() {}
-    virtual void execute(DocCommand* pCmd);
+    virtual void execute(DocCursor* pCursor, DocCommand* pCmd);
     virtual void undo();
     virtual void redo();
 

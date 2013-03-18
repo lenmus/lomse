@@ -211,15 +211,16 @@ void DocCommand::set_command_name(const string& name, ImoObj* pImo)
 //=======================================================================================
 // DocCommandExecuter
 //=======================================================================================
-DocCommandExecuter::DocCommandExecuter(Document* target, DocCursor* pCursor)
+DocCommandExecuter::DocCommandExecuter(Document* target)
     : m_pDoc(target)
-    , m_pCursor(pCursor)
+    , m_pCursor(NULL)
 {
 }
 
 //---------------------------------------------------------------------------------------
-void DocCommandExecuter::execute(DocCommand* pCmd)
+void DocCommandExecuter::execute(DocCursor* pCursor, DocCommand* pCmd)
 {
+    m_pCursor = pCursor;
     m_stack.push(pCmd);
     pCmd->perform_action(m_pDoc, m_pCursor);
 }
@@ -269,7 +270,10 @@ void CmdCursor::perform_action(Document* pDoc, DocCursor* pCursor)
             m_name = "Cursor: enter element";
             pCursor->enter_element();
             break;
-//        case k_exit:    pCursor->?
+        case k_exit:
+            m_name = "Cursor: exit element";
+            pCursor->exit_element();
+            break;
         case k_point_to:
             m_name = "Cursor: point to";
             pCursor->point_to(m_targetId);

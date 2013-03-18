@@ -124,7 +124,7 @@ protected:
 
 public:
     MyInteractor(LibraryScope& libraryScope, Document* pDoc, View* pView)
-        : EditInteractor(libraryScope, pDoc, pView)
+        : EditInteractor(libraryScope, pDoc, pView, NULL)
         , m_fSelRectInvoked(false)
         , m_fSelObjInvoked(false)
     {
@@ -189,7 +189,7 @@ SUITE(InteractorTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             &doc);
-        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, &doc, pView, NULL);
 
         CHECK( pIntor != NULL );
         CHECK( pIntor->get_graphic_model() != NULL );
@@ -206,7 +206,7 @@ SUITE(InteractorTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             &doc);
-        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, &doc, pView, NULL);
         pView->set_interactor(pIntor);
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -236,7 +236,7 @@ SUITE(InteractorTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, &doc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         pView->set_interactor(pIntor);
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
@@ -276,7 +276,7 @@ SUITE(InteractorTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, &doc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         pView->set_interactor(pIntor);
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
@@ -321,7 +321,7 @@ SUITE(InteractorTest)
         pDoc->create_empty();
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, pDoc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, pDoc, pView, NULL);
         pView->set_interactor(pIntor);
         MyTaskDragView task(pIntor);
         task.init_task();
@@ -338,7 +338,7 @@ SUITE(InteractorTest)
         pDoc->create_empty();
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, pDoc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, pDoc, pView, NULL);
         pView->set_interactor(pIntor);
         MyTaskDragView task(pIntor);
         task.init_task();
@@ -365,7 +365,7 @@ SUITE(InteractorTest)
         pDoc->create_empty();
         View* pView = Injector::inject_View(libraryScope, ViewFactory::k_view_simple,
                                             pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView, NULL);
         pView->set_interactor(pIntor);
         MyTaskDragView task(pIntor);
         task.init_task();
@@ -394,7 +394,7 @@ SUITE(InteractorTest)
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView, NULL);
         pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();
@@ -415,7 +415,7 @@ SUITE(InteractorTest)
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView, NULL);
         pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();
@@ -440,7 +440,7 @@ SUITE(InteractorTest)
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView, NULL);
         pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();
@@ -486,7 +486,7 @@ SUITE(InteractorTest)
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView, NULL);
         pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();
@@ -511,7 +511,7 @@ SUITE(InteractorTest)
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView, NULL);
         pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();

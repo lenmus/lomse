@@ -42,8 +42,7 @@ namespace lomse
 
 //forward declarations
 class Document;
-//class DocCommandExecuter;
-//class UserCommandExecuter;
+class DocCommandExecuter;
 class Notification;
 class Presenter;
 class View;
@@ -122,11 +121,11 @@ protected:
     Document* m_pDoc;
     std::list<Interactor*> m_interactors;
     void* m_userData;
-    //UserCommandExecuter* m_pExec;
+    DocCommandExecuter* m_pExec;
     void (*m_callback)(Notification* event);
 
 public:
-    Presenter(Document* pDoc, Interactor* pIntor);     //, UserCommandExecuter* pExec);
+    Presenter(Document* pDoc, Interactor* pIntor, DocCommandExecuter* pExec);
     virtual ~Presenter();
 
     void close_document();
@@ -138,7 +137,7 @@ public:
 
     //accessors
     inline Document* get_document() { return m_pDoc; }
-    //inline UserCommandExecuter* get_command_executer() { return m_pExec; }
+    inline DocCommandExecuter* get_command_executer() { return m_pExec; }
 
     //to sent notifications to user application
     void set_callback( void (*pt2Func)(Notification* event) );

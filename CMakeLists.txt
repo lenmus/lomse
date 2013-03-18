@@ -423,6 +423,8 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/lomse_box_slice.cpp
     ${SRC_DIR}/graphic_model/lomse_box_slice_instr.cpp
     ${SRC_DIR}/graphic_model/lomse_box_system.cpp
+    ${SRC_DIR}/graphic_model/lomse_caret.cpp
+    ${SRC_DIR}/graphic_model/lomse_caret_positioner.cpp
     ${SRC_DIR}/graphic_model/lomse_glyphs.cpp
     ${SRC_DIR}/graphic_model/lomse_gm_basic.cpp
     ${SRC_DIR}/graphic_model/lomse_selections.cpp

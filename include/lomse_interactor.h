@@ -46,16 +46,17 @@ namespace lomse
 {
 
 //forward declarations
+class CaretPositioner;
+class DocCommandExecuter;
+class DocCommand;
 class Document;
 class DocCursor;
-class Task;
-class GraphicModel;
 class GmoObj;
-class ImoStaffObj;
+class GraphicModel;
 class ImoScore;
+class ImoStaffObj;
 class PlayerGui;
-//class UserCommandExecuter;
-//class LdpCompiler;
+class Task;
 
 
 //---------------------------------------------------------------------------------------
@@ -70,6 +71,8 @@ protected:
     View*           m_pView;
     GraphicModel*   m_pGraphicModel;
     Task*           m_pTask;
+    DocCursor*      m_pCursor;
+    DocCommandExecuter* m_pExec;
     SelectionSet    m_selections;
     GmoObj*         m_pLastMouseOverGmo;
 
@@ -87,11 +90,9 @@ protected:
     //to avoid problems during playback
     bool        m_fViewUpdatesEnabled;
 
-    //UserCommandExecuter*    m_pExec;
-    //LdpCompiler*            m_pCompiler;
-
 public:
-    Interactor(LibraryScope& libraryScope, Document* pDoc, View* pView); //, UserCommandExecuter* pExec);
+    Interactor(LibraryScope& libraryScope, Document* pDoc, View* pView,
+               DocCommandExecuter* pExec);
     virtual ~Interactor();
 
     virtual void on_document_reloaded();
@@ -100,6 +101,7 @@ public:
     //access to collaborators
     GraphicModel* get_graphic_model();
     inline View* get_view() { return m_pView; }
+    inline DocCursor* get_cursor() { return m_pCursor; }
 
     //mandatory override required by EventHandler
 	void handle_event(SpEventInfo pEvent);
@@ -123,6 +125,7 @@ public:
     virtual void set_rendering_option(int option, bool value);
     virtual void set_box_to_draw(int boxType);
     virtual void reset_boxes_to_draw();
+    virtual void update_caret();
         //units conversion and related
     virtual void screen_point_to_page_point(double* x, double* y);
     virtual void model_point_to_screen(double* x, double* y, int iPage);
@@ -164,11 +167,17 @@ public:
     //mandatory overrides from Observable
     EventNotifier* get_event_notifier() { return this; }
 
+    //caret
+    bool blink_caret();
+    void show_caret();
+    void hide_caret();
+    string get_caret_timecode();
 
     ////abstract class implements all possible commands. Derived classes override
     ////them as needed, either programming a diferent behaviour or as empty methods
     ////for those commands not allowed
     //virtual void insert_rest(DocCursor& cursor, const std::string& source);
+    virtual void exec_command(DocCommand* pCmd);
 
     // event handlers for user actions. Library API
     virtual void on_mouse_move(Pixels x, Pixels y, unsigned flags);
@@ -224,7 +233,8 @@ protected:
 
 public:
 
-    EditInteractor(LibraryScope& libraryScope, Document* pDoc, View* pView); //, UserCommandExecuter* pExec);
+    EditInteractor(LibraryScope& libraryScope, Document* pDoc, View* pView,
+                   DocCommandExecuter* pExec);
     virtual ~EditInteractor();
 
 };

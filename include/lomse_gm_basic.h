@@ -77,6 +77,8 @@ protected:
     bool m_modified;
     std::map<ImoNoteRest*, GmoShape*> m_noterestToShape;
     std::map<ImoObj*, RefToGmo*> m_imoToGmo;
+    std::map<long, GmoBox*> m_imoToBox;
+    std::map<long, GmoShape*> m_imoToShape;
 
 public:
     GraphicModel();
@@ -88,6 +90,9 @@ public:
     GmoBoxDocPage* get_page(int i);
     inline void set_modified(bool value) { m_modified = value; }
     inline bool is_modified() { return m_modified; }
+
+    //special accessors
+    GmoShapeStaff* get_shape_for_first_staff_in_first_system(long scoreId);
 
     //drawing
     void draw_page(int iPage, UPoint& origin, Drawer* pDrawer, RenderOptions& opt);
@@ -106,10 +111,12 @@ public:
 
     //creation
     void store_in_map_imo_shape(ImoNoteRest* pNR, GmoShape* pShape);
+    void store_in_map_imo_shape(long imoId, GmoShape* pShape);
     void remove_from_map_imo_gmo(GmoBox* child);
     void add_to_map_imo_gmo(GmoBox* child);
-    GmoShape* get_shape_for(ImoObj* pImo, int id=0);
-    GmoBox* get_box_for(ImoObj* pImo);
+    GmoShape* get_shape_for_imo(long imoId, int shapeId=0);
+    GmoBox* get_box_for_imo(long id);
+    void build_main_boxes_table();
 
     //tests
     void dump_page(int iPage, ostream& outStream);
@@ -154,6 +161,7 @@ public:
         k_highlighted       = 0x0008,   //highlighted
         k_hover             = 0x0010,   //mouse over
         k_in_link           = 0x0020,   //is part of a link
+        k_has_edit_focus    = 0x0040,   //this box has the focus for edition
     };
 
     //selection
@@ -389,6 +397,7 @@ public:
     inline int get_num_boxes() { return static_cast<int>( m_childBoxes.size() ); }
     void add_child_box(GmoBox* child);
     GmoBox* get_child_box(int i);  //i = 0..n-1
+    inline vector<GmoBox*>& get_child_boxes() { return m_childBoxes; }
 
     //contained shapes
     inline int get_num_shapes() { return static_cast<int>( m_shapes.size() ); }
@@ -398,6 +407,7 @@ public:
     //flags
     void set_hover(bool value) { set_flag_value(value, k_hover); }
     void set_in_link(bool value) { set_flag_value(value, k_in_link); }
+    void set_has_edit_focus(bool value) { set_flag_value(value, k_has_edit_focus); }
     void set_flag_value(bool value, unsigned int flag);
 
     //maintaining references

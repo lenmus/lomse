@@ -36,8 +36,10 @@
 #include "lomse_doorway.h"
 #include "lomse_agg_types.h"
 
+//other
 #include <vector>
 #include <list>
+using namespace std;
 
 
 namespace lomse
@@ -50,6 +52,7 @@ class Interactor;
 class GraphicModel;
 class Document;
 class ImoStaffObj;
+class Caret;
 
 
 ////---------------------------------------------------------------------------------------
@@ -119,6 +122,10 @@ protected:
     bool                m_fTempoLineVisible;
     Rectangle<Pixels>   m_tempoLine;
 
+    //caret
+    Caret* m_pCaret;
+    CaretPositioner* m_pCaretPositioner;
+
     //objects currently highlighted
     std::list<ImoStaffObj*> m_highlighted;
 
@@ -137,6 +144,7 @@ public:
     void get_viewport(Pixels* x, Pixels* y) { *x = m_vxOrg; *y = m_vyOrg; }
     void set_viewport_at_page_center(Pixels screenWidth);
     virtual void set_viewport_for_page_fit_full(Pixels screenWidth) = 0;
+    void use_cursor(DocCursor* pCursor);
 
     //scrolling support
     virtual void get_view_size(Pixels* xWidth, Pixels* yHeight) = 0;
@@ -161,7 +169,12 @@ public:
 
     //inline DocCursor& get_cursor() { return m_cursor; }
 
-    ////caret movement
+    //caret
+    bool update_caret();
+    void show_caret();
+    void hide_caret();
+    bool toggle_caret();
+    string get_caret_timecode();
     //void caret_right();
     //void caret_left();
     //void caret_to_object(long nId);
@@ -203,6 +216,7 @@ protected:
     void draw_graphic_model();
     void draw_sel_rectangle();
     void draw_tempo_line();
+    void draw_caret();
     void add_controls();
     void generate_paths();
     virtual void collect_page_bounds() = 0;

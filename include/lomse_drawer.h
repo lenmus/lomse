@@ -91,19 +91,27 @@ struct RenderOptions
     Color background_color;
     Color highlighted_color;
     Color selected_color;
+    Color focussed_box_color;
+    Color unfocussed_box_color;
 
     //document page appearance
     bool page_border_flag;
     bool cast_shadow_flag;
 
+    //other options
+    bool draw_focus_lines_on_boxes_flag;
+
     RenderOptions()
         : draw_anchors(false)
         , scale(1.0)
-        , background_color(127, 127, 127)   //grey
-        , highlighted_color(255,0,0)        //red
-        , selected_color(0,0,255)           //blue
+        , background_color(127, 127, 127)       //grey
+        , highlighted_color(255,0,0)            //red
+        , selected_color(0,0,255)               //blue
+        , focussed_box_color(0,0,255)           //blue
+        , unfocussed_box_color(200,200,200)     //light grey
         , page_border_flag(true)
         , cast_shadow_flag(true)
+        , draw_focus_lines_on_boxes_flag(false)
     {
         boxes.reset();
     }

@@ -52,7 +52,6 @@ using namespace agg;
 #include <iostream>
 using namespace std;
 
-
 namespace lomse
 {
 

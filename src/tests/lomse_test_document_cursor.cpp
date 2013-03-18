@@ -373,56 +373,6 @@ SUITE(DocContentCursorTest)
 // DocCursor tests
 //=======================================================================================
 
-//---------------------------------------------------------------------------------------
-// DocCursor is a cursor to traverse the document, Traversing path is based on
-// user expectations when traversing visually a document.
-// It is a facade object that only manages top level navigation and delegates
-// on specific ElementCursors classes for traversing inner nodes.
-//
-// User stories:
-//
-// + initialy points to first element in content
-// + if document is empty points to 'end-of-collection' value (NULL)
-//
-// - next():
-//     + if traversal not delegated (implies it is pointing to a top level element):
-//        + advance to next top level element if pointing to a top level element, or
-//        + advance to 'end-of-collection' value if no more top level elements.
-//
-//   - if traversal delegated:
-//        - if currently at 'end-of-child', stop delegation and advance to next
-//          top level element.
-//        - else, delegate and check returned value:
-//          - if 'end-of-collection' (implies that the delegate was pointing to
-//            last sub-element of traversed top level element): what to do?
-//            caret must be placed after last subelement (i.e. at end of a score,
-//            so that the user can add more notes). Let's try returning an
-//            'end-of-child' value.
-//          - else: do nothing. the delegate have done its job and has advanced
-//  		  to next sub-element in logical sequence.
-//
-// - prev().
-//    + if traversal not delegated:
-//        + remains at first top level element if pointing to first top level element.
-//        + moves back to previous top level element if pointing to a top level element
-//        + moves to last top level element if pointing to 'end-of-collection' value.
-//
-//    - if traversal delegated:
-//        - moves back to the top level element if pointing to its first sub-element.
-//        - moves back to previous sub-element in logical sequence if inside a top
-//          level element.
-//        - moves back to previous sub-element in logical sequence if pointing
-//          to 'end-of-child' value.
-//
-// - enter().
-//    - Does nothing if pointing to a sub-element.
-//    - if pointing to a top level element, delegates to specialized cursor (it will move to its initial position).
-//
-// - any other operation:
-//    - if pointing to top level: do nothing
-//    - else: delegate.
-//---------------------------------------------------------------------------------------
-
 //derivate class to have access to some protected methods
 class MyDocCursor : public DocCursor
 {
@@ -483,7 +433,7 @@ SUITE(DocCursorTest)
 {
     TEST_FIXTURE(DocCursorTestFixture, DocCursorPointsStartOfContent)
     {
-        //@ initialy points to first element in content
+        //1. initialy points to first element in content
         create_document_1();
         MyDocCursor cursor(m_pDoc);
         CHECK( (*cursor)->is_score() == true );
@@ -491,7 +441,7 @@ SUITE(DocCursorTest)
 
     TEST_FIXTURE(DocCursorTestFixture, empty_doc_points_to_end_of_content)
     {
-        //@ if document is empty points to 'end-of-collection' value (NULL)
+        //2. if document is empty points to 'end-of-collection' value (NULL)
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content ))" );
         MyDocCursor cursor(m_pDoc);
@@ -558,12 +508,23 @@ SUITE(DocCursorTest)
 
     TEST_FIXTURE(DocCursorTestFixture, enter_top_delegates)
     {
-        //@enter: if pointing to a top level element, delegates
+        //1. enter: if pointing to a top level element, delegates
         create_document_1();
         MyDocCursor cursor(m_pDoc);
         CHECK( !cursor.my_is_delegating() );
         cursor.enter_element();
         CHECK( cursor.my_is_delegating() );
+    }
+
+    TEST_FIXTURE(DocCursorTestFixture, EnterOtherDoesNothing)
+    {
+        //2. enter: attempt to enter non-top element does nothing
+        create_document_1();
+        MyDocCursor cursor(m_pDoc);
+        cursor.enter_element();     //enter score: points to clef
+        CHECK( cursor.my_is_delegating() == true );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_clef() == true );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, point_to_content_element)
@@ -627,52 +588,6 @@ SUITE(DocCursorTest)
         CHECK( cursor.my_is_delegating() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_key_signature() == true );
-    }
-
-    TEST_FIXTURE(DocCursorTestFixture, EnterOtherDoesNothing)
-    {
-        //@ enter: attempt to enter non-top element does nothing
-        create_document_1();
-        MyDocCursor cursor(m_pDoc);
-        cursor.enter_element();     //enter score: points to clef
-        CHECK( cursor.my_is_delegating() == true );
-        CHECK( *cursor != NULL );
-        CHECK( (*cursor)->is_clef() == true );
-    }
-
-    TEST_FIXTURE(DocCursorTestFixture, reposition_after_delete_top)
-    {
-        //@ when top level pointed object is deleted, go to next top level object
-        create_document_1();
-        MyDocCursor cursor(m_pDoc);
-        ImoScore* pScore = static_cast<ImoScore*>( *cursor );
-        ImoDocument* pImoDoc = pScore->get_document();
-        pImoDoc->erase(pScore);
-
-        cursor.update_after_deletion();
-
-        CHECK( cursor.my_is_delegating() == false );
-        CHECK( *cursor != NULL );
-        CHECK( (*cursor)->is_paragraph() == true );
-    }
-
-    TEST_FIXTURE(DocCursorTestFixture, reposition_after_delete_last_top)
-    {
-        //@ when last top level pointed object is deleted, go to end
-        create_document_1();
-        MyDocCursor cursor(m_pDoc);
-        ++cursor;   //paragraph
-        ImoParagraph* pImo = static_cast<ImoParagraph*>( *cursor );
-        ImoDocument* pImoDoc = pImo->get_document();
-        pImoDoc->erase(pImo);
-
-        cursor.update_after_deletion();     //should move to end
-
-        CHECK( cursor.my_is_delegating() == false );
-        CHECK( *cursor == NULL );
-        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
-        --cursor;
-        CHECK( (*cursor)->is_score() == true );
     }
 
     TEST_FIXTURE(DocCursorTestFixture, to_start_not_delegating)
@@ -796,6 +711,69 @@ SUITE(DocCursorTest)
         CHECK( cursor.get_top_id() == 15L );
         CHECK( cursor.get_pointee_id() == 24L );
         CHECK( cursor.my_is_delegating() == true );
+    }
+
+    TEST_FIXTURE(DocCursorTestFixture, delegating_1)
+    {
+        //1. next delegating: top level not modified and delegate move
+        create_document_1();
+        MyDocCursor cursor(m_pDoc);
+        cursor.point_to(24L);   //first note
+
+        cursor.move_next();      //to rest #25
+
+        CHECK( cursor.get_top_id() == 15L );
+        CHECK( cursor.get_pointee_id() == 25L );
+        CHECK( cursor.my_is_delegating() == true );
+    }
+
+    TEST_FIXTURE(DocCursorTestFixture, delegating_2)
+    {
+        //2. prev delegating: top level not modified and delegate move
+        create_document_1();
+        MyDocCursor cursor(m_pDoc);
+        cursor.point_to(25L);    //last rest
+
+        cursor.move_prev();      //to note #24
+
+        CHECK( cursor.get_top_id() == 15L );
+        CHECK( cursor.get_pointee_id() == 24L );
+        CHECK( cursor.my_is_delegating() == true );
+    }
+
+    TEST_FIXTURE(DocCursorTestFixture, reposition_after_delete_top)
+    {
+        //@ when top level pointed object is deleted, go to next top level object
+        create_document_1();
+        MyDocCursor cursor(m_pDoc);
+        ImoScore* pScore = static_cast<ImoScore*>( *cursor );
+        ImoDocument* pImoDoc = pScore->get_document();
+        pImoDoc->erase(pScore);
+
+        cursor.update_after_deletion();
+
+        CHECK( cursor.my_is_delegating() == false );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_paragraph() == true );
+    }
+
+    TEST_FIXTURE(DocCursorTestFixture, reposition_after_delete_last_top)
+    {
+        //@ when last top level pointed object is deleted, go to end
+        create_document_1();
+        MyDocCursor cursor(m_pDoc);
+        ++cursor;   //paragraph
+        ImoParagraph* pImo = static_cast<ImoParagraph*>( *cursor );
+        ImoDocument* pImoDoc = pImo->get_document();
+        pImoDoc->erase(pImo);
+
+        cursor.update_after_deletion();     //should move to end
+
+        CHECK( cursor.my_is_delegating() == false );
+        CHECK( *cursor == NULL );
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end );
+        --cursor;
+        CHECK( (*cursor)->is_score() == true );
     }
 
 //    TEST_FIXTURE(DocCursorTestFixture, DocCursor_RestoreStateAtEndOfCollection)

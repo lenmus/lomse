@@ -39,8 +39,6 @@
 #include "lomse_model_builder.h"
 #include "lomse_document.h"
 #include "lomse_font_storage.h"
-//#include "lomse_glyphs.h"
-//#include "lomse_user_command.h"
 #include "lomse_graphic_view.h"
 #include "lomse_interactor.h"
 #include "lomse_presenter.h"
@@ -50,8 +48,10 @@
 #include "lomse_events.h"
 #include "lomse_score_player.h"
 #include "lomse_metronome.h"
-#include "lomse_events_dispatcher.h"
 #include "lomse_id_assigner.h"
+#include "lomse_document_cursor.h"
+#include "lomse_command.h"
+#include "lomse_caret_positioner.h"
 
 #include <sstream>
 using namespace std;
@@ -95,6 +95,7 @@ LibraryScope::~LibraryScope()
         m_pDispatcher->stop_events_loop();
         delete m_pDispatcher;
     }
+
 //    delete m_pMusicGlyphs;
 }
 
@@ -124,6 +125,15 @@ EventsDispatcher* LibraryScope::get_events_dispatcher()
     }
     return m_pDispatcher;
 }
+
+#if (LOMSE_USE_BOOST_ASIO == 1)
+//---------------------------------------------------------------------------------------
+boost::asio::io_service& LibraryScope::get_io_service()
+{
+    EventsDispatcher* pDispatcher = get_events_dispatcher();
+    return pDispatcher->get_io_service();
+}
+#endif
 
 //---------------------------------------------------------------------------------------
 double LibraryScope::get_screen_ppi() const
@@ -317,22 +327,23 @@ View* Injector::inject_View(LibraryScope& libraryScope, int viewType, Document* 
 
 //---------------------------------------------------------------------------------------
 Interactor* Injector::inject_Interactor(LibraryScope& libraryScope,
-                                        Document* pDoc, View* pView) //, UserCommandExecuter* pExec)
+                                        Document* pDoc, View* pView,
+                                        DocCommandExecuter* pExec)
 {
     //factory method
 
-    return LOMSE_NEW EditInteractor(libraryScope, pDoc, pView);  //, pExec);
+    return LOMSE_NEW EditInteractor(libraryScope, pDoc, pView, pExec);
 }
 
 //---------------------------------------------------------------------------------------
 Presenter* Injector::inject_Presenter(LibraryScope& libraryScope,
                                       int viewType, Document* pDoc)
 {
-    //UserCommandExecuter* pExec = Injector::inject_UserCommandExecuter(pDoc);
-    View* pView = Injector::inject_View(libraryScope, viewType, pDoc); //, pExec);
-    Interactor* pInteractor = Injector::inject_Interactor(libraryScope, pDoc, pView);
+    View* pView = Injector::inject_View(libraryScope, viewType, pDoc);
+    DocCommandExecuter* pExec = Injector::inject_DocCommandExecuter(pDoc);
+    Interactor* pInteractor = Injector::inject_Interactor(libraryScope, pDoc, pView, pExec);
     pView->set_interactor(pInteractor);
-    return LOMSE_NEW Presenter(pDoc, pInteractor);  //, pExec);
+    return LOMSE_NEW Presenter(pDoc, pInteractor, pExec);
 }
 
 //---------------------------------------------------------------------------------------
@@ -346,6 +357,24 @@ ScorePlayer* Injector::inject_ScorePlayer(LibraryScope& libraryScope,
                                           MidiServerBase* pSoundServer)
 {
     return LOMSE_NEW ScorePlayer(libraryScope, pSoundServer);
+}
+
+//---------------------------------------------------------------------------------------
+DocCursor* Injector::inject_DocCursor(Document* pDoc)
+{
+    return LOMSE_NEW DocCursor(pDoc);
+}
+
+//---------------------------------------------------------------------------------------
+DocCommandExecuter* Injector::inject_DocCommandExecuter(Document* pDoc)
+{
+    return LOMSE_NEW DocCommandExecuter(pDoc);
+}
+
+//---------------------------------------------------------------------------------------
+CaretPositioner* Injector::inject_CaretPositioner(DocCursor* pCursor)
+{
+    return LOMSE_NEW CaretPositioner(pCursor);
 }
 
 

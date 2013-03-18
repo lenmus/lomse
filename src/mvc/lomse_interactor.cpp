@@ -29,8 +29,6 @@
 
 #include "lomse_interactor.h"
 
-//#include "lomse_user_command.h"
-//#include "lomse_command.h"
 #include "lomse_ldp_compiler.h"
 #include "lomse_document.h"
 #include "lomse_document_cursor.h"
@@ -42,6 +40,9 @@
 #include "lomse_graphic_view.h"
 #include "lomse_events.h"
 #include "lomse_player_gui.h"
+#include "lomse_document_cursor.h"
+#include "lomse_command.h"
+
 #include <sstream>
 using namespace std;
 
@@ -54,7 +55,8 @@ namespace lomse
 //=======================================================================================
 // Interactor implementation
 //=======================================================================================
-Interactor::Interactor(LibraryScope& libraryScope, Document* pDoc, View* pView)      //UserCommandExecuter* pExec)
+Interactor::Interactor(LibraryScope& libraryScope, Document* pDoc, View* pView,
+                       DocCommandExecuter* pExec)
     : EventHandler()
     , EventNotifier(libraryScope.get_events_dispatcher())
     , Observable()
@@ -63,16 +65,20 @@ Interactor::Interactor(LibraryScope& libraryScope, Document* pDoc, View* pView) 
     , m_pView(pView)
     , m_pGraphicModel(NULL)
     , m_pTask( Injector::inject_Task(TaskFactory::k_task_null, NULL) )
+    , m_pCursor( Injector::inject_DocCursor(pDoc) )
+    , m_pExec(pExec)
     , m_selections()
     , m_pLastMouseOverGmo(NULL)
     , m_renderTime(0.0)
     , m_gmodelBuildTime(0.0)
     , m_fViewParamsChanged(false)
     , m_fViewUpdatesEnabled(true)
-    //, m_pExec(pExec)
-    //m_pCompiler( Injector::inject_LdpCompiler(m_libScope, *pDocScope) )
 {
     switch_task(TaskFactory::k_task_selection);     //k_task_drag_view);
+
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->use_cursor(m_pCursor);
 }
 
 //---------------------------------------------------------------------------------------
@@ -81,6 +87,7 @@ Interactor::~Interactor()
     delete m_pTask;
     delete m_pView;
     delete_graphic_model();
+    delete m_pCursor;
 }
 
 //---------------------------------------------------------------------------------------
@@ -110,6 +117,7 @@ void Interactor::create_graphic_model()
         DocLayouter layouter(pIModel, m_libScope);
         layouter.layout_document();
         m_pGraphicModel = layouter.get_gm_model();
+        m_pGraphicModel->build_main_boxes_table();
     }
 
     m_gmodelBuildTime = get_elapsed_time();
@@ -787,13 +795,67 @@ double Interactor::get_elapsed_time() const
     //return double(clock() - m_startTime) * 1000.0 / CLOCKS_PER_SEC;
 }
 
+//---------------------------------------------------------------------------------------
+bool Interactor::blink_caret()
+{
+    // returns true if caret has been repainted
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        return pGView->toggle_caret();
+    else
+        return false;
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::show_caret()
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->show_caret();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::hide_caret()
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->hide_caret();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::update_caret()
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        pGView->update_caret();
+        request_window_update();
+    }
+}
+
+//---------------------------------------------------------------------------------------
+string Interactor::get_caret_timecode()
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        return pGView->get_caret_timecode();
+
+    return "";
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::exec_command(DocCommand* pCmd)
+{
+    m_pExec->execute(m_pCursor, pCmd);
+}
+
 
 //=======================================================================================
 // EditInteractor implementation
 //=======================================================================================
-EditInteractor::EditInteractor(LibraryScope& libraryScope, Document* pDoc, View* pView)
-        //UserCommandExecuter* pExec)
-    : Interactor(libraryScope, pDoc, pView)    //, pExec)
+EditInteractor::EditInteractor(LibraryScope& libraryScope, Document* pDoc, View* pView,
+                               DocCommandExecuter* pExec)
+    : Interactor(libraryScope, pDoc, pView, pExec)
 {
 }
 

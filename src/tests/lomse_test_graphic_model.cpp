@@ -136,7 +136,7 @@ SUITE(GraphicModelTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -175,7 +175,7 @@ SUITE(GraphicModelTest)
             "(instrument (staves 2)(musicData )))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);
         LUnits x = pPage->get_left();
@@ -198,7 +198,7 @@ SUITE(GraphicModelTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -238,7 +238,7 @@ SUITE(GraphicModelTest)
             "(instrument (musicData (clef G))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -277,7 +277,7 @@ SUITE(GraphicModelTest)
             "(instrument (staves 2)(musicData )))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -312,7 +312,7 @@ SUITE(GraphicModelTest)
             "(instrument (staves 2)(musicData )))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);
         LUnits x = pPage->get_left() - 1.0f;
@@ -335,7 +335,7 @@ SUITE(GraphicModelTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -375,7 +375,7 @@ SUITE(GraphicModelTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -425,7 +425,7 @@ SUITE(GraphicModelTest)
         //build gmodel
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoShape* pShape = pModel->get_shape_for_noterest(pNote);
@@ -448,7 +448,7 @@ SUITE(GraphicModelTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
         GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
@@ -487,7 +487,7 @@ SUITE(GraphicModelTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
         GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
@@ -554,7 +554,7 @@ SUITE(GraphicModelTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
             Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView);
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
         GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
@@ -638,7 +638,7 @@ SUITE(GraphicModelTest)
 
         gm.add_to_map_imo_gmo(pBox);
 
-        CHECK( gm.get_box_for(pScore) == pBox );
+        CHECK( gm.get_box_for_imo(pScore->get_id()) == pBox );
 
         delete pBox;
     }
@@ -656,7 +656,7 @@ SUITE(GraphicModelTest)
         gm.add_to_map_imo_gmo(pBox);
 
         CHECK( rmap.size() == 1 );
-        CHECK( gm.get_box_for(pScore) == pBox );
+        CHECK( gm.get_box_for_imo(pScore->get_id()) == pBox );
 
         delete pBox;
     }
@@ -676,7 +676,7 @@ SUITE(GraphicModelTest)
         gm.add_to_map_imo_gmo(pBox);
 
         CHECK( rmap.size() == 1 );
-        CHECK( gm.get_box_for(pScore) == pBox );
+        CHECK( gm.get_box_for_imo(pScore->get_id()) == pBox );
 
         delete pBox;
     }

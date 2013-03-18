@@ -183,11 +183,11 @@ DocCursor::DocCursor(Document* pDoc)
 }
 
 //---------------------------------------------------------------------------------------
-DocCursor::DocCursor(const DocCursor& cursor)
-    : m_pDoc(cursor.m_pDoc)
+DocCursor::DocCursor(const DocCursor* cursor)
+    : m_pDoc(cursor->m_pDoc)
+    , m_pInnerCursor(NULL)
     , m_topLevelCursor(m_pDoc)
 {
-//    m_topLevelCursor = cursor.m_topLevelCursor;
 //    m_pFirst = cursor.m_pFirst;
 //    if (cursor.m_pInnerCursor == NULL)
 //        m_pInnerCursor = NULL;
@@ -301,32 +301,31 @@ void DocCursor::move_next()
 //        stop_delegation();
 //        ++m_topLevelCursor;
 //    }
-//    else if (is_delegating())
-//	{
-//		m_pInnerCursor->move_next();
-//	}
-//	else
+//    else
+    if (is_delegating())
+		m_pInnerCursor->move_next();
+	else
 		++m_topLevelCursor;
 }
 
 //---------------------------------------------------------------------------------------
 void DocCursor::move_prev()
 {
-//    if (is_delegating())
-//    {
+    if (is_delegating())
+    {
 //        if (m_pInnerCursor->is_at_start())
 //            stop_delegation();
 //        else
 //        {
-//            m_pInnerCursor->move_prev();
+            m_pInnerCursor->move_prev();
 //            if (m_pInnerCursor->get_pointee() == NULL)
 //                stop_delegation();
 //            else
 //                --m_topLevelCursor;
 //        }
-//    }
-//    else
-//    {
+    }
+    else
+    {
 //        if (m_pFirst == NULL)
 //        {
 //            //update ptr to first just in case document modified
@@ -342,7 +341,7 @@ void DocCursor::move_prev()
 //            else
 //                m_topLevelCursor.last_of_content();
 //        }
-//    }
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -350,6 +349,13 @@ void DocCursor::to_end()
 {
     stop_delegation();
     m_topLevelCursor.to_end();
+}
+
+//---------------------------------------------------------------------------------------
+void DocCursor::to_last_top_level()
+{
+    stop_delegation();
+    m_topLevelCursor.last_of_content();
 }
 
 //---------------------------------------------------------------------------------------
@@ -493,6 +499,38 @@ ImoObj* ScoreCursor::staffobj_internal()
         return (*m_it)->imo_object();
     else
         return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+ColStaffObjsEntry* ScoreCursor::find_previous_imo()
+{
+    auto_refresh();
+
+    ColStaffObjsIterator itSave = m_it;
+
+    float curTime = m_currentState.time();
+
+    //move to prev with lower time
+    p_move_iterator_to_prev();
+    while ( p_there_is_iter_object()
+            && !is_lower_time(p_iter_object_time(), curTime)
+          )
+    {
+        p_move_iterator_to_prev();
+    }
+
+    //based on found object, determine position
+    if ( !p_there_is_iter_object()
+         || !is_lower_time(p_iter_object_time(), curTime)
+       )
+    {
+        //no previous staffobj!
+        throw runtime_error("Must exist");
+    }
+
+    ColStaffObjsEntry* pEntry = *m_it;
+    m_it = itSave;
+    return pEntry;
 }
 
 //---------------------------------------------------------------------------------------
@@ -657,7 +695,8 @@ void ScoreCursor::p_to_start_of_next_staff()
 void ScoreCursor::p_update_as_end_of_staff()
 {
     m_currentState.id( k_cursor_at_end_of_staff );
-    m_currentState.ref_obj_id( -1L );
+    m_currentState.ref_obj_id(-1L);
+    m_currentState.ref_obj_time(0.0f);
 }
 
 //---------------------------------------------------------------------------------------
@@ -694,6 +733,7 @@ void ScoreCursor::p_update_as_end_of_score()
 
     m_currentState.id( k_cursor_at_end_of_staff );
     m_currentState.ref_obj_id( -1L );
+    m_currentState.ref_obj_time(0.0f);
 }
 
 //---------------------------------------------------------------------------------------
@@ -722,7 +762,7 @@ bool ScoreCursor::p_is_at_end_of_score()
 }
 
 //---------------------------------------------------------------------------------------
-bool ScoreCursor::is_at_start_of_score()
+bool ScoreCursor::is_at_end_of_empty_score()
 {
     //intrinsically safe
 
@@ -765,6 +805,7 @@ void ScoreCursor::p_update_state_from_iterator()
         m_currentState.time( p_iter_object_time() );
         m_currentState.id( p_iter_object_id() );
         m_currentState.ref_obj_id( p_iter_object_id() );
+        m_currentState.ref_obj_time( p_iter_object_time() );
     }
     else
         p_update_as_end_of_score();
@@ -786,11 +827,13 @@ void ScoreCursor::p_update_pointed_objects()
         {
             m_currentState.id( p_iter_object_id() );
             m_currentState.ref_obj_id( p_iter_object_id() );
+            m_currentState.ref_obj_time( p_iter_object_time() );
         }
         else
         {
             m_currentState.id( k_cursor_at_empty_place );
             m_currentState.ref_obj_id( p_iter_object_id() );
+            m_currentState.ref_obj_time( p_iter_object_time() );
         }
     }
     else
@@ -863,8 +906,8 @@ void ScoreCursor::move_prev()
 {
     auto_refresh();
 
-    //AWARE: is_at_start_of_score() is safe and will not invoke auto-refresh
-    if (is_at_start_of_score())
+    //AWARE: is_at_end_of_empty_score() is safe and will not invoke auto-refresh
+    if (is_at_end_of_empty_score())
         return;
 
     m_currentState = m_prevState;
@@ -1281,7 +1324,8 @@ ElementCursorState* ScoreCursor::get_state()
     auto_refresh();
 
     return LOMSE_NEW ScoreCursorState(instrument(), staff(), measure(),
-                                      time(), id(), staffobj_id_internal());
+                                      time(), id(), staffobj_id_internal(),
+                                      ref_obj_time());
 }
 
 //---------------------------------------------------------------------------------------
@@ -1299,6 +1343,7 @@ void ScoreCursor::restore_state(ElementCursorState* pState)
     m_currentState.staff( pSCS->staff() );  //fix staff when pointin to a barline
     m_currentState.id( pSCS->id() );
     m_currentState.time( pSCS->time() );
+    m_currentState.ref_obj_time( pSCS->ref_obj_time() );
 
     p_find_previous_state();
 }
@@ -1332,7 +1377,8 @@ string ScoreCursor::dump_cursor()
          << ", measure=" << m_currentState.measure()
          << ", time=" << m_currentState.time()
          << ", id=" << m_currentState.id()
-         << ", ref_id=" << m_currentState.ref_obj_id();
+         << ", ref_id=" << m_currentState.ref_obj_id()
+         << ", ref_time=" << m_currentState.ref_obj_time();
 
     if (m_currentState.id() < 0L)
     {
@@ -1356,7 +1402,8 @@ string ScoreCursor::dump_cursor()
          << ", measure=" << m_prevState.measure()
          << ", time=" << m_prevState.time()
          << ", id=" << m_prevState.id()
-         << ", ref_id=" << m_prevState.ref_obj_id();
+         << ", ref_id=" << m_prevState.ref_obj_id()
+         << ", ref_time=" << m_prevState.ref_obj_time();
 
     if (m_prevState.id() < 0L)
     {

@@ -31,7 +31,7 @@
 
 #include "lomse_injectors.h"
 #include "lomse_document.h"
-//#include "lomse_user_command.h"
+#include "lomse_command.h"
 #include "lomse_view.h"
 #include "lomse_interactor.h"
 #include <sstream>
@@ -240,10 +240,10 @@ Presenter* PresenterBuilder::open_document(int viewType, LdpReader& reader,
 //=======================================================================================
 //Presenter implementation
 //=======================================================================================
-Presenter::Presenter(Document* pDoc, Interactor* pIntor)   //, UserCommandExecuter* pExec)
+Presenter::Presenter(Document* pDoc, Interactor* pIntor, DocCommandExecuter* pExec)
     : m_pDoc(pDoc)
     , m_userData(NULL)
-    //, m_pExec(pExec)
+    , m_pExec(pExec)
     , m_callback(NULL)
 {
     m_interactors.push_back(pIntor);
@@ -259,7 +259,7 @@ Presenter::~Presenter()
     m_interactors.clear();
 
     delete m_pDoc;
-    //delete m_pExec;
+    delete m_pExec;
 }
 
 //---------------------------------------------------------------------------------------

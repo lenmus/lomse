@@ -124,11 +124,11 @@ SUITE(DocCommandTest)
     {
         create_document_1();
         DocCursor cursor(m_pDoc);
-        DocCommandExecuter executer(m_pDoc, &cursor);
+        DocCommandExecuter executer(m_pDoc);
         CHECK( m_pDoc->is_dirty() == false );
         DocCommand* pCmd = LOMSE_NEW CmdCursor(CmdCursor::k_point_to, 25L);    //first note
 
-        executer.execute(pCmd);
+        executer.execute(&cursor, pCmd);
 
 //        cout << "cmd name = " << pCmd->get_name() << endl;
         CHECK( pCmd->get_name() == "Cursor: point to" );
@@ -140,9 +140,9 @@ SUITE(DocCommandTest)
     {
         create_document_1();
         DocCursor cursor(m_pDoc);
-        DocCommandExecuter executer(m_pDoc, &cursor);
+        DocCommandExecuter executer(m_pDoc);
         DocCommand* pCmd = LOMSE_NEW CmdCursor(CmdCursor::k_point_to, 25L);    //first note
-        executer.execute(pCmd);
+        executer.execute(&cursor, pCmd);
 
         executer.undo();
 
@@ -158,11 +158,11 @@ SUITE(DocCommandTest)
         doc.create_empty();
         doc.clear_dirty();
         DocCursor cursor(&doc);
-        DocCommandExecuter executer(&doc, &cursor);
+        DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertBlockLevelObj(k_imo_para);
         CHECK( doc.is_dirty() == false );
 
-        executer.execute(pCmd);
+        executer.execute(&cursor, pCmd);
 //        cout << doc.to_string() << endl;
 //        cout << "cmd name = " << pCmd->get_name() << endl;
         CHECK( pCmd->get_name() == "Insert paragraph" );
@@ -195,16 +195,16 @@ SUITE(DocCommandTest)
         doc.create_empty();
         doc.clear_dirty();
         DocCursor cursor(&doc);
-        DocCommandExecuter executer(&doc, &cursor);
+        DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertBlockLevelObj(k_imo_para);
-        executer.execute(pCmd);
+        executer.execute(&cursor, pCmd);
 
         --cursor;
         CHECK( (*cursor)->is_paragraph() == true );
         CmdInsertBlockLevelObj* pCmd2 =
             LOMSE_NEW CmdInsertBlockLevelObj(k_imo_score);
 
-        executer.execute(pCmd2);
+        executer.execute(&cursor, pCmd2);
         CHECK( pCmd2->get_name() == "Insert score" );
 //        cout << doc.to_string() << endl;
         ImoDocument* pImoDoc = doc.get_imodoc();
@@ -246,13 +246,13 @@ SUITE(DocCommandTest)
     {
         create_document_1();
         DocCursor cursor(m_pDoc);
-        DocCommandExecuter executer(m_pDoc, &cursor);
+        DocCommandExecuter executer(m_pDoc);
         CHECK( m_pDoc->is_dirty() == false );
         DocCommand* pCmd = LOMSE_NEW CmdDeleteBlockLevelObj();
 
         //cout << m_pDoc->to_string(k_save_ids) << endl;
         cursor.point_to(15L);   //score
-        executer.execute(pCmd);
+        executer.execute(&cursor, pCmd);
 //        cout << m_pDoc->to_string(k_save_ids) << endl;
 //        cout << "cmd name = " << pCmd->get_name() << endl;
 
@@ -268,11 +268,11 @@ SUITE(DocCommandTest)
 //    {
 //        create_document_1();
 //        DocCursor cursor(m_pDoc);
-//        DocCommandExecuter executer(m_pDoc, &cursor);
+//        DocCommandExecuter executer(m_pDoc);
 //        DocCommand* pCmd = LOMSE_NEW CmdDeleteBlockLevelObj();
 //
 //        cursor.point_to(15L);   //score
-//        executer.execute(pCmd);
+//        executer.execute(&cursor, pCmd);
 //        executer.undo();
 //
 //        cursor.update_after_deletion();
@@ -296,11 +296,11 @@ SUITE(DocCommandTest)
     {
         create_document_1();
         DocCursor cursor(m_pDoc);
-        DocCommandExecuter executer(m_pDoc, &cursor);
+        DocCommandExecuter executer(m_pDoc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
         cursor.point_to(24L);
-        executer.execute(pCmd);
+        executer.execute(&cursor, pCmd);
         //cout << m_pDoc->to_string(k_save_ids) << endl;
         //ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
         //cout << pScore->get_staffobjs_table()->dump() << endl;
@@ -317,12 +317,12 @@ SUITE(DocCommandTest)
     {
         create_document_2();
         DocCursor cursor(m_pDoc);
-        DocCommandExecuter executer(m_pDoc, &cursor);
+        DocCommandExecuter executer(m_pDoc);
         CHECK( m_pDoc->is_dirty() == false );
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
         cursor.point_to(24L);
-        executer.execute(pCmd);
+        executer.execute(&cursor, pCmd);
         executer.undo();
 
 //        cout << m_pDoc->to_string(k_save_ids) << endl;
@@ -342,14 +342,14 @@ SUITE(DocCommandTest)
 //    {
 //        create_document_1();
 //        DocCursor cursor(m_pDoc);
-//        DocCommandExecuter executer(m_pDoc, &cursor);
+//        DocCommandExecuter executer(m_pDoc);
 //
 //        cursor.point_to(24L);
 //        DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj(cursor, k_imo_note);
 //        cout << "cmd name = " << pCmd->get_name() << endl;
 //        CHECK( pCmd->get_name() == "Insert note" );
 //
-//        executer.execute(pCmd);
+//        executer.execute(&cursor, pCmd);
 //        cout << m_pDoc->to_string(k_save_ids) << endl;
 //        ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
 //        cout << pScore->get_staffobjs_table()->dump() << endl;

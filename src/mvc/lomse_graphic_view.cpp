@@ -33,6 +33,8 @@
 #include "lomse_gm_basic.h"
 #include "lomse_screen_drawer.h"
 #include "lomse_interactor.h"
+#include "lomse_caret.h"
+#include "lomse_caret_positioner.h"
 
 using namespace std;
 
@@ -93,6 +95,8 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_vyOrg(0)
     , m_fSelRectVisible(false)
     , m_fTempoLineVisible(false)
+    , m_pCaret( LOMSE_NEW Caret(this, libraryScope) )
+    , m_pCaretPositioner(NULL)
 {
 }
 
@@ -100,6 +104,14 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
 GraphicView::~GraphicView()
 {
     delete m_pDrawer;
+    delete m_pCaret;
+    delete m_pCaretPositioner;
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::use_cursor(DocCursor* pCursor)
+{
+    m_pCaretPositioner = Injector::inject_CaretPositioner(pCursor);
 }
 
 //---------------------------------------------------------------------------------------
@@ -131,8 +143,70 @@ void GraphicView::redraw_bitmap() //, RepaintOptions& opt)
         draw_graphic_model();
         draw_sel_rectangle();
         //draw_tempo_line();
+        draw_caret();
         add_controls();
     }
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::show_caret()
+{
+    m_pCaret->show_caret();
+    update_caret();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::hide_caret()
+{
+    m_pCaret->hide_caret();
+    update_caret();
+}
+
+//---------------------------------------------------------------------------------------
+bool GraphicView::toggle_caret()
+{
+    // returns true if caret has been repainted
+
+    if ( m_pCaret->is_visible() && m_pCaret->is_blink_enabled() )
+    {
+        m_pCaret->toggle_caret();
+        return update_caret();
+    }
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+bool GraphicView::update_caret()
+{
+    // returns true if caret has been repainted
+
+    //TODO: overlays, to avoid repainting the whole bitmap
+    if (m_pRenderBuf)
+    {
+        draw_graphic_model();
+        draw_sel_rectangle();
+        //draw_tempo_line();
+        draw_caret();
+        add_controls();
+        return true;
+    }
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::draw_caret()
+{
+//    m_options.draw_focus_lines_on_boxes_flag = true;
+
+    GraphicModel* pGModel = get_graphic_model();
+    m_pCaretPositioner->prepare_caret(m_pCaret, pGModel);
+    m_pCaret->on_draw(m_pDrawer);
+}
+
+//---------------------------------------------------------------------------------------
+string GraphicView::get_caret_timecode()
+{
+    return m_pCaret->get_timecode();
 }
 
 //---------------------------------------------------------------------------------------

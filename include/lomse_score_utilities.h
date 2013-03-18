@@ -27,8 +27,8 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#ifndef __LOMSE_SORE_UTILITIES_H__
-#define __LOMSE_SORE_UTILITIES_H__
+#ifndef __LOMSE_SCORE_UTILITIES_H__
+#define __LOMSE_SCORE_UTILITIES_H__
 
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"        //for EKeySignature enum
@@ -112,4 +112,4 @@ class ImoTimeSignature;
 
 }   //namespace lomse
 
-#endif      //__LOMSE_SORE_UTILITIES_H__
+#endif      //__LOMSE_SCORE_UTILITIES_H__

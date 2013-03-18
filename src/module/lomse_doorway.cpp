@@ -35,6 +35,7 @@
 #include <sstream>
 using namespace std;
 
+
 namespace lomse
 {
 
@@ -94,6 +95,7 @@ void LomseDoorway::init_library(int pixel_format, int ppi, bool reverse_y_axis,
     m_platform.screen_ppi = float(ppi);
 
     m_pLibraryScope = LOMSE_NEW LibraryScope(reporter, this);
+//    m_pLibraryScope->get_threads_poll();        //force to create the threads
 }
 
 //---------------------------------------------------------------------------------------
