@@ -282,7 +282,7 @@ void StaffObjsCursor::go_back_to_saved_position()
 //}
 //
 //---------------------------------------------------------------------------------------
-//void StaffObjsCursor::AdvanceAfterTimepos(float rTimepos)
+//void StaffObjsCursor::AdvanceAfterTimepos(TimeUnits rTimepos)
 //{
 //    //advance all iterators so that last processed timepos is rTimepos. That is, pointed
 //    //objects will be the firsts ones with timepos > rTimepos.

@@ -550,7 +550,8 @@ GmoBoxDocPage* GmoBox::get_parent_box_page()
 //---------------------------------------------------------------------------------------
 GraphicModel* GmoBox::get_graphic_model()
 {
-    return get_parent_box()->get_graphic_model();
+    GmoBox* pParent = get_parent_box();
+    return (pParent == NULL ? NULL : pParent->get_graphic_model());
 }
 
 //---------------------------------------------------------------------------------------

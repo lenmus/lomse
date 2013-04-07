@@ -43,11 +43,8 @@ class CheckboxCtrl : public Control
                    , public VertexSource
 {
 protected:
-    LibraryScope& m_libraryScope;
     string m_label;
-    string m_language;
     GmoBoxControl* m_pMainBox;
-    ImoStyle* m_style;
     UPoint  m_pos;
     LUnits  m_width;
     LUnits  m_height;

@@ -2217,7 +2217,7 @@ public:
                 }
                 else
                 {
-                    float rTime = to_duration(figdots.noteType, figdots.dots);
+                    TimeUnits rTime = to_duration(figdots.noteType, figdots.dots);
                     pImo->set_time_shift(rTime);
                 }
             }

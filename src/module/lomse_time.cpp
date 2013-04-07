@@ -36,28 +36,28 @@ namespace lomse
 
 //---------------------------------------------------------------------------------------
 //global helper functions to compare times (two floating point numbers)
-bool is_equal_time(float t1, float t2)
+bool is_equal_time(TimeUnits t1, TimeUnits t2)
 {
-    return (fabs(t1 - t2) < 0.1f);
+    return (fabs(t1 - t2) < 0.1);
 }
 
 //---------------------------------------------------------------------------------------
-bool is_lower_time(float t1, float t2)
+bool is_lower_time(TimeUnits t1, TimeUnits t2)
 {
-    return (t1 < t2) && (fabs(t2 - t1) >= 0.1f);
+    return (t1 < t2) && (fabs(t2 - t1) >= 0.1);
 }
 
 //---------------------------------------------------------------------------------------
-bool is_greater_time(float t1, float t2)
+bool is_greater_time(TimeUnits t1, TimeUnits t2)
 {
-    return (t1 > t2) && (fabs(t1 - t2) >= 0.1f);
+    return (t1 > t2) && (fabs(t1 - t2) >= 0.1);
 }
 
 //---------------------------------------------------------------------------------------
 //global function for implementing round-half-up rounding algorithm
-float round_half_up(float num)
+TimeUnits round_half_up(TimeUnits num)
 {
-    return floor(num * 100.0f + 0.5f) / 100.0f;
+    return floor(num * 100.0 + 0.5) / 100.0;
 }
 
 

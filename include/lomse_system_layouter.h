@@ -82,18 +82,18 @@ class LineEntry
 {
 public:
     // constructor and destructor
-    LineEntry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, float rTime,
+    LineEntry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, TimeUnits rTime,
               LUnits xUserShift, LUnits yUserShift);
     ~LineEntry() {}
 
     //constructor for unit tests
-    LineEntry(bool fIsBarlineEntry, bool fProlog, float rTime, LUnits xAnchor,
+    LineEntry(bool fIsBarlineEntry, bool fProlog, TimeUnits rTime, LUnits xAnchor,
               LUnits xLeft, LUnits uSize, LUnits uFixedSpace, LUnits uVarSpace,
               LUnits xFinal);
 
 
     void reposition_at(LUnits uxNewXLeft);
-	void assign_fixed_and_variable_space(ColumnLayouter* pTT, float rFactor);
+	void assign_fixed_and_variable_space(ColumnLayouter* pTT, TimeUnits rFactor);
     void move_shape(UPoint sliceOrg);
     void add_shape_info();
 
@@ -102,7 +102,7 @@ public:
     inline ImoStaffObj* get_staffobj() { return m_pSO; }
     inline GmoShape*  get_shape() { return m_pShape; }
 	inline bool is_prolog_object() { return m_fProlog; }
-    inline float get_timepos() { return m_rTimePos; }
+    inline TimeUnits get_timepos() { return m_rTimePos; }
     inline LUnits get_position() { return m_xLeft; }
     inline LUnits get_anchor() { return m_uxAnchor; }
     inline LUnits get_x_final() { return m_xFinal; }
@@ -115,7 +115,7 @@ public:
     inline void set_variable_space(LUnits space) { m_uVariableSpace = space; }
     inline void set_fixed_space(LUnits space) { m_uFixedSpace = space; }
     inline void set_size(LUnits width) { m_uSize = width; }
-    inline float get_duration() { return 0.0f; } //TODO m_pSO->GetTimePosIncrement(); }
+    inline TimeUnits get_duration() { return 0.0; } //TODO m_pSO->GetTimePosIncrement(); }
     inline void set_position(LUnits uPos) { m_xLeft = uPos; }
     inline void mark_as_barline_entry() { m_fIsBarlineEntry = true; }
     LUnits get_shift_to_noterest_center();
@@ -136,7 +136,7 @@ protected:
     ImoStaffObj*    m_pSO;              //ptr to the StaffObj
     GmoShape*       m_pShape;           //ptr to the shape
 	bool			m_fProlog;          //this shape is a prolog object (clef, KS, TS at start of system)
-    float           m_rTimePos;         //timepos for this pSO or -1 if not anchored in time
+    TimeUnits       m_rTimePos;         //timepos for this pSO or -1 if not anchored in time
     LUnits          m_xLeft;            //current position of the left border of the object
     LUnits          m_uxAnchor;         //offset to anchor line
     LUnits          m_xFinal;           //next position (right border position + trailing space)
@@ -173,7 +173,7 @@ protected:
     LUnits m_uxFirstAnchor;             //xa - first anchor position
     LUnits m_uxRightEdge;               //xr - right most position
     LUnits m_uxStartOfEndVarSpace;      //xv - start of final var space
-    float m_rFirstTime;                 //time for first timed entry or -1
+    TimeUnits m_rFirstTime;             //time for first timed entry or -1
 
     //to control if ends in barline
     enum {
@@ -191,8 +191,8 @@ public:
     //building the line
     inline void clear() { m_LineEntries.clear(); }
     inline void push_back(LineEntry* pEntry) { m_LineEntries.push_back(pEntry); }
-	LineEntry* add_entry(ImoStaffObj* pSO, GmoShape* pShape, float rTime, bool fInProlog,
-                         LUnits xUserShift, LUnits yUserShift);
+	LineEntry* add_entry(ImoStaffObj* pSO, GmoShape* pShape, TimeUnits rTime,
+                         bool fInProlog, LUnits xUserShift, LUnits yUserShift);
     void do_measurements();
 
     //access to an item
@@ -212,7 +212,7 @@ public:
     inline LUnits get_start_of_final_var_space() { return m_uxStartOfEndVarSpace; }  //xv
     inline LUnits get_first_anchor_position() { return m_uxFirstAnchor; }       //xa
     inline LUnits get_start_of_first_symbol() { return m_uxFirstSymbol; }       //xs
-    inline float get_first_time() { return m_rFirstTime; }
+    inline TimeUnits get_first_time() { return m_rFirstTime; }
 
     LUnits get_final_pos();             //xf
     LUnits get_end_hook_width();
@@ -279,7 +279,7 @@ public:
     inline void set_initial_space(LUnits fixedSpace) { m_uStartFixedSpace = fixedSpace; }
 
     //methods to build the lines
-    bool include_object(int iLine, int iInstr, ImoStaffObj* pSO, float rTime,
+    bool include_object(int iLine, int iInstr, ImoStaffObj* pSO, TimeUnits rTime,
                         int nStaff, GmoShape* pShape, bool fInProlog,
                         LUnits xUserShift, LUnits yUserShift);
     void finish_column_measurements(LUnits xStart);
@@ -380,7 +380,7 @@ public:
 
     //column creation
     void start_column_measurements(LUnits uxStart, LUnits fixedSpace);
-    void include_object(int iLine, int iInstr, ImoStaffObj* pSO, float rTime,
+    void include_object(int iLine, int iInstr, ImoStaffObj* pSO, TimeUnits rTime,
                         int nStaff, GmoShape* pShape, bool fInProlog);
     void finish_column_measurements(LUnits xStart);
     void save_context(int iInstr, int iStaff, ColStaffObjsEntry* pClefEntry,
@@ -443,7 +443,7 @@ protected:
 
     //variables and methods for column traversal ---------------------------------
     bool    m_fThereAreObjects;
-    float   m_rCurrentTime;         //current tiempos being aligned
+    TimeUnits   m_rCurrentTime;     //current tiempos being aligned
     LUnits  m_uCurrentPos;          //xPos to start placing objects
 
     void create_line_spacers();
@@ -562,9 +562,9 @@ public:
     LineResizer(MusicLine* pLine, LUnits uOldBarSize, LUnits uNewBarSize,
                 LUnits uNewStart, UPoint sliceOrg);
 
-    float move_prolog_shapes();
+    TimeUnits move_prolog_shapes();
     void reasign_position_to_all_other_objects(LUnits uFizedSizeAtStart);
-    LUnits get_time_line_position_for_time(float rFirstTime);
+    LUnits get_time_line_position_for_time(TimeUnits rFirstTime);
 
     //values only valid after having resized the line
     inline bool has_shapes() { return m_fHasShapes; }
@@ -588,7 +588,7 @@ protected:
     float               m_rFactor;          //spacing factor
     ScoreMeter*         m_pMeter;           //for tenths/logical conversion
     LineEntryIterator   m_itCur;            //current entry
-    float               m_rCurTime;         //current time
+    TimeUnits           m_rCurTime;         //current time
 	LUnits              m_uxCurPos;         //current xPos at start of current time
     LUnits              m_uxRemovable;      //space that can be removed if required
     LineEntryIterator   m_itNonTimedAtCurPos;
@@ -602,13 +602,13 @@ public:
     void process_non_timed_at_current_timepos(LUnits uxPos);
     void process_timed_at_current_timepos(LUnits uxPos);
     LUnits determine_next_feasible_position_after(LUnits uxPos);
-	inline bool current_time_is(float rTime) { return is_equal_time(m_rCurTime, rTime); }
+	inline bool current_time_is(TimeUnits rTime) { return is_equal_time(m_rCurTime, rTime); }
     inline bool are_there_timed_objs() {
         return m_itCur != m_pLine->end()
                && is_equal_time((*m_itCur)->get_timepos(), m_rCurTime);
     }
     inline bool are_there_more_objects() { return (m_itCur != m_pLine->end()); }
-    float get_next_available_time();
+    TimeUnits get_next_available_time();
     LUnits get_next_position();
 
 protected:
@@ -658,8 +658,8 @@ protected:
 //an item in the positions and times table
 typedef struct
 {
-    float rTimepos;
-    float rDuration;
+    TimeUnits rTimepos;
+    TimeUnits rDuration;
     LUnits uxPos;
 }
 PosTimeItem;
@@ -678,12 +678,12 @@ public:
     inline int get_size() { return (int)m_PosTimes.size(); }
 
     //access to an entry values
-    inline float get_timepos(int iItem) { return m_PosTimes[iItem].rTimepos; }
-    inline float get_duration(int iItem) { return m_PosTimes[iItem].rDuration; }
+    inline TimeUnits get_timepos(int iItem) { return m_PosTimes[iItem].rTimepos; }
+    inline TimeUnits get_duration(int iItem) { return m_PosTimes[iItem].rDuration; }
     inline LUnits get_x_pos(int iItem) { return m_PosTimes[iItem].uxPos; }
 
     //access by position
-    float get_time_for_position(LUnits uxPos);
+    TimeUnits get_time_for_position(LUnits uxPos);
 
 //    //debug
 //    void dump();
@@ -691,8 +691,8 @@ public:
 protected:
     //variables and methods for column traversal
     std::vector<TimeGridLineExplorer*> m_LineExplorers;
-    float m_rCurrentTime;
-    float m_rMinDuration;
+    TimeUnits m_rCurrentTime;
+    TimeUnits m_rMinDuration;
     LUnits m_uCurPos;
     bool m_fTimedObjectsFound;
 
@@ -717,7 +717,7 @@ protected:
     std::vector<PosTimeItem>& m_PosTimes;
 
     std::vector<PosTimeItem>::iterator  m_itInsertionPoint;
-    float m_rTimeBeforeInsertionPoint;
+    TimeUnits m_rTimeBeforeInsertionPoint;
     LUnits m_uPositionBeforeInsertionPoint;
 
 public:
@@ -725,9 +725,9 @@ public:
     void interpolate_missing_times();
 
 protected:
-    bool is_time_in_table(float rTimepos);
-    void find_insertion_point(float rTimepos);
-    void insert_time_interpolating_position(float rTimepos);
+    bool is_time_in_table(TimeUnits rTimepos);
+    void find_insertion_point(TimeUnits rTimepos);
+    void insert_time_interpolating_position(TimeUnits rTimepos);
 
 };
 
@@ -741,10 +741,10 @@ class TimeGridLineExplorer
 private:
     MusicLine* m_pLine;           //the line to assign space
     LineEntryIterator m_itCur;            //current entry
-    float m_rCurTime;
+    TimeUnits m_rCurTime;
 	LUnits m_uCurPos;
     LUnits m_uShiftToNoteRestCenter;
-    float m_rMinDuration;
+    TimeUnits m_rMinDuration;
 
 public:
     TimeGridLineExplorer(MusicLine* pLineTable);
@@ -753,8 +753,8 @@ public:
     bool skip_non_timed_at_current_timepos();
     bool find_shortest_noterest_at_current_timepos();
     inline bool there_are_objects() { return (m_itCur != m_pLine->end()); }
-    float get_current_time();
-    float get_duration_for_found_entry();
+    TimeUnits get_current_time();
+    TimeUnits get_duration_for_found_entry();
     LUnits get_position_for_found_entry();
 
 protected:
@@ -781,7 +781,7 @@ protected:
     LUnits m_uOldWidth;
     LUnits m_uNewStart;
     UPoint m_sliceOrg;
-    float m_rFirstTime;
+    TimeUnits m_rFirstTime;
     LUnits m_uFixedPart;
     std::vector<LineResizer*> m_LineResizers;
 

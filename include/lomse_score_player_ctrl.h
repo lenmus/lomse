@@ -47,25 +47,19 @@ class Metronome;
 class ScorePlayerCtrl : public Control, public PlayerGui
 {
 protected:
-    LibraryScope& m_libraryScope;
     ImoScorePlayer* m_pOwnerImo;
-    string m_label;
     GmoBoxControl* m_pMainBox;
-    ImoStyle* m_style;
     UPoint  m_pos;
     LUnits  m_width;
     LUnits  m_height;
-    LUnits  m_xCenter;
-    LUnits  m_yCenter;
 
     Color   m_normalColor;
     Color   m_hoverColor;
-    Color   m_visitedColor;
-    Color   m_prevColor;
     Color   m_currentColor;
-    bool    m_visited;
 
     int     m_metronome;
+    int     m_playButtonState;
+    bool    m_fFullView;
 
 public:
     ScorePlayerCtrl(LibraryScope& libScope, ImoScorePlayer* pOwner, Document* pDoc);
@@ -92,14 +86,14 @@ public:
     bool metronome_status();
 
     //specific methods
-    void set_text(const string& text);
+    void set_text(const string& text) {}
     void set_tooltip(const string& text);
-    void change_label(const string& text);
     inline void set_metronome_mm(int value) { m_metronome = value; }
+    void set_play_button_state(int value);
+
+    enum { k_stop=0, k_pause, k_play};  //play button state
 
 protected:
-    void select_font();
-    URect determine_text_position_and_size();
     ImoStyle* create_default_style();
 
 };

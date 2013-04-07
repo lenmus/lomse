@@ -34,6 +34,8 @@
 #include "lomse_command.h"
 #include "lomse_view.h"
 #include "lomse_interactor.h"
+#include "lomse_logger.h"
+
 #include <sstream>
 using namespace std;
 
@@ -65,128 +67,6 @@ public:
     }
 
 };
-
-
-//=======================================================================================
-//PresentersCollection implementation
-//=======================================================================================
-PresentersCollection::PresentersCollection()
-{
-}
-
-//---------------------------------------------------------------------------------------
-PresentersCollection::~PresentersCollection()
-{
-    std::list<Presenter*>::iterator it;
-    for (it=m_presenters.begin(); it != m_presenters.end(); ++it)
-    {
-        delete *it;
-    }
-    m_presenters.clear();
-}
-
-//---------------------------------------------------------------------------------------
-Document* PresentersCollection::get_document(int iDoc)
-{
-    Presenter* pPresenter = get_presenter(iDoc);
-    return pPresenter->get_document();
-}
-
-////---------------------------------------------------------------------------------------
-//UserCommandExecuter* PresentersCollection::get_command_executer(int iDoc)
-//{
-//    Presenter* pPresenter = get_presenter(iDoc);
-//    return pPresenter->get_command_executer();
-//}
-
-//---------------------------------------------------------------------------------------
-Presenter* PresentersCollection::get_presenter(int iDoc)
-{
-    std::list<Presenter*>::iterator it;
-    int i = 0;
-    for (it=m_presenters.begin(); it != m_presenters.end() && i != iDoc; ++it, ++i);
-    if (i == iDoc)
-        return *it;
-    else
-        throw std::runtime_error("[PresentersCollection::get_presenter] invalid index");
-}
-
-//---------------------------------------------------------------------------------------
-Presenter* PresentersCollection::get_presenter(Document* pDoc)
-{
-    std::list<Presenter*>::iterator it;
-    for (it=m_presenters.begin(); it != m_presenters.end(); ++it)
-    {
-        if (pDoc == (*it)->get_document())
-            return *it;
-    }
-    throw std::runtime_error("[PresentersCollection::get_presenter] invalid pointer");
-}
-
-//---------------------------------------------------------------------------------------
-void PresentersCollection::add(Presenter* pPresenter)
-{
-    m_presenters.push_back(pPresenter);
-}
-
-//---------------------------------------------------------------------------------------
-void PresentersCollection::close_document(int iDoc)
-{
-    std::list<Presenter*>::iterator it;
-    int i = 0;
-    for (it=m_presenters.begin(); it != m_presenters.end() && i != iDoc; ++it, ++i);
-    if (iDoc == i)
-    {
-        delete *it;
-        m_presenters.erase(it);
-    }
-    else
-        throw std::runtime_error("[PresentersCollection::close_document] invalid index");
-}
-
-//---------------------------------------------------------------------------------------
-void PresentersCollection::close_document(Document* pDoc)
-{
-    std::list<Presenter*>::iterator it;
-    for (it=m_presenters.begin(); it != m_presenters.end(); ++it)
-    {
-        if (pDoc == (*it)->get_document())
-        {
-            delete *it;
-            m_presenters.erase(it);
-            break;
-        }
-    }
-}
-
-////---------------------------------------------------------------------------------------
-//UserCommandExecuter* PresentersCollection::get_command_executer(Document* pDoc)
-//{
-//    Presenter* pPresenter = get_presenter(pDoc);
-//    //View* pView
-//    return pPresenter->get_command_executer();
-//}
-
-//---------------------------------------------------------------------------------------
-void PresentersCollection::add_interactor(Document* pDoc, Interactor* pIntor)
-{
-    //Presenter* pPresenter = get_presenter(pDoc);
-    //pPresenter->add_view(pView);
-}
-
-//---------------------------------------------------------------------------------------
-int PresentersCollection::get_num_views(Document* pDoc)
-{
-    Presenter* pPresenter = get_presenter(pDoc);
-    return pPresenter->get_num_interactors();
-}
-
-//---------------------------------------------------------------------------------------
-void PresentersCollection::on_document_reloaded(Document* pDoc)
-{
-    Presenter* pPresenter = get_presenter(pDoc);
-    pPresenter->on_document_reloaded();
-}
 
 
 //=======================================================================================
@@ -241,24 +121,20 @@ Presenter* PresenterBuilder::open_document(int viewType, LdpReader& reader,
 //Presenter implementation
 //=======================================================================================
 Presenter::Presenter(Document* pDoc, Interactor* pIntor, DocCommandExecuter* pExec)
-    : m_pDoc(pDoc)
+    : m_spDoc(pDoc)
     , m_userData(NULL)
     , m_pExec(pExec)
     , m_callback(NULL)
 {
-    m_interactors.push_back(pIntor);
-    m_pDoc->add_event_handler(k_doc_modified_event, pIntor);
+    m_interactors.push_back( SpInteractor(pIntor) );
+    m_spDoc->add_event_handler(k_doc_modified_event, pIntor);
 }
 
 //---------------------------------------------------------------------------------------
 Presenter::~Presenter()
 {
-    std::list<Interactor*>::iterator it;
-    for (it=m_interactors.begin(); it != m_interactors.end(); ++it)
-        delete *it;
     m_interactors.clear();
-
-    delete m_pDoc;
+    logger.log_message("[Presenter::~Presenter] Presenter is deleted", __FILE__,__LINE__);
     delete m_pExec;
 }
 
@@ -268,11 +144,11 @@ void Presenter::close_document()
 }
 
 //---------------------------------------------------------------------------------------
-Interactor* Presenter::get_interactor(int iIntor)
+SpInteractor Presenter::get_interactor_shared_ptr(int iIntor)
 {
-    std::list<Interactor*>::iterator it;
+    std::list<SpInteractor>::iterator it;
     int i = 0;
-    for (it=m_interactors.begin(); it != m_interactors.end()&& i != iIntor; ++it, ++i);
+    for (it=m_interactors.begin(); it != m_interactors.end() && i != iIntor; ++it, ++i);
     if (i == iIntor)
         return *it;
     else
@@ -280,9 +156,22 @@ Interactor* Presenter::get_interactor(int iIntor)
 }
 
 //---------------------------------------------------------------------------------------
+Interactor* Presenter::get_interactor_raw_ptr(int iIntor)
+{
+    return get_interactor_shared_ptr(iIntor).get();
+}
+
+//---------------------------------------------------------------------------------------
+WpInteractor Presenter::get_interactor(int iIntor)
+{
+    SpInteractor p = get_interactor_shared_ptr(iIntor);
+    return WpInteractor(p);
+}
+
+//---------------------------------------------------------------------------------------
 void Presenter::on_document_reloaded()
 {
-    std::list<Interactor*>::iterator it;
+    std::list<SpInteractor>::iterator it;
     for (it=m_interactors.begin(); it != m_interactors.end(); ++it)
         (*it)->on_document_reloaded();
 }
@@ -298,6 +187,12 @@ void Presenter::notify_user_application(Notification* event)
 void Presenter::set_callback( void (*pt2Func)(Notification* event) )
 {
     m_callback = pt2Func;
+}
+
+//---------------------------------------------------------------------------------------
+WpDocument Presenter::get_document()
+{
+    return WpDocument(m_spDoc);
 }
 
 

@@ -78,22 +78,22 @@ protected:
     int     m_instr;    //instrument (0..n-1)
     int     m_staff;    //staff (0..n-1)
     int     m_measure;  //measure number (0..n-1)
-	float   m_time;     //timepos
-	float   m_refTime;  //timepos of ref.object or 0.0f if no ref obj
+	TimeUnits m_time;   //timepos
+	TimeUnits m_refTime;//timepos of ref.object or 0.0f if no ref obj
     long    m_id;       //id of pointed object or k_cursor_at_empty_place if none
     long    m_refId;    //id of ref.object or k_cursor_at_end_of_child if at end.
 
     //values representing "end of score" position
     #define k_at_end_of_score 1000000
-    #define k_time_at_end_of_score 100000000.0f
+    #define k_time_at_end_of_score 100000000.0
 
     //values representing "before start" position
     #define k_before_start_of_score -1
-    #define k_time_before_start_of_score -1.0f
+    #define k_time_before_start_of_score -1.0
 
 public:
-    ScoreCursorState(int instr, int staff, int measure, float time, long id, long refId,
-                     float refTime)
+    ScoreCursorState(int instr, int staff, int measure, TimeUnits time, long id,
+                     long refId, TimeUnits refTime)
         : ElementCursorState(), m_instr(instr), m_staff(staff), m_measure(measure)
         , m_time(time), m_refTime(refTime), m_id(id), m_refId(refId)
     {
@@ -109,19 +109,19 @@ public:
     inline int instrument() { return m_instr; }
     inline int staff() { return m_staff; }
     inline int measure() { return m_measure; }
-    inline float time() { return m_time; }
+    inline TimeUnits time() { return m_time; }
     inline long id() { return m_id; }
     inline long ref_obj_id() { return m_refId; }
-    inline float ref_obj_time() { return m_refTime; }
+    inline TimeUnits ref_obj_time() { return m_refTime; }
 
     //setters
     inline void instrument(int instr) { m_instr = instr; }
     inline void staff(int staff) { m_staff = staff; }
     inline void measure(int measure) { m_measure = measure; }
-    inline void time(float time) { m_time = time; }
+    inline void time(TimeUnits time) { m_time = time; }
     inline void id(long id) { m_id = id; }
     inline void ref_obj_id(long id) { m_refId = id; }
-    inline void ref_obj_time(float time) { m_refTime = time; }
+    inline void ref_obj_time(TimeUnits time) { m_refTime = time; }
 
     inline void set_at_end_of_score() {
         m_instr = k_at_end_of_score;
@@ -130,7 +130,7 @@ public:
         m_time = k_time_at_end_of_score;
         m_id = k_cursor_at_end_of_child;
         m_refId = -1L;
-        m_refTime = 0.0f;
+        m_refTime = 0.0;
     }
     inline void set_before_start_of_score()
     {
@@ -140,7 +140,7 @@ public:
         m_time = k_time_before_start_of_score;
         m_id = k_cursor_before_start_of_child;
         m_refId = k_before_start_of_score;
-        m_refTime = 0.0f;
+        m_refTime = 0.0;
     }
 
     //checking position
@@ -279,7 +279,7 @@ protected:
     ColStaffObjs*   m_pColStaffObjs;
     ImoScore*       m_pScore;
     bool            m_fAutoRefresh;
-    float           m_timeStep;
+    TimeUnits       m_timeStep;
 
     //state variables
     ScoreCursorState    m_currentState;
@@ -305,7 +305,7 @@ public:
 //    //void to_start_of_measure(int nMeasure, int nStaff);
 //    void skip_clef_key_time();
     void point_to_barline(long id, int staff);
-    void to_state(int nInstr, int nMeasure, int nStaff, float rTime, long id=-1L);
+    void to_state(int nInstr, int nMeasure, int nStaff, TimeUnits rTime, long id=-1L);
 
     //saving/restoring state: mandatory overrides
     ElementCursorState* get_state();
@@ -320,18 +320,18 @@ public:
     inline int instrument() { return m_currentState.instrument(); }
     inline int measure() { return m_currentState.measure(); }
     inline int staff() { return m_currentState.staff(); }
-    inline float time() { return m_currentState.time(); }
+    inline TimeUnits time() { return m_currentState.time(); }
     inline long id() { return m_currentState.id(); }
     ImoStaffObj* staffobj();
     inline long staffobj_id() { return m_currentState.id(); }
     inline long staffobj_id_internal() { return m_currentState.ref_obj_id(); }
-    inline long ref_obj_time() { return m_currentState.ref_obj_time(); }
+    inline TimeUnits ref_obj_time() { return m_currentState.ref_obj_time(); }
     ImoObj* staffobj_internal();
 
     //previous position info
     //AWARE_ previous position is where move_prev() will be placed
     long prev_pos_id() { return m_prevState.id(); }
-    float prev_pos_time() { return m_prevState.time(); }
+    TimeUnits prev_pos_time() { return m_prevState.time(); }
 
     //helper boolean
     ///Score is not empty and cursor is pointing an staffobj
@@ -347,7 +347,7 @@ public:
     bool is_at_end_of_score();
 
     //other
-    inline void set_time_grid_resolution(float step) { m_timeStep = step; }
+    inline void set_time_grid_resolution(TimeUnits step) { m_timeStep = step; }
     ColStaffObjsEntry* find_previous_imo();
 //    ImoObj* get_musicData_for_current_instrument();
         //speciaL. access to internal reference object
@@ -378,7 +378,7 @@ protected:
     bool p_more_instruments();
     void p_to_start_of_next_instrument();
     void p_find_previous_state();
-    void p_to_state(int nInstr, int nMeasure, int nStaff, float rTime, long id=-1L);
+    void p_to_state(int nInstr, int nMeasure, int nStaff, TimeUnits rTime, long id=-1L);
     void p_point_to(long nId);
     inline ScoreCursorState p_get_current_state() { return m_currentState; }
     inline void p_set_previous_state(ScoreCursorState& state) { m_prevState = state; }
@@ -389,7 +389,7 @@ protected:
 
     //helper: dealing with ref.object
     inline int p_iter_object_id() { return (*m_it)->element_id(); }
-    inline float p_iter_object_time() { return (*m_it)->time(); }
+    inline TimeUnits p_iter_object_time() { return (*m_it)->time(); }
     inline int p_iter_object_measure() { return (*m_it)->measure(); }
     inline int p_iter_object_staff() { return (*m_it)->staff(); }
     inline int p_iter_object_instrument() { return (*m_it)->num_instrument(); }
@@ -406,10 +406,10 @@ protected:
     inline bool p_iter_object_is_on_instrument(int instr) {
         return p_iter_object_instrument() == instr;
     }
-    inline bool p_iter_object_is_on_time(float rTime) {
+    inline bool p_iter_object_is_on_time(TimeUnits rTime) {
         return is_equal_time(rTime, p_iter_object_time());
     }
-    float p_iter_object_duration();
+    TimeUnits p_iter_object_duration();
     bool p_iter_object_is_barline();
     bool p_iter_object_is_clef();
     bool p_iter_object_is_key();
@@ -417,10 +417,10 @@ protected:
 
     //helper: for move_next
     int p_determine_next_target_measure();
-    void p_forward_to_instr_measure_with_time_not_lower_than(float rTargetTime);
+    void p_forward_to_instr_measure_with_time_not_lower_than(TimeUnits rTargetTime);
     void p_forward_to_current_staff();
     bool p_find_current_staff_at_current_iter_object_time();
-    void p_forward_to_state(int instr, int staff, int measure, float time);
+    void p_forward_to_state(int instr, int staff, int measure, TimeUnits time);
     bool p_try_next_at_same_time();
     void p_move_next();
     void p_find_next_time_in_this_staff();
@@ -538,7 +538,7 @@ public:
 //            pCursor->point_to_barline(nId, nStaff);
 //    }
 //
-//    void to_state(int nInstr, int nMeasure, int nStaff, float rTime) {
+//    void to_state(int nInstr, int nMeasure, int nStaff, TimeUnits rTime) {
 //        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
 //        if (pCursor)
 //            pCursor->to_state(nInstr, nMeasure, nStaff, rTime);

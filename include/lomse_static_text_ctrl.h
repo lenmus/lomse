@@ -40,10 +40,8 @@ namespace lomse
 class StaticTextCtrl : public Control
 {
 protected:
-    LibraryScope& m_libraryScope;
     string m_label;
     GmoBoxControl* m_pMainBox;
-    ImoStyle* m_style;
     UPoint  m_pos;
     LUnits  m_width;
     LUnits  m_height;
@@ -73,7 +71,6 @@ public:
     void set_tooltip(const string& text);
 
 protected:
-    void select_font();
     URect determine_text_position_and_size();
     ImoStyle* create_default_style();
 

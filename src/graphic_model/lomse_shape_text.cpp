@@ -42,10 +42,11 @@ namespace lomse
 // GmoShapeText implementation
 //=======================================================================================
 GmoShapeText::GmoShapeText(ImoObj* pCreatorImo, int idx, const std::string& text,
-                           ImoStyle* pStyle, LUnits x, LUnits y,
+                           ImoStyle* pStyle, const string& language, LUnits x, LUnits y,
                            LibraryScope& libraryScope)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_text, idx, Color(0,0,0))
     , m_text(text)
+    , m_language(language)
     , m_pStyle(pStyle)
     , m_pFontStorage( libraryScope.font_storage() )
     , m_libraryScope(libraryScope)
@@ -92,13 +93,11 @@ void GmoShapeText::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //---------------------------------------------------------------------------------------
 void GmoShapeText::select_font()
 {
-    //TODO: language for text
-    //FIXME: if no style, must use score default style
     TextMeter meter(m_libraryScope);
     if (!m_pStyle)
-        meter.select_font("", "", "Liberation serif", 12.0);
+        meter.select_font(m_language, "", "Liberation serif", 12.0);
     else
-        meter.select_font("",   //no particular language
+        meter.select_font(m_language,
                           m_pStyle->font_file(),
                           m_pStyle->font_name(),
                           m_pStyle->font_size(),

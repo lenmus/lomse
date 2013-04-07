@@ -48,28 +48,20 @@ namespace lomse
 ProgressBarCtrl::ProgressBarCtrl(LibraryScope& libScope, Control* pParent,
                                  Document* pDoc, float maxValue,
                                  LUnits width, LUnits height, ImoStyle* pStyle)
-    : Control(pDoc, pParent)
-    , m_libraryScope(libScope)
+    : Control(libScope, pDoc, pParent)
     , m_label("0.0%")
     , m_maxValue(maxValue)
-    , m_language()
     , m_pMainBox(NULL)
-    , m_style(pStyle)
     , m_width(width)
     , m_height(height)
     , m_curValue(0.0f)
     , m_percent(0.0f)
     , m_fDisplayPercentage(true)
 {
-    if (!m_style)
-        m_style = create_default_style();
+    m_style = (pStyle == NULL ? create_default_style() : pStyle);
 
     m_textColor = m_style->color();
     m_barColor = Color(0,255,0,255);  //green solid
-
-    //default language
-    ImoDocument* pImoDoc = m_pDoc->get_imodoc();
-    m_language = pImoDoc->get_language();
 
     measure();
 
@@ -181,18 +173,6 @@ void ProgressBarCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
     //text
     pDrawer->set_text_color( m_textColor );
     pDrawer->draw_text(pos.x, pos.y, m_label);
-}
-
-//---------------------------------------------------------------------------------------
-void ProgressBarCtrl::select_font()
-{
-    TextMeter meter(m_libraryScope);
-    meter.select_font(m_language,
-                      m_style->font_file(),
-                      m_style->font_name(),
-                      m_style->font_size(),
-                      m_style->is_bold(),
-                      m_style->is_italic() );
 }
 
 

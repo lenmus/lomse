@@ -290,51 +290,51 @@ SUITE(DocCommandTest)
 //        CHECK( (*cursor)->is_paragraph() == true );
 //    }
 
-    // CmdDeleteStaffObj ----------------------------------------------------------------
-
-    TEST_FIXTURE(DocCommandTestFixture, delete_note_1)
-    {
-        create_document_1();
-        DocCursor cursor(m_pDoc);
-        DocCommandExecuter executer(m_pDoc);
-        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
-
-        cursor.point_to(24L);
-        executer.execute(&cursor, pCmd);
-        //cout << m_pDoc->to_string(k_save_ids) << endl;
-        //ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
-        //cout << pScore->get_staffobjs_table()->dump() << endl;
-        //cout << "cmd name = " << pCmd->get_name() << endl;
-
-        CHECK( pCmd->get_name() == "Delete note" );
-        cursor.update_after_deletion();
-        CHECK( *cursor != NULL );
-        CHECK( (*cursor)->is_rest() == true );
-        CHECK( m_pDoc->is_dirty() == true );
-    }
-
-    TEST_FIXTURE(DocCommandTestFixture, delete_note_1_undo)
-    {
-        create_document_2();
-        DocCursor cursor(m_pDoc);
-        DocCommandExecuter executer(m_pDoc);
-        CHECK( m_pDoc->is_dirty() == false );
-        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
-
-        cursor.point_to(24L);
-        executer.execute(&cursor, pCmd);
-        executer.undo();
-
-//        cout << m_pDoc->to_string(k_save_ids) << endl;
-//        pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
-//        cout << pScore->get_staffobjs_table()->dump() << endl;
-
-        cursor.update_after_deletion();
-        CHECK( *cursor != NULL );
-        CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->get_id() == 24L );
-        CHECK( m_pDoc->is_dirty() == true );
-    }
+//    // CmdDeleteStaffObj ----------------------------------------------------------------
+//
+//    TEST_FIXTURE(DocCommandTestFixture, delete_note_1)
+//    {
+//        create_document_1();
+//        DocCursor cursor(m_pDoc);
+//        DocCommandExecuter executer(m_pDoc);
+//        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
+//
+//        cursor.point_to(24L);
+//        executer.execute(&cursor, pCmd);
+//        //cout << m_pDoc->to_string(k_save_ids) << endl;
+//        //ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        //cout << pScore->get_staffobjs_table()->dump() << endl;
+//        //cout << "cmd name = " << pCmd->get_name() << endl;
+//
+//        CHECK( pCmd->get_name() == "Delete note" );
+//        cursor.update_after_deletion();
+//        CHECK( *cursor != NULL );
+//        CHECK( (*cursor)->is_rest() == true );
+//        CHECK( m_pDoc->is_dirty() == true );
+//    }
+//
+//    TEST_FIXTURE(DocCommandTestFixture, delete_note_1_undo)
+//    {
+//        create_document_2();
+//        DocCursor cursor(m_pDoc);
+//        DocCommandExecuter executer(m_pDoc);
+//        CHECK( m_pDoc->is_dirty() == false );
+//        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
+//
+//        cursor.point_to(24L);
+//        executer.execute(&cursor, pCmd);
+//        executer.undo();
+//
+////        cout << m_pDoc->to_string(k_save_ids) << endl;
+////        pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+////        cout << pScore->get_staffobjs_table()->dump() << endl;
+//
+//        cursor.update_after_deletion();
+//        CHECK( *cursor != NULL );
+//        CHECK( (*cursor)->is_note() == true );
+//        CHECK( (*cursor)->get_id() == 24L );
+//        CHECK( m_pDoc->is_dirty() == true );
+//    }
 
     // CmdInsertStaffObj ----------------------------------------------------------------
 

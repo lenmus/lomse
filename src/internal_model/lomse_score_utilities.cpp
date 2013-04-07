@@ -46,7 +46,7 @@ namespace lomse
 //=======================================================================================
 
 //---------------------------------------------------------------------------------------
-int get_beat_position(float timePos, ImoTimeSignature* pTS)
+int get_beat_position(TimeUnits timePos, ImoTimeSignature* pTS)
 {
     // Some times it is necessary to know the type of beat (strong, medium, weak,
     // off-beat) at which a note or rest is positioned.
@@ -73,9 +73,9 @@ int get_beat_position(float timePos, ImoTimeSignature* pTS)
 
     // compute relative position of this note/rest with reference to the beat
     int beatNum = int(timePos) / beatDuration;               //number of beat
-    float beatShift = fabs(timePos - float(beatDuration * beatNum));
+    TimeUnits beatShift = fabs(timePos - TimeUnits(beatDuration * beatNum));
 
-    if (beatShift < 1.0f)
+    if (beatShift < 1.0)
         //on-beat
         return beatNum;
     else
@@ -85,25 +85,25 @@ int get_beat_position(float timePos, ImoTimeSignature* pTS)
 }
 
 //---------------------------------------------------------------------------------------
-float get_duration_for_ref_note(int bottomNumber)
+TimeUnits get_duration_for_ref_note(int bottomNumber)
 {
     // returns beat duration (in LDP notes duration units)
 
     switch(bottomNumber) {
         case 1:
-            return pow(2.0f, (10 - k_whole));
+            return pow(2.0, (10 - k_whole));
         case 2:
-            return pow(2.0f, (10 - k_half));
+            return pow(2.0, (10 - k_half));
         case 4:
-            return pow(2.0f, (10 - k_quarter));
+            return pow(2.0, (10 - k_quarter));
         case 8:
-            return pow(2.0f, (10 - k_eighth));
+            return pow(2.0, (10 - k_eighth));
         case 16:
-            return pow(2.0f, (10 - k_16th));
+            return pow(2.0, (10 - k_16th));
         case 32:
-            return pow(2.0f, (10 - k_32th));
+            return pow(2.0, (10 - k_32th));
         case 64:
-            return pow(2.0f, (10 - k_64th));
+            return pow(2.0, (10 - k_64th));
         default:
             string msg = str( boost::format(
                                 "[get_duration_for_ref_note] Invalid bottom number %d")

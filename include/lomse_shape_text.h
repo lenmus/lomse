@@ -48,14 +48,16 @@ class FontStorage;
 class GmoShapeText : public GmoSimpleShape
 {
 protected:
-    std::string m_text;
+    string m_text;
+    string m_language;
     ImoStyle* m_pStyle;
     FontStorage* m_pFontStorage;
     LibraryScope& m_libraryScope;
 
     friend class TextEngraver;
     GmoShapeText(ImoObj* pCreatorImo, int idx, const std::string& text,
-                 ImoStyle* pStyle, LUnits x, LUnits y, LibraryScope& libraryScope);
+                 ImoStyle* pStyle, const string& language,
+                 LUnits x, LUnits y, LibraryScope& libraryScope);
 
 public:
 

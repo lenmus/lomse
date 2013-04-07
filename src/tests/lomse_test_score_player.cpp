@@ -94,15 +94,21 @@ public:
     }
 
     //access to protected members
-    void my_wait_for_termination() { wait_for_termination(); }
-    void my_end_of_playback_housekeeping(bool fVisualTracking, Interactor* pInteractor) {
-        end_of_playback_housekeeping(fVisualTracking, pInteractor);
+    void my_wait_for_termination()
+    {
+        //force to wait until the score if fully played
+        while (m_fPlaying)
+        {
+            boost::this_thread::sleep( boost::posix_time::milliseconds(100) );
+        }
+        delete m_pThread;
+        m_pThread = NULL;
     }
 
 };
 
 //---------------------------------------------------------------------------------------
-//Helper, for accessing protected member wait_for_termination()
+//Helper, to define my_wait_for_termination()
 class MyScorePlayer2 : public ScorePlayer
 {
 public:
@@ -111,7 +117,16 @@ public:
     {
     }
 
-    void my_wait_for_termination() { wait_for_termination(); }
+    void my_wait_for_termination()
+    {
+        //force to wait until the score if fully played
+        while (m_fPlaying)
+        {
+            boost::this_thread::sleep( boost::posix_time::milliseconds(100) );
+        }
+        delete m_pThread;
+        m_pThread = NULL;
+    }
 };
 
 //---------------------------------------------------------------------------------------
@@ -296,9 +311,9 @@ SUITE(ScorePlayerTest)
         PlayerNoGui playGui;
         player.load_score(pScore, &playGui);
         int nEvMax = player.my_get_table()->num_events() - 1;
-        Interactor inter(m_libraryScope, &doc, NULL, NULL);
+        SpInteractor inter( LOMSE_NEW Interactor(m_libraryScope, &doc, NULL, NULL) );
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_do_visual_tracking,
-                          k_no_countoff, 60L, &inter);
+                          k_no_countoff, 60L, inter.get());
         player.my_wait_for_termination();
 
         std::list<int>& events = midi.my_get_events();
@@ -364,9 +379,9 @@ SUITE(ScorePlayerTest)
         PlayerNoGui playGui;
         player.load_score(pScore, &playGui);
         int nEvMax = player.my_get_table()->num_events() - 1;
-        Interactor inter(m_libraryScope, &doc, NULL, NULL);
+        SpInteractor inter( LOMSE_NEW Interactor(m_libraryScope, &doc, NULL, NULL) );
         player.my_do_play(0, nEvMax, k_play_normal_instrument, k_do_visual_tracking,
-                          k_no_countoff, 60L, &inter);
+                          k_no_countoff, 60L, inter.get());
         player.my_wait_for_termination();
 
         std::list<int>& events = midi.my_get_events();

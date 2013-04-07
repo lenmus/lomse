@@ -102,7 +102,8 @@ void InstrumentEngraver::measure_name_abbrev()
         ImoStyle* pStyle = text.get_style();
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
-        TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
+        TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(),
+                          text.get_language(), pStyle);
         m_uIndentFirst += engr.measure_width() + uSpaceAfterName;
     }
     if (m_pInstr->has_abbrev())
@@ -111,7 +112,8 @@ void InstrumentEngraver::measure_name_abbrev()
         ImoStyle* pStyle = text.get_style();
         if (!pStyle)
             pStyle = m_pScore->get_default_style();
-        TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
+        TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(),
+                          text.get_language(), pStyle);
         m_uIndentOther += engr.measure_width() + uSpaceAfterName;
     }
 }
@@ -153,7 +155,8 @@ void InstrumentEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             ImoStyle* pStyle = text.get_style();
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
-            TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
+            TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(),
+                              text.get_language(), pStyle);
             GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }
@@ -166,7 +169,8 @@ void InstrumentEngraver::add_name_abbrev(GmoBoxSystem* pBox, int iSystem)
             ImoStyle* pStyle = text.get_style();
             if (!pStyle)
                 pStyle = m_pScore->get_default_style();
-            TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(), pStyle);
+            TextEngraver engr(m_libraryScope, m_pMeter, text.get_text(),
+                              text.get_language(), pStyle);
             GmoShape* pShape = engr.create_shape(m_pInstr, xLeft, yTop);
             pBox->add_shape(pShape, GmoShape::k_layer_staff);
         }

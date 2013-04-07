@@ -70,7 +70,7 @@ namespace lomse
 SoundEventsTable::SoundEventsTable(ImoScore* pScore)
     : m_pScore(pScore)
     , m_numMeasures(0)
-    , rAnacrusisMissingTime(0.0f)
+    , rAnacrusisMissingTime(0.0)
 {
 }
 
@@ -159,7 +159,7 @@ void SoundEventsTable::create_events()
 }
 
 //---------------------------------------------------------------------------------------
-void SoundEventsTable::store_event(float rTime, int eventType, int channel,
+void SoundEventsTable::store_event(TimeUnits rTime, int eventType, int channel,
                                    MidiPitch pitch, int volume, int step,
                                    ImoStaffObj* pSO, int measure)
 {
@@ -185,7 +185,7 @@ void SoundEventsTable::add_noterest_events(StaffObjsCursor& cursor, int channel,
     }
 
     //Generate Note ON event
-    float rTime = cursor.time() + cursor.anacrusis_missing_time();
+    TimeUnits rTime = cursor.time() + cursor.anacrusis_missing_time();
     if (pSO->is_rest())
     {
         //it is a rest. Generate only event for visual highlight
@@ -246,7 +246,7 @@ void SoundEventsTable::add_rythm_change(StaffObjsCursor& cursor, int measure,
 {
     //TODO Deal with non-standard time signatures
 
-    float rTime = cursor.time() + cursor.anacrusis_missing_time();
+    TimeUnits rTime = cursor.time() + cursor.anacrusis_missing_time();
     int refNoteDuration = int( pTS->get_ref_note_duration() );
     int topNum = pTS->get_top_number();
     int numBeats = pTS->get_num_pulses();
@@ -258,9 +258,9 @@ void SoundEventsTable::add_rythm_change(StaffObjsCursor& cursor, int measure,
 //---------------------------------------------------------------------------------------
 void SoundEventsTable::close_table()
 {
-    float maxTime = 0.0L;
+    TimeUnits maxTime = 0.0;
     if (m_events.size() > 0)
-        maxTime = float(m_events.back()->DeltaTime);
+        maxTime = TimeUnits(m_events.back()->DeltaTime);
     store_event(maxTime, SoundEvent::k_end_of_score, 0, 0, 0, 0, NULL, 0);
 }
 
@@ -418,7 +418,7 @@ string SoundEventsTable::dump_measures_table()
 }
 
 //---------------------------------------------------------------------------------------
-int SoundEventsTable::compute_volume(float timePos, ImoTimeSignature* pTS)
+int SoundEventsTable::compute_volume(TimeUnits timePos, ImoTimeSignature* pTS)
 {
     // Volume should depend on several factors: beat (strong, medium, weak) on which
     // this note is, phrase, on dynamics information, etc. For now, I'm going to

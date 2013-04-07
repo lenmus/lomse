@@ -34,6 +34,7 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <string>
 using namespace std;
 
 namespace lomse
@@ -57,6 +58,11 @@ public:
         dbgLogger.close();
     }
 
+    void log_message(const string& msg, const string& file, int line)
+    {
+        dbgLogger << file << ", line " << line << ": " << msg << endl;
+    }
+
 //    Logger& operator << (const char* t)
 //    {
 //        m_debugFile << t;
@@ -64,6 +70,8 @@ public:
 //    }
 
 };
+
+extern Logger logger;
 
 
 }   //namespace lomse

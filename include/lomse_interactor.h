@@ -64,6 +64,7 @@ class Task;
 class Interactor : public EventHandler
                  , public EventNotifier
                  , public Observable
+                 , public EnableSharedFromThis<Interactor>
 {
 protected:
     LibraryScope&   m_libScope;
@@ -94,6 +95,8 @@ public:
     Interactor(LibraryScope& libraryScope, Document* pDoc, View* pView,
                DocCommandExecuter* pExec);
     virtual ~Interactor();
+
+    inline SharedPtr<Interactor> get_shared_ptr_from_this() { return shared_from_this(); }
 
     virtual void on_document_reloaded();
     void switch_task(int taskType);
@@ -224,20 +227,22 @@ protected:
 
 };
 
+typedef SharedPtr<Interactor>   SpInteractor;
+typedef WeakPtr<Interactor>     WpInteractor;
 
-//---------------------------------------------------------------------------------------
-//A view to edit the score in full page
-class EditInteractor : public Interactor
-{
-protected:
-
-public:
-
-    EditInteractor(LibraryScope& libraryScope, Document* pDoc, View* pView,
-                   DocCommandExecuter* pExec);
-    virtual ~EditInteractor();
-
-};
+////---------------------------------------------------------------------------------------
+////A view to edit the score in full page
+//class EditInteractor : public Interactor
+//{
+//protected:
+//
+//public:
+//
+//    EditInteractor(LibraryScope& libraryScope, Document* pDoc, View* pView,
+//                   DocCommandExecuter* pExec);
+//    virtual ~EditInteractor();
+//
+//};
 
 
 

@@ -461,5 +461,19 @@ SUITE(DocumentTest)
 ////            "(instrument (musicData (n c4 q))))))" );
 //    }
 
+    // other ----------------------------------------------------------------------------
+
+    TEST_FIXTURE(DocumentTestFixture, get_weak_ptr)
+    {
+        SpDocument spDoc( LOMSE_NEW Document(m_libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (n c4 q))))))");
+
+        CHECK( spDoc.use_count() == 1 );
+
+        WpDocument wpDoc(spDoc);
+        CHECK( wpDoc.expired() == false );
+    }
+
 };
 

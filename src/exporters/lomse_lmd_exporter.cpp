@@ -880,7 +880,7 @@ protected:
       //      int nVoicesProcessed = 1;   //voice 0 is automatically processed
 		    //lmBarline* pBL = (lmBarline*)NULL;
       //      bool fGoBack = false;
-		    //float rTime = 0.0f;
+		    //TimeUnits rTime = 0.0;
       //      while (true)
       //      {
       //          lmSOIterator* pIT = m_cStaffObjs.CreateIterator();
@@ -930,7 +930,7 @@ protected:
       //          sSource += _T("\n");
       //          sSource.append(nIndent * lmLMD_INDENT_STEP, _T(' '));
       //          sSource += _T("(goBack start)\n");
-      //          rTime = 0.0f;
+      //          rTime = 0.0;
       //      }
 
       //      //if goBack added, add a goFwd to ensure that we are at end of measure

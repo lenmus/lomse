@@ -56,16 +56,16 @@ using namespace std;
 namespace lomse
 {
 
-#define LOMSE_NO_DURATION   100000000000.0f     //any impossible high value
-#define LOMSE_NO_TIME       100000000000.0f     //any impossible high value
-#define LOMSE_NO_POSITION   100000000000.0f     //any impossible high value
+#define LOMSE_NO_DURATION   100000000000000.0     //any impossible high value
+#define LOMSE_NO_TIME       100000000000000.0     //any impossible high value
+#define LOMSE_NO_POSITION   100000000000000.0f    //any impossible high value
 
 
 
 //=====================================================================================
 //LineEntry implementation
 //=====================================================================================
-LineEntry::LineEntry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, float rTime,
+LineEntry::LineEntry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, TimeUnits rTime,
                      LUnits xUserShift, LUnits yUserShift)
     : m_fIsBarlineEntry(false)
     , m_pSO(pSO)
@@ -91,7 +91,7 @@ LineEntry::LineEntry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, float rTi
 
 //---------------------------------------------------------------------------------------
 //constructor for unit tests
-LineEntry::LineEntry(bool fIsBarlineEntry, bool fProlog, float rTime, LUnits xAnchor,
+LineEntry::LineEntry(bool fIsBarlineEntry, bool fProlog, TimeUnits rTime, LUnits xAnchor,
                      LUnits xLeft, LUnits uSize, LUnits uFixedSpace,
                      LUnits uVarSpace, LUnits xFinal)
     : m_fIsBarlineEntry(fIsBarlineEntry)
@@ -253,7 +253,7 @@ MusicLine::~MusicLine()
 }
 
 //---------------------------------------------------------------------------------------
-LineEntry* MusicLine::add_entry(ImoStaffObj* pSO, GmoShape* pShape, float rTime,
+LineEntry* MusicLine::add_entry(ImoStaffObj* pSO, GmoShape* pShape, TimeUnits rTime,
                                 bool fInProlog, LUnits xUserShift, LUnits yUserShift)
 {
     LineEntry* pEntry = LOMSE_NEW LineEntry(pSO, pShape, fInProlog, rTime,
@@ -369,16 +369,18 @@ void MusicLine::do_measurements()
             m_uxFirstAnchor = (*it)->get_position() - (*it)->get_anchor();
             fFirstAnchorFound = (*it)->get_timepos() >= 0.0f;
         }
-        if (m_rFirstTime == LOMSE_NO_TIME && (*it)->get_timepos() >= 0.0f)
+        if (is_equal_time(m_rFirstTime, LOMSE_NO_TIME)
+            && !is_lower_time( (*it)->get_timepos(), 0.0) )
+        {
             m_rFirstTime = (*it)->get_timepos();
-
+        }
         if (is_equal_time(m_rFirstTime, (*it)->get_timepos()))
             m_uxFirstSymbol = min(m_uxFirstSymbol, m_uxFirstAnchor + (*it)->get_anchor());
     }
     if (m_rFirstTime == LOMSE_NO_TIME)
     {
         m_uxFirstSymbol = m_uxFirstAnchor;
-        m_rFirstTime = -1.0f;
+        m_rFirstTime = -1.0;
     }
 }
 
@@ -582,7 +584,7 @@ void ColumnLayouter::process_non_timed_at_prolog()
 void ColumnLayouter::process_timed_at_current_timepos()
 {
     m_fThereAreObjects = false;
-    float rNextTime = LOMSE_NO_TIME;           //any impossible high value
+    TimeUnits rNextTime = LOMSE_NO_TIME;           //any impossible high value
     LUnits uxPosForNextTime = LOMSE_NO_POSITION;    //any impossible high value
 
     //determine next valid position
@@ -712,7 +714,7 @@ void ColumnLayouter::start_column_measurements(LUnits uxStart, LUnits fixedSpace
 }
 
 //---------------------------------------------------------------------------------------
-void ColumnLayouter::include_object(int iLine, int iInstr, ImoStaffObj* pSO, float rTime,
+void ColumnLayouter::include_object(int iLine, int iInstr, ImoStaffObj* pSO, TimeUnits rTime,
                                    int iStaff, GmoShape* pShape, bool fInProlog)
 {
     //caller sends data about one staffobj in current bar, for column iCol [0..n-1]
@@ -1452,16 +1454,16 @@ void ColumnStorage::dump_column_storage(ostream& outStream)
 //---------------------------------------------------------------------------------------
 void ColumnStorage::determine_sizes()
 {
-    float rFirstTime = 10000000.0f;
+    TimeUnits rFirstTime = 1000000000000000.0;
 	for (LinesIterator it = m_Lines.begin(); it != m_Lines.end(); ++it)
     {
         (*it)->do_measurements();
 
-        float rTime = (*it)->get_first_time();
+        TimeUnits rTime = (*it)->get_first_time();
         if (rTime >= 0.0f)
             rFirstTime = min(rFirstTime, rTime);
     }
-    if (rFirstTime == 10000000.0f)
+    if (is_equal_time(rFirstTime, 1000000000000000.0))
         rFirstTime = -1;
 
     m_uxFinal = 0.0f;
@@ -1575,7 +1577,7 @@ void ColumnStorage::finish_column_measurements(LUnits xStart)
 }
 
 //---------------------------------------------------------------------------------------
-bool ColumnStorage::include_object(int line, int instr, ImoStaffObj* pSO, float rTime,
+bool ColumnStorage::include_object(int line, int instr, ImoStaffObj* pSO, TimeUnits rTime,
                                   int nStaff, GmoShape* pShape, bool fInProlog,
                                   LUnits xUserShift, LUnits yUserShift)
 {
@@ -1612,7 +1614,7 @@ LineResizer::LineResizer(MusicLine* pLine, LUnits uOldWidth,
 }
 
 //---------------------------------------------------------------------------------------
-float LineResizer::move_prolog_shapes()
+TimeUnits LineResizer::move_prolog_shapes()
 {
     //all non-timed entries, at beginning, marked as fProlog must be only re-located
     //returns the first timepos found after the prolog or 0 if no valid timepos
@@ -1620,7 +1622,7 @@ float LineResizer::move_prolog_shapes()
     LUnits uLineStartPos = m_pLine->get_line_start_position();
     LUnits uLineShift = m_uNewStart - uLineStartPos;
     LineEntryIterator it = m_pLine->begin();
-    while (it != m_pLine->end() && (*it)->get_timepos() < 0.0f)
+    while (it != m_pLine->end() && is_lower_time((*it)->get_timepos(), 0.0))
     {
         if ((*it)->get_shape())
         {
@@ -1649,17 +1651,17 @@ float LineResizer::move_prolog_shapes()
     //return first timepos in this line
     if (it != m_pLine->end())
     {
-        if ((*it)->get_timepos() < 0.0f)
-            return 0.0f;
+        if ((*it)->get_timepos() < 0.0)
+            return 0.0;
         else
             return (*it)->get_timepos();
     }
     else
-        return 0.0f;
+        return 0.0;
 }
 
 //---------------------------------------------------------------------------------------
-LUnits LineResizer::get_time_line_position_for_time(float rFirstTime)
+LUnits LineResizer::get_time_line_position_for_time(TimeUnits rFirstTime)
 {
     if (m_itCurrent != m_pLine->end()
         && is_equal_time((*m_itCurrent)->get_timepos(), rFirstTime) )
@@ -1667,7 +1669,7 @@ LUnits LineResizer::get_time_line_position_for_time(float rFirstTime)
         return (*m_itCurrent)->get_position() - (*m_itCurrent)->get_anchor();
     }
     else
-        return 0.0f;
+        return 0.0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1722,7 +1724,7 @@ LineSpacer::LineSpacer(MusicLine* pLineTable, ScoreMeter* pMeter)
     , m_rFactor(pMeter->get_spacing_factor())
     , m_pMeter(pMeter)
     , m_itCur(pLineTable->end())
-    , m_rCurTime(0.0f)
+    , m_rCurTime(0.0)
 	, m_uxCurPos(0.0f)
     , m_uxRemovable(0.0f)
 {
@@ -1965,7 +1967,7 @@ void LineSpacer::shift_non_timed(LUnits uxShift)
 }
 
 //---------------------------------------------------------------------------------------
-float LineSpacer::get_next_available_time()
+TimeUnits LineSpacer::get_next_available_time()
 {
 	LineEntryIterator it = m_itCur;
     if (it != m_pLine->end())
@@ -2073,7 +2075,7 @@ LUnits LineSpacer::compute_ideal_distance_proportional(LineEntry* pEntry)
 	//spacing function:   Space(Di) = Smin*[1 + A*log2(Di/Dmin)]
 	LUnits uSmin = m_pMeter->tenths_to_logical(LOMSE_MIN_SPACE, iInstr, iStaff);
     ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
-    float rVar = log(pNR->get_duration() / LOMSE_DMIN) / rLog2;     //log2(Di/Dmin)
+    float rVar = log(float(pNR->get_duration()) / LOMSE_DMIN) / rLog2;     //log2(Di/Dmin)
     if (rVar > 0.0f)
         return uSmin * (1.0f + m_rFactor * rVar);
     else
@@ -2240,14 +2242,14 @@ void TimeGridTable::get_current_time()
 //}
 
 //---------------------------------------------------------------------------------------
-float TimeGridTable::get_time_for_position(LUnits uxPos)
+TimeUnits TimeGridTable::get_time_for_position(LUnits uxPos)
 {
     //timepos = 0 if measure is empty
     if (m_PosTimes.size() == 0)
-        return 0.0f;
+        return 0.0;
 
     //timepos = 0 if xPos < first entry xPos
-    float rTime = 0.0f;
+    TimeUnits rTime = 0.0;
     LUnits uxPrev = m_PosTimes.front().uxPos;
     if (uxPos <= uxPrev)
         return rTime;
@@ -2290,7 +2292,7 @@ void TimeInserter::interpolate_missing_times()
 {
     for (int i=0; i < (int)m_PosTimes.size(); ++i)
     {
-        float rNextTime = m_PosTimes[i].rTimepos + m_PosTimes[i].rDuration;
+        TimeUnits rNextTime = m_PosTimes[i].rTimepos + m_PosTimes[i].rDuration;
         if (!is_time_in_table(rNextTime))
         {
             find_insertion_point(rNextTime);
@@ -2300,7 +2302,7 @@ void TimeInserter::interpolate_missing_times()
 }
 
 //---------------------------------------------------------------------------------------
-bool TimeInserter::is_time_in_table(float rTimepos)
+bool TimeInserter::is_time_in_table(TimeUnits rTimepos)
 {
     if (m_PosTimes.size() == 0)
         return false;
@@ -2315,7 +2317,7 @@ bool TimeInserter::is_time_in_table(float rTimepos)
 }
 
 //---------------------------------------------------------------------------------------
-void TimeInserter::find_insertion_point(float rTimepos)
+void TimeInserter::find_insertion_point(TimeUnits rTimepos)
 {
     m_uPositionBeforeInsertionPoint = m_PosTimes.front().uxPos;
     m_rTimeBeforeInsertionPoint = m_PosTimes.front().rTimepos;
@@ -2332,11 +2334,11 @@ void TimeInserter::find_insertion_point(float rTimepos)
 }
 
 //---------------------------------------------------------------------------------------
-void TimeInserter::insert_time_interpolating_position(float rTimepos)
+void TimeInserter::insert_time_interpolating_position(TimeUnits rTimepos)
 {
     PosTimeItem oItem;
     oItem.rTimepos = rTimepos;
-    oItem.rDuration = 0.0f;
+    oItem.rDuration = 0.0;
     oItem.uxPos = m_uPositionBeforeInsertionPoint;
 
     if (m_itInsertionPoint == m_PosTimes.end())
@@ -2348,10 +2350,10 @@ void TimeInserter::insert_time_interpolating_position(float rTimepos)
     else
     {
         //insert before item pointed by iterator
-        float rTimeGap = (*m_itInsertionPoint).rTimepos - m_rTimeBeforeInsertionPoint;
-        float rPosGap = (*m_itInsertionPoint).uxPos - m_uPositionBeforeInsertionPoint;
-        float rTimeIncrement = rTimepos - m_rTimeBeforeInsertionPoint;
-        oItem.uxPos += rTimeIncrement * (rPosGap / rTimeGap);
+        TimeUnits rTimeGap = (*m_itInsertionPoint).rTimepos - m_rTimeBeforeInsertionPoint;
+        LUnits rPosGap = (*m_itInsertionPoint).uxPos - m_uPositionBeforeInsertionPoint;
+        TimeUnits rTimeIncrement = rTimepos - m_rTimeBeforeInsertionPoint;
+        oItem.uxPos += float(rTimeIncrement * (rPosGap / rTimeGap));
         m_PosTimes.insert(m_itInsertionPoint, oItem);
     }
 }
@@ -2409,7 +2411,7 @@ bool TimeGridLineExplorer::find_shortest_noterest_at_current_timepos()
 }
 
 //---------------------------------------------------------------------------------------
-float TimeGridLineExplorer::get_current_time()
+TimeUnits TimeGridLineExplorer::get_current_time()
 {
     if (current_object_is_timed())
         return (*m_itCur)->get_timepos();
@@ -2418,7 +2420,7 @@ float TimeGridLineExplorer::get_current_time()
 }
 
 //---------------------------------------------------------------------------------------
-float TimeGridLineExplorer::get_duration_for_found_entry()
+TimeUnits TimeGridLineExplorer::get_duration_for_found_entry()
 {
     return m_rMinDuration;
 }

@@ -70,7 +70,7 @@ private:
 
     //std::vector<StaffObjsIterator*> m_iterators;
     //std::vector<StaffObjsIterator*> m_savedIterators;
-    //float m_rBreakTime;       //last time to include in current column
+    //TimeUnits m_rBreakTime;       //last time to include in current column
 
 public:
     StaffObjsCursor(ImoScore* pScore);
@@ -89,11 +89,11 @@ public:
     inline int num_instrument() { return (*m_scoreIt)->num_instrument(); }
     inline int staff() { return (*m_scoreIt)->staff(); }
     inline int line() { return (*m_scoreIt)->line(); }
-    inline float time() { return (*m_scoreIt)->time(); }
+    inline TimeUnits time() { return (*m_scoreIt)->time(); }
     inline ImoObj* imo_object() { return (*m_scoreIt)->imo_object(); }
     ImoStaffObj* get_staffobj();
     inline bool is_empty_score() { return m_fScoreIsEmpty; }
-    inline float anacrusis_missing_time() {
+    inline TimeUnits anacrusis_missing_time() {
         return m_pColStaffObjs->anacrusis_missing_time();
     }
 
@@ -120,14 +120,14 @@ public:
 //    int GetNumMeasure(int iInstr);
 //
 //    //break time
-//    inline float GetBreakTime() { return m_rBreakTime; }
-//    inline void SetBreakTime(float rBreakTime) { m_rBreakTime = rBreakTime; }
+//    inline TimeUnits GetBreakTime() { return m_rBreakTime; }
+//    inline void SetBreakTime(TimeUnits rBreakTime) { m_rBreakTime = rBreakTime; }
 //
     //iterators management
 //    inline StaffObjsIterator* get_iterator(int iInstr) { return m_iterators[iInstr]; }
     void go_back_to_saved_position();
     void save_position();
-//    void AdvanceAfterTimepos(float rTimepos);
+//    void AdvanceAfterTimepos(TimeUnits rTimepos);
 
 protected:
     void initialize_clefs_keys_times(ImoScore* pScore);

@@ -670,7 +670,7 @@ protected:
             return;
 
         m_lines.reserve(k_max_num_lines);
-        m_rCurTime = 0.0f;
+        m_rCurTime = 0.0;
         ColStaffObjsIterator it = m_pColStaffObjs->begin();
         while (it != m_pColStaffObjs->end())
         {
@@ -736,7 +736,7 @@ protected:
             if ((*it)->num_instrument() == m_iInstr)
             {
                 ImoStaffObj* pImo = (*it)->imo_object();
-                if (pImo->get_duration() > 0.0f)
+                if (is_greater_time(pImo->get_duration(), 0.0))
                 {
                     m_itStartOfMeasure = it;
                     break;
@@ -799,15 +799,15 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
-    void add_go_fwd_back_if_needed(float time)
+    void add_go_fwd_back_if_needed(TimeUnits time)
     {
         if (m_pExporter->is_processing_chord())
             return;
 
         if (!is_equal_time(time, m_rCurTime))
         {
-            float shift = m_rCurTime - time;
-            if (shift > 0.0f)
+            TimeUnits shift = m_rCurTime - time;
+            if (shift > 0.0)
             {
                 start_element("goBack", -1L);
                 if (is_equal_time(time, m_rStartTime))
@@ -830,8 +830,8 @@ protected:
     ColStaffObjs* m_pColStaffObjs;
     ColStaffObjsIterator m_itStartOfMeasure;
     ColStaffObjsIterator m_itEndOfMeasure;
-    float m_rCurTime;
-    float m_rStartTime;
+    TimeUnits m_rCurTime;
+    TimeUnits m_rStartTime;
 
 
 //    //Old code exploring ImoTree
@@ -1393,9 +1393,13 @@ protected:
 
     void add_style()
     {
-        start_element("style", k_no_id);
-        m_source << "\"" << m_pObj->get_style()->get_name() << "\"";
-        end_element(k_in_same_line);
+        ImoStyle* pStyle = m_pObj->get_style();
+        if (pStyle)
+        {
+            start_element("style", k_no_id);
+            m_source << "\"" << pStyle->get_name() << "\"";
+            end_element(k_in_same_line);
+        }
     }
 
 };

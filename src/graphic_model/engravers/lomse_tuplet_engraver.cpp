@@ -182,7 +182,7 @@ bool TupletEngraver::decide_if_tuplet_placement_above()
 //---------------------------------------------------------------------------------------
 void TupletEngraver::add_text_shape()
 {
-    TextEngraver engr(m_libraryScope, m_pMeter, m_label, m_pStyle);
+    TextEngraver engr(m_libraryScope, m_pMeter, m_label, "", m_pStyle);
     GmoShapeText* pShape = engr.create_shape(m_pTuplet, 0.0f, 0.0f);
     m_pTupletShape->add_label(pShape);
 }

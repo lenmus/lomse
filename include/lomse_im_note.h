@@ -83,7 +83,7 @@ public:
 
     //getters
     inline int get_note_type() { return m_nNoteType; }
-    float get_duration();
+    TimeUnits get_duration();
     inline int get_dots() { return m_nDots; }
     inline int get_voice() { return m_nVoice; }
 

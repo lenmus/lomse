@@ -107,8 +107,9 @@ Engrouter* DefaultTextSplitter::get_next_text_engrouter(LUnits maxSpace)
     size_t breakPoint = m_start;
     LUnits nextWidth = m_glyphWidths[i];
     bool fSpaces = false;
-    while (i < m_totalGlyphs && width + nextWidth < maxSpace)
+    for (; i < m_totalGlyphs && width + nextWidth < maxSpace; ++i)
     {
+        nextWidth = m_glyphWidths[i];
         if (m_glyphs[i] == L' ')
         {
             if (!fSpaces)
@@ -120,7 +121,6 @@ Engrouter* DefaultTextSplitter::get_next_text_engrouter(LUnits maxSpace)
         else
             fSpaces = false;
         width += nextWidth;
-        nextWidth = m_glyphWidths[++i];
     }
     if (i == m_totalGlyphs || (m_glyphs[i] == L' ' && !fSpaces))
         breakPoint = i;

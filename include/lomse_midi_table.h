@@ -56,7 +56,7 @@ class StaffObjsCursor;
 class SoundEvent
 {
 public:
-    SoundEvent(float rTime, int nEventType, int nChannel,
+    SoundEvent(TimeUnits rTime, int nEventType, int nChannel,
                MidiPitch midiPitch, int nVolume, int nStep,
                ImoStaffObj* pStaffObj, int nMeasure)
         : DeltaTime(long(rTime + 0.5f))
@@ -115,7 +115,7 @@ protected:
     std::vector<SoundEvent*> m_events;
     std::vector<int> m_measures;
     std::vector<int> m_channels;
-    float rAnacrusisMissingTime;
+    TimeUnits rAnacrusisMissingTime;
     int m_accidentals[7];
 
 public:
@@ -130,7 +130,7 @@ public:
     inline int get_first_event_for_measure(int nMeasure) { return m_measures[nMeasure]; }
     inline int get_last_event() { return int(m_events.size()) - 1; }
     inline int get_num_measures() { return m_numMeasures; }
-    inline float get_anacrusis_missing_time() { return rAnacrusisMissingTime; }
+    inline TimeUnits get_anacrusis_missing_time() { return rAnacrusisMissingTime; }
     inline bool is_anacrusis_start() { return is_greater_time(rAnacrusisMissingTime, 0.0f); }
 
     //debug
@@ -138,7 +138,7 @@ public:
 
 
 protected:
-    void store_event(float rTime, int eventType, int channel, MidiPitch pitch,
+    void store_event(TimeUnits rTime, int eventType, int channel, MidiPitch pitch,
                      int volume, int step, ImoStaffObj* pSO, int measure);
     void program_sounds_for_instruments();
     void create_events();
@@ -148,7 +148,7 @@ protected:
     void add_noterest_events(StaffObjsCursor& cursor, int channel, int measure);
     void add_rythm_change(StaffObjsCursor& cursor, int measure, ImoTimeSignature* pTS);
     void delete_events_table();
-    int compute_volume(float timePos, ImoTimeSignature* pTS);
+    int compute_volume(TimeUnits timePos, ImoTimeSignature* pTS);
     void reset_accidentals(ImoKeySignature* pKey);
     void update_context_accidentals(ImoNote* pNote);
 

@@ -582,129 +582,131 @@ SUITE(GraphicModelTest)
         delete pIntor;
     }
 
-    // map Imo-> Gmo --------------------------------------------------------------------
-
-    TEST_FIXTURE(GraphicModelTestFixture, map_empty)
-    {
-        MyGraphicModel gm;
-        GmoBoxDocument* pBD = gm.get_root();
-        GmoBoxDocPage* pBDP = LOMSE_NEW GmoBoxDocPage(NULL);
-        pBD->add_child_box(pBDP);
-
-        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
-
-//        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(NULL);
-//        pDP->add_child_box(pDPC);
-
-        CHECK( rmap.size() == 0 );
-    }
-
-    TEST_FIXTURE(GraphicModelTestFixture, add_to_map)
-    {
-        MyGraphicModel gm;
-        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
-        Document doc(m_libraryScope);
-        doc.create_empty();
-        ImoScore* pScore = doc.add_score();
-        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
-
-        gm.add_to_map_imo_gmo(pBox);
-
-        CHECK( rmap.size() == 1 );
-
-        delete pBox;
-    }
-
-    TEST_FIXTURE(GraphicModelTestFixture, add_to_map_ignored_if_no_imo)
-    {
-        MyGraphicModel gm;
-        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
-        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(NULL);
-
-        gm.add_to_map_imo_gmo(pBox);
-
-        CHECK( rmap.size() == 0 );
-
-        delete pBox;
-    }
-
-    TEST_FIXTURE(GraphicModelTestFixture, map_get_box_simple)
-    {
-        MyGraphicModel gm;
-        Document doc(m_libraryScope);
-        doc.create_empty();
-        ImoScore* pScore = doc.add_score();
-        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
-
-        gm.add_to_map_imo_gmo(pBox);
-
-        CHECK( gm.get_box_for_imo(pScore->get_id()) == pBox );
-
-        delete pBox;
-    }
-
-    TEST_FIXTURE(GraphicModelTestFixture, add_to_map_twice)
-    {
-        MyGraphicModel gm;
-        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
-        Document doc(m_libraryScope);
-        doc.create_empty();
-        ImoScore* pScore = doc.add_score();
-        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
-        gm.add_to_map_imo_gmo(pBox);
-
-        gm.add_to_map_imo_gmo(pBox);
-
-        CHECK( rmap.size() == 1 );
-        CHECK( gm.get_box_for_imo(pScore->get_id()) == pBox );
-
-        delete pBox;
-    }
-
-    TEST_FIXTURE(GraphicModelTestFixture, add_to_map_update)
-    {
-        MyGraphicModel gm;
-        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
-        Document doc(m_libraryScope);
-        doc.create_empty();
-        ImoScore* pScore = doc.add_score();
-        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
-        gm.add_to_map_imo_gmo(pBox);
-        delete pBox;
-        pBox = LOMSE_NEW GmoBoxScorePage(pScore);
-
-        gm.add_to_map_imo_gmo(pBox);
-
-        CHECK( rmap.size() == 1 );
-        CHECK( gm.get_box_for_imo(pScore->get_id()) == pBox );
-
-        delete pBox;
-    }
-
-//    TEST_FIXTURE(GraphicModelTestFixture, map_add_box)
+//    // map Imo-> Gmo --------------------------------------------------------------------
+//
+//    TEST_FIXTURE(GraphicModelTestFixture, map_empty)
 //    {
 //        MyGraphicModel gm;
 //        GmoBoxDocument* pBD = gm.get_root();
 //        GmoBoxDocPage* pBDP = LOMSE_NEW GmoBoxDocPage(NULL);
 //        pBD->add_child_box(pBDP);
+//
 //        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
 //
+////        GmoBoxDocPageContent* pDPC = LOMSE_NEW GmoBoxDocPageContent(NULL);
+////        pDP->add_child_box(pDPC);
+//
+//        CHECK( rmap.size() == 0 );
+//    }
+//
+//    TEST_FIXTURE(GraphicModelTestFixture, add_to_map)
+//    {
+//        MyGraphicModel gm;
+//        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
 //        Document doc(m_libraryScope);
 //        doc.create_empty();
 //        ImoScore* pScore = doc.add_score();
-////        ImoInstrument* pInstr = pScore->add_instrument();
-////        ImoClef* pClef = pInstr->add_clef(k_clef_G2);
+//        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
 //
-//        ImoDocument* pDoc = doc.get_imodoc();
-//        ImoContent* pContent = static_cast<ImoContent*>(
-//                                    pDoc->get_child_of_type(k_content) );
-//        GmoBoxDocPageContent* pBDPC = LOMSE_NEW GmoBoxDocPageContent(pContent);
-//        CHECK( rmap.size() == 0 );
-//
-//        pBDP->add_child_box(pBDPC);
+//        gm.add_to_map_imo_gmo(pBox);
 //
 //        CHECK( rmap.size() == 1 );
+//
+//        delete pBox;
 //    }
+//
+//    TEST_FIXTURE(GraphicModelTestFixture, add_to_map_ignored_if_no_imo)
+//    {
+//        MyGraphicModel gm;
+//        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
+//        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(NULL);
+//
+//        gm.add_to_map_imo_gmo(pBox);
+//
+//        CHECK( rmap.size() == 0 );
+//
+//        delete pBox;
+//    }
+//
+//    TEST_FIXTURE(GraphicModelTestFixture, map_get_box_simple)
+//    {
+//        MyGraphicModel gm;
+//        Document doc(m_libraryScope);
+//        doc.create_empty();
+//        ImoScore* pScore = doc.add_score();
+//        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
+//
+//        gm.build_main_boxes_table();
+////        gm.add_to_map_imo_gmo(pBox);
+//        long id = pScore->get_id();
+//        GmoBox* pSavedBox = gm.get_box_for_imo(id);
+//        CHECK( pSavedBox == pBox );
+//
+//        delete pBox;
+//    }
+//
+//    TEST_FIXTURE(GraphicModelTestFixture, add_to_map_twice)
+//    {
+//        MyGraphicModel gm;
+//        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
+//        Document doc(m_libraryScope);
+//        doc.create_empty();
+//        ImoScore* pScore = doc.add_score();
+//        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
+//        gm.add_to_map_imo_gmo(pBox);
+//
+//        gm.add_to_map_imo_gmo(pBox);
+//
+//        CHECK( rmap.size() == 1 );
+//        CHECK( gm.get_box_for_imo(pScore->get_id()) == pBox );
+//
+//        delete pBox;
+//    }
+//
+//    TEST_FIXTURE(GraphicModelTestFixture, add_to_map_update)
+//    {
+//        MyGraphicModel gm;
+//        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
+//        Document doc(m_libraryScope);
+//        doc.create_empty();
+//        ImoScore* pScore = doc.add_score();
+//        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
+//        gm.add_to_map_imo_gmo(pBox);
+//        delete pBox;
+//        pBox = LOMSE_NEW GmoBoxScorePage(pScore);
+//
+//        gm.add_to_map_imo_gmo(pBox);
+//
+//        CHECK( rmap.size() == 1 );
+//        CHECK( gm.get_box_for_imo(pScore->get_id()) == pBox );
+//
+//        delete pBox;
+//    }
+//
+////    TEST_FIXTURE(GraphicModelTestFixture, map_add_box)
+////    {
+////        MyGraphicModel gm;
+////        GmoBoxDocument* pBD = gm.get_root();
+////        GmoBoxDocPage* pBDP = LOMSE_NEW GmoBoxDocPage(NULL);
+////        pBD->add_child_box(pBDP);
+////        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
+////
+////        Document doc(m_libraryScope);
+////        doc.create_empty();
+////        ImoScore* pScore = doc.add_score();
+//////        ImoInstrument* pInstr = pScore->add_instrument();
+//////        ImoClef* pClef = pInstr->add_clef(k_clef_G2);
+////
+////        ImoDocument* pDoc = doc.get_imodoc();
+////        ImoContent* pContent = static_cast<ImoContent*>(
+////                                    pDoc->get_child_of_type(k_content) );
+////        GmoBoxDocPageContent* pBDPC = LOMSE_NEW GmoBoxDocPageContent(pContent);
+////        CHECK( rmap.size() == 0 );
+////
+////        pBDP->add_child_box(pBDPC);
+////
+////        CHECK( rmap.size() == 1 );
+////    }
 
 };
 

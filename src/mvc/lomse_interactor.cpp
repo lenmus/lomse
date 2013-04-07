@@ -42,6 +42,7 @@
 #include "lomse_player_gui.h"
 #include "lomse_document_cursor.h"
 #include "lomse_command.h"
+#include "lomse_logger.h"
 
 #include <sstream>
 using namespace std;
@@ -88,6 +89,7 @@ Interactor::~Interactor()
     delete m_pView;
     delete_graphic_model();
     delete m_pCursor;
+    logger.log_message("[Interactor::~Interactor] Interactor is deleted", __FILE__,__LINE__);
 }
 
 //---------------------------------------------------------------------------------------
@@ -239,7 +241,9 @@ void Interactor::click_at_screen_point(Pixels x, Pixels y, unsigned flags)
         if (pGmo->is_box_control() || (pImo && pImo->is_visible()) )
         {
             long id = find_event_originator_imo(pGmo);
-            SpEventMouse pEvent( LOMSE_NEW EventMouse(k_on_click_event, this, id, m_pDoc) );
+            SpInteractor sp = get_shared_ptr_from_this();
+            WpInteractor wp(sp);
+            SpEventMouse pEvent( LOMSE_NEW EventMouse(k_on_click_event, wp, id, m_pDoc) );
             notify_event(pEvent, pGmo);
         }
     }
@@ -393,7 +397,9 @@ void Interactor::redraw_bitmap()
 //---------------------------------------------------------------------------------------
 void Interactor::request_window_update()
 {
-    SpEventView pEvent( LOMSE_NEW EventView(k_update_window_event, this) );
+    SpInteractor sp = get_shared_ptr_from_this();
+    WpInteractor wp(sp);
+    SpEventView pEvent( LOMSE_NEW EventView(k_update_window_event, wp) );
     notify_observers(pEvent, this);
 }
 
@@ -714,7 +720,9 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
 //---------------------------------------------------------------------------------------
 void Interactor::send_end_of_play_event(ImoScore* pScore, PlayerGui* pPlayCtrl)
 {
-    SpEventView pEvent( LOMSE_NEW EventView(k_end_of_playback_event, this) );
+    SpInteractor sp = get_shared_ptr_from_this();
+    WpInteractor wp(sp);
+    SpEventView pEvent( LOMSE_NEW EventView(k_end_of_playback_event, wp) );
     if (pPlayCtrl)
         pPlayCtrl->on_end_of_playback();
 
@@ -736,7 +744,9 @@ void Interactor::update_view_if_needed()
 void Interactor::send_mouse_out_event(GmoObj* pGmo)
 {
     long id = find_event_originator_imo(pGmo);
-    SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_out_event, this, id, m_pDoc) );
+    SpInteractor sp = get_shared_ptr_from_this();
+    WpInteractor wp(sp);
+    SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_out_event, wp, id, m_pDoc) );
     notify_event(pEvent, pGmo);
 }
 
@@ -744,7 +754,9 @@ void Interactor::send_mouse_out_event(GmoObj* pGmo)
 void Interactor::send_mouse_in_event(GmoObj* pGmo)
 {
     long id = find_event_originator_imo(pGmo);
-    SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_in_event, this, id, m_pDoc) );
+    SpInteractor sp = get_shared_ptr_from_this();
+    WpInteractor wp(sp);
+    SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_in_event, wp, id, m_pDoc) );
     notify_event(pEvent, pGmo);
 }
 
@@ -850,19 +862,19 @@ void Interactor::exec_command(DocCommand* pCmd)
 }
 
 
-//=======================================================================================
-// EditInteractor implementation
-//=======================================================================================
-EditInteractor::EditInteractor(LibraryScope& libraryScope, Document* pDoc, View* pView,
-                               DocCommandExecuter* pExec)
-    : Interactor(libraryScope, pDoc, pView, pExec)
-{
-}
-
-//---------------------------------------------------------------------------------------
-EditInteractor::~EditInteractor()
-{
-}
+////=======================================================================================
+//// EditInteractor implementation
+////=======================================================================================
+//EditInteractor::EditInteractor(LibraryScope& libraryScope, Document* pDoc, View* pView,
+//                               DocCommandExecuter* pExec)
+//    : Interactor(libraryScope, pDoc, pView, pExec)
+//{
+//}
+//
+////---------------------------------------------------------------------------------------
+//EditInteractor::~EditInteractor()
+//{
+//}
 
 
 

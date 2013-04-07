@@ -48,20 +48,20 @@ using namespace lomse;
 
 
 //---------------------------------------------------------------------------------------
-class PresenterBuilderTestFixture
+class PresenterTestFixture
 {
 public:
     LibraryScope m_libraryScope;
     std::string m_scores_path;
 
-    PresenterBuilderTestFixture()     //SetUp fixture
+    PresenterTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
     {
         m_scores_path = TESTLIB_SCORES_PATH;
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
-    ~PresenterBuilderTestFixture()    //TearDown fixture
+    ~PresenterTestFixture()    //TearDown fixture
     {
     }
 };
@@ -69,28 +69,17 @@ public:
 SUITE(PresenterTest)
 {
 
-//    //TEST_FIXTURE(PresenterBuilderTestFixture, PresenterBuilderCreatesPresenter)
-//    //{
-//    //    Document* pDoc = LOMSE_NEW Document(m_libraryScope);
-//    //    pDoc->create_empty();
-//    //    UserCommandExecuter* pExec = LOMSE_NEW UserCommandExecuter(pDoc);
-//    //    Interactor* pInteractor = LOMSE_NEW EditInteractor(m_libraryScope, pDoc, pExec);
-//    //    delete pDoc;
-//    //    delete pExec;
-//    //    delete pInteractor;
-//    //}
-
-    TEST_FIXTURE(PresenterBuilderTestFixture, PresenterBuilder_NewDocument)
+    TEST_FIXTURE(PresenterTestFixture, PresenterBuilder_NewDocument)
     {
         PresenterBuilder builder(m_libraryScope);
 
         Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
         CHECK( pPresenter != NULL );
-        Document* pDoc = pPresenter->get_document();
+        Document* pDoc = pPresenter->get_document_raw_ptr();
         ImoDocument* pImoDoc = pDoc->get_imodoc();
         CHECK( pImoDoc->get_content_item(0) == NULL );
         CHECK( pPresenter->get_num_interactors() == 1 );
-        Interactor* pIntor = pPresenter->get_interactor(0);
+        Interactor* pIntor = pPresenter->get_interactor_raw_ptr(0);
         CHECK( pIntor != NULL );
         CHECK( pIntor->get_view() != NULL );
         SimpleView* pView = dynamic_cast<SimpleView*>( pIntor->get_view() );
@@ -99,7 +88,31 @@ SUITE(PresenterTest)
         delete pPresenter;
     }
 
-    //TEST_FIXTURE(PresenterBuilderTestFixture, PresenterBuilderCreatesViewCursorAtEnd)
+    TEST_FIXTURE(PresenterTestFixture, get_weak_ptr_to_document)
+    {
+        PresenterBuilder builder(m_libraryScope);
+        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
+
+        WpDocument wpDoc = pPresenter->get_document();
+        CHECK( wpDoc.expired() == false );
+
+        delete pPresenter;
+        CHECK( wpDoc.expired() == true );
+    }
+
+    TEST_FIXTURE(PresenterTestFixture, get_weak_ptr_to_interactor)
+    {
+        PresenterBuilder builder(m_libraryScope);
+        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
+
+        WpInteractor wpIntor = pPresenter->get_interactor(0);
+        CHECK( wpIntor.expired() == false );
+
+        delete pPresenter;
+        CHECK( wpIntor.expired() == true );
+    }
+
+    //TEST_FIXTURE(PresenterTestFixture, PresenterBuilderCreatesViewCursorAtEnd)
     //{
     //    PresenterBuilder builder(m_libraryScope);
     //    Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
@@ -110,7 +123,7 @@ SUITE(PresenterTest)
     //    delete pPresenter;
     //}
 
-    //TEST_FIXTURE(PresenterBuilderTestFixture, PresenterBuilderCreatesViewCursorAtStart)
+    //TEST_FIXTURE(PresenterTestFixture, PresenterBuilderCreatesViewCursorAtStart)
     //{
     //    PresenterBuilder builder(m_libraryScope);
     //    Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple,
@@ -123,7 +136,7 @@ SUITE(PresenterTest)
     //    delete pPresenter;
     //}
 
-    //TEST_FIXTURE(PresenterBuilderTestFixture, PresenterBuilder_OpenDocument)
+    //TEST_FIXTURE(PresenterTestFixture, PresenterBuilder_OpenDocument)
     //{
     //    PresenterBuilder builder(m_libraryScope);
 
@@ -140,54 +153,54 @@ SUITE(PresenterTest)
 
 
 
-// PresentersCollection tests --------------------------------------------------
-
-
-    TEST_FIXTURE(PresenterBuilderTestFixture, PresentersCollection_CloseDocumentByIndex)
-    {
-        PresenterBuilder builder(m_libraryScope);
-        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
-        PresentersCollection elements;
-        elements.add(pPresenter);
-        CHECK( elements.get_num_documents() == 1 );
-
-        elements.close_document(0);
-        CHECK( elements.get_num_documents() == 0 );
-    }
-
-    TEST_FIXTURE(PresenterBuilderTestFixture, PresentersCollection_CloseDocumentByPointer)
-    {
-        PresenterBuilder builder(m_libraryScope);
-        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
-        PresentersCollection elements;
-        elements.add(pPresenter);
-        CHECK( elements.get_num_documents() == 1 );
-        Document* pDoc = pPresenter->get_document();
-
-        elements.close_document(pDoc);
-        CHECK( elements.get_num_documents() == 0 );
-    }
-
-//    TEST_FIXTURE(PresenterBuilderTestFixture, PresentersCollection_AddView)
+//// PresentersCollection tests --------------------------------------------------
+//
+//
+//    TEST_FIXTURE(PresenterTestFixture, PresentersCollection_CloseDocumentByIndex)
 //    {
-//        PresentersCollection elements;
 //        PresenterBuilder builder(m_libraryScope);
-//        Document* pDoc = builder.new_document(ViewFactory::k_view_simple);
-//        View* pView = LOMSE_NEW SimpleView(pDoc);
-//        CHECK( elements.get_num_views(pDoc) == 0 );
-//        elements.add_view(pDoc, pView);
-//        CHECK( elements.get_num_views(pDoc) == 1 );
-//        elements.close_document(pDoc);
-//        delete pView;
+//        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
+//        PresentersCollection elements;
+//        elements.add(pPresenter);
+//        CHECK( elements.get_num_documents() == 1 );
+//
+//        elements.close_document(0);
+//        CHECK( elements.get_num_documents() == 0 );
 //    }
 //
+//    TEST_FIXTURE(PresenterTestFixture, PresentersCollection_CloseDocumentByPointer)
+//    {
+//        PresenterBuilder builder(m_libraryScope);
+//        Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
+//        PresentersCollection elements;
+//        elements.add(pPresenter);
+//        CHECK( elements.get_num_documents() == 1 );
+//        Document* pDoc = pPresenter->get_document_raw_ptr();
+//
+//        elements.close_document(pDoc);
+//        CHECK( elements.get_num_documents() == 0 );
+//    }
+//
+////    TEST_FIXTURE(PresenterTestFixture, PresentersCollection_AddView)
+////    {
+////        PresentersCollection elements;
+////        PresenterBuilder builder(m_libraryScope);
+////        Document* pDoc = builder.new_document(ViewFactory::k_view_simple);
+////        View* pView = LOMSE_NEW SimpleView(pDoc);
+////        CHECK( elements.get_num_views(pDoc) == 0 );
+////        elements.add_view(pDoc, pView);
+////        CHECK( elements.get_num_views(pDoc) == 1 );
+////        elements.close_document(pDoc);
+////        delete pView;
+////    }
+////
 
 
 
 // MvcModel tests --------------------------------------------------
 
 
-    //TEST_FIXTURE(PresenterBuilderTestFixture, MvcModel_ViewIsNotifiedWhenModifications)
+    //TEST_FIXTURE(PresenterTestFixture, MvcModel_ViewIsNotifiedWhenModifications)
     //{
     //    PresenterBuilder builder(m_libraryScope);
     //    Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple,

@@ -97,14 +97,14 @@ ImoTuplet* ImoNoteRest::get_tuplet()
 }
 
 //---------------------------------------------------------------------------------------
-float ImoNoteRest::get_duration()
+TimeUnits ImoNoteRest::get_duration()
 {
-    float rTime = to_duration(m_nNoteType, m_nDots);
+    TimeUnits rTime = to_duration(m_nNoteType, m_nDots);
     ImoTuplet* pTuplet = get_tuplet();
     if (pTuplet)
     {
-        rTime *= float(pTuplet->get_normal_number());
-        rTime /= float(pTuplet->get_actual_number());
+        rTime *= TimeUnits(pTuplet->get_normal_number());
+        rTime /= TimeUnits(pTuplet->get_actual_number());
     }
     return rTime;
 }

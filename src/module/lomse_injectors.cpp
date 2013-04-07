@@ -332,7 +332,7 @@ Interactor* Injector::inject_Interactor(LibraryScope& libraryScope,
 {
     //factory method
 
-    return LOMSE_NEW EditInteractor(libraryScope, pDoc, pView, pExec);
+    return LOMSE_NEW Interactor(libraryScope, pDoc, pView, pExec);
 }
 
 //---------------------------------------------------------------------------------------

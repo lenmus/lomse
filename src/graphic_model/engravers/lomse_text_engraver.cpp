@@ -42,25 +42,26 @@ namespace lomse
 // TextEngraver implementation
 //=======================================================================================
 TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           const string& text, ImoStyle* pStyle)
+                           const string& text, const string& language, ImoStyle* pStyle)
     : Engraver(libraryScope, pScoreMeter)
     , m_text(text)
     , m_pStyle(pStyle)
     , m_pFontStorage( libraryScope.font_storage() )
+    , m_language(language)
 {
 }
 
-//---------------------------------------------------------------------------------------
-TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                           ImoScoreText* pText, ImoScore* pScore)
-    : Engraver(libraryScope, pScoreMeter)
-    , m_text(pText->get_text())
-    , m_pFontStorage( libraryScope.font_storage() )
-{
-    m_pStyle = pText->get_style();
-    if (!m_pStyle)
-        m_pStyle = pScore->get_default_style();
-}
+////---------------------------------------------------------------------------------------
+//TextEngraver::TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+//                           ImoScoreText* pText, ImoScore* pScore)
+//    : Engraver(libraryScope, pScoreMeter)
+//    , m_text(pText->get_text())
+//    , m_pFontStorage( libraryScope.font_storage() )
+//{
+//    m_pStyle = pText->get_style();
+//    if (!m_pStyle)
+//        m_pStyle = pScore->get_default_style();
+//}
 
 //---------------------------------------------------------------------------------------
 TextEngraver::~TextEngraver()
@@ -70,9 +71,8 @@ TextEngraver::~TextEngraver()
 //---------------------------------------------------------------------------------------
 LUnits TextEngraver::measure_width()
 {
-    //TODO: language
     TextMeter meter(m_libraryScope);
-    meter.select_font("",   //no particular language
+    meter.select_font(m_language,
                       m_pStyle->font_file(),
                       m_pStyle->font_name(),
                       m_pStyle->font_size() );
@@ -82,9 +82,8 @@ LUnits TextEngraver::measure_width()
 //---------------------------------------------------------------------------------------
 LUnits TextEngraver::measure_height()
 {
-    //TODO: language
     TextMeter meter(m_libraryScope);
-    meter.select_font("",   //no particular language
+    meter.select_font(m_language,
                       m_pStyle->font_file(),
                       m_pStyle->font_name(),
                       m_pStyle->font_size() );
@@ -106,8 +105,8 @@ GmoShapeText* TextEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUni
     }
 
     int idx = 0;
-    return LOMSE_NEW GmoShapeText(pCreatorImo, idx, m_text, m_pStyle, pos.x, pos.y,
-                            m_libraryScope);
+    return LOMSE_NEW GmoShapeText(pCreatorImo, idx, m_text, m_pStyle, m_language,
+                                  pos.x, pos.y, m_libraryScope);
 }
 
 

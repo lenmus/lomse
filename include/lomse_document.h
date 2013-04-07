@@ -77,6 +77,7 @@ class ImoTextItem;
 class LOMSE_EXPORT Document : public BlockLevelCreatorApi
                             , public EventNotifier
                             , public Observable
+                            , public EnableSharedFromThis<Document>
 {
 protected:
     LibraryScope&   m_libraryScope;
@@ -120,6 +121,7 @@ public:
     int from_checkpoint(const string& data);
     void create_empty();
     void create_with_empty_score();
+    inline SharedPtr<Document> get_shared_ptr_from_this() { return shared_from_this(); }
 
     //dirty
     inline void clear_dirty() { m_flags &= ~k_dirty; }
@@ -198,6 +200,9 @@ protected:
     void removed_from_model(ImoObj* pImo);
 
 };
+
+typedef SharedPtr<Document>  SpDocument;
+typedef WeakPtr<Document>  WpDocument;
 
 
 }   //namespace lomse

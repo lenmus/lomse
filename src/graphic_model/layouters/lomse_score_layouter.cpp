@@ -690,7 +690,7 @@ void ColumnsBuilder::collect_content_for_this_column()
         int iInstr = m_pSysCursor->num_instrument();
         int iStaff = m_pSysCursor->staff();
         int iLine = m_pSysCursor->line();
-        float rTime = m_pSysCursor->time();
+        TimeUnits rTime = m_pSysCursor->time();
         ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
         m_pagePos.y = m_instrEngravers[iInstr]->get_top_line_of_staff(iStaff);
         GmoShape* pShape = NULL;
@@ -713,7 +713,7 @@ void ColumnsBuilder::collect_content_for_this_column()
                 int clefType = pClef->get_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                                                                  m_pagePos, clefType, flags);
-                include_object(m_iColumn, iLine, iInstr, pSO, -1.0f, iStaff, pShape, fInProlog);
+                include_object(m_iColumn, iLine, iInstr, pSO, -1.0, iStaff, pShape, fInProlog);
             }
 
             else if (pSO->is_key_signature() || pSO->is_time_signature())
@@ -723,7 +723,7 @@ void ColumnsBuilder::collect_content_for_this_column()
                 int clefType = m_pSysCursor->get_applicable_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                                                                  m_pagePos, clefType, flags);
-                include_object(m_iColumn, iLine, iInstr, pSO, -1.0f, iStaff, pShape, fInProlog);
+                include_object(m_iColumn, iLine, iInstr, pSO, -1.0, iStaff, pShape, fInProlog);
             }
 
             else
@@ -731,7 +731,7 @@ void ColumnsBuilder::collect_content_for_this_column()
                 int clefType = m_pSysCursor->get_applicable_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                                                                  m_pagePos, clefType);
-                float time = (pSO->is_spacer() ? -1.0f : rTime);
+                TimeUnits time = (pSO->is_spacer() ? -1.0 : rTime);
                 include_object(m_iColumn, iLine, iInstr, pSO, time, iStaff, pShape);
             }
 
@@ -924,7 +924,7 @@ void ColumnsBuilder::start_column_measurements(int iCol, LUnits uxStart,
 
 //---------------------------------------------------------------------------------------
 void ColumnsBuilder::include_object(int iCol, int iLine, int iInstr, ImoStaffObj* pSO,
-                                    float rTime, int iStaff, GmoShape* pShape,
+                                    TimeUnits rTime, int iStaff, GmoShape* pShape,
                                     bool fInProlog)
 {
     m_ColLayouters[iCol]->include_object(iLine, iInstr, pSO, rTime, iStaff, pShape,
@@ -938,11 +938,11 @@ void ColumnsBuilder::finish_column_measurements(int iCol, LUnits xStart)
 }
 
 //---------------------------------------------------------------------------------------
-bool ColumnsBuilder::determine_if_is_in_prolog(float rTime)
+bool ColumnsBuilder::determine_if_is_in_prolog(TimeUnits rTime)
 {
     // only if clef/key/time is at start of score or after a barline. This is equivalent
     // to check that clef/key/time will be placed at timepos 0
-    return is_equal_time(rTime, 0.0f);
+    return is_equal_time(rTime, 0.0);
 }
 
 ////////---------------------------------------------------------------------------------------
@@ -976,7 +976,7 @@ ColumnBreaker::ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor)
 }
 
 //---------------------------------------------------------------------------------------
-bool ColumnBreaker::column_should_be_finished(ImoStaffObj* pSO, float rTime, int iLine)
+bool ColumnBreaker::column_should_be_finished(ImoStaffObj* pSO, TimeUnits rTime, int iLine)
 {
     bool fBreak = false;
     if (m_fBarlineFound && !pSO->is_barline())
@@ -1001,7 +1001,7 @@ bool ColumnBreaker::column_should_be_finished(ImoStaffObj* pSO, float rTime, int
     if (pSO->is_note_rest())
     {
         ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
-        float rNextTime = rTime + pNR->get_duration();
+        TimeUnits rNextTime = rTime + pNR->get_duration();
         m_targetBreakTime = max(m_targetBreakTime, rNextTime);
 
         m_beamed[iLine] = pNR->is_beamed() && !pNR->is_end_of_beam();
@@ -1157,7 +1157,7 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
         {
             ImoScoreText* pImo = static_cast<ImoScoreText*>(pAO);
             TextEngraver engrv(m_libraryScope, m_pScoreMeter, pImo->get_text(),
-                               pImo->get_style());
+                               pImo->get_language(), pImo->get_style());
             return engrv.create_shape(pImo, pos.x, pos.y);
         }
         default:

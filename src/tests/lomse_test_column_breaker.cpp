@@ -72,7 +72,7 @@ public:
 //            int iInstr = soCursor.num_instrument();
 //            int iStaff = soCursor.staff();
             int iLine = soCursor.line();
-            float rTime = soCursor.time();
+            TimeUnits rTime = soCursor.time();
 
             if ( breaker.column_should_be_finished(pSO, rTime, iLine) )
                 break;

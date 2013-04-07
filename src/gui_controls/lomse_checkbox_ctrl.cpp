@@ -69,27 +69,19 @@ const int CheckboxCtrl::m_nNumVertices
 CheckboxCtrl::CheckboxCtrl(LibraryScope& libScope, Control* pParent,
                            Document* pDoc, const string& label,
                            LUnits width, LUnits height, ImoStyle* pStyle)
-    : Control(pDoc, pParent)
-    , m_libraryScope(libScope)
+    : Control(libScope, pDoc, pParent)
     , m_label(label)
-    , m_language()
     , m_pMainBox(NULL)
-    , m_style(pStyle)
     , m_width(width)
     , m_height(height)
     , m_hoverColor( Color(255, 0, 0) )      //red
     , m_status(false)
 {
-    if (!m_style)
-        m_style = create_default_style();
+    m_style = (pStyle == NULL ? create_default_style() : pStyle);
 
     m_normalColor = m_style->color();
     m_prevColor = m_normalColor;
     m_currentColor = m_normalColor;
-
-    //default language
-    ImoDocument* pImoDoc = m_pDoc->get_imodoc();
-    m_language = pImoDoc->get_language();
 
     measure();
 

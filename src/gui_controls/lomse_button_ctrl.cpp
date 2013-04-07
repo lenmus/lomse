@@ -46,17 +46,14 @@ namespace lomse
 ButtonCtrl::ButtonCtrl(LibraryScope& libScope, Control* pParent,
                        Document* pDoc, const string& label,
                        LUnits width, LUnits height, ImoStyle* pStyle)
-    : Control(pDoc, pParent)
-    , m_libraryScope(libScope)
+    : Control(libScope, pDoc, pParent)
     , m_label(label)
-    , m_style(pStyle)
     , m_width(width)
     , m_height(height)
     , m_bgColor( Color(255,255,255) )
     , m_pMainBox(NULL)
 {
-    if (!m_style)
-        m_style = create_default_style();
+    m_style = (pStyle == NULL ? create_default_style() : pStyle);
 
     measure();
 
@@ -166,19 +163,6 @@ void ButtonCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
     LUnits x = m_pos.x + m_xLabel;
     LUnits y = m_pos.y + m_yLabel;
     pDrawer->draw_text(x, y, m_label);
-}
-
-//---------------------------------------------------------------------------------------
-void ButtonCtrl::select_font()
-{
-    //TODO: language
-    TextMeter meter(m_libraryScope);
-    meter.select_font("",   //no particular language
-                      m_style->font_file(),
-                      m_style->font_name(),
-                      m_style->font_size(),
-                      m_style->is_bold(),
-                      m_style->is_italic() );
 }
 
 

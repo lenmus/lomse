@@ -93,7 +93,7 @@ public:
 //
 //    //grid table: xPositions/timepos
 //    inline void SetTimeGridTable(lmTimeGridTable* pGridTable) { m_pGridTable = pGridTable; }
-//    float GetGridTimeForPosition(LUnits uxPos);
+//    TimeUnits GetGridTimeForPosition(LUnits uxPos);
 //    void DrawTimeLines(lmPaper* pPaper, wxColour color, LUnits uyTop,
 //                       LUnits uyBottom);
 protected:

@@ -114,7 +114,7 @@ public:
 
 //---------------------------------------------------------------------------------------
 //MyInteractor: Mock class for tests
-class MyInteractor : public EditInteractor
+class MyInteractor : public Interactor
 {
 protected:
     bool m_fSelRectInvoked;
@@ -124,7 +124,7 @@ protected:
 
 public:
     MyInteractor(LibraryScope& libraryScope, Document* pDoc, View* pView)
-        : EditInteractor(libraryScope, pDoc, pView, NULL)
+        : Interactor(libraryScope, pDoc, pView, NULL)
         , m_fSelRectInvoked(false)
         , m_fSelObjInvoked(false)
     {
@@ -189,12 +189,10 @@ SUITE(InteractorTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             &doc);
-        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, &doc, pView, NULL);
+        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, &doc, pView, NULL));
 
         CHECK( pIntor != NULL );
         CHECK( pIntor->get_graphic_model() != NULL );
-
-        delete pIntor;
     }
 
     //-- selecting objects --------------------------------------------------------------
@@ -206,8 +204,8 @@ SUITE(InteractorTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             &doc);
-        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, &doc, pView, NULL);
-        pView->set_interactor(pIntor);
+        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, &doc, pView, NULL));
+        pView->set_interactor(pIntor.get());
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
         GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
@@ -222,8 +220,6 @@ SUITE(InteractorTest)
 
         CHECK( pIntor->is_in_selection(pClef) == true );
         CHECK( pClef->is_selected() == true );
-
-        delete pIntor;
     }
 
     TEST_FIXTURE(InteractorTestFixture, Interactor_SelectObjectAtScreenPoint)
@@ -236,8 +232,8 @@ SUITE(InteractorTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, &doc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
-        pView->set_interactor(pIntor);
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, &doc, pView, NULL));
+        pView->set_interactor(pIntor.get());
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
         pView->redraw_bitmap();
@@ -262,8 +258,6 @@ SUITE(InteractorTest)
 
         CHECK( pIntor->is_in_selection(pClef) == true );
         CHECK( pClef->is_selected() == true );
-
-        delete pIntor;
     }
 
     TEST_FIXTURE(InteractorTestFixture, Interactor_SelectObjectsAtScreenRectangle)
@@ -276,8 +270,8 @@ SUITE(InteractorTest)
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, &doc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
-        pView->set_interactor(pIntor);
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, &doc, pView, NULL));
+        pView->set_interactor(pIntor.get());
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
         pView->redraw_bitmap();
@@ -308,8 +302,6 @@ SUITE(InteractorTest)
 
         CHECK( pIntor->is_in_selection(pClef) == true );
         CHECK( pClef->is_selected() == true );
-
-        delete pIntor;
     }
 
 
@@ -321,15 +313,14 @@ SUITE(InteractorTest)
         pDoc->create_empty();
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, pDoc, pView, NULL);
-        pView->set_interactor(pIntor);
-        MyTaskDragView task(pIntor);
+        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, pDoc, pView, NULL));
+        pView->set_interactor(pIntor.get());
+        MyTaskDragView task(pIntor.get());
         task.init_task();
 
         CHECK( task.is_waiting_for_first_point() == true );
 
         delete pDoc;
-        delete pIntor;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskDragView_MouseLeftDown)
@@ -338,9 +329,9 @@ SUITE(InteractorTest)
         pDoc->create_empty();
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
                                             pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(m_libraryScope, pDoc, pView, NULL);
-        pView->set_interactor(pIntor);
-        MyTaskDragView task(pIntor);
+        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, pDoc, pView, NULL));
+        pView->set_interactor(pIntor.get());
+        MyTaskDragView task(pIntor.get());
         task.init_task();
 
         task.process_event( Event(Event::k_mouse_move) );
@@ -353,7 +344,6 @@ SUITE(InteractorTest)
         CHECK( task.is_waiting_for_second_point() == true );
 
         delete pDoc;
-        delete pIntor;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskDragView_MouseMove)
@@ -365,9 +355,9 @@ SUITE(InteractorTest)
         pDoc->create_empty();
         View* pView = Injector::inject_View(libraryScope, ViewFactory::k_view_simple,
                                             pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView, NULL);
-        pView->set_interactor(pIntor);
-        MyTaskDragView task(pIntor);
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, pDoc, pView, NULL));
+        pView->set_interactor(pIntor.get());
+        MyTaskDragView task(pIntor.get());
         task.init_task();
         task.process_event( Event(Event::k_mouse_left_down) );
 
@@ -381,7 +371,6 @@ SUITE(InteractorTest)
         CHECK( task.is_waiting_for_first_point() == true );
 
         delete pDoc;
-        delete pIntor;
     }
 
     // TaskSelection --------------------------------------------------------------------
@@ -394,9 +383,9 @@ SUITE(InteractorTest)
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView, NULL);
-        pView->set_interactor(pIntor);
-        MyTaskSelection task(pIntor);
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, pDoc, pView, NULL));
+        pView->set_interactor(pIntor.get());
+        MyTaskSelection task(pIntor.get());
         task.init_task();
 
         CHECK( task.is_waiting_for_first_point() == true );
@@ -404,7 +393,6 @@ SUITE(InteractorTest)
         CHECK( task.first_point_y() == 0 );
 
         delete pDoc;
-        delete pIntor;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseLeftDown)
@@ -415,9 +403,9 @@ SUITE(InteractorTest)
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView, NULL);
-        pView->set_interactor(pIntor);
-        MyTaskSelection task(pIntor);
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, pDoc, pView, NULL));
+        pView->set_interactor(pIntor.get());
+        MyTaskSelection task(pIntor.get());
         task.init_task();
 
         task.process_event( Event(Event::k_mouse_move, 20, 70) );
@@ -429,7 +417,6 @@ SUITE(InteractorTest)
         CHECK( task.first_point_y() == 33 );
 
         delete pDoc;
-        delete pIntor;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseLeftMove)
@@ -440,9 +427,9 @@ SUITE(InteractorTest)
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView, NULL);
-        pView->set_interactor(pIntor);
-        MyTaskSelection task(pIntor);
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, pDoc, pView, NULL));
+        pView->set_interactor(pIntor.get());
+        MyTaskSelection task(pIntor.get());
         task.init_task();
         task.process_event( Event(Event::k_mouse_left_down, 10, 33, k_mouse_left) );
 
@@ -450,7 +437,6 @@ SUITE(InteractorTest)
         CHECK( task.is_waiting_for_point_2_left() == true );
 
         delete pDoc;
-        delete pIntor;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseLeftUp)
@@ -462,6 +448,7 @@ SUITE(InteractorTest)
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
         MyInteractor* pIntor = LOMSE_NEW MyInteractor(libraryScope, pDoc, pView);
+        SpInteractor sp(pIntor);
         pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();
@@ -475,7 +462,6 @@ SUITE(InteractorTest)
         CHECK( pIntor->sel_rectangle_is(10, 33, 21, 75) == true );
 
         delete pDoc;
-        delete pIntor;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseRightDown)
@@ -486,9 +472,9 @@ SUITE(InteractorTest)
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView, NULL);
-        pView->set_interactor(pIntor);
-        MyTaskSelection task(pIntor);
+        SpInteractor pIntor( Injector::inject_Interactor(libraryScope, pDoc, pView, NULL) );
+        pView->set_interactor(pIntor.get());
+        MyTaskSelection task(pIntor.get());
         task.init_task();
 
         task.process_event( Event(Event::k_mouse_move, 20, 70) );
@@ -500,7 +486,6 @@ SUITE(InteractorTest)
         CHECK( task.first_point_y() == 33 );
 
         delete pDoc;
-        delete pIntor;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseRightMove)
@@ -511,9 +496,9 @@ SUITE(InteractorTest)
         Document* pDoc = Injector::inject_Document(libraryScope);
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, pDoc, pView, NULL);
-        pView->set_interactor(pIntor);
-        MyTaskSelection task(pIntor);
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, pDoc, pView, NULL));
+        pView->set_interactor(pIntor.get());
+        MyTaskSelection task(pIntor.get());
         task.init_task();
         task.process_event( Event(Event::k_mouse_right_down, 10, 33, k_mouse_right) );
 
@@ -521,7 +506,6 @@ SUITE(InteractorTest)
         CHECK( task.is_waiting_for_point_2_right() == true );
 
         delete pDoc;
-        delete pIntor;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseRightUp)
@@ -533,6 +517,7 @@ SUITE(InteractorTest)
         pDoc->create_empty();
         GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
         MyInteractor* pIntor = LOMSE_NEW MyInteractor(libraryScope, pDoc, pView);
+        SpInteractor sp(pIntor);
         pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
         task.init_task();
@@ -546,7 +531,6 @@ SUITE(InteractorTest)
         CHECK( pIntor->sel_point_is(10, 33) == true );
 
         delete pDoc;
-        delete pIntor;
     }
 
     //TEST_FIXTURE(InteractorTestFixture, NotificationReceived)

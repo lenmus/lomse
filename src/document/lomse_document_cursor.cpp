@@ -454,7 +454,7 @@ ScoreCursor::ScoreCursor(Document* pDoc, ImoScore* pScore)
     , m_pColStaffObjs( pScore->get_staffobjs_table() )
     , m_pScore(pScore)
     , m_fAutoRefresh(false)
-    , m_timeStep( float(k_duration_eighth) )
+    , m_timeStep( TimeUnits(k_duration_eighth) )
 {
     p_start_cursor();
 }
@@ -508,7 +508,7 @@ ColStaffObjsEntry* ScoreCursor::find_previous_imo()
 
     ColStaffObjsIterator itSave = m_it;
 
-    float curTime = m_currentState.time();
+    TimeUnits curTime = m_currentState.time();
 
     //move to prev with lower time
     p_move_iterator_to_prev();
@@ -588,7 +588,7 @@ void ScoreCursor::point_to_barline(long id, int staff)
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::to_state(int nInstr, int nStaff, int nMeasure, float rTime, long id)
+void ScoreCursor::to_state(int nInstr, int nStaff, int nMeasure, TimeUnits rTime, long id)
 {
     auto_refresh();
 
@@ -596,7 +596,7 @@ void ScoreCursor::to_state(int nInstr, int nStaff, int nMeasure, float rTime, lo
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::p_to_state(int nInstr, int nStaff, int nMeasure, float rTime, long id)
+void ScoreCursor::p_to_state(int nInstr, int nStaff, int nMeasure, TimeUnits rTime, long id)
 {
     //if id==-1L move to first object satisfying all other conditions
 
@@ -610,7 +610,7 @@ void ScoreCursor::p_to_state(int nInstr, int nStaff, int nMeasure, float rTime, 
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::p_forward_to_state(int instr, int staff, int measure, float time)
+void ScoreCursor::p_forward_to_state(int instr, int staff, int measure, TimeUnits time)
 {
     m_currentState.instrument(instr);
     m_currentState.staff(staff);
@@ -696,7 +696,7 @@ void ScoreCursor::p_update_as_end_of_staff()
 {
     m_currentState.id( k_cursor_at_end_of_staff );
     m_currentState.ref_obj_id(-1L);
-    m_currentState.ref_obj_time(0.0f);
+    m_currentState.ref_obj_time(0.0);
 }
 
 //---------------------------------------------------------------------------------------
@@ -714,7 +714,7 @@ void ScoreCursor::p_update_as_end_of_score()
         ColStaffObjsEntry* pEntry = m_pColStaffObjs->back();
         ImoStaffObj* pImo = dynamic_cast<ImoStaffObj*>( pEntry->imo_object() );
         int measure = pEntry->measure();
-        float time = pEntry->time();
+        TimeUnits time = pEntry->time();
         if (pImo)
         {
             time += pImo->get_duration();
@@ -727,13 +727,13 @@ void ScoreCursor::p_update_as_end_of_score()
     else
     {
         m_currentState.measure(0);
-        m_currentState.time(0.0f);
+        m_currentState.time(0.0);
     }
 
 
     m_currentState.id( k_cursor_at_end_of_staff );
     m_currentState.ref_obj_id( -1L );
-    m_currentState.ref_obj_time(0.0f);
+    m_currentState.ref_obj_time(0.0);
 }
 
 //---------------------------------------------------------------------------------------
@@ -779,7 +779,7 @@ bool ScoreCursor::p_more_instruments()
 //---------------------------------------------------------------------------------------
 void ScoreCursor::p_to_start_of_next_instrument()
 {
-    p_to_state(m_currentState.instrument()+1, 0, 0, 0.0f);
+    p_to_state(m_currentState.instrument()+1, 0, 0, 0.0);
     p_update_pointed_objects();
 }
 
@@ -872,7 +872,7 @@ int ScoreCursor::p_determine_next_target_measure()
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::p_forward_to_instr_measure_with_time_not_lower_than(float rTargetTime)
+void ScoreCursor::p_forward_to_instr_measure_with_time_not_lower_than(TimeUnits rTargetTime)
 {
     while (p_there_is_iter_object()
            && ( !p_iter_object_is_on_instrument( m_currentState.instrument() )
@@ -886,7 +886,7 @@ void ScoreCursor::p_forward_to_instr_measure_with_time_not_lower_than(float rTar
 //---------------------------------------------------------------------------------------
 bool ScoreCursor::p_find_current_staff_at_current_iter_object_time()
 {
-    float rCurTime = p_iter_object_time();
+    TimeUnits rCurTime = p_iter_object_time();
     while (p_there_is_iter_object()
             && is_equal_time(rCurTime, p_iter_object_time())
             && ( !p_iter_object_is_on_instrument( m_currentState.instrument() )
@@ -984,7 +984,7 @@ void ScoreCursor::p_move_iterator_to_prev()
 void ScoreCursor::p_find_prev_time_in_this_staff()
 {
     ColStaffObjsIterator itSave = m_it;
-    float targetTime = m_currentState.time() - m_timeStep;
+    TimeUnits targetTime = m_currentState.time() - m_timeStep;
     int staff = m_currentState.staff();
     int instr = m_currentState.instrument();
 
@@ -1030,7 +1030,7 @@ void ScoreCursor::p_find_prev_time_in_this_staff()
 //---------------------------------------------------------------------------------------
 void ScoreCursor::p_find_next_time_in_this_staff()
 {
-    float targetTime = m_currentState.time() + m_timeStep;
+    TimeUnits targetTime = m_currentState.time() + m_timeStep;
     int measure = m_currentState.measure();
     ImoStaffObj* pSO = staffobj();
     if (pSO)
@@ -1095,7 +1095,7 @@ void ScoreCursor::p_find_next_time_in_this_staff()
 //---------------------------------------------------------------------------------------
 void ScoreCursor::p_iter_to_last_object_in_current_time()
 {
-    float curTime = m_currentState.time();
+    TimeUnits curTime = m_currentState.time();
     m_it = m_pColStaffObjs->end();
     p_move_iterator_to_prev();
     while ( p_there_is_iter_object() && is_greater_time(p_iter_object_time(), curTime) )
@@ -1109,7 +1109,7 @@ void ScoreCursor::p_find_position_at_current_time()
     //to find the right position
 
     //set new current time
-    float curTime = p_iter_object_time();
+    TimeUnits curTime = p_iter_object_time();
     m_currentState.time(curTime);
 
     //an object in current time found.
@@ -1169,13 +1169,13 @@ bool ScoreCursor::p_try_prev_at_same_time()
 bool ScoreCursor::p_is_at_start_of_staff()
 {
     return m_currentState.measure() == 0
-           && is_equal_time(m_currentState.time(), 0.0f);
+           && is_equal_time(m_currentState.time(), 0.0);
 }
 
 //---------------------------------------------------------------------------------------
 void ScoreCursor::p_to_end_of_prev_staff()
 {
-    m_currentState.time(0.0f);
+    m_currentState.time(0.0);
     m_currentState.staff( m_currentState.staff() - 1 );
 
     p_to_end_of_staff();
@@ -1184,7 +1184,7 @@ void ScoreCursor::p_to_end_of_prev_staff()
 //---------------------------------------------------------------------------------------
 void ScoreCursor::p_to_end_of_prev_instrument()
 {
-    m_currentState.time(0.0f);
+    m_currentState.time(0.0);
     int instr = m_currentState.instrument() - 1;
     m_currentState.instrument(instr);
 
@@ -1212,7 +1212,7 @@ void ScoreCursor::p_to_end_of_staff()
         if (p_there_is_iter_object())
         {
             int measure = p_iter_object_measure();
-            float time = p_iter_object_time();
+            TimeUnits time = p_iter_object_time();
             if (p_iter_object_is_barline())
                 ++ measure;
             else
@@ -1223,13 +1223,13 @@ void ScoreCursor::p_to_end_of_staff()
         else
         {
             m_currentState.measure(0);
-            m_currentState.time(0.0f);
+            m_currentState.time(0.0);
         }
     }
     else
     {
         m_currentState.measure(0);
-        m_currentState.time(0.0f);
+        m_currentState.time(0.0);
     }
 
     //move to end of staff
@@ -1282,7 +1282,7 @@ void ScoreCursor::p_to_end_of_staff()
 //}
 
 //---------------------------------------------------------------------------------------
-float ScoreCursor::p_iter_object_duration()
+TimeUnits ScoreCursor::p_iter_object_duration()
 {
     ImoStaffObj* pISO = dynamic_cast<ImoStaffObj*>((*m_it)->imo_object());
     return pISO->get_duration();

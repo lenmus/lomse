@@ -59,7 +59,7 @@ public:
                 LUnits xr, LUnits xv, LUnits xf, bool fEndsInBarline=false)
          : MusicLine(0, 0, xStart, fixedSpace)
     {
-        float rTime = 0.0f;
+        TimeUnits rTime = 0.0;
         LUnits xAnchor = xs - xa;       //0.0f; + xStart+fixedSpace
         LUnits xLeft = xa + xAnchor;
         LUnits uSize = xr - xLeft;
@@ -78,7 +78,7 @@ public:
 
     //inline void my_do_measurements() { do_measurements(); }
 
-    void my_add_entry(bool fIsBarline, bool fProlog, float rTime, LUnits xAnchor,
+    void my_add_entry(bool fIsBarline, bool fProlog, TimeUnits rTime, LUnits xAnchor,
                       LUnits xLeft, LUnits uSize, LUnits uFixedSpace,
                       LUnits uVarSpace, LUnits xFinal)
     {
@@ -161,7 +161,7 @@ SUITE(ColumnStorageTest)
         int iStaff = 0;
         int iLine = 0;
         int iInstr = 0;
-        float rTime = 0.0f;
+        TimeUnits rTime = 0.0;
 
         storage.include_object(iLine, iInstr, pClef, rTime, iStaff, pShape, true,
                                0.0f, 0.0f);
@@ -183,7 +183,7 @@ SUITE(ColumnStorageTest)
         int iStaff = 0;
         int iLine = 0;
         int iInstr = 0;
-        float rTime = 64.0f;
+        TimeUnits rTime = 64.0f;
         storage.include_object(iLine, iInstr, pBar, rTime, iStaff, pShape, false,
                                0.0f, 0.0f);
 
@@ -342,7 +342,7 @@ public:
 
     inline void my_do_measurements() { do_measurements(); }
 
-    void my_add_entry(bool fIsBarline, bool fProlog, float rTime, LUnits xAnchor,
+    void my_add_entry(bool fIsBarline, bool fProlog, TimeUnits rTime, LUnits xAnchor,
                       LUnits xLeft, LUnits uSize, LUnits uFixedSpace,
                       LUnits uVarSpace, LUnits xFinal)
     {
@@ -494,13 +494,13 @@ public:
 
     //accessors
     void my_prepare_for_traversing() { prepare_for_traversing(); }
-    float my_get_current_time() { return m_rCurTime; }
+    TimeUnits my_get_current_time() { return m_rCurTime; }
     LUnits my_get_current_x_pos() { return m_uxCurPos; }
     LUnits my_get_romvable_space() { return m_uxRemovable; }
     void my_process_non_timed_at_prolog(LUnits uSpace) { process_non_timed_at_prolog(uSpace); }
     void my_process_non_timed_at_current_timepos(LUnits uxPos) { process_non_timed_at_current_timepos(uxPos); }
     void my_process_timed_at_current_timepos(LUnits uxPos) { process_timed_at_current_timepos(uxPos); }
-    float my_get_next_available_time() { return get_next_available_time(); }
+    TimeUnits my_get_next_available_time() { return get_next_available_time(); }
     LUnits my_get_next_position() { return get_next_position(); }
 
 };
@@ -681,7 +681,7 @@ public:
     void my_process_non_timed_at_prolog() { process_non_timed_at_prolog(); }
     void my_process_timed_at_current_timepos() { process_timed_at_current_timepos(); }
 
-    float my_get_current_time() { return m_rCurrentTime; }
+    TimeUnits my_get_current_time() { return m_rCurrentTime; }
     LUnits my_get_current_pos() { return m_uCurrentPos; }
 
 

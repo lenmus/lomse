@@ -81,6 +81,7 @@ ImoTextItem* InlineLevelCreatorApi::add_text_item(const string& text, ImoStyle* 
                             ImFactory::inject(k_imo_text_item, pDoc) );
     pImo->set_text(text);
     pImo->set_style(pStyle);
+    pImo->set_language( pDoc->get_imodoc()->get_language() );
     m_pParent->append_child_imo(pImo);
     return pImo;
 }
@@ -1796,7 +1797,7 @@ void ImoInstrument::delete_staffobj(ImoStaffObj* pSO)
         //instr/staff. When a barline is found determine time implied by each staff
         //and choose greater one. If barline time doesn't change stop shifting times.
         //OPTIMIZATION: barlines should store time implied by each staff.
-        if (pSO->get_duration() > 0.0f)
+        if (is_greater_time(pSO->get_duration(), 0.0))
         {
 //            if (pSO->is_noterest() && )
         }
@@ -2443,12 +2444,15 @@ ImoStyle* ImoScore::create_default_style()
     // document language. This block is a fix just for Chinese.language
     {
         //get document language
-        ImoDocument* pImoDoc = m_pDoc->get_imodoc();;
-        string& language = pImoDoc->get_language();
-        if (language == "zh_CN")
+        ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+        if (pImoDoc)    //AWARE: in untit tests there could be no ImoDoc
         {
-            pDefStyle->font_file("wqy-zenhei.ttc");
-            pDefStyle->font_name("");
+            string& language = pImoDoc->get_language();
+            if (language == "zh_CN")
+            {
+                pDefStyle->font_file("wqy-zenhei.ttc");
+                pDefStyle->font_name("");
+            }
         }
     }
 
@@ -2814,6 +2818,25 @@ ImoPageInfo::ImoPageInfo(ImoPageInfo& dto)
 
 
 //=======================================================================================
+// ImoScoreText implementation
+//=======================================================================================
+string& ImoScoreText::get_language()
+{
+    string& language = m_text.get_language();
+    if (!language.empty())
+        return language;
+    else
+    {
+        ImoDocument* pDoc = get_document();
+        if (pDoc)
+            return pDoc->get_language();
+        else
+            throw std::runtime_error("[ImoScoreText::get_language] No owner Document.");
+    }
+}
+
+
+//=======================================================================================
 // ImoSlur implementation
 //=======================================================================================
 ImoSlur::~ImoSlur()
@@ -3102,29 +3125,29 @@ int ImoTimeSignature::get_num_pulses()
 }
 
 //---------------------------------------------------------------------------------------
-float ImoTimeSignature::get_ref_note_duration()
+TimeUnits ImoTimeSignature::get_ref_note_duration()
 {
-    // returns beat duration (in LDP notes duration units)
+    // returns beat duration (in LDP time units)
 
     switch(m_bottom)
     {
         case 1:
-            return pow(2.0f, (10 - k_whole));
+            return pow(2.0, (10 - k_whole));
         case 2:
-            return pow(2.0f, (10 - k_half));
+            return pow(2.0, (10 - k_half));
         case 4:
-            return pow(2.0f, (10 - k_quarter));
+            return pow(2.0, (10 - k_quarter));
         case 8:
-            return pow(2.0f, (10 - k_eighth));
+            return pow(2.0, (10 - k_eighth));
         case 16:
-            return pow(2.0f, (10 - k_16th));
+            return pow(2.0, (10 - k_16th));
         default:
-            return 64.0f;     //compiler happy
+            return 64.0;     //compiler happy
     }
 }
 
 //---------------------------------------------------------------------------------------
-float ImoTimeSignature::get_measure_duration()
+TimeUnits ImoTimeSignature::get_measure_duration()
 {
     return m_top * get_ref_note_duration();
 }
@@ -3261,44 +3284,44 @@ NoteTypeAndDots ldp_duration_to_components(const string& duration)
 }
 
 //---------------------------------------------------------------------------------------
-float to_duration(int nNoteType, int nDots)
+TimeUnits to_duration(int nNoteType, int nDots)
 {
     //compute duration without modifiers
-    //float rDuration = pow(2.0f, (10 - nNoteType));
+    //TimeUnits rDuration = pow(2.0, (10 - nNoteType));
     //Removed: pow not safe
     //      Valgrind: Conditional jump or move depends on uninitialised value(s)
     //                ==8126==    at 0x4140BBF: __ieee754_pow (e_pow.S:118)
-    float rDuration = 1;
+    TimeUnits rDuration = 1.0;
     switch (nNoteType)
     {
-        case k_longa:   rDuration=1024; break;    //  0
-        case k_breve:   rDuration=512;  break;    //  1
-        case k_whole:   rDuration=256;  break;    //  2
-        case k_half:    rDuration=128;  break;    //  3
-        case k_quarter: rDuration=64;   break;    //  4
-        case k_eighth:  rDuration=32;   break;    //  5
-        case k_16th:    rDuration=16;   break;    //  6
-        case k_32th:    rDuration=8;    break;    //  7
-        case k_64th:    rDuration=4;    break;    //  8
-        case k_128th:   rDuration=2;    break;    //  9
-        case k_256th:   rDuration=1;    break;    //  10
+        case k_longa:   rDuration=1024.0; break;    //  0
+        case k_breve:   rDuration=512.0;  break;    //  1
+        case k_whole:   rDuration=256.0;  break;    //  2
+        case k_half:    rDuration=128.0;  break;    //  3
+        case k_quarter: rDuration=64.0;   break;    //  4
+        case k_eighth:  rDuration=32.0;   break;    //  5
+        case k_16th:    rDuration=16.0;   break;    //  6
+        case k_32th:    rDuration=8.0;    break;    //  7
+        case k_64th:    rDuration=4.0;    break;    //  8
+        case k_128th:   rDuration=2.0;    break;    //  9
+        case k_256th:   rDuration=1.0;    break;    //  10
         default:
-            rDuration=64;
+            rDuration=64.0;
     }
 
     //take dots into account
     switch (nDots)
     {
-        case 0:                             break;
-        case 1: rDuration *= 1.5f;          break;
-        case 2: rDuration *= 1.75f;         break;
-        case 3: rDuration *= 1.875f;        break;
-        case 4: rDuration *= 1.9375f;       break;
-        case 5: rDuration *= 1.96875f;      break;
-        case 6: rDuration *= 1.984375f;     break;
-        case 7: rDuration *= 1.9921875f;    break;
-        case 8: rDuration *= 1.99609375f;   break;
-        case 9: rDuration *= 1.998046875f;  break;
+        case 0:                            break;
+        case 1: rDuration *= 1.5;          break;
+        case 2: rDuration *= 1.75;         break;
+        case 3: rDuration *= 1.875;        break;
+        case 4: rDuration *= 1.9375;       break;
+        case 5: rDuration *= 1.96875;      break;
+        case 6: rDuration *= 1.984375;     break;
+        case 7: rDuration *= 1.9921875;    break;
+        case 8: rDuration *= 1.99609375;   break;
+        case 9: rDuration *= 1.998046875;  break;
         default:
             ;
             //wxLogMessage(_T("[to_duration] Program limit: do you really need more than nine dots?"));

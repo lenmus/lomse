@@ -156,7 +156,6 @@ protected:
     virtual void play_segment(int nEvStart, int nEvEnd);
     void thread_main(int nEvStart, int nEvEnd, bool fVisualTracking, long nMM,
                      Interactor* pInteractor);
-    void wait_for_termination();
     void end_of_playback_housekeeping(bool fVisualTracking, Interactor* pInteractor);
 
     //helper, for do_play()

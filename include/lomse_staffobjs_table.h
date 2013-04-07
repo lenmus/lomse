@@ -76,7 +76,7 @@ public:
 
     //getters
     inline int measure() const { return m_measure; }
-    inline float time() const { return m_pImo->get_time(); }
+    inline TimeUnits time() const { return m_pImo->get_time(); }
     inline int num_instrument() const { return m_instr; }
     inline int line() const { return m_line; }
     inline int staff() const { return m_staff; }
@@ -84,14 +84,9 @@ public:
     inline long element_id() { return m_pImo->get_id(); }
 
     //setters
-    inline void decrement_time(float timeShift) {
+    inline void decrement_time(TimeUnits timeShift) {
         m_pImo->set_time( m_pImo->get_time() - timeShift );
     }
-//    inline void measure() const { return m_measure; }
-//    inline void time() const { return m_pImo->get_time(); }
-//    inline void num_instrument() const { return m_instr; }
-//    inline int line() const { return m_line; }
-//    inline int staff() const { return m_staff; }
 
     //debug
     string dump();
@@ -122,7 +117,7 @@ class ColStaffObjs
 protected:
     int m_numLines;
     int m_numEntries;
-    float m_rMissingTime;
+    TimeUnits m_rMissingTime;
 
     ColStaffObjsEntry* m_pFirst;
     ColStaffObjsEntry* m_pLast;
@@ -134,13 +129,13 @@ public:
     //table info
     inline int num_entries() { return m_numEntries; }
     inline int num_lines() { return m_numLines; }
-    inline bool is_anacrusis_start() { return is_greater_time(m_rMissingTime, 0.0f); }
-    inline float anacrusis_missing_time() { return m_rMissingTime; }
+    inline bool is_anacrusis_start() { return is_greater_time(m_rMissingTime, 0.0); }
+    inline TimeUnits anacrusis_missing_time() { return m_rMissingTime; }
 
     //table management
     void add_entry(int measure, int instr, int voice, int staff, ImoStaffObj* pImo);
     inline void set_total_lines(int number) { m_numLines = number; }
-    inline void set_anacrusis_missing_time(float rTime) { m_rMissingTime = rTime; }
+    inline void set_anacrusis_missing_time(TimeUnits rTime) { m_rMissingTime = rTime; }
     void delete_entry_for(ImoStaffObj* pSO);
     void sort_table();
 
@@ -150,29 +145,47 @@ public:
         protected:
             friend class ColStaffObjs;
             ColStaffObjsEntry* m_pCurrent;
+            ColStaffObjsEntry* m_pPrev;
+            ColStaffObjsEntry* m_pNext;
 
         public:
-            iterator() {}
-			iterator(ColStaffObjsEntry* pEntry) { m_pCurrent = pEntry; }
+            iterator() : m_pCurrent(NULL), m_pPrev(NULL), m_pNext(NULL) {}
+            iterator(ColStaffObjsEntry* pEntry) { init(pEntry); }
             virtual ~iterator() {}
 
             iterator& operator =(const iterator& it) {
-                m_pCurrent = it.m_pCurrent; return *this;
+                init(it.m_pCurrent); 
+                return *this;
             }
 
 	        ColStaffObjsEntry* operator *() const { return m_pCurrent; }
+
             iterator& operator ++() {
-                if (m_pCurrent)
-                    m_pCurrent = m_pCurrent->get_next();
+                init(m_pNext);
                 return *this;
             }
             iterator& operator --() {
-                if (m_pCurrent)
-                    m_pCurrent = m_pCurrent->get_prev();
+                init(m_pPrev);
                 return *this;
             }
 		    bool operator ==(const iterator& it) const { return m_pCurrent == it.m_pCurrent; }
 		    bool operator !=(const iterator& it) const { return m_pCurrent != it.m_pCurrent; }
+
+        protected:
+            void init(ColStaffObjsEntry* pEntry)
+            {
+                m_pCurrent = pEntry;
+                if (m_pCurrent)
+                {
+                    m_pPrev = m_pCurrent->get_prev();
+                    m_pNext = m_pCurrent->get_next();
+                }
+                else
+                {
+                    m_pPrev = NULL;
+                    m_pNext = NULL;
+                }
+            }
     };
 
 	inline iterator begin() { return iterator(m_pFirst); }
@@ -235,9 +248,9 @@ public:
 private:
     //global counters to assign measure, timepos and staff
     int     m_nCurMeasure;
-    float   m_rCurTime;
-    float   m_rMaxSegmentTime;
-    float   m_rStartSegmentTime;
+    TimeUnits   m_rCurTime;
+    TimeUnits   m_rMaxSegmentTime;
+    TimeUnits   m_rStartSegmentTime;
     StaffVoiceLineTable m_lines;
 
     void create_table();

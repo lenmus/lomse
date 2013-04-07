@@ -1133,24 +1133,24 @@ SUITE(ScoreCursorTest)
     // integrity preservation after score modifications
     //----------------------------------------------------------------------------
 
-    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_1)
-    {
-        //1. after deletion. previous object exists
-        create_document_1();
-        MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(24L);       //move to first note
-        ImoStaffObj* pImo = static_cast<ImoStaffObj*>( *cursor );
-        ImoInstrument* pInstr = m_pScore->get_instrument(0);
-        pInstr->delete_staffobj(pImo);
-//        m_pScore->close();
-        //dump_score();
-
-        cursor.refresh();
-
-        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0f, 25L, 25L);
-        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 0.0f, 23L, 23L);
-    }
+//    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_1)
+//    {
+//        //1. after deletion. previous object exists
+//        create_document_1();
+//        MyScoreCursor cursor(m_pDoc, m_pScore);
+//        cursor.point_to(24L);       //move to first note
+//        ImoStaffObj* pImo = static_cast<ImoStaffObj*>( *cursor );
+//        ImoInstrument* pInstr = m_pScore->get_instrument(0);
+//        pInstr->delete_staffobj(pImo);
+////        m_pScore->close();
+//        //dump_score();
+//
+//        cursor.refresh();
+//
+//        cout << cursor.dump_cursor();
+//        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0f, 25L, 25L);
+//        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 0.0f, 23L, 23L);
+//    }
 
     TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_2)
     {

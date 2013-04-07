@@ -36,10 +36,19 @@
 #include "lomse_interactor.h"
 #include "lomse_player_gui.h"
 #include "lomse_metronome.h"
+#include "lomse_logger.h"
 
 #include <algorithm>    //max(), min()
 #include <ctime>        //clock()
 
+#define LOMSE_LOG_SCORE_PLAYER  1
+
+#if LOMSE_LOG_SCORE_PLAYER == 1
+//    #define LOMSE_DO_LOG(msg)   dbgLogger << msg << endl;
+    #define LOMSE_DO_LOG(msg)   logger.log_message(msg, __FILE__,__LINE__);
+#else
+    #define LOMSE_DO_LOG(msg)
+#endif
 
 namespace lomse
 {
@@ -159,28 +168,26 @@ void ScorePlayer::play_from_measure(int nMeasure, bool fVisualTracking,
 //---------------------------------------------------------------------------------------
 void ScorePlayer::play_segment(int nEvStart, int nEvEnd)
 {
+    LOMSE_DO_LOG(">>[ScorePlayer::play_segment]");
     m_fQuit = false;
     m_fFinalEventSent = false;
 
     //Create a new thread. It starts inmediately to execute do_play()
     delete m_pThread;
+    m_fPlaying = true;
     m_pThread = LOMSE_NEW SoundThread(&ScorePlayer::thread_main, this,
                                 nEvStart, nEvEnd, m_fVisualTracking,
                                 m_nMM, m_pInteractor);
+    LOMSE_DO_LOG("<<[ScorePlayer::play_segment]");
 }
 
 //---------------------------------------------------------------------------------------
 void ScorePlayer::thread_main(int nEvStart, int nEvEnd, bool fVisualTracking,
                               long nMM, Interactor* pInteractor)
 {
+    LOMSE_DO_LOG(">>[ScorePlayer::thread_main]");
     try
     {
-        {
-            SoundLock lock(m_mutex);
-            m_fPaused = false;
-            m_canPlay.notify_one();
-        }
-        m_fPlaying = true;
         if (pInteractor && !m_fPostEvents)
             pInteractor->enable_view_updates(false);
         fVisualTracking &= (pInteractor != NULL);
@@ -188,30 +195,13 @@ void ScorePlayer::thread_main(int nEvStart, int nEvEnd, bool fVisualTracking,
     }
     catch (boost::thread_interrupted&)
     {
+        LOMSE_DO_LOG("  [ScorePlayer::thread_main] catching interrupt");
     }
 
     end_of_playback_housekeeping(fVisualTracking, pInteractor);
-}
+    m_fPlaying = false;
 
-//---------------------------------------------------------------------------------------
-void ScorePlayer::stop()
-{
-    if (m_pThread)
-    {
-        ////request the tread to terminate
-        //{
-        //    SoundLock lock(m_mutex);
-        //    m_fShouldStop = true;
-        //}
-
-        if (m_fPaused)                  //unlock if paused
-            pause();
-
-        if (m_fPlaying)
-            m_pThread->interrupt();    //request the tread to terminate
-
-        wait_for_termination();
-    }
+    LOMSE_DO_LOG("<<[ScorePlayer::thread_main]");
 }
 
 //---------------------------------------------------------------------------------------
@@ -229,10 +219,8 @@ void ScorePlayer::pause()
 {
     if (!m_pThread) return;
 
-    {
-        SoundLock lock(m_mutex);
-        m_fPaused = !m_fPaused;
-    }
+    m_fPaused = !m_fPaused;
+
     if (m_fPaused)
         m_pMidi->all_sounds_off();
     else
@@ -240,16 +228,30 @@ void ScorePlayer::pause()
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayer::wait_for_termination()
+void ScorePlayer::stop()
 {
+    LOMSE_DO_LOG(">>[ScorePlayer::stop]");
     if (m_pThread)
     {
-        m_pThread->join();
+        m_fShouldStop = true;
+
+        //wait 500 ms for termination
+        if(!m_pThread->timed_join(boost::posix_time::milliseconds(500)))
+        {
+            LOMSE_DO_LOG("  [ScorePlayer::stop] Not finisehd in 500ms. Force interrupt");
+            m_pThread->interrupt();
+            if(!m_pThread->timed_join(boost::posix_time::seconds(2)))
+            {
+                LOMSE_DO_LOG("  [ScorePlayer::stop] Interrupt failed. Force terminate");
+                throw runtime_error("Thread interrup failed");
+            }
+        }
+        LOMSE_DO_LOG("  [ScorePlayer::stop] Delete thread");
         delete m_pThread;
         m_pThread = NULL;
+        m_fShouldStop = false;
     }
-    //m_fShouldStop = false;
-    //boost::this_thread::sleep(boost::posix_time::seconds(1));
+    LOMSE_DO_LOG("<<[ScorePlayer::stop]");
 }
 
 //---------------------------------------------------------------------------------------
@@ -262,15 +264,22 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     // This is the real method doing the work. It is executed inside a
     // different thread.
 
+    LOMSE_DO_LOG(">>[ScorePlayer::do_play]");
     // if no MIDI server or not inside a thread, return
     if (!m_pMidi || !m_pThread)
+    {
+        LOMSE_DO_LOG("<<[ScorePlayer::do_play] no Midi or no thread");
         return;
+    }
 
     //TODO All issues related to sol-fa voice playback
 
     std::vector<SoundEvent*>& events = m_pTable->get_events();
     if (events.size() == 0)
+    {
+        LOMSE_DO_LOG("<<[ScorePlayer::do_play] no events to play");
         return;
+    }
 
     #define k_QUARTER_DURATION  64        //duration (LDP units) of a quarter note (to convert to milliseconds)
     #define k_SOLFA_NOTE        60        //pitch for sight reading with percussion sound
@@ -379,10 +388,19 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     nMtrEvDeltaTime = ((events[i]->DeltaTime / m_nMtrPulseDuration) - 1) * m_nMtrPulseDuration;
     curTime = delta_to_milliseconds( nMtrEvDeltaTime );
 
+    //prepare weak_ptr to interactor
+    WpInteractor wpInteractor;
+    if (pInteractor)
+    {
+        SpInteractor sp = pInteractor->get_shared_ptr_from_this();
+        wpInteractor = WpInteractor(sp);
+    }
+    else
+        wpInteractor = WpInteractor();
+
     //define and prepare highlight event
     SpEventScoreHighlight pEvent(
-        LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id()) );
-
+            LOMSE_NEW EventScoreHighlight(wpInteractor, m_pScore->get_id()) );
 
     bool fFirstBeatInMeasure = true;    //first beat of a measure
     bool fCountOffPulseActive = false;
@@ -395,10 +413,10 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     {
         //determine num pulses
         int numPulses = 0;
-        float prevTime = m_pTable->get_anacrusis_missing_time();
-        if (is_greater_time(prevTime, 0.0f))
+        TimeUnits prevTime = m_pTable->get_anacrusis_missing_time();
+        if (is_greater_time(prevTime, 0.0))
         {
-            numPulses = int(prevTime + 0.5f) / m_nMtrPulseDuration;
+            numPulses = int(prevTime + 0.5) / m_nMtrPulseDuration;
 
             //if anacrusis and first event is a rest (real or implicit), add
             //one additional pulse
@@ -460,7 +478,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 else if (pInteractor)
                     pInteractor->handle_event(pEvent);
                 pEvent = SpEventScoreHighlight(
-                            LOMSE_NEW EventScoreHighlight(pInteractor,
+                            LOMSE_NEW EventScoreHighlight(wpInteractor,
                                                           m_pScore->get_id()) );
             }
         }
@@ -491,7 +509,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     else if (pInteractor)
                         pInteractor->handle_event(pEvent);
                     pEvent = SpEventScoreHighlight(
-                                LOMSE_NEW EventScoreHighlight(pInteractor,
+                                LOMSE_NEW EventScoreHighlight(wpInteractor,
                                                               m_pScore->get_id()) );
                     clock_t t2=clock();
                     elapsed = long( ((t2-t1)*1000.0)/double(CLOCKS_PER_SEC));
@@ -558,7 +576,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     else if (pInteractor)
                         pInteractor->handle_event(pEvent);
                     pEvent = SpEventScoreHighlight(
-                                LOMSE_NEW EventScoreHighlight(pInteractor,
+                                LOMSE_NEW EventScoreHighlight(wpInteractor,
                                                               m_pScore->get_id()) );
                     clock_t t2=clock();
                     elapsed = long( ((t2-t1)*1000.0)/double(CLOCKS_PER_SEC));
@@ -694,47 +712,57 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         fPlayWithMetronome = m_pPlayerGui->metronome_status();
 
         //check if the thread should be paused or stopped
-        //boost::this_thread::interruption_point();
+        LOMSE_DO_LOG("  [ScorePlayer::do_play] in interrupt check point");
+        if (m_fShouldStop)
         {
-            SoundLock lock(m_mutex);
-            //if (m_fShouldStop)
-            //    break;
-            while(m_fPaused)
+            LOMSE_DO_LOG("  [ScorePlayer::do_play] Going to finish 1");
+            break;
+        }
+        while(m_fPaused)
+        {
+            boost::this_thread::sleep( boost::posix_time::milliseconds(200) );
+            if (m_fShouldStop)
             {
-                //if (m_fShouldStop)
-                //    break;
-                m_canPlay.wait(lock);
+                LOMSE_DO_LOG("  [ScorePlayer::do_play] Going to finish 2");
+                break;
             }
         }
 
     } while (i <= nEvEnd);
 
-    ////ensure that all visual highlight is removed
+    //ensure that all visual highlight is removed
     if (fVisualTracking && !m_fQuit)
     {
         m_fFinalEventSent = true;
         SpEventScoreHighlight pEvent(
-            LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id()) );
+            LOMSE_NEW EventScoreHighlight(wpInteractor, m_pScore->get_id()) );
         pEvent->add_item(k_end_of_higlight_event, NULL);
         if (m_fPostEvents)
             m_libScope.post_event(pEvent);
         else if (pInteractor)
             pInteractor->handle_event(pEvent);
     }
+    LOMSE_DO_LOG("<<[ScorePlayer::do_play]");
 }
 
 //---------------------------------------------------------------------------------------
 void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
                                                Interactor* pInteractor)
 {
-    m_fPlaying = false;
-
     //ensure that all visual highlight is removed
     if (fVisualTracking && !m_fQuit && !m_fFinalEventSent)
     {
         m_fFinalEventSent = true;
+        WpInteractor wpInteractor;
+        if (pInteractor)
+        {
+            SpInteractor sp = pInteractor->get_shared_ptr_from_this();
+            wpInteractor = WpInteractor(sp);
+        }
+        else
+            wpInteractor = WpInteractor();
         SpEventScoreHighlight pEvent(
-            LOMSE_NEW EventScoreHighlight(pInteractor, m_pScore->get_id()) );
+            LOMSE_NEW EventScoreHighlight(wpInteractor, m_pScore->get_id()) );
         pEvent->add_item(k_end_of_higlight_event, NULL);
         if (m_fPostEvents)
             m_libScope.post_event(pEvent);
@@ -760,8 +788,18 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
     //update player gui
     if (m_pPlayerGui)
     {
+        //prepare weak_ptr to interactor
+        WpInteractor wpInteractor;
+        if (pInteractor)
+        {
+            SpInteractor sp = pInteractor->get_shared_ptr_from_this();
+            wpInteractor = WpInteractor(sp);
+        }
+        else
+            wpInteractor = WpInteractor();
+
         SpEventPlayScore event(
-            LOMSE_NEW EventPlayScore(k_end_of_playback_event, pInteractor,
+            LOMSE_NEW EventPlayScore(k_end_of_playback_event, wpInteractor,
                                      m_pScore, m_pPlayerGui) );
         if (m_fPostEvents)
             m_libScope.post_event(event);

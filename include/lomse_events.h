@@ -31,9 +31,7 @@
 #define __LOMSE_EVENTS_H__
 
 #include "lomse_build_options.h"
-
-#include <boost/shared_ptr.hpp>
-using namespace boost;
+#include "lomse_basic.h"
 
 #include <list>
 #include <string>
@@ -49,9 +47,11 @@ class ImoDynamic;
 class ImoDocument;
 class ImoScore;
 class ImoStaffObj;
-class Interactor;
 class Document;
 class PlayerGui;
+
+class Interactor;
+typedef WeakPtr<Interactor>     WpInteractor;
 
 //observer pattern
 class EventNotifier;
@@ -171,17 +171,17 @@ typedef boost::shared_ptr<EventDoc>  SpEventDoc;
 class EventView : public EventInfo
 {
 protected:
-    Interactor* m_pInteractor;
+    WpInteractor m_wpInteractor;
 
 public:
-    EventView(EEventType type, Interactor* pInteractor)
+    EventView(EEventType type, WpInteractor wpInteractor)
         : EventInfo(type)
-        , m_pInteractor(pInteractor)
+        , m_wpInteractor(wpInteractor)
     {
     }
     ~EventView() {}
 
-    inline Interactor* get_interactor() { return m_pInteractor; }
+    inline WpInteractor get_interactor() { return m_wpInteractor; }
 };
 
 typedef boost::shared_ptr<EventView>  SpEventView;
@@ -196,11 +196,11 @@ protected:
     long m_imoId;
     //Observable* m_source;
 
-    EventMouse(EEventType type) : EventView(type, NULL) {}    //for unit tests
+    EventMouse(EEventType type) : EventView(type, WpInteractor()) {}    //for unit tests
 
 public:
-    EventMouse(EEventType type, Interactor* pInteractor, long id, Document* pDoc)
-        : EventView(type, pInteractor)
+    EventMouse(EEventType type, WpInteractor wpInteractor, long id, Document* pDoc)
+        : EventView(type, wpInteractor)
         , m_pDoc(pDoc)
         , m_imoId(id)
     {
@@ -223,12 +223,12 @@ protected:
     ImoScore* m_pScore;
     PlayerGui* m_pPlayer;
 
-    EventPlayScore(EEventType evType) : EventView(evType, NULL) {}    //for unit tests
+    EventPlayScore(EEventType evType) : EventView(evType, WpInteractor()) {}    //for unit tests
 
 public:
-    EventPlayScore(EEventType evType, Interactor* pInteractor, ImoScore* pScore,
+    EventPlayScore(EEventType evType, WpInteractor wpInteractor, ImoScore* pScore,
                    PlayerGui* pPlayer)
-        : EventView(evType, pInteractor)
+        : EventView(evType, wpInteractor)
         , m_pScore(pScore)
         , m_pPlayer(pPlayer)
     {
@@ -252,15 +252,15 @@ protected:
     std::list< pair<int, ImoStaffObj*> > m_items;
 
 public:
-    EventScoreHighlight(Interactor* pInteractor, long nScoreID)
-        : EventView(k_highlight_event, pInteractor)
+    EventScoreHighlight(WpInteractor wpInteractor, long nScoreID)
+        : EventView(k_highlight_event, wpInteractor)
         , m_nID(nScoreID)
     {
     }
 
     // copy constructor
     EventScoreHighlight(const EventScoreHighlight& event)
-        : EventView(event.m_type, event.m_pInteractor)
+        : EventView(event.m_type, event.m_wpInteractor)
         , m_nID(event.m_nID)
         , m_items(event.m_items)
     {

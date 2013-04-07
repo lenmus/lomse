@@ -54,12 +54,13 @@ protected:
     const string& m_text;
     ImoStyle* m_pStyle;
     FontStorage* m_pFontStorage;
+    string m_language;
 
 public:
     TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 const string& text, ImoStyle* pStyle);
-    TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                 ImoScoreText* pText, ImoScore* pScore);
+                 const string& text, const string& language, ImoStyle* pStyle);
+//    TextEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+//                 ImoScoreText* pText, ImoScore* pScore);
     ~TextEngraver();
 
     GmoShapeText* create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUnits yTop);

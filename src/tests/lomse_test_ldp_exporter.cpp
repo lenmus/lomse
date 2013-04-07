@@ -442,7 +442,7 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
 //        cout << "\"" << source << "\"" << endl;
-        CHECK( source == "(musicData (clef G p1 )(r q p1 )(barline simple)(n c4 q p1 ))" );
+        CHECK( source == "(musicData (clef G p1 )(r q v1  p1 )(barline simple)(n c4 q v1  p1 ))" );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, musicData_2)
@@ -463,7 +463,7 @@ SUITE(LdpExporterTest)
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
 //        cout << "\"" << source << "\"" << endl;
-        CHECK( source == "(musicData (clef C3 p1 )(n f4 e p1 ))" );
+        CHECK( source == "(musicData (clef C3 p1 )(n f4 e v1  p1 ))" );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, musicData_3)
@@ -485,7 +485,7 @@ SUITE(LdpExporterTest)
         string source = exporter.get_source(pMD);
 //        cout << "\"" << source << "\"" << endl;
         CHECK( source ==
-            "(musicData (clef G p1 )(n c4 q p1 )(goBack start)(n a3 e p2 )(n e4 e p2 ))" );
+            "(musicData (clef G p1 )(n c4 q v1  p1 )(goBack start)(n a3 e v1  p2 )(n e4 e v1  p2 ))" );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, musicData_4)
@@ -505,7 +505,7 @@ SUITE(LdpExporterTest)
         string source = exporter.get_source(pMD);
 //        cout << "\"" << source << "\"" << endl;
         CHECK( source ==
-            "(musicData (clef G p1 )(n c4 q p1 )(goFwd 32)(n a3 e p1 ))" );
+            "(musicData (clef G p1 )(n c4 q v1  p1 )(goFwd 32)(n a3 e v1  p1 ))" );
     }
 
     TEST_FIXTURE(LdpExporterTestFixture, musicData_5)
@@ -528,8 +528,8 @@ SUITE(LdpExporterTest)
 //        cout << "\"" << source << "\"" << endl;
         string expected =
             "(musicData "
-            "(clef G p1 )(clef F4 p2 )(key C)(time 2 4)(n c4 e p1 )"
-            "(goBack start)(n g2 e p2 )(n c3 e p2 )(n e3 e p2 )(n g3 e p2 )(barline simple))";
+            "(clef G p1 )(clef F4 p2 )(key C)(time 2 4)(n c4 e v1  p1 )"
+            "(goBack start)(n g2 e v1  p2 )(n c3 e v1  p2 )(n e3 e v1  p2 )(n g3 e v1  p2 )(barline simple))";
         CHECK( source == expected );
     }
 //        parser.parse_text("(lenmusdoc (vers 0.0) (content "
@@ -562,11 +562,11 @@ SUITE(LdpExporterTest)
         string source = exporter.get_source(pMD);
 //        cout << "\"" << source << "\"" << endl;
         string expected =
-            "(musicData (clef G p1 )(key G)(time 3 4)(chord (n g3 q p1 )(n d4 q p1 ))"
-            "(r e p1 )(n g5 e p1 )(n g5 s p1 (beam 34 ++))(n f5 s p1 (beam 34 =-))"
-            "(n g5 e p1 (beam 34 -))(barline simple)"
-            "(chord (n a4 q p1 )(n e5 q p1 ))(r q p1 )"
-            "(chord (n d4 q p1 )(n g4 q p1 )(n f5 q p1 ))(barline simple))";
+            "(musicData (clef G p1 )(key G)(time 3 4)(chord (n g3 q v1  p1 )(n d4 q v1  p1 ))"
+            "(r e v1  p1 )(n g5 e v1  p1 )(n g5 s v1  p1 (beam 34 ++))(n f5 s v1  p1 (beam 34 =-))"
+            "(n g5 e v1  p1 (beam 34 -))(barline simple)"
+            "(chord (n a4 q v1  p1 )(n e5 q v1  p1 ))(r q v1  p1 )"
+            "(chord (n d4 q v1  p1 )(n g4 q v1  p1 )(n f5 q v1  p1 ))(barline simple))";
         CHECK( source == expected );
     }
 

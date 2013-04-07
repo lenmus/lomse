@@ -35,6 +35,7 @@
 #include "lomse_injectors.h"
 #include "lomse_events.h"               // EventHandler
 #include "lomse_gm_basic.h"
+#include "lomse_calligrapher.h"         //TextMeter
 
 namespace lomse
 {
@@ -52,27 +53,35 @@ class Control : public EventHandler
               , public Observable
 {
 protected:
+    LibraryScope&   m_libraryScope;
     Document*       m_pDoc;
     Control*        m_pParent;
     long            m_ownerImoId;
-    ImoStyle*       m_pStyle;
+    string          m_language;
+    ImoStyle*       m_style;
     bool            m_fEnabled;
     bool            m_fVisible;
     long            m_id;
     list<Control*>  m_controls;
 
-    Control(Document* pDoc, Control* pParent)
+    Control(LibraryScope& libraryScope, Document* pDoc, Control* pParent)
         : EventHandler()
         , Observable()
+        , m_libraryScope(libraryScope)
         , m_pDoc(pDoc)
         , m_pParent(pParent)
         , m_ownerImoId(-1L)
-        , m_pStyle(NULL)
+        , m_language()
+        , m_style(NULL)
         , m_fEnabled(true)
         , m_fVisible(true)
         , m_id(-1L)
     {
         pDoc->assign_id(this);
+
+        //default language
+        ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+        m_language = pImoDoc->get_language();
     }
 
 public:
@@ -114,7 +123,7 @@ public:
     //Any Control must know how to generate its graphical model
     virtual GmoBoxControl* layout(LibraryScope& libraryScope, UPoint pos) = 0;
     virtual void on_draw(Drawer* pDrawer, RenderOptions& opt) = 0;
-    inline void set_style(ImoStyle* pStyle) { m_pStyle = pStyle; }
+    inline void set_style(ImoStyle* pStyle) { m_style = pStyle; }
 
     //mandatory overrides from Observable
     EventNotifier* get_event_notifier() { return m_pDoc->get_event_notifier(); }
@@ -160,7 +169,44 @@ public:
     inline void set_owner_imo(ImoControl* pImo) { m_ownerImoId = pImo->get_id(); }
 
 protected:
-    ImoStyle* get_style() { return m_pStyle; }
+
+    void select_font()
+    {
+        TextMeter meter(m_libraryScope);
+        meter.select_font(m_language,
+                          m_style->font_file(),
+                          m_style->font_name(),
+                          m_style->font_size(),
+                          m_style->is_bold(),
+                          m_style->is_italic() );
+//        string language = "";
+//        string fontFile = m_style->font_file();
+//        string fontName = m_style->font_name();
+//
+//        //get document language
+//        ImoDocument* pImoDoc = m_pDoc->get_imodoc();
+//        if (pImoDoc)    //AWARE: in untit tests there could be no ImoDoc
+//            language = pImoDoc->get_language();
+//
+//        //BUG_BYPASS: Default style should use the right font file / font name for the current
+//        // document language. This block is a fix just for Chinese.language
+//        {
+//            if (language == "zh_CN")
+//            {
+//                fontFile = "wqy-zenhei.ttc";
+//                fontName = "";
+//            }
+//        }
+//
+//        TextMeter meter(m_libraryScope);
+//        meter.select_font(language,
+//                          fontFile,
+//                          fontName,
+//                          m_style->font_size(),
+//                          m_style->is_bold(),
+//                          m_style->is_italic() );
+    }
+
 };
 
 

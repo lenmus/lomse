@@ -67,6 +67,15 @@ GmoShape* ClefEngraver::create_shape(ImoObj* pCreatorImo, UPoint uPos, int clefT
     int nIdx = 0;   //single-shape
     GmoShape* pShape = LOMSE_NEW GmoShapeClef(pCreatorImo, nIdx, m_iGlyph, UPoint(uPos.x, y),
                                         Color(0,0,0), m_libraryScope, fontSize);
+
+//    // VS 2003 is not C99 compliant and does not have stdint.h
+//    int_fast64_t idx = nIdx + 10;
+//    size_t size_fast64 = sizeof(int_fast64_t);      //lin32:8, lin64:8, win32:, win64:
+//    size_t size_least64 = sizeof(int_least64_t);    //lin32:8, lin64:8, win32:, win64:
+//    size_t size_int = sizeof(int);                  //lin32:4, lin64:4, win32:4, win64:
+//    size_t size_long = sizeof(long);                //lin32:4, lin64:8, win32:4, win64:
+//    size_t size_float = sizeof(float);              //lin32:4, lin64:4, win32:4, win64:
+
     return pShape;
 }
 

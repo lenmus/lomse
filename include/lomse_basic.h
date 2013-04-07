@@ -36,6 +36,30 @@
 #include <vector>
 using namespace std;
 
+//if it is a C++11 compliant compiler use std shared_ptr, else use boost shared_ptr
+#if __cplusplus > 199711L
+    #include <memory>
+    namespace lomse
+    {
+        #define LOMSE_IS_USING_STD_SHARED_PTRS  1
+        #define SharedPtr std::shared_ptr
+        #define WeakPtr std::weak_ptr
+        #define EnableSharedFromThis  std::enable_shared_from_this
+    }
+#else
+    #include <boost/shared_ptr.hpp>
+    #include <boost/weak_ptr.hpp>
+    #include <boost/enable_shared_from_this.hpp>
+    namespace lomse
+    {
+        #define LOMSE_IS_USING_STD_SHARED_PTRS  0
+        #define SharedPtr boost::shared_ptr
+        #define WeakPtr boost::weak_ptr
+        #define EnableSharedFromThis  boost::enable_shared_from_this
+    }
+#endif
+
+
 namespace lomse
 {
 
@@ -269,8 +293,22 @@ typedef Point<Pixels> VPoint;   //point, in pixels
 typedef Size<Pixels> VSize;     //size, in pixels
 typedef Rectangle<Pixels> VRect; //rectangle, in pixels
 
-typedef unsigned short Int16u;
-typedef unsigned char Int8u;
+//hack for compilers that not use <stdint.h>  (i.e. MS VisualStudio 2003)
+#ifndef UINT32_MAX
+typedef int             int_least32_t;
+typedef unsigned short  uint_least16_t;
+typedef unsigned char   uint_least8_t;
+#endif
+
+//types for agg
+typedef uint_least16_t Int16u;
+typedef uint_least8_t Int8u;
+
+//other specific types
+typedef int_least32_t ShapeId;      //identifier for GmoShape objects
+typedef int_least32_t ImoId;        //identifier for ImoObj objects
+typedef double TimeUnits;           //time units (TU). Relative, depends on metronome speed
+
 
 
 //---------------------------------------------------------------------------------------

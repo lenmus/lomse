@@ -40,9 +40,7 @@ namespace lomse
 class ButtonCtrl : public Control
 {
 protected:
-    LibraryScope& m_libraryScope;
     string m_label;
-    ImoStyle* m_style;
     UPoint  m_pos;
     LUnits  m_width;
     LUnits  m_height;
@@ -76,7 +74,6 @@ protected:
     LUnits  m_xLabel;
     LUnits  m_yLabel;
 
-    void select_font();
     ImoStyle* create_default_style();
     void center_text();
 

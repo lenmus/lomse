@@ -34,6 +34,7 @@
 #include <iostream>
 
 #include "lomse_reader.h"
+#include "lomse_basic.h"
 
 using namespace std;
 
@@ -41,52 +42,19 @@ namespace lomse
 {
 
 //forward declarations
-class Document;
 class DocCommandExecuter;
 class Notification;
 class Presenter;
 class View;
 class LibraryScope;
+
+class Document;
+typedef SharedPtr<Document>     SpDocument;
+typedef WeakPtr<Document>       WpDocument;
+
 class Interactor;
-
-
-//---------------------------------------------------------------------------------------
-//PresentersCollection: Responsible for managing the collection of Presenter objects.
-class PresentersCollection
-{
-protected:
-    std::list<Presenter*> m_presenters;
-
-public:
-
-    PresentersCollection();
-    ~PresentersCollection();
-
-    //add elements
-    void add(Presenter* pPresenter);
-
-    //remove elements
-    void close_document(int iDoc);
-    void close_document(Document* pDoc);
-
-    //get elements
-    Presenter* get_presenter(int iDoc);
-    Presenter* get_presenter(Document* pDoc);
-
-    //other
-    void add_interactor(Document* pDoc, Interactor* pIntor);
-    void on_document_reloaded(Document* pDoc);
-
-    //access to info
-    //UserCommandExecuter* get_command_executer(Document* pDoc);
-    int get_num_views(Document* pDoc);
-
-    //for unit tests
-    inline int get_num_documents() { return static_cast<int>(m_presenters.size()); }
-    Document* get_document(int iDoc);
-    //UserCommandExecuter* get_command_executer(int iDoc);
-
-};
+typedef SharedPtr<Interactor>   SpInteractor;
+typedef WeakPtr<Interactor>     WpInteractor;
 
 
 //---------------------------------------------------------------------------------------
@@ -118,8 +86,8 @@ public:
 class Presenter
 {
 protected:
-    Document* m_pDoc;
-    std::list<Interactor*> m_interactors;
+    SpDocument m_spDoc;
+    std::list<SpInteractor> m_interactors;
     void* m_userData;
     DocCommandExecuter* m_pExec;
     void (*m_callback)(Notification* event);
@@ -133,10 +101,14 @@ public:
 
     //interactors management
     inline int get_num_interactors() { return static_cast<int>( m_interactors.size() ); }
-    Interactor* get_interactor(int iIntor);
+    SpInteractor get_interactor_shared_ptr(int iIntor);
+    Interactor* get_interactor_raw_ptr(int iIntor);
+    WpInteractor get_interactor(int iIntor);
 
     //accessors
-    inline Document* get_document() { return m_pDoc; }
+    inline Document* get_document_raw_ptr() { return m_spDoc.get(); }
+    inline SpDocument get_document_shared_ptr() { return m_spDoc; }
+    WpDocument get_document();
     inline DocCommandExecuter* get_command_executer() { return m_pExec; }
 
     //to sent notifications to user application

@@ -30,21 +30,22 @@
 #ifndef __LOMSE_TIME_H__
 #define __LOMSE_TIME_H__
 
+#include "lomse_basic.h"
 
 namespace lomse
 {
 
 //helper functions to compare times (two floating point numbers)
 
-extern bool is_equal_time(float t1, float t2);
-extern bool is_lower_time(float t1, float t2);
-extern bool is_greater_time(float t1, float t2);
+extern bool is_equal_time(TimeUnits t1, TimeUnits t2);
+extern bool is_lower_time(TimeUnits t1, TimeUnits t2);
+extern bool is_greater_time(TimeUnits t1, TimeUnits t2);
 
 #define is_higher_time  is_greater_time
 
 //helper function to implement round-half-up algorithm
 
-float round_half_up(float num);
+TimeUnits round_half_up(TimeUnits num);
 
 
 }   //namespace lomse

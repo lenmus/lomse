@@ -1643,7 +1643,7 @@ class ImoStaffObj : public ImoScoreObj
 protected:
     int m_staff;
     int m_measure;
-    float m_time;
+    TimeUnits m_time;
 
     ImoStaffObj(int objtype)
         : ImoScoreObj(objtype), m_staff(0), m_measure(0), m_time(0.0f) {}
@@ -1667,14 +1667,14 @@ public:
     ImoRelObj* find_relation(int type);
 
     //getters
-    inline float get_time() { return m_time; }
-    virtual float get_duration() { return 0.0f; }
+    inline TimeUnits get_time() { return m_time; }
+    virtual TimeUnits get_duration() { return 0.0; }
     inline int get_staff() { return m_staff; }
     inline int get_measure() { return m_measure; }
 
     //setters
     virtual void set_staff(int staff) { m_staff = staff; }
-    inline void set_time(float rTime) { m_time = rTime; }
+    inline void set_time(TimeUnits rTime) { m_time = rTime; }
     inline void set_measure(int measure) { m_measure = measure; }
 
     //other
@@ -1896,12 +1896,12 @@ class ImoCursorInfo : public ImoSimpleObj
 protected:
     int m_instrument;
     int m_staff;
-    float m_time;
+    TimeUnits m_time;
     long m_id;
 
     friend class ImFactory;
     ImoCursorInfo() : ImoSimpleObj(k_imo_cursor_info)
-                    , m_instrument(0), m_staff(0), m_time(0.0f), m_id(-1L) {}
+                    , m_instrument(0), m_staff(0), m_time(0.0), m_id(-1L) {}
 
 public:
     ~ImoCursorInfo() {}
@@ -1909,13 +1909,13 @@ public:
     //getters
     inline int get_instrument() { return m_instrument; }
     inline int get_staff() { return m_staff; }
-    inline float get_time() { return m_time; }
+    inline TimeUnits get_time() { return m_time; }
     inline long get_id() { return m_id; }
 
     //setters
     inline void set_instrument(int value) { m_instrument = value; }
     inline void set_staff(int value) { m_staff = value; }
-    inline void set_time(float value) { m_time = value; }
+    inline void set_time(TimeUnits value) { m_time = value; }
     inline void set_id(long value) { m_id = value; }
 };
 
@@ -2075,6 +2075,7 @@ class ImoTextInfo : public ImoSimpleObj
 {
 protected:
     string m_text;
+    string m_language;
     ImoStyle* m_pStyle;
 
     friend class ImFactory;
@@ -2082,13 +2083,14 @@ protected:
     friend class ImoButton;
     friend class ImoScoreText;
     friend class ImoTextItem;
-    ImoTextInfo() : ImoSimpleObj(k_imo_text_info), m_text(""), m_pStyle(NULL) {}
+    ImoTextInfo() : ImoSimpleObj(k_imo_text_info), m_text(""), m_language(""), m_pStyle(NULL) {}
 
 public:
     ~ImoTextInfo() {}
 
     //getters
     inline string& get_text() { return m_text; }
+    inline string& get_language() { return m_language; }
     inline ImoStyle* get_style() { return m_pStyle; }
     const std::string& get_font_name();
     float get_font_size();
@@ -2099,6 +2101,7 @@ public:
     //setters
     inline void set_text(const string& text) { m_text = text; }
     inline void set_style(ImoStyle* pStyle) { m_pStyle = pStyle; }
+    inline void set_language(const string& language) { m_language = language; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -2502,15 +2505,15 @@ public:
 class ImoGoBackFwd : public ImoStaffObj
 {
 protected:
-    bool    m_fFwd;
-    float   m_rTimeShift;
+    bool        m_fFwd;
+    TimeUnits   m_rTimeShift;
 
-    const float SHIFT_START_END;     //any too big value
+    const TimeUnits SHIFT_START_END;     //any too big value
 
     friend class ImFactory;
     ImoGoBackFwd()
-        : ImoStaffObj(k_imo_go_back_fwd), m_fFwd(true), m_rTimeShift(0.0f)
-        , SHIFT_START_END(100000000.0f)
+        : ImoStaffObj(k_imo_go_back_fwd), m_fFwd(true), m_rTimeShift(0.0)
+        , SHIFT_START_END(100000000.0)
     {}
 
 public:
@@ -2521,10 +2524,10 @@ public:
     inline void set_forward(bool fFwd) { m_fFwd = fFwd; }
     inline bool is_to_start() { return !m_fFwd && (m_rTimeShift == -SHIFT_START_END); }
     inline bool is_to_end() { return m_fFwd && (m_rTimeShift == SHIFT_START_END); }
-    inline float get_time_shift() { return m_rTimeShift; }
+    inline TimeUnits get_time_shift() { return m_rTimeShift; }
     inline void set_to_start() { set_time_shift(SHIFT_START_END); }
     inline void set_to_end() { set_time_shift(SHIFT_START_END); }
-    inline void set_time_shift(float rTime) { m_rTimeShift = (m_fFwd ? rTime : -rTime); }
+    inline void set_time_shift(TimeUnits rTime) { m_rTimeShift = (m_fFwd ? rTime : -rTime); }
 };
 
 //---------------------------------------------------------------------------------------
@@ -2545,6 +2548,7 @@ public:
     //getters
     inline string& get_text() { return m_text.get_text(); }
     inline ImoTextInfo* get_text_info() { return &m_text; }
+    string& get_language();
 
     //setters
     inline void set_text(const std::string& value) { m_text.set_text(value); }
@@ -3698,8 +3702,8 @@ public:
     //other
     inline bool is_compound_meter() { return (m_top==6 || m_top==9 || m_top==12); }
     int get_num_pulses();
-    float get_ref_note_duration();
-    float get_measure_duration();
+    TimeUnits get_ref_note_duration();
+    TimeUnits get_measure_duration();
 
 };
 
@@ -3908,7 +3912,7 @@ typedef Visitor<ImoParagraph> ImParagraphVisitor;
 
 extern int to_note_type(const char& letter);
 extern NoteTypeAndDots ldp_duration_to_components(const string& duration);
-extern float to_duration(int nNoteType, int nDots);
+extern TimeUnits to_duration(int nNoteType, int nDots);
 
 
 }   //namespace lomse

@@ -128,7 +128,7 @@ bool is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
 ColStaffObjs::ColStaffObjs()
     : m_numLines(0)
     , m_numEntries(0)
-    , m_rMissingTime(0.0f)
+    , m_rMissingTime(0.0)
     , m_pFirst(NULL)
     , m_pLast(NULL)
 {
@@ -171,41 +171,6 @@ string ColStaffObjs::dump()
 //---------------------------------------------------------------------------------------
 void ColStaffObjs::add_entry_to_list(ColStaffObjsEntry* pEntry)
 {
-//    if (!m_pFirst)
-//    {
-//        //first entry
-//        m_pFirst = pEntry;
-//        m_pLast = pEntry;
-//        pEntry->set_prev( NULL );
-//        pEntry->set_next( NULL );
-//        return;
-//    }
-//
-//    //insert in list in order
-//    ColStaffObjsEntry* pCurrent = m_pFirst;
-//    while (pCurrent != NULL)
-//    {
-//        if (is_lower_entry(pEntry, pCurrent))
-//        {
-//            pEntry->set_next( pCurrent );
-//            ColStaffObjsEntry* pPrev = pCurrent->get_prev();
-//            pEntry->set_prev( pPrev );
-//            pCurrent->set_prev( pEntry );
-//            if (pPrev == NULL)
-//                m_pFirst = pEntry;
-//            else
-//                pPrev->set_next( pEntry );
-//            return;
-//        }
-//        pCurrent = pCurrent->get_next();
-//    }
-//
-//    //is the higest
-//    pEntry->set_next( NULL );
-//    pEntry->set_prev( m_pLast );
-//    m_pLast->set_next( pEntry );
-//    m_pLast = pEntry;
-
     if (!m_pFirst)
     {
         //first entry
@@ -253,6 +218,7 @@ void ColStaffObjs::delete_entry_for(ImoStaffObj* pSO)
 
     ColStaffObjsEntry* pPrev = pEntry->get_prev();
     ColStaffObjsEntry* pNext = pEntry->get_next();
+    delete pEntry;
     if (pPrev == NULL)
     {
         //removing the head of the list
@@ -439,9 +405,9 @@ void ColStaffObjsBuilder::delete_node(ImoGoBackFwd* pGBF, ImoMusicData* pMusicDa
 void ColStaffObjsBuilder::reset_counters()
 {
     m_nCurMeasure = 0;
-    m_rCurTime = 0.0f;
-    m_rMaxSegmentTime = 0.0f;
-    m_rStartSegmentTime = 0.0f;
+    m_rCurTime = 0.0;
+    m_rMaxSegmentTime = 0.0;
+    m_rStartSegmentTime = 0.0;
 }
 
 //---------------------------------------------------------------------------------------
@@ -472,7 +438,7 @@ void ColStaffObjsBuilder::update_measure(ImoStaffObj* pSO)
     if (pSO->is_barline())
     {
         ++m_nCurMeasure;
-        m_rMaxSegmentTime = 0.0f;
+        m_rMaxSegmentTime = 0.0;
         m_rStartSegmentTime = m_rCurTime;
     }
 }
@@ -505,7 +471,7 @@ void ColStaffObjsBuilder::collect_anacrusis_info()
 {
     ColStaffObjsIterator it = m_pColStaffObjs->begin();
     ImoTimeSignature* pTS = NULL;
-    float rTime = -1.0f;
+    TimeUnits rTime = -1.0;
 
     //find time signature
     while(it != m_pColStaffObjs->end())
@@ -535,11 +501,11 @@ void ColStaffObjsBuilder::collect_anacrusis_info()
         }
         ++it;
     }
-    if (rTime <= 0.0f)
+    if (rTime <= 0.0)
         return;
 
     //determine if anacrusis
-    float measureDuration = pTS->get_measure_duration();
+    TimeUnits measureDuration = pTS->get_measure_duration();
     m_pColStaffObjs->set_anacrusis_missing_time(measureDuration - rTime);
 }
 

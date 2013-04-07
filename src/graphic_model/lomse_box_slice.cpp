@@ -116,12 +116,12 @@ GmoBoxSliceInstr* GmoBoxSlice::add_box_for_instrument(ImoInstrument* pInstr)
 //}
 //
 ////--------------------------------------------------------------------------------------
-//float GmoBoxSlice::GetGridTimeForPosition(LUnits uxPos)
+//TimeUnits GmoBoxSlice::GetGridTimeForPosition(LUnits uxPos)
 //{
 //    if (m_pGridTable)
 //        return m_pGridTable->GetTimeForPosititon(uxPos);
 //    else
-//        return 0.0f;
+//        return 0.0;
 //}
 //
 ////--------------------------------------------------------------------------------------

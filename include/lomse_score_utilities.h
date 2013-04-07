@@ -64,11 +64,11 @@ class ImoTimeSignature;
     //-----------------------------------------------------------------------------------
     // Determines if a timePos is in on-beat, off-beat position
     enum { k_off_beat = -1, };
-    extern int get_beat_position(float timePos, ImoTimeSignature* pTS);
+    extern int get_beat_position(TimeUnits timePos, ImoTimeSignature* pTS);
 
     //-----------------------------------------------------------------------------------
     // returns ref.note duration (in LDP notes duration units)
-    extern float get_duration_for_ref_note(int bottomNumber);
+    extern TimeUnits get_duration_for_ref_note(int bottomNumber);
 
 
 //---------------------------------------------------------------------------------------

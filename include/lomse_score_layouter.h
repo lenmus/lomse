@@ -292,9 +292,9 @@ protected:
     //column creation
     void start_column_measurements(int iCol, LUnits uxStart, LUnits fixedSpace);
     void include_object(int iCol, int iLine, int iInstr, ImoStaffObj* pSO,
-                        float rTime, int nStaff, GmoShape* pShape, bool fInProlog=false);
+                        TimeUnits rTime, int nStaff, GmoShape* pShape, bool fInProlog=false);
     void finish_column_measurements(int iCol, LUnits xStart);
-    bool determine_if_is_in_prolog(float rTime);
+    bool determine_if_is_in_prolog(TimeUnits rTime);
 
     //helpers
     inline bool is_first_column() { return m_iColumn == 0; }
@@ -309,7 +309,7 @@ class ColumnBreaker
 protected:
     int m_numInstruments;
     bool m_fBarlineFound;
-    float m_targetBreakTime;
+    TimeUnits m_targetBreakTime;
     int m_numLines;
     std::vector<ImoStaffObj*> m_staffObjs;
     std::vector<bool> m_beamed;
@@ -318,7 +318,7 @@ public:
     ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor);
     ~ColumnBreaker() {}
 
-    bool column_should_be_finished(ImoStaffObj* pSO, float rTime, int iLine);
+    bool column_should_be_finished(ImoStaffObj* pSO, TimeUnits rTime, int iLine);
 };
 
 

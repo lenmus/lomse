@@ -191,7 +191,7 @@ public:
 //    virtual ~CmdInsertStaffObj() {};
 ////    lmCmdInsertRest(bool fNormalCmd,
 ////                    const wxString& name, lmDocument *pDoc,
-////					lmENoteType nNoteType, float rDuration, int nDots, int nVoice);
+////					lmENoteType nNoteType, TimeUnits rDuration, int nDots, int nVoice);
 //
 //    void undo_action(Document* pDoc, DocCursor* pCursor);
 //    void perform_action(Document* pDoc, DocCursor* pCursor);

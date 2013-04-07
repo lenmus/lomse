@@ -10,6 +10,64 @@
 <h1>Lomse Library. Log of changes</h1>
 
 <!-- ============================================================================ -->
+<p>Version 0.13.1</p>
+    <p>Implementing edition (2). Caret and CaretPositioner.</p>
+
+    <ul>
+        <li>Version number increased to 0.13.1</li>
+        <li>Caret object implemented: a displayable cursor on the document.</li>
+        <li>CaretPositioner implemented: responsible for Caret layout and position.</li>
+        <li>Interactor/Presented modified to create/own DocCursor & DocCommandExecuter</li>
+        <li>GraphicView modified to display Caret</li>
+        <li>Interactor: added methods to control Caret state and position</li>
+        <li>ScoreCursor: state now includes timepos for ref_obj.</li>
+        <li>ScoreCursor: added method to find previous staffobj</li>
+        <li>ScoreCursor: added helper methods to test for position type.</li>
+        <li>GModel modified for accesing a GmoBox given the id of its creator Imo</li>
+        <li>GModel: added helper methods for positioning caret.</li>
+    </ul>
+
+
+<!-- ============================================================================ -->
+<p>Version 0.13.0</p>
+    <p>Implementing edition commands (1). Refactoring and required functionality.</p>
+
+    <ul>
+        <li>More funcionality:
+        <ul>
+            <li>DocumentCursor and children cursors created.</li>
+            <li>ScoreCursor: changes for moving on a time grid</li>
+            <li>Added ScoreModifier class: Preliminary code to delete a staffobj</li>
+        </ul></li>
+
+        <li>Changes for ensuring integrity after an edit operation:
+        <ul>
+            <li>IdAssiner now responsible for translation from ImoObj Id to pointer to ImoObj.</li>
+            <li>ImoObj pointer replaced by ImoObj id. in many API methods</li>
+        </ul></li>
+
+        <li>Changes for supporting undo/redo:
+        <ul>
+            <li>LDP: comments now also posible in C style (/*..*/)</li>
+            <li>Document: generates checkpoints and restore from checkpoint.</li>
+            <li>LmdExporter: main tags operational with scores in ldp format.</li>
+        </ul></li>
+
+        <li>Refactoring:
+        <ul>
+            <li>version number increased to 0.13, to reflect backward incompatible API changes</li>
+            <li>Added ButtonCtrl. All Controls reviewed to ensure uniform approach.</li>
+            <li>ColStaffObjs: adding support inserting/deleting objects
+            <ul>
+                <li>time now kept in staffobj instead of in ColStaffObjEntry</li>
+                <li>change ColStaffObjs to a double linked list. Sort during insertion</li>
+                <li>change ColStaffObjsBuilder to remove goBack/goFwd nodes</li>
+            </ul></li>
+        </ul></li>
+    </ul>
+
+
+<!-- ============================================================================ -->
 <p>Version 0.12.5 (24/Nov/2012)</p>
 <ul>
     <li>Added public method GmoShapeImage::set_image().</li>
