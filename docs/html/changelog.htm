@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/11/24 -->
+<!-- $Updated: 2013/04/24 -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Lomse changelog</title>
@@ -8,6 +8,37 @@
 <body>
 
 <h1>Lomse Library. Log of changes</h1>
+
+<!-- ============================================================================ -->
+<p>Version 0.14.0</p>
+    <p>Fixes to support Chinese language, bug fixes related to multi-threading,
+       other fixes and some refactoring.</p>
+
+    <ul>
+        <li>Version number increased to 0.14.0 due to backwards incompatible API changes.</li>
+        <li>Document and Interactor raw pointers are now converted to shared pointers
+          when ownership is transferred to Presenter.</li>
+        <li>All Presenter API raw pointers to Document and to Interactor changed 
+          to weak_ptr.</li>
+        <li>All events receive now a weak_ptr to Interactor instead of a raw_ptr so
+          that code processing event can check if the event is still valid.</li>
+        <li>Limitation removed: Time units now represented as double.</li>
+        <li>Fixed bug in Ctrol objects: bad font selected for Chinese language.</li>
+        <li>Changed GmoShapeText and ImoScoreText to include language .</li>
+        <li>PresentersCollection removed: not used and not needed.</li>
+        <li>Fixed bug in ColStaffObjs iterator causing problems in destructor.</li>
+        <li>ScorePlayerCtrol: changes to use a graphical UI.</li>
+        <li>Refactoring: classes RefToGmo and MultiRefToGmo removed (not used).</li>
+        <li>Refactoring: GmoShape Id type changed from int to ShapeId.</li>
+        <li>Refactoring: ImoObj Id type changed from long to ImoId.</li>
+        <li>Refactoring: GmoRef defined. Maps to get Gmo for Imo revised.</li>
+        <li>Bug fixed in DefaultTextSplitter causing an infinite loop (app. hangs).</li>
+        <li>Bug fixed in ScorePlayer causing occational crashes.</li>
+        <li>Bug fixed in Interactor mouse events processing, causing crashes.</li>
+        <li>Logger class developped. Logging messages added in many places.</li>
+    </ul>
+
+
 
 <!-- ============================================================================ -->
 <p>Version 0.13.1</p>
