@@ -40,7 +40,7 @@ namespace lomse
 //=======================================================================================
 // GmoShapeLine object implementation
 //=======================================================================================
-GmoShapeLine::GmoShapeLine(ImoObj* pCreatorImo, int idx,
+GmoShapeLine::GmoShapeLine(ImoObj* pCreatorImo, ShapeId idx,
                            LUnits xStart, LUnits yStart,
                            LUnits xEnd, LUnits yEnd, LUnits uWidth,
                            LUnits uBoundsExtraWidth, ELineStyle nStyle,
@@ -173,7 +173,7 @@ void GmoShapeLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
 ////class GmoShapeFBLine implementation
 ////=======================================================================================
 //
-//GmoShapeFBLine::GmoShapeFBLine(lmScoreObj* pOwner, int idx,
+//GmoShapeFBLine::GmoShapeFBLine(lmScoreObj* pOwner, ShapeId idx,
 //                             lmFiguredBass* pEndFB,
 //                             LUnits uxStart, LUnits uyStart,    //user shift
 //                             LUnits uxEnd, LUnits uyEnd,        //user shift

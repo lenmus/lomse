@@ -65,7 +65,7 @@ public:
 
 
 protected:
-    GmoShapeBracketBrace(ImoObj* pCreatorImo, int type, int idx, Color color);
+    GmoShapeBracketBrace(ImoObj* pCreatorImo, int type, ShapeId idx, Color color);
     virtual void set_affine_transform() = 0;
 
 };
@@ -74,7 +74,7 @@ protected:
 class GmoShapeBracket : public GmoShapeBracketBrace
 {
     friend class InstrumentEngraver;
-    GmoShapeBracket(ImoObj* pCreatorImo, int idx, LUnits xLeft, LUnits yTop,
+    GmoShapeBracket(ImoObj* pCreatorImo, ShapeId idx, LUnits xLeft, LUnits yTop,
                     LUnits xRight, LUnits yBottom, Color color);
 
 public:
@@ -97,7 +97,7 @@ protected:
     LUnits m_udyHook;
 
     friend class InstrumentEngraver;
-    GmoShapeBrace(ImoObj* pCreatorImo, int idx, LUnits xLeft, LUnits yTop, LUnits xRight,
+    GmoShapeBrace(ImoObj* pCreatorImo, ShapeId idx, LUnits xLeft, LUnits yTop, LUnits xRight,
                   LUnits yBottom, LUnits dyHook, Color color);
 
 public:

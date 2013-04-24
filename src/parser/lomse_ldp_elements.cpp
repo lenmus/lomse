@@ -43,7 +43,7 @@ LdpElement::LdpElement()
     , m_name("")
     , m_fSimple(false)
     , m_numLine(0)
-    , m_id(-1L)
+    , m_id(k_no_imoid)
     , m_pImo(NULL)
     //, m_fProcessed(false)
 {

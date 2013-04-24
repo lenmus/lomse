@@ -35,6 +35,7 @@
 #include "lomse_build_options.h"
 #include "lomse_tree.h"
 #include "lomse_visitor.h"
+#include "lomse_basic.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -267,7 +268,7 @@ protected:
 	std::string m_value;    // for simple: the element value
     bool m_fSimple;         // true for simple elements
     int m_numLine;          // file line in whicht the elemnt starts or 0
-    long m_id;              // for composite: element ID (0..n)
+    ImoId m_id;              // for composite: element ID (0..n)
     ImoObj* m_pImo;
 
     LdpElement();
@@ -289,8 +290,8 @@ public:
     inline int get_line_number() { return m_numLine; }
     void set_imo(ImoObj* pImo);
     inline ImoObj* get_imo() { return m_pImo; }
-    inline long get_id() { return m_id; }
-    inline void set_id(long id) { m_id = id; }
+    inline ImoId get_id() { return m_id; }
+    inline void set_id(ImoId id) { m_id = id; }
 
 	//! returns the element value as it is represented in source LDP
 	std::string get_ldp_value();

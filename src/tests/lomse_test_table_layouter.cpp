@@ -154,14 +154,14 @@ public:
         return (fabs(x - y) < 0.1f);
     }
 
-    void create_doc_0(Document* pDoc)
+    void create_doc_0(SpDocument spDoc)
     {
         //     5000  4000
         //    +-----+-----+
         //    |  0  |  1  |
         //    +-----+-----+
 
-        pDoc->from_string(
+        spDoc->from_string(
             "<lenmusdoc vers='0.0'>"
                 "<styles>"
                     "<defineStyle>"
@@ -188,7 +188,7 @@ public:
             "</lenmusdoc>", Document::k_format_lmd);
     }
 
-    void create_doc_1(Document* pDoc)
+    void create_doc_1(SpDocument spDoc)
     {
         //     50  40  25  15
         //    +---+---+---+---+
@@ -197,7 +197,7 @@ public:
         //    | 4 |       | 7 |
         //    +---+---+---+---+
 
-        pDoc->from_string("(lenmusdoc (vers 0.0) "
+        spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(styles"
                 "(defineStyle \"table1-col1\" (table-col-width 5000))"
                 "(defineStyle \"table1-col2\" (table-col-width 4000))"
@@ -224,7 +224,7 @@ public:
             "))");
     }
 
-    void create_doc_2(Document* pDoc)
+    void create_doc_2(SpDocument spDoc)
     {
         //   50  40  25  15  20
         //  +---+---+---+---+---+
@@ -233,7 +233,7 @@ public:
         //  | 5 | 6 | 7 | 8 | 9 +
         //  +---+---+---+---+---+
 
-        pDoc->from_string("(lenmusdoc (vers 0.0) "
+        spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(styles"
                 "(defineStyle \"table1-col1\" (table-col-width 5000))"
                 "(defineStyle \"table1-col2\" (table-col-width 4000))"
@@ -265,7 +265,7 @@ public:
             "))");
     }
 
-    void create_doc_3(Document* pDoc)
+    void create_doc_3(SpDocument spDoc)
     {
         //      7000      8000      9000        7000
         //  +----------+--------------------+----------+
@@ -278,7 +278,7 @@ public:
         //  | Garblos  |   315   |   187    |          |
         //  +----------+---------+----------+----------+
 
-        pDoc->from_string("(lenmusdoc (vers 0.0) "
+        spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(styles"
             "   (defineStyle \"table1-col1\" (table-col-width 7000))"
             "   (defineStyle \"table1-col2\" (table-col-width 8000))"
@@ -328,14 +328,14 @@ SUITE(TableLayouterTest)
 
     TEST_FIXTURE(TableLayouterTestFixture, table_box_created)
     {
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) "
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape) "
             "(content (table "
                 "(tableHead (tableRow (tableCell (txt \"This is a head cell\")) ))"
                 "(tableBody (tableRow (tableCell (txt \"This is a body cell\")) ))"
             ") ))");
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
 
@@ -354,8 +354,8 @@ SUITE(TableLayouterTest)
 
     TEST_FIXTURE(TableLayouterTestFixture, table_determine_grid_size_1)
     {
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) "
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(content (table "
                 "(tableBody "
                 "    (tableRow (tableCell (txt \"Cell 0\"))"
@@ -366,7 +366,7 @@ SUITE(TableLayouterTest)
                 "              (tableCell (txt \"Cell 5\")) )"
                 ")"
             ")) )");
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
 
@@ -385,8 +385,8 @@ SUITE(TableLayouterTest)
 
     TEST_FIXTURE(TableLayouterTestFixture, table_determine_grid_size_2)
     {
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) "
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(content (table "
                 "(tableHead "
                 "    (tableRow (tableCell (txt \"Cell 1,1\"))"
@@ -401,7 +401,7 @@ SUITE(TableLayouterTest)
                 "              (tableCell (txt \"Cell 2,3\")) )"
                 ")"
             ")) )");
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
 
@@ -420,8 +420,8 @@ SUITE(TableLayouterTest)
 
     TEST_FIXTURE(TableLayouterTestFixture, table_determine_grid_size_3)
     {
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) "
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(content (table "
                 "(tableBody"
                     "(tableRow"
@@ -436,7 +436,7 @@ SUITE(TableLayouterTest)
                 ")"
             ")"
             "))");
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -450,8 +450,8 @@ SUITE(TableLayouterTest)
 
     TEST_FIXTURE(TableLayouterTestFixture, table_determine_widths_1)
     {
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) "
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(styles"
                 "(defineStyle \"table1-col1\" (table-col-width 5000))"
                 "(defineStyle \"table1-col2\" (table-col-width 4000))"
@@ -475,7 +475,7 @@ SUITE(TableLayouterTest)
                 ")"
             ")"
             "))");
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -491,14 +491,14 @@ SUITE(TableLayouterTest)
 
     TEST_FIXTURE(TableLayouterTestFixture, table_determine_widths_2)
     {
-        Document doc(m_libraryScope);
-        create_doc_1(&doc);
+        SpDocument spDoc( new Document(m_libraryScope) );
+        create_doc_1(spDoc);
         //    +---+---+---+---+
         //    | 0 |       | 3 |
         //    +---+   1   +---+
         //    | 4 |       | 7 |
         //    +---+---+---+---+
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -521,8 +521,8 @@ SUITE(TableLayouterTest)
         //    +=======+=======+
         //    |   0B  |   1B  |
         //    +-------+-------+
-        Document doc(m_libraryScope);
-        doc.from_string(
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->from_string(
             "(lenmusdoc (vers 0.0)"
             "(styles"
             "   (defineStyle \"table1-col1\" (table-col-width 7000))"
@@ -540,7 +540,7 @@ SUITE(TableLayouterTest)
                     "(tableCell (txt \"This is body cell 2\"))"
                 "))"
             ")) )");
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -555,14 +555,14 @@ SUITE(TableLayouterTest)
 
     TEST_FIXTURE(TableLayouterTestFixture, body_layouter_created_1)
     {
-        Document doc(m_libraryScope);
-        create_doc_1(&doc);
+        SpDocument spDoc( new Document(m_libraryScope) );
+        create_doc_1(spDoc);
         //    +---+---+---+---+
         //    | 0 |       | 3 |
         //    +---+   1   +---+
         //    | 4 |       | 7 |
         //    +---+---+---+---+
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -576,14 +576,14 @@ SUITE(TableLayouterTest)
 
     TEST_FIXTURE(TableLayouterTestFixture, create_cell_layouters_1)
     {
-        Document doc(m_libraryScope);
-        create_doc_1(&doc);
+        SpDocument spDoc( new Document(m_libraryScope) );
+        create_doc_1(spDoc);
         //    +---+---+---+---+
         //    | 0 |       | 3 |
         //    +---+   1   +---+
         //    | 4 |       | 7 |
         //    +---+---+---+---+
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -608,15 +608,15 @@ SUITE(TableLayouterTest)
 
     TEST_FIXTURE(TableLayouterTestFixture, create_cell_layouters_2)
     {
-        Document doc(m_libraryScope);
-        create_doc_2(&doc);
+        SpDocument spDoc( new Document(m_libraryScope) );
+        create_doc_2(spDoc);
             //   50  40  25  15  20
             //  +---+---+---+---+---+
             //  | 0 |   1   |   3   |
             //  +---+---+---+---+---+
             //  | 5 | 6 | 7 | 8 | 9 +
             //  +---+---+---+---+---+
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -644,8 +644,8 @@ SUITE(TableLayouterTest)
 
     TEST_FIXTURE(TableLayouterTestFixture, create_cell_layouters_3)
     {
-        Document doc(m_libraryScope);
-        create_doc_3(&doc);
+        SpDocument spDoc( new Document(m_libraryScope) );
+        create_doc_3(spDoc);
         //      7000      8000      9000        7000
         //  +----------+--------------------+----------+
         //  |          |      Bolfgums      |   Eesh   |
@@ -656,7 +656,7 @@ SUITE(TableLayouterTest)
         //  +----------+---------+----------+    37%   |
         //  | Garblos  |   315   |   187    |          |
         //  +----------+---------+----------+----------+
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -706,8 +706,8 @@ SUITE(TableLayouterTest)
 //        | 9 |10 |11 |
 //        +---+---+---+
 
-        Document doc(m_libraryScope);
-        doc.from_string(
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->from_string(
             "(lenmusdoc (vers 0.0)"
             "(styles"
             "   (defineStyle \"table1-col1\" (table-col-width 7000))"
@@ -742,7 +742,7 @@ SUITE(TableLayouterTest)
                 ")"
             ")"
             "))");
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -775,8 +775,8 @@ SUITE(TableLayouterTest)
 //        | 9 |10 |11 |
 //        +---+---+---+
 
-        Document doc(m_libraryScope);
-        doc.from_string(
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->from_string(
             "(lenmusdoc (vers 0.0)"
             "(styles"
             "   (defineStyle \"table1-col1\" (table-col-width 7000))"
@@ -810,7 +810,7 @@ SUITE(TableLayouterTest)
                 ")"
             ")"
             "))");
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -842,8 +842,8 @@ SUITE(TableLayouterTest)
 //        | 9 |   |11 |
 //        +---+---+---+
 
-        Document doc(m_libraryScope);
-        doc.from_string(
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->from_string(
             "(lenmusdoc (vers 0.0)"
             "(styles"
             "   (defineStyle \"table1-col1\" (table-col-width 7000))"
@@ -876,7 +876,7 @@ SUITE(TableLayouterTest)
                 ")"
             ")"
             "))");
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -907,8 +907,8 @@ SUITE(TableLayouterTest)
 //        | 9 |10 |11 |
 //        +---+---+---+
 
-        Document doc(m_libraryScope);
-        doc.from_string(
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->from_string(
             "(lenmusdoc (vers 0.0)"
             "(styles"
             "   (defineStyle \"table1-col1\" (table-col-width 70))"
@@ -940,7 +940,7 @@ SUITE(TableLayouterTest)
                 ")"
             ")"
             "))");
-        ImoDocument* pDoc = doc.get_imodoc();
+        ImoDocument* pDoc = spDoc->get_imodoc();
         ImoStyles* pStyles = pDoc->get_styles();
         ImoTable* pTable = static_cast<ImoTable*>( pDoc->get_content_item(0) );
         GraphicModel model;
@@ -964,16 +964,16 @@ SUITE(TableLayouterTest)
         MyDoorway2 doorway;
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        create_doc_0(&doc);
+        SpDocument spDoc( new Document(libraryScope) );
+        create_doc_0(spDoc);
         //     5000  4000
         //    +-----+-----+
         //    |  0  |  1  |
         //    +-----+-----+
 
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, spDoc, pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         CHECK( pModel != NULL );

@@ -165,7 +165,7 @@ const int m_nNumVerticesBrace2 = sizeof(m_BraceVertices2)/sizeof(Vertex);
 //---------------------------------------------------------------------------------------
 // Implementation of GmoShapeBracketBrace
 //---------------------------------------------------------------------------------------
-GmoShapeBracketBrace::GmoShapeBracketBrace(ImoObj* pCreatorImo, int type, int idx,
+GmoShapeBracketBrace::GmoShapeBracketBrace(ImoObj* pCreatorImo, int type, ShapeId idx,
                                            Color color)
     : GmoSimpleShape(pCreatorImo, type, idx, color)
     //, m_nSymbol(nSymbol)
@@ -209,7 +209,7 @@ void GmoShapeBracketBrace::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //---------------------------------------------------------------------------------------
 // Implementation of GmoShapeBracket
 //---------------------------------------------------------------------------------------
-GmoShapeBracket::GmoShapeBracket(ImoObj* pCreatorImo, int idx, LUnits xLeft, LUnits yTop,
+GmoShapeBracket::GmoShapeBracket(ImoObj* pCreatorImo, ShapeId idx, LUnits xLeft, LUnits yTop,
                                  LUnits xRight, LUnits yBottom, Color color)
     : GmoShapeBracketBrace(pCreatorImo, GmoObj::k_shape_staff, idx, color)
 {
@@ -254,7 +254,7 @@ unsigned GmoShapeBracket::vertex(double* px, double* py)
 //---------------------------------------------------------------------------------------
 // Implementation of GmoShapeBrace
 //---------------------------------------------------------------------------------------
-GmoShapeBrace::GmoShapeBrace(ImoObj* pCreatorImo, int idx, LUnits xLeft, LUnits yTop,
+GmoShapeBrace::GmoShapeBrace(ImoObj* pCreatorImo, ShapeId idx, LUnits xLeft, LUnits yTop,
                              LUnits xRight, LUnits yBottom,
                              LUnits dyHook, Color color)
     : GmoShapeBracketBrace(pCreatorImo, GmoObj::k_shape_brace, idx, color)

@@ -93,7 +93,7 @@ SUITE(PresenterTest)
         PresenterBuilder builder(m_libraryScope);
         Presenter* pPresenter = builder.new_document(ViewFactory::k_view_simple);
 
-        WpDocument wpDoc = pPresenter->get_document();
+        WpDocument wpDoc = pPresenter->get_document_weak_ptr();
         CHECK( wpDoc.expired() == false );
 
         delete pPresenter;

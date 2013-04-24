@@ -38,7 +38,7 @@ namespace lomse
 // Implementation of class GmoShape: any renderizable object, such as a line,
 // a glyph, a note head, an arch, etc.
 //=======================================================================================
-GmoShape::GmoShape(ImoObj* pCreatorImo, int objtype, int idx, Color color)
+GmoShape::GmoShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color)
     : GmoObj(objtype, pCreatorImo)
     , Linkable<USize>()
     , m_idx(idx)
@@ -139,7 +139,7 @@ GmoShape* GmoShape::find_related_shape(int type)
 //=======================================================================================
 // Implementation of class GmoSimpleShape
 //=======================================================================================
-GmoSimpleShape::GmoSimpleShape(ImoObj* pCreatorImo, int objtype, int idx, Color color)
+GmoSimpleShape::GmoSimpleShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color)
     : GmoShape(pCreatorImo, objtype, idx, color)
 {
 }
@@ -154,7 +154,7 @@ GmoSimpleShape::~GmoSimpleShape()
 //=======================================================================================
 // Implementation of class GmoCompositeShape
 //=======================================================================================
-GmoCompositeShape::GmoCompositeShape(ImoObj* pCreatorImo, int objtype, int idx,
+GmoCompositeShape::GmoCompositeShape(ImoObj* pCreatorImo, int objtype, ShapeId idx,
                                      Color color)
     : GmoShape(pCreatorImo, objtype, idx, color)
     , m_fLocked(true)

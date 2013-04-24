@@ -136,7 +136,7 @@ GmoShape* MetronomeMarkEngraver::create_shape_note_value()
 //---------------------------------------------------------------------------------------
 void MetronomeMarkEngraver::create_main_container_shape()
 {
-    int idx = 0;
+    ShapeId idx = 0;
     m_pMainShape = LOMSE_NEW GmoShapeMetronomeMark(m_pCreatorImo, idx, m_uPos,
                                                    Color(0,0,0), m_libraryScope);
 }

@@ -245,7 +245,7 @@ void DocCommandExecuter::redo()
 //=======================================================================================
 // CmdCursor implementation
 //=======================================================================================
-CmdCursor::CmdCursor(int cmd, long id)
+CmdCursor::CmdCursor(int cmd, ImoId id)
     : DocCmdSimple()
     , m_operation(cmd)
     , m_targetId(id)
@@ -348,7 +348,7 @@ void CmdDeleteStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
 //=======================================================================================
 CmdInsertBlockLevelObj::CmdInsertBlockLevelObj(int type)
     : DocCmdSimple()
-    , m_insertedId(-1L)
+    , m_insertedId(k_no_imoid)
     , m_type(type)
 {
 }
@@ -356,13 +356,13 @@ CmdInsertBlockLevelObj::CmdInsertBlockLevelObj(int type)
 //---------------------------------------------------------------------------------------
 void CmdInsertBlockLevelObj::undo_action(Document* pDoc, DocCursor* pCursor)
 {
-    if (m_insertedId > -1L)
+    if (m_insertedId != k_no_imoid)
     {
         ImoDocument* pImoDoc = pDoc->get_imodoc();
         ImoObj* pImo = pDoc->get_pointer_to_imo(m_insertedId);
         TreeNode<ImoObj>::iterator it(pImo);
         pImoDoc->erase(it);
-        m_insertedId = -1L;
+        m_insertedId = k_no_imoid;
     }
 }
 
@@ -385,7 +385,7 @@ void CmdInsertBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
 //CmdInsertStaffObj::CmdInsertStaffObj(DocCursor& cursor, int type)
 //    : DocCmdSimple()
 //    , m_cursorId( cursor.get_pointee_id() )
-//    , m_insertedId(-1L)
+//    , m_insertedId(k_no_imoid)
 //    , m_type(type)
 //{
 //    m_name = "Insert ";
@@ -400,13 +400,13 @@ void CmdInsertBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
 ////---------------------------------------------------------------------------------------
 //void CmdInsertStaffObj::undo_action(Document* pDoc, DocCursor* pCursor)
 //{
-////    if (m_insertedId > -1L)
+////    if (m_insertedId != k_no_imoid)
 ////    {
 ////        ImoDocument* pImoDoc = pDoc->get_imodoc();
 ////        ImoObj* pImo = pDoc->get_pointer_to_imo(m_insertedId);
 ////        TreeNode<ImoObj>::iterator it(pImo);
 ////        pImoDoc->erase(it);
-////        m_insertedId = -1L;
+////        m_insertedId = k_no_imoid;
 ////    }
 //}
 //
@@ -417,7 +417,7 @@ void CmdInsertBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
 ////        static_cast<ImoBlockLevelObj*>( ImFactory::inject(m_type, pDoc) );
 ////    ImoDocument* pImoDoc = pDoc->get_imodoc();
 ////    ImoBlockLevelObj* pAt = NULL;
-////    if (m_cursorId > -1L)
+////    if (m_cursorId != k_no_imoid)
 ////    {
 ////        pAt = dynamic_cast<ImoBlockLevelObj*>( pDoc->get_pointer_to_imo(m_cursorId) );
 ////    }

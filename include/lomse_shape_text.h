@@ -55,7 +55,7 @@ protected:
     LibraryScope& m_libraryScope;
 
     friend class TextEngraver;
-    GmoShapeText(ImoObj* pCreatorImo, int idx, const std::string& text,
+    GmoShapeText(ImoObj* pCreatorImo, ShapeId idx, const std::string& text,
                  ImoStyle* pStyle, const string& language,
                  LUnits x, LUnits y, LibraryScope& libraryScope);
 
@@ -85,7 +85,7 @@ protected:
     LUnits m_baseline;          //relative to m_origin.y
 
     friend class WordEngrouter;
-    GmoShapeWord(ImoObj* pCreatorImo, int idx, const wstring& text,
+    GmoShapeWord(ImoObj* pCreatorImo, ShapeId idx, const wstring& text,
                  ImoStyle* pStyle, const string& language, LUnits x, LUnits y,
                  LUnits halfLeading, LibraryScope& libraryScope);
 

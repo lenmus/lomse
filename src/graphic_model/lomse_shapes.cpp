@@ -41,9 +41,9 @@ namespace lomse
 //=======================================================================================
 // GmoShapeGlyph object implementation
 //=======================================================================================
-GmoShapeGlyph::GmoShapeGlyph(ImoObj* pCreatorImo, int type, int idx, unsigned int nGlyph,
-                             UPoint pos, Color color, LibraryScope& libraryScope,
-                             double fontHeight)
+GmoShapeGlyph::GmoShapeGlyph(ImoObj* pCreatorImo, int type, ShapeId idx,
+                             unsigned int nGlyph, UPoint pos, Color color,
+                             LibraryScope& libraryScope, double fontHeight)
     : GmoSimpleShape(pCreatorImo, type, idx, color)
     , m_pFontStorage( libraryScope.font_storage() )
     , m_libraryScope(libraryScope)
@@ -210,7 +210,7 @@ void GmoShapeSimpleLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //=======================================================================================
 // GmoShapeInvisible
 //=======================================================================================
-GmoShapeInvisible::GmoShapeInvisible(ImoObj* pCreatorImo, int idx, UPoint uPos,
+GmoShapeInvisible::GmoShapeInvisible(ImoObj* pCreatorImo, ShapeId idx, UPoint uPos,
                                      USize uSize)
 	: GmoSimpleShape(pCreatorImo, GmoObj::k_shape_invisible, idx, Color(0,0,0))
 {
@@ -244,7 +244,7 @@ void GmoShapeInvisible::on_draw(Drawer* pDrawer, RenderOptions& opt)
 // GmoShapeRectangle: a rectangle with optional rounded corners
 //=======================================================================================
 GmoShapeRectangle::GmoShapeRectangle(
-                        ImoObj* pCreatorImo, int type, int idx,
+                        ImoObj* pCreatorImo, int type, ShapeId idx,
                         const UPoint& pos, const USize& size,     //position and size
                         LUnits radius,              //for rounded corners
                         ImoStyle* pStyle            //for line style & background color

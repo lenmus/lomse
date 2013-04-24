@@ -305,7 +305,7 @@ void Document::notify_if_document_modified()
 }
 
 //---------------------------------------------------------------------------------------
-Observable* Document::get_observable_child(int childType, long childId)
+Observable* Document::get_observable_child(int childType, ImoId childId)
 {
     if (childType == Observable::k_imo)
         return static_cast<ImoContentObj*>( get_pointer_to_imo(childId) );
@@ -337,13 +337,13 @@ void Document::removed_from_model(ImoObj* pImo)
 }
 
 //---------------------------------------------------------------------------------------
-ImoObj* Document::get_pointer_to_imo(long id) const
+ImoObj* Document::get_pointer_to_imo(ImoId id) const
 {
     return m_pIdAssigner->get_pointer_to_imo(id);
 }
 
 //---------------------------------------------------------------------------------------
-Control* Document::get_pointer_to_control(long id) const
+Control* Document::get_pointer_to_control(ImoId id) const
 {
     return m_pIdAssigner->get_pointer_to_control(id);
 }

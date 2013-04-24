@@ -35,6 +35,7 @@
 #include "lomse_interactor.h"
 #include "lomse_caret.h"
 #include "lomse_caret_positioner.h"
+#include "lomse_logger.h"
 
 using namespace std;
 
@@ -95,9 +96,10 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_vyOrg(0)
     , m_fSelRectVisible(false)
     , m_fTempoLineVisible(false)
-    , m_pCaret( LOMSE_NEW Caret(this, libraryScope) )
+    , m_pCaret(NULL)
     , m_pCaretPositioner(NULL)
 {
+    m_pCaret = LOMSE_NEW Caret(this, libraryScope);
 }
 
 //---------------------------------------------------------------------------------------
@@ -138,6 +140,8 @@ GraphicModel* GraphicView::get_graphic_model()
 //---------------------------------------------------------------------------------------
 void GraphicView::redraw_bitmap() //, RepaintOptions& opt)
 {
+    LOMSE_LOG_DEBUG(Logger::k_render, "");
+
     if (m_pRenderBuf)
     {
         draw_graphic_model();
@@ -323,7 +327,6 @@ void GraphicView::draw_tempo_line()
 //---------------------------------------------------------------------------------------
 void GraphicView::highlight_object(ImoStaffObj* pSO)
 {
-
     GraphicModel* pGModel = get_graphic_model();
     pGModel->highlight_object(pSO, true);
     m_highlighted.push_back(pSO);
@@ -346,6 +349,12 @@ void GraphicView::remove_all_highlight()
     for (it = m_highlighted.begin(); it != m_highlighted.end(); ++it)
         pGModel->highlight_object(*it, false);
 
+    m_highlighted.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::discard_all_highlight()
+{
     m_highlighted.clear();
 }
 
@@ -579,8 +588,8 @@ void GraphicView::screen_point_to_page_point(double* x, double* y)
     }
     else
     {
-        *x = LOMSE_OUT_OF_MODEL;
-        *y = LOMSE_OUT_OF_MODEL;
+        *x = k_out_of_model;
+        *y = k_out_of_model;
     }
 }
 
@@ -972,7 +981,7 @@ bool GraphicView::is_valid_viewport()
 //}
 //
 ////---------------------------------------------------------------------------------------
-//void GraphicView::caret_to_object(long nId)
+//void GraphicView::caret_to_object(ImoId nId)
 //{
 //    m_cursor.reset_and_point_to(nId);
 //}

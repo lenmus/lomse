@@ -192,7 +192,7 @@ public:
     static HorizontalBookView* inject_HorizontalBookView(LibraryScope& libraryScope,
                                                          Document* pDoc);  //UserCommandExecuter* pExec)
     static Interactor* inject_Interactor(LibraryScope& libraryScope,
-                                         Document* pDoc, View* pView,
+                                         WpDocument wpDoc, View* pView,
                                          DocCommandExecuter* pExec);
     static Presenter* inject_Presenter(LibraryScope& libraryScope,
                                        int viewType, Document* pDoc);

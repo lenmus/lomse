@@ -30,6 +30,8 @@
 #ifndef __LOMSE_ID_ASSIGNER_H__
 #define __LOMSE_ID_ASSIGNER_H__
 
+#include "lomse_basic.h"
+
 #include <map>
 #include <string>
 using namespace std;
@@ -47,9 +49,9 @@ class Control;
 class IdAssigner
 {
 protected:
-    long m_idCounter;
-    std::map<long, ImoObj*> m_idToImo;
-    std::map<long, Control*> m_idToControl;
+    ImoId m_idCounter;
+    std::map<ImoId, ImoObj*> m_idToImo;
+    std::map<ImoId, Control*> m_idToControl;
 
 public:
     IdAssigner();
@@ -59,8 +61,8 @@ public:
 
     void assign_id(ImoObj* pImo);
     void assign_id(Control* pControl);
-    ImoObj* get_pointer_to_imo(long id) const;
-    Control* get_pointer_to_control(long id) const;
+    ImoObj* get_pointer_to_imo(ImoId id) const;
+    Control* get_pointer_to_control(ImoId id) const;
     void remove(ImoObj* pImo);
 
     //debug

@@ -92,7 +92,7 @@ public:
     MyGraphicModel() : GraphicModel() {}
     ~MyGraphicModel() {}
 
-    std::map<ImoObj*, RefToGmo*>& my_get_map() { return m_imoToGmo; }
+//    std::map<ImoObj*, RefToGmo*>& my_get_map() { return m_imoToGmo; }
 };
 
 
@@ -131,12 +131,12 @@ SUITE(GraphicModelTest)
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -169,13 +169,13 @@ SUITE(GraphicModelTest)
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) "
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (staves 2)(musicData )))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);
         LUnits x = pPage->get_left();
@@ -193,12 +193,12 @@ SUITE(GraphicModelTest)
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -233,12 +233,12 @@ SUITE(GraphicModelTest)
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -269,15 +269,15 @@ SUITE(GraphicModelTest)
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        //doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        SpDocument spDoc( new Document(libraryScope) );
+        //spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
         //    "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        doc.from_string("(lenmusdoc (vers 0.0) "
+        spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (staves 2)(musicData )))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -306,13 +306,13 @@ SUITE(GraphicModelTest)
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) "
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) "
             "(content (score (vers 1.6) "
             "(instrument (staves 2)(musicData )))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);
         LUnits x = pPage->get_left() - 1.0f;
@@ -330,12 +330,12 @@ SUITE(GraphicModelTest)
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -370,12 +370,12 @@ SUITE(GraphicModelTest)
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -414,18 +414,18 @@ SUITE(GraphicModelTest)
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
 
         //build document, in steps, for easier access to ImObjs
-        Document doc(libraryScope);
-        doc.create_empty();
-        ImoScore* pScore = doc.add_score();
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->create_empty();
+        ImoScore* pScore = spDoc->add_score();
         ImoInstrument* pInstr = pScore->add_instrument();
         pInstr->add_clef(k_clef_G2);
         ImoNote* pNote = static_cast<ImoNote*>( pInstr->add_object("(n c4 q)") );
-        doc.end_of_changes();
+        spDoc->end_of_changes();
 
         //build gmodel
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
 
         GmoShape* pShape = pModel->get_shape_for_noterest(pNote);
@@ -443,12 +443,12 @@ SUITE(GraphicModelTest)
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
         GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
@@ -482,12 +482,12 @@ SUITE(GraphicModelTest)
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
         GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
@@ -549,12 +549,12 @@ SUITE(GraphicModelTest)
         MyDoorway doorway;
         LibraryScope libraryScope(cout, &doorway);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         VerticalBookView* pView = dynamic_cast<VerticalBookView*>(
-            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, &doc) );
-        Interactor* pIntor = Injector::inject_Interactor(libraryScope, &doc, pView, NULL);
+            Injector::inject_View(libraryScope, ViewFactory::k_view_vertical_book, spDoc.get()) );
+        Interactor* pIntor = Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL);
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
         GmoBox* pBDPC = pPage->get_child_box(0);        //DocPageContent
@@ -582,6 +582,20 @@ SUITE(GraphicModelTest)
         delete pIntor;
     }
 
+    TEST_FIXTURE(GraphicModelTestFixture, all_gmos_have_name)
+    {
+        bool fOk = true;
+        for (int i=0; i < GmoObj::k_max; ++i)
+        {
+            if (GmoObj::get_name(i) == "unknown" )
+            {
+                fOk = false;
+                cout << "Name for GmoObj type " << i << " is not defined" << endl;
+            }
+        }
+        CHECK (fOk);
+    }
+
 //    // map Imo-> Gmo --------------------------------------------------------------------
 //
 //    TEST_FIXTURE(GraphicModelTestFixture, map_empty)
@@ -604,8 +618,8 @@ SUITE(GraphicModelTest)
 //        MyGraphicModel gm;
 //        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
 //        Document doc(m_libraryScope);
-//        doc.create_empty();
-//        ImoScore* pScore = doc.add_score();
+//        spDoc->create_empty();
+//        ImoScore* pScore = spDoc->add_score();
 //        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
 //
 //        gm.add_to_map_imo_gmo(pBox);
@@ -632,13 +646,13 @@ SUITE(GraphicModelTest)
 //    {
 //        MyGraphicModel gm;
 //        Document doc(m_libraryScope);
-//        doc.create_empty();
-//        ImoScore* pScore = doc.add_score();
+//        spDoc->create_empty();
+//        ImoScore* pScore = spDoc->add_score();
 //        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
 //
 //        gm.build_main_boxes_table();
 ////        gm.add_to_map_imo_gmo(pBox);
-//        long id = pScore->get_id();
+//        ImoId id = pScore->get_id();
 //        GmoBox* pSavedBox = gm.get_box_for_imo(id);
 //        CHECK( pSavedBox == pBox );
 //
@@ -650,8 +664,8 @@ SUITE(GraphicModelTest)
 //        MyGraphicModel gm;
 //        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
 //        Document doc(m_libraryScope);
-//        doc.create_empty();
-//        ImoScore* pScore = doc.add_score();
+//        spDoc->create_empty();
+//        ImoScore* pScore = spDoc->add_score();
 //        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
 //        gm.add_to_map_imo_gmo(pBox);
 //
@@ -668,8 +682,8 @@ SUITE(GraphicModelTest)
 //        MyGraphicModel gm;
 //        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
 //        Document doc(m_libraryScope);
-//        doc.create_empty();
-//        ImoScore* pScore = doc.add_score();
+//        spDoc->create_empty();
+//        ImoScore* pScore = spDoc->add_score();
 //        GmoBoxScorePage* pBox = LOMSE_NEW GmoBoxScorePage(pScore);
 //        gm.add_to_map_imo_gmo(pBox);
 //        delete pBox;
@@ -692,12 +706,12 @@ SUITE(GraphicModelTest)
 ////        std::map<ImoObj*, RefToGmo*>& rmap = gm.my_get_map();
 ////
 ////        Document doc(m_libraryScope);
-////        doc.create_empty();
-////        ImoScore* pScore = doc.add_score();
+////        spDoc->create_empty();
+////        ImoScore* pScore = spDoc->add_score();
 //////        ImoInstrument* pInstr = pScore->add_instrument();
 //////        ImoClef* pClef = pInstr->add_clef(k_clef_G2);
 ////
-////        ImoDocument* pDoc = doc.get_imodoc();
+////        ImoDocument* pDoc = spDoc->get_imodoc();
 ////        ImoContent* pContent = static_cast<ImoContent*>(
 ////                                    pDoc->get_child_of_type(k_content) );
 ////        GmoBoxDocPageContent* pBDPC = LOMSE_NEW GmoBoxDocPageContent(pContent);

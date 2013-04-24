@@ -49,8 +49,6 @@ using namespace boost::local_time;
 namespace lomse
 {
 
-#define lk_indent_step  3
-
 //=======================================================================================
 // LmdGenerator
 //=======================================================================================
@@ -97,10 +95,9 @@ protected:
 
 };
 
-#define k_in_same_line    false
-#define k_in_new_line     true
-#define k_no_id             -1
-#define k_indent_step       3
+const bool k_in_same_line = false;
+const bool k_in_new_line = true;
+const int k_indent_step = 3;
 
 //=======================================================================================
 // generators for specific elements
@@ -145,11 +142,19 @@ public:
     {
         start_element("barline", m_pObj);
         close_start_tag();
-//        add_barline_type();
+        add_barline_type();
         source_for_base_staffobj(m_pObj);
         end_element(k_in_same_line);
         return m_source.str();
     }
+
+protected:
+
+    void add_barline_type()
+    {
+        m_source << LmdExporter::barline_type_to_ldp( m_pObj->get_type() );
+    }
+
 };
 
 
@@ -1817,6 +1822,23 @@ string LmdExporter::clef_type_to_ldp(int clefType)
         return undefined;
     else
         return name[clefType];
+}
+
+//---------------------------------------------------------------------------------------
+string LmdExporter::barline_type_to_ldp(int barType)
+{
+    //AWARE: indexes in correspondence with enum in ImoBarline
+    static const string name[] = {
+        "simple",
+        "double",
+        "start",
+        "end",
+        "endRepetition",
+        "startRepetition",
+        "doubleRepetition",
+    };
+
+    return name[barType];
 }
 
 //---------------------------------------------------------------------------------------

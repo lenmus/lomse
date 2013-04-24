@@ -37,6 +37,7 @@
 #include "lomse_shapes.h"
 #include "lomse_calligrapher.h"
 #include "lomse_text_splitter.h"
+#include "lomse_logger.h"
 
 //other
 #include <boost/format.hpp>
@@ -77,17 +78,26 @@ bool EngroutersCreator::more_content()
 Engrouter* EngroutersCreator::create_next_engrouter(LUnits maxSpace)
 {
     if (!more_content())
+    {
+        LOMSE_LOG_DEBUG(Logger::k_layout, "No more content");
         return NULL;
+    }
 
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
     if (!m_pCurEngrouter)
     {
         ImoInlineLevelObj* pImo = static_cast<ImoInlineLevelObj*>( *m_itCurContent );
+        LOMSE_LOG_TRACE(Logger::k_layout, str(boost::format(
+            "Trying to create the EngroutersCreator for Imo id %d %s")
+            % pImo->get_id() % pImo->get_name() ));
 
         //composite content objects
         if (pImo->is_text_item())
         {
             ImoTextItem* pText = static_cast<ImoTextItem*>(pImo);
             m_pCurEngrouter = create_next_text_engrouter_for(pText, maxSpace);
+            LOMSE_LOG_TRACE(Logger::k_layout, str(boost::format(
+                "Text item [%s]") % pText->get_text() ));
         }
         else if (pImo->is_box_inline())
         {
@@ -105,6 +115,10 @@ Engrouter* EngroutersCreator::create_next_engrouter(LUnits maxSpace)
         if (m_pCurEngrouter)
             m_pCurEngrouter->measure();
     }
+    else
+    {
+        LOMSE_LOG_TRACE(Logger::k_layout, "EngroutersCreator already exists.");
+    }
 
     if (m_pCurEngrouter)
     {
@@ -116,9 +130,19 @@ Engrouter* EngroutersCreator::create_next_engrouter(LUnits maxSpace)
             m_pCurEngrouter = NULL;
             return pEngr;
         }
+        else
+        {
+            LOMSE_LOG_TRACE(Logger::k_layout, str(boost::format(
+                "Not enough space. Needed=%.02f, available=%.02f")
+                % width % maxSpace ));
+            return NULL;
+        }
     }
-
-    return NULL;
+    else
+    {
+        LOMSE_LOG_TRACE(Logger::k_layout, "EngroutersCreator not created!");
+        return NULL;
+    }
 }
 
 //---------------------------------------------------------------------------------------

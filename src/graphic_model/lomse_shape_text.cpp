@@ -41,7 +41,7 @@ namespace lomse
 //=======================================================================================
 // GmoShapeText implementation
 //=======================================================================================
-GmoShapeText::GmoShapeText(ImoObj* pCreatorImo, int idx, const std::string& text,
+GmoShapeText::GmoShapeText(ImoObj* pCreatorImo, ShapeId idx, const std::string& text,
                            ImoStyle* pStyle, const string& language, LUnits x, LUnits y,
                            LibraryScope& libraryScope)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_text, idx, Color(0,0,0))
@@ -120,7 +120,7 @@ void GmoShapeText::set_text(const std::string& text)
 //=======================================================================================
 // GmoShapeWord implementation
 //=======================================================================================
-GmoShapeWord::GmoShapeWord(ImoObj* pCreatorImo, int idx, const wstring& text,
+GmoShapeWord::GmoShapeWord(ImoObj* pCreatorImo, ShapeId idx, const wstring& text,
                            ImoStyle* pStyle, const string& language,
                            LUnits x, LUnits y, LUnits halfLeading,
                            LibraryScope& libraryScope)
@@ -156,7 +156,7 @@ Color GmoShapeWord::get_normal_color()
 //---------------------------------------------------------------------------------------
 void GmoShapeWord::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    if (!dynamic_cast<ImoContentObj*>(m_pCreatorImo)->is_visible())
+    if (!static_cast<ImoContentObj*>(m_pCreatorImo)->is_visible())
         return;
 
     select_font();

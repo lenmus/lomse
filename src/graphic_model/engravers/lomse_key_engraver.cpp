@@ -57,7 +57,7 @@ GmoShape* KeyEngraver::create_shape(ImoKeySignature* pKey, int clefType, UPoint 
     m_fontSize = determine_font_size();
 
     //create the container shape object
-    int idx = 0;
+    ShapeId idx = 0;
     m_pKeyShape = LOMSE_NEW GmoShapeKeySignature(pKey, idx, uPos, Color(0,0,0), m_libraryScope);
     //m_pKeyShape->SetShapeLevel(lm_eMainShape);
 

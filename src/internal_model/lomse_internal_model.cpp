@@ -220,10 +220,32 @@ void BlockLevelCreatorApi::add_to_model(ImoBlockLevelObj* pImo, ImoStyle* pStyle
 //=======================================================================================
 // ImoObj implementation
 //=======================================================================================
-ImoObj::ImoObj(int objtype, long id)
+ImoObj::ImoObj(int objtype, ImoId id)
     : m_id(id)
     , m_objtype(objtype)
     , m_flags(k_dirty)
+{
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj::~ImoObj()
+{
+    TreeNode<ImoObj>::children_iterator it(this);
+    it = begin();
+    while (it != end())
+    {
+        ImoObj* child = *it;
+        ++it;
+	    delete child;
+    }
+
+    Document* pDoc = get_the_document();
+    if (pDoc)
+        pDoc->removed_from_model(this);
+}
+
+//---------------------------------------------------------------------------------------
+const string& ImoObj::get_name(int type)
 {
     //Register all IM objects
     if (!m_fNamesRegistered)
@@ -243,15 +265,25 @@ ImoObj::ImoObj(int objtype, long id)
 
         // ImoBlocksContainer (A)
         m_TypeToName[k_imo_content] = "content";
+        m_TypeToName[k_imo_dynamic] = "dynamic";
         m_TypeToName[k_imo_document] = "lenmusdoc";
+        m_TypeToName[k_imo_list] = "list";
+        m_TypeToName[k_imo_listitem] = "listitem";
+        m_TypeToName[k_imo_multicolumn] = "multicolumn";
+        m_TypeToName[k_imo_table] = "table";
+        m_TypeToName[k_imo_table_cell] = "table-cell";
+        m_TypeToName[k_imo_table_row] = "table-row";
         m_TypeToName[k_imo_score] = "score";
 
         // ImoInlinesContainer (A)
-        m_TypeToName[k_imo_dynamic] = "dynamic";
+        m_TypeToName[k_imo_anonymous_block] = "anonymous-block";
         m_TypeToName[k_imo_heading] = "heading";
         m_TypeToName[k_imo_para] = "para";
 
         // ImoInlineLevelObj
+        m_TypeToName[k_imo_image] = "image";
+        m_TypeToName[k_imo_score_player] = "score-player";
+        m_TypeToName[k_imo_control] = "control";
         m_TypeToName[k_imo_button] = "buttom";
         m_TypeToName[k_imo_text_item] = "txt";
 
@@ -293,10 +325,12 @@ ImoObj::ImoObj(int objtype, long id)
 //
         //ImoCollection(A)
         m_TypeToName[k_imo_instruments] = "instruments";
-//            k_imo_instrument_groups,
+        m_TypeToName[k_imo_instrument_groups] = "instr-groups";
         m_TypeToName[k_imo_music_data] = "musicData";
         m_TypeToName[k_imo_options] = "options";
         m_TypeToName[k_imo_styles] = "styles";
+        m_TypeToName[k_imo_table_head] = "table-head";
+        m_TypeToName[k_imo_table_body] = "table-body";
 
         // Special collections
         m_TypeToName[k_imo_attachments] = "attachments";
@@ -309,6 +343,7 @@ ImoObj::ImoObj(int objtype, long id)
         m_TypeToName[k_imo_fermata] = "fermata";
         m_TypeToName[k_imo_line] = "line";
         m_TypeToName[k_imo_score_text] = "score-text";
+        m_TypeToName[k_imo_score_line] = "score-line";
         m_TypeToName[k_imo_score_title] = "title";
         m_TypeToName[k_imo_text_box] = "text-box";
 
@@ -319,30 +354,44 @@ ImoObj::ImoObj(int objtype, long id)
         m_TypeToName[k_imo_tie] = "tie";
         m_TypeToName[k_imo_tuplet] = "tuplet";
 
+        //abstract and non-valid objects
+        m_TypeToName[k_imo_obj] = "non-valid";
+        m_TypeToName[k_imo_dto] = "non-valid";
+        m_TypeToName[k_imo_dto_last] = "non-valid";
+        m_TypeToName[k_imo_simpleobj] = "non-valid";
+        m_TypeToName[k_imo_simpleobj_last] = "non-valid";
+        m_TypeToName[k_imo_reldataobj] = "non-valid";
+        m_TypeToName[k_imo_reldataobj_last] = "non-valid";
+        m_TypeToName[k_imo_collection] = "non-valid";
+        m_TypeToName[k_imo_collection_last] = "non-valid";
+        m_TypeToName[k_imo_containerobj] = "non-valid";
+        m_TypeToName[k_imo_containerobj_last] = "non-valid";
+        m_TypeToName[k_imo_contentobj] = "non-valid";
+        m_TypeToName[k_imo_scoreobj] = "non-valid";
+        m_TypeToName[k_imo_staffobj] = "non-valid";
+        m_TypeToName[k_imo_staffobj_last] = "non-valid";
+        m_TypeToName[k_imo_auxobj] = "non-valid";
+        m_TypeToName[k_imo_auxobj_last] = "non-valid";
+        m_TypeToName[k_imo_relobj] = "non-valid";
+        m_TypeToName[k_imo_relobj_last] = "non-valid";
+        m_TypeToName[k_imo_scoreobj_last] = "non-valid";
+        m_TypeToName[k_imo_block_level_obj] = "non-valid";
+        m_TypeToName[k_imo_blocks_container] = "non-valid";
+        m_TypeToName[k_imo_blocks_container_last] = "non-valid";
+        m_TypeToName[k_imo_inlines_container] = "non-valid";
+        m_TypeToName[k_imo_inlines_container_last] = "non-valid";
+        m_TypeToName[k_imo_block_level_obj_last] = "non-valid";
+        m_TypeToName[k_imo_inline_level_obj] = "non-valid";
+        m_TypeToName[k_imo_control_end] = "non-valid";
+        m_TypeToName[k_imo_box_inline] = "non-valid";
+        m_TypeToName[k_imo_box_inline_last] = "non-valid";
+        m_TypeToName[k_imo_inline_level_obj_last] = "non-valid";
+        m_TypeToName[k_imo_contentobj_last] = "non-valid";
+        m_TypeToName[k_imo_last] = "non-valid";
+
         m_fNamesRegistered = true;
     }
-}
 
-//---------------------------------------------------------------------------------------
-ImoObj::~ImoObj()
-{
-    TreeNode<ImoObj>::children_iterator it(this);
-    it = begin();
-    while (it != end())
-    {
-        ImoObj* child = *it;
-        ++it;
-	    delete child;
-    }
-
-    Document* pDoc = get_the_document();
-    if (pDoc)
-        pDoc->removed_from_model(this);
-}
-
-//---------------------------------------------------------------------------------------
-const string& ImoObj::get_name(int type)
-{
 	map<int, std::string>::const_iterator it = m_TypeToName.find( type );
 	if (it != m_TypeToName.end())
 		return it->second;
@@ -1214,7 +1263,7 @@ ImoContentObj::ImoContentObj(int objtype)
 }
 
 //---------------------------------------------------------------------------------------
-ImoContentObj::ImoContentObj(long id, int objtype)
+ImoContentObj::ImoContentObj(ImoId id, int objtype)
     : ImoObj(id, objtype)
     , Observable()
     , m_pStyle(NULL)
@@ -2576,7 +2625,7 @@ void ImoScore::close()
 // ImoScoreLine implementation
 //=======================================================================================
 
-//ImoScoreLine::ImoScoreLine(lmScoreObj* pOwner, long nID, lmTenths xStart, lmTenths yStart,
+//ImoScoreLine::ImoScoreLine(lmScoreObj* pOwner, ImoId nID, lmTenths xStart, lmTenths yStart,
 //                         lmTenths xEnd, lmTenths yEnd, lmTenths nWidth,
 //                         lmELineCap nStartCap, lmELineCap nEndCap, lmELineStyle nStyle,
 //                         wxColour nColor)

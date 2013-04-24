@@ -200,7 +200,7 @@ void LdpParser::Do_WaitingForName()
             const std::string& tagname = m_pTk->get_value();
             std::string nodename = tagname;
             size_t i = tagname.find('#');
-            long id = -1L;
+            ImoId id = k_no_imoid;
             if (i != string::npos)
             {
                 nodename = tagname.substr(0, i);
@@ -209,7 +209,7 @@ void LdpParser::Do_WaitingForName()
                 {
                     m_reporter << "Line " << m_pTk->get_line_number()
                                << ". Bad id in name '" + tagname + "'." << endl;
-                    id = -1L;
+                    id = k_no_imoid;
                 }
             }
 
@@ -427,31 +427,6 @@ void LdpParser::report_error(const std::string& msg)
     m_reporter << msg << endl;
 }
 
-//========================================================================================
-//========================================================================================
-//========================================================================================
-#if 0
-long LdpParser::GetNodeId(LdpElement* pNode)
-{
-    long nId = pNode->get_id();
-    return nId;
-}
-
-bool LdpParser::ParenthesisMatch(const std::string& sSource)
-{
-    int i = sSource.length();
-    int nPar = 0;
-    for(i=0; i < (int)sSource.length(); i++) {
-        if (sSource.GetChar(i) == _T('('))
-            nPar++;
-        else if (sSource.GetChar(i) == _T(')'))
-            nPar--;
-    }
-    return (nPar == 0);
-}
-
-
-#endif
 
 } //namespace lomse
 

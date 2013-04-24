@@ -130,12 +130,9 @@ public:
     //internal model
     inline ImoDocument* get_imodoc() const { return m_pImoDoc; }
     inline InternalModel* get_im_model() const { return m_pIModel; }
-    ImoObj* get_pointer_to_imo(long id) const;
-    Control* get_pointer_to_control(long id) const;
-
-    #define k_save_ids      true
-    #define k_no_save_ids   false
-    string to_string(bool fWithIds = k_no_save_ids);
+    ImoObj* get_pointer_to_imo(ImoId id) const;
+    Control* get_pointer_to_control(ImoId id) const;
+    string to_string(bool fWithIds = false);
     string get_checkpoint_data();
 
     //API: objects creation/modification
@@ -166,7 +163,7 @@ public:
 
     //mandatory overrides from Observable
     EventNotifier* get_event_notifier() { return this; }
-    Observable* get_observable_child(int childType, long childId);
+    Observable* get_observable_child(int childType, ImoId childId);
 
     /** Send doc-modified events
         To have more control about when to update views, the document doesn't

@@ -38,5 +38,74 @@ namespace lomse
 ofstream dbgLogger;
 Logger logger;
 
+//=======================================================================================
+// Logger implementation
+//=======================================================================================
+Logger::Logger(int mode)
+    : m_mode(mode)
+    , m_areas(0xffffffff)       //all areas enabled
+{
+    dbgLogger.open("dbg_tables.txt");
+}
+
+//---------------------------------------------------------------------------------------
+Logger::~Logger()
+{
+    dbgLogger.close();
+}
+
+//---------------------------------------------------------------------------------------
+void Logger::log_message(const string& file, int line, const string& prettyFunction,
+                         const string& prefix, const string& msg)
+{
+    size_t end = prettyFunction.rfind("(");
+    size_t begin = prettyFunction.substr(0,end).rfind(" ") + 1;
+    end -= begin;
+
+    size_t fileStartLinux = file.rfind("/") + 1;
+    size_t fileStartWindows = file.rfind("\\") + 1;
+    size_t fileStart = max(fileStartLinux, fileStartWindows);
+
+    dbgLogger << file.substr(fileStart) << ", line " << line << ". " << prefix << "["
+            << prettyFunction.substr(begin,end) << "] " << msg << endl;
+}
+
+//---------------------------------------------------------------------------------------
+void Logger::log_error(const string& file, int line, const string& prettyFunction,
+                       const string& msg)
+{
+    log_message(file, line, prettyFunction, "ERROR: ", msg);
+}
+
+//---------------------------------------------------------------------------------------
+void Logger::log_warn(const string& file, int line, const string& prettyFunction,
+                      const string& msg)
+{
+    log_message(file, line, prettyFunction, "WARNING: ", msg);
+}
+
+//---------------------------------------------------------------------------------------
+void Logger::log_info(const string& file, int line, const string& prettyFunction,
+                      const string& msg)
+{
+    log_message(file, line, prettyFunction, "INFO: ", msg);
+}
+
+//---------------------------------------------------------------------------------------
+void Logger::log_debug(const string& file, int line, const string& prettyFunction,
+                       uint_least32_t area, const string& msg)
+{
+    if ((m_mode == k_debug_mode || m_mode == k_trace_mode) && ((m_areas & area) != 0))
+        log_message(file, line, prettyFunction, "DEBUG: ", msg);
+}
+
+//---------------------------------------------------------------------------------------
+void Logger::log_trace(const string& file, int line, const string& prettyFunction,
+                       uint_least32_t area, const string& msg)
+{
+    if (m_mode == k_trace_mode && ((m_areas & area) != 0))
+        log_message(file, line, prettyFunction, "TRACE: ", msg);
+}
+
 
 }   //namespace lomse

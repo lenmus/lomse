@@ -123,8 +123,8 @@ protected:
     Point<Pixels> m_selPoint;
 
 public:
-    MyInteractor(LibraryScope& libraryScope, Document* pDoc, View* pView)
-        : Interactor(libraryScope, pDoc, pView, NULL)
+    MyInteractor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView)
+        : Interactor(libraryScope, wpDoc, pView, NULL)
         , m_fSelRectInvoked(false)
         , m_fSelObjInvoked(false)
     {
@@ -184,12 +184,12 @@ SUITE(InteractorTest)
 
     TEST_FIXTURE(InteractorTestFixture, Interactor_CreatesGraphicModel)
     {
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
-                                            &doc);
-        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, &doc, pView, NULL));
+                                            spDoc.get());
+        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, NULL));
 
         CHECK( pIntor != NULL );
         CHECK( pIntor->get_graphic_model() != NULL );
@@ -199,12 +199,12 @@ SUITE(InteractorTest)
 
     TEST_FIXTURE(InteractorTestFixture, Interactor_SelectObject)
     {
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
-                                            &doc);
-        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, &doc, pView, NULL));
+                                            spDoc.get());
+        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, NULL));
         pView->set_interactor(pIntor.get());
         GraphicModel* pModel = pIntor->get_graphic_model();
         GmoBoxDocPage* pPage = pModel->get_page(0);     //DocPage
@@ -228,11 +228,11 @@ SUITE(InteractorTest)
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, &doc);
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, &doc, pView, NULL));
+        VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
         pView->set_interactor(pIntor.get());
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
@@ -266,11 +266,11 @@ SUITE(InteractorTest)
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document doc(libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
-        VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, &doc);
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, &doc, pView, NULL));
+        VerticalBookView* pView = Injector::inject_VerticalBookView(libraryScope, spDoc.get());
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
         pView->set_interactor(pIntor.get());
         RenderingBuffer rbuf;
         pView->set_rendering_buffer(&rbuf);
@@ -309,27 +309,25 @@ SUITE(InteractorTest)
 
     TEST_FIXTURE(InteractorTestFixture, TaskDragView_Creation)
     {
-        Document* pDoc = Injector::inject_Document(m_libraryScope);
-        pDoc->create_empty();
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->create_empty();
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
-                                            pDoc);
-        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, pDoc, pView, NULL));
+                                            spDoc.get());
+        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, NULL));
         pView->set_interactor(pIntor.get());
         MyTaskDragView task(pIntor.get());
         task.init_task();
 
         CHECK( task.is_waiting_for_first_point() == true );
-
-        delete pDoc;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskDragView_MouseLeftDown)
     {
-        Document* pDoc = Injector::inject_Document(m_libraryScope);
-        pDoc->create_empty();
+        SpDocument spDoc( new Document(m_libraryScope) );
+        spDoc->create_empty();
         View* pView = Injector::inject_View(m_libraryScope, ViewFactory::k_view_simple,
-                                            pDoc);
-        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, pDoc, pView, NULL));
+                                            spDoc.get());
+        SpInteractor pIntor(Injector::inject_Interactor(m_libraryScope, WpDocument(spDoc), pView, NULL));
         pView->set_interactor(pIntor.get());
         MyTaskDragView task(pIntor.get());
         task.init_task();
@@ -342,8 +340,6 @@ SUITE(InteractorTest)
 
         task.process_event( Event(Event::k_mouse_left_down) );
         CHECK( task.is_waiting_for_second_point() == true );
-
-        delete pDoc;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskDragView_MouseMove)
@@ -351,11 +347,11 @@ SUITE(InteractorTest)
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document* pDoc= LOMSE_NEW Document(libraryScope);
-        pDoc->create_empty();
+        SpDocument spDoc( LOMSE_NEW Document(libraryScope) );
+        spDoc->create_empty();
         View* pView = Injector::inject_View(libraryScope, ViewFactory::k_view_simple,
-                                            pDoc);
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, pDoc, pView, NULL));
+                                            spDoc.get());
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
         pView->set_interactor(pIntor.get());
         MyTaskDragView task(pIntor.get());
         task.init_task();
@@ -369,8 +365,6 @@ SUITE(InteractorTest)
 
         task.process_event( Event(Event::k_mouse_left_up) );
         CHECK( task.is_waiting_for_first_point() == true );
-
-        delete pDoc;
     }
 
     // TaskSelection --------------------------------------------------------------------
@@ -380,10 +374,10 @@ SUITE(InteractorTest)
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document* pDoc = Injector::inject_Document(libraryScope);
-        pDoc->create_empty();
-        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, pDoc, pView, NULL));
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
         task.init_task();
@@ -391,8 +385,6 @@ SUITE(InteractorTest)
         CHECK( task.is_waiting_for_first_point() == true );
         CHECK( task.first_point_x() == 0 );
         CHECK( task.first_point_y() == 0 );
-
-        delete pDoc;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseLeftDown)
@@ -400,10 +392,10 @@ SUITE(InteractorTest)
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document* pDoc = Injector::inject_Document(libraryScope);
-        pDoc->create_empty();
-        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, pDoc, pView, NULL));
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
         task.init_task();
@@ -415,8 +407,6 @@ SUITE(InteractorTest)
         CHECK( task.is_waiting_for_point_2_left() == true );
         CHECK( task.first_point_x() == 10 );
         CHECK( task.first_point_y() == 33 );
-
-        delete pDoc;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseLeftMove)
@@ -424,10 +414,10 @@ SUITE(InteractorTest)
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document* pDoc = Injector::inject_Document(libraryScope);
-        pDoc->create_empty();
-        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, pDoc, pView, NULL));
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
         task.init_task();
@@ -435,8 +425,6 @@ SUITE(InteractorTest)
 
         task.process_event( Event(Event::k_mouse_move, 20, 70, k_mouse_left) );
         CHECK( task.is_waiting_for_point_2_left() == true );
-
-        delete pDoc;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseLeftUp)
@@ -444,10 +432,10 @@ SUITE(InteractorTest)
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document* pDoc = Injector::inject_Document(libraryScope);
-        pDoc->create_empty();
-        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        MyInteractor* pIntor = LOMSE_NEW MyInteractor(libraryScope, pDoc, pView);
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+        MyInteractor* pIntor = LOMSE_NEW MyInteractor(libraryScope, WpDocument(spDoc), pView);
         SpInteractor sp(pIntor);
         pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
@@ -460,8 +448,6 @@ SUITE(InteractorTest)
         CHECK( task.is_waiting_for_first_point() == true );
         CHECK( pIntor->select_objects_in_rectangle_invoked() == true );
         CHECK( pIntor->sel_rectangle_is(10, 33, 21, 75) == true );
-
-        delete pDoc;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseRightDown)
@@ -469,10 +455,10 @@ SUITE(InteractorTest)
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document* pDoc = Injector::inject_Document(libraryScope);
-        pDoc->create_empty();
-        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        SpInteractor pIntor( Injector::inject_Interactor(libraryScope, pDoc, pView, NULL) );
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+        SpInteractor pIntor( Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL) );
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
         task.init_task();
@@ -484,8 +470,6 @@ SUITE(InteractorTest)
         CHECK( task.is_waiting_for_point_2_right() == true );
         CHECK( task.first_point_x() == 10 );
         CHECK( task.first_point_y() == 33 );
-
-        delete pDoc;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseRightMove)
@@ -493,10 +477,10 @@ SUITE(InteractorTest)
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document* pDoc = Injector::inject_Document(libraryScope);
-        pDoc->create_empty();
-        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, pDoc, pView, NULL));
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+        SpInteractor pIntor(Injector::inject_Interactor(libraryScope, WpDocument(spDoc), pView, NULL));
         pView->set_interactor(pIntor.get());
         MyTaskSelection task(pIntor.get());
         task.init_task();
@@ -504,8 +488,6 @@ SUITE(InteractorTest)
 
         task.process_event( Event(Event::k_mouse_move, 11, 35, k_mouse_right) );
         CHECK( task.is_waiting_for_point_2_right() == true );
-
-        delete pDoc;
     }
 
     TEST_FIXTURE(InteractorTestFixture, TaskSelection_MouseRightUp)
@@ -513,10 +495,10 @@ SUITE(InteractorTest)
         MyDoorway platform;
         LibraryScope libraryScope(cout, &platform);
         libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-        Document* pDoc = Injector::inject_Document(libraryScope);
-        pDoc->create_empty();
-        GraphicView* pView = Injector::inject_SimpleView(libraryScope, pDoc);
-        MyInteractor* pIntor = LOMSE_NEW MyInteractor(libraryScope, pDoc, pView);
+        SpDocument spDoc( new Document(libraryScope) );
+        spDoc->create_empty();
+        GraphicView* pView = Injector::inject_SimpleView(libraryScope, spDoc.get());
+        MyInteractor* pIntor = LOMSE_NEW MyInteractor(libraryScope, WpDocument(spDoc), pView);
         SpInteractor sp(pIntor);
         pView->set_interactor(pIntor);
         MyTaskSelection task(pIntor);
@@ -529,19 +511,17 @@ SUITE(InteractorTest)
         CHECK( task.is_waiting_for_first_point() == true );
         CHECK( pIntor->select_object_invoked() == true );
         CHECK( pIntor->sel_point_is(10, 33) == true );
-
-        delete pDoc;
     }
 
     //TEST_FIXTURE(InteractorTestFixture, NotificationReceived)
     //{
     //    fNotified = false;
-    //    Document* pDoc = Injector::inject_Document(m_libraryScope);
-    //    pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n c4 q)(n d4 e)(barline simple))))))" );
+    //    SpDocument spDoc( new Document(m_libraryScope) );
+    //    spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n c4 q)(n d4 e)(barline simple))))))" );
     //    Presenter* pPresenter = Injector::inject_Presenter(m_libraryScope,
-    //                                                   ViewFactory::k_view_simple, pDoc);
+    //                                                   ViewFactory::k_view_simple, spDoc.get());
     //    pPresenter->set_callback( &my_callback_function );
-    //    pDoc->notify_that_document_has_been_modified();
+    //    spDoc->notify_that_document_has_been_modified();
 
     //    CHECK( fNotified == true );
 
@@ -552,10 +532,10 @@ SUITE(InteractorTest)
     //TEST_FIXTURE(InteractorTestFixture, Presenter_InsertRest)
     //{
     //    fNotified = false;
-    //    Document* pDoc = Injector::inject_Document(m_libraryScope);
-    //    pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n c4 q)(n d4 e)(barline simple))))))" );
+    //    SpDocument spDoc( new Document(m_libraryScope) );
+    //    spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n c4 q)(n d4 e)(barline simple))))))" );
     //    Presenter* pPresenter = Injector::inject_Presenter(m_libraryScope,
-    //                                                   PresenterBuilder::k_edit_view, pDoc);
+    //                                                   PresenterBuilder::k_edit_view, spDoc.get());
     //    pPresenter->set_callback( &my_callback_function );
     //    EditView* pView = dynamic_cast<EditView*>( pPresenter->get_view(0) );
     //    DocCursor& cursor = pView->get_cursor();
@@ -581,10 +561,10 @@ SUITE(InteractorTest)
     //TEST_FIXTURE(InteractorTestFixture, Presenter_InsertRest_AtEnd)
     //{
     //    fNotified = false;
-    //    Document* pDoc = Injector::inject_Document(m_libraryScope);
-    //    pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n c4 q))))))" );
+    //    SpDocument spDoc( new Document(m_libraryScope) );
+    //    spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n c4 q))))))" );
     //    Presenter* pPresenter = Injector::inject_Presenter(m_libraryScope,
-    //                                                   PresenterBuilder::k_edit_view, pDoc);
+    //                                                   PresenterBuilder::k_edit_view, spDoc.get());
     //    pPresenter->set_callback( &my_callback_function );
     //    EditView* pView = dynamic_cast<EditView*>( pPresenter->get_view(0) );
     //    DocCursor& cursor = pView->get_cursor();
@@ -607,10 +587,10 @@ SUITE(InteractorTest)
     //TEST_FIXTURE(InteractorTestFixture, Presenter_InsertRest_DifferentVoice_TimeZero)
     //{
     //    fNotified = false;
-    //    Document* pDoc = Injector::inject_Document(m_libraryScope);
-    //    pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n a3 q v1))))))" );
+    //    SpDocument spDoc( new Document(m_libraryScope) );
+    //    spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n a3 q v1))))))" );
     //    Presenter* pPresenter = Injector::inject_Presenter(m_libraryScope,
-    //                                                   PresenterBuilder::k_edit_view, pDoc);
+    //                                                   PresenterBuilder::k_edit_view, spDoc.get());
     //    pPresenter->set_callback( &my_callback_function );
     //    EditView* pView = dynamic_cast<EditView*>( pPresenter->get_view(0) );
     //    DocCursor& cursor = pView->get_cursor();
@@ -632,10 +612,10 @@ SUITE(InteractorTest)
     //TEST_FIXTURE(InteractorTestFixture, Presenter_InsertRest_DifferentVoice_OtherTime)
     //{
     //    fNotified = false;
-    //    Document* pDoc = Injector::inject_Document(m_libraryScope);
-    //    pDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n c4 q v1)(n a3 q v1))))))" );
+    //    SpDocument spDoc( new Document(m_libraryScope) );
+    //    spDoc->from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (clef G)(key e)(n c4 q v1)(n a3 q v1))))))" );
     //    Presenter* pPresenter = Injector::inject_Presenter(m_libraryScope,
-    //                                                   PresenterBuilder::k_edit_view, pDoc);
+    //                                                   PresenterBuilder::k_edit_view, spDoc.get());
     //    pPresenter->set_callback( &my_callback_function );
     //    EditView* pView = dynamic_cast<EditView*>( pPresenter->get_view(0) );
     //    DocCursor& cursor = pView->get_cursor();

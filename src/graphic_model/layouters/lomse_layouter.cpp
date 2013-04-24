@@ -35,6 +35,7 @@
 #include "lomse_score_layouter.h"
 #include "lomse_inlines_container_layouter.h"
 #include "lomse_table_layouter.h"
+#include "lomse_logger.h"
 
 namespace lomse
 {
@@ -72,6 +73,8 @@ Layouter::Layouter(LibraryScope& libraryScope)
 //---------------------------------------------------------------------------------------
 GmoBox* Layouter::start_new_page()
 {
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+
     GmoBox* pParentBox = m_pParentLayouter->start_new_page();
 
     m_pageCursor = m_pParentLayouter->get_cursor();
@@ -86,6 +89,9 @@ GmoBox* Layouter::start_new_page()
 //---------------------------------------------------------------------------------------
 void Layouter::layout_item(ImoContentObj* pItem, GmoBox* pParentBox)
 {
+    LOMSE_LOG_DEBUG(Logger::k_layout, str(boost::format(
+        "Layouting id %d %s") % pItem->get_id() % pItem->get_name() ));
+
     m_pCurLayouter = create_layouter(pItem);
 
     m_pCurLayouter->prepare_to_start_layout();
@@ -123,6 +129,10 @@ void Layouter::set_cursor_and_available_space()
 
     m_availableWidth = m_pItemMainBox->get_content_width();
     m_availableHeight = m_pItemMainBox->get_content_height();
+
+    LOMSE_LOG_DEBUG(Logger::k_layout, str(boost::format(
+        "cursor at(%.2f, %.2f), available space(%.2f, %.2f)")
+        % m_pageCursor.x % m_pageCursor.y % m_availableWidth % m_availableHeight ));
 }
 
 //---------------------------------------------------------------------------------------

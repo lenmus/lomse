@@ -47,11 +47,14 @@ class ImoDynamic;
 class ImoDocument;
 class ImoScore;
 class ImoStaffObj;
-class Document;
 class PlayerGui;
 
 class Interactor;
 typedef WeakPtr<Interactor>     WpInteractor;
+
+class Document;
+typedef WeakPtr<Document>       WpDocument;
+
 
 //observer pattern
 class EventNotifier;
@@ -144,7 +147,7 @@ public:
 
 };
 
-typedef boost::shared_ptr<EventInfo>  SpEventInfo;
+typedef SharedPtr<EventInfo>  SpEventInfo;
 
 
 //---------------------------------------------------------------------------------------
@@ -164,7 +167,7 @@ public:
     inline Document* get_document() { return m_pDoc; }
 };
 
-typedef boost::shared_ptr<EventDoc>  SpEventDoc;
+typedef SharedPtr<EventDoc>  SpEventDoc;
 
 
 //---------------------------------------------------------------------------------------
@@ -184,7 +187,7 @@ public:
     inline WpInteractor get_interactor() { return m_wpInteractor; }
 };
 
-typedef boost::shared_ptr<EventView>  SpEventView;
+typedef SharedPtr<EventView>  SpEventView;
 
 
 //---------------------------------------------------------------------------------------
@@ -192,16 +195,15 @@ typedef boost::shared_ptr<EventView>  SpEventView;
 class EventMouse : public EventView
 {
 protected:
-    Document* m_pDoc;
-    long m_imoId;
-    //Observable* m_source;
+    WpDocument m_wpDoc;
+    ImoId m_imoId;
 
     EventMouse(EEventType type) : EventView(type, WpInteractor()) {}    //for unit tests
 
 public:
-    EventMouse(EEventType type, WpInteractor wpInteractor, long id, Document* pDoc)
+    EventMouse(EEventType type, WpInteractor wpInteractor, ImoId id, WpDocument wpDoc)
         : EventView(type, wpInteractor)
-        , m_pDoc(pDoc)
+        , m_wpDoc(wpDoc)
         , m_imoId(id)
     {
     }
@@ -209,10 +211,13 @@ public:
     // accessors
     ImoContentObj* get_imo_object();
     Observable* get_source();
+    inline ImoId get_imo_id() { return m_imoId; }
+
+    bool is_still_valid();
 
 };
 
-typedef boost::shared_ptr<EventMouse>  SpEventMouse;
+typedef SharedPtr<EventMouse>  SpEventMouse;
 
 
 //---------------------------------------------------------------------------------------
@@ -239,7 +244,7 @@ public:
     inline PlayerGui* get_player() const { return m_pPlayer; }
 };
 
-typedef boost::shared_ptr<EventPlayScore>  SpEventPlayScore;
+typedef SharedPtr<EventPlayScore>  SpEventPlayScore;
 
 
 //---------------------------------------------------------------------------------------
@@ -248,11 +253,11 @@ typedef boost::shared_ptr<EventPlayScore>  SpEventPlayScore;
 class EventScoreHighlight : public EventView
 {
 protected:
-    long m_nID;             //ID of the target score for the event
-    std::list< pair<int, ImoStaffObj*> > m_items;
+    ImoId m_nID;             //ID of the target score for the event
+    std::list< pair<int, ImoId> > m_items;
 
 public:
-    EventScoreHighlight(WpInteractor wpInteractor, long nScoreID)
+    EventScoreHighlight(WpInteractor wpInteractor, ImoId nScoreID)
         : EventView(k_highlight_event, wpInteractor)
         , m_nID(nScoreID)
     {
@@ -267,18 +272,18 @@ public:
     }
 
     //construction
-    void add_item(int type, ImoStaffObj* pSO)
+    void add_item(int type, ImoId id)
     {
-        m_items.push_back( make_pair(type, pSO) );
+        m_items.push_back( make_pair(type, id) );
     }
 
     // accessors
-    inline long get_scoreID() { return m_nID; }
+    inline ImoId get_score_id() { return m_nID; }
     inline int get_num_items() { return int( m_items.size() ); }
-    inline std::list< pair<int, ImoStaffObj*> >&  get_items() { return m_items; }
+    inline std::list< pair<int, ImoId> >&  get_items() { return m_items; }
 };
 
-typedef boost::shared_ptr<EventScoreHighlight>  SpEventScoreHighlight;
+typedef SharedPtr<EventScoreHighlight>  SpEventScoreHighlight;
 
 
 //=======================================================================================
@@ -411,12 +416,12 @@ class Observer
 protected:
     Observable* m_target;
     int m_type;
-    long m_id;
+    ImoId m_id;
     std::list<EventCallback*> m_handlers;
 
     friend class EventNotifier;
     Observer(Observable* target);
-    Observer(Observable* root, int childType, long childId);
+    Observer(Observable* root, int childType, ImoId childId);
 
 public:
     virtual ~Observer();
@@ -427,7 +432,7 @@ public:
     void add_handler(int eventType, void* pThis,
                      void (*pt2Func)(void* pObj, SpEventInfo event) );
     void add_handler(int eventType, EventHandler* pHandler);
-    void add_handler(int eventType, int childType, long childId, EventHandler* pHandler);
+    void add_handler(int eventType, int childType, ImoId childId, EventHandler* pHandler);
     void remove_handler(int evtType);
 
     inline int get_observable_type() { return m_type; }
@@ -465,14 +470,14 @@ public:
     //observing children
     enum { k_root=0, k_control, k_gmo, k_imo, };    //child type
 
-    void add_event_handler(int childType, long childId, int eventType,
+    void add_event_handler(int childType, ImoId childId, int eventType,
                            EventHandler* pHandler);
-    void add_event_handler(int childType, long childId, int eventType, void* pThis,
+    void add_event_handler(int childType, ImoId childId, int eventType, void* pThis,
                            void (*pt2Func)(void* pObj, SpEventInfo event) );
-    void add_event_handler(int childType, long childId, int eventType,
+    void add_event_handler(int childType, ImoId childId, int eventType,
                            void (*pt2Func)(SpEventInfo event) );
 
-    virtual Observable* get_observable_child(int childType, long childId) { return NULL; }
+    virtual Observable* get_observable_child(int childType, ImoId childId) { return NULL; }
 
 };
 
@@ -495,7 +500,7 @@ public:
     void notify_observers(SpEventInfo pEvent, Observable* target);
     void remove_observer(Observer* observer);
     Observer* add_observer_for(Observable* target);
-    Observer* add_observer_for_child(Observable* parent, int childType, long childId);
+    Observer* add_observer_for_child(Observable* parent, int childType, ImoId childId);
 
 protected:
     friend class Observable;
@@ -505,11 +510,11 @@ protected:
     void add_handler(Observable* target, int eventType,
                      void (*pt2Func)(SpEventInfo event) );
 
-    void add_handler_for_child(Observable* parent, int childType, long childId,
+    void add_handler_for_child(Observable* parent, int childType, ImoId childId,
                                int eventType, EventHandler* pHandler);
-    void add_handler_for_child(Observable* parent, int childType, long childId,
+    void add_handler_for_child(Observable* parent, int childType, ImoId childId,
                                int eventType, void (*pt2Func)(SpEventInfo event) );
-    void add_handler_for_child(Observable* parent, int childType, long childId,
+    void add_handler_for_child(Observable* parent, int childType, ImoId childId,
                                int eventType, void* pThis,
                                void (*pt2Func)(void* pObj, SpEventInfo event) );
 

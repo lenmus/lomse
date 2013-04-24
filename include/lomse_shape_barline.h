@@ -54,7 +54,7 @@ protected:
     LUnits  m_uRadius;             // for dots
 
     friend class BarlineEngraver;
-    GmoShapeBarline(ImoObj* pCreatorImo, int idx, int nBarlineType,
+    GmoShapeBarline(ImoObj* pCreatorImo, ShapeId idx, int nBarlineType,
                     LUnits xPos, LUnits yTop, LUnits yBottom,
                     LUnits uThinLineWidth, LUnits uThickLineWidth,
                     LUnits uSpacing, LUnits uRadius, Color color,

@@ -120,8 +120,8 @@ Presenter* PresenterBuilder::open_document(int viewType, LdpReader& reader,
 //=======================================================================================
 //Presenter implementation
 //=======================================================================================
-Presenter::Presenter(Document* pDoc, Interactor* pIntor, DocCommandExecuter* pExec)
-    : m_spDoc(pDoc)
+Presenter::Presenter(SpDocument spDoc, Interactor* pIntor, DocCommandExecuter* pExec)
+    : m_spDoc(spDoc)
     , m_userData(NULL)
     , m_pExec(pExec)
     , m_callback(NULL)
@@ -134,7 +134,7 @@ Presenter::Presenter(Document* pDoc, Interactor* pIntor, DocCommandExecuter* pEx
 Presenter::~Presenter()
 {
     m_interactors.clear();
-    logger.log_message("[Presenter::~Presenter] Presenter is deleted", __FILE__,__LINE__);
+    LOMSE_LOG_TRACE(Logger::k_mvc, "[Presenter::~Presenter] Presenter is deleted");
     delete m_pExec;
 }
 
@@ -190,7 +190,7 @@ void Presenter::set_callback( void (*pt2Func)(Notification* event) )
 }
 
 //---------------------------------------------------------------------------------------
-WpDocument Presenter::get_document()
+WpDocument Presenter::get_document_weak_ptr()
 {
     return WpDocument(m_spDoc);
 }

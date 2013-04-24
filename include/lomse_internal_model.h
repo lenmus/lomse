@@ -365,11 +365,11 @@ class DtoObj;
                     k_imo_score,
 
                     // ImoBlocksContainer (A)
-                    ik_imo_blocks_container,
+                    k_imo_blocks_container,
                         k_imo_content, k_imo_dynamic, k_imo_document, k_imo_list,
                         k_imo_listitem, k_imo_multicolumn,
                         k_imo_table, k_imo_table_cell, k_imo_table_row,
-                    ik_imo_blocks_container_last,
+                    k_imo_blocks_container_last,
 
                     // ImoInlinesContainer (A)
                     k_imo_inlines_container,
@@ -394,6 +394,7 @@ class DtoObj;
                 k_imo_inline_level_obj_last,
 
             k_imo_contentobj_last,
+        k_imo_last,
 
     };
 
@@ -485,7 +486,7 @@ public:
 
     //getters
     inline ImoObj* get_root() { return m_pRoot; }
-    ImoObj* get_pointer_to_imo(long id);
+    ImoObj* get_pointer_to_imo(ImoId id);
 
 };
 
@@ -504,12 +505,12 @@ public:
 class ImoObj : public Visitable, public TreeNode<ImoObj>
 {
 private:
-    long m_id;
+    ImoId m_id;
     int m_objtype;
     unsigned int m_flags;
 
 protected:
-    ImoObj(int objtype, long id=-1L);
+    ImoObj(int objtype, ImoId id=k_no_imoid);
 
 public:
     virtual ~ImoObj();
@@ -527,10 +528,10 @@ public:
     void set_children_dirty(bool value);
 
     //getters
-    inline long get_id() { return m_id; }
+    inline ImoId get_id() { return m_id; }
 
     //setters
-    inline void set_id(long id) { m_id = id; }
+    inline void set_id(ImoId id) { m_id = id; }
 
     //required by Visitable parent class
 	virtual void accept_visitor(BaseVisitor& v);
@@ -575,8 +576,8 @@ public:
                                   && m_objtype < k_imo_relobj_last; }
     inline bool is_block_level_obj() { return m_objtype > k_imo_block_level_obj
                                            && m_objtype < k_imo_block_level_obj_last; }
-	inline bool is_blocks_container() { return m_objtype > ik_imo_blocks_container
-	                                        && m_objtype < ik_imo_blocks_container_last; }
+	inline bool is_blocks_container() { return m_objtype > k_imo_blocks_container
+	                                        && m_objtype < k_imo_blocks_container_last; }
 	inline bool is_inlines_container() { return m_objtype > k_imo_inlines_container
 	                                         && m_objtype < k_imo_inlines_container_last; }
     inline bool is_box_inline() { return m_objtype > k_imo_box_inline
@@ -666,6 +667,13 @@ public:
     inline bool is_tuplet_dto() { return m_objtype == k_imo_tuplet_dto; }
     inline bool is_tuplet_data() { return m_objtype == k_imo_tuplet_data; }
 
+    //special checkers
+    inline bool is_mouse_over_generator() {
+        return    m_objtype == k_imo_link
+               || m_objtype == k_imo_button
+               ;
+    }
+
 protected:
     void visit_children(BaseVisitor& v);
     void propagate_dirty();
@@ -740,7 +748,7 @@ protected:
 class ImoSimpleObj : public ImoObj
 {
 protected:
-    ImoSimpleObj(int objtype, long id) : ImoObj(objtype, id) {}
+    ImoSimpleObj(int objtype, ImoId id) : ImoObj(objtype, id) {}
     ImoSimpleObj(int objtype) : ImoObj(objtype) {}
 
 public:
@@ -1309,7 +1317,7 @@ protected:
     bool m_fVisible;
 
     ImoContentObj(int objtype);
-    ImoContentObj(long id, int objtype);
+    ImoContentObj(ImoId id, int objtype);
 
 public:
     virtual ~ImoContentObj();
@@ -1429,7 +1437,7 @@ public:
 class ImoBlockLevelObj : public ImoContentObj
 {
 protected:
-    ImoBlockLevelObj(long id, int objtype) : ImoContentObj(id, objtype) {}
+    ImoBlockLevelObj(ImoId id, int objtype) : ImoContentObj(id, objtype) {}
     ImoBlockLevelObj(int objtype) : ImoContentObj(objtype) {}
 
 public:
@@ -1442,7 +1450,7 @@ public:
 class ImoBlocksContainer : public ImoBlockLevelObj, public BlockLevelCreatorApi
 {
 protected:
-    ImoBlocksContainer(long id, int objtype)
+    ImoBlocksContainer(ImoId id, int objtype)
         : ImoBlockLevelObj(id, objtype)
         , BlockLevelCreatorApi()
     {
@@ -1622,7 +1630,7 @@ class ImoScoreObj : public ImoContentObj
 protected:
     Color m_color;
 
-    ImoScoreObj(long id, int objtype) : ImoContentObj(id, objtype), m_color(0,0,0) {}
+    ImoScoreObj(ImoId id, int objtype) : ImoContentObj(id, objtype), m_color(0,0,0) {}
     ImoScoreObj(int objtype) : ImoContentObj(objtype), m_color(0,0,0) {}
 
 public:
@@ -1647,7 +1655,7 @@ protected:
 
     ImoStaffObj(int objtype)
         : ImoScoreObj(objtype), m_staff(0), m_measure(0), m_time(0.0f) {}
-    ImoStaffObj(long id, int objtype)
+    ImoStaffObj(ImoId id, int objtype)
         : ImoScoreObj(id, objtype), m_staff(0), m_measure(0), m_time(0.0f) {}
 
 public:
@@ -1693,7 +1701,7 @@ public:
     virtual ~ImoAuxObj() {}
 
 protected:
-    ImoAuxObj(ImoContentObj* pOwner, long id, int objtype) : ImoScoreObj(id, objtype) {}
+    ImoAuxObj(ImoContentObj* pOwner, ImoId id, int objtype) : ImoScoreObj(id, objtype) {}
 
 };
 
@@ -1897,11 +1905,11 @@ protected:
     int m_instrument;
     int m_staff;
     TimeUnits m_time;
-    long m_id;
+    ImoId m_id;
 
     friend class ImFactory;
     ImoCursorInfo() : ImoSimpleObj(k_imo_cursor_info)
-                    , m_instrument(0), m_staff(0), m_time(0.0), m_id(-1L) {}
+                    , m_instrument(0), m_staff(0), m_time(0.0), m_id(k_no_imoid) {}
 
 public:
     ~ImoCursorInfo() {}
@@ -1910,13 +1918,13 @@ public:
     inline int get_instrument() { return m_instrument; }
     inline int get_staff() { return m_staff; }
     inline TimeUnits get_time() { return m_time; }
-    inline long get_id() { return m_id; }
+    inline ImoId get_id() { return m_id; }
 
     //setters
     inline void set_instrument(int value) { m_instrument = value; }
     inline void set_staff(int value) { m_staff = value; }
     inline void set_time(TimeUnits value) { m_time = value; }
-    inline void set_id(long value) { m_id = value; }
+    inline void set_id(ImoId value) { m_id = value; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -2456,7 +2464,7 @@ public:
     void delete_block_level_obj(ImoBlockLevelObj* pAt);
 
 //        //factory methods for ImoObj objects
-//    ImoButton* create_button(long id, const string& label, const USize& size,
+//    ImoButton* create_button(ImoId id, const string& label, const USize& size,
 //                             ImoStyle* pStyle=NULL);
 //    ImoInlineWrapper* create_inline_box();
     //ImoTextItem* create_text_item(const string& text, ImoStyle* pStyle=NULL);

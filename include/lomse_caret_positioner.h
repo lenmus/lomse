@@ -136,10 +136,10 @@ protected:
     void caret_at_start_of_score(Caret* pCaret);
     void caret_at_end_of_staff(Caret* pCaret);
 
-    URect get_bounds_for_imo(long id);
+    URect get_bounds_for_imo(ImoId id);
     LUnits tenths_to_logical(Tenths value);
     void set_caret_timecode(Caret* pCaret);
-    void set_caret_y_pos_and_height(URect* pBounds, long id);
+    void set_caret_y_pos_and_height(URect* pBounds, ImoId id);
 
 };
 

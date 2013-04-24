@@ -378,7 +378,7 @@ protected:
     void add_to_model(ImoObj* pImo);
 
     //auxiliary
-    inline long get_node_id() { return get_node_id(m_pAnalysedNode); }
+    inline ImoId get_node_id() { return get_node_id(m_pAnalysedNode); }
     bool contains(ELdpElement type, ELdpElement* pValid, int nValid);
     inline const string& get_document_locator() {
         return m_pAnalyser->get_document_locator();
@@ -388,7 +388,7 @@ protected:
 
     //-----------------------------------------------------------------------------------
     //XmlNode helper methods
-    inline long get_node_id(XmlNode* node) { return m_pAnalyser->get_node_id(node); }
+    inline ImoId get_node_id(XmlNode* node) { return m_pAnalyser->get_node_id(node); }
     inline XmlNode* get_first_child(XmlNode* node) { return node->first_node(); }
     inline XmlNode* get_next_sibling(XmlNode* node) { return node->next_sibling(); }
     inline string get_value(XmlNode* node) { return m_pAnalyser->get_value(node); }
@@ -1558,7 +1558,7 @@ public:
 
         // <objID>
         if (get_mandatory(k_number))
-            pCursor->set_id( get_long_value(-1L) );
+            pCursor->set_id( get_long_value(k_no_imoid) );
 
         add_to_model(pCursor);
         return pCursor;

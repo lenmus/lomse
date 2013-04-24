@@ -268,7 +268,7 @@ LUnits GmoShapeNote::get_stem_extra_length() const
 //=======================================================================================
 // GmoShapeNote implementation
 //=======================================================================================
-GmoShapeRest::GmoShapeRest(ImoObj* pCreatorImo, int idx, LUnits x, LUnits y, Color color,
+GmoShapeRest::GmoShapeRest(ImoObj* pCreatorImo, ShapeId idx, LUnits x, LUnits y, Color color,
                            LibraryScope& libraryScope)
     : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_rest, idx, color)
     , m_libraryScope(libraryScope)

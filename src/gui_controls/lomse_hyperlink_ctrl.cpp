@@ -36,6 +36,7 @@
 #include "lomse_drawer.h"
 #include "lomse_calligrapher.h"
 #include "lomse_events.h"
+#include "lomse_logger.h"
 
 namespace lomse
 {
@@ -103,6 +104,8 @@ GmoBoxControl* HyperlinkCtrl::layout(LibraryScope& libraryScope, UPoint pos)
 //---------------------------------------------------------------------------------------
 void HyperlinkCtrl::handle_event(SpEventInfo pEvent)
 {
+    LOMSE_LOG_DEBUG(Logger::k_events, str(boost::format("label: %s") % m_label));
+
     if (m_fEnabled)
     {
         if (pEvent->is_mouse_in_event())
@@ -121,6 +124,7 @@ void HyperlinkCtrl::handle_event(SpEventInfo pEvent)
             m_prevColor = m_visitedColor;
         }
 
+        LOMSE_LOG_DEBUG(Logger::k_events, "Asking Document to notify observers");
         m_pDoc->notify_observers(pEvent, this);
     }
 }

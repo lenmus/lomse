@@ -46,7 +46,7 @@ ImoObj* ImFactory::inject(Document* pDoc, const std::string& ldpSource)
 }
 
 //---------------------------------------------------------------------------------------
-ImoObj* ImFactory::inject(int type, Document* pDoc, long id)
+ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
 {
     ImoObj* pObj = NULL;
     switch(type)
@@ -179,7 +179,7 @@ ImoTuplet* ImFactory::inject_tuplet(Document* pDoc, ImoTupletDto* pDto)
 }
 
 //---------------------------------------------------------------------------------------
-ImoTextBox* ImFactory::inject_text_box(Document* pDoc, ImoTextBlockInfo& dto, long id)
+ImoTextBox* ImFactory::inject_text_box(Document* pDoc, ImoTextBlockInfo& dto, ImoId id)
 {
     ImoTextBox* pObj = LOMSE_NEW ImoTextBox(dto);
     pObj->set_id(id);

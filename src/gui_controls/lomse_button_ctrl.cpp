@@ -50,7 +50,9 @@ ButtonCtrl::ButtonCtrl(LibraryScope& libScope, Control* pParent,
     , m_label(label)
     , m_width(width)
     , m_height(height)
-    , m_bgColor( Color(255,255,255) )
+    , m_normalColor( Color(255,255,255) )       //white
+    , m_overColor( Color(255,200,0) )           //orange
+    , m_fMouseIn(false)
     , m_pMainBox(NULL)
 {
     m_style = (pStyle == NULL ? create_default_style() : pStyle);
@@ -107,7 +109,21 @@ void ButtonCtrl::set_label(const string& text)
 //---------------------------------------------------------------------------------------
 void ButtonCtrl::set_bg_color(Color color)
 {
-    m_bgColor = color;
+    m_normalColor = color;
+    if (m_pMainBox)
+        m_pMainBox->set_dirty(true);
+}
+
+//---------------------------------------------------------------------------------------
+void ButtonCtrl::set_mouse_over_color(Color color)
+{
+    m_overColor = color;
+}
+
+//---------------------------------------------------------------------------------------
+void ButtonCtrl::set_mouse_in(bool fValue)
+{
+    m_fMouseIn = fValue;
     if (m_pMainBox)
         m_pMainBox->set_dirty(true);
 }
@@ -137,14 +153,15 @@ void ButtonCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
 
     Color textColor = is_enabled() ? Color(0, 0, 0) : Color(128, 128, 128);
     Color strokeColor = Color(128, 128, 128);
+    Color bgColor = (m_fMouseIn ? m_overColor : m_normalColor);
 
     //draw button gradient and border
     pDrawer->begin_path();
-    pDrawer->fill( m_bgColor );
+    pDrawer->fill( m_normalColor );
     pDrawer->stroke( strokeColor );
     pDrawer->stroke_width(15.0);
     Color white(255, 255, 255);
-    Color dark(m_bgColor);
+    Color dark(bgColor);
     dark.a = 45;
     Color light(dark);
     light = light.gradient(white, 0.2);

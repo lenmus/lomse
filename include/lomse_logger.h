@@ -30,6 +30,8 @@
 #ifndef __LOMSE_LOGGER_H__
 #define __LOMSE_LOGGER_H__
 
+#include "lomse_config.h"
+#include "lomse_basic.h"
 
 #include <iostream>
 #include <iomanip>
@@ -37,37 +39,119 @@
 #include <string>
 using namespace std;
 
+//other
+#include <boost/format.hpp>
+
 namespace lomse
 {
 
 extern ofstream dbgLogger;
 
+#define LOMSE_ENABLE_DEBUG_LOGS   0
 
+
+#if (LOMSE_COMPILER_MSVC == 1)
+    #define LOMSE_LOG_ERROR(msg)        logger.log_error(__FILE__,__LINE__,__FUNCTION__, msg);
+    #define LOMSE_LOG_WARN(msg)         logger.log_warn(__FILE__,__LINE__,__FUNCTION__, msg);
+    #define LOMSE_LOG_INFO(msg)         logger.log_info(__FILE__,__LINE__,__FUNCTION__, msg);
+    #if (LOMSE_DEBUG == 1 && LOMSE_ENABLE_DEBUG_LOGS == 1)
+        #define LOMSE_LOG_DEBUG(area, msg)  logger.log_debug(__FILE__,__LINE__,__FUNCTION__, area, msg);
+        #define LOMSE_LOG_TRACE(area, msg)  logger.log_trace(__FILE__,__LINE__,__FUNCTION__, area, msg);
+    #else
+        #define LOMSE_LOG_DEBUG(area, msg)
+        #define LOMSE_LOG_TRACE(area, msg)
+    #endif
+
+#elif (LOMSE_COMPILER_GCC == 1)
+    #define LOMSE_LOG_ERROR(msg)        logger.log_error(__FILE__,__LINE__,__PRETTY_FUNCTION__, msg);
+    #define LOMSE_LOG_WARN(msg)         logger.log_warn(__FILE__,__LINE__,__PRETTY_FUNCTION__, msg);
+    #define LOMSE_LOG_INFO(msg)         logger.log_info(__FILE__,__LINE__,__PRETTY_FUNCTION__, msg);
+    #if (LOMSE_DEBUG == 1 && LOMSE_ENABLE_DEBUG_LOGS == 1)
+        #define LOMSE_LOG_DEBUG(area, msg)  logger.log_debug(__FILE__,__LINE__,__PRETTY_FUNCTION__, area, msg);
+        #define LOMSE_LOG_TRACE(area, msg)  logger.log_trace(__FILE__,__LINE__,__PRETTY_FUNCTION__, area, msg);
+    #else
+        #define LOMSE_LOG_DEBUG(area, msg)
+        #define LOMSE_LOG_TRACE(area, msg)
+    #endif
+
+#endif
+
+
+
+//---------------------------------------------------------------------------------------
 class Logger
 {
 private:
-    //ofstream m_debugFile;
+    int m_mode;
+    uint_least32_t m_areas;
 
 public:
-    Logger()
+    Logger(int mode=k_normal_mode);
+    ~Logger();
+
+    inline bool debug_mode_enabled() { return m_mode == k_debug_mode; }
+    inline bool trace_mode_enabled() { return m_mode == k_trace_mode; }
+
+    //settings
+    inline void set_logging_areas(uint_least32_t areas) { m_areas = areas; }
+    inline void add_logging_areas(uint_least32_t areas) { m_areas |= areas; }
+    inline void clear_logging_areas() { m_areas = 0; }
+    inline void set_logging_mode(int mode) { m_mode = mode; }
+
+    //logging modes
+    enum
     {
-        dbgLogger.open("dbg_tables.txt");
+        k_normal_mode = 0,  //log all error, warn and info level messages.
+        k_debug_mode,       //as normal mode plus all debug level messages.
+        k_trace_mode,       //as debug mode plus all trace level messages.
     };
-    ~Logger()
-    {
-        dbgLogger.close();
-    }
 
-    void log_message(const string& msg, const string& file, int line)
+    //logging areas
+    enum
     {
-        dbgLogger << file << ", line " << line << ": " << msg << endl;
-    }
+            //16 areas reserved for lomse library
+        k_events =      0x00000001,     //event
+        k_mvc =         0x00000002,     //creation/destruction of MVC objects
+        k_score_player= 0x00000004,     //ScorePlayer playback
+        k_render =      0x00000008,     //rendering
+        k_layout =      0x00000010,     //layout
+        k_gmodel =      0x00000020,     //Graphical model creation and related
 
-//    Logger& operator << (const char* t)
-//    {
-//        m_debugFile << t;
-//        return *this;
-//    }
+            //16 areas reserved for user application
+        k_user1 =       0x00010000,
+        k_user2 =       0x00020000,
+        k_user3 =       0x00040000,
+        k_user4 =       0x00080000,
+        k_user5 =       0x00100000,
+        k_user6 =       0x00200000,
+        k_user7 =       0x00400000,
+        k_user8 =       0x00800000,
+        k_user9 =       0x01000000,
+        k_user10 =      0x02000000,
+        k_user11 =      0x04000000,
+        k_user12 =      0x08000000,
+        k_user13 =      0x10000000,
+        k_user14 =      0x20000000,
+        k_user15 =      0x40000000,
+        k_user16 =      0x80000000,
+
+        k_all =         0x0ffffffff,    //all areas
+    };
+
+    void log_error(const string& file, int line, const string& prettyFunction,
+                   const string& msg);
+    void log_warn(const string& file, int line, const string& prettyFunction,
+                  const string& msg);
+    void log_info(const string& file, int line, const string& prettyFunction,
+                  const string& msg);
+    void log_debug(const string& file, int line, const string& prettyFunction,
+                   uint_least32_t area, const string& msg);
+    void log_trace(const string& file, int line, const string& prettyFunction,
+                   uint_least32_t area, const string& msg);
+
+protected:
+    void log_message(const string& file, int line, const string& prettyFunction,
+                     const string& prefix, const string& msg);
 
 };
 

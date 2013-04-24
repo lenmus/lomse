@@ -40,12 +40,6 @@
 namespace lomse
 {
 
-//some macros to improve code reading
-#define START       ImoBezierInfo::k_start
-#define END         ImoBezierInfo::k_end
-#define CTROL1      ImoBezierInfo::k_ctrol1
-#define CTROL2      ImoBezierInfo::k_ctrol2
-
 //---------------------------------------------------------------------------------------
 // SlurEngraver implementation
 //---------------------------------------------------------------------------------------
@@ -108,10 +102,10 @@ void SlurEngraver::create_one_shape()
 {
     m_numShapes = 1;
 
-    compute_ref_point(m_notes[0].second, &m_points1[START]);
-    compute_ref_point(m_notes.back().second, &m_points1[END]);
+    compute_ref_point(m_notes[0].second, &m_points1[ImoBezierInfo::k_start]);
+    compute_ref_point(m_notes.back().second, &m_points1[ImoBezierInfo::k_end]);
 //    compute_start_point();
-//    compute_end_point(&m_points1[END]);
+//    compute_end_point(&m_points1[ImoBezierInfo::k_end]);
     compute_default_control_points(&m_points1[0]);
     //add_user_displacements(0, &m_points1[0]);
     m_shapesInfo[0].pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, 0, &m_points1[0], m_thickness);
@@ -132,7 +126,7 @@ void SlurEngraver::create_one_shape()
 //    //m_shapesInfo[0].pShape = LOMSE_NEW GmoShapeSlur(m_pSlur, 0, &m_points1[0], m_thickness);
 //
 //    ////create second shape
-//    //compute_end_point(&m_points2[END]);
+//    //compute_end_point(&m_points2[ImoBezierInfo::k_end]);
 //    //compute_start_of_staff_point();
 //    //compute_default_control_points(&m_points2[0]);
 //    //add_user_displacements(1, &m_points2[0]);
@@ -142,29 +136,29 @@ void SlurEngraver::create_one_shape()
 //---------------------------------------------------------------------------------------
 void SlurEngraver::compute_default_control_points(UPoint* points)
 {
-    LUnits D = (points+END)->x - (points+START)->x;
+    LUnits D = (points+ImoBezierInfo::k_end)->x - (points+ImoBezierInfo::k_start)->x;
     LUnits d = D / 5.8f;
     m_thickness = tenths_to_logical(LOMSE_TIE_MAX_THICKNESS);
     LUnits hc = m_thickness * 3.88f;
-    (points+CTROL1)->x = (points+START)->x + d;
-    (points+CTROL1)->y = (points+START)->y + (m_fSlurBelow ? hc : -hc);
+    (points+ImoBezierInfo::k_ctrol1)->x = (points+ImoBezierInfo::k_start)->x + d;
+    (points+ImoBezierInfo::k_ctrol1)->y = (points+ImoBezierInfo::k_start)->y + (m_fSlurBelow ? hc : -hc);
 
-    (points+CTROL2)->x = (points+END)->x - d;
-    (points+CTROL2)->y = (points+END)->y + (m_fSlurBelow ? hc : -hc);
+    (points+ImoBezierInfo::k_ctrol2)->x = (points+ImoBezierInfo::k_end)->x - d;
+    (points+ImoBezierInfo::k_ctrol2)->y = (points+ImoBezierInfo::k_end)->y + (m_fSlurBelow ? hc : -hc);
 }
 
 ////---------------------------------------------------------------------------------------
 //void SlurEngraver::compute_start_of_staff_point()
 //{
-//    //m_points2[START].x = m_uStaffLeft;
-//    //m_points2[START].y = m_points2[END].y;
+//    //m_points2[ImoBezierInfo::k_start].x = m_uStaffLeft;
+//    //m_points2[ImoBezierInfo::k_start].y = m_points2[ImoBezierInfo::k_end].y;
 //}
 //
 ////---------------------------------------------------------------------------------------
 //void SlurEngraver::compute_end_of_staff_point()
 //{
-//    //m_points1[END].x = m_uStaffRight;
-//    //m_points1[END].y = m_points1[START].y;
+//    //m_points1[ImoBezierInfo::k_end].x = m_uStaffRight;
+//    //m_points1[ImoBezierInfo::k_end].y = m_points1[ImoBezierInfo::k_start].y;
 //}
 
 //---------------------------------------------------------------------------------------

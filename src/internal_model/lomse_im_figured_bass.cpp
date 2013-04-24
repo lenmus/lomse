@@ -535,7 +535,7 @@ ImoFiguredBass::~ImoFiguredBass()
     //    delete m_pNextFBLine;
 }
 
-//ImoFiguredBassLine* ImoFiguredBass::create_line(long nID, ImoFiguredBass* pEndFB)
+//ImoFiguredBassLine* ImoFiguredBass::create_line(ImoId nID, ImoFiguredBass* pEndFB)
 //{
 //    //create a line between the two figured bass objects. The start of the
 //    //line is this FB. The other is the end FB and can be NULL and in this
@@ -563,7 +563,7 @@ ImoFiguredBass::~ImoFiguredBass()
 //    return pFBL;
 //}
 //
-//ImoFiguredBassLine* ImoFiguredBass::create_line(ImoFiguredBass* pEndFB, long nID,
+//ImoFiguredBassLine* ImoFiguredBass::create_line(ImoFiguredBass* pEndFB, ImoId nID,
 //                                               lmLocation tStartLine,
 //                                               lmLocation tEndLine,
 //                                               lmTenths ntWidth,
@@ -624,7 +624,7 @@ ImoFiguredBass::~ImoFiguredBass()
 //// ImoFiguredBassLine: an auxliary relation object to model the 'hold chord' line
 ////-------------------------------------------------------------------------------------------
 //
-//ImoFiguredBassLine::ImoFiguredBassLine(lmScoreObj* pOwner, long nID,
+//ImoFiguredBassLine::ImoFiguredBassLine(lmScoreObj* pOwner, ImoId nID,
 //                                     ImoFiguredBass* pStartFB, ImoFiguredBass* pEndFB,
 //                                     wxColour nColor, lmTenths tWidth)
 //    : lmBinaryRelObX(pOwner, nID, lm_eSO_FBLine, pStartFB, pEndFB, lmDRAGGABLE)

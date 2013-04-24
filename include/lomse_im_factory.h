@@ -55,7 +55,7 @@ public:
     ~ImFactory() {}
 
     //factory injector, from type
-    static ImoObj* inject(int type, Document* pDoc, long id=-1L);
+    static ImoObj* inject(int type, Document* pDoc, ImoId id=k_no_imoid);
 
     //factory injector, from LDP source code
     static ImoObj* inject(Document* pDoc, const std::string& ldpSource);
@@ -71,7 +71,7 @@ public:
     static ImoTupletData* inject_tuplet_data(Document* pDoc, ImoTupletDto* pDto);
     static ImoSlurData* inject_slur_data(Document* pDoc, ImoSlurDto* pDto);
     static ImoTuplet* inject_tuplet(Document* pDoc, ImoTupletDto* pDto);
-    static ImoTextBox* inject_text_box(Document* pDoc, ImoTextBlockInfo& dto, long id=-1L);
+    static ImoTextBox* inject_text_box(Document* pDoc, ImoTextBlockInfo& dto, ImoId id=k_no_imoid);
     static ImoMultiColumn* inject_multicolumn(Document* pDoc);
     static ImoImage* inject_image(Document* pDoc, unsigned char* imgbuf,
                                   VSize bmpSize, EPixelFormat format, USize imgSize);

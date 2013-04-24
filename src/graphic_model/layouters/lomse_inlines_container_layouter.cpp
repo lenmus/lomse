@@ -37,6 +37,7 @@
 #include "lomse_shapes.h"
 #include "lomse_calligrapher.h"
 #include "lomse_blocks_container_layouter.h"
+#include "lomse_logger.h"
 
 //other
 #include <boost/format.hpp>
@@ -96,6 +97,8 @@ void InlinesContainerLayouter::get_indent_and_bullet_info()
 //---------------------------------------------------------------------------------------
 void InlinesContainerLayouter::layout_in_box()
 {
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+
     //AWARE: This method is invoked to layout a page. If there are more pages to
     //layout, it will be invoked more times. Therefore, this method must not initialize
     //anything. All initializations must be done in 'prepare_to_start_layout()'.
@@ -131,6 +134,8 @@ void InlinesContainerLayouter::layout_in_box()
 //---------------------------------------------------------------------------------------
 void InlinesContainerLayouter::prepare_line()
 {
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+
     set_line_pos_and_width();
     initialize_line_references();
 
@@ -138,6 +143,11 @@ void InlinesContainerLayouter::prepare_line()
         add_bullet();
 
     bool fBreak = false;
+
+    LOMSE_LOG_TRACE(Logger::k_layout, str(boost::format("available space=%.02f")
+                                          % m_availableSpace ));
+
+    bool fSomethingAdded = false;
     while (space_in_line() && !fBreak)
     {
         Engrouter* pEngr = create_next_engrouter();
@@ -145,16 +155,35 @@ void InlinesContainerLayouter::prepare_line()
         {
             add_engrouter_to_line(pEngr);
             fBreak = pEngr->break_requested();
+            fSomethingAdded = true;
         }
         else
+        {
+            if (!fSomethingAdded)
+                LOMSE_LOG_TRACE(Logger::k_layout, "No engrouter created.");
             break;
+        }
     }
 }
 
 //---------------------------------------------------------------------------------------
 Engrouter* InlinesContainerLayouter::create_next_engrouter()
 {
-    return m_pEngrCreator->create_next_engrouter(m_availableSpace);
+    if (logger.debug_mode_enabled() || logger.trace_mode_enabled())
+    {
+        Engrouter* pEngr = m_pEngrCreator->create_next_engrouter(m_availableSpace);
+        if (pEngr)
+        {
+            LOMSE_LOG_DEBUG(Logger::k_layout, "Engrouter created");
+        }
+        else
+        {
+            LOMSE_LOG_DEBUG(Logger::k_layout, "Engrouter is NULL");
+        }
+        return pEngr;
+    }
+    else
+        return m_pEngrCreator->create_next_engrouter(m_availableSpace);
 }
 
 //---------------------------------------------------------------------------------------
@@ -205,6 +234,8 @@ void InlinesContainerLayouter::set_line_pos_and_width()
 //---------------------------------------------------------------------------------------
 void InlinesContainerLayouter::add_line()
 {
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+
     m_pageCursor.x = m_xLineStart;
     LUnits left = m_pageCursor.x;       //save left margin
 
@@ -243,6 +274,8 @@ void InlinesContainerLayouter::add_line()
 //---------------------------------------------------------------------------------------
 void InlinesContainerLayouter::advance_current_line_space(LUnits left)
 {
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+
     m_pageCursor.x = left;
     m_pageCursor.y += m_lineRefs.lineHeight;
     m_availableSpace = m_availableWidth;
@@ -253,6 +286,8 @@ void InlinesContainerLayouter::advance_current_line_space(LUnits left)
 //---------------------------------------------------------------------------------------
 void InlinesContainerLayouter::add_engrouter_to_line(Engrouter* pEngrouter)
 {
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+
     //add engrouter to the list of engrouters for current line.
     m_engrouters.push_back( pEngrouter );
 

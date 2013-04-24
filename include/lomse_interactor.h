@@ -49,7 +49,6 @@ namespace lomse
 class CaretPositioner;
 class DocCommandExecuter;
 class DocCommand;
-class Document;
 class DocCursor;
 class GmoObj;
 class GraphicModel;
@@ -57,6 +56,10 @@ class ImoScore;
 class ImoStaffObj;
 class PlayerGui;
 class Task;
+
+class Document;
+typedef SharedPtr<Document>     SpDocument;
+typedef WeakPtr<Document>       WpDocument;
 
 
 //---------------------------------------------------------------------------------------
@@ -68,14 +71,14 @@ class Interactor : public EventHandler
 {
 protected:
     LibraryScope&   m_libScope;
-    Document*       m_pDoc;
+    WpDocument      m_wpDoc;
     View*           m_pView;
     GraphicModel*   m_pGraphicModel;
     Task*           m_pTask;
     DocCursor*      m_pCursor;
     DocCommandExecuter* m_pExec;
     SelectionSet    m_selections;
-    GmoObj*         m_pLastMouseOverGmo;
+    GmoRef          m_grefLastMouseOver;
 
     //for performance measurements
     clock_t     m_startTime;
@@ -92,7 +95,7 @@ protected:
     bool        m_fViewUpdatesEnabled;
 
 public:
-    Interactor(LibraryScope& libraryScope, Document* pDoc, View* pView,
+    Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView,
                DocCommandExecuter* pExec);
     virtual ~Interactor();
 
@@ -157,6 +160,7 @@ public:
     virtual void highlight_object(ImoStaffObj* pSO);
     virtual void remove_highlight_from_object(ImoStaffObj* pSO);
     virtual void remove_all_highlight();
+    virtual void discard_all_highlight();
     void on_visual_highlight(SpEventScoreHighlight pEvent);
         //printing
     virtual void set_printing_buffer(RenderingBuffer* rbuf);
@@ -216,14 +220,17 @@ protected:
     void create_graphic_model();
     void delete_graphic_model();
     GmoObj* find_object_at(Pixels x, Pixels y);
-    void send_mouse_out_event(GmoObj* pGmo);
-    void send_mouse_in_event(GmoObj* pGmo);
+    void send_mouse_out_event(GmoRef gref);
+    void send_mouse_in_event(GmoRef gref);
     void notify_event(SpEventInfo pEvent, GmoObj* pGmo);
     void update_view_if_gmodel_modified();
     void update_view_if_needed();
     void find_parent_link_box_and_notify_event(SpEventInfo pEvent, GmoObj* pGmo);
     void do_force_redraw();
-    long find_event_originator_imo(GmoObj* pGmo);
+    ImoObj* find_event_originator_imo(GmoObj* pGmo);
+    GmoRef find_event_originator_gref(GmoObj* pGmo);
+    bool discard_score_highlight_event_if_not_valid(SpEventScoreHighlight pEvent);
+    bool is_valid_play_score_event(SpEventPlayScore pEvent);
 
 };
 

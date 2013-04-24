@@ -32,6 +32,7 @@
 #include "lomse_engrouters.h"
 #include "lomse_internal_model.h"
 #include "lomse_calligrapher.h"
+#include "lomse_logger.h"
 
 #include "utf8.h"
 
@@ -107,9 +108,8 @@ Engrouter* DefaultTextSplitter::get_next_text_engrouter(LUnits maxSpace)
     size_t breakPoint = m_start;
     LUnits nextWidth = m_glyphWidths[i];
     bool fSpaces = false;
-    for (; i < m_totalGlyphs && width + nextWidth < maxSpace; ++i)
+    while (i < m_totalGlyphs && width + nextWidth < maxSpace)
     {
-        nextWidth = m_glyphWidths[i];
         if (m_glyphs[i] == L' ')
         {
             if (!fSpaces)
@@ -120,7 +120,9 @@ Engrouter* DefaultTextSplitter::get_next_text_engrouter(LUnits maxSpace)
         }
         else
             fSpaces = false;
+
         width += nextWidth;
+        nextWidth = m_glyphWidths[++i];
     }
     if (i == m_totalGlyphs || (m_glyphs[i] == L' ' && !fSpaces))
         breakPoint = i;
@@ -141,6 +143,8 @@ Engrouter* DefaultTextSplitter::get_next_text_engrouter(LUnits maxSpace)
         return pEngr;
     }
     else
+    {
+        LOMSE_LOG_ERROR("Text without spaces is longer than line size");
         //TODO: If a text without spaces is longer than line size, returning NULL
         //will enter the program in an infinite loop, as TextSplitter will be invoked
         //again. Therefore, it is necessary to deal with this case. A posibility is
@@ -149,6 +153,7 @@ Engrouter* DefaultTextSplitter::get_next_text_engrouter(LUnits maxSpace)
         //was previouly returned and current maxSize == saved maxSize, it is clear
         //that text must be splitted in non-spaces position.
         return NULL;
+    }
 }
 
 
@@ -197,7 +202,17 @@ Engrouter* ChineseTextSplitter::get_next_text_engrouter(LUnits maxSpace)
         return pEngr;
     }
     else
+    {
+        LOMSE_LOG_ERROR("Text without spaces is longer than line size");
+        //TODO: If a text without spaces is longer than line size, returning NULL
+        //will enter the program in an infinite loop, as TextSplitter will be invoked
+        //again. Therefore, it is necessary to deal with this case. A posibility is
+        //to save information about maxSize and a flag signaling that NULL was returned
+        //in previous invocation. Then, when NULL is going to be returned, if NULL
+        //was previouly returned and current maxSize == saved maxSize, it is clear
+        //that text must be splitted in non-spaces position.
         return NULL;
+    }
 }
 
 

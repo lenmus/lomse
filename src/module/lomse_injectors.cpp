@@ -327,12 +327,12 @@ View* Injector::inject_View(LibraryScope& libraryScope, int viewType, Document* 
 
 //---------------------------------------------------------------------------------------
 Interactor* Injector::inject_Interactor(LibraryScope& libraryScope,
-                                        Document* pDoc, View* pView,
+                                        WpDocument wpDoc, View* pView,
                                         DocCommandExecuter* pExec)
 {
     //factory method
 
-    return LOMSE_NEW Interactor(libraryScope, pDoc, pView, pExec);
+    return LOMSE_NEW Interactor(libraryScope, wpDoc, pView, pExec);
 }
 
 //---------------------------------------------------------------------------------------
@@ -341,9 +341,11 @@ Presenter* Injector::inject_Presenter(LibraryScope& libraryScope,
 {
     View* pView = Injector::inject_View(libraryScope, viewType, pDoc);
     DocCommandExecuter* pExec = Injector::inject_DocCommandExecuter(pDoc);
-    Interactor* pInteractor = Injector::inject_Interactor(libraryScope, pDoc, pView, pExec);
+    SpDocument spDoc(pDoc);
+    WpDocument wpDoc(spDoc);
+    Interactor* pInteractor = Injector::inject_Interactor(libraryScope, wpDoc, pView, pExec);
     pView->set_interactor(pInteractor);
-    return LOMSE_NEW Presenter(pDoc, pInteractor, pExec);
+    return LOMSE_NEW Presenter(spDoc, pInteractor, pExec);
 }
 
 //---------------------------------------------------------------------------------------

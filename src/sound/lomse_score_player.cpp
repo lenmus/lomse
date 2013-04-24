@@ -41,14 +41,6 @@
 #include <algorithm>    //max(), min()
 #include <ctime>        //clock()
 
-#define LOMSE_LOG_SCORE_PLAYER  1
-
-#if LOMSE_LOG_SCORE_PLAYER == 1
-//    #define LOMSE_DO_LOG(msg)   dbgLogger << msg << endl;
-    #define LOMSE_DO_LOG(msg)   logger.log_message(msg, __FILE__,__LINE__);
-#else
-    #define LOMSE_DO_LOG(msg)
-#endif
 
 namespace lomse
 {
@@ -168,7 +160,7 @@ void ScorePlayer::play_from_measure(int nMeasure, bool fVisualTracking,
 //---------------------------------------------------------------------------------------
 void ScorePlayer::play_segment(int nEvStart, int nEvEnd)
 {
-    LOMSE_DO_LOG(">>[ScorePlayer::play_segment]");
+    LOMSE_LOG_DEBUG(Logger::k_score_player, ">>[ScorePlayer::play_segment]");
     m_fQuit = false;
     m_fFinalEventSent = false;
 
@@ -178,14 +170,14 @@ void ScorePlayer::play_segment(int nEvStart, int nEvEnd)
     m_pThread = LOMSE_NEW SoundThread(&ScorePlayer::thread_main, this,
                                 nEvStart, nEvEnd, m_fVisualTracking,
                                 m_nMM, m_pInteractor);
-    LOMSE_DO_LOG("<<[ScorePlayer::play_segment]");
+    LOMSE_LOG_DEBUG(Logger::k_score_player, "<<[ScorePlayer::play_segment]");
 }
 
 //---------------------------------------------------------------------------------------
 void ScorePlayer::thread_main(int nEvStart, int nEvEnd, bool fVisualTracking,
                               long nMM, Interactor* pInteractor)
 {
-    LOMSE_DO_LOG(">>[ScorePlayer::thread_main]");
+    LOMSE_LOG_DEBUG(Logger::k_score_player, ">>[ScorePlayer::thread_main]");
     try
     {
         if (pInteractor && !m_fPostEvents)
@@ -195,13 +187,13 @@ void ScorePlayer::thread_main(int nEvStart, int nEvEnd, bool fVisualTracking,
     }
     catch (boost::thread_interrupted&)
     {
-        LOMSE_DO_LOG("  [ScorePlayer::thread_main] catching interrupt");
+        LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::thread_main] catching interrupt");
     }
 
     end_of_playback_housekeeping(fVisualTracking, pInteractor);
     m_fPlaying = false;
 
-    LOMSE_DO_LOG("<<[ScorePlayer::thread_main]");
+    LOMSE_LOG_DEBUG(Logger::k_score_player, "<<[ScorePlayer::thread_main]");
 }
 
 //---------------------------------------------------------------------------------------
@@ -230,7 +222,7 @@ void ScorePlayer::pause()
 //---------------------------------------------------------------------------------------
 void ScorePlayer::stop()
 {
-    LOMSE_DO_LOG(">>[ScorePlayer::stop]");
+    LOMSE_LOG_DEBUG(Logger::k_score_player, ">>[ScorePlayer::stop]");
     if (m_pThread)
     {
         m_fShouldStop = true;
@@ -238,20 +230,20 @@ void ScorePlayer::stop()
         //wait 500 ms for termination
         if(!m_pThread->timed_join(boost::posix_time::milliseconds(500)))
         {
-            LOMSE_DO_LOG("  [ScorePlayer::stop] Not finisehd in 500ms. Force interrupt");
+            LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::stop] Not finisehd in 500ms. Force interrupt");
             m_pThread->interrupt();
             if(!m_pThread->timed_join(boost::posix_time::seconds(2)))
             {
-                LOMSE_DO_LOG("  [ScorePlayer::stop] Interrupt failed. Force terminate");
+                LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::stop] Interrupt failed. Force terminate");
                 throw runtime_error("Thread interrup failed");
             }
         }
-        LOMSE_DO_LOG("  [ScorePlayer::stop] Delete thread");
+        LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::stop] Delete thread");
         delete m_pThread;
         m_pThread = NULL;
         m_fShouldStop = false;
     }
-    LOMSE_DO_LOG("<<[ScorePlayer::stop]");
+    LOMSE_LOG_DEBUG(Logger::k_score_player, "<<[ScorePlayer::stop]");
 }
 
 //---------------------------------------------------------------------------------------
@@ -264,11 +256,11 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     // This is the real method doing the work. It is executed inside a
     // different thread.
 
-    LOMSE_DO_LOG(">>[ScorePlayer::do_play]");
+    LOMSE_LOG_DEBUG(Logger::k_score_player, ">>[ScorePlayer::do_play]");
     // if no MIDI server or not inside a thread, return
     if (!m_pMidi || !m_pThread)
     {
-        LOMSE_DO_LOG("<<[ScorePlayer::do_play] no Midi or no thread");
+        LOMSE_LOG_DEBUG(Logger::k_score_player, "<<[ScorePlayer::do_play] no Midi or no thread");
         return;
     }
 
@@ -277,12 +269,12 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     std::vector<SoundEvent*>& events = m_pTable->get_events();
     if (events.size() == 0)
     {
-        LOMSE_DO_LOG("<<[ScorePlayer::do_play] no events to play");
+        LOMSE_LOG_DEBUG(Logger::k_score_player, "<<[ScorePlayer::do_play] no events to play");
         return;
     }
 
-    #define k_QUARTER_DURATION  64        //duration (LDP units) of a quarter note (to convert to milliseconds)
-    #define k_SOLFA_NOTE        60        //pitch for sight reading with percussion sound
+    const long k_QUARTER_DURATION = 64L;    //duration (LDP units) of a quarter note (to convert to milliseconds)
+    const int k_SOLFA_NOTE = 60;            //pitch for sight reading with percussion sound
     int nPercussionChannel = m_MtrChannel;        //channel to use for percussion
 
     //options
@@ -468,7 +460,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         m_pMidi->note_on(m_MtrChannel, m_MtrTone1, 127);
         if (fVisualTracking)
         {
-            pEvent->add_item(k_advance_tempo_line_event, events[i]->pSO);
+            if (events[i]->pSO)
+                pEvent->add_item(k_advance_tempo_line_event, events[i]->pSO->get_id());
             if (nMtrEvDeltaTime < events[i]->DeltaTime)
             {
                 //last metronome click is previous to first event from table.
@@ -551,8 +544,8 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                     else
                         m_pMidi->note_on(m_MtrChannel, m_MtrTone2, 127);
                 }
-                if (fVisualTracking)
-                    pEvent->add_item(k_advance_tempo_line_event, events[i]->pSO);
+                if (fVisualTracking && events[i]->pSO != NULL)
+                    pEvent->add_item(k_advance_tempo_line_event, events[i]->pSO->get_id());
 
                 fMtrOn = true;
                 nMtrEvDeltaTime += nMtrIntvalOff;
@@ -614,7 +607,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 }
 
                 if (fVisualTracking && events[i]->pSO->is_visible())
-                    pEvent->add_item(k_highlight_on_event, events[i]->pSO);
+                    pEvent->add_item(k_highlight_on_event, events[i]->pSO->get_id());
 
             }
             else if (events[i]->EventType == SoundEvent::k_note_off)
@@ -637,20 +630,20 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
                 }
 
                 if (fVisualTracking && events[i]->pSO->is_visible())
-                    pEvent->add_item(k_highlight_off_event, events[i]->pSO);
+                    pEvent->add_item(k_highlight_off_event, events[i]->pSO->get_id());
             }
             else if (events[i]->EventType == SoundEvent::k_visual_on)
             {
                 //set visual highlight
                 if (fVisualTracking)
-                    pEvent->add_item(k_highlight_on_event, events[i]->pSO);
+                    pEvent->add_item(k_highlight_on_event, events[i]->pSO->get_id());
 
             }
             else if (events[i]->EventType == SoundEvent::k_visual_off)
             {
                 //remove visual highlight
                 if (fVisualTracking)
-                    pEvent->add_item(k_highlight_off_event, events[i]->pSO);
+                    pEvent->add_item(k_highlight_off_event, events[i]->pSO->get_id());
 
             }
             else if (events[i]->EventType == SoundEvent::k_end_of_score)
@@ -712,10 +705,10 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         fPlayWithMetronome = m_pPlayerGui->metronome_status();
 
         //check if the thread should be paused or stopped
-        LOMSE_DO_LOG("  [ScorePlayer::do_play] in interrupt check point");
+        LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::do_play] in interrupt check point");
         if (m_fShouldStop)
         {
-            LOMSE_DO_LOG("  [ScorePlayer::do_play] Going to finish 1");
+            LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::do_play] Going to finish 1");
             break;
         }
         while(m_fPaused)
@@ -723,7 +716,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             boost::this_thread::sleep( boost::posix_time::milliseconds(200) );
             if (m_fShouldStop)
             {
-                LOMSE_DO_LOG("  [ScorePlayer::do_play] Going to finish 2");
+                LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::do_play] Going to finish 2");
                 break;
             }
         }
@@ -736,13 +729,13 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         m_fFinalEventSent = true;
         SpEventScoreHighlight pEvent(
             LOMSE_NEW EventScoreHighlight(wpInteractor, m_pScore->get_id()) );
-        pEvent->add_item(k_end_of_higlight_event, NULL);
+        pEvent->add_item(k_end_of_higlight_event, k_no_imoid);
         if (m_fPostEvents)
             m_libScope.post_event(pEvent);
         else if (pInteractor)
             pInteractor->handle_event(pEvent);
     }
-    LOMSE_DO_LOG("<<[ScorePlayer::do_play]");
+    LOMSE_LOG_DEBUG(Logger::k_score_player, "<<[ScorePlayer::do_play]");
 }
 
 //---------------------------------------------------------------------------------------
@@ -763,7 +756,7 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
             wpInteractor = WpInteractor();
         SpEventScoreHighlight pEvent(
             LOMSE_NEW EventScoreHighlight(wpInteractor, m_pScore->get_id()) );
-        pEvent->add_item(k_end_of_higlight_event, NULL);
+        pEvent->add_item(k_end_of_higlight_event, k_no_imoid);
         if (m_fPostEvents)
             m_libScope.post_event(pEvent);
         else if (pInteractor)

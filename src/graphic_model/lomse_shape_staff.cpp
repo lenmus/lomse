@@ -40,7 +40,7 @@ namespace lomse
 //#define lmNO_LEDGER_LINES   -100000.0f
 
 //---------------------------------------------------------------------------------------
-GmoShapeStaff::GmoShapeStaff(ImoObj* pCreatorImo, int idx, ImoStaffInfo* pStaff,
+GmoShapeStaff::GmoShapeStaff(ImoObj* pCreatorImo, ShapeId idx, ImoStaffInfo* pStaff,
                              int iStaff, LUnits width, Color color)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_staff, idx, color)
     , m_pStaff(pStaff)

@@ -56,20 +56,20 @@ namespace lomse
 //=======================================================================================
 // Interactor implementation
 //=======================================================================================
-Interactor::Interactor(LibraryScope& libraryScope, Document* pDoc, View* pView,
+Interactor::Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView,
                        DocCommandExecuter* pExec)
     : EventHandler()
     , EventNotifier(libraryScope.get_events_dispatcher())
     , Observable()
     , m_libScope(libraryScope)
-    , m_pDoc(pDoc)
+    , m_wpDoc(wpDoc)
     , m_pView(pView)
     , m_pGraphicModel(NULL)
     , m_pTask( Injector::inject_Task(TaskFactory::k_task_null, NULL) )
-    , m_pCursor( Injector::inject_DocCursor(pDoc) )
+    , m_pCursor(NULL)
     , m_pExec(pExec)
     , m_selections()
-    , m_pLastMouseOverGmo(NULL)
+    , m_grefLastMouseOver(k_no_gmo_ref)
     , m_renderTime(0.0)
     , m_gmodelBuildTime(0.0)
     , m_fViewParamsChanged(false)
@@ -77,9 +77,17 @@ Interactor::Interactor(LibraryScope& libraryScope, Document* pDoc, View* pView,
 {
     switch_task(TaskFactory::k_task_selection);     //k_task_drag_view);
 
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->use_cursor(m_pCursor);
+    if (SpDocument spDoc = m_wpDoc.lock())
+    {
+        LOMSE_LOG_DEBUG(Logger::k_mvc, "[Interactor::Interactor] Creating Interactor. Document is valid");
+        Document* pDoc = spDoc.get();
+        m_pCursor = Injector::inject_DocCursor(pDoc);
+
+        GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+        if (pGView)
+            pGView->use_cursor(m_pCursor);
+    }
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "[Interactor::Interactor] Interactor created.");
 }
 
 //---------------------------------------------------------------------------------------
@@ -89,7 +97,7 @@ Interactor::~Interactor()
     delete m_pView;
     delete_graphic_model();
     delete m_pCursor;
-    logger.log_message("[Interactor::~Interactor] Interactor is deleted", __FILE__,__LINE__);
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "[Interactor::~Interactor] Interactor is deleted");
 }
 
 //---------------------------------------------------------------------------------------
@@ -111,23 +119,32 @@ GraphicModel* Interactor::get_graphic_model()
 //---------------------------------------------------------------------------------------
 void Interactor::create_graphic_model()
 {
-    start_timer();
+    LOMSE_LOG_DEBUG(Logger::k_render, "");
 
-    InternalModel* pIModel = m_pDoc->get_im_model();
-    if (pIModel)
+    if (SpDocument spDoc = m_wpDoc.lock())
     {
-        DocLayouter layouter(pIModel, m_libScope);
-        layouter.layout_document();
-        m_pGraphicModel = layouter.get_gm_model();
-        m_pGraphicModel->build_main_boxes_table();
-    }
+        start_timer();
 
-    m_gmodelBuildTime = get_elapsed_time();
+        InternalModel* pIModel = spDoc->get_im_model();
+        if (pIModel)
+        {
+            LOMSE_LOG_DEBUG(Logger::k_render, "[Interactor::create_graphic_model]");
+            DocLayouter layouter(pIModel, m_libScope);
+            layouter.layout_document();
+            m_pGraphicModel = layouter.get_gm_model();
+            m_pGraphicModel->build_main_boxes_table();
+        }
+        spDoc->clear_dirty();
+
+        m_gmodelBuildTime = get_elapsed_time();
+    }
+//    m_idLastMouseOver = k_no_imoid;
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::on_document_reloaded()
 {
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "[Interactor::on_document_reloaded]");
     delete_graphic_model();
     create_graphic_model();
     //TODO: Interactor::on_document_reloaded. Update cursor
@@ -147,6 +164,9 @@ void Interactor::handle_event(SpEventInfo pEvent)
 
         case k_highlight_event:
         {
+            //AWARE: It sould never arrive here as on_visual_highlight() must
+            //be invoked directly by user application to save time
+            LOMSE_LOG_DEBUG(Logger::k_events, "Interactor::handle_even] Higlight event received");
             SpEventScoreHighlight pEv(
                 boost::static_pointer_cast<EventScoreHighlight>(pEvent) );
             on_visual_highlight(pEv);
@@ -155,8 +175,12 @@ void Interactor::handle_event(SpEventInfo pEvent)
 
         case k_end_of_playback_event:
         {
+            //AWARE: It could never arrive here as send_end_of_play_event() could
+            //be invoked directly by user application
+            LOMSE_LOG_DEBUG(Logger::k_events, "Interactor::handle_even] End of playback event received");
             SpEventPlayScore pEv( boost::static_pointer_cast<EventPlayScore>(pEvent) );
-            send_end_of_play_event(pEv->get_score(), pEv->get_player());
+            if (is_valid_play_score_event(pEv))
+                send_end_of_play_event(pEv->get_score(), pEv->get_player());
             break;
         }
 
@@ -171,7 +195,8 @@ void Interactor::delete_graphic_model()
     m_selections.clear();
     delete m_pGraphicModel;
     m_pGraphicModel = NULL;
-    m_pLastMouseOverGmo = NULL;
+//    m_idLastMouseOver = k_no_imoid;
+    LOMSE_LOG_DEBUG(Logger::k_render, "[Interactor::delete_graphic_model] deleted.");
 }
 
 ////---------------------------------------------------------------------------------------
@@ -191,6 +216,7 @@ void Interactor::delete_graphic_model()
 //---------------------------------------------------------------------------------------
 void Interactor::on_mouse_button_down(Pixels x, Pixels y, unsigned flags)
 {
+    LOMSE_LOG_DEBUG(Logger::k_events, "");
     m_pTask->process_event( Event((flags & k_mouse_left ? Event::k_mouse_left_down
                                                         : Event::k_mouse_right_down),
                                   x, y, flags) );
@@ -199,6 +225,7 @@ void Interactor::on_mouse_button_down(Pixels x, Pixels y, unsigned flags)
 //---------------------------------------------------------------------------------------
 void Interactor::on_mouse_move(Pixels x, Pixels y, unsigned flags)
 {
+    LOMSE_LOG_TRACE(Logger::k_events, "[Interactor::on_mouse_move] mouse move detected");
     m_pTask->process_event( Event(Event::k_mouse_move, x, y, flags) );
 }
 
@@ -234,17 +261,21 @@ void Interactor::select_object_at_screen_point(Pixels x, Pixels y, unsigned flag
 void Interactor::click_at_screen_point(Pixels x, Pixels y, unsigned flags)
 
 {
-    GmoObj* pGmo = find_object_at(x, y);
-    if (pGmo)
+    if (SpDocument spDoc = m_wpDoc.lock())
     {
-        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
-        if (pGmo->is_box_control() || (pImo && pImo->is_visible()) )
+        GmoObj* pGmo = find_object_at(x, y);
+        if (pGmo)
         {
-            long id = find_event_originator_imo(pGmo);
-            SpInteractor sp = get_shared_ptr_from_this();
-            WpInteractor wp(sp);
-            SpEventMouse pEvent( LOMSE_NEW EventMouse(k_on_click_event, wp, id, m_pDoc) );
-            notify_event(pEvent, pGmo);
+            ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
+            if (pGmo->is_box_control() || (pImo && pImo->is_visible()) )
+            {
+                ImoObj* pImo = find_event_originator_imo(pGmo);
+                ImoId id = pImo ? pImo->get_id() : k_no_imoid;
+                SpInteractor sp = get_shared_ptr_from_this();
+                WpInteractor wp(sp);
+                SpEventMouse pEvent( LOMSE_NEW EventMouse(k_on_click_event, wp, id, m_wpDoc) );
+                notify_event(pEvent, pGmo);
+            }
         }
     }
 }
@@ -253,45 +284,63 @@ void Interactor::click_at_screen_point(Pixels x, Pixels y, unsigned flags)
 void Interactor::mouse_in_out(Pixels x, Pixels y)
 {
     GmoObj* pGmo = find_object_at(x, y);
+    if (pGmo == NULL)
+        return;
 
-    if (m_pLastMouseOverGmo && m_pLastMouseOverGmo != pGmo)
+    GmoRef gref = find_event_originator_gref(pGmo);
+
+    LOMSE_LOG_DEBUG(Logger::k_events, str(boost::format(
+        "[Interactor::mouse_in_out] Gmo %d, %s / gref(%d, %d) -------------------")
+         % pGmo->get_gmobj_type() % pGmo->get_name()
+         % gref.first % gref.second ));
+
+    if (m_grefLastMouseOver != k_no_gmo_ref && m_grefLastMouseOver != gref)
     {
-        send_mouse_out_event(m_pLastMouseOverGmo);
-        m_pLastMouseOverGmo = NULL;
+        LOMSE_LOG_DEBUG(Logger::k_events, str(boost::format(
+            "[Interactor::mouse_in_out] Mouse out. gref(%d %d)")
+            % m_grefLastMouseOver.first % m_grefLastMouseOver.second ));
+        send_mouse_out_event(m_grefLastMouseOver);
+        m_grefLastMouseOver = k_no_gmo_ref;
     }
 
-    if (pGmo && m_pLastMouseOverGmo != pGmo)
+    if (m_grefLastMouseOver == k_no_gmo_ref && gref != k_no_gmo_ref)
     {
-        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
-        if (pGmo->is_box_control() || (pImo && pImo->is_visible()) )
-        {
-//            if (pImo)
-//                cout << "mouse-in: " << pImo->get_obj_type() << endl;
-            send_mouse_in_event(pGmo);
-            m_pLastMouseOverGmo = pGmo;
-        }
+        LOMSE_LOG_DEBUG(Logger::k_events, str(boost::format(
+            "[Interactor::mouse_in_out] Mouse in. gref(%d %d)")
+            % gref.first % gref.second ));
+        send_mouse_in_event(gref);
+        m_grefLastMouseOver = gref;
     }
 
-    update_view_if_needed();
 }
 
 //---------------------------------------------------------------------------------------
-long Interactor::find_event_originator_imo(GmoObj* pGmo)
+ImoObj* Interactor::find_event_originator_imo(GmoObj* pGmo)
 {
     ImoContentObj* pParent = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
     while (pParent && !pParent->is_link())
         pParent = dynamic_cast<ImoContentObj*>( pParent->get_parent() );
 
     if (pParent && pParent->is_link())
-        return pParent->get_id();
+        return pParent;
     else
+        return dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
+}
+
+//---------------------------------------------------------------------------------------
+GmoRef Interactor::find_event_originator_gref(GmoObj* pGmo)
+{
+    if (pGmo->is_box_control())
+        return pGmo->get_ref();
+
+    else if (pGmo->is_shape_word())
     {
-        pParent = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
-        if (pParent)
-            return pParent->get_id();
-        else
-            return -1L; //TODO: throw ?
+        ImoObj* pImo = find_event_originator_imo(pGmo);
+        if (pImo && pImo->is_mouse_over_generator())
+            return make_pair(pImo->get_id(), 0);
     }
+
+    return k_no_gmo_ref;
 }
 
 ////---------------------------------------------------------------------------------------
@@ -339,13 +388,18 @@ bool Interactor::view_needs_repaint()
     //if (!m_fViewUpdatesEnabled)
     //    return false;
 
-    if (m_pDoc->is_dirty() || m_fViewParamsChanged)
-        return true;
-    else
+    if (SpDocument spDoc = m_wpDoc.lock())
     {
-        GraphicModel* pGM = get_graphic_model();
-        return pGM->is_modified();
+        if (spDoc->is_dirty() || m_fViewParamsChanged)
+            return true;
+        else
+        {
+            GraphicModel* pGM = get_graphic_model();
+            return pGM->is_modified();
+        }
     }
+    else
+        return true;
 }
 
 //---------------------------------------------------------------------------------------
@@ -397,9 +451,11 @@ void Interactor::redraw_bitmap()
 //---------------------------------------------------------------------------------------
 void Interactor::request_window_update()
 {
+    LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::request_window_update]");
+
     SpInteractor sp = get_shared_ptr_from_this();
-    WpInteractor wp(sp);
-    SpEventView pEvent( LOMSE_NEW EventView(k_update_window_event, wp) );
+    WpInteractor wpIntor(sp);
+    SpEventView pEvent( LOMSE_NEW EventView(k_update_window_event, wpIntor) );
     notify_observers(pEvent, this);
 }
 
@@ -524,7 +580,9 @@ void Interactor::highlight_object(ImoStaffObj* pSO)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
+    {
         pGView->highlight_object(pSO);
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -533,6 +591,14 @@ void Interactor::remove_highlight_from_object(ImoStaffObj* pSO)
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->remove_highlight_from_object(pSO);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::discard_all_highlight()
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->discard_all_highlight();
 }
 
 //---------------------------------------------------------------------------------------
@@ -676,115 +742,216 @@ VSize Interactor::get_page_size_in_pixels(int nPage)
 //        pGView->on_resize(x, y);
 //}
 
+//---------------------------------------------------------------------------------------
+bool Interactor::discard_score_highlight_event_if_not_valid(SpEventScoreHighlight pEvent)
+{
+    //returns true if event discarded
+
+    ImoObj* pScore = NULL;
+    if (SpDocument spDoc = m_wpDoc.lock())
+        pScore = spDoc->get_pointer_to_imo( pEvent->get_score_id() );
+
+    if (!pScore || !pScore->is_score())
+    {
+        LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::discard_score_highlight_event_if_not_valid] Score deleted. All highlight discarded");
+        discard_all_highlight();
+        return true;
+    }
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
+bool Interactor::is_valid_play_score_event(SpEventPlayScore pEvent)
+{
+    LOMSE_LOG_ERROR("TODO: Method not implemented");
+    //TODO
+//    ImoObj* pScore = m_pDoc->get_pointer_to_imo( pEvent->get_score_id() );
+//    if (!pScore || !pScore->is_score())
+//    {
+//        logger.log_message("[Interactor::is_valid_play_score_event] Score not valid. Event discarded", __FILE__, __LINE__);
+//        return false;
+//    }
+    return true;
+}
 
 //---------------------------------------------------------------------------------------
 void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
 {
     static Pixels xPos = 100;
 
-    std::list< pair<int, ImoStaffObj*> >& items = pEvent->get_items();
-    std::list< pair<int, ImoStaffObj*> >::iterator it;
-    for (it = items.begin(); it != items.end(); ++it)
+    if (SpDocument spDoc = m_wpDoc.lock())
     {
-        ImoStaffObj* pSO = (*it).second;
-        switch ((*it).first)
+        if (discard_score_highlight_event_if_not_valid(pEvent))
+            return;
+
+        LOMSE_LOG_DEBUG(Logger::k_events, "Interactor::on_visual_highlight] Processing higlight event");
+        std::list< pair<int, ImoId> >& items = pEvent->get_items();
+        std::list< pair<int, ImoId> >::iterator it;
+        for (it = items.begin(); it != items.end(); ++it)
         {
-            case k_end_of_higlight_event:
-                hide_tempo_line();
-                remove_all_highlight();
-                break;
+            switch ((*it).first)
+            {
+                case k_end_of_higlight_event:
+                    hide_tempo_line();
+                    remove_all_highlight();
+                    break;
 
-            case k_highlight_off_event:
-                remove_highlight_from_object(pSO);
-                break;
+                case k_highlight_off_event:
+                    remove_highlight_from_object( static_cast<ImoStaffObj*>(
+                                                spDoc->get_pointer_to_imo((*it).second) ));
+                    break;
 
-            case k_highlight_on_event:
-                highlight_object(pSO);
-                break;
+                case k_highlight_on_event:
+                    highlight_object( static_cast<ImoStaffObj*>(
+                                            spDoc->get_pointer_to_imo((*it).second) ));
+                    break;
 
-            case k_advance_tempo_line_event:
-                xPos += 20;
-                show_tempo_line(xPos, 150, xPos+1, 200);
-                break;
+                case k_advance_tempo_line_event:
+                    xPos += 20;
+                    show_tempo_line(xPos, 150, xPos+1, 200);
+                    break;
 
-            default:
-                string msg = str( boost::format(
-                                "[Interactor::on_visual_highlight] Unknown event type %d.")
-                                % (*it).first );
-                throw std::runtime_error(msg);
+                default:
+                    string msg = str( boost::format(
+                                    "[Interactor::on_visual_highlight] Unknown event type %d.")
+                                    % (*it).first );
+                    throw std::runtime_error(msg);
+            }
         }
+        do_force_redraw();
     }
-    do_force_redraw();
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::send_end_of_play_event(ImoScore* pScore, PlayerGui* pPlayCtrl)
 {
-    SpInteractor sp = get_shared_ptr_from_this();
-    WpInteractor wp(sp);
-    SpEventView pEvent( LOMSE_NEW EventView(k_end_of_playback_event, wp) );
-    if (pPlayCtrl)
-        pPlayCtrl->on_end_of_playback();
+    LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::send_end_of_play_event]");
 
-    m_pDoc->notify_observers(pEvent, m_pDoc);
+    if (SpDocument spDoc = m_wpDoc.lock())
+    {
+        Document* pDoc = spDoc.get();
+        SpInteractor sp = get_shared_ptr_from_this();
+        WpInteractor wpIntor(sp);
+        SpEventView pEvent( LOMSE_NEW EventView(k_end_of_playback_event, wpIntor) );
+        if (pPlayCtrl)
+            pPlayCtrl->on_end_of_playback();
 
-    update_view_if_needed();
+        pDoc->notify_observers(pEvent, pDoc);
+
+        update_view_if_needed();
+    }
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::update_view_if_needed()
 {
-    if (m_pDoc->is_dirty())
-        m_pDoc->notify_if_document_modified();
-    else
-        update_view_if_gmodel_modified();
+    if (SpDocument spDoc = m_wpDoc.lock())
+    {
+        if (spDoc->is_dirty())
+        {
+            LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::update_view_if_needed] ask Document to update if dirty.");
+            spDoc->notify_if_document_modified();
+        }
+        else
+        {
+            LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::update_view_if_needed] update view if GModel dirty");
+            update_view_if_gmodel_modified();
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::send_mouse_out_event(GmoObj* pGmo)
+void Interactor::send_mouse_out_event(GmoRef gref)
 {
-    long id = find_event_originator_imo(pGmo);
-    SpInteractor sp = get_shared_ptr_from_this();
-    WpInteractor wp(sp);
-    SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_out_event, wp, id, m_pDoc) );
-    notify_event(pEvent, pGmo);
+    if (SpDocument spDoc = m_wpDoc.lock())
+    {
+        LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::send_mouse_out_event]");
+        SpInteractor spIntor = get_shared_ptr_from_this();
+        WpInteractor wpIntor(spIntor);
+        ImoId id = gref.first;
+        SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_out_event, wpIntor, id, m_wpDoc));
+        GraphicModel* pGM = get_graphic_model();
+        GmoObj* pGmo = pGM->get_box_for_control(gref);
+        if (pGmo)
+            notify_event(pEvent, pGmo);
+    }
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::send_mouse_in_event(GmoObj* pGmo)
+void Interactor::send_mouse_in_event(GmoRef gref)
 {
-    long id = find_event_originator_imo(pGmo);
-    SpInteractor sp = get_shared_ptr_from_this();
-    WpInteractor wp(sp);
-    SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_in_event, wp, id, m_pDoc) );
-    notify_event(pEvent, pGmo);
+    if (SpDocument spDoc = m_wpDoc.lock())
+    {
+        LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::send_mouse_in_event]");
+        SpInteractor sp = get_shared_ptr_from_this();
+        WpInteractor wp(sp);
+        ImoId id = gref.first;
+        SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_in_event, wp, id, m_wpDoc) );
+        GraphicModel* pGM = get_graphic_model();
+        GmoObj* pGmo = pGM->get_box_for_control(gref);
+        if (pGmo)
+            notify_event(pEvent, pGmo);
+    }
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::notify_event(SpEventInfo pEvent, GmoObj* pGmo)
 {
-    if (pGmo->is_box_control())
-        (static_cast<GmoBoxControl*>(pGmo))->notify_event(pEvent);
-    else if (pGmo->is_box_link() || pGmo->is_in_link())
-        find_parent_link_box_and_notify_event(pEvent, pGmo);
-    else
-        m_pDoc->notify_observers(pEvent, pEvent->get_source() );
+    if (SpDocument spDoc = m_wpDoc.lock())
+    {
+        if (spDoc->is_dirty())
+        {
+            LOMSE_LOG_TRACE(Logger::k_events, "Document is already dirty!");
+        }
+
+        if (pGmo->is_box_control())
+        {
+            LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::notify_event] notify to GmoBoxControl");
+            (static_cast<GmoBoxControl*>(pGmo))->notify_event(pEvent);
+            update_view_if_gmodel_modified();
+        }
+        else if (pGmo->is_box_link() || pGmo->is_in_link())
+        {
+            LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::notify_event] notify to link");
+            find_parent_link_box_and_notify_event(pEvent, pGmo);
+        }
+        else
+        {
+            LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::notify_event] notify to Document");
+            spDoc->notify_observers(pEvent, pEvent->get_source() );
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::find_parent_link_box_and_notify_event(SpEventInfo pEvent, GmoObj* pGmo)
 {
     while(pGmo && !pGmo->is_box_link())
+    {
+        LOMSE_LOG_DEBUG(Logger::k_events, str( boost::format("Gmo type: %d, %s")
+                    % pGmo->get_gmobj_type() % pGmo->get_name() ) );
         pGmo = pGmo->get_owner_box();
+    }
 
     if (pGmo)
     {
         (static_cast<GmoBoxLink*>(pGmo))->notify_event(pEvent);
+
         if (pEvent->is_on_click_event())
+        {
+            LOMSE_LOG_DEBUG(Logger::k_events, " post_event to user app.");
             m_libScope.post_event(pEvent);
             //AWARE: current document will be destroyed when the event is processed
+        }
         else
+        {
+            LOMSE_LOG_DEBUG(Logger::k_events, " update_view_if_needed");
             update_view_if_needed();
+        }
+    }
+    else
+    {
+        LOMSE_LOG_DEBUG(Logger::k_events, "No  parent box link found");
     }
 }
 

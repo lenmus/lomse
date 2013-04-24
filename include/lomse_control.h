@@ -56,12 +56,12 @@ protected:
     LibraryScope&   m_libraryScope;
     Document*       m_pDoc;
     Control*        m_pParent;
-    long            m_ownerImoId;
+    ImoId           m_ownerImoId;
     string          m_language;
     ImoStyle*       m_style;
     bool            m_fEnabled;
     bool            m_fVisible;
-    long            m_id;
+    ImoId           m_id;
     list<Control*>  m_controls;
 
     Control(LibraryScope& libraryScope, Document* pDoc, Control* pParent)
@@ -70,12 +70,12 @@ protected:
         , m_libraryScope(libraryScope)
         , m_pDoc(pDoc)
         , m_pParent(pParent)
-        , m_ownerImoId(-1L)
+        , m_ownerImoId(k_no_imoid)
         , m_language()
         , m_style(NULL)
         , m_fEnabled(true)
         , m_fVisible(true)
-        , m_id(-1L)
+        , m_id(k_no_imoid)
     {
         pDoc->assign_id(this);
 
@@ -150,8 +150,8 @@ public:
     //getters
     inline bool is_enabled() { return m_fEnabled; }
     inline bool is_visible() { return m_fVisible; }
-    inline long get_id() { return m_id; }
-    inline long get_owner_imo_id() { return m_ownerImoId; }
+    inline ImoId get_control_id() { return m_id; }
+    inline ImoId get_owner_imo_id() { return m_ownerImoId; }
 
     ImoControl* get_owner_imo() {
         if (m_ownerImoId != -1L)
@@ -165,7 +165,7 @@ public:
     //setters
     inline void enable(bool value) { m_fEnabled = value; }
     inline void set_visible(bool value) { m_fVisible = value; }
-    inline void set_id(long id) { m_id = id; }
+    inline void set_control_id(ImoId id) { m_id = id; }
     inline void set_owner_imo(ImoControl* pImo) { m_ownerImoId = pImo->get_id(); }
 
 protected:

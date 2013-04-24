@@ -54,7 +54,7 @@ public:
     virtual string generate_source(ImoObj* pParent=NULL) = 0;
 
 protected:
-    void start_element(const string& name, int id, bool fInNewLine=true);
+    void start_element(const string& name, ImoId id, bool fInNewLine=true);
     void end_element(bool fStartLine = true);
     void start_comment();
     void end_comment();
@@ -82,10 +82,9 @@ protected:
 
 };
 
-#define k_in_same_line      false
-#define k_in_new_line       true
-#define k_no_id             -1
-#define k_indent_step       3
+const bool k_in_same_line = false;
+const bool k_in_new_line = true;
+const int k_indent_step = 3;
 
 
 //=======================================================================================
@@ -202,7 +201,7 @@ protected:
 
     string source_for_first()
     {
-        start_element("beam", k_no_id, k_in_same_line);
+        start_element("beam", k_no_imoid, k_in_same_line);
         add_beam_number();
         add_segments_info();
         end_element(k_in_same_line);
@@ -598,7 +597,7 @@ protected:
 
     void add_version()
     {
-        start_element("vers", k_no_id);
+        start_element("vers", k_no_imoid);
         m_source << m_pObj->get_version();
         end_element(k_in_same_line);
     }
@@ -940,7 +939,7 @@ public:
     {
         if (m_pObj->is_start_of_chord())
         {
-            start_element("chord", k_no_id);
+            start_element("chord", k_no_imoid);
             m_pExporter->set_processing_chord(true);
         }
 
@@ -1255,14 +1254,14 @@ protected:
 
     void add_start_point()
     {
-        start_element("startPoint", k_no_id, k_in_same_line);
+        start_element("startPoint", k_no_imoid, k_in_same_line);
         add_location(m_pObj->get_start_point());
         end_element(k_in_same_line);
     }
 
     void add_end_point()
     {
-        start_element("endPoint", k_no_id, k_in_same_line);
+        start_element("endPoint", k_no_imoid, k_in_same_line);
         add_location(m_pObj->get_end_point());
         end_element(k_in_same_line);
     }
@@ -1273,7 +1272,7 @@ protected:
         if (type == k_line_none)
             return;
 
-        start_element("lineStyle", k_no_id, k_in_same_line);
+        start_element("lineStyle", k_no_imoid, k_in_same_line);
         switch(type)
         {
             case k_line_solid:
@@ -1307,7 +1306,7 @@ protected:
         if (type == k_cap_none)
             return;
 
-        start_element(tag, k_no_id, k_in_same_line);
+        start_element(tag, k_no_imoid, k_in_same_line);
         switch(type)
         {
             case k_cap_arrowhead:
@@ -1396,7 +1395,7 @@ protected:
         ImoStyle* pStyle = m_pObj->get_style();
         if (pStyle)
         {
-            start_element("style", k_no_id);
+            start_element("style", k_no_imoid);
             m_source << "\"" << pStyle->get_name() << "\"";
             end_element(k_in_same_line);
         }
@@ -1435,7 +1434,7 @@ protected:
         {
             m_source << " p" << (m_pObj->get_staff() + 1) << " ";
 //            m_source << " ";
-//            start_element("staffNum", k_no_id, k_in_same_line);
+//            start_element("staffNum", k_no_imoid, k_in_same_line);
 //            m_source << (m_pObj->get_staff() + 1);
 //            end_element(k_in_same_line);
         }
@@ -1557,7 +1556,7 @@ protected:
                                        : m_pTie->get_stop_bezier() );
         if (pInfo)
         {
-            start_element("bezier", k_no_id);
+            start_element("bezier", k_no_imoid);
 
             static string sPointNames[4] = { "start", "end", "ctrol1", "ctrol2" };
 
@@ -1569,13 +1568,13 @@ protected:
                 {
                     if (pt.x != 0.0f)
                     {
-                        start_element( sPointNames[i] + "-x", k_no_id, k_in_same_line);
+                        start_element( sPointNames[i] + "-x", k_no_imoid, k_in_same_line);
                         m_source << pt.x;
                         end_element(k_in_same_line);
                     }
                     if (pt.y != 0.0f)
                     {
-                        start_element( sPointNames[i] + "-y", k_no_id, k_in_same_line);
+                        start_element( sPointNames[i] + "-y", k_no_imoid, k_in_same_line);
                         m_source << pt.y;
                         end_element(k_in_same_line);
                     }
@@ -1706,7 +1705,7 @@ protected:
             return;     //default option
 
         m_source << " ";
-        start_element("displayNumber", k_no_id, k_in_same_line);
+        start_element("displayNumber", k_no_imoid, k_in_same_line);
 
         if (number == ImoTuplet::k_number_both)
             m_source << "both";
@@ -1729,13 +1728,13 @@ protected:
 //=======================================================================================
 // LdpGenerator implementation
 //=======================================================================================
-void LdpGenerator::start_element(const string& name, int id, bool fInNewLine)
+void LdpGenerator::start_element(const string& name, ImoId id, bool fInNewLine)
 {
     if (fInNewLine)
         new_line_and_indent_spaces();
 
     m_source << "(" << name;
-    if (m_pExporter->get_add_id() && id != k_no_id)
+    if (m_pExporter->get_add_id() && id != k_no_imoid)
         m_source << "#" << std::dec << id;
     m_source << " ";
     increment_indent();
@@ -1900,7 +1899,7 @@ void LdpGenerator::add_width_if_not_default(Tenths width, Tenths def)
 {
     if (width != def)
     {
-        start_element("width", k_no_id, k_in_same_line);
+        start_element("width", k_no_imoid, k_in_same_line);
         m_source << width;
         end_element(k_in_same_line);
     }
@@ -1913,13 +1912,13 @@ void LdpGenerator::add_location_if_not_zero(Tenths x, Tenths y)
     {
         if (x != 0.0f)
         {
-            start_element("dx", k_no_id, k_in_same_line);
+            start_element("dx", k_no_imoid, k_in_same_line);
             m_source << x;
             end_element(k_in_same_line);
         }
         if (y != 0.0f)
         {
-            start_element("dy", k_no_id, k_in_same_line);
+            start_element("dy", k_no_imoid, k_in_same_line);
             m_source << y;
             end_element(k_in_same_line);
         }
@@ -1929,11 +1928,11 @@ void LdpGenerator::add_location_if_not_zero(Tenths x, Tenths y)
 //---------------------------------------------------------------------------------------
 void LdpGenerator::add_location(TPoint pt)
 {
-    start_element("dx", k_no_id, k_in_same_line);
+    start_element("dx", k_no_imoid, k_in_same_line);
     m_source << pt.x;
     end_element(k_in_same_line);
 
-    start_element("dy", k_no_id, k_in_same_line);
+    start_element("dy", k_no_imoid, k_in_same_line);
     m_source << pt.y;
     end_element(k_in_same_line);
 }

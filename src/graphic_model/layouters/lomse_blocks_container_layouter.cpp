@@ -37,6 +37,7 @@
 #include "lomse_shape_text.h"
 #include "lomse_inlines_container_layouter.h"
 #include "lomse_score_player_ctrl.h"
+#include "lomse_logger.h"
 
 
 namespace lomse
@@ -56,6 +57,8 @@ ContentLayouter::ContentLayouter(ImoContentObj* pItem, Layouter* pParent,
 //---------------------------------------------------------------------------------------
 void ContentLayouter::layout_in_box()
 {
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+
     set_cursor_and_available_space();
 
     TreeNode<ImoObj>::children_iterator it;
@@ -102,6 +105,8 @@ MultiColumnLayouter::~MultiColumnLayouter()
 //---------------------------------------------------------------------------------------
 void MultiColumnLayouter::layout_in_box()
 {
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+
     set_cursor_and_available_space();
 
     //get total witdh
@@ -235,6 +240,8 @@ BlocksContainerLayouter::BlocksContainerLayouter(ImoContentObj* pImo, Layouter* 
 //---------------------------------------------------------------------------------------
 void BlocksContainerLayouter::layout_in_box()
 {
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+
     set_cursor_and_available_space();
 
     ImoBlocksContainer* pBlock = static_cast<ImoBlocksContainer*>(m_pItem);

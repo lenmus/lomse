@@ -85,8 +85,9 @@ public:
     //auxiliary
     string get_version_and_time_string();
 
-    //static methods for ldp names to types conversion
+    //static methods for types ldp names to conversion
     static string clef_type_to_ldp(int clefType);
+    static string barline_type_to_ldp(int barType);
     static string color_to_ldp(Color color);
     static string float_to_string(float num);
 

@@ -65,7 +65,7 @@ GmoShape* TimeEngraver::create_shape_normal(ImoObj* pCreatorImo,
 //---------------------------------------------------------------------------------------
 void TimeEngraver::create_main_container_shape(UPoint uPos)
 {
-    int idx = 0;
+    ShapeId idx = 0;
     m_pTimeShape = LOMSE_NEW GmoShapeTimeSignature(m_pCreatorImo, idx, uPos, Color(0,0,0),
                                              m_libraryScope);
     //m_pTimeShape->SetShapeLevel(lm_eMainShape);

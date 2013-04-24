@@ -89,7 +89,7 @@ TopLevelCaretPositioner::TopLevelCaretPositioner(DocCursor* pCursor,
 //---------------------------------------------------------------------------------------
 void TopLevelCaretPositioner::prepare_caret(Caret* pCaret)
 {
-    long id = m_state.get_top_level_id();
+    ImoId id = m_state.get_top_level_id();
     GmoBox* pBox = m_pGModel->get_box_for_imo(id);
 
     URect pos;
@@ -123,7 +123,7 @@ GmoBox* TopLevelCaretPositioner::get_box_for_last_element()
 {
     DocCursor cursor(m_pCursor);
     cursor.to_last_top_level();
-    long id = cursor.get_top_id();
+    ImoId id = cursor.get_top_id();
     return m_pGModel->get_box_for_imo(id);
 }
 
@@ -153,7 +153,7 @@ ScoreCaretPositioner::ScoreCaretPositioner(DocCursor* pCursor,
     m_pState = static_cast<ScoreCursorState*>( state.get_delegate_state() );
 
     //get score
-    long id = state.get_top_level_id();
+    ImoId id = state.get_top_level_id();
     m_pScore = static_cast<ImoScore*>( m_pDoc->get_pointer_to_imo(id) );
 
     //create score meter
@@ -205,8 +205,8 @@ void ScoreCaretPositioner::caret_on_empty_timepos(Caret* pCaret)
     //Place caret between both staffobjs. Interpolate position based on cursor time
 
     ColStaffObjsEntry* pEntry = m_pScoreCursor->find_previous_imo();
-    long prevId = pEntry->element_id();
-    long refId = m_pState->ref_obj_id();
+    ImoId prevId = pEntry->element_id();
+    ImoId refId = m_pState->ref_obj_id();
 //    int instr = m_pState->instrument();
 //    int staff = m_pState->staff();
 
@@ -219,7 +219,7 @@ void ScoreCaretPositioner::caret_on_empty_timepos(Caret* pCaret)
     TimeUnits time2 = m_pState->time();
     TimeUnits time3 = m_pState->ref_obj_time();
     LUnits xIncr = bounds.x - boundsPrev.x;     // Ax = x3-x1
-    bounds.x = boundsPrev.x + 
+    bounds.x = boundsPrev.x +
         (xIncr * float((time2 - time1) / (time3 - time1)) );
     set_caret_y_pos_and_height(&bounds, prevId);
 
@@ -237,7 +237,7 @@ void ScoreCaretPositioner::caret_at_start_of_score(Caret* pCaret)
 
     //get shape for first system
     DocCursorState state = m_pDocCursor->get_state();
-    long scoreId = state.get_top_level_id();
+    ImoId scoreId = state.get_top_level_id();
     GmoShapeStaff* pShape = m_pGModel->get_shape_for_first_staff_in_first_system(scoreId);
 
     URect bounds;
@@ -254,7 +254,7 @@ void ScoreCaretPositioner::caret_at_start_of_score(Caret* pCaret)
 //        uPos.y = pBPage->GetYTop();
 //        uPos.x = pBPage->GetXLeft() + pScore->tenths_to_logical(20);
     }
-    set_caret_y_pos_and_height(&bounds, -1L);
+    set_caret_y_pos_and_height(&bounds, k_no_imoid);
 
 
     pCaret->set_type(Caret::k_line);
@@ -270,7 +270,7 @@ void ScoreCaretPositioner::caret_at_end_of_staff(Caret* pCaret)
     //No current staffobj but previous one must exist.
     //Place cursor two lines (20 tenths) at the right of last staffobj
 
-    long id = m_pScoreCursor->prev_pos_id();
+    ImoId id = m_pScoreCursor->prev_pos_id();
     URect bounds = get_bounds_for_imo(id);
 
     bounds.x += tenths_to_logical(20);
@@ -291,7 +291,7 @@ void ScoreCaretPositioner::set_caret_timecode(Caret* pCaret)
 }
 
 //---------------------------------------------------------------------------------------
-URect ScoreCaretPositioner::get_bounds_for_imo(long id)
+URect ScoreCaretPositioner::get_bounds_for_imo(ImoId id)
 {
     GmoShape* pShape = m_pGModel->get_shape_for_imo(id, 0);
     if (!pShape)
@@ -307,11 +307,11 @@ LUnits ScoreCaretPositioner::tenths_to_logical(Tenths value)
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCaretPositioner::set_caret_y_pos_and_height(URect* pBounds, long id)
+void ScoreCaretPositioner::set_caret_y_pos_and_height(URect* pBounds, ImoId id)
 {
     URect staffBounds;
 
-    if (id >= 0L)
+    if (id != k_no_imoid)
     {
         GmoShape* pShape = m_pGModel->get_shape_for_imo(id, 0);
         GmoBox* pBox = pShape->get_owner_box();

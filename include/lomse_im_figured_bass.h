@@ -168,10 +168,10 @@ public:
 
     inline std::string get_figured_bass_string() { return m_info.get_figured_bass_string(); }
 
-//    ImoFiguredBassLine* create_line(long nID, ImoFiguredBass* pEndFB);
+//    ImoFiguredBassLine* create_line(ImoId nID, ImoFiguredBass* pEndFB);
 //    inline void SetAsStartOfFBLine(ImoFiguredBassLine* pFBLine) { m_pNextFBLine = pFBLine; }
 //    inline void SetAsEndOfFBLine(ImoFiguredBassLine* pFBLine) { m_pPrevFBLine = pFBLine; }
-//    ImoFiguredBassLine* create_line(ImoFiguredBass* pEndFB, long nID,
+//    ImoFiguredBassLine* create_line(ImoFiguredBass* pEndFB, ImoId nID,
 //                                    lmLocation tStartLine, lmLocation tEndLine,
 //                                    lmTenths ntWidth, wxColour nColor);
 //
@@ -187,7 +187,7 @@ public:
 //class ImoFiguredBassLine : public lmBinaryRelObX
 //{
 //public:
-//    ImoFiguredBassLine(lmScoreObj* pOwner, long nID, ImoFiguredBass* pStartFB,
+//    ImoFiguredBassLine(lmScoreObj* pOwner, ImoId nID, ImoFiguredBass* pStartFB,
 //                      ImoFiguredBass* pEndFB, wxColour nColor = *wxBLACK,
 //                      lmTenths tWidth = 1.0f);
 //    ~ImoFiguredBassLine();

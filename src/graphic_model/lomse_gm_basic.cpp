@@ -36,6 +36,7 @@
 #include "lomse_time.h"
 #include "lomse_control.h"
 #include "lomse_box_system.h"
+#include "lomse_logger.h"
 
 #include <cstdlib>      //abs
 #include <iomanip>
@@ -46,35 +47,16 @@ namespace lomse
 
 
 //=======================================================================================
-// MultiRefToGmo implementation
-//=======================================================================================
-MultiRefToGmo::MultiRefToGmo(GmoShape* pShape)
-    : RefToGmo()
-{
-
-}
-
-//---------------------------------------------------------------------------------------
-MultiRefToGmo::~MultiRefToGmo()
-{
-
-}
-
-//---------------------------------------------------------------------------------------
-GmoObj* MultiRefToGmo::get_gmo(int id)
-{
-//    list<GmoShape*> m_shapes;
-    return NULL;
-}
-
-
-//=======================================================================================
 // Graphic model implementation
 //=======================================================================================
+static long m_idCounter = 0L;
+
+//---------------------------------------------------------------------------------------
 GraphicModel::GraphicModel()
     : m_modified(true)
 {
     m_root = LOMSE_NEW GmoBoxDocument(this, NULL);    //TODO: replace NULL by ImoDocument
+    m_modelId = ++m_idCounter;
 }
 
 //---------------------------------------------------------------------------------------
@@ -82,7 +64,7 @@ GraphicModel::~GraphicModel()
 {
     delete m_root;
     m_noterestToShape.clear();
-    m_imoToGmo.clear();
+//    m_imoToBox.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -172,9 +154,9 @@ void GraphicModel::store_in_map_imo_shape(ImoNoteRest* pNR, GmoShape* pShape)
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicModel::store_in_map_imo_shape(long imoId, GmoShape* pShape)
+void GraphicModel::store_in_map_imo_shape(ImoId id, GmoShape* pShape)
 {
-    m_imoToShape[imoId] = pShape;
+    m_imoToShape[id] = pShape;
 }
 
 //---------------------------------------------------------------------------------------
@@ -189,38 +171,70 @@ void GraphicModel::highlight_object(ImoStaffObj* pSO, bool value)
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicModel::remove_from_map_imo_gmo(GmoBox* child)
+void GraphicModel::add_to_map_imo_to_box(GmoBox* pBox)
 {
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicModel::add_to_map_imo_gmo(GmoBox* child)
-{
-    ImoObj* pImo = child->get_creator_imo();
+    ImoObj* pImo = pBox->get_creator_imo();
     if (pImo)
-        m_imoToGmo[pImo] = child;
-}
-
-//---------------------------------------------------------------------------------------
-GmoShape* GraphicModel::get_shape_for_imo(long imoId, int shapeId)
-{
-    return m_imoToShape[imoId];
-}
-
-//---------------------------------------------------------------------------------------
-GmoBox* GraphicModel::get_box_for_imo(long id)
-{
-    return m_imoToBox[id];
-}
-
-//---------------------------------------------------------------------------------------
-GmoObj* GraphicModel::get_gmo_for(ImoObj* pImo, int id)
-{
-    RefToGmo* pRef = m_imoToGmo[pImo];
-    if (pRef->is_simple_ref())
     {
-        return pRef->get_gmo(id);
+        ImoId id = pImo->get_id();
+        //DBG ------------------------------------------------------------
+        map<ImoId, GmoBox*>::const_iterator it = m_imoToBox.find(id);
+        if (it != m_imoToBox.end())
+        {
+            LOMSE_LOG_ERROR( str( boost::format(
+                "Duplicated Imo id %d. Existing Gmo: %s. Adding Gmo: %s")
+                % id % (it->second)->get_name() % pBox->get_name()) );
+        }
+        //END_DBG --------------------------------------------------------
+        m_imoToBox[id] = pBox;
     }
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicModel::add_to_map_ref_to_box(GmoBox* pBox)
+{
+    GmoRef gref = pBox->get_ref();
+    if (gref != k_no_gmo_ref)
+    {
+        LOMSE_LOG_TRACE(Logger::k_gmodel, str(boost::format("Added (%d, %d) %s")
+            % gref.first % gref.second % pBox->get_name() ));
+        m_ctrolToPtr[gref] = pBox;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* GraphicModel::get_shape_for_imo(ImoId id, ShapeId shapeId)
+{
+	map<ImoId, GmoShape*>::const_iterator it = m_imoToShape.find(id);
+	if (it != m_imoToShape.end())
+		return it->second;
+    else
+        return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+GmoObj* GraphicModel::get_box_for_control(GmoRef gref)
+{
+	map<GmoRef, GmoObj*>::const_iterator it = m_ctrolToPtr.find(gref);
+	if (it != m_ctrolToPtr.end())
+		return it->second;
+    else
+        return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+GmoBox* GraphicModel::get_box_for_imo(ImoId id)
+{
+	map<ImoId, GmoBox*>::const_iterator it = m_imoToBox.find(id);
+	if (it != m_imoToBox.end())
+		return it->second;
+    else
+        return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+GmoObj* GraphicModel::get_gmo_for(ImoObj* pImo, ShapeId id)
+{
     return NULL;
 }
 
@@ -237,22 +251,19 @@ void GraphicModel::build_main_boxes_table()
             vector<GmoBox*>::iterator itC;
             for (itC=contentBoxes.begin(); itC != contentBoxes.end(); ++itC)
             {
+                (*itC)->add_boxes_to_controls_map(this);
+
                 vector<GmoBox*>& childBoxes = (*itC)->get_child_boxes();
                 vector<GmoBox*>::iterator it;
                 for (it=childBoxes.begin(); it != childBoxes.end(); ++it)
-                {
-                    GmoBox* pBox = *it;
-                    ImoObj* pImo = pBox->get_creator_imo();
-                    long id = pImo->get_id();
-                    m_imoToBox[id] = pBox;
-                }
+                    add_to_map_imo_to_box(*it);
             }
         }
     }
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeStaff* GraphicModel::get_shape_for_first_staff_in_first_system(long scoreId)
+GmoShapeStaff* GraphicModel::get_shape_for_first_staff_in_first_system(ImoId scoreId)
 {
     GmoBoxScorePage* pBSP = static_cast<GmoBoxScorePage*>( get_box_for_imo(scoreId) );
     GmoBoxSystem* pSystem = dynamic_cast<GmoBoxSystem*>(pBSP->get_child_box(0));
@@ -269,6 +280,7 @@ GmoShapeStaff* GraphicModel::get_shape_for_first_staff_in_first_system(long scor
 //association object-type <-> object-name
 static std::map<int, std::string> m_typeToName;
 static bool m_fNamesLoaded = false;
+static string m_unknown = "unknown";
 
 //---------------------------------------------------------------------------------------
 GmoObj::GmoObj(int objtype, ImoObj* pCreatorImo)
@@ -359,10 +371,11 @@ void GmoObj::dump(ostream& outStream, int level)
 }
 
 //---------------------------------------------------------------------------------------
-string& GmoObj::get_name(int objtype)
+const string& GmoObj::get_name(int objtype)
 {
     if (!m_fNamesLoaded)
     {
+        m_typeToName[k_box]                     = "box (A)        ";
         m_typeToName[k_box_control]             = "box-control    ";
         m_typeToName[k_box_document]            = "box-document   ";
         m_typeToName[k_box_doc_page]            = "box-doc-page   ";
@@ -378,6 +391,7 @@ string& GmoObj::get_name(int objtype)
         m_typeToName[k_box_table_rows]          = "box-table-rows ";
 
         // shapes
+        m_typeToName[k_shape]                   = "shape (A)      ";
         m_typeToName[k_shape_accidentals]       = "accidentals    ";
         m_typeToName[k_shape_accidental_sign]   = "accidental-sign";
         m_typeToName[k_shape_barline]           = "barline        ";
@@ -414,7 +428,11 @@ string& GmoObj::get_name(int objtype)
         m_fNamesLoaded = true;
     }
 
-    return m_typeToName[objtype];
+	map<int, std::string>::const_iterator it = m_typeToName.find( objtype );
+	if (it != m_typeToName.end())
+		return it->second;
+    else
+        return m_unknown;
 }
 
 //---------------------------------------------------------------------------------------
@@ -451,6 +469,32 @@ void GmoObj::propagate_dirty()
     }
 }
 
+//---------------------------------------------------------------------------------------
+GmoRef GmoObj::get_ref()
+{
+    if (this->is_box())
+    {
+        ImoObj* pImo = get_creator_imo();
+        if (pImo)
+        {
+            if (this->is_box_control() || pImo->is_mouse_over_generator())
+            {
+                ImoId id = pImo->get_id();
+                ImoId idg = 0;
+                if (is_box_control())
+                {
+                    Control* pControl =
+                        static_cast<GmoBoxControl*>(this)->get_creator_control();
+                    idg = pControl->get_control_id();
+                }
+
+                return make_pair(id, idg);
+            }
+        }
+    }
+    return k_no_gmo_ref;
+}
+
 
 
 //=======================================================================================
@@ -477,10 +521,7 @@ void GmoBox::delete_boxes()
 {
     std::vector<GmoBox*>::iterator it;
     for (it=m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
-    {
-        remove_from_map_imo_gmo(*it);
         delete *it;
-    }
     m_childBoxes.clear();
 }
 
@@ -498,7 +539,6 @@ void GmoBox::add_child_box(GmoBox* child)
 {
     m_childBoxes.push_back(child);
     child->set_owner_box(this);
-    add_to_map_imo_gmo(child);
 }
 
 //---------------------------------------------------------------------------------------
@@ -836,27 +876,23 @@ ImoStyle* GmoBox::get_style()
 {
     if (m_pCreatorImo && m_pCreatorImo->is_contentobj())
     {
-        ImoContentObj* pImo = static_cast<ImoContentObj*>(m_pCreatorImo);
-        return pImo->get_style();
-        //ImoStyle* pStyle = pImo->get_style();
-        //if (pStyle)
-        //    return pStyle;
+        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(m_pCreatorImo);
+        if (pImo)
+            return pImo->get_style();
     }
     return NULL;
 }
 
 //---------------------------------------------------------------------------------------
-void GmoBox::remove_from_map_imo_gmo(GmoBox* child)
+void GmoBox::add_boxes_to_controls_map(GraphicModel* pGM)
 {
-//    GraphicModel* pGM = get_graphic_model();
-//    pGM->remove_from_map_imo_gmo(child);
-}
+    pGM->add_to_map_ref_to_box(this);
 
-//---------------------------------------------------------------------------------------
-void GmoBox::add_to_map_imo_gmo(GmoBox* child)
-{
-//    GraphicModel* pGM = get_graphic_model();
-//    pGM->add_to_map_imo_gmo(child);
+    vector<GmoBox*>::iterator it;
+    for (it = m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
+    {
+        (*it)->add_boxes_to_controls_map(pGM);
+    }
 }
 
 
@@ -1182,24 +1218,25 @@ void GmoBoxLink::notify_event(SpEventInfo pEvent)
 {
     if (pEvent->is_mouse_in_event())
     {
-        //m_currentColor = m_hoverColor;
+        LOMSE_LOG_DEBUG(Logger::k_events, "set hover true");
         set_hover(true);
         set_dirty(true);
     }
     else if (pEvent->is_mouse_out_event())
     {
-        //m_currentColor = m_prevColor;
+        LOMSE_LOG_DEBUG(Logger::k_events, "set hover false");
         set_hover(false);
         set_dirty(true);
     }
     else if (pEvent->is_on_click_event())
     {
+        LOMSE_LOG_ERROR("is_on_click_event: TODO");
         //TODO: GmoBoxLink::notify_event, on_click_event
 //        m_visited = true;
 //        m_prevColor = m_visitedColor;
     }
-
-//    notify_observers(pEvent, this);
+    else
+        LOMSE_LOG_DEBUG(Logger::k_events, "event ignored");
 }
 
 

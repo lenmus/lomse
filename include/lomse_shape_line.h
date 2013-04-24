@@ -82,7 +82,7 @@ protected:
     UPoint m_uPoint[2];
 
     friend class LineEngraver;
-    GmoShapeLine(ImoObj* pCreatorImo, int idx,
+    GmoShapeLine(ImoObj* pCreatorImo, ShapeId idx,
                  LUnits xStart, LUnits yStart, LUnits xEnd, LUnits yEnd,
                  LUnits uWidth, LUnits uBoundsExtraWidth, ELineStyle nStyle,
                  Color color, ELineEdge nEdge, ELineCap nStartCap, ELineCap nEndCap);
@@ -125,7 +125,7 @@ protected:
 //class GmoShapeFBLine : public GmoShapeLine
 //{
 //public:
-//    GmoShapeFBLine(lmScoreObj* pOwner, int idx, lmFiguredBass* pEndFB,
+//    GmoShapeFBLine(lmScoreObj* pOwner, ShapeId idx, lmFiguredBass* pEndFB,
 //                  LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd,
 //                  lmTenths tWidth, lmShapeFiguredBass* pShapeStartFB,
 //                  lmShapeFiguredBass* pShapeEndFB, Color nColor, bool fVisible);

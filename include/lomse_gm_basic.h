@@ -63,9 +63,8 @@ class Drawer;
 struct RenderOptions;
 class GmoLayer;
 class SelectionSet;
-class RefToGmo;
-class MultiRefToGmo;
 class Control;
+
 
 //---------------------------------------------------------------------------------------
 // GraphicModel: storage for the graphic objects
@@ -74,11 +73,12 @@ class GraphicModel
 {
 protected:
     GmoBoxDocument* m_root;
+    long m_modelId;
     bool m_modified;
-    std::map<ImoNoteRest*, GmoShape*> m_noterestToShape;
-    std::map<ImoObj*, RefToGmo*> m_imoToGmo;
-    std::map<long, GmoBox*> m_imoToBox;
-    std::map<long, GmoShape*> m_imoToShape;
+    map<ImoNoteRest*, GmoShape*> m_noterestToShape;
+    map<ImoId, GmoBox*> m_imoToBox;
+    map<ImoId, GmoShape*> m_imoToShape;
+    map<GmoRef, GmoObj*> m_ctrolToPtr;
 
 public:
     GraphicModel();
@@ -90,9 +90,10 @@ public:
     GmoBoxDocPage* get_page(int i);
     inline void set_modified(bool value) { m_modified = value; }
     inline bool is_modified() { return m_modified; }
+    inline long get_model_id() { return m_modelId; }
 
     //special accessors
-    GmoShapeStaff* get_shape_for_first_staff_in_first_system(long scoreId);
+    GmoShapeStaff* get_shape_for_first_staff_in_first_system(ImoId scoreId);
 
     //drawing
     void draw_page(int iPage, UPoint& origin, Drawer* pDrawer, RenderOptions& opt);
@@ -111,31 +112,20 @@ public:
 
     //creation
     void store_in_map_imo_shape(ImoNoteRest* pNR, GmoShape* pShape);
-    void store_in_map_imo_shape(long imoId, GmoShape* pShape);
-    void remove_from_map_imo_gmo(GmoBox* child);
-    void add_to_map_imo_gmo(GmoBox* child);
-    GmoShape* get_shape_for_imo(long imoId, int shapeId=0);
-    GmoBox* get_box_for_imo(long id);
+    void store_in_map_imo_shape(ImoId imoId, GmoShape* pShape);
+    void add_to_map_imo_to_box(GmoBox* child);
+    void add_to_map_ref_to_box(GmoBox* pBox);
+    GmoShape* get_shape_for_imo(ImoId imoId, ShapeId shapeId=0);
+    GmoBox* get_box_for_imo(ImoId id);
+    GmoObj* get_box_for_control(GmoRef gref);
     void build_main_boxes_table();
 
     //tests
     void dump_page(int iPage, ostream& outStream);
 
 protected:
-    GmoObj* get_gmo_for(ImoObj* pImo, int id=0);
+    GmoObj* get_gmo_for(ImoObj* pImo, ImoId id=0);
 
-};
-
-//---------------------------------------------------------------------------------------
-//Abstract class to define the interface for objects to be stored in the map to track
-//the shape/box for an ImoObj
-class RefToGmo
-{
-public:
-    RefToGmo() {}
-
-    virtual GmoObj* get_gmo(int id) = 0;
-    virtual bool is_simple_ref() = 0;
 };
 
 //---------------------------------------------------------------------------------------
@@ -168,6 +158,9 @@ public:
     inline bool is_selected() { return (m_flags & k_selected) != 0; }
     virtual void set_selected(bool value) { value ? m_flags |= k_selected
                                                   : m_flags &= ~k_selected; }
+
+    //info
+    GmoRef get_ref();
 
     //hover (mouse over)
     inline bool is_hover() { return (m_flags & k_hover) != 0; }
@@ -299,7 +292,8 @@ public:
 
     //tests & debug
     void dump(ostream& outStream, int level);
-    static string& get_name(int objtype);
+    static const string& get_name(int objtype);
+    inline const string& get_name() { return get_name(m_objtype); }
 
 protected:
     GmoObj(int objtype, ImoObj* pCreatorImo);
@@ -308,20 +302,16 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-class GmoShape : public GmoObj, public Linkable<USize>, public RefToGmo
+class GmoShape : public GmoObj, public Linkable<USize>
 {
 protected:
-    int m_idx;
+    ShapeId m_idx;
     int m_layer;
 	Color m_color;
     std::list<GmoShape*>* m_pRelatedShapes;
 
 public:
     virtual ~GmoShape();
-
-    //RefToGmo virtual methods
-    GmoObj* get_gmo(int id) { return this; }
-    bool is_simple_ref() { return true; }
 
     virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
@@ -364,14 +354,14 @@ public:
     }
 
 protected:
-    GmoShape(ImoObj* pCreatorImo, int objtype, int idx, Color color);
+    GmoShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color);
     Color determine_color_to_use(RenderOptions& opt);
     virtual Color get_normal_color() { return m_color; }
 
 };
 
 //---------------------------------------------------------------------------------------
-class GmoBox : public GmoObj, public RefToGmo
+class GmoBox : public GmoObj
 {
 protected:
     std::vector<GmoBox*> m_childBoxes;
@@ -389,15 +379,12 @@ protected:
 public:
     virtual ~GmoBox();
 
-    //RefToGmo virtual methods
-    GmoObj* get_gmo(int id) { return this; }
-    bool is_simple_ref() { return true; }
-
     //child boxes
     inline int get_num_boxes() { return static_cast<int>( m_childBoxes.size() ); }
     void add_child_box(GmoBox* child);
     GmoBox* get_child_box(int i);  //i = 0..n-1
     inline vector<GmoBox*>& get_child_boxes() { return m_childBoxes; }
+    void add_boxes_to_controls_map(GraphicModel* pGM);
 
     //contained shapes
     inline int get_num_shapes() { return static_cast<int>( m_shapes.size() ); }
@@ -462,8 +449,6 @@ protected:
     Color get_box_color();
     void draw_box_bounds(Drawer* pDrawer, double xorg, double yorg, Color& color);
     void draw_shapes(Drawer* pDrawer, RenderOptions& opt);
-    void remove_from_map_imo_gmo(GmoBox* child);
-    void add_to_map_imo_gmo(GmoBox* child);
     void add_shapes_to_tables_in(GmoBoxDocPage* pPage);
 
     virtual ImoStyle* get_style();
@@ -642,22 +627,6 @@ public:
     GmoBoxTableRows(ImoObj* pCreatorImo)
         : GmoBox(GmoObj::k_box_table_rows, pCreatorImo) {}
     virtual ~GmoBoxTableRows() {}
-};
-
-
-//---------------------------------------------------------------------------------------
-//Derived class, to contain a list of shapes
-class MultiRefToGmo : public RefToGmo
-{
-protected:
-    list<GmoShape*> m_shapes;
-
-public:
-    MultiRefToGmo(GmoShape* pShape);
-    ~MultiRefToGmo();
-
-    GmoObj* get_gmo(int id);
-    bool is_simple_ref() { return false; }
 };
 
 

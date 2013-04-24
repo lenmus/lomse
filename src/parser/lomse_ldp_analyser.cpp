@@ -337,7 +337,7 @@ protected:
     void add_to_model(ImoObj* pImo);
 
     //auxiliary
-    inline long get_node_id() { return m_pAnalysedNode->get_id(); }
+    inline ImoId get_node_id() { return m_pAnalysedNode->get_id(); }
     bool contains(ELdpElement type, ELdpElement* pValid, int nValid);
     inline const string& get_document_locator() {
         return m_pAnalyser->get_document_locator();
@@ -1463,7 +1463,7 @@ public:
 
         // <objID>
         if (get_mandatory(k_number))
-            pCursor->set_id( get_long_value(-1L) );
+            pCursor->set_id( get_long_value(k_no_imoid) );
 
         add_to_model(pCursor);
     }

@@ -41,10 +41,12 @@ class ButtonCtrl : public Control
 {
 protected:
     string m_label;
-    UPoint  m_pos;
-    LUnits  m_width;
-    LUnits  m_height;
-    Color m_bgColor;
+    UPoint m_pos;
+    LUnits m_width;
+    LUnits m_height;
+    Color m_normalColor;
+    Color m_overColor;
+    bool m_fMouseIn;
 
 public:
     ButtonCtrl(LibraryScope& libScope, Control* pParent, Document* pDoc,
@@ -67,7 +69,11 @@ public:
     //specific methods
     void set_label(const string& text);
     void set_tooltip(const string& text);
+
+    //colors
     void set_bg_color(Color color);
+    void set_mouse_over_color(Color color);
+    void set_mouse_in(bool fValue);
 
 protected:
     GmoBoxControl* m_pMainBox;

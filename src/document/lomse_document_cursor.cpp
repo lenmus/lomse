@@ -104,7 +104,7 @@ void DocContentCursor::last_of_content()
 }
 
 //---------------------------------------------------------------------------------------
-void DocContentCursor::point_to(long id)
+void DocContentCursor::point_to(ImoId id)
 {
     point_to( m_pDoc->get_pointer_to_imo(id) );
 }
@@ -247,14 +247,14 @@ ImoObj* DocCursor::get_top_object()
 }
 
 //---------------------------------------------------------------------------------------
-long DocCursor::get_pointee_id()
+ImoId DocCursor::get_pointee_id()
 {
     ImoObj* pImo = get_pointee();
     return (pImo == NULL ? k_cursor_at_end : pImo->get_id() );
 }
 
 //---------------------------------------------------------------------------------------
-long DocCursor::get_top_id()
+ImoId DocCursor::get_top_id()
 {
     ImoObj* pImo = get_top_object();
     return (pImo == NULL ? k_cursor_at_end : pImo->get_id() );
@@ -359,7 +359,7 @@ void DocCursor::to_last_top_level()
 }
 
 //---------------------------------------------------------------------------------------
-void DocCursor::point_to(long id)
+void DocCursor::point_to(ImoId id)
 {
     point_to( m_pDoc->get_pointer_to_imo(id) );
 }
@@ -413,7 +413,7 @@ void DocCursor::update_after_deletion()
 }
 
 ////---------------------------------------------------------------------------------------
-//void DocCursor::reset_and_point_to(long nId)
+//void DocCursor::reset_and_point_to(ImoId nId)
 //{
 //    if (is_delegating())
 //		m_pInnerCursor->reset_and_point_to(nId);
@@ -424,7 +424,7 @@ void DocCursor::update_after_deletion()
 //---------------------------------------------------------------------------------------
 DocCursorState DocCursor::get_state()
 {
-    long id = get_top_id();
+    ImoId id = get_top_id();
     if (is_delegating())
 		return DocCursorState(id, m_pInnerCursor->get_state());
 	else
@@ -543,7 +543,7 @@ void ScoreCursor::p_move_iterator_to_next()
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::point_to(long nId)
+void ScoreCursor::point_to(ImoId nId)
 {
     auto_refresh();
 
@@ -551,7 +551,7 @@ void ScoreCursor::point_to(long nId)
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::p_point_to(long nId)
+void ScoreCursor::p_point_to(ImoId nId)
 {
     p_move_iterator_to(nId);
     p_update_state_from_iterator();
@@ -559,9 +559,9 @@ void ScoreCursor::p_point_to(long nId)
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::p_move_iterator_to(long id)
+void ScoreCursor::p_move_iterator_to(ImoId id)
 {
-    if (id <= -1L)
+    if (id <= k_no_imoid)
         m_it = m_pColStaffObjs->end();
     else
     {
@@ -579,7 +579,7 @@ void ScoreCursor::point_to(ImoObj* pImo)
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::point_to_barline(long id, int staff)
+void ScoreCursor::point_to_barline(ImoId id, int staff)
 {
     auto_refresh();
 
@@ -588,7 +588,7 @@ void ScoreCursor::point_to_barline(long id, int staff)
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::to_state(int nInstr, int nStaff, int nMeasure, TimeUnits rTime, long id)
+void ScoreCursor::to_state(int nInstr, int nStaff, int nMeasure, TimeUnits rTime, ImoId id)
 {
     auto_refresh();
 
@@ -596,9 +596,9 @@ void ScoreCursor::to_state(int nInstr, int nStaff, int nMeasure, TimeUnits rTime
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::p_to_state(int nInstr, int nStaff, int nMeasure, TimeUnits rTime, long id)
+void ScoreCursor::p_to_state(int nInstr, int nStaff, int nMeasure, TimeUnits rTime, ImoId id)
 {
-    //if id==-1L move to first object satisfying all other conditions
+    //if id==k_no_imoid move to first object satisfying all other conditions
 
     //TODO: This method will fail when several objects at same timepos (i.e. notes
     //in chord, notes in different voices, prolog -- clef, key, time, note --)
@@ -695,7 +695,7 @@ void ScoreCursor::p_to_start_of_next_staff()
 void ScoreCursor::p_update_as_end_of_staff()
 {
     m_currentState.id( k_cursor_at_end_of_staff );
-    m_currentState.ref_obj_id(-1L);
+    m_currentState.ref_obj_id(k_no_imoid);
     m_currentState.ref_obj_time(0.0);
 }
 
@@ -732,7 +732,7 @@ void ScoreCursor::p_update_as_end_of_score()
 
 
     m_currentState.id( k_cursor_at_end_of_staff );
-    m_currentState.ref_obj_id( -1L );
+    m_currentState.ref_obj_id( k_no_imoid );
     m_currentState.ref_obj_time(0.0);
 }
 

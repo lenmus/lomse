@@ -119,7 +119,7 @@ public:
     virtual ~GmoSimpleShape();
 
 protected:
-    GmoSimpleShape(ImoObj* pCreatorImo, int objtype, int idx, Color color);
+    GmoSimpleShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color);
 };
 
 //---------------------------------------------------------------------------------------
@@ -150,7 +150,7 @@ public:
 
 
 protected:
-    GmoCompositeShape(ImoObj* pCreatorImo, int objtype, int idx, Color color);
+    GmoCompositeShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color);
 	void recompute_bounds();
 };
 

@@ -93,7 +93,7 @@ protected:
     void (*m_callback)(Notification* event);
 
 public:
-    Presenter(Document* pDoc, Interactor* pIntor, DocCommandExecuter* pExec);
+    Presenter(SpDocument spDoc, Interactor* pIntor, DocCommandExecuter* pExec);
     virtual ~Presenter();
 
     void close_document();
@@ -108,7 +108,7 @@ public:
     //accessors
     inline Document* get_document_raw_ptr() { return m_spDoc.get(); }
     inline SpDocument get_document_shared_ptr() { return m_spDoc; }
-    WpDocument get_document();
+    WpDocument get_document_weak_ptr();
     inline DocCommandExecuter* get_command_executer() { return m_pExec; }
 
     //to sent notifications to user application

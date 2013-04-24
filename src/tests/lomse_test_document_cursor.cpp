@@ -312,7 +312,7 @@ SUITE(DocContentCursorTest)
 //        ImoDocument* pImoDoc = m_pDoc->get_imodoc();
 //
 //        ImoParagraph* pImo = pImoDoc->add_paragraph();
-//        long id = pImo->get_id();
+//        ImoId id = pImo->get_id();
 //        cout << "id=" << id << endl;
 //
 //        //cursor is not aware of changes

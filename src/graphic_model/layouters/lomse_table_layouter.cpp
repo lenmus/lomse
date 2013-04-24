@@ -32,6 +32,7 @@
 
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
+#include "lomse_logger.h"
 
 namespace lomse
 {
@@ -92,6 +93,8 @@ void TableLayouter::create_sections_layouters()
 //---------------------------------------------------------------------------------------
 void TableLayouter::layout_in_box()
 {
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+
     //AWARE: This method is invoked to layout a page. If there are more pages to
     //layout, it will be invoked more times. Therefore, this method must not initialize
     //anything. All initializations must be done in 'prepare_to_start_layout()'.
@@ -306,10 +309,16 @@ void TableSectionLayouter::prepare_to_start_layout()
 }
 
 //---------------------------------------------------------------------------------------
-void TableSectionLayouter::layout_in_box(){}
+void TableSectionLayouter::layout_in_box()
+{
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+}
+
+//---------------------------------------------------------------------------------------
 void TableSectionLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
                                       LUnits height)
 {
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
 }
 
 //---------------------------------------------------------------------------------------
@@ -520,6 +529,8 @@ TableRowLayouter::~TableRowLayouter()
 //---------------------------------------------------------------------------------------
 void TableRowLayouter::layout_in_box()
 {
+    LOMSE_LOG_DEBUG(Logger::k_layout, "");
+
     set_cursor_and_available_space();
     LUnits yPos = m_pageCursor.y;
 

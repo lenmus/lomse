@@ -49,7 +49,7 @@ protected:
 
 public: //TO_FIX: constructor invoked from test
 //    friend class InstrumentEngraver;
-    GmoShapeStaff(ImoObj* pCreatorImo, int idx, ImoStaffInfo* m_pStaff, int iStaff,
+    GmoShapeStaff(ImoObj* pCreatorImo, ShapeId idx, ImoStaffInfo* m_pStaff, int iStaff,
                   LUnits width, Color color);
 
 public:

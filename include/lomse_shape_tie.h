@@ -60,7 +60,7 @@ protected:
     int m_nContour;                 //current countour
 
 public:
-    GmoShapeTie(ImoObj* pCreatorImo, int idx, UPoint points[], LUnits tickness,
+    GmoShapeTie(ImoObj* pCreatorImo, ShapeId idx, UPoint points[], LUnits tickness,
                 Color color = Color(0,0,0));
     ~GmoShapeTie();
 
@@ -87,7 +87,7 @@ protected:
     int m_nContour;                 //current countour
 
 public:
-    GmoShapeSlur(ImoObj* pCreatorImo, int idx, UPoint points[], LUnits tickness,
+    GmoShapeSlur(ImoObj* pCreatorImo, ShapeId idx, UPoint points[], LUnits tickness,
                 Color color = Color(0,0,0));
     ~GmoShapeSlur();
 

@@ -40,12 +40,6 @@
 namespace lomse
 {
 
-//some macros to improve code reading
-#define START       ImoBezierInfo::k_start
-#define END         ImoBezierInfo::k_end
-#define CTROL1      ImoBezierInfo::k_ctrol1
-#define CTROL2      ImoBezierInfo::k_ctrol2
-
 //---------------------------------------------------------------------------------------
 // TieEngraver implementation
 //---------------------------------------------------------------------------------------
@@ -105,7 +99,7 @@ void TieEngraver::create_one_shape()
     m_numShapes = 1;
 
     compute_start_point();
-    compute_end_point(&m_points1[END]);
+    compute_end_point(&m_points1[ImoBezierInfo::k_end]);
     compute_default_control_points(&m_points1[0]);
     add_user_displacements(0, &m_points1[0]);
     m_shapesInfo[0].pShape = LOMSE_NEW GmoShapeTie(m_pTie, 0, &m_points1[0], m_thickness);
@@ -126,7 +120,7 @@ void TieEngraver::create_two_shapes()
     m_shapesInfo[0].pShape = LOMSE_NEW GmoShapeTie(m_pTie, 0, &m_points1[0], m_thickness);
 
     //create second shape
-    compute_end_point(&m_points2[END]);
+    compute_end_point(&m_points2[ImoBezierInfo::k_end]);
     compute_start_of_staff_point();
     compute_default_control_points(&m_points2[0]);
     add_user_displacements(1, &m_points2[0]);
@@ -136,28 +130,28 @@ void TieEngraver::create_two_shapes()
 //---------------------------------------------------------------------------------------
 void TieEngraver::compute_default_control_points(UPoint* points)
 {
-    LUnits D = (points+END)->x - (points+START)->x;
+    LUnits D = (points+ImoBezierInfo::k_end)->x - (points+ImoBezierInfo::k_start)->x;
     LUnits d = D / 5.8f;
     m_thickness = tenths_to_logical(LOMSE_TIE_MAX_THICKNESS);
     LUnits hc = m_thickness * 3.88f;
-    (points+CTROL1)->x = (points+START)->x + d;
-    (points+CTROL1)->y = (points+START)->y + (m_fTieBelowNote ? hc : -hc);
+    (points+ImoBezierInfo::k_ctrol1)->x = (points+ImoBezierInfo::k_start)->x + d;
+    (points+ImoBezierInfo::k_ctrol1)->y = (points+ImoBezierInfo::k_start)->y + (m_fTieBelowNote ? hc : -hc);
 
-    (points+CTROL2)->x = (points+END)->x - d;
-    (points+CTROL2)->y = (points+END)->y + (m_fTieBelowNote ? hc : -hc);
+    (points+ImoBezierInfo::k_ctrol2)->x = (points+ImoBezierInfo::k_end)->x - d;
+    (points+ImoBezierInfo::k_ctrol2)->y = (points+ImoBezierInfo::k_end)->y + (m_fTieBelowNote ? hc : -hc);
 }
 
 //---------------------------------------------------------------------------------------
 void TieEngraver::compute_start_point()
 {
 	//x pos: center on notehead
-	m_points1[START].x = (m_pStartNoteShape->get_notehead_right() +
+	m_points1[ImoBezierInfo::k_start].x = (m_pStartNoteShape->get_notehead_right() +
                           m_pStartNoteShape->get_notehead_left()) / 2.0f;
 
     //y pos: 5 tenths appart from notehead
     LUnits space = tenths_to_logical(LOMSE_TIE_VERTICAL_SPACE);
 
-    m_points1[START].y = (m_fTieBelowNote ?
+    m_points1[ImoBezierInfo::k_start].y = (m_fTieBelowNote ?
                           m_pStartNoteShape->get_notehead_bottom() + space
                           : m_pStartNoteShape->get_notehead_top() - space );
 }
@@ -180,15 +174,15 @@ void TieEngraver::compute_end_point(UPoint* point)
 //---------------------------------------------------------------------------------------
 void TieEngraver::compute_start_of_staff_point()
 {
-    m_points2[START].x = m_uStaffLeft;
-    m_points2[START].y = m_points2[END].y;
+    m_points2[ImoBezierInfo::k_start].x = m_uStaffLeft;
+    m_points2[ImoBezierInfo::k_start].y = m_points2[ImoBezierInfo::k_end].y;
 }
 
 //---------------------------------------------------------------------------------------
 void TieEngraver::compute_end_of_staff_point()
 {
-    m_points1[END].x = m_uStaffRight;
-    m_points1[END].y = m_points1[START].y;
+    m_points1[ImoBezierInfo::k_end].x = m_uStaffRight;
+    m_points1[ImoBezierInfo::k_end].y = m_points1[ImoBezierInfo::k_start].y;
 }
 
 //---------------------------------------------------------------------------------------

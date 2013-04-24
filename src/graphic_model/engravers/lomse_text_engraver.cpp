@@ -104,7 +104,7 @@ GmoShapeText* TextEngraver::create_shape(ImoObj* pCreatorImo, LUnits xLeft, LUni
         yTop -= meter.get_descender();
     }
 
-    int idx = 0;
+    ShapeId idx = 0;
     return LOMSE_NEW GmoShapeText(pCreatorImo, idx, m_text, m_pStyle, m_language,
                                   pos.x, pos.y, m_libraryScope);
 }

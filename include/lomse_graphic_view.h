@@ -163,6 +163,7 @@ public:
     void highlight_object(ImoStaffObj* pSO);
     void remove_highlight_from_object(ImoStaffObj* pSO);
     void remove_all_highlight();
+    void discard_all_highlight();
 
     // The View is requested to re-paint itself onto the window
     virtual void redraw_bitmap();
@@ -177,7 +178,7 @@ public:
     string get_caret_timecode();
     //void caret_right();
     //void caret_left();
-    //void caret_to_object(long nId);
+    //void caret_to_object(ImoId nId);
 
     //graphical model
     GraphicModel* get_graphic_model();

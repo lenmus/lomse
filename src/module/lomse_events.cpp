@@ -33,6 +33,7 @@
 #include "lomse_events_dispatcher.h"
 #include "lomse_control.h"
 #include "lomse_document.h"
+#include "lomse_logger.h"
 
 namespace lomse
 {
@@ -102,7 +103,7 @@ Observer::Observer(Observable* target)
 }
 
 //---------------------------------------------------------------------------------------
-Observer::Observer(Observable* root, int childType, long childId)
+Observer::Observer(Observable* root, int childType, ImoId childId)
     : m_target(root)
     , m_type(childType)
     , m_id(childId)
@@ -211,7 +212,7 @@ void Observable::add_event_handler(int eventType, EventHandler* pHandler)
 }
 
 //---------------------------------------------------------------------------------------
-void Observable::add_event_handler(int childType, long childId, int eventType,
+void Observable::add_event_handler(int childType, ImoId childId, int eventType,
                            EventHandler* pHandler)
 {
     EventNotifier* pNotifier = get_event_notifier();
@@ -219,7 +220,7 @@ void Observable::add_event_handler(int childType, long childId, int eventType,
 }
 
 //---------------------------------------------------------------------------------------
-void Observable::add_event_handler(int childType, long childId, int eventType, void* pThis,
+void Observable::add_event_handler(int childType, ImoId childId, int eventType, void* pThis,
                            void (*pt2Func)(void* pObj, SpEventInfo event) )
 {
     EventNotifier* pNotifier = get_event_notifier();
@@ -228,7 +229,7 @@ void Observable::add_event_handler(int childType, long childId, int eventType, v
 }
 
 //---------------------------------------------------------------------------------------
-void Observable::add_event_handler(int childType, long childId, int eventType,
+void Observable::add_event_handler(int childType, ImoId childId, int eventType,
                            void (*pt2Func)(SpEventInfo event) )
 {
     EventNotifier* pNotifier = get_event_notifier();
@@ -271,6 +272,7 @@ void EventNotifier::notify_observers(SpEventInfo pEvent, Observable* target)
 
         if (fNotify)
         {
+            LOMSE_LOG_DEBUG(Logger::k_events, "Posting event.");
             m_pDispatcher->post_event((*it), pEvent);
 //            (*it)->notify(pEvent);
             return;
@@ -280,6 +282,7 @@ void EventNotifier::notify_observers(SpEventInfo pEvent, Observable* target)
             //    objects in m_observers (!!!!)
         }
     }
+    LOMSE_LOG_DEBUG(Logger::k_events, "No observers. Event ignored");
 }
 
 //---------------------------------------------------------------------------------------
@@ -299,7 +302,7 @@ Observer* EventNotifier::add_observer_for(Observable* target)
 
 //---------------------------------------------------------------------------------------
 Observer* EventNotifier::add_observer_for_child(Observable* parent, int childType,
-                                                long childId)
+                                                ImoId childId)
 {
     std::list<Observer*>::iterator it;
     for (it = m_observers.begin(); it != m_observers.end(); ++it)
@@ -356,7 +359,7 @@ void EventNotifier::add_handler(Observable* pSource, int eventType,
 
 //---------------------------------------------------------------------------------------
 void EventNotifier::add_handler_for_child(Observable* parent, int childType,
-                                          long childId, int eventType,
+                                          ImoId childId, int eventType,
                                           EventHandler* pHandler)
 {
     Observer* observer = add_observer_for_child(parent, childType, childId);
@@ -365,7 +368,7 @@ void EventNotifier::add_handler_for_child(Observable* parent, int childType,
 
 //---------------------------------------------------------------------------------------
 void EventNotifier::add_handler_for_child(Observable* parent, int childType,
-                                          long childId, int eventType,
+                                          ImoId childId, int eventType,
                                           void (*pt2Func)(SpEventInfo event) )
 {
     Observer* observer = add_observer_for_child(parent, childType, childId);
@@ -374,7 +377,7 @@ void EventNotifier::add_handler_for_child(Observable* parent, int childType,
 
 //---------------------------------------------------------------------------------------
 void EventNotifier::add_handler_for_child(Observable* parent, int childType,
-                                          long childId, int eventType, void* pThis,
+                                          ImoId childId, int eventType, void* pThis,
                                           void (*pt2Func)(void* pObj, SpEventInfo event) )
 {
     Observer* observer = add_observer_for_child(parent, childType, childId);
@@ -387,7 +390,10 @@ void EventNotifier::add_handler_for_child(Observable* parent, int childType,
 //=======================================================================================
 ImoContentObj* EventMouse::get_imo_object()
 {
-    return dynamic_cast<ImoContentObj*>( m_pDoc->get_pointer_to_imo(m_imoId) );
+    if (SpDocument sp = m_wpDoc.lock())
+        return dynamic_cast<ImoContentObj*>( sp->get_pointer_to_imo(m_imoId) );
+    else
+        return NULL;
 }
 
 //---------------------------------------------------------------------------------------
@@ -395,6 +401,13 @@ Observable* EventMouse::get_source()
 {
     return static_cast<Observable*>( get_imo_object() );
 }
+
+//---------------------------------------------------------------------------------------
+bool EventMouse::is_still_valid()
+{
+    return !m_wpDoc.expired() && !m_wpInteractor.expired();
+}
+
 
 
 }   //namespace lomse

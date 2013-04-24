@@ -41,7 +41,7 @@ namespace lomse
 
 //---------------------------------------------------------------------------------------
 IdAssigner::IdAssigner()
-    : m_idCounter(-1L)
+    : m_idCounter(k_no_imoid)
 {
 }
 
@@ -49,14 +49,14 @@ IdAssigner::IdAssigner()
 void IdAssigner::reset()
 {
     m_idToImo.clear();
-    m_idCounter = -1L;
+    m_idCounter = k_no_imoid;
 }
 
 //---------------------------------------------------------------------------------------
 void IdAssigner::assign_id(ImoObj* pImo)
 {
-    long id = pImo->get_id();
-    if (id == -1L)
+    ImoId id = pImo->get_id();
+    if (id == k_no_imoid)
         pImo->set_id(++m_idCounter);
     else
         m_idCounter = max(id, m_idCounter);
@@ -67,9 +67,9 @@ void IdAssigner::assign_id(ImoObj* pImo)
 //---------------------------------------------------------------------------------------
 void IdAssigner::assign_id(Control* pControl)
 {
-    long id = pControl->get_id();
-    if (id == -1L)
-        pControl->set_id(++m_idCounter);
+    ImoId id = pControl->get_control_id();
+    if (id == k_no_imoid)
+        pControl->set_control_id(++m_idCounter);
     else
         m_idCounter = max(id, m_idCounter);
 
@@ -79,15 +79,15 @@ void IdAssigner::assign_id(Control* pControl)
 //---------------------------------------------------------------------------------------
 void IdAssigner::remove(ImoObj* pImo)
 {
-    long id = pImo->get_id();
-    if (id != -1L)
+    ImoId id = pImo->get_id();
+    if (id != k_no_imoid)
         m_idToImo.erase(id);
 }
 
 //---------------------------------------------------------------------------------------
-ImoObj* IdAssigner::get_pointer_to_imo(long id) const
+ImoObj* IdAssigner::get_pointer_to_imo(ImoId id) const
 {
-	map<long, ImoObj*>::const_iterator it = m_idToImo.find( id );
+	map<ImoId, ImoObj*>::const_iterator it = m_idToImo.find( id );
 	if (it != m_idToImo.end())
 		return it->second;
     else
@@ -95,9 +95,9 @@ ImoObj* IdAssigner::get_pointer_to_imo(long id) const
 }
 
 //---------------------------------------------------------------------------------------
-Control* IdAssigner::get_pointer_to_control(long id) const
+Control* IdAssigner::get_pointer_to_control(ImoId id) const
 {
-	map<long, Control*>::const_iterator it = m_idToControl.find( id );
+	map<ImoId, Control*>::const_iterator it = m_idToControl.find( id );
 	if (it != m_idToControl.end())
 		return it->second;
     else
@@ -109,12 +109,12 @@ string IdAssigner::dump() const
 {
     stringstream data;
     data << "Imo: ";
-	map<long, ImoObj*>::const_iterator it;
+	map<ImoId, ImoObj*>::const_iterator it;
 	for (it = m_idToImo.begin(); it != m_idToImo.end(); ++it)
 		data << it->first << ", ";
 
     data << endl << "Control: ";
-	map<long, Control*>::const_iterator itC;
+	map<ImoId, Control*>::const_iterator itC;
 	for (itC = m_idToControl.begin(); itC != m_idToControl.end(); ++itC)
 		data << itC->first << ", ";
 

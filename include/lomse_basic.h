@@ -286,27 +286,34 @@ typedef float LUnits;           //absolute unit (logical unit): one cent of mm
 typedef Point<LUnits> UPoint;   //point, in LUnits
 typedef Size<LUnits> USize;     //size, in LUnits
 typedef Rectangle<LUnits> URect; //rectangle, in LUnits
-#define LOMSE_OUT_OF_MODEL    -1000000.0f       //LUnits, when value is out of model
+const LUnits k_out_of_model = -100000000000.0f;      //LUnits, when value is out of model
 
 typedef int Pixels;             //device units: pixels
 typedef Point<Pixels> VPoint;   //point, in pixels
 typedef Size<Pixels> VSize;     //size, in pixels
 typedef Rectangle<Pixels> VRect; //rectangle, in pixels
 
-//hack for compilers that not use <stdint.h>  (i.e. MS VisualStudio 2003)
+//for compilers that not use <stdint.h>  (i.e. MS VisualStudio 2003)
 #ifndef UINT32_MAX
-typedef int             int_least32_t;
-typedef unsigned short  uint_least16_t;
-typedef unsigned char   uint_least8_t;
+    typedef int             int_least32_t;
+    typedef unsigned int    uint_least32_t;
+    typedef unsigned short  uint_least16_t;
+    typedef unsigned char   uint_least8_t;
 #endif
 
 //types for agg
 typedef uint_least16_t Int16u;
 typedef uint_least8_t Int8u;
 
-//other specific types
+//other specific types and constants
 typedef int_least32_t ShapeId;      //identifier for GmoShape objects
+
 typedef int_least32_t ImoId;        //identifier for ImoObj objects
+const ImoId k_no_imoid = -1;        //value for undefined imo id (MUST BE -1. See Cursor)
+
+typedef std::pair<ImoId, ImoId> GmoRef;        //identifier for GmoObj objects
+const GmoRef k_no_gmo_ref = make_pair(-1, -1);
+
 typedef double TimeUnits;           //time units (TU). Relative, depends on metronome speed
 
 

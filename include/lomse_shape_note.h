@@ -136,7 +136,7 @@ class GmoShapeNotehead : public GmoShapeGlyph
 //protected:
 //    friend class NoteEngraver;
 public:     //TO_FIX: Constructor used in tests
-    GmoShapeNotehead(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
+    GmoShapeNotehead(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                      Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_notehead, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
@@ -149,7 +149,7 @@ class GmoShapeFlag : public GmoShapeGlyph
 {
 protected:
     friend class StemFlagEngraver;
-    GmoShapeFlag(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
+    GmoShapeFlag(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                  Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_flag, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
@@ -163,7 +163,7 @@ class GmoShapeDot : public GmoShapeGlyph
 protected:
     friend class NoteEngraver;
     friend class RestEngraver;
-    GmoShapeDot(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
+    GmoShapeDot(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                 Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_dot, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
@@ -190,7 +190,7 @@ protected:
 
 public:     //TO_FIX: Constructor used in tests
 //    friend class RestEngraver;
-    GmoShapeRest(ImoObj* pCreatorImo, int idx, LUnits x, LUnits y, Color color,
+    GmoShapeRest(ImoObj* pCreatorImo, ShapeId idx, LUnits x, LUnits y, Color color,
                  LibraryScope& libraryScope);
 
 public:
@@ -202,7 +202,7 @@ class GmoShapeRestGlyph : public GmoShapeGlyph
 {
 protected:
     friend class RestEngraver;
-    GmoShapeRestGlyph(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
+    GmoShapeRestGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                       Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_rest_glyph, idx, iGlyph,
                         pos, color, libraryScope, fontSize)

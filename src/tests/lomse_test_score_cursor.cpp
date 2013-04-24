@@ -1258,7 +1258,7 @@ SUITE(ScoreCursorTest)
         cursor.point_to(27L);       //first note second measure
         ImoStaffObj* pImo = static_cast<ImoStaffObj*>(
                                 ImFactory::inject_note(m_pDoc,3,4,k_32th) );
-        long id = pImo->get_id();
+        ImoId id = pImo->get_id();
         ImoInstrument* pInstr = m_pScore->get_instrument(0);
         ImoStaffObj* pPos = static_cast<ImoStaffObj*>( cursor.staffobj_internal() );
         pInstr->insert_staffobj(pPos, pImo);
@@ -1283,7 +1283,7 @@ SUITE(ScoreCursorTest)
 //
 //        ImoStaffObj* pImo = static_cast<ImoStaffObj*>(
 //                                ImFactory::inject_note(m_pDoc,3,4,k_32th) );
-//        long id = pImo->get_id();
+//        ImoId id = pImo->get_id();
 //        ImoInstrument* pInstr = m_pScore->get_instrument(0);
 //        ImoStaffObj* pPos = static_cast<ImoStaffObj*>( cursor.staffobj_internal() );
 //        pInstr->insert_staffobj(pPos, pImo);

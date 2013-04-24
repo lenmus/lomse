@@ -39,13 +39,6 @@
 namespace lomse
 {
 
-//some macros to improve code reading
-#define START       ImoBezierInfo::k_start
-#define END         ImoBezierInfo::k_end
-#define CTROL1      ImoBezierInfo::k_ctrol1
-#define CTROL2      ImoBezierInfo::k_ctrol2
-
-
 //---------------------------------------------------------------------------------------
 //vertices data. Common for ties and slurs
 Vertex m_cmd[] = {
@@ -67,7 +60,7 @@ const int m_nNumVertices = sizeof(m_cmd)/sizeof(Vertex);
 //=======================================================================================
 // GmoShapeTie implementation
 //=======================================================================================
-GmoShapeTie::GmoShapeTie(ImoObj* pCreatorImo, int idx, UPoint* points, LUnits tickness,
+GmoShapeTie::GmoShapeTie(ImoObj* pCreatorImo, ShapeId idx, UPoint* points, LUnits tickness,
                          Color color)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_tie, idx, color)
     , m_thickness(tickness)
@@ -100,10 +93,14 @@ void GmoShapeTie::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->stroke(Color(255,0,0));
     LUnits uWidth = 20.0f;
     pDrawer->stroke_width(uWidth);
-    pDrawer->move_to(m_points[START].x + uWidth / 2.0f, m_points[START].y);
-    pDrawer->line_to(m_points[CTROL1].x + uWidth / 2.0f, m_points[CTROL1].y);
-    pDrawer->line_to(m_points[CTROL2].x + uWidth / 2.0f, m_points[CTROL2].y);
-    pDrawer->line_to(m_points[END].x + uWidth / 2.0f, m_points[END].y);
+    pDrawer->move_to(m_points[ImoBezierInfo::k_start].x 
+                     + uWidth / 2.0f, m_points[ImoBezierInfo::k_start].y);
+    pDrawer->line_to(m_points[ImoBezierInfo::k_ctrol1].x 
+                     + uWidth / 2.0f, m_points[ImoBezierInfo::k_ctrol1].y);
+    pDrawer->line_to(m_points[ImoBezierInfo::k_ctrol2].x 
+                     + uWidth / 2.0f, m_points[ImoBezierInfo::k_ctrol2].y);
+    pDrawer->line_to(m_points[ImoBezierInfo::k_end].x 
+                     + uWidth / 2.0f, m_points[ImoBezierInfo::k_end].y);
     pDrawer->end_path();
     pDrawer->render();
 #endif
@@ -120,17 +117,17 @@ void GmoShapeTie::save_points(UPoint* points)
 void GmoShapeTie::compute_vertices()
 {
     LUnits t = m_thickness / 2.0f;
-    m_vertices[0] = m_points[START];
-    m_vertices[1].x = m_points[CTROL1].x;
-    m_vertices[1].y = m_points[CTROL1].y - t;
-    m_vertices[2].x = m_points[CTROL2].x;
-    m_vertices[2].y = m_points[CTROL2].y - t;
-    m_vertices[3] = m_points[END];
-    m_vertices[4].x = m_points[CTROL2].x - t;
-    m_vertices[4].y = m_points[CTROL2].y + t;
-    m_vertices[5].x = m_points[CTROL1].x + t;
-    m_vertices[5].y = m_points[CTROL1].y + t;
-    m_vertices[6] = m_points[START];
+    m_vertices[0] = m_points[ImoBezierInfo::k_start];
+    m_vertices[1].x = m_points[ImoBezierInfo::k_ctrol1].x;
+    m_vertices[1].y = m_points[ImoBezierInfo::k_ctrol1].y - t;
+    m_vertices[2].x = m_points[ImoBezierInfo::k_ctrol2].x;
+    m_vertices[2].y = m_points[ImoBezierInfo::k_ctrol2].y - t;
+    m_vertices[3] = m_points[ImoBezierInfo::k_end];
+    m_vertices[4].x = m_points[ImoBezierInfo::k_ctrol2].x - t;
+    m_vertices[4].y = m_points[ImoBezierInfo::k_ctrol2].y + t;
+    m_vertices[5].x = m_points[ImoBezierInfo::k_ctrol1].x + t;
+    m_vertices[5].y = m_points[ImoBezierInfo::k_ctrol1].y + t;
+    m_vertices[6] = m_points[ImoBezierInfo::k_start];
 }
 
 //---------------------------------------------------------------------------------------
@@ -157,7 +154,7 @@ unsigned GmoShapeTie::vertex(double* px, double* py)
 //=======================================================================================
 // GmoShapeSlur implementation
 //=======================================================================================
-GmoShapeSlur::GmoShapeSlur(ImoObj* pCreatorImo, int idx, UPoint* points, LUnits tickness,
+GmoShapeSlur::GmoShapeSlur(ImoObj* pCreatorImo, ShapeId idx, UPoint* points, LUnits tickness,
                          Color color)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_slur, idx, color)
     , m_thickness(tickness)
@@ -189,10 +186,10 @@ void GmoShapeSlur::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //    pDrawer->stroke(Color(255,0,0));
 //    LUnits uWidth = 20.0f;
 //    pDrawer->stroke_width(uWidth);
-//    pDrawer->move_to(m_points[START].x + uWidth / 2.0f, m_points[START].y);
-//    pDrawer->line_to(m_points[CTROL1].x + uWidth / 2.0f, m_points[CTROL1].y);
-//    pDrawer->line_to(m_points[CTROL2].x + uWidth / 2.0f, m_points[CTROL2].y);
-//    pDrawer->line_to(m_points[END].x + uWidth / 2.0f, m_points[END].y);
+//    pDrawer->move_to(m_points[ImoBezierInfo::k_start].x + uWidth / 2.0f, m_points[ImoBezierInfo::k_start].y);
+//    pDrawer->line_to(m_points[ImoBezierInfo::k_ctrol1].x + uWidth / 2.0f, m_points[ImoBezierInfo::k_ctrol1].y);
+//    pDrawer->line_to(m_points[ImoBezierInfo::k_ctrol2].x + uWidth / 2.0f, m_points[ImoBezierInfo::k_ctrol2].y);
+//    pDrawer->line_to(m_points[ImoBezierInfo::k_end].x + uWidth / 2.0f, m_points[ImoBezierInfo::k_end].y);
 //    pDrawer->end_path();
 //    pDrawer->render();
 }
@@ -208,17 +205,17 @@ void GmoShapeSlur::save_points(UPoint* points)
 void GmoShapeSlur::compute_vertices()
 {
     LUnits t = m_thickness / 2.0f;
-    m_vertices[0] = m_points[START];
-    m_vertices[1].x = m_points[CTROL1].x;
-    m_vertices[1].y = m_points[CTROL1].y - t;
-    m_vertices[2].x = m_points[CTROL2].x;
-    m_vertices[2].y = m_points[CTROL2].y - t;
-    m_vertices[3] = m_points[END];
-    m_vertices[4].x = m_points[CTROL2].x - t;
-    m_vertices[4].y = m_points[CTROL2].y + t;
-    m_vertices[5].x = m_points[CTROL1].x + t;
-    m_vertices[5].y = m_points[CTROL1].y + t;
-    m_vertices[6] = m_points[START];
+    m_vertices[0] = m_points[ImoBezierInfo::k_start];
+    m_vertices[1].x = m_points[ImoBezierInfo::k_ctrol1].x;
+    m_vertices[1].y = m_points[ImoBezierInfo::k_ctrol1].y - t;
+    m_vertices[2].x = m_points[ImoBezierInfo::k_ctrol2].x;
+    m_vertices[2].y = m_points[ImoBezierInfo::k_ctrol2].y - t;
+    m_vertices[3] = m_points[ImoBezierInfo::k_end];
+    m_vertices[4].x = m_points[ImoBezierInfo::k_ctrol2].x - t;
+    m_vertices[4].y = m_points[ImoBezierInfo::k_ctrol2].y + t;
+    m_vertices[5].x = m_points[ImoBezierInfo::k_ctrol1].x + t;
+    m_vertices[5].y = m_points[ImoBezierInfo::k_ctrol1].y + t;
+    m_vertices[6] = m_points[ImoBezierInfo::k_start];
 }
 
 //---------------------------------------------------------------------------------------
@@ -240,6 +237,5 @@ unsigned GmoShapeSlur::vertex(double* px, double* py)
 
 	return m_cmd[m_nCurVertex++].cmd;
 }
-
 
 }  //namespace lomse

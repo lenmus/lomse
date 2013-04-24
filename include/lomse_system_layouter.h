@@ -407,8 +407,8 @@ public:
     inline void set_system_break(bool value) { m_fHasSystemBreak = value; }
     LUnits get_start_of_column();
     bool is_empty_column();
-    inline ColStaffObjsEntry* get_prolog_clef(int idx) { return m_prologClefs[idx]; }
-    inline ColStaffObjsEntry* get_prolog_key(int idx) { return m_prologKeys[idx]; }
+    inline ColStaffObjsEntry* get_prolog_clef(ShapeId idx) { return m_prologClefs[idx]; }
+    inline ColStaffObjsEntry* get_prolog_key(ShapeId idx) { return m_prologKeys[idx]; }
     inline LUnits get_end_hook_width() { return m_pColStorage->get_end_hook_width(); }
     inline LUnits get_start_hook_width() { return m_pColStorage->get_start_hook_width(); }
     inline LUnits get_fixed_space_for_next_column() {

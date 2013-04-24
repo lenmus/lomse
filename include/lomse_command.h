@@ -130,11 +130,11 @@ class CmdCursor : public DocCmdSimple
 {
 protected:
     int             m_operation;
-    long            m_targetId;
+    ImoId           m_targetId;
     DocCursorState  m_curState;
 
 public:
-    CmdCursor(int cmd, long id=-1L);
+    CmdCursor(int cmd, ImoId id=k_no_imoid);
     virtual ~CmdCursor() {};
 
     enum { k_move_next=0, k_move_prev, k_enter, k_exit, k_point_to, k_refresh, };
@@ -167,7 +167,7 @@ public:
 class CmdInsertBlockLevelObj : public DocCmdSimple
 {
 protected:
-    long m_insertedId;
+    ImoId m_insertedId;
     int m_type;
 
 public:
@@ -182,8 +182,8 @@ public:
 //class CmdInsertStaffObj : public DocCmdSimple
 //{
 //protected:
-//    long m_cursorId;
-//    long m_insertedId;
+//    ImoId m_cursorId;
+//    ImoId m_insertedId;
 //    int m_type;
 //
 //public:

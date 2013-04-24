@@ -80,6 +80,20 @@ SUITE(InternalModelTest)
         delete pDoc;
     }
 
+    TEST_FIXTURE(InternalModelTestFixture, all_imos_have_name)
+    {
+        bool fOk = true;
+        for (int i=0; i < k_imo_last; ++i)
+        {
+            if (ImoObj::get_name(i) == "unknown" )
+            {
+                fOk = false;
+                cout << "Name for ImoObj type " << i << " is not defined" << endl;
+            }
+        }
+        CHECK (fOk);
+    }
+
     TEST_FIXTURE(InternalModelTestFixture, DocumentWithText)
     {
         Document doc(m_libraryScope);

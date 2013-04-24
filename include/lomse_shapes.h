@@ -60,7 +60,7 @@ public:
     virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
 protected:
-    GmoShapeGlyph(ImoObj* pCreatorImo, int type, int nShapeIdx, unsigned int nGlyph,
+    GmoShapeGlyph(ImoObj* pCreatorImo, int type, ShapeId idx, unsigned int nGlyph,
                   UPoint pos, Color color, LibraryScope& libraryScope,
                   double fontHeight);
 
@@ -74,7 +74,7 @@ class GmoShapeClef : public GmoShapeGlyph
 //protected:
 //    friend class ClefEngraver;
 public: //TO_FIX: constructor used in tests.
-    GmoShapeClef(ImoObj* pCreatorImo, int idx, int nGlyph, UPoint pos, Color color,
+    GmoShapeClef(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos, Color color,
                  LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_clef, idx, nGlyph, pos, color,
                         libraryScope, fontSize )
@@ -105,7 +105,7 @@ class GmoShapeFermata : public GmoShapeGlyph
 {
 protected:
     friend class FermataEngraver;
-    GmoShapeFermata(ImoObj* pCreatorImo, int idx, int nGlyph, UPoint pos,
+    GmoShapeFermata(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos,
                     Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_fermata, idx, nGlyph, pos, color,
                         libraryScope, fontSize )
@@ -146,7 +146,7 @@ protected:
 public:
     GmoShapeRectangle(ImoObj* pCreatorImo
                       , int type = GmoObj::k_shape_rectangle
-                      , int idx = 0
+                      , ShapeId idx = 0
                       , const UPoint& pos = UPoint(0.0f, 0.0f)    //top-left corner
                       , const USize& size = USize(0.0f, 0.0f)     //rectangle size
                       , LUnits radius = 0.0f                      //for rounded corners
@@ -168,7 +168,7 @@ class GmoShapeInvisible : public GmoSimpleShape
 {
 protected:
     friend class InvisibleEngraver;
-    GmoShapeInvisible(ImoObj* pCreatorImo, int idx, UPoint uPos, USize uSize);
+    GmoShapeInvisible(ImoObj* pCreatorImo, ShapeId idx, UPoint uPos, USize uSize);
 
 public:
     virtual void on_draw(Drawer* pDrawer, RenderOptions& opt);
@@ -255,7 +255,7 @@ class GmoShapeAccidentals : public GmoCompositeShape
 {
 protected:
     friend class AccidentalsEngraver;
-    GmoShapeAccidentals(ImoObj* pCreatorImo, int idx, UPoint pos, Color color)
+    GmoShapeAccidentals(ImoObj* pCreatorImo, ShapeId idx, UPoint pos, Color color)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_accidentals, idx, color)
     {
     }
@@ -267,7 +267,7 @@ class GmoShapeAccidental : public GmoShapeGlyph
 protected:
     friend class AccidentalsEngraver;
     friend class KeyEngraver;
-    GmoShapeAccidental(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
+    GmoShapeAccidental(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                        Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_accidental_sign, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
@@ -280,7 +280,7 @@ class GmoShapeTimeDigit : public GmoShapeGlyph
 {
 protected:
     friend class TimeEngraver;
-    GmoShapeTimeDigit(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
+    GmoShapeTimeDigit(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                   Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_time_signature_digit, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
@@ -295,7 +295,7 @@ protected:
     LibraryScope& m_libraryScope;
 
     friend class KeyEngraver;
-    GmoShapeKeySignature(ImoObj* pCreatorImo, int idx, UPoint pos, Color color,
+    GmoShapeKeySignature(ImoObj* pCreatorImo, ShapeId idx, UPoint pos, Color color,
                          LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_key_signature, idx, color)
         , m_libraryScope(libraryScope)
@@ -310,7 +310,7 @@ protected:
     LibraryScope& m_libraryScope;
 
     friend class TimeEngraver;
-    GmoShapeTimeSignature(ImoObj* pCreatorImo, int idx, UPoint pos, Color color,
+    GmoShapeTimeSignature(ImoObj* pCreatorImo, ShapeId idx, UPoint pos, Color color,
                           LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_time_signature, idx, color)
         , m_libraryScope(libraryScope)
@@ -325,7 +325,7 @@ protected:
     LibraryScope& m_libraryScope;
 
     friend class MetronomeMarkEngraver;
-    GmoShapeMetronomeMark(ImoObj* pCreatorImo, int idx, UPoint pos, Color color,
+    GmoShapeMetronomeMark(ImoObj* pCreatorImo, ShapeId idx, UPoint pos, Color color,
                           LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_metronome_mark, idx, color)
         , m_libraryScope(libraryScope)
@@ -338,7 +338,7 @@ class GmoShapeMetronomeGlyph : public GmoShapeGlyph
 {
 protected:
     friend class MetronomeMarkEngraver;
-    GmoShapeMetronomeGlyph(ImoObj* pCreatorImo, int idx, unsigned int iGlyph, UPoint pos,
+    GmoShapeMetronomeGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                            Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_metronome_glyph, idx, iGlyph,
                         pos, color, libraryScope, fontSize)

@@ -40,7 +40,7 @@ namespace lomse
 //=======================================================================================
 // GmoShapeBarline implementation
 //=======================================================================================
-GmoShapeBarline::GmoShapeBarline(ImoObj* pCreatorImo, int idx, int nBarlineType,
+GmoShapeBarline::GmoShapeBarline(ImoObj* pCreatorImo, ShapeId idx, int nBarlineType,
                                  LUnits xPos, LUnits yTop,
 						         LUnits yBottom, LUnits uThinLineWidth,
                                  LUnits uThickLineWidth, LUnits uSpacing,

@@ -48,16 +48,16 @@ using namespace lomse;
 class MyEventOnClick : public EventMouse
 {
 public:
-    MyEventOnClick(ImoContentObj* pImo, Document* pDoc)
+    MyEventOnClick(ImoContentObj* pImo, WpDocument wpDoc)
         : EventMouse(k_on_click_event)
     {
-        m_pDoc = pDoc;
+        m_wpDoc = wpDoc;
         m_imoId = pImo->get_id();
     }
-    MyEventOnClick(Control* pCtrl, Document* pDoc)
+    MyEventOnClick(Control* pCtrl, WpDocument wpDoc)
         : EventMouse(k_on_click_event)
     {
-        m_pDoc = pDoc;
+        m_wpDoc = wpDoc;
         m_imoId = pCtrl->get_owner_imo_id();
     }
     ~MyEventOnClick() {}
@@ -143,16 +143,17 @@ SUITE(DocumentEventsTest)
 
     TEST_FIXTURE(DocumentEventsTestFixture, AddHandler_C)
     {
-        MyDocument doc(m_libraryScope);
-        doc.create_empty();
-        ImoParagraph* pPara = doc.add_paragraph();
+        SpDocument spDoc( new MyDocument(m_libraryScope) );
+        spDoc->create_empty();
+        ImoParagraph* pPara = spDoc->add_paragraph();
         ImoLink* pLink = pPara->add_link("Click me");
 
         MyEventHandler handler;
         pLink->add_event_handler(k_on_click_event, &handler,
                                    MyEventHandler::my_on_event_received_wrapper);
 
-        std::list<Observer*> observers = doc.my_get_observers();
+        MyDocument* pDoc = static_cast<MyDocument*>( spDoc.get() );
+        std::list<Observer*> observers = pDoc->my_get_observers();
         CHECK( observers.size() == 1 );
         Observer* pObserver = observers.front();
         CHECK( pObserver->target() == pLink );
@@ -160,9 +161,9 @@ SUITE(DocumentEventsTest)
 
     TEST_FIXTURE(DocumentEventsTestFixture, NotifyEvent_C)
     {
-        MyDocument doc(m_libraryScope);
-        doc.create_empty();
-        ImoParagraph* pPara = doc.add_paragraph();
+        SpDocument spDoc( new MyDocument(m_libraryScope) );
+        spDoc->create_empty();
+        ImoParagraph* pPara = spDoc->add_paragraph();
         ImoLink* pLink = pPara->add_link("Click me");
         MyEventHandler handler;
         pLink->add_event_handler(k_on_click_event, &handler,
@@ -170,23 +171,24 @@ SUITE(DocumentEventsTest)
 
         CHECK( handler.event_received() == false );
 
-        SpEventInfo ev( new MyEventOnClick(pLink, &doc) );
-        doc.notify_observers(ev, pLink);
+        SpEventInfo ev( new MyEventOnClick(pLink, WpDocument(spDoc)) );
+        spDoc->notify_observers(ev, pLink);
 
         CHECK( handler.event_received() == true );
     }
 
     TEST_FIXTURE(DocumentEventsTestFixture, AddHandler_CPP)
     {
-        MyDocument doc(m_libraryScope);
-        doc.create_empty();
-        ImoParagraph* pPara = doc.add_paragraph();
+        SpDocument spDoc( new MyDocument(m_libraryScope) );
+        spDoc->create_empty();
+        ImoParagraph* pPara = spDoc->add_paragraph();
         ImoLink* pLink = pPara->add_link("Click me");
 
         MyEventHandlerCPP handler;
         pLink->add_event_handler(k_on_click_event, &handler);
 
-        std::list<Observer*> observers = doc.my_get_observers();
+        MyDocument* pDoc = static_cast<MyDocument*>( spDoc.get() );
+        std::list<Observer*> observers = pDoc->my_get_observers();
         CHECK( observers.size() == 1 );
         Observer* pObserver = observers.front();
         CHECK( pObserver->target() == pLink );
@@ -194,33 +196,33 @@ SUITE(DocumentEventsTest)
 
     TEST_FIXTURE(DocumentEventsTestFixture, NotifyEvent_CPP)
     {
-        MyDocument doc(m_libraryScope);
-        doc.create_empty();
-        ImoParagraph* pPara = doc.add_paragraph();
+        SpDocument spDoc( new MyDocument(m_libraryScope) );
+        spDoc->create_empty();
+        ImoParagraph* pPara = spDoc->add_paragraph();
         ImoLink* pLink = pPara->add_link("Click me");
         MyEventHandlerCPP handler;
         pLink->add_event_handler(k_on_click_event, &handler);
         CHECK( handler.event_received() == false );
 
-        SpEventInfo ev( new MyEventOnClick(pLink, &doc) );
-        doc.notify_observers(ev, ev->get_source() );
+        SpEventInfo ev( new MyEventOnClick(pLink,WpDocument(spDoc)) );
+        spDoc->notify_observers(ev, ev->get_source() );
 
         CHECK( handler.event_received() == true );
     }
 
     TEST_FIXTURE(DocumentEventsTestFixture, control)
     {
-        MyDocument doc(m_libraryScope);
-        doc.create_empty();
-        ImoParagraph* pPara = doc.add_paragraph();
-        HyperlinkCtrl* pLink = new HyperlinkCtrl(m_libraryScope, NULL, &doc, "link");
+        SpDocument spDoc( new MyDocument(m_libraryScope) );
+        spDoc->create_empty();
+        ImoParagraph* pPara = spDoc->add_paragraph();
+        HyperlinkCtrl* pLink = new HyperlinkCtrl(m_libraryScope, NULL, spDoc.get(), "link");
         ImoControl* pControl = pPara->add_control(pLink);
         MyEventHandlerCPP handler;
         pLink->add_event_handler(k_on_click_event, &handler);
 
         CHECK( handler.event_received() == false );
 
-        SpEventInfo ev( new MyEventOnClick(pControl, &doc) );
+        SpEventInfo ev( new MyEventOnClick(pControl, WpDocument(spDoc)) );
         pLink->handle_event(ev);
 
         CHECK( handler.event_received() == true );
@@ -229,8 +231,8 @@ SUITE(DocumentEventsTest)
 ////    TEST_FIXTURE(DocumentEventsTestFixture, ReplaceHandler)
 ////    {
 ////        Document doc(m_libraryScope);
-////        doc.create_empty();
-////        ImoParagraph* pPara = doc.add_paragraph();
+////        spDoc->create_empty();
+////        ImoParagraph* pPara = spDoc->add_paragraph();
 ////        ImoButton* pButton = pPara->add_button(m_libraryScope, "Click me", USize(1000.0f, 600.0f));
 ////
 ////        MyObserver observer(pButton);
