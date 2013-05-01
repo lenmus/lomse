@@ -40,6 +40,7 @@
 #include "lomse_control.h"
 #include "lomse_score_player_ctrl.h"
 #include "lomse_button_ctrl.h"
+#include "lomse_logger.h"
 
 using namespace std;
 
@@ -81,7 +82,7 @@ ImoTextItem* InlineLevelCreatorApi::add_text_item(const string& text, ImoStyle* 
                             ImFactory::inject(k_imo_text_item, pDoc) );
     pImo->set_text(text);
     pImo->set_style(pStyle);
-    pImo->set_language( pDoc->get_imodoc()->get_language() );
+    pImo->set_language( pDoc->get_language() );
     m_pParent->append_child_imo(pImo);
     return pImo;
 }
@@ -396,8 +397,11 @@ const string& ImoObj::get_name(int type)
 	if (it != m_TypeToName.end())
 		return it->second;
     else
+    {
+        LOMSE_LOG_ERROR("Invalid type.");
         return m_unknown;
-        //throw std::runtime_error( "[ImoObj::get_name]. Invalid type" );
+        //throw runtime_error( "[ImoObj::get_name]. Invalid type" );
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -418,7 +422,6 @@ Document* ImoObj::get_the_document()
             return pImo->get_the_document();
         else
             return NULL;
-//            throw std::runtime_error("[ImoObj::get_the_document] No owner Document.");
     }
 }
 
@@ -468,7 +471,10 @@ ImoDocument* ImoObj::get_document()
         if (pParent)
             return (static_cast<ImoContentObj*>(pParent))->get_document();
         else
-            throw std::runtime_error("[ImoObj::get_document] No parent!");
+        {
+            LOMSE_LOG_ERROR("[ImoObj::get_document] No parent!");
+            throw runtime_error("[ImoObj::get_document] No parent!");
+        }
     }
 }
 
@@ -1388,7 +1394,10 @@ Document* ImoContentObj::get_the_document()
         if (pDoc)
             return pDoc->get_owner();
         else
-            throw std::runtime_error("[ImoContentObj::get_the_document] No owner Document.");
+        {
+            LOMSE_LOG_ERROR("[ImoContentObj::get_the_document] No owner Document.");
+            throw runtime_error("[ImoContentObj::get_the_document] No owner Document.");
+        }
     }
 }
 
@@ -1951,7 +1960,10 @@ string& ImoLink::get_language()
         if (pDoc)
             return pDoc->get_language();
         else
-            throw std::runtime_error("[ImoLink::get_language] No owner Document.");
+        {
+            LOMSE_LOG_ERROR("[ImoLink::get_language] No owner Document.");
+            throw runtime_error("[ImoLink::get_language] No owner Document.");
+        }
     }
 }
 
@@ -2330,7 +2342,8 @@ int ImoScore::get_instr_number_for(ImoInstrument* pInstr)
         if (*it == pInstr)
             return i;
     }
-    throw std::runtime_error("[ImoScore::get_instr_number_for] pInstr not found!");
+    LOMSE_LOG_ERROR("[ImoScore::get_instr_number_for] pInstr not found!");
+    throw runtime_error("[ImoScore::get_instr_number_for] pInstr not found!");
 }
 
 //---------------------------------------------------------------------------------------
@@ -2880,7 +2893,10 @@ string& ImoScoreText::get_language()
         if (pDoc)
             return pDoc->get_language();
         else
-            throw std::runtime_error("[ImoScoreText::get_language] No owner Document.");
+        {
+            LOMSE_LOG_ERROR("[ImoScoreText::get_language] No owner Document.");
+            throw runtime_error("[ImoScoreText::get_language] No owner Document.");
+        }
     }
 }
 
@@ -3036,10 +3052,16 @@ ImoStyle* ImoTableRow::get_style()
             if (pParent && pParent->is_table())
                 return (static_cast<ImoContentObj*>(pParent))->get_style();
             else
-                throw std::runtime_error("[ImoTableRow::get_style] No parent or table row not in table!");
+            {
+                LOMSE_LOG_ERROR("[ImoTableRow::get_style] No parent or table row not in table!");
+                throw runtime_error("[ImoTableRow::get_style] No parent or table row not in table!");
+            }
         }
         else
-            throw std::runtime_error("[ImoTableRow::get_style] No parent or table row not in table!");
+        {
+            LOMSE_LOG_ERROR("[ImoTableRow::get_style] No parent or table row not in table!");
+            throw runtime_error("[ImoTableRow::get_style] No parent or table row not in table!");
+        }
     }
 }
 
@@ -3090,7 +3112,10 @@ string& ImoTextItem::get_language()
         if (pDoc)
             return pDoc->get_language();
         else
-            throw std::runtime_error("[ImoTextItem::get_language] No owner Document.");
+        {
+            LOMSE_LOG_ERROR("[ImoTextItem::get_language] No owner Document.");
+            throw runtime_error("[ImoTextItem::get_language] No owner Document.");
+        }
     }
 }
 

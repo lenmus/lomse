@@ -29,6 +29,8 @@
 
 #include "lomse_ldp_factory.h"
 
+#include "lomse_logger.h"
+
 #include <sstream>
 #include <iostream>
 using namespace std;
@@ -452,9 +454,10 @@ LdpElement* LdpFactory::create(ELdpElement type, int numLine) const
 		return create(it->second, numLine);
 
     std::stringstream err;
-    err << "LdpFactory::create called with unknown type \""
+    err << "[LdpFactory::create] invoked with unknown type \""
         << type << "\"" << endl;
-    throw std::runtime_error( err.str() );
+    LOMSE_LOG_ERROR( err.str() );
+    throw runtime_error( err.str() );
 	return 0;
 }
 
@@ -464,7 +467,10 @@ const std::string& LdpFactory::get_name(ELdpElement type) const
 	if (it != m_TypeToName.end())
 		return it->second;
     else
-        throw std::runtime_error( "[LdpFactory::get_name]. Invalid type" );
+    {
+        LOMSE_LOG_ERROR("[LdpFactory::get_name]. Invalid type" );
+        throw std::runtime_error("[LdpFactory::get_name]. Invalid type" );
+    }
 }
 
 }   //namespace lomse

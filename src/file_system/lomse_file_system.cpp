@@ -30,6 +30,7 @@
 #include "lomse_file_system.h"
 
 #include "lomse_zip_stream.h"
+#include "lomse_logger.h"
 
 #include <iostream>
 #include <sstream>
@@ -202,12 +203,18 @@ InputStream* FileSystem::open_input_stream(const string& filelocator)
                 case DocLocator::k_zip:
                     return LOMSE_NEW ZipInputStream(filelocator);
                 default:
-                    throw("Invalid file locator protocol");
+                {
+                    LOMSE_LOG_ERROR("Invalid file locator protocol");
+                    throw runtime_error("[FileSystem::open_input_stream] Invalid file locator protocol");
+                }
             }
         }
 
         default:
-            throw("Invalid file locator protocol");
+        {
+            LOMSE_LOG_ERROR("Invalid file locator protocol");
+            throw runtime_error("[FileSystem::open_input_stream] Invalid file locator protocol");
+        }
     }
     return NULL;    //compiler happy
 }
@@ -223,8 +230,10 @@ LocalInputStream::LocalInputStream(const std::string& filelocator)
     if(!m_file.is_open())
     {
         stringstream s;
-        s << "File not found: \"" << filelocator << "\"";
-        throw std::invalid_argument(s.str());
+        s << "[LocalInputStream::LocalInputStream] File not found: \""
+          << filelocator << "\"";
+        LOMSE_LOG_ERROR(s.str());
+        throw runtime_error(s.str());
     }
 }
 

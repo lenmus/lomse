@@ -29,6 +29,8 @@
 
 #include "lomse_image_reader.h"
 
+#include "lomse_logger.h"
+
 #include <png.h>
 #include <pngconf.h>
 
@@ -80,6 +82,7 @@ SpImage ImageReader::load_image(const string& locator)
         stringstream s;
         s << "[ImageReader::load_image] Image format not supported. Locator: "
           << locator;
+        LOMSE_LOG_ERROR(s.str());
         throw runtime_error(s.str());
     }
     catch(exception& e)
@@ -119,6 +122,7 @@ void read_callback(png_structp png, png_bytep data, png_size_t length)
 //---------------------------------------------------------------------------------------
 void error_callback (png_structp, png_const_charp)
 {
+    LOMSE_LOG_ERROR("error reading png image");
     throw "error reading png image";
 }
 

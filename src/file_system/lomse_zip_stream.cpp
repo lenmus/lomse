@@ -29,6 +29,8 @@
 
 #include "lomse_zip_stream.h"
 
+#include "lomse_logger.h"
+
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -49,8 +51,10 @@ ZipInputStream::ZipInputStream(const std::string& filelocator)
     if (!open_zip_archive(filelocator))
     {
         stringstream s;
-        s << "File not found: \"" << filelocator << "\"";
-        throw std::invalid_argument(s.str());
+        s << "[ZipInputStream::ZipInputStream] File not found: \""
+          << filelocator << "\"";
+        LOMSE_LOG_ERROR(s.str());
+        throw runtime_error(s.str());
     }
 
     if (get_num_entries() != 0)
@@ -110,8 +114,9 @@ void ZipInputStream::open_specified_entry_or_first(const std::string& filelocato
         if (!move_to_first_entry())
         {
             stringstream s;
-            s << "Failure positioning at first entry in zip archive: \"" << filelocator << "\"";
-            throw std::runtime_error(s.str());
+            s << "[ZipInputStream::open_specified_entry_or_first] Failure positioning at first entry in zip archive: \"" << filelocator << "\"";
+            LOMSE_LOG_ERROR(s.str());
+            throw runtime_error(s.str());
         }
     }
     else
@@ -119,9 +124,10 @@ void ZipInputStream::open_specified_entry_or_first(const std::string& filelocato
         if (!move_to_entry(innerPath))
         {
             stringstream s;
-            s << "Failure positioning at entry \"" << innerPath
+            s << "[ZipInputStream::open_specified_entry_or_first] Failure positioning at entry \"" << innerPath
               << "\" in zip archive: \"" << filelocator << "\"";
-            throw std::runtime_error(s.str());
+            LOMSE_LOG_ERROR(s.str());
+            throw runtime_error(s.str());
         }
     }
 
@@ -264,7 +270,10 @@ void ZipInputStream::close_current_entry()
 void ZipInputStream::unget()
 {
     if (!m_curEntry.fIsOpen)
-        throw std::logic_error("Invoking unget() in closed ZipInputStream entry");
+    {
+        LOMSE_LOG_ERROR("[ZipInputStream::unget] Invoking unget() in closed ZipInputStream entry");
+        throw logic_error("[ZipInputStream::unget] Invoking unget() in closed ZipInputStream entry");
+    }
 
     if (m_pNextChar > m_buffer)
     {
@@ -290,13 +299,22 @@ bool ZipInputStream::eof()
 char ZipInputStream::get_char()
 {
     if (!m_curEntry.fIsOpen)
-        throw std::logic_error("Invoking get_char() in closed ZipInputStream entry");
+    {
+        LOMSE_LOG_ERROR("[ZipInputStream::get_char] Invoking get_char() in closed ZipInputStream entry");
+        throw logic_error("[ZipInputStream::get_char] Invoking get_char() in closed ZipInputStream entry");
+    }
 
     if (m_curEntry.fEOF)
-        throw std::logic_error("Invoking get_char() after eof in ZipInputStream entry");
+    {
+        LOMSE_LOG_ERROR("[ZipInputStream::get_char] Invoking get_char() after eof in ZipInputStream entry");
+        throw logic_error("[ZipInputStream::get_char] Invoking get_char() after eof in ZipInputStream entry");
+    }
 
     if (m_remainingBytes <= 0)
-        throw std::logic_error("Invoking get_char() with empty buffer in ZipInputStream entry");
+    {
+        LOMSE_LOG_ERROR("[ZipInputStream::get_char] Invoking get_char() with empty buffer in ZipInputStream entry");
+        throw logic_error("[ZipInputStream::get_char] Invoking get_char() with empty buffer in ZipInputStream entry");
+    }
 
     if (m_remainingBytes == 1)
     {
@@ -324,13 +342,22 @@ char ZipInputStream::get_char()
 long ZipInputStream::read(unsigned char* pDestBuffer, long nBytesToRead)
 {
     if (!m_curEntry.fIsOpen)
-        throw std::logic_error("Invoking read() in closed ZipInputStream entry");
+    {
+        LOMSE_LOG_ERROR("[ZipInputStream::read] Invoking read() in closed ZipInputStream entry");
+        throw logic_error("[ZipInputStream::read] Invoking read() in closed ZipInputStream entry");
+    }
 
     if (m_curEntry.fEOF)
-        throw std::logic_error("Invoking read() after eof in ZipInputStream entry");
+    {
+        LOMSE_LOG_ERROR("[ZipInputStream::read] Invoking read() after eof in ZipInputStream entry");
+        throw logic_error("[ZipInputStream::read] Invoking read() after eof in ZipInputStream entry");
+    }
 
     if (m_remainingBytes <= 0)
-        throw std::logic_error("Invoking read() with empty buffer in ZipInputStream entry");
+    {
+        LOMSE_LOG_ERROR("[ZipInputStream::read] Invoking read() with empty buffer in ZipInputStream entry");
+        throw std::logic_error("[ZipInputStream::read] Invoking read() with empty buffer in ZipInputStream entry");
+    }
 
     long bytesRead = min(m_remainingBytes, nBytesToRead);
     memcpy(pDestBuffer, m_pNextChar, bytesRead);
@@ -360,7 +387,10 @@ long ZipInputStream::read(unsigned char* pDestBuffer, long nBytesToRead)
 long ZipInputStream::get_size()
 {
     if (!m_curEntry.fIsOpen)
-        throw std::logic_error("[ZipInputStream::get_size] Invoking get_size() in closed ZipInputStream entry");
+    {
+        LOMSE_LOG_ERROR("[ZipInputStream::get_size] Invoking get_size() in closed ZipInputStream entry");
+        throw logic_error("[ZipInputStream::get_size] Invoking get_size() in closed ZipInputStream entry");
+    }
 
     return long(m_curEntry.dwUncompressedSize);
 }

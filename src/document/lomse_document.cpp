@@ -44,6 +44,7 @@
 #include "lomse_events.h"
 #include "lomse_ldp_elements.h"
 #include "lomse_control.h"
+#include "lomse_logger.h"
 
 #include <sstream>
 using namespace std;
@@ -79,8 +80,11 @@ Document::~Document()
 void Document::initialize()
 {
     if (m_pImoDoc)
+    {
+        LOMSE_LOG_ERROR("Aborting. Attempting to create already created document");
         throw std::runtime_error(
             "[Document::create] Attempting to create already created document");
+    }
 
     m_flags = k_dirty;
     m_pImoDoc = NULL;
@@ -229,8 +233,11 @@ Compiler* Document::get_compiler_for_format(int format)
             return Injector::inject_LmdCompiler(m_libraryScope, this);
 
         default:
+        {
+            LOMSE_LOG_ERROR("Aborting. Invalid identifier for file format.");
             throw std::runtime_error(
-                "[Document::from_file] Invalid identifier for file format");
+                "[Document::from_file] Invalid identifier for file format.");
+        }
     }
     return NULL;
 }
@@ -313,6 +320,7 @@ Observable* Document::get_observable_child(int childType, ImoId childId)
         return get_pointer_to_control(childId);
     else
     {
+        LOMSE_LOG_ERROR("Aborting. Invalid child type.");
         throw std::runtime_error(
             "[Document::get_observable_child] Invalid child type");
     }

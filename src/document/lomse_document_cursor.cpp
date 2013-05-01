@@ -33,6 +33,7 @@
 #include "lomse_score_iterator.h"
 #include "lomse_internal_model.h"
 #include "lomse_time.h"
+#include "lomse_logger.h"
 
 using namespace std;
 
@@ -524,8 +525,10 @@ ColStaffObjsEntry* ScoreCursor::find_previous_imo()
          || !is_lower_time(p_iter_object_time(), curTime)
        )
     {
-        //no previous staffobj!
-        throw runtime_error("Must exist");
+        //no previous staffobj! But must exist!
+        LOMSE_LOG_ERROR("Aborting. No previous staffobj.");
+        throw runtime_error(
+            "[ScoreCursor::find_previous_imo] No previous staffobj.");
     }
 
     ColStaffObjsEntry* pEntry = *m_it;

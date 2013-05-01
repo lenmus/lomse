@@ -31,8 +31,7 @@
 
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
-//#include "lomse_ldp_parser.h"
-//#include "lomse_ldp_analyser.h"
+#include "lomse_logger.h"
 #include "lomse_document.h"
 
 
@@ -128,7 +127,10 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_tuplet_dto:          pObj = LOMSE_NEW ImoTupletDto();          break;
 
         default:
-            throw std::runtime_error("[ImFactory::inject] invalid type.");
+        {
+            LOMSE_LOG_ERROR("[ImFactory::inject] invalid type.");
+            throw runtime_error("[ImFactory::inject] invalid type.");
+        }
     }
     if (!pObj->is_dto())
     {

@@ -43,6 +43,7 @@
 #include "lomse_pixel_formats.h"
 #include "lomse_injectors.h"
 #include "lomse_image.h"
+#include "lomse_logger.h"
 
 using namespace std;
 
@@ -1255,7 +1256,10 @@ protected:
         else if (m_pParent)
             return m_pParent->get_float_property(prop);
         else
+        {
+            LOMSE_LOG_ERROR("Aborting. Style has no parent.");
             throw std::runtime_error( "[ImoStyle::get_float_property]. No parent" );
+        }
     }
 
     LUnits get_lunits_property(int prop)
@@ -1266,7 +1270,10 @@ protected:
         else if (m_pParent)
             return m_pParent->get_lunits_property(prop);
         else
-            throw std::runtime_error( "[ImoStyle::get_float_property]. No parent" );
+        {
+            LOMSE_LOG_ERROR("Aborting. Style has no parent.");
+            throw std::runtime_error( "[ImoStyle::get_lunits_property]. No parent" );
+        }
     }
 
     const string& get_string_property(int prop)
@@ -1277,7 +1284,10 @@ protected:
         else if (m_pParent)
             return m_pParent->get_string_property(prop);
         else
+        {
+            LOMSE_LOG_ERROR("Aborting. Style has no parent.");
             throw std::runtime_error( "[ImoStyle::get_string_property]. No parent" );
+        }
     }
 
     int get_int_property(int prop)
@@ -1288,7 +1298,10 @@ protected:
         else if (m_pParent)
             return m_pParent->get_int_property(prop);
         else
+        {
+            LOMSE_LOG_ERROR("Aborting. Style has no parent.");
             throw std::runtime_error( "[ImoStyle::get_int_property]. No parent" );
+        }
     }
 
     Color get_color_property(int prop)
@@ -2557,6 +2570,8 @@ public:
     inline string& get_text() { return m_text.get_text(); }
     inline ImoTextInfo* get_text_info() { return &m_text; }
     string& get_language();
+    inline void set_language(const string& lang) { m_text.set_language(lang); }
+    inline bool has_language() { return !m_text.get_language().empty(); }
 
     //setters
     inline void set_text(const std::string& value) { m_text.set_text(value); }

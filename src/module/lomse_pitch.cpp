@@ -30,6 +30,7 @@
 #include "lomse_pitch.h"
 #include "lomse_score_utilities.h"
 #include "lomse_ldp_analyser.h"
+#include "lomse_logger.h"
 
 #include <sstream>
 using namespace std;
@@ -154,8 +155,10 @@ FPitch::FPitch(const string& note)
     int step, octave;
     EAccidentals accidentals;
     if (LdpAnalyser::ldp_pitch_to_components(note, &step, &octave, &accidentals))
-        //TODO throw ?
+    {
+        LOMSE_LOG_ERROR(note);
         create(k_step_C, k_octave_4, 0);        //error
+    }
     else
     {
         int acc = accidentals_to_number(accidentals);
@@ -661,8 +664,11 @@ string DiatonicPitch::get_ldp_name()
     if (is_valid())
         return m_sNoteName[step()] + m_sOctave[octave()];
     else
+    {
+        LOMSE_LOG_ERROR("Operation on non-valid DiatonicPitch");
         return "*";
         //throw runtime_error("Operation on non-valid DiatonicPitch");
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -789,7 +795,10 @@ bool MidiPitch::is_natural_note_for(EKeySignature nKey)
             //        C D EF G A B
             sScale = "010110101011";   break;
         default:
-            throw runtime_error( "[MidiPitch::is_natural_note_for]. Invalid key signature" );
+        {
+            LOMSE_LOG_ERROR("[MidiPitch::is_natural_note_for]. Invalid key signature");
+            throw runtime_error("[MidiPitch::is_natural_note_for]. Invalid key signature");
+        }
     }
 
     int nRemainder = m_pitch % 12;      //nRemainder goes from 0 (Do) to 11 (Si)

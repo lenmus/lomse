@@ -1,6 +1,12 @@
+//Lines before Copyright header are for cmake module FindLomse. *DO NOT CHANGE POSITION* 
+//---------------------------------------------------------------------------------------
+//..+....1....+....20
+//VERSION          @LOMSE_VERSION@
+//DEPENDENCIES     @LOMSE_DEPENDENCIES@
+
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -72,12 +78,17 @@
 //---------------------------------------------------------------------------------------
 // build options
 //---------------------------------------------------------------------------------------
+#define ON 1
+#define OFF 0
 
-// 1 - Debug build: include debug options
+// Debug build: include debug options
 #define LOMSE_DEBUG                 @LOMSE_DEBUG@ 
 
-// 1 - Accept without warning/error LDP v1.5 syntax
+// Accept without warning/error LDP v1.5 syntax
 #define LOMSE_COMPATIBILITY_LDP_1_5     @LOMSE_COMPATIBILITY_LDP_1_5@
+
+// Enable debug logs. It is independent of build mode: debug or release
+#define LOMSE_ENABLE_DEBUG_LOGS     @LOMSE_ENABLE_DEBUG_LOGS@
 
 
 #endif  // __LOMSE_CONFIG_H__

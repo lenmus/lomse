@@ -30,7 +30,9 @@
 #include "lomse_tokenizer.h"
 
 #include "lomse_reader.h"
+#include "lomse_logger.h"
 
+#include <sstream>
 #include <stdexcept>
 using namespace std;
 
@@ -460,18 +462,27 @@ LdpToken* LdpTokenizer::parse_new_token()
                 break;
 
             case k_Error:
-                if (curChar == nEOF) {
+                if (curChar == nEOF)
+                {
                     return LOMSE_NEW LdpToken(tkEndOfFile, "", numLine);
-                } else {
-                    m_reporter << "[LdpTokenizer::parse_new_token]: Bad character '"
-                               << curChar << "' found" << endl;
-                    throw std::runtime_error("[LdpTokenizer::parse_new_token] Invalid char");
+                }
+                else
+                {
+                    stringstream s;
+                    s << "[LdpTokenizer::parse_new_token]: Bad character '"
+                      << curChar << "' found" << endl;
+                    m_reporter << s.str();
+                    LOMSE_LOG_ERROR(s.str());
+                    throw runtime_error(s.str());
                 }
                 state = k_Start;
                 break;
 
             default:
-                throw std::runtime_error("[LdpTokenizer::parse_new_token] Invalid state");
+            {
+                LOMSE_LOG_ERROR("[LdpTokenizer::parse_new_token] Invalid state");
+                throw runtime_error("[LdpTokenizer::parse_new_token] Invalid state");
+            }
 
         }
     }

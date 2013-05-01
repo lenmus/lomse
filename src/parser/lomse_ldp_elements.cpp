@@ -165,7 +165,10 @@ LdpElement* LdpElement::get_parameter(int i)
     if (it != this->end() && i == numChild)
         return *it;
     else
-        throw std::runtime_error("[LdpElement::get_parameter]. Num child greater than available children" );
+    {
+        LOMSE_LOG_ERROR("[LdpElement::get_parameter]. Num child greater than available children" );
+        throw runtime_error("[LdpElement::get_parameter]. Num child greater than available children" );
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -174,7 +177,10 @@ float LdpElement::get_value_as_float()
     float rValue;
     std::istringstream iss(m_value);
     if ((iss >> std::dec >> rValue).fail())
-        throw std::runtime_error( "[LdpElement::get_value_as_float]. Invalid conversion to number" );
+    {
+        LOMSE_LOG_ERROR("[LdpElement::get_value_as_float]. Invalid conversion to number" );
+        throw runtime_error("[LdpElement::get_value_as_float]. Invalid conversion to number" );
+    }
     return rValue;
 }
 

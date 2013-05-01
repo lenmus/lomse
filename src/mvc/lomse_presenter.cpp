@@ -152,7 +152,10 @@ SpInteractor Presenter::get_interactor_shared_ptr(int iIntor)
     if (i == iIntor)
         return *it;
     else
-        throw std::runtime_error("[Presenter::get_interactor] invalid index");
+    {
+        LOMSE_LOG_ERROR("[Presenter::get_interactor] invalid index");
+        throw runtime_error("[Presenter::get_interactor] invalid index");
+    }
 }
 
 //---------------------------------------------------------------------------------------

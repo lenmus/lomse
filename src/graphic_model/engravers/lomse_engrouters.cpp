@@ -168,6 +168,7 @@ Engrouter* EngroutersCreator::create_engrouter_for(ImoInlineLevelObj* pImo)
                             "[EngroutersCreator::create_engrouter_for] invalid object %d")
                             % pImo->get_obj_type() );
         cout << "Throw: " << msg << endl;
+        LOMSE_LOG_ERROR(msg);
         throw std::runtime_error(msg);
     }
 }

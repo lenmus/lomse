@@ -35,6 +35,7 @@
 #include "lomse_internal_model.h"
 #include "lomse_text_engraver.h"
 #include "lomse_shape_text.h"
+#include "lomse_logger.h"
 
 //other
 #include <boost/format.hpp>
@@ -77,7 +78,8 @@ GmoShape* MetronomeMarkEngraver::create_shape(ImoMetronomeMark* pImo, UPoint uPo
             string msg = str( boost::format(
                             "[MetronomeMarkEngraver::create_shape] invalid mark type %d")
                             % markType );
-            throw std::runtime_error(msg);
+            LOMSE_LOG_ERROR(msg);
+            throw runtime_error(msg);
         }
     }
 }
@@ -185,7 +187,8 @@ int MetronomeMarkEngraver::select_glyph(int noteType, int dots)
             string msg = str( boost::format(
                             "[MetronomeMarkEngraver::select_glyph] invalid note type %d")
                             % noteType );
-            throw std::runtime_error(msg);
+            LOMSE_LOG_ERROR(msg);
+            throw runtime_error(msg);
         }
     }
 }

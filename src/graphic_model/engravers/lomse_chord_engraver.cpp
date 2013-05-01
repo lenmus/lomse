@@ -35,6 +35,7 @@
 #include "lomse_note_engraver.h"
 #include "lomse_score_meter.h"
 #include "lomse_engraving_options.h"
+#include "lomse_logger.h"
 
 #include <cstdlib>      //abs
 #include <stdexcept>
@@ -92,7 +93,10 @@ void ChordEngraver::set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
 {
     add_note(pSO, pStaffObjShape);
     if (m_numNotesMissing != 0)
+    {
+        LOMSE_LOG_ERROR("[ChordEngraver::set_end_staffobj] Num added notes doesn't match exzpected notes in chord");
         throw runtime_error("[ChordEngraver::set_end_staffobj] Num added notes doesn't match exzpected notes in chord");
+    }
 }
 
 //---------------------------------------------------------------------------------------

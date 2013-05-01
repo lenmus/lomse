@@ -41,6 +41,7 @@
 
 #include "lomse_font_storage.h"
 #include "lomse_renderer.h"
+#include "lomse_logger.h"
 #include "utf8.h"
 #include <vector>
 
@@ -204,7 +205,7 @@ void TextMeter::measure_glyphs(wstring* glyphs, std::vector<LUnits>& glyphWidths
     if (!m_pFonts->is_font_valid())
     {
         string msg("[TextMeter::measure_glyphs] Not valid font");
-        cout << "Throw: " << msg << endl;
+        LOMSE_LOG_ERROR(msg);
         throw std::runtime_error(msg);
     }
 

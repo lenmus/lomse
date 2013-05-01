@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------------------
 # This file is part of the Lomse library.
-# Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+# Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
@@ -28,20 +28,60 @@
 # 
 #---------------------------------------------------------------------------------------
 
+
 #-------------------------------------------------------------------------------------
-#  This is a CMake configuration file for building makefiles and installfiles for
-#  the library and all test/demo programs
+# This is a CMake configuration file for building makefiles and installfiles for
+# the Lomse library
 #
-#  To use it you need CMake which can be downloaded from http://www.cmake.org/
+# To use it you need CMake which can be downloaded from http://www.cmake.org/
 #
-#  This file has been tested with the following generators:
-#   Windows:
-#       Visual Studio 7 .NET
-#       Visual Studio 2008
-#   Linux:
-#       Unix Makefiles
-#       CodeBlocks - Unix Makefiles
-# 
+# Usage
+#   cmake [<options>] <source-tree>
+#   make
+#   make package
+#   sudo dpkg -i <created-liblomse.package>.deb
+#
+# example:
+#   cmake ../lomse
+#
+# The default target (in Linux) is "Unix Makefiles". If you would like to generate
+# a diferent makefile use option -G<desired-target>. For instance:
+#
+#   cmake -G "CodeBlocks - Unix Makefiles"  ...
+#
+# Installation options
+# ---------------------
+#
+# The default installation prefix is "/usr/local". Therefore, libraries (binaries)
+# will be installed at "/usr/local/lib" and include files at
+# "/usr/local/include/lomse". You can change the default location 
+# by specifying option CMAKE_INSTALL_PREFIX. For instance:
+#
+#   cmake -DCMAKE_INSTALL_PREFIX=/usr  ...
+#
+# Also, a pkg-config file, liblomse.pc, will be installed. The default
+# location is "/usr/lib/pkgconfig". You can change this default location
+# by using the option -DLOMSE_PKG_CONFIG_INSTALL=/new/pkgconfig/path.
+# For instance:
+#
+#   cmake -DLOMSE_PKG_CONFIG_INSTALL=/usr/lib/x86_64-linux-gnu/pkgconfig  ...
+#
+#
+# Additional build options (ON / OFF values):
+# --------------------------------------------
+# Values can be changed directly in the CMake GUI or through
+# the command line by prefixing a variable's name with '-D':
+# i.e.:    cmake -DLOMSE_DEBUG=ON  ...
+#
+# LOMSE_ENABLE_DEBUG_LOGS   (Default value: OFF)
+#       Enable debug logs (performance loss). Doesn't require a debug build.
+#
+# LOMSE_DEBUG   (Default value: OFF)      
+#       Force to create a debug build, with debug symbols.
+#
+# LOMSE_COMPATIBILITY_LDP_1_5   (Default value: ON)
+#       Enables backwards compatibility for scores in LDP v1.5
+#
 #-------------------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 2.8)
@@ -68,15 +108,58 @@ message("OUTDIR: ${OUTDIR}")
 set( CMAKE_MODULE_PATH "${ROOT_DIR}/cmake-modules" )
 
 
-if(0)
 # Various options that the user can select (var, msg, default value).
 # Values can be changed directly in the CMake GUI or through
 # the command line by prefixing a variable's name with '-D':
-# i.e.:    cmake -DLOMSE_BUILD_DEBUG=ON
+# i.e.:    cmake -DLOMSE_DEBUG=ON
 #
 #-------------------------------------------------------------------
+
+# command line build options
+if(DEFINED LOMSE_ENABLE_DEBUG_LOGS)
+  option( LOMSE_ENABLE_DEBUG_LOGS  "Enable debug logs. Doesn't require debug build" ${LOMSE_ENABLE_DEBUG_LOGS})
+else()
+  option( LOMSE_ENABLE_DEBUG_LOGS  "Enable debug logs. Doesn't require debug build" OFF)
+endif()
+
+if(DEFINED LOMSE_DEBUG)
+    option( LOMSE_DEBUG  "Debug build, with debug symbols" ${LOMSE_DEBUG})
+else()
+    option( LOMSE_DEBUG  "Debug build, with debug symbols" OFF)
+endif()
+
+if(DEFINED LOMSE_COMPATIBILITY_LDP_1_5)
+    option( LOMSE_COMPATIBILITY_LDP_1_5  "Enable compatibility for LDP v1.5" ${LOMSE_COMPATIBILITY_LDP_1_5})
+else()
+    option( LOMSE_COMPATIBILITY_LDP_1_5  "Enable compatibility for LDP v1.5" ON)
+endif()
+
+#options not yet implemented
+#if(DEFINED LOMSE_BUILD_STATIC_LIB)
+#    option( LOMSE_BUILD_STATIC_LIB  "Build Lomse as static library" ${LOMSE_BUILD_STATIC_LIB})
+#else()
+    option( LOMSE_BUILD_STATIC_LIB  "Build Lomse as static library" ON)
+#endif()
+
+option( LOMSE_BUILD_EXAMPLE  "Build test example" OFF)
+option( LOMSE_BUILD_TESTS  "Build and run unit tests" OFF)
+
+
+# build type
+if (LOMSE_BUILD_STATIC_LIB)
+    set( LOMSE_USE_DLL "0")
+    set( LOMSE_CREATE_DLL "0")
+else()
+    set( LOMSE_USE_DLL "1")
+    set( LOMSE_CREATE_DLL "1")
+endif()
+
+message("Create Debug build = ${LOMSE_DEBUG}")
+message("Enable debug logs = ${LOMSE_ENABLE_DEBUG_LOGS}")
+message("Compatibility for LDP v1.5 = ${LOMSE_COMPATIBILITY_LDP_1_5}")
+
+if(0)
 option(LOMSE_BUILD_STATIC_LIB "Build Lomse as static library" ON)
-option(LOMSE_BUILD_DEBUG      "Build with debug symbols" OFF)
 
 if(WIN32)
     option(LOMSE_USE_PREBUILT_FREETYPE "Use supplied prebuilt lib for freetype" OFF)
@@ -144,15 +227,6 @@ message ("version = '${LOMSE_VERSION}'")
 #set(LOMSE_VERSION_STRING "${LOMSE_VERSION_STRING}.${LOMSE_REVISION}" )
 message ("version string = '${LOMSE_VERSION_STRING}'") 
 
-
-
-# build type
-set( LOMSE_USE_DLL "0")
-set( LOMSE_CREATE_DLL "0")
-
-# build options
-set( LOMSE_DEBUG "0")
-set( LOMSE_COMPATIBILITY_LDP_1_5 "1")
 
 # platform
 if(WIN32)
@@ -248,10 +322,14 @@ if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
     link_libraries( ${Boost_LIBRARIES} )
     link_directories( ${Boost_LIBRARY_DIRS} )
+    message("Boost found: version= ${Boost_LIB_VERSION}" )
+    string(REGEX REPLACE "_" "." Boost_LIB_VERSION "${Boost_LIB_VERSION}" )
+    set(BOOST_DEPENDENCIES 
+        "libboost-thread${Boost_LIB_VERSION}, libboost-date-time${Boost_LIB_VERSION}")
     message("Boost found: libraries: ${Boost_LIBRARIES}" )
     message("Boost found: include= ${Boost_INCLUDE_DIRS}" )
     message("Boost found: libdir= ${Boost_LIBRARY_DIRS}" )
-    message("Boost found: version= ${Boost_LIB_VERSION}" )
+    message("Boost dependencies: ${BOOST_DEPENDENCIES}" )
 else()
     message(SEND_ERROR "Boost package not found. Reason: ${Boost_ERROR_REASON}" )
 endif()
@@ -294,24 +372,28 @@ if( ZLIB_FOUND )
     message("zlib found: libraries= ${ZLIB_LIBRARIES}" )
     message("zlib found: include= ${ZLIB_INCLUDE_DIRS}" )
     message("zlib found: libdir= ${ZLIB_LINK_DIR}" )
+    message("zlib version: ${ZLIB_VERSION_STRING}" )
 else()
     message(SEND_ERROR "zlib package not found.")
 endif()
 
 
+#dependencies for building and for pkg-config file
+set(LOMSE_REQUIRES "freetype2, libpng, zlib")
+set(LOMSE_DEPENDENCIES "libfreetype6, libpng12-0 (>=1.2.42), zlib1g (>= ${ZLIB_VERSION_STRING}), ${BOOST_DEPENDENCIES} ")
+
 
 # include directories to be installed
 set( INCLUDES_LOMSE  ${ROOT_DIR}/include )
 set( INCLUDES_AGG  ${ROOT_DIR}/src/agg/include )
-set( INCLUDES_RAPIDXML  ${ROOT_DIR}/include/rapidxml )
+set( INCLUDES_UTFCPP  ${ROOT_DIR}/packages/utfcpp )
+set( INCLUDES_MINIZIP  ${ROOT_DIR}/packages/minizip )
 include_directories(
     ${INCLUDES_LOMSE}
     ${INCLUDES_AGG}
-    ${INCLUDES_RAPIDXML}
     ${ROOT_DIR}/src/agg/font_freetype
-    ${ROOT_DIR}/packages/utfcpp
-    ${ROOT_DIR}/packages/minizip
-    ${UNITTEST_INCLUDE_DIRS}
+    ${INCLUDES_UTFCPP}
+    ${INCLUDES_MINIZIP}
 )
 
 
@@ -373,7 +455,6 @@ configure_file(
 )
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
-
 
 
 
@@ -650,124 +731,124 @@ set_target_properties(${LOMSE_DYN}
 # Target: program for testing the library
 #
 ###############################################################################
-if(0)
+if(LOMSE_BUILD_TESTS)
 
-set (TESTLIB  testlib)
+    set (TESTLIB  testlib)
 
-# Dirty hack: I don't know why it conflicts with LIBCD. But for
-# now I need to continue. See:
-# http://mygoldenchariot.blogspot.com/2006/07/link-warning-lnk4098-defaultlib-libcd.html
-if(MSVC)
-    set(CMAKE_LINKER_FLAGS_DEBUG
-         ${CMAKE_LINKER_FLAGS_DEBUG} "/NODEFAULTLIB:LIBCD"
+    # Dirty hack: I don't know why it conflicts with LIBCD. But for
+    # now I need to continue. See:
+    # http://mygoldenchariot.blogspot.com/2006/07/link-warning-lnk4098-defaultlib-libcd.html
+    if(MSVC)
+        set(CMAKE_LINKER_FLAGS_DEBUG
+             ${CMAKE_LINKER_FLAGS_DEBUG} "/NODEFAULTLIB:LIBCD"
+        )
+    endif()
+
+    # source files to compile
+    add_executable( ${TESTLIB} 
+            ${SRC_DIR}/tests/lomse_test_barline_engraver.cpp
+            ${SRC_DIR}/tests/lomse_test_beam_engraver.cpp
+            ${SRC_DIR}/tests/lomse_test_chord_engraver.cpp
+            ${SRC_DIR}/tests/lomse_test_column_breaker.cpp
+            ${SRC_DIR}/tests/lomse_test_column_layouter.cpp
+            ${SRC_DIR}/tests/lomse_test_command.cpp
+            ${SRC_DIR}/tests/lomse_test_document.cpp
+            ${SRC_DIR}/tests/lomse_test_document_cursor.cpp
+            ${SRC_DIR}/tests/lomse_test_document_iterator.cpp
+            ${SRC_DIR}/tests/lomse_test_document_layouter.cpp
+            ${SRC_DIR}/tests/lomse_test_elements.cpp
+            ${SRC_DIR}/tests/lomse_test_engrouters.cpp
+            ${SRC_DIR}/tests/lomse_test_events.cpp
+            ${SRC_DIR}/tests/lomse_test_file_system.cpp
+            ${SRC_DIR}/tests/lomse_test_gm_objects.cpp
+            ${SRC_DIR}/tests/lomse_test_graphic_model.cpp
+            ${SRC_DIR}/tests/lomse_test_image_reader.cpp
+            ${SRC_DIR}/tests/lomse_test_inlines_container_layouter.cpp
+            ${SRC_DIR}/tests/lomse_test_interactor.cpp
+            ${SRC_DIR}/tests/lomse_test_internal_model.cpp
+            ${SRC_DIR}/tests/lomse_test_ldp_analyser.cpp
+            ${SRC_DIR}/tests/lomse_test_ldp_compiler.cpp
+            ${SRC_DIR}/tests/lomse_test_ldp_exporter.cpp
+            ${SRC_DIR}/tests/lomse_test_ldp_parser.cpp
+            ${SRC_DIR}/tests/lomse_test_lines_breaker.cpp
+            ${SRC_DIR}/tests/lomse_test_linkable.cpp
+            ${SRC_DIR}/tests/lomse_test_linker.cpp
+            ${SRC_DIR}/tests/lomse_test_list_layouter.cpp
+            ${SRC_DIR}/tests/lomse_test_lmd_analyser.cpp
+            ${SRC_DIR}/tests/lomse_test_lmd_compiler.cpp
+            ${SRC_DIR}/tests/lomse_test_lmd_exporter.cpp
+            ${SRC_DIR}/tests/lomse_test_lmd_parser.cpp
+            ${SRC_DIR}/tests/lomse_test_midi_table.cpp
+            ${SRC_DIR}/tests/lomse_test_model_builder.cpp
+            ${SRC_DIR}/tests/lomse_test_multicolumn_layouter.cpp
+            ${SRC_DIR}/tests/lomse_test_note_engraver.cpp
+            ${SRC_DIR}/tests/lomse_test_pitch.cpp
+            ${SRC_DIR}/tests/lomse_test_presenter.cpp
+            ${SRC_DIR}/tests/lomse_test_reader.cpp
+            ${SRC_DIR}/tests/lomse_test_rest_engraver.cpp
+            ${SRC_DIR}/tests/lomse_test_score_iterator.cpp
+            ${SRC_DIR}/tests/lomse_test_score_layouter.cpp
+            ${SRC_DIR}/tests/lomse_test_score_meter.cpp
+            ${SRC_DIR}/tests/lomse_test_score_player.cpp
+            ${SRC_DIR}/tests/lomse_test_selections.cpp
+            ${SRC_DIR}/tests/lomse_test_shapes.cpp
+            ${SRC_DIR}/tests/lomse_test_sizers.cpp
+            ${SRC_DIR}/tests/lomse_test_stack.cpp
+            ${SRC_DIR}/tests/lomse_test_staffobjs_table.cpp
+            ${SRC_DIR}/tests/lomse_test_system_cursor.cpp
+            ${SRC_DIR}/tests/lomse_test_system_layouter.cpp
+            ${SRC_DIR}/tests/lomse_test_table_layouter.cpp
+            ${SRC_DIR}/tests/lomse_test_text_engraver.cpp
+            ${SRC_DIR}/tests/lomse_test_text_splitter.cpp
+            ${SRC_DIR}/tests/lomse_test_tokenizer.cpp
+            ${SRC_DIR}/tests/lomse_test_tree.cpp
+            ${SRC_DIR}/tests/lomse_test_tuplet_engraver.cpp
+            ${SRC_DIR}/tests/lomse_test_view.cpp
+            ${SRC_DIR}/tests/lomse_test_zip_stream.cpp
+            ${SRC_DIR}/tests/lomse_the_test_runner.cpp
     )
-endif()
 
-# source files to compile
-add_executable( ${TESTLIB} 
-        ${SRC_DIR}/tests/lomse_test_barline_engraver.cpp
-        ${SRC_DIR}/tests/lomse_test_beam_engraver.cpp
-        ${SRC_DIR}/tests/lomse_test_chord_engraver.cpp
-        ${SRC_DIR}/tests/lomse_test_column_breaker.cpp
-        ${SRC_DIR}/tests/lomse_test_column_layouter.cpp
-        ${SRC_DIR}/tests/lomse_test_command.cpp
-        ${SRC_DIR}/tests/lomse_test_document.cpp
-        ${SRC_DIR}/tests/lomse_test_document_cursor.cpp
-        ${SRC_DIR}/tests/lomse_test_document_iterator.cpp
-        ${SRC_DIR}/tests/lomse_test_document_layouter.cpp
-        ${SRC_DIR}/tests/lomse_test_elements.cpp
-        ${SRC_DIR}/tests/lomse_test_engrouters.cpp
-        ${SRC_DIR}/tests/lomse_test_events.cpp
-        ${SRC_DIR}/tests/lomse_test_file_system.cpp
-        ${SRC_DIR}/tests/lomse_test_gm_objects.cpp
-        ${SRC_DIR}/tests/lomse_test_graphic_model.cpp
-        ${SRC_DIR}/tests/lomse_test_image_reader.cpp
-        ${SRC_DIR}/tests/lomse_test_inlines_container_layouter.cpp
-        ${SRC_DIR}/tests/lomse_test_interactor.cpp
-        ${SRC_DIR}/tests/lomse_test_internal_model.cpp
-        ${SRC_DIR}/tests/lomse_test_ldp_analyser.cpp
-        ${SRC_DIR}/tests/lomse_test_ldp_compiler.cpp
-        ${SRC_DIR}/tests/lomse_test_ldp_exporter.cpp
-        ${SRC_DIR}/tests/lomse_test_ldp_parser.cpp
-        ${SRC_DIR}/tests/lomse_test_lines_breaker.cpp
-        ${SRC_DIR}/tests/lomse_test_linkable.cpp
-        ${SRC_DIR}/tests/lomse_test_linker.cpp
-        ${SRC_DIR}/tests/lomse_test_list_layouter.cpp
-        ${SRC_DIR}/tests/lomse_test_lmd_analyser.cpp
-        ${SRC_DIR}/tests/lomse_test_lmd_compiler.cpp
-        ${SRC_DIR}/tests/lomse_test_lmd_exporter.cpp
-        ${SRC_DIR}/tests/lomse_test_lmd_parser.cpp
-        ${SRC_DIR}/tests/lomse_test_midi_table.cpp
-        ${SRC_DIR}/tests/lomse_test_model_builder.cpp
-        ${SRC_DIR}/tests/lomse_test_multicolumn_layouter.cpp
-        ${SRC_DIR}/tests/lomse_test_note_engraver.cpp
-        ${SRC_DIR}/tests/lomse_test_pitch.cpp
-        ${SRC_DIR}/tests/lomse_test_presenter.cpp
-        ${SRC_DIR}/tests/lomse_test_reader.cpp
-        ${SRC_DIR}/tests/lomse_test_rest_engraver.cpp
-        ${SRC_DIR}/tests/lomse_test_score_iterator.cpp
-        ${SRC_DIR}/tests/lomse_test_score_layouter.cpp
-        ${SRC_DIR}/tests/lomse_test_score_meter.cpp
-        ${SRC_DIR}/tests/lomse_test_score_player.cpp
-        ${SRC_DIR}/tests/lomse_test_selections.cpp
-        ${SRC_DIR}/tests/lomse_test_shapes.cpp
-        ${SRC_DIR}/tests/lomse_test_sizers.cpp
-        ${SRC_DIR}/tests/lomse_test_stack.cpp
-        ${SRC_DIR}/tests/lomse_test_staffobjs_table.cpp
-        ${SRC_DIR}/tests/lomse_test_system_cursor.cpp
-        ${SRC_DIR}/tests/lomse_test_system_layouter.cpp
-        ${SRC_DIR}/tests/lomse_test_table_layouter.cpp
-        ${SRC_DIR}/tests/lomse_test_text_engraver.cpp
-        ${SRC_DIR}/tests/lomse_test_text_splitter.cpp
-        ${SRC_DIR}/tests/lomse_test_tokenizer.cpp
-        ${SRC_DIR}/tests/lomse_test_tree.cpp
-        ${SRC_DIR}/tests/lomse_test_tuplet_engraver.cpp
-        ${SRC_DIR}/tests/lomse_test_view.cpp
-        ${SRC_DIR}/tests/lomse_test_zip_stream.cpp
-        ${SRC_DIR}/tests/lomse_the_test_runner.cpp
-)
+    # libraries to link
+    if(UNIX)
+        target_link_libraries ( ${TESTLIB} liblomse.so libunittest++.a )
+    elseif(WIN32)
+        target_link_libraries ( ${TESTLIB} lomse.lib UnitTest++.vsnet2003.lib )
+    endif()
 
-# libraries to link
-if(UNIX)
-    target_link_libraries ( ${TESTLIB} liblomse.so libunittest++.a )
-elseif(WIN32)
-    target_link_libraries ( ${TESTLIB} lomse.lib UnitTest++.vsnet2003.lib )
-endif()
+    # properties
+    if(MSVC)
+        set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:LIBCD" )
+        set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS "/MACHINE:X86" )
+        set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+        set_target_properties(${TESTLIB} PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
 
-# properties
-if(MSVC)
-    set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:LIBCD" )
-    set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS "/MACHINE:X86" )
-    set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-    set_target_properties(${TESTLIB} PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
-
-    set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-    set_target_properties(${TESTLIB} PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
-endif()
+        set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
+        set_target_properties(${TESTLIB} PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
+    endif()
 
 
-# dependencies
-add_dependencies(testlib lomse)
+    # dependencies
+    add_dependencies(testlib lomse)
 
 
-# once generated, run tests
-if(WIN32)
-    set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/debug/${TESTLIB}.exe )
-else()
-    set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB} )
-endif()
+    # once generated, run tests
+    if(WIN32)
+        set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/debug/${TESTLIB}.exe )
+    else()
+        set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB} )
+    endif()
 
-#copy test scores and fonts
-#file(COPY ${ROOT_DIR}/test-scores DESTINATION ${OUTDIR})
-#file(COPY ${ROOT_DIR}/fonts DESTINATION ${OUTDIR})
+    #copy test scores and fonts
+    #file(COPY ${ROOT_DIR}/test-scores DESTINATION ${OUTDIR})
+    #file(COPY ${ROOT_DIR}/fonts DESTINATION ${OUTDIR})
 
-add_custom_command(
-    TARGET ${TESTLIB} POST_BUILD
-    COMMAND ${TESTLIB_EXECUTABLE}
-    WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
-)
+    add_custom_command(
+        TARGET ${TESTLIB} POST_BUILD
+        COMMAND ${TESTLIB_EXECUTABLE}
+        WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+    )
 
-
+endif(LOMSE_BUILD_TESTS)
 
 ###############################################################################
 #
@@ -775,69 +856,67 @@ add_custom_command(
 #
 ###############################################################################
 
+if (LOMSE_BUILD_EXAMPLE)
 
-set (EXAMPLE1 example_1)
-set( EXAMPLE1_SRC  ${ROOT_DIR}/examples )
+    set (EXAMPLE1 example_1)
+    set( EXAMPLE1_SRC  ${ROOT_DIR}/examples )
 
-if( WIN32 )
-#-------------------------------------------------------------
-    include_directories(
-        ${SRC_DIR}/agg/include/platform/win32/agg_win32_bmp.h
-    )
+    if( WIN32 )
+    #-------------------------------------------------------------
+        include_directories(
+            ${SRC_DIR}/agg/include/platform/win32/agg_win32_bmp.h
+        )
 
-    add_executable( ${EXAMPLE1} WIN32
-        ${EXAMPLE1_SRC}/example_1_win32.cpp
-        ${EXAMPLE1_SRC}/win32/example_1/example_1.ico
-        ${EXAMPLE1_SRC}/win32/example_1/example_1.rc
-        ${EXAMPLE1_SRC}/win32/example_1/stdafx.cpp
-        ${EXAMPLE1_SRC}/win32/example_1/resource.h
-        ${EXAMPLE1_SRC}/win32/example_1/stdafx.h
-        ${EXAMPLE1_SRC}/win32/example_1/small.ico
-        ${SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp 
-    )
+        add_executable( ${EXAMPLE1} WIN32
+            ${EXAMPLE1_SRC}/example_1_win32.cpp
+            ${EXAMPLE1_SRC}/win32/example_1/example_1.ico
+            ${EXAMPLE1_SRC}/win32/example_1/example_1.rc
+            ${EXAMPLE1_SRC}/win32/example_1/stdafx.cpp
+            ${EXAMPLE1_SRC}/win32/example_1/resource.h
+            ${EXAMPLE1_SRC}/win32/example_1/stdafx.h
+            ${EXAMPLE1_SRC}/win32/example_1/small.ico
+            ${SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp 
+        )
 
-    target_link_libraries( ${EXAMPLE1}
-        lomse.lib
-        ${Boost_LIBRARIES}
-        ${FREETYPE_LIBRARIES}
-        ${PNG_LIBRARIES}
-        ${ZLIB_LIBRARIES}
-    )
+        target_link_libraries( ${EXAMPLE1}
+            lomse.lib
+            ${Boost_LIBRARIES}
+            ${FREETYPE_LIBRARIES}
+            ${PNG_LIBRARIES}
+            ${ZLIB_LIBRARIES}
+        )
 
-    
-elseif( UNIX )
-#-------------------------------------------------------------
-    find_package(X11)
-    if(X11_FOUND)  
-        include_directories(${X11_INCLUDE_DIRS})
-        link_libraries(${X11_LIBRARIES})
-    endif(X11_FOUND)
-
-    add_executable( ${EXAMPLE1} ""
-        ${EXAMPLE1_SRC}/example_1_x11.cpp
-    )
-
-    target_link_libraries ( ${EXAMPLE1} 
-        liblomse.so
-        ${Boost_LIBRARIES}
-        ${FREETYPE_LIBRARIES}
-        ${PNG_LIBRARIES}
-        ${ZLIB_LIBRARIES}
-    )
         
-endif()
+    elseif( UNIX )
+    #-------------------------------------------------------------
+        find_package(X11)
+        if(X11_FOUND)  
+            include_directories(${X11_INCLUDE_DIRS})
+            link_libraries(${X11_LIBRARIES})
+        endif(X11_FOUND)
 
-# dependencies
-add_dependencies(example_1 lomse)
+        add_executable( ${EXAMPLE1} ""
+            ${EXAMPLE1_SRC}/example_1_x11.cpp
+        )
 
-endif(0)
+        target_link_libraries ( ${EXAMPLE1} 
+            liblomse.so
+            ${Boost_LIBRARIES}
+            ${FREETYPE_LIBRARIES}
+            ${PNG_LIBRARIES}
+            ${ZLIB_LIBRARIES}
+        )
+            
+    endif()
+
+    # dependencies
+    add_dependencies(example_1 lomse)
+
+endif(LOMSE_BUILD_EXAMPLE)
 
 ###############################################################################
-#
 # library installation
 #
-###############################################################################
-
 # You can change the install location by running cmake like this:
 #
 #   cmake -DCMAKE_INSTALL_PREFIX=/new/install/prefix
@@ -846,20 +925,19 @@ endif(0)
 #   - Linux: "/usr/local"
 #   - Windows: "C:\Program Files\lomse\"
 #
+###############################################################################
 
 message("CMAKE_INSTALL_PREFIX = " ${CMAKE_INSTALL_PREFIX} )
 
-#if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-#set(CMAKE_INSTALL_PREFIX
-#    "/opt/foo" CACHE PATH "FOO install prefix" FORCE
-#)
-#endif()
-
 if( UNIX )
 
+    #define base paths
+    set(LOMSE_LIBDIR        ${CMAKE_INSTALL_PREFIX}/lib)
+    set(LOMSE_INCLUDEDIR    ${CMAKE_INSTALL_PREFIX}/include/lomse )
+
     # copy generated libraries
-    install( TARGETS ${LOMSE} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
-    install( TARGETS ${LOMSE_DYN} LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
+    install( TARGETS ${LOMSE} DESTINATION ${LOMSE_LIBDIR} )
+    install( TARGETS ${LOMSE_DYN} LIBRARY DESTINATION ${LOMSE_LIBDIR} )
 
     #create symlink to library
 	install( CODE
@@ -869,20 +947,34 @@ if( UNIX )
 
     # copy lomse includes
     install(DIRECTORY ${INCLUDES_LOMSE}/
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse"
+            DESTINATION "${LOMSE_INCLUDEDIR}"
             FILES_MATCHING PATTERN "*.h"
+                           PATTERN "*.hpp"
+                           PATTERN "*.txt"
                            PATTERN ".svn" EXCLUDE
                            PATTERN "platform" EXCLUDE )
 
     # copy agg includes
     install(DIRECTORY "${INCLUDES_AGG}/"
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse"
+            DESTINATION "${LOMSE_INCLUDEDIR}"
+            FILES_MATCHING PATTERN "*.h"
+                           PATTERN ".svn" EXCLUDE )
+
+    # copy minizip includes
+    install(DIRECTORY "${INCLUDES_MINIZIP}/"
+            DESTINATION "${LOMSE_INCLUDEDIR}"
+            FILES_MATCHING PATTERN "*.h"
+                           PATTERN ".svn" EXCLUDE )
+
+    # copy utfcpp includes
+    install(DIRECTORY "${INCLUDES_UTFCPP}/"
+            DESTINATION "${LOMSE_INCLUDEDIR}"
             FILES_MATCHING PATTERN "*.h"
                            PATTERN ".svn" EXCLUDE )
 
     # copy also lomse_config.h
     install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse" )
+            DESTINATION "${LOMSE_INCLUDEDIR}" )
 
     #copy fonts
     install(DIRECTORY  "${ROOT_DIR}/fonts/"
@@ -894,6 +986,9 @@ if( UNIX )
 elseif( WIN32 )
 #-------------------------------------------------------------
 
+    #define base paths
+    set(LOMSE_LIBDIR        ${CMAKE_INSTALL_PREFIX}/lib)
+    set(LOMSE_INCLUDEDIR    ${CMAKE_INSTALL_PREFIX}/include/lomse )
 
     # copy generated libraries
     install( TARGETS ${LOMSE} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
@@ -901,20 +996,36 @@ elseif( WIN32 )
 
     # copy lomse includes
     install(DIRECTORY ${INCLUDES_LOMSE}/
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse"
+            DESTINATION "${LOMSE_INCLUDEDIR}"
             FILES_MATCHING PATTERN "*.h"
                            PATTERN ".svn" EXCLUDE
                            PATTERN "platform" EXCLUDE )
 
     # copy agg includes
     install(DIRECTORY "${INCLUDES_AGG}/"
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse"
+            DESTINATION "${LOMSE_INCLUDEDIR}"
+            FILES_MATCHING PATTERN "*.h"
+                           PATTERN ".svn" EXCLUDE )
+
+    # copy minizip includes
+    install(DIRECTORY "${INCLUDES_MINIZIP}/"
+            DESTINATION "${LOMSE_INCLUDEDIR}"
+            FILES_MATCHING PATTERN "*.h"
+                           PATTERN ".svn" EXCLUDE )
+
+    # copy utfcpp includes
+    install(DIRECTORY "${INCLUDES_UTFCPP}/"
+            DESTINATION "${LOMSE_INCLUDEDIR}"
+            FILES_MATCHING PATTERN "*.h"
+                           PATTERN ".svn" EXCLUDE )
+    install(DIRECTORY "${INCLUDES_UTFCPP}/utf8"
+            DESTINATION "${LOMSE_INCLUDEDIR}/utf8"
             FILES_MATCHING PATTERN "*.h"
                            PATTERN ".svn" EXCLUDE )
 
     # copy also lomse_config.h
     install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/lomse_config.h 
-            DESTINATION "${CMAKE_INSTALL_PREFIX}/include/lomse" )
+            DESTINATION "${LOMSE_INCLUDEDIR}" )
 
     #copy fonts
     install(DIRECTORY  "${ROOT_DIR}/fonts/"
@@ -926,15 +1037,40 @@ elseif( WIN32 )
 endif()
 
 
+###############################################################################
+# create and install the pkg-config file: liblomse.pc
+#
+# By default, pkg-config file will be installed in /usr/lib/pkgconfig
+# You can change the install location by running cmake like this:
+#
+#   cmake -DLOMSE_PKG_CONFIG_INSTALL=/new/install/path
+#
+###############################################################################
+
+if(NOT DEFINED LOMSE_PKG_CONFIG_INSTALL)
+    set( LOMSE_PKG_CONFIG_INSTALL "/usr/lib/pkgconfig" )
+endif()
+
+set(prefix ${CMAKE_INSTALL_PREFIX})
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/liblomse.pc.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/liblomse.pc"
+    @ONLY
+)
+install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/liblomse.pc
+        DESTINATION ${LOMSE_PKG_CONFIG_INSTALL} )
+
+message("pkg-config install path: ${LOMSE_PKG_CONFIG_INSTALL}" )
+
 
 ###############################################################################
 #
 # CPack section: installers generation
 #
+#   Currently it just builds the Debian binary package.
+# 
 ###############################################################################
-#
-# Currently it just builds the debian binary package.
-#
 
 set(CPACK_PACKAGE_VENDOR "LenMus Project")
 set(CPACK_PACKAGE_VERSION ${LOMSE_VERSION_STRING} )
@@ -947,27 +1083,27 @@ set(CPACK_RESOURCE_FILE_LICENSE "${ROOT_DIR}/COPYING")
 set(CPACK_RESOURCE_FILE_README "${ROOT_DIR}/README")
 
 if(UNIX)
+    set(CPACK_GENERATOR "DEB")
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Cecilio Salmeron") #required
     set(CPACK_DEBIAN_PACKAGE_NAME ${CPACK_PACKAGE_NAME} )
     set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION} )
-    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386")
+
+    IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "^x86_64$|^amd64$")  
+        set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+    ELSE()
+        set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386")
+    ENDIF() 
 
     set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}\r\rLomse is a free open source project to provide software developers with\r a C++ library for rendering, editing and playing back music scores.\r With it, you can add capabilities to any program for displaying and\r editing music scores. It is witten in C++, it is platform independent.\r\rLomse website: http://www.lenmus.org/en/lomse/intro")
 
-    set(CPACK_PACKAGE_FILE_NAME
-        "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-linux-i386")
-    #even hardcoding dependencies, this doesn't work in my machine!
-    #set(CPACK_DEBIAN_PACKAGE_DEPENDS "libfreetype6, libpng12 (>=1.2.42), zlib1g (>= 1:1.2.1), libboost_date_time${Boost_LIB_VERSION}, libboost_thread${Boost_LIB_VERSION}" )
+    set(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}-${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
-    
-    #message ("dependencies: '${CPACK_DEBIAN_PACKAGE_DEPENDS}'")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS ${LOMSE_DEPENDENCIES})
+    message("Package dependencies: ${CPACK_DEBIAN_PACKAGE_DEPENDS}" )
 
-endif(UNIX)
-
-
-if(UNIX)
-    set(CPACK_GENERATOR "DEB")
-#else()
+#elseif( WIN32 )
+#    # MS Windows package
 #    set(CPACK_GENERATOR "NSIS")
 
 #    # There is a bug in NSI that does not handle full unix paths properly. Make
@@ -979,6 +1115,7 @@ if(UNIX)
 #    SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.my-personal-home-page.com")
 #    SET(CPACK_NSIS_CONTACT "me@my-personal-home-page.com")
 #    SET(CPACK_NSIS_MODIFY_PATH ON)
+
 endif()
 
 include(CPack)

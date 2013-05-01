@@ -347,6 +347,10 @@ ImoObj* Linker::add_text(ImoScoreText* pText)
             return pText;
         }
 
+        //if language not set, use document language
+        if (!pText->has_language())
+            pText->set_language( m_pDoc->get_language() );
+
         if (m_pParent->is_instrument())
         {
             ImoInstrument* pInstr = static_cast<ImoInstrument*>(m_pParent);
@@ -437,6 +441,10 @@ ImoObj* Linker::add_title(ImoScoreTitle* pTitle)
     {
         ImoScore* pScore = static_cast<ImoScore*>(m_pParent);
         pScore->add_title(pTitle);
+
+        //if language not set, use document language
+        if (!pTitle->has_language())
+            pTitle->set_language( m_pDoc->get_language() );
     }
     return pTitle;
 }

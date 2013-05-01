@@ -30,6 +30,7 @@
 #include "lomse_image.h"
 
 #include "lomse_image_reader.h"
+#include "lomse_logger.h"
 
 #include <iostream>
 #include <sstream>
@@ -67,7 +68,10 @@ Image::Image()
     //allocate a buffer for the bitmap
     int bmpsize = 24 * 24 * 4;   //24px width, 24px height, 4bytes per pixel (RGBA)
     if ((m_bmap = (unsigned char*)malloc(bmpsize)) == NULL)
-        throw std::runtime_error("[Image constructor]: not enough memory for image buffer");
+    {
+        LOMSE_LOG_ERROR("[Image constructor]: not enough memory for image buffer");
+        throw runtime_error("[Image constructor]: not enough memory for image buffer");
+    }
 
     unsigned char no_image = 0x77;
     memset(m_bmap, no_image, bmpsize);
@@ -83,7 +87,10 @@ Image::Image(const Image& img)
 
     int bmpsize = m_bmpSize.width * m_bmpSize.height * get_bits_per_pixel()/8;
     if ((m_bmap = (unsigned char*)malloc(bmpsize)) == NULL)
-        throw std::runtime_error("[Image copy constructor]: not enough memory for image buffer");
+    {
+        LOMSE_LOG_ERROR("[Image copy constructor]: not enough memory for image buffer");
+        throw runtime_error("[Image copy constructor]: not enough memory for image buffer");
+    }
     memcpy(m_bmap, img.m_bmap, bmpsize);
 }
 
@@ -102,7 +109,10 @@ Image& Image::operator=(const Image &img)
 
         int bmpsize = m_bmpSize.width * m_bmpSize.height * get_bits_per_pixel()/8;
         if ((m_bmap = (unsigned char*)malloc(bmpsize)) == NULL)
-            throw std::runtime_error("[Image copy constructor]: not enough memory for image buffer");
+        {
+            LOMSE_LOG_ERROR("[Image::operator=]: not enough memory for image buffer");
+            throw runtime_error("[Image::operator=]: not enough memory for image buffer");
+        }
         memcpy(m_bmap, img.m_bmap, bmpsize);
     }
     return *this;
@@ -198,7 +208,8 @@ bool Image::has_alpha()
         {
             stringstream s;
             s << "[Image::has_alpha] unsupported pixel format " << m_format;
-            throw std::runtime_error(s.str());
+            LOMSE_LOG_ERROR(s.str());
+            throw runtime_error(s.str());
         }
     }
     return false;       //compiler happy

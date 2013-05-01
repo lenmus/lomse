@@ -47,14 +47,11 @@ namespace lomse
 
 extern ofstream dbgLogger;
 
-#define LOMSE_ENABLE_DEBUG_LOGS   0
-
-
 #if (LOMSE_COMPILER_MSVC == 1)
     #define LOMSE_LOG_ERROR(msg)        logger.log_error(__FILE__,__LINE__,__FUNCTION__, msg);
     #define LOMSE_LOG_WARN(msg)         logger.log_warn(__FILE__,__LINE__,__FUNCTION__, msg);
     #define LOMSE_LOG_INFO(msg)         logger.log_info(__FILE__,__LINE__,__FUNCTION__, msg);
-    #if (LOMSE_DEBUG == 1 && LOMSE_ENABLE_DEBUG_LOGS == 1)
+    #if (LOMSE_ENABLE_DEBUG_LOGS == 1)
         #define LOMSE_LOG_DEBUG(area, msg)  logger.log_debug(__FILE__,__LINE__,__FUNCTION__, area, msg);
         #define LOMSE_LOG_TRACE(area, msg)  logger.log_trace(__FILE__,__LINE__,__FUNCTION__, area, msg);
     #else
@@ -66,7 +63,7 @@ extern ofstream dbgLogger;
     #define LOMSE_LOG_ERROR(msg)        logger.log_error(__FILE__,__LINE__,__PRETTY_FUNCTION__, msg);
     #define LOMSE_LOG_WARN(msg)         logger.log_warn(__FILE__,__LINE__,__PRETTY_FUNCTION__, msg);
     #define LOMSE_LOG_INFO(msg)         logger.log_info(__FILE__,__LINE__,__PRETTY_FUNCTION__, msg);
-    #if (LOMSE_DEBUG == 1 && LOMSE_ENABLE_DEBUG_LOGS == 1)
+    #if (LOMSE_ENABLE_DEBUG_LOGS == 1)
         #define LOMSE_LOG_DEBUG(area, msg)  logger.log_debug(__FILE__,__LINE__,__PRETTY_FUNCTION__, area, msg);
         #define LOMSE_LOG_TRACE(area, msg)  logger.log_trace(__FILE__,__LINE__,__PRETTY_FUNCTION__, area, msg);
     #else

@@ -71,7 +71,10 @@ View* ViewFactory::create_view(LibraryScope& libraryScope, int viewType,
             return LOMSE_NEW HorizontalBookView(libraryScope, pDrawer);
 
         default:
-            throw std::runtime_error("[ViewFactory::create_view] invalid view type");
+        {
+            LOMSE_LOG_ERROR("[ViewFactory::create_view] invalid view type");
+            throw runtime_error("[ViewFactory::create_view] invalid view type");
+        }
     }
     return NULL;
 }

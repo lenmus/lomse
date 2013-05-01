@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <iostream>
 #include "lomse_ldp_factory.h"
+#include "lomse_logger.h"
 
 using namespace std;
 
@@ -166,8 +167,10 @@ void LdpParser::do_syntax_analysis(LdpReader& reader)
 
     // at this point m_curNode is all the tree
     if (!m_curNode)
-        throw std::runtime_error(
-            "[LdpParser::do_syntax_analysis] LDP file format error.");
+    {
+        LOMSE_LOG_ERROR("[LdpParser::do_syntax_analysis] LDP file format error.");
+        throw runtime_error("[LdpParser::do_syntax_analysis] LDP file format error.");
+    }
 
     m_tree = LOMSE_NEW LdpTree(m_curNode);
 }

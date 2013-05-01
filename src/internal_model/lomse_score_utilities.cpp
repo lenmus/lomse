@@ -31,6 +31,7 @@
 
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
+#include "lomse_logger.h"
 
 //other
 #include <boost/format.hpp>
@@ -66,9 +67,12 @@ int get_beat_position(TimeUnits timePos, ImoTimeSignature* pTS)
         case 8: beatDuration = 3 * int( to_duration(k_eighth, 0) ); break;
         case 16: beatDuration = int( to_duration(k_eighth, 0) ); break;
         default:
+        {
             string msg = str( boost::format("[get_beat_position] BeatType %d unknown.")
                               % beatType );
-            throw std::runtime_error(msg);
+            LOMSE_LOG_ERROR(msg);
+            throw runtime_error(msg);
+        }
     }
 
     // compute relative position of this note/rest with reference to the beat
@@ -105,10 +109,13 @@ TimeUnits get_duration_for_ref_note(int bottomNumber)
         case 64:
             return pow(2.0, (10 - k_64th));
         default:
+        {
             string msg = str( boost::format(
                                 "[get_duration_for_ref_note] Invalid bottom number %d")
                                 % bottomNumber );
-            throw std::runtime_error(msg);
+            LOMSE_LOG_ERROR(msg);
+            throw runtime_error(msg);
+        }
     }
 }
 
@@ -241,10 +248,13 @@ void get_accidentals_for_key(int keyType, int nAccidentals[])
             nAccidentals[3] = -1;         //Fa b
             break;
         default:
+        {
             string msg = str( boost::format(
                                 "[get_accidentals_for_key] Invalid key signature %d")
                                 % keyType );
-            throw std::runtime_error(msg);
+            LOMSE_LOG_ERROR(msg);
+            throw runtime_error(msg);
+        }
     }
 
 }
@@ -304,10 +314,13 @@ int get_step_for_root_note(EKeySignature keyType)
             return k_step_B;
 
         default:
+        {
             string msg = str( boost::format(
                                 "[get_step_for_root_note] Invalid key signature %d")
                                 % keyType );
-            throw std::runtime_error(msg);
+            LOMSE_LOG_ERROR(msg);
+            throw runtime_error(msg);
+        }
     }
 }
 
@@ -441,10 +454,13 @@ int key_signature_to_num_fifths(int keyType)
             nFifths = -7;
             break;
         default:
+        {
             string msg = str( boost::format(
                                 "[key_signature_to_num_fifths] Invalid key signature %d")
                                 % keyType );
-            throw std::runtime_error(msg);
+            LOMSE_LOG_ERROR(msg);
+            throw runtime_error(msg);
+        }
     }
     return nFifths;
 }
@@ -484,10 +500,13 @@ EKeySignature get_relative_minor_key(EKeySignature nMajorKey)
         case k_key_Cf:
             return k_key_af;
         default:
+        {
             string msg = str( boost::format(
                                 "[get_relative_minor_key] Invalid key signature %d")
                                 % nMajorKey );
-            throw std::runtime_error(msg);
+            LOMSE_LOG_ERROR(msg);
+            throw runtime_error(msg);
+        }
     }
 
 }
@@ -527,11 +546,14 @@ EKeySignature get_relative_major_key(EKeySignature nMinorKey)
         case k_key_af:
             return k_key_Cf;
         default:
+        {
             string msg = str( boost::format(
                                 "[get_relative_major_key] Invalid key signature %d")
                                 % nMinorKey );
-            throw std::runtime_error(msg);
+            LOMSE_LOG_ERROR(msg);
+            //throw runtime_error(msg);
             return k_key_c;
+        }
     }
 
 }
@@ -609,10 +631,13 @@ DiatonicPitch get_diatonic_pitch_for_first_line(EClef nClef)
         case k_clef_undefined:
         case k_clef_percussion:   return NO_DPITCH;
         default:
+        {
             string msg = str( boost::format(
                                 "[get_diatonic_pitch_for_first_line] Invalid clef %d")
                                 % nClef );
-            throw std::runtime_error(msg);
+            LOMSE_LOG_ERROR(msg);
+            throw runtime_error(msg);
+        }
     }
     return NO_DPITCH;
 }

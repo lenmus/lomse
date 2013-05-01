@@ -812,10 +812,13 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
                     break;
 
                 default:
+                {
                     string msg = str( boost::format(
                                     "[Interactor::on_visual_highlight] Unknown event type %d.")
                                     % (*it).first );
-                    throw std::runtime_error(msg);
+                    LOMSE_LOG_ERROR(msg);
+                    throw runtime_error(msg);
+                }
             }
         }
         do_force_redraw();

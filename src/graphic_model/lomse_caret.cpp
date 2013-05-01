@@ -31,6 +31,7 @@
 
 #include "lomse_screen_drawer.h"
 #include "lomse_graphic_view.h"
+#include "lomse_logger.h"
 
 
 namespace lomse
@@ -109,7 +110,10 @@ void Caret::draw_caret(ScreenDrawer* pDrawer)
         case k_box:         draw_caret_as_box(pDrawer);         break;
         case k_line:        draw_caret_as_line(pDrawer);        break;
         default:
+        {
+            LOMSE_LOG_ERROR("[Caret::draw_caret] Invalid caret type");
             throw runtime_error("[Caret::draw_caret] Invalid caret type");
+        }
     }
 }
 

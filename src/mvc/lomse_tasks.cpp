@@ -30,6 +30,7 @@
 #include "lomse_tasks.h"
 
 #include "lomse_interactor.h"
+#include "lomse_logger.h"
 
 namespace lomse
 {
@@ -61,7 +62,10 @@ Task* TaskFactory::create_task(int taskType, Interactor* pIntor)
             return LOMSE_NEW TaskSelection(pIntor);
 
         default:
-            throw std::runtime_error("[TaskFactory::create_task] invalid task type");
+        {
+            LOMSE_LOG_ERROR("[TaskFactory::create_task] invalid task type");
+            throw runtime_error("[TaskFactory::create_task] invalid task type");
+        }
     }
 }
 

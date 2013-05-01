@@ -35,6 +35,7 @@
 #include "lomse_shape_staff.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_box_system.h"
+#include "lomse_logger.h"
 
 //other
 #include <sstream>
@@ -182,7 +183,10 @@ void ScoreCaretPositioner::prepare_caret(Caret* pCaret)
         caret_at_end_of_staff(pCaret);
 
     else
-        throw runtime_error("ScoreCaretPositioner: Score cursor is incoherent!");
+    {
+        LOMSE_LOG_ERROR("[ScoreCaretPositioner::prepare_caret] Score cursor is incoherent!");
+        throw runtime_error("[ScoreCaretPositioner::prepare_caret] Score cursor is incoherent!");
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -295,7 +299,10 @@ URect ScoreCaretPositioner::get_bounds_for_imo(ImoId id)
 {
     GmoShape* pShape = m_pGModel->get_shape_for_imo(id, 0);
     if (!pShape)
+    {
+        LOMSE_LOG_ERROR("[ScoreCaretPositioner::get_bounds_for_imo] No shape for requested object!");
         throw runtime_error("[ScoreCaretPositioner::get_bounds_for_imo] No shape for requested object!");
+    }
 
     return pShape->get_bounds();
 }
@@ -318,7 +325,10 @@ void ScoreCaretPositioner::set_caret_y_pos_and_height(URect* pBounds, ImoId id)
         while (pBox && !pBox->is_box_system())
             pBox = pBox->get_owner_box();
         if (!pBox)
-            throw runtime_error("ScoreCaretPositioner: Invalid boxes structure");
+        {
+            LOMSE_LOG_ERROR("[ScoreCaretPositioner::set_caret_y_pos_and_height] Invalid boxes structure");
+            throw runtime_error("[ScoreCaretPositioner::set_caret_y_pos_and_height] Invalid boxes structure");
+        }
         GmoBoxSystem* pSystem = static_cast<GmoBoxSystem*>(pBox);
 
         //get_staff_shape() requires as parameter the staff number, relative to the

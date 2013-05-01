@@ -134,6 +134,9 @@ public:
     Control* get_pointer_to_control(ImoId id) const;
     string to_string(bool fWithIds = false);
     string get_checkpoint_data();
+    inline string get_language() {
+        return (m_pImoDoc != NULL ? m_pImoDoc->get_language() : "en");
+    }
 
     //API: objects creation/modification
     void end_of_changes();

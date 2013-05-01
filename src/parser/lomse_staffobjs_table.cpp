@@ -214,7 +214,10 @@ void ColStaffObjs::delete_entry_for(ImoStaffObj* pSO)
 {
     ColStaffObjsEntry* pEntry = find_entry_for(pSO);
     if (!pEntry)
-        throw std::runtime_error("[ColStaffObjs::delete_entry_for] entry not found!");
+    {
+        LOMSE_LOG_ERROR("[ColStaffObjs::delete_entry_for] entry not found!");
+        throw runtime_error("[ColStaffObjs::delete_entry_for] entry not found!");
+    }
 
     ColStaffObjsEntry* pPrev = pEntry->get_prev();
     ColStaffObjsEntry* pNext = pEntry->get_next();

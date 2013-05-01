@@ -34,6 +34,7 @@
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_ldp_exporter.h"
+#include "lomse_logger.h"
 
 #include <stack>
 #include <ctime>   //clock
@@ -1114,7 +1115,8 @@ public:
                 stringstream s;
                 s << "[ScoreLmdGenerator::generate_source] Invalid score format. Value="
                   << format;
-                throw std::runtime_error(s.str());
+                LOMSE_LOG_ERROR(s.str());
+                throw runtime_error(s.str());
             }
         }
     }

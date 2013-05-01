@@ -222,7 +222,7 @@ void ScorePlayer::pause()
 //---------------------------------------------------------------------------------------
 void ScorePlayer::stop()
 {
-    LOMSE_LOG_DEBUG(Logger::k_score_player, ">>[ScorePlayer::stop]");
+    LOMSE_LOG_DEBUG(Logger::k_score_player, ">> Enter");
     if (m_pThread)
     {
         m_fShouldStop = true;
@@ -230,20 +230,20 @@ void ScorePlayer::stop()
         //wait 500 ms for termination
         if(!m_pThread->timed_join(boost::posix_time::milliseconds(500)))
         {
-            LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::stop] Not finisehd in 500ms. Force interrupt");
+            LOMSE_LOG_DEBUG(Logger::k_score_player, "Not finished in 500ms. Force interrupt");
             m_pThread->interrupt();
             if(!m_pThread->timed_join(boost::posix_time::seconds(2)))
             {
-                LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::stop] Interrupt failed. Force terminate");
-                throw runtime_error("Thread interrup failed");
+                LOMSE_LOG_ERROR("Interrupt failed. Force terminate");
+                //throw runtime_error("[ScorePlayer::stop] Thread interrupt failed");
             }
         }
-        LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::stop] Delete thread");
+        LOMSE_LOG_DEBUG(Logger::k_score_player, "Delete thread");
         delete m_pThread;
         m_pThread = NULL;
         m_fShouldStop = false;
     }
-    LOMSE_LOG_DEBUG(Logger::k_score_player, "<<[ScorePlayer::stop]");
+    LOMSE_LOG_DEBUG(Logger::k_score_player, "<< Exit");
 }
 
 //---------------------------------------------------------------------------------------
@@ -256,11 +256,11 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     // This is the real method doing the work. It is executed inside a
     // different thread.
 
-    LOMSE_LOG_DEBUG(Logger::k_score_player, ">>[ScorePlayer::do_play]");
+    LOMSE_LOG_DEBUG(Logger::k_score_player, ">> Enter");
     // if no MIDI server or not inside a thread, return
     if (!m_pMidi || !m_pThread)
     {
-        LOMSE_LOG_DEBUG(Logger::k_score_player, "<<[ScorePlayer::do_play] no Midi or no thread");
+        LOMSE_LOG_DEBUG(Logger::k_score_player, "<< Enter. No Midi or no thread. << Exit");
         return;
     }
 
@@ -269,7 +269,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
     std::vector<SoundEvent*>& events = m_pTable->get_events();
     if (events.size() == 0)
     {
-        LOMSE_LOG_DEBUG(Logger::k_score_player, "<<[ScorePlayer::do_play] no events to play");
+        LOMSE_LOG_DEBUG(Logger::k_score_player, "<< Enter. No events to play. << Exit");
         return;
     }
 
@@ -705,10 +705,10 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         fPlayWithMetronome = m_pPlayerGui->metronome_status();
 
         //check if the thread should be paused or stopped
-        LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::do_play] in interrupt check point");
+        LOMSE_LOG_DEBUG(Logger::k_score_player, "In interrupt check point");
         if (m_fShouldStop)
         {
-            LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::do_play] Going to finish 1");
+            LOMSE_LOG_DEBUG(Logger::k_score_player, "Going to finish 1");
             break;
         }
         while(m_fPaused)
@@ -716,7 +716,7 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
             boost::this_thread::sleep( boost::posix_time::milliseconds(200) );
             if (m_fShouldStop)
             {
-                LOMSE_LOG_DEBUG(Logger::k_score_player, "  [ScorePlayer::do_play] Going to finish 2");
+                LOMSE_LOG_DEBUG(Logger::k_score_player, "Going to finish 2");
                 break;
             }
         }
@@ -735,13 +735,15 @@ void ScorePlayer::do_play(int nEvStart, int nEvEnd, bool fVisualTracking,
         else if (pInteractor)
             pInteractor->handle_event(pEvent);
     }
-    LOMSE_LOG_DEBUG(Logger::k_score_player, "<<[ScorePlayer::do_play]");
+    LOMSE_LOG_DEBUG(Logger::k_score_player, "<< Exit");
 }
 
 //---------------------------------------------------------------------------------------
 void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
                                                Interactor* pInteractor)
 {
+    LOMSE_LOG_DEBUG(Logger::k_score_player, "<< Enter");
+
     //ensure that all visual highlight is removed
     if (fVisualTracking && !m_fQuit && !m_fFinalEventSent)
     {
@@ -768,7 +770,10 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
 
     //do not generate events if quit
     if (m_fQuit)
+    {
+        LOMSE_LOG_DEBUG(Logger::k_score_player, "<< Exit");
         return;
+    }
 
     //enable again the general metronome
     if (m_pMtr)
@@ -799,6 +804,7 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
         else if (pInteractor)
             pInteractor->handle_event(event);
     }
+    LOMSE_LOG_DEBUG(Logger::k_score_player, "<< Exit");
 }
 
 

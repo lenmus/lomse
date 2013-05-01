@@ -34,6 +34,7 @@
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_staffobjs_table.h"
+#include "lomse_logger.h"
 
 
 namespace lomse
@@ -166,6 +167,7 @@ protected:
                 stringstream s;
                 s << "[BarlineLdpGenerator::add_barline_type] Invalid barline type. Value="
                   << type;
+                LOMSE_LOG_ERROR(s.str());
                 throw std::runtime_error(s.str());
             }
         }
@@ -909,7 +911,8 @@ protected:
             {
                 stringstream s;
                 s << "[MetronomeLdpGenerator::add_marks] Invalid type. Value=" << type;
-                throw std::runtime_error(s.str());
+                LOMSE_LOG_ERROR(s.str());
+                throw runtime_error(s.str());
             }
         }
 
@@ -1018,7 +1021,8 @@ protected:
             {
                 stringstream s;
                 s << "[NoteLdpGenerator::add_stem] Invalid stem. Value=" << stem;
-                throw std::runtime_error(s.str());
+                LOMSE_LOG_ERROR(s.str());
+                throw runtime_error(s.str());
             }
         }
     }
@@ -1295,7 +1299,8 @@ protected:
                 stringstream s;
                 s << "[ScoreLineLdpGenerator::add_line_style] Invalid line style. Value="
                   << type;
-                throw std::runtime_error(s.str());
+                LOMSE_LOG_ERROR(s.str());
+                throw runtime_error(s.str());
             }
         }
         end_element(k_in_same_line);
@@ -1329,7 +1334,8 @@ protected:
                 stringstream s;
                 s << "[ScoreLineLdpGenerator::add_cap] Invalid line cap. Value="
                   << type;
-                throw std::runtime_error(s.str());
+                LOMSE_LOG_ERROR(s.str());
+                throw runtime_error(s.str());
             }
         }
         end_element(k_in_same_line);
@@ -1716,7 +1722,8 @@ protected:
             stringstream s;
             s << "[TupletLdpGenerator::add_display_number] Invalid option. Value="
               << number;
-            throw std::runtime_error(s.str());
+            LOMSE_LOG_ERROR(s.str());
+            throw runtime_error(s.str());
         }
 
         end_element(k_in_same_line);

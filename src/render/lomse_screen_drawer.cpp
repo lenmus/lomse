@@ -41,6 +41,7 @@
 
 #include "lomse_screen_drawer.h"
 
+#include "lomse_logger.h"
 #include "lomse_renderer.h"
 #include "agg_ellipse.h"
 #include "agg_rounded_rect.h"
@@ -562,7 +563,10 @@ void ScreenDrawer::begin_path()
 void ScreenDrawer::end_path()
 {
     if(m_attr_storage.size() == 0)
-        throw std::runtime_error("[ScreenDrawer::end_path] The path was not begun");
+    {
+        LOMSE_LOG_ERROR("[ScreenDrawer::end_path] The path was not begun!");
+        throw runtime_error("[ScreenDrawer::end_path] The path was not begun!");
+    }
 }
 
 //---------------------------------------------------------------------------------------
