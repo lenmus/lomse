@@ -141,9 +141,10 @@ public:
     //API: objects creation/modification
     void end_of_changes();
 
-    ImoObj* create_object(const string& source);
+    ImoObj* create_object_from_ldp(const string& source, ostream& reporter);
+    ImoObj* create_object_from_ldp(const string& source);
+    ImoObj* create_object_from_lmd(const string& source);
     void add_staff_objects(const string& source, ImoMusicData* pMD);
-//    ImoObj* create_object(int type);
 
     //API: styles
     ImoStyle* get_default_style();

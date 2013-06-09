@@ -221,6 +221,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_text_align] = "text-align";
     m_TypeToName[k_text_decoration] = "text-decoration";
     m_TypeToName[k_tie] = "tie";
+    m_TypeToName[k_time_modification] = "tm";
     m_TypeToName[k_time_signature] = "time";
     m_TypeToName[k_title] = "title";
     m_TypeToName[k_tuplet] = "t";
@@ -402,6 +403,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["tie"] = LOMSE_NEW LdpElementFunctor<k_tie>;
     m_NameToFunctor["time"] = LOMSE_NEW LdpElementFunctor<k_time_signature>;
     m_NameToFunctor["title"] = LOMSE_NEW LdpElementFunctor<k_title>;
+    m_NameToFunctor["tm"] = LOMSE_NEW LdpElementFunctor<k_time_modification>;
     m_NameToFunctor["txt"] = LOMSE_NEW LdpElementFunctor<k_txt>;
     m_NameToFunctor["undefined"] = LOMSE_NEW LdpElementFunctor<k_undefined>;
     m_NameToFunctor["undoData"] = LOMSE_NEW LdpElementFunctor<k_undoData>;

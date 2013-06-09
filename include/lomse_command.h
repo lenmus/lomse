@@ -50,17 +50,31 @@ class DocCommand
 protected:
     string m_name;          //displayable name for undo/redo actions display
     string m_checkpoint;    //checkpoint data
+    string m_error;
+    uint_least16_t m_flags;
 
-    DocCommand() {}
+    enum {
+        k_reversible        = 0x0001,
+        k_recordable        = 0x0002,
+    };
+
+    DocCommand() : m_flags(0) {}
 
 public:
     virtual ~DocCommand() {}
 
+    //cursor update policy to be used with this command
+    enum { k_do_nothing=0, k_update_after_deletion, k_update_after_insertion, };
+    virtual int get_cursor_update_policy() = 0;
+
     //information
     inline std::string get_name() { return m_name; }
+    inline bool is_reversible() { return m_flags &  k_reversible; }
+    inline bool is_recordable() { return m_flags &  k_recordable; }
+    inline string get_error() { return m_error; }
 
     //actions
-    virtual void perform_action(Document* pDoc, DocCursor* pCursor)=0;
+    virtual int perform_action(Document* pDoc, DocCursor* pCursor)=0;
     virtual void undo_action(Document* pDoc, DocCursor* pCursor);
 
 protected:
@@ -81,9 +95,6 @@ protected:
 public:
     virtual ~DocCmdSimple() {}
 
-//    //actions
-//    void undo_action(Document* pDoc, DocCursor* pCursor) {}
-//    void perform_action(Document* pDoc, DocCursor* pCursor) {}
 };
 
 //---------------------------------------------------------------------------------------
@@ -99,10 +110,26 @@ public:
 };
 
 
+//---------------------------------------------------------------------------------------
+// undo/redo element: command and cursor
+class UndoElement
+{
+public:
+    DocCommand*         pCmd;
+    DocCursorState      cursorState;
+
+public:
+    UndoElement(DocCommand* cmd, DocCursorState state)
+        : pCmd(cmd), cursorState(state)
+    {
+    }
+};
+
+
 
 //---------------------------------------------------------------------------------------
-// A class to manage the undo/redo stack
-typedef UndoableStack<DocCommand*>     UndoStack;
+// Helper, to manage the undo/redo stack
+typedef UndoableStack< UndoElement* >   UndoStack;
 
 
 //---------------------------------------------------------------------------------------
@@ -111,18 +138,26 @@ class DocCommandExecuter
 {
 private:
     Document*   m_pDoc;
-    DocCursor*  m_pCursor;
     UndoStack   m_stack;
+    string      m_error;
 
 public:
     DocCommandExecuter(Document* target);
     virtual ~DocCommandExecuter() {}
-    virtual void execute(DocCursor* pCursor, DocCommand* pCmd);
-    virtual void undo();
-    virtual void redo();
+    virtual int execute(DocCursor* pCursor, DocCommand* pCmd);
+    virtual void undo(DocCursor* pCursor);
+    virtual void redo(DocCursor* pCursor);
+    inline string get_error() { return m_error; }
 
-//    virtual bool is_document_modified() { return m_pDoc->is_modified(); }
+    //info
+    bool is_undo_possible() { return m_stack.size() > 0; }
+    bool is_redo_possible() { return m_stack.history_size() > 0; }
+
     virtual size_t undo_stack_size() { return m_stack.size(); }
+
+protected:
+    void update_cursor(DocCursor* pCursor, DocCommand* pCmd);
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -139,8 +174,9 @@ public:
 
     enum { k_move_next=0, k_move_prev, k_enter, k_exit, k_point_to, k_refresh, };
 
-    void perform_action(Document* pDoc, DocCursor* pCursor);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
     void undo_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_do_nothing; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -150,7 +186,8 @@ public:
     CmdDeleteBlockLevelObj();
     virtual ~CmdDeleteBlockLevelObj() {};
 
-    void perform_action(Document* pDoc, DocCursor* pCursor);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_update_after_deletion; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -160,42 +197,98 @@ public:
     CmdDeleteStaffObj();
     virtual ~CmdDeleteStaffObj() {};
 
-    void perform_action(Document* pDoc, DocCursor* pCursor);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_update_after_deletion; }
 };
 
 //---------------------------------------------------------------------------------------
-class CmdInsertBlockLevelObj : public DocCmdSimple
+class CmdInsertObj : public DocCmdSimple
 {
 protected:
-    ImoId m_insertedId;
-    int m_type;
+    ImoId m_lastInsertedId;
+    string m_source;
+
+    CmdInsertObj() : DocCmdSimple(), m_lastInsertedId(k_no_imoid) {}
+
+public:
+    ~CmdInsertObj() {}
+
+    inline ImoId last_inserted_id() { return m_lastInsertedId; }
+
+protected:
+    void remove_object(Document* pDoc, ImoId id);
+    int validate_source();
+};
+
+//---------------------------------------------------------------------------------------
+class CmdInsertBlockLevelObj : public CmdInsertObj
+{
+protected:
+    int m_blockType;
+    bool m_fFromSource;
 
 public:
     CmdInsertBlockLevelObj(int type);
+    CmdInsertBlockLevelObj(const string& source);
     virtual ~CmdInsertBlockLevelObj() {};
 
-    void perform_action(Document* pDoc, DocCursor* pCursor);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
     void undo_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_update_after_insertion; }
+
+protected:
+    void perform_action_from_source(Document* pDoc, DocCursor* pCursor);
+    void perform_action_from_type(Document* pDoc, DocCursor* pCursor);
+
 };
 
-////---------------------------------------------------------------------------------------
-//class CmdInsertStaffObj : public DocCmdSimple
-//{
-//protected:
-//    ImoId m_cursorId;
-//    ImoId m_insertedId;
-//    int m_type;
-//
-//public:
-//    CmdInsertStaffObj(DocCursor& cursor, int type);
-//    virtual ~CmdInsertStaffObj() {};
-////    lmCmdInsertRest(bool fNormalCmd,
-////                    const wxString& name, lmDocument *pDoc,
-////					lmENoteType nNoteType, TimeUnits rDuration, int nDots, int nVoice);
-//
-//    void undo_action(Document* pDoc, DocCursor* pCursor);
-//    void perform_action(Document* pDoc, DocCursor* pCursor);
-//};
+//---------------------------------------------------------------------------------------
+class CmdInsertStaffObj : public CmdInsertObj
+{
+protected:
+
+public:
+    CmdInsertStaffObj(const string& source);
+    virtual ~CmdInsertStaffObj() {};
+
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_update_after_insertion; }
+};
+
+//---------------------------------------------------------------------------------------
+class CmdInsertManyStaffObjs : public CmdInsertObj
+{
+protected:
+    bool m_fSaved;
+
+public:
+    CmdInsertManyStaffObjs(const string& source,
+                           const string& name="Insert staff objects");
+    virtual ~CmdInsertManyStaffObjs() {};
+
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_update_after_insertion; }
+
+protected:
+    void save_source_code_with_ids(Document* pDoc, const list<ImoStaffObj*>& objects);
+
+};
+
+//---------------------------------------------------------------------------------------
+class CmdAddStaffObj : public CmdInsertObj
+{
+protected:
+    ImoId m_firstInsertedId;
+
+public:
+    CmdAddStaffObj(const string& source);
+    virtual ~CmdAddStaffObj() {};
+
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_update_after_insertion; }
+};
 
 
 }   //namespace lomse

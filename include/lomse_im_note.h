@@ -76,6 +76,8 @@ protected:
     int     m_nNoteType;
     int     m_nDots;
     int     m_nVoice;
+    int     m_timeModifierTop;
+    int     m_timeModifierBottom;
 
 public:
     ImoNoteRest(int objtype);
@@ -86,12 +88,18 @@ public:
     TimeUnits get_duration();
     inline int get_dots() { return m_nDots; }
     inline int get_voice() { return m_nVoice; }
+    inline int get_time_modifier_top() { return m_timeModifierTop; }
+    inline int get_time_modifier_bottom() { return m_timeModifierBottom; }
 
     //setters
     inline void set_note_type(int noteType) { m_nNoteType = noteType; }
     inline void set_dots(int dots) { m_nDots = dots; }
     inline void set_voice(int voice) { m_nVoice = voice; }
     void set_note_type_and_dots(int noteType, int dots);
+    inline void set_time_modification(int numerator, int denominator) {
+        m_timeModifierTop = numerator;
+        m_timeModifierBottom = denominator;
+    }
 
     //beam
     ImoBeam* get_beam();
@@ -110,12 +118,19 @@ public:
 class ImoRest : public ImoNoteRest
 {
 protected:
+    bool m_fGoFwd;
+
     friend class ImFactory;
-    ImoRest() : ImoNoteRest(k_imo_rest) {}
+    ImoRest() : ImoNoteRest(k_imo_rest), m_fGoFwd(false) {}
+
+    friend class GoBackFwdAnalyser;
+    friend class GoBackFwdLmdAnalyser;
+    inline void mark_as_go_fwd() { m_fGoFwd = true; }
 
 public:
     ~ImoRest() {}
 
+    inline bool is_go_fwd() { return m_fGoFwd; }
 };
 
 //---------------------------------------------------------------------------------------

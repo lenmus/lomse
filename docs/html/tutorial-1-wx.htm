@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/12/23 -->
+<!-- $Updated: 2013/05/04 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -205,7 +205,6 @@ protected:
 <pre class="code">
 LomseDoorway&   m_lomse;        //the Lomse library doorway
 Presenter*      m_pPresenter;   //relates the View, the Document and the Interactor
-Interactor*     m_pInteractor;  //to interact with the View
 </pre>
 
 <p>
@@ -255,7 +254,6 @@ protected:
     // Let's define the necessary variables:
     LomseDoorway&   m_lomse;        //the Lomse library doorway
     Presenter*      m_pPresenter;
-    Interactor*     m_pInteractor;  //to interact with the View
 
     //the Lomse View renders its content on a bitmap. To manage it, Lomse
     //associates the bitmap to a RenderingBuffer object.
@@ -470,11 +468,16 @@ void MyCanvas::open_test_document()
             ")"
         ")" );
 
-    //now, get the pointers to the relevant components
-    m_pInteractor = m_pPresenter->get_interactor(0);
+    //get the pointer to the interactor, set the rendering buffer and register for
+    //receiving desired events
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        //connect the View with the window buffer
+        spInteractor->set_rendering_buffer(&m_rbuf_window);
 
-    //connect the View with the window buffer
-    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
+        //hide edition caret
+        spInteractor->hide_caret();
+    }
 }
 </pre>
 
@@ -515,22 +518,31 @@ void MyCanvas::open_test_document()
 <p>For a detailed description of the LDP language see the <a href="###ldp_full###">LDP Reference Manual</a>. I have plans for supporting scores in MusicXML format, as well as to move the LDP language to XML syntax. But other more urgent task force me to always postpone these objectives. Any help is welcome!
 </p>
 
-<p>Once the Document and a View for it are created, we just get pointers to the Interactor, so that we can 'communicate' with the Document and its View:
-<p>
+<p>Once the Document and a View for it are created, we just get pointers to the Interactor, so that we can 'communicate' with the Document and its View. But Presenter returns a weak_pointer that has to be converted to a valid pointer before using it:
+</p>
 <pre class="code">
-    //next, get the pointers to the relevant components
-    m_pInteractor = m_pPresenter->get_interactor(0);
+    //get the pointer to the interactor, set the rendering buffer and register for
+    //receiving desired events
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
 </pre>
 
 <p>Lomse architecture is based on the Model-View-Controller pattern, and supports multiple simultaneous Views for a Document. By default, when creating a Document also a View and its associated <tt>Interactor</tt> are created. So, parameter <code>'0'</code> in <code>get_interactor(0)</code> refers to first <tt>Interactor</tt>, in this case, the only one created.
 </p>
 
-<p>Once we've got the <tt>Interactor</tt> we only have one <b>important</b> tasks to do: to inform the <tt>Interactor</tt> about the rendering buffer that must be used for its associated View:
+<p>Once we've got the <tt>Interactor</tt> we only have two <b>important</b> tasks to do: to inform the <tt>Interactor</tt> about the rendering buffer that must be used for its associated View:
 </p>
 
 <pre class="code">
     //connect the View with the window buffer
-    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
+    spInteractor->set_rendering_buffer(&m_rbuf_window);
+</pre>
+
+<p>And the second one is to hide the document caret, as we are not going to enable document edition:
+</p>
+<pre class="code">
+    //hide edition caret
+    spInteractor->hide_caret();
 </pre>
 
 
@@ -637,7 +649,7 @@ void MyCanvas::OnSize(wxSizeEvent& WXUNUSED(event))
 <pre class="code">
 void MyCanvas::OnPaint(wxPaintEvent& event)
 {
-    if (!m_pInteractor)
+    if (!m_pPresenter)
         event.Skip(false);
     else
     {
@@ -648,11 +660,11 @@ void MyCanvas::OnPaint(wxPaintEvent& event)
 }
 </pre>
 
-<p>If there is no interactor is because the window has just been created and nothing else has been done. In this case, just ignore the event, as there is nothing to paint. This can never happen in our sample code but it can be a safeguard to avoid spurious crashes in more complex applications.
+<p>If there is no presenter is because the window has just been created and nothing else has been done. In this case, just ignore the event, as there is nothing to paint. This can never happen in our sample code but it can be a safeguard to avoid spurious crashes in more complex applications.
 </p>
 
 <p>
-If the interactor is already created, the only thing to do is to ask Lomse to paint the bitmap and copy it to the window. But notice that we don't have to ask Lomse to paint the bitmap whenever a <tt>wxPaintEvent</tt> event arrives. These events are generated because several reasons. The most frequent is when our window image is damaged (i.e. another window covering our window has moved). But in these cases the image is preserved in the bitmap so it is enough to re-display the bitmap. Other cases for receiving paint events are because the window has changed: when the window is created or when it is resized or when our program changes its content (i.e. because the if the user asks to open a different score). In our application this last case is not possible and so, the only source for additional paint event com from size events.
+If the presenter is already created, the only thing to do is to ask Lomse to paint the bitmap and copy it to the window. But notice that we don't have to ask Lomse to paint the bitmap whenever a <tt>wxPaintEvent</tt> event arrives. These events are generated because several reasons. The most frequent is when our window image is damaged (i.e. another window covering our window has moved). But in these cases the image is preserved in the bitmap so it is enough to re-display the bitmap. Other cases for receiving paint events are because the window has changed: when the window is created or when it is resized or when our program changes its content (i.e. because the if the user asks to open a different score). In our application this last case is not possible and so, the only source for additional paint event com from size events.
 </p>
 
 <p>But as we have seen, whenever the window is resized a new bitmap is automatically created, and flag <tt>m_view_needs_redraw</tt> is set. Therefore, this flag can be used to determine if have to ask Lomse to repaint the bitmap. Here is the code:
@@ -672,8 +684,10 @@ void MyCanvas::update_view_content()
 {
     //request the view to re-draw the bitmap
 
-    if (!m_pInteractor) return;
-    m_pInteractor->redraw_bitmap();
+    if (!m_pPresenter) return;
+
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+        spInteractor->redraw_bitmap();
 }
 </pre>
 
@@ -730,24 +744,14 @@ In the next section we are going to build and run our sample.
 <!--====================================================-->
 
 <p>
-Your project makefile must include the following path for Lomse header files:
-</p>
-
-<pre class="code">
-    /usr/local/include/lomse
-</pre>
-
-<p>Some Lomse headers include freetype2 references and, therefore, it is necessary to include Freetype2 headers. As the specific paths could be different in your machine, the best for this is to use the pkg-config tool:
+Your proyect makefile must include the paths for the headers of Lomse library. The best way of doing it is by using the <code>pkg-config</code> tool:
 </p>
 
 <pre class="console">
-`pkg-config --cflags freetype2`
+`pkg-config --cflags liblomse`
 </pre>
 
-<p>It will generate something as <code>-I/usr/include/freetype2</code>.
-</p>
-
-<p>It would be nice to use the pkg-config tool for Lomse but Lomse installation scripts do not generate (yet) the necessary .pc file. If you would like to contribute by improving Lomse installation scripts you are welcome!. Join the Lomse list and post a message.
+<p>It will generate something as <code>-I/usr/include/freetype2 -I/usr/include/libpng12 -I/usr/include/lomse</code>.
 </p>
 
 <p>
@@ -758,9 +762,8 @@ Also, do not forget to add paths and options for wxWidgets. The best approach is
 `wx-config --cflags`
 </pre>
 
-<p>As to the libraries to link, you will have to include
-<code>/usr/local/lib/liblomse.so</code> and the wxWidgets libraries. For wxWidgets, the best approach is to use the <code>wx-config</code> command as follows:
-<code>`wx-config --libs`</code>
+<p>As to the libraries to link, you will have to include the Lomse library and the wxWidgets libraries. Again, the best approach is using <code>pkg-config</code> command for Lomse and the <code>wx-config</code> command as follows:
+<code>`pkg-config --libs liblomse` `wx-config --libs`</code>
 </p>
 
 <p>
@@ -768,9 +771,9 @@ Ok, lets's do it. Open a terminal window, move to the directory containing the s
 </p>
 
 <pre class="console">
-gcc example_1_wxwidgets.cpp -o example-1-wx `wx-config --cflags`   \
-    -I /usr/local/include/lomse  -I /usr/include                   \
-    `pkg-config --cflags freetype2` -L /usr/local/lib -llomse `wx-config --libs`
+gcc example_1_wxwidgets.cpp -o example-1-wx    \
+    `pkg-config --cflags liblomse` `wx-config --cflags`   \
+    `pkg-config --libs liblomse` `wx-config --libs`
 </pre>
 
 <p>

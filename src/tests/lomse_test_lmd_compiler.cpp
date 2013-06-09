@@ -95,7 +95,7 @@ SUITE(LmdCompilerTest)
         CHECK( pScore != NULL );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_staffobjs_table() != NULL );
-        CHECK( pScore->get_version() == "1.6" );
+        CHECK( pScore->get_version_string() == "1.6" );
         delete pIModel;
     }
 

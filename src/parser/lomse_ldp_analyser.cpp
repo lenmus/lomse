@@ -397,6 +397,22 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
+    void get_voice()
+    {
+        string voice = m_pParamToAnalyse->get_value().substr(1);
+        int nVoice;
+        std::istringstream iss(voice);
+        if ((iss >> std::dec >> nVoice).fail())
+        {
+            report_msg(m_pParamToAnalyse->get_line_number(),
+                "Invalid voice 'v" + voice + "'. Replaced by 'v1'.");
+            m_pAnalyser->set_current_voice(1);
+        }
+        else
+            m_pAnalyser->set_current_voice(nVoice);
+    }
+
+    //-----------------------------------------------------------------------------------
     bool is_long_value()
     {
         string number = m_pParamToAnalyse->get_value();
@@ -892,7 +908,7 @@ public:
     void do_analysis()
     {
         string name = m_pLdpFactory->get_name( m_pAnalysedNode->get_type() );
-        cout << "Missing analyser for element '" << name << "'. Node ignored." << endl;
+        m_reporter << "Missing analyser for element '" << name << "'. Node ignored." << endl;
     }
 };
 
@@ -1038,7 +1054,6 @@ public:
 
     void do_analysis()
     {
-        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto( m_pAnalysedNode );
 
         // num
@@ -2086,6 +2101,10 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <goFwd> = (goFwd <duration> [voice])
+//@ <duration> = note/rest duration, letter plus dots, i.e. 'e..'
+//@
+//@ Version 1.x
 //@ <goBack> = (goBack <timeShift>)
 //@ <goFwd> = (goFwd <timeShift>)
 //@ <timeShift> = { start | end | <number> | <duration> }
@@ -2103,6 +2122,16 @@ public:
         : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     void do_analysis()
+    {
+        if (m_pAnalyser->get_score_version() < 200)
+            do_analysis_v1();
+        else
+            do_analysis_v2();
+    }
+
+protected:
+
+    void do_analysis_v1()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoGoBackFwd* pImo = static_cast<ImoGoBackFwd*>(
@@ -2180,6 +2209,90 @@ public:
 
         add_to_model(pImo);
     }
+
+    //-----------------------------------------------------------------------------------
+    void do_analysis_v2()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoRest* pImo = static_cast<ImoRest*>(
+                                ImFactory::inject(k_imo_rest, pDoc, get_node_id()) );
+        pImo->mark_as_go_fwd();
+        pImo->set_visible(false);
+
+        // <duration> (label)
+        if (get_mandatory(k_label))
+            set_duration(pImo);
+
+        // [{ <voice> | <staffNum> }*]
+        analyse_options(pImo);
+
+        // [<componentOptions>*]
+        analyse_staffobjs_options(pImo);
+
+        pImo->set_staff( m_pAnalyser->get_current_staff() );
+        pImo->set_voice( m_pAnalyser->get_current_voice() );
+
+        add_to_model(pImo);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_duration(ImoNoteRest* pNR)
+    {
+        NoteTypeAndDots figdots = get_note_type_and_dots();
+        pNR->set_note_type_and_dots(figdots.noteType, figdots.dots);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void analyse_options(ImoNoteRest* pNR)
+    {
+        // { <voice> | <staffNum> }
+
+        while( more_params_to_analyse() )
+        {
+            m_pParamToAnalyse = get_param_to_analyse();
+            ELdpElement type = m_pParamToAnalyse->get_type();
+            if (type == k_voice)
+            {
+                set_voice_element(pNR);
+            }
+            else if (type == k_staffNum)
+            {
+                set_staff_num_element(pNR);
+            }
+            else if (type == k_label)   //possible staffNum as 'p1' or voice as 'v2'
+            {
+                char first = (m_pParamToAnalyse->get_value())[0];
+                if (first == 'p')
+                    get_num_staff();
+                else if (first == 'v')
+                    get_voice();
+                else
+                    error_invalid_param();
+            }
+            else
+                break;
+
+            move_to_next_param();
+        }
+    }
+
+    void set_voice_element(ImoNoteRest* pNR)
+    {
+        m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+        int voice = get_integer_value( m_pAnalyser->get_current_voice() );
+        m_pAnalyser->set_current_voice(voice);
+        pNR->set_voice(voice);
+    }
+
+    void set_staff_num_element(ImoNoteRest* pNR)
+    {
+        m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+        int curStaff = m_pAnalyser->get_current_staff() + 1;
+        int staff = get_integer_value(curStaff) - 1;
+        m_pAnalyser->set_current_staff(staff);
+        pNR->set_staff(staff);
+    }
+
 };
 
 //@--------------------------------------------------------------------------------------
@@ -3030,6 +3143,7 @@ protected:
     ImoBeamDto* m_pBeamInfo;
     ImoSlurDto* m_pSlurDto;
     ImoFermata* m_pFermata;
+    ImoTimeModificationDto* m_pTimeModifDto;
     std::string m_srcOldBeam;
     std::string m_srcOldTuplet;
 
@@ -3042,6 +3156,7 @@ public:
         , m_pBeamInfo(NULL)
         , m_pSlurDto(NULL)
         , m_pFermata(NULL)
+        , m_pTimeModifDto(NULL)
         , m_srcOldBeam("")
         , m_srcOldTuplet("")
     {
@@ -3133,7 +3248,7 @@ public:
         analyse_note_rest_options(pNR);
 
         // [<componentOptions>*]
-        analyse_scoreobj_options(pNR);
+        analyse_staffobjs_options(pNR);
 
         add_to_model(pNR);
 
@@ -3159,6 +3274,15 @@ public:
             add_to_current_tuplet(pNR);
 
         add_tuplet_info(pNR);
+
+        //time modification
+        if (m_pTimeModifDto != NULL)
+        {
+            pNR->set_time_modification( m_pTimeModifDto->get_top_number(),
+                                        m_pTimeModifDto->get_bottom_number() );
+            delete m_pTimeModifDto;
+        }
+
 
         //beam
         if (fAddOldBeam)
@@ -3213,7 +3337,7 @@ protected:
 
     void analyse_note_rest_options(ImoNoteRest* pNR)
     {
-        // { <beam> | <tuplet> | <voice> | <staffNum> | <fermata> }
+        // { <beam> | <tuplet> | <timeModification> | <voice> | <staffNum> | <fermata> }
 
         while( more_params_to_analyse() )
         {
@@ -3221,18 +3345,23 @@ protected:
             ELdpElement type = m_pParamToAnalyse->get_type();
             if (type == k_tuplet)
             {
-                ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
-                m_pTupletInfo = static_cast<ImoTupletDto*>( pImo );
+                m_pTupletInfo = static_cast<ImoTupletDto*>(
+                        m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
+            }
+            else if (type == k_time_modification)
+            {
+                m_pTimeModifDto = static_cast<ImoTimeModificationDto*>(
+                        m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
             }
             else if (type == k_fermata)
             {
-                ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
-                m_pFermata = static_cast<ImoFermata*>( pImo );
+                m_pFermata = static_cast<ImoFermata*>(
+                        m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
             }
             else if (type == k_beam)
             {
-                ImoObj* pImo = m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL);
-                m_pBeamInfo = static_cast<ImoBeamDto*>( pImo );
+                m_pBeamInfo = static_cast<ImoBeamDto*>(
+                        m_pAnalyser->analyse_node(m_pParamToAnalyse, NULL) );
             }
             else if (type == k_voice)
             {
@@ -3241,6 +3370,14 @@ protected:
             else if (type == k_staffNum)
             {
                 set_staff_num_element(pNR);
+            }
+            else if (type == k_label)   //possible staffNum as 'p1'
+            {
+                char first = (m_pParamToAnalyse->get_value())[0];
+                if (first == 'p')
+                    get_num_staff();
+                else
+                    error_invalid_param();
             }
             else
                 break;
@@ -3288,21 +3425,6 @@ protected:
                 "Invalid parameter '" + m_pParamToAnalyse->get_value()
                 + "'. Ignored.");
         }
-    }
-
-    void get_voice()
-    {
-        string voice = m_pParamToAnalyse->get_value().substr(1);
-        int nVoice;
-        std::istringstream iss(voice);
-        if ((iss >> std::dec >> nVoice).fail())
-        {
-            report_msg(m_pParamToAnalyse->get_line_number(),
-                "Invalid voice 'v" + voice + "'. Replaced by 'v1'.");
-            m_pAnalyser->set_current_voice(1);
-        }
-        else
-            m_pAnalyser->set_current_voice(nVoice);
     }
 
     void set_stem(ImoNote* pNote)
@@ -3967,8 +4089,11 @@ public:
         if (get_mandatory(k_vers))
         {
             string version = get_version();
-            pScore->set_version(version);
-            m_pAnalyser->set_score_version(version);
+            int vers = m_pAnalyser->set_score_version(version);
+            pScore->set_version(vers);
+            if (vers == 0)
+            {
+            }
         }
 
         // [<language>]
@@ -4447,14 +4572,11 @@ public:
 
     void do_analysis()
     {
-        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        //ImoSystemInfo dto;
         ImoSystemInfo* pDto;
         if (m_pAnchor && m_pAnchor->is_system_info())
             pDto = static_cast<ImoSystemInfo*>(m_pAnchor);
         else
             return;     //what is this for?
-            //pDto = &dto;
 
         if (get_mandatory(k_number))
             pDto->set_left_margin(get_float_value());
@@ -4972,6 +5094,43 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <timeModification> = (tm <numerator> <denominator>)
+//@ <numerator> = integer number
+//@ <denominator> = integer number
+
+class TimeModificationAnalyser : public ElementAnalyser
+{
+public:
+    TimeModificationAnalyser(LdpAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                          ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoTimeModificationDto* pTime = static_cast<ImoTimeModificationDto*>(
+                    ImFactory::inject(k_imo_time_modification_dto, pDoc, get_node_id()) );
+
+        // <numerator> (num)
+        if (get_mandatory(k_number))
+        {
+            pTime->set_top_number( get_integer_value(1) );
+
+            // <denominator> (num)
+            if (get_mandatory(k_number))
+            {
+                pTime->set_bottom_number( get_integer_value(1) );
+                error_if_more_elements();
+                add_to_model(pTime);
+                return;
+            }
+        }
+        delete pTime;
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <timeSignature> = (time <top><bottom>[<visible>][<location>])
 //@ <top> = <num>
 //@ <bottom> = <num>
@@ -5140,6 +5299,7 @@ public:
             analyse_tuplet_options(pInfo);
         }
 
+        pInfo->set_only_graphical( m_pAnalyser->get_score_version() >= 107 );
         m_pAnalysedNode->set_imo(pInfo);
     }
 
@@ -5414,10 +5574,10 @@ void ElementAnalyser::error_if_more_elements()
 void ElementAnalyser::analyse_staffobjs_options(ImoStaffObj* pSO)
 {
     //@----------------------------------------------------------------------------
-    //@ <staffobjOptions> = { <numStaff> | <componentOptions> }
-    //@ <numStaff> = pn
+    //@ <staffobjOptions> = { <staffNum> | <componentOptions> }
+    //@ <staffNum> = pn | (staffNum n)
 
-    // [<numStaff>]
+    // [p1]
     if (get_optional(k_label))
     {
         char type = (m_pParamToAnalyse->get_value())[0];
@@ -5425,6 +5585,14 @@ void ElementAnalyser::analyse_staffobjs_options(ImoStaffObj* pSO)
             get_num_staff();
         else
             error_invalid_param();
+    }
+
+    // [<staffNum>]
+    else if (get_optional(k_staffNum))
+    {
+        m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
+        long nStaff = get_long_value(1L);
+        m_pAnalyser->set_current_staff(--nStaff);
     }
 
     //set staff: either found value or inherited one
@@ -5508,7 +5676,7 @@ LdpAnalyser::LdpAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_pCurScore(NULL)
     , m_pLastScore(NULL)
     , m_pImoDoc(NULL)
-    , m_scoreVersion("")
+    , m_scoreVersion(0)
     , m_pTree()
     , m_fileLocator("")
     , m_nShowTupletBracket(k_yesno_default)
@@ -5608,6 +5776,49 @@ void LdpAnalyser::clear_pending_relations()
     m_pBeamsBuilder->clear_pending_items();
     m_pOldBeamsBuilder->clear_pending_old_beams();
     m_pTupletsBuilder->clear_pending_items();
+}
+
+//---------------------------------------------------------------------------------------
+int LdpAnalyser::set_score_version(const string& version)
+{
+    //version is a string "major.minor". Extract major and minor and compose
+    //and integer 100*major+minor
+
+    m_scoreVersion = 0;
+    size_t i = version.find('.');
+    if (i != string::npos)
+    {
+        string major = version.substr(0, i);
+        if ( to_integer(major, &m_scoreVersion) )
+            return m_scoreVersion;
+
+        m_scoreVersion *= 100;
+        string minor = version.substr(i+1);
+        int nMinor;
+        to_integer(minor, &nMinor);
+
+        m_scoreVersion += nMinor;
+    }
+    return m_scoreVersion;
+}
+
+//---------------------------------------------------------------------------------------
+bool LdpAnalyser::to_integer(const string& text, int* pResult)
+{
+    //return true if error
+
+    long number;
+    std::istringstream iss(text);
+    if ((iss >> std::dec >> number).fail())
+    {
+        *pResult = 0;
+        return true;    //error
+    }
+    else
+    {
+        *pResult = number;
+        return false;   //ok
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -5923,6 +6134,7 @@ ElementAnalyser* LdpAnalyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_txt:             return LOMSE_NEW TextItemAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_text:            return LOMSE_NEW TextStringAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_textbox:         return LOMSE_NEW TextBoxAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_time_modification:  return LOMSE_NEW TimeModificationAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_time_signature:  return LOMSE_NEW TimeSignatureAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_tie:             return LOMSE_NEW TieAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_title:           return LOMSE_NEW TitleAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -6215,6 +6427,7 @@ void TupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
 
     ImoTupletDto* pStartDto = m_matches.front();
     ImoTuplet* pTuplet = ImFactory::inject_tuplet(pDoc, pStartDto);
+    bool fOnlyGraphical = pStartDto->is_only_graphical();
 
     std::list<ImoTupletDto*>::iterator it;
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
@@ -6222,6 +6435,9 @@ void TupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
         ImoNoteRest* pNR = (*it)->get_note_rest();
         ImoTupletData* pData = ImFactory::inject_tuplet_data(pDoc, *it);
         pNR->include_in_relation(pDoc, pTuplet, pData);
+        if (!fOnlyGraphical)
+            pNR->set_time_modification( pTuplet->get_normal_number(),
+                                        pTuplet->get_actual_number() );
     }
 }
 

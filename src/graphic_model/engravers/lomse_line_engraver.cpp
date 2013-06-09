@@ -55,7 +55,8 @@ GmoShapeLine* LineEngraver::create_shape(ImoScoreLine* pLine, UPoint pos)
     UPoint end(pos.x + tenths_to_logical(pLine->get_x_end()),
                pos.y + tenths_to_logical(pLine->get_y_end()) );
 
-    return LOMSE_NEW GmoShapeLine(pLine, 0,
+    ShapeId idx = 0;
+    return LOMSE_NEW GmoShapeLine(pLine, idx,
                                   start.x, start.y,
                                   end.x, end.y,
                                   tenths_to_logical(pLine->get_line_width()),

@@ -137,6 +137,12 @@ void DocContentCursor::update_after_deletion()
 }
 
 //---------------------------------------------------------------------------------------
+void DocContentCursor::update_after_insertion(ImoId lastInsertedId)
+{
+    //TODO
+}
+
+//---------------------------------------------------------------------------------------
 void DocContentCursor::find_previous()
 {
      if (m_pCurItem)
@@ -159,14 +165,14 @@ void DocContentCursor::to_end()
 }
 
 //---------------------------------------------------------------------------------------
-ElementCursorState* DocContentCursor::get_state()
+SpElementCursorState DocContentCursor::get_state()
 {
     //TODO
-    return NULL;
+    return SharedPtr<ElementCursorState>();
 }
 
 //---------------------------------------------------------------------------------------
-void DocContentCursor::restore_state(ElementCursorState* pState)
+void DocContentCursor::restore_state(SpElementCursorState spState)
 {
     //TODO
 }
@@ -413,6 +419,15 @@ void DocCursor::update_after_deletion()
 		m_topLevelCursor.update_after_deletion();
 }
 
+//---------------------------------------------------------------------------------------
+void DocCursor::update_after_insertion(ImoId lastInsertedId)
+{
+    if (is_delegating())
+		m_pInnerCursor->update_after_insertion(lastInsertedId);
+	else
+		m_topLevelCursor.update_after_insertion(lastInsertedId);
+}
+
 ////---------------------------------------------------------------------------------------
 //void DocCursor::reset_and_point_to(ImoId nId)
 //{
@@ -429,7 +444,7 @@ DocCursorState DocCursor::get_state()
     if (is_delegating())
 		return DocCursorState(id, m_pInnerCursor->get_state());
 	else
-        return DocCursorState(id, NULL);
+        return DocCursorState(id, SharedPtr<ElementCursorState>());
 }
 
 //---------------------------------------------------------------------------------------
@@ -456,13 +471,141 @@ ScoreCursor::ScoreCursor(Document* pDoc, ImoScore* pScore)
     , m_pScore(pScore)
     , m_fAutoRefresh(false)
     , m_timeStep( TimeUnits(k_duration_eighth) )
+    , m_totalDuration(0.0)
+    , m_curBeatDuration(k_duration_quarter)
+    , m_startOfBarTimepos(0.0)
 {
+    p_determine_total_duration();
     p_start_cursor();
 }
 
 //---------------------------------------------------------------------------------------
 ScoreCursor::~ScoreCursor()
 {
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCursor::update_after_deletion()
+{
+    //TODO
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCursor::update_after_insertion(ImoId lastInsertedId)
+{
+    m_pScore = static_cast<ImoScore*>( m_pDoc->get_pointer_to_imo(m_scoreId) );
+    m_pColStaffObjs = m_pScore->get_staffobjs_table();
+
+    //after an insertion cursor must be pointing current position. But it is necessary
+    //to refresh current state values, as they could have changed (at least, time).
+    ImoObj* pImo = m_pDoc->get_pointer_to_imo( m_currentState.ref_obj_id() );
+    if (pImo)
+        p_point_to( m_currentState.ref_obj_id() );
+    else
+    {
+        p_point_to(lastInsertedId);
+        p_move_next();
+    }
+
+    //current position is updated. Now find previous state
+    p_find_previous_state();
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCursor::point_to(ImoId id)
+{
+    auto_refresh();
+
+    p_point_to(id);
+    p_find_previous_state();
+    p_find_start_of_measure_and_time_signature();
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCursor::point_to(ImoObj* pImo)
+{
+    point_to( pImo->get_id() );
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCursor::point_to_barline(ImoId id, int staff)
+{
+    auto_refresh();
+
+    p_point_to(id);
+    m_currentState.staff(staff);
+    p_find_previous_state();
+    p_find_start_of_measure_and_time_signature();
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCursor::to_state(int iInstr, int iStaff, int iMeasure, TimeUnits rTime, ImoId id)
+{
+    auto_refresh();
+
+    p_to_state(iInstr, iStaff, iMeasure, rTime, id);
+    p_find_start_of_measure_and_time_signature();
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCursor::move_prev()
+{
+    auto_refresh();
+
+    //AWARE: is_at_end_of_empty_score() is safe and will not invoke auto-refresh
+    if (is_at_end_of_empty_score())
+        return;
+
+    m_currentState = m_prevState;
+    m_it = m_itPrev;
+
+    p_find_previous_state();
+    p_find_start_of_measure_and_time_signature();
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCursor::move_next()
+{
+    //Implements user expectations when pressing 'cursor right' key: move cursor to
+    //next timepos in current instrument. Cursor remains in current staff even if
+    //the timepos is not occupied in that staff. When in last timepos, moves to next
+    //logical timepos (current timepos + object duration). When end of staff is
+    //reached:
+    // - if current instrument has more staves,
+    //   advance to next staff, to first object in first measure.
+    // - else to first staff of next instrument.
+    // - If no more instruments, remains at end of score
+
+    auto_refresh();
+    p_move_next();
+    //TODO: Possible optimization: as departure point for move_next is a
+    //      situation in which cursor time information is valid, updating this
+    //      time info is just controlling current object before movig and saving it.
+    //      The, after moving, if cursor has not changed instrument/staff the info
+    //      is still valid and it is not necessary to perform next sentence.
+    p_find_start_of_measure_and_time_signature();
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCursor::restore_state(SpElementCursorState spState)
+{
+    //intrinsically safe
+
+    ScoreCursorState* pSCS = dynamic_cast<ScoreCursorState*>(spState.get());
+    if (pSCS == NULL)
+        return;
+
+    m_pScore = static_cast<ImoScore*>( m_pDoc->get_pointer_to_imo(m_scoreId) );
+    m_pColStaffObjs = m_pScore->get_staffobjs_table();
+    p_point_to(pSCS->ref_obj_id());
+    m_currentState.staff( pSCS->staff() );  //fix staff when pointin to a barline
+    m_currentState.id( pSCS->id() );
+    m_currentState.time( pSCS->time() );
+    m_currentState.ref_obj_time( pSCS->ref_obj_time() );
+    m_currentState.ref_obj_staff( pSCS->ref_obj_staff() );
+
+    p_find_previous_state();
+    p_find_start_of_measure_and_time_signature();
 }
 
 //---------------------------------------------------------------------------------------
@@ -526,9 +669,8 @@ ColStaffObjsEntry* ScoreCursor::find_previous_imo()
        )
     {
         //no previous staffobj! But must exist!
-        LOMSE_LOG_ERROR("Aborting. No previous staffobj.");
-        throw runtime_error(
-            "[ScoreCursor::find_previous_imo] No previous staffobj.");
+        LOMSE_LOG_ERROR("No previous staffobj, but must exist!");
+        LOMSE_LOG_ERROR( dump_cursor() );
     }
 
     ColStaffObjsEntry* pEntry = *m_it;
@@ -546,22 +688,6 @@ void ScoreCursor::p_move_iterator_to_next()
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::point_to(ImoId nId)
-{
-    auto_refresh();
-
-    p_point_to(nId);
-}
-
-//---------------------------------------------------------------------------------------
-void ScoreCursor::p_point_to(ImoId nId)
-{
-    p_move_iterator_to(nId);
-    p_update_state_from_iterator();
-    p_find_previous_state();
-}
-
-//---------------------------------------------------------------------------------------
 void ScoreCursor::p_move_iterator_to(ImoId id)
 {
     if (id <= k_no_imoid)
@@ -574,28 +700,10 @@ void ScoreCursor::p_move_iterator_to(ImoId id)
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::point_to(ImoObj* pImo)
+void ScoreCursor::p_point_to(ImoId nId)
 {
-    auto_refresh();
-
-    p_point_to( pImo->get_id() );
-}
-
-//---------------------------------------------------------------------------------------
-void ScoreCursor::point_to_barline(ImoId id, int staff)
-{
-    auto_refresh();
-
-    p_point_to(id);
-    m_currentState.staff(staff);
-}
-
-//---------------------------------------------------------------------------------------
-void ScoreCursor::to_state(int nInstr, int nStaff, int nMeasure, TimeUnits rTime, ImoId id)
-{
-    auto_refresh();
-
-    p_to_state(nInstr, nStaff, nMeasure, rTime, id);
+    p_move_iterator_to(nId);
+    p_update_state_from_iterator();
 }
 
 //---------------------------------------------------------------------------------------
@@ -630,23 +738,6 @@ void ScoreCursor::p_save_current_state_as_previous_state()
 {
     m_prevState = m_currentState;
     m_itPrev = m_it;
-}
-
-//---------------------------------------------------------------------------------------
-void ScoreCursor::move_next()
-{
-    //Implements user expectations when pressing 'cursor right' key: move cursor to
-    //next timepos in current instrument. Cursor remains in current staff even if
-    //the timepos is not occupied in that staff. When in last timepos, moves to next
-    //logical timepos (current timepos + object duration). When end of staff is
-    //reached:
-    // - if current instrument has more staves,
-    //   advance to next staff, to first object in first measure.
-    // - else to first staff of next instrument.
-    // - If no more instruments, remains at end of score
-
-    auto_refresh();
-    p_move_next();
 }
 
 //---------------------------------------------------------------------------------------
@@ -700,6 +791,7 @@ void ScoreCursor::p_update_as_end_of_staff()
     m_currentState.id( k_cursor_at_end_of_staff );
     m_currentState.ref_obj_id(k_no_imoid);
     m_currentState.ref_obj_time(0.0);
+    m_currentState.ref_obj_staff(0);
 }
 
 //---------------------------------------------------------------------------------------
@@ -769,6 +861,8 @@ bool ScoreCursor::is_at_end_of_empty_score()
 {
     //intrinsically safe
 
+//    return m_pColStaffObjs->num_entries() == 0
+//        && m_prevState.is_before_start_of_score();
     return m_prevState.is_before_start_of_score();
 }
 
@@ -809,6 +903,7 @@ void ScoreCursor::p_update_state_from_iterator()
         m_currentState.id( p_iter_object_id() );
         m_currentState.ref_obj_id( p_iter_object_id() );
         m_currentState.ref_obj_time( p_iter_object_time() );
+        m_currentState.ref_obj_staff( p_iter_object_staff() );
     }
     else
         p_update_as_end_of_score();
@@ -831,12 +926,14 @@ void ScoreCursor::p_update_pointed_objects()
             m_currentState.id( p_iter_object_id() );
             m_currentState.ref_obj_id( p_iter_object_id() );
             m_currentState.ref_obj_time( p_iter_object_time() );
+            m_currentState.ref_obj_staff( p_iter_object_staff() );
         }
         else
         {
             m_currentState.id( k_cursor_at_empty_place );
             m_currentState.ref_obj_id( p_iter_object_id() );
             m_currentState.ref_obj_time( p_iter_object_time() );
+            m_currentState.ref_obj_staff( p_iter_object_staff() );
         }
     }
     else
@@ -856,9 +953,15 @@ bool ScoreCursor::p_try_next_at_same_time()
         if ( p_there_is_iter_object()
              && p_iter_object_is_on_instrument( m_currentState.instrument() )
              && p_iter_object_is_on_staff( m_currentState.staff() )
-             && is_equal_time(p_iter_object_time(), m_currentState.time()) )
+             && is_equal_time(p_iter_object_time(), m_currentState.time())
+           )
         {
-            return true;     //prev object found. done
+            //skip implicit ket/time signatures
+            ImoStaffObj* pImo = p_iter_object();
+            if (!(p_iter_object_staff() > 0
+                  && (pImo->is_key_signature() || pImo->is_time_signature()) )
+               )
+                return true;     //prev object found. done
         }
     }
     m_it = itSave;
@@ -905,27 +1008,13 @@ bool ScoreCursor::p_find_current_staff_at_current_iter_object_time()
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::move_prev()
-{
-    auto_refresh();
-
-    //AWARE: is_at_end_of_empty_score() is safe and will not invoke auto-refresh
-    if (is_at_end_of_empty_score())
-        return;
-
-    m_currentState = m_prevState;
-    m_it = m_itPrev;
-
-    p_find_previous_state();
-}
-
-//---------------------------------------------------------------------------------------
 void ScoreCursor::p_find_previous_state()
 {
     //Implements user expectations when pressing 'cursor left' key: move cursor to
     //previous time in current instrument.
     //Cursor will always stop in each measure at timepos 0 (even if no objects
     //there) and then move to prev measure and stop before barline.
+    //It skips implicit key and time signatures
     //If cursor is at start of score will remain there.
     //When cursor is at start of staff:
     // - if current instrument has more staves,
@@ -1161,7 +1250,12 @@ bool ScoreCursor::p_try_prev_at_same_time()
              && p_iter_object_is_on_staff( m_currentState.staff() )
              && is_equal_time(p_iter_object_time(), m_currentState.time()) )
         {
-            return true;     //prev object found. done
+            //skip implicit ket/time signatures
+            ImoStaffObj* pImo = p_iter_object();
+            if (!(p_iter_object_staff() > 0
+                  && (pImo->is_key_signature() || pImo->is_time_signature()) )
+               )
+                return true;     //prev object found. done
         }
     }
     m_it = itSave;
@@ -1322,33 +1416,15 @@ bool ScoreCursor::p_iter_object_is_time()
 }
 
 //---------------------------------------------------------------------------------------
-ElementCursorState* ScoreCursor::get_state()
+SpElementCursorState ScoreCursor::get_state()
 {
     auto_refresh();
 
-    return LOMSE_NEW ScoreCursorState(instrument(), staff(), measure(),
-                                      time(), id(), staffobj_id_internal(),
-                                      ref_obj_time());
-}
-
-//---------------------------------------------------------------------------------------
-void ScoreCursor::restore_state(ElementCursorState* pState)
-{
-    //intrinsically safe
-
-    ScoreCursorState* pSCS = dynamic_cast<ScoreCursorState*>(pState);
-    if (pSCS == NULL)
-        return;
-
-    m_pScore = static_cast<ImoScore*>( m_pDoc->get_pointer_to_imo(m_scoreId) );
-    m_pColStaffObjs = m_pScore->get_staffobjs_table();
-    p_point_to(pSCS->ref_obj_id());
-    m_currentState.staff( pSCS->staff() );  //fix staff when pointin to a barline
-    m_currentState.id( pSCS->id() );
-    m_currentState.time( pSCS->time() );
-    m_currentState.ref_obj_time( pSCS->ref_obj_time() );
-
-    p_find_previous_state();
+    return SpElementCursorState(
+                LOMSE_NEW ScoreCursorState(instrument(), staff(), measure(),
+                                          time(), id(), staffobj_id_internal(),
+                                          ref_obj_time(), ref_obj_staff())
+                                );
 }
 
 ////---------------------------------------------------------------------------------------
@@ -1381,7 +1457,9 @@ string ScoreCursor::dump_cursor()
          << ", time=" << m_currentState.time()
          << ", id=" << m_currentState.id()
          << ", ref_id=" << m_currentState.ref_obj_id()
-         << ", ref_time=" << m_currentState.ref_obj_time();
+         << ", ref_time=" << m_currentState.ref_obj_time()
+         << ", ref_staff=" << m_currentState.ref_obj_staff();
+
 
     if (m_currentState.id() < 0L)
     {
@@ -1406,7 +1484,8 @@ string ScoreCursor::dump_cursor()
          << ", time=" << m_prevState.time()
          << ", id=" << m_prevState.id()
          << ", ref_id=" << m_prevState.ref_obj_id()
-         << ", ref_time=" << m_prevState.ref_obj_time();
+         << ", ref_time=" << m_prevState.ref_obj_time()
+         << ", ref_staff=" << m_prevState.ref_obj_staff();
 
     if (m_prevState.id() < 0L)
     {
@@ -1514,6 +1593,119 @@ bool ScoreCursor::p_success_refreshing_current()
     p_point_to( m_currentState.ref_obj_id() );
     p_find_previous_state();
     return true;
+}
+
+//---------------------------------------------------------------------------------------
+TimeInfo ScoreCursor::get_time_info()
+{
+    return TimeInfo(m_currentState.time(), m_totalDuration, m_curBeatDuration,
+                    m_startOfBarTimepos, m_currentState.measure());
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCursor::p_determine_total_duration()
+{
+    ColStaffObjsEntry* pEntry = NULL;
+    if (m_pColStaffObjs->num_entries() > 0)
+        pEntry = m_pColStaffObjs->back();
+
+    if (pEntry)
+        m_totalDuration = pEntry->time() + pEntry->duration();
+    else
+        m_totalDuration = 0.0;
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCursor::p_find_start_of_measure_and_time_signature()
+{
+    bool fBarlineFound = false;
+    bool fTimeFound = false;
+    m_startOfBarTimepos = 0.0;
+    m_curBeatDuration = k_duration_quarter;
+
+    ColStaffObjsIterator itSave = m_it;
+    p_move_iterator_to_prev();
+    while (p_there_is_iter_object())
+    {
+        if (p_iter_object_instrument() == m_currentState.instrument())
+        {
+            if (!fBarlineFound && p_iter_object()->is_barline())
+            {
+                m_startOfBarTimepos = p_iter_object_time();
+                fBarlineFound = true;
+            }
+            if (!fTimeFound && p_iter_object()->is_time_signature())
+            {
+                ImoTimeSignature* pTS =
+                        static_cast<ImoTimeSignature*>( p_iter_object() );
+                m_curBeatDuration = pTS->get_beat_duration();
+                fTimeFound = true;
+            }
+        }
+        if (fBarlineFound && fTimeFound)
+            break;
+        p_move_iterator_to_prev();
+    }
+    m_it = itSave;
+}
+
+
+//=======================================================================================
+// TimeInfo implementation
+//=======================================================================================
+TimeInfo::TimeInfo(TimeUnits curTimepos, TimeUnits totalDuration,
+                   TimeUnits curBeatDuration, TimeUnits startOfBarTimepos, int iMeasure)
+    : m_totalDuration(totalDuration)
+    , m_beatDuration(curBeatDuration)
+    , m_startOfBarTimepos(startOfBarTimepos)
+    , m_curTimepos(curTimepos)
+    , m_bar(iMeasure + 1)
+{
+}
+
+//---------------------------------------------------------------------------------------
+long TimeInfo::to_millisecs(int mm)
+{
+    //TODO
+    return 0L;
+}
+
+//---------------------------------------------------------------------------------------
+float TimeInfo::get_metronome_mm_for_lasting(long millisecs)
+{
+    //TODO
+    return 0.0f;
+}
+
+//---------------------------------------------------------------------------------------
+float TimeInfo::played_percentage()
+{
+    if ( is_equal_time(m_totalDuration, 0.0) )
+        return 100.0;
+    else
+        return float( (m_curTimepos * 100.0) / m_totalDuration);
+}
+
+//---------------------------------------------------------------------------------------
+float TimeInfo::remaining_percentage()
+{
+    if ( is_equal_time(m_totalDuration, 0.0) )
+        return 0.0;
+    else
+        return float( ((m_totalDuration - m_curTimepos) * 100.0) / m_totalDuration);
+}
+
+//---------------------------------------------------------------------------------------
+Timecode TimeInfo::get_timecode()
+{
+    TimeUnits remain = m_curTimepos - m_startOfBarTimepos;
+    int beat = int( remain / m_beatDuration );
+    remain -= TimeUnits(beat++ * m_beatDuration);
+    int n16th = int(remain / k_duration_16th);
+    remain -= TimeUnits(n16th * k_duration_16th);
+    int ticks = int( 7.5 * remain);
+
+    return Timecode(m_bar, beat, n16th, ticks);
 }
 
 

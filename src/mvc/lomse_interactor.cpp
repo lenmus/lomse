@@ -73,6 +73,7 @@ Interactor::Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView
     , m_renderTime(0.0)
     , m_gmodelBuildTime(0.0)
     , m_fViewParamsChanged(false)
+    , m_fCaretNeedsRepaint(false)
     , m_fViewUpdatesEnabled(true)
 {
     switch_task(TaskFactory::k_task_selection);     //k_task_drag_view);
@@ -375,7 +376,7 @@ GmoRef Interactor::find_event_originator_gref(GmoObj* pGmo)
 void Interactor::update_view_if_gmodel_modified()
 {
     GraphicModel* pGM = get_graphic_model();
-    if (pGM->is_modified())
+    if (pGM->is_modified() || m_fCaretNeedsRepaint)
     {
         force_redraw();
         pGM->set_modified(false);
@@ -475,6 +476,7 @@ void Interactor::do_force_redraw()
         pGView->redraw_bitmap();
         request_window_update();
     }
+    m_fCaretNeedsRepaint = false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -983,17 +985,23 @@ bool Interactor::blink_caret()
     // returns true if caret has been repainted
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
+    {
+        m_fCaretNeedsRepaint = true;
         return pGView->toggle_caret();
+    }
     else
         return false;
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::show_caret()
+void Interactor::show_caret(bool fShow)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->show_caret();
+    {
+        fShow ? pGView->show_caret(): pGView->hide_caret();
+    }
+    m_fCaretNeedsRepaint = true;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1002,17 +1010,7 @@ void Interactor::hide_caret()
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
         pGView->hide_caret();
-}
-
-//---------------------------------------------------------------------------------------
-void Interactor::update_caret()
-{
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-    {
-        pGView->update_caret();
-        request_window_update();
-    }
+    m_fCaretNeedsRepaint = true;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1029,6 +1027,41 @@ string Interactor::get_caret_timecode()
 void Interactor::exec_command(DocCommand* pCmd)
 {
     m_pExec->execute(m_pCursor, pCmd);
+    update_caret_and_view();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::exec_undo()
+{
+    m_pExec->undo(m_pCursor);
+    update_caret_and_view();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::exec_redo()
+{
+    m_pExec->redo(m_pCursor);
+    update_caret_and_view();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::update_caret_and_view()
+{
+    if ( dynamic_cast<GraphicView*>(m_pView) )
+        m_fCaretNeedsRepaint = true;
+    update_view_if_needed();
+}
+
+//---------------------------------------------------------------------------------------
+bool Interactor::should_enable_edit_undo()
+{
+    return m_pExec->is_undo_possible();
+}
+
+//---------------------------------------------------------------------------------------
+bool Interactor::should_enable_edit_redo()
+{
+    return m_pExec->is_redo_possible();
 }
 
 

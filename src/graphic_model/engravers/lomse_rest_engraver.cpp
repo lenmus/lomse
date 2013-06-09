@@ -80,12 +80,12 @@ void RestEngraver::determine_position()
 //---------------------------------------------------------------------------------------
 void RestEngraver::create_main_shape()
 {
-    int nIdx = 0;   //single-shape
-    m_pRestShape = LOMSE_NEW GmoShapeRest(m_pRest, nIdx, m_uxLeft, m_uyTop, Color(0,0,0),
+    ShapeId idx = 0;
+    m_pRestShape = LOMSE_NEW GmoShapeRest(m_pRest, idx, m_uxLeft, m_uyTop, Color(0,0,0),
                                     m_libraryScope);
     m_pNoteRestShape = m_pRestShape;
 
-    GmoShape* pGlyph = LOMSE_NEW GmoShapeRestGlyph(m_pRest, nIdx, m_iGlyph,
+    GmoShape* pGlyph = LOMSE_NEW GmoShapeRestGlyph(m_pRest, idx, m_iGlyph,
                                              UPoint(m_uxLeft, m_uyTop),
                                              Color(0,0,0), m_libraryScope, m_fontSize);
     m_pRestShape->add(pGlyph);

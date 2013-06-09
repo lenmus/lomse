@@ -82,6 +82,7 @@ public:
     inline int staff() const { return m_staff; }
     inline ImoStaffObj* imo_object() const { return m_pImo; }
     inline long element_id() { return m_pImo->get_id(); }
+    inline TimeUnits duration() const { return m_pImo->get_duration(); }
 
     //setters
     inline void decrement_time(TimeUnits timeShift) {
@@ -89,7 +90,7 @@ public:
     }
 
     //debug
-    string dump();
+    string dump(bool fWithIds=true);
     std::string to_string();
     std::string to_string_with_ids();
 
@@ -154,7 +155,7 @@ public:
             virtual ~iterator() {}
 
             iterator& operator =(const iterator& it) {
-                init(it.m_pCurrent); 
+                init(it.m_pCurrent);
                 return *this;
             }
 
@@ -195,7 +196,7 @@ public:
     inline iterator find(ImoStaffObj* pSO) { return iterator(find_entry_for(pSO)); }
 
     //debug
-    string dump();
+    string dump(bool fWithIds=true);
 
 protected:
     void add_entry_to_list(ColStaffObjsEntry* pEntry);
@@ -207,7 +208,7 @@ typedef  ColStaffObjs::iterator      ColStaffObjsIterator;
 
 
 //---------------------------------------------------------------------------------------
-// StaffVoiceLineTable: algorithm assign and manage line number to voices/staves
+// StaffVoiceLineTable: algorithm assign line number to voices/staves
 //---------------------------------------------------------------------------------------
 class StaffVoiceLineTable
 {
@@ -231,43 +232,105 @@ private:
 
 
 //---------------------------------------------------------------------------------------
-// ColStaffObjsBuilder: algorithm to create a ColStaffObjs table
+// ColStaffObjsBuilder: generic algorithm to create a ColStaffObjs table
 //---------------------------------------------------------------------------------------
+class ColStaffObjsBuilderEngine;
+
 class ColStaffObjsBuilder
 {
-protected:
-    ColStaffObjs*   m_pColStaffObjs;
-    ImoScore*       m_pImScore;
-
 public:
-    ColStaffObjsBuilder();
-    ~ColStaffObjsBuilder() {}
+    ColStaffObjsBuilder() {}
+    virtual ~ColStaffObjsBuilder() {}
 
     ColStaffObjs* build(ImoScore* pScore);
 
-private:
-    //global counters to assign measure, timepos and staff
-    int     m_nCurMeasure;
-    TimeUnits   m_rCurTime;
+protected:
+    ColStaffObjsBuilderEngine* create_builder_engine(ImoScore* pScore);
+};
+
+//---------------------------------------------------------------------------------------
+// ColStaffObjsBuilderEngine: specific algorithm to create a ColStaffObjs table
+// Abstract class, because different LDP versions requires different algorithms
+//---------------------------------------------------------------------------------------
+class ColStaffObjsBuilderEngine
+{
+protected:
+    ColStaffObjs* m_pColStaffObjs;
+    ImoScore* m_pImScore;
+
+    int         m_nCurMeasure;
     TimeUnits   m_rMaxSegmentTime;
     TimeUnits   m_rStartSegmentTime;
-    StaffVoiceLineTable m_lines;
+    StaffVoiceLineTable  m_lines;
+
+    ColStaffObjsBuilderEngine(ImoScore* pScore) : m_pImScore(pScore) {}
+
+public:
+    virtual ~ColStaffObjsBuilderEngine() {}
+
+    ColStaffObjs* do_build();
+
+protected:
+    virtual void initializations()=0;
+    virtual void determine_timepos(ImoStaffObj* pSO)=0;
+    virtual void create_entries(int nInstr)=0;
 
     void create_table();
+    void collect_anacrusis_info();
+    int get_line_for(int nVoice, int nStaff);
     void set_num_lines();
-    void find_voices_per_staff(int nInstr);
+    void add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr);
+    void prepare_for_next_instrument();
+
+};
+
+
+//---------------------------------------------------------------------------------------
+// ColStaffObjsBuilderEngine1x: algorithm to create a ColStaffObjs table for LDP 1.x
+//---------------------------------------------------------------------------------------
+class ColStaffObjsBuilderEngine1x : public ColStaffObjsBuilderEngine
+{
+protected:
+
+public:
+    ColStaffObjsBuilderEngine1x(ImoScore* pScore) : ColStaffObjsBuilderEngine(pScore) {}
+    virtual ~ColStaffObjsBuilderEngine1x() {}
+
+private:
+    TimeUnits   m_rCurTime;
+
+    void initializations();
     void create_entries(int nInstr);
     void reset_counters();
-    void prepare_for_next_instrument();
-    int get_line_for(int nVoice, int nStaff);
     void determine_timepos(ImoStaffObj* pSO);
     void update_measure(ImoStaffObj* pSO);
     void update_time_counter(ImoGoBackFwd* pGBF);
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
-    void add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr);
     ImoSpacer* anchor_object(ImoAuxObj* pImo);
-    void collect_anacrusis_info();
     void delete_node(ImoGoBackFwd* pGBF, ImoMusicData* pMusicData);
+
+};
+
+
+//---------------------------------------------------------------------------------------
+// ColStaffObjsBuilderEngine2x: algorithm to create a ColStaffObjs table for LDP 2.x
+//---------------------------------------------------------------------------------------
+class ColStaffObjsBuilderEngine2x : public ColStaffObjsBuilderEngine
+{
+protected:
+    vector<TimeUnits> m_rCurTime;
+
+public:
+    ColStaffObjsBuilderEngine2x(ImoScore* pScore) : ColStaffObjsBuilderEngine(pScore) {}
+    virtual ~ColStaffObjsBuilderEngine2x() {}
+
+private:
+    void initializations();
+    void create_entries(int nInstr);
+    void reset_counters();
+    void determine_timepos(ImoStaffObj* pSO);
+    void update_measure();
+    void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
 
 };
 

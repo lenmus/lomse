@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/12/29 -->
+<!-- $Updated: 2013/05/05 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -64,14 +64,14 @@ This is an excerpt of the needed code (more on it later):
 
     //step2: go on
     bool fVisualTracking = true;
-    m_pPlayer->play(fVisualTracking, 0, m_pInteractor);
+    m_pPlayer->play(fVisualTracking, 0, spInteractor.get());
 </pre>
 
 <p><tt>PlayerGui</tt> is an interface between your application playback GUI controls and the Lomse library. By "playback GUI controls" I am referring to things such as a button, a menu item, or a link to ask for playing back the score, check boxes for specifying playback options, such as "generate metronome clicks" or "start with count off clicks", a slider for specifying tempo speed, etc. The simplest way for specifying an option (i.e. tempo speed for playing back the score) would be to pass its value directly to Lomse when asking to play the score. But this approach has a drawback: the chosen values can not be changed by the user while the score is being played. Therefore, instead of passing Lomse the values for options, the idea is to have an interface between Lomse and your application, so that Lomse can ask your application for these values when needed. More on this later.
 </p>
 
 <p>
-The last line of previous code is invocation of <tt>play</tt> method- It will trigger all the playback machinery. But <b>Lomse will not generate any sounds</b>. Sound generation is always responsibility of your application. What Lomse will do is to generate <i>sound events</i>. Therefore, for playback, your application has three main responsibilities:
+The last line of previous code is invocation of <tt>play</tt> method. It will trigger all the playback machinery. But <b>Lomse will not generate any sounds</b>. Sound generation is always responsibility of your application. What Lomse will do is to generate <i>sound events</i>. Therefore, for playback, your application has three main responsibilities:
 </p>
 
 <ol>
@@ -134,7 +134,7 @@ For sound generation we will use the wxMidi (<a href="http://www.lenmus.org/en/w
 </p>
 
 <p>
-In this tuturial on score playback we will have to devote a lot of time to something not directly related to using Lomse: sound generation. Therefore, I will split this toturial into two. In this tutorial we are not going to generate any visual tracking effects during playback. And we will do it in fourth tutorial.
+In this tuturial on score playback we will have to devote a lot of time to something not directly related to using Lomse: sound generation. Therefore, I will split this tutorial into two. In this tutorial we are not going to generate any visual tracking effects during playback. And we will do it in the fourth tutorial.
 </p>
 
 <p>
@@ -698,7 +698,6 @@ MyCanvas::MyCanvas(wxFrame *frame, LomseDoorway& lomse, ScorePlayer* pPlayer)
     : wxWindow(frame, wxID_ANY)
     , m_lomse(lomse)
     , m_pPresenter(NULL)
-    , m_pInteractor(NULL)
     , m_buffer(NULL)
     , m_pPlayer(pPlayer)
     , m_view_needs_redraw(true)
@@ -824,7 +823,6 @@ MyCanvas::MyCanvas(wxFrame *frame, LomseDoorway& lomse, ScorePlayer* pPlayer)
     , PlayerNoGui(60L /*tempo 60 MM*/, true /*count off*/, true /*metronome clicks*/)
     , m_lomse(lomse)
 	, m_pPresenter(NULL)
-	, m_pInteractor(NULL)
 	, m_buffer(NULL)
 	, m_pPlayer(pPlayer)
 	, m_view_needs_redraw(true)
@@ -846,7 +844,7 @@ MyCanvas::MyCanvas(wxFrame *frame, LomseDoorway& lomse, ScorePlayer* pPlayer)
 The main doubt you should have is how to get the score to play. In these tutorials I never explained how access parts of a document, such as a paragraph or a score. In a future tutorial I will explain this in detail but, for now, you should learn that <tt>Document</tt> class has member methods for traversing the document and accessing its components. One of these methods is <tt>get_content_item(int index)</tt> that takes as argument the index to the desired content item. Index 0 is the first item in the document, index 1 the second one, and so on. Therefore, as we know that the document only contains one score, getting the score to play is just getting the document and invoking <tt>get_content_item(0)</tt> method:
 </p>
 <pre class="code">
-    Document* pDoc = m_pPresenter->get_document();
+    Document* pDoc = m_pPresenter->get_document_raw_ptr();
     ImoScore* pScore = static_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
 </pre>
 
@@ -857,13 +855,16 @@ With this knowledge we can now code the <tt>play_start</tt> method:
 <pre class="code">
 void MyCanvas::play_start()
 {
-    Document* pDoc = m_pPresenter->get_document();
-    ImoScore* pScore = pDoc->static_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
-    m_pPlayer->load_score(pScore, this);
-
-    bool fVisualTracking = false;
-    m_pPlayer->play(fVisualTracking, 0, m_pInteractor);
-
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        Document* pDoc = m_pPresenter->get_document_raw_ptr();
+        ImoScore* pScore = static_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
+        if (pScore)
+        {
+            m_pPlayer->load_score(pScore, this);
+            m_pPlayer->play(k_do_visual_tracking, 0, spInteractor.get());
+        }
+    }
 }
 </pre>
 
@@ -930,11 +931,9 @@ With these changes, your build command in Linux will be something as (adjust pat
 </p>
 
 <pre class="console">
-gcc example_3_wxwidgets.cpp ./wxMidi/wxMidi.cpp ./wxMidi/wxMidiDatabase.cpp  \
-    -o example-3-wx `wx-config --cflags`                       \
-    -I /usr/local/include/lomse  -I /usr/include -I ./wxMidi/  \
-    `pkg-config --cflags freetype2` -L /usr/local/lib -llomse  \
-    -lportmidi -lporttime `wx-config --libs`
+gcc example_3_wxwidgets.cpp ./wxMidi/wxMidi.cpp ./wxMidi/wxMidiDatabase.cpp -o example-3-wx \
+    `wx2812-config --cflags` `pkg-config --cflags liblomse`  -I ./wxMidi/    \
+    `pkg-config --libs liblomse` -lportmidi -lporttime `wx2812-config --libs`
 </pre>
 
 <p>

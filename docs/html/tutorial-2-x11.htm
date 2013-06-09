@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/12/23 -->
+<!-- $Updated: 2013/05/05 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -13,7 +13,7 @@
 
 <p>
 In this second example we are going to add more features to the simple application we developed in first tutorial. In particular, we will add some interaction with the score: zooming, dragging, and selecting/deselecting objects. You can download the full source code for this example from 
-<a href="../../examples/x11/example_2_x11.cpp">../../examples/x11/example_2_x11.cpp</a>.
+<a href="../../examples/example_2_x11.cpp">../../examples/example_2_x11.cpp</a>.
 </p>
 
 
@@ -210,27 +210,30 @@ When a key is pressed, now we will receive and event, and function <code>on_key<
 <pre class="code">
 void on_key(int x, int y, unsigned key, unsigned flags)
 {
-    if (!m_pInteractor) return;
+    if (!m_pPresenter) return;
 
-    switch (key)
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        case 'd':
-            m_pInteractor->switch_task(TaskFactory::k_task_drag_view);
-            break;
-        case 's':
-            m_pInteractor->switch_task(TaskFactory::k_task_selection);
-            break;
-        case '+':
-            m_pInteractor->zoom_in(x, y);
-            break;
-        case '-':
-            m_pInteractor->zoom_out(x, y);
-            break;
-        default:
-            ;
-    }
+        switch (key)
+        {
+            case 'd':
+                spInteractor->switch_task(TaskFactory::k_task_drag_view);
+                break;
+            case 's':
+                spInteractor->switch_task(TaskFactory::k_task_selection);
+                break;
+            case '+':
+                spInteractor->zoom_in(x, y);
+                break;
+            case '-':
+                spInteractor->zoom_out(x, y);
+                break;
+            default:
+                ;
+        }
 
-    m_pInteractor->force_redraw();
+        spInteractor->force_redraw();
+    }
 }
 </pre>
 
@@ -238,7 +241,7 @@ void on_key(int x, int y, unsigned key, unsigned flags)
 </p>
 
 <pre class="code">
-m_pInteractor->colorize_score();
+spInteractor->colorize_score();
 </pre>
 
 <p>Of couse it is not that simple!. But could be in future. Lomse aims at supporting not only document renderization and score playback but also document/score edition. The Interactor is the key object to interact with the document (here the name 'Interactor') and, currently, a lot of functionality is programmed for doing the most common tasks for renderization and playback. But for edition, I has just started. Simple things can be done but not many. As I am developping Lomse as part of the LenMus Phonascus application, Lomse is growing giving priority to Phonascus needs. Currently, all renderization and playback support needed by Phonascus is in place, and I am starting with score edition. If you would like to help, there are many programming tasks for you. Join the Lomse list and post a message. Thank you!
@@ -248,7 +251,7 @@ m_pInteractor->colorize_score();
 </p>
 
 <pre class="code">
-m_pInteractor->force_redraw();
+spInteractor->force_redraw();
 </pre>
 
 <p><code>force_redraw()</code> does two things: first, instructs the View to update the rendering buffer and, then, forces Lomse to send a <code>k_update_window_event</code>. Therefore, after updating the rendering buffer, our application will be notified and all the code in place from example 1 will take care of inmediatelly updating the window. That simple!.
@@ -266,20 +269,26 @@ As the two mouse tasks, 'selection' and 'score dragging', are currently programm
 <pre class="code">
 void on_mouse_button_down(int x, int y, unsigned flags)
 {
-    if (!m_pInteractor) return;
-    m_pInteractor->on_mouse_button_down(x, y, flags);
+    if (!m_pPresenter) return;
+
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+        spInteractor->on_mouse_button_down(x, y, flags);
 }
 
 void on_mouse_move(int x, int y, unsigned flags)
 {
-    if (!m_pInteractor) return;
-    m_pInteractor->on_mouse_move(x, y, flags);
+    if (!m_pPresenter) return;
+
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+        spInteractor->on_mouse_move(x, y, flags);
 }
 
 void on_mouse_button_up(int x, int y, unsigned flags)
 {
-    if (!m_pInteractor) return;
-    m_pInteractor->on_mouse_button_up(x, y, flags);
+    if (!m_pPresenter) return;
+
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+        spInteractor->on_mouse_button_up(x, y, flags);
 }
 </pre>
 
@@ -287,7 +296,7 @@ void on_mouse_button_up(int x, int y, unsigned flags)
 
 <p>And this is all. Our application is ready for building and testing.
 You can download the full source code for this example from
-<a href="../../examples/x11/example_2_x11.cpp">../../examples/x11/example_2_x11.cpp</a>.
+<a href="../../examples/example_2_x11.cpp">../../examples/example_2_x11.cpp</a>.
 </p>
 
 
@@ -297,26 +306,23 @@ You can download the full source code for this example from
 <!--====================================================-->
 
 <p>
-As usual, your proyect makefile must include the following path for Lomse header files:
+As usual, your proyect makefile must include the paths for the headers of used libraries: Lomse and X11. The best way of doing it is by using the <code>pkg-config</code> tool:
 </p>
 
-<pre class="code">
-    /usr/local/include/lomse
-    /usr/include/X11
+<pre class="console">
+`pkg-config --cflags x11` `pkg-config --cflags liblomse`
 </pre>
 
-<p>Some Lomse headers include freetype2 references and, therefore, it is necessary to include Freetype2 headers. As the specific paths could be different in your machine, the best for this is to use the pkg-config tool, by including <code>`pkg-config --cflags freetype2`</code>
+<p>It will generate something as <code>-I/usr/include/freetype2 -I/usr/include/libpng12 -I/usr/include/lomse</code>.
 </p>
 
-<p>
-Open a terminal window, move to the directory containing the sample code and enter (fix paths if necessary):
+<p>As to the libraries to link, you only will have to include Lomse and X11. Again, the best way of doing it is by using pkg-config tool. Open a terminal window, move to the directory containing the sample code and enter:
 </p>
 
 <pre class="console">
 gcc example_2_x11.cpp -o example-2-x11  \
-    -I /usr/include/X11 -L /usr/X11/lib -lX11 \
-    -I /usr/local/include/lomse -L /usr/local/lib -llomse \
-    -I /usr/include  `pkg-config --cflags freetype2`
+    `pkg-config --cflags x11` `pkg-config --cflags liblomse`   \
+    `pkg-config --libs liblomse` `pkg-config --libs x11`
 </pre>
 
 <p>I didn't say but in method <code>open_document()</code> I've changed the score, replacing the trivial score used in example-1 by a more complex score. When executing example-2 you should see something as:
@@ -326,7 +332,6 @@ gcc example_2_x11.cpp -o example-2-x11  \
 
 <p>Play with the mouse for dragging the score and for selecting objects. Test zooming by using the keys '+' and '-'.
 </p>
-
 
 
 

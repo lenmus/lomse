@@ -33,6 +33,8 @@
 #include "lomse_ldp_parser.h"
 #include "lomse_ldp_analyser.h"
 #include "lomse_ldp_compiler.h"
+#include "lomse_lmd_analyser.h"
+#include "lomse_lmd_parser.h"
 #include "lomse_lmd_compiler.h"
 #include "lomse_injectors.h"
 #include "lomse_id_assigner.h"
@@ -243,15 +245,60 @@ Compiler* Document::get_compiler_for_format(int format)
 }
 
 //---------------------------------------------------------------------------------------
-ImoObj* Document::create_object(const string& source)
+ImoObj* Document::create_object_from_ldp(const string& source)
 {
-    LdpParser parser(m_reporter, m_libraryScope.ldp_factory());
+    return create_object_from_ldp(source, m_reporter);
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj* Document::create_object_from_ldp(const string& source, ostream& reporter)
+{
+    LdpParser parser(reporter, m_libraryScope.ldp_factory());
     parser.parse_text(source);
     LdpTree* tree = parser.get_ldp_tree();
-    LdpAnalyser a(m_reporter, m_libraryScope, this);
+    if (tree)
+    {
+        LdpAnalyser a(reporter, m_libraryScope, this);
+        try
+        {
+            ImoObj* pImo = a.analyse_tree_and_get_object(tree);
+            delete tree->get_root();
+
+            if (pImo)
+            {
+                ModelBuilder builder;
+                builder.structurize(pImo);
+            }
+            return pImo;
+        }
+        catch (...)
+        {
+            return NULL;
+        }
+    }
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+ImoObj* Document::create_object_from_lmd(const string& source)
+{
+    LmdParser parser(m_reporter);
+    parser.parse_text(source);
+    LmdAnalyser a(m_reporter, m_libraryScope, this, &parser);
+    XmlNode* tree = parser.get_tree_root();
     ImoObj* pImo = a.analyse_tree_and_get_object(tree);
-    delete tree->get_root();
+
+    ModelBuilder builder;
+    builder.structurize(pImo);
     return pImo;
+
+
+//    Compiler* pCompiler = get_compiler_for_format(format);
+//    m_pIModel = pCompiler->compile_string(source);
+//    m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
+//    int numErrors = pCompiler->get_num_errors();
+//    delete pCompiler;
+//    return numErrors;
 }
 
 //---------------------------------------------------------------------------------------

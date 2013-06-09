@@ -119,7 +119,7 @@ class ScoreCaretPositioner : public InnerLevelCaretPositioner
 protected:
     DocCursor* m_pDocCursor;
     ScoreCursor* m_pScoreCursor;
-    ScoreCursorState* m_pState;
+    SpScoreCursorState m_spState;
     Document* m_pDoc;
     ImoScore* m_pScore;
     ScoreMeter* m_pMeter;
@@ -136,10 +136,11 @@ protected:
     void caret_at_start_of_score(Caret* pCaret);
     void caret_at_end_of_staff(Caret* pCaret);
 
-    URect get_bounds_for_imo(ImoId id);
+    URect get_bounds_for_imo(ImoId id, int iStaff);
     LUnits tenths_to_logical(Tenths value);
     void set_caret_timecode(Caret* pCaret);
-    void set_caret_y_pos_and_height(URect* pBounds, ImoId id);
+    void set_caret_y_pos_and_height(URect* pBounds, ImoId id, int iStaff);
+    GmoShape* get_shape_for_imo(ImoId id, int iStaff);
 
 };
 

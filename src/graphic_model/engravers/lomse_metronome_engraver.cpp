@@ -159,7 +159,8 @@ void MetronomeMarkEngraver::create_symbol_shape(int iGlyph)
 {
     Tenths yOffset = glyphs_lmbasic2[iGlyph].GlyphOffset + 5.0f;
     LUnits y = m_uPos.y + m_pMeter->tenths_to_logical(yOffset, m_iInstr, m_iStaff);
-    GmoShape* pShape = LOMSE_NEW GmoShapeMetronomeGlyph(m_pCreatorImo, 0, iGlyph,
+    ShapeId idx = 0;
+    GmoShape* pShape = LOMSE_NEW GmoShapeMetronomeGlyph(m_pCreatorImo, idx, iGlyph,
                                                UPoint(m_uPos.x, y), Color(0,0,0),
                                                m_libraryScope, m_fontSize);
 	m_pMainShape->add(pShape);

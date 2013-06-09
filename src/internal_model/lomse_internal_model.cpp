@@ -41,6 +41,7 @@
 #include "lomse_score_player_ctrl.h"
 #include "lomse_button_ctrl.h"
 #include "lomse_logger.h"
+#include "lomse_ldp_exporter.h"
 
 using namespace std;
 
@@ -254,15 +255,15 @@ const string& ImoObj::get_name(int type)
         // ImoStaffObj (A)
         m_TypeToName[k_imo_barline] = "barline";
         m_TypeToName[k_imo_clef] = "clef";
-        m_TypeToName[k_imo_key_signature] = "keySignature";
-        m_TypeToName[k_imo_time_signature] = "time";
-        m_TypeToName[k_imo_note] = "n";
-        m_TypeToName[k_imo_rest] = "r";
+        m_TypeToName[k_imo_key_signature] = "key signature";
+        m_TypeToName[k_imo_time_signature] = "time signature";
+        m_TypeToName[k_imo_note] = "note";
+        m_TypeToName[k_imo_rest] = "rest";
         m_TypeToName[k_imo_go_back_fwd] = "go_back_fwd";
-        m_TypeToName[k_imo_metronome_mark] = "metronome";
-        m_TypeToName[k_imo_system_break] = "system-break";
+        m_TypeToName[k_imo_metronome_mark] = "metronome mark";
+        m_TypeToName[k_imo_system_break] = "system break";
         m_TypeToName[k_imo_spacer] = "spacer";
-        m_TypeToName[k_imo_figured_bass] = "figuredBass";
+        m_TypeToName[k_imo_figured_bass] = "figured bass";
 
         // ImoBlocksContainer (A)
         m_TypeToName[k_imo_content] = "content";
@@ -272,21 +273,21 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_listitem] = "listitem";
         m_TypeToName[k_imo_multicolumn] = "multicolumn";
         m_TypeToName[k_imo_table] = "table";
-        m_TypeToName[k_imo_table_cell] = "table-cell";
-        m_TypeToName[k_imo_table_row] = "table-row";
+        m_TypeToName[k_imo_table_cell] = "table cell";
+        m_TypeToName[k_imo_table_row] = "table row";
         m_TypeToName[k_imo_score] = "score";
 
         // ImoInlinesContainer (A)
         m_TypeToName[k_imo_anonymous_block] = "anonymous-block";
         m_TypeToName[k_imo_heading] = "heading";
-        m_TypeToName[k_imo_para] = "para";
+        m_TypeToName[k_imo_para] = "paragraph";
 
         // ImoInlineLevelObj
         m_TypeToName[k_imo_image] = "image";
-        m_TypeToName[k_imo_score_player] = "score-player";
+        m_TypeToName[k_imo_score_player] = "score player";
         m_TypeToName[k_imo_control] = "control";
         m_TypeToName[k_imo_button] = "buttom";
-        m_TypeToName[k_imo_text_item] = "txt";
+        m_TypeToName[k_imo_text_item] = "text";
 
         // ImoBoxInline (A)
         m_TypeToName[k_imo_inline_wrapper] = "wrapper";
@@ -311,11 +312,12 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_size_dto] = "size";
         m_TypeToName[k_imo_slur_dto] = "slur-dto";
         m_TypeToName[k_imo_staff_info] = "staff-info";
+        m_TypeToName[k_imo_style] = "style";
         m_TypeToName[k_imo_system_info] = "system-info";
         m_TypeToName[k_imo_text_info] = "text-info";
         m_TypeToName[k_imo_text_style] = "text-style";
-        m_TypeToName[k_imo_style] = "style";
         m_TypeToName[k_imo_tie_dto] = "tie-dto";
+        m_TypeToName[k_imo_time_modification_dto] = "time-modificator-dto";
         m_TypeToName[k_imo_tuplet_dto] = "tuplet-dto";
 
         // ImoRelDataObj (A)
@@ -330,8 +332,8 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_music_data] = "musicData";
         m_TypeToName[k_imo_options] = "options";
         m_TypeToName[k_imo_styles] = "styles";
-        m_TypeToName[k_imo_table_head] = "table-head";
-        m_TypeToName[k_imo_table_body] = "table-body";
+        m_TypeToName[k_imo_table_head] = "table head";
+        m_TypeToName[k_imo_table_body] = "table body";
 
         // Special collections
         m_TypeToName[k_imo_attachments] = "attachments";
@@ -343,10 +345,10 @@ const string& ImoObj::get_name(int type)
         // ImoAuxObj (A)
         m_TypeToName[k_imo_fermata] = "fermata";
         m_TypeToName[k_imo_line] = "line";
-        m_TypeToName[k_imo_score_text] = "score-text";
-        m_TypeToName[k_imo_score_line] = "score-line";
+        m_TypeToName[k_imo_score_text] = "score text";
+        m_TypeToName[k_imo_score_line] = "score line";
         m_TypeToName[k_imo_score_title] = "title";
-        m_TypeToName[k_imo_text_box] = "text-box";
+        m_TypeToName[k_imo_text_box] = "text box";
 
         // ImoRelObj (A)
         m_TypeToName[k_imo_beam] = "beam";
@@ -528,6 +530,16 @@ void ImoObj::remove_child_imo(ImoObj* pImo)
     remove_child(pImo);
     set_dirty(true);
 }
+
+//---------------------------------------------------------------------------------------
+string ImoObj::to_string(bool fWithIds)
+{
+    LdpExporter exporter;
+    exporter.set_remove_newlines(true);
+    exporter.set_add_id(fWithIds);
+    return exporter.get_source(this);
+}
+
 
 //=======================================================================================
 // ImoRelObj implementation
@@ -1822,7 +1834,7 @@ ImoTimeSignature* ImoInstrument::add_time_signature(int top, int bottom,
 //---------------------------------------------------------------------------------------
 ImoObj* ImoInstrument::add_object(const string& ldpsource)
 {
-    ImoObj* pImo = m_pDoc->create_object(ldpsource);
+    ImoObj* pImo = m_pDoc->create_object_from_ldp(ldpsource);
     ImoMusicData* pMD = get_musicdata();
     pMD->append_child_imo(pImo);
     return pImo;
@@ -1836,32 +1848,58 @@ void ImoInstrument::add_staff_objects(const string& ldpsource)
 }
 
 //---------------------------------------------------------------------------------------
+ImoStaffObj* ImoInstrument::insert_staffobj_at(ImoStaffObj* pAt, ImoStaffObj* pImo)
+{
+    if (pAt)
+        insert_staffobj(pAt, pImo);
+    else
+    {
+        ImoMusicData* pMD = get_musicdata();
+        pMD->append_child_imo(pImo);
+    }
+    return pImo;
+}
+
+//---------------------------------------------------------------------------------------
+ImoStaffObj* ImoInstrument::insert_staffobj_at(ImoStaffObj* pAt, const string& ldpsource,
+                                               ostream& reporter)
+{
+    ImoStaffObj* pImo =
+        static_cast<ImoStaffObj*>( m_pDoc->create_object_from_ldp(ldpsource, reporter) );
+
+    if (pImo)
+        return insert_staffobj_at(pAt, pImo);
+    else
+        return NULL;
+}
+
+//---------------------------------------------------------------------------------------
 void ImoInstrument::delete_staffobj(ImoStaffObj* pSO)
 {
     //high level method. Can not be used if ColStaffObjs not build
     ColStaffObjs* pColStaffObjs = m_pScore->get_staffobjs_table();
-    if (!pColStaffObjs)
-        return;
+    if (pColStaffObjs)
+    {
+        //General houskeeping:
 
-    //General houskeeping:
+            //recursively delete all attachments
+            //DONE: this is automatic: deleting ImoObj recursively deletes its attachments
 
-        //recursively delete all attachments
-        //DONE: this is automatic: deleting ImoObj recursively deletes its attachments
+            //remove from all relations. Could imply deleting the relation.
+            //TODO
 
-        //remove from all relations. Could imply deleting the relation.
-        //TODO
+            //if duration > 0 && ! is-noterest-in-chord shift back all staffobjs in that
+            //instr/staff. When a barline is found determine time implied by each staff
+            //and choose greater one. If barline time doesn't change stop shifting times.
+            //OPTIMIZATION: barlines should store time implied by each staff.
+            if (is_greater_time(pSO->get_duration(), 0.0))
+            {
+    //            if (pSO->is_noterest() && )
+            }
 
-        //if duration > 0 && ! is-noterest-in-chord shift back all staffobjs in that
-        //instr/staff. When a barline is found determine time implied by each staff
-        //and choose greater one. If barline time doesn't change stop shifting times.
-        //OPTIMIZATION: barlines should store time implied by each staff.
-        if (is_greater_time(pSO->get_duration(), 0.0))
-        {
-//            if (pSO->is_noterest() && )
-        }
-
-    //remove from ColStaffObjs
-    pColStaffObjs->delete_entry_for(pSO);
+        //remove from ColStaffObjs
+        pColStaffObjs->delete_entry_for(pSO);
+    }
 
     //remove from ImoTree
     ImoMusicData* pMusicData = get_musicdata();
@@ -1880,6 +1918,49 @@ void ImoInstrument::insert_staffobj(ImoStaffObj* pPos, ImoStaffObj* pImo)
     ImoMusicData* pMD = get_musicdata();
     pMD->insert(it, pImo);
     set_dirty(true);
+}
+
+//---------------------------------------------------------------------------------------
+list<ImoStaffObj*> ImoInstrument::insert_staff_objects_at(ImoStaffObj* pAt,
+                                            const string& ldpsource, ostream& reporter)
+{
+    string data = "(musicData " + ldpsource + ")";
+    ImoMusicData* pObjects =
+        static_cast<ImoMusicData*>( m_pDoc->create_object_from_ldp(data, reporter) );
+
+    if (pObjects)
+        return insert_staff_objects_at(pAt, pObjects);
+
+    //error. return empty list
+    list<ImoStaffObj*> objects;
+    return objects;
+}
+
+//---------------------------------------------------------------------------------------
+list<ImoStaffObj*> ImoInstrument::insert_staff_objects_at(ImoStaffObj* pAt,
+                                                          ImoMusicData* pObjects)
+{
+    //move all objects in pObjects to this instrument MusicData, before object pAt
+
+    ImoMusicData* pMD = get_musicdata();
+    TreeNode<ImoObj>::iterator itPos(pAt);
+
+    list<ImoStaffObj*> objects;
+    ImoObj::children_iterator it = pObjects->begin();
+    while (it != pObjects->end())
+    {
+        ImoStaffObj* pImo = static_cast<ImoStaffObj*>(*it);
+        pObjects->remove_child(pImo);
+        if (pAt)
+            pMD->insert(itPos, pImo);
+        else
+            pMD->append_child_imo(pImo);
+        objects.push_back(pImo);
+        it = pObjects->begin();
+    }
+    delete pObjects;
+    set_dirty(true);
+    return objects;
 }
 
 
@@ -2174,7 +2255,7 @@ static const LongOption m_LongOptions[] =
 //---------------------------------------------------------------------------------------
 ImoScore::ImoScore(Document* pDoc)
     : ImoBlockLevelObj(k_imo_score)
-    , m_version("")
+    , m_version(0)
     , m_pDoc(pDoc)
     , m_pColStaffObjs(NULL)
     , m_pMidiTable(NULL)
@@ -2197,15 +2278,79 @@ ImoScore::~ImoScore()
 }
 
 //---------------------------------------------------------------------------------------
+string ImoScore::get_version_string()
+{
+    stringstream v;
+    v << get_version_major() << "." << get_version_minor();
+    return v.str();
+}
+
+//---------------------------------------------------------------------------------------
 void ImoScore::set_defaults_for_system_info()
 {
     m_systemInfoFirst.set_first(true);
     m_systemInfoFirst.set_top_system_distance(1000.0f);     //half system distance
     m_systemInfoFirst.set_system_distance(2000.0f);         //2 cm
 
-    m_systemInfoOther.set_first(true);
+    m_systemInfoOther.set_first(false);
     m_systemInfoOther.set_top_system_distance(1500.0f);     //1.5 cm
     m_systemInfoOther.set_system_distance(2000.0f);         //2 cm
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoScore::has_default_values(ImoSystemInfo* pInfo)
+{
+    if (pInfo->is_first())
+    {
+        return pInfo->get_left_margin() == 0.0f
+            && pInfo->get_right_margin() == 0.0f
+            && pInfo->get_top_system_distance() == 1000.0f
+            && pInfo->get_system_distance() == 2000.0f;
+    }
+    else
+    {
+        return pInfo->get_left_margin() == 0.0f
+            && pInfo->get_right_margin() == 0.0f
+            && pInfo->get_top_system_distance() == 1500.0f
+            && pInfo->get_system_distance() == 2000.0f;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoScore::has_default_value(ImoOptionInfo* pOpt)
+{
+    string name = pOpt->get_name();
+    if (pOpt->is_bool_option())
+    {
+        for (unsigned i=0; i < sizeof(m_BoolOptions)/sizeof(BoolOption); i++)
+        {
+            if (m_BoolOptions[i].sOptName == name)
+                return pOpt->get_bool_value() == m_BoolOptions[i].fBoolValue;
+        }
+        return false;
+    }
+
+    if (pOpt->is_long_option())
+    {
+        for (unsigned i=0; i < sizeof(m_LongOptions)/sizeof(LongOption); i++)
+        {
+            if (m_LongOptions[i].sOptName == name)
+                return pOpt->get_long_value() == m_LongOptions[i].nLongValue;
+        }
+        return false;
+    }
+
+    if (pOpt->is_float_option())
+    {
+        for (unsigned i=0; i < sizeof(m_FloatOptions)/sizeof(FloatOption); i++)
+        {
+            if (m_FloatOptions[i].sOptName == name)
+                return pOpt->get_float_value() == m_FloatOptions[i].rFloatValue;
+        }
+        return false;
+    }
+
+    return false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -3226,6 +3371,12 @@ TimeUnits ImoTimeSignature::get_measure_duration()
     return m_top * get_ref_note_duration();
 }
 
+//---------------------------------------------------------------------------------------
+TimeUnits ImoTimeSignature::get_beat_duration()
+{
+    return get_measure_duration() / get_num_pulses();
+}
+
 
 
 //=======================================================================================
@@ -3248,6 +3399,7 @@ ImoTupletDto::ImoTupletDto()
     , m_nShowBracket(k_yesno_default)
     , m_nPlacement(k_placement_default)
     , m_nShowNumber(ImoTuplet::k_number_actual)
+    , m_fOnlyGraphical(false)
     , m_pTupletElm(NULL)
     , m_pNR(NULL)
 {
@@ -3262,6 +3414,7 @@ ImoTupletDto::ImoTupletDto(LdpElement* pTupletElm)
     , m_nShowBracket(k_yesno_default)
     , m_nPlacement(k_placement_default)
     , m_nShowNumber(ImoTuplet::k_number_actual)
+    , m_fOnlyGraphical(false)
     , m_pTupletElm(pTupletElm)
     , m_pNR(NULL)
 {

@@ -45,28 +45,24 @@ namespace lomse
 //=======================================================================================
 // ColStaffObjsEntry implementation
 //=======================================================================================
-string ColStaffObjsEntry::dump()
+string ColStaffObjsEntry::dump(bool fWithIds)
 {
     stringstream s;
     s << m_instr << "\t" << m_staff << "\t" << m_measure << "\t" << time() << "\t"
-      << m_line << "\t" << to_string_with_ids() << endl;
+      << m_line << "\t" << (fWithIds ? to_string_with_ids() : to_string()) << endl;
     return s.str();
 }
 
 //---------------------------------------------------------------------------------------
 std::string ColStaffObjsEntry::to_string()
 {
-    LdpExporter exporter;
-    return exporter.get_source(m_pImo);
+    return m_pImo->to_string();
 }
 
 //---------------------------------------------------------------------------------------
 std::string ColStaffObjsEntry::to_string_with_ids()
 {
-    LdpExporter exporter;
-    exporter.set_add_id(true);
-    exporter.set_remove_newlines(true);
-    return exporter.get_source(m_pImo);
+    return m_pImo->to_string_with_ids();
 }
 
 
@@ -153,7 +149,7 @@ void ColStaffObjs::add_entry(int measure, int instr, int voice, int staff,
 }
 
 //---------------------------------------------------------------------------------------
-string ColStaffObjs::dump()
+string ColStaffObjs::dump(bool fWithIds)
 {
     stringstream s;
     ColStaffObjs::iterator it;
@@ -163,7 +159,7 @@ string ColStaffObjs::dump()
     s << "----------------------------------------------------------------" << endl;
     for (it=begin(); it != end(); ++it)
     {
-        s << (*it)->dump();
+        s << (*it)->dump(fWithIds);
     }
     return s.str();
 }
@@ -241,6 +237,7 @@ void ColStaffObjs::delete_entry_for(ImoStaffObj* pSO)
         pPrev->set_next( pNext );
         pNext->set_prev( pPrev );
     }
+    --m_numEntries;
 }
 
 //---------------------------------------------------------------------------------------
@@ -287,190 +284,52 @@ void ColStaffObjs::sort_table()
 //=======================================================================================
 // ColStaffObjsBuilder implementation: algorithm to create a ColStaffObjs
 //=======================================================================================
-ColStaffObjsBuilder::ColStaffObjsBuilder()
+ColStaffObjs* ColStaffObjsBuilder::build(ImoScore* pScore)
 {
+    ColStaffObjsBuilderEngine* builder = create_builder_engine(pScore);
+    ColStaffObjs* pColStaffObjs = builder->do_build();
+    pScore->set_staffobjs_table(pColStaffObjs);
+    delete builder;
+    return pColStaffObjs;
 }
 
 //---------------------------------------------------------------------------------------
-ColStaffObjs* ColStaffObjsBuilder::build(ImoScore* pScore)
+ColStaffObjsBuilderEngine* ColStaffObjsBuilder::create_builder_engine(ImoScore* pScore)
 {
-    m_pColStaffObjs = LOMSE_NEW ColStaffObjs();
-    m_pImScore = pScore;
+    int major = pScore->get_version_major();
+    if (major < 2)
+        return LOMSE_NEW ColStaffObjsBuilderEngine1x(pScore);
+    else
+        return LOMSE_NEW ColStaffObjsBuilderEngine2x(pScore);
+}
+
+
+
+//=======================================================================================
+// ColStaffObjsBuilderEngine
+//=======================================================================================
+ColStaffObjs* ColStaffObjsBuilderEngine::do_build()
+{
     create_table();
     set_num_lines();
-    m_pImScore->set_staffobjs_table(m_pColStaffObjs);
     return m_pColStaffObjs;
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::create_table()
+void ColStaffObjsBuilderEngine::create_table()
 {
-    int nTotalInstruments = m_pImScore->get_num_instruments();
-    for (int nInstr = 0; nInstr < nTotalInstruments; nInstr++)
+    initializations();
+    int totalInstruments = m_pImScore->get_num_instruments();
+    for (int instr = 0; instr < totalInstruments; instr++)
     {
-        //find_voices_per_staff(nInstr);
-        create_entries(nInstr);
+        create_entries(instr);
         prepare_for_next_instrument();
     }
     collect_anacrusis_info();
 }
 
 //---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::set_num_lines()
-{
-    m_pColStaffObjs->set_total_lines( m_lines.get_number_of_lines() );
-}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::find_voices_per_staff(int nInstr)
-{
-}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::create_entries(int nInstr)
-{
-    ImoInstrument* pInstr = m_pImScore->get_instrument(nInstr);
-    ImoMusicData* pMusicData = pInstr->get_musicdata();
-    if (!pMusicData)
-        return;
-
-    ImoObj::children_iterator it = pMusicData->begin();
-    reset_counters();
-    while(it != pMusicData->end())
-    {
-        if ((*it)->is_go_back_fwd())
-        {
-            ImoGoBackFwd* pGBF = static_cast<ImoGoBackFwd*>(*it);
-            update_time_counter(pGBF);
-            ++it;
-            delete_node(pGBF, pMusicData);
-        }
-        else if ((*it)->is_key_signature() || (*it)->is_time_signature())
-        {
-            add_entries_for_key_or_time_signature(*it, nInstr);
-            ++it;
-        }
-        else
-        {
-            ImoStaffObj* pSO = static_cast<ImoStaffObj*>(*it);
-            add_entry_for_staffobj(pSO, nInstr);
-            update_measure(pSO);
-            ++it;
-        }
-    }
-}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::add_entry_for_staffobj(ImoObj* pImo, int nInstr)
-{
-    ImoStaffObj* pSO = static_cast<ImoStaffObj*>(pImo);
-    determine_timepos(pSO);
-    int nStaff = pSO->get_staff();
-    int nVoice = 0;
-    if (pSO->is_note_rest())
-    {
-        ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
-        nVoice = pNR->get_voice();
-    }
-    int nLine = get_line_for(nVoice, nStaff);
-    m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
-}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr)
-{
-    ImoInstrument* pInstr = m_pImScore->get_instrument(nInstr);
-    int numStaves = pInstr->get_num_staves();
-
-    ImoStaffObj* pSO = static_cast<ImoStaffObj*>(pImo);
-    determine_timepos(pSO);
-    for (int nStaff=0; nStaff < numStaves; nStaff++)
-    {
-        int nLine = get_line_for(0, nStaff);
-        m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
-    }
-}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::prepare_for_next_instrument()
-{
-    m_lines.new_instrument();
-}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::delete_node(ImoGoBackFwd* pGBF, ImoMusicData* pMusicData)
-{
-    pMusicData->remove_child(pGBF);
-    delete pGBF;
-}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::reset_counters()
-{
-    m_nCurMeasure = 0;
-    m_rCurTime = 0.0;
-    m_rMaxSegmentTime = 0.0;
-    m_rStartSegmentTime = 0.0;
-}
-
-//---------------------------------------------------------------------------------------
-int ColStaffObjsBuilder::get_line_for(int nVoice, int nStaff)
-{
-    return m_lines.get_line_assigned_to(nVoice, nStaff);
-}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::determine_timepos(ImoStaffObj* pSO)
-{
-    pSO->set_time(m_rCurTime);
-
-    if (pSO->is_note())
-    {
-        ImoNote* pNote = static_cast<ImoNote*>(pSO);
-        if (!pNote->is_in_chord() || pNote->is_end_of_chord())
-            m_rCurTime += pSO->get_duration();
-    }
-    else
-        m_rCurTime += pSO->get_duration();
-    m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_rCurTime);
-}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::update_measure(ImoStaffObj* pSO)
-{
-    if (pSO->is_barline())
-    {
-        ++m_nCurMeasure;
-        m_rMaxSegmentTime = 0.0;
-        m_rStartSegmentTime = m_rCurTime;
-    }
-}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::update_time_counter(ImoGoBackFwd* pGBF)
-{
-    if (pGBF->is_to_start())
-        m_rCurTime = m_rStartSegmentTime;
-    else if (pGBF->is_to_end())
-        m_rCurTime = m_rMaxSegmentTime;
-    else
-    {
-        m_rCurTime += pGBF->get_time_shift();
-        m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_rCurTime);
-    }
-}
-
-//---------------------------------------------------------------------------------------
-ImoSpacer* ColStaffObjsBuilder::anchor_object(ImoAuxObj* pAux)
-{
-    Document* pDoc = m_pImScore->get_the_document();
-    ImoSpacer* pAnchor = static_cast<ImoSpacer*>(ImFactory::inject(k_imo_spacer, pDoc));
-    pAnchor->add_attachment(pDoc, pAux);
-    return pAnchor;
-}
-
-//---------------------------------------------------------------------------------------
-void ColStaffObjsBuilder::collect_anacrusis_info()
+void ColStaffObjsBuilderEngine::collect_anacrusis_info()
 {
     ColStaffObjsIterator it = m_pColStaffObjs->begin();
     ImoTimeSignature* pTS = NULL;
@@ -511,6 +370,268 @@ void ColStaffObjsBuilder::collect_anacrusis_info()
     TimeUnits measureDuration = pTS->get_measure_duration();
     m_pColStaffObjs->set_anacrusis_missing_time(measureDuration - rTime);
 }
+
+//---------------------------------------------------------------------------------------
+int ColStaffObjsBuilderEngine::get_line_for(int nVoice, int nStaff)
+{
+    return m_lines.get_line_assigned_to(nVoice, nStaff);
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine::set_num_lines()
+{
+    m_pColStaffObjs->set_total_lines( m_lines.get_number_of_lines() );
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine::add_entries_for_key_or_time_signature(ImoObj* pImo, int nInstr)
+{
+    ImoInstrument* pInstr = m_pImScore->get_instrument(nInstr);
+    int numStaves = pInstr->get_num_staves();
+
+    ImoStaffObj* pSO = static_cast<ImoStaffObj*>(pImo);
+    determine_timepos(pSO);
+    for (int nStaff=0; nStaff < numStaves; nStaff++)
+    {
+        int nLine = get_line_for(0, nStaff);
+        m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine::prepare_for_next_instrument()
+{
+    m_lines.new_instrument();
+}
+
+
+
+//=======================================================================================
+// ColStaffObjsBuilderEngine1x implementation: algorithm to create a ColStaffObjs
+//=======================================================================================
+void ColStaffObjsBuilderEngine1x::initializations()
+{
+    m_pColStaffObjs = LOMSE_NEW ColStaffObjs();
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine1x::create_entries(int nInstr)
+{
+    ImoInstrument* pInstr = m_pImScore->get_instrument(nInstr);
+    ImoMusicData* pMusicData = pInstr->get_musicdata();
+    if (!pMusicData)
+        return;
+
+    ImoObj::children_iterator it = pMusicData->begin();
+    reset_counters();
+    while(it != pMusicData->end())
+    {
+        if ((*it)->is_go_back_fwd())
+        {
+            ImoGoBackFwd* pGBF = static_cast<ImoGoBackFwd*>(*it);
+            update_time_counter(pGBF);
+            ++it;
+
+            //delete_node(pGBF, pMusicData);
+            //CSG: goBack/Fwd nodes can not be removed. They are necessary in score edition
+            //when ColStaffObjs must be rebuild
+        }
+        else if ((*it)->is_key_signature() || (*it)->is_time_signature())
+        {
+            add_entries_for_key_or_time_signature(*it, nInstr);
+            ++it;
+        }
+        else
+        {
+            ImoStaffObj* pSO = static_cast<ImoStaffObj*>(*it);
+            add_entry_for_staffobj(pSO, nInstr);
+            update_measure(pSO);
+            ++it;
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine1x::add_entry_for_staffobj(ImoObj* pImo, int nInstr)
+{
+    ImoStaffObj* pSO = static_cast<ImoStaffObj*>(pImo);
+    determine_timepos(pSO);
+    int nStaff = pSO->get_staff();
+    int nVoice = 0;
+    if (pSO->is_note_rest())
+    {
+        ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
+        nVoice = pNR->get_voice();
+    }
+    int nLine = get_line_for(nVoice, nStaff);
+    m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine1x::delete_node(ImoGoBackFwd* pGBF, ImoMusicData* pMusicData)
+{
+    pMusicData->remove_child(pGBF);
+    delete pGBF;
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine1x::reset_counters()
+{
+    m_nCurMeasure = 0;
+    m_rCurTime = 0.0;
+    m_rMaxSegmentTime = 0.0;
+    m_rStartSegmentTime = 0.0;
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine1x::determine_timepos(ImoStaffObj* pSO)
+{
+    pSO->set_time(m_rCurTime);
+
+    if (pSO->is_note())
+    {
+        ImoNote* pNote = static_cast<ImoNote*>(pSO);
+        if (!pNote->is_in_chord() || pNote->is_end_of_chord())
+            m_rCurTime += pSO->get_duration();
+    }
+    else
+        m_rCurTime += pSO->get_duration();
+    m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_rCurTime);
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine1x::update_measure(ImoStaffObj* pSO)
+{
+    if (pSO->is_barline())
+    {
+        ++m_nCurMeasure;
+        m_rMaxSegmentTime = 0.0;
+        m_rStartSegmentTime = m_rCurTime;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine1x::update_time_counter(ImoGoBackFwd* pGBF)
+{
+    if (pGBF->is_to_start())
+        m_rCurTime = m_rStartSegmentTime;
+    else if (pGBF->is_to_end())
+        m_rCurTime = m_rMaxSegmentTime;
+    else
+    {
+        m_rCurTime += pGBF->get_time_shift();
+        m_rMaxSegmentTime = max(m_rMaxSegmentTime, m_rCurTime);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+ImoSpacer* ColStaffObjsBuilderEngine1x::anchor_object(ImoAuxObj* pAux)
+{
+    Document* pDoc = m_pImScore->get_the_document();
+    ImoSpacer* pAnchor = static_cast<ImoSpacer*>(ImFactory::inject(k_imo_spacer, pDoc));
+    pAnchor->add_attachment(pDoc, pAux);
+    return pAnchor;
+}
+
+
+
+//=======================================================================================
+// ColStaffObjsBuilderEngine2x implementation: algorithm to create a ColStaffObjs
+//=======================================================================================
+void ColStaffObjsBuilderEngine2x::initializations()
+{
+    m_rCurTime.reserve(k_max_voices);
+    m_pColStaffObjs = LOMSE_NEW ColStaffObjs();
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine2x::create_entries(int nInstr)
+{
+    ImoInstrument* pInstr = m_pImScore->get_instrument(nInstr);
+    ImoMusicData* pMusicData = pInstr->get_musicdata();
+    if (!pMusicData)
+        return;
+
+    reset_counters();
+    ImoObj::children_iterator it;
+    for(it = pMusicData->begin(); it != pMusicData->end(); ++it)
+    {
+        if ((*it)->is_key_signature() || (*it)->is_time_signature())
+        {
+            add_entries_for_key_or_time_signature(*it, nInstr);
+        }
+        else
+        {
+            ImoStaffObj* pSO = static_cast<ImoStaffObj*>(*it);
+            add_entry_for_staffobj(pSO, nInstr);
+            if (pSO->is_barline())
+                update_measure();
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine2x::add_entry_for_staffobj(ImoObj* pImo, int nInstr)
+{
+    ImoStaffObj* pSO = static_cast<ImoStaffObj*>(pImo);
+    determine_timepos(pSO);
+    int nStaff = pSO->get_staff();
+    int nVoice = 0;
+    if (pSO->is_note_rest())
+    {
+        ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
+        nVoice = pNR->get_voice();
+    }
+    int nLine = get_line_for(nVoice, nStaff);
+    m_pColStaffObjs->add_entry(m_nCurMeasure, nInstr, nLine, nStaff, pSO);
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine2x::reset_counters()
+{
+    m_nCurMeasure = 0;
+    m_rMaxSegmentTime = 0.0;
+    m_rStartSegmentTime = 0.0;
+    m_rCurTime.assign(k_max_voices, 0.0);
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine2x::determine_timepos(ImoStaffObj* pSO)
+{
+    TimeUnits time;
+    TimeUnits duration = pSO->get_duration();
+
+    if (pSO->is_note_rest())
+    {
+        ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
+        int voice = pNR->get_voice();
+        time = m_rCurTime[voice];
+
+        if (pSO->is_note())
+        {
+            ImoNote* pNote = static_cast<ImoNote*>(pSO);
+            if (pNote->is_in_chord() && !pNote->is_end_of_chord())
+                duration = 0.0;
+        }
+        m_rCurTime[voice] += duration;
+    }
+    else
+    {
+        time = m_rMaxSegmentTime;
+    }
+
+    pSO->set_time(time);
+    m_rMaxSegmentTime = max(m_rMaxSegmentTime, time+duration);
+}
+
+//---------------------------------------------------------------------------------------
+void ColStaffObjsBuilderEngine2x::update_measure()
+{
+    ++m_nCurMeasure;
+    m_rStartSegmentTime = m_rMaxSegmentTime;
+    m_rCurTime.assign(k_max_voices, m_rMaxSegmentTime);
+}
+
 
 
 //=======================================================================================

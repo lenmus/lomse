@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/12/29 -->
+<!-- $Updated: 2013/05/05 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -141,7 +141,6 @@ For this, we need to define some Lomse related variables:
 <pre class="code">
 LomseDoorway    m_lomse;        //the Lomse library doorway
 Presenter*      m_pPresenter;   //relates the View, the Document and the Interactor
-Interactor*     m_pInteractor;  //to interact with the View
 </pre>
 
 <p>
@@ -293,11 +292,16 @@ void open_test_document()
             ")"
         ")" );
 
-    //now, get the pointers to the relevant components
-    m_pInteractor = m_pPresenter->get_interactor(0);
+    //get the pointer to the interactor, set the rendering buffer and register for
+    //receiving desired events
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        //connect the View with the window buffer
+        spInteractor->set_rendering_buffer(&m_rbuf_window);
 
-    //connect the View with the window buffer
-    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
+        //hide edition caret
+        spInteractor->hide_caret();
+    }
 }
 </pre>
 
@@ -348,13 +352,15 @@ void open_test_document()
 <p>Lomse architecture is based on the Model-View-Controller pattern, and supports multiple simultaneous Views for a Document. By default, when creating a Document also a View and its associated <tt>Interactor</tt> are created. So, parameter <code>'0'</code> in <code>get_interactor(0)</code> refers to first <tt>Interactor</tt>, in this case, the only one created.
 </p>
 
-<p>Once we've got the Interactor we have one <b>important</b> task to do. It is to inform the Interactor about the rendering buffer that must be used for its associated View:
+<p>Once we've got the Interactor we have one <b>important</b> task to do. It is to inform the Interactor about the rendering buffer that must be used for its associated View. But Presenter returns a weak_pointer that has to be converted to a valid pointer before using it:
 </p>
-
 <pre class="code">
-    //connect the View with the window buffer
-    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
+    //get the pointer to the interactor, set the rendering buffer and register for
+    //receiving desired events
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
 </pre>
+
 
 <p>
 In the previous line, we pass to the interactor the address of the rendering buffer but, we have not yet created any bitmap. Don't worry, the bitmap will not be used until we ask Lomse to render something, so we can delay its creation until really needed. We will see later hao the bitmap is created.
@@ -465,11 +471,14 @@ void update_rendering_buffer_if_needed()
 {
     //request the view to re-draw the bitmap
 
-    if (!m_pInteractor) return;
+    if (!m_pPresenter) return;
 
     if (m_view_needs_redraw)
-        m_pInteractor->force_redraw();
-    m_view_needs_redraw = false;
+    {
+        if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+            spInteractor->force_redraw();
+        m_view_needs_redraw = false;
+    }
 }
 </pre>
 

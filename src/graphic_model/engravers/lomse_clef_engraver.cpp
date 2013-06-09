@@ -64,8 +64,8 @@ GmoShape* ClefEngraver::create_shape(ImoObj* pCreatorImo, UPoint uPos, int clefT
     double fontSize = determine_font_size();
 
     //create the shape object
-    int nIdx = 0;   //single-shape
-    GmoShape* pShape = LOMSE_NEW GmoShapeClef(pCreatorImo, nIdx, m_iGlyph, UPoint(uPos.x, y),
+    ShapeId idx = 0;
+    GmoShape* pShape = LOMSE_NEW GmoShapeClef(pCreatorImo, idx, m_iGlyph, UPoint(uPos.x, y),
                                         Color(0,0,0), m_libraryScope, fontSize);
 
 //    // VS 2003 is not C99 compliant and does not have stdint.h

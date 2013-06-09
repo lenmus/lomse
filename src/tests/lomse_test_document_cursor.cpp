@@ -648,7 +648,7 @@ SUITE(DocCursorTest)
         DocCursorState state = cursor.get_state();
         CHECK( state.get_top_level_id() == 15L );     //score
         CHECK( state.get_delegate_state() != NULL );
-        ScoreCursorState* pSCE = dynamic_cast<ScoreCursorState*>( state.get_delegate_state() );
+        ScoreCursorState* pSCE = dynamic_cast<ScoreCursorState*>( state.get_delegate_state().get() );
         CHECK( pSCE->id() == 24L );
         CHECK( pSCE->instrument() == 0 );
         CHECK( pSCE->measure() == 0 );

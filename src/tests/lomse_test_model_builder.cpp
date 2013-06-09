@@ -122,7 +122,7 @@ SUITE(PitchAssignerTest)
         ImoInstrument* pInstr = pScore->add_instrument();
         pInstr->add_clef(k_clef_G2);
         pInstr->add_key_signature(k_key_D);
-        pInstr->add_time_signature(4 ,4, NO_VISIBLE);
+        pInstr->add_time_signature(4 ,4, k_no_visible);
         ImoNote* pNote1 = static_cast<ImoNote*>( pInstr->add_object("(n f4 q)") );
         ImoNote* pNote2 = static_cast<ImoNote*>( pInstr->add_object("(n +d4 q)") );
         ImoNote* pNote3 = static_cast<ImoNote*>( pInstr->add_object("(n d4 q)") );
@@ -152,7 +152,7 @@ SUITE(PitchAssignerTest)
         ImoInstrument* pInstr = pScore->add_instrument();
         pInstr->add_clef(k_clef_G2);
         pInstr->add_key_signature(k_key_D);
-        pInstr->add_time_signature(4 ,4, NO_VISIBLE);
+        pInstr->add_time_signature(4 ,4, k_no_visible);
         ImoNote* pNote1 = static_cast<ImoNote*>( pInstr->add_object("(n f4 q)") );
         ImoNote* pNote2 = static_cast<ImoNote*>( pInstr->add_object("(n +d4 q)") );
         ImoNote* pNote3 = static_cast<ImoNote*>( pInstr->add_object("(n d4 q)") );
@@ -206,7 +206,7 @@ SUITE(PitchAssignerTest)
         ImoInstrument* pInstr = pScore->add_instrument();
         pInstr->add_clef(k_clef_G2);
         pInstr->add_key_signature(k_key_D);
-        pInstr->add_time_signature(4 ,4, NO_VISIBLE);
+        pInstr->add_time_signature(4 ,4, k_no_visible);
         ImoNote* pNote1 = static_cast<ImoNote*>( pInstr->add_object("(n f4 q)") );
         ImoNote* pNote2 = static_cast<ImoNote*>( pInstr->add_object("(n +d4 q)") );
         ImoNote* pNote3 = static_cast<ImoNote*>( pInstr->add_object("(n d4 q)") );

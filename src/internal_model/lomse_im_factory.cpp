@@ -41,7 +41,7 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 ImoObj* ImFactory::inject(Document* pDoc, const std::string& ldpSource)
 {
-    return pDoc->create_object(ldpSource);
+    return pDoc->create_object_from_ldp(ldpSource);
 }
 
 //---------------------------------------------------------------------------------------
@@ -122,6 +122,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
 //        case k_imo_text_style:      pObj = LOMSE_NEW ImoParagraph();              break;
         case k_imo_tie:                 pObj = LOMSE_NEW ImoTie();                break;
         case k_imo_tie_dto:             pObj = LOMSE_NEW ImoTieDto();             break;
+        case k_imo_time_modification_dto:  pObj = LOMSE_NEW ImoTimeModificationDto();  break;
         case k_imo_time_signature:      pObj = LOMSE_NEW ImoTimeSignature();      break;
         case k_imo_tuplet:              pObj = LOMSE_NEW ImoTuplet();             break;
         case k_imo_tuplet_dto:          pObj = LOMSE_NEW ImoTupletDto();          break;

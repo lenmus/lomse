@@ -151,7 +151,8 @@ ScoreCaretPositioner::ScoreCaretPositioner(DocCursor* pCursor,
 {
     //get score cursor state
     DocCursorState state = m_pDocCursor->get_state();
-    m_pState = static_cast<ScoreCursorState*>( state.get_delegate_state() );
+    m_spState = SpScoreCursorState( boost::static_pointer_cast<ScoreCursorState>(
+                                        state.get_delegate_state() ));
 
     //get score
     ImoId id = state.get_top_level_id();
@@ -192,9 +193,9 @@ void ScoreCaretPositioner::prepare_caret(Caret* pCaret)
 //---------------------------------------------------------------------------------------
 void ScoreCaretPositioner::caret_on_pointed_object(Caret* pCaret)
 {
-    URect bounds = get_bounds_for_imo( m_pState->id() );
-    bounds.x -= tenths_to_logical(3);
-    set_caret_y_pos_and_height(&bounds, m_pState->id());
+    URect bounds = get_bounds_for_imo( m_spState->id(), m_spState->staff() );
+    bounds.x -= tenths_to_logical(1);
+    set_caret_y_pos_and_height(&bounds, m_spState->id(), m_spState->staff());
 
     pCaret->set_type(Caret::k_line);
     pCaret->set_position( bounds.get_top_left() );
@@ -210,22 +211,22 @@ void ScoreCaretPositioner::caret_on_empty_timepos(Caret* pCaret)
 
     ColStaffObjsEntry* pEntry = m_pScoreCursor->find_previous_imo();
     ImoId prevId = pEntry->element_id();
-    ImoId refId = m_pState->ref_obj_id();
-//    int instr = m_pState->instrument();
-//    int staff = m_pState->staff();
+    int prevStaff = pEntry->staff();
+    ImoId refId = m_spState->ref_obj_id();
+    int refStaff = m_spState->ref_obj_staff();
 
-    URect boundsPrev = get_bounds_for_imo(prevId);
-    URect bounds = get_bounds_for_imo(refId);
+    URect boundsPrev = get_bounds_for_imo(prevId, prevStaff);
+    URect bounds = get_bounds_for_imo(refId, refStaff);
 
     //interpolate position
     //TODO: linear interpolation is wrong. This has to be changed to use time-grid
     TimeUnits time1 = pEntry->time();
-    TimeUnits time2 = m_pState->time();
-    TimeUnits time3 = m_pState->ref_obj_time();
+    TimeUnits time2 = m_spState->time();
+    TimeUnits time3 = m_spState->ref_obj_time();
     LUnits xIncr = bounds.x - boundsPrev.x;     // Ax = x3-x1
     bounds.x = boundsPrev.x +
         (xIncr * float((time2 - time1) / (time3 - time1)) );
-    set_caret_y_pos_and_height(&bounds, prevId);
+    set_caret_y_pos_and_height(&bounds, prevId, prevStaff);
 
     pCaret->set_type(Caret::k_line);
     pCaret->set_position( bounds.get_top_left() );
@@ -258,7 +259,7 @@ void ScoreCaretPositioner::caret_at_start_of_score(Caret* pCaret)
 //        uPos.y = pBPage->GetYTop();
 //        uPos.x = pBPage->GetXLeft() + pScore->tenths_to_logical(20);
     }
-    set_caret_y_pos_and_height(&bounds, k_no_imoid);
+    set_caret_y_pos_and_height(&bounds, k_no_imoid, 0);
 
 
     pCaret->set_type(Caret::k_line);
@@ -275,10 +276,11 @@ void ScoreCaretPositioner::caret_at_end_of_staff(Caret* pCaret)
     //Place cursor two lines (20 tenths) at the right of last staffobj
 
     ImoId id = m_pScoreCursor->prev_pos_id();
-    URect bounds = get_bounds_for_imo(id);
+    int staff = m_pScoreCursor->prev_pos_staff();
+    URect bounds = get_bounds_for_imo(id, staff);
 
     bounds.x += tenths_to_logical(20);
-    set_caret_y_pos_and_height(&bounds, id);
+    set_caret_y_pos_and_height(&bounds, id, staff);
 
     pCaret->set_type(Caret::k_line);
     pCaret->set_position( bounds.get_top_left() );
@@ -289,15 +291,19 @@ void ScoreCaretPositioner::caret_at_end_of_staff(Caret* pCaret)
 //---------------------------------------------------------------------------------------
 void ScoreCaretPositioner::set_caret_timecode(Caret* pCaret)
 {
+    TimeInfo ti = m_pScoreCursor->get_time_info();
+    Timecode tc = ti.get_timecode();
+    TimeUnits tu = m_spState->time();
+
     ostringstream ss;
-    ss << (m_pState->measure() + 1) << ".0.0." << m_pState->time();
+    ss << tc.bar << "." << tc.beat << "." << tc.n16th << "." << tc.ticks << " (" << tu << ")";
     pCaret->set_timecode( ss.str() );
 }
 
 //---------------------------------------------------------------------------------------
-URect ScoreCaretPositioner::get_bounds_for_imo(ImoId id)
+URect ScoreCaretPositioner::get_bounds_for_imo(ImoId id, int iStaff)
 {
-    GmoShape* pShape = m_pGModel->get_shape_for_imo(id, 0);
+    GmoShape* pShape = get_shape_for_imo(id, iStaff);
     if (!pShape)
     {
         LOMSE_LOG_ERROR("[ScoreCaretPositioner::get_bounds_for_imo] No shape for requested object!");
@@ -308,19 +314,33 @@ URect ScoreCaretPositioner::get_bounds_for_imo(ImoId id)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits ScoreCaretPositioner::tenths_to_logical(Tenths value)
+GmoShape* ScoreCaretPositioner::get_shape_for_imo(ImoId id, int iStaff)
 {
-    return m_pMeter->tenths_to_logical(value, m_pState->instrument(), m_pState->staff());
+    ImoObj* pImo = m_pDoc->get_pointer_to_imo(id);
+    if (pImo->can_generate_secondary_shapes() && !pImo->is_clef())
+    {
+        ShapeId idx = GmoShape::generate_main_or_implicity_shape_id(iStaff);
+        return m_pGModel->get_shape_for_imo(id, idx);
+    }
+    else
+        return m_pGModel->get_main_shape_for_imo(id);
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCaretPositioner::set_caret_y_pos_and_height(URect* pBounds, ImoId id)
+LUnits ScoreCaretPositioner::tenths_to_logical(Tenths value)
+{
+    return m_pMeter->tenths_to_logical(value, m_spState->instrument(), m_spState->staff());
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCaretPositioner::set_caret_y_pos_and_height(URect* pBounds, ImoId id,
+                                                       int iStaff)
 {
     URect staffBounds;
 
     if (id != k_no_imoid)
     {
-        GmoShape* pShape = m_pGModel->get_shape_for_imo(id, 0);
+        GmoShape* pShape = get_shape_for_imo(id, iStaff);
         GmoBox* pBox = pShape->get_owner_box();
         while (pBox && !pBox->is_box_system())
             pBox = pBox->get_owner_box();
@@ -335,8 +355,8 @@ void ScoreCaretPositioner::set_caret_y_pos_and_height(URect* pBounds, ImoId id)
         //total number of staves in the system. But we have staff number relative to
         //staves in current instrument. So we have to determine how many instruments
         //there are, and transform staff number.
-        int relStaff = m_pState->staff();
-        int instr = m_pState->instrument();
+        int relStaff = m_spState->staff();
+        int instr = m_spState->instrument();
         if (instr > 0)
         {
             relStaff += m_pScore->get_instrument(0)->get_num_staves();

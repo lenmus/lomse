@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -222,7 +222,6 @@ protected:
     // Let's define the necessary variables:
     LomseDoorway&   m_lomse;        //the Lomse library doorway
     Presenter*      m_pPresenter;
-    Interactor*     m_pInteractor;  //to interact with the View
 
     //the Lomse View renders its content on a bitmap. To manage it, Lomse
     //associates the bitmap to a RenderingBuffer object.
@@ -634,7 +633,6 @@ MyCanvas::MyCanvas(wxFrame *frame, LomseDoorway& lomse, ScorePlayer* pPlayer)
     , PlayerNoGui(60L /*tempo 60 MM*/, false /*no count off*/, false /*no metronome clicks*/)
     , m_lomse(lomse)
 	, m_pPresenter(NULL)
-	, m_pInteractor(NULL)
 	, m_buffer(NULL)
 	, m_pPlayer(pPlayer)
 	, m_view_needs_redraw(true)
@@ -660,14 +658,19 @@ void MyCanvas::open_file(const wxString& fullname)
     m_pPresenter = m_lomse.open_document(ViewFactory::k_view_horizontal_book,
                                          filename);
 
-    //get the pointers to the relevant components
-    m_pInteractor = m_pPresenter->get_interactor(0);
+    //get the pointer to the interactor, set the rendering buffer and register for
+    //receiving desired events
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        //connect the View with the window buffer
+        spInteractor->set_rendering_buffer(&m_rbuf_window);
 
-    //connect the View with the window buffer and set required callbacks
-    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
+        //ask to receive desired events
+        spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
 
-    //ask to receive desired events
-    m_pInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
+        //hide edition caret
+        spInteractor->hide_caret();
+    }
 
     //render the new score
     m_view_needs_redraw = true;
@@ -686,7 +689,7 @@ void MyCanvas::OnSize(wxSizeEvent& WXUNUSED(event))
 //---------------------------------------------------------------------------------------
 void MyCanvas::OnPaint(wxPaintEvent& event)
 {
-    if (!m_pInteractor)
+    if (!m_pPresenter)
         event.Skip(false);
     else
     {
@@ -772,14 +775,19 @@ void MyCanvas::open_test_document()
         "))"
         ")))" );
 
-    //now, get the pointers to the relevant components
-    m_pInteractor = m_pPresenter->get_interactor(0);
+    //get the pointer to the interactor, set the rendering buffer and register for
+    //receiving desired events
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        //connect the View with the window buffer
+        spInteractor->set_rendering_buffer(&m_rbuf_window);
 
-    //connect the View with the window buffer
-    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
+        //ask to receive desired events
+        spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
 
-    //ask to receive update_window events
-    m_pInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
+        //hide edition caret
+        spInteractor->hide_caret();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -821,14 +829,16 @@ void MyCanvas::update_view_content()
 {
     //request the view to re-draw the bitmap
 
-    if (!m_pInteractor) return;
-    m_pInteractor->redraw_bitmap();
+    if (!m_pPresenter) return;
+
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+        spInteractor->redraw_bitmap();
 }
 
 //---------------------------------------------------------------------------------------
 void MyCanvas::OnKeyDown(wxKeyEvent& event)
 {
-    if (!m_pInteractor) return;
+    if (!m_pPresenter) return;
 
     int nKeyCode = event.GetKeyCode();
     unsigned flags = get_keyboard_flags(event);
@@ -856,47 +866,56 @@ void MyCanvas::OnKeyDown(wxKeyEvent& event)
 //-------------------------------------------------------------------------
 void MyCanvas::on_key(int x, int y, unsigned key, unsigned flags)
 {
-    switch (key)
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
-        case 'D':
-            m_pInteractor->switch_task(TaskFactory::k_task_drag_view);
-            break;
-        case 'S':
-            m_pInteractor->switch_task(TaskFactory::k_task_selection);
-            break;
-        case '+':
-            m_pInteractor->zoom_in(x, y);
-            force_redraw();
-            break;
-        case '-':
-            m_pInteractor->zoom_out(x, y);
-            force_redraw();
-            break;
-        default:
-           return;
+        switch (key)
+        {
+            case 'D':
+                spInteractor->switch_task(TaskFactory::k_task_drag_view);
+                break;
+            case 'S':
+                spInteractor->switch_task(TaskFactory::k_task_selection);
+                break;
+            case '+':
+                spInteractor->zoom_in(x, y);
+                force_redraw();
+                break;
+            case '-':
+                spInteractor->zoom_out(x, y);
+                force_redraw();
+                break;
+            default:
+               return;
+        }
     }
 }
 
 //-------------------------------------------------------------------------
 void MyCanvas::zoom_in()
 {
-    if (!m_pInteractor) return;
+    if (!m_pPresenter) return;
 
     //do zoom in centered on window center
-    wxSize size = this->GetClientSize();
-    m_pInteractor->zoom_in(size.GetWidth()/2, size.GetHeight()/2);
-    force_redraw();
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        wxSize size = this->GetClientSize();
+        spInteractor->zoom_in(size.GetWidth()/2, size.GetHeight()/2);
+        force_redraw();
+    }
 }
 
 //-------------------------------------------------------------------------
 void MyCanvas::zoom_out()
 {
-    if (!m_pInteractor) return;
+    if (!m_pPresenter) return;
 
     //do zoom out centered on window center
-    wxSize size = this->GetClientSize();
-    m_pInteractor->zoom_out(size.GetWidth()/2, size.GetHeight()/2);
-    force_redraw();
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        wxSize size = this->GetClientSize();
+        spInteractor->zoom_out(size.GetWidth()/2, size.GetHeight()/2);
+        force_redraw();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -925,46 +944,53 @@ unsigned MyCanvas::get_keyboard_flags(wxKeyEvent& event)
 //-------------------------------------------------------------------------
 void MyCanvas::OnMouseEvent(wxMouseEvent& event)
 {
-    if (!m_pInteractor) return;
+    if (!m_pPresenter) return;
 
-    wxEventType nEventType = event.GetEventType();
-    wxPoint pos = event.GetPosition();
-    unsigned flags = get_mouse_flags(event);
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        wxEventType nEventType = event.GetEventType();
+        wxPoint pos = event.GetPosition();
+        unsigned flags = get_mouse_flags(event);
 
-    if (nEventType==wxEVT_LEFT_DOWN)
-    {
-        flags |= k_mouse_left;
-        m_pInteractor->on_mouse_button_down(pos.x, pos.y, flags);
+        if (nEventType==wxEVT_LEFT_DOWN)
+        {
+            flags |= k_mouse_left;
+            spInteractor->on_mouse_button_down(pos.x, pos.y, flags);
+        }
+        else if (nEventType==wxEVT_LEFT_UP)
+        {
+            flags |= k_mouse_left;
+            spInteractor->on_mouse_button_up(pos.x, pos.y, flags);
+        }
+        else if (nEventType==wxEVT_RIGHT_DOWN)
+        {
+            flags |= k_mouse_right;
+            spInteractor->on_mouse_button_down(pos.x, pos.y, flags);
+        }
+        else if (nEventType==wxEVT_RIGHT_UP)
+        {
+            flags |= k_mouse_right;
+            spInteractor->on_mouse_button_up(pos.x, pos.y, flags);
+        }
+        else if (nEventType==wxEVT_MOTION)
+            spInteractor->on_mouse_move(pos.x, pos.y, flags);
     }
-    else if (nEventType==wxEVT_LEFT_UP)
-    {
-        flags |= k_mouse_left;
-        m_pInteractor->on_mouse_button_up(pos.x, pos.y, flags);
-    }
-    else if (nEventType==wxEVT_RIGHT_DOWN)
-    {
-        flags |= k_mouse_right;
-        m_pInteractor->on_mouse_button_down(pos.x, pos.y, flags);
-    }
-    else if (nEventType==wxEVT_RIGHT_UP)
-    {
-        flags |= k_mouse_right;
-        m_pInteractor->on_mouse_button_up(pos.x, pos.y, flags);
-    }
-    else if (nEventType==wxEVT_MOTION)
-        m_pInteractor->on_mouse_move(pos.x, pos.y, flags);
 }
 
 
 //-------------------------------------------------------------------------
 void MyCanvas::play_start()
 {
-    Document* pDoc = m_pPresenter->get_document();
-    ImoScore* pScore = static_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
-    m_pPlayer->load_score(pScore, this);
-
-    bool fVisualTracking = true;
-    m_pPlayer->play(fVisualTracking, 0, m_pInteractor);
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        Document* pDoc = m_pPresenter->get_document_raw_ptr();
+        ImoScore* pScore = static_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
+        if (pScore)
+        {
+            m_pPlayer->load_score(pScore, this);
+            m_pPlayer->play(k_do_visual_tracking, 0, spInteractor.get());
+        }
+    }
 }
 
 //-------------------------------------------------------------------------
@@ -983,7 +1009,9 @@ void MyCanvas::play_pause()
 void MyCanvas::on_visual_highlight(MyScoreHighlightEvent& event)
 {
     SpEventScoreHighlight pEv = event.get_lomse_event();
-    m_pInteractor->on_visual_highlight(pEv);
+    WpInteractor wpInteractor = pEv->get_interactor();
+    if (SpInteractor sp = wpInteractor.lock())
+        sp->on_visual_highlight(pEv);
 }
 
 

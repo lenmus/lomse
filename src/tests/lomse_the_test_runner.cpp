@@ -57,6 +57,8 @@ int main(int argc, char** argv)
     cout << "Lomse version " << LibraryScope::get_version_string()
          << ". Library tests runner." << endl << endl;
 
+    cout << "Path for tests scores: '" << TESTLIB_SCORES_PATH << "'" << endl << endl;
+
     int nErrors = 0;
 
     if( argc > 1 )

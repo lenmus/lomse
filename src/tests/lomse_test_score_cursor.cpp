@@ -167,7 +167,7 @@ public:
 
     void create_document_4()
     {
-        //As score with emptypositions defined by time grid
+        //As score 3 with empty positions defined by time grid
         // (score#15 (vers 1.6)
         //    (instrument#19 (staves 2) (musicData#20
         //      (clef#21 G p1)(clef#22 F4 p2)(key#23 C)(time#24 2 4)
@@ -184,7 +184,35 @@ public:
                "(barline) )))"
             "))" );
         m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
-//        cout << m_pDoc->to_string(k_save_ids) << endl;
+//        cout << m_pDoc->to_string(true) << endl;
+    }
+
+    void create_document_5()
+    {
+        //A score in 6/8 time signature
+        // (score#15 (vers 1.6)
+        //    (instrument#19 (musicData#20
+        //      (clef#21 G)(key#22 C)(time#23 6 8)
+        //      (n#24 e4 e g+)(n#25 g4 e)(n#26 c5 e g-)
+        //      (n#34 c4 e g+)(n#35 e4 e)(n#36 g4 e g-)
+        //      (barline#44)
+        //      (n#45 e4 e g+)(n#46 g4 e)(n#47 c5 e g-)
+        //      (n#55 c4 e g+)(n#56 e4 e)(n#57 g4 e g-)
+        //      (barline#65) )))
+        m_pDoc = LOMSE_NEW Document(m_libraryScope);
+        m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 1.6)"
+               "(instrument (musicData "
+               "(clef G)(key C)(time 6 8)"
+               "(n e4 e g+)(n g4 e)(n c5 e g-)"
+               "(n c4 e g+)(n e4 e)(n g4 e g-)"
+               "(barline)"
+               "(n e4 e g+)(n g4 e)(n c5 e g-)"
+               "(n c4 e g+)(n e4 e)(n g4 e g-)"
+               "(barline) )))"
+            "))" );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        cout << m_pDoc->to_string(true) << endl;
     }
 
     void create_document_empty_score()
@@ -370,7 +398,7 @@ SUITE(ScoreCursorTest)
         //3. to prev object. must skip objects in other instruments
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cout << m_pDoc->to_string(k_save_ids) << endl;
+//        cout << m_pDoc->to_string(true) << endl;
 //        dump_score();
         cursor.point_to(41L);   //last note staff 2, measure 1
 
@@ -391,7 +419,7 @@ SUITE(ScoreCursorTest)
         //6. back from empty place to existing time
         //7. back from object to existing time. Skips objects in other staff
         create_document_4();
-//        cout << m_pDoc->to_string(k_save_ids) << endl;
+//        cout << m_pDoc->to_string(true) << endl;
 //        dump_score();
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.point_to_barline(41L, 0);   //4. prev.state: from object to empty place
@@ -485,23 +513,17 @@ SUITE(ScoreCursorTest)
         //13. to prev object at same time: note -> time --> key -> clef
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(33L);   //first note in instrument 1, staff 2
+        cursor.point_to(25L);   //first note in instrument 1, staff 1
 
-//        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0f, 33L, 33L);
-        CHECK_PREVIOUS_STATE(cursor, 0, 1, 0, 0.0f, 24L, 24L);
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0f, 25L, 25L);
+        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 0.0f, 24L, 24L);
 
         cursor.move_prev();     //to time. prev state is key signature
-
-//        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0f, 24L, 24L);
-        CHECK_PREVIOUS_STATE(cursor, 0, 1, 0, 0.0f, 23L, 23L);
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0f, 24L, 24L);
+        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 0.0f, 23L, 23L);
 
         cursor.move_prev();     //to key. prev state is clef
-
-//        cout << cursor.dump_cursor();
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0f, 23L, 23L);
-        CHECK_PREVIOUS_STATE(cursor, 0, 1, 0, 0.0f, 22L, 22L);
+        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 0.0f, 21L, 21L);
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, move_prev_14)
@@ -535,7 +557,7 @@ SUITE(ScoreCursorTest)
 
         cursor.move_prev();     // remains at start of score
 
-//        cout << cursor.dump_cursor();
+        //cout << cursor.dump_cursor();
         CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0f, 21L, 21L);
         CHECK_PREVIOUS_STATE(cursor, -1, -1, -1, -1.0f, k_cursor_before_start_of_child, -1L);
     }
@@ -547,7 +569,7 @@ SUITE(ScoreCursorTest)
         m_pDoc->from_file(m_scores_path + "90013-two-instruments-four-staves.lms" );
         m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
         MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cout << m_pDoc->to_string(k_save_ids) << endl;
+//        cout << m_pDoc->to_string(true) << endl;
 //        dump_score();
 
         cursor.point_to(56L);   //clef instr 2, staff 1
@@ -562,6 +584,21 @@ SUITE(ScoreCursorTest)
 //        cout << cursor.dump_cursor();
         CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 1, 2, 256.0f);
         CHECK_PREVIOUS_STATE(cursor, 0, 1, 1, 256.0f, 53L, 53L);
+    }
+
+    TEST_FIXTURE(ScoreCursorTestFixture, move_prev_16)
+    {
+        //16. skip implicit shapes: note -> (skip time & key) -> clef
+        create_document_2();
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+
+        cursor.point_to(33L);   //first note in instrument 1, staff 2
+        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0f, 33L, 33L);
+        CHECK_PREVIOUS_STATE(cursor, 0, 1, 0, 0.0f, 22L, 22L);
+
+        cursor.move_prev();     //to clef (skip time and key signatures)
+        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0f, 22L, 22L);
+        CHECK_PREVIOUS_STATE_AT_END_OF_STAFF(cursor, 0, 0, 2, 256.0f);
     }
 
     //----------------------------------------------------------------------------
@@ -698,7 +735,7 @@ SUITE(ScoreCursorTest)
         //3. to next object. must skip objects in other instruments
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cout << m_pDoc->to_string(k_save_ids) << endl;
+//        cout << m_pDoc->to_string(true) << endl;
 //        dump_score();
         cursor.point_to(25L);   //first note first staff
 
@@ -825,7 +862,7 @@ SUITE(ScoreCursorTest)
         m_pDoc->from_file(m_scores_path + "90013-two-instruments-four-staves.lms" );
         m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
         MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cout << m_pDoc->to_string(k_save_ids) << endl;
+//        cout << m_pDoc->to_string(true) << endl;
 //        dump_score();
         cursor.point_to(52L);   //to last note instr 1, staff 2
         cursor.move_next();     //to barline 53L
@@ -847,7 +884,7 @@ SUITE(ScoreCursorTest)
         m_pDoc->from_file(m_scores_path + "90013-two-instruments-four-staves.lms" );
         m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
         MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cout << m_pDoc->to_string(k_save_ids) << endl;
+//        cout << m_pDoc->to_string(true) << endl;
 //        dump_score();
         cursor.point_to(86L);   //to last note instr 2, staff 2
         cursor.move_next();     //to barline 87L
@@ -874,7 +911,7 @@ SUITE(ScoreCursorTest)
         m_pDoc->from_file(m_scores_path + "90013-two-instruments-four-staves.lms" );
         m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
         MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cout << m_pDoc->to_string(k_save_ids) << endl;
+//        cout << m_pDoc->to_string(true) << endl;
 //        dump_score();
 
         cursor.point_to(62L);   //first note in instr 2, staff 2
@@ -943,19 +980,31 @@ SUITE(ScoreCursorTest)
         //15. to next object at same time: clef -> key -> time -> note
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
-        cursor.point_to(22L);   //clef in staff 2
+        cursor.point_to(21L);   //clef in staff 1
 
         cursor.move_next();     //key
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0f, 23L, 23L);
-        CHECK_PREVIOUS_STATE(cursor, 0, 1, 0, 0.0f, 22L, 22L);
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0f, 23L, 23L);
+        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 0.0f, 21L, 21L);
 
         cursor.move_next();     //time
-        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0f, 24L, 24L);
-        CHECK_PREVIOUS_STATE(cursor, 0, 1, 0, 0.0f, 23L, 23L);
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0f, 24L, 24L);
+        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 0.0f, 23L, 23L);
 
         cursor.move_next();     //note
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0f, 25L, 25L);
+        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 0.0f, 24L, 24L);
+    }
+
+    TEST_FIXTURE(ScoreCursorTestFixture, move_next_16)
+    {
+        //16. skip implicit shapes: clef -> (skip key, time) -> note
+        create_document_2();
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+        cursor.point_to(22L);   //clef in staff 2
+
+        cursor.move_next();     //note (skips key & time)
         CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0f, 33L, 33L);
-        CHECK_PREVIOUS_STATE(cursor, 0, 1, 0, 0.0f, 24L, 24L);
+        CHECK_PREVIOUS_STATE(cursor, 0, 1, 0, 0.0f, 22L, 22L);
     }
 
     //----------------------------------------------------------------------------
@@ -1036,11 +1085,11 @@ SUITE(ScoreCursorTest)
 //        dump_score();
         cursor.point_to(52L);   //first half note, instr 1, staff 2, measure 2
 
-        ScoreCursorState* pState = static_cast<ScoreCursorState*>( cursor.get_state() );
+        SpElementCursorState spState = cursor.get_state();
 
 //        dump_cursor_state(pState);
-        CHECK_STATE(pState, 0, 1, 1, 128.0f, 52L, 52L);
-        delete pState;
+        ScoreCursorState* state = static_cast<ScoreCursorState*>( spState.get() );
+        CHECK_STATE(state, 0, 1, 1, 128.0f, 52L, 52L);
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, get_state_at_end_of_score)
@@ -1051,11 +1100,11 @@ SUITE(ScoreCursorTest)
         cursor.point_to(50L);   //to barline
         cursor.move_next();     //to end of staff
 
-        ScoreCursorState* pState = static_cast<ScoreCursorState*>( cursor.get_state() );
+        SpElementCursorState spState = cursor.get_state();
 
 //        dump_cursor_state(pState);
-        CHECK_STATE(pState, 0, 0, 2, 256.0f, k_cursor_at_end_of_staff, -1L);
-        delete pState;
+        ScoreCursorState* state = static_cast<ScoreCursorState*>( spState.get() );
+        CHECK_STATE(state, 0, 0, 2, 256.0f, k_cursor_at_end_of_staff, -1L);
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, get_state_at_empty_place)
@@ -1066,11 +1115,11 @@ SUITE(ScoreCursorTest)
         cursor.point_to(26L);   //second note firt staff
         cursor.move_next();     //empty place
 
-        ScoreCursorState* pState = static_cast<ScoreCursorState*>( cursor.get_state() );
+        SpElementCursorState spState = cursor.get_state();
 
 //        dump_cursor_state(pState);
-        CHECK_STATE(pState, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 47L);
-        delete pState;
+        ScoreCursorState* state = static_cast<ScoreCursorState*>( spState.get() );
+        CHECK_STATE(state, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 47L);
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, restore_state)
@@ -1079,15 +1128,14 @@ SUITE(ScoreCursorTest)
         create_document_2();
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.point_to(41L);   //last note in staff 2, measure 1
-        ScoreCursorState* pState = static_cast<ScoreCursorState*>( cursor.get_state() );
+        SpElementCursorState spState = cursor.get_state();
         cursor.point_to(21L);   //clef in staff 1
 
-        cursor.restore_state(pState);
+        cursor.restore_state(spState);
 
 //        cout << cursor.dump_cursor();
         CHECK_CURRENT_STATE(cursor, 0, 1, 0, 96.0f, 41L, 41L);
         CHECK_PREVIOUS_STATE(cursor, 0, 1, 0, 64.0f, 40L, 40L);
-        delete pState;
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, restore_state_at_end_of_score)
@@ -1097,17 +1145,16 @@ SUITE(ScoreCursorTest)
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.point_to(50L);   //to barline
         cursor.move_next();     //to end of staff
-        ScoreCursorState* pState = static_cast<ScoreCursorState*>( cursor.get_state() );
+        SpElementCursorState spState = cursor.get_state();
         cursor.point_to(21L);   //clef in staff 1
 
-        cursor.restore_state(pState);
+        cursor.restore_state(spState);
 
 //        dump_cursor_state(pState);
 //        cout << cursor.dump_cursor();
         CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 0, 2, 256.0f);
         CHECK( cursor.is_at_end_of_score() == false );
         CHECK_PREVIOUS_STATE(cursor, 0, 0, 1, 256.0f, 50L, 50L);
-        delete pState;
     }
 
     TEST_FIXTURE(ScoreCursorTestFixture, restore_state_to_empty_place)
@@ -1117,16 +1164,15 @@ SUITE(ScoreCursorTest)
         MyScoreCursor cursor(m_pDoc, m_pScore);
         cursor.point_to(26L);   //second note firt staff
         cursor.move_next();     //to empty place
-        ScoreCursorState* pState = static_cast<ScoreCursorState*>( cursor.get_state() );
+        SpElementCursorState spState = cursor.get_state();
         cursor.point_to(50L);   //to barline
 
-        cursor.restore_state(pState);
+        cursor.restore_state(spState);
 
 //        dump_cursor_state(pState);
 //        cout << cursor.dump_cursor();
         CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0f, k_cursor_at_empty_place, 47L);
         CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 32.0f, 26L, 26L);
-        delete pState;
     }
 
     //----------------------------------------------------------------------------
@@ -1289,7 +1335,7 @@ SUITE(ScoreCursorTest)
 //        pInstr->insert_staffobj(pPos, pImo);
 //        m_pScore->close();
 //        dump_score();
-//        cout << m_pDoc->to_string(k_save_ids) << endl;
+//        cout << m_pDoc->to_string(true) << endl;
 //
 //        cursor.refresh();
 //
@@ -1298,4 +1344,225 @@ SUITE(ScoreCursorTest)
 //        CHECK_PREVIOUS_STATE(cursor, 0, 0, 1, 128.0f, id, id);
 //    }
 
-}
+    //----------------------------------------------------------------------------
+    // Cursor collects information for computing time and timecode
+    //----------------------------------------------------------------------------
+
+    TEST_FIXTURE(ScoreCursorTestFixture, time_info_1)
+    {
+        //1. if score empty, duration == 0, timepos == 0
+        create_document_empty_score();
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+
+        TimeInfo ti = cursor.get_time_info();
+
+        CHECK( ti.get_timepos() == 0.0 );
+        CHECK( ti.get_score_total_duration() == 0.0 );
+        CHECK( ti.get_current_beat_duration() == k_duration_quarter );
+        CHECK( ti.get_current_measure_start_timepos() == 0.0 );
+    }
+
+    TEST_FIXTURE(ScoreCursorTestFixture, time_info_2)
+    {
+        //2. if score not empty, duration >= 0, timepos == 0
+        create_document_1();
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+
+        TimeInfo ti = cursor.get_time_info();
+
+        CHECK( ti.get_timepos() == 0.0 );
+        CHECK( ti.get_score_total_duration() == 192.0 );
+        CHECK( ti.get_current_beat_duration() == k_duration_quarter );
+        CHECK( ti.get_current_measure_start_timepos() == 0.0 );
+    }
+
+    TEST_FIXTURE(ScoreCursorTestFixture, time_info_3)
+    {
+        //3. point_to() updates time related info
+        create_document_5();
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+
+        cursor.point_to(46L);   //2nd note in 2nd bar
+
+        TimeInfo ti = cursor.get_time_info();
+        CHECK( ti.get_timepos() == 224.0 );
+        CHECK( ti.get_score_total_duration() == 384.0 );
+        CHECK( ti.get_current_beat_duration() == k_duration_quarter_dotted );
+        CHECK( ti.get_current_measure_start_timepos() == 192.0 );
+    }
+
+    TEST_FIXTURE(ScoreCursorTestFixture, time_info_4)
+    {
+        //4. point_to_barline() updates time related info
+        create_document_5();
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+
+        cursor.point_to_barline(44L, 0);   //1st barline
+
+        TimeInfo ti = cursor.get_time_info();
+        CHECK( ti.get_timepos() == 192.0 );
+        CHECK( ti.get_score_total_duration() == 384.0 );
+        CHECK( ti.get_current_beat_duration() == k_duration_quarter_dotted );
+        CHECK( ti.get_current_measure_start_timepos() == 0.0 );
+    }
+
+    TEST_FIXTURE(ScoreCursorTestFixture, time_info_5)
+    {
+        //5. move_next() updates time related info
+        create_document_5();
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+        cursor.point_to(21L);   //clef in staff 1
+
+        cursor.move_next();     //key
+        CHECK( cursor.get_time_info().get_current_beat_duration() == k_duration_quarter );
+
+        cursor.move_next();     //time
+        CHECK( cursor.get_time_info().get_current_beat_duration() == k_duration_quarter );
+
+        cursor.move_next();     //note
+        CHECK( cursor.get_time_info().get_current_beat_duration() == k_duration_quarter_dotted );
+    }
+
+    TEST_FIXTURE(ScoreCursorTestFixture, time_info_6)
+    {
+        //6. move_prev() updates time related info
+        create_document_5();
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+
+        cursor.point_to(45L);   //1st note in 2nd bar
+
+        TimeInfo ti = cursor.get_time_info();
+        CHECK( ti.get_timepos() == 192.0 );
+        CHECK( ti.get_score_total_duration() == 384.0 );
+        CHECK( ti.get_current_beat_duration() == k_duration_quarter_dotted );
+        CHECK( ti.get_current_measure_start_timepos() == 192.0 );
+
+        cursor.move_prev();     //barline
+        ti = cursor.get_time_info();
+        CHECK( ti.get_timepos() == 192.0 );
+        CHECK( ti.get_score_total_duration() == 384.0 );
+        CHECK( ti.get_current_beat_duration() == k_duration_quarter_dotted );
+        CHECK( ti.get_current_measure_start_timepos() == 0.0 );
+
+        cursor.move_prev();     //note
+        cursor.move_prev();     //note
+        cursor.move_prev();     //note
+        cursor.move_prev();     //note
+        cursor.move_prev();     //note
+        cursor.move_prev();     //note
+        ti = cursor.get_time_info();
+        CHECK( ti.get_timepos() == 0.0 );
+        CHECK( ti.get_score_total_duration() == 384.0 );
+        CHECK( ti.get_current_beat_duration() == k_duration_quarter_dotted );
+        CHECK( ti.get_current_measure_start_timepos() == 0.0 );
+
+        cursor.move_prev();     //time signature
+        ti = cursor.get_time_info();
+        CHECK( ti.get_timepos() == 0.0 );
+        CHECK( ti.get_score_total_duration() == 384.0 );
+        CHECK( ti.get_current_beat_duration() == k_duration_quarter );
+        CHECK( ti.get_current_measure_start_timepos() == 0.0 );
+    }
+
+    TEST_FIXTURE(ScoreCursorTestFixture, time_info_7)
+    {
+        //7. to_state() updates time related info
+        create_document_5();
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+
+        cursor.to_state(0, 0, 1, 224.0, 46L);
+//        cout << cursor.dump_cursor();
+
+        TimeInfo ti = cursor.get_time_info();
+        CHECK( ti.get_timepos() == 224.0 );
+        CHECK( ti.get_score_total_duration() == 384.0 );
+        CHECK( ti.get_current_beat_duration() == k_duration_quarter_dotted );
+        CHECK( ti.get_current_measure_start_timepos() == 192.0 );
+    }
+
+    TEST_FIXTURE(ScoreCursorTestFixture, time_info_8)
+    {
+        //8. restore_state() updates time related info
+        create_document_2();
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+        cursor.point_to(41L);   //last note in staff 2, measure 1
+        SpElementCursorState spState = cursor.get_state();
+        cursor.point_to(21L);   //clef in staff 1
+
+        cursor.restore_state(spState);
+
+        TimeInfo ti = cursor.get_time_info();
+        CHECK( ti.get_timepos() == 96.0 );
+        CHECK( ti.get_score_total_duration() == 256.0 );
+        CHECK( ti.get_current_beat_duration() == k_duration_quarter );
+        CHECK( ti.get_current_measure_start_timepos() == 0.0 );
+    }
+
+};
+
+//=======================================================================================
+class TimeInfoTestFixture
+{
+public:
+    LibraryScope m_libraryScope;
+
+    TimeInfoTestFixture()     //SetUp fixture
+        : m_libraryScope(cout)
+    {
+        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
+    }
+
+    ~TimeInfoTestFixture()    //TearDown fixture
+    {
+    }
+};
+
+SUITE(TimeInfoTest)
+{
+
+    TEST_FIXTURE(TimeInfoTestFixture, timecode_1)
+    {
+        TimeUnits curTimepos = 230.0;
+        TimeUnits totalDuration = 1280.0;
+        TimeUnits curBeatDuration = 64.0;
+        TimeUnits startOfBarTimepos = 128.0;
+        int measure = 1;
+        TimeInfo ti(curTimepos, totalDuration, curBeatDuration, startOfBarTimepos, measure);
+
+        Timecode tc = ti.get_timecode();
+
+        CHECK( tc.bar == 2 );
+        CHECK( tc.beat == 2 );
+        CHECK( tc.n16th == 2 );
+        CHECK( tc.ticks == 45 );
+    }
+
+    TEST_FIXTURE(TimeInfoTestFixture, timecode_2)
+    {
+        TimeUnits curTimepos = 256.0;
+        TimeUnits totalDuration = 1280.0;
+        TimeUnits curBeatDuration = 64.0;
+        TimeUnits startOfBarTimepos = 128.0;
+        int measure = 1;
+        TimeInfo ti(curTimepos, totalDuration, curBeatDuration, startOfBarTimepos, measure);
+
+        CHECK( ti.played_percentage() == 20.0f );
+        CHECK( ti.remaining_percentage() == 80.0f );
+    }
+
+    TEST_FIXTURE(TimeInfoTestFixture, timecode_3)
+    {
+        //at start of empty score
+        TimeUnits curTimepos = 0.0;
+        TimeUnits totalDuration = 0.0;
+        TimeUnits curBeatDuration = 64.0;
+        TimeUnits startOfBarTimepos = 0.0;
+        int measure = 0;
+        TimeInfo ti(curTimepos, totalDuration, curBeatDuration, startOfBarTimepos, measure);
+
+        CHECK( ti.played_percentage() == 100.0f );
+        CHECK( ti.remaining_percentage() == 0.0f );
+    }
+
+};
+

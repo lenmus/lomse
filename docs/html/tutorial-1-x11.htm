@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/12/23 -->
+<!-- $Updated: 2013/05/04 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -17,7 +17,7 @@ This is meant to be an introduction to using Lomse in a X11 program. Before star
 
 
 <p>In this first example we are just going to open a window and display the text "Hello world!" and an score on it. You can download the full source code for this example from
-<a href="../../examples/x11/example_1_x11.cpp">../../examples/x11/example_1_x11.cpp</a>. After building the program and running it you will see something as:
+<a href="../../examples/example_1_x11.cpp">../../examples/example_1_x11.cpp</a>. After building the program and running it you will see something as:
 </p>
 
 <img class="center" src="./images/example-1-x11.png" width="500px" />
@@ -127,7 +127,6 @@ For this, we need to define some Lomse related variables:
 <pre class="code">
 LomseDoorway    m_lomse;        //the Lomse library doorway
 Presenter*      m_pPresenter;   //relates the View, the Document and the Interactor
-Interactor*     m_pInteractor;  //to interact with the View
 </pre>
 
 <p>
@@ -382,14 +381,19 @@ void open_document()
             ")"
         ")" );
 
-    //next, get the pointers to the relevant components
-    m_pInteractor = m_pPresenter->get_interactor(0);
+    //get the pointer to the interactor, set the rendering buffer and register for
+    //receiving desired events
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        //connect the View with the window buffer
+        spInteractor->set_rendering_buffer(&m_rbuf_window);
 
-    //connect the View with the window buffer
-    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
+        //ask to receive desired events
+        spInteractor->add_event_handler(k_update_window_event, update_window);
 
-    //ask to receive desired events
-    m_pInteractor->add_event_handler(k_update_window_event, update_window);
+        //hide edition caret
+        spInteractor->hide_caret();
+    }
 }
 </pre>
 
@@ -430,29 +434,38 @@ void open_document()
 <p>For a detailed description of the LDP language see the <a href="###ldp_full###">LDP Reference Manual</a>. I have plans for supporting scores in MusicXML format as well as to move the LDP language to XML. But other more urgent task force to always postpone these objectives. Any help is welcome!
 </p>
 
-<p>Once the Document and a View for it are created, we just get pointers to the Interactor, so that we can 'communicate' with the Document and its View:
-<p>
+<p>Once the Document and a View for it are created, we just get pointers to the Interactor, so that we can 'communicate' with the Document and its View. But Presenter returns a weak_pointer that has to be converted to a valid pointer before using it:
+</p>
 <pre class="code">
-    //next, get the pointers to the relevant components
-    m_pInteractor = m_pPresenter->get_interactor(0);
+    //get the pointer to the interactor, set the rendering buffer and register for
+    //receiving desired events
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
 </pre>
 
 <p>Lomse architecture is based on the Model-View-Controller pattern, and supports multiple simultaneous Views for a Document. By default, when creating a Document also a View and its associated Interactor are created. So, parameter <code>'0'</code> in <code>get_interactor(0)</code> refers to first Interactor, in this case, the only one created.
 </p>
 
-<p>Once we've got the Interactor we have two <b>important</b> tasks to do, The first one is to inform the Interactor about the rendering buffer that must be used for its associated View:
+<p>Once we've got the Interactor we have three <b>important</b> tasks to do, The first one is to inform the Interactor about the rendering buffer that must be used for its associated View:
 </p>
 
 <pre class="code">
     //connect the View with the window buffer
-    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
+    spInteractor->set_rendering_buffer(&m_rbuf_window);
 </pre>
 
-<p>And the second one is to set up a handler for receiving Lomse events related to the associated View:
+<p>The second one is to set up a handler for receiving Lomse events related to the associated View:
 </p>
 <pre class="code">
     //ask to receive desired events
-    m_pInteractor->add_event_handler(k_update_window_event, update_window);
+    spInteractor->add_event_handler(k_update_window_event, update_window);
+</pre>
+
+<p>And the last one is to hide the document caret, as we are not going to enable document edition:
+</p>
+<pre class="code">
+    //hide edition caret
+    spInteractor->hide_caret();
 </pre>
 
 <p>In this example, we are interested in receiving a notification each time the View changes, so that we can display the updated bitmap in the window. We will see this in more detail later.</p>
@@ -559,8 +572,10 @@ void update_view_content()
 {
     //request the view to re-draw the bitmap
 
-    if (!m_pInteractor) return;
-    m_pInteractor->redraw_bitmap();
+    if (!m_pPresenter) return;
+
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+        spInteractor->redraw_bitmap();
 }
 </pre>
 
@@ -640,7 +655,7 @@ Finally, the remaining code is just for housekeeping when the application finish
 
 <p>
 With this, I finish the explanation of the code. You can download the full source code for this example from
-<a href="../../examples/x11/example_1_x11.cpp">../../examples/x11/example_1_x11.cpp</a>.
+<a href="../../examples/example_1_x11.cpp">../../examples/example_1_x11.cpp</a>.
 In the next section we are going to build and run our sample.
 </p>
 
@@ -650,38 +665,23 @@ In the next section we are going to build and run our sample.
 <!--====================================================-->
 
 <p>
-Now for the fun (an sometimes troubling) part. Compiling your code and running it! Your proyect makefile must include the following path for Lomse header files:
-</p>
-
-<pre class="code">
-    /usr/local/include/lomse
-</pre>
-
-<p>
-Also, do not forget to add path for X11 headers (usually at <code>/usr/include/X11</code>).
-</p>
-
-<p>Some Lomse headers include freetype2 references and, therefore, it is necessary to include Freetype2 headers. As the specific paths could be different in your machine, the best for this is to use the pkg-config tool:
+Now for the fun (an sometimes troubling) part. Compiling your code and running it! Your proyect makefile must include the paths for the headers of used libraries: Lomse and X11. The best way of doing it is by using the <code>pkg-config</code> tool:
 </p>
 
 <pre class="console">
-`pkg-config --cflags freetype2`
+`pkg-config --cflags x11` `pkg-config --cflags liblomse`
 </pre>
 
-<p>It will generate something as <code>-I/usr/include/freetype2</code>.
+<p>It will generate something as <code>-I/usr/include/freetype2 -I/usr/include/libpng12 -I/usr/include/lomse</code>.
 </p>
 
-<p>It would be nice to use the pkg-config tool for Lomse but Lomse installation scripts do not generate (yet) the necessary .pc file. If you would like to contribute by improving Lomse installation scripts you are welcome!. Join the Lomse list and post a message.
-</p>
-
-<p>As to the libraries to link, you only will have to include Lomse and X11. Open a terminal window, move to the directory containing the sample code and enter (fix paths if necessary):
+<p>As to the libraries to link, you only will have to include Lomse and X11. Again, the best way of doing it is by using pkg-config tool. Open a terminal window, move to the directory containing the sample code and enter:
 </p>
 
 <pre class="console">
 gcc example_1_x11.cpp -o example-1-x11  \
-    -I /usr/include/X11 -L /usr/X11/lib -lX11 \
-    -I /usr/local/include/lomse -L /usr/local/lib -llomse \
-    -I /usr/include `pkg-config --cflags freetype2`
+    `pkg-config --cflags x11` `pkg-config --cflags liblomse`   \
+    `pkg-config --libs liblomse` `pkg-config --libs x11`
 </pre>
 
 <p>

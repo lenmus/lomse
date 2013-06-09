@@ -57,11 +57,27 @@ void IdAssigner::assign_id(ImoObj* pImo)
 {
     ImoId id = pImo->get_id();
     if (id == k_no_imoid)
+    {
         pImo->set_id(++m_idCounter);
+        m_idToImo[m_idCounter] = pImo;
+    }
     else
-        m_idCounter = max(id, m_idCounter);
-
-    m_idToImo[m_idCounter] = pImo;
+    {
+//        //check if id already exists
+//        map<ImoId, ImoObj*>::const_iterator it = m_idToImo.find( id );
+//        if (it != m_idToImo.end())
+//        {
+//            //it is in use. Assign a new id
+//            pImo->set_id(++m_idCounter);
+//            m_idToImo[m_idCounter] = pImo;
+//        }
+//        else
+        {
+            //doesn't exist. use it
+            m_idToImo[id] = pImo;
+            m_idCounter = max(id, m_idCounter);
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -53,7 +53,6 @@ using namespace lomse;
 //
 LomseDoorway    m_lomse;        //the Lomse library doorway
 Presenter*      m_pPresenter;	//relates the View, the Document and the Interactor
-Interactor*     m_pInteractor;  //to interact with the View
 
 //the Lomse View renders its content on a bitmap. To manage it, Lomse
 //associates the bitmap to a RenderingBuffer object.
@@ -146,14 +145,19 @@ void open_document()
             ")"
         ")" );
 
-    //next, get the pointers to the relevant components
-    m_pInteractor = m_pPresenter->get_interactor(0);
+    //get the pointer to the interactor, set the rendering buffer and register for
+    //receiving desired events
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        //connect the View with the window buffer
+        spInteractor->set_rendering_buffer(&m_rbuf_window);
 
-    //connect the View with the window buffer
-    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
+        //ask to receive desired events
+        spInteractor->add_event_handler(k_update_window_event, update_window);
 
-    //ask to receive desired events
-    m_pInteractor->add_event_handler(k_update_window_event, update_window);
+        //hide edition caret
+        spInteractor->hide_caret();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -161,8 +165,10 @@ void update_view_content()
 {
     //request the view to re-draw the bitmap
 
-    if (!m_pInteractor) return;
-    m_pInteractor->redraw_bitmap();
+    if (!m_pPresenter) return;
+
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+        spInteractor->redraw_bitmap();
 }
 
 //---------------------------------------------------------------------------------------
@@ -477,7 +483,6 @@ void initialize_lomse()
     m_lomse.init_library(m_format, 96, m_flip_y);   //resolution=96 ppi
 
     //initialize lomse related variables
-    m_pInteractor = NULL;
     m_pPresenter = NULL;
 }
 

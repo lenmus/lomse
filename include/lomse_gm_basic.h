@@ -75,9 +75,9 @@ protected:
     GmoBoxDocument* m_root;
     long m_modelId;
     bool m_modified;
-    map<ImoNoteRest*, GmoShape*> m_noterestToShape;
     map<ImoId, GmoBox*> m_imoToBox;
-    map<ImoId, GmoShape*> m_imoToShape;
+    map<ImoId, GmoShape*> m_imoToMainShape;
+    map< pair<ImoId, ShapeId>, GmoShape*> m_imoToSecondaryShape;
     map<GmoRef, GmoObj*> m_ctrolToPtr;
 
 public:
@@ -111,11 +111,11 @@ public:
     GmoShape* get_shape_for_noterest(ImoNoteRest* pNR);
 
     //creation
-    void store_in_map_imo_shape(ImoNoteRest* pNR, GmoShape* pShape);
-    void store_in_map_imo_shape(ImoId imoId, GmoShape* pShape);
+    void store_in_map_imo_shape(ImoObj* pImo, GmoShape* pShape);
     void add_to_map_imo_to_box(GmoBox* child);
     void add_to_map_ref_to_box(GmoBox* pBox);
-    GmoShape* get_shape_for_imo(ImoId imoId, ShapeId shapeId=0);
+    GmoShape* get_shape_for_imo(ImoId imoId, ShapeId shapeId);
+    GmoShape* get_main_shape_for_imo(ImoId id);
     GmoBox* get_box_for_imo(ImoId id);
     GmoObj* get_box_for_control(GmoRef gref);
     void build_main_boxes_table();
@@ -145,6 +145,7 @@ public:
 
     //flag values
     enum {
+        //temporary flags
         k_selected          = 0x0001,   //selected
         k_dirty             = 0x0002,   //dirty: modified since last "clear_dirty()": need to render it again
         k_children_dirty    = 0x0004,   //this is not dirty but some children are dirty
@@ -291,7 +292,7 @@ public:
     inline GmoBox* get_owner_box() { return m_pParentBox; };
 
     //tests & debug
-    void dump(ostream& outStream, int level);
+    virtual void dump(ostream& outStream, int level);
     static const string& get_name(int objtype);
     inline const string& get_name() { return get_name(m_objtype); }
 
@@ -352,6 +353,23 @@ public:
     void set_flag_value(bool value, unsigned int flag) {
         value ? m_flags |= flag : m_flags &= ~flag;
     }
+
+    //shape id
+    inline ShapeId get_shape_id() { return m_idx; }
+    inline void assign_id_as_main_shape() { m_idx = 0; }
+    inline void assign_id_as_main_or_implicit_shape(int iStaff) { m_idx = iStaff; }
+    inline void assign_id_as_courtesy_shape(int iStaff, int numStaves)
+    {
+        m_idx = numStaves + iStaff;
+    }
+    inline void assign_id_as_prolog_shape(int iSystem, int iStaff, int numStaves)
+    {
+        m_idx = (2 + iSystem) * numStaves + iStaff;
+    }
+    static ShapeId generate_main_or_implicity_shape_id(int iStaff) { return iStaff; }
+
+    //test and debug
+    void dump(ostream& outStream, int level);
 
 protected:
     GmoShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color);

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2012 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -129,7 +129,6 @@ protected:
     // Let's define the necessary variables:
     LomseDoorway&   m_lomse;        //the Lomse library doorway
     Presenter*      m_pPresenter;
-    Interactor*     m_pInteractor;  //to interact with the View
 
     //the Lomse View renders its content on a bitmap. To manage it, Lomse
     //associates the bitmap to a RenderingBuffer object.
@@ -307,7 +306,6 @@ MyCanvas::MyCanvas(wxFrame *frame, LomseDoorway& lomse)
     : wxWindow(frame, wxID_ANY)
     , m_lomse(lomse)
 	, m_pPresenter(NULL)
-	, m_pInteractor(NULL)
 	, m_buffer(NULL)
 	, m_view_needs_redraw(true)
 {
@@ -335,7 +333,7 @@ void MyCanvas::OnSize(wxSizeEvent& WXUNUSED(event))
 //---------------------------------------------------------------------------------------
 void MyCanvas::OnPaint(wxPaintEvent& event)
 {
-    if (!m_pInteractor)
+    if (!m_pPresenter)
         event.Skip(false);
     else
     {
@@ -403,11 +401,16 @@ void MyCanvas::open_test_document()
             ")"
         ")" );
 
-    //now, get the pointers to the relevant components
-    m_pInteractor = m_pPresenter->get_interactor(0);
+    //get the pointer to the interactor, set the rendering buffer and register for
+    //receiving desired events
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        //connect the View with the window buffer
+        spInteractor->set_rendering_buffer(&m_rbuf_window);
 
-    //connect the View with the window buffer
-    m_pInteractor->set_rendering_buffer(&m_rbuf_window);
+        //hide edition caret
+        spInteractor->hide_caret();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -425,6 +428,8 @@ void MyCanvas::update_view_content()
 {
     //request the view to re-draw the bitmap
 
-    if (!m_pInteractor) return;
-    m_pInteractor->redraw_bitmap();
+    if (!m_pPresenter) return;
+
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+        spInteractor->redraw_bitmap();
 }

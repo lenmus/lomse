@@ -981,7 +981,8 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
 
     GmoBoxSystem* pBox = get_box_system();
 
-    for (int iStaff=0; iStaff < pInstr->get_num_staves(); ++iStaff)
+    int numStaves = pInstr->get_num_staves();
+    for (int iStaff=0; iStaff < numStaves; ++iStaff)
     {
         LUnits xPos = xStartPos;
         m_pagePos.y = m_instrEngravers[iInstr]->get_top_line_of_staff(iStaff);
@@ -1004,6 +1005,7 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
                 GmoShape* pShape =
                     m_pShapesCreator->create_staffobj_shape(pClef, iInstr, iStaff,
                                                             m_pagePos, clefType);
+                pShape->assign_id_as_prolog_shape(m_iSystem, iStaff, numStaves);
                 pBox->add_shape(pShape, GmoShape::k_layer_notes);
                 xPos += pShape->get_width();
             }
@@ -1020,6 +1022,7 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
                 GmoShape* pShape =
                     m_pShapesCreator->create_staffobj_shape(pKey, iInstr, iStaff,
                                                             m_pagePos, clefType);
+                pShape->assign_id_as_prolog_shape(m_iSystem, iStaff, numStaves);
                 pBox->add_shape(pShape, GmoShape::k_layer_notes);
                 xPos += pShape->get_width();
             }

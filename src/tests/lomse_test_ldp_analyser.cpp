@@ -43,6 +43,7 @@
 #include "lomse_events.h"
 #include "lomse_doorway.h"
 #include "lomse_im_factory.h"
+#include "lomse_time.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -173,7 +174,7 @@ SUITE(LdpAnalyserTest)
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
         ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
         CHECK( pScore != NULL );
-        CHECK( pScore->get_version() == "1.6" );
+        CHECK( pScore->get_version_string() == "1.6" );
         CHECK( pScore->get_num_instruments() == 0 );
 
         delete tree->get_root();
@@ -2441,6 +2442,35 @@ SUITE(LdpAnalyserTest)
         CHECK( !pGBF->is_to_start() );
         CHECK( !pGBF->is_to_end() );
         CHECK( pGBF->get_time_shift() == -21.3f );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    // goFwd 2.0 ------------------------------------------------------------------------
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, fwd_1)
+    {
+        //has voice
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(goFwd h v3)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        a.set_score_version("2.0");
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_rest() == true );
+        ImoRest* pImo = static_cast<ImoRest*>( pIModel->get_root() );
+        CHECK( pImo->is_go_fwd() == true );
+        CHECK( pImo->get_duration() == 128.0 );
+        CHECK( pImo->get_voice() == 3 );
+        CHECK( pImo->is_visible() == false );
 
         delete tree->get_root();
         delete pIModel;
@@ -4776,6 +4806,94 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LdpAnalyserTestFixture, beam_10)
+    {
+        //bug found: beam fails when preceeded by stem and staff
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
+        string src = "(musicData (n c4 e. (stem up) p1 (beam 14 +))"
+            "(n d4 s (stem up) p1 (beam 14 -b)))";
+        parser.parse_text(src);
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        delete pA;
+        ImoMusicData* pMusic = dynamic_cast<ImoMusicData*>( pIModel->get_root() );
+        CHECK( pMusic != NULL );
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoObj::children_iterator it = pMusic->begin();
+
+        ImoNote* pNote1 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote1 != NULL );
+        CHECK( pNote1->is_beamed() == true );
+        CHECK( pNote1->get_beam_type(0) == ImoBeam::k_begin );
+        CHECK( pNote1->get_beam_type(1) == ImoBeam::k_none );
+        CHECK( pNote1->get_beam_type(2) == ImoBeam::k_none );
+
+        ++it;
+        ImoNote* pNote2 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote2 != NULL );
+        CHECK( pNote2->is_beamed() == true );
+        CHECK( pNote2->get_beam_type(0) == ImoBeam::k_end );
+        CHECK( pNote2->get_beam_type(1) == ImoBeam::k_backward );
+        CHECK( pNote2->get_beam_type(2) == ImoBeam::k_none );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, beam_11)
+    {
+        //duration ok when not beamed note in middle of beamed group
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
+        string src =
+            "(score (vers 1.7) (instrument (musicData "
+            "(clef F4 p1 )(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
+            "(goBack start)(n c2 w v1  p1 )(goBack 234.667)"
+            "(n g3 e v1 p1 (beam 37 =))(n c4 e v1 p1 (beam 37 -)(t -)) )))";
+        parser.parse_text(src);
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        delete pA;
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMusic = pInstr->get_musicdata();
+        CHECK( pMusic != NULL );
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoObj::children_iterator it = pMusic->begin();
+
+        CHECK( (*it)->is_clef() == true );
+        ++it;
+        CHECK( (*it)->is_note() == true );
+        ImoNote* pNote1 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote1->is_beamed() == true );
+        CHECK( is_equal_time(pNote1->get_duration(), k_duration_eighth) );
+        ++it;
+        CHECK( (*it)->is_go_back_fwd() == true );
+        ++it;
+        CHECK( (*it)->is_note() == true );
+        pNote1 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote1->is_beamed() == false );
+        CHECK( is_equal_time(pNote1->get_duration(), k_duration_whole) );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
     // beam (old syntax) ----------------------------------------------------------------
 
     TEST_FIXTURE(LdpAnalyserTestFixture, Analyser_BeamOld_ErrorInvalidG)
@@ -5159,6 +5277,102 @@ SUITE(LdpAnalyserTest)
         CHECK( pInfo->get_actual_number() == 3 );
         CHECK( pInfo->get_normal_number() == 2 );
         CHECK( pInfo->get_show_bracket() == k_yesno_default );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, tuplet_1)
+    {
+        //is score version < 1.6 tuplet also affects notes duration
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
+        string src =
+            "(score (vers 1.6) (instrument (musicData "
+            "(clef F4 p1 )(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
+            "(n g3 e v1 p1 (beam 37 =))(n c4 e v1 p1 (beam 37 -)(t -)) )))";
+        parser.parse_text(src);
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        delete pA;
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMusic = pInstr->get_musicdata();
+        CHECK( pMusic != NULL );
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoObj::children_iterator it = pMusic->begin();
+
+        CHECK( (*it)->is_clef() == true );
+        ++it;
+        CHECK( (*it)->is_note() == true );
+        ImoNote* pNote1 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote1->is_beamed() == true );
+        CHECK( is_equal_time(pNote1->get_duration(), 21.3333) );
+        ++it;
+        CHECK( (*it)->is_note() == true );
+        pNote1 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote1->is_beamed() == true );
+        CHECK( is_equal_time(pNote1->get_duration(), 21.3333) );
+        ++it;
+        CHECK( (*it)->is_note() == true );
+        pNote1 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote1->is_beamed() == true );
+        CHECK( is_equal_time(pNote1->get_duration(), 21.3333) );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, tuplet_2)
+    {
+        //if score version > 1.6 tuplet does not affect notes duration
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
+        string src =
+            "(score (vers 1.7) (instrument (musicData "
+            "(clef F4 p1 )(n e3 e v1 p1 (beam 37 +)(t + 3 2))"
+            "(n g3 e v1 p1 (beam 37 =))(n c4 e v1 p1 (beam 37 -)(t -)) )))";
+        parser.parse_text(src);
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser* pA = LOMSE_NEW LdpAnalyser(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = pA->analyse_tree(tree, "string:");
+        delete pA;
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMusic = pInstr->get_musicdata();
+        CHECK( pMusic != NULL );
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoObj::children_iterator it = pMusic->begin();
+
+        CHECK( (*it)->is_clef() == true );
+        ++it;
+        CHECK( (*it)->is_note() == true );
+        ImoNote* pNote1 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote1->is_beamed() == true );
+        CHECK( is_equal_time(pNote1->get_duration(), k_duration_eighth) );
+        ++it;
+        CHECK( (*it)->is_note() == true );
+        pNote1 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote1->is_beamed() == true );
+        CHECK( is_equal_time(pNote1->get_duration(), k_duration_eighth) );
+        ++it;
+        CHECK( (*it)->is_note() == true );
+        pNote1 = dynamic_cast<ImoNote*>( *it );
+        CHECK( pNote1->is_beamed() == true );
+        CHECK( is_equal_time(pNote1->get_duration(), k_duration_eighth) );
 
         delete tree->get_root();
         delete pIModel;
@@ -5598,6 +5812,56 @@ SUITE(LdpAnalyserTest)
         ImoNote* pNote3 = dynamic_cast<ImoNote*>( *it );
         CHECK( pNote3 != NULL );
         CHECK( pNote3 == pNt3 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+
+    // timeModification -----------------------------------------------------------------
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, timeModification_0)
+    {
+        //error
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        expected << "Line 0. tm: missing mandatory element 'number'." << endl;
+        parser.parse_text("(tm 5)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() == NULL );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, timeModification_1)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text("(tm 2 3)");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_time_modification_dto() == true );
+        ImoTimeModificationDto* pInfo = dynamic_cast<ImoTimeModificationDto*>( pIModel->get_root() );
+        CHECK( pInfo != NULL );
+        CHECK( pInfo->get_top_number() == 2 );
+        CHECK( pInfo->get_bottom_number() == 3 );
 
         delete tree->get_root();
         delete pIModel;

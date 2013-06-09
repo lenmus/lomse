@@ -36,6 +36,9 @@
 #include "lomse_staffobjs_table.h"
 #include "lomse_logger.h"
 
+#include <sstream>
+using namespace std;
+
 
 namespace lomse
 {
@@ -79,7 +82,7 @@ protected:
     void add_location_if_not_zero(Tenths x, Tenths y);
     void add_location(TPoint pt);
     void add_width_if_not_default(Tenths width, Tenths def);
-
+    void add_style(ImoStyle* pStyle);
 
 };
 
@@ -164,11 +167,10 @@ protected:
                 break;
             default:
             {
+                m_source << "simple";
                 stringstream s;
-                s << "[BarlineLdpGenerator::add_barline_type] Invalid barline type. Value="
-                  << type;
+                s << "Invalid barline type. Value=" << type;
                 LOMSE_LOG_ERROR(s.str());
-                throw std::runtime_error(s.str());
             }
         }
     }
@@ -191,12 +193,25 @@ public:
     string generate_source(ImoObj* pParent=NULL)
     {
         m_pNR = static_cast<ImoNoteRest*>( pParent );
-        if ( m_pNR == m_pRO->get_start_object() )
-            return source_for_first();
-        else if ( m_pNR == m_pRO->get_end_object() )
-            return source_for_last();
-        else
-            return source_for_middle();
+
+        //skip if note in chord and not base of chord
+        bool fSkip = false;
+        if (pParent && pParent->is_note())
+        {
+            ImoNote* pNote = static_cast<ImoNote*>(pParent);
+            fSkip = pNote->is_in_chord() && ! pNote->is_start_of_chord();
+        }
+
+        if (!fSkip)
+        {
+            if ( m_pNR == m_pRO->get_start_object() )
+                return source_for_first();
+            else if ( m_pNR == m_pRO->get_end_object() )
+                return source_for_last();
+            else
+                return source_for_middle();
+        }
+        return m_source.str();
     }
 
 protected:
@@ -325,6 +340,305 @@ protected:
             }
         }
     }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <defineStyle> = (defineStyle <syleName> { <styleProperty>* | <font><color> } )
+//@ <styleProperty> = (property-tag value)
+//@
+//@ For backwards compatibility, also old syntax <font><color> is accepted as an
+//@ alternative to full description using property-value pairs.
+//@
+//@ Examples:
+//@     (defineStyle "Composer" (font "Times New Roman" 12pt normal) (color #000000))
+//@     (defineStyle "Instruments" (font "Times New Roman" 14pt bold) (color #000000))
+//@     (defineStyle "para"
+//@         (font-name "Times New Roman")
+//@         (font-size 12pt)
+//@         (font-style normal)
+//@         (color #ff0000)
+//@         (margin-bottom 2em)
+//@     )
+//@
+//@ font-style :  { "normal" | "italic" }
+//@ font-weight : { "normal" | "bold" }
+//@
+
+class DefineStyleLdpGenerator : public LdpGenerator
+{
+protected:
+    ImoStyle* m_pObj;
+
+public:
+    DefineStyleLdpGenerator(ImoObj* pImo, LdpExporter* pExporter) : LdpGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoStyle*>(pImo);
+    }
+
+    string generate_source(ImoObj* pParent=NULL)
+    {
+        start_element("defineStyle", k_no_imoid, k_in_new_line);
+        add_name();
+        add_properties();
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_name()
+    {
+        m_source << "\"" << m_pObj->get_name() << "\" ";
+    }
+
+    void add_properties()
+    {
+        string sValue;
+        LUnits uValue;
+        int iValue;
+        float rValue;
+        Color cValue;
+
+        //font properties
+        if (m_pObj->get_string_property(ImoStyle::k_font_file, &sValue))
+        {
+            if (!sValue.empty())     //font-file can be empty when font-name is set
+                create_string_element("font-file", sValue);
+        }
+
+        if (m_pObj->get_string_property(ImoStyle::k_font_name, &sValue))
+            create_string_element("font-name", sValue);
+
+        if (m_pObj->get_float_property(ImoStyle::k_font_size, &rValue))
+        {
+            start_element("font-size", k_no_imoid);
+            m_source << rValue << "pt";
+            end_element(k_in_same_line);
+        }
+
+        if (m_pObj->get_int_property(ImoStyle::k_font_style, &iValue))
+            create_font_style(iValue);
+
+        if (m_pObj->get_int_property(ImoStyle::k_font_weight, &iValue))
+            create_font_weight(iValue);
+
+        //text properties
+        if (m_pObj->get_int_property(ImoStyle::k_word_spacing, &iValue))
+            create_int_element("word-spacing", iValue);
+
+        if (m_pObj->get_int_property(ImoStyle::k_text_decoration, &iValue))
+            create_text_decoration(iValue);
+
+        if (m_pObj->get_int_property(ImoStyle::k_vertical_align, &iValue))
+            create_vertical_align(iValue);
+
+        if (m_pObj->get_int_property(ImoStyle::k_text_align, &iValue))
+            create_text_align(iValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_text_indent_length, &uValue))
+            create_lunits_element("", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_word_spacing_length, &uValue))
+            create_lunits_element("", uValue);
+
+        if (m_pObj->get_float_property(ImoStyle::k_line_height, &rValue))
+            create_float_element("line-height", rValue);
+
+        //color and background properties
+        if (m_pObj->get_color_property(ImoStyle::k_color, &cValue))
+            create_color_element("color", cValue);
+
+        if (m_pObj->get_color_property(ImoStyle::k_background_color, &cValue))
+            create_color_element("background-color", cValue);
+
+        //border-width  properties
+        if (m_pObj->get_lunits_property(ImoStyle::k_border_width_top, &uValue))
+            create_lunits_element("border-width-top", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_border_width_bottom, &uValue))
+            create_lunits_element("border-width-bottom", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_border_width_left, &uValue))
+            create_lunits_element("border-width-left", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_border_width_right, &uValue))
+            create_lunits_element("border-width-right", uValue);
+
+        //padding properties
+        if (m_pObj->get_lunits_property(ImoStyle::k_padding_top, &uValue))
+            create_lunits_element("padding-top", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_padding_bottom, &uValue))
+            create_lunits_element("padding-bottom", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_padding_left, &uValue))
+            create_lunits_element("padding-left", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_padding_right, &uValue))
+            create_lunits_element("padding-right", uValue);
+
+        //margin properties
+        if (m_pObj->get_lunits_property(ImoStyle::k_margin_top, &uValue))
+            create_lunits_element("margin-top", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_margin_bottom, &uValue))
+            create_lunits_element("margin-bottom", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_margin_left, &uValue))
+            create_lunits_element("margin-left", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_margin_right, &uValue))
+            create_lunits_element("margin-right", uValue);
+
+        //size properties
+        if (m_pObj->get_lunits_property(ImoStyle::k_width, &uValue))
+            create_lunits_element("width", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_height, &uValue))
+            create_lunits_element("height", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_min_width, &uValue))
+            create_lunits_element("min-width", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_min_height, &uValue))
+            create_lunits_element("min-height", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_max_width, &uValue))
+            create_lunits_element("max-width", uValue);
+
+        if (m_pObj->get_lunits_property(ImoStyle::k_max_height, &uValue))
+            create_lunits_element("max-height", uValue);
+
+        //table properties
+        if (m_pObj->get_lunits_property(ImoStyle::k_table_col_width, &uValue))
+            create_lunits_element("table-col-width", uValue);
+    }
+
+    void create_string_element(const string& tag, const string& value)
+    {
+        start_element(tag, k_no_imoid);
+        m_source << "\"" << value << "\"";
+        end_element(k_in_same_line);
+    }
+
+    void create_float_element(const string& tag, float value)
+    {
+        start_element(tag, k_no_imoid);
+        m_source << value;
+        end_element(k_in_same_line);
+    }
+
+    void create_lunits_element(const string& tag, LUnits value)
+    {
+        start_element(tag, k_no_imoid);
+        m_source << value;
+        end_element(k_in_same_line);
+    }
+
+    void create_int_element(const string& tag, int value)
+    {
+        start_element(tag, k_no_imoid);
+        m_source << value;
+        end_element(k_in_same_line);
+    }
+
+    void create_color_element(const string& tag, Color color)
+    {
+        start_element(tag, k_no_imoid);
+        m_source << LdpExporter::color_to_ldp(color);
+        end_element(k_in_same_line);
+    }
+
+    void create_font_style(int value)
+    {
+        start_element("font-style", k_no_imoid);
+
+        if (value == ImoStyle::k_font_normal)
+            m_source << "normal";
+        else if (value == ImoStyle::k_italic)
+            m_source << "italic";
+        else
+            m_source << "invalid value " << value;
+
+        end_element(k_in_same_line);
+    }
+
+    void create_font_weight(int value)
+    {
+        start_element("font-weight", k_no_imoid);
+
+        if (value == ImoStyle::k_font_normal)
+            m_source << "normal";
+        else if (value == ImoStyle::k_bold)
+            m_source << "bold";
+        else
+            m_source << "invalid value " << value;
+
+        end_element(k_in_same_line);
+    }
+
+    void create_text_decoration(int value)
+    {
+        start_element("text-decoration", k_no_imoid);
+
+        if (value == ImoStyle::k_decoration_none)
+            m_source << "none";
+        else if (value == ImoStyle::k_decoration_underline)
+            m_source << "underline";
+        else if (value == ImoStyle::k_decoration_overline)
+            m_source << "overline";
+        else if (value == ImoStyle::k_decoration_line_through)
+            m_source << "line-through";
+        else
+            m_source << "invalid value " << value;
+
+        end_element(k_in_same_line);
+    }
+
+    void create_vertical_align(int value)
+    {
+        start_element("vertical-align", k_no_imoid);
+
+        if (value == ImoStyle::k_valign_baseline)
+            m_source << "baseline";
+        else if (value == ImoStyle::k_valign_sub)
+            m_source << "sub";
+        else if (value == ImoStyle::k_valign_super)
+            m_source << "super";
+        else if (value == ImoStyle::k_valign_top)
+            m_source << "top";
+        else if (value == ImoStyle::k_valign_text_top)
+            m_source << "text-top";
+        else if (value == ImoStyle::k_valign_middle)
+            m_source << "middle";
+        else if (value == ImoStyle::k_valign_bottom)
+            m_source << "bottom";
+        else if (value == ImoStyle::k_valign_text_bottom)
+            m_source << "text-bottom";
+        else
+            m_source << "invalid value " << value;
+
+        end_element(k_in_same_line);
+    }
+
+    void create_text_align(int value)
+    {
+        start_element("text-align", k_no_imoid);
+
+        if (value == ImoStyle::k_align_left)
+            m_source << "left";
+        else if (value == ImoStyle::k_align_right)
+            m_source << "right";
+        else if (value == ImoStyle::k_align_center)
+            m_source << "center";
+        else if (value == ImoStyle::k_align_justify)
+            m_source << "justify";
+        else
+            m_source << "invalid value " << value;
+
+        end_element(k_in_same_line);
+    }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -459,10 +773,9 @@ public:
     string generate_source(ImoObj* pParent=NULL)
     {
         start_element("instrument", m_pObj->get_id());
-
-        add_num_staves();
-        add_midi_info();
         add_name_abbreviation();
+        add_staves_info();
+        add_midi_info();
         add_music_data();
         end_element();
         return m_source.str();
@@ -470,41 +783,138 @@ public:
 
 protected:
 
-    void add_num_staves()
+    void add_staves_info()
     {
-	    //sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
-	    //sSource += wxString::Format(_T("(staves %d)\n"), m_pVStaff->GetNumStaves());
-     //   int nStaves = m_pVStaff->GetNumStaves();
-     //   for (int i=0; i < nStaves; i++)
-     //       sSource += m_pVStaff->GetStaff(i+1)->SourceLDP(nIndent, fUndoData);
+        start_element("staves", k_no_imoid);
+        int staves = m_pObj->get_num_staves();
+        m_source << staves;
+        end_element(k_in_same_line);
+
+        for (int i=1; i <= staves; ++i)
+        {
+            ImoStaffInfo* pStaff = m_pObj->get_staff(i-1);
+            if (!has_default_values(pStaff))
+            {
+                open_staff_element(i);
+                add_staff_type(pStaff);
+                add_staff_lines(pStaff);
+                add_staff_spacing(pStaff);
+                add_staff_distance(pStaff);
+                add_line_thickness(pStaff);
+                close_staff_element();
+            }
+        }
     }
 
     void add_midi_info()
     {
-	    //sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
-	    //sSource += wxString::Format(_T("(infoMIDI %d %d)\n"), m_nMidiInstr, m_nMidiChannel);
+        int instr = m_pObj->get_instrument();
+        int channel = m_pObj->get_channel();
+        if (instr != 0 || channel != 0)
+        {
+            start_element("infoMIDI", k_no_imoid);
+            m_source << instr << " " << channel;
+            end_element(k_in_same_line);
+        }
     }
 
     void add_name_abbreviation()
     {
-     //   if (m_pName)
-     //   {
-	    //    sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
-     //       sSource += m_pName->SourceLDP(_T("name"), fUndoData);
-     //       sSource += _T("\n");
-     //   }
-     //   if (m_pAbbreviation)
-     //   {
-	    //    sSource.append(nIndent * lmLDP_INDENT_STEP, _T(' '));
-     //       sSource += m_pAbbreviation->SourceLDP(_T("abbrev"), fUndoData);
-     //       sSource += _T("\n");
-     //   }
+        //TODO: export style, location
+        if (m_pObj->has_name())
+        {
+            start_element("name", k_no_imoid);
+            ImoScoreText& txt = m_pObj->get_name();
+            m_source << "\"" << txt.get_text() << "\"";
+            add_style( txt.get_style() );
+            end_element(k_in_same_line);
+        }
+        if (m_pObj->has_abbrev())
+        {
+            start_element("abbrev", k_no_imoid);
+            ImoScoreText& txt = m_pObj->get_abbrev();
+            m_source << "\"" << txt.get_text() << "\"";
+            add_style( txt.get_style() );
+            end_element(k_in_same_line);
+        }
     }
 
     void add_music_data()
     {
         add_source_for( m_pObj->get_musicdata() );
     }
+
+    bool has_default_values(ImoStaffInfo* pStaff)
+    {
+        return pStaff->get_staff_type() == ImoStaffInfo::k_staff_regular
+            && pStaff->get_num_lines() == 5
+            && pStaff->get_line_spacing() == 180.0f
+            && pStaff->get_line_thickness() == 15.0f
+            && pStaff->get_staff_margin() == 1000.0f
+            ;
+    }
+
+    void add_staff_type(ImoStaffInfo* pInfo)
+    {
+        // (staffType { ossia | cue | editorial | regular | alternate } )
+
+        int type = pInfo->get_staff_type();
+        start_element("staffType", k_no_imoid);
+        switch (type)
+        {
+            case ImoStaffInfo::k_staff_ossia:       m_source << "ossia";        break;
+            case ImoStaffInfo::k_staff_cue:         m_source << "cue";          break;
+            case ImoStaffInfo::k_staff_editorial:   m_source << "editorial";    break;
+            case ImoStaffInfo::k_staff_regular:     m_source << "regular";      break;
+            case ImoStaffInfo::k_staff_alternate:   m_source << "alternate";    break;
+            default:
+                m_source << "regular";
+                stringstream ss;
+                ss << "Invalid staff type " << type;
+                LOMSE_LOG_ERROR(ss.str());
+        }
+        end_element(k_in_same_line);
+    }
+
+    void add_staff_lines(ImoStaffInfo* pStaff)
+    {
+        start_element("staffLines", k_no_imoid);
+        m_source << pStaff->get_num_lines();
+        end_element(k_in_same_line);
+    }
+
+    void add_staff_spacing(ImoStaffInfo* pStaff)
+    {
+        start_element("staffSpacing", k_no_imoid);
+        m_source << pStaff->get_line_spacing();
+        end_element(k_in_same_line);
+    }
+
+    void add_staff_distance(ImoStaffInfo* pStaff)
+    {
+        start_element("staffDistance", k_no_imoid);
+        m_source << pStaff->get_staff_margin();
+        end_element(k_in_same_line);
+    }
+
+    void add_line_thickness(ImoStaffInfo* pStaff)
+    {
+        start_element("lineThickness", k_no_imoid);
+        m_source << pStaff->get_line_thickness();
+        end_element(k_in_same_line);
+    }
+
+    void open_staff_element(int i)
+    {
+        start_element("staff", k_no_imoid);
+        m_source << i << " ";
+    }
+
+    void close_staff_element()
+    {
+        end_element();
+    }
+
 };
 
 
@@ -659,6 +1069,121 @@ public:
 
 protected:
 
+    int m_curMeasure;
+    int m_iInstr;
+    bool m_fNewMeasure;
+    ColStaffObjs* m_pColStaffObjs;
+    vector<TimeUnits> m_rCurTime;
+
+    //-----------------------------------------------------------------------------------
+    void add_staffobjs()
+    {
+        int nMeasure = 1;
+
+        ImoInstrument* pInstr = m_pObj->get_instrument();
+        m_iInstr = m_pScore->get_instr_number_for(pInstr);
+        m_pColStaffObjs = m_pScore->get_staffobjs_table();
+
+        if (m_pColStaffObjs->num_entries() < 1)
+            return;
+
+        initializations();
+
+        ColStaffObjsIterator it = m_pColStaffObjs->begin();
+        while (it != m_pColStaffObjs->end())
+        {
+            ColStaffObjsEntry* pEntry = *it;
+            if (pEntry->num_instrument() == m_iInstr)
+            {
+                if (m_fNewMeasure)
+                    add_measure_comment();
+
+                ImoStaffObj* pSO = pEntry->imo_object();
+                int voice = determine_voice(pSO);
+
+                //add goFwd if necessary (for 1.x imported scores)
+                if (voice > 0 && is_lower_time(m_rCurTime[voice], pEntry->time()) )
+                {
+                    TimeUnits shift = pEntry->time() - m_rCurTime[voice];
+                    int staff = pSO->get_staff() + 1;
+
+                    start_element("goFwd", k_no_imoid);
+                    m_source << shift << " v" << voice << " p" << staff;
+                    end_element(k_in_same_line);
+
+                    m_rCurTime[voice] = pEntry->time();
+                }
+
+                //update time counters with this pSO duration
+                TimeUnits duration = pSO->get_duration();
+                if (pSO->is_note())
+                {
+                    ImoNote* pNote = static_cast<ImoNote*>(pSO);
+                    if (pNote->is_in_chord() && !pNote->is_end_of_chord())
+                        duration = 0.0;
+                }
+                m_rCurTime[voice] += duration;
+
+                //update max reached time
+                m_rCurTime[0] = max(m_rCurTime[0], pEntry->time());
+
+                //add source for this staff obj, but
+                //skip key and time signatures not in staff 0 (duplicates)
+                if (!((pSO->is_key_signature() || pSO->is_time_signature())
+                      && pEntry->staff() != 0) )
+                {
+                    add_source_for(pSO);
+                }
+
+                //finish measure
+                if (pSO->is_barline())
+                {
+                    m_fNewMeasure = true;
+                    ++m_curMeasure;
+                    m_rCurTime.assign(k_max_voices, pEntry->time());
+                }
+            }
+            ++it;
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void initializations()
+    {
+        m_fNewMeasure = true;
+        m_curMeasure = 0;
+        m_rCurTime.reserve(k_max_voices);
+        m_rCurTime.assign(k_max_voices, 0.0);
+    }
+
+    //-----------------------------------------------------------------------------------
+    int determine_voice(ImoStaffObj* pSO)
+    {
+        if (pSO->is_note_rest())
+        {
+            ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
+            return pNR->get_voice();
+        }
+        else
+            return 0;
+    }
+
+    //-----------------------------------------------------------------------------------
+    void add_measure_comment()
+    {
+        if (!m_pExporter->get_remove_newlines())
+        {
+            empty_line();
+            start_comment();
+            m_source << "measure " << (m_curMeasure + 1);
+            end_comment();
+        }
+        m_fNewMeasure = false;
+    }
+
+
+#if 0  //LDP version 1.7
+
     enum { k_max_num_lines = 16, };
 
     void add_staffobjs()
@@ -744,15 +1269,16 @@ protected:
                 }
                 if ((*it)->measure() == m_curMeasure)
                 {
-                    //skip key and time signatures not in line 0 (duplicates)
+                    //skip key and time signatures not in staff 0 (duplicates)
                     if (!((pImo->is_key_signature() || pImo->is_time_signature())
-                          && (*it)->line() != 0) )
+                          && (*it)->staff() != 0) )
                     {
                         add_source_for(pImo);
                     }
                 }
             }
         }
+        m_itStartOfMeasure = it;
     }
 
     //-----------------------------------------------------------------------------------
@@ -834,6 +1360,7 @@ protected:
     TimeUnits m_rCurTime;
     TimeUnits m_rStartTime;
 
+#endif  //LDP version 1.7
 
 //    //Old code exploring ImoTree
 //    void add_staffobjs()
@@ -909,10 +1436,10 @@ protected:
                 break;
             default:
             {
+                m_source << "60";
                 stringstream s;
-                s << "[MetronomeLdpGenerator::add_marks] Invalid type. Value=" << type;
+                s << "Invalid type. Value=" << type;
                 LOMSE_LOG_ERROR(s.str());
-                throw runtime_error(s.str());
             }
         }
 
@@ -951,6 +1478,7 @@ public:
         add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
         add_voice();
         add_stem();
+        add_time_modifier();
         source_for_base_staffobj(m_pObj);
         end_element(k_in_same_line);
 
@@ -1020,9 +1548,8 @@ protected:
             default:
             {
                 stringstream s;
-                s << "[NoteLdpGenerator::add_stem] Invalid stem. Value=" << stem;
+                s << "Invalid stem. Value=" << stem;
                 LOMSE_LOG_ERROR(s.str());
-                throw runtime_error(s.str());
             }
         }
     }
@@ -1030,6 +1557,18 @@ protected:
     void add_voice()
     {
         m_source << " v" << m_pObj->get_voice() << " ";
+    }
+
+    void add_time_modifier()
+    {
+        if (m_pObj->get_time_modifier_top() != 1
+            || m_pObj->get_time_modifier_bottom() != 1)
+        {
+            start_element("tm", k_no_imoid, k_in_same_line);
+            m_source << m_pObj->get_time_modifier_top() << " "
+                     << m_pObj->get_time_modifier_bottom();
+            end_element(k_in_same_line);
+        }
     }
 
 };
@@ -1049,19 +1588,44 @@ public:
 
     string generate_source(ImoObj* pParent=NULL)
     {
-        start_element("r", m_pObj->get_id());
-        add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
-        add_voice();
-        source_for_base_staffobj(m_pObj);
-        end_element(k_in_same_line);
+        if (is_rest())
+            generate_rest();
+        else
+            generate_go_fwd();
+
         return m_source.str();
     }
 
 protected:
 
+    bool is_rest()
+    {
+        return m_pObj->is_visible()
+            || m_pObj->has_attachments()
+            || m_pObj->is_beamed();
+    }
+
     void add_voice()
     {
         m_source << " v" << m_pObj->get_voice() << " ";
+    }
+
+    void generate_rest()
+    {
+        start_element("r", m_pObj->get_id());
+        add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
+        add_voice();
+        source_for_base_staffobj(m_pObj);
+        end_element(k_in_same_line);
+    }
+
+    void generate_go_fwd()
+    {
+        start_element("goFwd", m_pObj->get_id());
+        add_duration(m_source, m_pObj->get_note_type(), m_pObj->get_dots());
+        add_voice();
+        m_source << "p" << (m_pObj->get_staff() + 1);
+        end_element(k_in_same_line);
     }
 
 };
@@ -1082,15 +1646,16 @@ public:
 
     string generate_source(ImoObj* pParent=NULL)
     {
+        //TODO: commented elements
         start_element("score", m_pObj->get_id());
         add_version();
-        add_undo_data();
-        add_creation_mode();
+        add_style( m_pObj->get_style() );
+        //add_undo_data();
+        //add_creation_mode();
         add_styles();
-        add_titles();
-        add_page_layout();
+        //add_titles();
+        //add_page_layout();
         add_system_layout();
-        add_cursor();
         add_options();
         add_instruments_and_groups();
         end_element();
@@ -1101,9 +1666,7 @@ protected:
 
     void add_version()
     {
-        m_source << "(vers ";
-        m_source << m_pObj->get_version();
-        m_source << ")";
+        m_source << "(vers 2.0)";
     }
 
     void add_undo_data()
@@ -1128,8 +1691,19 @@ protected:
 
     void add_styles()
     {
-//    //styles
-//    m_source << m_TextStyles.SourceLDP(1, fUndoData);
+        map<std::string, ImoStyle*>& styles = m_pObj->get_styles();
+        map<std::string, ImoStyle*>::const_iterator it;
+        for (it = styles.begin(); it != styles.end(); ++it)
+        {
+            if (!(it->first == "Default style"
+                  || it->first == "Instrument names"
+                  || it->first == "Tuplet numbers"
+                ))
+            {
+                DefineStyleLdpGenerator gen(it->second, m_pExporter);
+                m_source << gen.generate_source();
+            }
+        }
     }
 
     void add_titles()
@@ -1167,55 +1741,50 @@ protected:
 
     void add_system_layout()
     {
+        ImoSystemInfo* pInfo = m_pObj->get_first_system_info();
+        if (!m_pObj->has_default_values(pInfo))
+            add_system_info(pInfo);
+
+        pInfo = m_pObj->get_other_system_info();
+        if (!m_pObj->has_default_values(pInfo))
+            add_system_info(pInfo);
     }
 
-    void add_cursor()
+    void add_system_info(ImoSystemInfo* pInfo)
     {
-//    //score cursor information
-//    if (fUndoData)
-//    {
-//        lmCursorState tState = m_SCursor.GetState();
-//        m_source << wxString::Format(_T("   (cursor %d %d %s %d)\n"),
-//                        tState.GetNumInstr(),
-//                        tState.GetNumStaff(),
-//		                DoubleToStr((double)tState.GetTimepos(), 2).c_str(),
-//                        tState.GetObjID() );
-//    }
+        start_element("systemLayout", pInfo->get_id(), k_in_new_line);
+        m_source << (pInfo->is_first() ? "first" : "other") << " ";
+        start_element("systemMargins", k_no_imoid);
+        m_source << pInfo->get_left_margin() << " "
+                 << pInfo->get_right_margin() << " "
+                 << pInfo->get_system_distance() << " "
+                 << pInfo->get_top_system_distance();
+        end_element(k_in_same_line);
+        end_element(k_in_same_line);
     }
 
     void add_options()
     {
-    //    //options with non-default values
-    //    bool fBoolValue;
-    //    long nLongValue;
-    //    double rDoubleValue;
-    //
-    //    //bool
-    //    for (int i=0; i < (int)(sizeof(m_BoolOptions)/sizeof(lmBoolOption)); i++)
-    //    {
-    //        fBoolValue = GetOptionBool(m_BoolOptions[i].sOptName);
-    //        if (fBoolValue != m_BoolOptions[i].fBoolValue)
-    //            m_source << wxString::Format(_T("   (opt %s %s)\n"), m_BoolOptions[i].sOptName.c_str(),
-    //                                        (fBoolValue ? _T("true") : _T("false")) );
-    //    }
-    //
-    //    //long
-    //    for (int i=0; i < (int)(sizeof(m_LongOptions)/sizeof(lmLongOption)); i++)
-    //    {
-    //        nLongValue = GetOptionLong(m_LongOptions[i].sOptName);
-    //        if (nLongValue != m_LongOptions[i].nLongValue)
-    //            m_source << wxString::Format(_T("   (opt %s %d)\n"), m_LongOptions[i].sOptName.c_str(),
-    //                                        nLongValue );
-    //    }
-    //
-    //    //double
-    //    for (int i=0; i < (int)(sizeof(m_DoubleOptions)/sizeof(lmDoubleOption)); i++)
-    //    {
-    //        rDoubleValue = GetOptionDouble(m_DoubleOptions[i].sOptName);
-    //        if (rDoubleValue != m_DoubleOptions[i].rDoubleValue)
-    //            m_source << wxString::Format(_T("   (opt %s %s)\n"), m_DoubleOptions[i].sOptName.c_str(),
-    //                                        DoubleToStr(rDoubleValue, 4).c_str() );
-    //    }
+        ImoOptions* pColOpts = m_pObj->get_options();
+        ImoObj::children_iterator it;
+        for (it= pColOpts->begin(); it != pColOpts->end(); ++it)
+        {
+            ImoOptionInfo* pOpt = dynamic_cast<ImoOptionInfo*>(*it);
+            if (!m_pObj->has_default_value(pOpt))
+            {
+                start_element("opt", pOpt->get_id(), k_in_new_line);
+                m_source << pOpt->get_name() << " ";
+                if (pOpt->is_bool_option())
+                    m_source << (pOpt->get_bool_value() ? "true" : "false");
+                else if (pOpt->is_long_option())
+                    m_source << pOpt->get_long_value();
+                else if (pOpt->is_float_option())
+                    m_source << pOpt->get_float_value();
+                else
+                    m_source << pOpt->get_string_value();
+                end_element(k_in_same_line);
+            }
+        }
     }
 
     void add_instruments_and_groups()
@@ -1296,11 +1865,10 @@ protected:
                 break;
             default:
             {
+                m_source << "solid";
                 stringstream s;
-                s << "[ScoreLineLdpGenerator::add_line_style] Invalid line style. Value="
-                  << type;
+                s << "Invalid line style. Value=" << type;
                 LOMSE_LOG_ERROR(s.str());
-                throw runtime_error(s.str());
             }
         }
         end_element(k_in_same_line);
@@ -1331,11 +1899,10 @@ protected:
                 break;
             default:
             {
+                m_source << "arrowhead";
                 stringstream s;
-                s << "[ScoreLineLdpGenerator::add_cap] Invalid line cap. Value="
-                  << type;
+                s << "Invalid line cap. Value=" << type;
                 LOMSE_LOG_ERROR(s.str());
-                throw runtime_error(s.str());
             }
         }
         end_element(k_in_same_line);
@@ -1382,7 +1949,7 @@ public:
     {
         start_element("text", m_pObj->get_id());
         add_text();
-        add_style();
+        add_style( m_pObj->get_style() );
         add_location_if_not_zero(m_pObj->get_user_location_x(),
                                  m_pObj->get_user_location_y());
         end_element();
@@ -1394,17 +1961,6 @@ protected:
     void add_text()
     {
         m_source << "\"" << m_pObj->get_text() << "\"";
-    }
-
-    void add_style()
-    {
-        ImoStyle* pStyle = m_pObj->get_style();
-        if (pStyle)
-        {
-            start_element("style", k_no_imoid);
-            m_source << "\"" << pStyle->get_name() << "\"";
-            end_element(k_in_same_line);
-        }
     }
 
 };
@@ -1438,11 +1994,14 @@ protected:
             && !m_pObj->is_barline()
             && !m_pObj->is_go_back_fwd() )
         {
+#if 1       // 1= px  0- (staffNum x)
             m_source << " p" << (m_pObj->get_staff() + 1) << " ";
-//            m_source << " ";
-//            start_element("staffNum", k_no_imoid, k_in_same_line);
-//            m_source << (m_pObj->get_staff() + 1);
-//            end_element(k_in_same_line);
+#else
+            m_source << " ";
+            start_element("staffNum", k_no_imoid, k_in_same_line);
+            m_source << (m_pObj->get_staff() + 1);
+            end_element(k_in_same_line);
+#endif
         }
     }
 
@@ -1652,7 +2211,7 @@ public:
         }
         else if (m_pNR == m_pTuplet->get_end_object())
         {
-            start_element("t", m_pTuplet->get_id());
+            start_element("t", m_pTuplet->get_id(), k_in_same_line);
             //add_tuplet_number();      //TODO: For now not generated
             add_tuplet_type(false);
             end_element(k_in_same_line);
@@ -1719,11 +2278,10 @@ protected:
             m_source << "none";
         else
         {
+            m_source << "both";
             stringstream s;
-            s << "[TupletLdpGenerator::add_display_number] Invalid option. Value="
-              << number;
+            s << "Invalid option. Value=" << number;
             LOMSE_LOG_ERROR(s.str());
-            throw runtime_error(s.str());
         }
 
         end_element(k_in_same_line);
@@ -1943,6 +2501,19 @@ void LdpGenerator::add_location(TPoint pt)
     m_source << pt.y;
     end_element(k_in_same_line);
 }
+
+//---------------------------------------------------------------------------------------
+void LdpGenerator::add_style(ImoStyle* pStyle)
+{
+    if (pStyle && pStyle->get_name() != "Default style")
+    {
+        m_source << " ";
+        start_element("style", k_no_imoid);
+        m_source << "\"" << pStyle->get_name() << "\"";
+        end_element(k_in_same_line);
+    }
+}
+
 
 //=======================================================================================
 // LdpExporter implementation

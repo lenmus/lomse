@@ -1175,9 +1175,7 @@ protected:
 
     void add_version()
     {
-        m_source << "(vers ";
-        m_source << m_pObj->get_version();
-        m_source << ")";
+        m_source << "(vers 2.0)";
     }
 
     void add_undo_data()

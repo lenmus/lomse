@@ -48,7 +48,9 @@ using namespace std;
 using namespace lomse;
 
 
-//---------------------------------------------------------------------------------------
+//=======================================================================================
+// StaffVoiceLineTable tests
+//=======================================================================================
 class StaffVoiceLineTableTestFixture
 {
 public:
@@ -87,32 +89,334 @@ SUITE(StaffVoiceLineTableTest)
 
 }
 
+
 //---------------------------------------------------------------------------------------
-class ColStaffObjsTestFixture
+// helper macros
+// CHECK_ENTRY: checks/displays ids
+// CHECK_ENTRY0: does not check/displays ids
+#define CHECK_ENTRY(it, _instr, _staff, _measure, _time, _line, _object) \
+            CHECK( (*it)->num_instrument() == _instr );         \
+            CHECK( (*it)->staff() == _staff );                  \
+            CHECK( (*it)->measure() == _measure );              \
+            CHECK( is_equal_time((*it)->time(), _time) );       \
+            CHECK( (*it)->line() == _line );                    \
+            CHECK( (*it)->to_string_with_ids() == _object );
+
+#define CHECK_ENTRY0(it, _instr, _staff, _measure, _time, _line, _object) \
+            CHECK( (*it)->num_instrument() == _instr );         \
+            CHECK( (*it)->staff() == _staff );                  \
+            CHECK( (*it)->measure() == _measure );              \
+            CHECK( is_equal_time((*it)->time(), _time) );       \
+            CHECK( (*it)->line() == _line );                    \
+            CHECK( (*it)->to_string() == _object );             \
+            ++it;
+;
+
+
+//=======================================================================================
+// ColStaffObjsBuilder test
+//=======================================================================================
+class ColStaffObjsBuilderTestFixture
 {
 public:
-
-    ColStaffObjsTestFixture()     //SetUp fixture
-        : m_libraryScope(cout)
-    {
-        m_scores_path = TESTLIB_SCORES_PATH;
-        m_pLdpFactory = m_libraryScope.ldp_factory();
-        m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
-    }
-
-    ~ColStaffObjsTestFixture()    //TearDown fixture
-    {
-    }
-
     LibraryScope m_libraryScope;
+    Document* m_pDoc;
+    LdpTree* m_pTree;
+    InternalModel* m_pIModel;
     LdpFactory* m_pLdpFactory;
-    std::string m_scores_path;
+
+    ColStaffObjsBuilderTestFixture()     //SetUp fixture
+        : m_libraryScope(cout)
+        , m_pDoc(NULL)
+        , m_pTree(NULL)
+        , m_pIModel(NULL)
+    {
+        m_pLdpFactory = m_libraryScope.ldp_factory();
+    }
+
+    ~ColStaffObjsBuilderTestFixture()    //TearDown fixture
+    {
+        delete m_pDoc;
+    }
+
+    ImoScore* create_score(const string &ldp)
+    {
+        m_pDoc = LOMSE_NEW Document(m_libraryScope);
+        LdpParser parser(cout, m_libraryScope.ldp_factory());
+        parser.parse_text(ldp);
+        LdpTree* pTree = parser.get_ldp_tree();
+        LdpAnalyser a(cout, m_libraryScope, m_pDoc);
+        ImoObj* pImo = a.analyse_tree_and_get_object(pTree);
+        delete pTree->get_root();
+        return dynamic_cast<ImoScore*>(pImo);
+    }
+
 };
 
-SUITE(ColStaffObjsTest)
+SUITE(ColStaffObjsBuilderTest)
 {
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsAddEntries)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_1)
+    {
+        //empty score creates empty table
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0)(instrument (musicData "
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pTable = builder.build(pScore);
+
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 0 );
+        CHECK( pTable->is_anacrusis_start() == false );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_2)
+    {
+        //each voice uses a different time counter
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n c4 q v1)(n c5 e v2)(n e4 e v1)(n e5 e v2)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pTable = builder.build(pScore);
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 5 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        //cout << pTable->dump();
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 e v2  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(n e5 e v2  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1  p1 )" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_3)
+    {
+        //barline is placed at maximum time reached in the measure
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n c4 q v1)(n c5 e v2)(n e4 e v1)(n e5 w v2)(barline)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pTable = builder.build(pScore);
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 6 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        //cout << pTable->dump();
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 e v2  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(n e5 w v2  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0, 288,     0, "(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_4)
+    {
+        //after barline voices are correctly positioned
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n c4 q v1)(n c5 e v2)(n e4 e v1)(n e5 w v2)(barline)"
+            "(n c4 q v1)(n c5 e v2)(n e4 e v1)(n e5 w v2)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pTable = builder.build(pScore);
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 10 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        //cout << pTable->dump();
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c5 e v2  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     1, "(n e5 w v2  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0, 288,     0, "(barline simple)" );
+        CHECK_ENTRY0(it, 0,    0,      1, 288,     0, "(n c4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      1, 288,     1, "(n c5 e v2  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      1, 320,     1, "(n e5 w v2  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      1, 352,     0, "(n e4 e v1  p1 )" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_5)
+    {
+        //key and time signatures generate secondary entries
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0) (instrument (staves 2)(musicData "
+            "(clef G p1)(clef F4 p2)(key C)(time 2 4)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pTable = builder.build(pScore);
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 6 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        //cout << pTable->dump();
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(clef F4 p2 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(key C)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 2 4)" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(time 2 4)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_6)
+    {
+        //chord notes have time and staff properly assigned
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0) (instrument (staves 2)(musicData "
+            "(clef G p1)(clef F4 p2)(key C)(time 2 4)(chord (n c3 w p2)(n g3 w p2)"
+            "(n e4 w p1)(n c5 w p1))(barline)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pTable = builder.build(pScore);
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 11 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        //cout << pTable->dump();
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(clef F4 p2 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(key C)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 2 4)" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(time 2 4)" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(chord (n c3 w v1  p2 )" );
+        CHECK_ENTRY0(it, 0,    1,      0,   0,     1, "(n g3 w v1  p2 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 w v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c5 w v1  p1 ))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 256,     0, "(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_7)
+    {
+        //anchor staffobjs
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0) (instrument (musicData "
+            "(clef G)(key C)(n f4 q)(text \"Hello world\")(barline)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pTable = builder.build(pScore);
+
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 5 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        //cout << pTable->dump();
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(spacer 0 p1 (text \"Hello world\"))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_8)
+    {
+        //anacruxis
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0) (instrument (musicData "
+            "(clef G)(time 3 4)(n c4 q)(barline)(n d4 e.)(n d4 s)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pTable = builder.build(pScore);
+
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 6 );
+        CHECK( pTable->is_anacrusis_start() == true );
+        CHECK( is_equal_time( pTable->anacrusis_missing_time(), 128.0f) == true );
+
+        //cout << pTable->dump();
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 3 4)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(barline simple)" );
+        CHECK_ENTRY0(it, 0,    0,      1,  64,     0, "(n d4 e. v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      1, 112,     0, "(n d4 s v1  p1 )" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_9)
+    {
+        //goFwd replaced by special invisible rest
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n c4 e v1)(goFwd e v1)(n e4 e v1)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pTable = builder.build(pScore);
+
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 4 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        //cout << pTable->dump();
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(goFwd e v1 p1)" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n e4 e v1  p1 )" );
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, builder_10)
+    {
+        //notes in other voices intermixed in beamed group
+        ImoScore* pScore = create_score(
+            "(score (vers 2.0)(instrument (musicData "
+            "(clef F4)(n e3 e g+)(n g3 e)(n c4 e g-)"
+            "(n c2 w v3)(barline)"
+            ")))"
+        );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pTable = builder.build(pScore);
+
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 6 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        //cout << pTable->dump();
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef F4 p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e3 e v1  p1 (beam 21 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c2 w v3  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g3 e v1  p1 (beam 21 =))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c4 e v1  p1 (beam 21 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 256,     0, "(barline simple)" );
+    }
+
+    // ColStaffObjsBuilderEngine1x ------------------------------------------------------
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsAddEntries)
     {
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_pLdpFactory);
@@ -126,7 +430,6 @@ SUITE(ColStaffObjsTest)
         ColStaffObjsBuilder builder;
         ColStaffObjs* pColStaffObjs = builder.build(pScore);
 
-//        ColStaffObjsIterator it = pColStaffObjs->begin();
 //        cout << pColStaffObjs->dump();
 
         CHECK( pColStaffObjs->num_entries() == 2 );
@@ -136,7 +439,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ScoreIteratorPointsFirst)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ScoreIteratorPointsFirst)
     {
         LdpParser parser(cout, m_pLdpFactory);
         parser.parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6) (instrument (musicData (n c4 q) (barline simple))))))" );
@@ -161,7 +464,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsChangeMeasure)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsChangeMeasure)
     {
         LdpParser parser(cout, m_pLdpFactory);
         parser.parse_text("(lenmusdoc (vers 0.0) (content "
@@ -204,7 +507,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsTimeInSequence)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsTimeInSequence)
     {
         LdpParser parser(cout, m_pLdpFactory);
         parser.parse_text("(lenmusdoc (vers 0.0) (content "
@@ -247,7 +550,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsTimeGoBack)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsTimeGoBack)
     {
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_pLdpFactory);
@@ -296,7 +599,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, GoBack_StartTime)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, GoBack_StartTime)
     {
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_pLdpFactory);
@@ -364,7 +667,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsTimeGoFwd)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsTimeGoFwd)
     {
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_pLdpFactory);
@@ -408,7 +711,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsStaffAssigned)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsStaffAssigned)
     {
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_pLdpFactory);
@@ -446,182 +749,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsLineAssigned)
-    {
-        Document doc(m_libraryScope);
-        LdpParser parser(cout, m_pLdpFactory);
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
-            "(score (vers 1.6) (instrument (musicData "
-            "(n c4 q v1)(n d4 e.)(n d4 s v3)(n e4 h)))) ))" );
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore);
-        ColStaffObjsIterator it = pColStaffObjs->begin();
-        //pColStaffObjs->dump();
-        CHECK( pColStaffObjs->num_entries() == 4 );
-        CHECK( pColStaffObjs->num_lines() == 2 );
-
-        //CHECK( (*it)->to_string() == "(n c4 q v1)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n d4 e.)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n d4 s v3)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 1 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n e4 h)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 1 );
-
-        delete tree->get_root();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsAssigLineToClef)
-    {
-        Document doc(m_libraryScope);
-        LdpParser parser(cout, m_pLdpFactory);
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
-            "(score (vers 1.6) (instrument (musicData "
-            "(clef G)(n c4 q v2)(n d4 e.)(n d4 s v3)(n e4 h)))) ))" );
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore);
-        ColStaffObjsIterator it = pColStaffObjs->begin();
-        //pColStaffObjs->dump();
-        CHECK( pColStaffObjs->num_entries() == 5 );
-        CHECK( pColStaffObjs->num_lines() == 2 );
-
-        //CHECK( (*it)->to_string() == "(clef G)" );
-        CHECK( (*it)->imo_object()->is_clef() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n c4 q v2)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n d4 e.)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n d4 s v3)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 1 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n e4 h)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 1 );
-
-        delete tree->get_root();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsAssigLineToKey)
-    {
-        Document doc(m_libraryScope);
-        LdpParser parser(cout, m_pLdpFactory);
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
-            "(score (vers 1.6) (instrument (staves 2)(musicData "
-            "(clef G p1)(clef F4 p2)(key D)(n c4 q v2 p1)(n d4 e.)"
-            "(n d4 s v3 p2)(n e4 h)))) ))" );
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore);
-        ColStaffObjsIterator it = pColStaffObjs->begin();
-        //pColStaffObjs->dump();
-        CHECK( pColStaffObjs->num_entries() == 8 );
-        CHECK( pColStaffObjs->num_lines() == 2 );
-
-        //CHECK( (*it)->to_string() == "(clef G p1)" );
-        CHECK( (*it)->imo_object()->is_clef() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(clef F4 p2)" );
-        CHECK( (*it)->imo_object()->is_clef() == true );
-        CHECK( (*it)->line() == 1 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(key D)" );
-        CHECK( (*it)->imo_object()->is_key_signature() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(key D)" );
-        CHECK( (*it)->imo_object()->is_key_signature() == true );
-        CHECK( (*it)->line() == 1 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n c4 q v2 p1)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n d4 e.)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n d4 s v3 p2)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 1 );
-        ++it;
-        //CHECK( (*it)->to_string() == "(n e4 h)" );
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 1 );
-
-        delete tree->get_root();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsAssigLineToTime)
-    {
-        Document doc(m_libraryScope);
-        LdpParser parser(cout, m_pLdpFactory);
-        parser.parse_text("(lenmusdoc (vers 0.0) (content "
-            "(score (vers 1.6) (instrument (staves 2)(musicData "
-            "(clef G p1)(clef F4 p2)(key D)(time 2 4)(n c4 q v2 p1)"
-            "(n d4 e.)(n d4 s v3 p2)(n e4 h)))) ))" );
-        LdpTree* tree = parser.get_ldp_tree();
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
-        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-        ColStaffObjsBuilder builder;
-        ColStaffObjs* pColStaffObjs = builder.build(pScore);
-        ColStaffObjsIterator it = pColStaffObjs->begin();
-        //pColStaffObjs->dump();
-        CHECK( pColStaffObjs->num_lines() == 2 );
-        CHECK( pColStaffObjs->num_entries() == 10 );
-                   // (clef G p1)
-        ++it;       //(clef F4 p2)
-        ++it;       //(key D)
-        ++it;       //(key D)
-        ++it;       //(time 2 4)
-        CHECK( (*it)->imo_object()->is_time_signature() == true );
-        CHECK( (*it)->line() == 0 );
-        ++it;       //(time 2 4)
-        CHECK( (*it)->imo_object()->is_time_signature() == true );
-        CHECK( (*it)->line() == 1 );
-        ++it;       //(n c4 q v2 p1)
-        CHECK( (*it)->imo_object()->is_note() == true );
-        CHECK( (*it)->line() == 0 );
-
-        delete tree->get_root();
-        delete pIModel;
-    }
-
-    TEST_FIXTURE(ColStaffObjsTestFixture, Anacrusis)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, Anacrusis)
     {
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_pLdpFactory);
@@ -665,7 +793,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsFullExample)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsFullExample)
     {
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_pLdpFactory);
@@ -875,7 +1003,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsAddAnchor)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsAddAnchor)
     {
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_pLdpFactory);
@@ -917,7 +1045,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ChordAcrossTwoStaves)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ChordAcrossTwoStaves)
     {
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_pLdpFactory);
@@ -978,7 +1106,7 @@ SUITE(ColStaffObjsTest)
 
 //Additional test for ColStaffObjsIterator -------------------------------------
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, CSOIteratorAtEnd)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, CSOIteratorAtEnd)
     {
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_pLdpFactory);
@@ -1034,7 +1162,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjs_Chord)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjs_Chord)
     {
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_pLdpFactory);
@@ -1081,7 +1209,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjs_NoMusicData)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjs_NoMusicData)
     {
         Document doc(m_libraryScope);
         stringstream errormsg;
@@ -1108,7 +1236,7 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(ColStaffObjsTestFixture, ColStaffObjsTimeInSequenceWhenDecimals)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsTimeInSequenceWhenDecimals)
     {
         Document doc(m_libraryScope);
         LdpParser parser(cout, m_pLdpFactory);
@@ -1195,25 +1323,191 @@ SUITE(ColStaffObjsTest)
         delete pIModel;
     }
 
-//    TEST_FIXTURE(ColStaffObjsTestFixture, fix_bug_1)
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsLineAssigned)
+    {
+        Document doc(m_libraryScope);
+        LdpParser parser(cout, m_pLdpFactory);
+        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 1.6) (instrument (musicData "
+            "(n c4 q v1)(n d4 e.)(n d4 s v3)(n e4 h)))) ))" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(cout, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+        //pColStaffObjs->dump();
+        CHECK( pColStaffObjs->num_entries() == 4 );
+        CHECK( pColStaffObjs->num_lines() == 2 );
+
+        //CHECK( (*it)->to_string() == "(n c4 q v1)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n d4 e.)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n d4 s v3)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 1 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n e4 h)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 1 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsAssigLineToClef)
+    {
+        Document doc(m_libraryScope);
+        LdpParser parser(cout, m_pLdpFactory);
+        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 1.6) (instrument (musicData "
+            "(clef G)(n c4 q v2)(n d4 e.)(n d4 s v3)(n e4 h)))) ))" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(cout, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+        //pColStaffObjs->dump();
+        CHECK( pColStaffObjs->num_entries() == 5 );
+        CHECK( pColStaffObjs->num_lines() == 2 );
+
+        //CHECK( (*it)->to_string() == "(clef G)" );
+        CHECK( (*it)->imo_object()->is_clef() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n c4 q v2)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n d4 e.)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n d4 s v3)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 1 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n e4 h)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 1 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsAssigLineToKey)
+    {
+        Document doc(m_libraryScope);
+        LdpParser parser(cout, m_pLdpFactory);
+        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 1.6) (instrument (staves 2)(musicData "
+            "(clef G p1)(clef F4 p2)(key D)(n c4 q v2 p1)(n d4 e.)"
+            "(n d4 s v3 p2)(n e4 h)))) ))" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(cout, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+        //pColStaffObjs->dump();
+        CHECK( pColStaffObjs->num_entries() == 8 );
+        CHECK( pColStaffObjs->num_lines() == 2 );
+
+        //CHECK( (*it)->to_string() == "(clef G p1)" );
+        CHECK( (*it)->imo_object()->is_clef() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(clef F4 p2)" );
+        CHECK( (*it)->imo_object()->is_clef() == true );
+        CHECK( (*it)->line() == 1 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(key D)" );
+        CHECK( (*it)->imo_object()->is_key_signature() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(key D)" );
+        CHECK( (*it)->imo_object()->is_key_signature() == true );
+        CHECK( (*it)->line() == 1 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n c4 q v2 p1)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n d4 e.)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n d4 s v3 p2)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 1 );
+        ++it;
+        //CHECK( (*it)->to_string() == "(n e4 h)" );
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 1 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, ColStaffObjsAssigLineToTime)
+    {
+        Document doc(m_libraryScope);
+        LdpParser parser(cout, m_pLdpFactory);
+        parser.parse_text("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 1.6) (instrument (staves 2)(musicData "
+            "(clef G p1)(clef F4 p2)(key D)(time 2 4)(n c4 q v2 p1)"
+            "(n d4 e.)(n d4 s v3 p2)(n e4 h)))) ))" );
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(cout, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        ColStaffObjsBuilder builder;
+        ColStaffObjs* pColStaffObjs = builder.build(pScore);
+        ColStaffObjsIterator it = pColStaffObjs->begin();
+        //pColStaffObjs->dump();
+        CHECK( pColStaffObjs->num_lines() == 2 );
+        CHECK( pColStaffObjs->num_entries() == 10 );
+                   // (clef G p1)
+        ++it;       //(clef F4 p2)
+        ++it;       //(key D)
+        ++it;       //(key D)
+        ++it;       //(time 2 4)
+        CHECK( (*it)->imo_object()->is_time_signature() == true );
+        CHECK( (*it)->line() == 0 );
+        ++it;       //(time 2 4)
+        CHECK( (*it)->imo_object()->is_time_signature() == true );
+        CHECK( (*it)->line() == 1 );
+        ++it;       //(n c4 q v2 p1)
+        CHECK( (*it)->imo_object()->is_note() == true );
+        CHECK( (*it)->line() == 0 );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+//    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, voice_0)
 //    {
-//        //Fix bug. Score with .....
+//        //voice correctly assigned to second voice
 //        Document doc(m_libraryScope);
 //        LdpParser parser(cout, m_pLdpFactory);
 //        parser.parse_text("(lenmusdoc (vers 0.0) (content "
-//            "(score (vers 1.6)"
-//               "(instrument (staves 2) (musicData "
-//               "(clef G p1)(clef F4 p2)(key C)(time 2 4)"
-//               "(n c5 e p1 v1 (stem up))(n e5 e (stem up))(n c5 e (stem up))(n e5 e (stem up))(goBack start)"
-//               "(n e4 e p1 v2 (stem down))(n g4 e (stem down))(n e4 e (stem down))(n g4 e (stem down))(goBack start)"
-//               "(n c3 e p2 v3 (stem up))(n e3 e (stem up))(n g3 q (stem up))(goBack start)"
-//               "(n g2 e p2 v4 (stem down))(n c3 e (stem down))(n c3 e (stem down))(n c3 e (stem down))(barline)"
-//               "(n c5 e p1 v1 (stem up))(n e5 e (stem up))(n c5 e (stem up))(n e5 e (stem up))(goBack start)"
-//               "(n e4 e p1 v2 (stem down))(n g4 e (stem down))(n e4 e (stem down))(n g4 e (stem down))(goBack start)"
-//               "(n c3 e p2 v3 (stem up))(n e3 e (stem up))(n g3 q (stem up))(goBack start)"
-//               "(n g2 e p2 v4 (stem down))(n c3 e (stem down))(n c3 e (stem down))(n c3 e (stem down))(barline)"
-//            ")) )))"
-//             );
+//            "(score (vers 1.6)(instrument (musicData "
+//            "(clef F4)(n e3 e g+)(n g3 e)(n c4 e g-)"
+//            "(goBack start)(n c2 w)(barline)"
+//            ")) )))" );
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(cout, m_libraryScope, &doc);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -1221,45 +1515,53 @@ SUITE(ColStaffObjsTest)
 //        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
 //        ColStaffObjsBuilder builder;
 //        ColStaffObjs* pColStaffObjs = builder.build(pScore);
+//        ColStaffObjsIterator it = pColStaffObjs->begin();
 //
-//        cout << pColStaffObjs->dump();
-//        CHECK( pColStaffObjs->num_entries() == 11 );
+//        //cout << pColStaffObjs->dump();
+//        CHECK( pColStaffObjs->num_entries() == 6 );
 //        CHECK( pColStaffObjs->num_lines() == 2 );
 //
-//        ColStaffObjsIterator it = pColStaffObjs->begin();
-//        //it        (n a3 w p1)
-//        CHECK( (*it)->imo_object()->is_note() == true );
-//        CHECK( (*it)->measure() == 0 );
-//        CHECK( is_equal_time((*it)->time(), 0.0f) );
-//        CHECK( (*it)->line() == 0 );
+//        //             instr, staff, meas. time, line, scr
+//        CHECK_ENTRY(it, 0,    0,      0,   0,     0, "(clef#21 F4 p1 )" );
+//        ++it;
+//        CHECK_ENTRY(it, 0,    0,      0,   0,     0, "(n#22 e3 e v1  p1 (beam 25 +))" );
+//        ++it;
+//        CHECK_ENTRY(it, 0,    0,      0,   0,     1, "(n#33 c2 w v2  p1 )" );
+//        ++it;
+//        CHECK_ENTRY(it, 0,    0,      0,  32,     0, "(n#23 g3 e v1  p1 (beam 25 =))" );
+//        ++it;
+//        CHECK_ENTRY(it, 0,    0,      0,  64,     0, "(n#24 c4 e v1  p1 (beam 25 -))" );
+//        ++it;
+//        CHECK_ENTRY(it, 0,    0,      0, 256,     0, "(barline#34 simple)" );
 //
 //        delete tree->get_root();
 //        delete pIModel;
 //    }
 
-//    //Code for displaying the ColStaffObjs for a score
-//    TEST_FIXTURE(ColStaffObjsTestFixture, display_colstaffobjs)
+
+//    TEST_FIXTURE(ColStaffObjsBuilderTestFixture, display_colstaffobjs)
 //    {
-//        //For investigating problems
+//        //test for displaying colstaffobjs table
 //        Document doc(m_libraryScope);
 //        LdpParser parser(cout, m_pLdpFactory);
 //        parser.parse_text(
-//            "(score (vers 1.6)"
-//            "(instrument (staves 2)(musicData "
-//            "(clef G p1)(clef F4 p2)(key D)(time 4 4)(n c4 e p1)(n e4 s)(goBack start)"
-//            "(n g3 q p2)(n e3 e)(goFwd 160)(barline)"
+//            "(lenmusdoc (vers 0.0) (content "
+//            "(score (vers 1.7)(instrument (musicData "
+//            "(clef F4 p1 )(n e3 e v1 p1 (beam 37 +)(t + 3 2)(tm 2 3))"
+//            "(goBack start)(n c2 w v1  p1 )(goBack 234.667)"
+//            "(n g3 e v1 p1 (beam 37 =)(tm 2 3))(n c4 e v1 p1 (beam 37 -)(t -)(tm 2 3)) )))"
 //            "))"
-//            "(instrument (musicData (clef G p1)(key D)(time 4 4)"
-//            "(n c4 h.)(n e4 s)(goFwd 48)(barline)"
-//            "))"
-//            ")"
 //        );
 //        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(cout, m_libraryScope, &doc);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+//        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+//        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
 //        ColStaffObjsBuilder builder;
 //        ColStaffObjs* pColStaffObjs = builder.build(pScore);
+//        ColStaffObjsIterator it = pColStaffObjs->begin();
+//
+//        cout << "Test: ColStaffObjsBuilderTestFixture, display_colstaffobjs" << endl;
 //        cout << pColStaffObjs->dump();
 //    }
 

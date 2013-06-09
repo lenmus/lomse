@@ -186,7 +186,7 @@ protected:
     ImoScore*       m_pCurScore;
     ImoScore*       m_pLastScore;
     ImoDocument*    m_pImoDoc;
-    string          m_scoreVersion;
+    int             m_scoreVersion;     //100*major + minor
 
     //analysis input
     LdpTree* m_pTree;
@@ -259,8 +259,8 @@ public:
 //    void add_chord(ImoChord* pChord);
 
     //access to score being analysed
-    inline void set_score_version(const string& version) { m_scoreVersion = version; }
-    inline const string& get_score_version() { return m_scoreVersion; }
+    int set_score_version(const string& version);
+    inline const int get_score_version() { return m_scoreVersion; }
     inline void score_analysis_begin(ImoScore* pScore) { m_pCurScore = pScore; }
     inline void score_analysis_end() {
         m_pLastScore = m_pCurScore;
@@ -287,6 +287,9 @@ public:
 protected:
     ElementAnalyser* new_analyser(ELdpElement type, ImoObj* pAnchor=NULL);
     void delete_relation_builders();
+
+    //auxiliary
+    bool to_integer(const string& text, int* pResult);
 
     //auxiliary. for ldp notes analysis
     static int to_step(const char& letter);

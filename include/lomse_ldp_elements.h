@@ -212,6 +212,7 @@ enum ELdpElement
     k_table_col_width,
     k_text_align,
     k_text_decoration,
+    k_time_modification,
     k_title,
     k_url,
     k_value,

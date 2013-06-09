@@ -130,7 +130,8 @@ void AccidentalsEngraver::find_glyphs()
 //---------------------------------------------------------------------------------------
 void AccidentalsEngraver::create_container_shape(UPoint pos)
 {
-    m_pContainer = LOMSE_NEW GmoShapeAccidentals(m_pCreatorImo, 0, pos, Color(0,0,0));
+    ShapeId idx = 0;
+    m_pContainer = LOMSE_NEW GmoShapeAccidentals(m_pCreatorImo, idx, pos, Color(0,0,0));
 }
 
 //---------------------------------------------------------------------------------------

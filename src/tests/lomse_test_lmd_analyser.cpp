@@ -318,7 +318,7 @@ SUITE(LmdAnalyserTest)
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
 //        CHECK( pScore != NULL );
-//        CHECK( pScore->get_version() == "1.6" );
+//        CHECK( pScore->get_version_string() == "1.6" );
 //        CHECK( pScore->get_num_instruments() == 0 );
 //
 //        delete tree->get_root();

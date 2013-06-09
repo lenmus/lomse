@@ -33,6 +33,7 @@
 #include "lomse_document.h"
 #include "lomse_document_cursor.h"
 #include "lomse_im_factory.h"
+#include "lomse_logger.h"
 
 
 #include <sstream>
@@ -91,14 +92,14 @@ void DocCommand::set_command_name(const string& name, ImoObj* pImo)
 {
     m_name = name;
     int type = pImo->get_obj_type();
-    switch(type)
-    {
-        case k_imo_note:        m_name.append("note");          break;
-        case k_imo_para:        m_name.append("paragraph");     break;
-        case k_imo_rest:        m_name.append("rest");          break;
-        default:
+//    switch(type)
+//    {
+//        case k_imo_note:        m_name.append("note");          break;
+//        case k_imo_para:        m_name.append("paragraph");     break;
+//        case k_imo_rest:        m_name.append("rest");          break;
+//        default:
             m_name.append( ImoObj::get_name(type) );
-    }
+//    }
 }
 
 ////=======================================================================================
@@ -213,32 +214,88 @@ void DocCommand::set_command_name(const string& name, ImoObj* pImo)
 //=======================================================================================
 DocCommandExecuter::DocCommandExecuter(Document* target)
     : m_pDoc(target)
-    , m_pCursor(NULL)
 {
 }
 
 //---------------------------------------------------------------------------------------
-void DocCommandExecuter::execute(DocCursor* pCursor, DocCommand* pCmd)
+int DocCommandExecuter::execute(DocCursor* pCursor, DocCommand* pCmd)
 {
-    m_pCursor = pCursor;
-    m_stack.push(pCmd);
-    pCmd->perform_action(m_pDoc, m_pCursor);
+    int result = pCmd->perform_action(m_pDoc, pCursor);
+    m_error = pCmd->get_error();
+    if ( result == k_success && pCmd->is_reversible())
+    {
+        m_stack.push( LOMSE_NEW UndoElement(pCmd, pCursor->get_state()) );
+        update_cursor(pCursor, pCmd);
+    }
+    return result;
 }
 
 //---------------------------------------------------------------------------------------
-void DocCommandExecuter::undo()
+void DocCommandExecuter::update_cursor(DocCursor* pCursor, DocCommand* pCmd)
 {
-    DocCommand* cmd = m_stack.pop();
-    cmd->undo_action(m_pDoc, m_pCursor);
+    int policy = pCmd->get_cursor_update_policy();
+    switch (policy)
+    {
+        case DocCommand::k_do_nothing:
+            break;
+
+        case DocCommand::k_update_after_insertion:
+        {
+            CmdInsertObj* cmd = static_cast<CmdInsertObj*>(pCmd);
+            pCursor->update_after_insertion( cmd->last_inserted_id() );
+            break;
+        }
+
+        case DocCommand::k_update_after_deletion:
+            pCursor->update_after_deletion();
+            break;
+
+        default:
+        {
+            LOMSE_LOG_ERROR("Unknown cursor update policy.");
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------
-void DocCommandExecuter::redo()
+void DocCommandExecuter::undo(DocCursor* pCursor)
 {
-    DocCommand* cmd = m_stack.undo_pop();
-    cmd->perform_action(m_pDoc, m_pCursor);
+    UndoElement* pUE = m_stack.pop();
+    if (pUE)
+    {
+        DocCommand* cmd = pUE->pCmd;
+        cmd->undo_action(m_pDoc, pCursor);
+
+        pCursor->restore_state( pUE->cursorState );
+    }
 }
 
+//---------------------------------------------------------------------------------------
+void DocCommandExecuter::redo(DocCursor* pCursor)
+{
+    UndoElement* pUE = m_stack.undo_pop();
+    if (pUE)
+    {
+        pCursor->restore_state( pUE->cursorState );
+        DocCommand* cmd = pUE->pCmd;
+        cmd->perform_action(m_pDoc, pCursor);
+
+        update_cursor(pCursor, cmd);
+    }
+}
+
+////---------------------------------------------------------------------------------------
+//void DocCommandExecuter::replay(DocCursor* pCursor)
+//{
+//    UndoElement* pUE = m_stack.undo_pop();  <-- replace by m_recording stack
+//    if (pUE)
+//    {
+//        DocCommand* cmd = pUE->pCmd;
+//        cmd->perform_action(m_pDoc, pCursor);
+//
+//        update_cursor(pCursor, cmd->get_cursor_update_policy());
+//    }
+//}
 
 
 
@@ -250,10 +307,11 @@ CmdCursor::CmdCursor(int cmd, ImoId id)
     , m_operation(cmd)
     , m_targetId(id)
 {
+    m_flags = k_recordable;
 }
 
 //---------------------------------------------------------------------------------------
-void CmdCursor::perform_action(Document* pDoc, DocCursor* pCursor)
+int CmdCursor::perform_action(Document* pDoc, DocCursor* pCursor)
 {
     m_curState = pCursor->get_state();
     switch(m_operation)
@@ -285,12 +343,14 @@ void CmdCursor::perform_action(Document* pDoc, DocCursor* pCursor)
         default:
             ;
     }
+    return k_success;
 }
 
 //---------------------------------------------------------------------------------------
 void CmdCursor::undo_action(Document* pDoc, DocCursor* pCursor)
 {
-    pCursor->restore_state(m_curState);
+    //CmdCursor is not reversible. Nothing to do here.
+    //pCursor->restore_state(m_curState);
 }
 
 
@@ -300,10 +360,11 @@ void CmdCursor::undo_action(Document* pDoc, DocCursor* pCursor)
 CmdDeleteBlockLevelObj::CmdDeleteBlockLevelObj()
     : DocCmdSimple()
 {
+    m_flags = k_recordable | k_reversible;
 }
 
 //---------------------------------------------------------------------------------------
-void CmdDeleteBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
+int CmdDeleteBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
 {
     create_checkpoint(pDoc);
 
@@ -313,7 +374,9 @@ void CmdDeleteBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
         set_command_name("Delete ", pImo);
         ImoDocument* pImoDoc = pDoc->get_imodoc();
         pImoDoc->delete_block_level_obj(pImo);
+        return k_success;
     }
+    return k_failure;
 }
 
 
@@ -323,10 +386,11 @@ void CmdDeleteBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
 CmdDeleteStaffObj::CmdDeleteStaffObj()
     : DocCmdSimple()
 {
+    m_flags = k_recordable | k_reversible;
 }
 
 //---------------------------------------------------------------------------------------
-void CmdDeleteStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
+int CmdDeleteStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
 {
     create_checkpoint(pDoc);
 
@@ -339,91 +403,395 @@ void CmdDeleteStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
 
         ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_top_object() );
         pScore->close();
+        return k_success;
+    }
+    return k_failure;
+}
+
+
+//=======================================================================================
+// CmdInsertObj implementation
+//=======================================================================================
+void CmdInsertObj::remove_object(Document* pDoc, ImoId id)
+{
+    if (id != k_no_imoid)
+    {
+        //get object to remove
+        ImoStaffObj* pImo = static_cast<ImoStaffObj*>( pDoc->get_pointer_to_imo(id) );
+
+        //remove object from imo tree
+        ImoDocument* pImoDoc = pDoc->get_imodoc();
+        TreeNode<ImoObj>::iterator it(pImo);
+        pImoDoc->erase(it);
+        pImoDoc->set_dirty(true);
+        delete pImo;
     }
 }
+
+//---------------------------------------------------------------------------------------
+int CmdInsertObj::validate_source()
+{
+    //TODO: refactor. Source code exploration must be done by LdpParser. It should return
+    //the number of top level elements and a flag for signaling no parenthesis missmatch.
+    //Here, we should only ask parser for a quick check and validate num of top level
+    //elements
+
+    //starts and ends with parenthesis
+    size_t size = m_source.size();
+    if (size < 3 || m_source.at(0) != '(' || m_source.at(size-1) != ')')
+    {
+        m_error = "Missing start or end parenthesis";
+        return k_failure;
+    }
+
+    int open = 1;
+    bool fPerhapsMoreThanOneElement = false;
+    for (size_t i=1; i < size; ++i)
+    {
+        if (m_source.at(i) == '(')
+        {
+            if (open == 0)
+                fPerhapsMoreThanOneElement = true;
+            open++;
+        }
+        else if (m_source.at(i) == ')')
+            open--;
+        //TODO: skip parenthesis inside strings!
+    }
+    if (open != 0)
+    {
+        m_error = "Parenthesis missmatch";
+        return k_failure;
+    }
+    if (fPerhapsMoreThanOneElement)
+    {
+        m_error = "More than one LDP elements";
+        return k_failure;
+    }
+
+    return k_success;
+}
+
 
 
 //=======================================================================================
 // CmdInsertBlockLevelObj implementation
 //=======================================================================================
 CmdInsertBlockLevelObj::CmdInsertBlockLevelObj(int type)
-    : DocCmdSimple()
-    , m_insertedId(k_no_imoid)
-    , m_type(type)
+    : CmdInsertObj()
+    , m_blockType(type)
+    , m_fFromSource(false)
 {
+    m_flags = k_recordable | k_reversible;
+}
+
+//---------------------------------------------------------------------------------------
+CmdInsertBlockLevelObj::CmdInsertBlockLevelObj(const string& source)
+    : CmdInsertObj()
+    , m_blockType(k_imo_block_level_obj)
+    , m_fFromSource(true)
+{
+    m_source = source;
+    m_flags = k_recordable | k_reversible;
+    m_name = "Insert block";
 }
 
 //---------------------------------------------------------------------------------------
 void CmdInsertBlockLevelObj::undo_action(Document* pDoc, DocCursor* pCursor)
 {
-    if (m_insertedId != k_no_imoid)
+    if (m_lastInsertedId != k_no_imoid)
     {
         ImoDocument* pImoDoc = pDoc->get_imodoc();
-        ImoObj* pImo = pDoc->get_pointer_to_imo(m_insertedId);
-        TreeNode<ImoObj>::iterator it(pImo);
-        pImoDoc->erase(it);
-        m_insertedId = k_no_imoid;
+        ImoBlockLevelObj* pImo = static_cast<ImoBlockLevelObj*>(
+                                            pDoc->get_pointer_to_imo(m_lastInsertedId) );
+        pImoDoc->delete_block_level_obj(pImo);
+        m_lastInsertedId = k_no_imoid;
     }
 }
 
 //---------------------------------------------------------------------------------------
-void CmdInsertBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
+int CmdInsertBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
+{
+    if (m_fFromSource)
+        perform_action_from_source(pDoc, pCursor);
+    else
+        perform_action_from_type(pDoc, pCursor);
+    return k_success;
+}
+
+//---------------------------------------------------------------------------------------
+void CmdInsertBlockLevelObj::perform_action_from_type(Document* pDoc, DocCursor* pCursor)
 {
     ImoBlockLevelObj* pImo =
-        static_cast<ImoBlockLevelObj*>( ImFactory::inject(m_type, pDoc) );
+        static_cast<ImoBlockLevelObj*>( ImFactory::inject(m_blockType, pDoc) );
     set_command_name("Insert ", pImo);
     ImoDocument* pImoDoc = pDoc->get_imodoc();
     ImoBlockLevelObj* pAt = dynamic_cast<ImoBlockLevelObj*>( pCursor->get_pointee() );
     pImoDoc->insert_block_level_obj(pAt, pImo);
-    m_insertedId = pImo->get_id();
+    m_lastInsertedId = pImo->get_id();
+}
+
+//---------------------------------------------------------------------------------------
+void CmdInsertBlockLevelObj::perform_action_from_source(Document* pDoc, DocCursor* pCursor)
+{
+    //create object
+    ImoObj* pImo = pDoc->create_object_from_lmd(m_source);
+
+    if (pImo && pImo->is_block_level_obj())
+    {
+        //insert the created subtree at desired point
+        ImoBlockLevelObj* pAt = dynamic_cast<ImoBlockLevelObj*>( pCursor->get_pointee() );
+        ImoDocument* pImoDoc = pDoc->get_imodoc();
+        pImoDoc->insert_block_level_obj(pAt, static_cast<ImoBlockLevelObj*>(pImo));
+        m_lastInsertedId = pImo->get_id();
+    }
+    else
+    {
+        delete pImo;
+    }
 }
 
 
-////=======================================================================================
-//// CmdInsertStaffObj implementation
-////=======================================================================================
-//CmdInsertStaffObj::CmdInsertStaffObj(DocCursor& cursor, int type)
-//    : DocCmdSimple()
-//    , m_cursorId( cursor.get_pointee_id() )
-//    , m_insertedId(k_no_imoid)
-//    , m_type(type)
-//{
-//    m_name = "Insert ";
-////    switch(type)
-////    {
-////        case k_imo_para:        m_name.append("paragraph");     break;
-////        default:
-////            m_name.append( ImoObj::get_name(type) );
-////    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void CmdInsertStaffObj::undo_action(Document* pDoc, DocCursor* pCursor)
-//{
-////    if (m_insertedId != k_no_imoid)
-////    {
-////        ImoDocument* pImoDoc = pDoc->get_imodoc();
-////        ImoObj* pImo = pDoc->get_pointer_to_imo(m_insertedId);
-////        TreeNode<ImoObj>::iterator it(pImo);
-////        pImoDoc->erase(it);
-////        m_insertedId = k_no_imoid;
-////    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void CmdInsertStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
-//{
-////    ImoBlockLevelObj* pImo =
-////        static_cast<ImoBlockLevelObj*>( ImFactory::inject(m_type, pDoc) );
-////    ImoDocument* pImoDoc = pDoc->get_imodoc();
-////    ImoBlockLevelObj* pAt = NULL;
-////    if (m_cursorId != k_no_imoid)
-////    {
-////        pAt = dynamic_cast<ImoBlockLevelObj*>( pDoc->get_pointer_to_imo(m_cursorId) );
-////    }
-////    pImoDoc->insert_block_level_obj(pAt, pImo);
-////    m_insertedId = pImo->get_id();
-//}
+
+//=======================================================================================
+// CmdInsertStaffObj implementation
+//=======================================================================================
+CmdInsertStaffObj::CmdInsertStaffObj(const string& source)
+    : CmdInsertObj()
+{
+    m_source = source;
+    m_flags = k_recordable | k_reversible;
+    m_name = "Insert ";
+}
+
+//---------------------------------------------------------------------------------------
+void CmdInsertStaffObj::undo_action(Document* pDoc, DocCursor* pCursor)
+{
+    if (m_lastInsertedId != k_no_imoid)
+    {
+        remove_object(pDoc, m_lastInsertedId);
+        //TODO: set document modified
+
+        //update ColStaffObjs
+        ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_top_object() );
+        pScore->close();
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int CmdInsertStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
+{
+    if (validate_source() != k_success)
+        return k_failure;
+
+    //get instrument that will be modified
+    DocCursorState state = pCursor->get_state();
+    SpElementCursorState elmState = state.get_delegate_state();
+    ScoreCursorState* pState = static_cast<ScoreCursorState*>( elmState.get() );
+    ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_top_object() );
+    ImoInstrument* pInstr = pScore->get_instrument( pState->instrument() );
+
+    //create and insert object
+    if (pInstr)
+    {
+        //insert the created object at desired point
+        stringstream errormsg;
+        ImoStaffObj* pAt = dynamic_cast<ImoStaffObj*>( pCursor->get_pointee() );
+        ImoStaffObj* pImo = pInstr->insert_staffobj_at(pAt, m_source, errormsg);
+        if (pImo)
+        {
+            if (m_lastInsertedId == k_no_imoid)
+            {
+                m_lastInsertedId = pImo->get_id();
+
+                //inject id in source code
+                size_t i = m_source.find(' ');
+                if (i == string::npos)
+                    i = m_source.find(')');
+
+                stringstream source;
+                source << m_source.substr(0, i) << "#" << m_lastInsertedId
+                       << m_source.substr(i);
+                m_source = source.str();
+            }
+
+            //update ColStaffObjs table
+            pScore->close();
+
+            //assign name to this command
+            m_name.append( pImo->get_name() );
+
+            return k_success;
+        }
+        else
+        {
+            m_error = errormsg.str();
+            return k_failure;
+        }
+    }
+    return k_failure;
+}
+
+
+
+//=======================================================================================
+// CmdInsertManyStaffObjs implementation
+//=======================================================================================
+CmdInsertManyStaffObjs::CmdInsertManyStaffObjs(const string& source,  const string& name)
+    : CmdInsertObj()
+    , m_fSaved(false)
+{
+    m_source = source;
+    m_flags = k_recordable | k_reversible;
+    m_name = name;
+}
+
+//---------------------------------------------------------------------------------------
+int CmdInsertManyStaffObjs::perform_action(Document* pDoc, DocCursor* pCursor)
+{
+    //Undo strategy: The inserted objects can create relations with other objects (for
+    //instance, beamed groups, ligatures, etc.). Therefore, an 'undo' operation
+    //would require to identify and remove these relations before removing the
+    //staff objects. As this can be complex, it is simpler to use checkpoints.
+    create_checkpoint(pDoc);
+
+    //get instrument that will be modified
+    DocCursorState state = pCursor->get_state();
+    SpElementCursorState elmState = state.get_delegate_state();
+    ScoreCursorState* pState = static_cast<ScoreCursorState*>( elmState.get() );
+    ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_top_object() );
+    ImoInstrument* pInstr = pScore->get_instrument( pState->instrument() );
+
+    //create and insert objects
+    if (pInstr)
+    {
+        //insert the created object at desired point
+        stringstream errormsg;
+        ImoStaffObj* pAt = dynamic_cast<ImoStaffObj*>( pCursor->get_pointee() );
+        list<ImoStaffObj*> objects = pInstr->insert_staff_objects_at(pAt, m_source, errormsg);
+        if (objects.size() > 0)
+        {
+            pScore->close();        //update ColStaffObjs table
+            save_source_code_with_ids(pDoc, objects);
+            m_lastInsertedId = objects.back()->get_id();
+            objects.clear();
+            return k_success;
+        }
+    }
+    return k_failure;
+}
+
+//---------------------------------------------------------------------------------------
+void CmdInsertManyStaffObjs::save_source_code_with_ids(Document* pDoc,
+                                                       const list<ImoStaffObj*>& objects)
+{
+    //This is not necessary. As unodo/redo is based on checkpoints, the undo operation
+    //rebuildsthe document and resets ImoId counter. Therefore, redo operation reassigns
+    //*the same* ids, without the need of saving them in this command source code.
+
+    if (!m_fSaved)
+    {
+        //generate source code with ids.
+
+        m_fSaved = true;
+    }
+}
+
+
+//=======================================================================================
+// CmdAddStaffObj implementation
+//=======================================================================================
+CmdAddStaffObj::CmdAddStaffObj(const string& source)
+    : CmdInsertObj()
+    , m_firstInsertedId(k_no_imoid)
+{
+    m_source = source;
+    m_flags = k_recordable | k_reversible;
+    m_name = "Add ";
+}
+
+//---------------------------------------------------------------------------------------
+void CmdAddStaffObj::undo_action(Document* pDoc, DocCursor* pCursor)
+{
+    //Undo strategy: direct undo by removing added objects.
+
+    if (m_firstInsertedId != m_lastInsertedId)
+        remove_object(pDoc, m_firstInsertedId);
+    remove_object(pDoc, m_lastInsertedId);
+
+    //TODO: set document modified
+
+    //update ColStaffObjs
+    ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_top_object() );
+    pScore->close();
+}
+
+//---------------------------------------------------------------------------------------
+int CmdAddStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
+{
+//    if (validate_source() != k_success)
+//        return k_failure;
+
+    //get instrument that will be modified
+    DocCursorState state = pCursor->get_state();
+    SpElementCursorState elmState = state.get_delegate_state();
+    ScoreCursorState* pState = static_cast<ScoreCursorState*>( elmState.get() );
+    ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_top_object() );
+    ImoInstrument* pInstr = pScore->get_instrument( pState->instrument() );
+
+    //create and insert object
+    if (pInstr)
+    {
+        //insert the created object at desired point
+        stringstream errormsg;
+        ImoStaffObj* pAt = dynamic_cast<ImoStaffObj*>( pCursor->get_pointee() );
+        ImoStaffObj* pImo = pInstr->insert_staffobj_at(pAt, m_source, errormsg);
+        if (pImo)
+        {
+            //assign name to this command
+            m_name.append( pImo->get_name() );
+
+            //save and inject imo id in source code, if not yet done
+            if (m_firstInsertedId == k_no_imoid)
+            {
+                m_firstInsertedId = pImo->get_id();
+
+                //inject id in source code
+                size_t i = m_source.find(' ');
+                if (i == string::npos)
+                    i = m_source.find(')');
+
+                stringstream src;
+                src << m_source.substr(0, i) << "#" << m_firstInsertedId
+                    << m_source.substr(i);
+                m_source = src.str();
+            }
+
+            //insert goBack if needed
+            TimeUnits duration = pImo->get_duration();
+            if (is_greater_time(duration, 0.0))
+            {
+                stringstream src;
+                src << "(goBack " << duration << ")";
+                pImo = pInstr->insert_staffobj_at(pAt, src.str(), errormsg);
+            }
+
+            //save id of last inserted object
+            m_lastInsertedId = pImo->get_id();
+
+            //update ColStaffObjs table
+            pScore->close();
+
+            return k_success;
+        }
+        else
+        {
+            m_error = errormsg.str();
+            return k_failure;
+        }
+    }
+    return k_failure;
+}
 
 
 }  //namespace lomse

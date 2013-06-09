@@ -63,8 +63,6 @@ GraphicModel::GraphicModel()
 GraphicModel::~GraphicModel()
 {
     delete m_root;
-    m_noterestToShape.clear();
-//    m_imoToBox.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -139,24 +137,18 @@ GmoShape* GraphicModel::find_shape_for_object(ImoStaffObj* pSO)
 //---------------------------------------------------------------------------------------
 GmoShape* GraphicModel::get_shape_for_noterest(ImoNoteRest* pNR)
 {
-    map<ImoNoteRest*, GmoShape*>::const_iterator it =  m_noterestToShape.find( pNR );
-	if (it != m_noterestToShape.end())
-		return it->second;
+    return get_main_shape_for_imo(pNR->get_id());
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicModel::store_in_map_imo_shape(ImoObj* pImo, GmoShape* pShape)
+{
+    ImoId id = pImo->get_id();
+    ShapeId idx = pShape->get_shape_id();
+    if (idx > 0)
+        m_imoToSecondaryShape[ make_pair(id, idx) ] = pShape;
     else
-        return NULL;
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicModel::store_in_map_imo_shape(ImoNoteRest* pNR, GmoShape* pShape)
-{
-    if (pNR)
-        m_noterestToShape[pNR] = pShape;
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicModel::store_in_map_imo_shape(ImoId id, GmoShape* pShape)
-{
-    m_imoToShape[id] = pShape;
+        m_imoToMainShape[id] = pShape;
 }
 
 //---------------------------------------------------------------------------------------
@@ -205,9 +197,25 @@ void GraphicModel::add_to_map_ref_to_box(GmoBox* pBox)
 //---------------------------------------------------------------------------------------
 GmoShape* GraphicModel::get_shape_for_imo(ImoId id, ShapeId shapeId)
 {
-	map<ImoId, GmoShape*>::const_iterator it = m_imoToShape.find(id);
-	if (it != m_imoToShape.end())
-		return it->second;
+    if (shapeId == 0)
+        return get_main_shape_for_imo(id);
+    else
+    {
+        map< pair<ImoId, ShapeId>, GmoShape*>::const_iterator it
+            = m_imoToSecondaryShape.find( make_pair(id, shapeId) );
+        if (it != m_imoToSecondaryShape.end())
+            return it->second;
+        else
+            return NULL;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* GraphicModel::get_main_shape_for_imo(ImoId id)
+{
+    map<ImoId, GmoShape*>::const_iterator it = m_imoToMainShape.find(id);
+    if (it != m_imoToMainShape.end())
+        return it->second;
     else
         return NULL;
 }
@@ -1050,18 +1058,7 @@ void GmoBoxDocPage::store_in_map_imo_shape(GmoShape* pShape)
     {
         GraphicModel* pModel = get_graphic_model();
         if (pModel)
-            pModel->store_in_map_imo_shape(pImo->get_id(), pShape);
-    }
-
-    if (pShape->is_shape_note() || pShape->is_shape_rest())
-    {
-        ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>( pShape->get_creator_imo() );
-        if (pNR)
-        {
-            GraphicModel* pModel = get_graphic_model();
-            if (pModel)
-                pModel->store_in_map_imo_shape(pNR, pShape);
-        }
+            pModel->store_in_map_imo_shape(pImo, pShape);
     }
 }
 

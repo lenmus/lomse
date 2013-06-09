@@ -30,6 +30,8 @@
 #include "lomse_shape_base.h"
 
 #include "lomse_drawer.h"
+#include "lomse_logger.h"
+#include "lomse_time.h"      //round_half_up
 
 namespace lomse
 {
@@ -132,6 +134,19 @@ GmoShape* GmoShape::find_related_shape(int type)
             return *it;
     }
     return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShape::dump(ostream& outStream, int level)
+{
+    outStream << setw(level*3) << level << " [" << setw(3) << m_objtype << "] "
+              << get_name(m_objtype)
+              << "[" << m_idx << "]"
+              << fixed << setprecision(2) << setfill(' ')
+              << setw(10) << round_half_up(m_origin.x) << ", "
+              << setw(10) << round_half_up(m_origin.y) << ", "
+              << setw(10) << round_half_up(m_size.width) << ", "
+              << setw(10) << round_half_up(m_size.height) << endl;
 }
 
 

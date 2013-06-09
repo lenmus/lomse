@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/12/29 -->
+<!-- $Updated: 2013/05/05 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -247,7 +247,9 @@ As we will implement standard visual effects, the implementation of this method 
 void MyCanvas::on_visual_highlight(MyScoreHighlightEvent& event)
 {
     SpEventScoreHighlight pEv = event.get_lomse_event();
-    m_pInteractor->on_visual_highlight(pEv);
+    WpInteractor wpInteractor = pEv->get_interactor();
+    if (SpInteractor sp = wpInteractor.lock())
+        sp->on_visual_highlight(pEv);
 }
 </pre>
 
@@ -262,8 +264,14 @@ And this is all. Our code is now finished and our application is ready for build
 <!--====================================================-->
 
 <p>
-At this point, we could compile and tests all these changes. Please follow the instructions in Tutorial 3.
+At this point, we could compile and tests all these changes. Open a terminal window at enter (adjust paths if necessary):
 </p>
+
+<pre class="console">
+gcc example_4_wxwidgets.cpp ./wxMidi/wxMidi.cpp ./wxMidi/wxMidiDatabase.cpp -o example-4-wx \
+    `wx2812-config --cflags` `pkg-config --cflags liblomse`  -I ./wxMidi/    \
+    `pkg-config --libs liblomse` -lportmidi -lporttime `wx2812-config --libs`
+</pre>
 
 <p>
 When executing example-4 and playing the score you will hear the music and you will see that notes get coloured in red as they are being played. You should see something as:

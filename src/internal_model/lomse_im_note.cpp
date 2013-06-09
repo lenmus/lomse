@@ -41,6 +41,8 @@ ImoNoteRest::ImoNoteRest(int objtype)
     , m_nNoteType(k_quarter)
     , m_nDots(0)
     , m_nVoice(1)
+    , m_timeModifierTop(1)
+    , m_timeModifierBottom(1)
 {
 }
 
@@ -99,14 +101,9 @@ ImoTuplet* ImoNoteRest::get_tuplet()
 //---------------------------------------------------------------------------------------
 TimeUnits ImoNoteRest::get_duration()
 {
-    TimeUnits rTime = to_duration(m_nNoteType, m_nDots);
-    ImoTuplet* pTuplet = get_tuplet();
-    if (pTuplet)
-    {
-        rTime *= TimeUnits(pTuplet->get_normal_number());
-        rTime /= TimeUnits(pTuplet->get_actual_number());
-    }
-    return rTime;
+    double modifier = double(m_timeModifierTop) / double(m_timeModifierBottom);
+
+    return to_duration(m_nNoteType, m_nDots) * modifier;
 }
 
 //---------------------------------------------------------------------------------------

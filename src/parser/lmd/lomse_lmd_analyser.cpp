@@ -4056,8 +4056,8 @@ public:
         if (get_mandatory(k_vers))
         {
             string version = get_version();
-            pScore->set_version(version);
-            m_pAnalyser->set_score_version(version);
+            int vers = m_pAnalyser->set_score_version(version);
+            pScore->set_version(vers);
         }
 
         // [<language>]
@@ -5666,7 +5666,7 @@ LmdAnalyser::LmdAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_pCurScore(NULL)
     , m_pLastScore(NULL)
     , m_pImoDoc(NULL)
-    , m_scoreVersion("")
+    , m_scoreVersion(0)
     //, m_pNodeImo(NULL)
     , m_pTree()
     , m_fileLocator("")
@@ -5782,6 +5782,49 @@ void LmdAnalyser::clear_pending_relations()
     m_pBeamsBuilder->clear_pending_items();
     m_pOldBeamsBuilder->clear_pending_old_beams();
     m_pTupletsBuilder->clear_pending_items();
+}
+
+//---------------------------------------------------------------------------------------
+int LmdAnalyser::set_score_version(const string& version)
+{
+    //version is a string "major.minor". Extract major and minor and compose
+    //and integer 100*major+minor
+
+    m_scoreVersion = 0;
+    size_t i = version.find('.');
+    if (i != string::npos)
+    {
+        string major = version.substr(0, i);
+        if ( to_integer(major, &m_scoreVersion) )
+            return m_scoreVersion;
+
+        m_scoreVersion *= 100;
+        string minor = version.substr(i+1);
+        int nMinor;
+        to_integer(minor, &nMinor);
+
+        m_scoreVersion += nMinor;
+    }
+    return m_scoreVersion;
+}
+
+//---------------------------------------------------------------------------------------
+bool LmdAnalyser::to_integer(const string& text, int* pResult)
+{
+    //return true if error
+
+    long number;
+    std::istringstream iss(text);
+    if ((iss >> std::dec >> number).fail())
+    {
+        *pResult = 0;
+        return true;    //error
+    }
+    else
+    {
+        *pResult = number;
+        return false;   //ok
+    }
 }
 
 //---------------------------------------------------------------------------------------

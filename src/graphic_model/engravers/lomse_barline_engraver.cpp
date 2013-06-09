@@ -61,7 +61,8 @@ GmoShape* BarlineEngraver::create_shape(ImoBarline* pBarline, LUnits xPos,
     //force selection rectangle to have at least a width of half line (5 tenths)
     LUnits uMinWidth = 0;   //m_pMeter->tenths_to_logical(5.0f, m_iInstr, 0);
 
-    return LOMSE_NEW GmoShapeBarline(pBarline, 0, pBarline->get_type(),
+    ShapeId idx = 0;
+    return LOMSE_NEW GmoShapeBarline(pBarline, idx, pBarline->get_type(),
                                      xPos, yTop, yBottom,
                                      thinLineWidth, thickLineWidth, spacing,
                                      radius, Color(0,0,0), uMinWidth);

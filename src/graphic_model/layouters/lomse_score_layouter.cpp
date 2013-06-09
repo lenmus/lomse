@@ -715,6 +715,7 @@ void ColumnsBuilder::collect_content_for_this_column()
                 int clefType = pClef->get_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                                                                  m_pagePos, clefType, flags);
+                pShape->assign_id_as_main_shape();
                 include_object(m_iColumn, iLine, iInstr, pSO, -1.0, iStaff, pShape, fInProlog);
             }
 
@@ -725,6 +726,7 @@ void ColumnsBuilder::collect_content_for_this_column()
                 int clefType = m_pSysCursor->get_applicable_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                                                                  m_pagePos, clefType, flags);
+                pShape->assign_id_as_main_or_implicit_shape(iStaff);
                 include_object(m_iColumn, iLine, iInstr, pSO, -1.0, iStaff, pShape, fInProlog);
             }
 
@@ -1058,7 +1060,6 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
     if (!pSO->is_visible())
         return create_invisible_shape(pSO, iInstr, iStaff, pos, 0.0f);
 
-
     switch (pSO->get_obj_type())
     {
         case k_imo_barline:
@@ -1104,9 +1105,16 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
         case k_imo_rest:
         {
             ImoRest* pImo = static_cast<ImoRest*>(pSO);
-            RestEngraver engrv(m_libraryScope, m_pScoreMeter, &m_shapesStorage,
-                               iInstr, iStaff);
-            return engrv.create_shape(pImo, pos);
+            if (pImo->is_go_fwd())
+            {
+                return create_invisible_shape(pSO, iInstr, iStaff, pos, 0.0f);
+            }
+            else
+            {
+                RestEngraver engrv(m_libraryScope, m_pScoreMeter, &m_shapesStorage,
+                                   iInstr, iStaff);
+                return engrv.create_shape(pImo, pos);
+            }
         }
         case k_imo_time_signature:
         {

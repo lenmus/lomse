@@ -897,30 +897,6 @@ SUITE(InternalModelTest)
         delete pNote;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, Note_TupletModifiesDuration)
-    {
-        //@ Note duration is modified by tuplet
-
-        Document doc(m_libraryScope);
-        ImoNote* pNote = ImFactory::inject_note(&doc, k_step_A, 4, k_eighth);
-        CHECK( is_equal_time(pNote->get_duration(), 32.0f) );
-
-        ImoTupletDto dto;
-        dto.set_tuplet_type(ImoTupletDto::k_start);
-        dto.set_note_rest(pNote);
-        dto.set_actual_number(3);
-        dto.set_normal_number(2);
-        ImoTupletData* pTupletData = ImFactory::inject_tuplet_data(&doc, &dto);
-        ImoTuplet* pTuplet = ImFactory::inject_tuplet(&doc, &dto);
-        pNote->include_in_relation(&doc, pTuplet, pTupletData);
-
-        //cout << "note duration = " << pNote->get_duration() << endl;
-        CHECK( pNote->is_in_tuplet() == true );
-        CHECK( is_equal_time(pNote->get_duration(), 21.3333f) );
-
-        delete pNote;
-    }
-
     // ImoStyle -----------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelTestFixture, Score_GetDefaultStyle)

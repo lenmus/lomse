@@ -79,7 +79,7 @@ public:
 
     //operations
     inline void toggle_caret() { m_fBlinkStateOn = !m_fBlinkStateOn; }
-    inline void show_caret() { m_fVisible = true; }
+    inline void show_caret(bool fVisible=true) { m_fVisible = fVisible; }
     inline void hide_caret() { m_fVisible = false; }
 
     virtual void on_draw(ScreenDrawer* pDrawer);

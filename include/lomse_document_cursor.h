@@ -56,6 +56,69 @@ const ImoId k_cursor_at_empty_place =        -5;
 const ImoId k_cursor_before_start_of_child = -6;
 const ImoId k_cursor_at_end_of_staff =       -7;
 
+
+//=======================================================================================
+// Helper classes for converting TimeUnits to time code or real time
+//=======================================================================================
+
+class Timecode
+{
+public:
+    int bar;
+    int beat;
+    int n16th;
+    int ticks;
+
+    Timecode(int br, int bt, int n16, int tck)
+        : bar(br), beat(bt), n16th(n16), ticks(tck)
+    {
+    }
+
+    Timecode() : bar(1), beat(0), n16th(0), ticks(0)
+    {
+    }
+
+};
+
+//---------------------------------------------------------------------------------------
+// Helper class for computing time and time code
+class TimeInfo
+{
+private:
+    TimeUnits m_totalDuration;      //score total duration
+    TimeUnits m_beatDuration;       //duration of a beat, for current time signature
+                                    //  Will be 0 if not time signature yet found
+    TimeUnits m_startOfBarTimepos;  //timepos at start of current measure
+    TimeUnits m_curTimepos;         //current timepos
+    int m_bar;                      //current bar number (1..n)
+
+public:
+    TimeInfo(TimeUnits curTimepos, TimeUnits totalDuration, TimeUnits curBeatDuration,
+             TimeUnits startOfBarTimepos, int iMeasure);
+
+    //accessors
+    inline TimeUnits get_timepos() { return m_curTimepos; }
+    inline TimeUnits get_current_beat_duration() { return m_beatDuration; }
+    inline TimeUnits get_current_measure_start_timepos() { return m_startOfBarTimepos; }
+    inline TimeUnits get_score_total_duration() { return m_totalDuration; }
+
+    //! convert current timepos to millisecons for a given metronome speed
+    long to_millisecs(int mm);
+
+    //! determine metronome speed to force a given total duration
+    float get_metronome_mm_for_lasting(long millisecs);
+
+    //! Returns current position expressed as percentage of total score duration
+    //! Returned number: 0.00 - 100.00
+    float played_percentage();
+    float remaining_percentage();
+
+    //! timecode for current position
+    Timecode get_timecode();
+
+};
+
+
 //=======================================================================================
 // Helper classes to save cursor state
 //=======================================================================================
@@ -71,6 +134,9 @@ public:
     virtual ~ElementCursorState() {}
 };
 
+typedef SharedPtr<ElementCursorState>  SpElementCursorState;
+
+
 //---------------------------------------------------------------------------------------
 class ScoreCursorState : public ElementCursorState
 {
@@ -82,6 +148,7 @@ protected:
 	TimeUnits m_refTime;//timepos of ref.object or 0.0f if no ref obj
     ImoId   m_id;       //id of pointed object or k_cursor_at_empty_place if none
     ImoId   m_refId;    //id of ref.object or k_cursor_at_end_of_child if at end.
+    int     m_refStaff; //staff (0..n-1) of ref.object or 0 if no ref obj
 
     //values representing "end of score" position
     #define k_at_end_of_score 1000000
@@ -93,9 +160,10 @@ protected:
 
 public:
     ScoreCursorState(int instr, int staff, int measure, TimeUnits time, ImoId id,
-                     ImoId refId, TimeUnits refTime)
+                     ImoId refId, TimeUnits refTime, int refStaff)
         : ElementCursorState(), m_instr(instr), m_staff(staff), m_measure(measure)
         , m_time(time), m_refTime(refTime), m_id(id), m_refId(refId)
+        , m_refStaff(refStaff)
     {
     }
     ScoreCursorState()
@@ -113,6 +181,7 @@ public:
     inline ImoId id() { return m_id; }
     inline ImoId ref_obj_id() { return m_refId; }
     inline TimeUnits ref_obj_time() { return m_refTime; }
+    inline int ref_obj_staff() { return m_refStaff; }
 
     //setters
     inline void instrument(int instr) { m_instr = instr; }
@@ -122,6 +191,7 @@ public:
     inline void id(ImoId id) { m_id = id; }
     inline void ref_obj_id(ImoId id) { m_refId = id; }
     inline void ref_obj_time(TimeUnits time) { m_refTime = time; }
+    inline void ref_obj_staff(int iStaff) { m_refStaff = iStaff; }
 
     inline void set_at_end_of_score() {
         m_instr = k_at_end_of_score;
@@ -131,6 +201,7 @@ public:
         m_id = k_cursor_at_end_of_child;
         m_refId = k_no_imoid;
         m_refTime = 0.0;
+        m_refStaff = 0;
     }
     inline void set_before_start_of_score()
     {
@@ -141,6 +212,7 @@ public:
         m_id = k_cursor_before_start_of_child;
         m_refId = k_before_start_of_score;
         m_refTime = 0.0;
+        m_refStaff = 0;
     }
 
     //checking position
@@ -152,30 +224,30 @@ public:
     }
 };
 
+typedef SharedPtr<ScoreCursorState>  SpScoreCursorState;
+
+
 //---------------------------------------------------------------------------------------
 class DocCursorState
 {
 protected:
-    ImoId               m_id;       //id of top level pointed object or -1 if none
-    ElementCursorState* m_pState;   //delegated class state
+    ImoId m_id;                         //id of top level pointed object or -1 if none
+    SpElementCursorState m_spState;     //delegated class state
 
 public:
-    DocCursorState(ImoId nTopLevelId, ElementCursorState* pState)
+    DocCursorState(ImoId nTopLevelId, SpElementCursorState spState)
         : m_id(nTopLevelId)
-        , m_pState(pState)
+        , m_spState(spState)
     {
     }
 
-    DocCursorState() : m_id(k_no_imoid) , m_pState(NULL) {}
+    DocCursorState() : m_id(k_no_imoid) {}
 
-    ~DocCursorState() {
-        if (m_pState)
-            delete m_pState;
-    }
+    ~DocCursorState() {}
 
-    inline bool is_delegating() { return m_pState != NULL; }
+    inline bool is_delegating() { return m_spState.get() != NULL; }
     inline ImoId get_top_level_id() { return m_id; }
-    inline ElementCursorState* get_delegate_state() { return m_pState; }
+    inline SpElementCursorState get_delegate_state() { return m_spState; }
 
 };
 
@@ -210,8 +282,8 @@ public:
 //    virtual void reset_and_point_to(ImoId nId)=0;
 
     //saving/restoring state
-    virtual ElementCursorState* get_state()=0;
-    virtual void restore_state(ElementCursorState* pState)=0;
+    virtual SpElementCursorState get_state()=0;
+    virtual void restore_state(SpElementCursorState spState)=0;
 
     //info
     virtual ImoObj* get_pointee()=0;
@@ -222,6 +294,7 @@ public:
 
     //special operations
     virtual void update_after_deletion()=0;
+    virtual void update_after_insertion(ImoId lastInsertedId)=0;
 };
 
 
@@ -250,11 +323,12 @@ public:
     void to_end();
 
     //saving/restoring state: mandatory overrides
-    ElementCursorState* get_state();
-    void restore_state(ElementCursorState* pState);
+    SpElementCursorState get_state();
+    void restore_state(SpElementCursorState spState);
 
     //special operations: mandatory overrides
     void update_after_deletion();
+    void update_after_insertion(ImoId lastInsertedId);
 
     //access to current position: mandatory overrides
     ImoObj* get_pointee()  { return m_pCurItem; }
@@ -287,6 +361,10 @@ protected:
     ColStaffObjsIterator  m_it;       //iterator pointing to ref.object
     ColStaffObjsIterator  m_itPrev;   //iterator for previous state
 
+    //variables for providing time information
+    TimeUnits m_totalDuration;      //score total duration
+    TimeUnits m_curBeatDuration;    //duration of a beat, for current time signature
+    TimeUnits m_startOfBarTimepos;  //timepos at start of current measure
 
 public:
     ScoreCursor(Document* pDoc, ImoScore* pScore);
@@ -308,11 +386,12 @@ public:
     void to_state(int nInstr, int nMeasure, int nStaff, TimeUnits rTime, ImoId id=k_no_imoid);
 
     //saving/restoring state: mandatory overrides
-    ElementCursorState* get_state();
-    void restore_state(ElementCursorState* pState);
+    SpElementCursorState get_state();
+    void restore_state(SpElementCursorState spState);
 
     //special operations: mandatory overrides
-    void update_after_deletion() {}
+    void update_after_deletion();
+    void update_after_insertion(ImoId lastInsertedId);
     void set_auto_refresh(bool enable) { m_fAutoRefresh = enable; }
     void refresh();
 
@@ -326,12 +405,15 @@ public:
     inline ImoId staffobj_id() { return m_currentState.id(); }
     inline ImoId staffobj_id_internal() { return m_currentState.ref_obj_id(); }
     inline TimeUnits ref_obj_time() { return m_currentState.ref_obj_time(); }
+    inline int ref_obj_staff() { return m_currentState.ref_obj_staff(); }
     ImoObj* staffobj_internal();
+    TimeInfo get_time_info();
 
     //previous position info
     //AWARE_ previous position is where move_prev() will be placed
     ImoId prev_pos_id() { return m_prevState.id(); }
     TimeUnits prev_pos_time() { return m_prevState.time(); }
+    int prev_pos_staff() { return m_prevState.staff(); }
 
     //helper boolean
     ///Score is not empty and cursor is pointing an staffobj
@@ -347,7 +429,7 @@ public:
     bool is_at_end_of_score();
 
     //other
-    inline void set_time_grid_resolution(TimeUnits step) { m_timeStep = step; }
+    inline void set_time_step(TimeUnits step) { m_timeStep = step; }
     ColStaffObjsEntry* find_previous_imo();
 //    ImoObj* get_musicData_for_current_instrument();
         //speciaL. access to internal reference object
@@ -386,8 +468,11 @@ protected:
     void p_save_current_state_as_previous_state();
     inline bool p_is_at_end_of_staff() { return m_currentState.id() == k_cursor_at_end_of_staff; }
     bool p_is_at_end_of_score();
+    void p_determine_total_duration();
+    void p_find_start_of_measure_and_time_signature();
 
     //helper: dealing with ref.object
+    inline ImoStaffObj* p_iter_object() { return (*m_it)->imo_object(); }
     inline int p_iter_object_id() { return (*m_it)->element_id(); }
     inline TimeUnits p_iter_object_time() { return (*m_it)->time(); }
     inline int p_iter_object_measure() { return (*m_it)->measure(); }
@@ -494,6 +579,7 @@ public:
 
     //special operations
     void update_after_deletion();
+    void update_after_insertion(ImoId lastInsertedId);
 
 ////	//info
 ////	inline bool is_at_end_of_child() { return is_delegating() && get_pointee() == NULL; }

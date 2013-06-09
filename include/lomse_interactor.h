@@ -88,8 +88,9 @@ protected:
     double      m_renderTime;
     double      m_gmodelBuildTime;
 
-    //to know that view parameters (viewport, scale, ..) has been changed
-    bool        m_fViewParamsChanged;
+    //for controlling repaints
+    bool        m_fViewParamsChanged;       //viewport, scale, ... have been modified
+    bool        m_fCaretNeedsRepaint;       //caret should be repainted
 
     //to avoid problems during playback
     bool        m_fViewUpdatesEnabled;
@@ -131,7 +132,6 @@ public:
     virtual void set_rendering_option(int option, bool value);
     virtual void set_box_to_draw(int boxType);
     virtual void reset_boxes_to_draw();
-    virtual void update_caret();
         //units conversion and related
     virtual void screen_point_to_page_point(double* x, double* y);
     virtual void model_point_to_screen(double* x, double* y, int iPage);
@@ -176,7 +176,7 @@ public:
 
     //caret
     bool blink_caret();
-    void show_caret();
+    void show_caret(bool fShow=true);
     void hide_caret();
     string get_caret_timecode();
 
@@ -185,6 +185,12 @@ public:
     ////for those commands not allowed
     //virtual void insert_rest(DocCursor& cursor, const std::string& source);
     virtual void exec_command(DocCommand* pCmd);
+    virtual void exec_undo();
+    virtual void exec_redo();
+
+    //edition related info
+    bool should_enable_edit_undo();
+    bool should_enable_edit_redo();
 
     // event handlers for user actions. Library API
     virtual void on_mouse_move(Pixels x, Pixels y, unsigned flags);
@@ -231,6 +237,7 @@ protected:
     GmoRef find_event_originator_gref(GmoObj* pGmo);
     bool discard_score_highlight_event_if_not_valid(SpEventScoreHighlight pEvent);
     bool is_valid_play_score_event(SpEventPlayScore pEvent);
+    void update_caret_and_view();
 
 };
 

@@ -121,6 +121,7 @@ class ImoTextItem;
 class ImoTextStyle;
 class ImoTieData;
 class ImoTieDto;
+class ImoTimeModificationDto;
 class ImoTimeSignature;
 class ImoTupletData;
 class ImoTupletDto;
@@ -131,9 +132,11 @@ class DtoObj;
 
 //---------------------------------------------------------------------------------------
 // some helper defines
-#define NO_VISIBLE    false
-#define VISIBLE       true
+#define k_no_visible    false
 
+//---------------------------------------------------------------------------------------
+//limits
+#define k_max_voices    64      //number of voices per instrument
 
 //---------------------------------------------------------------------------------------
 // enums for common values
@@ -291,6 +294,7 @@ class DtoObj;
             //ImoDto (A)
             k_imo_dto,
                 k_imo_font_style_dto,
+                k_imo_time_modification_dto,
             k_imo_dto_last,
 
             // ImoSimpleObj (A)
@@ -546,9 +550,14 @@ public:
     Document* get_the_document();
     ImoDocument* get_document();
 
-    //Get the name from object type
+    //Get the name and source code
     static const string& get_name(int type);
     const string& get_name() const;
+    string to_string(bool fWithIds=false);
+    inline string to_string_with_ids() { return to_string(true); }
+
+    //properties
+    virtual bool can_generate_secondary_shapes() { return false; }
 
     //object classification
     inline int get_obj_type() { return m_objtype; }
@@ -664,6 +673,7 @@ public:
     inline bool is_tie_data() { return m_objtype == k_imo_tie_data; }
     inline bool is_tie_dto() { return m_objtype == k_imo_tie_dto; }
     inline bool is_time_signature() { return m_objtype == k_imo_time_signature; }
+    inline bool is_time_modification_dto() { return m_objtype == k_imo_time_modification_dto; }
     inline bool is_tuplet() { return m_objtype == k_imo_tuplet; }
     inline bool is_tuplet_dto() { return m_objtype == k_imo_tuplet_dto; }
     inline bool is_tuplet_data() { return m_objtype == k_imo_tuplet_data; }
@@ -1185,6 +1195,7 @@ protected:
 	}
 
     friend class DefineStyleLmdGenerator;
+    friend class DefineStyleLdpGenerator;
 
     //getters non-inheriting from parent. Returns true if property exists
     bool get_float_property(int prop, float* value)
@@ -2368,6 +2379,9 @@ public:
     inline int get_symbol_size() { return m_symbolSize; }
     inline void set_symbol_size(int symbolSize) { m_symbolSize = symbolSize; }
 
+    //properties
+    bool can_generate_secondary_shapes() { return true; }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -2746,6 +2760,12 @@ public:
     //score edition API
     void delete_staffobj(ImoStaffObj* pImo);
     void insert_staffobj(ImoStaffObj* pPos, ImoStaffObj* pImo);
+    ImoStaffObj* insert_staffobj_at(ImoStaffObj* pAt, ImoStaffObj* pImo);
+    ImoStaffObj* insert_staffobj_at(ImoStaffObj* pAt, const string& ldpsource,
+                                    ostream& reporter=cout);
+    list<ImoStaffObj*> insert_staff_objects_at(ImoStaffObj* pAt, ImoMusicData* pObjects);
+    list<ImoStaffObj*> insert_staff_objects_at(ImoStaffObj* pAt, const string& ldpsource,
+                                               ostream& reporter);
 
 
 protected:
@@ -2794,6 +2814,9 @@ public:
 
     //overrides: key signatures always in staff 0
     void set_staff(int staff) { m_staff = 0; }
+
+    //properties
+    bool can_generate_secondary_shapes() { return true; }
 
 };
 
@@ -3247,15 +3270,15 @@ public:
 class ImoScore : public ImoBlockLevelObj      //ImoBlocksContainer
 {
 protected:
-    string          m_version;
+    int             m_version;
     Document*       m_pDoc;
     ColStaffObjs*   m_pColStaffObjs;
     SoundEventsTable* m_pMidiTable;
     ImoSystemInfo   m_systemInfoFirst;
     ImoSystemInfo   m_systemInfoOther;
     ImoPageInfo     m_pageInfo;
-    std::list<ImoScoreTitle*> m_titles;
-	std::map<std::string, ImoStyle*> m_nameToStyle;
+    list<ImoScoreTitle*> m_titles;
+	map<string, ImoStyle*> m_nameToStyle;
 
 	friend class ImFactory;
 	ImoScore(Document* pDoc);
@@ -3266,8 +3289,11 @@ public:
     ~ImoScore();
 
     //getters and setters
-    inline std::string& get_version() { return m_version; }
-    inline void set_version(const std::string& version) { m_version = version; }
+    string get_version_string();
+    inline int get_version_major() { return m_version/100; }
+    inline int get_version_minor() { return m_version % 100; }
+    inline int get_version_number() { return m_version; }
+    inline void set_version(int version) { m_version = version; }
     inline ColStaffObjs* get_staffobjs_table() { return m_pColStaffObjs; }
     void set_staffobjs_table(ColStaffObjs* pColStaffObjs);
     SoundEventsTable* get_midi_table();
@@ -3291,6 +3317,7 @@ public:
     void set_bool_option(const std::string& name, bool value);
     void set_long_option(const std::string& name, long value);
     void add_or_replace_option(ImoOptionInfo* pOpt);
+    bool has_default_value(ImoOptionInfo* pOpt);
 
     //score layout
     void add_sytem_info(ImoSystemInfo* pSL);
@@ -3298,6 +3325,8 @@ public:
     inline ImoSystemInfo* get_other_system_info() { return &m_systemInfoOther; }
     void add_page_info(ImoPageInfo* pPI);
     inline ImoPageInfo* get_page_info() { return &m_pageInfo; }
+    bool has_default_values(ImoSystemInfo* pInfo);
+
 
     //titles
     void add_title(ImoScoreTitle* pTitle);
@@ -3321,6 +3350,9 @@ protected:
     ImoStyle* create_default_style();
     void set_defaults_for_system_info();
     void set_defaults_for_options();
+
+    friend class ScoreLdpGenerator;
+    inline map<std::string, ImoStyle*>& get_styles() { return m_nameToStyle; }
 
 };
 
@@ -3701,6 +3733,25 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
+class ImoTimeModificationDto : public ImoDto
+{
+protected:
+    int m_top;
+    int m_bottom;
+
+public:
+    ImoTimeModificationDto() : ImoDto(k_imo_time_modification_dto)
+        , m_top(1), m_bottom(1) {}
+    ~ImoTimeModificationDto() {}
+
+    //getters & setters
+    inline int get_top_number() { return m_top; }
+    inline void set_top_number(int num) { m_top = num; }
+    inline int get_bottom_number() { return m_bottom; }
+    inline void set_bottom_number(int num) { m_bottom = num; }
+};
+
+//---------------------------------------------------------------------------------------
 class ImoTimeSignature : public ImoStaffObj
 {
 protected:
@@ -3722,11 +3773,15 @@ public:
     //overrides: time signatures always in staff 0
     void set_staff(int staff) { m_staff = 0; }
 
+    //properties
+    bool can_generate_secondary_shapes() { return true; }
+
     //other
     inline bool is_compound_meter() { return (m_top==6 || m_top==9 || m_top==12); }
     int get_num_pulses();
     TimeUnits get_ref_note_duration();
     TimeUnits get_measure_duration();
+    TimeUnits get_beat_duration();
 
 };
 
@@ -3741,6 +3796,7 @@ protected:
     int m_nShowBracket;
     int m_nPlacement;
     int m_nShowNumber;
+    bool m_fOnlyGraphical;
     LdpElement* m_pTupletElm;
     ImoNoteRest* m_pNR;
 
@@ -3762,6 +3818,7 @@ public:
     inline int get_show_number() { return m_nShowNumber; }
     inline int get_placement() { return m_nPlacement; }
     int get_line_number();
+    inline bool is_only_graphical() { return m_fOnlyGraphical; }
 
     //setters
     inline void set_note_rest(ImoNoteRest* pNR) { m_pNR = pNR; }
@@ -3772,6 +3829,7 @@ public:
     inline void set_show_bracket(int value) { m_nShowBracket = value; }
     inline void set_show_number(int value) { m_nShowNumber = value; }
     inline void set_placement(int value) { m_nPlacement = value; }
+    inline void set_only_graphical(bool value) { m_fOnlyGraphical = value; }
 
     //required by RelationBuilder
     int get_item_number() { return 0; }

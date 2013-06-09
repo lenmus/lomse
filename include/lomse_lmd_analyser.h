@@ -187,7 +187,7 @@ protected:
     ImoScore*       m_pCurScore;
     ImoScore*       m_pLastScore;
     ImoDocument*    m_pImoDoc;
-    string          m_scoreVersion;
+    int             m_scoreVersion;
     ImoObj*         m_pNodeImo;
 
     //analysis input
@@ -263,8 +263,8 @@ public:
 //    void add_chord(ImoChord* pChord);
 
     //access to score being analysed
-    inline void set_score_version(const string& version) { m_scoreVersion = version; }
-    inline const string& get_score_version() { return m_scoreVersion; }
+    int set_score_version(const string& version);
+    inline int get_score_version() { return m_scoreVersion; }
     inline void score_analysis_begin(ImoScore* pScore) { m_pCurScore = pScore; }
     inline void score_analysis_end() {
         m_pLastScore = m_pCurScore;
@@ -351,6 +351,8 @@ public:
     inline int get_tag(XmlNode* node) { return name_to_tag( get_name(node) ); }
 
     int name_to_tag(const string& name) const;
+    bool to_integer(const string& text, int* pResult);
+
 
 protected:
     LmdElementAnalyser* new_analyser(const string& name, ImoObj* pAnchor=NULL);
