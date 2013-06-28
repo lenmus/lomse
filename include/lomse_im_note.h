@@ -128,7 +128,7 @@ protected:
     inline void mark_as_go_fwd() { m_fGoFwd = true; }
 
 public:
-    ~ImoRest() {}
+    virtual ~ImoRest() {}
 
     inline bool is_go_fwd() { return m_fGoFwd; }
 };
@@ -152,7 +152,7 @@ protected:
             int dots=0, int staff=0, int voice=0, int stem=k_stem_default);
 
 public:
-    ~ImoNote();
+    virtual ~ImoNote();
 
     //pitch
     inline int get_step() { return m_step; }

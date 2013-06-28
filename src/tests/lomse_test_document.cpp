@@ -52,44 +52,20 @@ using namespace lomse;
 //=======================================================================================
 // IdAssigner tests
 //=======================================================================================
-
-//helper, to access protected members
-class MyIdAssigner : public IdAssigner
-{
-public:
-    MyIdAssigner() : IdAssigner() {}
-
-        long my_get_last_id() { return m_idCounter; }
-};
-
-//---------------------------------------------------------------------------------------
 class IdAssignerTestFixture
 {
 public:
 
     IdAssignerTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
-        , m_scores_path(TESTLIB_SCORES_PATH)
-        , m_pImo(NULL)
     {
     }
 
     ~IdAssignerTestFixture()    //TearDown fixture
     {
-        delete m_pImo;
-    }
-
-    void create_imo()
-    {
-        Document doc(m_libraryScope);
-        doc.create_empty();
-        m_pImo = ImFactory::inject(k_imo_clef, &doc);
-        m_pImo->set_id(-1L);
     }
 
     LibraryScope m_libraryScope;
-    std::string m_scores_path;
-    ImoObj* m_pImo;
 
 };
 
@@ -97,51 +73,45 @@ public:
 SUITE(IdAssignerTest)
 {
 
-    TEST_FIXTURE(IdAssignerTestFixture, initial_value)
-    {
-        MyIdAssigner ida;
-        CHECK( ida.my_get_last_id() == -1L );
-    }
-
     TEST_FIXTURE(IdAssignerTestFixture, assigns_id)
     {
-        MyIdAssigner ida;
-        create_imo();
-        CHECK( m_pImo->get_id() == -1L );
+        Document doc(m_libraryScope);
+        ImoObj* pImo1 = ImFactory::inject(k_imo_clef, &doc);
+        CHECK( pImo1->get_id() == 0L );
 
-        ida.assign_id(m_pImo);
-        CHECK( m_pImo->get_id() == 0L );
-        delete m_pImo;
+        ImoObj* pImo2 = ImFactory::inject(k_imo_key_signature, &doc);
+        CHECK( pImo2->get_id() == 1L );
 
-        create_imo();
-        ida.assign_id(m_pImo);
-        CHECK( m_pImo->get_id() == 1L );
+        delete pImo1;
+        delete pImo2;
     }
 
     TEST_FIXTURE(IdAssignerTestFixture, stores_id)
     {
-        MyIdAssigner ida;
-        create_imo();
-        ida.assign_id(m_pImo);
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_clef, &doc);
 
-        CHECK( ida.get_pointer_to_imo(0L) == m_pImo );
+        CHECK( pImo->get_id() == 0L );
+        CHECK( doc.get_pointer_to_imo(0L) == pImo );
+
+        delete pImo;
     }
 
     TEST_FIXTURE(IdAssignerTestFixture, id_not_found)
     {
-        MyIdAssigner ida;
-        CHECK( ida.get_pointer_to_imo(7L) == NULL );
+        Document doc(m_libraryScope);
+        CHECK( doc.get_pointer_to_imo(7L) == NULL );
     }
 
     TEST_FIXTURE(IdAssignerTestFixture, removes_id)
     {
-        MyIdAssigner ida;
-        create_imo();
-        ida.assign_id(m_pImo);
-        CHECK( ida.get_pointer_to_imo(0L) == m_pImo );
+        Document doc(m_libraryScope);
+        ImoObj* pImo = ImFactory::inject(k_imo_clef, &doc);
+        CHECK( doc.get_pointer_to_imo(0L) == pImo );
 
-        ida.remove(m_pImo);
-        CHECK( ida.get_pointer_to_imo(0L) == NULL );
+        doc.removed_from_model(pImo);
+        CHECK( doc.get_pointer_to_imo(0L) == NULL );
+        delete pImo;
     }
 };
 

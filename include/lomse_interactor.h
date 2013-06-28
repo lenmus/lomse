@@ -109,6 +109,7 @@ public:
     GraphicModel* get_graphic_model();
     inline View* get_view() { return m_pView; }
     inline DocCursor* get_cursor() { return m_pCursor; }
+    inline SelectionSet& get_selection_set() { return m_selections; }
 
     //mandatory override required by EventHandler
 	void handle_event(SpEventInfo pEvent);

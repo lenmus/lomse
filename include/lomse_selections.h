@@ -56,6 +56,12 @@ public:
     bool contains(GmoObj* pGmo);
     void clear();
 
+    ///true if no objects selected
+    inline bool empty() { return m_objects.size() == 0; }
+
+    ///filter selection, only returning objects of requested types
+    list<ImoId> filter_notes_rests();
+
 };
 
 

@@ -34,6 +34,7 @@
 #include "lomse_document_cursor.h"
 #include "lomse_im_factory.h"
 #include "lomse_logger.h"
+#include "lomse_ldp_analyser.h"     //class Autobeamer
 
 
 #include <sstream>
@@ -102,112 +103,6 @@ void DocCommand::set_command_name(const string& name, ImoObj* pImo)
 //    }
 }
 
-////=======================================================================================
-//// DocCommandInsert
-////=======================================================================================
-//DocCommandInsert::DocCommandInsert(DocIterator& it,ImoObj* pNewObj)
-//    : DocCmdComposite(it, pNewObj, NULL)
-//{
-//}
-//
-////---------------------------------------------------------------------------------------
-//DocCommandInsert::~DocCommandInsert()
-//{
-//    if (!m_applied)
-//        delete m_added;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void DocCommandInsert::undo(Document* pDoc)
-//{
-//    (*m_itInserted)->reset_modified();
-//    pDoc->remove(m_itInserted);
-//    m_applied = false;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void DocCommandInsert::redo(Document* pDoc)
-//{
-//    m_itInserted = pDoc->insert(m_position, m_added);
-//    (*m_itInserted)->set_modified();
-//    m_applied = true;
-//}
-
-
-////=======================================================================================
-//// DocCommandPushBack
-////=======================================================================================
-//DocCommandPushBack::DocCommandPushBack(Document::iterator& it, LdpElement* added)
-//    : DocCmdComposite(it, added, NULL)
-//{
-//}
-//
-////---------------------------------------------------------------------------------------
-//DocCommandPushBack::~DocCommandPushBack()
-//{
-//    if (!m_applied)
-//        delete m_added;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void DocCommandPushBack::undo(Document* pDoc)
-//{
-//    (*m_position)->reset_modified();
-//    pDoc->remove_last_param(m_position);
-//    m_applied = false;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void DocCommandPushBack::redo(Document* pDoc)
-//{
-//    pDoc->add_param(m_position, m_added);
-//    (*m_position)->set_modified();
-//    m_applied = true;
-//}
-//
-//
-////=======================================================================================
-//// DocCommandRemove
-////=======================================================================================
-//DocCommandRemove::DocCommandRemove(Document::iterator& it)
-//    : DocCmdComposite(it, NULL, *it)
-//{
-//    m_parent = (*it)->get_parent();
-//    m_nextSibling = (*it)->get_next_sibling();
-//}
-//
-////---------------------------------------------------------------------------------------
-//DocCommandRemove::~DocCommandRemove()
-//{
-//    if (m_applied)
-//        delete m_removed;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void DocCommandRemove::undo(Document* pDoc)
-//{
-//    m_parent->reset_modified();
-//    if (!m_nextSibling)
-//    {
-//        Document::iterator it(m_parent);
-//        pDoc->add_param(it, m_removed);
-//    }
-//    else
-//    {
-//        Document::iterator it(m_nextSibling);
-//        pDoc->insert(it, m_removed);
-//    }
-//    m_applied = false;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void DocCommandRemove::redo(Document* pDoc)
-//{
-//    pDoc->remove(m_position);
-//    m_parent->set_modified();
-//    m_applied = true;
-//}
-
 
 //=======================================================================================
 // DocCommandExecuter
@@ -220,13 +115,20 @@ DocCommandExecuter::DocCommandExecuter(Document* target)
 //---------------------------------------------------------------------------------------
 int DocCommandExecuter::execute(DocCursor* pCursor, DocCommand* pCmd)
 {
+    UndoElement* pUE = NULL;
+    if (pCmd->is_reversible())
+        pUE = LOMSE_NEW UndoElement(pCmd, pCursor->get_state());
+
     int result = pCmd->perform_action(m_pDoc, pCursor);
     m_error = pCmd->get_error();
     if ( result == k_success && pCmd->is_reversible())
     {
-        m_stack.push( LOMSE_NEW UndoElement(pCmd, pCursor->get_state()) );
+        m_stack.push( pUE );
         update_cursor(pCursor, pCmd);
     }
+    else
+        delete pUE;
+
     return result;
 }
 
@@ -298,6 +200,251 @@ void DocCommandExecuter::redo(DocCursor* pCursor)
 //}
 
 
+//=======================================================================================
+// CmdAddTie implementation
+//=======================================================================================
+CmdAddTie::CmdAddTie(ImoId start, ImoId end)
+    : DocCmdSimple()
+    , m_startId(start)
+    , m_endId(end)
+    , m_tieId(k_no_imoid)
+{
+    m_flags = k_recordable | k_reversible;
+    m_name = "Add tie";
+}
+
+//---------------------------------------------------------------------------------------
+int CmdAddTie::perform_action(Document* pDoc, DocCursor* pCursor)
+{
+    //Undo strategy: direct undo, as it only implies deleting the tuplet
+
+    stringstream msg;
+    ImoNote* pStart = static_cast<ImoNote*>(
+                                    pDoc->get_pointer_to_imo(m_startId) );
+    ImoNote* pEnd = static_cast<ImoNote*>(
+                                    pDoc->get_pointer_to_imo(m_endId) );
+    ImoTie* pTie = pDoc->tie_notes(pStart, pEnd, msg);
+    if (pTie)
+        m_tieId = pTie->get_id();
+    m_error = msg.str();
+    return (pTie != NULL ? k_success : k_failure);
+}
+
+//---------------------------------------------------------------------------------------
+void CmdAddTie::undo_action(Document* pDoc, DocCursor* pCursor)
+{
+    if (m_tieId != k_no_imoid)
+    {
+        ImoTie* pTie = static_cast<ImoTie*>(
+                                pDoc->get_pointer_to_imo(m_tieId) );
+        pDoc->delete_relation(pTie);
+        m_tieId = k_no_imoid;
+    }
+}
+
+
+//=======================================================================================
+// CmdAddTuplet implementation
+//=======================================================================================
+CmdAddTuplet::CmdAddTuplet(ImoId startNR, ImoId endNR, const string& src)
+    : DocCmdSimple()
+    , m_startId(startNR)
+    , m_endId(endNR)
+    , m_tupletId(k_no_imoid)
+    , m_source(src)
+{
+    m_flags = k_recordable | k_reversible;
+    m_name = "Add tuplet";
+}
+
+//---------------------------------------------------------------------------------------
+int CmdAddTuplet::perform_action(Document* pDoc, DocCursor* pCursor)
+{
+    //Undo strategy: direct undo, as it only implies deleting the tuplet
+
+    stringstream msg;
+    ImoNoteRest* pStart = static_cast<ImoNoteRest*>(
+                                        pDoc->get_pointer_to_imo(m_startId) );
+    ImoNoteRest* pEnd = static_cast<ImoNoteRest*>(
+                                        pDoc->get_pointer_to_imo(m_endId) );
+    ImoTuplet* pTuplet = pDoc->add_tuplet(pStart, pEnd, m_source, msg);
+    if (pTuplet)
+        m_tupletId = pTuplet->get_id();
+    m_error = msg.str();
+    return (pTuplet != NULL ? k_success : k_failure);
+}
+
+//---------------------------------------------------------------------------------------
+void CmdAddTuplet::undo_action(Document* pDoc, DocCursor* pCursor)
+{
+    if (m_tupletId != k_no_imoid)
+    {
+        ImoTuplet* pTuplet = static_cast<ImoTuplet*>(
+                                pDoc->get_pointer_to_imo(m_tupletId) );
+        pDoc->delete_relation(pTuplet);
+        m_tupletId = k_no_imoid;
+    }
+}
+
+
+//=======================================================================================
+// CmdBreakBeam implementation
+//=======================================================================================
+CmdBreakBeam::CmdBreakBeam(ImoNoteRest* pBeforeNR)
+    : DocCmdSimple()
+    , m_beforeId( pBeforeNR->get_id() )
+{
+    m_flags = k_recordable | k_reversible;
+    m_name = "Break beam";
+}
+
+//---------------------------------------------------------------------------------------
+int CmdBreakBeam::perform_action(Document* pDoc, DocCursor* pCursor)
+{
+    //Undo strategy: Checkpoint.
+    //TODO: Posible optimization: partial checkpoint: save only source code for beam
+    create_checkpoint(pDoc);
+
+    //it is previously verified that pBeforeNR is beamed and it is not the first one
+    //of the beam
+
+    //get the beam
+    ImoNoteRest* pBeforeNR = static_cast<ImoNoteRest*>(
+                                pDoc->get_pointer_to_imo(m_beforeId) );
+    ImoBeam* pBeam = pBeforeNR->get_beam();
+
+    //save pointers to the note/rests before break point
+    int nNotesBefore = 0;
+    list<ImoNoteRest*> notesBefore;
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >& objs = pBeam->get_related_objects();
+    list< pair<ImoStaffObj*, ImoRelDataObj*> >::const_iterator it;
+    it = objs.begin();
+    ImoNoteRest* pNR = static_cast<ImoNoteRest*>( (*it).first );
+    ImoNoteRest* pPrevNR = NULL;
+    ++it;
+    while (pNR && pNR != pBeforeNR && it != objs.end())
+    {
+        notesBefore.push_back( pNR );
+
+        pPrevNR = pNR;
+        ++nNotesBefore;
+        pNR = static_cast<ImoNoteRest*>( (*it).first );
+        ++it;
+    }
+
+    //pBeforeNR must be found and it must not be the first one in the beam
+    if (pNR == NULL || pPrevNR == NULL || nNotesBefore == 0)
+        return k_failure;
+
+    pPrevNR->set_dirty(true);
+    pBeforeNR->set_dirty(true);
+
+    int nNotesAfter = int(objs.size()) - nNotesBefore;
+
+    //four cases:
+    //  a) two single notes         (nNotesBefore == 1 && nNotesAfter == 1)
+    //  b) single note + new beam   (nNotesBefore == 1 && nNotesAfter > 1)
+    //  c) new beam + new beam      (nNotesBefore > 1 && nNotesAfter > 1)
+    //  d) new beam + single note   (nNotesBefore > 1 && nNotesAfter == 1)
+
+    //Case a) two single notes
+    if (nNotesBefore == 1 && nNotesAfter == 1)
+    {
+        //just remove the beam
+        pDoc->delete_relation(pBeam);
+        return k_success;
+    }
+
+    //case b) single note + new beam
+    if (nNotesBefore == 1 && nNotesAfter > 1)
+    {
+        //remove first note from beam
+        pPrevNR->remove_from_relation(pBeam);
+        AutoBeamer autobeamer(pBeam);
+        autobeamer.do_autobeam();
+        return k_success;
+    }
+
+    //case c) new beam + new beam
+    if (nNotesBefore > 1 && nNotesAfter > 1)
+    {
+        //split the beam. Create a new beam for first group and keep the existing one
+        //for the second group
+
+        //remove 'before' notes from existing beam
+        list<ImoNoteRest*>::iterator it = notesBefore.begin();
+        for (it = notesBefore.begin(); it != notesBefore.end(); ++it)
+            (*it)->remove_from_relation(pBeam);
+
+        //create a new beam for the removed notes
+        pDoc->add_beam(notesBefore);
+
+        //adjust the old beam
+        AutoBeamer autobeamer(pBeam);
+        autobeamer.do_autobeam();
+
+        return k_success;
+    }
+
+    //case d) new beam + single note
+    if (nNotesBefore > 1 && nNotesAfter == 1)
+    {
+        //remove last note from beam
+        pBeforeNR->remove_from_relation(pBeam);
+        AutoBeamer autobeamer(pBeam);
+        autobeamer.do_autobeam();
+        return k_success;
+    }
+
+    return k_failure;
+}
+
+
+//=======================================================================================
+// CmdChangeDots implementation
+//=======================================================================================
+CmdChangeDots::CmdChangeDots(const list<ImoId>& noteRests, int dots)
+    : DocCmdSimple()
+    , m_dots(dots)
+{
+    m_flags = k_recordable | k_reversible;
+    m_name = "Change dots";
+
+    //save affected note/rests
+    list<ImoId>::const_iterator it;
+    for (it = noteRests.begin(); it != noteRests.end(); ++it)
+        m_noteRests.push_back(*it);
+}
+
+//---------------------------------------------------------------------------------------
+int CmdChangeDots::perform_action(Document* pDoc, DocCursor* pCursor)
+{
+    //Undo strategy: direct undo, as it only implies restoring dots
+
+    bool fSaveDots = (m_oldDots.size() == 0);
+    list<ImoId>::iterator it;
+    for (it = m_noteRests.begin(); it != m_noteRests.end(); ++it)
+    {
+        ImoNoteRest* pNR = static_cast<ImoNoteRest*>( pDoc->get_pointer_to_imo(*it) );
+        if (fSaveDots)
+            m_oldDots.push_back( pNR->get_dots() );
+        pNR->set_dots(m_dots);
+        pNR->set_dirty(true);
+    }
+    return k_success;
+}
+
+//---------------------------------------------------------------------------------------
+void CmdChangeDots::undo_action(Document* pDoc, DocCursor* pCursor)
+{
+    list<ImoId>::iterator itNR;
+    list<int>::iterator itD = m_oldDots.begin();
+    for (itNR = m_noteRests.begin(); itNR != m_noteRests.end(); ++itNR, ++itD)
+    {
+        ImoNoteRest* pNR = static_cast<ImoNoteRest*>( pDoc->get_pointer_to_imo(*itNR) );
+        pNR->set_dots(*itD);
+    }
+}
 
 //=======================================================================================
 // CmdCursor implementation
@@ -313,6 +460,8 @@ CmdCursor::CmdCursor(int cmd, ImoId id)
 //---------------------------------------------------------------------------------------
 int CmdCursor::perform_action(Document* pDoc, DocCursor* pCursor)
 {
+    //Undo strategy: this command is not reversible
+
     m_curState = pCursor->get_state();
     switch(m_operation)
     {
@@ -366,6 +515,10 @@ CmdDeleteBlockLevelObj::CmdDeleteBlockLevelObj()
 //---------------------------------------------------------------------------------------
 int CmdDeleteBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
 {
+    //Undo strategy: Checkpoint.
+    //TODO: Posible optimization: partial checkpoint: save only source code for deleted
+    //block
+
     create_checkpoint(pDoc);
 
     ImoBlockLevelObj* pImo = dynamic_cast<ImoBlockLevelObj*>( **pCursor );
@@ -381,6 +534,32 @@ int CmdDeleteBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
 
 
 //=======================================================================================
+// CmdDeleteRelation implementation
+//=======================================================================================
+CmdDeleteRelation::CmdDeleteRelation(ImoRelObj* pRO)
+    : DocCmdSimple()
+{
+    m_flags = k_recordable | k_reversible;
+    m_relId = pRO->get_id();
+    m_name = "Delete " + pRO->get_name();
+}
+
+//---------------------------------------------------------------------------------------
+int CmdDeleteRelation::perform_action(Document* pDoc, DocCursor* pCursor)
+{
+    //Undo strategy: checkpoint, because the relation could have some attributes
+    //modified (color, user positioned, ...).
+    //TODO: OPTIMIZATION direct undo via partial checkpoint, that is, only relation
+    //source code
+    create_checkpoint(pDoc);
+
+    ImoRelObj* pRO = static_cast<ImoRelObj*>( pDoc->get_pointer_to_imo(m_relId) );
+    pDoc->delete_relation(pRO);
+    return k_success;
+}
+
+
+//=======================================================================================
 // CmdDeleteStaffObj implementation
 //=======================================================================================
 CmdDeleteStaffObj::CmdDeleteStaffObj()
@@ -392,17 +571,54 @@ CmdDeleteStaffObj::CmdDeleteStaffObj()
 //---------------------------------------------------------------------------------------
 int CmdDeleteStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
 {
+    //Undo strategy: Deleted objects could have relations with other objects (for
+    //instance, beamed groups, ligatures, etc.). Therefore, an 'undo' operation
+    //would require to identify and rebuild these relations. As this can be complex,
+    //it is simpler to use checkpoints.
     create_checkpoint(pDoc);
+
 
     ImoStaffObj* pImo = dynamic_cast<ImoStaffObj*>( pCursor->get_pointee() );
     if (pImo)
     {
         set_command_name("Delete ", pImo);
+
+        //get and save relations
+        vector<ImoId> relIds;
+        ImoRelations* pRels = pImo->get_relations();
+        if (pRels)
+        {
+            list<ImoRelObj*>& relations = pRels->get_relations();
+            if (relations.size() > 0)
+            {
+                list<ImoRelObj*>::iterator it;
+                for (it = relations.begin(); it != relations.end(); ++it)
+                {
+                    relIds.push_back( (*it)->get_id() );
+                }
+            }
+        }
+
+        //delete object
         ImoInstrument* pInstr = pImo->get_instrument();
         pInstr->delete_staffobj(pImo);
 
+        //ask relations to reorganize themselves
+        if (relIds.size() > 0)
+        {
+            vector<ImoId>::iterator itV;
+            for (itV = relIds.begin(); itV != relIds.end(); ++itV)
+            {
+                ImoRelObj* pRO = static_cast<ImoRelObj*>( pDoc->get_pointer_to_imo(*itV) );
+                if (pRO)
+                    pRO->reorganize_after_object_deletion();
+            }
+        }
+
+        //rebuild StaffObjs collection
         ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_top_object() );
         pScore->close();
+
         return k_success;
     }
     return k_failure;
@@ -512,6 +728,8 @@ void CmdInsertBlockLevelObj::undo_action(Document* pDoc, DocCursor* pCursor)
 //---------------------------------------------------------------------------------------
 int CmdInsertBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
 {
+    //Undo strategy: direct undo, as it only implies to delete the inserted object
+
     if (m_fFromSource)
         perform_action_from_source(pDoc, pCursor);
     else
@@ -581,6 +799,8 @@ void CmdInsertStaffObj::undo_action(Document* pDoc, DocCursor* pCursor)
 //---------------------------------------------------------------------------------------
 int CmdInsertStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
 {
+    //Undo strategy: direct undo, as it only implies to delete the inserted object
+
     if (validate_source() != k_success)
         return k_failure;
 
@@ -631,7 +851,6 @@ int CmdInsertStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
     }
     return k_failure;
 }
-
 
 
 //=======================================================================================
@@ -685,8 +904,9 @@ int CmdInsertManyStaffObjs::perform_action(Document* pDoc, DocCursor* pCursor)
 void CmdInsertManyStaffObjs::save_source_code_with_ids(Document* pDoc,
                                                        const list<ImoStaffObj*>& objects)
 {
-    //This is not necessary. As unodo/redo is based on checkpoints, the undo operation
-    //rebuildsthe document and resets ImoId counter. Therefore, redo operation reassigns
+    //TODO: Remove this method
+    //This is not necessary. As undo/redo is based on checkpoints, the undo operation
+    //rebuilds the document and resets ImoId counter. Therefore, redo operation reassigns
     //*the same* ids, without the need of saving them in this command source code.
 
     if (!m_fSaved)
@@ -699,98 +919,45 @@ void CmdInsertManyStaffObjs::save_source_code_with_ids(Document* pDoc,
 
 
 //=======================================================================================
-// CmdAddStaffObj implementation
+// CmdJoinBeam implementation
 //=======================================================================================
-CmdAddStaffObj::CmdAddStaffObj(const string& source)
-    : CmdInsertObj()
-    , m_firstInsertedId(k_no_imoid)
+CmdJoinBeam::CmdJoinBeam(const list<ImoId>& notes)
+    : DocCmdSimple()
 {
-    m_source = source;
     m_flags = k_recordable | k_reversible;
-    m_name = "Add ";
+    m_name = "Join beam";
+
+    //save note/rests Ids
+    list<ImoId>::const_iterator it;
+    for (it = notes.begin(); it != notes.end(); ++it)
+        m_notesId.push_back(*it);
 }
 
 //---------------------------------------------------------------------------------------
-void CmdAddStaffObj::undo_action(Document* pDoc, DocCursor* pCursor)
+int CmdJoinBeam::perform_action(Document* pDoc, DocCursor* pCursor)
 {
-    //Undo strategy: direct undo by removing added objects.
+    //Undo strategy: Note/rests to be beamed could have beams. For now, it is
+    //simpler to use a checkpoint
+    create_checkpoint(pDoc);
 
-    if (m_firstInsertedId != m_lastInsertedId)
-        remove_object(pDoc, m_firstInsertedId);
-    remove_object(pDoc, m_lastInsertedId);
+    //get pointers to notes/rests
+    list<ImoNoteRest*> notes;
+    list<ImoId>::const_iterator it;
+    for (it = m_notesId.begin(); it != m_notesId.end(); ++it)
+        notes.push_back( static_cast<ImoNoteRest*>( pDoc->get_pointer_to_imo(*it) ) );
 
-    //TODO: set document modified
-
-    //update ColStaffObjs
-    ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_top_object() );
-    pScore->close();
-}
-
-//---------------------------------------------------------------------------------------
-int CmdAddStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
-{
-//    if (validate_source() != k_success)
-//        return k_failure;
-
-    //get instrument that will be modified
-    DocCursorState state = pCursor->get_state();
-    SpElementCursorState elmState = state.get_delegate_state();
-    ScoreCursorState* pState = static_cast<ScoreCursorState*>( elmState.get() );
-    ImoScore* pScore = static_cast<ImoScore*>( pCursor->get_top_object() );
-    ImoInstrument* pInstr = pScore->get_instrument( pState->instrument() );
-
-    //create and insert object
-    if (pInstr)
+    //remove all existing beams
+    list<ImoNoteRest*>::const_iterator itNR;
+    for (itNR = notes.begin(); itNR != notes.end(); ++itNR)
     {
-        //insert the created object at desired point
-        stringstream errormsg;
-        ImoStaffObj* pAt = dynamic_cast<ImoStaffObj*>( pCursor->get_pointee() );
-        ImoStaffObj* pImo = pInstr->insert_staffobj_at(pAt, m_source, errormsg);
-        if (pImo)
-        {
-            //assign name to this command
-            m_name.append( pImo->get_name() );
-
-            //save and inject imo id in source code, if not yet done
-            if (m_firstInsertedId == k_no_imoid)
-            {
-                m_firstInsertedId = pImo->get_id();
-
-                //inject id in source code
-                size_t i = m_source.find(' ');
-                if (i == string::npos)
-                    i = m_source.find(')');
-
-                stringstream src;
-                src << m_source.substr(0, i) << "#" << m_firstInsertedId
-                    << m_source.substr(i);
-                m_source = src.str();
-            }
-
-            //insert goBack if needed
-            TimeUnits duration = pImo->get_duration();
-            if (is_greater_time(duration, 0.0))
-            {
-                stringstream src;
-                src << "(goBack " << duration << ")";
-                pImo = pInstr->insert_staffobj_at(pAt, src.str(), errormsg);
-            }
-
-            //save id of last inserted object
-            m_lastInsertedId = pImo->get_id();
-
-            //update ColStaffObjs table
-            pScore->close();
-
-            return k_success;
-        }
-        else
-        {
-            m_error = errormsg.str();
-            return k_failure;
-        }
+        if ((*itNR)->is_beamed())
+            pDoc->delete_relation( (*itNR)->get_beam() );
     }
-    return k_failure;
+
+    //create the new beam
+    pDoc->add_beam(notes);
+
+    return k_success;
 }
 
 

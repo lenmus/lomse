@@ -465,7 +465,8 @@ protected:
     inline ScoreCursorState p_get_current_state() { return m_currentState; }
     inline void p_set_previous_state(ScoreCursorState& state) { m_prevState = state; }
     inline void p_set_current_state(ScoreCursorState& state) { m_currentState = state; }
-    void p_save_current_state_as_previous_state();
+    void p_copy_current_state_as_previous_state();
+    void p_copy_previous_state_as_current_state();
     inline bool p_is_at_end_of_staff() { return m_currentState.id() == k_cursor_at_end_of_staff; }
     bool p_is_at_end_of_score();
     void p_determine_total_duration();
@@ -588,47 +589,6 @@ public:
     //saving/restoring state
     DocCursorState get_state();
     void restore_state(DocCursorState& state);
-
-    //ScoreCursorInterface: methods for changing cursor position
-    //-----------------------------------------------------------------------------------
-//    //void move_next_new_time() {
-//    //    ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//    //    if (pCursor)
-//    //        pCursor->move_next_new_time();
-//    //}
-//    //void move_prev_new_time() {
-//    //    ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//    //    if (pCursor)
-//    //        pCursor->move_prev_new_time();
-//    //}
-//    //void to_start_of_instrument(int nInstr) {
-//    //    ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//    //    if (pCursor)
-//    //        pCursor->to_start_of_instrument(nInstr);
-//    //}
-//    //void to_start_of_measure(int nMeasure, int nStaff) {
-//    //    ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//    //    if (pCursor)
-//    //        pCursor->to_start_of_measure(nMeasure, nStaff);
-//    //}
-//    void skip_clef_key_time() {
-//        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//        if (pCursor)
-//            pCursor->skip_clef_key_time();
-//    }
-//
-//    //ScoreCursorInterface: direct positioning
-//    void point_to_barline(ImoId nId, int nStaff) {
-//        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//        if (pCursor)
-//            pCursor->point_to_barline(nId, nStaff);
-//    }
-//
-//    void to_state(int nInstr, int nMeasure, int nStaff, TimeUnits rTime) {
-//        ScoreCursor* pCursor = dynamic_cast<ScoreCursor*>(m_pInnerCursor);
-//        if (pCursor)
-//            pCursor->to_state(nInstr, nMeasure, nStaff, rTime);
-//    }
 
 protected:
     void start_delegation();

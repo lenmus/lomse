@@ -96,6 +96,7 @@ public:
         , m_pShape3(NULL)
         , m_pStorage(NULL)
         , m_pChordEngrv(NULL)
+        , m_pDoc(NULL)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
@@ -113,19 +114,19 @@ public:
                      int step3=-1, int octave3=-1, int noteType=k_eighth)
     {
         delete_chord();
-        Document doc(m_libraryScope);
-        m_pChord = static_cast<ImoChord*>( ImFactory::inject(k_imo_chord, &doc) );
+        m_pDoc = LOMSE_NEW Document(m_libraryScope);
+        m_pChord = static_cast<ImoChord*>( ImFactory::inject(k_imo_chord, m_pDoc) );
 
-        m_pNote1 = ImFactory::inject_note(&doc, step1, octave1, noteType, k_no_accidentals);
-        m_pNote1->include_in_relation(&doc, m_pChord);
+        m_pNote1 = ImFactory::inject_note(m_pDoc, step1, octave1, noteType, k_no_accidentals);
+        m_pNote1->include_in_relation(m_pDoc, m_pChord);
 
-        m_pNote2 = ImFactory::inject_note(&doc, step2, octave2, noteType, k_no_accidentals);
-        m_pNote2->include_in_relation(&doc, m_pChord);
+        m_pNote2 = ImFactory::inject_note(m_pDoc, step2, octave2, noteType, k_no_accidentals);
+        m_pNote2->include_in_relation(m_pDoc, m_pChord);
 
         if (step3 >= 0)
         {
-            m_pNote3 = ImFactory::inject_note(&doc, step3, octave3, noteType, k_no_accidentals);
-            m_pNote3->include_in_relation(&doc, m_pChord);
+            m_pNote3 = ImFactory::inject_note(m_pDoc, step3, octave3, noteType, k_no_accidentals);
+            m_pNote3->include_in_relation(m_pDoc, m_pChord);
         }
         else
             m_pNote3 = NULL;
@@ -156,6 +157,7 @@ public:
         delete m_pShape3;
         delete m_pStorage;
         delete m_pChordEngrv;
+        delete m_pDoc;
     }
 
     void engrave_chord()
@@ -199,6 +201,7 @@ public:
     GmoShapeNote* m_pShape3;
     ShapesStorage* m_pStorage;
     MyChordEngraver* m_pChordEngrv;
+    Document* m_pDoc;
 
 };
 
@@ -207,6 +210,7 @@ SUITE(ChordEngraverTest)
 
     TEST_FIXTURE(ChordEngraverTestFixture, ChordEngraver_CreateShapes)
     {
+
         create_chord(0,4,  2,4,  4,4);
         engrave_chord();
 

@@ -213,6 +213,10 @@ public:
     void analyse_node(LdpTree::iterator itNode);
     ImoObj* analyse_node(LdpElement* pNode, ImoObj* pAnchor=NULL);
 
+    //helper, for score edition
+    ImoBeam* create_beam(const list<ImoNoteRest*>& notes);
+    ImoTie* create_tie(ImoNote* pStart, ImoNote* pEnd);
+
     //inherited and saved values. setters & getters
     void reset_defaults_for_instrument();
 

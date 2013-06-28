@@ -280,6 +280,85 @@ ImoObj* Document::create_object_from_ldp(const string& source, ostream& reporter
 }
 
 //---------------------------------------------------------------------------------------
+ImoTuplet* Document::add_tuplet(ImoNoteRest* pStartNR, ImoNoteRest* pEndNR,
+                                const string& source, ostream& reporter)
+{
+    LdpParser parser(reporter, m_libraryScope.ldp_factory());
+    try
+    {
+        parser.parse_text(source);
+        LdpTree* tree = parser.get_ldp_tree();
+        if (tree)
+        {
+            LdpAnalyser a(reporter, m_libraryScope, this);
+            a.set_score_version("2.0");
+            ImoTupletDto* pTupletStart = dynamic_cast<ImoTupletDto*>(
+                                            a.analyse_tree_and_get_object(tree) );
+            delete tree->get_root();
+
+            if (pTupletStart)
+            {
+                //attach the tuplet to start note/rest
+                pTupletStart->set_note_rest(pStartNR);
+                a.add_relation_info(pTupletStart);
+                pStartNR->set_dirty(true);
+
+                //create end of tuplet and attach it to end note/rest
+                ImoTupletDto* pTupletEnd = LOMSE_NEW ImoTupletDto();
+                pTupletEnd->set_tuplet_type(ImoTupletDto::k_stop);
+                pTupletEnd->set_note_rest(pEndNR);
+                a.add_relation_info(pTupletEnd);
+
+                //get the tuplet
+                ImoTuplet* pTuplet = pStartNR->get_tuplet();
+                return pTuplet;
+            }
+        }
+    }
+    catch (const std::exception& e)
+    {
+        reporter << e.what();
+    }
+    catch (...)
+    {
+        reporter << "exception caught";
+    }
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+ImoBeam* Document::add_beam(const list<ImoNoteRest*>& notes)
+{
+    LdpAnalyser a(m_reporter, m_libraryScope, this);
+    return a.create_beam(notes);
+}
+
+//---------------------------------------------------------------------------------------
+ImoTie* Document::tie_notes(ImoNote* pStart, ImoNote* pEnd, ostream& reporter)
+{
+    LdpAnalyser a(reporter, m_libraryScope, this);
+    return a.create_tie(pStart, pEnd);
+}
+
+//---------------------------------------------------------------------------------------
+void Document::delete_relation(ImoRelObj* pRO)
+{
+    //special treatment for ties
+    if (pRO->is_tie())
+    {
+        ImoTie* pTie = static_cast<ImoTie*>(pRO);
+        pTie->get_start_note()->set_tie_next(NULL);
+        pTie->get_end_note()->set_tie_prev(NULL);
+    }
+
+    //procedure for all
+    ImoNoteRest* pNR = static_cast<ImoNoteRest*>( pRO->get_start_object() );
+    pRO->remove_all();
+    delete pRO;
+    pNR->set_dirty(true);
+}
+
+//---------------------------------------------------------------------------------------
 ImoObj* Document::create_object_from_lmd(const string& source)
 {
     LmdParser parser(m_reporter);

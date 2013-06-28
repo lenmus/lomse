@@ -103,86 +103,80 @@ public:
     {
     }
 
-    ImoTuplet* create_tuplet(int numNotes, ImoNoteRest* notes[], string tuplets[],
-                             int tupletNum)
+    ImoTuplet* create_tuplet(Document& doc, const string& src)
     {
-        Document doc(m_libraryScope);
-        LdpAnalyser a(cout, m_libraryScope, &doc);
-        TupletsBuilder builder(cout, &a);
-        for (int i=0; i < numNotes; ++i)
-        {
-            ImoTupletDto* pDto = LOMSE_NEW ImoTupletDto();
-            if (i == 0)
-            {
-                pDto->set_tuplet_type(ImoTupletDto::k_start);
-                pDto->set_note_rest(notes[i]);
-                pDto->set_actual_number(2);
-                pDto->set_normal_number(3);
-                builder.add_item_info(pDto);
-            }
-            else if (i == numNotes-1)
-            {
-                pDto->set_tuplet_type(ImoTupletDto::k_stop);
-                pDto->set_note_rest(notes[i]);
-                builder.add_item_info(pDto);
-            }
-        }
+        string ldp = "(score (vers 2.0)(instrument (musicData (clef G)";
+        ldp += src;
+        ldp += ")))";
 
-        return notes[0]->get_tuplet();
+        doc.from_string(ldp);
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        ImoMusicData* pMD = pInstr->get_musicdata();
+        ImoNote* pNote1 = static_cast<ImoNote*>( pMD->get_child(1) );
+        return dynamic_cast<ImoTuplet*>( pNote1->get_relation(0) );
     }
 
-    void prepare_to_engrave_tuplet(int numNotes, ImoNoteRest* notes[], ImoTuplet* pTuplet)
+    void prepare_to_engrave_tuplet(ImoTuplet* pTuplet)
     {
         int iInstr = 0;
         int iStaff = 0;
         int iSystem = 0;
         int iCol = 0;
 
+        list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes = pTuplet->get_related_objects();
+        int numNotes = int( notes.size() );
+
         m_shapes.reserve(numNotes);
         m_pMeter = LOMSE_NEW ScoreMeter(1, 1, 180.0f);
         m_pStorage = LOMSE_NEW ShapesStorage();
 
         //engrave notes/rests
+        list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
+
         m_pNoteEngrv = LOMSE_NEW NoteEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
         m_pRestEngrv = LOMSE_NEW RestEngraver(m_libraryScope, m_pMeter, m_pStorage, 0, 0);
-        for (int i=0; i < numNotes; ++i)
+        for (it = notes.begin(); it != notes.end(); ++it)
         {
+            ImoNoteRest* pNR = static_cast<ImoNoteRest*>( (*it).first );
             GmoShape* pShape;
-            if (notes[i]->is_note())
+            if (pNR->is_note())
             {
-                ImoNote* pNote = dynamic_cast<ImoNote*>(notes[i]);
+                ImoNote* pNote = static_cast<ImoNote*>(pNR);
                 pShape = m_pNoteEngrv->create_shape(pNote, k_clef_G2,
                                                     UPoint(10.0f, 15.0f) );
             }
             else
             {
-                ImoRest* pRest = dynamic_cast<ImoRest*>(notes[i]);
+                ImoRest* pRest = static_cast<ImoRest*>(pNR);
                 pShape = m_pRestEngrv->create_shape(pRest, UPoint(10.0f, 15.0f));
             }
             m_shapes.push_back(pShape);
         }
 
         //send note data to tuplet engraver
-        for (int i=0; i < numNotes; ++i)
+        int i=0;
+        for (it = notes.begin(); it != notes.end(); ++it, ++i)
         {
+            ImoNoteRest* pNR = static_cast<ImoNoteRest*>( (*it).first );
             if (i == 0)
             {
                 //first note
                 m_pTupletEngrv = LOMSE_NEW MyTupletEngraver(m_libraryScope, m_pMeter);
-                m_pTupletEngrv->set_start_staffobj(pTuplet, notes[i], m_shapes[i],
+                m_pTupletEngrv->set_start_staffobj(pTuplet, pNR, m_shapes[i],
                                                  iInstr, iStaff, iSystem, iCol);
                 m_pStorage->save_engraver(m_pTupletEngrv, pTuplet);
             }
             else if (i == numNotes-1)
             {
                 //last note
-                m_pTupletEngrv->set_end_staffobj(pTuplet, notes[i], m_shapes[i],
+                m_pTupletEngrv->set_end_staffobj(pTuplet, pNR, m_shapes[i],
                                                iInstr, iStaff, iSystem, iCol);
             }
             else
             {
                 //intermediate note
-                m_pTupletEngrv->set_middle_staffobj(pTuplet, notes[i], m_shapes[i],
+                m_pTupletEngrv->set_middle_staffobj(pTuplet, pNR, m_shapes[i],
                                                   iInstr, iStaff, iSystem, iCol);
             }
         }
@@ -220,85 +214,38 @@ SUITE(TupletEngraverTest)
     TEST_FIXTURE(TupletEngraverTestFixture, CreateTuplet)
     {
         Document doc(m_libraryScope);
-        ImoNote* note1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth);
-        ImoNote* note2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth);
-        ImoNoteRest* notes[] = { note1, note2 };
-        string tuplets[] = { "+", "-" };
-
-        ImoTuplet* pTuplet = create_tuplet(2, notes, tuplets, 12);
-
+        ImoTuplet* pTuplet = create_tuplet(doc, "(n c4 e (t + 2 3))(n f4 e (t -))");
         CHECK( pTuplet != NULL );
         CHECK( pTuplet->get_actual_number() == 2 );
         CHECK( pTuplet->get_normal_number() == 3 );
-        CHECK( notes[0]->is_in_tuplet() == true );
-        CHECK( notes[1]->is_in_tuplet() == true );
-
-        delete note1;
-        delete note2;
     }
 
     TEST_FIXTURE(TupletEngraverTestFixture, FeedEngraver)
     {
         Document doc(m_libraryScope);
-        ImoNote* note1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth);
-        ImoNote* note2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth);
-        ImoNoteRest* notes[] = { note1, note2 };
-        string tuplets[] = { "+", "-" };
-
-        ImoTuplet* pTuplet = create_tuplet(2, notes, tuplets, 12);
-        prepare_to_engrave_tuplet(2, notes, pTuplet);
+        ImoTuplet* pTuplet = create_tuplet(doc, "(n c4 e (t + 2 3))(n f4 e (t -))");
+        prepare_to_engrave_tuplet(pTuplet);
 
         MyTupletEngraver* pEngrv = dynamic_cast<MyTupletEngraver*>(m_pStorage->get_engraver(pTuplet));
 
         CHECK( pEngrv != NULL );
         CHECK( pEngrv == m_pTupletEngrv );
 
-        delete note1;
-        delete note2;
         delete_test_data();
     }
 
     TEST_FIXTURE(TupletEngraverTestFixture, CreateTupletShape)
     {
         Document doc(m_libraryScope);
-        ImoNote* note1 = ImFactory::inject_note(&doc, k_step_C, 4, k_eighth);
-        ImoNote* note2 = ImFactory::inject_note(&doc, k_step_F, 4, k_eighth);
-        ImoNoteRest* notes[] = { note1, note2 };
-        string tuplets[] = { "+", "-" };
-
-        ImoTuplet* pTuplet = create_tuplet(2, notes, tuplets, 12);
-        prepare_to_engrave_tuplet(2, notes, pTuplet);
+        ImoTuplet* pTuplet = create_tuplet(doc, "(n c4 e (t + 2 3))(n f4 e (t -))");
+        prepare_to_engrave_tuplet(pTuplet);
 
         m_pTupletEngrv->create_shapes();
         m_pTupletShape = dynamic_cast<GmoShapeTuplet*>( m_pTupletEngrv->get_shape() );
         CHECK( m_pTupletShape != NULL );
 
-        delete note1;
-        delete note2;
         delete_test_data();
     }
-
-    //TEST_FIXTURE(TupletEngraverTestFixture, TupletShapeAddedToNoteShape)
-    //{
-    //    ImoNote note1(k_step_C, 4, k_eighth);
-    //    ImoNote note2(k_step_F, 4, k_eighth);
-    //    ImoNoteRest* notes[] = { note1, note2 };
-    //    string tuplets[] = { "+", "-" };
-
-    //    ImoTuplet* pTuplet = create_tuplet(2, notes, tuplets, 12);
-    //    prepare_to_engrave_tuplet(2, notes, pTuplet);
-
-    //    m_pTupletEngrv->create_shapes();
-    //    m_pTupletShape = dynamic_cast<GmoShapeTuplet*>( m_pTupletEngrv->get_shape() );
-
-    //    //method prepare_to_engrave_tuplet() store notes shapes in m_shapes
-    //    std::vector<GmoShape*>::iterator it;
-    //    for (it = m_shapes.begin(); it != m_shapes.end(); ++it)
-    //        CHECK( (*it)->find_related_shape(GmoObj::k_shape_tuplet) == m_pTupletShape );
-
-    //    delete_test_data();
-    //}
-
 
     // decide_on_stems_direction --------------------------------------------------------
 

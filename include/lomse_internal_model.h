@@ -509,13 +509,17 @@ public:
 // the root. Any object must derive from it
 class ImoObj : public Visitable, public TreeNode<ImoObj>
 {
-private:
+protected:
+    Document* m_pDoc;
     ImoId m_id;
     int m_objtype;
     unsigned int m_flags;
 
 protected:
     ImoObj(int objtype, ImoId id=k_no_imoid);
+
+    friend class ImFactory;
+    inline void set_owner_document(Document* pDoc) { m_pDoc = pDoc; }
 
 public:
     virtual ~ImoObj();
@@ -688,6 +692,7 @@ public:
 protected:
     void visit_children(BaseVisitor& v);
     void propagate_dirty();
+    void remove_id();
 
 };
 
@@ -733,7 +738,7 @@ protected:
 public:
     ImoColorDto() : ImoDto(k_imo_color_dto), m_color(0, 0, 0, 255), m_ok(true) {}
     ImoColorDto(Int8u r, Int8u g, Int8u b, Int8u a = 255);
-    ~ImoColorDto() {}
+    virtual ~ImoColorDto() {}
 
     Color& set_from_rgb_string(const std::string& rgb);
     Color& set_from_rgba_string(const std::string& rgba);
@@ -813,7 +818,7 @@ protected:
     ImoStyle() : ImoSimpleObj(k_imo_style), m_name(), m_pParent(NULL) {}
 
 public:
-    ~ImoStyle() {}
+    virtual ~ImoStyle() {}
 
     //text style
     enum { k_spacing_normal=0, k_length, };
@@ -1356,9 +1361,6 @@ public:
     inline void set_user_location_y(Tenths ty) { m_tyUserLocation = ty; }
     inline void set_visible(bool visible) { m_fVisible = visible; }
 
-    //root
-    Document* get_the_document();
-
     //attachments (first child)
     ImoAttachments* get_attachments();
     bool has_attachments();
@@ -1425,7 +1427,7 @@ protected:
     ImoRelations() : ImoSimpleObj(k_imo_relations) {}
 
 public:
-    ~ImoRelations();
+    virtual ~ImoRelations();
 
     //overrides, to traverse this special node
 	void accept_visitor(BaseVisitor& v);
@@ -1435,8 +1437,8 @@ public:
     ImoRelObj* get_item(int iItem);   //iItem = 0..n-1
     inline int get_num_items() { return int(m_relations.size()); }
     inline std::list<ImoRelObj*>& get_relations() { return m_relations; }
-    void remove(ImoRelObj* pRO);
-    void add(ImoRelObj* pRO);
+    void remove_relation(ImoRelObj* pRO);
+    void add_relation(ImoRelObj* pRO);
     ImoRelObj* find_item_of_type(int type);
     void remove_from_all_relations(ImoStaffObj* pSO);
 
@@ -1622,7 +1624,7 @@ protected:
     ImoInlineWrapper() : ImoBoxInline(k_imo_inline_wrapper) {}
 
 public:
-    ~ImoInlineWrapper() {}
+    virtual ~ImoInlineWrapper() {}
 };
 
 //---------------------------------------------------------------------------------------
@@ -1637,7 +1639,7 @@ private:
     ImoLink() : ImoBoxInline(k_imo_link) {}
 
 public:
-    ~ImoLink() {}
+    virtual ~ImoLink() {}
 
     //url
     inline string& get_url() { return m_url; }
@@ -1744,7 +1746,6 @@ protected:
 //---------------------------------------------------------------------------------------
 //An abstract object relating two or more StaffObjs
 class ImoRelObj : public ImoScoreObj
-//class ImoRelObj : public ImoAuxObj
 {
 protected:
 	std::list< pair<ImoStaffObj*, ImoRelDataObj*> > m_relatedObjects;
@@ -1765,10 +1766,10 @@ public:
     ImoRelDataObj* get_end_data() { return m_relatedObjects.back().second; }
     ImoRelDataObj* get_data_for(ImoStaffObj* pSO);
 
+    virtual void reorganize_after_object_deletion()=0;
     virtual int get_min_number_for_autodelete() { return 2; }
 
 protected:
-    //ImoRelObj(int objtype) : ImoAuxObj(objtype) {}
     ImoRelObj(int objtype) : ImoScoreObj(objtype) {}
 
 };
@@ -1808,7 +1809,7 @@ protected:
     ImoBeamData(ImoBeamDto* pDto);
 
 public:
-    ~ImoBeamData() {}
+    virtual ~ImoBeamData() {}
 
     //getters
     inline int get_beam_number() { return m_beamNum; }
@@ -1836,7 +1837,7 @@ protected:
 public:
     ImoBeamDto();
     ImoBeamDto(LdpElement* pBeamElm);
-    ~ImoBeamDto() {}
+    virtual ~ImoBeamDto() {}
 
     //getters
     inline int get_beam_number() { return m_beamNum; }
@@ -1877,7 +1878,7 @@ protected:
 public:
     ImoBezierInfo(ImoBezierInfo* pBezier);
 
-    ~ImoBezierInfo() {}
+    virtual ~ImoBezierInfo() {}
 
 	enum { k_start=0, k_end, k_ctrol1, k_ctrol2, k_max};     // point number
 
@@ -1897,7 +1898,7 @@ class ImoBorderDto : public ImoSimpleObj
 public:
     ImoBorderDto() : ImoSimpleObj(k_imo_border_dto)
         , m_color(Color(0,0,0,255)), m_width(1.0f), m_style(k_line_solid) {}
-    ~ImoBorderDto() {}
+    virtual ~ImoBorderDto() {}
 
     //getters
     inline Color get_color() { return m_color; }
@@ -1919,7 +1920,9 @@ protected:
     ImoChord() : ImoRelObj(k_imo_chord) {}
 
 public:
-    ~ImoChord() {}
+    virtual ~ImoChord() {}
+
+    void reorganize_after_object_deletion() {}
 };
 
 //---------------------------------------------------------------------------------------
@@ -1936,7 +1939,7 @@ protected:
                     , m_instrument(0), m_staff(0), m_time(0.0), m_id(k_no_imoid) {}
 
 public:
-    ~ImoCursorInfo() {}
+    virtual ~ImoCursorInfo() {}
 
     //getters
     inline int get_instrument() { return m_instrument; }
@@ -1998,7 +2001,7 @@ protected:
     }
 
 public:
-    ~ImoLineStyle() {}
+    virtual ~ImoLineStyle() {}
 
     //getters
     inline ELineStyle get_line_style() const { return m_lineStyle; }
@@ -2055,7 +2058,7 @@ public:
     {
     }
 
-    ~ImoTextBlockInfo() {}
+    virtual ~ImoTextBlockInfo() {}
 
     //getters
     inline Tenths get_height() { return m_size.height; }
@@ -2090,7 +2093,7 @@ protected:
     ImoMidiInfo() : ImoSimpleObj(k_imo_midi_info) , m_instr(0) , m_channel(0) {}
 
 public:
-    ~ImoMidiInfo() {}
+    virtual ~ImoMidiInfo() {}
 
     //getters
     inline int get_instrument() { return m_instr; }
@@ -2118,7 +2121,7 @@ protected:
     ImoTextInfo() : ImoSimpleObj(k_imo_text_info), m_text(""), m_language(""), m_pStyle(NULL) {}
 
 public:
-    ~ImoTextInfo() {}
+    virtual ~ImoTextInfo() {}
 
     //getters
     inline string& get_text() { return m_text; }
@@ -2155,7 +2158,7 @@ protected:
     ImoPageInfo(ImoPageInfo& dto);
 
 public:
-    ~ImoPageInfo() {}
+    virtual ~ImoPageInfo() {}
 
     //getters
     inline LUnits get_left_margin() { return m_uLeftMargin; }
@@ -2211,7 +2214,7 @@ protected:
     ImoBarline(): ImoStaffObj(k_imo_barline), m_barlineType(k_simple) {}
 
 public:
-    ~ImoBarline() {}
+    virtual ~ImoBarline() {}
 
 	enum { k_simple=0, k_double, k_start, k_end, k_end_repetition, k_start_repetition,
            k_double_repetition, };
@@ -2233,11 +2236,12 @@ protected:
     ImoBeam() : ImoRelObj(k_imo_beam) {}
 
 public:
-    ~ImoBeam() {}
+    virtual ~ImoBeam() {}
 
     //type of beam
     enum { k_none = 0, k_begin, k_continue, k_end, k_forward, k_backward, };
 
+    void reorganize_after_object_deletion();
 };
 
 //---------------------------------------------------------------------------------------
@@ -2250,7 +2254,7 @@ protected:
     ImoBlock(int objtype, ImoTextBlockInfo& box) : ImoAuxObj(objtype), m_box(box) {}
 
 public:
-    ~ImoBlock() {}
+    virtual ~ImoBlock() {}
 
 };
 
@@ -2269,7 +2273,7 @@ protected:
                                       , m_fHasAnchorLine(false) {}
 
 public:
-    ~ImoTextBox() {}
+    virtual ~ImoTextBox() {}
 
     inline ImoTextBlockInfo* get_box_info() { return &m_box; }
     inline ImoLineStyle* get_anchor_line_info() { return &m_line; }
@@ -2325,7 +2329,7 @@ protected:
     ImoButton();
 
 public:
-    ~ImoButton() {}
+    virtual ~ImoButton() {}
 
     //getters
     inline string& get_label() { return m_text; }
@@ -2371,7 +2375,7 @@ protected:
     }
 
 public:
-    ~ImoClef() {}
+    virtual ~ImoClef() {}
 
     //getters and setters
     inline int get_clef_type() { return m_clefType; }
@@ -2388,16 +2392,14 @@ public:
 class ImoContent : public ImoBlocksContainer
 {
 protected:
-    Document* m_pOwner;
-
     friend class ImFactory;
-    ImoContent(Document* pOwner) : ImoBlocksContainer(k_imo_content), m_pOwner(pOwner) {}
+    ImoContent() : ImoBlocksContainer(k_imo_content) {}
     ImoContent(int objtype) : ImoBlocksContainer(objtype) {}
 
 public:
     virtual ~ImoContent() {}
 
-    inline Document* get_owner() { return m_pOwner; }
+    inline Document* get_owner() { return m_pDoc; }
 
     //contents
     ImoContentObj* get_item(int iItem) {   //iItem = 0..n-1
@@ -2405,10 +2407,6 @@ public:
     }
     inline int get_num_items() { return get_num_children(); }
     inline void remove_item(ImoContentObj* pItem) { remove_child_imo(pItem); }
-
-//protected:
-//    //mandatory overrides
-//    ImoContentObj* get_container_node() { return this; }
 
 };
 
@@ -2443,29 +2441,28 @@ protected:
     ImoSystemBreak() : ImoStaffObj(k_imo_system_break) {}
 
 public:
-    ~ImoSystemBreak() {}
+    virtual ~ImoSystemBreak() {}
 };
 
 //---------------------------------------------------------------------------------------
 class ImoDocument : public ImoBlocksContainer
 {
 protected:
-    Document* m_pOwner;
     string m_version;
     string m_language;
     ImoPageInfo m_pageInfo;
     std::list<ImoStyle*> m_privateStyles;
 
     friend class ImFactory;
-    ImoDocument(Document* owner, const std::string& version="");
+    ImoDocument(const std::string& version="");
 
 public:
-    ~ImoDocument();
+    virtual ~ImoDocument();
 
     //info
     inline std::string& get_version() { return m_version; }
     inline void set_version(const string& version) { m_version = version; }
-    inline Document* get_owner() { return m_pOwner;; }
+    inline Document* get_owner() { return m_pDoc; }
     inline std::string& get_language() { return m_language; }
     inline void set_language(const string& language) { m_language = language; }
 
@@ -2489,13 +2486,6 @@ public:
     //support for edition commands
     void insert_block_level_obj(ImoBlockLevelObj* pAt, ImoBlockLevelObj* pImoNew);
     void delete_block_level_obj(ImoBlockLevelObj* pAt);
-
-//        //factory methods for ImoObj objects
-//    ImoButton* create_button(ImoId id, const string& label, const USize& size,
-//                             ImoStyle* pStyle=NULL);
-//    ImoInlineWrapper* create_inline_box();
-    //ImoTextItem* create_text_item(const string& text, ImoStyle* pStyle=NULL);
-
 
     //cursor
     //TODO: method add_cursor_info
@@ -2522,7 +2512,7 @@ protected:
     }
 
 public:
-    ~ImoFermata() {}
+    virtual ~ImoFermata() {}
 
     enum { k_normal, k_angled, k_square, };     //symbol
 
@@ -2552,7 +2542,7 @@ protected:
     {}
 
 public:
-    ~ImoGoBackFwd() {}
+    virtual ~ImoGoBackFwd() {}
 
     //getters and setters
     inline bool is_forward() { return m_fFwd; }
@@ -2602,7 +2592,7 @@ protected:
     ImoScoreTitle() : ImoScoreText(k_imo_score_title), m_hAlign(k_halign_center) {}
 
 public:
-    ~ImoScoreTitle() {}
+    virtual ~ImoScoreTitle() {}
 
     inline int get_h_align() { return m_hAlign; }
     inline void set_h_align(int value) { m_hAlign = value; }
@@ -2673,7 +2663,7 @@ protected:
     inline void set_owner_score(ImoScore* pScore) { m_pScore = pScore; }
 
 public:
-    ~ImoInstrGroup();
+    virtual ~ImoInstrGroup();
 
     enum { k_none=0, k_default, k_brace, k_bracket, };
 
@@ -2701,7 +2691,6 @@ public:
 class ImoInstrument : public ImoContainerObj
 {
 protected:
-    Document*       m_pDoc;
     ImoScore*       m_pScore;
     ImoScoreText    m_name;
     ImoScoreText    m_abbrev;
@@ -2710,14 +2699,14 @@ protected:
     std::list<ImoStaffInfo*> m_staves;
 
     friend class ImFactory;
-    ImoInstrument(Document* pDoc);
+    ImoInstrument();
 
     friend class ImoScore;
     friend class ImoInstrGroup;
     inline void set_owner_score(ImoScore* pScore) { m_pScore = pScore; }
 
 public:
-    ~ImoInstrument();
+    virtual ~ImoInstrument();
 
     //getters
     inline int get_num_staves() { return static_cast<int>(m_staves.size()); }
@@ -2780,7 +2769,7 @@ protected:
     ImoInstruments() : ImoCollection(k_imo_instruments) {}
 
 public:
-    ~ImoInstruments() {}
+    virtual ~ImoInstruments() {}
 
 };
 
@@ -2792,7 +2781,7 @@ protected:
     ImoInstrGroups() : ImoCollection(k_imo_instrument_groups) {}
 
 public:
-    ~ImoInstrGroups() {}
+    virtual ~ImoInstrGroups() {}
 
 };
 
@@ -2806,7 +2795,7 @@ protected:
     ImoKeySignature() : ImoStaffObj(k_imo_key_signature), m_keyType(k_key_undefined) {}
 
 public:
-    ~ImoKeySignature() {}
+    virtual ~ImoKeySignature() {}
 
     //getters and setters
     inline int get_key_type() { return m_keyType; }
@@ -2829,7 +2818,7 @@ class ImoLine : public ImoAuxObj
     ImoLine() : ImoAuxObj(k_imo_line), m_pStyle(NULL) {}
 
 public:
-    ~ImoLine() { delete m_pStyle; }
+    virtual ~ImoLine() { delete m_pStyle; }
 
     inline ImoLineStyle* get_line_info() { return m_pStyle; }
     inline void set_line_style(ImoLineStyle* pStyle) { m_pStyle = pStyle; }
@@ -2901,7 +2890,7 @@ protected:
     {}
 
 public:
-    ~ImoMetronomeMark() {}
+    virtual ~ImoMetronomeMark() {}
 
     enum { k_note_value=0, k_note_note, k_value, };
 
@@ -2922,16 +2911,6 @@ public:
     inline void set_ticks_per_minute(int ticks) { m_ticksPerMinute = ticks; }
     inline void set_mark_type(int type) { m_markType = type; }
     inline void set_parenthesis(bool fValue) { m_fParenthesis = fValue; }
-
-    //inline void set_right_note_dots(const NoteTypeAndDots& figdots) {
-    //    m_rightNoteType = figdots.noteType;
-    //    m_rightDots = figdots.dots;
-    //}
-    //inline void set_left_note_dots(const NoteTypeAndDots& figdots) {
-    //    m_leftNoteType = figdots.noteType;
-    //    m_leftDots = figdots.dots;
-    //}
-
 };
 
 //---------------------------------------------------------------------------------------
@@ -2969,7 +2948,7 @@ protected:
     ImoMusicData() : ImoCollection(k_imo_music_data) {}
 
 public:
-    ~ImoMusicData() {}
+    virtual ~ImoMusicData() {}
 
     ImoInstrument* get_instrument();
 };
@@ -2991,7 +2970,7 @@ protected:
         , m_fValue(false) {}
 
 public:
-    ~ImoOptionInfo() {}
+    virtual ~ImoOptionInfo() {}
 
     enum { k_boolean=0, k_number_long, k_number_float, k_string };
 
@@ -3024,7 +3003,7 @@ protected:
     ImoOptions() : ImoCollection(k_imo_options) {}
 
 public:
-    ~ImoOptions() {}
+    virtual ~ImoOptions() {}
 
 };
 
@@ -3055,7 +3034,7 @@ protected:
     ImoParamInfo() : ImoSimpleObj(k_imo_param_info), m_name(), m_value() {}
 
 public:
-    ~ImoParamInfo() {}
+    virtual ~ImoParamInfo() {}
 
     //getters
     inline string& get_name() { return m_name; }
@@ -3096,7 +3075,7 @@ class ImoPointDto : public ImoSimpleObj
 
 public:
     ImoPointDto() : ImoSimpleObj(k_imo_point_dto) {}
-    ~ImoPointDto() {}
+    virtual ~ImoPointDto() {}
 
     inline TPoint get_point() { return m_point; }
 
@@ -3131,7 +3110,7 @@ protected:
     }
 
 public:
-    ~ImoScoreLine() {}
+    virtual ~ImoScoreLine() {}
 
     //setters
     inline void set_start_point(TPoint point) { m_startPoint = point; }
@@ -3204,7 +3183,7 @@ class ImoSizeDto : public ImoSimpleObj
 
 public:
     ImoSizeDto() : ImoSimpleObj(k_imo_size_dto) {}
-    ~ImoSizeDto() {}
+    virtual ~ImoSizeDto() {}
 
     inline TSize get_size() { return m_size; }
 
@@ -3223,7 +3202,7 @@ protected:
     ImoSpacer() : ImoStaffObj(k_imo_spacer), m_space(0.0f) {}
 
 public:
-    ~ImoSpacer() {}
+    virtual ~ImoSpacer() {}
 
     //getters
     inline Tenths get_width() { return m_space; }
@@ -3249,7 +3228,7 @@ protected:
     ImoSystemInfo(ImoSystemInfo& dto);
 
 public:
-    ~ImoSystemInfo() {}
+    virtual ~ImoSystemInfo() {}
 
     //getters
     inline bool is_first() { return m_fFirst; }
@@ -3271,7 +3250,6 @@ class ImoScore : public ImoBlockLevelObj      //ImoBlocksContainer
 {
 protected:
     int             m_version;
-    Document*       m_pDoc;
     ColStaffObjs*   m_pColStaffObjs;
     SoundEventsTable* m_pMidiTable;
     ImoSystemInfo   m_systemInfoFirst;
@@ -3286,7 +3264,7 @@ protected:
 
 
 public:
-    ~ImoScore();
+    virtual ~ImoScore();
 
     //getters and setters
     string get_version_string();
@@ -3366,12 +3344,14 @@ protected:
     ImoSlur() : ImoRelObj(k_imo_slur), m_slurNum(0) {}
 
 public:
-    ~ImoSlur();
+    virtual ~ImoSlur();
 
     inline int get_slur_number() { return m_slurNum; }
     inline void set_slur_number(int num) { m_slurNum = num; }
     ImoNote* get_start_note();
     ImoNote* get_end_note();
+
+    void reorganize_after_object_deletion();
 };
 
 //---------------------------------------------------------------------------------------
@@ -3388,7 +3368,7 @@ protected:
     ImoSlurData(ImoSlurDto* pDto);
 
 public:
-    ~ImoSlurData() {}
+    virtual ~ImoSlurData() {}
 
     //type of slur
     enum { k_start = 0, k_continue, k_stop };
@@ -3431,7 +3411,7 @@ protected:
     }
 
 public:
-    ~ImoStaffInfo() {}
+    virtual ~ImoStaffInfo() {}
 
     enum { k_staff_ossia=0, k_staff_cue, k_staff_editorial, k_staff_regular,
         k_staff_alternate, };
@@ -3471,13 +3451,12 @@ class ImoStyles : public ImoSimpleObj
 {
 protected:
 	std::map<std::string, ImoStyle*> m_nameToStyle;
-	Document* m_pDoc;
 
 	friend class ImFactory;
     ImoStyles(Document* pDoc);
 
 public:
-    ~ImoStyles();
+    virtual ~ImoStyles();
 
     //overrides, to traverse this special node
 	void accept_visitor(BaseVisitor& v);
@@ -3539,7 +3518,7 @@ protected:
     ImoTableCell(Document* pDoc);
 
 public:
-    ~ImoTableCell() {}
+    virtual ~ImoTableCell() {}
 
     //accessors
     inline void set_rowspan(int value) { m_rowspan = value; }
@@ -3655,7 +3634,7 @@ protected:
     ImoTieData(ImoTieDto* pDto);
 
 public:
-    ~ImoTieData();
+    virtual ~ImoTieData();
 
     //getters
     inline bool is_start() { return m_fStart; }
@@ -3675,7 +3654,7 @@ protected:
     ImoTie(int num) : ImoRelObj(k_imo_tie), m_tieNum(num) {}
 
 public:
-    ~ImoTie() {}
+    virtual ~ImoTie() {}
 
     //getters
     inline int get_tie_number() { return m_tieNum; }
@@ -3690,6 +3669,7 @@ public:
     ImoBezierInfo* get_start_bezier();
     ImoBezierInfo* get_stop_bezier() ;
 
+    void reorganize_after_object_deletion();
 };
 
 // raw info about a pending tie
@@ -3707,7 +3687,7 @@ protected:
 public:
     ImoTieDto() : ImoSimpleObj(k_imo_tie_dto), m_fStart(true), m_tieNum(0), m_pNote(NULL)
                  , m_pBezier(NULL), m_pTieElm(NULL) {}
-    ~ImoTieDto();
+    virtual ~ImoTieDto();
 
     //getters
     inline bool is_start() { return m_fStart; }
@@ -3742,7 +3722,7 @@ protected:
 public:
     ImoTimeModificationDto() : ImoDto(k_imo_time_modification_dto)
         , m_top(1), m_bottom(1) {}
-    ~ImoTimeModificationDto() {}
+    virtual ~ImoTimeModificationDto() {}
 
     //getters & setters
     inline int get_top_number() { return m_top; }
@@ -3762,7 +3742,7 @@ protected:
     ImoTimeSignature() : ImoStaffObj(k_imo_time_signature), m_top(2), m_bottom(4) {}
 
 public:
-    ~ImoTimeSignature() {}
+    virtual ~ImoTimeSignature() {}
 
     //getters and setters
     inline int get_top_number() { return m_top; }
@@ -3803,7 +3783,7 @@ protected:
 public:
     ImoTupletDto();
     ImoTupletDto(LdpElement* pBeamElm);
-    ~ImoTupletDto() {}
+    virtual ~ImoTupletDto() {}
 
     enum { k_unknown = 0, k_start, k_continue, k_stop, };
 
@@ -3846,7 +3826,7 @@ protected:
     ImoTupletData(ImoTupletDto* pDto);
 
 public:
-    ~ImoTupletData() {}
+    virtual ~ImoTupletData() {}
 };
 
 //---------------------------------------------------------------------------------------
@@ -3864,7 +3844,7 @@ protected:
     ImoTuplet(ImoTupletDto* dto);
 
 public:
-    ~ImoTuplet() {}
+    virtual ~ImoTuplet() {}
 
     enum { k_straight = 0, k_curved, k_slurred, };
     enum { k_number_actual=0, k_number_both, k_number_none, };
@@ -3875,6 +3855,8 @@ public:
     inline int get_show_bracket() { return m_nShowBracket; }
     inline int get_show_number() { return m_nShowNumber; }
     inline int get_placement() { return m_nPlacement; }
+
+    void reorganize_after_object_deletion();
 };
 
 
@@ -3906,7 +3888,7 @@ public:
         , m_pSlurElm(NULL)
     {
     }
-    ~ImoSlurDto();
+    virtual ~ImoSlurDto();
 
     //getters
     inline bool is_stop() { return m_slurType == ImoSlurData::k_stop; }

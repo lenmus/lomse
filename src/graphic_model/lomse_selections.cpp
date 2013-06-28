@@ -30,6 +30,7 @@
 #include "lomse_selections.h"
 
 #include "lomse_gm_basic.h"
+#include "lomse_internal_model.h"
 
 
 namespace lomse
@@ -76,6 +77,20 @@ void SelectionSet::clear()
         (*it)->set_selected(false);
     }
     m_objects.clear();
+}
+
+//---------------------------------------------------------------------------------------
+list<ImoId> SelectionSet::filter_notes_rests()
+{
+    list<ImoId> notes;
+    list<GmoObj*>::iterator it;
+    for (it = m_objects.begin(); it != m_objects.end(); ++it)
+    {
+        ImoObj* pImo = (*it)->get_creator_imo();
+        if (pImo->is_note_rest())
+            notes.push_back(pImo->get_id());
+    }
+    return notes;
 }
 
 

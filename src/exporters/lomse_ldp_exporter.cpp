@@ -1078,8 +1078,6 @@ protected:
     //-----------------------------------------------------------------------------------
     void add_staffobjs()
     {
-        int nMeasure = 1;
-
         ImoInstrument* pInstr = m_pObj->get_instrument();
         m_iInstr = m_pScore->get_instr_number_for(pInstr);
         m_pColStaffObjs = m_pScore->get_staffobjs_table();

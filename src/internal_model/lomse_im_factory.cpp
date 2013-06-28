@@ -62,9 +62,9 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_chord:               pObj = LOMSE_NEW ImoChord();              break;
         case k_imo_clef:                pObj = LOMSE_NEW ImoClef();               break;
         case k_imo_color_dto:           pObj = LOMSE_NEW ImoColorDto();           break;
-        case k_imo_content:             pObj = LOMSE_NEW ImoContent(pDoc);        break;
+        case k_imo_content:             pObj = LOMSE_NEW ImoContent();            break;
         case k_imo_cursor_info:         pObj = LOMSE_NEW ImoCursorInfo();         break;
-        case k_imo_document:            pObj = LOMSE_NEW ImoDocument(pDoc);       break;
+        case k_imo_document:            pObj = LOMSE_NEW ImoDocument();           break;
         case k_imo_dynamic:             pObj = LOMSE_NEW ImoDynamic();            break;
         case k_imo_fermata:             pObj = LOMSE_NEW ImoFermata();            break;
 //        case k_imo_figured_bass:    pObj = LOMSE_NEW ImoFiguredBass();              break;
@@ -75,7 +75,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_image:               pObj = LOMSE_NEW ImoImage();              break;
         case k_imo_inline_wrapper:      pObj = LOMSE_NEW ImoInlineWrapper();      break;
         case k_imo_instr_group:         pObj = LOMSE_NEW ImoInstrGroup();         break;
-        case k_imo_instrument:          pObj = LOMSE_NEW ImoInstrument(pDoc);     break;
+        case k_imo_instrument:          pObj = LOMSE_NEW ImoInstrument();         break;
         case k_imo_instruments:         pObj = LOMSE_NEW ImoInstruments();        break;
         case k_imo_instrument_groups:   pObj = LOMSE_NEW ImoInstrGroups();        break;
         case k_imo_key_signature:       pObj = LOMSE_NEW ImoKeySignature();       break;
@@ -133,11 +133,13 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
             throw runtime_error("[ImFactory::inject] invalid type.");
         }
     }
+
     if (!pObj->is_dto())
     {
         pObj->set_id(id);
         pDoc->assign_id(pObj);
     }
+    pObj->set_owner_document(pDoc);
     return pObj;
 }
 
@@ -146,6 +148,7 @@ ImoBeamData* ImFactory::inject_beam_data(Document* pDoc, ImoBeamDto* pDto)
 {
     ImoBeamData* pObj = LOMSE_NEW ImoBeamData(pDto);
     pDoc->assign_id(pObj);
+    pObj->set_owner_document(pDoc);
     return pObj;
 }
 
@@ -154,6 +157,7 @@ ImoTieData* ImFactory::inject_tie_data(Document* pDoc, ImoTieDto* pDto)
 {
     ImoTieData* pObj = LOMSE_NEW ImoTieData(pDto);
     pDoc->assign_id(pObj);
+    pObj->set_owner_document(pDoc);
     return pObj;
 }
 
@@ -162,6 +166,7 @@ ImoTupletData* ImFactory::inject_tuplet_data(Document* pDoc, ImoTupletDto* pDto)
 {
     ImoTupletData* pObj = LOMSE_NEW ImoTupletData(pDto);
     pDoc->assign_id(pObj);
+    pObj->set_owner_document(pDoc);
     return pObj;
 }
 
@@ -170,6 +175,7 @@ ImoSlurData* ImFactory::inject_slur_data(Document* pDoc, ImoSlurDto* pDto)
 {
     ImoSlurData* pObj = LOMSE_NEW ImoSlurData(pDto);
     pDoc->assign_id(pObj);
+    pObj->set_owner_document(pDoc);
     return pObj;
 }
 
@@ -178,6 +184,7 @@ ImoTuplet* ImFactory::inject_tuplet(Document* pDoc, ImoTupletDto* pDto)
 {
     ImoTuplet* pObj = LOMSE_NEW ImoTuplet(pDto);
     pDoc->assign_id(pObj);
+    pObj->set_owner_document(pDoc);
     return pObj;
 }
 
@@ -187,6 +194,7 @@ ImoTextBox* ImFactory::inject_text_box(Document* pDoc, ImoTextBlockInfo& dto, Im
     ImoTextBox* pObj = LOMSE_NEW ImoTextBox(dto);
     pObj->set_id(id);
     pDoc->assign_id(pObj);
+    pObj->set_owner_document(pDoc);
     return pObj;
 }
 
@@ -198,6 +206,7 @@ ImoNote* ImFactory::inject_note(Document* pDoc, int step, int octave,
     ImoNote* pObj = LOMSE_NEW ImoNote(step, octave, noteType, accidentals, dots,
                                 staff, voice, stem);
     pDoc->assign_id(pObj);
+    pObj->set_owner_document(pDoc);
     return pObj;
 }
 
@@ -206,6 +215,7 @@ ImoMultiColumn* ImFactory::inject_multicolumn(Document* pDoc)
 {
     ImoMultiColumn* pObj = LOMSE_NEW ImoMultiColumn(pDoc);
     pDoc->assign_id(pObj);
+    pObj->set_owner_document(pDoc);
     return pObj;
 }
 
@@ -215,6 +225,7 @@ ImoImage* ImFactory::inject_image(Document* pDoc, unsigned char* imgbuf, VSize b
 {
     ImoImage* pObj = LOMSE_NEW ImoImage(imgbuf, bmpSize, format, imgSize);
     pDoc->assign_id(pObj);
+    pObj->set_owner_document(pDoc);
     return pObj;
 }
 
@@ -223,6 +234,7 @@ ImoControl* ImFactory::inject_control(Document* pDoc, Control* ctrol)
 {
     ImoControl* pObj = LOMSE_NEW ImoControl(ctrol);
     pDoc->assign_id(pObj);
+    pObj->set_owner_document(pDoc);
     return pObj;
 }
 

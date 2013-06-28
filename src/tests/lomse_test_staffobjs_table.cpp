@@ -110,7 +110,6 @@ SUITE(StaffVoiceLineTableTest)
             CHECK( (*it)->line() == _line );                    \
             CHECK( (*it)->to_string() == _object );             \
             ++it;
-;
 
 
 //=======================================================================================

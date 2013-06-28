@@ -97,7 +97,10 @@ void IdAssigner::remove(ImoObj* pImo)
 {
     ImoId id = pImo->get_id();
     if (id != k_no_imoid)
+    {
         m_idToImo.erase(id);
+        pImo->set_id(k_no_imoid);
+    }
 }
 
 //---------------------------------------------------------------------------------------

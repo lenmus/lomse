@@ -137,6 +137,8 @@ public:
     inline string get_language() {
         return (m_pImoDoc != NULL ? m_pImoDoc->get_language() : "en");
     }
+    void removed_from_model(ImoObj* pImo);
+
 
     //API: objects creation/modification
     void end_of_changes();
@@ -145,6 +147,12 @@ public:
     ImoObj* create_object_from_ldp(const string& source);
     ImoObj* create_object_from_lmd(const string& source);
     void add_staff_objects(const string& source, ImoMusicData* pMD);
+    void delete_relation(ImoRelObj* pRO);
+    ImoTuplet* add_tuplet(ImoNoteRest* pStartNR, ImoNoteRest* pEndNR,
+                          const string& source, ostream& reporter);
+    ImoBeam* add_beam(const list<ImoNoteRest*>& notes);
+    ImoTie* tie_notes(ImoNote* pStart, ImoNote* pEnd, ostream& reporter);
+
 
     //API: styles
     ImoStyle* get_default_style();
@@ -196,9 +204,6 @@ protected:
 
     friend class Control;
     void assign_id(Control* pControl);
-
-    friend class ImoObj;
-    void removed_from_model(ImoObj* pImo);
 
 };
 

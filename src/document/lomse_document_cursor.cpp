@@ -487,7 +487,22 @@ ScoreCursor::~ScoreCursor()
 //---------------------------------------------------------------------------------------
 void ScoreCursor::update_after_deletion()
 {
-    //TODO
+    m_pScore = static_cast<ImoScore*>( m_pDoc->get_pointer_to_imo(m_scoreId) );
+    m_pColStaffObjs = m_pScore->get_staffobjs_table();
+
+    //after a deletion previous position is still valid. It is only necessary to
+    //find next position.
+
+    //restore previous position as current position
+    p_point_to( m_prevState.ref_obj_id() );
+    m_currentState.staff( m_prevState.staff() );  //fix staff when pointin to a barline
+    m_currentState.id( m_prevState.id() );
+    m_currentState.time( m_prevState.time() );
+    m_currentState.ref_obj_time( m_prevState.ref_obj_time() );
+    m_currentState.ref_obj_staff( m_prevState.ref_obj_staff() );
+
+    //and move next
+    p_move_next();
 }
 
 //---------------------------------------------------------------------------------------
@@ -734,10 +749,17 @@ void ScoreCursor::p_forward_to_state(int instr, int staff, int measure, TimeUnit
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreCursor::p_save_current_state_as_previous_state()
+void ScoreCursor::p_copy_current_state_as_previous_state()
 {
     m_prevState = m_currentState;
     m_itPrev = m_it;
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreCursor::p_copy_previous_state_as_current_state()
+{
+    m_currentState = m_prevState;
+    m_it = m_itPrev;
 }
 
 //---------------------------------------------------------------------------------------
@@ -746,7 +768,7 @@ void ScoreCursor::p_move_next()
     if (p_is_at_end_of_score())
         return;
 
-    p_save_current_state_as_previous_state();
+    p_copy_current_state_as_previous_state();
 
     if (p_is_at_end_of_staff())
     {

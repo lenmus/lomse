@@ -152,6 +152,12 @@ ImoNote::ImoNote(int step, int octave, int noteType, EAccidentals accidentals, i
 //---------------------------------------------------------------------------------------
 ImoNote::~ImoNote()
 {
+    //if tied, inform the other note
+    if (m_pTieNext)
+        m_pTieNext->get_end_note()->set_tie_prev(NULL);
+
+    if (m_pTiePrev)
+        m_pTiePrev->get_start_note()->set_tie_next(NULL);
 }
 
 //---------------------------------------------------------------------------------------

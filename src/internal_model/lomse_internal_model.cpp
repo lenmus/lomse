@@ -42,6 +42,7 @@
 #include "lomse_button_ctrl.h"
 #include "lomse_logger.h"
 #include "lomse_ldp_exporter.h"
+#include "lomse_ldp_analyser.h"     //class Autobeamer
 
 using namespace std;
 
@@ -223,7 +224,8 @@ void BlockLevelCreatorApi::add_to_model(ImoBlockLevelObj* pImo, ImoStyle* pStyle
 // ImoObj implementation
 //=======================================================================================
 ImoObj::ImoObj(int objtype, ImoId id)
-    : m_id(id)
+    : m_pDoc(NULL)
+    , m_id(id)
     , m_objtype(objtype)
     , m_flags(k_dirty)
 {
@@ -241,9 +243,18 @@ ImoObj::~ImoObj()
 	    delete child;
     }
 
-    Document* pDoc = get_the_document();
-    if (pDoc)
-        pDoc->removed_from_model(this);
+    remove_id();
+}
+
+//---------------------------------------------------------------------------------------
+void ImoObj::remove_id()
+{
+    if (get_id() != k_no_imoid)
+    {
+        Document* pDoc = get_the_document();
+        if (pDoc)
+            pDoc->removed_from_model(this);
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -415,16 +426,16 @@ const string& ImoObj::get_name() const
 //---------------------------------------------------------------------------------------
 Document* ImoObj::get_the_document()
 {
-    if (is_document())
-        return static_cast<ImoDocument*>(this)->get_owner();
+    return m_pDoc;
+}
+
+//---------------------------------------------------------------------------------------
+ImoDocument* ImoObj::get_document()
+{
+    if (m_pDoc)
+        return m_pDoc->get_imodoc();
     else
-    {
-        ImoObj* pImo = get_parent();
-        if (pImo)
-            return pImo->get_the_document();
-        else
-            return NULL;
-    }
+        return NULL;
 }
 
 //---------------------------------------------------------------------------------------
@@ -460,24 +471,6 @@ ImoObj* ImoObj::get_child_of_type(int objtype)
             return pChild;
     }
     return NULL;
-}
-
-//---------------------------------------------------------------------------------------
-ImoDocument* ImoObj::get_document()
-{
-    if (is_document())
-        return static_cast<ImoDocument*>(this);
-    else
-    {
-        ImoObj* pParent = get_parent();
-        if (pParent)
-            return (static_cast<ImoContentObj*>(pParent))->get_document();
-        else
-        {
-            LOMSE_LOG_ERROR("[ImoObj::get_document] No parent!");
-            throw runtime_error("[ImoObj::get_document] No parent!");
-        }
-    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -546,7 +539,6 @@ string ImoObj::to_string(bool fWithIds)
 //=======================================================================================
 ImoRelObj::~ImoRelObj()
 {
-    //should be empty. Unit test
     m_relatedObjects.clear();
 }
 
@@ -621,7 +613,7 @@ void ImoStaffObj::add_relation(Document* pDoc, ImoRelObj* pRO)
                         ImFactory::inject(k_imo_relations, pDoc) );
         append_child_imo(pRelObjs);
     }
-    pRelObjs->add(pRO);
+    pRelObjs->add_relation(pRO);
 }
 
 //---------------------------------------------------------------------------------------
@@ -650,7 +642,7 @@ void ImoStaffObj::remove_but_not_delete_relation(ImoRelObj* pRelObj)
     pRelObj->remove(this);
 
     ImoRelations* pRelObjs = get_relations();
-    pRelObjs->remove(pRelObj);
+    pRelObjs->remove_relation(pRelObj);
 }
 
 //---------------------------------------------------------------------------------------
@@ -867,6 +859,16 @@ void ImoBeamDto::set_repeat(int level, bool value)
 bool ImoBeamDto::get_repeat(int level)
 {
     return m_repeat[level];
+}
+
+
+//=======================================================================================
+// ImoBeam implementation
+//=======================================================================================
+void ImoBeam::reorganize_after_object_deletion()
+{
+    AutoBeamer autobeamer(this);
+    autobeamer.do_autobeam();
 }
 
 
@@ -1130,6 +1132,7 @@ ImoRelations::~ImoRelations()
     std::list<ImoRelObj*>::iterator it;
     for(it = m_relations.begin(); it != m_relations.end(); ++it)
         delete *it;
+
     m_relations.clear();
 }
 
@@ -1163,13 +1166,13 @@ ImoRelObj* ImoRelations::get_item(int iItem)
 }
 
 //---------------------------------------------------------------------------------------
-void ImoRelations::remove(ImoRelObj* pRO)
+void ImoRelations::remove_relation(ImoRelObj* pRO)
 {
     m_relations.remove(pRO);
 }
 
 //---------------------------------------------------------------------------------------
-void ImoRelations::add(ImoRelObj* pRO)
+void ImoRelations::add_relation(ImoRelObj* pRO)
 {
     //attachments must be ordered by renderization priority
 
@@ -1241,7 +1244,6 @@ void ImoRelations::remove_from_all_relations(ImoStaffObj* pSO)
             ImoRelObj* pRO = static_cast<ImoRelObj*>( *it );
             ++it;
             pSO->remove_from_relation(pRO);
-            //m_relations.erase(it++);
         }
         else
         {
@@ -1394,26 +1396,6 @@ void ImoContentObj::set_style(ImoStyle* pStyle)
 }
 
 //---------------------------------------------------------------------------------------
-Document* ImoContentObj::get_the_document()
-{
-    if (is_document())
-        return static_cast<ImoDocument*>(this)->get_owner();
-    else if (is_content())
-        return static_cast<ImoContent*>(this)->get_owner();
-    else
-    {
-        ImoDocument* pDoc = get_document();
-        if (pDoc)
-            return pDoc->get_owner();
-        else
-        {
-            LOMSE_LOG_ERROR("[ImoContentObj::get_the_document] No owner Document.");
-            throw runtime_error("[ImoContentObj::get_the_document] No owner Document.");
-        }
-    }
-}
-
-//---------------------------------------------------------------------------------------
 void ImoContentObj::add_event_handler(int eventType, EventHandler* pHandler)
 {
     Document* pDoc = get_the_document();
@@ -1473,9 +1455,8 @@ void ImoAnonymousBlock::accept_visitor(BaseVisitor& v)
 //=======================================================================================
 // ImoDocument implementation
 //=======================================================================================
-ImoDocument::ImoDocument(Document* owner, const std::string& version)
+ImoDocument::ImoDocument(const std::string& version)
     : ImoBlocksContainer(k_imo_document)
-    , m_pOwner(owner)
     , m_version(version)
     , m_language("en")
     , m_pageInfo()
@@ -1652,9 +1633,8 @@ void ImoHeading::accept_visitor(BaseVisitor& v)
 //=======================================================================================
 // ImoInstrument implementation
 //=======================================================================================
-ImoInstrument::ImoInstrument(Document* pDoc)
+ImoInstrument::ImoInstrument()
     : ImoContainerObj(k_imo_instrument)
-    , m_pDoc(pDoc)
     , m_pScore(NULL)
     , m_name()
     , m_abbrev()
@@ -2256,15 +2236,15 @@ static const LongOption m_LongOptions[] =
 ImoScore::ImoScore(Document* pDoc)
     : ImoBlockLevelObj(k_imo_score)
     , m_version(0)
-    , m_pDoc(pDoc)
     , m_pColStaffObjs(NULL)
     , m_pMidiTable(NULL)
     , m_systemInfoFirst()
     , m_systemInfoOther()
     , m_pageInfo()
 {
-    append_child_imo( ImFactory::inject(k_imo_options, m_pDoc) );
-    append_child_imo( ImFactory::inject(k_imo_instruments, m_pDoc) );
+    m_pDoc = pDoc;
+    append_child_imo( ImFactory::inject(k_imo_options, pDoc) );
+    append_child_imo( ImFactory::inject(k_imo_instruments, pDoc) );
     set_defaults_for_system_info();
     set_defaults_for_options();
 }
@@ -2540,6 +2520,7 @@ void ImoScore::add_or_replace_option(ImoOptionInfo* pOpt)
     if (pOldOpt)
     {
         ImoOptions* pColOpts = get_options();
+        m_pDoc->removed_from_model(pOldOpt);
         pColOpts->remove_child_imo(pOldOpt);
         delete pOldOpt;
     }
@@ -2859,8 +2840,8 @@ int ImoScorePlayer::get_metronome_mm()
 //=======================================================================================
 ImoStyles::ImoStyles(Document* pDoc)
     : ImoSimpleObj(k_imo_styles)
-    , m_pDoc(pDoc)
 {
+    m_pDoc = pDoc;
     create_default_styles();
 }
 
@@ -3063,6 +3044,12 @@ ImoNote* ImoSlur::get_start_note()
 ImoNote* ImoSlur::get_end_note()
 {
     return static_cast<ImoNote*>( get_end_object() );
+}
+
+//---------------------------------------------------------------------------------------
+void ImoSlur::reorganize_after_object_deletion()
+{
+    //TODO
 }
 
 
@@ -3293,6 +3280,13 @@ ImoBezierInfo* ImoTie::get_stop_bezier()
     return pData->get_bezier();
 }
 
+//---------------------------------------------------------------------------------------
+void ImoTie::reorganize_after_object_deletion()
+{
+    //Nothing to do. As a tie involves only two objects, the tie is removed when
+    //one of the notes is deleted. Also, in note destructor, the other note is informed.
+}
+
 
 
 //=======================================================================================
@@ -3441,6 +3435,12 @@ ImoTuplet::ImoTuplet(ImoTupletDto* dto)
     , m_nShowNumber(dto->get_show_number())
     , m_nPlacement(dto->get_placement())
 {
+}
+
+//---------------------------------------------------------------------------------------
+void ImoTuplet::reorganize_after_object_deletion()
+{
+    //TODO
 }
 
 

@@ -1054,6 +1054,8 @@ public:
 
     void do_analysis()
     {
+        //AWARE: ImoBeamDto will be discarded. So no ID will be assigned to avoid
+        //problems with undo/redo
         ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto( m_pAnalysedNode );
 
         // num
@@ -5052,9 +5054,9 @@ public:
 
     void do_analysis()
     {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoTieDto* pInfo = static_cast<ImoTieDto*>(
-                    ImFactory::inject(k_imo_tie_dto, pDoc, get_node_id()));
+        //AWARE: ImoTieDto will be discarded. So no ID will be assigned to avoid
+        //problems with undo/redo
+        ImoTieDto* pInfo = LOMSE_NEW ImoTieDto();
 
         // num
         if (get_mandatory(k_number))
@@ -5259,7 +5261,8 @@ public:
 
     void do_analysis()
     {
-        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        //AWARE: ImoTupletDto will be discarded. So no ID will be assigned to avoid
+        //problems with undo/redo
         ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
         set_default_values(pInfo);
 
@@ -5751,6 +5754,75 @@ ImoObj* LdpAnalyser::analyse_node(LdpElement* pNode, ImoObj* pAnchor)
     a->analyse_node(pNode);
     delete a;
     return pNode->get_imo();
+}
+
+//---------------------------------------------------------------------------------------
+ImoBeam* LdpAnalyser::create_beam(const list<ImoNoteRest*>& notes)
+{
+    //helper method for score edition
+    //TODO: refactor. This method is here because it is necessary to use BeamsBuilder.
+    //It is necessary to refactor so that BeamBuilder can be used without hanving to
+    //create LdpAnalyser for this.
+
+    m_pBeamsBuilder = LOMSE_NEW BeamsBuilder(m_reporter, this);
+
+    list<ImoNoteRest*>::const_iterator it;
+    int lastNote = int( notes.size() ) - 1;
+    int i=0;
+    for (it = notes.begin(); it != notes.end(); ++it, ++i)
+    {
+        //create ImoBeamDto for this note
+        ImoBeamDto* pBeamDto = static_cast<ImoBeamDto*>(
+                                        ImFactory::inject(k_imo_beam_dto, m_pDoc) );
+        if (i == 0)
+            pBeamDto->set_beam_type(0, ImoBeam::k_begin);
+        else if ( i == lastNote)
+            pBeamDto->set_beam_type(0, ImoBeam::k_end);
+        else
+            pBeamDto->set_beam_type(0, ImoBeam::k_continue);
+
+        //associate the beam dto to the note
+        pBeamDto->set_note_rest(*it);
+
+        //add it to the beams builder;
+        add_relation_info(pBeamDto);
+    }
+
+    ImoBeam* pBeam = notes.front()->get_beam();
+
+    AutoBeamer autobeamer(pBeam);
+    autobeamer.do_autobeam();
+
+    return pBeam;
+}
+
+//---------------------------------------------------------------------------------------
+ImoTie* LdpAnalyser::create_tie(ImoNote* pStart, ImoNote* pEnd)
+{
+    //helper method for score edition
+    //TODO: refactor. This method is here because it is necessary to use TiesBuilder.
+    //It is necessary to refactor so that TiesBuilder can be used without hanving to
+    //create LdpAnalyser for this.
+
+    m_pTiesBuilder = LOMSE_NEW TiesBuilder(m_reporter, this);
+
+    //create ImoTieDto for the notes
+    ImoTieDto* pTieDto1 = static_cast<ImoTieDto*>(
+                                    ImFactory::inject(k_imo_tie_dto, m_pDoc) );
+    pTieDto1->set_start(true);
+    ImoTieDto* pTieDto2 = static_cast<ImoTieDto*>(
+                                    ImFactory::inject(k_imo_tie_dto, m_pDoc) );
+    pTieDto2->set_start(false);
+
+    //associate the tie dto objects to the notes
+    pTieDto1->set_note(pStart);
+    pTieDto2->set_note(pEnd);
+
+    //add the tie dto objects to the ties builder;
+    add_relation_info(pTieDto1);
+    add_relation_info(pTieDto2);
+
+    return pStart->get_tie_next();
 }
 
 //---------------------------------------------------------------------------------------
@@ -6283,6 +6355,7 @@ void OldTiesBuilder::tie_notes(ImoNote* pStartNote, ImoNote* pEndNote)
 {
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
     ImoTie* pTie = static_cast<ImoTie*>(ImFactory::inject(k_imo_tie, pDoc));
+    pTie->set_tie_number( pTie->get_id() );
 
     ImoTieDto startDto;
     startDto.set_start(true);
@@ -6427,18 +6500,27 @@ void TupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
 
     ImoTupletDto* pStartDto = m_matches.front();
     ImoTuplet* pTuplet = ImFactory::inject_tuplet(pDoc, pStartDto);
-    bool fOnlyGraphical = pStartDto->is_only_graphical();
 
-    std::list<ImoTupletDto*>::iterator it;
-    for (it = m_matches.begin(); it != m_matches.end(); ++it)
+    //if not only graphical (LDP < 2.0) add time modification to all note/rest
+    if (!pStartDto->is_only_graphical())
     {
-        ImoNoteRest* pNR = (*it)->get_note_rest();
-        ImoTupletData* pData = ImFactory::inject_tuplet_data(pDoc, *it);
-        pNR->include_in_relation(pDoc, pTuplet, pData);
-        if (!fOnlyGraphical)
+        std::list<ImoTupletDto*>::iterator it;
+        for (it = m_matches.begin(); it != m_matches.end(); ++it)
+        {
+            ImoNoteRest* pNR = (*it)->get_note_rest();
             pNR->set_time_modification( pTuplet->get_normal_number(),
                                         pTuplet->get_actual_number() );
+        }
     }
+
+    //create tuplet data and add tuplet to start and end note/rest
+    ImoNoteRest* pNR = pStartDto->get_note_rest();
+    ImoTupletData* pData = ImFactory::inject_tuplet_data(pDoc, pStartDto);
+    pNR->include_in_relation(pDoc, pTuplet, pData);
+
+    pNR = pEndDto->get_note_rest();
+    pData = ImFactory::inject_tuplet_data(pDoc, pEndDto);
+    pNR->include_in_relation(pDoc, pTuplet, pData);
 }
 
 

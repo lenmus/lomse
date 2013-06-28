@@ -161,6 +161,73 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+class CmdAddTie : public DocCmdSimple
+{
+protected:
+    ImoId m_startId;
+    ImoId m_endId;
+    ImoId m_tieId;
+
+public:
+    CmdAddTie(ImoId startNR, ImoId endNR);
+    virtual ~CmdAddTie() {};
+
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_do_nothing; }
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+};
+
+//---------------------------------------------------------------------------------------
+class CmdAddTuplet : public DocCmdSimple
+{
+protected:
+    ImoId m_startId;
+    ImoId m_endId;
+    ImoId m_tupletId;
+    string m_source;
+
+public:
+    CmdAddTuplet(ImoId startNR, ImoId endNR, const string& src);
+    virtual ~CmdAddTuplet() {};
+
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_do_nothing; }
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+};
+
+//---------------------------------------------------------------------------------------
+class CmdBreakBeam : public DocCmdSimple
+{
+protected:
+    ImoId m_beforeId;
+
+public:
+    CmdBreakBeam(ImoNoteRest* pBeforeNR);
+    virtual ~CmdBreakBeam() {};
+
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_do_nothing; }
+};
+
+//---------------------------------------------------------------------------------------
+class CmdChangeDots : public DocCmdSimple
+{
+protected:
+    int m_dots;
+    list<ImoId> m_noteRests;
+    list<int> m_oldDots;
+
+public:
+    CmdChangeDots(const list<ImoId>& noteRests, int dots);
+    virtual ~CmdChangeDots() {};
+
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_do_nothing; }
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+
+};
+
+//---------------------------------------------------------------------------------------
 class CmdCursor : public DocCmdSimple
 {
 protected:
@@ -188,6 +255,20 @@ public:
 
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_update_after_deletion; }
+};
+
+//---------------------------------------------------------------------------------------
+class CmdDeleteRelation : public DocCmdSimple
+{
+protected:
+    ImoId m_relId;
+
+public:
+    CmdDeleteRelation(ImoRelObj* pRO);
+    virtual ~CmdDeleteRelation() {};
+
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_do_nothing; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -276,18 +357,17 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-class CmdAddStaffObj : public CmdInsertObj
+class CmdJoinBeam : public DocCmdSimple
 {
 protected:
-    ImoId m_firstInsertedId;
+    list<ImoId> m_notesId;
 
 public:
-    CmdAddStaffObj(const string& source);
-    virtual ~CmdAddStaffObj() {};
+    CmdJoinBeam(const list<ImoId>& notes);
+    virtual ~CmdJoinBeam() {};
 
     int perform_action(Document* pDoc, DocCursor* pCursor);
-    void undo_action(Document* pDoc, DocCursor* pCursor);
-    int get_cursor_update_policy() { return k_update_after_insertion; }
+    int get_cursor_update_policy() { return k_do_nothing; }
 };
 
 

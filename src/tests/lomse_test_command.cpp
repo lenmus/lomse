@@ -36,6 +36,7 @@
 #include "lomse_document.h"
 #include "lomse_command.h"
 #include "lomse_document_cursor.h"
+#include "lomse_im_note.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -67,6 +68,19 @@ using namespace lomse;
 //};
 
 //---------------------------------------------------------------------------------------
+// helper macros
+// CHECK_ENTRY0: does not check/displays ids
+#define CHECK_ENTRY0(it, _instr, _staff, _measure, _time, _line, _object) \
+            CHECK( (*it)->num_instrument() == _instr );         \
+            CHECK( (*it)->staff() == _staff );                  \
+            CHECK( (*it)->measure() == _measure );              \
+            CHECK( is_equal_time((*it)->time(), _time) );       \
+            CHECK( (*it)->line() == _line );                    \
+            CHECK( (*it)->to_string() == _object );             \
+            ++it;
+
+
+//---------------------------------------------------------------------------------------
 class DocCommandTestFixture
 {
 public:
@@ -94,7 +108,7 @@ public:
 
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
-            "(score (vers 1.6) "
+            "(score (vers 2.0) "
                 "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q)(r q) )))"
             "(para (txt \"Hello world!\"))"
             "))" );
@@ -105,11 +119,25 @@ public:
     {
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
-            "(score (vers 1.6) "
+            "(score (vers 2.0) "
                 "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q)(r q) )))"
             "))" );
         m_pDoc->clear_dirty();
     }
+
+//    void dump_cursor(DocCursor& cursor)
+//    {
+//        cout << "cursor: top-level=" << cursor.get_top_id()
+//         << ", pointee=" << cursor.get_pointee_id()
+//         << ", delegating?=" << (cursor.is_delegating() ? "Yes" : "No")
+//         << ", at top level?=" << (cursor.is_at_top_level() ? "Yes" : "No")
+//         << endl;
+//
+//        if (!cursor.is_delegating())
+//        {
+//            DocContentCursor* pDCC = <DocContentCursor*>( cursor.get)
+//        }
+//    }
 
     LibraryScope m_libraryScope;
     std::string m_scores_path;
@@ -295,10 +323,13 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW CmdDeleteBlockLevelObj();
 
         cursor.point_to(15L);   //score
+//        cout << "cursor: top-level=" << cursor.get_top_id()
+//             << ", pointee=" << cursor.get_pointee_id()
+//             << ", delegating?=" << (cursor.is_delegating() ? "Yes" : "No")
+//             << ", at top level?=" << (cursor.is_at_top_level() ? "Yes" : "No")
+//             << endl;
         executer.execute(&cursor, pCmd);
         executer.undo(&cursor);
-
-        cursor.update_after_deletion();
         CHECK( m_pDoc->get_imodoc()->get_num_content_items() == 2 );
         CHECK( m_pDoc->is_dirty() == true );
         CHECK( *cursor != NULL );
@@ -306,7 +337,6 @@ SUITE(DocCommandTest)
 
         executer.redo(&cursor);
 
-        cursor.update_after_deletion();
         CHECK( m_pDoc->get_imodoc()->get_num_content_items() == 1 );
         CHECK( m_pDoc->is_dirty() == true );
         CHECK( *cursor != NULL );
@@ -478,6 +508,185 @@ SUITE(DocCommandTest)
         CHECK( executer.get_error() == "Parenthesis missmatch" );
     }
 
+    TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_8)
+    {
+        //add note in second voice
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData (clef G)(n c4 q))))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n c4 q
+        CHECK( (*cursor)->is_note() == true );
+
+        DocCommandExecuter executer(&doc);
+        DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(n e4 e v2)");
+
+        executer.execute(&cursor, pCmd);
+
+        CHECK( pCmd->get_name() == "Insert note" );
+        //cout << "name: '" << pCmd->get_name() << "'" << endl;
+        CHECK( doc.is_dirty() == true );
+
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
+        //cout << "cursor: " << (*cursor)->to_string() << endl;
+
+        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+        //cout << pSC->dump_cursor() << endl;
+        CHECK( pSC->time() == 0 );
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 3 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v2  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c4 q v1  p1 )" );
+//        cout << pTable->dump();
+//        cout << doc.to_string() << endl;
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_9)
+    {
+        //undo insertion in second voice
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData (clef G)(n c4 q))))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n c4 q
+        DocCommandExecuter executer(&doc);
+        DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(n e4 e v2)");
+        executer.execute(&cursor, pCmd);
+
+        executer.undo(&cursor);
+
+        CHECK( doc.is_dirty() == true );
+
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
+        //cout << "cursor: " << (*cursor)->to_string() << endl;
+
+        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+        //cout << pSC->dump_cursor() << endl;
+        CHECK( pSC->time() == 0 );
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 2 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
+//        cout << pTable->dump();
+//        cout << doc.to_string() << endl;
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_10)
+    {
+        //redo insertion in second voice
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData (clef G)(n c4 q))))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n c4 q
+        DocCommandExecuter executer(&doc);
+        DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(n e4 e v2)");
+        executer.execute(&cursor, pCmd);
+
+        executer.undo(&cursor);
+
+        executer.redo(&cursor);
+
+        CHECK( doc.is_dirty() == true );
+
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
+        //cout << "cursor: " << (*cursor)->to_string() << endl;
+
+        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+        //cout << pSC->dump_cursor() << endl;
+        CHECK( pSC->time() == 0 );
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 2 );
+        CHECK( pTable->num_entries() == 3 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v2  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c4 q v1  p1 )" );
+//        cout << pTable->dump();
+//        cout << doc.to_string() << endl;
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_11)
+    {
+        //undo/redo when cursor repositioned (two consecutive commands but
+        //with a cursor reposition before second command)
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData (clef G)(n c4 q))))");
+        doc.clear_dirty();
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        DocCursor cursor(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n c4 q
+        DocCommandExecuter executer(&doc);
+        DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(n e4 e v2)");
+        executer.execute(&cursor, pCmd);
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
+        CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
+
+        cursor.move_prev();         //points to inserted note e4 e
+        pCmd = LOMSE_NEW CmdInsertStaffObj("(n g4 e v3)");
+        executer.execute(&cursor, pCmd);
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n e4 e v2  p1 )" );
+        CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
+        //cout << "cursor: " << (*cursor)->to_string() << endl;
+
+        executer.undo(&cursor);    //remove note g4. Cursor points to note e4
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n e4 e v2  p1 )" );
+        CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
+        //cout << "cursor: " << (*cursor)->to_string() << endl;
+
+        executer.undo(&cursor);    //remove note e4. Cursor points to note c4
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
+        CHECK( pScore->get_staffobjs_table()->num_entries() == 2 );
+
+        executer.redo(&cursor);    //add note e4. Cursor points to note c4
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
+        CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
+
+        executer.redo(&cursor);    //add note g4. Cursor points to note e4
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n e4 e v2  p1 )" );
+        CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
+        //cout << "cursor: " << (*cursor)->to_string() << endl;
+
+        //cout << doc.to_string() << endl;
+        //cout << pScore->get_staffobjs_table()->dump() << endl;
+    }
+
     // CmdInsertManyStaffObjs -----------------------------------------------------------
 
     TEST_FIXTURE(DocCommandTestFixture, insert_many_staffobjs_1)
@@ -613,206 +822,1194 @@ SUITE(DocCommandTest)
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
     }
 
-    // CmdAddStaffObj ----------------------------------------------------------------
+    // CmdDeleteStaffObj ----------------------------------------------------------------
 
-    TEST_FIXTURE(DocCommandTestFixture, add_staffobj_1)
+    TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_1)
     {
-        //object added and cursor updated
-        Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument (musicData (clef G)(n c4 q))))");
-        doc.clear_dirty();
-        DocCursor cursor(&doc);
-        cursor.enter_element();     //points to clef
-        cursor.move_next();         //points to n c4 q
-        CHECK( (*cursor)->is_note() == true );
+        //delete object. cursor points to next one
+        create_document_1();
+        DocCursor cursor(m_pDoc);
+        DocCommandExecuter executer(m_pDoc);
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        DocCommandExecuter executer(&doc);
-        DocCommand* pCmd = LOMSE_NEW CmdAddStaffObj("(n e4 e v2)");
-
+        cursor.point_to(24L);
         executer.execute(&cursor, pCmd);
+        //cout << m_pDoc->to_string(true) << endl;
+        //ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        //cout << pScore->get_staffobjs_table()->dump() << endl;
+        //cout << "cmd name = " << pCmd->get_name() << endl;
 
-        CHECK( pCmd->get_name() == "Add note" );
-        //cout << "name: '" << pCmd->get_name() << "'" << endl;
-        CHECK( doc.is_dirty() == true );
+        CHECK( pCmd->get_name() == "Delete note" );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_rest() == true );
+        CHECK( m_pDoc->is_dirty() == true );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_2)
+    {
+        create_document_2();
+        DocCursor cursor(m_pDoc);
+        DocCommandExecuter executer(m_pDoc);
+        CHECK( m_pDoc->is_dirty() == false );
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
+
+        cursor.point_to(24L);
+        executer.execute(&cursor, pCmd);
+        executer.undo(&cursor);
+
+//        cout << m_pDoc->to_string(true) << endl;
+//        pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        cout << pScore->get_staffobjs_table()->dump() << endl;
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
-        //cout << "cursor: " << (*cursor)->to_string() << endl;
-
-        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
-        //cout << pSC->dump_cursor() << endl;
-        CHECK( pSC->time() == 0 );
-
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
-//        cout << pScore->get_staffobjs_table()->dump() << endl;
-//        cout << doc.to_string() << endl;
+        CHECK( (*cursor)->get_id() == 24L );
+        CHECK( m_pDoc->is_dirty() == true );
     }
 
-    TEST_FIXTURE(DocCommandTestFixture, add_staffobj_2)
+    TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_3)
     {
-        //undo insertion
+        //delete beamed note
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument (musicData (clef G)(n c4 q))))");
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n c4 e g+)(n e4 e g-)"
+            ")))");
         doc.clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n c4 q
+        CHECK( (*cursor)->is_note() == true );
+
         DocCommandExecuter executer(&doc);
-        DocCommand* pCmd = LOMSE_NEW CmdAddStaffObj("(n e4 e v2)");
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
+
         executer.execute(&cursor, pCmd);
-
-        executer.undo(&cursor);
-
-        CHECK( doc.is_dirty() == true );
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
-        //cout << "cursor: " << (*cursor)->to_string() << endl;
+        CHECK( (*cursor)->to_string() == "(n e4 e v1  p1 )" );
+//        cout << "cursor: " << (*cursor)->to_string() << endl;
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
-        //cout << pSC->dump_cursor() << endl;
+//        cout << pSC->dump_cursor() << endl;
         CHECK( pSC->time() == 0 );
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        CHECK( pScore->get_staffobjs_table()->num_entries() == 2 );
-//        cout << pScore->get_staffobjs_table()->dump() << endl;
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 2 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1  p1 )" );
+//        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
 
-    TEST_FIXTURE(DocCommandTestFixture, add_staffobj_3)
+    TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_4)
     {
-        //redo insertion
+        //undo delete beamed note
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument (musicData (clef G)(n c4 q))))");
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n c4 e g+)(n e4 e g-)"
+            ")))");
         doc.clear_dirty();
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to n c4 q
+        CHECK( (*cursor)->is_note() == true );
+
         DocCommandExecuter executer(&doc);
-        DocCommand* pCmd = LOMSE_NEW CmdAddStaffObj("(n e4 e v2)");
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
+
+        executer.execute(&cursor, pCmd);
+        executer.undo(&cursor);
+
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n c4 e v1  p1 (beam 24 +))" );
+//        cout << "cursor: " << (*cursor)->to_string() << endl;
+
+        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+        CHECK( pSC->time() == 0 );
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 3 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e v1  p1 (beam 24 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n e4 e v1  p1 (beam 24 -))" );
+//        cout << pTable->dump();
+//        cout << doc.to_string() << endl;
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_5)
+    {
+        //delete beamed note. Still two notes in beam
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n g5 s g+)(n f5 s)(n g5 e g-)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n g5 s
+        CHECK( (*cursor)->is_note() == true );
+
+        DocCommandExecuter executer(&doc);
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
+
+        executer.execute(&cursor, pCmd);
+
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n f5 s v1  p1 (beam 25 +f))" );
+//        cout << "cursor: " << (*cursor)->to_string() << endl;
+
+        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+        CHECK( pSC->time() == 0 );
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 3 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f5 s v1  p1 (beam 25 +f))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  16,     0, "(n g5 e v1  p1 (beam 25 -))" );
+//        cout << pTable->dump();
+//        cout << doc.to_string() << endl;
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_6)
+    {
+        //undo delete beamed note when still two notes in beam
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n g5 s g+)(n f5 s)(n g5 e g-)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n g5 s
+        CHECK( (*cursor)->is_note() == true );
+
+        DocCommandExecuter executer(&doc);
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
+
+        executer.execute(&cursor, pCmd);
+        executer.undo(&cursor);
+
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n g5 s v1  p1 (beam 25 ++))" );
+//        cout << "cursor: " << (*cursor)->to_string() << endl;
+
+        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+        CHECK( pSC->time() == 0 );
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 4 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g5 s v1  p1 (beam 25 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  16,     0, "(n f5 s v1  p1 (beam 25 =-))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g5 e v1  p1 (beam 25 -))" );
+//        cout << pTable->dump();
+//        cout << doc.to_string() << endl;
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_7)
+    {
+        //delete note in chord. Still two notes in chord
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(chord (n c4 s)(n e4 s)(n g4 s))"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n c4 s
+        CHECK( (*cursor)->is_note() == true );
+
+        DocCommandExecuter executer(&doc);
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
+
+        executer.execute(&cursor, pCmd);
+
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(chord (n e4 s v1  p1 )" );
+//        cout << "cursor: " << (*cursor)->to_string() << endl;
+
+        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+        CHECK( pSC->time() == 0 );
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 3 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(chord (n e4 s v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g4 s v1  p1 ))" );
+//        cout << pTable->dump();
+//        cout << doc.to_string() << endl;
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_8)
+    {
+        //delete note in chord. One note left: chord removed
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(chord (n e4 s)(n g4 s))"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4 s
+        CHECK( (*cursor)->is_note() == true );
+
+        DocCommandExecuter executer(&doc);
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
+
+        executer.execute(&cursor, pCmd);
+
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n g4 s v1  p1 )" );
+//        cout << "cursor: " << (*cursor)->to_string() << endl;
+        ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_in_chord() == false );
+
+        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+        CHECK( pSC->time() == 0 );
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 2 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g4 s v1  p1 )" );
+//        cout << pTable->dump();
+//        cout << doc.to_string() << endl;
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_9)
+    {
+        //delete tied note. Tie removed
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n g4 s l+)(n g4 s l-)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n g4 s
+        CHECK( (*cursor)->is_note() == true );
+
+        DocCommandExecuter executer(&doc);
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
+
+        executer.execute(&cursor, pCmd);
+
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n g4 s v1  p1 )" );
+//        cout << "cursor: " << (*cursor)->to_string() << endl;
+        ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_tied_next() == false );
+        CHECK( pNote->is_tied_prev() == false );
+
+        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+        CHECK( pSC->time() == 0 );
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 2 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g4 s v1  p1 )" );
+//        cout << pTable->dump();
+//        cout << doc.to_string() << endl;
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_10)
+    {
+        //delete start note of tuplet. Tuplet removed
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n g4 s (t + 2 3))(n e4 s (t -))"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n g4 s
+        CHECK( (*cursor)->is_note() == true );
+        ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_in_tuplet() == true );
+
+        DocCommandExecuter executer(&doc);
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
+
+        executer.execute(&cursor, pCmd);
+
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n e4 s v1  p1 )" );
+//        cout << "cursor: " << (*cursor)->to_string() << endl;
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_in_tuplet() == false );
+
+        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+        CHECK( pSC->time() == 0 );
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 2 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 s v1  p1 )" );
+//        cout << pTable->dump();
+//        cout << doc.to_string() << endl;
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, delete_staffobj_11)
+    {
+        //delete end note of tuplet. Tuplet removed
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 s (t + 2 3))(n g4 s (t -))"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4 s
+        ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_in_tuplet() == true );
+        cursor.move_next();         //points to n g4 s
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_in_tuplet() == true );
+
+        DocCommandExecuter executer(&doc);
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
+
+        executer.execute(&cursor, pCmd);
+
+        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+        CHECK( pSC->is_at_end_of_staff() == true );
+        cursor.move_prev();         //points to n e4 s
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( (*cursor)->to_string() == "(n e4 s v1  p1 )" );
+//        cout << "cursor: " << (*cursor)->to_string() << endl;
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_in_tuplet() == false );
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 2 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 s v1  p1 )" );
+//        cout << pTable->dump();
+//        cout << doc.to_string() << endl;
+    }
+
+    // CmdChangeDots --------------------------------------------------------------------
+
+    TEST_FIXTURE(DocCommandTestFixture, change_dots_1)
+    {
+        //change dots
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e g+)(n g4 s g-)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        list<ImoId> notes;
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4 e
+        ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        notes.push_back( pNote->get_id() );
+        DocCommand* pCmd = LOMSE_NEW CmdChangeDots(notes, 1);
+
+        executer.execute(&cursor, pCmd);
+
+        CHECK( doc.is_dirty() == true );
+        CHECK( pCmd->get_name() == "Change dots" );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( pNote == static_cast<ImoNote*>( *cursor ) );
+        CHECK( pNote->get_dots() == 1 );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, change_dots_2)
+    {
+        //undo change dots
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e g+)(n g4 s g-)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4 e
+        ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        list<ImoId> notes;
+        notes.push_back( pNote1->get_id() );
+        cursor.move_next();         //points to n g4 s
+        ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
+        notes.push_back( pNote2->get_id() );
+        DocCommand* pCmd = LOMSE_NEW CmdChangeDots(notes, 2);
         executer.execute(&cursor, pCmd);
 
         executer.undo(&cursor);
+        CHECK( doc.is_dirty() == true );
+        CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
+        CHECK( pNote2->get_dots() == 0 );
+        cursor.move_prev();
+        CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
+        CHECK( pNote1->get_dots() == 0 );
 
         executer.redo(&cursor);
+        CHECK( doc.is_dirty() == true );
+        CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
+        CHECK( pNote2->get_dots() == 2 );
+        cursor.move_prev();
+        CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
+        CHECK( pNote1->get_dots() == 2 );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+    }
+
+    // CmdAddTuplet ---------------------------------------------------------------------
+
+    TEST_FIXTURE(DocCommandTestFixture, add_tuplet_1)
+    {
+        //add tuplet
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e g+)(n f4 e)(n g4 e g-)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4 e
+        ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        cursor.move_next();         //points to n f4 e
+        cursor.move_next();         //points to n g4 e
+        ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
+        DocCommand* pCmd = LOMSE_NEW CmdAddTuplet(pNote1->get_id(),
+                                                  pNote2->get_id(),
+                                                  "(t + 2 3)");
+
+        executer.execute(&cursor, pCmd);
 
         CHECK( doc.is_dirty() == true );
-
+        CHECK( pCmd->get_name() == "Add tuplet" );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
-        //cout << "cursor: " << (*cursor)->to_string() << endl;
+        CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
+        CHECK( pNote2->is_in_tuplet() == true );
 
-        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
-        //cout << pSC->dump_cursor() << endl;
-        CHECK( pSC->time() == 0 );
-
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
-//        cout << pScore->get_staffobjs_table()->dump() << endl;
-//        cout << doc.to_string() << endl;
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
     }
 
-    TEST_FIXTURE(DocCommandTestFixture, add_staffobj_4)
+    TEST_FIXTURE(DocCommandTestFixture, add_tuplet_2)
     {
-        //undo/redo when cursor repositioned (two consecutive commands but
-        //with a cursor reposition before second command)
+        //add tuplet error
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument (musicData (clef G)(n c4 q))))");
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e g+)(n f4 e)(n g4 e g-)"
+            ")))");
         doc.clear_dirty();
-        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         DocCursor cursor(&doc);
-        cursor.enter_element();     //points to clef
-        cursor.move_next();         //points to n c4 q
         DocCommandExecuter executer(&doc);
-        DocCommand* pCmd = LOMSE_NEW CmdAddStaffObj("(n e4 e v2)");
-        executer.execute(&cursor, pCmd);
-        CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
-        CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4 e
+        ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        cursor.move_next();         //points to n f4 e
+        cursor.move_next();         //points to n g4 e
+        ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
+        DocCommand* pCmd = LOMSE_NEW CmdAddTuplet(pNote1->get_id(),
+                                                  pNote2->get_id(),
+                                                  "(t = 2 3)");         // "(t % 2 3)");
 
-        cursor.move_prev();         //points to inserted note e4 e
-        pCmd = LOMSE_NEW CmdAddStaffObj("(n g4 e v3)");
-        executer.execute(&cursor, pCmd);
-        CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n e4 e v2  p1 )" );
-        CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
-        //cout << "cursor: " << (*cursor)->to_string() << endl;
+        int result = executer.execute(&cursor, pCmd);
 
-        executer.undo(&cursor);    //remove note g4. Cursor points to note e4
-        CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n e4 e v2  p1 )" );
-        CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
-        //cout << "cursor: " << (*cursor)->to_string() << endl;
+        CHECK( result == k_failure );
+        CHECK( executer.get_error() == "Line 0. Missing or invalid tuplet type. Tuplet ignored.\n" );
+//        cout << "msg=[" << executer.get_error() << "]" << endl;
 
-        executer.undo(&cursor);    //remove note e4. Cursor points to note c4
-        CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
-        CHECK( pScore->get_staffobjs_table()->num_entries() == 2 );
-
-        executer.redo(&cursor);    //add note e4. Cursor points to note c4
-        CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
-        CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
-
-        executer.redo(&cursor);    //add note g4. Cursor points to note e4
-        CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n e4 e v2  p1 )" );
-        CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
-        //cout << "cursor: " << (*cursor)->to_string() << endl;
-
-        //cout << doc.to_string() << endl;
-        //cout << pScore->get_staffobjs_table()->dump() << endl;
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
     }
 
+    TEST_FIXTURE(DocCommandTestFixture, add_tuplet_3)
+    {
+        //undo add tuplet
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e g+)(n f4 e)(n g4 e g-)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4 e
+        ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        cursor.move_next();         //points to n f4 e
+        cursor.move_next();         //points to n g4 e
+        ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
+        DocCommand* pCmd = LOMSE_NEW CmdAddTuplet(pNote1->get_id(),
+                                                  pNote2->get_id(),
+                                                  "(t + 2 3)");
 
-//    // CmdDeleteStaffObj ----------------------------------------------------------------
-//
-//    TEST_FIXTURE(DocCommandTestFixture, delete_note_1)
-//    {
-//        create_document_1();
-//        DocCursor cursor(m_pDoc);
-//        DocCommandExecuter executer(m_pDoc);
-//        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
-//
-//        cursor.point_to(24L);
-//        executer.execute(&cursor, pCmd);
-//        //cout << m_pDoc->to_string(true) << endl;
-//        //ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
-//        //cout << pScore->get_staffobjs_table()->dump() << endl;
-//        //cout << "cmd name = " << pCmd->get_name() << endl;
-//
-//        CHECK( pCmd->get_name() == "Delete note" );
-//        cursor.update_after_deletion();
-//        CHECK( *cursor != NULL );
-//        CHECK( (*cursor)->is_rest() == true );
-//        CHECK( m_pDoc->is_dirty() == true );
-//    }
-//
-//    TEST_FIXTURE(DocCommandTestFixture, delete_note_1_undo)
-//    {
-//        create_document_2();
-//        DocCursor cursor(m_pDoc);
-//        DocCommandExecuter executer(m_pDoc);
-//        CHECK( m_pDoc->is_dirty() == false );
-//        DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
-//
-//        cursor.point_to(24L);
-//        executer.execute(&cursor, pCmd);
-//        executer.undo(&cursor);
-//
-////        cout << m_pDoc->to_string(true) << endl;
-////        pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
-////        cout << pScore->get_staffobjs_table()->dump() << endl;
-//
-//        cursor.update_after_deletion();
-//        CHECK( *cursor != NULL );
-//        CHECK( (*cursor)->is_note() == true );
-//        CHECK( (*cursor)->get_id() == 24L );
-//        CHECK( m_pDoc->is_dirty() == true );
-//    }
+        executer.execute(&cursor, pCmd);
+
+        executer.undo(&cursor);
+        CHECK( doc.is_dirty() == true );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
+        CHECK( pNote2->is_in_tuplet() == false );
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+
+        executer.redo(&cursor);
+        CHECK( doc.is_dirty() == true );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
+        CHECK( pNote2->is_in_tuplet() == true );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+    }
+
+    // CmdDeleteRelation ----------------------------------------------------------------
+
+    TEST_FIXTURE(DocCommandTestFixture, delete_relation_1)
+    {
+        //delete relation (tuplet)
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e g+ (t + 2 3))(n f4 e)(n g4 e g- (t -))"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4 e
+        ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        ImoTuplet* pTuplet = pNote1->get_tuplet();
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteRelation(pTuplet);
+
+        executer.execute(&cursor, pCmd);
+
+        CHECK( doc.is_dirty() == true );
+        CHECK( pCmd->get_name() == "Delete tuplet" );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
+        CHECK( pNote1->is_in_tuplet() == false );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, delete_relation_2)
+    {
+        //delete relation (beam)
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e g+)(n f4 e)(n g4 e g-)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4 e
+        ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        ImoBeam* pBeam = pNote1->get_beam();
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteRelation(pBeam);
+
+        executer.execute(&cursor, pCmd);
+
+        CHECK( doc.is_dirty() == true );
+        CHECK( pCmd->get_name() == "Delete beam" );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
+        CHECK( pNote1->is_beamed() == false );
+        cursor.move_next();
+        CHECK( static_cast<ImoNote*>( *cursor )->is_beamed() == false );
+        cursor.move_next();
+        CHECK( static_cast<ImoNote*>( *cursor )->is_beamed() == false );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, delete_relation_3)
+    {
+        //delete relation (beam)
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e g+)(n f4 e)(n g4 e g-)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4 e
+        ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        ImoBeam* pBeam = pNote->get_beam();
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteRelation(pBeam);
+        executer.execute(&cursor, pCmd);
+
+        executer.undo(&cursor);
+        CHECK( doc.is_dirty() == true );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_beamed() == true );
+        cursor.move_next();
+        CHECK( static_cast<ImoNote*>( *cursor )->is_beamed() == true );
+        cursor.move_next();
+        CHECK( static_cast<ImoNote*>( *cursor )->is_beamed() == true );
+
+        executer.redo(&cursor);
+        CHECK( doc.is_dirty() == true );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_beamed() == false );
+        cursor.move_next();
+        CHECK( static_cast<ImoNote*>( *cursor )->is_beamed() == false );
+        cursor.move_next();
+        CHECK( static_cast<ImoNote*>( *cursor )->is_beamed() == false );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, delete_relation_4)
+    {
+        //delete relation (old tie)
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n f4 e l)(n f4 q)(n e4 e l)(n e4 q)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n f4 e
+        cursor.move_next();         //points to n f4 q
+        cursor.move_next();         //points to n e4 e
+        ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        ImoTie* pTie = pNote->get_tie_next();
+//        cout << "Before delete tie: id=" << pTie->get_id() << endl;
+//        cout << doc.to_string(true) << endl;
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteRelation(pTie);
+        executer.execute(&cursor, pCmd);
+        CHECK( doc.is_dirty() == true );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_tied_next() == false );
+        CHECK( pNote->is_tied_prev() == false );
+        cursor.move_next();
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_tied_next() == false );
+        CHECK( pNote->is_tied_prev() == false );
+
+        executer.undo(&cursor);
+        CHECK( doc.is_dirty() == true );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_tied_next() == true );
+        CHECK( pNote->is_tied_prev() == false );
+        cursor.move_next();
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_tied_next() == false );
+        CHECK( pNote->is_tied_prev() == true );
+        pTie = pNote->get_tie_prev();
+//        cout << "After undo: id=" << pTie->get_id() << endl;
+//        cout << doc.to_string(true) << endl;
+
+        executer.redo(&cursor);
+        CHECK( doc.is_dirty() == true );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_tied_next() == false );
+        CHECK( pNote->is_tied_prev() == false );
+        cursor.move_next();
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_tied_next() == false );
+        CHECK( pNote->is_tied_prev() == false );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, delete_relation_5)
+    {
+        //delete relation (new tie, notes appart)
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n f4 e v1 (tie 1 start))(n a4 q v2)(n f4 e v1 (tie 1 stop))"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n f4 e
+        ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        ImoTie* pTie = pNote->get_tie_next();
+
+//        cout << "Before delete tie: id=" << pTie->get_id() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+
+        DocCommand* pCmd = LOMSE_NEW CmdDeleteRelation(pTie);
+        executer.execute(&cursor, pCmd);
+        CHECK( doc.is_dirty() == true );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );      // f4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_tied_next() == false );
+        CHECK( pNote->is_tied_prev() == false );
+        cursor.move_next();                         // a4
+        cursor.move_next();                         // f4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_tied_next() == false );
+        CHECK( pNote->is_tied_prev() == false );
+
+//        cout << "After delete tie:" << endl;
+//        pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+
+        executer.undo(&cursor);
+        CHECK( doc.is_dirty() == true );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );      // f4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_tied_next() == true );
+        CHECK( pNote->is_tied_prev() == false );
+        cursor.move_next();                         // a4
+        cursor.move_next();                         // f4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_tied_next() == false );
+        CHECK( pNote->is_tied_prev() == true );
+
+//        pTie = pNote->get_tie_prev();
+//        cout << "After undo: id=" << pTie->get_id() << endl;
+//        pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+
+        executer.redo(&cursor);
+        CHECK( doc.is_dirty() == true );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );      //f4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_tied_next() == false );
+        CHECK( pNote->is_tied_prev() == false );
+        cursor.move_next();                         // a4
+        cursor.move_next();                         // f4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->is_tied_next() == false );
+        CHECK( pNote->is_tied_prev() == false );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        cout << "After redo:" << endl;
+//        pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+    }
+
+    // CmdBreakBeam ---------------------------------------------------------------------
+
+    TEST_FIXTURE(DocCommandTestFixture, break_beam_1)
+    {
+        //break beam. note + note = beam removed
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e g+)(n a4 e g-)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4
+        cursor.move_next();         //points to n a4
+        ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        DocCommand* pCmd = LOMSE_NEW CmdBreakBeam(pNote);
+
+        int result = executer.execute(&cursor, pCmd);
+
+        CHECK ( result == k_success );
+        CHECK( doc.is_dirty() == true );
+        CHECK( pCmd->get_name() == "Break beam" );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_A );
+        CHECK( pNote->is_beamed() == false );
+        cursor.move_prev();         //points to n e4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_E );
+        CHECK( pNote->is_beamed() == false );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, break_beam_2)
+    {
+        //break beam: note + beam
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e g+)(n f4 s)(n a4 s g-)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4
+        cursor.move_next();         //points to n f4
+        ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        DocCommand* pCmd = LOMSE_NEW CmdBreakBeam(pNote);
+
+        int result = executer.execute(&cursor, pCmd);
+
+        CHECK ( result == k_success );
+        CHECK( doc.is_dirty() == true );
+        CHECK( pCmd->get_name() == "Break beam" );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_F );
+        cursor.move_prev();         //points to n e4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_E );
+        CHECK( pNote->is_beamed() == false );
+        cursor.move_next();         //points to f4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_F );
+        CHECK( pNote->is_beamed() == true );
+        CHECK( pNote->get_beam_type(0) == ImoBeam::k_begin );
+        CHECK( pNote->get_beam_type(1) == ImoBeam::k_begin );
+        CHECK( pNote->get_beam_type(2) == ImoBeam::k_none );
+        cursor.move_next();         //points to a4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_A );
+        CHECK( pNote->is_beamed() == true );
+        CHECK( pNote->get_beam_type(0) == ImoBeam::k_end );
+        CHECK( pNote->get_beam_type(1) == ImoBeam::k_end );
+        CHECK( pNote->get_beam_type(2) == ImoBeam::k_none );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, break_beam_3)
+    {
+        //break beam: beam + note
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 s g+)(n f4 s)(n a4 e g-)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4
+        cursor.move_next();         //points to n f4
+        cursor.move_next();         //points to n a4
+        ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        DocCommand* pCmd = LOMSE_NEW CmdBreakBeam(pNote);
+
+        int result = executer.execute(&cursor, pCmd);
+
+        CHECK ( result == k_success );
+        CHECK( doc.is_dirty() == true );
+        CHECK( pCmd->get_name() == "Break beam" );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_A );
+        cursor.move_prev();         //points to n f4
+        cursor.move_prev();         //points to n e4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_E );
+        CHECK( pNote->is_beamed() == true );
+        CHECK( pNote->get_beam_type(0) == ImoBeam::k_begin );
+        CHECK( pNote->get_beam_type(1) == ImoBeam::k_begin );
+        CHECK( pNote->get_beam_type(2) == ImoBeam::k_none );
+        cursor.move_next();         //points to f4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_F );
+        CHECK( pNote->is_beamed() == true );
+        CHECK( pNote->get_beam_type(0) == ImoBeam::k_end );
+        CHECK( pNote->get_beam_type(1) == ImoBeam::k_end );
+        CHECK( pNote->get_beam_type(2) == ImoBeam::k_none );
+        cursor.move_next();         //points to a4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_A );
+        CHECK( pNote->is_beamed() == false );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, break_beam_4)
+    {
+        //break beam: two beams
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 s g+)(n f4 s)(n g4 s)(n a4 s g-)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to n e4 s
+        cursor.move_next();         //points to n f4
+        cursor.move_next();         //points to n g4
+        ImoNote* pNote = static_cast<ImoNote*>( *cursor );
+        DocCommand* pCmd = LOMSE_NEW CmdBreakBeam(pNote);
+
+        int result = executer.execute(&cursor, pCmd);
+
+        CHECK ( result == k_success );
+        CHECK( doc.is_dirty() == true );
+        CHECK( pCmd->get_name() == "Break beam" );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_G );
+        cursor.move_prev();         //points to n f4
+        cursor.move_prev();         //points to n e4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_E );
+        CHECK( pNote->is_beamed() == true );
+        CHECK( pNote->get_beam_type(0) == ImoBeam::k_begin );
+        CHECK( pNote->get_beam_type(1) == ImoBeam::k_begin );
+        CHECK( pNote->get_beam_type(2) == ImoBeam::k_none );
+        cursor.move_next();         //points to f4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_F );
+        CHECK( pNote->is_beamed() == true );
+        CHECK( pNote->get_beam_type(0) == ImoBeam::k_end );
+        CHECK( pNote->get_beam_type(1) == ImoBeam::k_end );
+        CHECK( pNote->get_beam_type(2) == ImoBeam::k_none );
+        cursor.move_next();         //points to g4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_G );
+        CHECK( pNote->is_beamed() == true );
+        CHECK( pNote->get_beam_type(0) == ImoBeam::k_begin );
+        CHECK( pNote->get_beam_type(1) == ImoBeam::k_begin );
+        CHECK( pNote->get_beam_type(2) == ImoBeam::k_none );
+        cursor.move_next();         //points to f4
+        pNote = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote->get_step() == k_step_A );
+        CHECK( pNote->is_beamed() == true );
+        CHECK( pNote->get_beam_type(0) == ImoBeam::k_end );
+        CHECK( pNote->get_beam_type(1) == ImoBeam::k_end );
+        CHECK( pNote->get_beam_type(2) == ImoBeam::k_none );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+    }
+
+    // CmdJoinBeam ----------------------------------------------------------------------
+
+    TEST_FIXTURE(DocCommandTestFixture, join_beam_1)
+    {
+        //join beam
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e)(n f4 e)(n g4 e)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to e4
+        list<ImoId> notes;
+        ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        notes.push_back( pNote1->get_id() );
+        cursor.move_next();         //points to f4
+        ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
+        notes.push_back( pNote2->get_id() );
+        cursor.move_next();         //points to g4
+        ImoNote* pNote3 = static_cast<ImoNote*>( *cursor );
+        notes.push_back( pNote3->get_id() );
+        DocCommand* pCmd = LOMSE_NEW CmdJoinBeam(notes);
+
+        executer.execute(&cursor, pCmd);
+
+        CHECK( doc.is_dirty() == true );
+        CHECK( pCmd->get_name() == "Join beam" );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        pNote3 = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote3->get_step() == k_step_G );
+        CHECK( pNote3->is_beamed() == true );
+        cursor.move_prev();
+        pNote2 = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote2->get_step() == k_step_F );
+        CHECK( pNote2->is_beamed() == true );
+        cursor.move_prev();
+        pNote1 = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote1->get_step() == k_step_E );
+        CHECK( pNote1->is_beamed() == true );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+    }
+
+    // CmdAddTie ------------------------------------------------------------------------
+
+    TEST_FIXTURE(DocCommandTestFixture, add_tie_1)
+    {
+        //add tie
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e)(n e4 q)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to e4 e
+        ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        ImoId id1 = pNote1->get_id();
+        cursor.move_next();         //points to e4 q
+        ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
+        ImoId id2 = pNote2->get_id();
+        DocCommand* pCmd = LOMSE_NEW CmdAddTie(id1, id2);
+
+        executer.execute(&cursor, pCmd);
+
+        CHECK( doc.is_dirty() == true );
+        CHECK( pCmd->get_name() == "Add tie" );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        pNote2 = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote2->is_tied_prev() == true );
+        CHECK( pNote2->is_tied_next() == false );
+        cursor.move_prev();
+        pNote1 = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote1->is_tied_prev() == false );
+        CHECK( pNote1->is_tied_next() == true );
+
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+    }
 
 }
