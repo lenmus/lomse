@@ -47,27 +47,56 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 RestEngraver::RestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            ShapesStorage* pShapesStorage, int iInstr, int iStaff)
-    : NoterestEngraver(libraryScope, pScoreMeter, pShapesStorage, iInstr, iStaff)
+    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_pRest(NULL)
 {
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeRest* RestEngraver::create_shape(ImoRest* pRest, UPoint uPos)
+GmoShapeRest* RestEngraver::create_shape(ImoRest* pRest, UPoint uPos,
+                                         Color color)
 {
     m_restType = pRest->get_note_type();
     m_numDots = pRest->get_dots();
     m_pRest = pRest;
-    m_pNoteRest = pRest;
     m_uxLeft = uPos.x;
     m_uyTop = uPos.y;
     m_fontSize = determine_font_size();
+    m_color = color;
 
     determine_position();
     create_main_shape();
     add_shapes_for_dots_if_required();
 
     return m_pRestShape;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* RestEngraver::create_tool_dragged_shape(int restType, int dots)
+{
+    m_restType = restType;
+    m_numDots = dots;
+    m_pRest = NULL;
+    m_uxLeft = 0.0;
+    m_uyTop = 0.0;
+    m_fontSize = 21.0;
+    m_color = Color(255,0,0);       //TODO: options/configuration
+
+    determine_position();
+    create_main_shape();
+    add_shapes_for_dots_if_required();
+
+    return m_pRestShape;
+}
+
+//---------------------------------------------------------------------------------------
+UPoint RestEngraver::get_drag_offset()
+{
+    //return center of rest shape
+    URect total = m_pRestShape->get_bounds();
+    URect rest = m_pRestGlyphShape->get_bounds();
+    return UPoint(rest.get_x() - total.get_x() + rest.get_width() / 2.0,
+                  rest.get_y() - total.get_y() + rest.get_height() / 2.0 );
 }
 
 //---------------------------------------------------------------------------------------
@@ -81,15 +110,14 @@ void RestEngraver::determine_position()
 void RestEngraver::create_main_shape()
 {
     ShapeId idx = 0;
-    m_pRestShape = LOMSE_NEW GmoShapeRest(m_pRest, idx, m_uxLeft, m_uyTop, Color(0,0,0),
+    m_pRestShape = LOMSE_NEW GmoShapeRest(m_pRest, idx, m_uxLeft, m_uyTop, m_color,
                                     m_libraryScope);
-    m_pNoteRestShape = m_pRestShape;
 
-    GmoShape* pGlyph = LOMSE_NEW GmoShapeRestGlyph(m_pRest, idx, m_iGlyph,
+    m_pRestGlyphShape = LOMSE_NEW GmoShapeRestGlyph(m_pRest, idx, m_iGlyph,
                                              UPoint(m_uxLeft, m_uyTop),
-                                             Color(0,0,0), m_libraryScope, m_fontSize);
-    m_pRestShape->add(pGlyph);
-    m_uxLeft += pGlyph->get_width();
+                                             m_color, m_libraryScope, m_fontSize);
+    m_pRestShape->add(m_pRestGlyphShape);
+    m_uxLeft += m_pRestGlyphShape->get_width();
 }
 
 //---------------------------------------------------------------------------------------
@@ -130,7 +158,7 @@ void RestEngraver::add_shapes_for_dots_if_required()
         for (int i = 0; i < m_numDots; i++)
         {
             m_uxLeft += uSpaceBeforeDot;
-            m_uxLeft += add_dot_shape(m_uxLeft, uyPos, Color(0,0,0));
+            m_uxLeft += add_dot_shape(m_uxLeft, uyPos, m_color);
         }
     }
 }
@@ -140,7 +168,7 @@ LUnits RestEngraver::add_dot_shape(LUnits x, LUnits y, Color color)
 {
     y += get_glyph_offset(k_glyph_dot) + tenths_to_logical(-75.0);
     GmoShapeDot* pShape = LOMSE_NEW GmoShapeDot(m_pRest, 0, k_glyph_dot, UPoint(x, y),
-                                          color, m_libraryScope, m_fontSize);
+                                                color, m_libraryScope, m_fontSize);
 	m_pRestShape->add(pShape);
     return pShape->get_width();
 }

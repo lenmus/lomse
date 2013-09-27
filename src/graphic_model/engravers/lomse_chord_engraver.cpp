@@ -100,8 +100,9 @@ void ChordEngraver::set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-int ChordEngraver::create_shapes()
+int ChordEngraver::create_shapes(Color color)
 {
+    m_color = color;
     decide_on_stem_direction();
     layout_noteheads();
     layout_accidentals();
@@ -494,7 +495,7 @@ void ChordEngraver::add_stem_and_flag()
     StemFlagEngraver engrv(m_libraryScope, m_pMeter, pNote, instr, staff);
 
     engrv.add_stem_flag(pNoteShape, pBaseNoteShape, m_noteType, is_stem_down(),
-                        has_flag(), stemLength, Color(0,0,0));
+                        has_flag(), stemLength, m_color);
 }
 
 

@@ -1,11 +1,9 @@
 (score
-   (vers 1.5)(language en iso-8859-1)
-
-   (title center "Two instruments, three staves" (font bold 14))
+   (vers 2.0)
 
    (instrument (name "Flute")(abbrev "F") 
       (musicData 
-            (clef treble)
+            (clef G)
             (key a)
             (time 2 4)
             (n e4 e g+)(n g4 e g-)(n d4 e g+)(n g4 e g-)
@@ -24,7 +22,7 @@
    
    (instrument (name "Piano")(abbrev "P")(staves 2)
       (musicData 
-            (clef treble p1)
+            (clef G p1)
             (clef bass p2)  
             (key a)
             (time 2 4)

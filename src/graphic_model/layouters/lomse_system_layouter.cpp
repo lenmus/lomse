@@ -761,6 +761,13 @@ void ColumnLayouter::save_context(int iInstr, int iStaff, ColStaffObjsEntry* pCl
     m_prologKeys[idx] = pKeyEntry;
 }
 
+//---------------------------------------------------------------------------------------
+TimeGridTable* ColumnLayouter::create_time_grid_table_for_column()
+{
+    TimeGridTableBuilder builder(m_pColStorage);
+    return builder.build_table();
+}
+
 
 
 //=======================================================================================
@@ -822,12 +829,15 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
     reposition_staves(indent);
     fill_current_system_with_columns();
     justify_current_system();
+    build_system_timegrid();
     engrave_system_details(m_iSystem);
 
     if (m_pScoreLyt->is_last_system() && m_pScoreLyt->m_fStopStaffLinesAtFinalBarline)
         truncate_current_system(indent);
 
+    add_empty_column_if_necessary();
     engrave_instrument_details();
+    add_instruments_info();
 
     ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.Hide");
     bool fDrawStafflines = (pOpt == NULL || pOpt->get_bool_value() == false);
@@ -890,6 +900,49 @@ void SystemLayouter::justify_current_system()
         redistribute_free_space();
 
     reposition_slices_and_staffobjs();
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::add_empty_column_if_necessary()
+{
+#if 0
+    //TODO: Following code doesn't work when empty system (m_iLastCol == 0 ?)
+    //TODO: BoxSlice constructor ask for column number but it is useless. Remove
+    if (m_pScoreLyt->is_system_empty(m_iSystem)
+        || m_iLastCol == m_pScoreLyt->get_num_columns())
+    {
+        GmoBoxSlice* pLastSlice = m_ColLayouters[m_iLastCol-1]->get_slice_box();
+        LUnits emptyWidth = m_pBoxSystem->get_right() - pLastSlice->get_right();
+        if (emptyWidth > 0.0)
+        {
+            GmoBoxSlice* pSlice = LOMSE_NEW GmoBoxSlice(m_iLastCol, m_pScore);
+
+            pSlice->set_left( pLastSlice->get_right() );
+            pSlice->set_top( m_pBoxSystem->get_top() );
+            pSlice->set_width( emptyWidth );
+            pSlice->set_height( m_pBoxSystem->get_height() );
+
+            m_pBoxSystem->add_child_box(pSlice);
+
+            //add slice intrument boxes
+            int maxInstr = m_pScore->get_num_instruments() - 1;
+            for (int iInstr = 0; iInstr <= maxInstr; iInstr++)
+            {
+                GmoBoxSliceInstr* pBSI =
+                    m_ColLayouters[m_iLastCol-1]->get_slice_instr(iInstr);
+                LUnits top = pBSI->get_top();
+                LUnits height = pBSI->get_height();
+
+                ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
+                pBSI = pSlice->add_box_for_instrument(pInstr);
+                pBSI->set_top( top );
+                pBSI->set_left( pSlice->get_left() );
+                pBSI->set_width( pSlice->get_width() );
+                pBSI->set_height( height );
+            }
+        }
+    }
+#endif
 }
 
 //---------------------------------------------------------------------------------------
@@ -1197,29 +1250,17 @@ void SystemLayouter::add_initial_line_joining_all_staves_in_system()
         return;
 
     //TODO: HideStaffLines option
-//    lmVStaff* pVStaff = m_pScore->GetFirstInstrument()->GetVStaff();
 	if (m_pScoreMeter->must_draw_left_barline())    //&& !pVStaff->HideStaffLines() )
 	{
-        //ImoObj* pCreator = m_pScore->get_instrument(0);
-        //LUnits xPos = m_instrEngravers[0]->get_staves_left();
-        //LUnits yTop = m_instrEngravers[0]->get_staves_top_line();
-        //int iInstr = m_pScoreMeter->num_instruments() - 1;
-        //LUnits yBottom = m_instrEngravers[iInstr]->get_staves_bottom_line();
-        //LUnits uLineThickness =
-        //    m_pScoreMeter->tenths_to_logical(LOMSE_THIN_LINE_WIDTH, 0, 0);
-        //GmoShape* pLine = LOMSE_NEW GmoShapeBarline(pCreator, 0, ImoBarline::k_simple,
-        //                                      xPos, yTop, yBottom,
-        //                                      uLineThickness, uLineThickness,
-        //                                      0.0f, 0.0f, Color(0,0,0), uLineThickness);
-        //m_pBoxSystem->add_shape(pLine, GmoShape::k_layer_staff);
-
         ImoObj* pCreator = m_pScore->get_instrument(0);
         LUnits xPos = m_instrEngravers[0]->get_staves_left();
         LUnits yTop = m_instrEngravers[0]->get_staves_top_line();
         int iInstr = m_pScoreMeter->num_instruments() - 1;
         LUnits yBottom = m_instrEngravers[iInstr]->get_staves_bottom_line();
         BarlineEngraver engrv(m_libraryScope, m_pScoreMeter);
-        GmoShape* pLine = engrv.create_system_barline_shape(pCreator, xPos, yTop, yBottom);
+        Color color = Color(0,0,0); //TODO staff lines color?
+        GmoShape* pLine =
+            engrv.create_system_barline_shape(pCreator, xPos, yTop, yBottom, color);
         m_pBoxSystem->add_shape(pLine, GmoShape::k_layer_staff);
 	}
 }
@@ -1376,16 +1417,35 @@ void SystemLayouter::add_auxobj_shape_to_model(GmoShape* pShape, int layer, int 
     m_yMax = max(m_yMax, pShape->get_bottom());
 }
 
+//---------------------------------------------------------------------------------------
+void SystemLayouter::build_system_timegrid()
+{
+    TimeGridTable* pTable = LOMSE_NEW TimeGridTable();
 
+    for (int iCol = m_iFirstCol; iCol < m_iLastCol; ++iCol)
+    {
+        TimeGridTable* pColTable =
+            m_ColLayouters[iCol]->create_time_grid_table_for_column();
 
+        //accumulate data
+        pTable->add_entries( pColTable->get_entries() );
 
-//////---------------------------------------------------------------------------------------
-////void SystemLayouter::AddTimeGridToBoxSlice(int iCol, GmoBoxSlice* pBSlice)
-////{
-////    //create the time-grid table and transfer it (and its ownership) to GmoBoxSlice
-////    pBSlice->SetTimeGridTable( new TimeGridTable(m_ColStorage[iCol]) );
-////}
+        delete pColTable;
+    }
 
+    m_pBoxSystem->set_time_grid_table(pTable);
+}
+
+//---------------------------------------------------------------------------------------
+void SystemLayouter::add_instruments_info()
+{
+    int maxInstr = m_pScore->get_num_instruments() - 1;
+    for (int i = 0; i <= maxInstr; i++)
+    {
+        ImoInstrument* pInstr = m_pScore->get_instrument(i);
+        m_pBoxSystem->add_num_staves_for_instrument(pInstr->get_num_staves());
+    }
+}
 
 
 
@@ -2120,15 +2180,98 @@ void LineSpacer::assign_minimum_fixed_space(LineEntry* pEntry)
 //  A table with the relation timepos <=> position for all valid positions to insert
 //  a note.
 //  This object is responsible for supplying all valid timepos and their positions so
-//  that other objects (in fact only GmoBoxSlice) could:
+//  that other objects could:
 //      a) Determine the timepos to assign to a mouse click in a certain position.
 //      b) Draw a grid of valid timepos
 //=======================================================================================
-TimeGridTable::TimeGridTable(ColumnStorage* pColStorage)
+TimeGridTable::TimeGridTable()
+{
+}
+
+//---------------------------------------------------------------------------------------
+TimeGridTable::~TimeGridTable()
+{
+    m_PosTimes.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void TimeGridTable::add_entries(vector<TimeGridTableEntry>& entries)
+{
+    int iMax = int(entries.size());
+    for (int i=0; i < iMax; ++i)
+    {
+        add_entry(entries[i]);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void TimeGridTable::add_entry(TimeGridTableEntry& entry)
+{
+    TimeGridTableEntry tPosTime = {entry.rTimepos, entry.rDuration, entry.uxPos};
+    m_PosTimes.push_back(tPosTime);
+}
+
+//---------------------------------------------------------------------------------------
+string TimeGridTable::dump()
+{
+    stringstream s;
+                //...........+..........+..........
+    s << endl << "     timepos        Dur       Pos" << endl;
+    vector<TimeGridTableEntry>::iterator it;
+    for (it = m_PosTimes.begin(); it != m_PosTimes.end(); ++it)
+    {
+        s << fixed << setprecision(2) << setfill(' ')
+                   << setw(11) << (*it).rTimepos
+                   << setw(11) << (*it).rDuration
+                   << setw(11) << (*it).uxPos
+                   << endl;
+    }
+    return s.str();
+}
+
+//---------------------------------------------------------------------------------------
+TimeUnits TimeGridTable::get_time_for_position(LUnits uxPos)
+{
+    //timepos = 0 if measure is empty
+    if (m_PosTimes.size() == 0)
+        return 0.0;
+
+    //timepos = 0 if xPos < first entry xPos
+    if (uxPos <= m_PosTimes.front().uxPos)
+        return 0.0;
+
+    //otherwise find in table
+    std::vector<TimeGridTableEntry>::iterator it = m_PosTimes.begin();
+    for (++it; it != m_PosTimes.end(); ++it)
+    {
+        if (uxPos <= (*it).uxPos)
+            return (*it).rTimepos;
+    }
+
+    //if not found return last entry timepos
+    return m_PosTimes.back().rTimepos;
+}
+
+
+
+
+//=======================================================================================
+// TimeGridTableBuilder implementation
+//=======================================================================================
+TimeGridTableBuilder::TimeGridTableBuilder(ColumnStorage* pColStorage)
     : m_pColStorage(pColStorage)
 {
-    //build the table
+}
 
+//---------------------------------------------------------------------------------------
+TimeGridTableBuilder::~TimeGridTableBuilder()
+{
+    m_PosTimes.clear();
+}
+
+//---------------------------------------------------------------------------------------
+TimeGridTable* TimeGridTableBuilder::build_table()
+{
     create_line_explorers();
     while (there_are_objects())
     {
@@ -2141,16 +2284,14 @@ TimeGridTable::TimeGridTable(ColumnStorage* pColStorage)
     }
     interpolate_missing_times();
     delete_line_explorers();
+
+    TimeGridTable* table = LOMSE_NEW TimeGridTable();
+    table->add_entries(m_PosTimes);
+    return table;
 }
 
 //---------------------------------------------------------------------------------------
-TimeGridTable::~TimeGridTable()
-{
-    m_PosTimes.clear();
-}
-
-//---------------------------------------------------------------------------------------
-bool TimeGridTable::there_are_objects()
+bool TimeGridTableBuilder::there_are_objects()
 {
     std::vector<TimeGridLineExplorer*>::iterator it;
     for (it = m_LineExplorers.begin(); it != m_LineExplorers.end(); ++it)
@@ -2162,14 +2303,14 @@ bool TimeGridTable::there_are_objects()
 }
 
 //---------------------------------------------------------------------------------------
-void TimeGridTable::create_table_entry()
+void TimeGridTableBuilder::create_table_entry()
 {
-    PosTimeItem tPosTime = {m_rCurrentTime, m_rMinDuration, m_uCurPos };
+    TimeGridTableEntry tPosTime = {m_rCurrentTime, m_rMinDuration, m_uCurPos };
     m_PosTimes.push_back(tPosTime);
 }
 
 //---------------------------------------------------------------------------------------
-void TimeGridTable::delete_line_explorers()
+void TimeGridTableBuilder::delete_line_explorers()
 {
     std::vector<TimeGridLineExplorer*>::iterator it;
     for (it = m_LineExplorers.begin(); it != m_LineExplorers.end(); ++it)
@@ -2178,7 +2319,7 @@ void TimeGridTable::delete_line_explorers()
 }
 
 //---------------------------------------------------------------------------------------
-void TimeGridTable::create_line_explorers()
+void TimeGridTableBuilder::create_line_explorers()
 {
     const LinesIterator itEnd = m_pColStorage->end();
     for (LinesIterator it=m_pColStorage->begin(); it != itEnd; ++it)
@@ -2189,7 +2330,7 @@ void TimeGridTable::create_line_explorers()
 }
 
 //---------------------------------------------------------------------------------------
-void TimeGridTable::skip_non_timed_at_current_timepos()
+void TimeGridTableBuilder::skip_non_timed_at_current_timepos()
 {
     m_fTimedObjectsFound = false;
     std::vector<TimeGridLineExplorer*>::iterator it;
@@ -2200,7 +2341,7 @@ void TimeGridTable::skip_non_timed_at_current_timepos()
 }
 
 //---------------------------------------------------------------------------------------
-void TimeGridTable::find_shortest_noterest_at_current_timepos()
+void TimeGridTableBuilder::find_shortest_noterest_at_current_timepos()
 {
     get_current_time();
     m_rMinDuration = LOMSE_NO_DURATION;
@@ -2221,7 +2362,7 @@ void TimeGridTable::find_shortest_noterest_at_current_timepos()
 }
 
 //---------------------------------------------------------------------------------------
-void TimeGridTable::get_current_time()
+void TimeGridTableBuilder::get_current_time()
 {
     m_rCurrentTime = LOMSE_NO_TIME;
     std::vector<TimeGridLineExplorer*>::iterator it;
@@ -2231,49 +2372,8 @@ void TimeGridTable::get_current_time()
     }
 }
 
-////---------------------------------------------------------------------------------------
-//std::string TimeGridTable::dump()
-//{
-//                      //   .......+.......+.......+
-//    std::string sDump = _T("\n timepos     Dur     Pos\n");
-//    std::vector<PosTimeItem>::iterator it;
-//    for (it = m_PosTimes.begin(); it != m_PosTimes.end(); ++it)
-//    {
-//        sDump += std::string::Format(_T("%8.2f %8.2f %8.2f\n"),
-//                                (*it).rTimepos, (*it).rDuration, (*it).uxPos );
-//    }
-//}
-
 //---------------------------------------------------------------------------------------
-TimeUnits TimeGridTable::get_time_for_position(LUnits uxPos)
-{
-    //timepos = 0 if measure is empty
-    if (m_PosTimes.size() == 0)
-        return 0.0;
-
-    //timepos = 0 if xPos < first entry xPos
-    TimeUnits rTime = 0.0;
-    LUnits uxPrev = m_PosTimes.front().uxPos;
-    if (uxPos <= uxPrev)
-        return rTime;
-
-    //otherwise find in table
-    std::vector<PosTimeItem>::iterator it = m_PosTimes.begin();
-    for (++it; it != m_PosTimes.end(); ++it)
-    {
-        LUnits uxLimit = uxPrev + ((*it).uxPos - uxPrev) / 2.0f;
-        if (uxPos <= uxLimit)
-            return rTime;
-        uxPrev = (*it).uxPos;
-        rTime = (*it).rTimepos;
-    }
-
-    //if not found return last entry timepos
-    return m_PosTimes.back().rTimepos;
-}
-
-//---------------------------------------------------------------------------------------
-void TimeGridTable::interpolate_missing_times()
+void TimeGridTableBuilder::interpolate_missing_times()
 {
     TimeInserter oInserter(m_PosTimes);
     oInserter.interpolate_missing_times();
@@ -2285,7 +2385,7 @@ void TimeGridTable::interpolate_missing_times()
 //TimeInserter
 // helper class to interpolate missing entries
 //=======================================================================================
-TimeInserter::TimeInserter(std::vector<PosTimeItem>& oPosTimes)
+TimeInserter::TimeInserter(std::vector<TimeGridTableEntry>& oPosTimes)
     : m_PosTimes(oPosTimes)
 {
 }
@@ -2310,7 +2410,7 @@ bool TimeInserter::is_time_in_table(TimeUnits rTimepos)
     if (m_PosTimes.size() == 0)
         return false;
 
-    std::vector<PosTimeItem>::iterator it;
+    std::vector<TimeGridTableEntry>::iterator it;
     for (it=m_PosTimes.begin(); it != m_PosTimes.end(); ++it)
     {
         if (is_equal_time(rTimepos, (*it).rTimepos))
@@ -2325,7 +2425,7 @@ void TimeInserter::find_insertion_point(TimeUnits rTimepos)
     m_uPositionBeforeInsertionPoint = m_PosTimes.front().uxPos;
     m_rTimeBeforeInsertionPoint = m_PosTimes.front().rTimepos;
 
-    std::vector<PosTimeItem>::iterator it;
+    std::vector<TimeGridTableEntry>::iterator it;
     for (it=m_PosTimes.begin(); it != m_PosTimes.end(); ++it)
     {
         if (is_greater_time((*it).rTimepos, rTimepos))
@@ -2339,7 +2439,7 @@ void TimeInserter::find_insertion_point(TimeUnits rTimepos)
 //---------------------------------------------------------------------------------------
 void TimeInserter::insert_time_interpolating_position(TimeUnits rTimepos)
 {
-    PosTimeItem oItem;
+    TimeGridTableEntry oItem;
     oItem.rTimepos = rTimepos;
     oItem.rDuration = 0.0;
     oItem.uxPos = m_uPositionBeforeInsertionPoint;

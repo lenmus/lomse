@@ -69,10 +69,16 @@ protected:
     ColStaffObjsEntry*  m_pPrev;    //prev. entry in the collection
 
 public:
-    ColStaffObjsEntry(int measure, int instr, int line, int staff,
-                      ImoStaffObj* pImo)
-            : m_measure(measure), m_instr(instr), m_line(line)
-            , m_staff(staff), m_pImo(pImo), m_pNext(NULL), m_pPrev(NULL) {}
+    ColStaffObjsEntry(int measure, int instr, int line, int staff, ImoStaffObj* pImo)
+        : m_measure(measure)
+        , m_instr(instr)
+        , m_line(line)
+        , m_staff(staff)
+        , m_pImo(pImo)
+        , m_pNext(NULL)
+        , m_pPrev(NULL)
+    {
+    }
 
     //getters
     inline int measure() const { return m_measure; }
@@ -139,6 +145,7 @@ public:
     inline void set_anacrusis_missing_time(TimeUnits rTime) { m_rMissingTime = rTime; }
     void delete_entry_for(ImoStaffObj* pSO);
     void sort_table();
+    static bool is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a);
 
     //iterator related
     class iterator
@@ -332,6 +339,28 @@ private:
     void update_measure();
     void add_entry_for_staffobj(ImoObj* pImo, int nInstr);
 
+};
+
+
+//---------------------------------------------------------------------------------------
+// ScoreAlgorithms
+//  General methods for dealing with the staffobjs collection
+//---------------------------------------------------------------------------------------
+class ScoreAlgorithms
+{
+protected:
+
+public:
+    ScoreAlgorithms() {}
+    ~ScoreAlgorithms() {}
+
+    ///try to find a note that can be tied (as end of tie) with pStartNote
+    static ImoNote* find_possible_end_of_tie(ColStaffObjs* pColStaffObjs,
+                                             ImoNote* pStartNote);
+
+    ///finds applicable clef at specified timepos
+    static int get_applicable_clef_for(ImoScore* pScore,
+                                       int iInstr, int iStaff, TimeUnits time);
 };
 
 

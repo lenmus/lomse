@@ -67,6 +67,7 @@ class LineEntry;
 class ColumnResizer;
 class LineResizer;
 class LineSpacer;
+class TimeGridTable;
 class TimeGridLineExplorer;
 
 //some helper definitions
@@ -396,6 +397,7 @@ public:
     inline void set_justified_width(LUnits size) { m_pColStorage->set_justified_width(size); }
     inline void increment_justified_width(LUnits uIncr) { m_pColStorage->increment_justified_width(uIncr); }
     LUnits redistribute_space(LUnits uNewStart, LUnits uNewWidth, UPoint org);
+    TimeGridTable* create_time_grid_table_for_column();
 
     //access to info
     bool column_has_barline();
@@ -494,8 +496,6 @@ public:
     GmoBoxSystem* create_system_box(LUnits left, LUnits top, LUnits width, LUnits height);
     void engrave_system(LUnits indent, int iFirstCol, int iLastCol, UPoint pos);
 
-    //    void AddTimeGridToBoxSlice(int iCol, GmoBoxSlice* pBSlice);
-
         //Access to information
     inline void set_prolog_width(LUnits width) { m_uPrologWidth = width; }
     inline LUnits get_prolog_width() { return m_uPrologWidth; }
@@ -507,8 +507,10 @@ protected:
     void reposition_staves(LUnits indent);
     void fill_current_system_with_columns();
     void justify_current_system();
+    void build_system_timegrid();
     void engrave_instrument_details();
     void truncate_current_system(LUnits indent);
+    void add_empty_column_if_necessary();
 
     void add_column_to_system(int iCol);
     void add_shapes_for_column(int iCol, ShapesStorage* pStorage);
@@ -518,6 +520,7 @@ protected:
     LUnits redistribute_space(int iCol, LUnits uNewStart);
     void redistribute_free_space();
     void engrave_system_details(int iSystem);
+    void add_instruments_info();
 
     void add_system_prolog_if_necessary();
     LUnits engrave_prolog(int iInstr);
@@ -655,38 +658,36 @@ protected:
 //  A table with occupied times and durations, and connecting time with position
 //---------------------------------------------------------------------------------------
 
-//an item in the positions and times table
+//an entry in the TimeGridTable
 typedef struct
 {
     TimeUnits rTimepos;
     TimeUnits rDuration;
     LUnits uxPos;
 }
-PosTimeItem;
+TimeGridTableEntry;
 
-//the table
-class TimeGridTable
+//algorithm for building the table for a column
+class TimeGridTableBuilder
 {
 protected:
     ColumnStorage* m_pColStorage;
-    std::vector<PosTimeItem> m_PosTimes;         //the table
+    TimeGridTable* m_theTable;
+    vector<TimeGridTableEntry> m_PosTimes;
 
 public:
-    TimeGridTable(ColumnStorage* pColStorage);
-    ~TimeGridTable();
+    TimeGridTableBuilder(ColumnStorage* pColStorage);
+    ~TimeGridTableBuilder();
+
+    TimeGridTable* build_table();
 
     inline int get_size() { return (int)m_PosTimes.size(); }
 
-    //access to an entry values
-    inline TimeUnits get_timepos(int iItem) { return m_PosTimes[iItem].rTimepos; }
-    inline TimeUnits get_duration(int iItem) { return m_PosTimes[iItem].rDuration; }
-    inline LUnits get_x_pos(int iItem) { return m_PosTimes[iItem].uxPos; }
-
-    //access by position
-    TimeUnits get_time_for_position(LUnits uxPos);
-
-//    //debug
-//    void dump();
+//    //access to an entry values
+//    inline TimeUnits get_timepos(int iItem) { return m_PosTimes[iItem].rTimepos; }
+//    inline TimeUnits get_duration(int iItem) { return m_PosTimes[iItem].rDuration; }
+//    inline LUnits get_x_pos(int iItem) { return m_PosTimes[iItem].uxPos; }
+//    inline TimeGridTableEntry& get_entry(int iItem) { return m_PosTimes[iItem]; }
 
 protected:
     //variables and methods for column traversal
@@ -708,20 +709,54 @@ protected:
 
 };
 
+//the table
+class TimeGridTable
+{
+protected:
+    vector<TimeGridTableEntry> m_PosTimes;         //the table
+
+public:
+    TimeGridTable();
+    ~TimeGridTable();
+
+    //creation
+    void add_entries(vector<TimeGridTableEntry>& entries);
+    void add_entry(TimeGridTableEntry& entry);
+
+    //info
+    inline int get_size() { return (int)m_PosTimes.size(); }
+
+    //access to an entry values
+    inline TimeUnits get_timepos(int iItem) { return m_PosTimes[iItem].rTimepos; }
+    inline TimeUnits get_duration(int iItem) { return m_PosTimes[iItem].rDuration; }
+    inline LUnits get_x_pos(int iItem) { return m_PosTimes[iItem].uxPos; }
+    inline TimeGridTableEntry& get_entry(int iItem) { return m_PosTimes[iItem]; }
+    inline vector<TimeGridTableEntry>& get_entries() { return m_PosTimes; }
+
+    //access by position
+    TimeUnits get_time_for_position(LUnits uxPos);
+
+    //debug
+    string dump();
+
+protected:
+
+};
+
 //---------------------------------------------------------------------------------------
 // helper class to interpolate missing entries
 //---------------------------------------------------------------------------------------
 class TimeInserter
 {
 protected:
-    std::vector<PosTimeItem>& m_PosTimes;
+    std::vector<TimeGridTableEntry>& m_PosTimes;
 
-    std::vector<PosTimeItem>::iterator  m_itInsertionPoint;
+    std::vector<TimeGridTableEntry>::iterator  m_itInsertionPoint;
     TimeUnits m_rTimeBeforeInsertionPoint;
     LUnits m_uPositionBeforeInsertionPoint;
 
 public:
-    TimeInserter(std::vector<PosTimeItem>& oPosTimes);
+    TimeInserter(std::vector<TimeGridTableEntry>& oPosTimes);
     void interpolate_missing_times();
 
 protected:

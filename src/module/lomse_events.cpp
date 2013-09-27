@@ -246,8 +246,10 @@ EventNotifier::~EventNotifier()
 }
 
 //---------------------------------------------------------------------------------------
-void EventNotifier::notify_observers(SpEventInfo pEvent, Observable* target)
+bool EventNotifier::notify_observers(SpEventInfo pEvent, Observable* target)
 {
+    //returns true if event is dispatched to an observer
+
     std::list<Observer*>::iterator it;
     for (it = m_observers.begin(); it != m_observers.end(); ++it)
     {
@@ -258,14 +260,16 @@ void EventNotifier::notify_observers(SpEventInfo pEvent, Observable* target)
         //observing its parents
         if (!fNotify)
         {
-            ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(target);
-            if (pImo)
+            ImoObj* pImo = dynamic_cast<ImoObj*>(target);
+            Observable* pObs = target;
+            if (pImo && pObs)
             {
-                while(pImo && pImo != observedTarget)
+                while(pImo && pObs && pObs != observedTarget)
                 {
-                    pImo = dynamic_cast<ImoContentObj*>( pImo->get_parent() );
+                    pObs = pImo->get_observable_parent();
+                    pImo = dynamic_cast<ImoObj*>( pObs );
                 }
-                fNotify = (pImo == observedTarget);
+                fNotify = (pObs == observedTarget);
                 //TODO: do notification and continue bubbling.
             }
         }
@@ -275,7 +279,7 @@ void EventNotifier::notify_observers(SpEventInfo pEvent, Observable* target)
             LOMSE_LOG_DEBUG(Logger::k_events, "Posting event.");
             m_pDispatcher->post_event((*it), pEvent);
 //            (*it)->notify(pEvent);
-            return;
+            return true;
             //TODO: remove 'return' when following problem is fixed:
             //    Object receiving notification might modify the document (i.e. link
             //    'new problem') and this will invalidate target and all remaining
@@ -283,6 +287,7 @@ void EventNotifier::notify_observers(SpEventInfo pEvent, Observable* target)
         }
     }
     LOMSE_LOG_DEBUG(Logger::k_events, "No observers. Event ignored");
+    return false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -388,10 +393,10 @@ void EventNotifier::add_handler_for_child(Observable* parent, int childType,
 //=======================================================================================
 // EventMouse implementation
 //=======================================================================================
-ImoContentObj* EventMouse::get_imo_object()
+ImoObj* EventMouse::get_imo_object()
 {
     if (SpDocument sp = m_wpDoc.lock())
-        return dynamic_cast<ImoContentObj*>( sp->get_pointer_to_imo(m_imoId) );
+        return sp->get_pointer_to_imo(m_imoId);
     else
         return NULL;
 }
@@ -399,7 +404,15 @@ ImoContentObj* EventMouse::get_imo_object()
 //---------------------------------------------------------------------------------------
 Observable* EventMouse::get_source()
 {
-    return static_cast<Observable*>( get_imo_object() );
+    ImoObj* pImo = get_imo_object();
+    if (pImo)
+    {
+        if (pImo->is_contentobj())
+            return static_cast<Observable*>( static_cast<ImoContentObj*>(pImo) );
+        else
+            return pImo->get_observable_parent();
+    }
+    return NULL;
 }
 
 //---------------------------------------------------------------------------------------
@@ -408,6 +421,21 @@ bool EventMouse::is_still_valid()
     return !m_wpDoc.expired() && !m_wpInteractor.expired();
 }
 
+
+//=======================================================================================
+// EventControlPointMoved implementation
+//=======================================================================================
+EventControlPointMoved::EventControlPointMoved(EEventType type, WpInteractor wpInteractor,
+                    GmoObj* pGmo, int iHandler, UPoint uShift, WpDocument wpDoc)
+    : EventCommand(type, wpInteractor, 0, wpDoc)
+    , m_iHandler(iHandler)
+    , m_uShift(uShift)
+{
+    ImoObj* pImo = pGmo->get_creator_imo();
+    m_imoId = pImo->get_id();
+    m_gmoType = pGmo->get_gmobj_type();
+    m_idx = (pGmo->is_shape() ? static_cast<GmoShape*>(pGmo)->get_shape_id() : -1);
+}
 
 
 }   //namespace lomse

@@ -359,6 +359,18 @@ void Document::delete_relation(ImoRelObj* pRO)
 }
 
 //---------------------------------------------------------------------------------------
+void Document::delete_auxobj(ImoAuxObj* pAO)
+{
+    ImoObj* pParent = pAO->get_parent();
+    if (pParent && pParent->is_attachments())       //MUST SUCCESS
+    {
+        ImoAttachments* pOwner = static_cast<ImoAttachments*>(pParent);
+        pOwner->remove_child_imo(pAO);
+        delete pAO;
+    }
+}
+
+//---------------------------------------------------------------------------------------
 ImoObj* Document::create_object_from_lmd(const string& source)
 {
     LmdParser parser(m_reporter);

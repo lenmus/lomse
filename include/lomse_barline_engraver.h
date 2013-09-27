@@ -48,12 +48,20 @@ class BarlineEngraver : public Engraver
 {
 public:
     BarlineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int iInstr=0);
+    BarlineEngraver(LibraryScope& libraryScope);
     ~BarlineEngraver() {}
 
     GmoShape* create_shape(ImoBarline* pBarline, LUnits xPos, LUnits yTop,
-                           LUnits yBottom);
+                           LUnits yBottom, Color color=Color(0,0,0));
     GmoShape* create_system_barline_shape(ImoObj* pCreatorImo, LUnits xPos,
-                                          LUnits yTop, LUnits yBottom);
+                                          LUnits yTop, LUnits yBottom,
+                                          Color color=Color(0,0,0));
+    GmoShape* create_tool_dragged_shape(int barType);
+    UPoint get_drag_offset();
+
+protected:
+    GmoShape* m_pBarlineShape;
+
 };
 
 

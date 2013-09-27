@@ -29,6 +29,7 @@
 
 #include "lomse_document_layouter.h"
 
+#include "lomse_graphical_model.h"
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
 #include "lomse_layouter.h"

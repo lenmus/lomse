@@ -42,6 +42,7 @@ class GmoShapeTimeSignature;
 class ImoObj;
 class GmoShape;
 class ScoreMeter;
+class ImoTimeSignature;
 
 //---------------------------------------------------------------------------------------
 class TimeEngraver : public Engraver
@@ -54,17 +55,18 @@ protected:
     GmoShape* m_pShapesTop[2];
     GmoShape* m_pShapesBottom[2];
     double m_fontSize;
-    ImoObj* m_pCreatorImo;
+    ImoTimeSignature* m_pCreatorImo;
+    Color m_color;
 
 public:
     TimeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                  int iInstr, int iStaff);
     ~TimeEngraver() {}
 
-    GmoShape* create_shape_normal(ImoObj* pCreatorImo, UPoint uPos, int beats,
-                                  int beat_type);
-    GmoShape* create_shape_common(ImoObj* pCreatorImo, UPoint uPos);
-    GmoShape* create_shape_cut(ImoObj* pCreatorImo, UPoint uPos);
+    GmoShape* create_shape_normal(ImoTimeSignature* pCreatorImo, UPoint uPos, int beats,
+                                  int beat_type, Color color=Color(0,0,0));
+    GmoShape* create_shape_common(ImoTimeSignature* pCreatorImo, UPoint uPos);
+    GmoShape* create_shape_cut(ImoTimeSignature* pCreatorImo, UPoint uPos);
 
 protected:
     void create_main_container_shape(UPoint uPos);

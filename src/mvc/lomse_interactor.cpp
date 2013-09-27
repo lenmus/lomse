@@ -34,7 +34,9 @@
 #include "lomse_document_cursor.h"
 #include "lomse_basic.h"
 #include "lomse_tasks.h"
+#include "lomse_graphical_model.h"
 #include "lomse_gm_basic.h"
+#include "lomse_shape_note.h"
 #include "lomse_document_layouter.h"
 #include "lomse_view.h"
 #include "lomse_graphic_view.h"
@@ -43,6 +45,10 @@
 #include "lomse_document_cursor.h"
 #include "lomse_command.h"
 #include "lomse_logger.h"
+#include "lomse_handler.h"
+#include "lomse_visual_effect.h"
+#include "lomse_score_utilities.h"
+#include "lomse_shape_staff.h"
 
 #include <sstream>
 using namespace std;
@@ -65,30 +71,33 @@ Interactor::Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView
     , m_wpDoc(wpDoc)
     , m_pView(pView)
     , m_pGraphicModel(NULL)
-    , m_pTask( Injector::inject_Task(TaskFactory::k_task_null, NULL) )
+    , m_pTask(NULL)
     , m_pCursor(NULL)
     , m_pExec(pExec)
     , m_selections()
     , m_grefLastMouseOver(k_no_gmo_ref)
-    , m_renderTime(0.0)
-    , m_gmodelBuildTime(0.0)
+    , m_operatingMode(k_mode_read_only)
+    , m_fEditionEnabled(false)
     , m_fViewParamsChanged(false)
-    , m_fCaretNeedsRepaint(false)
     , m_fViewUpdatesEnabled(true)
+    , m_idControlledImo(k_no_imoid)
 {
-    switch_task(TaskFactory::k_task_selection);     //k_task_drag_view);
+    switch_task(TaskFactory::k_task_only_clicks);
 
     if (SpDocument spDoc = m_wpDoc.lock())
     {
-        LOMSE_LOG_DEBUG(Logger::k_mvc, "[Interactor::Interactor] Creating Interactor. Document is valid");
+        LOMSE_LOG_DEBUG(Logger::k_mvc, "Creating Interactor. Document is valid");
         Document* pDoc = spDoc.get();
         m_pCursor = Injector::inject_DocCursor(pDoc);
 
         GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
         if (pGView)
+        {
             pGView->use_cursor(m_pCursor);
+            pGView->use_selection_set(&m_selections);
+        }
     }
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "[Interactor::Interactor] Interactor created.");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "Interactor created.");
 }
 
 //---------------------------------------------------------------------------------------
@@ -98,12 +107,16 @@ Interactor::~Interactor()
     delete m_pView;
     delete_graphic_model();
     delete m_pCursor;
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "[Interactor::~Interactor] Interactor is deleted");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "Interactor is deleted");
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::switch_task(int taskType)
 {
+    stringstream s;
+    s << "new task type=" << taskType;
+    LOMSE_LOG_DEBUG(Logger::k_mvc, s.str());
+
     delete m_pTask;
     m_pTask = Injector::inject_Task(taskType, this);
     m_pTask->init_task();
@@ -124,7 +137,7 @@ void Interactor::create_graphic_model()
 
     if (SpDocument spDoc = m_wpDoc.lock())
     {
-        start_timer();
+        m_gmodelBuildStartTime = get_current_time();
 
         InternalModel* pIModel = spDoc->get_im_model();
         if (pIModel)
@@ -132,12 +145,17 @@ void Interactor::create_graphic_model()
             LOMSE_LOG_DEBUG(Logger::k_render, "[Interactor::create_graphic_model]");
             DocLayouter layouter(pIModel, m_libScope);
             layouter.layout_document();
-            m_pGraphicModel = layouter.get_gm_model();
+            m_pGraphicModel = layouter.get_graphic_model();
             m_pGraphicModel->build_main_boxes_table();
         }
         spDoc->clear_dirty();
 
-        m_gmodelBuildTime = get_elapsed_time();
+        timing_graphic_model_build_end();
+
+        double buildTime = get_ellapsed_time_since(m_gmodelBuildStartTime);
+        stringstream msg;
+        msg << "gmodel build time = " << buildTime << " ms.";
+        LOMSE_LOG_INFO(msg.str());
     }
 //    m_idLastMouseOver = k_no_imoid;
 }
@@ -160,6 +178,7 @@ void Interactor::handle_event(SpEventInfo pEvent)
     {
         case k_doc_modified_event:
             delete_graphic_model();
+            restore_selection();
             force_redraw();
             break;
 
@@ -226,8 +245,20 @@ void Interactor::on_mouse_button_down(Pixels x, Pixels y, unsigned flags)
 //---------------------------------------------------------------------------------------
 void Interactor::on_mouse_move(Pixels x, Pixels y, unsigned flags)
 {
-    LOMSE_LOG_TRACE(Logger::k_events, "[Interactor::on_mouse_move] mouse move detected");
+    LOMSE_LOG_TRACE(Logger::k_events, "");
     m_pTask->process_event( Event(Event::k_mouse_move, x, y, flags) );
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::on_mouse_enter_window(Pixels x, Pixels y, unsigned flags)
+{
+    enable_drag_image(true);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::on_mouse_leave_window(Pixels x, Pixels y, unsigned flags)
+{
+    enable_drag_image(false);
 }
 
 //---------------------------------------------------------------------------------------
@@ -241,7 +272,9 @@ void Interactor::on_mouse_button_up(Pixels x, Pixels y, unsigned flags)
 //---------------------------------------------------------------------------------------
 void Interactor::select_object(GmoObj* pGmo, unsigned flags)
 {
+    m_selections.clear();
     m_selections.add(pGmo, flags);
+    send_update_UI_event(k_selection_set_change);
 }
 
 //---------------------------------------------------------------------------------------
@@ -251,38 +284,151 @@ bool Interactor::is_in_selection(GmoObj* pGmo)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::select_object_at_screen_point(Pixels x, Pixels y, unsigned flags)
+void Interactor::task_action_select_object_and_show_contextual_menu(
+                                                    Pixels x, Pixels y, unsigned flags)
 {
-    GmoObj* pGmo = find_object_at(x, y);
-    if (pGmo)
-        select_object(pGmo, flags);
-}
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
 
-//---------------------------------------------------------------------------------------
-void Interactor::click_at_screen_point(Pixels x, Pixels y, unsigned flags)
-
-{
     if (SpDocument spDoc = m_wpDoc.lock())
     {
         GmoObj* pGmo = find_object_at(x, y);
         if (pGmo)
         {
-            ImoContentObj* pImo = dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
-            if (pGmo->is_box_control() || (pImo && pImo->is_visible()) )
+            select_object(pGmo, flags);
+            force_redraw();     //to draw it as selected and remove previous selection
+            ImoObj* pImo = pGmo->get_creator_imo();
+            if (pImo)
             {
-                ImoObj* pImo = find_event_originator_imo(pGmo);
                 ImoId id = pImo ? pImo->get_id() : k_no_imoid;
                 SpInteractor sp = get_shared_ptr_from_this();
                 WpInteractor wp(sp);
-                SpEventMouse pEvent( LOMSE_NEW EventMouse(k_on_click_event, wp, id, m_wpDoc) );
-                notify_event(pEvent, pGmo);
+                SpEventMouse pEvent(
+                    LOMSE_NEW EventMouse(k_show_contextual_menu_event, wp, id, x, y, m_wpDoc) );
+                m_libScope.post_event(pEvent);
             }
         }
     }
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::mouse_in_out(Pixels x, Pixels y)
+void Interactor::task_action_click_at_screen_point(Pixels x, Pixels y, unsigned flags)
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    //mouse left click when in selection mode
+
+    m_selections.clear();
+    GmoObj* pGmo = find_object_at(x, y);
+
+//    stringstream msg;
+//    msg << "Click: Gmo=" << (pGmo ? pGmo->get_name() : "NULL") << ", point("
+//        << x << ", " << y << ")";
+//    LOMSE_LOG_INFO(msg.str());
+
+    if (pGmo)
+        send_click_event(pGmo, x, y, flags);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::send_click_event(GmoObj* pGmo, Pixels x, Pixels y, unsigned flags)
+
+{
+    if (SpDocument spDoc = m_wpDoc.lock())
+    {
+        if (pGmo)
+        {
+            ImoObj* pImo = find_event_originator_imo(pGmo);
+            ImoId id = pImo ? pImo->get_id() : k_no_imoid;
+            SpInteractor sp = get_shared_ptr_from_this();
+            WpInteractor wp(sp);
+            SpEventMouse pEvent(
+                LOMSE_NEW EventMouse(k_on_click_event, wp, id, x, y, m_wpDoc) );
+            notify_event(pEvent, pGmo);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+DocCursorState Interactor::click_event_to_cursor_state(SpEventMouse event)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView == NULL)
+    {
+        string msg = "Invoking Interactor::click_event_to_cursor_state() but no graphic view!";
+        LOMSE_LOG_ERROR(msg);
+        throw runtime_error(msg);
+    }
+
+    ImoObj* pImo = event->get_imo_object();
+    double x = double(event->get_x());
+    double y = double(event->get_y());
+    int iPage = pGView->page_at_screen_point(x, y);
+    GmoObj* pGmo = find_object_at(x, y);
+    screen_point_to_page_point(&x, &y);
+    return pGView->click_event_to_cursor_state(iPage, LUnits(x), LUnits(y), pImo, pGmo);
+}
+
+//---------------------------------------------------------------------------------------
+DiatonicPitch Interactor::get_pitch_at(Pixels x, Pixels y)
+{
+    //What would be the pitch if a note is inserted at received point?
+
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView == NULL)
+    {
+        string msg = "Invoking Interactor::get_pitch_at() but no graphic view!";
+        LOMSE_LOG_ERROR(msg);
+        throw runtime_error(msg);
+    }
+
+    double xPos = double(x);
+    double yPos = double(y);
+    int iPage = page_at_screen_point(xPos, yPos);
+    if (iPage == -1)
+        return DiatonicPitch(k_no_pitch);
+
+    screen_point_to_page_point(&xPos, &yPos);
+    GraphicModel* pGM = get_graphic_model();
+    AreaInfo* pInfo = pGM->get_info_for_point(iPage, LUnits(xPos), LUnits(yPos));
+    if (pInfo->pShapeStaff)
+    {
+        //determine position on staff
+        int lineSpace = pInfo->pShapeStaff->line_space_at(yPos);     //0=first ledger line below staff
+
+        //determine instrument, staff and timepos
+        GmoObj* pGmo = pInfo->pGmo;
+        ImoObj* pImo = pGmo->get_creator_imo();
+        DocCursorState state = pGView->click_event_to_cursor_state(iPage, LUnits(xPos),
+                                                                LUnits(yPos), pImo, pGmo);
+        if (state.get_top_level_id() != k_no_imoid)
+        {
+            SpScoreCursorState pState(
+                boost::static_pointer_cast<ScoreCursorState>(state.get_delegate_state()) );
+            int staff = pState->staff();
+            int instr = pState->instrument();
+            TimeUnits time = pState->time();
+
+            //determine clef
+            ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                        pInfo->pShapeStaff->get_creator_imo() );
+            ImoScore* pScore = pInstr->get_score();
+            EClef clef = EClef(
+                ScoreAlgorithms::get_applicable_clef_for(pScore, instr, staff, time) );
+            if (clef == k_clef_undefined || clef == k_clef_percussion)
+                return DiatonicPitch(k_no_pitch);
+
+            //determine pitch
+            DiatonicPitch dp = get_diatonic_pitch_for_first_line(clef);
+            dp += (lineSpace - 2);
+
+            return dp;
+        }
+    }
+    return DiatonicPitch(k_no_pitch);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::task_action_mouse_in_out(Pixels x, Pixels y)
 {
     GmoObj* pGmo = find_object_at(x, y);
     if (pGmo == NULL)
@@ -291,28 +437,54 @@ void Interactor::mouse_in_out(Pixels x, Pixels y)
     GmoRef gref = find_event_originator_gref(pGmo);
 
     LOMSE_LOG_DEBUG(Logger::k_events, str(boost::format(
-        "[Interactor::mouse_in_out] Gmo %d, %s / gref(%d, %d) -------------------")
+        "Gmo %d, %s / gref(%d, %d) -------------------")
          % pGmo->get_gmobj_type() % pGmo->get_name()
          % gref.first % gref.second ));
 
     if (m_grefLastMouseOver != k_no_gmo_ref && m_grefLastMouseOver != gref)
     {
         LOMSE_LOG_DEBUG(Logger::k_events, str(boost::format(
-            "[Interactor::mouse_in_out] Mouse out. gref(%d %d)")
+            "Mouse out. gref(%d %d)")
             % m_grefLastMouseOver.first % m_grefLastMouseOver.second ));
-        send_mouse_out_event(m_grefLastMouseOver);
+        send_mouse_out_event(m_grefLastMouseOver, x, y);
         m_grefLastMouseOver = k_no_gmo_ref;
     }
 
     if (m_grefLastMouseOver == k_no_gmo_ref && gref != k_no_gmo_ref)
     {
         LOMSE_LOG_DEBUG(Logger::k_events, str(boost::format(
-            "[Interactor::mouse_in_out] Mouse in. gref(%d %d)")
+            "Mouse in. gref(%d %d)")
             % gref.first % gref.second ));
-        send_mouse_in_event(gref);
+        send_mouse_in_event(gref, x, y);
         m_grefLastMouseOver = gref;
     }
 
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::task_action_move_drag_image(Pixels x, Pixels y)
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        UPoint pos = screen_point_to_model_point(x, y);
+        pGView->move_drag_image(pos.x, pos.y);
+        request_window_update();
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::task_action_insert_object_at_point(Pixels x, Pixels y)
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    //invoked only from TaskDataEntry: mouse left click when in data entry mode
+
+    //TODO: decide if special treatment. For now, same than selection mode
+    task_action_click_at_screen_point(x, y);
+    force_redraw();
 }
 
 //---------------------------------------------------------------------------------------
@@ -325,7 +497,7 @@ ImoObj* Interactor::find_event_originator_imo(GmoObj* pGmo)
     if (pParent && pParent->is_link())
         return pParent;
     else
-        return dynamic_cast<ImoContentObj*>( pGmo->get_creator_imo() );
+        return pGmo->get_creator_imo();
 }
 
 //---------------------------------------------------------------------------------------
@@ -376,10 +548,21 @@ GmoRef Interactor::find_event_originator_gref(GmoObj* pGmo)
 void Interactor::update_view_if_gmodel_modified()
 {
     GraphicModel* pGM = get_graphic_model();
-    if (pGM->is_modified() || m_fCaretNeedsRepaint)
+    if (pGM->is_modified())
     {
         force_redraw();
         pGM->set_modified(false);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::redraw_caret()
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        pGView->draw_caret();
+        request_window_update();
     }
 }
 
@@ -418,10 +601,41 @@ GmoObj* Interactor::find_object_at(Pixels x, Pixels y)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::select_objects_in_screen_rectangle(Pixels x1, Pixels y1,
-                                                    Pixels x2, Pixels y2,
-                                                    unsigned flags)
+GmoBox* Interactor::find_box_at(Pixels x, Pixels y)
 {
+    double xPos = double(x);
+    double yPos = double(y);
+    int iPage = page_at_screen_point(xPos, yPos);
+    if (iPage == -1)
+        return NULL;
+
+    screen_point_to_page_point(&xPos, &yPos);
+    GraphicModel* pGM = get_graphic_model();
+    return pGM->find_inner_box_at(iPage, LUnits(xPos), LUnits(yPos));
+}
+
+//---------------------------------------------------------------------------------------
+Handler* Interactor::handlers_hit_test(Pixels x, Pixels y)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        UPoint pos = screen_point_to_model_point(x, y);
+        return pGView->handlers_hit_test(pos.x, pos.y);
+    }
+    else
+        return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::task_action_select_objects_in_screen_rectangle(Pixels x1, Pixels y1,
+                                                                Pixels x2, Pixels y2,
+                                                                unsigned flags)
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    //invoked only from TaskSelection
+
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (!pGView)
         return;
@@ -433,33 +647,198 @@ void Interactor::select_objects_in_screen_rectangle(Pixels x1, Pixels y1,
 
     GraphicModel* pGM = get_graphic_model();
     list<PageRectangle*>::iterator it;
+    m_selections.clear();
     for (it = rectangles.begin(); it != rectangles.end(); ++it)
     {
         pGM->select_objects_in_rectangle((*it)->iPage, m_selections, (*it)->rect, flags);
         delete *it;
+    }
+
+    pGView->draw_selected_objects();
+    request_window_update();
+
+    send_update_UI_event(k_selection_set_change);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::task_action_decide_on_switching_task(Pixels x, Pixels y)
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    // Edition mode: mouse left click at point (x, y). Decide what to do.
+
+    m_pCurHandler = handlers_hit_test(x, y);
+    if (m_pCurHandler)
+    {
+        //click on handler: move it
+        switch_task(TaskFactory::k_task_move_handler);
+        static_cast<TaskMoveHandler*>(m_pTask)->set_first_point(x, y);
+        return;
+    }
+
+    GmoObj* pGmo = find_object_at(x, y);
+    ImoObj* pImo = (pGmo != NULL ? pGmo->get_creator_imo() : NULL);
+    if (pImo && pImo->is_staffobj())
+    {
+        //click on staffobj: drag it
+        GmoShape* pShape = NULL;
+        if (pImo->is_note())
+        {
+            GmoShapeNote* pNote = static_cast<GmoShapeNote*>(pGmo);
+            pShape = pNote->get_notehead_shape();
+        }
+        else
+            pShape = static_cast<GmoShape*>(pGmo);
+
+        //compute offset so that hotspot is at clicked point
+        double xPos = double(x);
+        double yPos = double(y);
+        screen_point_to_page_point(&xPos, &yPos);
+        UPoint org = pShape->get_origin();
+        UPoint offset(LUnits(xPos)-org.x, LUnits(yPos)-org.y);
+
+        set_drag_image(pShape, k_do_not_get_ownership, offset);
+        show_drag_image(true);
+
+        m_selections.clear();
+        switch_task(TaskFactory::k_task_move_object);
+        static_cast<TaskMoveObject*>(m_pTask)->set_first_point(x, y);
+    }
+    else
+    {
+        //click at other areas: start a selection rectangle
+        m_selections.clear();
+        start_selection_rectangle(x, y);
+
+        switch_task(TaskFactory::k_task_selection_rectangle);
+        static_cast<TaskSelectionRectangle*>(m_pTask)->set_first_point(x, y);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::task_action_switch_to_default_task()
+{
+    switch_task(TaskFactory::k_task_selection);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::task_action_move_object(Pixels x, Pixels y)
+{
+    //TODO
+    show_drag_image(false);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::task_action_move_handler(Pixels x, Pixels y)
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    UPoint pos = screen_point_to_model_point(x, y);
+    m_pCurHandler->move_to(pos);
+
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        pGView->draw_handler(m_pCurHandler);
+        request_window_update();
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::task_action_move_handler_end_point(Pixels xFinal, Pixels yFinal,
+                                                    Pixels xTotalShift, Pixels yTotalShift)
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    task_action_move_handler(xFinal, yFinal);
+
+    //generate event for updating the internal model
+    GmoObj* pGmo = m_pCurHandler->get_controlled_gmo();
+    int iHandler = m_pCurHandler->get_handler_index();
+    //UPoint shift = screen_point_to_model_point(xTotalShift, yTotalShift);
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    UPoint shift(pGView->pixels_to_lunits(xTotalShift),
+                 pGView->pixels_to_lunits(yTotalShift) );
+
+    //save reference for re-selecting the object
+    m_idControlledImo = m_pCurHandler->get_controlled_gmo()->get_creator_imo()->get_id();
+    m_pCurHandler = NULL;
+
+    SpInteractor sp = get_shared_ptr_from_this();
+    WpInteractor wpIntor(sp);
+    SpEventControlPointMoved pEvent(
+        LOMSE_NEW EventControlPointMoved(k_control_point_moved_event, wpIntor,
+                                         pGmo, iHandler, shift, m_wpDoc) );
+    notify_observers(pEvent, this);
+
+//    //when redrawing the graphic model the selection set is cleared.
+//    //So tie must be re-selected here
+//    GraphicModel* pGModel = get_graphic_model();
+//    pGmo = pGModel->get_main_shape_for_imo(id);
+//    select_object(pGmo);
+
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::task_action_drag_the_view(Pixels x, Pixels y)
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    new_viewport(x, y);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::restore_selection()
+{
+    //when redrawing the graphic model the selection set is cleared.
+    //This method restores the selection if only one Imo with handlers was selected
+
+    if (m_idControlledImo != k_no_imoid)
+    {
+        GraphicModel* pGModel = get_graphic_model();
+        GmoObj* pGmo = pGModel->get_main_shape_for_imo(m_idControlledImo);
+        select_object(pGmo);
+        m_idControlledImo = k_no_imoid;
     }
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::redraw_bitmap()
 {
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->redraw_bitmap();
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    if (SpDocument spDoc = m_wpDoc.lock())
+    {
+        if (spDoc->is_dirty())
+            delete_graphic_model();
+
+        GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+        if (pGView)
+            pGView->redraw_bitmap();
+    }
     m_fViewParamsChanged = false;
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::request_window_update()
 {
-    LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::request_window_update]");
+    LOMSE_LOG_DEBUG(Logger::k_events | Logger::k_mvc, "");
 
     SpInteractor sp = get_shared_ptr_from_this();
     WpInteractor wpIntor(sp);
-    SpEventView pEvent( LOMSE_NEW EventView(k_update_window_event, wpIntor) );
+    SpEventPaint pEvent( LOMSE_NEW EventPaint(wpIntor, get_damaged_rectangle()) );
     notify_observers(pEvent, this);
 }
 
+//---------------------------------------------------------------------------------------
+VRect Interactor::get_damaged_rectangle()
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        return pGView->get_damaged_rectangle();
+    else
+        return VRect(0, 0, 0, 0);
+}
 //---------------------------------------------------------------------------------------
 void Interactor::force_redraw()
 {
@@ -470,22 +849,25 @@ void Interactor::force_redraw()
 //---------------------------------------------------------------------------------------
 void Interactor::do_force_redraw()
 {
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-    {
-        pGView->redraw_bitmap();
-        request_window_update();
-    }
-    m_fCaretNeedsRepaint = false;
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    redraw_bitmap();
+    request_window_update();
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::new_viewport(Pixels x, Pixels y)
+void Interactor::new_viewport(Pixels x, Pixels y, bool fForceRedraw)
 {
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
     m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
+    {
         pGView->new_viewport(x, y);
+        if (fForceRedraw)
+            force_redraw();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -522,11 +904,14 @@ void Interactor::get_viewport(Pixels* x, Pixels* y)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::show_selection_rectangle(Pixels x1, Pixels y1, Pixels x2, Pixels y2)
+void Interactor::start_selection_rectangle(Pixels x1, Pixels y1)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->show_selection_rectangle(x1, y1, x2, y2);
+    {
+        UPoint start = screen_point_to_model_point(x1, y1);
+        pGView->start_selection_rectangle(start.x, start.y);
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -542,7 +927,12 @@ void Interactor::update_selection_rectangle(Pixels x2, Pixels y2)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->update_selection_rectangle(x2, y2);
+    {
+        UPoint end = screen_point_to_model_point(x2, y2);
+        pGView->update_selection_rectangle(end.x, end.y);
+        pGView->draw_selection_rectangle();
+        request_window_update();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -600,7 +990,7 @@ void Interactor::discard_all_highlight()
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->discard_all_highlight();
+        pGView->remove_all_highlight();
 }
 
 //---------------------------------------------------------------------------------------
@@ -620,6 +1010,16 @@ void Interactor::model_point_to_screen(double* x, double* y, int iPage)
 }
 
 //---------------------------------------------------------------------------------------
+UPoint Interactor::screen_point_to_model_point(Pixels x, Pixels y)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        return pGView->screen_point_to_model_point(x, y);
+    else
+        return UPoint(0.0, 0.0);
+}
+
+//---------------------------------------------------------------------------------------
 int Interactor::page_at_screen_point(double x, double y)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
@@ -629,39 +1029,59 @@ int Interactor::page_at_screen_point(double x, double y)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::zoom_in(Pixels x, Pixels y)
+void Interactor::zoom_in(Pixels x, Pixels y, bool fForceRedraw)
 {
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
     m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
+    {
         pGView->zoom_in(x, y);
+        if (fForceRedraw)
+            force_redraw();
+    }
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::zoom_out(Pixels x, Pixels y)
+void Interactor::zoom_out(Pixels x, Pixels y, bool fForceRedraw)
 {
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
     m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
+    {
         pGView->zoom_out(x, y);
+        if (fForceRedraw)
+            force_redraw();
+    }
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::zoom_fit_full(Pixels width, Pixels height)
+void Interactor::zoom_fit_full(Pixels width, Pixels height, bool fForceRedraw)
 {
     m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
+    {
         pGView->zoom_fit_full(width, height);
+        if (fForceRedraw)
+            force_redraw();
+    }
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::zoom_fit_width(Pixels width)
+void Interactor::zoom_fit_width(Pixels width, bool fForceRedraw)
 {
     m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
+    {
         pGView->zoom_fit_width(width);
+        if (fForceRedraw)
+            force_redraw();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -675,12 +1095,16 @@ double Interactor::get_scale()
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::set_scale(double scale, Pixels x, Pixels y)
+void Interactor::set_scale(double scale, Pixels x, Pixels y, bool fForceRedraw)
 {
     m_fViewParamsChanged = true;
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
+    {
         pGView->set_scale(scale, x, y);
+        if (fForceRedraw)
+            force_redraw();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -781,12 +1205,16 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
 {
     static Pixels xPos = 100;
 
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (!pGView)
+        return;
+
     if (SpDocument spDoc = m_wpDoc.lock())
     {
         if (discard_score_highlight_event_if_not_valid(pEvent))
             return;
 
-        LOMSE_LOG_DEBUG(Logger::k_events, "Interactor::on_visual_highlight] Processing higlight event");
+        LOMSE_LOG_DEBUG(Logger::k_events, "Processing higlight event");
         std::list< pair<int, ImoId> >& items = pEvent->get_items();
         std::list< pair<int, ImoId> >::iterator it;
         for (it = items.begin(); it != items.end(); ++it)
@@ -815,29 +1243,32 @@ void Interactor::on_visual_highlight(SpEventScoreHighlight pEvent)
 
                 default:
                 {
-                    string msg = str( boost::format(
-                                    "[Interactor::on_visual_highlight] Unknown event type %d.")
+                    string msg = str( boost::format("Unknown event type %d.")
                                     % (*it).first );
                     LOMSE_LOG_ERROR(msg);
                     throw runtime_error(msg);
                 }
             }
         }
-        do_force_redraw();
+
+        pGView->draw_playback_highlight();
+        request_window_update();
     }
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::send_end_of_play_event(ImoScore* pScore, PlayerGui* pPlayCtrl)
 {
-    LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::send_end_of_play_event]");
+    LOMSE_LOG_DEBUG(Logger::k_events, "");
 
     if (SpDocument spDoc = m_wpDoc.lock())
     {
         Document* pDoc = spDoc.get();
         SpInteractor sp = get_shared_ptr_from_this();
         WpInteractor wpIntor(sp);
-        SpEventView pEvent( LOMSE_NEW EventView(k_end_of_playback_event, wpIntor) );
+//        SpEventView pEvent( LOMSE_NEW EventView(k_end_of_playback_event, wpIntor) );
+        SpEventView pEvent( LOMSE_NEW EventPlayScore(k_end_of_playback_event,
+                                                     wpIntor, pScore, pPlayCtrl) );
         if (pPlayCtrl)
             pPlayCtrl->on_end_of_playback();
 
@@ -866,7 +1297,7 @@ void Interactor::update_view_if_needed()
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::send_mouse_out_event(GmoRef gref)
+void Interactor::send_mouse_out_event(GmoRef gref, Pixels x, Pixels y)
 {
     if (SpDocument spDoc = m_wpDoc.lock())
     {
@@ -874,7 +1305,8 @@ void Interactor::send_mouse_out_event(GmoRef gref)
         SpInteractor spIntor = get_shared_ptr_from_this();
         WpInteractor wpIntor(spIntor);
         ImoId id = gref.first;
-        SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_out_event, wpIntor, id, m_wpDoc));
+        SpEventMouse pEvent(
+            LOMSE_NEW EventMouse(k_mouse_out_event, wpIntor, id, x, y, m_wpDoc));
         GraphicModel* pGM = get_graphic_model();
         GmoObj* pGmo = pGM->get_box_for_control(gref);
         if (pGmo)
@@ -883,7 +1315,7 @@ void Interactor::send_mouse_out_event(GmoRef gref)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::send_mouse_in_event(GmoRef gref)
+void Interactor::send_mouse_in_event(GmoRef gref, Pixels x, Pixels y)
 {
     if (SpDocument spDoc = m_wpDoc.lock())
     {
@@ -891,11 +1323,31 @@ void Interactor::send_mouse_in_event(GmoRef gref)
         SpInteractor sp = get_shared_ptr_from_this();
         WpInteractor wp(sp);
         ImoId id = gref.first;
-        SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_in_event, wp, id, m_wpDoc) );
+        SpEventMouse pEvent(
+            LOMSE_NEW EventMouse(k_mouse_in_event, wp, id, x, y, m_wpDoc) );
         GraphicModel* pGM = get_graphic_model();
         GmoObj* pGmo = pGM->get_box_for_control(gref);
         if (pGmo)
             notify_event(pEvent, pGmo);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::send_update_UI_event(EEventType type)
+{
+    if (SpDocument spDoc = m_wpDoc.lock())
+    {
+        LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::send_update_UI_event]");
+        SpInteractor sp = get_shared_ptr_from_this();
+        WpInteractor wp(sp);
+        SpEventUpdateUI pEvent(
+            LOMSE_NEW EventUpdateUI(type, wp, m_wpDoc, &m_selections, m_pCursor) );
+
+        //AWARE: update UI events are sent directly to the application global handler.
+        //It is assumed that this event is of interest only for application main frame.
+        //TODO: lomse global option at initialization?
+        m_libScope.post_event(pEvent);
+//        notify_observers(pEvent, this);
     }
 }
 
@@ -911,19 +1363,20 @@ void Interactor::notify_event(SpEventInfo pEvent, GmoObj* pGmo)
 
         if (pGmo->is_box_control())
         {
-            LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::notify_event] notify to GmoBoxControl");
+            LOMSE_LOG_DEBUG(Logger::k_events, "Notify to GmoBoxControl");
             (static_cast<GmoBoxControl*>(pGmo))->notify_event(pEvent);
             update_view_if_gmodel_modified();
         }
         else if (pGmo->is_box_link() || pGmo->is_in_link())
         {
-            LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::notify_event] notify to link");
+            LOMSE_LOG_DEBUG(Logger::k_events, "Notify to link");
             find_parent_link_box_and_notify_event(pEvent, pGmo);
         }
         else
         {
-            LOMSE_LOG_DEBUG(Logger::k_events, "[Interactor::notify_event] notify to Document");
-            spDoc->notify_observers(pEvent, pEvent->get_source() );
+            LOMSE_LOG_DEBUG(Logger::k_events, "Notify to Document");
+            if (!spDoc->notify_observers(pEvent, pEvent->get_source() ))
+                LOMSE_LOG_DEBUG(Logger::k_events, "Event discarded");
         }
     }
 }
@@ -961,57 +1414,122 @@ void Interactor::find_parent_link_box_and_notify_event(SpEventInfo pEvent, GmoOb
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::start_timer()
+ptime Interactor::get_current_time() const
 {
-    m_startTime = clock();
-    m_start = microsec_clock::universal_time();
+    return microsec_clock::universal_time();
 }
 
 //---------------------------------------------------------------------------------------
-double Interactor::get_elapsed_time() const
+double Interactor::get_ellapsed_time_since(ptime startTime) const
 {
-    //millisecods since last start_timer() invocation
+    //millisecods
 
     ptime now = microsec_clock::universal_time();
-    time_duration diff = now - m_start;
+    time_duration diff = now - startTime;
     return double( diff.total_milliseconds() );
-    //return double( diff.total_microseconds() );
-    //return double(clock() - m_startTime) * 1000.0 / CLOCKS_PER_SEC;
 }
 
 //---------------------------------------------------------------------------------------
-bool Interactor::blink_caret()
+void Interactor::timing_start_measurements()
 {
-    // returns true if caret has been repainted
+    //timing starts. render_start = now, gmodel_build=0, gmodel_draw=0, visual_start = now
+
+    for (int i=0; i < k_timing_max_value; ++i)
+        m_ellapsedTimes[i] = 0.0;
+
+    m_renderStartTime = microsec_clock::universal_time();
+    m_visualEffectsStartTime = m_renderStartTime;
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::timing_graphic_model_build_end()
+{
+    //gmodel_build ends. gmodel_build = now - render_star
+
+    ptime now = microsec_clock::universal_time();
+    time_duration diff = now - m_renderStartTime;
+    m_ellapsedTimes[k_timing_gmodel_build_time] = double( diff.total_milliseconds() );
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::timing_graphic_model_render_end()
+{
+    //draw gmodel ends. gmodel_draw = (now - render_start) - gmodel_build
+
+    ptime now = microsec_clock::universal_time();
+    time_duration diff = now - m_renderStartTime;
+    m_ellapsedTimes[k_timing_gmodel_draw_time] =
+        double( diff.total_milliseconds() ) - m_ellapsedTimes[k_timing_gmodel_build_time];
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::timing_visual_effects_start()
+{
+    //draw visual effects start. visual_start = now
+
+    m_visualEffectsStartTime = microsec_clock::universal_time();
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::timing_renderization_end()
+{
+    //draw end. visual_draw = now - visual_start; total_render = now - render_start;
+    //repaint_start=now
+
+    ptime now = microsec_clock::universal_time();
+    time_duration diff = now - m_visualEffectsStartTime;
+    m_ellapsedTimes[k_timing_visual_effects_draw_time] =
+        double( diff.total_milliseconds() );
+
+    diff = now - m_renderStartTime;
+    m_ellapsedTimes[k_timing_total_render_time] =
+        double( diff.total_milliseconds() );
+
+    m_repaintStartTime = now;
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::timing_repaint_done()
+{
+    //repaint_time = (now - repaint_start)
+
+    ptime now = microsec_clock::universal_time();
+    time_duration diff = now - m_repaintStartTime;
+    m_ellapsedTimes[k_timing_repaint_time] =  double( diff.total_milliseconds() );
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::blink_caret()
+{
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
+    if (pGView && pGView->is_caret_visible() && pGView->is_caret_blink_enabled())
     {
-        m_fCaretNeedsRepaint = true;
-        return pGView->toggle_caret();
+        pGView->toggle_caret();
+        redraw_caret();
     }
-    else
-        return false;
 }
 
-//---------------------------------------------------------------------------------------
-void Interactor::show_caret(bool fShow)
-{
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-    {
-        fShow ? pGView->show_caret(): pGView->hide_caret();
-    }
-    m_fCaretNeedsRepaint = true;
-}
-
-//---------------------------------------------------------------------------------------
-void Interactor::hide_caret()
-{
-    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
-    if (pGView)
-        pGView->hide_caret();
-    m_fCaretNeedsRepaint = true;
-}
+////---------------------------------------------------------------------------------------
+//void Interactor::show_caret(bool fShow)
+//{
+//    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+//    if (pGView)
+//    {
+//        fShow ? pGView->show_caret(): pGView->hide_caret();
+//        redraw_caret();
+//    }
+//}
+//
+////---------------------------------------------------------------------------------------
+//void Interactor::hide_caret()
+//{
+//    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+//    if (pGView)
+//    {
+//        pGView->hide_caret();
+//        redraw_caret();
+//    }
+//}
 
 //---------------------------------------------------------------------------------------
 string Interactor::get_caret_timecode()
@@ -1024,10 +1542,70 @@ string Interactor::get_caret_timecode()
 }
 
 //---------------------------------------------------------------------------------------
+void Interactor::set_operating_mode(int mode)
+{
+    if (mode != m_operatingMode)
+    {
+        m_operatingMode = mode;
+        switch_task(mode == k_mode_edition ? TaskFactory::k_task_selection
+                                           : TaskFactory::k_task_only_clicks);
+
+        GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+        if (pGView)
+        {
+            pGView->set_visual_effects_for_mode(mode);
+            pGView->draw_all_visual_effects();
+            request_window_update();
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::show_drag_image(bool fShow)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        pGView->show_drag_image(fShow);
+
+        //if hidding, remove image from screen
+        if (!fShow)
+        {
+            pGView->draw_dragged_image();
+            request_window_update();
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::enable_drag_image(bool fEnabled)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+    {
+        pGView->enable_drag_image(fEnabled);
+        if (fEnabled == false)
+        {
+            pGView->draw_dragged_image();
+            request_window_update();
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::set_drag_image(GmoShape* pShape, bool fGetOwnership, UPoint offset)
+{
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->set_drag_image(pShape, fGetOwnership, offset);
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::exec_command(DocCommand* pCmd)
 {
-    m_pExec->execute(m_pCursor, pCmd);
+    m_pExec->execute(m_pCursor, pCmd, &m_selections);
     update_caret_and_view();
+    send_update_UI_event(k_pointed_object_change);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1035,6 +1613,7 @@ void Interactor::exec_undo()
 {
     m_pExec->undo(m_pCursor);
     update_caret_and_view();
+    send_update_UI_event(k_pointed_object_change);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1042,14 +1621,14 @@ void Interactor::exec_redo()
 {
     m_pExec->redo(m_pCursor);
     update_caret_and_view();
+    send_update_UI_event(k_pointed_object_change);
 }
 
 //---------------------------------------------------------------------------------------
 void Interactor::update_caret_and_view()
 {
-    if ( dynamic_cast<GraphicView*>(m_pView) )
-        m_fCaretNeedsRepaint = true;
     update_view_if_needed();
+    redraw_caret();
 }
 
 //---------------------------------------------------------------------------------------
@@ -1063,6 +1642,14 @@ bool Interactor::should_enable_edit_redo()
 {
     return m_pExec->is_redo_possible();
 }
+
+////---------------------------------------------------------------------------------------
+//void Interactor::enable_edition(bool value)
+//{
+//    m_fEditionEnabled = value;
+//    switch_task(m_fEditionEnabled ? TaskFactory::k_task_selection
+//                                  : TaskFactory::k_task_only_clicks);
+//}
 
 
 ////=======================================================================================

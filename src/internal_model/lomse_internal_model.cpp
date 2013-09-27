@@ -43,6 +43,7 @@
 #include "lomse_logger.h"
 #include "lomse_ldp_exporter.h"
 #include "lomse_ldp_analyser.h"     //class Autobeamer
+#include "lomse_im_attributes.h"
 
 using namespace std;
 
@@ -439,6 +440,85 @@ ImoDocument* ImoObj::get_document()
 }
 
 //---------------------------------------------------------------------------------------
+Observable* ImoObj::get_observable_parent()
+{
+    if (this->is_document())
+    {
+        Document* pDoc = static_cast<ImoDocument*>(this)->get_the_document();
+        return static_cast<Observable*>( pDoc );
+    }
+    else
+        return static_cast<Observable*>( get_contentobj_parent() );
+}
+
+//---------------------------------------------------------------------------------------
+ImoContentObj* ImoObj::get_contentobj_parent()
+{
+    //TODO: Reorganize/re-design ImoTree.
+    // It is badly designed for at least two reasons:
+    //  1. not all objects have an Imo parent, as some objects are not children
+    //     but are included in std collections.
+    //  2. There is no a chain of ImoContentObj children. This problem affects this
+    //     method. Instead of using virtual methods I've preferred to implement
+    //     the exceptions here for simplicity and for better trace when problems.
+
+    if (this->is_staffobj())            //parent is ImoMusicData (ImoSimpleObj)
+        return static_cast<ImoStaffObj*>(this)->get_score();
+
+//    else if (this->is_music_data())     //parent is ImoInstrument (ImoSimpleObj)
+//        return static_cast<ImoInstrument*>(this)->get_score();
+
+    else if (this->is_instrument())     //ImoInstrument is ImoSimpleObj
+        return static_cast<ImoInstrument*>(this)->get_score();
+
+//    else if (this->is_table_section())     //ImoTableSection is ImoSimpleObj
+//        return static_cast<ImoTableSection*>(this)->get_table();
+
+    else if (this->is_relobj())     //no single parent! use first of relation
+        return static_cast<ImoRelObj*>(this)->get_start_object();
+
+    else
+    {
+        //get its parent and see
+        ImoObj* pImo = get_parent();
+        if (pImo)
+        {
+            if (pImo->is_simpleobj()) //ImoCollection, ImoAttachments, ImoRelations, ...
+            {
+                pImo = pImo->get_parent();
+            }
+            else if (pImo->is_auxobj())  //normally child of ImoAttachments
+            {
+                pImo = pImo->get_parent();
+                while(pImo && pImo->is_auxobj())
+                    pImo = pImo->get_parent();
+                if (pImo && pImo->is_attachments())
+                    pImo = pImo->get_parent();
+            }
+
+
+            if (pImo->is_contentobj())
+                return static_cast<ImoContentObj*>(pImo);
+        }
+    }
+
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+ImoBlockLevelObj* ImoObj::find_block_level_parent()
+{
+    ImoObj* pParent = this;
+
+    while (pParent && !pParent->is_block_level_obj())
+    {
+        pParent = pParent->get_contentobj_parent();
+    }
+
+    return static_cast<ImoBlockLevelObj*>( pParent );
+}
+
+//---------------------------------------------------------------------------------------
 void ImoObj::accept_visitor(BaseVisitor& v)
 {
     Visitor<ImoObj>* p = dynamic_cast<Visitor<ImoObj>*>(&v);
@@ -476,6 +556,7 @@ ImoObj* ImoObj::get_child_of_type(int objtype)
 //---------------------------------------------------------------------------------------
 void ImoObj::set_dirty(bool dirty)
 {
+    //change status and propagate
     if (dirty)
     {
         m_flags |= k_dirty;
@@ -590,6 +671,50 @@ ImoRelDataObj* ImoRelObj::get_data_for(ImoStaffObj* pSO)
 
 
 //=======================================================================================
+// ImoScoreObj implementation
+//=======================================================================================
+void ImoScoreObj::set_int_attribute(TIntAttribute attrib, int value)
+{
+    ImoContentObj::set_int_attribute(attrib, value);
+}
+
+//---------------------------------------------------------------------------------------
+int ImoScoreObj::get_int_attribute(TIntAttribute attrib)
+{
+    return ImoContentObj::get_int_attribute(attrib);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoScoreObj::set_color_attribute(TIntAttribute attrib, Color value)
+{
+    if (k_attr_color)
+    {
+        set_color(value);
+        set_dirty(true);
+    }
+    else
+        ImoContentObj::set_color_attribute(attrib, value);
+}
+
+//---------------------------------------------------------------------------------------
+Color ImoScoreObj::get_color_attribute(TIntAttribute attrib)
+{
+    if (k_attr_color)
+        return m_color;
+    else
+        return ImoContentObj::get_color_attribute(attrib);
+}
+
+//---------------------------------------------------------------------------------------
+list<TIntAttribute> ImoScoreObj::get_supported_attributes()
+{
+    list<TIntAttribute> supported = ImoContentObj::get_supported_attributes();
+    supported.push_back(k_attr_color);
+    return supported;
+}
+
+
+//=======================================================================================
 // ImoStaffObj implementation
 //=======================================================================================
 ImoStaffObj::~ImoStaffObj()
@@ -693,6 +818,47 @@ ImoInstrument* ImoStaffObj::get_instrument()
 {
     ImoObj* pParent = this->get_parent_imo();   //musicData
     return static_cast<ImoInstrument*>( pParent->get_parent_imo() );
+}
+
+//---------------------------------------------------------------------------------------
+ImoScore* ImoStaffObj::get_score()
+{
+    ImoInstrument* pInstr = get_instrument();
+    return pInstr->get_score();
+}
+
+//---------------------------------------------------------------------------------------
+void ImoStaffObj::set_int_attribute(TIntAttribute attrib, int value)
+{
+    switch(attrib)
+    {
+        case k_attr_staff_num:
+            m_staff = value;
+            set_dirty(true);
+            break;
+
+        default:
+            ImoScoreObj::set_int_attribute(attrib, value);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int ImoStaffObj::get_int_attribute(TIntAttribute attrib)
+{
+    switch(attrib)
+    {
+        case k_attr_staff_num:      return m_staff;
+        default:
+            return ImoScoreObj::get_int_attribute(attrib);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+list<TIntAttribute> ImoStaffObj::get_supported_attributes()
+{
+    list<TIntAttribute> supported = ImoScoreObj::get_supported_attributes();
+    supported.push_back(k_attr_staff_num);
+    return supported;
 }
 
 
@@ -883,6 +1049,11 @@ ImoBezierInfo::ImoBezierInfo(ImoBezierInfo* pBezier)
         for (int i=0; i < 4; ++i)
             m_tPoints[i] = pBezier->get_point(i);
     }
+    else
+    {
+        for (int i=0; i < 4; ++i)
+            m_tPoints[i] = TPoint(0.0f, 0.0f);
+    }
 }
 
 
@@ -966,6 +1137,52 @@ void ImoBlocksContainer::append_content_item(ImoContentObj* pItem)
     if (!pContent)
         pContent = add_content_wrapper();
     pContent->append_child_imo(pItem);
+}
+
+//=======================================================================================
+// ImoBarline implementation
+//=======================================================================================
+void ImoBarline::set_int_attribute(TIntAttribute attrib, int value)
+{
+    //AWARE: override of staff_num (in ImoStaffObj)
+
+    switch(attrib)
+    {
+        case k_attr_staff_num:
+            m_staff = 0;    //barlines always in staff 0
+            break;
+
+        case k_attr_barline:
+            m_barlineType = value;
+            set_dirty(true);
+            break;
+
+        default:
+            ImoStaffObj::set_int_attribute(attrib, value);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int ImoBarline::get_int_attribute(TIntAttribute attrib)
+{
+    switch(attrib)
+    {
+        case k_attr_barline:        return m_barlineType;
+        default:
+            return ImoStaffObj::get_int_attribute(attrib);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+list<TIntAttribute> ImoBarline::get_supported_attributes()
+{
+    list<TIntAttribute> supported = ImoStaffObj::get_supported_attributes();
+    supported.push_back(k_attr_barline);
+
+    supported.remove(k_attr_staff_num);     //always 0
+    supported.remove(k_attr_ypos);          //vertical displacement not allowed
+
+    return supported;
 }
 
 
@@ -1424,6 +1641,113 @@ EventNotifier* ImoContentObj::get_event_notifier()
     return get_the_document();
 }
 
+//---------------------------------------------------------------------------------------
+void ImoContentObj::set_int_attribute(TIntAttribute attrib, int value)
+{
+    ImoObj::set_int_attribute(attrib, value);
+}
+
+//---------------------------------------------------------------------------------------
+int ImoContentObj::get_int_attribute(TIntAttribute attrib)
+{
+    return ImoObj::get_int_attribute(attrib);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoContentObj::set_bool_attribute(TIntAttribute attrib, bool value)
+{
+    switch(attrib)
+    {
+        case k_attr_visible:
+            m_fVisible = value;
+            set_dirty(true);
+            break;
+
+        default:
+            ImoObj::set_bool_attribute(attrib, value);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+bool ImoContentObj::get_bool_attribute(TIntAttribute attrib)
+{
+    switch(attrib)
+    {
+        case k_attr_visible:        return m_fVisible;
+        default:
+            return ImoObj::get_bool_attribute(attrib);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ImoContentObj::set_double_attribute(TIntAttribute attrib, double value)
+{
+    switch(attrib)
+    {
+        case k_attr_xpos:
+            m_txUserLocation = value;
+            set_dirty(true);
+            break;
+
+        case k_attr_ypos:
+            m_tyUserLocation = value;
+            set_dirty(true);
+            break;
+
+        default:
+            ImoObj::set_double_attribute(attrib, value);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+double ImoContentObj::get_double_attribute(TIntAttribute attrib)
+{
+    switch(attrib)
+    {
+        case k_attr_xpos:       return m_txUserLocation;
+        case k_attr_ypos:       return m_tyUserLocation;
+        default:
+            return ImoObj::get_double_attribute(attrib);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ImoContentObj::set_string_attribute(TIntAttribute attrib, const string& value)
+{
+    switch(attrib)
+    {
+        case k_attr_style:
+            //TODO
+            set_dirty(true);
+            break;
+
+        default:
+            ImoObj::set_string_attribute(attrib, value);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+string ImoContentObj::get_string_attribute(TIntAttribute attrib)
+{
+    switch(attrib)
+    {
+        case k_attr_style:      return (m_pStyle ? m_pStyle->get_name() : "");
+        default:
+            return ImoObj::get_string_attribute(attrib);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+list<TIntAttribute> ImoContentObj::get_supported_attributes()
+{
+    list<TIntAttribute> supported = ImoObj::get_supported_attributes();
+    supported.push_back(k_attr_style);
+    supported.push_back(k_attr_xpos);
+    supported.push_back(k_attr_ypos);
+    supported.push_back(k_attr_visible);
+    return supported;
+}
+
 
 //=======================================================================================
 // ImoAnonymousBlock implementation
@@ -1766,23 +2090,25 @@ ImoBarline* ImoInstrument::add_barline(int type, bool fVisible)
 }
 
 //---------------------------------------------------------------------------------------
-ImoClef* ImoInstrument::add_clef(int type, int nStaff)
+ImoClef* ImoInstrument::add_clef(int type, int nStaff, bool fVisible)
 {
     ImoMusicData* pMD = get_musicdata();
     ImoClef* pImo = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, m_pDoc) );
     pImo->set_clef_type(type);
     pImo->set_staff(nStaff - 1);
+    pImo->set_visible(fVisible);
     pMD->append_child_imo(pImo);
     return pImo;
 }
 
 //---------------------------------------------------------------------------------------
-ImoKeySignature* ImoInstrument::add_key_signature(int type)
+ImoKeySignature* ImoInstrument::add_key_signature(int type, bool fVisible)
 {
     ImoMusicData* pMD = get_musicdata();
     ImoKeySignature* pImo = static_cast<ImoKeySignature*>(
                                 ImFactory::inject(k_imo_key_signature, m_pDoc) );
     pImo->set_key_type(type);
+    pImo->set_visible(fVisible);
     pMD->append_child_imo(pImo);
     return pImo;
 }
@@ -3274,10 +3600,30 @@ ImoBezierInfo* ImoTie::get_start_bezier()
 }
 
 //---------------------------------------------------------------------------------------
+ImoBezierInfo* ImoTie::get_start_bezier_or_create()
+{
+    ImoTieData* pData = static_cast<ImoTieData*>( get_start_data() );
+    ImoBezierInfo* pInfo = pData->get_bezier();
+    if (!pInfo)
+        pInfo = pData->add_bezier();
+    return pInfo;
+}
+
+//---------------------------------------------------------------------------------------
 ImoBezierInfo* ImoTie::get_stop_bezier()
 {
     ImoTieData* pData = static_cast<ImoTieData*>( get_end_data() );
     return pData->get_bezier();
+}
+
+//---------------------------------------------------------------------------------------
+ImoBezierInfo* ImoTie::get_stop_bezier_or_create()
+{
+    ImoTieData* pData = static_cast<ImoTieData*>( get_end_data() );
+    ImoBezierInfo* pInfo = pData->get_bezier();
+    if (!pInfo)
+        pInfo = pData->add_bezier();
+    return pInfo;
 }
 
 //---------------------------------------------------------------------------------------
@@ -3308,6 +3654,13 @@ ImoTieData::~ImoTieData()
     delete m_pBezier;
 }
 
+//---------------------------------------------------------------------------------------
+ImoBezierInfo* ImoTieData::add_bezier()
+{
+    if (!m_pBezier)
+        m_pBezier = LOMSE_NEW ImoBezierInfo(NULL);
+    return m_pBezier;
+}
 
 //=======================================================================================
 // ImoTieDto implementation

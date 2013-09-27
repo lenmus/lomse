@@ -51,7 +51,7 @@ FermataEngraver::FermataEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreM
 
 //---------------------------------------------------------------------------------------
 GmoShapeFermata* FermataEngraver::create_shape(ImoFermata* pFermata, UPoint pos,
-                                               GmoShape* pParentShape)
+                                               Color color, GmoShape* pParentShape)
 {
     m_pFermata = pFermata;
     m_placement = pFermata->get_placement();
@@ -63,7 +63,7 @@ GmoShapeFermata* FermataEngraver::create_shape(ImoFermata* pFermata, UPoint pos,
     UPoint position = compute_location(pos);
     ShapeId idx = 0;
     m_pFermataShape = LOMSE_NEW GmoShapeFermata(pFermata, idx, iGlyph, position,
-                                                Color(0,0,0), m_libraryScope, fontSize);
+                                                color, m_libraryScope, fontSize);
     center_on_parent();
     return m_pFermataShape;
 }

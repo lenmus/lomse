@@ -76,7 +76,6 @@ public:
     //only for unit tests
     ScoreLayouter* get_score_layouter();
     void save_score_layouter(Layouter* pLayouter);
-    inline GraphicModel* get_gm_model() { return m_pGModel; }
 
 protected:
     void layout_content();

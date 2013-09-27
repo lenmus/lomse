@@ -46,6 +46,7 @@ namespace lomse
 //forward declarations
 class Caret;
 class GmoBox;
+class GmoBoxSystem;
 class GraphicModel;
 class InnerLevelCaretPositioner;
 
@@ -59,16 +60,17 @@ protected:
     DocCursor* m_pCursor;
 
 public:
-    CaretPositioner(DocCursor* pCursor);
+    CaretPositioner();
     virtual ~CaretPositioner() {}
 
     //operations
-    void prepare_caret(Caret* pCaret, GraphicModel* pGModel);
+    void layout_caret(Caret* pCaret, DocCursor* pCursor, GraphicModel* pGModel);
+    DocCursorState click_point_to_cursor_state(GraphicModel* pGModel, int iPage, LUnits x,
+                                         LUnits y, ImoObj* pImo, GmoObj* pGmo);
 
 
 protected:
-    InnerLevelCaretPositioner* new_positioner(DocCursor* pCursor,
-                                              GraphicModel* pGModel);
+    InnerLevelCaretPositioner* new_positioner(ImoObj* pTopLevel, GraphicModel* pGModel);
 
 };
 
@@ -83,10 +85,10 @@ protected:
     DocCursorState m_state;
 
 public:
-    TopLevelCaretPositioner(DocCursor* pCursor, GraphicModel* pGModel);
+    TopLevelCaretPositioner(GraphicModel* pGModel);
     virtual ~TopLevelCaretPositioner() {}
 
-    void prepare_caret(Caret* pCaret);
+    void layout_caret(Caret* pCaret, DocCursor* pCursor);
 
 protected:
     GmoBox* get_box_for_last_element();
@@ -107,7 +109,9 @@ protected:
 public:
     virtual ~InnerLevelCaretPositioner() {}
 
-    virtual void prepare_caret(Caret* pCaret) = 0;
+    virtual void layout_caret(Caret* pCaret, DocCursor* pCursor) = 0;
+    virtual SpElementCursorState click_point_to_cursor_state(int iPage, LUnits x, LUnits y,
+                                                 ImoObj* pImo, GmoObj* pGmo) = 0;
 };
 
 
@@ -123,12 +127,15 @@ protected:
     Document* m_pDoc;
     ImoScore* m_pScore;
     ScoreMeter* m_pMeter;
+    GmoBoxSystem* m_pBoxSystem;
 
 public:
-    ScoreCaretPositioner(DocCursor* pCursor, GraphicModel* pGModel);
+    ScoreCaretPositioner(GraphicModel* pGModel);
     virtual ~ScoreCaretPositioner();
 
-    void prepare_caret(Caret* pCaret);
+    void layout_caret(Caret* pCaret, DocCursor* pCursor);
+    SpElementCursorState click_point_to_cursor_state(int iPage, LUnits x, LUnits y,
+                                               ImoObj* pImo, GmoObj* pGmo);
 
 protected:
     void caret_on_pointed_object(Caret* pCaret);

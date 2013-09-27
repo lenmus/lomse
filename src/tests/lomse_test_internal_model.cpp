@@ -1261,6 +1261,37 @@ SUITE(InternalModelTest)
         CHECK( pClef->get_instrument() == pInstr );
     }
 
+    TEST_FIXTURE(InternalModelTestFixture, staffobj_attributes)
+    {
+        Document doc(m_libraryScope);
+        doc.create_empty();
+        ImoScore* pScore = doc.add_score();
+        ImoInstrument* pInstr = pScore->add_instrument();
+        ImoClef* pClef = pInstr->add_clef(k_clef_G2);
+        ImoStaffObj* pImo = static_cast<ImoStaffObj*>(pClef);
+
+        list<int> supported = pImo->get_supported_attributes();
+
+        //cout << "staffobj supported = " << supported.size() << endl;
+        CHECK( supported.size() == 6 );
+    }
+
+    // ImoBarline -----------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, barline_attributes)
+    {
+        Document doc(m_libraryScope);
+        ImoBarline* pImo = static_cast<ImoBarline*>(ImFactory::inject(k_imo_barline, &doc));
+
+        list<int> supported = pImo->get_supported_attributes();
+
+        //cout << "barline supported = " << supported.size() << endl;
+        CHECK( supported.size() == 5 );
+//        CHECK( supported.find(k_attr_barline) == ? );
+
+        delete pImo;
+    }
+
 }
 
 

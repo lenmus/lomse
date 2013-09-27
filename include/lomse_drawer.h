@@ -74,11 +74,9 @@ struct RenderOptions
     //for debug: draw a box around boxes of selected types
     bitset<GmoObj::k_max> boxes;
 
-    //bool g_fDrawBoundsShapes;           //draw bound rectangles for non boxes
-    //bool g_fDrawSelRect;    //draw selection rectangles around staff objects
-    //bool g_fDrawBounds;     //draw bounds rectangles around staff objects
+    bool draw_anchors;          //draw anchors, to see them in the score
+    bool draw_shape_bounds;     //draw bounds around selected shapes
     //bool g_fShowMargins;    //draw margins in scores, so user can change them
-    bool draw_anchors;      //draw anchors, to see them in the score
     //bool g_fFreeMove;		//the shapes can be dragged without restrictions
 
 
@@ -90,6 +88,7 @@ struct RenderOptions
     //colors
     Color background_color;
     Color highlighted_color;
+    Color dragged_color;
     Color selected_color;
     Color focussed_box_color;
     Color unfocussed_box_color;
@@ -100,18 +99,26 @@ struct RenderOptions
 
     //other options
     bool draw_focus_lines_on_boxes_flag;
+    bool draw_shapes_highlighted;
+    bool draw_shapes_dragged;
+    bool draw_shapes_selected;
 
     RenderOptions()
         : draw_anchors(false)
+        , draw_shape_bounds(false)
         , scale(1.0)
         , background_color(127, 127, 127)       //grey
         , highlighted_color(255,0,0)            //red
+        , dragged_color(0,0,255,128)            //blue, semitransparent
         , selected_color(0,0,255)               //blue
         , focussed_box_color(0,0,255)           //blue
         , unfocussed_box_color(200,200,200)     //light grey
         , page_border_flag(true)
         , cast_shadow_flag(true)
         , draw_focus_lines_on_boxes_flag(false)
+        , draw_shapes_highlighted(false)
+        , draw_shapes_dragged(false)
+        , draw_shapes_selected(false)
     {
         boxes.reset();
     }

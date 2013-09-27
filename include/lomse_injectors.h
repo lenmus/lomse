@@ -95,6 +95,7 @@ protected:
     bool m_fDumpColumnTables;
     bool m_fDrawAnchors;
     bool m_fReplaceLocalMetronome;
+    bool m_fShowShapeBounds;
 
 
 public:
@@ -146,6 +147,8 @@ public:
     inline bool dump_column_tables() { return m_fDumpColumnTables; }
     inline void set_draw_anchors(bool value) { m_fDrawAnchors = value; }
     inline bool draw_anchors() { return m_fDrawAnchors; }
+    inline void set_draw_shape_bounds(bool value) { m_fShowShapeBounds = value; }
+    inline bool draw_shape_bounds() { return m_fShowShapeBounds; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -201,7 +204,6 @@ public:
                                            MidiServerBase* pSoundServer);
     static DocCursor* inject_DocCursor(Document* pDoc);
     static DocCommandExecuter* inject_DocCommandExecuter(Document* pDoc);
-    static CaretPositioner* inject_CaretPositioner(DocCursor* pCursor);
 };
 
 

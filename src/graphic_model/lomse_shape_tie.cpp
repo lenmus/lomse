@@ -67,6 +67,7 @@ GmoShapeTie::GmoShapeTie(ImoObj* pCreatorImo, ShapeId idx, UPoint* points, LUnit
 {
     save_points(points);
     compute_vertices();
+    compute_bounds();
 }
 
 //---------------------------------------------------------------------------------------
@@ -93,13 +94,13 @@ void GmoShapeTie::on_draw(Drawer* pDrawer, RenderOptions& opt)
     pDrawer->stroke(Color(255,0,0));
     LUnits uWidth = 20.0f;
     pDrawer->stroke_width(uWidth);
-    pDrawer->move_to(m_points[ImoBezierInfo::k_start].x 
+    pDrawer->move_to(m_points[ImoBezierInfo::k_start].x
                      + uWidth / 2.0f, m_points[ImoBezierInfo::k_start].y);
-    pDrawer->line_to(m_points[ImoBezierInfo::k_ctrol1].x 
+    pDrawer->line_to(m_points[ImoBezierInfo::k_ctrol1].x
                      + uWidth / 2.0f, m_points[ImoBezierInfo::k_ctrol1].y);
-    pDrawer->line_to(m_points[ImoBezierInfo::k_ctrol2].x 
+    pDrawer->line_to(m_points[ImoBezierInfo::k_ctrol2].x
                      + uWidth / 2.0f, m_points[ImoBezierInfo::k_ctrol2].y);
-    pDrawer->line_to(m_points[ImoBezierInfo::k_end].x 
+    pDrawer->line_to(m_points[ImoBezierInfo::k_end].x
                      + uWidth / 2.0f, m_points[ImoBezierInfo::k_end].y);
     pDrawer->end_path();
     pDrawer->render();
@@ -131,6 +132,40 @@ void GmoShapeTie::compute_vertices()
 }
 
 //---------------------------------------------------------------------------------------
+void GmoShapeTie::compute_bounds()
+{
+    //TODO: Improve bounds computation.
+    //For now, I just take a rectangle based on control points
+
+//    m_origin.x = m_points[ImoBezierInfo::k_start].x;
+//    m_origin.y = min(m_points[ImoBezierInfo::k_ctrol1].y, m_points[ImoBezierInfo::k_start].y);
+//    m_size.width = fabs(m_points[ImoBezierInfo::k_end].x - m_points[ImoBezierInfo::k_start].x);
+//    m_size.height = fabs(m_points[ImoBezierInfo::k_start].y - m_points[ImoBezierInfo::k_ctrol1].y);
+    m_origin.x = m_points[ImoBezierInfo::k_start].x;
+    m_origin.x = min(m_origin.x, m_points[ImoBezierInfo::k_ctrol1].x);
+    m_origin.x = min(m_origin.x, m_points[ImoBezierInfo::k_ctrol2].x);
+    m_origin.x = min(m_origin.x, m_points[ImoBezierInfo::k_end].x);
+
+    m_origin.y = m_points[ImoBezierInfo::k_start].y;
+    m_origin.y = min(m_origin.y, m_points[ImoBezierInfo::k_ctrol1].y);
+    m_origin.y = min(m_origin.y, m_points[ImoBezierInfo::k_ctrol2].y);
+    m_origin.y = min(m_origin.y, m_points[ImoBezierInfo::k_end].y);
+
+    LUnits max_x = m_points[ImoBezierInfo::k_end].x;
+    max_x = max(max_x, m_points[ImoBezierInfo::k_ctrol1].x);
+    max_x = max(max_x, m_points[ImoBezierInfo::k_ctrol2].x);
+    max_x = max(max_x, m_points[ImoBezierInfo::k_end].x);
+
+    LUnits max_y = m_points[ImoBezierInfo::k_start].y;
+    max_y = max(max_y, m_points[ImoBezierInfo::k_ctrol1].y);
+    max_y = max(max_y, m_points[ImoBezierInfo::k_ctrol2].y);
+    max_y = max(max_y, m_points[ImoBezierInfo::k_end].y);
+
+    m_size.width = max_x - m_origin.x;
+    m_size.height = max_y - m_origin.y;
+}
+
+//---------------------------------------------------------------------------------------
 unsigned GmoShapeTie::vertex(double* px, double* py)
 {
 	if(m_nCurVertex >= m_nNumVertices)
@@ -148,6 +183,32 @@ unsigned GmoShapeTie::vertex(double* px, double* py)
     }
 
 	return m_cmd[m_nCurVertex++].cmd;
+}
+
+//---------------------------------------------------------------------------------------
+int GmoShapeTie::get_num_handlers()
+{
+    return 4;
+}
+
+//---------------------------------------------------------------------------------------
+UPoint GmoShapeTie::get_handler_point(int i)
+{
+    return m_points[i];
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeTie::on_handler_dragged(int iHandler, UPoint newPos)
+{
+    m_points[iHandler] = newPos;
+    compute_vertices();
+    compute_bounds();
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeTie::on_end_of_handler_drag(int iHandler, UPoint newPos)
+{
+    //TODO
 }
 
 
@@ -216,6 +277,36 @@ void GmoShapeSlur::compute_vertices()
     m_vertices[5].x = m_points[ImoBezierInfo::k_ctrol1].x + t;
     m_vertices[5].y = m_points[ImoBezierInfo::k_ctrol1].y + t;
     m_vertices[6] = m_points[ImoBezierInfo::k_start];
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeSlur::compute_bounds()
+{
+    //TODO: Improve bounds computation.
+    //For now, I just take a rectangle based on control points
+
+    m_origin.x = m_points[ImoBezierInfo::k_start].x;
+    m_origin.x = min(m_origin.x, m_points[ImoBezierInfo::k_ctrol1].x);
+    m_origin.x = min(m_origin.x, m_points[ImoBezierInfo::k_ctrol2].x);
+    m_origin.x = min(m_origin.x, m_points[ImoBezierInfo::k_end].x);
+
+    m_origin.y = m_points[ImoBezierInfo::k_start].y;
+    m_origin.y = min(m_origin.y, m_points[ImoBezierInfo::k_ctrol1].y);
+    m_origin.y = min(m_origin.y, m_points[ImoBezierInfo::k_ctrol2].y);
+    m_origin.y = min(m_origin.y, m_points[ImoBezierInfo::k_end].y);
+
+    LUnits max_x = m_points[ImoBezierInfo::k_end].x;
+    max_x = max(max_x, m_points[ImoBezierInfo::k_ctrol1].x);
+    max_x = max(max_x, m_points[ImoBezierInfo::k_ctrol2].x);
+    max_x = max(max_x, m_points[ImoBezierInfo::k_end].x);
+
+    LUnits max_y = m_points[ImoBezierInfo::k_start].y;
+    max_y = max(max_y, m_points[ImoBezierInfo::k_ctrol1].y);
+    max_y = max(max_y, m_points[ImoBezierInfo::k_ctrol2].y);
+    max_y = max(max_y, m_points[ImoBezierInfo::k_end].y);
+
+    m_size.width = max_x - m_origin.x;
+    m_size.height = max_y - m_origin.y;
 }
 
 //---------------------------------------------------------------------------------------

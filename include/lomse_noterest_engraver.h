@@ -67,14 +67,14 @@ protected:
     NoterestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                  ShapesStorage* pShapesStorage, int iInstr, int iStaff);
 
-    void layout_tuplet();
+//    void layout_tuplet();
 
     inline bool is_beamed() { return m_pNoteRest->is_beamed(); }
 
     //helper
     inline bool has_stem() { return m_pNoteRest->get_note_type() >= k_half; }
     inline bool has_flag() { return m_pNoteRest->get_note_type() >= k_eighth; }
-    Tenths get_glyph_offset(int iGlyph);
+//    Tenths get_glyph_offset(int iGlyph);
 
     LUnits m_uyStaffTopLine;
     LUnits m_uxLeft, m_uyTop;       //current position

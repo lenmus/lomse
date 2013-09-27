@@ -41,6 +41,7 @@ namespace lomse
 {
 
 //forward declarations
+class DocCursor;
 class ImoObj;
 class ImoContentObj;
 class ImoDynamic;
@@ -48,6 +49,8 @@ class ImoDocument;
 class ImoScore;
 class ImoStaffObj;
 class PlayerGui;
+class SelectionSet;
+class GmoObj;
 
 class Interactor;
 typedef WeakPtr<Interactor>     WpInteractor;
@@ -75,10 +78,20 @@ enum EEventType
 
         k_update_window_event,      //ask user app to update window with current bitmap
 
+        k_update_UI_event,          //possible need for UI updates
+            k_selection_set_change,     //selected objects changed
+            k_pointed_object_change,    //cursor pointing to a different object
+
         k_mouse_event,
-            k_mouse_in_event,           //mouse goes over an object
-            k_mouse_out_event,          //mouse goes out from an object
-            k_on_click_event,           //Document, ImoContentObj: click on object
+            k_mouse_in_event,               //mouse goes over an object
+            k_mouse_out_event,              //mouse goes out from an object
+            k_on_click_event,               //Document, ImoContentObj: click on object
+            k_show_contextual_menu_event,   //Click event: object selected and menu request
+
+        k_command_event,
+//            k_show_contextual_menu_event,   //Right click event: object selected and menu request
+            k_control_point_moved_event,    //user moves a handler: handler released event
+            k_object_moved_event,           //user drags an object: object released event
 
         k_highlight_event,          //score playbaxk (highlight)
             k_highlight_on_event,           //add highlight to a note/rest
@@ -118,19 +131,32 @@ public:
         //view level events
     inline bool is_view_level_event() { return m_type >= k_view_level_event
                                             && m_type < k_doc_level_event;
-    }
+                                      }
+    inline bool is_update_UI_event() { return m_type == k_selection_set_change
+                                       || m_type == k_pointed_object_change;
+                                     }
     inline bool is_update_window_event() { return m_type == k_update_window_event; }
     inline bool is_mouse_event() { return m_type == k_on_click_event
                                        || m_type == k_mouse_in_event
-                                       || m_type == k_mouse_out_event;
+                                       || m_type == k_mouse_out_event
+                                       || m_type == k_show_contextual_menu_event
+                                       || m_type == k_control_point_moved_event
+                                       || m_type == k_object_moved_event;
+                                 }
+    inline bool is_command_event() { return m_type == k_control_point_moved_event
+                                         || m_type == k_object_moved_event;
     }
     inline bool is_play_score_event() { return m_type == k_do_play_score_event
                                             || m_type == k_pause_score_event
+                                            || m_type == k_stop_playback_event
                                             || m_type == k_end_of_playback_event;
-    }
+                                      }
     inline bool is_mouse_in_event() { return m_type == k_mouse_in_event; }
     inline bool is_mouse_out_event() { return m_type == k_mouse_out_event; }
     inline bool is_on_click_event() { return m_type == k_on_click_event; }
+    inline bool is_show_contextual_menu_event() { return m_type == k_show_contextual_menu_event; }
+    inline bool is_control_point_moved_event() { return m_type == k_control_point_moved_event; }
+    inline bool is_object_moved_event() { return m_type == k_object_moved_event; }
     inline bool is_highlight_event() { return m_type == k_highlight_event; }
     inline bool is_highlight_on_event() { return m_type == k_highlight_on_event; }
     inline bool is_highlight_off_event() { return m_type == k_highlight_off_event; }
@@ -176,18 +202,74 @@ class EventView : public EventInfo
 protected:
     WpInteractor m_wpInteractor;
 
-public:
     EventView(EEventType type, WpInteractor wpInteractor)
         : EventInfo(type)
         , m_wpInteractor(wpInteractor)
     {
     }
-    ~EventView() {}
+
+public:
+    virtual ~EventView() {}
 
     inline WpInteractor get_interactor() { return m_wpInteractor; }
 };
 
 typedef SharedPtr<EventView>  SpEventView;
+
+
+//---------------------------------------------------------------------------------------
+// EventPaint: inform user application about the need to repaint the screen
+class EventPaint : public EventView
+{
+protected:
+    VRect m_damagedRectangle;
+
+public:
+    EventPaint(WpInteractor wpInteractor, VRect damagedRectangle)
+        : EventView(k_update_window_event, wpInteractor)
+        , m_damagedRectangle(damagedRectangle)
+    {
+    }
+    ~EventPaint() {}
+
+    inline VRect get_damaged_rectangle() { return m_damagedRectangle; }
+};
+
+typedef SharedPtr<EventPaint>  SpEventPaint;
+
+
+//---------------------------------------------------------------------------------------
+// Update UI event
+class EventUpdateUI : public EventView
+{
+protected:
+    WpDocument m_wpDoc;
+    SelectionSet* m_pSelection;
+    DocCursor* m_pCursor;
+
+    EventUpdateUI(EEventType type) : EventView(type, WpInteractor()) {}    //for unit tests
+
+public:
+    EventUpdateUI(EEventType type, WpInteractor wpInteractor, WpDocument wpDoc,
+                  SelectionSet* pSelection, DocCursor* pCursor)
+        : EventView(type, wpInteractor)
+        , m_wpDoc(wpDoc)
+        , m_pSelection(pSelection)
+        , m_pCursor(pCursor)
+    {
+    }
+
+    // accessors
+    inline SelectionSet* get_selection() { return m_pSelection; }
+    inline DocCursor* get_cursor() { return m_pCursor; }
+
+    bool is_still_valid() {
+        return !m_wpDoc.expired() && !m_wpInteractor.expired();
+    }
+
+};
+
+typedef SharedPtr<EventUpdateUI>  SpEventUpdateUI;
 
 
 //---------------------------------------------------------------------------------------
@@ -197,21 +279,28 @@ class EventMouse : public EventView
 protected:
     WpDocument m_wpDoc;
     ImoId m_imoId;
+    Pixels m_x;
+    Pixels m_y;
 
     EventMouse(EEventType type) : EventView(type, WpInteractor()) {}    //for unit tests
 
 public:
-    EventMouse(EEventType type, WpInteractor wpInteractor, ImoId id, WpDocument wpDoc)
+    EventMouse(EEventType type, WpInteractor wpInteractor, ImoId id,
+               Pixels x, Pixels y, WpDocument wpDoc)
         : EventView(type, wpInteractor)
         , m_wpDoc(wpDoc)
         , m_imoId(id)
+        , m_x(x)
+        , m_y(y)
     {
     }
 
     // accessors
-    ImoContentObj* get_imo_object();
+    ImoObj* get_imo_object();
     Observable* get_source();
     inline ImoId get_imo_id() { return m_imoId; }
+    inline Pixels get_x() { return m_x; }
+    inline Pixels get_y() { return m_y; }
 
     bool is_still_valid();
 
@@ -284,6 +373,66 @@ public:
 };
 
 typedef SharedPtr<EventScoreHighlight>  SpEventScoreHighlight;
+
+
+//---------------------------------------------------------------------------------------
+// Command event. Base class
+// This event represents a user action (keyboard or mouse) that has been intrepreted by
+// Lomse as a command to change the View or to modify the Document.
+class EventCommand : public EventView
+{
+protected:
+    WpDocument m_wpDoc;
+    ImoId m_imoId;
+
+    EventCommand(EEventType type) : EventView(type, WpInteractor()) {}    //for unit tests
+
+    EventCommand(EEventType type, WpInteractor wpInteractor, ImoId id, WpDocument wpDoc)
+        : EventView(type, wpInteractor)
+        , m_wpDoc(wpDoc)
+        , m_imoId(id)
+    {
+    }
+
+public:
+
+    // accessors
+    ImoObj* get_imo_object();
+    inline ImoId get_imo_id() { return m_imoId; }
+
+    bool is_still_valid() {
+        return !m_wpDoc.expired() && !m_wpInteractor.expired();
+    }
+
+};
+
+typedef SharedPtr<EventCommand>  SpEventCommand;
+
+
+//---------------------------------------------------------------------------------------
+// EventControlPointMoved event
+// A control point (handler) has been moved
+class EventControlPointMoved : public EventCommand
+{
+protected:
+    int m_iHandler;     //modified point index
+    UPoint m_uShift;    //shift to apply to object
+    int m_gmoType;
+    ShapeId m_idx;      //affected shape 0r -1 if box
+
+public:
+    EventControlPointMoved(EEventType type, WpInteractor wpInteractor, GmoObj* pGmo,
+                           int iHandler, UPoint uShift, WpDocument wpDoc);
+
+    // accessors
+    inline int get_handler_index() { return m_iHandler; }
+    inline ShapeId get_shape_index() { return m_idx; }
+    inline UPoint get_shift() { return m_uShift; }
+    inline int get_gmo_type() { return m_gmoType; }
+
+};
+
+typedef SharedPtr<EventControlPointMoved>  SpEventControlPointMoved;
 
 
 //=======================================================================================
@@ -497,7 +646,7 @@ public:
     virtual ~EventNotifier();
 
     //Event notification
-    void notify_observers(SpEventInfo pEvent, Observable* target);
+    bool notify_observers(SpEventInfo pEvent, Observable* target);
     void remove_observer(Observer* observer);
     Observer* add_observer_for(Observable* target);
     Observer* add_observer_for_child(Observable* parent, int childType, ImoId childId);

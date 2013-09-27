@@ -59,11 +59,7 @@ GmoShape::~GmoShape()
 //---------------------------------------------------------------------------------------
 void GmoShape::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-//    if (IsVisible())
-//        Render(pPaper, (IsSelected() ? g_pColors->ScoreSelected() : m_color) );
-
-
-    if (is_selected())  //draw bounding box if selected (just for testing)
+    if (opt.draw_shape_bounds)
     {
         pDrawer->begin_path();
         pDrawer->fill(Color(0, 0, 0, 0));
@@ -81,8 +77,12 @@ void GmoShape::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //---------------------------------------------------------------------------------------
 Color GmoShape::determine_color_to_use(RenderOptions& opt)
 {
-    if (is_highlighted())
+    if (opt.draw_shapes_highlighted)
         return opt.highlighted_color;
+    else if (opt.draw_shapes_dragged)
+        return opt.dragged_color;
+    else if (opt.draw_shapes_selected)
+        return opt.selected_color;
     else if (is_selected())
         return opt.selected_color;
     else if (is_hover())
@@ -149,6 +149,12 @@ void GmoShape::dump(ostream& outStream, int level)
               << setw(10) << round_half_up(m_size.height) << endl;
 }
 
+//---------------------------------------------------------------------------------------
+bool GmoShape::hit_test(LUnits x, LUnits y)
+{
+    URect bbox = get_bounds();
+    return bbox.contains(x, y);
+}
 
 
 //=======================================================================================
@@ -248,16 +254,6 @@ void GmoCompositeShape::set_selected(bool value)
     std::list<GmoShape*>::iterator it;
     for (it = m_components.begin(); it != m_components.end(); ++it)
         (*it)->set_selected(value);
-}
-
-//---------------------------------------------------------------------------------------
-void GmoCompositeShape::set_highlighted(bool value)
-{
-    GmoShape::set_highlighted(value);
-
-    std::list<GmoShape*>::iterator it;
-    for (it = m_components.begin(); it != m_components.end(); ++it)
-        (*it)->set_highlighted(value);
 }
 
 //---------------------------------------------------------------------------------------

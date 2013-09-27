@@ -337,7 +337,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pIModel->get_root()->is_barline() == true );
 //        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
 //        CHECK( pBarline != NULL );
-//        CHECK( pBarline->get_type() == ImoBarline::k_simple );
+//        CHECK( pBarline->get_type() == k_barline_simple );
 //        CHECK( pBarline->is_visible() );
 //
 //        delete tree->get_root();
@@ -354,7 +354,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pIModel->get_root()->is_barline() == true );
 //        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
 //        CHECK( pBarline != NULL );
-//        CHECK( pBarline->get_type() == ImoBarline::k_double );
+//        CHECK( pBarline->get_type() == k_barline_double );
 //        CHECK( pBarline->is_visible() );
 //
 //        delete tree->get_root();
@@ -379,7 +379,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pIModel->get_root()->is_barline() == true );
 //        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
 //        CHECK( pBarline != NULL );
-//        CHECK( pBarline->get_type() == ImoBarline::k_simple );
+//        CHECK( pBarline->get_type() == k_barline_simple );
 //        CHECK( pBarline->is_visible() );
 //
 //        delete tree->get_root();
@@ -395,7 +395,7 @@ SUITE(LmdAnalyserTest)
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
 //        CHECK( pBarline != NULL );
-//        CHECK( pBarline->get_type() == ImoBarline::k_double );
+//        CHECK( pBarline->get_type() == k_barline_double );
 //        CHECK( pBarline->is_visible() );
 //
 //        delete tree->get_root();
@@ -411,7 +411,7 @@ SUITE(LmdAnalyserTest)
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
 //        CHECK( pBarline != NULL );
-//        CHECK( pBarline->get_type() == ImoBarline::k_double );
+//        CHECK( pBarline->get_type() == k_barline_double );
 //        CHECK( pBarline->is_visible() == false );
 //
 //        delete tree->get_root();
@@ -433,7 +433,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( errormsg.str() == expected.str() );
 //        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
 //        CHECK( pBarline != NULL );
-//        CHECK( pBarline->get_type() == ImoBarline::k_double );
+//        CHECK( pBarline->get_type() == k_barline_double );
 //        CHECK( pBarline->is_visible() );
 //
 //        delete tree->get_root();
@@ -449,7 +449,7 @@ SUITE(LmdAnalyserTest)
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
 //        CHECK( pBarline != NULL );
-//        CHECK( pBarline->get_type() == ImoBarline::k_double );
+//        CHECK( pBarline->get_type() == k_barline_double );
 //        CHECK( pBarline->is_visible() );
 //        CHECK( pBarline->get_user_location_x() == 70.0f );
 //        CHECK( pBarline->get_user_location_y() == 0.0f );
@@ -467,7 +467,7 @@ SUITE(LmdAnalyserTest)
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
 //        CHECK( pBarline != NULL );
-//        CHECK( pBarline->get_type() == ImoBarline::k_double );
+//        CHECK( pBarline->get_type() == k_barline_double );
 //        CHECK( pBarline->is_visible() );
 //        CHECK( pBarline->get_user_location_x() == 0.0f );
 //        CHECK( pBarline->get_user_location_y() == 60.5f );
@@ -485,7 +485,7 @@ SUITE(LmdAnalyserTest)
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
 //        CHECK( pBarline != NULL );
-//        CHECK( pBarline->get_type() == ImoBarline::k_double );
+//        CHECK( pBarline->get_type() == k_barline_double );
 //        CHECK( pBarline->is_visible() );
 //        CHECK( pBarline->get_user_location_x() == 70.0f );
 //        CHECK( pBarline->get_user_location_y() == 20.3f );
@@ -509,7 +509,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( errormsg.str() == expected.str() );
 //        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
 //        CHECK( pBarline != NULL );
-//        CHECK( pBarline->get_type() == ImoBarline::k_double );
+//        CHECK( pBarline->get_type() == k_barline_double );
 //        CHECK( pBarline->is_visible() );
 //        CHECK( pBarline->get_user_location_x() == 0.0f );
 //        CHECK( pBarline->get_user_location_y() == 0.0f );
@@ -533,7 +533,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( errormsg.str() == expected.str() );
 //        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
 //        CHECK( pBarline != NULL );
-//        CHECK( pBarline->get_type() == ImoBarline::k_double );
+//        CHECK( pBarline->get_type() == k_barline_double );
 //        CHECK( pBarline->is_visible() );
 //        CHECK( pBarline->get_user_location_x() == 0.0f );
 //        CHECK( pBarline->get_user_location_y() == 0.0f );
@@ -557,7 +557,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( errormsg.str() == expected.str() );
 //        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
 //        CHECK( pBarline != NULL );
-//        CHECK( pBarline->get_type() == ImoBarline::k_double );
+//        CHECK( pBarline->get_type() == k_barline_double );
 //        CHECK( pBarline->is_visible() );
 //        CHECK( pBarline->get_user_location_x() == 20.3f );
 //        CHECK( pBarline->get_user_location_y() == 70.0f );
@@ -5344,7 +5344,7 @@ SUITE(LmdAnalyserTest)
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //        ImoBarline* pBarline = dynamic_cast<ImoBarline*>( pIModel->get_root() );
 //        CHECK( pBarline != NULL );
-//        CHECK( pBarline->get_type() == ImoBarline::k_double );
+//        CHECK( pBarline->get_type() == k_barline_double );
 //        CHECK( pBarline->is_visible() );
 //        CHECK( is_equal(pBarline->get_color(), Color(255,0,0)) );
 //

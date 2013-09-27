@@ -508,6 +508,9 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/lomse_caret_positioner.cpp
     ${SRC_DIR}/graphic_model/lomse_glyphs.cpp
     ${SRC_DIR}/graphic_model/lomse_gm_basic.cpp
+    ${SRC_DIR}/graphic_model/lomse_graphical_model.cpp
+    ${SRC_DIR}/graphic_model/lomse_handler.cpp
+    ${SRC_DIR}/graphic_model/lomse_overlays_generator.cpp
     ${SRC_DIR}/graphic_model/lomse_selections.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_barline.cpp
     ${SRC_DIR}/graphic_model/lomse_shape_base.cpp
@@ -522,6 +525,8 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/lomse_shapes.cpp
     ${SRC_DIR}/graphic_model/lomse_shapes_storage.cpp
     ${SRC_DIR}/graphic_model/lomse_sizers.cpp
+    ${SRC_DIR}/graphic_model/lomse_time_grid.cpp
+    ${SRC_DIR}/graphic_model/lomse_visual_effect.cpp
     
     ${SRC_DIR}/graphic_model/engravers/lomse_accidentals_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_beam_engraver.cpp
@@ -536,7 +541,6 @@ set(GRAPHIC_MODEL_FILES
     ${SRC_DIR}/graphic_model/engravers/lomse_line_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_metronome_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_note_engraver.cpp
-    ${SRC_DIR}/graphic_model/engravers/lomse_noterest_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_rest_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_slur_engraver.cpp
     ${SRC_DIR}/graphic_model/engravers/lomse_text_engraver.cpp
@@ -568,6 +572,7 @@ set(GUI_CONTROLS_FILES
 set(INTERNAL_MODEL_FILES
     ${SRC_DIR}/internal_model/lomse_im_factory.cpp
     ${SRC_DIR}/internal_model/lomse_im_figured_bass.cpp
+    ${SRC_DIR}/internal_model/lomse_im_attributes.cpp
     ${SRC_DIR}/internal_model/lomse_im_note.cpp
     ${SRC_DIR}/internal_model/lomse_internal_model.cpp
     ${SRC_DIR}/internal_model/lomse_score_utilities.cpp

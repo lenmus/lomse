@@ -68,9 +68,23 @@ GmoBoxSystem* GmoBoxScorePage::get_system(int iSystem)
 
 	int i = iSystem - m_nFirstSystem;
 	if (i < 0)
-		return (GmoBoxSystem*)NULL;		//the system is not in this page
+		return NULL;		//the system is not in this page
 	else
-		return (GmoBoxSystem*)m_childBoxes[i];
+		return static_cast<GmoBoxSystem*>(m_childBoxes[i]);
+}
+
+//---------------------------------------------------------------------------------------
+int GmoBoxScorePage::nearest_system_to_point(LUnits y)
+{
+    //returns sytem absolute number or -1 if not found
+
+    for (int i = m_nFirstSystem; i <= m_nLastSystem; ++i)
+    {
+        GmoBoxSystem* pBox = static_cast<GmoBoxSystem*>(m_childBoxes[i]);
+        if (y <= pBox->get_bottom() && y >= pBox->get_top())
+            return i;
+    }
+    return -1;
 }
 
 

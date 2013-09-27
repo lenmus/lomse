@@ -94,11 +94,13 @@ class RelAuxObjEngraver : public Engraver
 {
 protected:
     GmoShape* m_pShape;
+    Color m_color;
 
 public:
     RelAuxObjEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter)
         : Engraver(libraryScope, pScoreMeter)
         , m_pShape(NULL)
+        , m_color( Color(0,0,0) )
     {
     }
     virtual ~RelAuxObjEngraver() {}
@@ -112,7 +114,7 @@ public:
     virtual void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                   GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                   int iSystem, int iCol) = 0;
-    virtual int create_shapes() = 0;
+    virtual int create_shapes(Color color=Color(0,0,0)) = 0;
     virtual int get_num_shapes() = 0;
     virtual ShapeBoxInfo* get_shape_box_info(int i) = 0;
     virtual void set_prolog_width(LUnits width) {}

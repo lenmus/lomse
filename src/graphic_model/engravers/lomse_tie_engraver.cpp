@@ -82,8 +82,9 @@ void TieEngraver::set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-int TieEngraver::create_shapes()
+int TieEngraver::create_shapes(Color color)
 {
+    m_color = color;
     decide_placement();
     decide_if_one_or_two_arches();
     if (two_arches_needed())
@@ -102,7 +103,8 @@ void TieEngraver::create_one_shape()
     compute_end_point(&m_points1[ImoBezierInfo::k_end]);
     compute_default_control_points(&m_points1[0]);
     add_user_displacements(0, &m_points1[0]);
-    m_shapesInfo[0].pShape = LOMSE_NEW GmoShapeTie(m_pTie, 0, &m_points1[0], m_thickness);
+    m_shapesInfo[0].pShape =
+        LOMSE_NEW GmoShapeTie(m_pTie, 0, &m_points1[0], m_thickness, m_color);
 
     m_shapesInfo[1].pShape = NULL;
 }
@@ -117,14 +119,16 @@ void TieEngraver::create_two_shapes()
     compute_end_of_staff_point();
     compute_default_control_points(&m_points1[0]);
     add_user_displacements(0, &m_points1[0]);
-    m_shapesInfo[0].pShape = LOMSE_NEW GmoShapeTie(m_pTie, 0, &m_points1[0], m_thickness);
+    m_shapesInfo[0].pShape =
+        LOMSE_NEW GmoShapeTie(m_pTie, 0, &m_points1[0], m_thickness, m_color);
 
     //create second shape
     compute_end_point(&m_points2[ImoBezierInfo::k_end]);
     compute_start_of_staff_point();
     compute_default_control_points(&m_points2[0]);
     add_user_displacements(1, &m_points2[0]);
-    m_shapesInfo[1].pShape = LOMSE_NEW GmoShapeTie(m_pTie, 0, &m_points2[0], m_thickness);
+    m_shapesInfo[1].pShape =
+        LOMSE_NEW GmoShapeTie(m_pTie, 1, &m_points2[0], m_thickness, m_color);
 }
 
 //---------------------------------------------------------------------------------------

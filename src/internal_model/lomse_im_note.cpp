@@ -29,6 +29,9 @@
 
 #include "lomse_im_note.h"
 
+#include "lomse_im_attributes.h"
+
+
 namespace lomse
 {
 
@@ -111,6 +114,68 @@ void ImoNoteRest::set_note_type_and_dots(int noteType, int dots)
 {
     m_nNoteType = noteType;
     m_nDots = dots;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoNoteRest::set_int_attribute(TIntAttribute attrib, int value)
+{
+    switch(attrib)
+    {
+        case k_attr_note_type:
+            //TODO
+            set_dirty(true);
+            break;
+
+        case k_attr_dots:
+            //TODO
+            set_dirty(true);
+            break;
+
+        case k_attr_voice:
+            //TODO
+            set_dirty(true);
+            break;
+
+        case k_attr_time_modifier_top:
+            //TODO
+            set_dirty(true);
+            break;
+
+        case k_attr_time_modifier_bottom:
+            //TODO
+            set_dirty(true);
+            break;
+
+        default:
+            ImoStaffObj::set_int_attribute(attrib, value);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int ImoNoteRest::get_int_attribute(TIntAttribute attrib)
+{
+    switch(attrib)
+    {
+        case k_attr_note_type:              return m_nNoteType;
+        case k_attr_dots:                   return m_nDots;
+        case k_attr_voice:                  return m_nVoice;
+        case k_attr_time_modifier_top:      return m_timeModifierTop;
+        case k_attr_time_modifier_bottom:   return m_timeModifierBottom;
+        default:
+            return ImoStaffObj::get_int_attribute(attrib);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+list<TIntAttribute> ImoNoteRest::get_supported_attributes()
+{
+    list<TIntAttribute> supported = ImoStaffObj::get_supported_attributes();
+    supported.push_back(k_attr_time_modifier_bottom);
+    supported.push_back(k_attr_time_modifier_top);
+    supported.push_back(k_attr_voice);
+    supported.push_back(k_attr_dots);
+    supported.push_back(k_attr_note_type);
+    return supported;
 }
 
 
@@ -226,7 +291,6 @@ int ImoNote::get_midi_bend()
     return 0;
 }
 
-
 //---------------------------------------------------------------------------------------
 float ImoNote::get_cents()
 {
@@ -234,6 +298,84 @@ float ImoNote::get_cents()
 
     //TODO: ImoNote::get_cents
     return 0.0f;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoNote::set_int_attribute(TIntAttribute attrib, int value)
+{
+    switch(attrib)
+    {
+        case k_attr_step:
+            //TODO
+            set_dirty(true);
+            break;
+
+        case k_attr_octave:
+            //TODO
+            set_dirty(true);
+            break;
+
+        case k_attr_notated_accidentals:
+            //TODO
+            set_dirty(true);
+            break;
+
+        case k_attr_stem_type:
+            //TODO
+            m_stemDirection = value;
+            set_dirty(true);
+            break;
+
+        default:
+            ImoNoteRest::set_int_attribute(attrib, value);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+int ImoNote::get_int_attribute(TIntAttribute attrib)
+{
+    switch(attrib)
+    {
+        case k_attr_step:                   return m_step;
+        case k_attr_octave:                 return m_octave;
+        case k_attr_notated_accidentals:    return m_notated_acc;
+        case k_attr_stem_type:              return m_stemDirection;
+        default:
+            return ImoNoteRest::get_int_attribute(attrib);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+list<TIntAttribute> ImoNote::get_supported_attributes()
+{
+    list<TIntAttribute> supported = ImoNoteRest::get_supported_attributes();
+    supported.push_back(k_attr_stem_type);
+    supported.push_back(k_attr_notated_accidentals);
+    supported.push_back(k_attr_octave);
+    supported.push_back(k_attr_step);
+    return supported;
+}
+
+
+//=======================================================================================
+// ImoRest implementation
+//=======================================================================================
+void ImoRest::set_int_attribute(TIntAttribute attrib, int value)
+{
+    ImoNoteRest::set_int_attribute(attrib, value);
+}
+
+//---------------------------------------------------------------------------------------
+int ImoRest::get_int_attribute(TIntAttribute attrib)
+{
+    return ImoNoteRest::get_int_attribute(attrib);
+}
+
+//---------------------------------------------------------------------------------------
+list<TIntAttribute> ImoRest::get_supported_attributes()
+{
+    list<TIntAttribute> supported = ImoNoteRest::get_supported_attributes();
+    return supported;
 }
 
 

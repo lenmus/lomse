@@ -112,6 +112,11 @@ public:
     bool is_in_tuplet();
     ImoTuplet* get_tuplet();
 
+    //edition support
+    virtual void set_int_attribute(TIntAttribute attrib, int value);
+    virtual int get_int_attribute(TIntAttribute attrib);
+    virtual list<TIntAttribute> get_supported_attributes();
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -126,6 +131,11 @@ protected:
     friend class GoBackFwdAnalyser;
     friend class GoBackFwdLmdAnalyser;
     inline void mark_as_go_fwd() { m_fGoFwd = true; }
+
+    //edition support
+    virtual void set_int_attribute(TIntAttribute attrib, int value);
+    virtual int get_int_attribute(TIntAttribute attrib);
+    virtual list<TIntAttribute> get_supported_attributes();
 
 public:
     virtual ~ImoRest() {}
@@ -150,6 +160,11 @@ protected:
     ImoNote();
     ImoNote(int step, int octave, int noteType, EAccidentals accidentals=k_no_accidentals,
             int dots=0, int staff=0, int voice=0, int stem=k_stem_default);
+
+    //edition support
+    virtual void set_int_attribute(TIntAttribute attrib, int value);
+    virtual int get_int_attribute(TIntAttribute attrib);
+    virtual list<TIntAttribute> get_supported_attributes();
 
 public:
     virtual ~ImoNote();

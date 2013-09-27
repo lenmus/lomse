@@ -1,16 +1,15 @@
 (score
-   (vers 1.6)
+   (vers 2.0)
    (instrument (staves 2)
       (musicData
          (clef G p1)
          (clef G p2)
 
-         (n a4 e g+ t3 p1)(n a4 e)(n a4 e g- t-)
-         (n a4 q)
+         (n a4 e g+ t3 v1 p1)(n a4 e v1)(n a4 e v1 g- t-)
+         (n a4 q v1)
          
-         (goBack 128)
-         (n a4 s g+ p2)(n a4 e. g-)
-         (n a4 q)
+         (n a4 s g+ v2 p2)(n a4 e. v2 g-)
+         (n a4 q v2)
          
          (barline)
       )

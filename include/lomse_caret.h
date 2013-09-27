@@ -32,6 +32,7 @@
 
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
+#include "lomse_visual_effect.h"
 
 //other
 #include <iostream>
@@ -49,18 +50,16 @@ namespace lomse
 //forward declarations
 class ScreenDrawer;
 class GraphicView;
+class GmoBoxSystem;
 
 
 //---------------------------------------------------------------------------------------
 // Caret: a blinking cursor showing the position that will be affected by next command.
-class Caret
+class Caret : public VisualEffect
 {
 protected:
-    LibraryScope& m_libraryScope;
-    GraphicView* m_pView;        //the view to which this caret is associated
     Color m_color;
     Color m_topLevelSelected;
-    bool m_fVisible;        //the caret must be displayed
     bool m_fBlinkStateOn;   //currently displayed
     bool m_fBlinkEnabled;   //blinking enabled
     URect m_box;            //bounding box for top level element
@@ -72,6 +71,8 @@ protected:
     int m_blinkTime;            //milliseconds.
     boost::asio::deadline_timer m_timer;
 #endif
+    GmoBoxSystem* m_pBoxSystem;     //active system: the one on which the caret is placed
+    URect m_bounds;         //the real bounds of the caret drawing
 
 public:
     Caret(GraphicView* view, LibraryScope& libraryScope);
@@ -82,7 +83,9 @@ public:
     inline void show_caret(bool fVisible=true) { m_fVisible = fVisible; }
     inline void hide_caret() { m_fVisible = false; }
 
-    virtual void on_draw(ScreenDrawer* pDrawer);
+    //mandatory overrides from VisualEffect
+    void on_draw(ScreenDrawer* pDrawer);
+    URect get_bounds() { return m_bounds; }
 
     //caret shapes
     enum { k_top_level=0, k_box, k_line, k_block, };
@@ -93,6 +96,7 @@ public:
     inline USize get_size() const { return m_size; }
     inline int get_type() const { return m_type; }
     inline const string& get_timecode() const { return m_timecode; }
+    inline GmoBoxSystem* get_active_system() { return m_pBoxSystem; }
 
     //set properties
     inline void set_color(Color color) { m_color = color; }
@@ -102,10 +106,9 @@ public:
     inline void set_type(int type) { m_type = type; }
     inline void enable_blink(bool value) { m_fBlinkEnabled = value; }
     inline void set_timecode(const string& value) { m_timecode = value; }
+    inline void set_active_system(GmoBoxSystem* pSystem) { m_pBoxSystem = pSystem; }
 
     //properties
-//    bool is_currently shown() const { return m_countVisible > 0; }
-    inline bool is_visible() const { return m_fVisible; }
     inline bool is_blink_enabled() const { return m_fBlinkEnabled; }
     inline bool is_displayed() const { return m_fBlinkStateOn; }
 
@@ -118,7 +121,6 @@ public:
 protected:
     void schedule_the_timer();
     void draw_caret(ScreenDrawer* pDrawer);
-    void remove_caret(ScreenDrawer* pDrawer);
 
     void draw_caret_as_top_level(ScreenDrawer* pDrawer);
     void draw_caret_as_block(ScreenDrawer* pDrawer);

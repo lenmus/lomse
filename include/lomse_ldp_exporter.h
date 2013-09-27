@@ -81,8 +81,11 @@ public:
 
     //static methods for ldp names to types conversion
     static string clef_type_to_ldp(int clefType);
+    static string barline_type_to_ldp(int barlineType);
     static string color_to_ldp(Color color);
     static string float_to_string(float num);
+    static string accidentals_to_string(int acc);
+    static string notetype_to_string(int noteType, int dots=0);
 
     //other methods
     string& get_library_version() { return m_version; }

@@ -280,6 +280,7 @@ public:
     virtual void move_next()=0;
     virtual void move_prev()=0;
 //    virtual void reset_and_point_to(ImoId nId)=0;
+    virtual void to_inner_point(SpElementCursorState spState)=0;
 
     //saving/restoring state
     virtual SpElementCursorState get_state()=0;
@@ -321,6 +322,7 @@ public:
     void start_of_content();
     void last_of_content();
     void to_end();
+    void to_inner_point(SpElementCursorState spState) {}
 
     //saving/restoring state: mandatory overrides
     SpElementCursorState get_state();
@@ -352,7 +354,6 @@ protected:
     ImoId           m_scoreId;
     ColStaffObjs*   m_pColStaffObjs;
     ImoScore*       m_pScore;
-    bool            m_fAutoRefresh;
     TimeUnits       m_timeStep;
 
     //state variables
@@ -376,14 +377,16 @@ public:
     void point_to(ImoId nId);
     void move_next();
     void move_prev();
+    void to_inner_point(SpElementCursorState spState);
         //specific
+    void to_time(int iInstr, int iStaff, TimeUnits timepos);
+    void to_state(int iInstr, int iStaff, int iMeasure, TimeUnits rTime, ImoId id=k_no_imoid);
+    void point_to_barline(ImoId id, int staff);
 //    //void move_next_new_time();
 //    //void move_prev_new_time();
 //    //void to_start_of_instrument(int nInstr);
 //    //void to_start_of_measure(int nMeasure, int nStaff);
 //    void skip_clef_key_time();
-    void point_to_barline(ImoId id, int staff);
-    void to_state(int nInstr, int nMeasure, int nStaff, TimeUnits rTime, ImoId id=k_no_imoid);
 
     //saving/restoring state: mandatory overrides
     SpElementCursorState get_state();
@@ -392,8 +395,6 @@ public:
     //special operations: mandatory overrides
     void update_after_deletion();
     void update_after_insertion(ImoId lastInsertedId);
-    void set_auto_refresh(bool enable) { m_fAutoRefresh = enable; }
-    void refresh();
 
     //specific: curent position info
     inline int instrument() { return m_currentState.instrument(); }
@@ -408,12 +409,13 @@ public:
     inline int ref_obj_staff() { return m_currentState.ref_obj_staff(); }
     ImoObj* staffobj_internal();
     TimeInfo get_time_info();
+    ImoId find_last_imo_id();
 
     //previous position info
     //AWARE_ previous position is where move_prev() will be placed
-    ImoId prev_pos_id() { return m_prevState.id(); }
-    TimeUnits prev_pos_time() { return m_prevState.time(); }
-    int prev_pos_staff() { return m_prevState.staff(); }
+    inline ImoId prev_pos_id() { return m_prevState.id(); }
+    inline TimeUnits prev_pos_time() { return m_prevState.time(); }
+    inline int prev_pos_staff() { return m_prevState.staff(); }
 
     //helper boolean
     ///Score is not empty and cursor is pointing an staffobj
@@ -460,7 +462,7 @@ protected:
     bool p_more_instruments();
     void p_to_start_of_next_instrument();
     void p_find_previous_state();
-    void p_to_state(int nInstr, int nMeasure, int nStaff, TimeUnits rTime, ImoId id=k_no_imoid);
+    void p_to_state(int iInstr, int iStaff, int iMeasure, TimeUnits rTime, ImoId id=k_no_imoid);
     void p_point_to(ImoId nId);
     inline ScoreCursorState p_get_current_state() { return m_currentState; }
     inline void p_set_previous_state(ScoreCursorState& state) { m_prevState = state; }
@@ -501,17 +503,19 @@ protected:
     bool p_iter_object_is_key();
     bool p_iter_object_is_time();
 
-    //helper: for move_next
+    //helper: mainly for move_next
     int p_determine_next_target_measure();
+    void p_forward_to_instr_with_time_not_lower_than(TimeUnits rTargetTime);
     void p_forward_to_instr_measure_with_time_not_lower_than(TimeUnits rTargetTime);
+    void p_forward_to_instr_staff_with_time_not_lower_than(TimeUnits rTargetTime);
     void p_forward_to_current_staff();
     bool p_find_current_staff_at_current_iter_object_time();
     void p_forward_to_state(int instr, int staff, int measure, TimeUnits time);
     bool p_try_next_at_same_time();
     void p_move_next();
-    void p_find_next_time_in_this_staff();
+    void p_find_next_time_in_this_instrument();
 
-    //helper: for move_prev
+    //helper: mainly for move_prev
     inline bool p_is_first_staff_of_current_instrument() {
                                     return m_currentState.staff() == 0; }
     void p_iter_to_last_object_in_current_time();
@@ -523,12 +527,6 @@ protected:
     void p_to_end_of_staff();
     void p_find_position_at_current_time();
     void p_find_prev_time_in_this_staff();
-
-    //ensuring integrity after updates
-    inline void auto_refresh() { if (m_fAutoRefresh) refresh(); }
-    bool p_success_refreshing_prev();
-    bool p_success_refreshing_current();
-
 
 };
 
@@ -577,6 +575,7 @@ public:
     void to_start();
     void to_end();
     void to_last_top_level();
+    void to_inner_point(DocCursorState& state);
 
     //special operations
     void update_after_deletion();
@@ -593,7 +592,6 @@ public:
 protected:
     void start_delegation();
     void stop_delegation();
-    ImoBlockLevelObj* find_block_level_parent(ImoObj* pImo);
 
 };
 

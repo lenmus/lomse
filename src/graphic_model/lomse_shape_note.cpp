@@ -51,6 +51,12 @@ GmoShapeNote::GmoShapeNote(ImoObj* pCreatorImo, LUnits x, LUnits y, Color color,
     , m_pAccidentalsShape(NULL)
     , m_pFlagShape(NULL)
     , m_uAnchorOffset(0.0f)
+    , m_fUpOriented(true)
+    , m_nPosOnStaff(1)
+    , m_uyStaffTopLine(0)
+    , m_uLineOutgoing(0)
+    , m_uLineThickness(0)
+    , m_lineSpacing(0)
 {
 }
 

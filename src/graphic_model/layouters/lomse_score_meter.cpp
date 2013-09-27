@@ -129,6 +129,13 @@ LUnits ScoreMeter::tenths_to_logical(Tenths value, int iInstr, int iStaff)
 }
 
 //---------------------------------------------------------------------------------------
+Tenths ScoreMeter::logical_to_tenths(LUnits value, int iInstr, int iStaff)
+{
+    int idx = m_staffIndex[iInstr] + iStaff;
+	return (value * 10.0f) / m_lineSpace[idx];
+}
+
+//---------------------------------------------------------------------------------------
 LUnits ScoreMeter::line_spacing_for_instr_staff(int iInstr, int iStaff)
 {
     int idx = m_staffIndex[iInstr] + iStaff;

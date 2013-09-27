@@ -62,16 +62,13 @@ protected:
     GmoShapeFlag* m_pFlagShape;
     LUnits m_uAnchorOffset;
     bool m_fUpOriented;     //explicit info. about note orientation: up (stem up) or down
+    int m_nPosOnStaff;      //required by the beam engraver and ledger lines
 
     //for leger lines
-    int m_nPosOnStaff;
     LUnits m_uyStaffTopLine;
     LUnits m_uLineOutgoing;
     LUnits m_uLineThickness;
     LUnits m_lineSpacing;
-
-    //required by the beam engraver
-    int m_posOnStaff;
 
  public:    //TO_FIX: constructor used in tests
     //friend class NoteEngraver;
@@ -118,8 +115,7 @@ public:
     void set_stem_length(LUnits length);
 
     //required by beam engraver
-    inline void set_pos_on_staff(int posOnStaff) { m_posOnStaff = posOnStaff; }
-    inline int get_pos_on_staff() { return m_posOnStaff; }
+    inline int get_pos_on_staff() { return m_nPosOnStaff; }
 
     //info
     inline bool is_up() { return m_fUpOriented; }

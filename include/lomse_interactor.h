@@ -35,6 +35,8 @@
 #include "lomse_agg_types.h"
 #include "lomse_selections.h"
 #include "lomse_events.h"
+#include "lomse_document_cursor.h"
+#include "lomse_pitch.h"
 
 #include <iostream>
 #include <ctime>   //clock
@@ -51,15 +53,39 @@ class DocCommandExecuter;
 class DocCommand;
 class DocCursor;
 class GmoObj;
+class GmoBox;
 class GraphicModel;
 class ImoScore;
 class ImoStaffObj;
 class PlayerGui;
 class Task;
+class Handler;
 
 class Document;
 typedef SharedPtr<Document>     SpDocument;
 typedef WeakPtr<Document>       WpDocument;
+
+class GmoShape;
+typedef SharedPtr<GmoShape>  SpGmoShape;
+
+//some constants for improving code legibillity
+#define k_no_redraw     false   //do not force view redraw
+#define k_force_redraw  true    //force a view redraw
+
+#define k_get_ownership         true
+#define k_do_not_get_ownership  false
+
+//---------------------------------------------------------------------------------------
+// Event flags for mouse and keyboard pressed keys
+enum EInputFlag
+{
+    k_mouse_left  = 1,
+    k_mouse_right = 2,
+    k_mouse_middle = 4,
+    k_kbd_shift   = 8,
+    k_kbd_ctrl    = 16,
+    k_kbd_alt     = 32,
+};
 
 
 //---------------------------------------------------------------------------------------
@@ -79,21 +105,17 @@ protected:
     DocCommandExecuter* m_pExec;
     SelectionSet    m_selections;
     GmoRef          m_grefLastMouseOver;
-
-    //for performance measurements
-    clock_t     m_startTime;
-    ptime       m_start;
-
-    //measured times (milliseconds)
-    double      m_renderTime;
-    double      m_gmodelBuildTime;
+    int             m_operatingMode;
+    bool            m_fEditionEnabled;
 
     //for controlling repaints
     bool        m_fViewParamsChanged;       //viewport, scale, ... have been modified
-    bool        m_fCaretNeedsRepaint;       //caret should be repainted
 
     //to avoid problems during playback
     bool        m_fViewUpdatesEnabled;
+
+    Handler*    m_pCurHandler;  //current handler being dragged, if any
+    ImoId       m_idControlledImo;
 
 public:
     Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView,
@@ -104,6 +126,9 @@ public:
 
     virtual void on_document_reloaded();
     void switch_task(int taskType);
+    void set_operating_mode(int mode);
+    inline int get_operating_mode() { return m_operatingMode; }
+    enum { k_mode_read_only=0, k_mode_edition, k_mode_playback, };     //operating modes
 
     //access to collaborators
     GraphicModel* get_graphic_model();
@@ -120,7 +145,6 @@ public:
     bool view_needs_repaint();
 
     //creating events
-    virtual void request_window_update();
     virtual void send_end_of_play_event(ImoScore* pScore, PlayerGui* pPlayCtrl);
 
     //play back
@@ -137,20 +161,21 @@ public:
     virtual void screen_point_to_page_point(double* x, double* y);
     virtual void model_point_to_screen(double* x, double* y, int iPage);
     virtual int page_at_screen_point(double x, double y);
+    virtual UPoint screen_point_to_model_point(Pixels x, Pixels y);
         //wiewport / scroll
-    virtual void new_viewport(Pixels x, Pixels y);
+    virtual void new_viewport(Pixels x, Pixels y, bool fForceRedraw=true);
     virtual void set_viewport_at_page_center(Pixels screenWidth);
     virtual void get_viewport(Pixels* x, Pixels* y);
     virtual void get_view_size(Pixels* xWidth, Pixels* yHeight);
         //scale
     virtual double get_scale();
-    virtual void set_scale(double scale, Pixels x=0, Pixels y=0);
-    virtual void zoom_in(Pixels x=0, Pixels y=0);
-    virtual void zoom_out(Pixels x=0, Pixels y=0);
-    virtual void zoom_fit_full(Pixels width, Pixels height);
-    virtual void zoom_fit_width(Pixels width);
+    virtual void set_scale(double scale, Pixels x=0, Pixels y=0, bool fForceRedraw=true);
+    virtual void zoom_in(Pixels x=0, Pixels y=0, bool fForceRedraw=true);
+    virtual void zoom_out(Pixels x=0, Pixels y=0, bool fForceRedraw=true);
+    virtual void zoom_fit_full(Pixels width, Pixels height, bool fForceRedraw=true);
+    virtual void zoom_fit_width(Pixels width, bool fForceRedraw=true);
         //selection rectangle
-    virtual void show_selection_rectangle(Pixels x1, Pixels y1, Pixels x2, Pixels y2);
+    virtual void start_selection_rectangle(Pixels x1, Pixels y1);
     virtual void hide_selection_rectangle();
     virtual void update_selection_rectangle(Pixels x2, Pixels y2);
         //tempo line
@@ -162,7 +187,7 @@ public:
     virtual void remove_highlight_from_object(ImoStaffObj* pSO);
     virtual void remove_all_highlight();
     virtual void discard_all_highlight();
-    void on_visual_highlight(SpEventScoreHighlight pEvent);
+    virtual void on_visual_highlight(SpEventScoreHighlight pEvent);
         //printing
     virtual void set_printing_buffer(RenderingBuffer* rbuf);
     virtual void on_print_page(int page, double scale, VPoint viewport);
@@ -176,59 +201,94 @@ public:
     EventNotifier* get_event_notifier() { return this; }
 
     //caret
-    bool blink_caret();
-    void show_caret(bool fShow=true);
-    void hide_caret();
+    void blink_caret();
+//    void show_caret(bool fShow=true);
+//    void hide_caret();
     string get_caret_timecode();
+    DocCursorState click_event_to_cursor_state(SpEventMouse event);
 
-    ////abstract class implements all possible commands. Derived classes override
-    ////them as needed, either programming a diferent behaviour or as empty methods
-    ////for those commands not allowed
-    //virtual void insert_rest(DocCursor& cursor, const std::string& source);
-    virtual void exec_command(DocCommand* pCmd);
-    virtual void exec_undo();
-    virtual void exec_redo();
+    //dragged image associated to mouse cursor
+    void show_drag_image(bool value);
+    void set_drag_image(GmoShape* pShape, bool fGetOwnership, UPoint offset);
+    void enable_drag_image(bool fEnabled);
+
+    //edition commands
+    void exec_command(DocCommand* pCmd);
+    void exec_undo();
+    void exec_redo();
 
     //edition related info
     bool should_enable_edit_undo();
     bool should_enable_edit_redo();
+//    void enable_edition(bool value);
+//    inline bool is_edition_enabled() { return m_fEditionEnabled; }
 
     // event handlers for user actions. Library API
     virtual void on_mouse_move(Pixels x, Pixels y, unsigned flags);
     virtual void on_mouse_button_down(Pixels x, Pixels y, unsigned flags);
     virtual void on_mouse_button_up(Pixels x, Pixels y, unsigned flags);
+    virtual void on_mouse_enter_window(Pixels x, Pixels y, unsigned flags);
+    virtual void on_mouse_leave_window(Pixels x, Pixels y, unsigned flags);
     //virtual void on_init();
 //    virtual void on_resize(Pixels x, Pixels y);
     //virtual void on_idle();
     //virtual void on_key(Pixels x, Pixels y, unsigned key, unsigned flags);
     //virtual void on_ctrl_change();
 
+    //miscellaneous
+    DiatonicPitch get_pitch_at(Pixels x, Pixels y);
+
     //-----------------------------------------------------------------------------------
     //commands
 
-    //selection
-    virtual void click_at_screen_point(Pixels x, Pixels y, unsigned flags=0);
-    virtual void select_object_at_screen_point(Pixels x, Pixels y, unsigned flags=0);
-    virtual void select_objects_in_screen_rectangle(Pixels x1, Pixels y1,
-                                                    Pixels x2, Pixels y2,
-                                                    unsigned flags=0);
+    //actions requested by Task objects
+    virtual void task_action_click_at_screen_point(Pixels x, Pixels y, unsigned flags=0);
+    virtual void task_action_select_objects_in_screen_rectangle(Pixels x1, Pixels y1,
+                                                                Pixels x2, Pixels y2,
+                                                                unsigned flags=0);
+    virtual void task_action_select_object_and_show_contextual_menu(Pixels x, Pixels y,
+                                                                    unsigned flags=0);
+    virtual void task_action_mouse_in_out(Pixels x, Pixels y);
+    virtual void task_action_insert_object_at_point(Pixels x, Pixels y);
+    virtual void task_action_drag_the_view(Pixels x, Pixels y);
+    virtual void task_action_decide_on_switching_task(Pixels x, Pixels y);
+    virtual void task_action_switch_to_default_task();
+    virtual void task_action_move_drag_image(Pixels x, Pixels y);
+    virtual void task_action_move_object(Pixels x, Pixels y);
+    virtual void task_action_move_handler(Pixels x, Pixels y);
+    virtual void task_action_move_handler_end_point(Pixels xFinal, Pixels yFinal,
+                                                    Pixels xTotalShift, Pixels yTotalShift);
 
-    virtual void mouse_in_out(Pixels x, Pixels y);
-
-    //performance measurements
-    void start_timer();
-    double get_elapsed_time() const;
-    inline void gmodel_rendering_time(double milliseconds) { m_renderTime = milliseconds; }
-    inline double gmodel_rendering_time() { return m_renderTime; }
-    inline double gmodel_build_time() { return m_gmodelBuildTime; }
+    //for performance measurements
+    enum { k_timing_gmodel_build_time=0, k_timing_gmodel_draw_time,
+           k_timing_visual_effects_draw_time, k_timing_total_render_time,
+           k_timing_repaint_time, k_timing_max_value, };
+    void timing_start_measurements();
+    void timing_graphic_model_build_end();
+    void timing_graphic_model_render_end();
+    void timing_visual_effects_start();
+    void timing_renderization_end();
+    void timing_repaint_done();
+    inline double* get_ellapsed_times() { return &m_ellapsedTimes[0]; }
 
 
 protected:
+    //for performance measurements
+    double m_ellapsedTimes[k_timing_max_value];
+    ptime m_renderStartTime;
+    ptime m_visualEffectsStartTime;
+    ptime m_repaintStartTime;
+    ptime m_gmodelBuildStartTime;
+
     void create_graphic_model();
     void delete_graphic_model();
+    void request_window_update();
+    VRect get_damaged_rectangle();
     GmoObj* find_object_at(Pixels x, Pixels y);
-    void send_mouse_out_event(GmoRef gref);
-    void send_mouse_in_event(GmoRef gref);
+    GmoBox* find_box_at(Pixels x, Pixels y);
+    void send_mouse_out_event(GmoRef gref, Pixels x, Pixels y);
+    void send_mouse_in_event(GmoRef gref, Pixels x, Pixels y);
+    void send_click_event(GmoObj* pGmo, Pixels x, Pixels y, unsigned flags);
     void notify_event(SpEventInfo pEvent, GmoObj* pGmo);
     void update_view_if_gmodel_modified();
     void update_view_if_needed();
@@ -239,6 +299,12 @@ protected:
     bool discard_score_highlight_event_if_not_valid(SpEventScoreHighlight pEvent);
     bool is_valid_play_score_event(SpEventPlayScore pEvent);
     void update_caret_and_view();
+    void redraw_caret();
+    void send_update_UI_event(EEventType type);
+    ptime get_current_time() const;
+    double get_ellapsed_time_since(ptime startTime) const;
+    Handler* handlers_hit_test(Pixels x, Pixels y);
+    void restore_selection();
 
 };
 
@@ -246,7 +312,7 @@ typedef SharedPtr<Interactor>   SpInteractor;
 typedef WeakPtr<Interactor>     WpInteractor;
 
 ////---------------------------------------------------------------------------------------
-////A view to edit the score in full page
+////A view to edit the document in full page
 //class EditInteractor : public Interactor
 //{
 //protected:

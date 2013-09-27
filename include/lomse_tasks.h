@@ -41,18 +41,6 @@ namespace lomse
 //forward declarations
 class Interactor;
 
-//---------------------------------------------------------------------------------------
-// Event flags for mouse and keyboard pressed keys
-enum EInputFlag
-{
-    k_mouse_left  = 1,
-    k_mouse_right = 2,
-    k_mouse_middle = 4,
-    k_kbd_shift   = 8,
-    k_kbd_ctrl    = 16,
-    k_kbd_alt     = 32,
-};
-
 
 //---------------------------------------------------------------------------------------
 //Event: encapsulates info about an event
@@ -113,7 +101,9 @@ public:
     TaskFactory();
     virtual ~TaskFactory();
 
-    enum { k_task_drag_view=0, k_task_null, k_task_selection, };
+    enum { k_task_drag_view=0, k_task_null, k_task_only_clicks, k_task_selection,
+           k_task_data_entry, k_task_selection_rectangle, k_task_move_object,
+           k_task_move_handler, };
 
     static Task* create_task(int taskType, Interactor* pIntor);
 
@@ -147,10 +137,6 @@ protected:
     void start_drag(Event& event);
     void do_drag(Event& event);
     void end_drag(Event& event);
-
-    //helpers
-    void repaint_view();
-
 };
 
 
@@ -165,6 +151,62 @@ public:
     void process_event(Event event) {}
 
 };
+//
+//
+////---------------------------------------------------------------------------------------
+////TaskSelection: A task to select objects.
+//class TaskSelection : public Task
+//{
+//protected:
+//    //states
+//    enum { k_start=0, k_waiting_for_first_point, k_waiting_for_point_2_left,
+//           k_waiting_for_point_2_right };
+//    int m_state;
+//    Interactor* m_pGView;
+//    Pixels m_xStart, m_yStart;      //first point
+//
+//public:
+//    TaskSelection(Interactor* pIntor);
+//    ~TaskSelection() {}
+//
+//    void init_task();
+//    void process_event(Event event);
+//
+//protected:
+//    //actions
+//    void record_first_point(Event& event);
+//    void select_objects_or_click(Event& event);
+//    void track_sel_rectangle(Event& event);
+//    void select_object_and_show_contextual_menu(Event& event);
+//    void mouse_in_out(Event& event);
+//};
+
+
+//---------------------------------------------------------------------------------------
+//TaskOnlyClicks: Default task when edition mode disabled. User can only move mouse,
+//and click on objects (links, buttons, etc.)
+class TaskOnlyClicks : public Task
+{
+protected:
+    //states
+    enum { k_start=0, k_waiting_for_first_point, k_waiting_for_point_2, };
+    int m_state;
+    Interactor* m_pGView;
+    Pixels m_xStart, m_yStart;      //first point
+
+public:
+    TaskOnlyClicks(Interactor* pIntor);
+    ~TaskOnlyClicks() {}
+
+    void init_task();
+    void process_event(Event event);
+
+protected:
+    //actions
+    void record_first_point(Event& event);
+    void click_at_point(Event& event);
+    void mouse_in_out(Event& event);
+};
 
 
 //---------------------------------------------------------------------------------------
@@ -173,8 +215,7 @@ class TaskSelection : public Task
 {
 protected:
     //states
-    enum { k_start=0, k_waiting_for_first_point, k_waiting_for_point_2_left,
-           k_waiting_for_point_2_right };
+    enum { k_start=0, k_waiting_for_first_point, k_waiting_for_point_2, };
     int m_state;
     Interactor* m_pGView;
     Pixels m_xStart, m_yStart;      //first point
@@ -189,14 +230,119 @@ public:
 protected:
     //actions
     void record_first_point(Event& event);
+    void click_at_point();
+    void decide_on_switching_task(Event& event);
+    void select_object_and_show_contextual_menu(Event& event);
+    void mouse_in_out(Event& event);
+};
+
+
+//---------------------------------------------------------------------------------------
+//TaskSelectionRectangle: A task to display a rubber band rectangle
+class TaskSelectionRectangle : public Task
+{
+protected:
+    //states
+    enum { k_start=0, k_waiting_for_point_2, k_request_task_switch };
+    int m_state;
+    Interactor* m_pGView;
+    Pixels m_xStart, m_yStart;      //first point
+
+public:
+    TaskSelectionRectangle(Interactor* pIntor);
+    ~TaskSelectionRectangle() {}
+
+    void init_task();
+    void process_event(Event event);
+    void set_first_point(Pixels xStart, Pixels yStart);
+
+protected:
+    //actions
     void select_objects_or_click(Event& event);
     void track_sel_rectangle(Event& event);
-    void select_object_at_first_point(Event& event);
-    void show_contextual_menu();
-    void mouse_in_out(Event& event);
+    void switch_to_default_task();
+};
 
-    //helpers
-    void repaint_view();
+
+//---------------------------------------------------------------------------------------
+//TaskMoveObject: A task to drag an image and, finally, move the object to end point
+class TaskMoveObject : public Task
+{
+protected:
+    //states
+    enum { k_start=0, k_waiting_for_point_2, k_request_task_switch };
+    int m_state;
+    Interactor* m_pGView;
+    Pixels m_xStart, m_yStart;      //first point
+
+public:
+    TaskMoveObject(Interactor* pIntor);
+    ~TaskMoveObject() {}
+
+    void init_task();
+    void process_event(Event event);
+    void set_first_point(Pixels xStart, Pixels yStart);
+
+protected:
+    //actions
+    void move_drag_image(Event& event);
+    void move_object_or_click(Event& event);
+    void switch_to_default_task();
+};
+
+
+//---------------------------------------------------------------------------------------
+//TaskDataEntry: A task to insert new objects by clicking with the mouse
+class TaskDataEntry : public Task
+{
+protected:
+    //states
+    enum { k_start=0, k_waiting_for_first_point, k_waiting_for_point_2_left,
+           k_waiting_for_point_2_right };
+    int m_state;
+    Interactor* m_pGView;
+    Pixels m_xStart, m_yStart;      //first point
+
+public:
+    TaskDataEntry(Interactor* pIntor);
+    ~TaskDataEntry() {}
+
+    void init_task();
+    void process_event(Event event);
+
+protected:
+    //actions
+    void record_first_point(Event& event);
+    void insert_object(Event& event);
+    void show_contextual_menu(Event& event);
+    void move_drag_image(Event& event);
+};
+
+
+//---------------------------------------------------------------------------------------
+//TaskMoveHandler: A task to move a handler
+class TaskMoveHandler : public Task
+{
+protected:
+    //states
+    enum { k_start=0, k_waiting_for_point_2, k_request_task_switch };
+    int m_state;
+    Interactor* m_pGView;
+    Pixels m_xStart, m_yStart;      //first point
+
+public:
+    TaskMoveHandler(Interactor* pIntor);
+    ~TaskMoveHandler() {}
+
+    void init_task();
+    void process_event(Event event);
+    void set_first_point(Pixels xStart, Pixels yStart);
+
+protected:
+    //actions
+    void move_handler(Event& event);
+    void move_handler_end_point(Event& event);
+    void switch_to_default_task();
 };
 
 

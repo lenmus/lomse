@@ -336,51 +336,6 @@ bool is_minor_key(EKeySignature keyType)
     return (keyType >= k_key_a);
 }
 
-////---------------------------------------------------------------------------------------
-//const wxString& get_key_signature_name(EKeySignature keyType)
-//{
-//    static bool fStringsLoaded = false;
-//
-//    if (!fStringsLoaded)
-//    {
-//        //language dependent strings. Can not be statically initiallized because
-//        //then they do not get translated
-//        m_sKeySignatureName[0] = _("C Major");
-//        m_sKeySignatureName[1] = _("G Major");
-//        m_sKeySignatureName[2] = _("D Major");
-//        m_sKeySignatureName[3] = _("A Major");
-//        m_sKeySignatureName[4] = _("E Major");
-//        m_sKeySignatureName[5] = _("B Major");
-//        m_sKeySignatureName[6] = _("F # Major");
-//        m_sKeySignatureName[7] = _("C # Major");
-//        m_sKeySignatureName[8] = _("C b Major");
-//        m_sKeySignatureName[9] = _("G b Major");
-//        m_sKeySignatureName[10] = _("D b Major");
-//        m_sKeySignatureName[11] = _("A b Major");
-//        m_sKeySignatureName[12] = _("E b Major");
-//        m_sKeySignatureName[13] = _("B b Major");
-//        m_sKeySignatureName[14] = _("F Major");
-//        m_sKeySignatureName[15] = _("A minor");
-//        m_sKeySignatureName[16] = _("E minor");
-//        m_sKeySignatureName[17] = _("B minor");
-//        m_sKeySignatureName[18] = _("F # minor");
-//        m_sKeySignatureName[19] = _("C # minor");
-//        m_sKeySignatureName[20] = _("G # minor");
-//        m_sKeySignatureName[21] = _("D # minor");
-//        m_sKeySignatureName[22] = _("A # minor");
-//        m_sKeySignatureName[23] = _("A b minor");
-//        m_sKeySignatureName[24] = _("E b minor");
-//        m_sKeySignatureName[25] = _("B b minor");
-//        m_sKeySignatureName[26] = _("F minor");
-//        m_sKeySignatureName[27] = _("C minor");
-//        m_sKeySignatureName[28] = _("G minor");
-//        m_sKeySignatureName[29] = _("D minor");
-//        fStringsLoaded = true;
-//    }
-//
-//    return m_sKeySignatureName[keyType - lmMIN_KEY];
-//}
-
 //---------------------------------------------------------------------------------------
 int key_signature_to_num_fifths(int keyType)
 {
@@ -558,50 +513,10 @@ EKeySignature get_relative_major_key(EKeySignature nMinorKey)
 
 }
 
-////---------------------------------------------------------------------------------------
-//wxString GetKeyLDPNameFromType(EKeySignature keyType)
-//{
-//    return m_sLDPKeyName[keyType];
-//}
-
 
 //=======================================================================================
 // global functions related to Clefs
 //=======================================================================================
-
-////---------------------------------------------------------------------------------------
-//wxString GetClefLDPNameFromType(lmEClefType nType)
-//{
-//    //AWARE: indexes in correspondence with enum lmEClefType
-//    static const wxString sName[] = {
-//        _T("G"),
-//        _T("F"),
-//        _T("F3"),
-//        _T("C1"),
-//        _T("C2"),
-//        _T("C3"),
-//        _T("C4"),
-//        _T("percussion"),
-//        _T("C5"),
-//        _T("F5"),
-//        _T("G1"),
-//        _T("G+8va"),    //8 above
-//        _T("G-8va"),    //8 below
-//        _T("F+8va"),    //8 above
-//        _T("F-8va"),    //8 below
-//        _T("G+15ma"),   //15 above
-//        _T("G-15ma"),   //15 below
-//        _T("F+15ma"),   //15 above
-//        _T("F-15ma"),   //15 below
-//    };
-//    static const wxString sUndefined = _T("undefined");
-//
-//
-//    if (nType == k_clefUndefined)
-//        return sUndefined;
-//    else
-//        return sName[nType];
-//}
 
 //---------------------------------------------------------------------------------------
 DiatonicPitch get_diatonic_pitch_for_first_line(EClef nClef)
@@ -641,27 +556,6 @@ DiatonicPitch get_diatonic_pitch_for_first_line(EClef nClef)
     }
     return NO_DPITCH;
 }
-
-////---------------------------------------------------------------------------------------
-//lmEGlyphIndex lmGetGlyphForCLef(lmEClefType nClefType)
-//{
-//    // returns the index (over global glyphs table) to the character to use to print
-//    // the clef (LenMus font)
-//
-//    switch (nClefType) {
-//        case k_clefSol: return GLYPH_G_CLEF;
-//        case k_clefFa4: return GLYPH_F_CLEF;
-//        case k_clefFa3: return GLYPH_F_CLEF;
-//        case k_clefDo1: return GLYPH_C_CLEF;
-//        case k_clefDo2: return GLYPH_C_CLEF;
-//        case k_clefDo3: return GLYPH_C_CLEF;
-//        case k_clefDo4: return GLYPH_C_CLEF;
-//        case k_clef_percussion: return GLYPH_PERCUSSION_CLEF_BLOCK;
-//        default:
-//            wxLogMessage(_T("[::lmGetGlyphForCLef] Invalid value (%d) for clef type"), nClefType);
-//            return GLYPH_G_CLEF;
-//    }
-//}
 
 
 }  //namespace lomse

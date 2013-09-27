@@ -97,8 +97,9 @@ void TupletEngraver::set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-int TupletEngraver::create_shapes()
+int TupletEngraver::create_shapes(Color color)
 {
+    m_color = color;
     decide_if_show_bracket();
     determine_tuplet_text();
 
@@ -120,7 +121,7 @@ void TupletEngraver::create_shape()
 {
     m_pStyle = m_pMeter->get_tuplets_style_info();
 
-    m_pTupletShape = LOMSE_NEW GmoShapeTuplet(m_pTuplet, Color(0,0,0));
+    m_pTupletShape = LOMSE_NEW GmoShapeTuplet(m_pTuplet, m_color);
     m_pShape = m_pTupletShape;
     m_shapesInfo[0].pShape = m_pTupletShape;
 

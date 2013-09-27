@@ -148,6 +148,7 @@ public:
     ImoObj* create_object_from_lmd(const string& source);
     void add_staff_objects(const string& source, ImoMusicData* pMD);
     void delete_relation(ImoRelObj* pRO);
+    void delete_auxobj(ImoAuxObj* pAO);
     ImoTuplet* add_tuplet(ImoNoteRest* pStartNR, ImoNoteRest* pEndNR,
                           const string& source, ostream& reporter);
     ImoBeam* add_beam(const list<ImoNoteRest*>& notes);

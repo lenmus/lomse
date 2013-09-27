@@ -52,6 +52,7 @@ protected:
     GmoShapeAccidentals* m_pContainer;
     double m_fontSize;
     ImoObj* m_pCreatorImo;
+    Color m_color;
 
 public:
     AccidentalsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
@@ -60,7 +61,8 @@ public:
 
     GmoShapeAccidentals* create_shape(ImoObj* pCreatorImo, UPoint uPos,
                                       EAccidentals accidentals,
-                                      bool fCautionary=false);
+                                      bool fCautionary=false,
+                                      Color color=Color(0,0,0));
 
 protected:
     void find_glyphs();

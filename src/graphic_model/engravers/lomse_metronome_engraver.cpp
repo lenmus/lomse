@@ -56,12 +56,14 @@ MetronomeMarkEngraver::MetronomeMarkEngraver(LibraryScope& libraryScope,
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* MetronomeMarkEngraver::create_shape(ImoMetronomeMark* pImo, UPoint uPos)
+GmoShape* MetronomeMarkEngraver::create_shape(ImoMetronomeMark* pImo, UPoint uPos,
+                                              Color color)
 {
     m_fontSize = determine_font_size();
     m_pCreatorImo = pImo;
     m_uPos = uPos;
-    m_uPos.y -= m_pMeter->tenths_to_logical(20.0f, m_iInstr, m_iStaff);;
+    m_uPos.y -= m_pMeter->tenths_to_logical(20.0f, m_iInstr, m_iStaff);
+    m_color = color;
 
     create_main_container_shape();
     int markType = pImo->get_mark_type();
@@ -140,7 +142,7 @@ void MetronomeMarkEngraver::create_main_container_shape()
 {
     ShapeId idx = 0;
     m_pMainShape = LOMSE_NEW GmoShapeMetronomeMark(m_pCreatorImo, idx, m_uPos,
-                                                   Color(0,0,0), m_libraryScope);
+                                                   m_color, m_libraryScope);
 }
 
 //---------------------------------------------------------------------------------------
@@ -161,7 +163,7 @@ void MetronomeMarkEngraver::create_symbol_shape(int iGlyph)
     LUnits y = m_uPos.y + m_pMeter->tenths_to_logical(yOffset, m_iInstr, m_iStaff);
     ShapeId idx = 0;
     GmoShape* pShape = LOMSE_NEW GmoShapeMetronomeGlyph(m_pCreatorImo, idx, iGlyph,
-                                               UPoint(m_uPos.x, y), Color(0,0,0),
+                                               UPoint(m_uPos.x, y), m_color,
                                                m_libraryScope, m_fontSize);
 	m_pMainShape->add(pShape);
     m_uPos.x += pShape->get_width();

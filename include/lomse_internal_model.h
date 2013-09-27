@@ -44,6 +44,8 @@
 #include "lomse_injectors.h"
 #include "lomse_image.h"
 #include "lomse_logger.h"
+//#include "lomse_im_attributes.h"
+typedef int TIntAttribute;
 
 using namespace std;
 
@@ -188,6 +190,8 @@ class DtoObj;
         k_clef_G2_15,       //15 below
         k_clef_15_F4,       //15 above
         k_clef_F4_15,       //15 below
+
+        k_max_clef,
     };
 
     //-----------------------------------------------------------------------------
@@ -253,6 +257,8 @@ class DtoObj;
         k_64th = 8,
         k_128th = 9,
         k_256th = 10,
+
+        k_max_note_type,
     };
 
 
@@ -282,6 +288,22 @@ class DtoObj;
         k_duration_128th = 2,
         k_duration_256th = 1,
    };
+
+    //-----------------------------------------------------------------------------
+    //Barlines
+    enum EBarline
+    {
+        k_barline_unknown = -1,
+        k_barline_simple,
+        k_barline_double,
+        k_barline_start,
+        k_barline_end,
+        k_barline_start_repetition,
+        k_barline_end_repetition,
+        k_barline_double_repetition,
+
+        k_max_barline,
+    };
 
 
     //-----------------------------------------------------------------------------
@@ -553,6 +575,9 @@ public:
     void remove_child_imo(ImoObj* pImo);
     Document* get_the_document();
     ImoDocument* get_document();
+    Observable* get_observable_parent();
+    ImoContentObj* get_contentobj_parent();
+    ImoBlockLevelObj* find_block_level_parent();
 
     //Get the name and source code
     static const string& get_name(int type);
@@ -562,6 +587,23 @@ public:
 
     //properties
     virtual bool can_generate_secondary_shapes() { return false; }
+
+    //edition support
+    virtual void set_int_attribute(TIntAttribute attrib, int value) {}      //TODO pure virtual
+    virtual int get_int_attribute(TIntAttribute attrib) { return 0; }       //TODO pure virtual
+    virtual void set_color_attribute(TIntAttribute attrib, Color value) {}  //TODO pure virtual
+    virtual Color get_color_attribute(TIntAttribute attrib) { return Color(0,0,0); }    //TODO pure virtual
+    virtual void set_bool_attribute(TIntAttribute attrib, bool value) {}  //TODO pure virtual
+    virtual bool get_bool_attribute(TIntAttribute attrib) { return true; }    //TODO pure virtual
+    virtual void set_double_attribute(TIntAttribute attrib, double value) {}  //TODO pure virtual
+    virtual double get_double_attribute(TIntAttribute attrib) { return 0.0; }    //TODO pure virtual
+    virtual void set_string_attribute(TIntAttribute attrib, const string& value) {}  //TODO pure virtual
+    virtual string get_string_attribute(TIntAttribute attrib) { return ""; }    //TODO pure virtual
+    virtual list<TIntAttribute> get_supported_attributes()
+    {
+        list<TIntAttribute> supported;
+        return supported;
+    }
 
     //object classification
     inline int get_obj_type() { return m_objtype; }
@@ -1340,7 +1382,6 @@ class ImoContentObj : public ImoObj
 {
 protected:
     ImoStyle* m_pStyle;
-
     Tenths m_txUserLocation;
     Tenths m_tyUserLocation;
     bool m_fVisible;
@@ -1398,6 +1439,17 @@ public:
         ImoStyle* pStyle = get_style();
         return pStyle ? pStyle->margin_bottom() : 0.0f;
     }
+
+    //edition support
+    void set_int_attribute(TIntAttribute attrib, int value);
+    int get_int_attribute(TIntAttribute attrib);
+    void set_bool_attribute(TIntAttribute attrib, bool value);
+    bool get_bool_attribute(TIntAttribute attrib);
+    void set_double_attribute(TIntAttribute attrib, double value);
+    double get_double_attribute(TIntAttribute attrib);
+    void set_string_attribute(TIntAttribute attrib, const string& value);
+    string get_string_attribute(TIntAttribute attrib);
+    list<TIntAttribute> get_supported_attributes();
 
 };
 
@@ -1668,6 +1720,14 @@ public:
     //setters
     inline void set_color(Color color) { m_color = color; }
 
+    //edition support
+    void set_int_attribute(TIntAttribute attrib, int value);
+    int get_int_attribute(TIntAttribute attrib);
+    void set_color_attribute(TIntAttribute attrib, Color value);
+    Color get_color_attribute(TIntAttribute attrib);
+    list<TIntAttribute> get_supported_attributes();
+
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -1713,6 +1773,13 @@ public:
 
     //other
     ImoInstrument* get_instrument();
+    ImoScore* get_score();
+
+    //edition support
+    virtual void set_int_attribute(TIntAttribute attrib, int value);
+    virtual int get_int_attribute(TIntAttribute attrib);
+    virtual list<TIntAttribute> get_supported_attributes();
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -2211,13 +2278,10 @@ protected:
     int m_barlineType;
 
     friend class ImFactory;
-    ImoBarline(): ImoStaffObj(k_imo_barline), m_barlineType(k_simple) {}
+    ImoBarline(): ImoStaffObj(k_imo_barline), m_barlineType(k_barline_simple) {}
 
 public:
     virtual ~ImoBarline() {}
-
-	enum { k_simple=0, k_double, k_start, k_end, k_end_repetition, k_start_repetition,
-           k_double_repetition, };
 
     //barline type
     inline int get_type() { return m_barlineType; }
@@ -2225,6 +2289,11 @@ public:
 
     //overrides: barlines always in staff 0
     void set_staff(int staff) { m_staff = 0; }
+
+    //edition support
+    virtual void set_int_attribute(TIntAttribute attrib, int value);
+    virtual int get_int_attribute(TIntAttribute attrib);
+    virtual list<TIntAttribute> get_supported_attributes();
 
 };
 
@@ -2685,6 +2754,9 @@ public:
     ImoInstrument* get_instrument(int iInstr);   //0..n-1
     int get_num_instruments();
 
+    //info
+    inline ImoScore* get_score() { return m_pScore; }
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -2736,11 +2808,12 @@ public:
     inline bool has_name() { return m_name.get_text() != ""; }
     inline bool has_abbrev() { return m_abbrev.get_text() != ""; }
     LUnits tenths_to_logical(Tenths value, int iStaff=0);
+    inline ImoScore* get_score() { return m_pScore; }
 
     //direct creation API
     ImoBarline* add_barline(int type, bool fVisible=true);
-    ImoClef* add_clef(int type, int nStaff=1);
-    ImoKeySignature* add_key_signature(int type);
+    ImoClef* add_clef(int type, int nStaff=1, bool fVisible=true);
+    ImoKeySignature* add_key_signature(int type, bool fVisible=true);
     ImoTimeSignature* add_time_signature(int top, int bottom, bool fVisible=true);
     ImoSpacer* add_spacer(Tenths space);
     ImoObj* add_object(const string& ldpsource);
@@ -2755,7 +2828,6 @@ public:
     list<ImoStaffObj*> insert_staff_objects_at(ImoStaffObj* pAt, ImoMusicData* pObjects);
     list<ImoStaffObj*> insert_staff_objects_at(ImoStaffObj* pAt, const string& ldpsource,
                                                ostream& reporter);
-
 
 protected:
 
@@ -3640,6 +3712,9 @@ public:
     inline bool is_start() { return m_fStart; }
     inline int get_tie_number() { return m_tieNum; }
     inline ImoBezierInfo* get_bezier() { return m_pBezier; }
+
+    //edition
+    ImoBezierInfo* add_bezier();
 };
 
 //---------------------------------------------------------------------------------------
@@ -3668,6 +3743,8 @@ public:
     //access to data objects
     ImoBezierInfo* get_start_bezier();
     ImoBezierInfo* get_stop_bezier() ;
+    ImoBezierInfo* get_start_bezier_or_create();
+    ImoBezierInfo* get_stop_bezier_or_create();
 
     void reorganize_after_object_deletion();
 };

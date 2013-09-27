@@ -50,8 +50,15 @@ BarlineEngraver::BarlineEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreM
 }
 
 //---------------------------------------------------------------------------------------
+BarlineEngraver::BarlineEngraver(LibraryScope& libraryScope)
+    : Engraver(libraryScope, NULL)
+{
+    //constructor for dragged images
+}
+
+//---------------------------------------------------------------------------------------
 GmoShape* BarlineEngraver::create_shape(ImoBarline* pBarline, LUnits xPos,
-                                        LUnits yTop, LUnits yBottom)
+                                        LUnits yTop, LUnits yBottom, Color color)
 {
     LUnits thinLineWidth = m_pMeter->tenths_to_logical(LOMSE_THIN_LINE_WIDTH, m_iInstr, 0);
     LUnits thickLineWidth = m_pMeter->tenths_to_logical(LOMSE_THICK_LINE_WIDTH, m_iInstr, 0);
@@ -65,18 +72,47 @@ GmoShape* BarlineEngraver::create_shape(ImoBarline* pBarline, LUnits xPos,
     return LOMSE_NEW GmoShapeBarline(pBarline, idx, pBarline->get_type(),
                                      xPos, yTop, yBottom,
                                      thinLineWidth, thickLineWidth, spacing,
-                                     radius, Color(0,0,0), uMinWidth);
+                                     radius, color, uMinWidth);
 }
 
 //---------------------------------------------------------------------------------------
 GmoShape* BarlineEngraver::create_system_barline_shape(ImoObj* pCreatorImo, LUnits xPos,
-                                                       LUnits yTop, LUnits yBottom)
+                                                       LUnits yTop, LUnits yBottom,
+                                                       Color color)
 {
     LUnits uLineThickness = m_pMeter->tenths_to_logical(LOMSE_THIN_LINE_WIDTH, 0, 0);
-    return LOMSE_NEW GmoShapeBarline(pCreatorImo, 0, ImoBarline::k_simple,
+    return LOMSE_NEW GmoShapeBarline(pCreatorImo, 0, k_barline_simple,
                                      xPos, yTop, yBottom,
                                      uLineThickness, uLineThickness,
-                                     0.0f, 0.0f, Color(0,0,0), uLineThickness);
+                                     0.0f, 0.0f, color, uLineThickness);
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* BarlineEngraver::create_tool_dragged_shape(int barType)
+{
+    //typical values, obtained by by placing a breakpoint in create_shape() method
+    LUnits thinLineWidth = 27.0;
+    LUnits thickLineWidth = 108.0;
+    LUnits spacing = 72.0;
+    LUnits radius = 36.0;
+    LUnits uMinWidth = 0;
+    LUnits yBottom = 720.0;
+
+    Color color(255,0,0);       //TODO: options/configuration
+    ShapeId idx = 0;
+
+    m_pBarlineShape = LOMSE_NEW GmoShapeBarline(NULL, idx, barType, 0.0, 0.0, yBottom,
+                                                thinLineWidth, thickLineWidth, spacing,
+                                                radius, color, uMinWidth);
+    return m_pBarlineShape;
+}
+
+//---------------------------------------------------------------------------------------
+UPoint BarlineEngraver::get_drag_offset()
+{
+    //return left side, vertical center
+    URect bounds = m_pBarlineShape->get_bounds();
+    return UPoint(0.0, bounds.get_height() / 2.0);
 }
 
 

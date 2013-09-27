@@ -183,6 +183,7 @@ ImoSlurData* ImFactory::inject_slur_data(Document* pDoc, ImoSlurDto* pDto)
 ImoTuplet* ImFactory::inject_tuplet(Document* pDoc, ImoTupletDto* pDto)
 {
     ImoTuplet* pObj = LOMSE_NEW ImoTuplet(pDto);
+    pObj->set_id( pDto->get_id() );
     pDoc->assign_id(pObj);
     pObj->set_owner_document(pDoc);
     return pObj;

@@ -35,6 +35,7 @@
 #include "lomse_drawer.h"
 #include "lomse_doorway.h"
 #include "lomse_agg_types.h"
+#include "lomse_document_cursor.h"
 
 //other
 #include <vector>
@@ -53,6 +54,19 @@ class GraphicModel;
 class Document;
 class ImoStaffObj;
 class Caret;
+class DocCursor;
+class OverlaysGenerator;
+class VisualEffect;
+class DraggedImage;
+class SelectionRectangle;
+class PlaybackHighlight;
+class TimeGrid;
+class Handler;
+class SelectionHighlight;
+class SelectionSet;
+class AreaInfo;
+
+typedef SharedPtr<GmoShape>  SpGmoShape;
 
 
 ////---------------------------------------------------------------------------------------
@@ -102,7 +116,7 @@ protected:
     std::vector<RenderingBuffer*> m_pPages;
     RenderOptions m_options;
     RenderingBuffer* m_pRenderBuf;
-    //DocCursor       m_cursor;
+    OverlaysGenerator* m_pOverlaysGenerator;
 
     //renderization parameters
     double m_expand;
@@ -114,20 +128,19 @@ protected:
     Pixels m_vxOrg, m_vyOrg;
     VSize  m_viewportSize;
 
-    //selection rectangle
-    bool                m_fSelRectVisible;
-    Rectangle<Pixels>   m_selRect;
-
+    //caret and other visual effects
+    Caret*              m_pCaret;
+    DocCursor*          m_pCursor;
+    DraggedImage*       m_pDragImg;
+    SelectionRectangle* m_pSelRect;
+    PlaybackHighlight*  m_pHighlighted;
+    TimeGrid*           m_pTimeGrid;
+    list<Handler*>      m_handlers;
+    SelectionHighlight* m_pSelObjects;
+//    TempoLine* m_pTempoLine;
     //line to highlight tempo when playing back a score
     bool                m_fTempoLineVisible;
     Rectangle<Pixels>   m_tempoLine;
-
-    //caret
-    Caret* m_pCaret;
-    CaretPositioner* m_pCaretPositioner;
-
-    //objects currently highlighted
-    std::list<ImoStaffObj*> m_highlighted;
 
     //bounds for each displayed page
     std::list<URect> m_pageBounds;
@@ -145,25 +158,38 @@ public:
     void set_viewport_at_page_center(Pixels screenWidth);
     virtual void set_viewport_for_page_fit_full(Pixels screenWidth) = 0;
     void use_cursor(DocCursor* pCursor);
+    void use_selection_set(SelectionSet* pSelectionSet);
+    void add_visual_effect(VisualEffect* pEffect);
+    void set_visual_effects_for_mode(int mode);
+
+    //renderization related
+    VRect get_damaged_rectangle();
+    UPoint get_page_origin_for(GmoObj* pGmo);
+    void draw_all_visual_effects();
+    void draw_selection_rectangle();
+    void draw_playback_highlight();
+    void draw_caret();
+    void draw_dragged_image();
+    void draw_selected_objects();
+    void draw_handler(Handler* pHandler);
 
     //scrolling support
     virtual void get_view_size(Pixels* xWidth, Pixels* yHeight) = 0;
 
     //selection rectangle
-    void show_selection_rectangle(Pixels x1, Pixels y1, Pixels x2, Pixels y2);
+    void start_selection_rectangle(LUnits x1, LUnits y1);
     void hide_selection_rectangle();
-    void update_selection_rectangle(Pixels x2, Pixels y2);
+    void update_selection_rectangle(LUnits x2, LUnits y2);
 
     //tempo line
     void show_tempo_line(Pixels x1, Pixels y1, Pixels x2, Pixels y2);
     void hide_tempo_line();
     void update_tempo_line(Pixels x2, Pixels y2);
 
-    //highlighting staffobjs
+    //highlighting notes and rests
     void highlight_object(ImoStaffObj* pSO);
     void remove_highlight_from_object(ImoStaffObj* pSO);
     void remove_all_highlight();
-    void discard_all_highlight();
 
     // The View is requested to re-paint itself onto the window
     virtual void redraw_bitmap();
@@ -171,14 +197,23 @@ public:
     //inline DocCursor& get_cursor() { return m_cursor; }
 
     //caret
-    bool update_caret();
     void show_caret();
     void hide_caret();
-    bool toggle_caret();
+    void toggle_caret();
     string get_caret_timecode();
-    //void caret_right();
-    //void caret_left();
-    //void caret_to_object(ImoId nId);
+    DocCursorState click_event_to_cursor_state(int iPage, LUnits x, LUnits y,
+                                               ImoObj* pImo, GmoObj* pGmo);
+    bool is_caret_visible();
+    bool is_caret_blink_enabled();
+
+    //dragged image associated to mouse cursor
+    void move_drag_image(LUnits x, LUnits y);
+    void set_drag_image(GmoShape* pShape, bool fGetOwnership, UPoint offset);
+    void show_drag_image(bool value);
+    void enable_drag_image(bool fEnabled);
+
+    //handlers
+    Handler* handlers_hit_test(LUnits x, LUnits y);
 
     //graphical model
     GraphicModel* get_graphic_model();
@@ -186,12 +221,14 @@ public:
     //coordinates conversions
     void screen_point_to_page_point(double* x, double* y);
     void model_point_to_screen(double* x, double* y, int iPage);
+    UPoint screen_point_to_model_point(Pixels x, Pixels y);
     virtual int page_at_screen_point(double x, double y);
     virtual bool trim_rectangle_to_be_on_pages(double* xLeft, double* yTop,
                                                double* xRight, double* yBottom);
     virtual void screen_rectangle_to_page_rectangles(Pixels x1, Pixels y1,
                                                      Pixels x2, Pixels y2,
                                                      list<PageRectangle*>* rectangles);
+    LUnits pixels_to_lunits(Pixels pixels);
 
     //scale
     void zoom_in(Pixels x=0, Pixels y=0);
@@ -211,14 +248,16 @@ public:
     virtual void on_print_page(int page, double scale, VPoint viewport);
     VSize get_page_size_in_pixels(int nPage);
 
+    //info
+    AreaInfo* get_info_for_point(Pixels x, Pixels y);
+
 protected:
     GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer);
 
+    void draw_all();
     void draw_graphic_model();
-    void draw_sel_rectangle();
     void draw_tempo_line();
-    void draw_caret();
-    void add_controls();
+    void draw_time_grid();
     void generate_paths();
     virtual void collect_page_bounds() = 0;
     void draw_visible_pages(int minPage, int maxPage);
@@ -236,6 +275,11 @@ protected:
     void determine_visible_pages(int* minPage, int* maxPage);
     bool is_valid_viewport();
     void delete_rectangles(list<PageRectangle*>& rectangles);
+    void layout_caret();
+    void layout_time_grid();
+    void layout_selection_highlight();
+    void delete_all_handlers();
+    void add_handler(int iHandler, GmoObj* pOwnerGmo);
 
 };
 

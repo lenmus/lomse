@@ -43,7 +43,6 @@ namespace lomse
 class GmoBoxSystem;
 class GmoBoxSliceInstr;
 class ImoInstrument;
-//class lmTimeGridTable;
 
 
 //---------------------------------------------------------------------------------------
@@ -58,7 +57,6 @@ protected:
 //    LUnits    m_xStart;
 //    LUnits    m_xEnd;
 //
-//    lmTimeGridTable*            m_pGridTable;
 
 public:
     GmoBoxSlice(int nAbsMeasure, ImoObj* pCreatorImo);    //, int nNumInSystem,
@@ -90,9 +88,7 @@ public:
 //
 //    //overrides
 //    void SetBottomSpace(LUnits uyValue);
-//
-//    //grid table: xPositions/timepos
-//    inline void SetTimeGridTable(lmTimeGridTable* pGridTable) { m_pGridTable = pGridTable; }
+
 //    TimeUnits GetGridTimeForPosition(LUnits uxPos);
 //    void DrawTimeLines(lmPaper* pPaper, wxColour color, LUnits uyTop,
 //                       LUnits uyBottom);

@@ -37,6 +37,7 @@
 #include "lomse_system_layouter.h"
 #include "lomse_injectors.h"
 #include "lomse_document.h"
+#include "lomse_graphical_model.h"
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
 #include "lomse_box_system.h"
@@ -173,7 +174,7 @@ public:
 
         m_pDocLayouter = LOMSE_NEW DocLayouter( m_pDoc->get_im_model(), m_libraryScope);
         m_pDocLayouter->layout_document();
-        m_pGModel = m_pDocLayouter->get_gm_model();
+        m_pGModel = m_pDocLayouter->get_graphic_model();
         CHECK( m_pGModel != NULL );
 
         m_pScoreLayouter = m_pDocLayouter->get_score_layouter();
@@ -1832,213 +1833,7 @@ SUITE(ScoreLayouterTest)
 //////
 
 #endif
-//////}
-
-
-
-//////-------------------------------------------------------------------------------------
-////// Unit tests for class lmTimeGridTable
-//////
-//////  lmTimeGridTable is a table with the relation timepos <-> position for all valid
-//////  positions to insert a note. The recorded positions are for the center of note heads
-//////  or rests. The last position is for the barline (if exists).
-//////  This object is responsible for supplying all valid timepos and their positions so
-//////  that other objects (in fact only lmBoxSlice) could:
-//////      a) Determine the timepos to assign to a mouse click in a certain position.
-//////      b) Draw a grid of valid timepos
-//////
-////// tests:
-//////      ? empty_score_builds_empty_table
-//////      ? just_barline_creates_one_entry
-//////      ? one_note_no_barline_creates_two_entries
-//////      ? three_consecutive_notes_creates_four_entries
-//////      ? one_chord_and_barline_creates_two_entries
-//////      ? when_two_notes_at_same_time_choose_the_shortest_one
-//////      ? interpolate_missing_time_between_two_notes
-//////      ? several_lines_with_different_durations
-//////
-//////
-//////-------------------------------------------------------------------------------------
-////
-////class lmTimeGridTableTestFixture
-////{
-////public:
-////
-////    wxSize m_ScoreSize;
-////    double m_rScale;
-////    lmScore* m_pScore;
-////    ScoreLayouter* m_pScoreLayouter;
-////    lmBoxScore* m_pBoxScore;
-////    lmTimeGridTable* m_pLine;
-////
-////
-////    void load_score_for_test(const wxString& sFilename)
-////    {
-////        delete_test_data();
-////        wxString sPath = g_pPaths->GetTestScoresPath();
-////        wxFileName oFilename(sPath, sFilename, "lms"), wxPATH_NATIVE);
-////        lmLDPParser parser;
-////        m_pScore = parser.ParseFile( oFilename.GetFullPath() );
-////        CHECK( m_pScore != NULL );
-////
-////        lmAggDrawer* pDrawer = LOMSE_NEW lmAggDrawer(m_ScoreSize.x, m_ScoreSize.y, m_rScale);
-////        lmPaper m_oPaper;
-////        m_oPaper.SetDrawer(pDrawer);
-////        m_pScoreLayouter = LOMSE_NEW ScoreLayouter(&m_oPaper);
-////        m_pBoxScore = m_pScore->Layout(&m_oPaper, m_pScoreLayouter);
-////        SystemLayouter* pSysFmt = (SystemLayouter*) m_pScoreLayouter->GetSystemScoreLayouter(0);
-////        lmColumnStorage* pColStorage = pSysFmt->GetColumnData(0);
-////        m_pLine = LOMSE_NEW lmTimeGridTable(pColStorage);
-////
-////        //wxLogMessage( sFilename );
-////        //wxLogMessage( m_pLine->Dump() );
-////    }
-////
-////    void delete_test_data()
-////    {
-////        if (m_pScore)
-////        {
-////            delete m_pScore;
-////            m_pScore = (lmScore*)NULL;
-////        }
-////        if (m_pScoreLayouter)
-////        {
-////            delete m_pScoreLayouter;
-////            m_pScoreLayouter = (ScoreLayouter*)NULL;
-////        }
-////        if (m_pBoxScore)
-////        {
-////            delete m_pBoxScore;
-////            m_pBoxScore = (lmBoxScore*)NULL;
-////        }
-////        if (m_pLine)
-////        {
-////            delete m_pLine;
-////            m_pLine = (lmTimeGridTable*)NULL;
-////        }
-////    }
-////
-////    // setUp
-////    lmTimeGridTableTestFixture()
-////    {
-////        m_ScoreSize = wxSize(700, 1000);
-////        m_rScale = 1.0f * lmSCALE;
-////        m_pScore = (lmScore*)NULL;
-////        m_pScoreLayouter = (ScoreLayouter*)NULL;
-////        m_pBoxScore = (lmBoxScore*)NULL;
-////        m_pLine = (lmTimeGridTable*)NULL;
-////    }
-////
-////    // tearDown
-////    ~lmTimeGridTableTestFixture()
-////    {
-////        delete_test_data();
-////    }
-////
-////};
-////
-////
-////
-////SUITE(lmTimeGridTableTest)
-////{
-////
-////    TEST_FIXTURE(lmTimeGridTableTestFixture, empty_score_builds_empty_table)
-////    {
-////        load_score_for_test("00010-empty-renders-one-staff");
-////        CHECK( m_pLine->GetSize() == 0 );
-////        delete_test_data();
-////    }
-////
-////    TEST_FIXTURE(lmTimeGridTableTestFixture, just_barline_creates_one_entry)
-////    {
-////        load_score_for_test("90003-empty-bar-with-barline");
-////        CHECK( m_pLine->GetSize() == 1 );
-////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
-////        CHECK( m_pLine->GetDuration(0) == 0.0f );
-////        delete_test_data();
-////    }
-////
-////    TEST_FIXTURE(lmTimeGridTableTestFixture, one_note_no_barline_creates_two_entries)
-////    {
-////        load_score_for_test("00022-spacing-in-prolog-one-note");
-////        CHECK( m_pLine->GetSize() == 2 );
-////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
-////        CHECK( m_pLine->GetDuration(0) == 64.0f );
-////        CHECK( m_pLine->GetTimepos(1) == 64.0f );
-////        CHECK( m_pLine->GetDuration(1) == 0.0f );
-////        delete_test_data();
-////    }
-////
-////    TEST_FIXTURE(lmTimeGridTableTestFixture, three_consecutive_notes_creates_four_entries)
-////    {
-////        load_score_for_test("00023-same-duration-notes-equally-spaced");
-////        CHECK( m_pLine->GetSize() == 4 );
-////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
-////        CHECK( m_pLine->GetDuration(0) == 64.0f );
-////        CHECK( m_pLine->GetTimepos(1) == 64.0f );
-////        CHECK( m_pLine->GetDuration(1) == 64.0f );
-////        CHECK( m_pLine->GetTimepos(2) == 128.0f );
-////        CHECK( m_pLine->GetDuration(2) == 64.0f );
-////        CHECK( m_pLine->GetTimepos(3) == 192.0f );
-////        CHECK( m_pLine->GetDuration(3) == 0.0f );
-////        delete_test_data();
-////    }
-////
-////    TEST_FIXTURE(lmTimeGridTableTestFixture, one_chord_and_barline_creates_two_entries)
-////    {
-////        load_score_for_test("00030-chord-notes-are-aligned");
-////        CHECK( m_pLine->GetSize() == 2 );
-////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
-////        CHECK( m_pLine->GetDuration(0) == 256.0f );
-////        CHECK( m_pLine->GetTimepos(1) == 256.0f );
-////        CHECK( m_pLine->GetDuration(1) == 0.0f );
-////        delete_test_data();
-////    }
-////
-////    TEST_FIXTURE(lmTimeGridTableTestFixture, when_two_notes_at_same_time_choose_the_shortest_one)
-////    {
-////        load_score_for_test("90001-two-notes-different-duration");
-////        CHECK( m_pLine->GetSize() == 2 );
-////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
-////        CHECK( m_pLine->GetDuration(0) == 32.0f );
-////        CHECK( m_pLine->GetTimepos(1) == 32.0f );
-////        CHECK( m_pLine->GetDuration(1) == 0.0f );
-////        delete_test_data();
-////    }
-////
-////    TEST_FIXTURE(lmTimeGridTableTestFixture, interpolate_missing_time_between_two_notes)
-////    {
-////        load_score_for_test("90004-two-voices-missing-timepos");
-////        CHECK( m_pLine->GetSize() == 4 );
-////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
-////        CHECK( m_pLine->GetDuration(0) == 32.0f );
-////        CHECK( m_pLine->GetTimepos(1) == 32.0f );
-////        CHECK( m_pLine->GetDuration(1) == 0.0f );
-////        CHECK( m_pLine->GetTimepos(2) == 64.0f );
-////        CHECK( m_pLine->GetDuration(2) == 64.0f );
-////        CHECK( m_pLine->GetTimepos(3) == 128.0f );
-////        CHECK( m_pLine->GetDuration(3) == 0.0f );
-////        delete_test_data();
-////    }
-////
-////    TEST_FIXTURE(lmTimeGridTableTestFixture, several_lines_with_different_durations)
-////    {
-////        load_score_for_test("90002-several-lines-with-different-durations");
-////        CHECK( m_pLine->GetSize() == 5 );
-////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
-////        CHECK( m_pLine->GetDuration(0) == 64.0f );
-////        CHECK( m_pLine->GetTimepos(1) == 64.0f );
-////        CHECK( m_pLine->GetDuration(1) == 32.0f );
-////        CHECK( m_pLine->GetTimepos(2) == 96.0f );
-////        CHECK( m_pLine->GetDuration(2) == 16.0f );
-////        CHECK( m_pLine->GetTimepos(3) == 112.0f );
-////        CHECK( m_pLine->GetDuration(3) == 16.0f );
-////        CHECK( m_pLine->GetTimepos(4) == 128.0f );
-////        CHECK( m_pLine->GetDuration(4) == 0.0f );
-////        delete_test_data();
-////    }
-
-};
+}
 
 
 
@@ -2153,4 +1948,216 @@ SUITE(ColumnsBuilderTest)
 //        CHECK( scoreLyt.my_get_staves_height() == 5940.0f );    //1000 * 3 + 735 * 4
 //    }
 //
+};
+
+
+
+//---------------------------------------------------------------------------------------
+// TimeGridTable tests
+//---------------------------------------------------------------------------------------
+class TimeGridTableTestFixture
+{
+public:
+
+////    wxSize m_ScoreSize;
+////    double m_rScale;
+////    Score* m_pScore;
+////    ScoreLayouter* m_pScoreLayouter;
+////    BoxScore* m_pBoxScore;
+////    TimeGridTable* m_pLine;
+////
+////
+////    void load_score_for_test(const wxString& sFilename)
+////    {
+////        delete_test_data();
+////        wxString sPath = g_pPaths->GetTestScoresPath();
+////        wxFileName oFilename(sPath, sFilename, "lms"), wxPATH_NATIVE);
+////        lmLDPParser parser;
+////        m_pScore = parser.ParseFile( oFilename.GetFullPath() );
+////        CHECK( m_pScore != NULL );
+////
+////        lmAggDrawer* pDrawer = LOMSE_NEW lmAggDrawer(m_ScoreSize.x, m_ScoreSize.y, m_rScale);
+////        lmPaper m_oPaper;
+////        m_oPaper.SetDrawer(pDrawer);
+////        m_pScoreLayouter = LOMSE_NEW ScoreLayouter(&m_oPaper);
+////        m_pBoxScore = m_pScore->Layout(&m_oPaper, m_pScoreLayouter);
+////        SystemLayouter* pSysFmt = (SystemLayouter*) m_pScoreLayouter->GetSystemScoreLayouter(0);
+////        lmColumnStorage* pColStorage = pSysFmt->GetColumnData(0);
+////        m_pLine = LOMSE_NEW TimeGridTable(pColStorage);
+////
+////        //wxLogMessage( sFilename );
+////        //wxLogMessage( m_pLine->Dump() );
+////    }
+////
+////    void delete_test_data()
+////    {
+////        if (m_pScore)
+////        {
+////            delete m_pScore;
+////            m_pScore = (lmScore*)NULL;
+////        }
+////        if (m_pScoreLayouter)
+////        {
+////            delete m_pScoreLayouter;
+////            m_pScoreLayouter = (ScoreLayouter*)NULL;
+////        }
+////        if (m_pBoxScore)
+////        {
+////            delete m_pBoxScore;
+////            m_pBoxScore = (lmBoxScore*)NULL;
+////        }
+////        if (m_pLine)
+////        {
+////            delete m_pLine;
+////            m_pLine = (TimeGridTable*)NULL;
+////        }
+////    }
+
+    // setUp
+    TimeGridTableTestFixture()
+    {
+//        m_ScoreSize = wxSize(700, 1000);
+//        m_rScale = 1.0f * lmSCALE;
+//        m_pScore = (lmScore*)NULL;
+//        m_pScoreLayouter = (ScoreLayouter*)NULL;
+//        m_pBoxScore = (lmBoxScore*)NULL;
+//        m_pLine = (TimeGridTable*)NULL;
+    }
+
+    // tearDown
+    ~TimeGridTableTestFixture()
+    {
+//        delete_test_data();
+    }
+
+};
+
+
+SUITE(TimeGridTableTest)
+{
+
+//    TEST_FIXTURE(TimeGridTableTestFixture, tablegrid_0)
+//    {
+//        //@ initial test: just display result
+//        Document doc(m_libraryScope);
+//        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
+//            "(instrument (musicData "
+//            "(clef G)(n c4 e p1 g+)(n d4 e p1 g-)(n g4 q)"
+//            ")) )))" );
+//        GraphicModel gmodel;
+//        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+//
+//        scoreLyt.layout();     //this creates and layouts columns
+//
+//        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(0);
+//
+////        scoreLyt.dump_column_data(0);
+//        //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
+//        //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
+//        //cout << "Gross width = " << pColLyt->get_gross_width() << endl;
+//
+//        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
+//        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 356.42f) );
+//
+//        scoreLyt.my_delete_all();
+//    }
+
+
+////    TEST_FIXTURE(TimeGridTableTestFixture, empty_score_builds_empty_table)
+////    {
+////        load_score_for_test("00010-empty-renders-one-staff");
+////        CHECK( m_pLine->GetSize() == 0 );
+////        delete_test_data();
+////    }
+////
+////    TEST_FIXTURE(TimeGridTableTestFixture, just_barline_creates_one_entry)
+////    {
+////        load_score_for_test("90003-empty-bar-with-barline");
+////        CHECK( m_pLine->GetSize() == 1 );
+////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
+////        CHECK( m_pLine->GetDuration(0) == 0.0f );
+////        delete_test_data();
+////    }
+////
+////    TEST_FIXTURE(TimeGridTableTestFixture, one_note_no_barline_creates_two_entries)
+////    {
+////        load_score_for_test("00022-spacing-in-prolog-one-note");
+////        CHECK( m_pLine->GetSize() == 2 );
+////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
+////        CHECK( m_pLine->GetDuration(0) == 64.0f );
+////        CHECK( m_pLine->GetTimepos(1) == 64.0f );
+////        CHECK( m_pLine->GetDuration(1) == 0.0f );
+////        delete_test_data();
+////    }
+////
+////    TEST_FIXTURE(TimeGridTableTestFixture, three_consecutive_notes_creates_four_entries)
+////    {
+////        load_score_for_test("00023-same-duration-notes-equally-spaced");
+////        CHECK( m_pLine->GetSize() == 4 );
+////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
+////        CHECK( m_pLine->GetDuration(0) == 64.0f );
+////        CHECK( m_pLine->GetTimepos(1) == 64.0f );
+////        CHECK( m_pLine->GetDuration(1) == 64.0f );
+////        CHECK( m_pLine->GetTimepos(2) == 128.0f );
+////        CHECK( m_pLine->GetDuration(2) == 64.0f );
+////        CHECK( m_pLine->GetTimepos(3) == 192.0f );
+////        CHECK( m_pLine->GetDuration(3) == 0.0f );
+////        delete_test_data();
+////    }
+////
+////    TEST_FIXTURE(TimeGridTableTestFixture, one_chord_and_barline_creates_two_entries)
+////    {
+////        load_score_for_test("00030-chord-notes-are-aligned");
+////        CHECK( m_pLine->GetSize() == 2 );
+////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
+////        CHECK( m_pLine->GetDuration(0) == 256.0f );
+////        CHECK( m_pLine->GetTimepos(1) == 256.0f );
+////        CHECK( m_pLine->GetDuration(1) == 0.0f );
+////        delete_test_data();
+////    }
+////
+////    TEST_FIXTURE(TimeGridTableTestFixture, when_two_notes_at_same_time_choose_the_shortest_one)
+////    {
+////        load_score_for_test("90001-two-notes-different-duration");
+////        CHECK( m_pLine->GetSize() == 2 );
+////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
+////        CHECK( m_pLine->GetDuration(0) == 32.0f );
+////        CHECK( m_pLine->GetTimepos(1) == 32.0f );
+////        CHECK( m_pLine->GetDuration(1) == 0.0f );
+////        delete_test_data();
+////    }
+////
+////    TEST_FIXTURE(TimeGridTableTestFixture, interpolate_missing_time_between_two_notes)
+////    {
+////        load_score_for_test("90004-two-voices-missing-timepos");
+////        CHECK( m_pLine->GetSize() == 4 );
+////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
+////        CHECK( m_pLine->GetDuration(0) == 32.0f );
+////        CHECK( m_pLine->GetTimepos(1) == 32.0f );
+////        CHECK( m_pLine->GetDuration(1) == 0.0f );
+////        CHECK( m_pLine->GetTimepos(2) == 64.0f );
+////        CHECK( m_pLine->GetDuration(2) == 64.0f );
+////        CHECK( m_pLine->GetTimepos(3) == 128.0f );
+////        CHECK( m_pLine->GetDuration(3) == 0.0f );
+////        delete_test_data();
+////    }
+////
+////    TEST_FIXTURE(TimeGridTableTestFixture, several_lines_with_different_durations)
+////    {
+////        load_score_for_test("90002-several-lines-with-different-durations");
+////        CHECK( m_pLine->GetSize() == 5 );
+////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
+////        CHECK( m_pLine->GetDuration(0) == 64.0f );
+////        CHECK( m_pLine->GetTimepos(1) == 64.0f );
+////        CHECK( m_pLine->GetDuration(1) == 32.0f );
+////        CHECK( m_pLine->GetTimepos(2) == 96.0f );
+////        CHECK( m_pLine->GetDuration(2) == 16.0f );
+////        CHECK( m_pLine->GetTimepos(3) == 112.0f );
+////        CHECK( m_pLine->GetDuration(3) == 16.0f );
+////        CHECK( m_pLine->GetTimepos(4) == 128.0f );
+////        CHECK( m_pLine->GetDuration(4) == 0.0f );
+////        delete_test_data();
+////    }
+
 };

@@ -33,6 +33,8 @@
 #include "lomse_stack.h"
 #include "lomse_internal_model.h"
 #include "lomse_document_cursor.h"
+#include "lomse_pitch.h"            //EAccidentals
+#include "lomse_im_attributes.h"
 
 #include <sstream>
 using namespace std;
@@ -42,6 +44,7 @@ namespace lomse
 
 //forward declarations
 class Document;
+class SelectionSet;
 
 //---------------------------------------------------------------------------------------
 // interface for any command to modify the document
@@ -54,11 +57,12 @@ protected:
     uint_least16_t m_flags;
 
     enum {
-        k_reversible        = 0x0001,
-        k_recordable        = 0x0002,
+        k_reversible                    = 0x0001,
+        k_recordable                    = 0x0002,
+        k_target_set_in_constructor     = 0x0004,
     };
 
-    DocCommand() : m_flags(0) {}
+    DocCommand(const string& name) : m_name(name), m_flags(0) {}
 
 public:
     virtual ~DocCommand() {}
@@ -71,9 +75,11 @@ public:
     inline std::string get_name() { return m_name; }
     inline bool is_reversible() { return m_flags &  k_reversible; }
     inline bool is_recordable() { return m_flags &  k_recordable; }
+    inline bool is_target_set_in_constructor() { return m_flags &  k_target_set_in_constructor; }
     inline string get_error() { return m_error; }
 
     //actions
+    virtual int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection)=0;
     virtual int perform_action(Document* pDoc, DocCursor* pCursor)=0;
     virtual void undo_action(Document* pDoc, DocCursor* pCursor);
 
@@ -90,7 +96,7 @@ class DocCmdSimple : public DocCommand
 {
 protected:
 
-    DocCmdSimple() : DocCommand() {}
+    DocCmdSimple(const string& name) : DocCommand(name) {}
 
 public:
     virtual ~DocCmdSimple() {}
@@ -102,7 +108,7 @@ public:
 class DocCmdComposite : public DocCommand
 {
 protected:
-    DocCmdComposite() : DocCommand() {}
+    DocCmdComposite(const string& name) : DocCommand(name) {}
 
 public:
     virtual ~DocCmdComposite() {}
@@ -144,7 +150,8 @@ private:
 public:
     DocCommandExecuter(Document* target);
     virtual ~DocCommandExecuter() {}
-    virtual int execute(DocCursor* pCursor, DocCommand* pCmd);
+    virtual int execute(DocCursor* pCursor, DocCommand* pCmd,
+                        SelectionSet* pSelection=NULL);
     virtual void undo(DocCursor* pCursor);
     virtual void redo(DocCursor* pCursor);
     inline string get_error() { return m_error; }
@@ -169,12 +176,15 @@ protected:
     ImoId m_tieId;
 
 public:
-    CmdAddTie(ImoId startNR, ImoId endNR);
+    CmdAddTie(const string& name="Add tie");
     virtual ~CmdAddTie() {};
 
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     void undo_action(Document* pDoc, DocCursor* pCursor);
+
+//    int set_target(ImoId startNR, ImoId endNR);
 };
 
 //---------------------------------------------------------------------------------------
@@ -187,9 +197,10 @@ protected:
     string m_source;
 
 public:
-    CmdAddTuplet(ImoId startNR, ImoId endNR, const string& src);
+    CmdAddTuplet(const string& src, const string& name="Add tuplet");
     virtual ~CmdAddTuplet() {};
 
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     void undo_action(Document* pDoc, DocCursor* pCursor);
@@ -202,11 +213,80 @@ protected:
     ImoId m_beforeId;
 
 public:
-    CmdBreakBeam(ImoNoteRest* pBeforeNR);
+    CmdBreakBeam(const string& name="Break beam");
     virtual ~CmdBreakBeam() {};
 
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
+};
+
+//---------------------------------------------------------------------------------------
+class CmdChangeAccidentals : public DocCmdSimple
+{
+protected:
+    EAccidentals m_acc;
+    list<ImoId> m_notes;
+    list<FPitch> m_oldPitch;
+
+public:
+    CmdChangeAccidentals(EAccidentals acc, const string& name="Change accidentals");
+    virtual ~CmdChangeAccidentals() {};
+
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_do_nothing; }
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+
+};
+
+//---------------------------------------------------------------------------------------
+class CmdChangeAttribute : public DocCmdSimple
+{
+protected:
+    ImoId           m_targetId;
+    EImoAttribute   m_attrb;
+    EDataType       m_dataType;
+    string          m_oldString;
+    string          m_newString;
+    double          m_oldDouble;
+    double          m_newDouble;
+    int             m_oldInt;
+    int             m_newInt;
+    Color           m_oldColor;
+    Color           m_newColor;
+
+public:
+    CmdChangeAttribute(EImoAttribute attrb, const string& value,
+                       const string& cmdName="");
+    CmdChangeAttribute(EImoAttribute attrb, double value,
+                       const string& cmdName="");
+    CmdChangeAttribute(EImoAttribute attrb, int value,
+                       const string& cmdName="");
+    CmdChangeAttribute(EImoAttribute attrb, Color value,
+                       const string& cmdName="");
+
+    CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb, const string& value,
+                       const string& cmdName="");
+    CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb, double value,
+                       const string& cmdName="");
+    CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb, int value,
+                       const string& cmdName="");
+    CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb, Color value,
+                       const string& cmdName="");
+
+    virtual ~CmdChangeAttribute() {};
+
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_do_nothing; }
+
+protected:
+    void set_default_name();
+    void save_current_value(ImoObj* pImo);
+    int set_target(ImoObj* pImo);
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -218,9 +298,10 @@ protected:
     list<int> m_oldDots;
 
 public:
-    CmdChangeDots(const list<ImoId>& noteRests, int dots);
+    CmdChangeDots(int dots, const string& name="Change dots");
     virtual ~CmdChangeDots() {};
 
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     void undo_action(Document* pDoc, DocCursor* pCursor);
@@ -234,25 +315,37 @@ protected:
     int             m_operation;
     ImoId           m_targetId;
     DocCursorState  m_curState;
+    DocCursorState  m_targetState;
 
 public:
-    CmdCursor(int cmd, ImoId id=k_no_imoid);
+    CmdCursor(int cmd, const string& name="");
+    CmdCursor(int cmd, ImoId id, const string& name="");
+    CmdCursor(DocCursorState& state, const string& name="");
     virtual ~CmdCursor() {};
 
-    enum { k_move_next=0, k_move_prev, k_enter, k_exit, k_point_to, k_refresh, };
+    enum { k_move_next=0, k_move_prev, k_enter, k_exit, k_point_to,
+           k_to_state, };
 
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
     void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
+
+protected:
+    void set_default_name();
 };
 
 //---------------------------------------------------------------------------------------
 class CmdDeleteBlockLevelObj : public DocCmdSimple
 {
+protected:
+    ImoId m_targetId;
+
 public:
-    CmdDeleteBlockLevelObj();
+    CmdDeleteBlockLevelObj(const string& name="");
     virtual ~CmdDeleteBlockLevelObj() {};
 
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_update_after_deletion; }
 };
@@ -261,39 +354,80 @@ public:
 class CmdDeleteRelation : public DocCmdSimple
 {
 protected:
-    ImoId m_relId;
+    int m_type;
+    list<ImoId> m_relobjs;
 
 public:
-    CmdDeleteRelation(ImoRelObj* pRO);
+    CmdDeleteRelation(const string& name="");
+    CmdDeleteRelation(int type, const string& name="");
     virtual ~CmdDeleteRelation() {};
 
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
 };
 
 //---------------------------------------------------------------------------------------
+class CmdDeleteSelection : public DocCmdSimple
+{
+protected:
+    list<ImoId> m_idSO;     //StaffObjs to delete
+    list<ImoId> m_idRO;     //RelObjs to delete
+    list<ImoId> m_idAO;     //AuxObjs to delete
+    list<ImoId> m_idOther;  //other objects to delete
+
+public:
+    CmdDeleteSelection(const string& name="Delete selection");
+    virtual ~CmdDeleteSelection() {};
+
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_update_after_deletion; }
+
+protected:
+    list<ImoId> m_relIds;   //when the action is performed, all relations in deleted
+                            //staffobjs are temporarily saved here
+
+    void cursor_to_first_staffobj(Document* pDoc, DocCursor* pCursor);
+    void delete_staffobjs(Document* pDoc);
+    void delete_relobjs(Document* pDoc);
+    void delete_auxobjs(Document* pDoc);
+    void delete_other(Document* pDoc);
+    void delete_staffobj(ImoStaffObj* pImo);
+    void reorganize_relations(Document* pDoc);
+
+};
+
+//---------------------------------------------------------------------------------------
 class CmdDeleteStaffObj : public DocCmdSimple
 {
+protected:
+    ImoId   m_id;
+
 public:
-    CmdDeleteStaffObj();
+    CmdDeleteStaffObj(const string& name="");
     virtual ~CmdDeleteStaffObj() {};
 
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_update_after_deletion; }
 };
 
 //---------------------------------------------------------------------------------------
+// abstract, base for all CmdInsert commands
 class CmdInsertObj : public DocCmdSimple
 {
 protected:
+    ImoId m_idAt;
     ImoId m_lastInsertedId;
     string m_source;
 
-    CmdInsertObj() : DocCmdSimple(), m_lastInsertedId(k_no_imoid) {}
+    CmdInsertObj(const string& name) : DocCmdSimple(name), m_lastInsertedId(k_no_imoid) {}
 
 public:
     ~CmdInsertObj() {}
 
+    virtual int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     inline ImoId last_inserted_id() { return m_lastInsertedId; }
 
 protected:
@@ -309,8 +443,8 @@ protected:
     bool m_fFromSource;
 
 public:
-    CmdInsertBlockLevelObj(int type);
-    CmdInsertBlockLevelObj(const string& source);
+    CmdInsertBlockLevelObj(int type, const string& name="");
+    CmdInsertBlockLevelObj(const string& source, const string& name="");
     virtual ~CmdInsertBlockLevelObj() {};
 
     int perform_action(Document* pDoc, DocCursor* pCursor);
@@ -324,20 +458,6 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-class CmdInsertStaffObj : public CmdInsertObj
-{
-protected:
-
-public:
-    CmdInsertStaffObj(const string& source);
-    virtual ~CmdInsertStaffObj() {};
-
-    int perform_action(Document* pDoc, DocCursor* pCursor);
-    void undo_action(Document* pDoc, DocCursor* pCursor);
-    int get_cursor_update_policy() { return k_update_after_insertion; }
-};
-
-//---------------------------------------------------------------------------------------
 class CmdInsertManyStaffObjs : public CmdInsertObj
 {
 protected:
@@ -348,6 +468,7 @@ public:
                            const string& name="Insert staff objects");
     virtual ~CmdInsertManyStaffObjs() {};
 
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_update_after_insertion; }
 
@@ -357,16 +478,52 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+class CmdInsertStaffObj : public CmdInsertObj
+{
+protected:
+
+public:
+    CmdInsertStaffObj(const string& source, const string& name="");
+    virtual ~CmdInsertStaffObj() {};
+
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_update_after_insertion; }
+};
+
+//---------------------------------------------------------------------------------------
 class CmdJoinBeam : public DocCmdSimple
 {
 protected:
-    list<ImoId> m_notesId;
+    list<ImoId> m_noteRests;
 
 public:
-    CmdJoinBeam(const list<ImoId>& notes);
+    CmdJoinBeam(const string& name="Join beam");
     virtual ~CmdJoinBeam() {};
 
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_do_nothing; }
+};
+
+//---------------------------------------------------------------------------------------
+class CmdMoveObjectPoint : public DocCmdSimple
+{
+protected:
+    ImoId   m_targetId;
+    int     m_pointIndex;
+    TPoint  m_oldPos;
+    UPoint  m_shift;
+
+public:
+    CmdMoveObjectPoint(int pointIndex, UPoint shift,
+                       const string& name="Move object point");
+    virtual ~CmdMoveObjectPoint() {};
+
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
 };
 

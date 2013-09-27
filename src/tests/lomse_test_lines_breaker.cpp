@@ -38,6 +38,7 @@
 #include "lomse_staffobjs_table.h"
 #include "lomse_internal_model.h"
 #include "lomse_score_layouter.h"
+#include "lomse_graphical_model.h"
 
 #include <vector>
 

@@ -52,13 +52,14 @@ protected:
     UPoint m_uPos;
     double m_fontSize;
     ImoMetronomeMark* m_pCreatorImo;
+    Color m_color;
 
 public:
     MetronomeMarkEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                           int iInstr, int iStaff);
     ~MetronomeMarkEngraver() {}
 
-    GmoShape* create_shape(ImoMetronomeMark* pImo, UPoint uPos);
+    GmoShape* create_shape(ImoMetronomeMark* pImo, UPoint uPos, Color color=Color(0,0,0));
 
 protected:
     void create_main_container_shape();

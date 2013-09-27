@@ -70,9 +70,16 @@ public:
     void rewind(int pathId = 0) { m_nCurVertex = 0; }
     unsigned vertex(double* px, double* py);
 
+    //support for handlers
+    int get_num_handlers();
+    UPoint get_handler_point(int i);
+    void on_handler_dragged(int iHandler, UPoint newPos);
+    void on_end_of_handler_drag(int iHandler, UPoint newPos);
+
 protected:
     void save_points(UPoint* points);
     void compute_vertices();
+    void compute_bounds();
 };
 
 //---------------------------------------------------------------------------------------
@@ -100,6 +107,7 @@ public:
 protected:
     void save_points(UPoint* points);
     void compute_vertices();
+    void compute_bounds();
 };
 
 

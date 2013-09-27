@@ -53,12 +53,14 @@ AccidentalsEngraver::AccidentalsEngraver(LibraryScope& libraryScope,
 GmoShapeAccidentals* AccidentalsEngraver::create_shape(ImoObj* pCreatorImo,
                                                        UPoint uPos,
                                                        EAccidentals accidentals,
-                                                       bool fCautionary)
+                                                       bool fCautionary,
+                                                       Color color)
 {
     m_accidentals = accidentals;
     m_fCautionary = fCautionary;
     m_fontSize = determine_font_size();
     m_pCreatorImo = pCreatorImo;
+    m_color = color;
 
     find_glyphs();
     create_container_shape(uPos);
@@ -131,7 +133,7 @@ void AccidentalsEngraver::find_glyphs()
 void AccidentalsEngraver::create_container_shape(UPoint pos)
 {
     ShapeId idx = 0;
-    m_pContainer = LOMSE_NEW GmoShapeAccidentals(m_pCreatorImo, idx, pos, Color(0,0,0));
+    m_pContainer = LOMSE_NEW GmoShapeAccidentals(m_pCreatorImo, idx, pos, m_color);
 }
 
 //---------------------------------------------------------------------------------------
@@ -143,7 +145,7 @@ void AccidentalsEngraver::add_glyphs_to_container_shape(UPoint pos)
         int iGlyph = m_glyphs[i];
         LUnits y = pos.y + glyph_offset(iGlyph);
         GmoShape* pShape = LOMSE_NEW GmoShapeAccidental(m_pCreatorImo, 0, iGlyph, UPoint(x, y),
-                                                  Color(0,0,0), m_libraryScope,
+                                                  m_color, m_libraryScope,
                                                   m_fontSize);
         m_pContainer->add(pShape);
         x += (pShape->get_left() - x) + pShape->get_width();

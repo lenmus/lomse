@@ -29,6 +29,7 @@
 
 #include "lomse_gm_basic.h"
 
+#include "lomse_graphical_model.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_drawer.h"
@@ -44,241 +45,6 @@
 
 namespace lomse
 {
-
-
-//=======================================================================================
-// Graphic model implementation
-//=======================================================================================
-static long m_idCounter = 0L;
-
-//---------------------------------------------------------------------------------------
-GraphicModel::GraphicModel()
-    : m_modified(true)
-{
-    m_root = LOMSE_NEW GmoBoxDocument(this, NULL);    //TODO: replace NULL by ImoDocument
-    m_modelId = ++m_idCounter;
-}
-
-//---------------------------------------------------------------------------------------
-GraphicModel::~GraphicModel()
-{
-    delete m_root;
-}
-
-//---------------------------------------------------------------------------------------
-int GraphicModel::get_num_pages()
-{
-    return m_root->get_num_pages();
-}
-
-//---------------------------------------------------------------------------------------
-GmoBoxDocPage* GraphicModel::get_page(int i)
-{
-    return m_root->get_page(i);
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicModel::draw_page(int iPage, UPoint& origin, Drawer* pDrawer,
-                             RenderOptions& opt)
-{
-    pDrawer->set_shift(-origin.x, -origin.y);
-    get_page(iPage)->on_draw(pDrawer, opt);
-    pDrawer->render();
-    pDrawer->remove_shift();
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicModel::dump_page(int iPage, ostream& outStream)
-{
-    outStream << "                    org.x        org.y     size.x      size.y" << endl;
-    outStream << "-------------------------------------------------------------" << endl;
-    get_page(iPage)->dump_boxes_shapes(outStream, 0);
-}
-
-//---------------------------------------------------------------------------------------
-GmoObj* GraphicModel::hit_test(int iPage, LUnits x, LUnits y)
-{
-    return get_page(iPage)->hit_test(x, y);
-}
-
-//---------------------------------------------------------------------------------------
-GmoShape* GraphicModel::find_shape_at(int iPage, LUnits x, LUnits y)
-{
-    return get_page(iPage)->find_shape_at(x, y);
-}
-
-//---------------------------------------------------------------------------------------
-GmoBox* GraphicModel::find_inner_box_at(int iPage, LUnits x, LUnits y)
-{
-    return get_page(iPage)->find_inner_box_at(x, y);
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicModel::select_objects_in_rectangle(int iPage, SelectionSet& selection,
-                                               const URect& selRect, unsigned flags)
-{
-    selection.clear();
-    get_page(iPage)->select_objects_in_rectangle(selection, selRect, flags);
-}
-
-//---------------------------------------------------------------------------------------
-GmoShape* GraphicModel::find_shape_for_object(ImoStaffObj* pSO)
-{
-    int numPages = get_num_pages();
-    for (int i = 0; i < numPages; ++i)
-    {
-        GmoShape* pShape = get_page(i)->find_shape_for_object(pSO);
-        if (pShape)
-            return pShape;
-    }
-    return NULL;
-}
-
-//---------------------------------------------------------------------------------------
-GmoShape* GraphicModel::get_shape_for_noterest(ImoNoteRest* pNR)
-{
-    return get_main_shape_for_imo(pNR->get_id());
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicModel::store_in_map_imo_shape(ImoObj* pImo, GmoShape* pShape)
-{
-    ImoId id = pImo->get_id();
-    ShapeId idx = pShape->get_shape_id();
-    if (idx > 0)
-        m_imoToSecondaryShape[ make_pair(id, idx) ] = pShape;
-    else
-        m_imoToMainShape[id] = pShape;
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicModel::highlight_object(ImoStaffObj* pSO, bool value)
-{
-    ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>( pSO );
-    if (pNR)
-    {
-        GmoShape* pShape = get_shape_for_noterest(pNR);
-        pShape->set_highlighted(value);
-    }
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicModel::add_to_map_imo_to_box(GmoBox* pBox)
-{
-    ImoObj* pImo = pBox->get_creator_imo();
-    if (pImo)
-    {
-        ImoId id = pImo->get_id();
-        //DBG ------------------------------------------------------------
-        map<ImoId, GmoBox*>::const_iterator it = m_imoToBox.find(id);
-        if (it != m_imoToBox.end())
-        {
-            LOMSE_LOG_ERROR( str( boost::format(
-                "Duplicated Imo id %d. Existing Gmo: %s. Adding Gmo: %s")
-                % id % (it->second)->get_name() % pBox->get_name()) );
-        }
-        //END_DBG --------------------------------------------------------
-        m_imoToBox[id] = pBox;
-    }
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicModel::add_to_map_ref_to_box(GmoBox* pBox)
-{
-    GmoRef gref = pBox->get_ref();
-    if (gref != k_no_gmo_ref)
-    {
-        LOMSE_LOG_TRACE(Logger::k_gmodel, str(boost::format("Added (%d, %d) %s")
-            % gref.first % gref.second % pBox->get_name() ));
-        m_ctrolToPtr[gref] = pBox;
-    }
-}
-
-//---------------------------------------------------------------------------------------
-GmoShape* GraphicModel::get_shape_for_imo(ImoId id, ShapeId shapeId)
-{
-    if (shapeId == 0)
-        return get_main_shape_for_imo(id);
-    else
-    {
-        map< pair<ImoId, ShapeId>, GmoShape*>::const_iterator it
-            = m_imoToSecondaryShape.find( make_pair(id, shapeId) );
-        if (it != m_imoToSecondaryShape.end())
-            return it->second;
-        else
-            return NULL;
-    }
-}
-
-//---------------------------------------------------------------------------------------
-GmoShape* GraphicModel::get_main_shape_for_imo(ImoId id)
-{
-    map<ImoId, GmoShape*>::const_iterator it = m_imoToMainShape.find(id);
-    if (it != m_imoToMainShape.end())
-        return it->second;
-    else
-        return NULL;
-}
-
-//---------------------------------------------------------------------------------------
-GmoObj* GraphicModel::get_box_for_control(GmoRef gref)
-{
-	map<GmoRef, GmoObj*>::const_iterator it = m_ctrolToPtr.find(gref);
-	if (it != m_ctrolToPtr.end())
-		return it->second;
-    else
-        return NULL;
-}
-
-//---------------------------------------------------------------------------------------
-GmoBox* GraphicModel::get_box_for_imo(ImoId id)
-{
-	map<ImoId, GmoBox*>::const_iterator it = m_imoToBox.find(id);
-	if (it != m_imoToBox.end())
-		return it->second;
-    else
-        return NULL;
-}
-
-//---------------------------------------------------------------------------------------
-GmoObj* GraphicModel::get_gmo_for(ImoObj* pImo, ShapeId id)
-{
-    return NULL;
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicModel::build_main_boxes_table()
-{
-    if (m_root)
-    {
-        vector<GmoBox*>& pageBoxes = m_root->get_child_boxes();
-        vector<GmoBox*>::iterator itP;
-        for (itP=pageBoxes.begin(); itP != pageBoxes.end(); ++itP)
-        {
-            vector<GmoBox*>& contentBoxes = (*itP)->get_child_boxes();
-            vector<GmoBox*>::iterator itC;
-            for (itC=contentBoxes.begin(); itC != contentBoxes.end(); ++itC)
-            {
-                (*itC)->add_boxes_to_controls_map(this);
-
-                vector<GmoBox*>& childBoxes = (*itC)->get_child_boxes();
-                vector<GmoBox*>::iterator it;
-                for (it=childBoxes.begin(); it != childBoxes.end(); ++it)
-                    add_to_map_imo_to_box(*it);
-            }
-        }
-    }
-}
-
-//---------------------------------------------------------------------------------------
-GmoShapeStaff* GraphicModel::get_shape_for_first_staff_in_first_system(ImoId scoreId)
-{
-    GmoBoxScorePage* pBSP = static_cast<GmoBoxScorePage*>( get_box_for_imo(scoreId) );
-    GmoBoxSystem* pSystem = dynamic_cast<GmoBoxSystem*>(pBSP->get_child_box(0));
-    if (pSystem)
-        return pSystem->get_staff_shape(0);
-    return NULL;
-}
 
 
 //=======================================================================================
@@ -501,6 +267,18 @@ GmoRef GmoObj::get_ref()
         }
     }
     return k_no_gmo_ref;
+}
+
+//---------------------------------------------------------------------------------------
+GmoBoxDocPage* GmoObj::get_page_box()
+{
+    if (is_box_doc_page())
+        return static_cast<GmoBoxDocPage*>(this);
+    else
+    {
+        GmoBox* pParent = get_owner_box();
+        return pParent->get_page_box();
+    }
 }
 
 
@@ -1005,16 +783,8 @@ GmoBoxDocPage::GmoBoxDocPage(ImoObj* pCreatorImo)
 //---------------------------------------------------------------------------------------
 void GmoBoxDocPage::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    ////clear lists with renderization information
-    //m_ActiveHandlers.clear();
-    //m_GMObjsWithHandlers.clear();
-
     draw_page_background(pDrawer, opt);
     GmoBox::on_draw(pDrawer, opt);
-
-    ////if requested, book to render page margins
-    //if (g_fShowMargins)
-    //    this->OnNeedToDrawHandlers(this);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1080,8 +850,7 @@ GmoShape* GmoBoxDocPage::find_shape_at(LUnits x, LUnits y)
     std::list<GmoShape*>::reverse_iterator it;
     for (it = m_allShapes.rbegin(); it != m_allShapes.rend(); ++it)
     {
-        URect bbox = (*it)->get_bounds();
-        if (bbox.contains(x, y))
+        if ((*it)->hit_test(x, y))
             return *it;
     }
     return NULL;
@@ -1165,6 +934,19 @@ GmoBoxDocPage* GmoBoxDocument::add_new_page()
 GmoBoxDocPage* GmoBoxDocument::get_page(int i)
 {
     return dynamic_cast<GmoBoxDocPage*>(get_child_box(i));
+}
+
+//---------------------------------------------------------------------------------------
+int GmoBoxDocument::get_page_number(GmoBoxDocPage* pBoxPage)
+{
+    vector<GmoBox*>& pages = get_child_boxes();
+    int iMax = int(pages.size());
+    for (int i=0; i < iMax; ++i)
+    {
+        if (pages[i] == pBoxPage)
+            return i;
+    }
+    return -1;
 }
 
 

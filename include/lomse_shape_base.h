@@ -143,7 +143,6 @@ public:
 
 	//overrides
     void set_selected(bool value);
-    void set_highlighted(bool value);
 
     //for unit tests
     inline std::list<GmoShape*>& get_components() { return m_components; }

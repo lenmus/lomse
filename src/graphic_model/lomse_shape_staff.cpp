@@ -97,38 +97,29 @@ void GmoShapeStaff::on_draw(Drawer* pDrawer, RenderOptions& opt)
 //		((lmCompositeShape*)GetParentShape())->RecomputeBounds();
 //}
 //
-////---------------------------------------------------------------------------------------
-//int GmoShapeStaff::GetLineSpace(LUnits uyPos)
-//{
-//    //returns the position (line/space number) for the received point. Position is
-//    //referred to the first ledger line of the staff:
-//    //        0 - on first ledger line (C note in G clef)
-//    //        1 - on next space (D in G clef)
-//    //        2 - on first line (E not in G clef)
-//    //        3 - on first space
-//    //        4 - on second line
-//    //        5 - on second space
-//    //        etc.
-//
-//	//The received position could be approximated (i.e. mouse position). So, first, we must
-//    //adjust position to the nearest valid line/half-line position
-//
-//    //int nSteps;
-//    //lmCheckNoteNewPosition((lmStaff*)GetScoreOwner(), m_uBoundsTop.y, uyPos, &nSteps);
-//    //return nSteps + 10;
-//
-//    //compute the number of steps (half lines) from line 5 (top staff line = step #10)
-//    lmStaff* pStaff = (lmStaff*)GetScoreOwner();
-//	LUnits uHalfLine = pStaff->TenthsToLogical(5.0f);
-//    float rStep = (m_uBoundsTop.y - uyPos)/uHalfLine;
-//    int nStep = (rStep > 0.0f ? (int)(rStep + 0.5f) : (int)(rStep - 0.5f) );
-//    //wxLogMessage(_T("[GmoShapeStaff::GetLineSpace] uyPos=%.2f, uHalfLine=%.2f, m_uBoundsTop.y=%.2f, rStep=%.2f, nStep=%d"),
-//    //             uyPos, uHalfLine, m_uBoundsTop.y, rStep, nStep);
-//	return  10 + nStep;
-//    //AWARE: Note that y axis is reversed. Therefore we return 10 + steps instead
-//    // of 10 - steps.
-//}
-//
+//---------------------------------------------------------------------------------------
+int GmoShapeStaff::line_space_at(LUnits yPos)
+{
+    //returns the position (line/space number) for the received point. Position is
+    //referred to the first ledger line of the staff:
+    //        0 - on first ledger line (C note in G clef)
+    //        1 - on next space (D in G clef)
+    //        2 - on first line (E not in G clef)
+    //        3 - on first space
+    //        4 - on second line
+    //        5 - on second space
+    //        etc.
+
+    //compute the number of steps (half lines) from line 5 (top staff line = step #10)
+    LUnits spacing = m_pStaff->get_line_spacing();
+	LUnits uHalfLine = spacing / 2.0;
+    float rStep = (m_origin.y - yPos)/uHalfLine;
+    int nStep = (rStep > 0.0f ? int(rStep + 0.5f) : int(rStep - 0.5f) );
+//    //wxLogMessage(_T("[GmoShapeStaff::line_space_at] yPos=%.2f, spacing=%.2f, Top.y=%.2f, rStep=%.2f, nStep=%d"),
+//    //             yPos, spacing, m_origin.y, rStep, nStep);
+	return  10 + nStep;     //AWARE: remember: y axis is reversed.
+}
+
 ////---------------------------------------------------------------------------------------
 //UPoint GmoShapeStaff::OnMouseStartMoving(lmPaper* pPaper, const UPoint& uPos)
 //{

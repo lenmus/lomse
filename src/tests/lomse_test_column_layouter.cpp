@@ -178,7 +178,7 @@ SUITE(ColumnStorageTest)
         MyColumnStorage storage(30.0f, 60.0f);
         ImoBarline* pBar = static_cast<ImoBarline*>(
                                 ImFactory::inject(k_imo_barline, &doc) );
-        pBar->set_type(ImoBarline::k_end);
+        pBar->set_type(k_barline_end);
         GmoShape* pShape = NULL;
         int iStaff = 0;
         int iLine = 0;

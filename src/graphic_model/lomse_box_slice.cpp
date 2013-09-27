@@ -48,17 +48,15 @@ GmoBoxSlice::GmoBoxSlice(int nAbsMeasure, ImoObj* pCreatorImo)
 //	, m_nNumInSystem(nNumInSystem)
 //    , m_xStart(xStart)
 //    , m_xEnd(xEnd)
-//    , m_pGridTable((lmTimeGridTable*)NULL)
 {
 }
 
 //---------------------------------------------------------------------------------------
 GmoBoxSlice::~GmoBoxSlice()
 {
-//    if (m_pGridTable)
-//        delete m_pGridTable;
 }
 
+//---------------------------------------------------------------------------------------
 GmoBoxSystem* GmoBoxSlice::get_system_box()
 {
     return dynamic_cast<GmoBoxSystem*>(m_pParentBox);

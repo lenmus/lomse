@@ -1075,7 +1075,7 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoBarline* pBarline = static_cast<ImoBarline*>(
                                     ImFactory::inject(k_imo_barline, pDoc) );
-        pBarline->set_type(ImoBarline::k_simple);
+        pBarline->set_type(k_barline_simple);
 
         // <type> (label)
         if (get_optional(k_label))
@@ -1095,21 +1095,21 @@ protected:
     int get_barline_type()
     {
         string value = get_value(m_pChildToAnalyse);
-        int type = ImoBarline::k_simple;
+        int type = k_barline_simple;
         if (value == "simple")
-            type = ImoBarline::k_simple;
+            type = k_barline_simple;
         else if (value == "double")
-            type = ImoBarline::k_double;
+            type = k_barline_double;
         else if (value == "start")
-            type = ImoBarline::k_start;
+            type = k_barline_start;
         else if (value == "end")
-            type = ImoBarline::k_end;
+            type = k_barline_end;
         else if (value == "endRepetition")
-            type = ImoBarline::k_end_repetition;
+            type = k_barline_end_repetition;
         else if (value == "startRepetition")
-            type = ImoBarline::k_start_repetition;
+            type = k_barline_start_repetition;
         else if (value == "doubleRepetition")
-            type = ImoBarline::k_double_repetition;
+            type = k_barline_double_repetition;
         else
         {
             report_msg(get_line_number(m_pChildToAnalyse),
@@ -6191,7 +6191,7 @@ void LmdTiesBuilder::tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto)
     ImoNote* pEndNote = pEndDto->get_note();
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
-    ImoTie* pTie = static_cast<ImoTie*>(ImFactory::inject(k_imo_tie, pDoc));
+    ImoTie* pTie = static_cast<ImoTie*>(ImFactory::inject(k_imo_tie, pDoc, pStartDto->get_tie_number()));
     pTie->set_tie_number( pStartDto->get_tie_number() );
     pTie->set_color( pStartDto->get_color() );
 

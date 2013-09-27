@@ -32,7 +32,7 @@
 
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
-#include "lomse_noterest_engraver.h"
+#include "lomse_engraver.h"
 
 namespace lomse
 {
@@ -45,19 +45,23 @@ class ShapesStorage;
 class GmoShapeBeam;
 
 //---------------------------------------------------------------------------------------
-class RestEngraver : public NoterestEngraver
+class RestEngraver : public Engraver
 {
 protected:
     int m_restType;
     int m_numDots;
     ImoRest* m_pRest;
+    Color m_color;
+    double m_fontSize;
 
 public:
     RestEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                  ShapesStorage* pShapesStorage, int iInstr, int iStaff);
     ~RestEngraver() {}
 
-    GmoShapeRest* create_shape(ImoRest* pRest, UPoint uPos);
+    GmoShapeRest* create_shape(ImoRest* pRest, UPoint uPos, Color color=Color(0,0,0));
+    GmoShape* create_tool_dragged_shape(int restType, int dots);
+    UPoint get_drag_offset();
 
 protected:
     void determine_position();
@@ -68,11 +72,12 @@ protected:
     LUnits get_glyph_offset(int iGlyph);
     LUnits add_dot_shape(LUnits x, LUnits y, Color color);
 
-    ImoBeam* get_beam() { return m_pRest->get_beam(); }
+//    ImoBeam* get_beam() { return m_pRest->get_beam(); }
 
     LUnits m_uxLeft, m_uyTop;       //current position
     int m_iGlyph;
     GmoShapeRest* m_pRestShape;
+    GmoShape* m_pRestGlyphShape;
 };
 
 

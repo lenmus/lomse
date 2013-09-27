@@ -33,6 +33,7 @@
 
 //classes related to these tests
 #include "lomse_injectors.h"
+#include "lomse_graphical_model.h"
 #include "lomse_gm_basic.h"
 #include "lomse_box_system.h"
 #include "lomse_shape_staff.h"

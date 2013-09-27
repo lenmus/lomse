@@ -126,7 +126,7 @@ SUITE(PitchAssignerTest)
         ImoNote* pNote1 = static_cast<ImoNote*>( pInstr->add_object("(n f4 q)") );
         ImoNote* pNote2 = static_cast<ImoNote*>( pInstr->add_object("(n +d4 q)") );
         ImoNote* pNote3 = static_cast<ImoNote*>( pInstr->add_object("(n d4 q)") );
-        pInstr->add_barline(ImoBarline::k_end);
+        pInstr->add_barline(k_barline_end);
 
         ColStaffObjsBuilder builder;
         builder.build(pScore);
@@ -156,7 +156,7 @@ SUITE(PitchAssignerTest)
         ImoNote* pNote1 = static_cast<ImoNote*>( pInstr->add_object("(n f4 q)") );
         ImoNote* pNote2 = static_cast<ImoNote*>( pInstr->add_object("(n +d4 q)") );
         ImoNote* pNote3 = static_cast<ImoNote*>( pInstr->add_object("(n d4 q)") );
-        pInstr->add_barline(ImoBarline::k_end);
+        pInstr->add_barline(k_barline_end);
 
         ColStaffObjsBuilder builder;
         builder.build(pScore);
@@ -210,7 +210,7 @@ SUITE(PitchAssignerTest)
         ImoNote* pNote1 = static_cast<ImoNote*>( pInstr->add_object("(n f4 q)") );
         ImoNote* pNote2 = static_cast<ImoNote*>( pInstr->add_object("(n +d4 q)") );
         ImoNote* pNote3 = static_cast<ImoNote*>( pInstr->add_object("(n d4 q)") );
-        pInstr->add_barline(ImoBarline::k_end);
+        pInstr->add_barline(k_barline_end);
 
         CHECK( pNote1->get_fpitch() == k_undefined_fpitch );
         CHECK( pNote2->get_fpitch() == k_undefined_fpitch );

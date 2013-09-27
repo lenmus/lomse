@@ -66,6 +66,7 @@ class ColumnLayouter;
 class ColumnStorage;
 class ColumnsBuilder;
 class ShapesCreator;
+class ScoreStub;
 
 
 //---------------------------------------------------------------------------------------
@@ -130,7 +131,8 @@ protected:
     LUnits              m_uFirstSystemIndent;
     LUnits              m_uOtherSystemIndent;
 
-    //current boxes being layouted
+    //score stub and current boxes being layouted
+    ScoreStub*          m_pStub;
     GmoBoxScorePage*    m_pCurBoxPage;
     GmoBoxSystem*       m_pCurBoxSystem;
 
@@ -178,6 +180,7 @@ protected:
     //---------------------------------------------------------------
     void create_instrument_engravers();
     void decide_systems_indentation();
+    void create_stub();
     void add_score_titles();
     bool enough_space_in_page();
     void create_system();

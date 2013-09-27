@@ -41,7 +41,7 @@
 #include "agg_pixfmt_rgba.h"
 #include "agg_rendering_buffer.h"
 #include "agg_trans_viewport.h"
-#include "lomse_tasks.h"
+//#include "lomse_tasks.h"
 #include "lomse_agg_types.h"
 #include "lomse_reader.h"
 #include "lomse_pixel_formats.h"
@@ -66,6 +66,7 @@ class Document;
 class Presenter;
 class ScorePlayer;
 class MidiServerBase;
+class Metronome;
 
 
 //---------------------------------------------------------------------------------------

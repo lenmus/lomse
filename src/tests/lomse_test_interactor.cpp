@@ -38,6 +38,7 @@
 #include "lomse_interactor.h"
 #include "lomse_graphic_view.h"
 #include "lomse_tasks.h"
+#include "lomse_graphical_model.h"
 #include "lomse_shapes.h"
 
 using namespace UnitTest;
@@ -105,8 +106,8 @@ public:
     MyTaskSelection(Interactor* pIntor) : TaskSelection(pIntor) {}
 
     bool is_waiting_for_first_point() { return m_state == k_waiting_for_first_point; }
-    bool is_waiting_for_point_2_left() { return m_state == k_waiting_for_point_2_left; }
-    bool is_waiting_for_point_2_right() { return m_state == k_waiting_for_point_2_right; }
+    bool is_waiting_for_point_2_left() { return m_state == k_waiting_for_point_2; }
+    bool is_waiting_for_point_2_right() { return m_state == k_waiting_for_point_2; }
     int get_state() { return m_state; }
     Pixels first_point_x() { return m_xStart; }
     Pixels first_point_y() { return m_yStart; }
@@ -130,7 +131,7 @@ public:
     {
     }
     //selection
-    void select_object_at_screen_point(Pixels x, Pixels y, unsigned flags=0)
+    void select_object_and_show_contextual_menu(Pixels x, Pixels y, unsigned flags=0)
     {
         m_fSelObjInvoked = true;
         m_selPoint = Point<Pixels>(x, y);
@@ -254,7 +255,7 @@ SUITE(InteractorTest)
         pIntor->model_point_to_screen(&vx, &vy, 0);
 
         CHECK( pClef->is_selected() == false );
-        pIntor->select_object_at_screen_point(Pixels(vx), Pixels(vy));
+        pIntor->task_action_select_object_and_show_contextual_menu(Pixels(vx), Pixels(vy));
 
         CHECK( pIntor->is_in_selection(pClef) == true );
         CHECK( pClef->is_selected() == true );
@@ -297,7 +298,7 @@ SUITE(InteractorTest)
         pIntor->model_point_to_screen(&x2, &y2, 0);
 
         CHECK( pClef->is_selected() == false );
-        pIntor->select_objects_in_screen_rectangle(Pixels(x1), Pixels(y1),
+        pIntor->task_action_select_objects_in_screen_rectangle(Pixels(x1), Pixels(y1),
                                                    Pixels(x2), Pixels(y2));
 
         CHECK( pIntor->is_in_selection(pClef) == true );

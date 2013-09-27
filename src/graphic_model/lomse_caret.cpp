@@ -32,6 +32,7 @@
 #include "lomse_screen_drawer.h"
 #include "lomse_graphic_view.h"
 #include "lomse_logger.h"
+#include "lomse_box_system.h"
 
 
 namespace lomse
@@ -41,11 +42,9 @@ namespace lomse
 // Caret implementation
 //=======================================================================================
 Caret::Caret(GraphicView* view, LibraryScope& libraryScope)
-    : m_libraryScope(libraryScope)
-    , m_pView(view)
+    : VisualEffect(view, libraryScope)
     , m_color( Color(0, 0, 255) )               //solid blue
     , m_topLevelSelected( Color(255, 0, 0) )    //solid red
-    , m_fVisible(true)              //display caret
     , m_fBlinkStateOn(false)        //currently not drawn
     , m_fBlinkEnabled(false)
     , m_type(k_top_level)
@@ -54,6 +53,7 @@ Caret::Caret(GraphicView* view, LibraryScope& libraryScope)
     , m_blinkTime(500)              //500 milliseconds
     , m_timer( libraryScope.get_io_service() )
 #endif
+    , m_pBoxSystem(NULL)
 {
     schedule_the_timer();
 }
@@ -70,7 +70,6 @@ void Caret::handle_timeout(boost::system::error_code const& cError)
 
     //repaint/erase the caret
     m_fBlinkStateOn = !m_fBlinkStateOn;
-//    m_pView->update_caret();
 
     // Schedule the timer again...
     schedule_the_timer();
@@ -96,8 +95,6 @@ void Caret::on_draw(ScreenDrawer* pDrawer)
     draw_top_level_box(pDrawer);
     if (!m_fBlinkStateOn)
         draw_caret(pDrawer);
-    else
-        remove_caret(pDrawer);
 }
 
 //---------------------------------------------------------------------------------------
@@ -139,21 +136,15 @@ void Caret::draw_caret_as_top_level(ScreenDrawer* pDrawer)
     pDrawer->end_path();
 
     pDrawer->render();
+
+    m_bounds = URect(UPoint(m_pos.x - 100, m_pos.y),
+                     UPoint(m_pos.x - 50, m_pos.y + 500) );
 }
 
 //---------------------------------------------------------------------------------------
 void Caret::draw_caret_as_line(ScreenDrawer* pDrawer)
 {
-//    double x1 = double( m_vline.left() );
-//    double y1 = double( m_vline.top() );
-//    double x2 = double( m_vline.right() );
-//    double y2 = double( m_vline.bottom() );
-//
-//    pDrawer->screen_point_to_model(&x1, &y1);
-//    pDrawer->screen_point_to_model(&x2, &y2);
-
-
-    double line_width = double( pDrawer->Pixels_to_LUnits(2) );
+    double line_width = double( pDrawer->Pixels_to_LUnits(1) );
     double x1 = double( m_pos.x );
     double y1 = double( m_pos.y );
     double x2 = double( m_pos.x + line_width );
@@ -175,13 +166,24 @@ void Caret::draw_caret_as_line(ScreenDrawer* pDrawer)
     pDrawer->hline_to(x2 + 100);
 
     pDrawer->end_path();
+
+    if (m_pBoxSystem)
+    {
+        UPoint org = m_pView->get_page_origin_for(m_pBoxSystem);
+        pDrawer->set_shift(-org.x, -org.y);
+    }
     pDrawer->render();
+    pDrawer->remove_shift();
+
+    m_bounds = URect(UPoint(x1 - 100, y1), UPoint(x2 + 100, y2));
 }
 
 //---------------------------------------------------------------------------------------
 void Caret::draw_caret_as_block(ScreenDrawer* pDrawer)
 {
     //TODO
+
+    m_bounds = m_box;
 }
 
 //---------------------------------------------------------------------------------------
@@ -197,6 +199,8 @@ void Caret::draw_caret_as_box(ScreenDrawer* pDrawer)
     pDrawer->end_path();
 
     pDrawer->render();
+
+    m_bounds = URect(m_pos, m_size);
 }
 
 //---------------------------------------------------------------------------------------
@@ -213,12 +217,8 @@ void Caret::draw_top_level_box(ScreenDrawer* pDrawer)
     pDrawer->end_path();
 
     pDrawer->render();
-}
 
-//---------------------------------------------------------------------------------------
-void Caret::remove_caret(ScreenDrawer* pDrawer)
-{
-    //TODO: Restore saved bitmap (?)
+    m_bounds = m_box;
 }
 
 

@@ -1,5 +1,5 @@
 (score
-   (vers 1.6)
+   (vers 2.0)
    (instrument (staves 2)
       (musicData
          (clef G p1)
@@ -8,9 +8,9 @@
          (n a4 e g+ t3 p1)(n a4 e)(n a4 e g- t-)
          (n a4 q p1)
          
-         (goBack start)
-         (n a4 s p2 g+ (t + 5 4))(n a4 s p2)(n a4 e p2)(n a4 s g- t- p2)
-         (n a4 q p2)
+         //second staff
+         (n a4 s p2 v2 g+ (t + 5 4))(n a4 s p2 v2)(n a4 e p2 v2)(n a4 s g- t- p2 v2)
+         (n a4 q p2 v2)
          
          (barline)
       )

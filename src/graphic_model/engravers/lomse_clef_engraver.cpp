@@ -51,12 +51,19 @@ ClefEngraver::ClefEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* ClefEngraver::create_shape(ImoObj* pCreatorImo, UPoint uPos, int clefType,
-                                     int symbolSize)
+ClefEngraver::ClefEngraver(LibraryScope& libraryScope)
+    : Engraver(libraryScope, NULL)
+{
+    //constructor for dragged images
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* ClefEngraver::create_shape(ImoClef* pCreatorImo, UPoint uPos, int clefType,
+                                     int symbolSize, Color color)
 {
     m_nClefType = clefType;
     m_symbolSize = symbolSize;
-    m_iGlyph = find_glyph();
+    m_iGlyph = find_glyph(clefType);
 
     // get the shift to the staff on which the clef must be drawn
     LUnits y = uPos.y + m_pMeter->tenths_to_logical(get_glyph_offset(), m_iInstr, m_iStaff);
@@ -65,27 +72,41 @@ GmoShape* ClefEngraver::create_shape(ImoObj* pCreatorImo, UPoint uPos, int clefT
 
     //create the shape object
     ShapeId idx = 0;
-    GmoShape* pShape = LOMSE_NEW GmoShapeClef(pCreatorImo, idx, m_iGlyph, UPoint(uPos.x, y),
-                                        Color(0,0,0), m_libraryScope, fontSize);
-
-//    // VS 2003 is not C99 compliant and does not have stdint.h
-//    int_fast64_t idx = nIdx + 10;
-//    size_t size_fast64 = sizeof(int_fast64_t);      //lin32:8, lin64:8, win32:, win64:
-//    size_t size_least64 = sizeof(int_least64_t);    //lin32:8, lin64:8, win32:, win64:
-//    size_t size_int = sizeof(int);                  //lin32:4, lin64:4, win32:4, win64:
-//    size_t size_long = sizeof(long);                //lin32:4, lin64:8, win32:4, win64:
-//    size_t size_float = sizeof(float);              //lin32:4, lin64:4, win32:4, win64:
-
-    return pShape;
+    m_pClefShape = LOMSE_NEW GmoShapeClef(pCreatorImo, idx, m_iGlyph, UPoint(uPos.x, y),
+                                        color, m_libraryScope, fontSize);
+    return m_pClefShape;
 }
 
 //---------------------------------------------------------------------------------------
-int ClefEngraver::find_glyph()
+GmoShape* ClefEngraver::create_tool_dragged_shape(int clefType)
+{
+    Color color(255,0,0);       //TODO: options/configuration
+    double fontSize = 21.0;
+    ShapeId idx = 0;
+    int iGlyph = find_glyph(clefType);
+    UPoint pos(0.0, 0.0);
+
+    m_pClefShape = LOMSE_NEW GmoShapeClef(NULL, idx, iGlyph, pos, color, m_libraryScope,
+                                          fontSize);
+    return m_pClefShape;
+}
+
+//---------------------------------------------------------------------------------------
+UPoint ClefEngraver::get_drag_offset()
+{
+    //return center of clef
+    URect bounds = m_pClefShape->get_bounds();
+    return UPoint(bounds.get_width() / 2.0,
+                  bounds.get_height() / 2.0 );
+}
+
+//---------------------------------------------------------------------------------------
+int ClefEngraver::find_glyph(int clefType)
 {
     // returns the index (over global glyphs table) to the character to use to print
     // the clef (LenMus font)
 
-    switch (m_nClefType)
+    switch (clefType)
     {
         case k_clef_G2: return k_glyph_g_clef;
         case k_clef_F4: return k_glyph_f_clef;

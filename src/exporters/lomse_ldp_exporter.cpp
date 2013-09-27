@@ -142,37 +142,16 @@ protected:
     void add_barline_type()
     {
         int type = m_pObj->get_type();
-        switch(type)
+        string name = LdpExporter::barline_type_to_ldp(type);
+        if (name == "undefined")
         {
-            case ImoBarline::k_simple:
-                m_source << "simple";
-                break;
-            case ImoBarline::k_double:
-                m_source << "double";
-                break;
-            case ImoBarline::k_start:
-                m_source << "start";
-                break;
-            case ImoBarline::k_end:
-                m_source << "end";
-                break;
-            case ImoBarline::k_end_repetition:
-                m_source << "endRepetition";
-                break;
-            case ImoBarline::k_start_repetition:
-                m_source << "startRepetition";
-                break;
-            case ImoBarline::k_double_repetition:
-                m_source << "doubleRepetition";
-                break;
-            default:
-            {
-                m_source << "simple";
-                stringstream s;
-                s << "Invalid barline type. Value=" << type;
-                LOMSE_LOG_ERROR(s.str());
-            }
+            m_source << "simple";
+            stringstream s;
+            s << "Invalid barline. Type=" << type;
+            LOMSE_LOG_ERROR(s.str());
         }
+        else
+            m_source << name;
     }
 
 };
@@ -218,7 +197,7 @@ protected:
 
     string source_for_first()
     {
-        start_element("beam", k_no_imoid, k_in_same_line);
+        start_element("beam", m_pRO->get_id(), k_in_same_line);
         add_beam_number();
         add_segments_info();
         end_element(k_in_same_line);
@@ -656,7 +635,7 @@ public:
 
     string generate_source(ImoObj* pParent=NULL)
     {
-        start_element("TODO: ", m_pImo->get_id());
+        start_element("TODO: No generator for ", m_pImo->get_id());
         m_source << m_pImo->get_name() << "   type=" << m_pImo->get_obj_type()
                  << ", id=" << m_pImo->get_id();
         end_element(k_in_same_line);
@@ -1504,20 +1483,8 @@ protected:
         }
 
         EAccidentals acc = m_pObj->get_notated_accidentals();
-        switch(acc)
-        {
-            case k_invalid_accidentals:     break;
-            case k_no_accidentals:          break;
-            case k_sharp:                   m_source << "+";  break;
-            case k_sharp_sharp:             m_source << "++";  break;
-            case k_double_sharp:            m_source << "x";  break;
-            case k_natural_sharp:           m_source << "=+";  break;
-            case k_flat:                    m_source << "-";  break;
-            case k_flat_flat:               m_source << "--";  break;
-            case k_natural_flat:            m_source << "=-";  break;
-            case k_natural:                 m_source << "=";   break;
-            default:                        break;
-        }
+        if (acc != k_no_accidentals)
+            m_source << LdpExporter::accidentals_to_string(acc);
 
         m_source << sNoteName[m_pObj->get_step()];
         m_source << sOctave[m_pObj->get_octave()];
@@ -2119,16 +2086,21 @@ protected:
                                        : m_pTie->get_stop_bezier() );
         if (pInfo)
         {
-            start_element("bezier", k_no_imoid);
-
             static string sPointNames[4] = { "start", "end", "ctrol1", "ctrol2" };
 
+            bool fElementStarted = false;
             for (int i=0; i < 4; i++)
             {
                 TPoint& pt = pInfo->get_point(i);
 
                 if (pt.x != 0.0f || pt.y != 0.0f)
                 {
+                    if (!fElementStarted)
+                    {
+                        start_element("bezier", k_no_imoid);
+                        fElementStarted = true;
+                    }
+
                     if (pt.x != 0.0f)
                     {
                         start_element( sPointNames[i] + "-x", k_no_imoid, k_in_same_line);
@@ -2143,7 +2115,8 @@ protected:
                     }
                 }
             }
-            end_element();
+            if (fElementStarted)
+                end_element();
         }
     }
 
@@ -2419,28 +2392,7 @@ void LdpGenerator::decrement_indent()
 //---------------------------------------------------------------------------------------
 void LdpGenerator::add_duration(stringstream& source, int noteType, int dots)
 {
-    switch(noteType)
-    {
-        case k_longa:   source << "l";  break;
-        case k_breve:   source << "b";  break;
-        case k_whole:   source << "w";  break;
-        case k_half:    source << "h";  break;
-        case k_quarter: source << "q";  break;
-        case k_eighth:  source << "e";  break;
-        case k_16th:    source << "s";  break;
-        case k_32th:    source << "t";  break;
-        case k_64th:    source << "i";  break;
-        case k_128th:   source << "o";  break;
-        case k_256th:   source << "f";  break;
-        default:                        break;
-    }
-
-    while (dots > 0)
-    {
-        source << ".";
-        --dots;
-    }
-
+    source << LdpExporter::notetype_to_string(noteType, dots);
 }
 
 //---------------------------------------------------------------------------------------
@@ -2627,6 +2579,30 @@ string LdpExporter::clef_type_to_ldp(int clefType)
 }
 
 //---------------------------------------------------------------------------------------
+string LdpExporter::barline_type_to_ldp(int barlineType)
+{
+    switch(barlineType)
+    {
+        case k_barline_end_repetition:
+            return "endRepetition";
+        case k_barline_start_repetition:
+            return "startRepetition";
+        case k_barline_end:
+            return "end";
+        case k_barline_double:
+            return "double";
+        case k_barline_simple:
+            return "simple";
+        case k_barline_start:
+            return "start";
+        case k_barline_double_repetition:
+            return "doubleRepetition";
+        default:
+            return "undefined";
+    }
+}
+
+//---------------------------------------------------------------------------------------
 string LdpExporter::color_to_ldp(Color color)
 {
     stringstream source;
@@ -2645,7 +2621,59 @@ string LdpExporter::color_to_ldp(Color color)
 //---------------------------------------------------------------------------------------
 string LdpExporter::float_to_string(float num)
 {
-    return "(TODO: float_to_string)";
+    stringstream source;
+    source << num;
+    return source.str();
+}
+
+//---------------------------------------------------------------------------------------
+string LdpExporter::accidentals_to_string(int acc)
+{
+    stringstream source;
+    switch(acc)
+    {
+        case k_invalid_accidentals:     break;
+        case k_no_accidentals:          break;
+        case k_sharp:                   source << "+";  break;
+        case k_sharp_sharp:             source << "++";  break;
+        case k_double_sharp:            source << "x";  break;
+        case k_natural_sharp:           source << "=+";  break;
+        case k_flat:                    source << "-";  break;
+        case k_flat_flat:               source << "--";  break;
+        case k_natural_flat:            source << "=-";  break;
+        case k_natural:                 source << "=";   break;
+        default:                        break;
+    }
+    return source.str();
+}
+
+//---------------------------------------------------------------------------------------
+string LdpExporter::notetype_to_string(int noteType, int dots)
+{
+    stringstream source;
+    switch(noteType)
+    {
+        case k_longa:   source << "l";  break;
+        case k_breve:   source << "b";  break;
+        case k_whole:   source << "w";  break;
+        case k_half:    source << "h";  break;
+        case k_quarter: source << "q";  break;
+        case k_eighth:  source << "e";  break;
+        case k_16th:    source << "s";  break;
+        case k_32th:    source << "t";  break;
+        case k_64th:    source << "i";  break;
+        case k_128th:   source << "o";  break;
+        case k_256th:   source << "f";  break;
+        default:                        break;
+    }
+
+    while (dots > 0)
+    {
+        source << ".";
+        --dots;
+    }
+
+    return source.str();
 }
 
 

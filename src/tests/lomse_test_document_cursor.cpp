@@ -776,6 +776,29 @@ SUITE(DocCursorTest)
         CHECK( (*cursor)->is_score() == true );
     }
 
+    TEST_FIXTURE(DocCursorTestFixture, to_inner_point_1)
+    {
+        //@ move to specified score and move to requested position on score
+        create_document_1();
+        MyDocCursor cursor(m_pDoc);
+        ++cursor;   //paragraph
+        CHECK ( (*cursor)->is_paragraph() );
+        CHECK( cursor.my_is_delegating() == false );
+
+        int instr = 0;
+        int staff = 0;
+        TimeUnits time = 64.0;
+        SpElementCursorState spScoreState(
+                LOMSE_NEW ScoreCursorState(instr, staff, 0, time, -1, -1, 0.0, 0) );
+        DocCursorState state(15L, spScoreState);
+
+        cursor.to_inner_point(state);
+
+        CHECK( cursor.my_is_delegating() == true );
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_rest() == true );
+    }
+
 //    TEST_FIXTURE(DocCursorTestFixture, DocCursor_RestoreStateAtEndOfCollection)
 //    {
 //        Document doc(m_libraryScope);

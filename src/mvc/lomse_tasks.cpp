@@ -58,12 +58,27 @@ Task* TaskFactory::create_task(int taskType, Interactor* pIntor)
         case k_task_null:
             return LOMSE_NEW TaskNull(pIntor);
 
+        case k_task_only_clicks:
+            return LOMSE_NEW TaskOnlyClicks(pIntor);
+
         case k_task_selection:
             return LOMSE_NEW TaskSelection(pIntor);
 
+        case k_task_selection_rectangle:
+            return LOMSE_NEW TaskSelectionRectangle(pIntor);
+
+        case k_task_move_object:
+            return LOMSE_NEW TaskMoveObject(pIntor);
+
+        case k_task_data_entry:
+            return LOMSE_NEW TaskDataEntry(pIntor);
+
+        case k_task_move_handler:
+            return LOMSE_NEW TaskMoveHandler(pIntor);
+
         default:
         {
-            LOMSE_LOG_ERROR("[TaskFactory::create_task] invalid task type");
+            LOMSE_LOG_ERROR("invalid task type");
             throw runtime_error("[TaskFactory::create_task] invalid task type");
         }
     }
@@ -135,7 +150,7 @@ void TaskDragView::do_drag(Event& event)
     m_vxOrg = m_dx - event.x();
     m_vyOrg = m_dy - event.y();
 
-    repaint_view();
+    m_pIntor->task_action_drag_the_view(m_vxOrg, m_vyOrg);
 }
 
 //---------------------------------------------------------------------------------------
@@ -144,14 +159,205 @@ void TaskDragView::end_drag(Event& event)
     m_drag_flag = false;
 }
 
-//---------------------------------------------------------------------------------------
-void TaskDragView::repaint_view()
+
+//=======================================================================================
+// TaskOnlyClicks implementation
+//=======================================================================================
+TaskOnlyClicks::TaskOnlyClicks(Interactor* pIntor)
+    : Task(TaskFactory::k_task_only_clicks, pIntor)
+    , m_state(k_start)
+    , m_pGView(pIntor)
 {
-    m_pIntor->new_viewport(m_vxOrg, m_vyOrg);
-    m_pIntor->force_redraw();
+}
+
+//---------------------------------------------------------------------------------------
+void TaskOnlyClicks::process_event(Event event)
+{
+    switch (m_state)
+    {
+        //--------------------------------------------------------------------------
+        case k_waiting_for_first_point:
+        {
+            switch (event.type())
+            {
+                case Event::k_mouse_left_down:
+                    m_state = k_waiting_for_point_2;
+                    record_first_point(event);
+                    break;
+                case Event::k_mouse_move:
+                    mouse_in_out(event);
+                    break;
+            }
+            break;
+       }
+
+        //--------------------------------------------------------------------------
+        case k_waiting_for_point_2:
+        {
+            switch (event.type())
+            {
+                case Event::k_mouse_left_up:
+                    m_state = k_waiting_for_first_point;
+                    click_at_point(event);
+                    break;
+            }
+            break;
+        }
+
+        default:
+            ;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void TaskOnlyClicks::init_task()
+{
+    m_state = k_waiting_for_first_point;
+    m_xStart = 0;
+    m_yStart = 0;
+}
+
+//---------------------------------------------------------------------------------------
+void TaskOnlyClicks::record_first_point(Event& event)
+{
+    m_xStart = event.x();
+    m_yStart = event.y();
+}
+
+//---------------------------------------------------------------------------------------
+void TaskOnlyClicks::click_at_point(Event& event)
+{
+    m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart);
+}
+
+//---------------------------------------------------------------------------------------
+void TaskOnlyClicks::mouse_in_out(Event& event)
+{
+    m_pIntor->task_action_mouse_in_out(event.x(), event.y());
 }
 
 
+////=======================================================================================
+//// TaskSelection implementation
+////=======================================================================================
+//TaskSelection::TaskSelection(Interactor* pIntor)
+//    : Task(TaskFactory::k_task_selection, pIntor)
+//    , m_state(k_start)
+//    , m_pGView(pIntor)
+//{
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::process_event(Event event)
+//{
+//    switch (m_state)
+//    {
+//        //--------------------------------------------------------------------------
+//        case k_waiting_for_first_point:
+//        {
+//            switch (event.type())
+//            {
+//                case Event::k_mouse_left_down:
+//                    m_state = k_waiting_for_point_2_left;
+//                    record_first_point(event);
+//                    break;
+//                case Event::k_mouse_right_down:
+//                    m_state = k_waiting_for_point_2_right;
+//                    record_first_point(event);
+//                    break;
+//                case Event::k_mouse_move:
+//                    mouse_in_out(event);
+//                    break;
+//            }
+//            break;
+//       }
+//
+//        //--------------------------------------------------------------------------
+//        case k_waiting_for_point_2_left:
+//        {
+//            switch (event.type())
+//            {
+//                case Event::k_mouse_left_up:
+//                    m_state = k_waiting_for_first_point;
+//                    select_objects_or_click(event);
+//                    break;
+//
+//                case Event::k_mouse_move:
+//                    m_state = k_waiting_for_point_2_left;
+//                    track_sel_rectangle(event);
+//                    break;
+//            }
+//            break;
+//        }
+//
+//        //--------------------------------------------------------------------------
+//        case k_waiting_for_point_2_right:
+//        {
+//            switch (event.type())
+//            {
+//                case Event::k_mouse_right_up:
+//                    m_state = k_waiting_for_first_point;
+//                    select_object_and_show_contextual_menu(event);
+////                    select_object_at_first_point(event);
+////                    show_contextual_menu();
+//                    break;
+//            }
+//            break;
+//        }
+//
+//        default:
+//            ;
+//    }
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::init_task()
+//{
+//    m_state = k_waiting_for_first_point;
+//    m_xStart = 0;
+//    m_yStart = 0;
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::record_first_point(Event& event)
+//{
+//    m_xStart = event.x();
+//    m_yStart = event.y();
+//    m_pIntor->show_selection_rectangle(m_xStart, m_yStart, m_xStart, m_yStart);
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::select_objects_or_click(Event& event)
+//{
+//    m_pIntor->hide_selection_rectangle();
+//
+//    //at least 5 pixels width, height to consider it a selection rectangle
+//    if (abs(m_xStart - event.x()) < 5 || abs(m_yStart - event.y()) < 5)
+//        m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart);
+//    else
+//        m_pIntor->task_action_select_objects_in_screen_rectangle(m_xStart, m_yStart,
+//                                                     event.x(), event.y());
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::track_sel_rectangle(Event& event)
+//{
+//    m_pIntor->update_selection_rectangle(event.x(), event.y());
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::select_object_and_show_contextual_menu(Event& event)
+//{
+//    m_pIntor->task_action_select_object_and_show_contextual_menu(m_xStart, m_yStart);
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::mouse_in_out(Event& event)
+//{
+//    m_pIntor->task_action_mouse_in_out(event.x(), event.y());
+//}
+//
+//
 //=======================================================================================
 // TaskSelection implementation
 //=======================================================================================
@@ -173,11 +379,13 @@ void TaskSelection::process_event(Event event)
             switch (event.type())
             {
                 case Event::k_mouse_left_down:
-                    m_state = k_waiting_for_point_2_left;
+                    m_state = k_waiting_for_point_2;
                     record_first_point(event);
+                    //click_at_point();
+                    decide_on_switching_task(event);
                     break;
                 case Event::k_mouse_right_down:
-                    m_state = k_waiting_for_point_2_right;
+                    m_state = k_waiting_for_point_2;
                     record_first_point(event);
                     break;
                 case Event::k_mouse_move:
@@ -188,32 +396,19 @@ void TaskSelection::process_event(Event event)
        }
 
         //--------------------------------------------------------------------------
-        case k_waiting_for_point_2_left:
+        case k_waiting_for_point_2:
         {
             switch (event.type())
             {
+                case Event::k_mouse_move:
+                    m_state = k_waiting_for_point_2;
+                    break;
                 case Event::k_mouse_left_up:
                     m_state = k_waiting_for_first_point;
-                    select_objects_or_click(event);
                     break;
-
-                case Event::k_mouse_move:
-                    m_state = k_waiting_for_point_2_left;
-                    track_sel_rectangle(event);
-                    break;
-            }
-            break;
-        }
-
-        //--------------------------------------------------------------------------
-        case k_waiting_for_point_2_right:
-        {
-            switch (event.type())
-            {
                 case Event::k_mouse_right_up:
                     m_state = k_waiting_for_first_point;
-                    select_object_at_first_point(event);
-                    show_contextual_menu();
+                    select_object_and_show_contextual_menu(event);
                     break;
             }
             break;
@@ -237,54 +432,378 @@ void TaskSelection::record_first_point(Event& event)
 {
     m_xStart = event.x();
     m_yStart = event.y();
-    m_pIntor->show_selection_rectangle(m_xStart, m_yStart, m_xStart, m_yStart);
 }
 
 //---------------------------------------------------------------------------------------
-void TaskSelection::select_objects_or_click(Event& event)
+void TaskSelection::click_at_point()
 {
-    m_pIntor->hide_selection_rectangle();
-
-    //at least 5 pixels width, height to consider it a selection rectangle
-    if (abs(m_xStart - event.x()) < 5 || abs(m_yStart - event.y()) < 5)
-        m_pIntor->click_at_screen_point(m_xStart, m_yStart);
-    else
-    {
-        m_pIntor->select_objects_in_screen_rectangle(m_xStart, m_yStart,
-                                                     event.x(), event.y());
-        repaint_view();
-    }
+    m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart);
 }
 
 //---------------------------------------------------------------------------------------
-void TaskSelection::track_sel_rectangle(Event& event)
+void TaskSelection::decide_on_switching_task(Event& event)
 {
-    m_pIntor->update_selection_rectangle(event.x(), event.y());
-    repaint_view();
+    m_pIntor->task_action_decide_on_switching_task(event.x(), event.y());
 }
 
 //---------------------------------------------------------------------------------------
-void TaskSelection::select_object_at_first_point(Event& event)
+void TaskSelection::select_object_and_show_contextual_menu(Event& event)
 {
-    m_pIntor->select_object_at_screen_point(m_xStart, m_yStart);
-    repaint_view();
-}
-
-//---------------------------------------------------------------------------------------
-void TaskSelection::show_contextual_menu()
-{
+    m_pIntor->task_action_select_object_and_show_contextual_menu(m_xStart, m_yStart);
 }
 
 //---------------------------------------------------------------------------------------
 void TaskSelection::mouse_in_out(Event& event)
 {
-    m_pIntor->mouse_in_out(event.x(), event.y());
+    m_pIntor->task_action_mouse_in_out(event.x(), event.y());
+}
+
+
+//=======================================================================================
+// TaskSelectionRectangle implementation
+//=======================================================================================
+TaskSelectionRectangle::TaskSelectionRectangle(Interactor* pIntor)
+    : Task(TaskFactory::k_task_selection_rectangle, pIntor)
+    , m_state(k_start)
+    , m_pGView(pIntor)
+{
 }
 
 //---------------------------------------------------------------------------------------
-void TaskSelection::repaint_view()
+void TaskSelectionRectangle::process_event(Event event)
 {
-    m_pIntor->force_redraw();
+    switch (m_state)
+    {
+        //--------------------------------------------------------------------------
+        case k_waiting_for_point_2:
+        {
+            switch (event.type())
+            {
+                case Event::k_mouse_left_up:
+                    m_state = k_request_task_switch;
+                    select_objects_or_click(event);
+                    switch_to_default_task();
+                    break;
+                case Event::k_mouse_move:
+                    track_sel_rectangle(event);
+                    break;
+            }
+            break;
+       }
+
+        //--------------------------------------------------------------------------
+        case k_request_task_switch:
+        {
+            m_state = k_request_task_switch;
+            switch_to_default_task();
+        }
+
+        default:
+            ;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void TaskSelectionRectangle::init_task()
+{
+    m_state = k_waiting_for_point_2;
+    m_xStart = 0;
+    m_yStart = 0;
+}
+
+//---------------------------------------------------------------------------------------
+void TaskSelectionRectangle::set_first_point(Pixels xStart, Pixels yStart)
+{
+    m_xStart = xStart;
+    m_yStart = yStart;
+}
+
+//---------------------------------------------------------------------------------------
+void TaskSelectionRectangle::select_objects_or_click(Event& event)
+{
+    m_pIntor->hide_selection_rectangle();
+
+    //at least 5 pixels width, height to consider it a selection rectangle
+    if (abs(m_xStart - event.x()) < 5 || abs(m_yStart - event.y()) < 5)
+        m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart);
+    else
+        m_pIntor->task_action_select_objects_in_screen_rectangle(m_xStart, m_yStart,
+                                                                 event.x(), event.y());
+}
+
+//---------------------------------------------------------------------------------------
+void TaskSelectionRectangle::track_sel_rectangle(Event& event)
+{
+    m_pIntor->update_selection_rectangle(event.x(), event.y());
+}
+
+//---------------------------------------------------------------------------------------
+void TaskSelectionRectangle::switch_to_default_task()
+{
+    m_pIntor->task_action_switch_to_default_task();
+}
+
+
+//=======================================================================================
+// TaskMoveObject implementation
+//=======================================================================================
+TaskMoveObject::TaskMoveObject(Interactor* pIntor)
+    : Task(TaskFactory::k_task_move_object, pIntor)
+    , m_state(k_start)
+    , m_pGView(pIntor)
+{
+}
+
+//---------------------------------------------------------------------------------------
+void TaskMoveObject::process_event(Event event)
+{
+    switch (m_state)
+    {
+        //--------------------------------------------------------------------------
+        case k_waiting_for_point_2:
+        {
+            switch (event.type())
+            {
+                case Event::k_mouse_left_up:
+                    m_state = k_request_task_switch;
+                    move_object_or_click(event);
+                    switch_to_default_task();
+                    break;
+                case Event::k_mouse_move:
+                    move_drag_image(event);
+                    break;
+            }
+            break;
+       }
+
+        //--------------------------------------------------------------------------
+        case k_request_task_switch:
+        {
+            m_state = k_request_task_switch;
+            switch_to_default_task();
+        }
+
+        default:
+            ;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void TaskMoveObject::init_task()
+{
+    m_state = k_waiting_for_point_2;
+    m_xStart = 0;
+    m_yStart = 0;
+}
+
+//---------------------------------------------------------------------------------------
+void TaskMoveObject::set_first_point(Pixels xStart, Pixels yStart)
+{
+    m_xStart = xStart;
+    m_yStart = yStart;
+}
+
+//---------------------------------------------------------------------------------------
+void TaskMoveObject::move_object_or_click(Event& event)
+{
+    //at least 5 pixels width, height to consider it a move object action
+    if (abs(m_xStart - event.x()) < 5 || abs(m_yStart - event.y()) < 5)
+        m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart);
+    else
+        m_pIntor->task_action_move_object(event.x(), event.y());
+}
+
+//---------------------------------------------------------------------------------------
+void TaskMoveObject::move_drag_image(Event& event)
+{
+    m_pIntor->task_action_move_drag_image(event.x(), event.y());
+}
+
+//---------------------------------------------------------------------------------------
+void TaskMoveObject::switch_to_default_task()
+{
+    m_pIntor->task_action_switch_to_default_task();
+}
+
+
+//=======================================================================================
+// TaskDataEntry implementation
+//=======================================================================================
+TaskDataEntry::TaskDataEntry(Interactor* pIntor)
+    : Task(TaskFactory::k_task_selection, pIntor)
+    , m_state(k_start)
+    , m_pGView(pIntor)
+{
+}
+
+//---------------------------------------------------------------------------------------
+void TaskDataEntry::process_event(Event event)
+{
+    switch (m_state)
+    {
+        //--------------------------------------------------------------------------
+        case k_waiting_for_first_point:
+        {
+            switch (event.type())
+            {
+                case Event::k_mouse_left_down:
+                    m_state = k_waiting_for_point_2_left;
+                    record_first_point(event);
+                    break;
+                case Event::k_mouse_right_down:
+                    m_state = k_waiting_for_point_2_right;
+                    record_first_point(event);
+                    break;
+                case Event::k_mouse_move:
+                    move_drag_image(event);
+                    break;
+            }
+            break;
+       }
+
+        //--------------------------------------------------------------------------
+        case k_waiting_for_point_2_left:
+        {
+            switch (event.type())
+            {
+                case Event::k_mouse_left_up:
+                    m_state = k_waiting_for_first_point;
+                    insert_object(event);
+                    break;
+            }
+            break;
+        }
+
+        //--------------------------------------------------------------------------
+        case k_waiting_for_point_2_right:
+        {
+            switch (event.type())
+            {
+                case Event::k_mouse_right_up:
+                    m_state = k_waiting_for_first_point;
+                    show_contextual_menu(event);
+                    break;
+            }
+            break;
+        }
+
+        default:
+            ;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void TaskDataEntry::init_task()
+{
+    m_state = k_waiting_for_first_point;
+    m_xStart = 0;
+    m_yStart = 0;
+}
+
+//---------------------------------------------------------------------------------------
+void TaskDataEntry::record_first_point(Event& event)
+{
+    m_xStart = event.x();
+    m_yStart = event.y();
+}
+
+//---------------------------------------------------------------------------------------
+void TaskDataEntry::insert_object(Event& event)
+{
+    m_pIntor->task_action_insert_object_at_point(m_xStart, m_yStart);
+}
+
+//---------------------------------------------------------------------------------------
+void TaskDataEntry::show_contextual_menu(Event& event)
+{
+    m_pIntor->task_action_select_object_and_show_contextual_menu(m_xStart, m_yStart);
+}
+
+//---------------------------------------------------------------------------------------
+void TaskDataEntry::move_drag_image(Event& event)
+{
+    m_pIntor->task_action_move_drag_image(event.x(), event.y());
+}
+
+
+//=======================================================================================
+// TaskMoveHandler implementation
+//=======================================================================================
+TaskMoveHandler::TaskMoveHandler(Interactor* pIntor)
+    : Task(TaskFactory::k_task_move_object, pIntor)
+    , m_state(k_start)
+    , m_pGView(pIntor)
+{
+}
+
+//---------------------------------------------------------------------------------------
+void TaskMoveHandler::process_event(Event event)
+{
+    switch (m_state)
+    {
+        //--------------------------------------------------------------------------
+        case k_waiting_for_point_2:
+        {
+            switch (event.type())
+            {
+                case Event::k_mouse_left_up:
+                    m_state = k_request_task_switch;
+                    move_handler_end_point(event);
+                    switch_to_default_task();
+                    break;
+                case Event::k_mouse_move:
+                    move_handler(event);
+                    break;
+            }
+            break;
+       }
+
+        //--------------------------------------------------------------------------
+        case k_request_task_switch:
+        {
+            m_state = k_request_task_switch;
+            switch_to_default_task();
+        }
+
+        default:
+            ;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void TaskMoveHandler::init_task()
+{
+    m_state = k_waiting_for_point_2;
+    m_xStart = 0;
+    m_yStart = 0;
+}
+
+//---------------------------------------------------------------------------------------
+void TaskMoveHandler::set_first_point(Pixels xStart, Pixels yStart)
+{
+    m_xStart = xStart;
+    m_yStart = yStart;
+}
+
+//---------------------------------------------------------------------------------------
+void TaskMoveHandler::move_handler(Event& event)
+{
+    m_pIntor->task_action_move_handler(event.x(), event.y());
+}
+
+//---------------------------------------------------------------------------------------
+void TaskMoveHandler::move_handler_end_point(Event& event)
+{
+    Pixels xTotalShift = event.x() - m_xStart;
+    Pixels yTotalShift = event.y() - m_yStart;
+    m_pIntor->task_action_move_handler_end_point(event.x(), event.y(),
+                                                 xTotalShift, yTotalShift);
+}
+
+//---------------------------------------------------------------------------------------
+void TaskMoveHandler::switch_to_default_task()
+{
+    m_pIntor->task_action_switch_to_default_task();
 }
 
 

@@ -105,11 +105,6 @@ class ImoTimeSignature;
     // Returns the diatonic pitch for first line, when using received clef.
     extern DiatonicPitch get_diatonic_pitch_for_first_line(EClef nClef);
 
-    //-----------------------------------------------------------------------------------
-    // returns the index (over global glyphs table) to the character to use to print
-    // the clef (LenMus font)
-    //extern lmEGlyphIndex lmGetGlyphForCLef(EClef nClefType);
-
 }   //namespace lomse
 
 #endif      //__LOMSE_SCORE_UTILITIES_H__

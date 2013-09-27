@@ -35,6 +35,7 @@
 #include "lomse_document_layouter.h"
 #include "lomse_injectors.h"
 #include "lomse_document.h"
+#include "lomse_graphical_model.h"
 #include "lomse_gm_basic.h"
 #include "lomse_box_system.h"
 #include "lomse_shape_staff.h"
@@ -97,7 +98,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
         //pGModel->dump_page(0, cout);
         CHECK( pGModel != NULL );
         delete pGModel;
@@ -110,7 +111,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
         CHECK( pGModel != NULL );
         CHECK( pGModel->get_num_pages() == 1 );
         delete pGModel;
@@ -125,7 +126,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         CHECK( pPage->is_box_doc_page() == true );
         CHECK( pPage->get_width() == 24000.0f );
@@ -142,7 +143,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         GmoBox* pBox = pPage->get_child_box(0);
         CHECK( pBox->is_box_doc_page_content() == true );
@@ -162,7 +163,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
 //        pGModel->dump_page(0, cout);
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         GmoBox* pBDPC = pPage->get_child_box(0);     //DocPageContent
@@ -186,7 +187,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
 //        pGModel->dump_page(0, cout);
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         GmoBox* pBDPC = pPage->get_child_box(0);     //DocPageContent
@@ -210,7 +211,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         GmoBox* pBDPC = pPage->get_child_box(0);     //DocPageContent
         GmoBox* pBSP = pBDPC->get_child_box(0);      //ScorePage
@@ -234,7 +235,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         GmoBox* pBDPC = pPage->get_child_box(0);     //DocPageContent
         GmoBox* pBSP = pBDPC->get_child_box(0);      //ScorePage
@@ -259,7 +260,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
@@ -280,7 +281,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData (clef G)(key e)(n c4 q)(r q)(barline simple))))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         GmoBox* pBDPC = pPage->get_child_box(0);    //DocPageContent
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
@@ -301,7 +302,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData )))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
         CHECK( pGModel->get_num_pages() == 1 );
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         CHECK( pPage->get_num_boxes() == 1 );
@@ -329,7 +330,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData (clef G) )) )))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
         CHECK( pGModel->get_num_pages() == 1 );
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         CHECK( pPage->get_num_boxes() == 1 );
@@ -369,7 +370,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData )) )))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
         CHECK( pGModel->get_num_pages() == 1 );
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         CHECK( pPage->get_num_boxes() == 1 );
@@ -397,7 +398,7 @@ SUITE(DocLayouterTest)
             "(instrument (staves 2)(musicData )))))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
         CHECK( pGModel->get_num_pages() == 1 );
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         CHECK( pPage->get_num_boxes() == 1 );
@@ -429,7 +430,7 @@ SUITE(DocLayouterTest)
             "(instrument (musicData )) (instrument (musicData )) )))" );
         DocLayouter dl( doc.get_im_model(), m_libraryScope);
         dl.layout_document();
-        GraphicModel* pGModel = dl.get_gm_model();
+        GraphicModel* pGModel = dl.get_graphic_model();
         CHECK( pGModel->get_num_pages() == 1 );
         GmoBoxDocPage* pPage = pGModel->get_page(0);
         CHECK( pPage->get_num_boxes() == 1 );

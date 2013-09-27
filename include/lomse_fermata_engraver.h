@@ -59,6 +59,7 @@ public:
     ~FermataEngraver() {}
 
     GmoShapeFermata* create_shape(ImoFermata* pFermata, UPoint pos,
+                                  Color color=Color(0,0,0),
                                   GmoShape* pParentShape=NULL);
 
 protected:

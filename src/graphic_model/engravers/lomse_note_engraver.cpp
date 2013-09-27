@@ -54,20 +54,22 @@ namespace lomse
 //=======================================================================================
 NoteEngraver::NoteEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                            ShapesStorage* pShapesStorage, int iInstr, int iStaff)
-    : NoterestEngraver(libraryScope, pScoreMeter, pShapesStorage, iInstr, iStaff)
+//    : NoterestEngraver(libraryScope, pScoreMeter, pShapesStorage, iInstr, iStaff)
+    : Engraver(libraryScope, pScoreMeter, iInstr, iStaff)
     , m_pNote(NULL)
+    , m_pShapesStorage(pShapesStorage)
 {
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, UPoint uPos)
+GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, UPoint uPos,
+                                     Color color)
 {
     //save data and initialize
     m_pNote = pNote;
-    m_pNoteRest = pNote;
     m_clefType = clefType;
     m_lineSpacing = m_pMeter->line_spacing_for_instr_staff(m_iInstr, m_iStaff);
-    m_color = m_pNote->get_color();
+    m_color = color;
     m_pNoteShape = NULL;
     m_pNoteheadShape = NULL;
     m_fontSize = determine_font_size();
@@ -78,20 +80,79 @@ GmoShape* NoteEngraver::create_shape(ImoNote* pNote, int clefType, UPoint uPos)
     m_uyTop = m_uyStaffTopLine - get_pitch_shift();
     m_uxLeft = uPos.x;
 
+    //get note required data
+    m_nDots = m_pNote->get_dots();
+    m_noteType = m_pNote->get_note_type();
+    m_acc = m_pNote->get_notated_accidentals();
+    determine_stem_direction();
+
+    create_shape();
+
+    return m_pNoteShape;
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* NoteEngraver::create_tool_dragged_shape(int noteType, EAccidentals acc,
+                                                  int dots)
+{
+    //initialize
+    m_pNote = NULL;
+    m_clefType = k_clef_G2;
+    m_lineSpacing = 72.0;
+    m_color = Color(255,0,0);       //TODO: options/configuration
+    m_pNoteShape = NULL;
+    m_pNoteheadShape = NULL;
+    m_fontSize = 21.0;
+
+    //y pos for note pitch
+    m_uyStaffTopLine = 0.0;
+    m_nPosOnStaff = 2;          //2 = on first line
+    m_uyTop = 0.0;
+    m_uxLeft = 0.0;
+
+    //set note required data
+    m_nDots = dots;
+    m_noteType = noteType;
+    m_acc = acc;
+    m_fStemDown = false;
+
+//    m_pNoteShape = LOMSE_NEW GmoShapeNote(NULL, 0.0, 0.0, m_color, m_libraryScope);
+//
+//    //create component shapes: accidentals, notehead, dots, stem, flag, ledger lines
+//    add_shapes_for_accidentals_if_required();
+//    add_notehead_shape();
+//    add_shapes_for_dots_if_required();
+//    add_stem_and_flag_if_required();
+//    add_leger_lines_if_necessary();
+
+    create_shape();
+
+    return m_pNoteShape;
+}
+
+//---------------------------------------------------------------------------------------
+void NoteEngraver::create_shape()
+{
 	//create the note container shape
-    m_pNoteShape = LOMSE_NEW GmoShapeNote(pNote, m_uxLeft, m_uyTop, m_color, m_libraryScope);
-    m_pNoteShape->set_pos_on_staff(m_nPosOnStaff);
-    m_pNoteRestShape = m_pNoteShape;
+    m_pNoteShape = LOMSE_NEW GmoShapeNote(m_pNote, m_uxLeft, m_uyTop, m_color,
+                                          m_libraryScope);
 
     //create component shapes: accidentals, notehead, dots, stem, flag, ledger lines
-    determine_stem_direction();
     add_shapes_for_accidentals_if_required();
     add_notehead_shape();
     add_shapes_for_dots_if_required();
     add_stem_and_flag_if_required();
     add_leger_lines_if_necessary();
+}
 
-    return m_pNoteShape;
+//---------------------------------------------------------------------------------------
+UPoint NoteEngraver::get_drag_offset()
+{
+    //return center of notehead
+    URect total = m_pNoteShape->get_bounds();
+    URect head = m_pNoteheadShape->get_bounds();
+    return UPoint(head.get_x() - total.get_x() + head.get_width() / 2.0,
+                  head.get_y() - total.get_y() + head.get_height() / 2.0 );
 }
 
 //---------------------------------------------------------------------------------------
@@ -123,8 +184,7 @@ void NoteEngraver::determine_stem_direction()
 //---------------------------------------------------------------------------------------
 void NoteEngraver::add_shapes_for_dots_if_required()
 {
-    int nDots = m_pNote->get_dots();
-    if (nDots > 0)
+    if (m_nDots > 0)
     {
         LUnits uSpaceBeforeDot = tenths_to_logical(LOMSE_SPACE_BEFORE_DOT);
         LUnits uyPos = m_uyTop;
@@ -137,7 +197,7 @@ void NoteEngraver::add_shapes_for_dots_if_required()
                 uyPos += tenths_to_logical(5.0f);
         }
 
-        for (int i = 0; i < nDots; i++)
+        for (int i = 0; i < m_nDots; i++)
         {
             m_uxLeft += uSpaceBeforeDot;
             m_uxLeft += add_dot_shape(m_uxLeft, uyPos, m_color);
@@ -162,12 +222,11 @@ void NoteEngraver::add_stem_and_flag_if_required()
 
     if (has_stem() && !is_in_chord())
     {
-        int noteType = m_pNote->get_note_type();
         bool fHasFlag = (!is_beamed() && has_flag());
         LUnits stemLength = tenths_to_logical(
                                 get_standard_stem_length(m_nPosOnStaff, m_fStemDown) );
         StemFlagEngraver engrv(m_libraryScope, m_pMeter, m_pNote, m_iInstr, m_iStaff);
-        engrv.add_stem_flag(m_pNoteShape, m_pNoteShape, noteType, m_fStemDown,
+        engrv.add_stem_flag(m_pNoteShape, m_pNoteShape, m_noteType, m_fStemDown,
                             fHasFlag, stemLength, m_color);
         m_pNoteShape->set_up_oriented(!m_fStemDown);
     }
@@ -178,12 +237,12 @@ void NoteEngraver::add_stem_and_flag_if_required()
 //---------------------------------------------------------------------------------------
 void NoteEngraver::add_shapes_for_accidentals_if_required()
 {
-    EAccidentals acc = m_pNote->get_notated_accidentals();
-    if (acc != k_no_accidentals)
+    if (m_acc != k_no_accidentals)
     {
         AccidentalsEngraver engrv(m_libraryScope, m_pMeter, m_iInstr, m_iStaff);
         m_pAccidentalsShape = engrv.create_shape(m_pNote, UPoint(m_uxLeft, m_uyTop),
-                                                 acc, false /*cautionary accidentals*/);
+                                                 m_acc, false /*cautionary accidentals*/,
+                                                 m_color);
         m_pNoteShape->add_accidentals(m_pAccidentalsShape);
         m_uxLeft += m_pAccidentalsShape->get_width();
         m_uxLeft += tenths_to_logical(LOMSE_SPACE_AFTER_ACCIDENTALS);
@@ -209,18 +268,17 @@ int NoteEngraver::decide_notehead_type()
 {
     //TODO: Notehead cross
 
-    int noteType = m_pNote->get_note_type();
     //if (! m_fCabezaX)
     {
-        if (noteType > k_half) {
+        if (m_noteType > k_half) {
             return k_notehead_quarter;
-        } else if (noteType == k_half) {
+        } else if (m_noteType == k_half) {
             return k_notehead_half;
-        } else if (noteType == k_whole) {
+        } else if (m_noteType == k_whole) {
             return k_notehead_whole;
-        } else if (noteType == k_breve) {
+        } else if (m_noteType == k_breve) {
             return k_notehead_breve;
-        } else if (noteType == k_longa) {
+        } else if (m_noteType == k_longa) {
             return k_notehead_longa;
         } else {
             //LogMessage("NoteEngraver::decide_notehead_type", "Unknown note type.");
@@ -449,7 +507,8 @@ void NoteEngraver::create_chord()
 {
     ImoChord* pChord = m_pNote->get_chord();
     int numNotes = pChord->get_num_objects();
-    ChordEngraver* pEngrv = LOMSE_NEW ChordEngraver(m_libraryScope, m_pMeter, numNotes);
+    ChordEngraver* pEngrv =
+        LOMSE_NEW ChordEngraver(m_libraryScope, m_pMeter, numNotes);
     m_pShapesStorage->save_engraver(pEngrv, pChord);
 
     pEngrv->set_start_staffobj(pChord, m_pNote, m_pNoteShape, m_iInstr, m_iStaff, 0, 0);
@@ -477,7 +536,7 @@ void NoteEngraver::layout_chord()
     pEngrv->set_end_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0);
 //    pEngrv->set_prolog_width( prologWidth );
 //
-    pEngrv->create_shapes();
+    pEngrv->create_shapes(pChord->get_color());
 
     m_pShapesStorage->remove_engraver(pChord);
     delete pEngrv;

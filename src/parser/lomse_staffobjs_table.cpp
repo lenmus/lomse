@@ -36,6 +36,10 @@
 #include "lomse_time.h"
 #include "lomse_im_factory.h"
 
+//specific for ScoreAlgorithms
+#include "lomse_pitch.h"
+
+
 #include <sstream>
 using namespace std;
 
@@ -70,57 +74,6 @@ std::string ColStaffObjsEntry::to_string_with_ids()
 //=======================================================================================
 // ColStaffObjs implementation
 //=======================================================================================
-
-//auxiliary, for sort: by time, object type (barlines before objects in other lines),
-//line and staff.
-//AWARE:
-//   Current order is first pA, then pB
-//   return TRUE to move pB before pA, FALSE to keep in current order
-
-bool is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
-{
-    //swap if B has lower time than A
-    if ( is_lower_time(b->time(), a->time()) )
-        return true;
-
-    //both have equal time
-    else if ( is_equal_time(b->time(), a->time()) )
-    {
-        ImoStaffObj* pB = b->imo_object();
-        ImoStaffObj* pA = a->imo_object();
-
-        //barline must go before all other objects at same measure
-        //TODO: not asking for measure but for line. Is this correct?
-        if (pB->is_barline() && !pA->is_barline() && b->line() != a->line())
-            return true;
-        else if (pA->is_barline() && !pB->is_barline() && b->line() != a->line())
-            return false;
-
-////        //note/rest can not go before non-timed
-////        else if (pA->is_note_rest() && pB->get_duration() == 0.0f)
-////            return true;
-////        else if (pB->is_note_rest() && pA->get_duration() == 0.0f)
-////            return false;
-////
-////        //clef in other staff can not go after key or time signature
-////        else if (pB->is_clef() && (pA->is_key_signature() || pA->is_time_signature())
-////                 && b->staff() != a->staff())
-////            return true;
-////        else if (pA->is_clef() && (pB->is_key_signature() || pB->is_time_signature()))
-////            return false;
-//
-//        //else order by staff and line
-//        return (b->line() < a->line() || (b->line() == a->line()
-//                                          && b->staff() < a->staff()) );
-        //else, preserve definition order
-        return false;
-    }
-
-    //time(pB) > time(pA). They are correctly ordered
-    return false;
-}
-
-//---------------------------------------------------------------------------------------
 ColStaffObjs::ColStaffObjs()
     : m_numLines(0)
     , m_numEntries(0)
@@ -206,6 +159,57 @@ void ColStaffObjs::add_entry_to_list(ColStaffObjsEntry* pEntry)
 }
 
 //---------------------------------------------------------------------------------------
+bool ColStaffObjs::is_lower_entry(ColStaffObjsEntry* b, ColStaffObjsEntry* a)
+{
+    //auxiliary, for sort: by time, object type (barlines before objects in other lines),
+    //line and staff.
+    //AWARE:
+    //   Current order is first pA, then pB
+    //   return TRUE to move pB before pA, FALSE to keep in current order
+
+
+    //swap if B has lower time than A
+    if ( is_lower_time(b->time(), a->time()) )
+        return true;
+
+    //both have equal time
+    else if ( is_equal_time(b->time(), a->time()) )
+    {
+        ImoStaffObj* pB = b->imo_object();
+        ImoStaffObj* pA = a->imo_object();
+
+        //barline must go before all other objects at same measure
+        //TODO: not asking for measure but for line. Is this correct?
+        if (pB->is_barline() && !pA->is_barline() && b->line() != a->line())
+            return true;
+        else if (pA->is_barline() && !pB->is_barline() && b->line() != a->line())
+            return false;
+
+////        //note/rest can not go before non-timed
+////        else if (pA->is_note_rest() && pB->get_duration() == 0.0f)
+////            return true;
+////        else if (pB->is_note_rest() && pA->get_duration() == 0.0f)
+////            return false;
+////
+////        //clef in other staff can not go after key or time signature
+////        else if (pB->is_clef() && (pA->is_key_signature() || pA->is_time_signature())
+////                 && b->staff() != a->staff())
+////            return true;
+////        else if (pA->is_clef() && (pB->is_key_signature() || pB->is_time_signature()))
+////            return false;
+//
+//        //else order by staff and line
+//        return (b->line() < a->line() || (b->line() == a->line()
+//                                          && b->staff() < a->staff()) );
+        //else, preserve definition order
+        return false;
+    }
+
+    //time(pB) > time(pA). They are correctly ordered
+    return false;
+}
+
+//---------------------------------------------------------------------------------------
 void ColStaffObjs::delete_entry_for(ImoStaffObj* pSO)
 {
     ColStaffObjsEntry* pEntry = find_entry_for(pSO);
@@ -260,7 +264,7 @@ void ColStaffObjs::sort_table()
     // * stable (preserve order of elements with equal keys)
     //The chosen algorithm is the insertion sort, that also has some advantages:
     // * good performance when table is nearly ordered
-    // * simple to implement and musch better performance than other simple algorithms,
+    // * simple to implement and much better performance than other simple algorithms,
     //   such as the bubble sort
     // * in-place sort (does not require extra memory)
 
@@ -700,6 +704,80 @@ void StaffVoiceLineTable::new_instrument()
     //first voice in each staff not yet known
     for (int i=0; i < 10; i++)
         m_firstVoiceForStaff[i] = 0;
+}
+
+
+//=======================================================================================
+// ScoreAlgorithms implementation
+//=======================================================================================
+ImoNote* ScoreAlgorithms::find_possible_end_of_tie(ColStaffObjs* pColStaffObjs,
+                                                   ImoNote* pStartNote)
+{
+    // This method explores forwards to try to find a note ("the candidate note") that
+    // can be tied (as end of tie) with pStartNote.
+    //
+    // Algorithm:
+    // Find the first comming note of the same pitch and voice, and verify that
+    // distance (in timepos) is equal to start note duration.
+    // The search will fail as soon as we find a rest or a note with different pitch.
+
+    //get target pitch and voice
+    FPitch pitch = pStartNote->get_fpitch();
+    int voice = pStartNote->get_voice();
+
+    //define a forwards iterator and find start note
+    ColStaffObjsIterator it = pColStaffObjs->find(pStartNote);
+    if (it == pColStaffObjs->end())
+        return NULL;    //pStartNote not found ??????
+
+    int instr = (*it)->num_instrument();
+
+    //do search
+    ++it;
+    while(it != pColStaffObjs->end())
+    {
+        ImoStaffObj* pSO = (*it)->imo_object();
+        if ((*it)->num_instrument() == instr
+            && pSO->is_note_rest()
+            && static_cast<ImoNoteRest*>(pSO)->get_voice() == voice)
+        {
+            if (pSO->is_note())
+            {
+                if (static_cast<ImoNote*>(pSO)->get_fpitch() == pitch)
+                    return static_cast<ImoNote*>(pSO);    // candidate found
+                else
+                    // a note in the same voice with different pitch found.
+                    // Imposible to tie
+                    return NULL;
+            }
+            else
+                // a rest in the same voice found. Imposible to tie
+                return NULL;
+        }
+        ++it;
+    }
+    return NULL;        //no suitable note found
+}
+
+//---------------------------------------------------------------------------------------
+int ScoreAlgorithms::get_applicable_clef_for(ImoScore* pScore,
+                                             int iInstr, int iStaff, TimeUnits time)
+{
+    ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+    int clef = k_clef_undefined;
+    ColStaffObjsIterator it;
+    for (it=pColStaffObjs->begin(); it != pColStaffObjs->end(); ++it)
+    {
+        if (is_greater_time((*it)->time(), time))
+            break;
+        if ((*it)->num_instrument() == iInstr && (*it)->staff() == iStaff)
+        {
+            ImoObj* pImo = (*it)->imo_object();
+            if (pImo->is_clef())
+                clef = static_cast<ImoClef*>(pImo)->get_clef_type();
+        }
+    }
+    return clef;
 }
 
 

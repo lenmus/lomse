@@ -937,7 +937,7 @@ public:
         pLine->set_end_edge(k_edge_normal);
 
         // <destination-point> = <dx><dy>
-        TPoint point;
+        TPoint point = TPoint(0.0f, 0.0f);
         if (get_mandatory(k_dx))
             point.x = get_location_param();
         if (get_mandatory(k_dy))
@@ -983,7 +983,7 @@ public:
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoBarline* pBarline = static_cast<ImoBarline*>(
                                     ImFactory::inject(k_imo_barline, pDoc, get_node_id()) );
-        pBarline->set_type(ImoBarline::k_simple);
+        pBarline->set_type(k_barline_simple);
 
         // <type> (label)
         if (get_optional(k_label))
@@ -1002,21 +1002,21 @@ protected:
     int get_barline_type()
     {
         string value = m_pParamToAnalyse->get_value();
-        int type = ImoBarline::k_simple;
+        int type = k_barline_simple;
         if (value == "simple")
-            type = ImoBarline::k_simple;
+            type = k_barline_simple;
         else if (value == "double")
-            type = ImoBarline::k_double;
+            type = k_barline_double;
         else if (value == "start")
-            type = ImoBarline::k_start;
+            type = k_barline_start;
         else if (value == "end")
-            type = ImoBarline::k_end;
+            type = k_barline_end;
         else if (value == "endRepetition")
-            type = ImoBarline::k_end_repetition;
+            type = k_barline_end_repetition;
         else if (value == "startRepetition")
-            type = ImoBarline::k_start_repetition;
+            type = k_barline_start_repetition;
         else if (value == "doubleRepetition")
-            type = ImoBarline::k_double_repetition;
+            type = k_barline_double_repetition;
         else
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
@@ -1054,9 +1054,8 @@ public:
 
     void do_analysis()
     {
-        //AWARE: ImoBeamDto will be discarded. So no ID will be assigned to avoid
-        //problems with undo/redo
         ImoBeamDto* pInfo = LOMSE_NEW ImoBeamDto( m_pAnalysedNode );
+        pInfo->set_id( get_node_id() );
 
         // num
         if (get_optional(k_number))
@@ -4296,8 +4295,8 @@ public:
 
     void do_analysis()
     {
-        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoSlurDto* pInfo = LOMSE_NEW ImoSlurDto();
+        pInfo->set_id( get_node_id() );
 
         // num
         if (get_mandatory(k_number))
@@ -5261,9 +5260,8 @@ public:
 
     void do_analysis()
     {
-        //AWARE: ImoTupletDto will be discarded. So no ID will be assigned to avoid
-        //problems with undo/redo
         ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
+        pInfo->set_id( get_node_id() );
         set_default_values(pInfo);
 
         // [<tupletID>]     //optional for 1.5 compatibility.
@@ -5783,6 +5781,7 @@ ImoBeam* LdpAnalyser::create_beam(const list<ImoNoteRest*>& notes)
 
         //associate the beam dto to the note
         pBeamDto->set_note_rest(*it);
+        (*it)->set_dirty(true);
 
         //add it to the beams builder;
         add_relation_info(pBeamDto);
@@ -6119,6 +6118,8 @@ EAccidentals LdpAnalyser::to_accidentals(const std::string& accidentals)
                 return k_flat_flat;
             else if (accidentals.compare(0, 2, "=-") == 0)
                 return k_natural_flat;
+            else if (accidentals.compare(0, 2, "=+") == 0)
+                return k_natural_sharp;
             else
                 return k_invalid_accidentals;
             break;
@@ -6380,7 +6381,10 @@ void SlursBuilder::add_relation_to_notes_rests(ImoSlurDto* pEndInfo)
 {
     m_matches.push_back(pEndInfo);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
-    ImoSlur* pSlur = static_cast<ImoSlur*>(ImFactory::inject(k_imo_slur, pDoc));
+
+    ImoSlurDto* pStartInfo = m_matches.front();
+    ImoSlur* pSlur = static_cast<ImoSlur*>(
+                        ImFactory::inject(k_imo_slur, pDoc, pStartInfo->get_id()) );
     pSlur->set_slur_number( pEndInfo->get_slur_number() );
     std::list<ImoSlurDto*>::iterator it;
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
@@ -6401,7 +6405,9 @@ void BeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
     m_matches.push_back(pEndInfo);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
-    ImoBeam* pBeam = static_cast<ImoBeam*>(ImFactory::inject(k_imo_beam, pDoc));
+    ImoBeamDto* pStartInfo = m_matches.front();
+    ImoBeam* pBeam = static_cast<ImoBeam*>(
+                        ImFactory::inject(k_imo_beam, pDoc, pStartInfo->get_id()) );
     std::list<ImoBeamDto*>::iterator it;
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {

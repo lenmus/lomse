@@ -32,6 +32,7 @@
 #include "lomse_staffobjs_table.h"
 #include "lomse_score_meter.h"
 #include "lomse_calligrapher.h"
+#include "lomse_graphical_model.h"
 #include "lomse_gm_basic.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
@@ -80,6 +81,7 @@ ScoreLayouter::ScoreLayouter(ImoContentObj* pItem, Layouter* pParent,
     , m_pScoreMeter( LOMSE_NEW ScoreMeter(m_pScore) )
     , m_pColsBuilder(NULL)
     , m_pShapesCreator(NULL)
+    , m_pStub(NULL)
     , m_pCurBoxPage(NULL)
     , m_pCurBoxSystem(NULL)
     , m_iColumnToTrace(-1)
@@ -302,6 +304,8 @@ void ScoreLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width
 {
     m_pItemMainBox = LOMSE_NEW GmoBoxScorePage(m_pScore);
     pParentBox->add_child_box(m_pItemMainBox);
+    create_stub();
+    m_pStub->add_page( static_cast<GmoBoxScorePage*>(m_pItemMainBox) );
 
     m_pItemMainBox->set_origin(pos);
     m_pItemMainBox->set_width(width);
@@ -336,10 +340,15 @@ void ScoreLayouter::move_cursor_to_top_left_corner()
 }
 
 //---------------------------------------------------------------------------------------
+void ScoreLayouter::create_stub()
+{
+    m_pStub = m_pGModel->add_stub_for(m_pScore->get_id());
+}
+
+//---------------------------------------------------------------------------------------
 void ScoreLayouter::add_score_titles()
 {
     //TODO: ScoreLayouter::add_score_titles
-    //m_pScore->LayoutAttachedObjects(m_pStubScore->GetCurrentPage(), m_pPaper);
 }
 
 //---------------------------------------------------------------------------------------
@@ -950,13 +959,6 @@ bool ColumnsBuilder::determine_if_is_in_prolog(TimeUnits rTime)
 }
 
 ////////---------------------------------------------------------------------------------------
-//////void ScoreLayouter::AddTimeGridToBoxSlice(int iCol, GmoBoxSlice* pBSlice)
-//////{
-//////    //create the time-grid table and transfer it (and its ownership) to GmoBoxSlice
-//////    pBSlice->SetTimeGridTable( LOMSE_NEW TimeGridTable(m_ColStorage[iCol]) );
-//////}
-
-////////---------------------------------------------------------------------------------------
 //////void ScoreLayouter::ClearDirtyFlags(int iCol)
 //////{
 //////    m_ColStorage[iCol]->ClearDirtyFlags();
@@ -1069,7 +1071,8 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             LUnits yTop = pInstrEngrv->get_staves_top_line();
             LUnits yBottom = pInstrEngrv->get_staves_bottom_line();
             BarlineEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr);
-            return engrv.create_shape(pImo, pos.x, yTop, yBottom);
+            Color color = pImo->get_color();
+            return engrv.create_shape(pImo, pos.x, yTop, yBottom, color);
         }
         case k_imo_clef:
         {
@@ -1078,21 +1081,24 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             int clefSize = pClef->get_symbol_size();
             if (clefSize == k_size_default)
                 clefSize = fSmallClef ? k_size_cue : k_size_full;
+            Color color = pClef->get_color();
             ClefEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
-            return engrv.create_shape(pClef, pos, clefType, clefSize);
+            return engrv.create_shape(pClef, pos, clefType, clefSize, color);
         }
         case k_imo_key_signature:
         {
             ImoKeySignature* pImo = static_cast<ImoKeySignature*>(pSO);
             KeyEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
-            return engrv.create_shape(pImo, clefType, pos);
+            Color color = pImo->get_color();
+            return engrv.create_shape(pImo, clefType, pos, color);
         }
         case k_imo_note:
         {
             ImoNote* pImo = static_cast<ImoNote*>(pSO);
             NoteEngraver engrv(m_libraryScope, m_pScoreMeter, &m_shapesStorage,
                                iInstr, iStaff);
-            GmoShape* pShape = engrv.create_shape(pImo, clefType, pos);
+            Color color = pImo->get_color();
+            GmoShape* pShape = engrv.create_shape(pImo, clefType, pos, color);
 
             //AWARE: Chords are an exception to the way relations are engraved. This
             //is because chords affect to note positions (reverse noteheads, shift
@@ -1113,7 +1119,8 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             {
                 RestEngraver engrv(m_libraryScope, m_pScoreMeter, &m_shapesStorage,
                                    iInstr, iStaff);
-                return engrv.create_shape(pImo, pos);
+                Color color = pImo->get_color();
+                return engrv.create_shape(pImo, pos, color);
             }
         }
         case k_imo_time_signature:
@@ -1122,7 +1129,8 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
             int beats = pImo->get_top_number();
             int beat_type = pImo->get_bottom_number();
             TimeEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
-            return engrv.create_shape_normal(pImo, pos, beats, beat_type);
+            Color color = pImo->get_color();
+            return engrv.create_shape_normal(pImo, pos, beats, beat_type, color);
         }
         case k_imo_spacer:
         {
@@ -1135,7 +1143,8 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
         {
             ImoMetronomeMark* pImo = static_cast<ImoMetronomeMark*>(pSO);
             MetronomeMarkEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
-            return engrv.create_shape(pImo, pos);
+            Color color = pImo->get_color();
+            return engrv.create_shape(pImo, pos, color);
         }
         default:
             return create_invisible_shape(pSO, iInstr, iStaff, pos, 0.0f);
@@ -1155,7 +1164,8 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
         {
             ImoFermata* pImo = static_cast<ImoFermata*>(pAO);
             FermataEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
-            return engrv.create_shape(pImo, pos, pParentShape);
+            Color color = pImo->get_color();
+            return engrv.create_shape(pImo, pos, color, pParentShape);
         }
         case k_imo_score_line:
         {
@@ -1270,7 +1280,7 @@ void ShapesCreator::finish_engraving_relobj(ImoRelObj* pRO,
     pEngrv->set_end_staffobj(pRO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol);
     pEngrv->set_prolog_width( prologWidth );
 
-    pEngrv->create_shapes();
+    pEngrv->create_shapes(pRO->get_color());
 }
 
 

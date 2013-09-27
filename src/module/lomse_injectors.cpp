@@ -75,6 +75,7 @@ LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
     , m_fDumpColumnTables(false)
     , m_fDrawAnchors(false)
     , m_fReplaceLocalMetronome(false)
+    , m_fShowShapeBounds(false)
 {
     if (!m_pDoorway)
     {
@@ -371,12 +372,6 @@ DocCursor* Injector::inject_DocCursor(Document* pDoc)
 DocCommandExecuter* Injector::inject_DocCommandExecuter(Document* pDoc)
 {
     return LOMSE_NEW DocCommandExecuter(pDoc);
-}
-
-//---------------------------------------------------------------------------------------
-CaretPositioner* Injector::inject_CaretPositioner(DocCursor* pCursor)
-{
-    return LOMSE_NEW CaretPositioner(pCursor);
 }
 
 

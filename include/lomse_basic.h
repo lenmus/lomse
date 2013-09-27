@@ -134,10 +134,10 @@ struct Rectangle
         , height(bottomRight.y - topLeft.y)
         { }
     Rectangle(const Point<T>& pt, const Size<T>& size)
-        : x(pt.x), y(pt.y), width(size.x), height(size.y)
+        : x(pt.x), y(pt.y), width(size.width), height(size.height)
         { }
     Rectangle(const Size<T>& size)
-        : x(0), y(0), width(size.x), height(size.y)
+        : x(0), y(0), width(size.width), height(size.height)
         { }
 
     // default copy ctor and assignment operators ok
@@ -246,10 +246,10 @@ struct Rectangle
     // compare rectangles
     bool operator==(const Rectangle& rect) const
     {
-        return this->x() == rect.x()
-               && this->y() == rect.y()
-               && this->width() == rect.width()
-               && this->height() == rect.height();
+        return this->x == rect.x
+               && this->y == rect.y
+               && this->width == rect.width
+               && this->height == rect.height;
     }
     bool operator!=(const Rectangle& rect) const { return !(*this == rect); }
 

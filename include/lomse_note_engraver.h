@@ -32,8 +32,8 @@
 
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
-#include "lomse_noterest_engraver.h"
 #include "lomse_im_note.h"
+#include "lomse_engraver.h"
 
 namespace lomse
 {
@@ -50,23 +50,28 @@ class ScoreMeter;
 class ShapesStorage;
 
 //---------------------------------------------------------------------------------------
-class NoteEngraver : public NoterestEngraver
+class NoteEngraver : public Engraver
 {
 protected:
     ImoNote* m_pNote;
     int m_clefType;
+    ShapesStorage* m_pShapesStorage;
 
 public:
     NoteEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                  ShapesStorage* pShapesStorage, int iInstr, int iStaff);
     virtual ~NoteEngraver() {}
 
-    GmoShape* create_shape(ImoNote* pNote, int clefType, UPoint uPos);
+    GmoShape* create_shape(ImoNote* pNote, int clefType, UPoint uPos,
+                           Color color=Color(0,0,0));
+    GmoShape* create_tool_dragged_shape(int noteType, EAccidentals acc, int dots);
+    UPoint get_drag_offset();
 
     static Tenths get_standard_stem_length(int nPosOnStaff, bool fStemDown);
     void add_to_chord_if_in_chord();
 
 protected:
+    void create_shape();
     void add_notehead_shape();
     void add_stem_and_flag_if_required();
     void add_leger_lines_if_necessary();
@@ -85,12 +90,13 @@ protected:
     void create_chord();
     void add_to_chord();
     void layout_chord();
-    inline bool is_in_chord() { return m_pNote->is_in_chord(); }
-    inline bool is_last_note_of_chord() { return m_pNote->is_end_of_chord(); }
+    inline bool is_in_chord() { return m_pNote && m_pNote->is_in_chord(); }
+    inline bool is_last_note_of_chord() { return m_pNote && m_pNote->is_end_of_chord(); }
 
     //helper
-    inline bool has_stem() { return m_pNote->get_note_type() >= k_half; }
-    inline bool has_flag() { return m_pNote->get_note_type() >= k_eighth; }
+    inline bool has_stem() { return m_noteType >= k_half; }
+    inline bool has_flag() { return m_noteType >= k_eighth; }
+    inline bool is_beamed() { return m_pNote && m_pNote->is_beamed(); }
     Tenths get_glyph_offset(int iGlyph);
 
 
@@ -101,6 +107,14 @@ protected:
     GmoShapeNote* m_pNoteShape;
     GmoShapeNotehead* m_pNoteheadShape;
     GmoShapeAccidentals* m_pAccidentalsShape;
+    int m_nDots;
+    int m_noteType;
+    EAccidentals m_acc;
+
+    LUnits m_lineSpacing;
+    Color m_color;
+    double m_fontSize;
+
 };
 
 //---------------------------------------------------------------------------------------

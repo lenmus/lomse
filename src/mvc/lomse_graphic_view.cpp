@@ -30,12 +30,17 @@
 #include "lomse_graphic_view.h"
 
 #include <cstdio>       //for sprintf
+#include "lomse_graphical_model.h"
 #include "lomse_gm_basic.h"
 #include "lomse_screen_drawer.h"
 #include "lomse_interactor.h"
 #include "lomse_caret.h"
 #include "lomse_caret_positioner.h"
 #include "lomse_logger.h"
+#include "lomse_time_grid.h"
+#include "lomse_visual_effect.h"
+#include "lomse_overlays_generator.h"
+#include "lomse_handler.h"
 
 using namespace std;
 
@@ -89,7 +94,6 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_pDrawer(pDrawer)
     , m_options()
     , m_pRenderBuf(NULL)
-    //, m_cursor(pDoc)
 
     , m_expand(0.0)
     , m_gamma(1.0)
@@ -97,31 +101,140 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     , m_transform()
     , m_vxOrg(0)
     , m_vyOrg(0)
-    , m_fSelRectVisible(false)
-    , m_fTempoLineVisible(false)
     , m_pCaret(NULL)
-    , m_pCaretPositioner(NULL)
+    , m_pCursor(NULL)
+    , m_fTempoLineVisible(false)
 {
     m_pCaret = LOMSE_NEW Caret(this, libraryScope);
+    m_pDragImg = LOMSE_NEW DraggedImage(this, libraryScope);
+    m_pSelRect = LOMSE_NEW SelectionRectangle(this, libraryScope);
+    m_pHighlighted = LOMSE_NEW PlaybackHighlight(this, libraryScope);
+    m_pTimeGrid = LOMSE_NEW TimeGrid(this, m_libraryScope);
+
+    m_pOverlaysGenerator = LOMSE_NEW OverlaysGenerator(this, libraryScope);
+
+    add_visual_effect(m_pCaret);
+    add_visual_effect(m_pDragImg);
+    add_visual_effect(m_pHighlighted);
+    add_visual_effect(m_pSelRect);
+    add_visual_effect(m_pTimeGrid);
 }
 
 //---------------------------------------------------------------------------------------
 GraphicView::~GraphicView()
 {
     delete m_pDrawer;
-    delete m_pCaret;
-    delete m_pCaretPositioner;
+    delete m_pOverlaysGenerator;
+
+    //ownership of VisualEffects is transferred to OverlaysGenerator
+//    delete m_pCaret;
+//    delete m_pDragImg;
+//    delete m_pHighlighted;
+//    delete m_pSelRect;
+//    delete m_pTimeGrid;
+//    delete_all_handlers();
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::use_cursor(DocCursor* pCursor)
 {
-    m_pCaretPositioner = Injector::inject_CaretPositioner(pCursor);
+    m_pCursor = pCursor;
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::use_selection_set(SelectionSet* pSelectionSet)
+{
+    m_pSelObjects = LOMSE_NEW SelectionHighlight(this, m_libraryScope, pSelectionSet);
+    add_visual_effect(m_pSelObjects);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::add_visual_effect(VisualEffect* pEffect)
+{
+    m_pOverlaysGenerator->add_visual_effect(pEffect);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::set_visual_effects_for_mode(int mode)
+{
+    bool fEditionMode = (mode == Interactor::k_mode_edition);
+    bool fPlaybackMode = (mode == Interactor::k_mode_playback);
+
+    //effects only visible in edition mode:
+    m_pCaret->set_visible(fEditionMode);
+    m_pTimeGrid->set_visible(fEditionMode);
+    m_pSelObjects->set_visible(fEditionMode);
+
+    //effects only visible in playback mode:
+    m_pHighlighted->set_visible(fPlaybackMode);
+    //m_pTempoLine->set_visible(fPlaybackMode);
+
+    //effects dynamically controlled
+    m_pSelRect->set_visible(false);
+    m_pDragImg->set_visible(false);
+
+    //any other visibility constraints are determined at layout time:
+    //Handlers, TimeGrid
+    if (!fEditionMode)
+        delete_all_handlers();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::layout_selection_highlight()
+{
+    if (m_pSelObjects->is_visible())
+    {
+        if (m_pSelObjects->are_handlers_needed())
+        {
+            GmoObj* pGmo = m_pSelObjects->get_object_needing_handlers();
+            if (m_pOverlaysGenerator->get_handlers_owner() != pGmo)
+            {
+                delete_all_handlers();
+                int numHandlers = pGmo->get_num_handlers();
+                for (int i=0; i < numHandlers; ++i)
+                {
+                    add_handler(i, pGmo);
+                }
+                m_pOverlaysGenerator->set_handlers_owner(pGmo);
+            }
+        }
+        else
+            delete_all_handlers();
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::delete_all_handlers()
+{
+    list<Handler*>::iterator it = m_handlers.begin();
+    while (it != m_handlers.end())
+    {
+        Handler* pHandler = *it;
+        m_pOverlaysGenerator->remove_visual_effect(pHandler);
+        it = m_handlers.erase(it);
+        delete pHandler;
+    }
+    m_pOverlaysGenerator->set_handlers_owner(NULL);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::add_handler(int iHandler, GmoObj* pOwnerGmo)
+{
+    Handler* pHandler =
+        LOMSE_NEW HandlerCircle(this, m_libraryScope, pOwnerGmo, iHandler);
+    pHandler->set_visible(true);
+    pHandler->move_to( pOwnerGmo->get_handler_point(iHandler) );
+    m_handlers.push_back(pHandler);
+    add_visual_effect(pHandler);
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::new_viewport(Pixels x, Pixels y)
 {
+    stringstream s;
+    s << "x=" << x << ", y=" << y;
+    LOMSE_LOG_DEBUG(Logger::k_mvc, s.str());
+
     m_vxOrg = x;
     m_vyOrg = y;
     m_transform.tx = double(-x);
@@ -145,69 +258,138 @@ void GraphicView::redraw_bitmap() //, RepaintOptions& opt)
 {
     LOMSE_LOG_DEBUG(Logger::k_render, "");
 
-    if (m_pRenderBuf)
-    {
-        draw_graphic_model();
-        draw_sel_rectangle();
-        //draw_tempo_line();
-        draw_caret();
-        add_controls();
-    }
+    draw_all();
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::show_caret()
 {
     m_pCaret->show_caret();
-    update_caret();
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::hide_caret()
 {
     m_pCaret->hide_caret();
-    update_caret();
 }
 
 //---------------------------------------------------------------------------------------
-bool GraphicView::toggle_caret()
+void GraphicView::toggle_caret()
 {
-    // returns true if caret has been repainted
-
     if ( m_pCaret->is_visible() && m_pCaret->is_blink_enabled() )
-    {
         m_pCaret->toggle_caret();
-        return update_caret();
-    }
-    return false;
 }
 
 //---------------------------------------------------------------------------------------
-bool GraphicView::update_caret()
+void GraphicView::layout_caret()
 {
-    // returns true if caret has been repainted
+    GraphicModel* pGModel = get_graphic_model();
+    CaretPositioner positioner;
+    positioner.layout_caret(m_pCaret, m_pCursor, pGModel);
+}
 
-    //TODO: overlays, to avoid repainting the whole bitmap
+//---------------------------------------------------------------------------------------
+bool GraphicView::is_caret_visible()
+{
+    return m_pCaret->is_visible();
+}
+
+//---------------------------------------------------------------------------------------
+bool GraphicView::is_caret_blink_enabled()
+{
+    return m_pCaret->is_blink_enabled();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::move_drag_image(LUnits x, LUnits y)
+{
+    m_pDragImg->move_to(x, y);
+    draw_dragged_image();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::show_drag_image(bool fShow)
+{
+    m_pDragImg->set_visible(fShow);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::enable_drag_image(bool fEnabled)
+{
+    m_pDragImg->enable(fEnabled);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::set_drag_image(GmoShape* pShape, bool fGetOwnership, UPoint offset)
+{
+    m_pDragImg->set_shape(pShape, fGetOwnership, offset);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::draw_all()
+{
     if (m_pRenderBuf)
     {
+        LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+        //render graphical model
+        m_pInteractor->timing_start_measurements();
         draw_graphic_model();
-        draw_sel_rectangle();
-        //draw_tempo_line();
-        draw_caret();
-        add_controls();
-        return true;
+        m_pInteractor->timing_graphic_model_render_end();
+
+        //render handlers and visual effects
+        m_pInteractor->timing_visual_effects_start();
+        m_pOverlaysGenerator->on_new_background();
+        draw_all_visual_effects();
+        m_pInteractor->timing_renderization_end();
     }
-    return false;
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_caret()
 {
-//    m_options.draw_focus_lines_on_boxes_flag = true;
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
 
+    m_pInteractor->timing_start_measurements();
+    layout_caret();
+    layout_time_grid();                 //depends on caret
+    layout_selection_highlight();       //for hidding Handlers
+    m_pOverlaysGenerator->update_visual_effect(m_pCaret, m_pDrawer);
+    m_pInteractor->timing_renderization_end();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::draw_time_grid()
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    m_pInteractor->timing_start_measurements();
+    layout_time_grid();
+    m_pOverlaysGenerator->update_visual_effect(m_pTimeGrid, m_pDrawer);
+    m_pInteractor->timing_renderization_end();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::layout_time_grid()
+{
+    if (m_pCaret->is_visible()
+        && m_pCursor->is_delegating()
+        && m_pCursor->get_top_object()->is_score())
+    {
+        m_pTimeGrid->set_system( m_pCaret->get_active_system() );
+        m_pTimeGrid->set_visible(true);
+    }
+    else
+        m_pTimeGrid->set_visible(false);
+}
+
+//---------------------------------------------------------------------------------------
+DocCursorState GraphicView::click_event_to_cursor_state(int iPage, LUnits x, LUnits y,
+                                                        ImoObj* pImo, GmoObj* pGmo)
+{
     GraphicModel* pGModel = get_graphic_model();
-    m_pCaretPositioner->prepare_caret(m_pCaret, pGModel);
-    m_pCaret->on_draw(m_pDrawer);
+    CaretPositioner positioner;
+    return positioner.click_point_to_cursor_state(pGModel, iPage, x, y, pImo, pGmo);
 }
 
 //---------------------------------------------------------------------------------------
@@ -240,12 +422,13 @@ void GraphicView::on_print_page(int page, double scale, VPoint viewport)
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_graphic_model()
 {
-    m_pInteractor->start_timer();
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
 
     m_options.background_color = Color(145, 156, 166);  //35, 52, 91); //127,127,127);
     m_options.page_border_flag = true;
     m_options.cast_shadow_flag = true;
     m_options.draw_anchors = m_libraryScope.draw_anchors();
+    m_options.draw_shape_bounds = m_libraryScope.draw_shape_bounds();
 
     m_pDrawer->reset(*m_pRenderBuf, m_options.background_color);
     m_pDrawer->set_viewport(m_vxOrg, m_vyOrg);
@@ -253,55 +436,16 @@ void GraphicView::draw_graphic_model()
 
     generate_paths();
     m_pDrawer->render();
-
-    double tm = m_pInteractor->get_elapsed_time();
-    m_pInteractor->gmodel_rendering_time(tm);
-
-#if (0)
-    //render statistics
-    double buildTime = m_pInteractor->gmodel_build_time();
-    char buf[256];
-    sprintf(buf, "Build time=%.3f, render time=%.3f ms, scale=%.3f",
-                 buildTime, tm, m_transform.scale() );
-    m_pDrawer->gsv_text(10.0, 20.0, buf);
-#endif
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicView::draw_sel_rectangle()
-{
-    if (m_fSelRectVisible)
-    {
-        double x1 = double( m_selRect.left() );
-        double y1 = double( m_selRect.top() );
-        double x2 = double( m_selRect.right() );
-        double y2 = double( m_selRect.bottom() );
-
-        m_pDrawer->screen_point_to_model(&x1, &y1);
-        m_pDrawer->screen_point_to_model(&x2, &y2);
-
-        double line_width = double( m_pDrawer->Pixels_to_LUnits(1) );
-
-        m_pDrawer->begin_path();
-        m_pDrawer->fill( Color(0, 0, 255, 16) );        //background blue transparent
-        m_pDrawer->stroke( Color(0, 0, 255, 255) );     //solid blue
-        m_pDrawer->stroke_width(line_width);
-        m_pDrawer->move_to(x1, y1);
-        m_pDrawer->hline_to(x2);
-        m_pDrawer->vline_to(y2);
-        m_pDrawer->hline_to(x1);
-        m_pDrawer->vline_to(y1);
-        m_pDrawer->end_path();
-
-        m_pDrawer->render();
-    }
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::draw_tempo_line()
 {
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
     if (m_fTempoLineVisible)
     {
+        //m_pInteractor->timing_start_measurements();
         double x1 = double( m_tempoLine.left() );
         double y1 = double( m_tempoLine.top() );
         double x2 = double( m_tempoLine.right() );
@@ -324,94 +468,147 @@ void GraphicView::draw_tempo_line()
         m_pDrawer->end_path();
 
         m_pDrawer->render();
+        //m_pInteractor->timing_renderization_end();
     }
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::draw_all_visual_effects()
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    layout_caret();
+    layout_time_grid();
+    layout_selection_highlight();
+    m_pOverlaysGenerator->update_all_visual_effects(m_pDrawer);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::draw_selection_rectangle()
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    m_pInteractor->timing_start_measurements();
+    m_pOverlaysGenerator->update_visual_effect(m_pSelRect, m_pDrawer);
+    m_pInteractor->timing_renderization_end();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::draw_playback_highlight()
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    m_pInteractor->timing_start_measurements();
+    m_pOverlaysGenerator->update_visual_effect(m_pHighlighted, m_pDrawer);
+    m_pInteractor->timing_renderization_end();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::draw_dragged_image()
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    m_pInteractor->timing_start_measurements();
+    m_pOverlaysGenerator->update_visual_effect(m_pDragImg, m_pDrawer);
+    m_pInteractor->timing_renderization_end();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::draw_handler(Handler* pHandler)
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    m_pInteractor->timing_start_measurements();
+    m_pOverlaysGenerator->update_visual_effect(pHandler, m_pDrawer);
+    m_pInteractor->timing_renderization_end();
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::draw_selected_objects()
+{
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
+    m_pInteractor->timing_start_measurements();
+    layout_selection_highlight();
+    m_pOverlaysGenerator->update_visual_effect(m_pSelObjects, m_pDrawer);
+    m_pInteractor->timing_renderization_end();
+}
+
+//---------------------------------------------------------------------------------------
+VRect GraphicView::get_damaged_rectangle()
+{
+    URect uRect = m_pOverlaysGenerator->get_damaged_rectangle();
+    if (uRect == URect(0.0, 0.0, 0.0, 0.0))
+        return VRect(0, 0, 0, 0);
+
+    double left = uRect.left();
+    double top = uRect.top();
+    double right = uRect.right();
+    double bottom = uRect.bottom();
+    m_pDrawer->model_point_to_screen(&left, &top);
+    m_pDrawer->model_point_to_screen(&right, &bottom);
+
+    //trim rectangle
+    Pixels x1 = max(0, Pixels(left));
+    Pixels y1 = max(0, Pixels(top));
+    Pixels x2 = min(Pixels(right), int(m_pRenderBuf->width()) );
+    Pixels y2 = min(Pixels(bottom), int(m_pRenderBuf->height()) );
+
+    return VRect(VPoint(x1, y1), VPoint(x2, y2));
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::highlight_object(ImoStaffObj* pSO)
 {
     GraphicModel* pGModel = get_graphic_model();
-    pGModel->highlight_object(pSO, true);
-    m_highlighted.push_back(pSO);
+    m_pHighlighted->set_visible(true);
+    m_pHighlighted->add_highlight( pGModel->get_main_shape_for_imo(pSO->get_id()) );
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::remove_highlight_from_object(ImoStaffObj* pSO)
 {
     GraphicModel* pGModel = get_graphic_model();
-    pGModel->highlight_object(pSO, false);
-    m_highlighted.remove(pSO);
+    m_pHighlighted->remove_highlight( pGModel->get_main_shape_for_imo(pSO->get_id()) );
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::remove_all_highlight()
 {
-    GraphicModel* pGModel = get_graphic_model();
-    std::list<ImoStaffObj*>::iterator it;
-
-    for (it = m_highlighted.begin(); it != m_highlighted.end(); ++it)
-        pGModel->highlight_object(*it, false);
-
-    m_highlighted.clear();
+    m_pHighlighted->set_visible(false);
+    m_pHighlighted->remove_all_highlight();
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::discard_all_highlight()
+Handler* GraphicView::handlers_hit_test(LUnits x, LUnits y)
 {
-    m_highlighted.clear();
+    list<Handler*>::const_iterator it;
+    for (it = m_handlers.begin(); it != m_handlers.end(); ++it)
+    {
+        if ((*it)->hit_test(x, y))
+            return *it;
+    }
+    return NULL;
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::add_controls()
+void GraphicView::start_selection_rectangle(LUnits x1, LUnits y1)
 {
-
-    //////render controls
-    ////ras.gamma(agg::gamma_none());
-    ////agg::render_ctrl(ras, sl, rb, m_expand);
-    ////agg::render_ctrl(ras, sl, rb, m_gamma);
-    ////agg::render_ctrl(ras, sl, rb, m_scale);
-    ////agg::render_ctrl(ras, sl, rb, m_rotate);
-
-    ////render statistics
-    //char buf[128];
-    //agg::gsv_text t;
-    //t.size(10.0);
-    //t.flip(true);
-
-    //agg::conv_stroke<agg::gsv_text> pt(t);
-    //pt.width(1.5);
-
-    //sprintf(buf, "Vertices=%d Time=%.3f ms", vertex_count, tm);
-
-    //t.start_point(10.0, 40.0);
-    //t.text(buf);
-
-    //ras.add_path(pt);
-    //ren.color(agg::rgba(0,0,0));
-    //agg::render_scanlines(ras, sl, ren);
-}
-
-//---------------------------------------------------------------------------------------
-void GraphicView::show_selection_rectangle(Pixels x1, Pixels y1, Pixels x2, Pixels y2)
-{
-    m_fSelRectVisible = true;
-    m_selRect.left(x1);
-    m_selRect.top(y1);
-    m_selRect.right(x2);
-    m_selRect.bottom(y2);
+    m_pSelRect->set_start_point(x1, y1);
+    m_pSelRect->set_end_point(x1, y1);
+    m_pSelRect->set_visible(true);
 }
 
 //---------------------------------------------------------------------------------------
 void GraphicView::hide_selection_rectangle()
 {
-    m_fSelRectVisible = false;
+    m_pSelRect->set_visible(false);
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::update_selection_rectangle(Pixels x2, Pixels y2)
+void GraphicView::update_selection_rectangle(LUnits x2, LUnits y2)
 {
-    m_selRect.right(x2);
-    m_selRect.bottom(y2);
+    m_pSelRect->set_end_point(x2, y2);
 }
 
 //---------------------------------------------------------------------------------------
@@ -440,6 +637,8 @@ void GraphicView::update_tempo_line(Pixels x2, Pixels y2)
 //---------------------------------------------------------------------------------------
 void GraphicView::zoom_in(Pixels x, Pixels y)
 {
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
     double rx(x);
     double ry(y);
 
@@ -461,6 +660,8 @@ void GraphicView::zoom_in(Pixels x, Pixels y)
 //---------------------------------------------------------------------------------------
 void GraphicView::zoom_out(Pixels x, Pixels y)
 {
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+
     double rx(x);
     double ry(y);
 
@@ -603,6 +804,21 @@ void GraphicView::model_point_to_screen(double* x, double* y, int iPage)
     *x += pageBounds.left();
     *y += pageBounds.top();
     m_pDrawer->model_point_to_screen(x, y);
+}
+
+//---------------------------------------------------------------------------------------
+UPoint GraphicView::screen_point_to_model_point(Pixels x, Pixels y)
+{
+    double xm = double(x);
+    double ym = double(y);
+    m_pDrawer->screen_point_to_model(&xm, &ym);
+    return UPoint(xm, ym);
+}
+
+//---------------------------------------------------------------------------------------
+LUnits GraphicView::pixels_to_lunits(Pixels pixels)
+{
+    return m_pDrawer->Pixels_to_LUnits(pixels);
 }
 
 //---------------------------------------------------------------------------------------
@@ -923,8 +1139,16 @@ void GraphicView::determine_visible_pages(int* minPage, int* maxPage)
     screen_rectangle_to_page_rectangles(0, 0, m_viewportSize.width,
                                         m_viewportSize.height, &rectangles);
 
-    *minPage = rectangles.front()->iPage;
-    *maxPage = rectangles.back()->iPage;
+    if (!rectangles.empty())
+    {
+        *minPage = rectangles.front()->iPage;
+        *maxPage = rectangles.back()->iPage;
+    }
+    else
+    {
+        *minPage = 0;
+        *maxPage = -1;
+    }
 
     delete_rectangles(rectangles);
 }
@@ -954,9 +1178,22 @@ void GraphicView::draw_visible_pages(int minPage, int maxPage)
 }
 
 //---------------------------------------------------------------------------------------
+UPoint GraphicView::get_page_origin_for(GmoObj* pGmo)
+{
+    GraphicModel* pGModel = get_graphic_model();
+    int iPage = pGModel->get_page_number_containing(pGmo);
+    if (iPage < 0)
+        return UPoint(0.0, 0.0);
+
+    URect bounds = get_page_bounds(iPage);
+    return UPoint(bounds.x, bounds.y);
+}
+
+//---------------------------------------------------------------------------------------
 void GraphicView::set_rendering_buffer(RenderingBuffer* rbuf)
 {
     m_pRenderBuf = rbuf;
+    m_pOverlaysGenerator->set_rendering_buffer(rbuf);
 }
 
 //---------------------------------------------------------------------------------------

@@ -310,8 +310,8 @@ protected:
     LibraryScope& m_libraryScope;
 
     friend class TimeEngraver;
-    GmoShapeTimeSignature(ImoObj* pCreatorImo, ShapeId idx, UPoint pos, Color color,
-                          LibraryScope& libraryScope)
+    GmoShapeTimeSignature(ImoObj* pCreatorImo, ShapeId idx, UPoint pos,
+                          Color color, LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_time_signature, idx, color)
         , m_libraryScope(libraryScope)
     {

@@ -71,34 +71,34 @@ void GmoShapeBarline::compute_width()
     LUnits width;
     switch(m_nBarlineType)
     {
-        case ImoBarline::k_double:
+        case k_barline_double:
             width = m_uThinLineWidth + m_uSpacing + m_uThinLineWidth;
             break;
 
-        case ImoBarline::k_end_repetition:
+        case k_barline_end_repetition:
             width = m_uRadius + m_uSpacing + m_uRadius + m_uThinLineWidth +
                     m_uSpacing + m_uThickLineWidth;
             break;
 
-        case ImoBarline::k_start_repetition:
+        case k_barline_start_repetition:
             width = m_uThinLineWidth + m_uSpacing + m_uThickLineWidth +
                     m_uSpacing + m_uRadius + m_uRadius;
             break;
 
-        case ImoBarline::k_double_repetition:
+        case k_barline_double_repetition:
             width = m_uRadius + m_uSpacing + m_uRadius + m_uThinLineWidth + m_uSpacing +
                     m_uThinLineWidth + m_uSpacing + m_uRadius + m_uRadius;
             break;
 
-        case ImoBarline::k_start:
+        case k_barline_start:
             width = m_uThinLineWidth + m_uSpacing + m_uThickLineWidth;
             break;
 
-        case ImoBarline::k_end:
+        case k_barline_end:
             width = m_uThinLineWidth + m_uSpacing + m_uThickLineWidth;
             break;
 
-        case ImoBarline::k_simple:
+        case k_barline_simple:
             width = m_uThinLineWidth;
             break;
     }
@@ -126,13 +126,13 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
 
     switch(m_nBarlineType)
     {
-        case ImoBarline::k_double:
+        case k_barline_double:
             draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
             uxPos += m_uThinLineWidth + m_uSpacing;
             draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
             break;
 
-        case ImoBarline::k_end_repetition:
+        case k_barline_end_repetition:
             uxPos += m_uRadius;
             draw_two_dots(pDrawer, uxPos, uyTop);
             uxPos += m_uSpacing + m_uRadius;
@@ -141,7 +141,7 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
             draw_thick_line(pDrawer, uxPos, uyTop, m_uThickLineWidth, uyBottom-uyTop, color);
             break;
 
-        case ImoBarline::k_start_repetition:
+        case k_barline_start_repetition:
             draw_thick_line(pDrawer, uxPos, uyTop, m_uThickLineWidth, uyBottom-uyTop, color);
             uxPos += m_uThickLineWidth + m_uSpacing;
             draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
@@ -149,7 +149,7 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
             draw_two_dots(pDrawer, uxPos, uyTop);
             break;
 
-        case ImoBarline::k_double_repetition:
+        case k_barline_double_repetition:
             uxPos += m_uRadius;
             draw_two_dots(pDrawer, uxPos, uyTop);
             uxPos += m_uSpacing + m_uRadius;
@@ -160,19 +160,19 @@ void GmoShapeBarline::on_draw(Drawer* pDrawer, RenderOptions& opt)
             draw_two_dots(pDrawer, uxPos, uyTop);
             break;
 
-        case ImoBarline::k_start:
+        case k_barline_start:
             draw_thick_line(pDrawer, uxPos, uyTop, m_uThickLineWidth, uyBottom-uyTop, color);
             uxPos += m_uThickLineWidth + m_uSpacing;
             draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
             break;
 
-        case ImoBarline::k_end:
+        case k_barline_end:
             draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
             uxPos += m_uThinLineWidth + m_uSpacing;
             draw_thick_line(pDrawer, uxPos, uyTop, m_uThickLineWidth, uyBottom-uyTop, color);
             break;
 
-        case ImoBarline::k_simple:
+        case k_barline_simple:
             draw_thin_line(pDrawer, uxPos, uyTop, uyBottom, color);
             break;
     }

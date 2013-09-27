@@ -32,6 +32,8 @@
 #include "lomse_box_slice.h"
 #include "lomse_internal_model.h"
 #include "lomse_shape_staff.h"
+#include "lomse_system_layouter.h"      //TimeGridTable
+#include "lomse_drawer.h"
 
 namespace lomse
 {
@@ -39,6 +41,7 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 GmoBoxSystem::GmoBoxSystem(ImoObj* pCreatorImo)    //, int nNumPage, int iSystem,
     : GmoBox(GmoObj::k_box_system, pCreatorImo)
+    , m_pGridTable(NULL)
 //    , m_nNumPage(nNumPage)
 //    , m_pBPage(pParent)
 //	, m_pTopSpacer(NULL)
@@ -49,6 +52,7 @@ GmoBoxSystem::GmoBoxSystem(ImoObj* pCreatorImo)    //, int nNumPage, int iSystem
 //---------------------------------------------------------------------------------------
 GmoBoxSystem::~GmoBoxSystem()
 {
+    delete m_pGridTable;
 }
 
 //---------------------------------------------------------------------------------------
@@ -60,12 +64,78 @@ GmoShapeStaff* GmoBoxSystem::add_staff_shape(GmoShapeStaff* pShape)
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeStaff* GmoBoxSystem::get_staff_shape(int iStaff)
+GmoShapeStaff* GmoBoxSystem::get_staff_shape(int absStaff)
 {
-	//returns the shape for staff iStaff (0..n-1). iStaff is the staff number
-    //relative to total staves in system
+	//returns the shape for staff absStaff (0..n-1). absStaff is the staff number
+    //referred to total staves in system
 
-    return m_staffShapes[iStaff];
+    return m_staffShapes[absStaff];
+}
+
+//---------------------------------------------------------------------------------------
+GmoShapeStaff* GmoBoxSystem::get_staff_shape(int iInstr, int iStaff)
+{
+    if (iInstr == 0)
+        return m_staffShapes[iStaff];
+    else
+        return m_staffShapes[ m_firstStaff[iInstr-1] + iStaff ];
+}
+
+//---------------------------------------------------------------------------------------
+void GmoBoxSystem::add_num_staves_for_instrument(int staves)
+{
+    if (m_firstStaff.size() == 0)
+        m_firstStaff.push_back(staves);
+    else
+        m_firstStaff.push_back( m_firstStaff.back() + staves);
+}
+
+//---------------------------------------------------------------------------------------
+int GmoBoxSystem::instr_number_for_staff(int absStaff)
+{
+    int maxInstr = int( m_firstStaff.size() );
+    for (int i=0; i < maxInstr; ++i)
+    {
+        if (absStaff < m_firstStaff[i])
+            return i;
+    }
+    return maxInstr;
+}
+
+//---------------------------------------------------------------------------------------
+int GmoBoxSystem::staff_number_for(int absStaff, int iInstr)
+{
+    if (absStaff < m_firstStaff[0])
+        return absStaff;
+
+    int staff = absStaff;
+    int maxInstr = int( m_firstStaff.size() );
+    for (int i=1; i < maxInstr; ++i)
+    {
+        if (staff < m_firstStaff[i])
+            return staff - m_firstStaff[i-1];
+    }
+    return staff - m_firstStaff.back();
+}
+
+//---------------------------------------------------------------------------------------
+int GmoBoxSystem::nearest_staff_to_point(LUnits y)
+{
+    //The y coordinate should be within system box limits.
+
+    int maxStaff = int( m_staffShapes.size() );
+    int iStaff = 0;
+    GmoShapeStaff* pStaff = m_staffShapes[iStaff++];
+    LUnits bottomPrev = pStaff->get_bottom();
+    while (iStaff < maxStaff)
+    {
+        GmoShapeStaff* pStaff = m_staffShapes[iStaff++];
+        LUnits limit = bottomPrev + (pStaff->get_top() - bottomPrev) / 2.0;
+        if (y < limit)
+            return iStaff-2;
+        bottomPrev = pStaff->get_bottom();
+    }
+    return maxStaff-1;
 }
 
 

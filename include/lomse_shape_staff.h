@@ -70,11 +70,10 @@ public:
 //    UPoint OnMouseMoving(lmPaper* pPaper, const UPoint& uPos);
 //	void OnMouseEndMoving(lmPaper* pPaper, UPoint uPagePos);
 //
-//
-//    //other
-//    int GetLineSpace(LUnits uyPos);
-//    lmVStaff* GetOwnerVStaff();
-//
+
+    //other
+    int line_space_at(LUnits yPos);
+
 //protected:
 //    //temporary data to be used when mouse tool moving over the staff
 //    int         m_nOldSteps;		//to clear leger lines while dragging

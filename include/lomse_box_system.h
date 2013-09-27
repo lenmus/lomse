@@ -40,79 +40,43 @@ namespace lomse
 
 //forward declarations
 class GmoBoxScorePage;
-//class ImoStaffInfo;
-//class GmoBoxSlice;
-//class lmShapeStaff;
-//class lmShapeMargin;
+class TimeGridTable;
 
-//
-// Class GmoBoxSystem represents a line of music in the printed score.
-//
-
+//---------------------------------------------------------------------------------------
+//GmoBoxSystem represents a line of music in the printed score.
 class GmoBoxSystem : public GmoBox
 {
 protected:
-//    GmoBoxScorePage*  m_pBPage;           //parent page
-//    int         m_nFirstMeasure;    //number of first measure
-//    LUnits    m_xPos, m_yPos;     //system position: pos to render first staff
-//    LUnits    m_nIndent;          //indentation for this system
-    //int m_nNumPage;         //page number (1..n) on which this system is included
-//	lmShapeMargin*	m_pTopSpacer;
-	std::vector<GmoShapeStaff*> m_staffShapes;
+	vector<GmoShapeStaff*> m_staffShapes;
+	vector<int> m_firstStaff;       //index to first staff for each instrument
+    TimeGridTable* m_pGridTable;
 
 public:
     GmoBoxSystem(ImoObj* pCreatorImo);
     ~GmoBoxSystem();
 
-//	int GetSystemNumber();
-//
     //slices
 	inline int get_num_slices() const { return (int)m_childBoxes.size(); }
     inline GmoBoxSlice* get_slice(int i) const { return (GmoBoxSlice*)m_childBoxes[i]; }
-//    void DeleteLastSlice();
-//    int GetNumMeasures();
-//    inline int GetFirstMeasureNumber() { return m_nFirstMeasure; }
-//    inline int GetLastMeasureNumber() { return m_nFirstMeasure + GetNumMeasures() - 1; }
-//    inline void SetFirstMeasure(int nAbsMeasure) { m_nFirstMeasure = nAbsMeasure; }
 
-//    //positioning
-//    void SetPosition(LUnits xPos, LUnits yPos);
-//    inline LUnits GetPositionX() const { return m_xPos; }
-//    inline LUnits GetPositionY() const { return m_yPos; }
-//    inline void SetIndent(LUnits xDsplz) { m_nIndent = xDsplz; }
-//    inline LUnits GetSystemIndent() const { return m_nIndent; }
-//    inline LUnits GetSystemFinalX() const { return m_uBoundsBottom.x; }
-//
-//	//miscellaneous info
-//	LUnits GetYTopFirstStaff();
-    GmoShapeStaff* get_staff_shape(int iStaff);
-//    GmoShapeStaff* get_staff_shape(lmInstrument* pInstr, int nStaff);
-//    GmoShapeStaff* get_staff_shape(lmInstrument* pInstr, lmUPoint uPoint);
-//
-//    //pointing at
-//	lmShapeStaff* FindStaffAtPosition(lmUPoint& uPoint);
-//	int GetNumMeasureAt(LUnits uxPos);
-//
-//	//access to objects
-//	GmoBoxSlice* FindBoxSliceAt(LUnits uxPos);
-//
-//    //implementation of virtual methods from base class
-//	int GetPageNumber() const;
-//
-//	//overrides
-//    void UpdateXRight(LUnits xPos);
-//    void SetBottomSpace(LUnits uyValue);
-//
-//	//owners and related
-//	GmoBoxSystem* GetOwnerSystem() { return this; }
+    //grid table: xPositions/timepos
+    inline void set_time_grid_table(TimeGridTable* pGridTable) { m_pGridTable = pGridTable; }
+    inline TimeGridTable* get_time_grid_table() { return m_pGridTable; }
+
+	//miscellaneous info
+    GmoShapeStaff* get_staff_shape(int absStaff);
+    GmoShapeStaff* get_staff_shape(int iInstr, int iStaff);
+    int instr_number_for_staff(int absStaff);
+    int staff_number_for(int absStaff, int iInstr);
 
     //Staff shapes
     GmoShapeStaff* add_staff_shape(GmoShapeStaff* pShape);
+    void add_num_staves_for_instrument(int staves);
 
+    //hit tests related
+    int nearest_staff_to_point(LUnits y);
 
-//private:
-//    void ClearStaffShapesTable();
-//
+protected:
 
 };
 

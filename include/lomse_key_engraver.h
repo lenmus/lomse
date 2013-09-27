@@ -52,13 +52,15 @@ protected:
     Tenths m_tPos[8];           //sharps/flats positions, in order of appearance
     double m_fontSize;
     ImoObj* m_pCreatorImo;
+    Color m_color;
 
 public:
     KeyEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int iInstr,
                 int iStaff);
     ~KeyEngraver() {}
 
-    GmoShape* create_shape(ImoKeySignature* pKey, int clefType, UPoint uPos);
+    GmoShape* create_shape(ImoKeySignature* pKey, int clefType, UPoint uPos,
+                           Color color=Color(0,0,0));
 
 protected:
     void compute_positions_for_flats(int clefType);

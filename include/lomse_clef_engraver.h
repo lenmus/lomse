@@ -53,17 +53,24 @@ protected:
     int m_iGlyph;
 
 public:
+    ClefEngraver(LibraryScope& libraryScope);
     ClefEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter, int iInstr,
                  int iStaff);
     ~ClefEngraver() {}
 
-    GmoShape* create_shape(ImoObj* pCreatorImo, UPoint uPos, int clefType,
-                           int m_symbolSize=k_size_full);
+    GmoShape* create_shape(ImoClef* pCreatorImo, UPoint uPos, int clefType,
+                           int m_symbolSize=k_size_full, Color color=Color(0,0,0));
+
+    GmoShape* create_tool_dragged_shape(int clefType);
+    UPoint get_drag_offset();
+
 
 protected:
-    int find_glyph();
+    int find_glyph(int clefType);
     double determine_font_size();
     Tenths get_glyph_offset();
+
+    GmoShape* m_pClefShape;
 };
 
 

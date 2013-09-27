@@ -76,20 +76,20 @@ enum EOctave
 // Accidentals
 // No microtonal accidentals. Only traditional ones.
 // sharp_sharp is two consecutive sharp signs.
-// double_sharp is the 'x' duoble shrp symbol
+// double_sharp is the 'x' double shrp symbol
 
 enum EAccidentals
 {
     k_invalid_accidentals = -1,
     k_no_accidentals = 0,
-    k_sharp,
-    k_sharp_sharp,
-    k_double_sharp,
-    k_natural_sharp,
-    k_flat,
-    k_flat_flat,
-    k_natural_flat,
     k_natural,
+    k_flat,
+    k_sharp,
+    k_flat_flat,
+    k_double_sharp,
+    k_sharp_sharp,
+    k_natural_flat,
+    k_natural_sharp,
 };
 
 

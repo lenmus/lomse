@@ -50,6 +50,7 @@ class GmoBoxDocument;
 class GmoBoxDocPage;
 class GmoBoxScorePage;
 class GmoBoxSlice;
+class GmoBoxSliceInstr;
 class GmoBoxSystem;
 class GmoShape;
 class GmoShapeStaff;
@@ -64,69 +65,27 @@ struct RenderOptions;
 class GmoLayer;
 class SelectionSet;
 class Control;
+class ScoreStub;
+class GraphicModel;
 
 
 //---------------------------------------------------------------------------------------
-// GraphicModel: storage for the graphic objects
-//
-class GraphicModel
+// Helper class: contains information related to graphical model for one score
+class ScoreStub
 {
 protected:
-    GmoBoxDocument* m_root;
-    long m_modelId;
-    bool m_modified;
-    map<ImoId, GmoBox*> m_imoToBox;
-    map<ImoId, GmoShape*> m_imoToMainShape;
-    map< pair<ImoId, ShapeId>, GmoShape*> m_imoToSecondaryShape;
-    map<GmoRef, GmoObj*> m_ctrolToPtr;
+    ImoId m_scoreId;
+    vector<GmoBoxScorePage*> m_pages;
 
 public:
-    GraphicModel();
-    virtual ~GraphicModel();
+    ScoreStub(ImoId id) : m_scoreId(id) {}
 
-    //accessors
-    inline GmoBoxDocument* get_root() { return m_root; }
-    int get_num_pages();
-    GmoBoxDocPage* get_page(int i);
-    inline void set_modified(bool value) { m_modified = value; }
-    inline bool is_modified() { return m_modified; }
-    inline long get_model_id() { return m_modelId; }
-
-    //special accessors
-    GmoShapeStaff* get_shape_for_first_staff_in_first_system(ImoId scoreId);
-
-    //drawing
-    void draw_page(int iPage, UPoint& origin, Drawer* pDrawer, RenderOptions& opt);
-    void highlight_object(ImoStaffObj* pSO, bool value);
-
-    //hit testing
-    GmoObj* hit_test(int iPage, LUnits x, LUnits y);
-    GmoShape* find_shape_at(int iPage, LUnits x, LUnits y);
-    GmoBox* find_inner_box_at(int iPage, LUnits x, LUnits y);
-
-    //selection
-    void select_objects_in_rectangle(int iPage, SelectionSet& selection,
-                                     const URect& selRect, unsigned flags=0);
-    GmoShape* find_shape_for_object(ImoStaffObj* pSO);
-    GmoShape* get_shape_for_noterest(ImoNoteRest* pNR);
-
-    //creation
-    void store_in_map_imo_shape(ImoObj* pImo, GmoShape* pShape);
-    void add_to_map_imo_to_box(GmoBox* child);
-    void add_to_map_ref_to_box(GmoBox* pBox);
-    GmoShape* get_shape_for_imo(ImoId imoId, ShapeId shapeId);
-    GmoShape* get_main_shape_for_imo(ImoId id);
-    GmoBox* get_box_for_imo(ImoId id);
-    GmoObj* get_box_for_control(GmoRef gref);
-    void build_main_boxes_table();
-
-    //tests
-    void dump_page(int iPage, ostream& outStream);
-
-protected:
-    GmoObj* get_gmo_for(ImoObj* pImo, ImoId id=0);
+    inline void add_page(GmoBoxScorePage* pPage) { m_pages.push_back(pPage); }
+    inline vector<GmoBoxScorePage*>& get_pages() { return m_pages; }
 
 };
+
+
 
 //---------------------------------------------------------------------------------------
 //Abstract class from which all graphic objects must derive
@@ -149,10 +108,9 @@ public:
         k_selected          = 0x0001,   //selected
         k_dirty             = 0x0002,   //dirty: modified since last "clear_dirty()": need to render it again
         k_children_dirty    = 0x0004,   //this is not dirty but some children are dirty
-        k_highlighted       = 0x0008,   //highlighted
-        k_hover             = 0x0010,   //mouse over
-        k_in_link           = 0x0020,   //is part of a link
-        k_has_edit_focus    = 0x0040,   //this box has the focus for edition
+        k_hover             = 0x0008,   //mouse over
+        k_in_link           = 0x0010,   //is part of a link
+        k_has_edit_focus    = 0x0020,   //this box has the focus for edition
     };
 
     //selection
@@ -290,6 +248,14 @@ public:
     //parent
     inline void set_owner_box(GmoBox* pBox) { m_pParentBox = pBox; };
     inline GmoBox* get_owner_box() { return m_pParentBox; };
+    GmoBoxDocPage* get_page_box();
+
+    //support for handlers
+    inline bool has_handlers() { return get_num_handlers() > 0; }
+    virtual int get_num_handlers() { return 0; }
+    virtual UPoint get_handler_point(int i) { return UPoint(0.0, 0.0); }
+    virtual void on_handler_dragged(int iHandler, UPoint newPos) {}
+    virtual void on_end_of_handler_drag(int iHandler, UPoint newPos) {}
 
     //tests & debug
     virtual void dump(ostream& outStream, int level);
@@ -334,18 +300,12 @@ public:
 
     //methods related to position
     void set_origin_and_notify_observers(LUnits xLeft, LUnits yTop);
+    virtual bool hit_test(LUnits x, LUnits y);
 
     //related shapes
     inline std::list<GmoShape*>* get_related_shapes() { return m_pRelatedShapes; }
     void add_related_shape(GmoShape* pShape);
     GmoShape* find_related_shape(int type);
-
-    //highlight
-    void highlight_off() { set_highlighted(false); };
-    void highlight_on() { set_highlighted(true); };
-    virtual	void set_highlighted(bool value) { value ? m_flags |= k_highlighted
-                                                     : m_flags &= ~k_highlighted; }
-    inline bool is_highlighted() { return (m_flags & k_highlighted) != 0; }
 
     //other flags
     void set_hover(bool value) { value ? m_flags |= k_hover : m_flags &= ~k_hover; }
@@ -404,6 +364,9 @@ public:
     inline vector<GmoBox*>& get_child_boxes() { return m_childBoxes; }
     void add_boxes_to_controls_map(GraphicModel* pGM);
 
+    //parent
+    GmoBox* get_parent_box() { return m_pParentBox; }
+
     //contained shapes
     inline int get_num_shapes() { return static_cast<int>( m_shapes.size() ); }
     void add_shape(GmoShape* shape, int layer);
@@ -427,6 +390,7 @@ public:
     inline void set_bottom_margin(LUnits space) { m_uBottomMargin = space; }
     inline void set_left_margin(LUnits space) { m_uLeftMargin = space; }
     inline void set_right_margin(LUnits space) { m_uRightMargin = space; }
+    virtual ImoStyle* get_style();
 
     //content size
     //old semantic, based on score margins
@@ -461,15 +425,12 @@ protected:
     void delete_boxes();
     void delete_shapes();
     GmoBoxDocPage* get_parent_box_page();
-    GmoBox* get_parent_box() { return m_pParentBox; }
     void draw_border(Drawer* pDrawer, RenderOptions& opt);
     bool must_draw_bounds(RenderOptions& opt);
     Color get_box_color();
     void draw_box_bounds(Drawer* pDrawer, double xorg, double yorg, Color& color);
     void draw_shapes(Drawer* pDrawer, RenderOptions& opt);
     void add_shapes_to_tables_in(GmoBoxDocPage* pPage);
-
-    virtual ImoStyle* get_style();
 
 };
 
@@ -489,6 +450,7 @@ public:
     GmoBoxDocPage* get_page(int i);     //i = 0..n-1
     inline int get_num_pages() { return get_num_boxes(); }
     inline GmoBoxDocPage* get_last_page() { return m_pLastPage; }
+    int get_page_number(GmoBoxDocPage* pBoxPage);
 
     //overrides
     GraphicModel* get_graphic_model() { return m_pGModel; }
@@ -560,6 +522,9 @@ public:
         return (m_nFirstSystem == -1 ? 0 : m_nLastSystem - m_nFirstSystem + 1);
     }
 	GmoBoxSystem* get_system(int iSystem);		//nSystem = 0..n-1
+
+    //hit tests related
+    int nearest_system_to_point(LUnits y);
 };
 
 //---------------------------------------------------------------------------------------
@@ -646,6 +611,17 @@ public:
         : GmoBox(GmoObj::k_box_table_rows, pCreatorImo) {}
     virtual ~GmoBoxTableRows() {}
 };
+
+
+//=======================================================================================
+// Utility global functions
+//=======================================================================================
+inline LUnits compute_distance(LUnits x1, LUnits y1, LUnits x2, LUnits y2)
+{
+    LUnits dx = x2-x1;
+    LUnits dy = y2-y1;
+    return sqrt(dx * dx + dy * dy);
+}
 
 
 }   //namespace lomse

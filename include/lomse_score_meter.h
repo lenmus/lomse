@@ -91,6 +91,7 @@ public:
 
     //spacing
     LUnits tenths_to_logical(Tenths value, int iInstr, int iStaff);
+    Tenths logical_to_tenths(LUnits value, int iInstr, int iStaff);
     LUnits line_spacing_for_instr_staff(int iInstr, int iStaff);
 
     //info about the score

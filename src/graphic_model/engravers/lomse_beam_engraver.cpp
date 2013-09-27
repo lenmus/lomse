@@ -94,8 +94,9 @@ void BeamEngraver::set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-int BeamEngraver::create_shapes()
+int BeamEngraver::create_shapes(Color color)
 {
+    m_color = color;
     decide_on_stems_direction();
     decide_beam_position();
     change_stems_direction();
@@ -110,7 +111,7 @@ int BeamEngraver::create_shapes()
 //---------------------------------------------------------------------------------------
 void BeamEngraver::create_shape()
 {
-    m_pBeamShape = LOMSE_NEW GmoShapeBeam(m_pBeam, m_uBeamThickness);
+    m_pBeamShape = LOMSE_NEW GmoShapeBeam(m_pBeam, m_uBeamThickness, m_color);
     m_pBeamShape->set_layout_data(m_segments, m_origin, m_size,
                                   m_outerLeftPoint, m_outerRightPoint);
     m_pShape = m_pBeamShape;
