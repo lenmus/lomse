@@ -64,6 +64,7 @@ GmoShapeFermata* FermataEngraver::create_shape(ImoFermata* pFermata, UPoint pos,
     ShapeId idx = 0;
     m_pFermataShape = LOMSE_NEW GmoShapeFermata(pFermata, idx, iGlyph, position,
                                                 color, m_libraryScope, fontSize);
+    add_voice();
     center_on_parent();
     return m_pFermataShape;
 }
@@ -118,6 +119,27 @@ void FermataEngraver::center_on_parent()
 
         USize shift(0.0f, yShift);
         m_pFermataShape->shift_origin(shift);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void FermataEngraver::add_voice()
+{
+    if (m_pParentShape->is_shape_note() || m_pParentShape->is_shape_rest())
+    {
+        VoiceRelatedShape* pNR;
+        if (m_pParentShape->is_shape_note())
+        {
+            GmoShapeNote* pNote = static_cast<GmoShapeNote*>(m_pParentShape);
+            pNR = static_cast<VoiceRelatedShape*>(pNote);
+        }
+        else
+        {
+            GmoShapeRest* pRest = static_cast<GmoShapeRest*>(m_pParentShape);
+            pNR = static_cast<VoiceRelatedShape*>(pRest);
+        }
+        VoiceRelatedShape* pVRS = static_cast<VoiceRelatedShape*>(m_pFermataShape);
+        pVRS->set_voice(pNR->get_voice());
     }
 }
 

@@ -279,6 +279,7 @@ GmoShapeStem::GmoShapeStem(ImoObj* pCreatorImo, LUnits xPos, LUnits yStart,
                            LUnits uWidth, Color color)
 	: GmoShapeSimpleLine(pCreatorImo, GmoObj::k_shape_stem, xPos, yStart, xPos, yEnd,
                          uWidth, 0.0f, color, k_edge_horizontal)
+    , VoiceRelatedShape()
 	, m_fStemDown(fStemDown)
     , m_uExtraLength(uExtraLength)
 {

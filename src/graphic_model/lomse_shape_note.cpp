@@ -44,6 +44,7 @@ namespace lomse
 GmoShapeNote::GmoShapeNote(ImoObj* pCreatorImo, LUnits x, LUnits y, Color color,
                            LibraryScope& libraryScope)
     : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_note, 0, color)
+    , VoiceRelatedShape()
     , m_pFontStorage( libraryScope.font_storage() )
     , m_libraryScope(libraryScope)
     , m_pNoteheadShape(NULL)
@@ -277,6 +278,7 @@ LUnits GmoShapeNote::get_stem_extra_length() const
 GmoShapeRest::GmoShapeRest(ImoObj* pCreatorImo, ShapeId idx, LUnits x, LUnits y, Color color,
                            LibraryScope& libraryScope)
     : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_rest, idx, color)
+    , VoiceRelatedShape()
     , m_libraryScope(libraryScope)
 	, m_pBeamShape(NULL)
 {

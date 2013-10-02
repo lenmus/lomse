@@ -65,7 +65,7 @@ void SelectionSet::set_validator(SelectionValidator* pValidator)
 }
 
 //---------------------------------------------------------------------------------------
-void SelectionSet::add(GmoObj* pGmo, unsigned flags)
+void SelectionSet::add(GmoObj* pGmo)
 {
     m_gmos.push_back(pGmo);
 //    pGmo->set_selected(true);

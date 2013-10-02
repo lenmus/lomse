@@ -1375,7 +1375,7 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
             GmoShape* pAuxShape =
                         m_pShapesCreator->create_auxobj_shape(pAO, iInstr, iStaff,
                                                             pMainShape, yTop);
-            pMainShape->accept_link_from(pAuxShape);
+//            pMainShape->accept_link_from(pAuxShape);
             add_auxobj_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs, iSystem,
                                         iCol, iInstr);
             m_yMax = max(m_yMax, pAuxShape->get_bottom());

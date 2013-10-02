@@ -98,14 +98,15 @@ Interactor::Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView
         }
     }
     LOMSE_LOG_DEBUG(Logger::k_mvc, "Interactor created.");
+    highlight_voice(2);
 }
 
 //---------------------------------------------------------------------------------------
 Interactor::~Interactor()
 {
+    delete_graphic_model();
     delete m_pTask;
     delete m_pView;
-    delete_graphic_model();
     delete m_pCursor;
     LOMSE_LOG_DEBUG(Logger::k_mvc, "Interactor is deleted");
 }
@@ -216,7 +217,8 @@ void Interactor::delete_graphic_model()
     delete m_pGraphicModel;
     m_pGraphicModel = NULL;
 //    m_idLastMouseOver = k_no_imoid;
-    LOMSE_LOG_DEBUG(Logger::k_render, "[Interactor::delete_graphic_model] deleted.");
+    set_drag_image(NULL, k_do_not_get_ownership, UPoint(0.0, 0.0));
+    LOMSE_LOG_DEBUG(Logger::k_render, "GModel deleted.");
 }
 
 ////---------------------------------------------------------------------------------------
@@ -270,11 +272,20 @@ void Interactor::on_mouse_button_up(Pixels x, Pixels y, unsigned flags)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::select_object(GmoObj* pGmo, unsigned flags)
+void Interactor::select_object(GmoObj* pGmo, bool fClearSelection)
 {
-    m_selections.clear();
-    m_selections.add(pGmo, flags);
+    if (fClearSelection)
+        m_selections.clear();
+    m_selections.add(pGmo);
     send_update_UI_event(k_selection_set_change);
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::select_object(ImoObj* pImo, bool fClearSelection)
+{
+    GraphicModel* pGM = get_graphic_model();
+    GmoObj* pGmo = pGM->find_shape_for_object( static_cast<ImoStaffObj*>(pImo) );
+    select_object(pGmo, fClearSelection);
 }
 
 //---------------------------------------------------------------------------------------
@@ -303,7 +314,8 @@ void Interactor::task_action_select_object_and_show_contextual_menu(
                 SpInteractor sp = get_shared_ptr_from_this();
                 WpInteractor wp(sp);
                 SpEventMouse pEvent(
-                    LOMSE_NEW EventMouse(k_show_contextual_menu_event, wp, id, x, y, m_wpDoc) );
+                    LOMSE_NEW EventMouse(k_show_contextual_menu_event,
+                                         wp, id, x, y, flags, m_wpDoc) );
                 m_libScope.post_event(pEvent);
             }
         }
@@ -317,7 +329,7 @@ void Interactor::task_action_click_at_screen_point(Pixels x, Pixels y, unsigned 
 
     //mouse left click when in selection mode
 
-    m_selections.clear();
+//    m_selections.clear();
     GmoObj* pGmo = find_object_at(x, y);
 
 //    stringstream msg;
@@ -342,7 +354,7 @@ void Interactor::send_click_event(GmoObj* pGmo, Pixels x, Pixels y, unsigned fla
             SpInteractor sp = get_shared_ptr_from_this();
             WpInteractor wp(sp);
             SpEventMouse pEvent(
-                LOMSE_NEW EventMouse(k_on_click_event, wp, id, x, y, m_wpDoc) );
+                LOMSE_NEW EventMouse(k_on_click_event, wp, id, x, y, flags, m_wpDoc) );
             notify_event(pEvent, pGmo);
         }
     }
@@ -428,7 +440,7 @@ DiatonicPitch Interactor::get_pitch_at(Pixels x, Pixels y)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::task_action_mouse_in_out(Pixels x, Pixels y)
+void Interactor::task_action_mouse_in_out(Pixels x, Pixels y, unsigned flags)
 {
     GmoObj* pGmo = find_object_at(x, y);
     if (pGmo == NULL)
@@ -461,6 +473,92 @@ void Interactor::task_action_mouse_in_out(Pixels x, Pixels y)
 
 }
 
+////---------------------------------------------------------------------------------------
+//void Interactor::task_action_single_click_at(Pixels x, Pixels y, bool fLeftButton)
+//{
+//    //TODO
+//    task_action_click_at_screen_point(x, y);
+//}
+//
+////---------------------------------------------------------------------------------------
+//void Interactor::task_action_double_click_at(Pixels x, Pixels y, bool fLeftButton)
+//{
+//    //TODO
+//}
+//
+////---------------------------------------------------------------------------------------
+//void Interactor::task_action_start_move_drag(Pixels x, Pixels y, bool fLeftButton)
+//{
+//    LOMSE_LOG_DEBUG(Logger::k_mvc, "");
+//
+//    // Edition mode: mouse click down at point (x, y). Decide what to do.
+//
+//    if (!fLeftButton)
+//        return;
+//
+////    m_pCurHandler = handlers_hit_test(x, y);
+////    if (m_pCurHandler)
+////    {
+////        //click on handler: move it
+////        switch_task(TaskFactory::k_task_move_handler);
+////        static_cast<TaskMoveHandler*>(m_pTask)->set_first_point(x, y);
+////        return;
+////    }
+////
+////    GmoObj* pGmo = find_object_at(x, y);
+////    ImoObj* pImo = (pGmo != NULL ? pGmo->get_creator_imo() : NULL);
+////    if (pImo && pImo->is_staffobj())
+////    {
+////        //click on staffobj: drag it
+////        GmoShape* pShape = NULL;
+////        if (pImo->is_note())
+////        {
+////            GmoShapeNote* pNote = static_cast<GmoShapeNote*>(pGmo);
+////            pShape = pNote->get_notehead_shape();
+////        }
+////        else
+////            pShape = static_cast<GmoShape*>(pGmo);
+////
+////        //compute offset so that hotspot is at clicked point
+////        double xPos = double(x);
+////        double yPos = double(y);
+////        screen_point_to_page_point(&xPos, &yPos);
+////        UPoint org = pShape->get_origin();
+////        UPoint offset(LUnits(xPos)-org.x, LUnits(yPos)-org.y);
+////
+////        set_drag_image(pShape, k_do_not_get_ownership, offset);
+////        show_drag_image(true);
+////
+////        m_selections.clear();
+////        switch_task(TaskFactory::k_task_move_object);
+////        static_cast<TaskMoveObject*>(m_pTask)->set_first_point(x, y);
+////    }
+////    else
+//    {
+//        //click at other areas: start a selection rectangle
+//        m_selections.clear();
+//        start_selection_rectangle(x, y);
+//
+////        switch_task(TaskFactory::k_task_selection_rectangle);
+////        static_cast<TaskSelectionRectangle*>(m_pTask)->set_first_point(x, y);
+//    }
+//}
+//
+////---------------------------------------------------------------------------------------
+//void Interactor::task_action_continue_move_drag(Pixels x, Pixels y, bool fLeftButton)
+//{
+//    //TODO
+//    task_action_update_selection_rectangle(x, y);
+//}
+//
+////---------------------------------------------------------------------------------------
+//void Interactor::task_action_end_move_drag(Pixels x, Pixels y, bool fLeftButton,
+//                                           Pixels xTotalShift, Pixels yTotalShift)
+//{
+//    //TODO
+//    task_action_select_objects_in_screen_rectangle(x, y, x+xTotalShift, y+yTotalShift);
+//}
+
 //---------------------------------------------------------------------------------------
 void Interactor::task_action_move_drag_image(Pixels x, Pixels y)
 {
@@ -476,14 +574,14 @@ void Interactor::task_action_move_drag_image(Pixels x, Pixels y)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::task_action_insert_object_at_point(Pixels x, Pixels y)
+void Interactor::task_action_insert_object_at_point(Pixels x, Pixels y, unsigned flags)
 {
     LOMSE_LOG_DEBUG(Logger::k_mvc, "");
 
     //invoked only from TaskDataEntry: mouse left click when in data entry mode
 
     //TODO: decide if special treatment. For now, same than selection mode
-    task_action_click_at_screen_point(x, y);
+    task_action_click_at_screen_point(x, y, flags);
     force_redraw();
 }
 
@@ -661,7 +759,7 @@ void Interactor::task_action_select_objects_in_screen_rectangle(Pixels x1, Pixel
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::task_action_decide_on_switching_task(Pixels x, Pixels y)
+void Interactor::task_action_decide_on_switching_task(Pixels x, Pixels y, unsigned flags)
 {
     LOMSE_LOG_DEBUG(Logger::k_mvc, "");
 
@@ -700,7 +798,7 @@ void Interactor::task_action_decide_on_switching_task(Pixels x, Pixels y)
         set_drag_image(pShape, k_do_not_get_ownership, offset);
         show_drag_image(true);
 
-        m_selections.clear();
+//        m_selections.clear();
         switch_task(TaskFactory::k_task_move_object);
         static_cast<TaskMoveObject*>(m_pTask)->set_first_point(x, y);
     }
@@ -923,7 +1021,7 @@ void Interactor::hide_selection_rectangle()
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::update_selection_rectangle(Pixels x2, Pixels y2)
+void Interactor::task_action_update_selection_rectangle(Pixels x2, Pixels y2)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
@@ -1135,6 +1233,15 @@ void Interactor::reset_boxes_to_draw()
 }
 
 //---------------------------------------------------------------------------------------
+void Interactor::highlight_voice(int voice)
+{
+    m_fViewParamsChanged = true;
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->highlight_voice(voice);
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::set_printing_buffer(RenderingBuffer* rbuf)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
@@ -1305,8 +1412,9 @@ void Interactor::send_mouse_out_event(GmoRef gref, Pixels x, Pixels y)
         SpInteractor spIntor = get_shared_ptr_from_this();
         WpInteractor wpIntor(spIntor);
         ImoId id = gref.first;
-        SpEventMouse pEvent(
-            LOMSE_NEW EventMouse(k_mouse_out_event, wpIntor, id, x, y, m_wpDoc));
+        unsigned flags = 0;
+        SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_out_event, wpIntor,
+                                                  id, x, y, flags, m_wpDoc) );
         GraphicModel* pGM = get_graphic_model();
         GmoObj* pGmo = pGM->get_box_for_control(gref);
         if (pGmo)
@@ -1323,8 +1431,9 @@ void Interactor::send_mouse_in_event(GmoRef gref, Pixels x, Pixels y)
         SpInteractor sp = get_shared_ptr_from_this();
         WpInteractor wp(sp);
         ImoId id = gref.first;
-        SpEventMouse pEvent(
-            LOMSE_NEW EventMouse(k_mouse_in_event, wp, id, x, y, m_wpDoc) );
+        unsigned flags = 0;
+        SpEventMouse pEvent( LOMSE_NEW EventMouse(k_mouse_in_event,
+                                                  wp, id, x, y, flags, m_wpDoc) );
         GraphicModel* pGM = get_graphic_model();
         GmoObj* pGmo = pGM->get_box_for_control(gref);
         if (pGmo)
@@ -1544,7 +1653,7 @@ string Interactor::get_caret_timecode()
 //---------------------------------------------------------------------------------------
 void Interactor::set_operating_mode(int mode)
 {
-    if (mode != m_operatingMode)
+    if (mode != m_operatingMode && is_operating_mode_allowed(mode))
     {
         m_operatingMode = mode;
         switch_task(mode == k_mode_edition ? TaskFactory::k_task_selection
@@ -1558,6 +1667,30 @@ void Interactor::set_operating_mode(int mode)
             request_window_update();
         }
     }
+}
+
+//---------------------------------------------------------------------------------------
+bool Interactor::is_operating_mode_allowed(int mode)
+{
+    if (mode == Interactor::k_mode_edition)
+    {
+        if (SpDocument spDoc = m_wpDoc.lock())
+        {
+            ImoDocument* pImoDoc = spDoc->get_imodoc();
+            int iMax = pImoDoc->get_num_content_items();
+            for (int i=0; i < iMax; ++i)
+            {
+                ImoObj* pImo = pImoDoc->get_content_item(i);
+                if (pImo->is_score())
+                {
+                    ImoScore* pScore = static_cast<ImoScore*>(pImo);
+                    if (pScore->get_version_number() < 200)
+                        return false;
+                }
+            }
+        }
+    }
+    return true;
 }
 
 //---------------------------------------------------------------------------------------

@@ -429,6 +429,8 @@ void GraphicView::draw_graphic_model()
     m_options.cast_shadow_flag = true;
     m_options.draw_anchors = m_libraryScope.draw_anchors();
     m_options.draw_shape_bounds = m_libraryScope.draw_shape_bounds();
+    m_options.read_only_mode =
+        m_pInteractor->get_operating_mode() != Interactor::k_mode_edition;
 
     m_pDrawer->reset(*m_pRenderBuf, m_options.background_color);
     m_pDrawer->set_viewport(m_vxOrg, m_vyOrg);
@@ -1092,6 +1094,10 @@ void GraphicView::set_rendering_option(int option, bool value)
         case k_option_draw_box_inline_flag:
             m_options.draw_box_for(GmoObj::k_box_inline);
             break;
+
+        case k_option_display_voices_in_colours:
+            m_options.draw_voices_coloured = value;
+            break;
     }
 }
 
@@ -1105,6 +1111,12 @@ void GraphicView::reset_boxes_to_draw()
 void GraphicView::set_box_to_draw(int boxType)
 {
     m_options.draw_box_for(boxType);
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::highlight_voice(int voice)
+{
+    m_options.highlighted_voice = voice;
 }
 
 //---------------------------------------------------------------------------------------

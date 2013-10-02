@@ -77,7 +77,7 @@ typedef SharedPtr<GmoShape>  SpGmoShape;
 
 //---------------------------------------------------------------------------------------
 // Event flags for mouse and keyboard pressed keys
-enum EInputFlag
+enum EEventFlag
 {
     k_mouse_left  = 1,
     k_mouse_right = 2,
@@ -86,7 +86,6 @@ enum EInputFlag
     k_kbd_ctrl    = 16,
     k_kbd_alt     = 32,
 };
-
 
 //---------------------------------------------------------------------------------------
 //Abstract class from which all Interactors must derive
@@ -157,6 +156,7 @@ public:
     virtual void set_rendering_option(int option, bool value);
     virtual void set_box_to_draw(int boxType);
     virtual void reset_boxes_to_draw();
+    virtual void highlight_voice(int voice);
         //units conversion and related
     virtual void screen_point_to_page_point(double* x, double* y);
     virtual void model_point_to_screen(double* x, double* y, int iPage);
@@ -177,7 +177,6 @@ public:
         //selection rectangle
     virtual void start_selection_rectangle(Pixels x1, Pixels y1);
     virtual void hide_selection_rectangle();
-    virtual void update_selection_rectangle(Pixels x2, Pixels y2);
         //tempo line
     virtual void show_tempo_line(Pixels x1, Pixels y1, Pixels x2, Pixels y2);
     virtual void hide_tempo_line();
@@ -194,7 +193,7 @@ public:
     virtual VSize get_page_size_in_pixels(int nPage);
 
     //interface to SelectionSet
-    virtual void select_object(GmoObj* pGmo, unsigned flags=0);
+    virtual void select_object(GmoObj* pGmo, bool fClearSelection=true);
     virtual bool is_in_selection(GmoObj* pGmo);
 
     //mandatory overrides from Observable
@@ -241,23 +240,33 @@ public:
     //-----------------------------------------------------------------------------------
     //commands
 
+    void select_object(ImoObj* pImo, bool fClearSelection=true);
+
     //actions requested by Task objects
-    virtual void task_action_click_at_screen_point(Pixels x, Pixels y, unsigned flags=0);
+    virtual void task_action_click_at_screen_point(Pixels x, Pixels y, unsigned flags);
     virtual void task_action_select_objects_in_screen_rectangle(Pixels x1, Pixels y1,
                                                                 Pixels x2, Pixels y2,
-                                                                unsigned flags=0);
+                                                                unsigned flags);
     virtual void task_action_select_object_and_show_contextual_menu(Pixels x, Pixels y,
-                                                                    unsigned flags=0);
-    virtual void task_action_mouse_in_out(Pixels x, Pixels y);
-    virtual void task_action_insert_object_at_point(Pixels x, Pixels y);
+                                                                    unsigned flags);
+    virtual void task_action_mouse_in_out(Pixels x, Pixels y, unsigned flags);
+    virtual void task_action_insert_object_at_point(Pixels x, Pixels y, unsigned flags);
     virtual void task_action_drag_the_view(Pixels x, Pixels y);
-    virtual void task_action_decide_on_switching_task(Pixels x, Pixels y);
+    virtual void task_action_decide_on_switching_task(Pixels x, Pixels y, unsigned flags);
     virtual void task_action_switch_to_default_task();
     virtual void task_action_move_drag_image(Pixels x, Pixels y);
     virtual void task_action_move_object(Pixels x, Pixels y);
     virtual void task_action_move_handler(Pixels x, Pixels y);
     virtual void task_action_move_handler_end_point(Pixels xFinal, Pixels yFinal,
                                                     Pixels xTotalShift, Pixels yTotalShift);
+    virtual void task_action_update_selection_rectangle(Pixels x2, Pixels y2);
+
+//    virtual void task_action_single_click_at(Pixels x, Pixels y, bool fLeftButton);
+//    virtual void task_action_double_click_at(Pixels x, Pixels y, bool fLeftButton);
+//    virtual void task_action_start_move_drag(Pixels x, Pixels y, bool fLeftButton);
+//    virtual void task_action_continue_move_drag(Pixels x, Pixels y, bool fLeftButton);
+//    virtual void task_action_end_move_drag(Pixels x, Pixels y, bool fLeftButton,
+//                                           Pixels xTotalShift, Pixels yTotalShift);
 
     //for performance measurements
     enum { k_timing_gmodel_build_time=0, k_timing_gmodel_draw_time,
@@ -305,6 +314,7 @@ protected:
     double get_ellapsed_time_since(ptime startTime) const;
     Handler* handlers_hit_test(Pixels x, Pixels y);
     void restore_selection();
+    bool is_operating_mode_allowed(int mode);
 
 };
 

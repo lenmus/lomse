@@ -63,6 +63,7 @@ const int m_nNumVertices = sizeof(m_cmd)/sizeof(Vertex);
 GmoShapeTie::GmoShapeTie(ImoObj* pCreatorImo, ShapeId idx, UPoint* points, LUnits tickness,
                          Color color)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_tie, idx, color)
+    , VoiceRelatedShape()
     , m_thickness(tickness)
 {
     save_points(points);

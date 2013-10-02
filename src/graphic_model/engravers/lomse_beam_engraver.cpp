@@ -124,6 +124,10 @@ void BeamEngraver::add_shape_to_noterests()
     std::list< pair<ImoNoteRest*, GmoShape*> >::iterator it;
     for(it=m_noteRests.begin(); it != m_noteRests.end(); ++it)
         (it->second)->add_related_shape(m_pBeamShape);
+
+    //set voice
+    it = m_noteRests.begin();
+    m_pBeamShape->set_voice( (it->first)->get_voice() );
 }
 
 //---------------------------------------------------------------------------------------

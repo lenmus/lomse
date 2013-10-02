@@ -127,6 +127,7 @@ int DocCommandExecuter::execute(DocCursor* pCursor, DocCommand* pCmd,
         {
             m_stack.push( pUE );
             update_cursor(pCursor, pCmd);
+            m_pDoc->set_modified();
         }
         else
             delete pUE;
@@ -174,6 +175,9 @@ void DocCommandExecuter::undo(DocCursor* pCursor)
         cmd->undo_action(m_pDoc, pCursor);
 
         pCursor->restore_state( pUE->cursorState );
+
+        if (cmd->is_reversible())
+            m_pDoc->reset_modified();
     }
 }
 
@@ -188,6 +192,9 @@ void DocCommandExecuter::redo(DocCursor* pCursor)
         cmd->perform_action(m_pDoc, pCursor);
 
         update_cursor(pCursor, cmd);
+
+        if (cmd->is_reversible())
+            m_pDoc->set_modified();
     }
 }
 
@@ -1020,13 +1027,23 @@ int CmdDeleteSelection::set_target(Document* pDoc, DocCursor* pCursor,
 {
     if (pSelection && !pSelection->empty())
     {
+        //staffobjs
+        ColStaffObjs* pCSO = pSelection->get_staffobjs_collection();
+        ColStaffObjsIterator itSO;
+        for (itSO = pCSO->begin(); itSO != pCSO->end(); ++itSO)
+        {
+            ImoId id = (*itSO)->element_id();
+            m_idSO.push_back(id);
+        }
+
+        //all other objects
         list<ImoObj*>& objects = pSelection->get_all_objects();
         list<ImoObj*>::const_iterator it;
         for (it = objects.begin(); it != objects.end(); ++it)
         {
             ImoId id = (*it)->get_id();
             if ((*it)->is_staffobj())
-                m_idSO.push_back(id);
+                ;   //ignore
             else if ((*it)->is_relobj())
                 m_idRO.push_back(id);
             else if ((*it)->is_auxobj())
@@ -1046,7 +1063,7 @@ int CmdDeleteSelection::perform_action(Document* pDoc, DocCursor* pCursor)
     //could be involved, the best approach is to use a checkpoint.
     create_checkpoint(pDoc);
 
-    cursor_to_first_staffobj(pDoc, pCursor);
+    prepare_cursor_for_deletion(pCursor);
     delete_staffobjs(pDoc);
     delete_relobjs(pDoc);
     delete_auxobjs(pDoc);
@@ -1060,21 +1077,27 @@ int CmdDeleteSelection::perform_action(Document* pDoc, DocCursor* pCursor)
 }
 
 //---------------------------------------------------------------------------------------
-void CmdDeleteSelection::cursor_to_first_staffobj(Document* pDoc, DocCursor* pCursor)
+void CmdDeleteSelection::prepare_cursor_for_deletion(DocCursor* pCursor)
 {
-    list<ImoId>::iterator it;
-    for (it = m_idSO.begin(); it != m_idSO.end(); ++it)
-    {
-        if (*it != k_no_imoid)
-        {
-            ImoStaffObj* pSO = static_cast<ImoStaffObj*>( pDoc->get_pointer_to_imo(*it) );
-            if (pSO)
-            {
-                pCursor->point_to(*it);
-                return;     //done
-            }
-        }
-    }
+    //For recovering from a deletion, cursor prev. position must be valid after
+    //deletion. Thus, in this method it is ensured that cursor is moved to a safe
+    //place before deletion
+
+    if (pCursor->is_at_top_level())
+        return;
+    if (!pCursor->get_top_object()->is_score())
+        return;
+    ScoreCursor* pSC = static_cast<ScoreCursor*>( pCursor->get_inner_cursor() );
+    ImoId prevId = pSC->prev_pos_id();
+    while (prevId >= 0 && is_going_to_be_deleted(prevId))
+        pCursor->move_prev();
+}
+
+//---------------------------------------------------------------------------------------
+bool CmdDeleteSelection::is_going_to_be_deleted(ImoId id)
+{
+    list<ImoId>::iterator it = find(m_idSO.begin(), m_idSO.end(), id);
+    return it != m_idSO.end();
 }
 
 //---------------------------------------------------------------------------------------

@@ -112,12 +112,21 @@ void RestEngraver::create_main_shape()
     ShapeId idx = 0;
     m_pRestShape = LOMSE_NEW GmoShapeRest(m_pRest, idx, m_uxLeft, m_uyTop, m_color,
                                     m_libraryScope);
+    add_voice(m_pRestShape);
 
     m_pRestGlyphShape = LOMSE_NEW GmoShapeRestGlyph(m_pRest, idx, m_iGlyph,
                                              UPoint(m_uxLeft, m_uyTop),
                                              m_color, m_libraryScope, m_fontSize);
+    add_voice(m_pRestGlyphShape);
     m_pRestShape->add(m_pRestGlyphShape);
     m_uxLeft += m_pRestGlyphShape->get_width();
+}
+
+//---------------------------------------------------------------------------------------
+void RestEngraver::add_voice(VoiceRelatedShape* pVRS)
+{
+    if (m_pRest)
+        pVRS->set_voice(m_pRest->get_voice());
 }
 
 //---------------------------------------------------------------------------------------
@@ -169,6 +178,7 @@ LUnits RestEngraver::add_dot_shape(LUnits x, LUnits y, Color color)
     y += get_glyph_offset(k_glyph_dot) + tenths_to_logical(-75.0);
     GmoShapeDot* pShape = LOMSE_NEW GmoShapeDot(m_pRest, 0, k_glyph_dot, UPoint(x, y),
                                                 color, m_libraryScope, m_fontSize);
+    add_voice(pShape);
 	m_pRestShape->add(pShape);
     return pShape->get_width();
 }

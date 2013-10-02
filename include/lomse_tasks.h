@@ -32,8 +32,11 @@
 
 #include "lomse_basic.h"
 #include "lomse_injectors.h"
+
 #include <iostream>
+#include <boost/date_time/posix_time/posix_time.hpp>
 using namespace std;
+using namespace boost::posix_time;
 
 namespace lomse
 {
@@ -151,35 +154,6 @@ public:
     void process_event(Event event) {}
 
 };
-//
-//
-////---------------------------------------------------------------------------------------
-////TaskSelection: A task to select objects.
-//class TaskSelection : public Task
-//{
-//protected:
-//    //states
-//    enum { k_start=0, k_waiting_for_first_point, k_waiting_for_point_2_left,
-//           k_waiting_for_point_2_right };
-//    int m_state;
-//    Interactor* m_pGView;
-//    Pixels m_xStart, m_yStart;      //first point
-//
-//public:
-//    TaskSelection(Interactor* pIntor);
-//    ~TaskSelection() {}
-//
-//    void init_task();
-//    void process_event(Event event);
-//
-//protected:
-//    //actions
-//    void record_first_point(Event& event);
-//    void select_objects_or_click(Event& event);
-//    void track_sel_rectangle(Event& event);
-//    void select_object_and_show_contextual_menu(Event& event);
-//    void mouse_in_out(Event& event);
-//};
 
 
 //---------------------------------------------------------------------------------------
@@ -230,11 +204,48 @@ public:
 protected:
     //actions
     void record_first_point(Event& event);
-    void click_at_point();
+//    void click_at_point();
     void decide_on_switching_task(Event& event);
     void select_object_and_show_contextual_menu(Event& event);
     void mouse_in_out(Event& event);
 };
+
+
+////---------------------------------------------------------------------------------------
+////TaskSelection: A task to select objects.
+//class TaskSelection : public Task
+//{
+//protected:
+//    //states
+//    enum { k_start=0, k_waiting_for_first_point, k_waiting_for_button_up,
+//           k_waiting_for_dclick, k_waiting_for_double_up, k_waiting_for_end_point, };
+//
+//    int m_state;
+//    Interactor* m_pGView;
+//    Pixels m_xStart, m_yStart;      //first point
+//    bool m_fLeftButton;
+//    ptime m_downTime;
+//
+//public:
+//    TaskSelection(Interactor* pIntor);
+//    ~TaskSelection() {}
+//
+//    void init_task();
+//    void process_event(Event event);
+//
+//protected:
+//    //actions
+//    void record_time_point_and_button(Event& event);
+//    void mouse_in_out(Event& event);
+//    void single_click();
+//    void double_click();
+//    void start_move_drag();
+//    void continue_move_drag(Event& event);
+//    void end_move_drag(Event& event);
+//
+//    double get_ellapsed_time();
+//
+//};
 
 
 //---------------------------------------------------------------------------------------

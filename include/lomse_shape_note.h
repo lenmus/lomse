@@ -51,7 +51,7 @@ class GmoShapeBeam;
 
 
 //---------------------------------------------------------------------------------------
-class GmoShapeNote : public GmoCompositeShape
+class GmoShapeNote : public GmoCompositeShape, public VoiceRelatedShape
 {
 protected:
     FontStorage* m_pFontStorage;
@@ -127,7 +127,7 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-class GmoShapeNotehead : public GmoShapeGlyph
+class GmoShapeNotehead : public GmoShapeGlyph, public VoiceRelatedShape
 {
 //protected:
 //    friend class NoteEngraver;
@@ -136,12 +136,13 @@ public:     //TO_FIX: Constructor used in tests
                      Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_notehead, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
+        , VoiceRelatedShape()
     {
     }
 };
 
 //---------------------------------------------------------------------------------------
-class GmoShapeFlag : public GmoShapeGlyph
+class GmoShapeFlag : public GmoShapeGlyph, public VoiceRelatedShape
 {
 protected:
     friend class StemFlagEngraver;
@@ -149,12 +150,13 @@ protected:
                  Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_flag, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
-    {
+        , VoiceRelatedShape()
+{
     }
 };
 
 //---------------------------------------------------------------------------------------
-class GmoShapeDot : public GmoShapeGlyph
+class GmoShapeDot : public GmoShapeGlyph, public VoiceRelatedShape
 {
 protected:
     friend class NoteEngraver;
@@ -163,6 +165,7 @@ protected:
                 Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_dot, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
+        , VoiceRelatedShape()
     {
     }
 };
@@ -178,7 +181,7 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
-class GmoShapeRest : public GmoCompositeShape
+class GmoShapeRest : public GmoCompositeShape, public VoiceRelatedShape
 {
 protected:
     LibraryScope& m_libraryScope;
@@ -194,7 +197,7 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class GmoShapeRestGlyph : public GmoShapeGlyph
+class GmoShapeRestGlyph : public GmoShapeGlyph, public VoiceRelatedShape
 {
 protected:
     friend class RestEngraver;
@@ -202,6 +205,7 @@ protected:
                       Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_rest_glyph, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
+        , VoiceRelatedShape()
     {
     }
 };

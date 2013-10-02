@@ -51,7 +51,7 @@ protected:
     bool m_fCautionary;
     GmoShapeAccidentals* m_pContainer;
     double m_fontSize;
-    ImoObj* m_pCreatorImo;
+    ImoNote* m_pNote;
     Color m_color;
 
 public:
@@ -59,7 +59,7 @@ public:
                         int iInstr, int iStaff);
     ~AccidentalsEngraver() {}
 
-    GmoShapeAccidentals* create_shape(ImoObj* pCreatorImo, UPoint uPos,
+    GmoShapeAccidentals* create_shape(ImoNote* pNote, UPoint uPos,
                                       EAccidentals accidentals,
                                       bool fCautionary=false,
                                       Color color=Color(0,0,0));
@@ -69,6 +69,7 @@ protected:
     void create_container_shape(UPoint pos);
     void add_glyphs_to_container_shape(UPoint pos);
     LUnits glyph_offset(int iGlyph);
+    void add_voice(VoiceRelatedShape* pVRS);
 
     int m_glyphs[4];
     int m_numGlyphs;

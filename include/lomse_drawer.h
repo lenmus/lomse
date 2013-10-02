@@ -54,15 +54,19 @@ namespace lomse
 class FontStorage;
 
 //---------------------------------------------------------------------------------------
-//rendering options. Mainly for debugging
+//rendering options
 enum ERenderOptions
 {
+    //for debugging
     k_option_draw_box_doc_page_content=0,
     k_option_draw_box_container,
     k_option_draw_box_system,
     k_option_draw_box_slice,
     k_option_draw_box_slice_instr,
     k_option_draw_box_inline_flag,
+
+    //for user or application needs
+    k_option_display_voices_in_colours,
 };
 
 
@@ -92,6 +96,8 @@ struct RenderOptions
     Color selected_color;
     Color focussed_box_color;
     Color unfocussed_box_color;
+    Color not_highlighted_voice_color;
+    Color voiceColor[9];
 
     //document page appearance
     bool page_border_flag;
@@ -102,6 +108,11 @@ struct RenderOptions
     bool draw_shapes_highlighted;
     bool draw_shapes_dragged;
     bool draw_shapes_selected;
+    bool draw_voices_coloured;
+
+    bool read_only_mode;
+    int highlighted_voice;          //0 for none
+
 
     RenderOptions()
         : draw_anchors(false)
@@ -113,14 +124,29 @@ struct RenderOptions
         , selected_color(0,0,255)               //blue
         , focussed_box_color(0,0,255)           //blue
         , unfocussed_box_color(200,200,200)     //light grey
+        , not_highlighted_voice_color(160, 160, 160)    //medium grey
         , page_border_flag(true)
         , cast_shadow_flag(true)
         , draw_focus_lines_on_boxes_flag(false)
         , draw_shapes_highlighted(false)
         , draw_shapes_dragged(false)
         , draw_shapes_selected(false)
+        , draw_voices_coloured(false)
+        , read_only_mode(true)
+        , highlighted_voice(0)                  //0=none, 1..n= voice 1..n
     {
         boxes.reset();
+
+        //default colors for voices
+        voiceColor[0] = Color(  0,   0,   0);   //black
+        voiceColor[1] = Color(190,  40,  40);   //dark red
+        voiceColor[2] = Color( 40,  52, 190);   //dark blue
+        voiceColor[3] = Color( 40, 190, 178);   //turquose
+        voiceColor[4] = Color(190,  40, 165);   //dark magenta
+        voiceColor[5] = Color( 87,  40, 190);   //violet
+        voiceColor[6] = Color( 40, 128, 190);   //blue
+        voiceColor[7] = Color( 50, 153,  60);   //dark green
+        voiceColor[8] = Color(126, 153,  50);   //olive green
     }
 
     void reset_boxes_to_draw()

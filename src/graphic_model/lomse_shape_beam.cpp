@@ -42,6 +42,7 @@ namespace lomse
 //=======================================================================================
 GmoShapeBeam::GmoShapeBeam(ImoObj* pCreatorImo, LUnits uBeamThickness, Color color)
     : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_beam, 0, color)
+    , VoiceRelatedShape()
     , m_uBeamThickness(uBeamThickness)
 {
 }

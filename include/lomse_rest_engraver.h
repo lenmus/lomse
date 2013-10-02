@@ -40,9 +40,11 @@ namespace lomse
 //forward declarations
 class ImoRest;
 class GmoShapeRest;
+class GmoShapeRestGlyph;
 class ScoreMeter;
 class ShapesStorage;
 class GmoShapeBeam;
+class VoiceRelatedShape;
 
 //---------------------------------------------------------------------------------------
 class RestEngraver : public Engraver
@@ -68,16 +70,15 @@ protected:
     void create_main_shape();
     void add_shapes_for_dots_if_required();
 
+    void add_voice(VoiceRelatedShape* pVRS);
     int find_glyph();
     LUnits get_glyph_offset(int iGlyph);
     LUnits add_dot_shape(LUnits x, LUnits y, Color color);
 
-//    ImoBeam* get_beam() { return m_pRest->get_beam(); }
-
     LUnits m_uxLeft, m_uyTop;       //current position
     int m_iGlyph;
     GmoShapeRest* m_pRestShape;
-    GmoShape* m_pRestGlyphShape;
+    GmoShapeRestGlyph* m_pRestGlyphShape;
 };
 
 

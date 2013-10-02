@@ -94,7 +94,7 @@ public:
     void set_validator(SelectionValidator* pValidator);
 
     //operations
-    void add(GmoObj* pGmo, unsigned flags=0);
+    void add(GmoObj* pGmo);
     bool contains(GmoObj* pGmo);
     void clear();
 

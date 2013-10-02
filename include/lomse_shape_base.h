@@ -111,6 +111,26 @@ enum ELinkType
 
 
 
+//---------------------------------------------------------------------------------------
+// auxiliary, to identify staffobjs associated to a voice and manage voice data
+class VoiceRelatedShape
+{
+protected:
+    int m_voice;
+
+public:
+    VoiceRelatedShape() : m_voice(0) {}
+    virtual ~VoiceRelatedShape() {}
+
+    //overrides required by shapes related to scores
+    bool is_voice_related_shape() { return true; }
+
+    //specific info
+    inline void set_voice(int voice) { m_voice = voice; }
+    inline int get_voice() { return m_voice; }
+};
+
+
 
 //---------------------------------------------------------------------------------------
 class GmoSimpleShape : public GmoShape

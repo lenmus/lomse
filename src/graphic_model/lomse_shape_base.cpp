@@ -42,7 +42,7 @@ namespace lomse
 //=======================================================================================
 GmoShape::GmoShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color)
     : GmoObj(objtype, pCreatorImo)
-    , Linkable<USize>()
+//    , Linkable<USize>()
     , m_idx(idx)
     , m_layer(GmoShape::k_layer_background)
     , m_color(color)
@@ -88,28 +88,40 @@ Color GmoShape::determine_color_to_use(RenderOptions& opt)
     else if (is_hover())
         return Color(255,0,0);
     else
+    {
+        VoiceRelatedShape* pSO = dynamic_cast<VoiceRelatedShape*>(this);
+        if (!opt.read_only_mode)
+        {
+            if (pSO && pSO->get_voice() != 0 && pSO->get_voice() != opt.highlighted_voice)
+                return opt.not_highlighted_voice_color;
+        }
+        else if (pSO && opt.draw_voices_coloured)
+        {
+            return opt.voiceColor[pSO->get_voice()];
+        }
         return get_normal_color();
+    }
 }
 
-//---------------------------------------------------------------------------------------
-void GmoShape::handle_link_event(Linkable<USize>* pShape, int type, USize shift)
-{
-    shift_origin(shift);
-    notify_linked_observers(shift);
-}
-
-//---------------------------------------------------------------------------------------
-void GmoShape::on_linked_to(Linkable<USize>* pShape, int type)
-{
-
-}
+////---------------------------------------------------------------------------------------
+//void GmoShape::handle_link_event(Linkable<USize>* pShape, int type, USize shift)
+//{
+//    shift_origin(shift);
+//    notify_linked_observers(shift);
+//}
+//
+////---------------------------------------------------------------------------------------
+//void GmoShape::on_linked_to(Linkable<USize>* pShape, int type)
+//{
+//
+//}
 
 //---------------------------------------------------------------------------------------
 void GmoShape::set_origin_and_notify_observers(LUnits xLeft, LUnits yTop)
 {
     USize shift(xLeft - m_origin.x, yTop);
     shift_origin(shift);
-    notify_linked_observers(shift);
+//    notify_linked_observers(shift);
 }
 
 //---------------------------------------------------------------------------------------

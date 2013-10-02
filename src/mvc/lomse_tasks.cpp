@@ -35,6 +35,9 @@
 namespace lomse
 {
 
+const double k_double_click_time = 250.0;    //millisecs
+
+
 //=======================================================================================
 // TaskFactory implementation
 //=======================================================================================
@@ -227,137 +230,17 @@ void TaskOnlyClicks::record_first_point(Event& event)
 //---------------------------------------------------------------------------------------
 void TaskOnlyClicks::click_at_point(Event& event)
 {
-    m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart);
+    m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart, event.flags());
 }
 
 //---------------------------------------------------------------------------------------
 void TaskOnlyClicks::mouse_in_out(Event& event)
 {
-    m_pIntor->task_action_mouse_in_out(event.x(), event.y());
+    m_pIntor->task_action_mouse_in_out(event.x(), event.y(), event.flags());
 }
 
 
-////=======================================================================================
-//// TaskSelection implementation
-////=======================================================================================
-//TaskSelection::TaskSelection(Interactor* pIntor)
-//    : Task(TaskFactory::k_task_selection, pIntor)
-//    , m_state(k_start)
-//    , m_pGView(pIntor)
-//{
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TaskSelection::process_event(Event event)
-//{
-//    switch (m_state)
-//    {
-//        //--------------------------------------------------------------------------
-//        case k_waiting_for_first_point:
-//        {
-//            switch (event.type())
-//            {
-//                case Event::k_mouse_left_down:
-//                    m_state = k_waiting_for_point_2_left;
-//                    record_first_point(event);
-//                    break;
-//                case Event::k_mouse_right_down:
-//                    m_state = k_waiting_for_point_2_right;
-//                    record_first_point(event);
-//                    break;
-//                case Event::k_mouse_move:
-//                    mouse_in_out(event);
-//                    break;
-//            }
-//            break;
-//       }
-//
-//        //--------------------------------------------------------------------------
-//        case k_waiting_for_point_2_left:
-//        {
-//            switch (event.type())
-//            {
-//                case Event::k_mouse_left_up:
-//                    m_state = k_waiting_for_first_point;
-//                    select_objects_or_click(event);
-//                    break;
-//
-//                case Event::k_mouse_move:
-//                    m_state = k_waiting_for_point_2_left;
-//                    track_sel_rectangle(event);
-//                    break;
-//            }
-//            break;
-//        }
-//
-//        //--------------------------------------------------------------------------
-//        case k_waiting_for_point_2_right:
-//        {
-//            switch (event.type())
-//            {
-//                case Event::k_mouse_right_up:
-//                    m_state = k_waiting_for_first_point;
-//                    select_object_and_show_contextual_menu(event);
-////                    select_object_at_first_point(event);
-////                    show_contextual_menu();
-//                    break;
-//            }
-//            break;
-//        }
-//
-//        default:
-//            ;
-//    }
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TaskSelection::init_task()
-//{
-//    m_state = k_waiting_for_first_point;
-//    m_xStart = 0;
-//    m_yStart = 0;
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TaskSelection::record_first_point(Event& event)
-//{
-//    m_xStart = event.x();
-//    m_yStart = event.y();
-//    m_pIntor->show_selection_rectangle(m_xStart, m_yStart, m_xStart, m_yStart);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TaskSelection::select_objects_or_click(Event& event)
-//{
-//    m_pIntor->hide_selection_rectangle();
-//
-//    //at least 5 pixels width, height to consider it a selection rectangle
-//    if (abs(m_xStart - event.x()) < 5 || abs(m_yStart - event.y()) < 5)
-//        m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart);
-//    else
-//        m_pIntor->task_action_select_objects_in_screen_rectangle(m_xStart, m_yStart,
-//                                                     event.x(), event.y());
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TaskSelection::track_sel_rectangle(Event& event)
-//{
-//    m_pIntor->update_selection_rectangle(event.x(), event.y());
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TaskSelection::select_object_and_show_contextual_menu(Event& event)
-//{
-//    m_pIntor->task_action_select_object_and_show_contextual_menu(m_xStart, m_yStart);
-//}
-//
-////---------------------------------------------------------------------------------------
-//void TaskSelection::mouse_in_out(Event& event)
-//{
-//    m_pIntor->task_action_mouse_in_out(event.x(), event.y());
-//}
-//
-//
+
 //=======================================================================================
 // TaskSelection implementation
 //=======================================================================================
@@ -381,7 +264,6 @@ void TaskSelection::process_event(Event event)
                 case Event::k_mouse_left_down:
                     m_state = k_waiting_for_point_2;
                     record_first_point(event);
-                    //click_at_point();
                     decide_on_switching_task(event);
                     break;
                 case Event::k_mouse_right_down:
@@ -434,29 +316,250 @@ void TaskSelection::record_first_point(Event& event)
     m_yStart = event.y();
 }
 
-//---------------------------------------------------------------------------------------
-void TaskSelection::click_at_point()
-{
-    m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart);
-}
+////---------------------------------------------------------------------------------------
+//void TaskSelection::click_at_point(Event& event)
+//{
+//    m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart, event.flags());
+//}
 
 //---------------------------------------------------------------------------------------
 void TaskSelection::decide_on_switching_task(Event& event)
 {
-    m_pIntor->task_action_decide_on_switching_task(event.x(), event.y());
+    m_pIntor->task_action_decide_on_switching_task(event.x(), event.y(), event.flags());
 }
 
 //---------------------------------------------------------------------------------------
 void TaskSelection::select_object_and_show_contextual_menu(Event& event)
 {
-    m_pIntor->task_action_select_object_and_show_contextual_menu(m_xStart, m_yStart);
+    m_pIntor->task_action_select_object_and_show_contextual_menu(m_xStart, m_yStart,
+                                                                 event.flags());
 }
 
 //---------------------------------------------------------------------------------------
 void TaskSelection::mouse_in_out(Event& event)
 {
-    m_pIntor->task_action_mouse_in_out(event.x(), event.y());
+    m_pIntor->task_action_mouse_in_out(event.x(), event.y(), event.flags());
 }
+
+
+
+////=======================================================================================
+//// TaskSelection implementation
+////=======================================================================================
+//TaskSelection::TaskSelection(Interactor* pIntor)
+//    : Task(TaskFactory::k_task_selection, pIntor)
+//    , m_state(k_start)
+//    , m_pGView(pIntor)
+//{
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::process_event(Event event)
+//{
+//    switch (m_state)
+//    {
+//        //--------------------------------------------------------------------------
+//        case k_waiting_for_first_point:
+//        {
+//            switch (event.type())
+//            {
+//                case Event::k_mouse_left_down:
+//                case Event::k_mouse_right_down:
+//                    m_state = k_waiting_for_button_up;
+//                    record_time_point_and_button(event);
+//                    break;
+//                case Event::k_mouse_move:
+//                    mouse_in_out(event);
+//                    break;
+//            }
+//            break;
+//        }
+//
+//        //--------------------------------------------------------------------------
+//        case k_waiting_for_button_up:
+//        {
+//            switch (event.type())
+//            {
+//                case Event::k_mouse_left_up:
+//                case Event::k_mouse_right_up:
+//                {
+//                    double ellapsed = get_ellapsed_time();
+//                    if (ellapsed < k_double_click_time)
+//                        m_state = k_waiting_for_dclick;
+//                    else
+//                    {
+//                        m_state = k_waiting_for_first_point;
+//                        single_click();
+//                    }
+//                    break;
+//                }
+//                case Event::k_mouse_move:
+//                    mouse_in_out(event);
+//                    break;
+//            }
+//            break;
+//        }
+//
+//        //--------------------------------------------------------------------------
+//        case k_waiting_for_dclick:
+//        {
+//            double ellapsed = get_ellapsed_time();
+//            switch (event.type())
+//            {
+//                case Event::k_mouse_left_down:
+//                case Event::k_mouse_right_down:
+//                {
+//                    if (ellapsed < k_double_click_time)
+//                        m_state = k_waiting_for_double_up;
+//                    else
+//                    {
+//                        m_state = k_waiting_for_first_point;
+//                        single_click();
+//                    }
+//                    break;
+//                }
+//                case Event::k_mouse_move:
+//                {
+//                    if (ellapsed < k_double_click_time)
+//                        m_state = k_waiting_for_dclick;
+//                    else
+//                    {
+//                        m_state = k_waiting_for_end_point;
+//                        single_click();
+//                        start_move_drag();
+//                    }
+//                    break;
+//                }
+//            }
+//            break;
+//        }
+//
+//        //--------------------------------------------------------------------------
+//        case k_waiting_for_double_up:
+//        {
+//            double ellapsed = get_ellapsed_time();
+//            switch (event.type())
+//            {
+//                case Event::k_mouse_left_up:
+//                case Event::k_mouse_right_up:
+//                {
+//                    if (ellapsed < k_double_click_time)
+//                    {
+//                        m_state = k_waiting_for_first_point;
+//                        double_click();
+//                    }
+//                    else
+//                    {
+//                        m_state = k_waiting_for_first_point;
+//                        single_click();
+//                    }
+//                    break;
+//                }
+//                case Event::k_mouse_move:
+//                {
+//                    if (ellapsed < k_double_click_time)
+//                        m_state = k_waiting_for_double_up;
+//                    else
+//                    {
+//                        m_state = k_waiting_for_end_point;
+//                        single_click();
+//                        start_move_drag();
+//                    }
+//                    break;
+//                }
+//            }
+//            break;
+//        }
+//
+//        //--------------------------------------------------------------------------
+//        case k_waiting_for_end_point:
+//        {
+//            switch (event.type())
+//            {
+//                case Event::k_mouse_left_up:
+//                case Event::k_mouse_right_up:
+//                    m_state = k_waiting_for_first_point;
+//                    end_move_drag(event);
+//                    break;
+//                case Event::k_mouse_move:
+//                    m_state = k_waiting_for_end_point;
+//                    continue_move_drag(event);
+//                    break;
+//            }
+//            break;
+//        }
+//
+//        default:
+//            ;
+//    }
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::init_task()
+//{
+//    m_state = k_waiting_for_first_point;
+//    m_xStart = 0;
+//    m_yStart = 0;
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::record_time_point_and_button(Event& event)
+//{
+//    m_xStart = event.x();
+//    m_yStart = event.y();
+//    m_fLeftButton = event.type() == Event::k_mouse_left_down;
+//    m_downTime = microsec_clock::universal_time();
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::single_click()
+//{
+//    m_pIntor->task_action_single_click_at(m_xStart, m_yStart, m_fLeftButton);
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::double_click()
+//{
+//    m_pIntor->task_action_double_click_at(m_xStart, m_yStart, m_fLeftButton);
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::mouse_in_out(Event& event)
+//{
+//    m_pIntor->task_action_mouse_in_out(event.x(), event.y());
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::start_move_drag()
+//{
+//    m_pIntor->task_action_start_move_drag(m_xStart, m_yStart, m_fLeftButton);
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::continue_move_drag(Event& event)
+//{
+//    m_pIntor->task_action_continue_move_drag(event.x(), event.y(), m_fLeftButton);
+//}
+//
+////---------------------------------------------------------------------------------------
+//void TaskSelection::end_move_drag(Event& event)
+//{
+//    Pixels xTotalShift = event.x() - m_xStart;
+//    Pixels yTotalShift = event.y() - m_yStart;
+//    m_pIntor->task_action_end_move_drag(event.x(), event.y(), m_fLeftButton,
+//                                        xTotalShift, yTotalShift);
+//}
+//
+////---------------------------------------------------------------------------------------
+//double TaskSelection::get_ellapsed_time()
+//{
+//    //millisecods
+//
+//    ptime now = microsec_clock::universal_time();
+//    time_duration diff = now - m_downTime;
+//    return double( diff.total_milliseconds() );
+//}
+
 
 
 //=======================================================================================
@@ -525,16 +628,17 @@ void TaskSelectionRectangle::select_objects_or_click(Event& event)
 
     //at least 5 pixels width, height to consider it a selection rectangle
     if (abs(m_xStart - event.x()) < 5 || abs(m_yStart - event.y()) < 5)
-        m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart);
+        m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart, event.flags());
     else
         m_pIntor->task_action_select_objects_in_screen_rectangle(m_xStart, m_yStart,
-                                                                 event.x(), event.y());
+                                                                 event.x(), event.y(),
+                                                                 event.flags());
 }
 
 //---------------------------------------------------------------------------------------
 void TaskSelectionRectangle::track_sel_rectangle(Event& event)
 {
-    m_pIntor->update_selection_rectangle(event.x(), event.y());
+    m_pIntor->task_action_update_selection_rectangle(event.x(), event.y());
 }
 
 //---------------------------------------------------------------------------------------
@@ -608,7 +712,7 @@ void TaskMoveObject::move_object_or_click(Event& event)
 {
     //at least 5 pixels width, height to consider it a move object action
     if (abs(m_xStart - event.x()) < 5 || abs(m_yStart - event.y()) < 5)
-        m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart);
+        m_pIntor->task_action_click_at_screen_point(m_xStart, m_yStart, event.flags());
     else
         m_pIntor->task_action_move_object(event.x(), event.y());
 }
@@ -710,13 +814,14 @@ void TaskDataEntry::record_first_point(Event& event)
 //---------------------------------------------------------------------------------------
 void TaskDataEntry::insert_object(Event& event)
 {
-    m_pIntor->task_action_insert_object_at_point(m_xStart, m_yStart);
+    m_pIntor->task_action_insert_object_at_point(m_xStart, m_yStart, event.flags());
 }
 
 //---------------------------------------------------------------------------------------
 void TaskDataEntry::show_contextual_menu(Event& event)
 {
-    m_pIntor->task_action_select_object_and_show_contextual_menu(m_xStart, m_yStart);
+    m_pIntor->task_action_select_object_and_show_contextual_menu(m_xStart, m_yStart,
+                                                                 event.flags());
 }
 
 //---------------------------------------------------------------------------------------

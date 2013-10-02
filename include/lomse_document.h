@@ -87,6 +87,7 @@ protected:
     InternalModel*  m_pIModel;
     ImoDocument*    m_pImoDoc;
     unsigned int    m_flags;
+    int             m_modified;
 
 protected:
     friend class LenmusdocAnalyser;
@@ -126,6 +127,12 @@ public:
     //dirty
     inline void clear_dirty() { m_flags &= ~k_dirty; }
     inline bool is_dirty() { return (m_flags & k_dirty) != 0; }
+
+    //modified since last 'save to file' operation
+    inline void clear_modified() { m_modified = 0; }
+    inline bool is_modified() { return m_modified > 0; }
+    inline void set_modified() { ++m_modified; }
+    inline void reset_modified() { if (m_modified > 0) --m_modified; }
 
     //internal model
     inline ImoDocument* get_imodoc() const { return m_pImoDoc; }

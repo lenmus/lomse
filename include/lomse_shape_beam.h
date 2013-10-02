@@ -43,7 +43,7 @@ class BeamEngraver;
 
 
 //---------------------------------------------------------------------------------------
-class GmoShapeBeam : public GmoSimpleShape
+class GmoShapeBeam : public GmoSimpleShape, public VoiceRelatedShape
 {
 protected:
     LUnits m_uBeamThickness;
@@ -65,7 +65,6 @@ public:
     //provide geometry reference info, for other related shapes
     UPoint get_outer_left_reference_point() { return m_outerLeftPoint; }
     UPoint get_outer_right_reference_point() { return m_outerRightPoint; }
-
 
 protected:
 	void draw_beam_segment(Drawer* pDrawer, LUnits uxStart, LUnits uyStart,

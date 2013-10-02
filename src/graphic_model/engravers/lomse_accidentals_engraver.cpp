@@ -50,7 +50,7 @@ AccidentalsEngraver::AccidentalsEngraver(LibraryScope& libraryScope,
 }
 
 //---------------------------------------------------------------------------------------
-GmoShapeAccidentals* AccidentalsEngraver::create_shape(ImoObj* pCreatorImo,
+GmoShapeAccidentals* AccidentalsEngraver::create_shape(ImoNote* pNote,
                                                        UPoint uPos,
                                                        EAccidentals accidentals,
                                                        bool fCautionary,
@@ -59,7 +59,7 @@ GmoShapeAccidentals* AccidentalsEngraver::create_shape(ImoObj* pCreatorImo,
     m_accidentals = accidentals;
     m_fCautionary = fCautionary;
     m_fontSize = determine_font_size();
-    m_pCreatorImo = pCreatorImo;
+    m_pNote = pNote;
     m_color = color;
 
     find_glyphs();
@@ -67,6 +67,13 @@ GmoShapeAccidentals* AccidentalsEngraver::create_shape(ImoObj* pCreatorImo,
     add_glyphs_to_container_shape(uPos);
 
     return m_pContainer;
+}
+
+//---------------------------------------------------------------------------------------
+void AccidentalsEngraver::add_voice(VoiceRelatedShape* pVRS)
+{
+    if (m_pNote)
+        pVRS->set_voice(m_pNote->get_voice());
 }
 
 //---------------------------------------------------------------------------------------
@@ -133,7 +140,8 @@ void AccidentalsEngraver::find_glyphs()
 void AccidentalsEngraver::create_container_shape(UPoint pos)
 {
     ShapeId idx = 0;
-    m_pContainer = LOMSE_NEW GmoShapeAccidentals(m_pCreatorImo, idx, pos, m_color);
+    m_pContainer = LOMSE_NEW GmoShapeAccidentals(m_pNote, idx, pos, m_color);
+    add_voice(m_pContainer);
 }
 
 //---------------------------------------------------------------------------------------
@@ -144,9 +152,10 @@ void AccidentalsEngraver::add_glyphs_to_container_shape(UPoint pos)
     {
         int iGlyph = m_glyphs[i];
         LUnits y = pos.y + glyph_offset(iGlyph);
-        GmoShape* pShape = LOMSE_NEW GmoShapeAccidental(m_pCreatorImo, 0, iGlyph, UPoint(x, y),
-                                                  m_color, m_libraryScope,
-                                                  m_fontSize);
+        GmoShapeAccidental* pShape =
+            LOMSE_NEW GmoShapeAccidental(m_pNote, 0, iGlyph, UPoint(x, y),
+                                         m_color, m_libraryScope, m_fontSize);
+        add_voice(pShape);
         m_pContainer->add(pShape);
         x += (pShape->get_left() - x) + pShape->get_width();
         x += m_pMeter->tenths_to_logical(LOMSE_SPACE_BETWEEN_ACCIDENTALS,

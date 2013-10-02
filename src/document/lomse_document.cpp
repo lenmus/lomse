@@ -68,6 +68,7 @@ Document::Document(LibraryScope& libraryScope, ostream& reporter)
     , m_pIModel(NULL)
     , m_pImoDoc(NULL)
     , m_flags(k_dirty)
+    , m_modified(0)
 {
 }
 
@@ -90,6 +91,7 @@ void Document::initialize()
 
     m_flags = k_dirty;
     m_pImoDoc = NULL;
+    m_modified = 0;
 }
 
 //---------------------------------------------------------------------------------------

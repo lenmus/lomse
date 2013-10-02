@@ -242,6 +242,7 @@ public:
     void set_rendering_option(int option, bool value);
     void reset_boxes_to_draw();
     void set_box_to_draw(int boxType);
+    void highlight_voice(int voice);
 
     //support for printing
     void set_printing_buffer(RenderingBuffer* rbuf) { m_pPrintBuf = rbuf; }

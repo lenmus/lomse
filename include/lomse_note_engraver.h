@@ -48,6 +48,7 @@ class GmoShapeAccidentals;
 class GmoShapeFlag;
 class ScoreMeter;
 class ShapesStorage;
+class VoiceRelatedShape;
 
 //---------------------------------------------------------------------------------------
 class NoteEngraver : public Engraver
@@ -77,6 +78,7 @@ protected:
     void add_leger_lines_if_necessary();
     void add_shapes_for_dots_if_required();
 
+    void add_voice(VoiceRelatedShape* pVRS);
     void determine_stem_direction();
     int decide_notehead_type();
     void add_shapes_for_accidentals_if_required();
@@ -147,6 +149,7 @@ protected:
     void add_stem_shape();
     void add_flag_shape_if_required();
 
+    void add_voice(VoiceRelatedShape* pVRS);
     void determine_stem_x_left();
     void determine_stem_y_note();
     void cut_stem_size_to_add_flag();

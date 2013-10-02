@@ -116,15 +116,6 @@ GmoShape* NoteEngraver::create_tool_dragged_shape(int noteType, EAccidentals acc
     m_acc = acc;
     m_fStemDown = false;
 
-//    m_pNoteShape = LOMSE_NEW GmoShapeNote(NULL, 0.0, 0.0, m_color, m_libraryScope);
-//
-//    //create component shapes: accidentals, notehead, dots, stem, flag, ledger lines
-//    add_shapes_for_accidentals_if_required();
-//    add_notehead_shape();
-//    add_shapes_for_dots_if_required();
-//    add_stem_and_flag_if_required();
-//    add_leger_lines_if_necessary();
-
     create_shape();
 
     return m_pNoteShape;
@@ -137,12 +128,21 @@ void NoteEngraver::create_shape()
     m_pNoteShape = LOMSE_NEW GmoShapeNote(m_pNote, m_uxLeft, m_uyTop, m_color,
                                           m_libraryScope);
 
+    add_voice(m_pNoteShape);
+
     //create component shapes: accidentals, notehead, dots, stem, flag, ledger lines
     add_shapes_for_accidentals_if_required();
     add_notehead_shape();
     add_shapes_for_dots_if_required();
     add_stem_and_flag_if_required();
     add_leger_lines_if_necessary();
+}
+
+//---------------------------------------------------------------------------------------
+void NoteEngraver::add_voice(VoiceRelatedShape* pVRS)
+{
+    if (m_pNote)
+        pVRS->set_voice(m_pNote->get_voice());
 }
 
 //---------------------------------------------------------------------------------------
@@ -211,6 +211,7 @@ LUnits NoteEngraver::add_dot_shape(LUnits x, LUnits y, Color color)
     y += tenths_to_logical(get_glyph_offset(k_glyph_dot));
     GmoShapeDot* pShape = LOMSE_NEW GmoShapeDot(m_pNote, 0, k_glyph_dot, UPoint(x, y),
                                           color, m_libraryScope, m_fontSize);
+    add_voice(pShape);
 	m_pNoteShape->add(pShape);
     return pShape->get_width();
 }
@@ -257,6 +258,7 @@ void NoteEngraver::add_notehead_shape()
     LUnits y = m_uyTop + tenths_to_logical(get_glyph_offset(iGlyph));
     m_pNoteheadShape = LOMSE_NEW GmoShapeNotehead(m_pNote, 0, iGlyph, UPoint(m_uxLeft, y),
                                             m_color, m_libraryScope, m_fontSize);
+    add_voice(m_pNoteheadShape);
     m_pNoteShape->add_notehead(m_pNoteheadShape);
     m_pNoteShape->set_anchor_offset(m_pNoteShape->get_left() - m_uxLeft);
     m_uxLeft += m_pNoteheadShape->get_width();
@@ -582,9 +584,11 @@ void StemFlagEngraver::add_stem_shape()
     m_uyStemFlag = m_uyStemNote + (m_fStemDown ? m_uStemLength : -m_uStemLength);
     LUnits yTop = (m_fStemDown ? m_uyStemNote : m_uyStemFlag);
     LUnits yBottom = (m_fStemDown ? m_uyStemFlag : m_uyStemNote);
-    m_pBaseNoteShape->add_stem(
-        LOMSE_NEW GmoShapeStem(m_pCreatorImo, m_uxStem, yTop, 0.0f, yBottom, m_fStemDown,
-                         m_uStemThickness, m_color) );
+    GmoShapeStem* pShape = LOMSE_NEW GmoShapeStem(m_pCreatorImo, m_uxStem, yTop,
+                                                  0.0f, yBottom, m_fStemDown,
+                                                  m_uStemThickness, m_color);
+    add_voice(pShape);
+    m_pBaseNoteShape->add_stem(pShape);
 }
 
 //---------------------------------------------------------------------------------------
@@ -595,9 +599,11 @@ void StemFlagEngraver::add_flag_shape_if_required()
         int iGlyph = get_glyph_for_flag();
         LUnits x = (m_fStemDown ? m_uxStem : m_uxStem + m_uStemThickness);
         LUnits y = m_uyStemFlag + get_glyph_offset(iGlyph);
-        m_pBaseNoteShape->add_flag( LOMSE_NEW GmoShapeFlag(m_pCreatorImo, 0, iGlyph,
-                                                     UPoint(x, y), m_color,
-                                                     m_libraryScope, m_fontSize) );
+        GmoShapeFlag* pShape = LOMSE_NEW GmoShapeFlag(m_pCreatorImo, 0, iGlyph,
+                                                      UPoint(x, y), m_color,
+                                                      m_libraryScope, m_fontSize);
+        add_voice(pShape);
+        m_pBaseNoteShape->add_flag(pShape);
     }
 }
 
@@ -688,6 +694,16 @@ LUnits StemFlagEngraver::get_glyph_offset(int iGlyph)
 {
     Tenths tenths = glyphs_lmbasic2[iGlyph].GlyphOffset;
     return m_pMeter->tenths_to_logical(tenths, m_iInstr, m_iStaff);
+}
+
+//---------------------------------------------------------------------------------------
+void StemFlagEngraver::add_voice(VoiceRelatedShape* pVRS)
+{
+    if (m_pNoteShape)
+    {
+        VoiceRelatedShape* pNote = static_cast<VoiceRelatedShape*>(m_pNoteShape);
+        pVRS->set_voice(pNote->get_voice());
+    }
 }
 
 

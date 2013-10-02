@@ -43,6 +43,7 @@ class ImoNote;
 class GmoShapeTie;
 class GmoShapeNote;
 class ScoreMeter;
+class VoiceRelatedShape;
 
 //---------------------------------------------------------------------------------------
 class TieEngraver : public RelAuxObjEngraver
@@ -88,6 +89,7 @@ protected:
     void create_two_shapes();
     void create_one_shape();
 
+    void add_voice(VoiceRelatedShape* pVRS);
     void compute_start_point();
     void compute_end_point(UPoint* point);
     void compute_start_of_staff_point();

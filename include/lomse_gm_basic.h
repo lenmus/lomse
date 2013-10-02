@@ -269,7 +269,7 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-class GmoShape : public GmoObj, public Linkable<USize>
+class GmoShape : public GmoObj      //, public Linkable<USize>
 {
 protected:
     ShapeId m_idx;
@@ -292,9 +292,12 @@ public:
     inline int get_layer() { return m_layer; }
     inline void set_layer(int layer) { m_layer = layer; }
 
-    //overrides required by Linkable
-	virtual void handle_link_event(Linkable<USize>* pShape, int type, USize shift);
-    virtual void on_linked_to(Linkable<USize>* pShape, int type);
+//    //overrides required by Linkable
+//	virtual void handle_link_event(Linkable<USize>* pShape, int type, USize shift);
+//    virtual void on_linked_to(Linkable<USize>* pShape, int type);
+
+//    //overrides required by score shapes related to a voice
+//    virtual bool is_voice_related_shape() { return false; }
 
     virtual LUnits get_anchor_offset() { return 0.0f; }
 
@@ -333,7 +336,7 @@ public:
 
 protected:
     GmoShape(ImoObj* pCreatorImo, int objtype, ShapeId idx, Color color);
-    Color determine_color_to_use(RenderOptions& opt);
+    virtual Color determine_color_to_use(RenderOptions& opt);
     virtual Color get_normal_color() { return m_color; }
 
 };

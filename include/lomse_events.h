@@ -281,17 +281,19 @@ protected:
     ImoId m_imoId;
     Pixels m_x;
     Pixels m_y;
+    unsigned m_flags;
 
     EventMouse(EEventType type) : EventView(type, WpInteractor()) {}    //for unit tests
 
 public:
     EventMouse(EEventType type, WpInteractor wpInteractor, ImoId id,
-               Pixels x, Pixels y, WpDocument wpDoc)
+               Pixels x, Pixels y, unsigned flags, WpDocument wpDoc)
         : EventView(type, wpInteractor)
         , m_wpDoc(wpDoc)
         , m_imoId(id)
         , m_x(x)
         , m_y(y)
+        , m_flags(flags)
     {
     }
 
@@ -301,6 +303,7 @@ public:
     inline ImoId get_imo_id() { return m_imoId; }
     inline Pixels get_x() { return m_x; }
     inline Pixels get_y() { return m_y; }
+    inline unsigned get_flags() { return m_flags; }
 
     bool is_still_valid();
 

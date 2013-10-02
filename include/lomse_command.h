@@ -388,7 +388,8 @@ protected:
     list<ImoId> m_relIds;   //when the action is performed, all relations in deleted
                             //staffobjs are temporarily saved here
 
-    void cursor_to_first_staffobj(Document* pDoc, DocCursor* pCursor);
+    void prepare_cursor_for_deletion(DocCursor* pCursor);
+    bool is_going_to_be_deleted(ImoId id);
     void delete_staffobjs(Document* pDoc);
     void delete_relobjs(Document* pDoc);
     void delete_auxobjs(Document* pDoc);

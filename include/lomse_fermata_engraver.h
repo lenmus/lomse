@@ -66,6 +66,7 @@ protected:
     bool determine_if_above();
     UPoint compute_location(UPoint pos);
     void center_on_parent();
+    void add_voice();
 
 };
 

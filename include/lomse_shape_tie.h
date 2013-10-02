@@ -49,7 +49,7 @@ class ImoObj;
 
 
 //---------------------------------------------------------------------------------------
-class GmoShapeTie : public GmoSimpleShape, public VertexSource
+class GmoShapeTie : public GmoSimpleShape, public VertexSource, public VoiceRelatedShape
 {
 protected:
     LUnits m_thickness;

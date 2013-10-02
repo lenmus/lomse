@@ -101,7 +101,7 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class GmoShapeFermata : public GmoShapeGlyph
+class GmoShapeFermata : public GmoShapeGlyph, public VoiceRelatedShape
 {
 protected:
     friend class FermataEngraver;
@@ -109,6 +109,7 @@ protected:
                     Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_fermata, idx, nGlyph, pos, color,
                         libraryScope, fontSize )
+        , VoiceRelatedShape()
     {
     }
 };
@@ -175,7 +176,7 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class GmoShapeStem : public GmoShapeSimpleLine
+class GmoShapeStem : public GmoShapeSimpleLine, public VoiceRelatedShape
 {
 private:
 	bool m_fStemDown;
@@ -251,18 +252,19 @@ public:
 //
 
 //---------------------------------------------------------------------------------------
-class GmoShapeAccidentals : public GmoCompositeShape
+class GmoShapeAccidentals : public GmoCompositeShape, public VoiceRelatedShape
 {
 protected:
     friend class AccidentalsEngraver;
     GmoShapeAccidentals(ImoObj* pCreatorImo, ShapeId idx, UPoint pos, Color color)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_accidentals, idx, color)
+        , VoiceRelatedShape()
     {
     }
 };
 
 //---------------------------------------------------------------------------------------
-class GmoShapeAccidental : public GmoShapeGlyph
+class GmoShapeAccidental : public GmoShapeGlyph, public VoiceRelatedShape
 {
 protected:
     friend class AccidentalsEngraver;
@@ -271,6 +273,7 @@ protected:
                        Color color, LibraryScope& libraryScope, double fontSize)
         : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_accidental_sign, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
+        , VoiceRelatedShape()
     {
     }
 };
