@@ -923,40 +923,7 @@ protected:
 
     void add_key_type()
     {
-        switch(m_pObj->get_key_type())
-        {
-            case k_key_C:   m_source << "C";    break;
-            case k_key_G:   m_source << "G";    break;
-            case k_key_D:   m_source << "D";    break;
-            case k_key_A:   m_source << "A";    break;
-            case k_key_E:   m_source << "E";    break;
-            case k_key_B:   m_source << "B";    break;
-            case k_key_Fs:  m_source << "Fs";   break;
-            case k_key_Cs:  m_source << "Cs";   break;
-            case k_key_Cf:  m_source << "Cf";   break;
-            case k_key_Gf:  m_source << "Gf";   break;
-            case k_key_Df:  m_source << "Df";   break;
-            case k_key_Af:  m_source << "Af";   break;
-            case k_key_Ef:  m_source << "Ef";   break;
-            case k_key_Bf:  m_source << "Bf";   break;
-            case k_key_F:   m_source << "F";    break;
-            case k_key_a:   m_source << "a";    break;
-            case k_key_e:   m_source << "e";    break;
-            case k_key_b:   m_source << "b";    break;
-            case k_key_fs:  m_source << "fs";   break;
-            case k_key_cs:  m_source << "cs";   break;
-            case k_key_gs:  m_source << "gs";   break;
-            case k_key_ds:  m_source << "ds";   break;
-            case k_key_as:  m_source << "as";   break;
-            case k_key_af:  m_source << "af";   break;
-            case k_key_ef:  m_source << "ef";   break;
-            case k_key_bf:  m_source << "bf";   break;
-            case k_key_f:   m_source << "f";    break;
-            case k_key_c:   m_source << "c";    break;
-            case k_key_g:   m_source << "g";    break;
-            case k_key_d:   m_source << "d";    break;
-            default:                            break;
-        }
+        m_source << LdpExporter::key_type_to_ldp( m_pObj->get_key_type() );
     }
 
 };
@@ -2576,6 +2543,45 @@ string LdpExporter::clef_type_to_ldp(int clefType)
         return undefined;
     else
         return name[clefType];
+}
+//---------------------------------------------------------------------------------------
+string LdpExporter::key_type_to_ldp(int keyType)
+{
+    switch(keyType)
+    {
+        case k_key_C:   return "C";
+        case k_key_G:   return "G";
+        case k_key_D:   return "D";
+        case k_key_A:   return "A";
+        case k_key_E:   return "E";
+        case k_key_B:   return "B";
+        case k_key_Fs:  return "Fs";
+        case k_key_Cs:  return "Cs";
+        case k_key_Cf:  return "Cf";
+        case k_key_Gf:  return "Gf";
+        case k_key_Df:  return "Df";
+        case k_key_Af:  return "Af";
+        case k_key_Ef:  return "Ef";
+        case k_key_Bf:  return "Bf";
+        case k_key_F:   return "F";
+        case k_key_a:   return "a";
+        case k_key_e:   return "e";
+        case k_key_b:   return "b";
+        case k_key_fs:  return "fs";
+        case k_key_cs:  return "cs";
+        case k_key_gs:  return "gs";
+        case k_key_ds:  return "ds";
+        case k_key_as:  return "as";
+        case k_key_af:  return "af";
+        case k_key_ef:  return "ef";
+        case k_key_bf:  return "bf";
+        case k_key_f:   return "f";
+        case k_key_c:   return "c";
+        case k_key_g:   return "g";
+        case k_key_d:   return "d";
+        default:
+            return "undefined";
+    }
 }
 
 //---------------------------------------------------------------------------------------

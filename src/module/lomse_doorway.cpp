@@ -63,11 +63,11 @@ Presenter* LomseDoorway::new_document(int viewType)
 }
 
 //---------------------------------------------------------------------------------------
-Presenter* LomseDoorway::new_document(int viewType, const string& ldpSource,
+Presenter* LomseDoorway::new_document(int viewType, const string& source, int format,
                                       ostream& reporter)
 {
     PresenterBuilder builder(*m_pLibraryScope);
-    return builder.new_document(viewType, ldpSource, reporter);
+    return builder.new_document(viewType, source, reporter, format);
 }
 
 //---------------------------------------------------------------------------------------

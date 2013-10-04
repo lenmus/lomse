@@ -35,6 +35,7 @@
 
 #include "lomse_reader.h"
 #include "lomse_basic.h"
+#include "lomse_document.h"
 
 using namespace std;
 
@@ -70,7 +71,8 @@ public:
 
     //presenter creation
     Presenter* new_document(int viewType, const std::string& content="",
-                            ostream& reporter = cout);
+                            ostream& reporter = cout,
+                            int format=Document::k_format_lmd);
     Presenter* open_document(int viewType, const std::string& filename,
                              ostream& reporter = cout);
     Presenter* open_document(int viewType, LdpReader& reader,

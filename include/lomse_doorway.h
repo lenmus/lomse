@@ -125,7 +125,7 @@ public:
 
     //common operations on documents
     Presenter* new_document(int viewType);
-    Presenter* new_document(int viewType, const string& ldpSource,
+    Presenter* new_document(int viewType, const string& source, int format,
                             ostream& reporter = cout);
     Presenter* open_document(int viewType, const string& filename,
                              ostream& reporter = cout);

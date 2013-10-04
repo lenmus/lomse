@@ -84,11 +84,11 @@ PresenterBuilder::~PresenterBuilder()
 
 //---------------------------------------------------------------------------------------
 Presenter* PresenterBuilder::new_document(int viewType, const std::string& content,
-                                          ostream& reporter)
+                                          ostream& reporter, int format)
 {
     Document* pDoc = Injector::inject_Document(m_libScope, reporter);
     if (content != "")
-        pDoc->from_string(content);
+        pDoc->from_string(content, format);
     else
         pDoc->create_empty();
 
