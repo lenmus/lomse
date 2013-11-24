@@ -153,6 +153,32 @@ int Document::from_checkpoint(const string& data)
 }
 
 //---------------------------------------------------------------------------------------
+int Document::replace_object_from_checkpoint_data(ImoId id, const string& data)
+{
+    //object to replace
+    ImoObj* pOldImo = get_pointer_to_imo(id);
+    ImoObj* pParent = pOldImo->get_parent();
+
+    //new object
+    IdAssigner assigner;
+    IdAssigner* pSave = m_pIdAssigner;
+    m_pIdAssigner = &assigner;
+    ImoObj* pNewImo = create_object_from_lmd(data);
+    m_pIdAssigner = pSave;
+
+    //replace old object
+    //TODO: check that new and old have the same id?
+    ImoObj::depth_first_iterator it(pOldImo);
+    pParent->replace_node(it, pNewImo);
+    delete pOldImo;
+
+    //add new ids
+    assigner.copy_ids_to(m_pIdAssigner);
+
+    return 0;
+}
+
+//---------------------------------------------------------------------------------------
 int Document::from_input(LdpReader& reader)
 {
     initialize();
@@ -214,15 +240,26 @@ string Document::to_string(bool fWithIds)
 //---------------------------------------------------------------------------------------
 string Document::get_checkpoint_data()
 {
-//    LdpExporter exporter;
-//    exporter.set_remove_newlines(true);
-//    exporter.set_add_id(true);
-//    return exporter.get_source(m_pImoDoc);
+    return get_checkpoint_data_for( m_pImoDoc->get_id() );
+}
+
+//---------------------------------------------------------------------------------------
+string Document::get_checkpoint_data_for(ImoId id)
+{
+    ImoObj* pImo = get_pointer_to_imo(id);
+    //TODO: check that ImoObj is a terminal node?
+
     LmdExporter exporter(m_libraryScope);
-    //exporter.set_remove_newlines(true);
+    //exporter.set_remove_newlines(true);   //Commented out to facilitate debugging
     exporter.set_add_id(true);
     exporter.set_score_format(LmdExporter::k_format_ldp);
-    return exporter.get_source(m_pImoDoc);
+    return exporter.get_source(pImo);
+
+    //code if Ldp format:
+        //LdpExporter exporter;
+        //exporter.set_remove_newlines(true);
+        //exporter.set_add_id(true);
+        //return exporter.get_source(m_pImoDoc);
 }
 
 //---------------------------------------------------------------------------------------
@@ -261,6 +298,7 @@ ImoObj* Document::create_object_from_ldp(const string& source, ostream& reporter
     if (tree)
     {
         LdpAnalyser a(reporter, m_libraryScope, this);
+        a.set_score_version("2.0");
         try
         {
             ImoObj* pImo = a.analyse_tree_and_get_object(tree);

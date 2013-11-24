@@ -681,6 +681,29 @@ void GmoBox::add_boxes_to_controls_map(GraphicModel* pGM)
     }
 }
 
+//---------------------------------------------------------------------------------------
+void GmoBox::add_boxes_to_map_imo_to_box(GraphicModel* pGM)
+{
+    //filter out boxes for non-terminal elements
+    if (this->is_box_control()
+        || this->is_box_document()
+        || this->is_box_doc_page()
+        || this->is_box_doc_page_content()
+        || this->is_box_paragraph()
+        || this->is_box_score_page()
+        || this->is_box_table()
+       )
+    {
+        pGM->add_to_map_imo_to_box(this);
+
+        vector<GmoBox*>::iterator it;
+        for (it = m_childBoxes.begin(); it != m_childBoxes.end(); ++it)
+        {
+            (*it)->add_boxes_to_map_imo_to_box(pGM);
+        }
+    }
+}
+
 
 //=======================================================================================
 // GmoLayer: helper class. A collection of GmoShape objects

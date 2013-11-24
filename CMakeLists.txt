@@ -570,9 +570,10 @@ set(GUI_CONTROLS_FILES
 )
 
 set(INTERNAL_MODEL_FILES
+    ${SRC_DIR}/internal_model/lomse_im_algorithms.cpp
+    ${SRC_DIR}/internal_model/lomse_im_attributes.cpp
     ${SRC_DIR}/internal_model/lomse_im_factory.cpp
     ${SRC_DIR}/internal_model/lomse_im_figured_bass.cpp
-    ${SRC_DIR}/internal_model/lomse_im_attributes.cpp
     ${SRC_DIR}/internal_model/lomse_im_note.cpp
     ${SRC_DIR}/internal_model/lomse_internal_model.cpp
     ${SRC_DIR}/internal_model/lomse_score_utilities.cpp
@@ -768,6 +769,7 @@ if(LOMSE_BUILD_TESTS)
             ${SRC_DIR}/tests/lomse_test_gm_objects.cpp
             ${SRC_DIR}/tests/lomse_test_graphic_model.cpp
             ${SRC_DIR}/tests/lomse_test_image_reader.cpp
+            ${SRC_DIR}/tests/lomse_test_im_algorithms.cpp
             ${SRC_DIR}/tests/lomse_test_inlines_container_layouter.cpp
             ${SRC_DIR}/tests/lomse_test_interactor.cpp
             ${SRC_DIR}/tests/lomse_test_internal_model.cpp
@@ -791,6 +793,7 @@ if(LOMSE_BUILD_TESTS)
             ${SRC_DIR}/tests/lomse_test_presenter.cpp
             ${SRC_DIR}/tests/lomse_test_reader.cpp
             ${SRC_DIR}/tests/lomse_test_rest_engraver.cpp
+            ${SRC_DIR}/tests/lomse_test_score_algorithms.cpp
             ${SRC_DIR}/tests/lomse_test_score_iterator.cpp
             ${SRC_DIR}/tests/lomse_test_score_layouter.cpp
             ${SRC_DIR}/tests/lomse_test_score_meter.cpp

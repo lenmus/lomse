@@ -35,11 +35,42 @@
 #include "lomse_staffobjs_table.h"
 #include "lomse_staffobjs_cursor.h"
 #include "lomse_score_utilities.h"
+#include "lomse_logger.h"
 
 using namespace std;
 
 namespace lomse
 {
+
+
+//=======================================================================================
+// helper class for accessing scores
+// AWARE: if in future there are more structurizable elements, modify this class as
+//        shown in commented sentences.
+//=======================================================================================
+class VisitorForStructurizables : public Visitor<ImoScore>
+//                                , public Visitor<ImoOtherStructurizable>
+{
+protected:
+    ModelBuilder* m_builder;
+
+public:
+    VisitorForStructurizables(ModelBuilder* builder)
+        : Visitor<ImoScore>()
+        //, Visitor<ImoOtherStructurizable>()
+        , m_builder(builder)
+    {
+    }
+	virtual ~VisitorForStructurizables() {}
+
+    void start_visit(ImoScore* pImo) { m_builder->structurize(pImo); }
+    //void start_visit(ImoOtherStructurizable* pImo) { m_builder->structurize(pImo); }
+
+	void end_visit(ImoScore* pImo) {}
+    //void end_visit(ImoOtherStructurizable* pImo) {}
+
+};
+
 
 //=======================================================================================
 // ModelBuilder implementation
@@ -47,9 +78,8 @@ namespace lomse
 ImoDocument* ModelBuilder::build_model(InternalModel* IModel)
 {
     ImoDocument* pDoc = static_cast<ImoDocument*>( IModel->get_root() );
-    int numContent = pDoc->get_num_content_items();
-    for (int i = 0; i < numContent; i++)
-        structurize( pDoc->get_content_item(i) );
+    VisitorForStructurizables v(this);
+    pDoc->accept_visitor(v);
     return pDoc;
 }
 
@@ -79,7 +109,7 @@ void ModelBuilder::structurize(ImoObj* pImo)
 {
     //in future this should invoke a factory object
 
-    if (pImo->is_score())
+    if (pImo && pImo->is_score())
     {
         ImoScore* pScore = static_cast<ImoScore*>(pImo);
         ColStaffObjsBuilder builder;

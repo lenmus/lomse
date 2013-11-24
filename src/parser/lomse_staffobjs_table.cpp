@@ -780,5 +780,155 @@ int ScoreAlgorithms::get_applicable_clef_for(ImoScore* pScore,
     return clef;
 }
 
+//---------------------------------------------------------------------------------------
+ImoNoteRest* ScoreAlgorithms::find_noterest_at(ImoScore* pScore,
+                                               int instr, int voice, TimeUnits time)
+{
+    ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+    ColStaffObjsIterator it;
+    for (it=pColStaffObjs->begin(); it != pColStaffObjs->end(); ++it)
+    {
+        if (is_greater_time((*it)->time(), time))
+            break;
+        ImoObj* pImo = (*it)->imo_object();
+        if (pImo->is_note_rest())
+        {
+            ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pImo);
+            if ((*it)->num_instrument() == instr)
+            {
+                if (pNR->get_voice() == voice
+                    && !is_greater_time(time, (*it)->time() + pNR->get_duration()) )
+                    return pNR;
+            }
+        }
+    }
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+list<OverlappedNoteRest*> ScoreAlgorithms::find_and_classify_overlapped_noterests_at(
+        ImoScore* pScore, int instr, int voice, TimeUnits time, TimeUnits duration)
+{
+    list<OverlappedNoteRest*> overlaps;
+    ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+    ColStaffObjsIterator it;
+    for (it=pColStaffObjs->begin(); it != pColStaffObjs->end(); ++it)
+    {
+        ImoObj* pImo = (*it)->imo_object();
+        if (pImo->is_note_rest())
+        {
+            ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pImo);
+            TimeUnits nrTime = (*it)->time();
+            TimeUnits nrDuration = pNR->get_duration();
+            if ((*it)->num_instrument() == instr
+                && pNR->get_voice() == voice
+                && is_greater_time(time + duration, nrTime)     //starts before end of inserted one
+                && is_lower_time(time, nrTime + nrDuration)     //ends after start of inserted one
+               )
+            {
+                OverlappedNoteRest* pOV = LOMSE_NEW OverlappedNoteRest(pNR);
+                if (is_equal_time(nrTime, time))
+                {
+                    //both start at same time
+                    if (is_lower_time(duration, nrDuration))
+                    {
+                        //test 4
+                        pOV->type = k_overlap_at_start;
+                        pOV->overlap = duration;
+                    }
+                    else
+                    {
+                        //test 1
+                        pOV->type = k_overlap_full;
+                        pOV->overlap = nrDuration;
+                    }
+                }
+                else if (is_lower_time(time, nrTime))
+                {
+                    //starts after inserted one: overlap at_start or full
+                    pOV->overlap = duration - (nrTime - time);
+                    if (is_lower_time(pOV->overlap, nrDuration))
+                    {
+                        //test 5
+                        pOV->type = k_overlap_at_start;
+                    }
+                    else
+                    {
+                        //test 3
+                        pOV->type = k_overlap_full;
+                        pOV->overlap = nrDuration;
+                    }
+                }
+                else
+                {
+                    //starts before inserted one: overlap at_end
+                    //test 2, 3, 5
+                    pOV->overlap = nrDuration - (time - nrTime);
+                    pOV->type = k_overlap_at_end;
+                }
+
+                overlaps.push_back(pOV);
+            }
+            else if (is_lower_time(time + duration, nrTime))
+                break;
+        }
+    }
+    return overlaps;
+}
+
+//---------------------------------------------------------------------------------------
+TimeUnits ScoreAlgorithms::find_end_time_for_voice(ImoScore* pScore,
+                                        int instr, int voice, TimeUnits maxTime)
+{
+
+    ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+    ColStaffObjsIterator it =
+                        find_barline_with_time_lower_or_equal(pScore, instr, maxTime);
+
+    TimeUnits endTime = 0.0;
+    if (it != pColStaffObjs->end())
+        endTime = (*it)->time();
+
+    for (; it != pColStaffObjs->end(); ++it)
+    {
+        ImoObj* pImo = (*it)->imo_object();
+        if (pImo->is_note_rest())
+        {
+            ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pImo);
+            TimeUnits time = (*it)->time();
+            TimeUnits duration = pNR->get_duration();
+            if ((*it)->num_instrument() == instr && pNR->get_voice() == voice)
+            {
+                if (!is_greater_time(time + duration, maxTime))
+                    endTime = max(endTime, time+duration);
+            }
+
+            if (is_greater_time(time, maxTime))
+                break;
+        }
+    }
+    return endTime;
+}
+
+//---------------------------------------------------------------------------------------
+ColStaffObjsIterator ScoreAlgorithms::find_barline_with_time_lower_or_equal(
+            ImoScore* pScore, int instr, TimeUnits maxTime)
+{
+    ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
+    ColStaffObjsIterator it = pColStaffObjs->begin();
+    ColStaffObjsIterator itLastBarline = it;
+    for (; it != pColStaffObjs->end(); ++it)
+    {
+        ImoObj* pImo = (*it)->imo_object();
+        if (pImo->is_barline())
+        {
+            if (is_greater_time((*it)->time(), maxTime))
+                break;
+            itLastBarline = it;
+        }
+    }
+    return itLastBarline;
+}
+
 
 }  //namespace lomse

@@ -120,6 +120,7 @@ public:
     int from_string(const string& source, int format=k_format_ldp);
     int from_input(LdpReader& reader);
     int from_checkpoint(const string& data);
+    int replace_object_from_checkpoint_data(ImoId id, const string& data);
     void create_empty();
     void create_with_empty_score();
     inline SharedPtr<Document> get_shared_ptr_from_this() { return shared_from_this(); }
@@ -141,6 +142,7 @@ public:
     Control* get_pointer_to_control(ImoId id) const;
     string to_string(bool fWithIds = false);
     string get_checkpoint_data();
+    string get_checkpoint_data_for(ImoId id);
     inline string get_language() {
         return (m_pImoDoc != NULL ? m_pImoDoc->get_language() : "en");
     }

@@ -247,22 +247,6 @@ SUITE(GmoShapeTest)
 
     // flags ----------------------------------------------------------------------------
 
-    TEST_FIXTURE(GmoShapeTestFixture, set_selected)
-    {
-        Document doc(m_libraryScope);
-        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
-                                    ImFactory::inject(k_imo_staff_info, &doc));
-        GmoShapeStaff staff(NULL, 0, pInfo, 0, 0.0f, Color(0,0,0));
-        CHECK( staff.is_selected() == false );
-
-        staff.set_selected(true);
-        CHECK( staff.is_selected() == true );
-        staff.set_selected(false);
-        CHECK( staff.is_selected() == false );
-
-        delete pInfo;
-    }
-
     TEST_FIXTURE(GmoShapeTestFixture, set_dirty)
     {
         Document doc(m_libraryScope);

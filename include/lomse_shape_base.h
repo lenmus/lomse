@@ -161,9 +161,6 @@ public:
     virtual void shift_origin(const USize& shift);
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
-	//overrides
-    void set_selected(bool value);
-
     //for unit tests
     inline std::list<GmoShape*>& get_components() { return m_components; }
 

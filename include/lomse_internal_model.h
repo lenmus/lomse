@@ -550,6 +550,10 @@ public:
     enum {
         k_dirty             = 0x0001,   //dirty: modified since last "clear_dirty()" ==> need to rebuild GModel
         k_children_dirty    = 0x0002,   //this is not dirty but some children are dirty
+        k_edit_terminal     = 0x0004,   //terminal node for edition
+        k_editable          = 0x0008,   //in edition, this node can be edited
+        k_deletable         = 0x0010,   //if editable, this node can be also deleted
+        k_expandable        = 0x0020,   //if editable, more children can be added/inserted
     };
 
     //dirty
@@ -557,6 +561,20 @@ public:
     void set_dirty(bool value);
     inline bool are_children_dirty() { return (m_flags & k_children_dirty) != 0; }
     void set_children_dirty(bool value);
+
+    //edition flags
+    inline bool is_terminal() { return (m_flags & k_edit_terminal) != 0; }
+    inline void set_terminal(bool value) { value ? m_flags |= k_edit_terminal
+                                                 : m_flags &= ~k_edit_terminal; }
+    inline bool is_editable() { return (m_flags & k_editable) != 0; }
+    inline void set_editable(bool value) { value ? m_flags |= k_editable
+                                                 : m_flags &= ~k_editable; }
+    inline bool is_deletable() { return (m_flags & k_deletable) != 0; }
+    inline void set_deletable(bool value) { value ? m_flags |= k_deletable
+                                                  : m_flags &= ~k_deletable; }
+    inline bool is_expandable() { return (m_flags & k_expandable) != 0; }
+    inline void set_expandable(bool value) { value ? m_flags |= k_expandable
+                                                   : m_flags &= ~k_expandable; }
 
     //getters
     inline ImoId get_id() { return m_id; }
@@ -665,6 +683,7 @@ public:
     inline bool is_figured_bass_info() { return m_objtype == k_imo_figured_bass_info; }
     inline bool is_font_style_dto() { return m_objtype == k_imo_font_style_dto; }
     inline bool is_go_back_fwd() { return m_objtype == k_imo_go_back_fwd; }
+    bool is_gap();      ///a rest representing a goFwd element
     inline bool is_heading() { return m_objtype == k_imo_heading; }
     inline bool is_image() { return m_objtype == k_imo_image; }
     inline bool is_inline_wrapper() { return m_objtype == k_imo_inline_wrapper; }
@@ -3086,7 +3105,11 @@ protected:
     friend class ImoBlocksContainer;
     friend class Document;
     friend class ImFactory;
-    ImoParagraph() : ImoInlinesContainer(k_imo_para) {}
+    ImoParagraph()
+        : ImoInlinesContainer(k_imo_para)
+    {
+        set_terminal(true);
+    }
 
 public:
     virtual ~ImoParagraph() {}
@@ -3126,7 +3149,12 @@ protected:
     int m_level;
 
     friend class ImFactory;
-    ImoHeading() : ImoInlinesContainer(k_imo_heading), m_level(1) {}
+    ImoHeading()
+        : ImoInlinesContainer(k_imo_heading)
+        , m_level(1)
+    {
+        set_terminal(true);
+    }
 
 public:
     virtual ~ImoHeading() {};
@@ -3347,6 +3375,9 @@ public:
     inline ColStaffObjs* get_staffobjs_table() { return m_pColStaffObjs; }
     void set_staffobjs_table(ColStaffObjs* pColStaffObjs);
     SoundEventsTable* get_midi_table();
+
+    //required by Visitable parent class
+	void accept_visitor(BaseVisitor& v);
 
     //instruments
     void add_instrument(ImoInstrument* pInstr);

@@ -412,7 +412,7 @@ DiatonicPitch Interactor::get_pitch_at(Pixels x, Pixels y)
         ImoObj* pImo = pGmo->get_creator_imo();
         DocCursorState state = pGView->click_event_to_cursor_state(iPage, LUnits(xPos),
                                                                 LUnits(yPos), pImo, pGmo);
-        if (state.get_top_level_id() != k_no_imoid)
+        if (state.get_parent_level_id() != k_no_imoid)
         {
             SpScoreCursorState pState(
                 boost::static_pointer_cast<ScoreCursorState>(state.get_delegate_state()) );
@@ -1242,6 +1242,15 @@ void Interactor::highlight_voice(int voice)
 }
 
 //---------------------------------------------------------------------------------------
+void Interactor::select_voice(int voice)
+{
+    m_fViewParamsChanged = true;
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    if (pGView)
+        pGView->change_cursor_voice(voice);
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::set_printing_buffer(RenderingBuffer* rbuf)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
@@ -1691,6 +1700,19 @@ bool Interactor::is_operating_mode_allowed(int mode)
         }
     }
     return true;
+}
+
+//---------------------------------------------------------------------------------------
+void Interactor::enable_edition_restricted_to(ImoId id)
+{
+    //AWARE: This is not implemented as a command, as it is considered an structural
+    //operation, not a user command.
+    m_operatingMode = k_mode_edition;
+    switch_task(TaskFactory::k_task_selection);
+    GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
+    m_pCursor->jailed_mode_in(id);
+    if (pGView)
+        pGView->set_visual_effects_for_mode(k_mode_edition);
 }
 
 //---------------------------------------------------------------------------------------

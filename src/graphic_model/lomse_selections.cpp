@@ -68,7 +68,6 @@ void SelectionSet::set_validator(SelectionValidator* pValidator)
 void SelectionSet::add(GmoObj* pGmo)
 {
     m_gmos.push_back(pGmo);
-//    pGmo->set_selected(true);
 
     ImoObj* pImo = pGmo->get_creator_imo();
     if (pImo)
@@ -138,11 +137,6 @@ bool SelectionSet::contains(GmoObj* pGmo)
 //---------------------------------------------------------------------------------------
 void SelectionSet::clear()
 {
-//    list<GmoObj*>::iterator it;
-//    for (it = m_gmos.begin(); it != m_gmos.end(); ++it)
-//    {
-//        (*it)->set_selected(false);
-//    }
     m_gmos.clear();
     m_imos.clear();
     delete m_pCollection;

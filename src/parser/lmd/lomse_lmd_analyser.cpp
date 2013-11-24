@@ -1474,7 +1474,7 @@ public:
 
         //node must be added to model before adding content to it, because
         //dynamic objects will generate requests to create other obejcts
-        //on the fly, and this reuires taht all nodes are properly chained
+        //on the fly, and this requires that all nodes are properly chained
         //in the tree.
         add_to_model(pContent);
 
@@ -1489,6 +1489,7 @@ public:
                  || analyse_optional("score", pContent)
                  || analyse_optional("ldpmusic", pContent)
                  //|| analyse_optional("xmlmusic", pContent)
+                 || analyse_optional("content", pContent)
                  || analyse_optional("dynamic", pContent)
                  || analyse_optional("scorePlayer", pContent)
                ))

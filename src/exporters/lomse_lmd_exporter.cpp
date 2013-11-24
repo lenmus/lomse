@@ -192,6 +192,83 @@ protected:
 
 
 //---------------------------------------------------------------------------------------
+class ContentLmdGenerator : public LmdGenerator
+{
+protected:
+    ImoContent* m_pObj;
+
+public:
+    ContentLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoContent*>(pImo);
+    }
+
+    string generate_source()
+    {
+        start_element("content", m_pObj);
+        add_optional_style(m_pObj);
+        close_start_tag();
+
+        add_contained_objects();
+
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_contained_objects()
+    {
+        TreeNode<ImoObj>::children_iterator it = m_pObj->begin();
+        for (it = m_pObj->begin(); it != m_pObj->end(); ++it)
+        {
+            add_source_for(*it);
+        }
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
+class ControlLmdGenerator : public LmdGenerator
+{
+protected:
+    ImoControl* m_pObj;
+
+public:
+    ControlLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoControl*>(pImo);
+    }
+
+    string generate_source()
+    {
+        start_element("control", m_pObj);
+        add_optional_style(m_pObj);
+        close_start_tag();
+
+        m_source << "<TODO: details for the Control>";
+        //add_contained_objects();
+
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_contained_objects()
+    {
+        TreeNode<ImoObj>::children_iterator it = m_pObj->begin();
+        for (it = m_pObj->begin(); it != m_pObj->end(); ++it)
+        {
+            add_source_for(*it);
+        }
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
 class ContentObjLmdGenerator : public LmdGenerator
 {
 protected:
@@ -573,6 +650,44 @@ protected:
             m_source << "invalid value " << value;
 
         end_element(k_in_same_line);
+    }
+
+};
+
+
+//---------------------------------------------------------------------------------------
+class DynamicLmdGenerator : public LmdGenerator
+{
+protected:
+    ImoDynamic* m_pObj;
+
+public:
+    DynamicLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    {
+        m_pObj = static_cast<ImoDynamic*>(pImo);
+    }
+
+    string generate_source()
+    {
+        start_element("dynamic", m_pObj);
+        add_optional_style(m_pObj);
+        close_start_tag();
+
+        add_contained_objects();
+
+        end_element();
+        return m_source.str();
+    }
+
+protected:
+
+    void add_contained_objects()
+    {
+        TreeNode<ImoObj>::children_iterator it = m_pObj->begin();
+        for (it = m_pObj->begin(); it != m_pObj->end(); ++it)
+        {
+            add_source_for(*it);
+        }
     }
 
 };
@@ -1656,16 +1771,18 @@ void LmdGenerator::source_for_inline_level_object(ImoInlineLevelObj* pImo,
         else
             m_source << pText->get_text();
     }
-    else if (pImo->is_box_inline())
-    {
-        //ImoBoxInline* pIB = static_cast<ImoBoxInline*>(pImo);
-        m_source << " (box_inline)";
-    }
-
-    //atomic content objects
+//    else if (pImo->is_box_inline())
+//    {
+//        add_source_for(pImo);
+////        //ImoBoxInline* pIB = static_cast<ImoBoxInline*>(pImo);
+////        m_source << " (box_inline: " << pImo->get_name() << ")";
+//    }
+//
+//    //atomic content objects
     else
     {
-        m_source << " (atomic content)";
+        add_source_for(pImo);
+        //m_source << " (atomic content: " << pImo->get_name() << ")";
     }
 }
 
@@ -1769,7 +1886,10 @@ LmdGenerator* LmdExporter::new_generator(ImoObj* pImo)
     {
         case k_imo_barline:         return LOMSE_NEW BarlineLmdGenerator(pImo, this);
         case k_imo_clef:            return LOMSE_NEW ClefLmdGenerator(pImo, this);
+        case k_imo_content:         return LOMSE_NEW ContentLmdGenerator(pImo, this);
+        case k_imo_control:         return LOMSE_NEW ControlLmdGenerator(pImo, this);
         case k_imo_document:        return LOMSE_NEW LenmusdocLmdGenerator(pImo, this);
+        case k_imo_dynamic:         return LOMSE_NEW DynamicLmdGenerator(pImo, this);
         case k_imo_heading:         return LOMSE_NEW SectionLmdGenerator(pImo, this);
         case k_imo_instrument:      return LOMSE_NEW InstrumentLmdGenerator(pImo, this);
         case k_imo_key_signature:   return LOMSE_NEW KeySignatureLmdGenerator(pImo, this);

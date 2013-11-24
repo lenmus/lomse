@@ -128,6 +128,7 @@ public:
     void set_operating_mode(int mode);
     inline int get_operating_mode() { return m_operatingMode; }
     enum { k_mode_read_only=0, k_mode_edition, k_mode_playback, };     //operating modes
+    void enable_edition_restricted_to(ImoId id);
 
     //access to collaborators
     GraphicModel* get_graphic_model();
@@ -205,6 +206,7 @@ public:
 //    void hide_caret();
     string get_caret_timecode();
     DocCursorState click_event_to_cursor_state(SpEventMouse event);
+    void select_voice(int voice);
 
     //dragged image associated to mouse cursor
     void show_drag_image(bool value);

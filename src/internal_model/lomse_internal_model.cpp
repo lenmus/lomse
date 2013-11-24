@@ -419,6 +419,13 @@ const string& ImoObj::get_name(int type)
 }
 
 //---------------------------------------------------------------------------------------
+bool ImoObj::is_gap()
+{
+    return m_objtype == k_imo_rest ? (static_cast<ImoRest*>(this))->is_go_fwd()
+                                   : false;
+}
+
+//---------------------------------------------------------------------------------------
 const string& ImoObj::get_name() const
 {
 	return ImoObj::get_name( m_objtype );
@@ -2568,6 +2575,7 @@ ImoScore::ImoScore(Document* pDoc)
     , m_systemInfoOther()
     , m_pageInfo()
 {
+    set_terminal(true);
     m_pDoc = pDoc;
     append_child_imo( ImFactory::inject(k_imo_options, pDoc) );
     append_child_imo( ImFactory::inject(k_imo_instruments, pDoc) );
@@ -2767,6 +2775,30 @@ void ImoScore::set_long_option(const std::string& name, long value)
         pOpt->set_long_value(value);
         add_option(pOpt);
      }
+}
+
+//---------------------------------------------------------------------------------------
+void ImoScore::accept_visitor(BaseVisitor& v)
+{
+    Visitor<ImoScore>* vThis = NULL;
+    Visitor<ImoObj>* vObj = NULL;
+
+    vThis = dynamic_cast<Visitor<ImoScore>*>(&v);
+    if (vThis)
+        vThis->start_visit(this);
+    else
+    {
+        vObj = dynamic_cast<Visitor<ImoObj>*>(&v);
+        if (vObj)
+            vObj->start_visit(this);
+    }
+
+    visit_children(v);
+
+    if (vThis)
+        vThis->end_visit(this);
+    else if (vObj)
+        vObj->end_visit(this);
 }
 
 //---------------------------------------------------------------------------------------

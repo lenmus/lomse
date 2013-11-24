@@ -205,6 +205,7 @@ public:
                                                ImoObj* pImo, GmoObj* pGmo);
     bool is_caret_visible();
     bool is_caret_blink_enabled();
+    void change_cursor_voice(int voice);
 
     //dragged image associated to mouse cursor
     void move_drag_image(LUnits x, LUnits y);

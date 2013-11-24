@@ -140,5 +140,29 @@ string IdAssigner::dump() const
     return data.str();
 }
 
+//---------------------------------------------------------------------------------------
+void IdAssigner::copy_ids_to(IdAssigner* assigner)
+{
+	map<ImoId, ImoObj*>::const_iterator it;
+	for (it = m_idToImo.begin(); it != m_idToImo.end(); ++it)
+        assigner->add_id(it->first, it->second);
+
+	map<ImoId, Control*>::const_iterator itC;
+	for (itC = m_idToControl.begin(); itC != m_idToControl.end(); ++itC)
+        assigner->add_control_id(itC->first, itC->second);
+}
+
+//---------------------------------------------------------------------------------------
+void IdAssigner::add_id(ImoId id, ImoObj* pImo)
+{
+    m_idToImo[id] = pImo;
+}
+
+//---------------------------------------------------------------------------------------
+void IdAssigner::add_control_id(ImoId id, Control* pControl)
+{
+    m_idToControl[id] = pControl;
+}
+
 
 }  //namespace lomse

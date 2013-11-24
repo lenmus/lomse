@@ -373,8 +373,8 @@ void GraphicView::draw_time_grid()
 void GraphicView::layout_time_grid()
 {
     if (m_pCaret->is_visible()
-        && m_pCursor->is_delegating()
-        && m_pCursor->get_top_object()->is_score())
+        && m_pCursor->is_inside_terminal_node()
+        && m_pCursor->get_parent_object()->is_score())
     {
         m_pTimeGrid->set_system( m_pCaret->get_active_system() );
         m_pTimeGrid->set_visible(true);
@@ -1117,6 +1117,18 @@ void GraphicView::set_box_to_draw(int boxType)
 void GraphicView::highlight_voice(int voice)
 {
     m_options.highlighted_voice = voice;
+}
+
+//---------------------------------------------------------------------------------------
+void GraphicView::change_cursor_voice(int voice)
+{
+    highlight_voice(voice);
+    if (m_pCursor->is_inside_terminal_node()
+        && m_pCursor->get_parent_object()->is_score())
+    {
+        ScoreCursor* pSC = static_cast<ScoreCursor*>(m_pCursor->get_inner_cursor());
+        pSC->change_voice_to(voice);
+    }
 }
 
 //---------------------------------------------------------------------------------------

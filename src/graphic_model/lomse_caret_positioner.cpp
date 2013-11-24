@@ -58,14 +58,23 @@ CaretPositioner::CaretPositioner()
 
 //---------------------------------------------------------------------------------------
 void CaretPositioner::layout_caret(Caret* pCaret, DocCursor* pCursor,
-                                    GraphicModel* pGModel)
+                                   GraphicModel* pGModel)
 {
     m_pCursor = pCursor;
-    if (m_pCursor->is_delegating())
+    if (m_pCursor->is_inside_terminal_node())
     {
-        ImoObj* pTopLevel = m_pCursor->get_top_object();
-        InnerLevelCaretPositioner* p = new_positioner(pTopLevel, pGModel);
-        p->layout_caret(pCaret, m_pCursor);
+        ImoObj* pTopLevel = m_pCursor->get_parent_object();
+        GmoBox* pBox = pGModel->get_box_for_imo(pCursor->get_parent_id());
+        if (!pBox)
+        {
+            LOMSE_LOG_ERROR("No box for cursor pointed object");
+        }
+        else
+        {
+            pCaret->set_top_level_box( pBox->get_bounds() );
+            InnerLevelCaretPositioner* p = new_positioner(pTopLevel, pGModel);
+            p->layout_caret(pCaret, m_pCursor);
+        }
     }
     else
     {
@@ -124,7 +133,7 @@ void TopLevelCaretPositioner::layout_caret(Caret* pCaret, DocCursor* pCursor)
     m_pCursor = pCursor;
     m_state = m_pCursor->get_state();
 
-    ImoId id = m_state.get_top_level_id();
+    ImoId id = m_state.get_parent_level_id();
     GmoBox* pBox = m_pGModel->get_box_for_imo(id);
 
     URect pos;
@@ -158,7 +167,7 @@ GmoBox* TopLevelCaretPositioner::get_box_for_last_element()
 {
     DocCursor cursor(m_pCursor);
     cursor.to_last_top_level();
-    ImoId id = cursor.get_top_id();
+    ImoId id = cursor.get_parent_id();
     return m_pGModel->get_box_for_imo(id);
 }
 
@@ -204,7 +213,7 @@ void ScoreCaretPositioner::layout_caret(Caret* pCaret, DocCursor* pCursor)
                                         state.get_delegate_state() ));
 
     //get score
-    ImoId id = state.get_top_level_id();
+    ImoId id = state.get_parent_level_id();
     m_pScore = static_cast<ImoScore*>( m_pDoc->get_pointer_to_imo(id) );
 
     //create score meter
@@ -225,7 +234,7 @@ void ScoreCaretPositioner::layout_caret(Caret* pCaret, DocCursor* pCursor)
     else
     {
         LOMSE_LOG_ERROR("[ScoreCaretPositioner::layout_caret] Score cursor is incoherent!");
-        throw runtime_error("[ScoreCaretPositioner::layout_caret] Score cursor is incoherent!");
+        caret_at_start_of_score(pCaret);
     }
     pCaret->set_active_system(m_pBoxSystem);
 }
@@ -249,11 +258,17 @@ void ScoreCaretPositioner::caret_on_empty_timepos(Caret* pCaret)
     //cursor is between two staffobjs, on a free time position.
     //Place caret between both staffobjs. Interpolate position based on cursor time
 
-    ColStaffObjsEntry* pEntry = m_pScoreCursor->find_previous_imo();
-    ImoId prevId = pEntry->element_id();
-    int prevStaff = pEntry->staff();
-    ImoId refId = m_spState->ref_obj_id();
-    int refStaff = m_spState->ref_obj_staff();
+    //get info for current ref. object
+    ImoId refId = m_pScoreCursor->staffobj_id_internal();
+    int refStaff = m_pScoreCursor->ref_obj_staff();
+
+    //get info for prev object
+    SpElementCursorState spState = m_pScoreCursor->get_state();
+    m_pScoreCursor->move_prev();
+    ImoId prevId = m_pScoreCursor->id();
+    int prevStaff = m_pScoreCursor->staff();
+    TimeUnits prevTime = m_pScoreCursor->time();
+    m_pScoreCursor->restore_state(spState);
 
     URect boundsPrev = get_bounds_for_imo(prevId, prevStaff);
     URect bounds = get_bounds_for_imo(refId, refStaff);
@@ -261,7 +276,7 @@ void ScoreCaretPositioner::caret_on_empty_timepos(Caret* pCaret)
 #if 1
     //interpolate position
     //TODO: linear interpolation is wrong. This has to be changed to use time-grid
-    TimeUnits time1 = pEntry->time();
+    TimeUnits time1 = prevTime;
     TimeUnits time2 = m_spState->time();
     TimeUnits time3 = m_spState->ref_obj_time();
     LUnits xIncr = bounds.x - boundsPrev.x;     // Ax = x3-x1
@@ -296,7 +311,7 @@ void ScoreCaretPositioner::caret_at_start_of_score(Caret* pCaret)
 
     //get shape for first system
     DocCursorState state = m_pDocCursor->get_state();
-    ImoId scoreId = state.get_top_level_id();
+    ImoId scoreId = state.get_parent_level_id();
 
     //GmoShapeStaff* pShape = m_pGModel->get_shape_for_first_staff_in_first_system(scoreId);
     GmoBoxScorePage* pBSP =
@@ -334,11 +349,13 @@ void ScoreCaretPositioner::caret_at_end_of_staff(Caret* pCaret)
     //No current staffobj but a previous one must exist.
     //Place cursor two lines (20 tenths) at the right of last staffobj
 
-    ImoId id = m_pScoreCursor->prev_pos_id();
-    if (id <= k_no_imoid)
-        id = m_pScoreCursor->find_last_imo_id();
+    //get info for prev object
+    SpElementCursorState spState = m_pScoreCursor->get_state();
+    m_pScoreCursor->move_prev();
+    ImoId id = m_pScoreCursor->id();
+    int staff = m_pScoreCursor->staff();
+    m_pScoreCursor->restore_state(spState);
 
-    int staff = m_pScoreCursor->prev_pos_staff();
     URect bounds = get_bounds_for_imo(id, staff);
 
     bounds.x += tenths_to_logical(20);
@@ -369,7 +386,7 @@ URect ScoreCaretPositioner::get_bounds_for_imo(ImoId id, int iStaff)
     if (!pShape)
     {
         LOMSE_LOG_ERROR("[ScoreCaretPositioner::get_bounds_for_imo] No shape for requested object!");
-        throw runtime_error("[ScoreCaretPositioner::get_bounds_for_imo] No shape for requested object!");
+        return URect(0,0,0,0);
     }
 
     GmoBoxSliceInstr* pBSI = static_cast<GmoBoxSliceInstr*>( pShape->get_owner_box() );
@@ -404,7 +421,7 @@ void ScoreCaretPositioner::set_caret_y_pos_and_height(URect* pBounds, ImoId id,
 {
     URect staffBounds;
 
-    if (id != k_no_imoid)
+    if (id >= 0)
     {
         GmoShape* pShape = get_shape_for_imo(id, iStaff);
         GmoBox* pBox = pShape->get_owner_box();

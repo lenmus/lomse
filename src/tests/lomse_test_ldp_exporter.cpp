@@ -166,6 +166,18 @@ public:
     void end_visit(ImoHeading* pImo) { end_visiting(pImo); }
 };
 
+//---------------------------------------------------------------------------------------
+class MyScoreVisitor : public Visitor<ImoScore>, public MyVisitor
+{
+public:
+    MyScoreVisitor(LibraryScope& libraryScope)
+        : Visitor<ImoScore>(), MyVisitor(libraryScope) {}
+	~MyScoreVisitor() {}
+
+    void start_visit(ImoScore* pImo) { start_visiting(pImo); }
+    void end_visit(ImoScore* pImo) { end_visiting(pImo); }
+};
+
 
 //---------------------------------------------------------------------------------------
 class ImVisitorTestFixture

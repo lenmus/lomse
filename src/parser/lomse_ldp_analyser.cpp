@@ -2221,6 +2221,8 @@ protected:
         pImo->set_visible(false);
 
         // <duration> (label)
+        //AWARE: As goFwd is a rest, only note/rest duration is allowed (i.e. "e.")
+        //       Duration for goFwd is no longer alloed as number (i.e. 32)
         if (get_mandatory(k_label))
             set_duration(pImo);
 

@@ -105,7 +105,6 @@ public:
     //flag values
     enum {
         //temporary flags
-        k_selected          = 0x0001,   //selected
         k_dirty             = 0x0002,   //dirty: modified since last "clear_dirty()": need to render it again
         k_children_dirty    = 0x0004,   //this is not dirty but some children are dirty
         k_hover             = 0x0008,   //mouse over
@@ -113,10 +112,6 @@ public:
         k_has_edit_focus    = 0x0020,   //this box has the focus for edition
     };
 
-    //selection
-    inline bool is_selected() { return (m_flags & k_selected) != 0; }
-    virtual void set_selected(bool value) { value ? m_flags |= k_selected
-                                                  : m_flags &= ~k_selected; }
 
     //info
     GmoRef get_ref();
@@ -365,7 +360,6 @@ public:
     void add_child_box(GmoBox* child);
     GmoBox* get_child_box(int i);  //i = 0..n-1
     inline vector<GmoBox*>& get_child_boxes() { return m_childBoxes; }
-    void add_boxes_to_controls_map(GraphicModel* pGM);
 
     //parent
     GmoBox* get_parent_box() { return m_pParentBox; }
@@ -434,6 +428,10 @@ protected:
     void draw_box_bounds(Drawer* pDrawer, double xorg, double yorg, Color& color);
     void draw_shapes(Drawer* pDrawer, RenderOptions& opt);
     void add_shapes_to_tables_in(GmoBoxDocPage* pPage);
+
+    friend class GraphicModel;
+    void add_boxes_to_map_imo_to_box(GraphicModel* pGM);
+    void add_boxes_to_controls_map(GraphicModel* pGM);
 
 };
 

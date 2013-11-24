@@ -83,8 +83,8 @@ Color GmoShape::determine_color_to_use(RenderOptions& opt)
         return opt.dragged_color;
     else if (opt.draw_shapes_selected)
         return opt.selected_color;
-    else if (is_selected())
-        return opt.selected_color;
+//    else if (is_selected())
+//        return opt.selected_color;
     else if (is_hover())
         return Color(255,0,0);
     else
@@ -256,16 +256,6 @@ void GmoCompositeShape::on_draw(Drawer* pDrawer, RenderOptions& opt)
     std::list<GmoShape*>::iterator it;
     for (it = m_components.begin(); it != m_components.end(); ++it)
         (*it)->on_draw(pDrawer, opt);
-}
-
-//---------------------------------------------------------------------------------------
-void GmoCompositeShape::set_selected(bool value)
-{
-    GmoShape::set_selected(value);
-
-    std::list<GmoShape*>::iterator it;
-    for (it = m_components.begin(); it != m_components.end(); ++it)
-        (*it)->set_selected(value);
 }
 
 //---------------------------------------------------------------------------------------

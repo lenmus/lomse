@@ -64,11 +64,14 @@ public:
     ImoObj* get_pointer_to_imo(ImoId id) const;
     Control* get_pointer_to_control(ImoId id) const;
     void remove(ImoObj* pImo);
+    void copy_ids_to(IdAssigner* assigner);
 
     //debug
     string dump() const;
 
 protected:
+    void add_id(ImoId id, ImoObj* pImo);
+    void add_control_id(ImoId id, Control* pControl);
 
 };
 

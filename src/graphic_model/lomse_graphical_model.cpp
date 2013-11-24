@@ -256,10 +256,12 @@ void GraphicModel::build_main_boxes_table()
             {
                 (*itC)->add_boxes_to_controls_map(this);
 
-                vector<GmoBox*>& childBoxes = (*itC)->get_child_boxes();
-                vector<GmoBox*>::iterator it;
-                for (it=childBoxes.begin(); it != childBoxes.end(); ++it)
-                    add_to_map_imo_to_box(*it);
+                (*itC)->add_boxes_to_map_imo_to_box(this);
+
+//                vector<GmoBox*>& childBoxes = (*itC)->get_child_boxes();
+//                vector<GmoBox*>::iterator it;
+//                for (it=childBoxes.begin(); it != childBoxes.end(); ++it)
+//                    add_to_map_imo_to_box(*it);
             }
         }
     }
@@ -438,7 +440,7 @@ AreaInfo* GraphicModel::get_info_for_point(int iPage, LUnits x, LUnits y)
 //        }
 //        ////DBG --------------------------------------
 //        //wxString sSO = (m_areaInfo.pGmo ? m_areaInfo.pGmo->GetName() : _T("No object"));
-//        //wxLogMessage(_T("[CommandEventHandler::GetPointedAreaInfo] LastBSI=0x%x, CurBSI=0x%x, LastStaff=0x%x, CurStaff=0x%x, Area=%d, Object=%s"),
+//        //wxLogMessage(_T("[GraphicModel::get_info_for_point] LastBSI=0x%x, CurBSI=0x%x, LastStaff=0x%x, CurStaff=0x%x, Area=%d, Object=%s"),
 //        //             m_pLastBSI, m_areaInfo.pBSI, m_pLastShapeStaff, m_areaInfo.pShapeStaff,
 //        //             m_areaInfo.areaType, sSO.c_str() );
 //        ////END DBG ----------------------------------
