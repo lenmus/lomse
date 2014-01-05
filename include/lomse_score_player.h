@@ -142,6 +142,10 @@ public:
     void play_from_measure(int nMeasure, bool fVisualTracking = k_no_visual_tracking,
                            long nMM = 0,
 						   Interactor* pInteractor = NULL);
+    void play_measures(int startMeasure, int numMeasures,
+                       bool fVisualTracking = k_no_visual_tracking,
+                       long nMM = 0,
+                       Interactor* pInteractor = NULL);
     void stop();
     void pause();
     void quit();

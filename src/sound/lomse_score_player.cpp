@@ -113,26 +113,14 @@ void ScorePlayer::play(bool fVisualTracking, long nMM, Interactor* pInteractor)
 void ScorePlayer::play_measure(int nMeasure, bool fVisualTracking,
                                long nMM, Interactor* pInteractor)
 {
-    // Play back measure n (n = 1 ... num_measures)
-
-    m_fVisualTracking = fVisualTracking;
-    m_nMM = nMM;
-    m_pInteractor = pInteractor;
-
-    //remember:
-    //   real measures 1..n correspond to table items 1..n
-    //   items 0 and n+1 are fictitius measures for pre and post control events
-    int evStart = m_pTable->get_first_event_for_measure(nMeasure);
-    int evEnd = m_pTable->get_first_event_for_measure(nMeasure + 1) - 1;
-
-    play_segment(evStart, evEnd);
+    play_measures(nMeasure, 1, fVisualTracking, nMM, pInteractor);
 }
 
 //---------------------------------------------------------------------------------------
 void ScorePlayer::play_from_measure(int nMeasure, bool fVisualTracking,
                                     long nMM, Interactor* pInteractor)
 {
-    // Play back from measure n (n = 1 ... num_measures) to end
+    // Playback from measure n (n = 1 ... num_measures) to end
 
     m_fVisualTracking = fVisualTracking;
     m_nMM = nMM;
@@ -155,6 +143,40 @@ void ScorePlayer::play_from_measure(int nMeasure, bool fVisualTracking,
     int nEvEnd = m_pTable->get_last_event();
 
     play_segment(nEvStart, nEvEnd);
+}
+
+//---------------------------------------------------------------------------------------
+void ScorePlayer::play_measures(int startMeasure, int numMeasures, bool fVisualTracking,
+                                long nMM, Interactor* pInteractor)
+{
+    // Playback numMeasures starting in measure startMeasure (1 ... num_measures)
+
+    m_fVisualTracking = fVisualTracking;
+    m_nMM = nMM;
+    m_pInteractor = pInteractor;
+
+    //remember:
+    //   real measures 1..n correspond to table items 1..n
+    //   items 0 and n+1 are fictitius measures for pre and post control events
+    int evStart = m_pTable->get_first_event_for_measure(startMeasure);
+    int maxMeasure = m_pTable->get_num_measures();
+    while (evStart == -1 && startMeasure < maxMeasure)
+    {
+        //Current measure is empty. Start in next one
+        evStart = m_pTable->get_first_event_for_measure(++startMeasure);
+    }
+
+    if (evStart == -1)
+        return;     //all measures are empty after selected one!
+
+    int lastMeasure = min(startMeasure + numMeasures, maxMeasure+1);
+    int evEnd;
+    if (lastMeasure > maxMeasure)
+        evEnd = m_pTable->get_last_event();
+    else
+        evEnd = m_pTable->get_first_event_for_measure(lastMeasure) - 1;
+
+    play_segment(evStart, evEnd);
 }
 
 //---------------------------------------------------------------------------------------

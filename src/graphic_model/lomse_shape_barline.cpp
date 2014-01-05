@@ -208,8 +208,8 @@ void GmoShapeBarline::draw_thick_line(Drawer* pDrawer, LUnits xLeft, LUnits uyTo
 //---------------------------------------------------------------------------------------
 void GmoShapeBarline::draw_two_dots(Drawer* pDrawer, LUnits uxPos, LUnits uyPos)
 {
-    LUnits uShift1 = m_uSpacing * 3.0f;
-    LUnits uShift2 = m_uSpacing * 5.0f;
+    LUnits uShift1 = m_uSpacing * 3.7f;
+    LUnits uShift2 = m_uSpacing * 6.1f;
     pDrawer->begin_path();
     pDrawer->circle(uxPos, uyPos + uShift1, m_uRadius);
     pDrawer->circle(uxPos, uyPos + uShift2, m_uRadius);
