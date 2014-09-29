@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -48,9 +48,12 @@ namespace lomse
 class LdpParser;
 class LdpAnalyser;
 class LdpCompiler;
-class LmdParser;
+class XmlParser;
 class LmdAnalyser;
 class LmdCompiler;
+class XmlParser;
+class MxlAnalyser;
+class MxlCompiler;
 class ModelBuilder;
 class Document;
 class LdpFactory;
@@ -174,14 +177,22 @@ public:
     Injector() {}
     ~Injector() {}
 
+    //LDP format
     static LdpParser* inject_LdpParser(LibraryScope& libraryScope, DocumentScope& documentScope);
     static LdpAnalyser* inject_LdpAnalyser(LibraryScope& libraryScope, Document* pDoc);
     static LdpCompiler* inject_LdpCompiler(LibraryScope& libraryScope, Document* pDoc);
 
-    static LmdParser* inject_LmdParser(LibraryScope& libraryScope, DocumentScope& documentScope);
+    //LMD format
+    static XmlParser* inject_XmlParser(LibraryScope& libraryScope, DocumentScope& documentScope);
     static LmdAnalyser* inject_LmdAnalyser(LibraryScope& libraryScope, Document* pDoc,
-                                           LmdParser* pParser);
+                                           XmlParser* pParser);
     static LmdCompiler* inject_LmdCompiler(LibraryScope& libraryScope, Document* pDoc);
+
+    //MusicXML format
+    static MxlAnalyser* inject_MxlAnalyser(LibraryScope& libraryScope, Document* pDoc,
+                                           XmlParser* pParser);
+    static MxlCompiler* inject_MxlCompiler(LibraryScope& libraryScope, Document* pDoc);
+
 
     static ModelBuilder* inject_ModelBuilder(DocumentScope& documentScope);
     static Document* inject_Document(LibraryScope& libraryScope,

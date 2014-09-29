@@ -62,6 +62,8 @@ public:
             return Document::k_format_ldp;
         else if (ext == ".lmd")
             return Document::k_format_lmd;
+        else if (ext == ".xml")
+            return Document::k_format_mxl;
         else
             return Document::k_format_unknown;
     }

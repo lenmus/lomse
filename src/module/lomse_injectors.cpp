@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -33,9 +33,11 @@
 #include "lomse_ldp_parser.h"
 #include "lomse_ldp_analyser.h"
 #include "lomse_ldp_compiler.h"
-#include "lomse_lmd_parser.h"
+#include "lomse_xml_parser.h"
 #include "lomse_lmd_analyser.h"
 #include "lomse_lmd_compiler.h"
+#include "lomse_mxl_analyser.h"
+#include "lomse_mxl_compiler.h"
 #include "lomse_model_builder.h"
 #include "lomse_document.h"
 #include "lomse_font_storage.h"
@@ -231,21 +233,21 @@ LdpCompiler* Injector::inject_LdpCompiler(LibraryScope& libraryScope,
                                           Document* pDoc)
 {
     return LOMSE_NEW LdpCompiler(inject_LdpParser(libraryScope, pDoc->get_scope()),
-                           inject_LdpAnalyser(libraryScope, pDoc),
-                           inject_ModelBuilder(pDoc->get_scope()),
-                           pDoc );
+                                 inject_LdpAnalyser(libraryScope, pDoc),
+                                 inject_ModelBuilder(pDoc->get_scope()),
+                                 pDoc );
 }
 
 //---------------------------------------------------------------------------------------
-LmdParser* Injector::inject_LmdParser(LibraryScope& libraryScope,
+XmlParser* Injector::inject_XmlParser(LibraryScope& libraryScope,
                                       DocumentScope& documentScope)
 {
-    return LOMSE_NEW LmdParser(documentScope.default_reporter());
+    return LOMSE_NEW XmlParser(documentScope.default_reporter());
 }
 
 //---------------------------------------------------------------------------------------
 LmdAnalyser* Injector::inject_LmdAnalyser(LibraryScope& libraryScope, Document* pDoc,
-                                          LmdParser* pParser)
+                                          XmlParser* pParser)
 {
     return LOMSE_NEW LmdAnalyser(pDoc->get_scope().default_reporter(),
                                  libraryScope, pDoc, pParser);
@@ -255,9 +257,28 @@ LmdAnalyser* Injector::inject_LmdAnalyser(LibraryScope& libraryScope, Document* 
 LmdCompiler* Injector::inject_LmdCompiler(LibraryScope& libraryScope,
                                           Document* pDoc)
 {
-    LmdParser* pParser = Injector::inject_LmdParser(libraryScope, pDoc->get_scope());
+    XmlParser* pParser = Injector::inject_XmlParser(libraryScope, pDoc->get_scope());
     return LOMSE_NEW LmdCompiler(pParser,
                                  inject_LmdAnalyser(libraryScope, pDoc, pParser),
+                                 inject_ModelBuilder(pDoc->get_scope()),
+                                 pDoc );
+}
+
+//---------------------------------------------------------------------------------------
+MxlAnalyser* Injector::inject_MxlAnalyser(LibraryScope& libraryScope, Document* pDoc,
+                                          XmlParser* pParser)
+{
+    return LOMSE_NEW MxlAnalyser(pDoc->get_scope().default_reporter(),
+                                 libraryScope, pDoc, pParser);
+}
+
+//---------------------------------------------------------------------------------------
+MxlCompiler* Injector::inject_MxlCompiler(LibraryScope& libraryScope,
+                                          Document* pDoc)
+{
+    XmlParser* pParser = Injector::inject_XmlParser(libraryScope, pDoc->get_scope());
+    return LOMSE_NEW MxlCompiler(pParser,
+                                 inject_MxlAnalyser(libraryScope, pDoc, pParser),
                                  inject_ModelBuilder(pDoc->get_scope()),
                                  pDoc );
 }

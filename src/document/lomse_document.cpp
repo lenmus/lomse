@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -34,8 +34,9 @@
 #include "lomse_ldp_analyser.h"
 #include "lomse_ldp_compiler.h"
 #include "lomse_lmd_analyser.h"
-#include "lomse_lmd_parser.h"
+#include "lomse_xml_parser.h"
 #include "lomse_lmd_compiler.h"
+#include "lomse_mxl_compiler.h"
 #include "lomse_injectors.h"
 #include "lomse_id_assigner.h"
 #include "lomse_internal_model.h"
@@ -105,10 +106,19 @@ void Document::set_imo_doc(ImoDocument* pImoDoc)
 int Document::from_file(const string& filename, int format)
 {
     initialize();
+    int numErrors = 0;
     Compiler* pCompiler = get_compiler_for_format(format);
-    m_pIModel = pCompiler->compile_file(filename);
-    int numErrors = pCompiler->get_num_errors();
-    delete pCompiler;
+    if (pCompiler)
+    {
+        m_pIModel = pCompiler->compile_file(filename);
+        numErrors = pCompiler->get_num_errors();
+        delete pCompiler;
+    }
+    else
+    {
+        m_reporter << "File format not supported." << endl;
+        numErrors = 1;
+    }
 
     if (m_pIModel)
         m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
@@ -122,11 +132,25 @@ int Document::from_file(const string& filename, int format)
 int Document::from_string(const string& source, int format)
 {
     initialize();
+    int numErrors = 0;
     Compiler* pCompiler = get_compiler_for_format(format);
-    m_pIModel = pCompiler->compile_string(source);
-    m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
-    int numErrors = pCompiler->get_num_errors();
-    delete pCompiler;
+    if (pCompiler)
+    {
+        m_pIModel = pCompiler->compile_string(source);
+        numErrors = pCompiler->get_num_errors();
+        delete pCompiler;
+    }
+    else
+    {
+        m_reporter << "File format not supported." << endl;
+        numErrors = 1;
+    }
+
+    if (m_pIModel)
+        m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
+    else
+        create_empty();
+
     return numErrors;
 }
 
@@ -273,12 +297,11 @@ Compiler* Document::get_compiler_for_format(int format)
         case k_format_lmd:
             return Injector::inject_LmdCompiler(m_libraryScope, this);
 
+        case k_format_mxl:
+            return Injector::inject_MxlCompiler(m_libraryScope, this);
+
         default:
-        {
-            LOMSE_LOG_ERROR("Aborting. Invalid identifier for file format.");
-            throw std::runtime_error(
-                "[Document::from_file] Invalid identifier for file format.");
-        }
+            return NULL;
     }
     return NULL;
 }
@@ -413,7 +436,7 @@ void Document::delete_auxobj(ImoAuxObj* pAO)
 //---------------------------------------------------------------------------------------
 ImoObj* Document::create_object_from_lmd(const string& source)
 {
-    LmdParser parser(m_reporter);
+    XmlParser parser(m_reporter);
     parser.parse_text(source);
     LmdAnalyser a(m_reporter, m_libraryScope, this, &parser);
     XmlNode* tree = parser.get_tree_root();

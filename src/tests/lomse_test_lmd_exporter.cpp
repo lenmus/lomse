@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -37,7 +37,7 @@
 #include "lomse_ldp_compiler.h"
 #include "lomse_document.h"
 #include "lomse_im_factory.h"
-#include "lomse_lmd_parser.h"
+#include "lomse_xml_parser.h"
 #include "lomse_lmd_analyser.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
@@ -109,7 +109,7 @@ SUITE(LmdExporterTest)
     TEST_FIXTURE(LmdExporterTestFixture, section)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         parser.parse_text("<section level='1'>This is a header</section>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
@@ -130,7 +130,7 @@ SUITE(LmdExporterTest)
     TEST_FIXTURE(LmdExporterTestFixture, section_with_style)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         parser.parse_text(
             "<lenmusdoc vers='0.0'>"
                 "<styles>"
@@ -158,7 +158,7 @@ SUITE(LmdExporterTest)
     TEST_FIXTURE(LmdExporterTestFixture, section_many_items_simplify)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         parser.parse_text("<section level='1'>This is a header"
             "<txt> with two items.</txt></section>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
@@ -180,7 +180,7 @@ SUITE(LmdExporterTest)
     TEST_FIXTURE(LmdExporterTestFixture, section_many_items_with_styles)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         parser.parse_text(
             "<lenmusdoc vers='0.0'>"
                 "<styles>"
@@ -215,7 +215,7 @@ SUITE(LmdExporterTest)
     TEST_FIXTURE(LmdExporterTestFixture, style)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         string src =
             "<defineStyle>"
                 "<name>Header1</name>"
@@ -247,7 +247,7 @@ SUITE(LmdExporterTest)
     TEST_FIXTURE(LmdExporterTestFixture, styles_empty)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         string src =
             "<styles>"
             "</styles>";
@@ -271,7 +271,7 @@ SUITE(LmdExporterTest)
     TEST_FIXTURE(LmdExporterTestFixture, styles)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         string src =
             "<styles>"
                 "<defineStyle>"
@@ -455,7 +455,7 @@ SUITE(LmdExporterTest)
     TEST_FIXTURE(LmdExporterTestFixture, lenmusdoc_with_styles)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         parser.parse_text(
             "<lenmusdoc vers='0.0'>"
                 "<styles>"

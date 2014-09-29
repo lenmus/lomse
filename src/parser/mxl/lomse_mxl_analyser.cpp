@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2014-2014 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -27,7 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_lmd_analyser.h"
+#include "lomse_mxl_analyser.h"
 #include "lomse_xml_parser.h"
 
 #include <iostream>
@@ -61,48 +61,48 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
-// assign a tag to each valid XML element
-enum ELmdTag
+// assign a tag to each valid MusicXML element
+enum EMxlTag
 {
-    k_tag_undefined = -1,
+    k_mxl_tag_undefined = -1,
 
-    k_tag_clef,
-    k_tag_content,
-    k_tag_color,
-    k_tag_defineStyle,
-    k_tag_dynamic,
-    k_tag_image,
-    k_tag_itemizedlist,
-    k_tag_ldpmusic,
-    k_tag_lenmusdoc,
-    k_tag_link,
-    k_tag_listitem,
-    k_tag_orderedlist,
-    k_tag_para,
-    k_tag_param,
-    k_tag_scorePlayer,
-    k_tag_section,
-    k_tag_styles,
-    k_tag_table,
-    k_tag_tableCell,
-    k_tag_tableColumn,
-    k_tag_tableBody,
-    k_tag_tableHead,
-    k_tag_tableRow,
-    k_tag_txt,
+    k_mxl_tag_clef,
+    k_mxl_tag_content,
+    k_mxl_tag_color,
+    k_mxl_tag_defineStyle,
+    k_mxl_tag_dynamic,
+    k_mxl_tag_image,
+    k_mxl_tag_itemizedlist,
+    k_mxl_tag_ldpmusic,
+    k_mxl_tag_lenmusdoc,
+    k_mxl_tag_link,
+    k_mxl_tag_listitem,
+    k_mxl_tag_orderedlist,
+    k_mxl_tag_para,
+    k_mxl_tag_param,
+    k_mxl_tag_scorePlayer,
+    k_mxl_tag_section,
+    k_mxl_tag_styles,
+    k_mxl_tag_table,
+    k_mxl_tag_tableCell,
+    k_mxl_tag_tableColumn,
+    k_mxl_tag_tableBody,
+    k_mxl_tag_tableHead,
+    k_mxl_tag_tableRow,
+    k_mxl_tag_txt,
 };
 
 //=======================================================================================
-// LmdAutoBeamer implementation
+// MxlAutoBeamer implementation
 //=======================================================================================
-void LmdAutoBeamer::do_autobeam()
+void MxlAutoBeamer::do_autobeam()
 {
     extract_notes();
     process_notes();
 }
 
 //---------------------------------------------------------------------------------------
-void LmdAutoBeamer::extract_notes()
+void MxlAutoBeamer::extract_notes()
 {
     m_notes.clear();
     std::list< pair<ImoStaffObj*, ImoRelDataObj*> >& noteRests
@@ -118,7 +118,7 @@ void LmdAutoBeamer::extract_notes()
 }
 
 //---------------------------------------------------------------------------------------
-void LmdAutoBeamer::get_triad(int iNote)
+void MxlAutoBeamer::get_triad(int iNote)
 {
     if (iNote == 0)
     {
@@ -144,7 +144,7 @@ void LmdAutoBeamer::get_triad(int iNote)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdAutoBeamer::determine_maximum_beam_level_for_current_triad()
+void MxlAutoBeamer::determine_maximum_beam_level_for_current_triad()
 {
     m_nLevelPrev = (m_curNotePos == k_first_note ? -1 : m_nLevelCur);
     m_nLevelCur = get_beaming_level(m_pCurNote);
@@ -152,7 +152,7 @@ void LmdAutoBeamer::determine_maximum_beam_level_for_current_triad()
 }
 
 //---------------------------------------------------------------------------------------
-void LmdAutoBeamer::process_notes()
+void MxlAutoBeamer::process_notes()
 {
     for (int iNote=0; iNote < (int)m_notes.size(); iNote++)
     {
@@ -163,7 +163,7 @@ void LmdAutoBeamer::process_notes()
 }
 
 //---------------------------------------------------------------------------------------
-void LmdAutoBeamer::compute_beam_types_for_current_note()
+void MxlAutoBeamer::compute_beam_types_for_current_note()
 {
     for (int level=0; level < 6; level++)
     {
@@ -172,7 +172,7 @@ void LmdAutoBeamer::compute_beam_types_for_current_note()
 }
 
 //---------------------------------------------------------------------------------------
-void LmdAutoBeamer::compute_beam_type_for_current_note_at_level(int level)
+void MxlAutoBeamer::compute_beam_type_for_current_note_at_level(int level)
 {
     if (level > m_nLevelCur)
         m_pCurNote->set_beam_type(level, ImoBeam::k_none);
@@ -276,7 +276,7 @@ void LmdAutoBeamer::compute_beam_type_for_current_note_at_level(int level)
 }
 
 //---------------------------------------------------------------------------------------
-int LmdAutoBeamer::get_beaming_level(ImoNote* pNote)
+int MxlAutoBeamer::get_beaming_level(ImoNote* pNote)
 {
     switch(pNote->get_note_type())
     {
@@ -303,7 +303,7 @@ int LmdAutoBeamer::get_beaming_level(ImoNote* pNote)
 // The syntax analyser is based on the Interpreter pattern ()
 //
 // The basic idea is to have a class for each language symbol, terminal or nonterminal
-// (classes derived from LmdElementAnalyser). The parse tree created by the Parser is an
+// (classes derived from MxlElementAnalyser). The parse tree created by the Parser is an
 // instance of the composite pattern and is traversed by the analysers to evaluate
 // (interpret) the sentence.
 //
@@ -318,24 +318,24 @@ int LmdAutoBeamer::get_beaming_level(ImoNote* pNote)
 //---------------------------------------------------------------------------------------
 // Abstract class: any element analyser must derive from it
 
-class LmdElementAnalyser
+class MxlElementAnalyser
 {
 protected:
     ostream& m_reporter;
-    LmdAnalyser* m_pAnalyser;
+    MxlAnalyser* m_pAnalyser;
     LibraryScope& m_libraryScope;
     LdpFactory* m_pLdpFactory;
     ImoObj* m_pAnchor;
 
 public:
-    LmdElementAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    MxlElementAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor=NULL)
         : m_reporter(reporter)
         , m_pAnalyser(pAnalyser)
         , m_libraryScope(libraryScope)
         , m_pLdpFactory(libraryScope.ldp_factory())
         , m_pAnchor(pAnchor) {}
-    virtual ~LmdElementAnalyser() {}
+    virtual ~MxlElementAnalyser() {}
     ImoObj* analyse_node(XmlNode* pNode);
 
 protected:
@@ -983,15 +983,15 @@ protected:
 //---------------------------------------------------------------------------------------
 // default analyser to use when there is no defined analyser for an LDP element
 
-class NullLmdAnalyser : public LmdElementAnalyser
+class NullMxlAnalyser : public MxlElementAnalyser
 {
 protected:
     const string m_tag;
 
 public:
-    NullLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    NullMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     const string& tag)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope)
         , m_tag(tag)
         {
         }
@@ -1010,12 +1010,12 @@ public:
 //@     i.e.: (anchorLine (dx value)(dy value)(lineStyle value)(color value)(width value))
 //@
 
-class AnchorLineLmdAnalyser : public LmdElementAnalyser
+class AnchorLineMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    AnchorLineLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    AnchorLineMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                        ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -1063,12 +1063,12 @@ public:
 //@ <type> = label: { start | end | double | simple | startRepetition |
 //@                   endRepetition | doubleRepetition }
 
-class BarlineLmdAnalyser : public LmdElementAnalyser
+class BarlineMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    BarlineLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    BarlineMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -1138,12 +1138,12 @@ protected:
 //@     (beam 17 --b)              **    **    **     **
 
 
-class BeamLmdAnalyser : public LmdElementAnalyser
+class BeamMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    BeamLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    BeamMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -1207,12 +1207,12 @@ protected:
 //@                       (ctrol1-x num) | (ctrol1-y num) | (ctrol2-x num) | (ctrol2-y num) }
 //@ <num> = real number, in tenths
 
-class BezierLmdAnalyser : public LmdElementAnalyser
+class BezierMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    BezierLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    BezierMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                    ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -1270,12 +1270,12 @@ public:
 //@ <border> = (border <width><lineStyle><color>)
 //@     i.e.: (border (width 2.5)(lineStyle solid)(color #ff0000))
 
-class BorderLmdAnalyser : public LmdElementAnalyser
+class BorderMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    BorderLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    BorderMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                    ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -1315,12 +1315,12 @@ protected:
 //@--------------------------------------------------------------------------------------
 //@ <chord> = (chord <note>+ )
 
-class ChordLmdAnalyser : public LmdElementAnalyser
+class ChordMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    ChordLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    ChordMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -1367,12 +1367,12 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-class ClefLmdAnalyser : public LmdElementAnalyser
+class ClefMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    ClefLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    ClefMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                  ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -1404,7 +1404,7 @@ public:
     int get_clef_type()
     {
         const std::string& value = get_value(m_pChildToAnalyse);
-        int clef = LmdAnalyser::ldp_name_to_clef_type(value);
+        int clef = MxlAnalyser::ldp_name_to_clef_type(value);
         if (clef == k_clef_undefined)
         {
             report_msg(get_line_number(m_pChildToAnalyse),
@@ -1437,11 +1437,11 @@ public:
 //@ <color> = (color <rgba>}
 //@ <rgba> = label: { #rrggbb | #rrggbbaa }
 
-class ColorLmdAnalyser : public LmdElementAnalyser
+class ColorMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    ColorLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope) {}
+    ColorMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope) {}
 
     ImoObj* do_analysis()
     {
@@ -1459,12 +1459,12 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class ContentLmdAnalyser : public LmdElementAnalyser
+class ContentMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    ContentLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    ContentMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -1507,12 +1507,12 @@ public:
 //@--------------------------------------------------------------------------------------
 //@ <newSystem> = (newSystem}
 
-class ControlLmdAnalyser : public LmdElementAnalyser
+class ControlMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    ControlLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    ControlMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -1532,12 +1532,12 @@ public:
 //@ <objID> = integer number
 //@
 
-class CursorLmdAnalyser : public LmdElementAnalyser
+class CursorMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    CursorLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    CursorMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                    ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -1567,12 +1567,12 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class DefineStyleLmdAnalyser : public LmdElementAnalyser
+class DefineStyleMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    DefineStyleLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    DefineStyleMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                         ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -1848,12 +1848,12 @@ protected:
 //  )
 //
 
-class DynamicLmdAnalyser : public LmdElementAnalyser
+class DynamicMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    DynamicLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    DynamicMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                      ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -1890,12 +1890,12 @@ public:
 //@ <fermata> = (fermata <placement>[<componentOptions>*])
 //@ <placement> = { above | below }
 
-class FermataLmdAnalyser : public LmdElementAnalyser
+class FermataMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    FermataLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    FermataMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -1965,12 +1965,12 @@ public:
 //@        (3)
 //@
 
-class FiguredBassLmdAnalyser : public LmdElementAnalyser
+class FiguredBassMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    FiguredBassLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    FiguredBassMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                         ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2088,12 +2088,12 @@ public:
 //@     size is a number followed by 'pt'. i.e.: 12pt
 
 
-class FontLmdAnalyser : public LmdElementAnalyser
+class FontMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    FontLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    FontMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                  ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2163,12 +2163,12 @@ public:
 //@   b) a number: the amount of 256th notes to go forward or backwards
 //@   c) a note/rest duration, i.e. 'e..'
 
-class GoBackFwdLmdAnalyser : public LmdElementAnalyser
+class GoBackFwdMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    GoBackFwdLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    GoBackFwdMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                       ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2266,12 +2266,12 @@ public:
 //@
 #if LOMSE_COMPATIBILITY_LDP_1_5
 
-class GraphicLmdAnalyser : public LmdElementAnalyser
+class GraphicMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    GraphicLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    GraphicMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2326,12 +2326,12 @@ public:
 //@ <grpSymbol> = (symbol {none | brace | bracket} )
 //@ <joinBarlines> = (joinBarlines {yes | no} )
 
-class GroupLmdAnalyser : public LmdElementAnalyser
+class GroupMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    GroupLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    GroupMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2413,12 +2413,12 @@ protected:
 //      <file>xxx</file>  <!-- name & ext. no path -->
 // </image>
 
-class ImageLmdAnalyser : public LmdElementAnalyser
+class ImageMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    ImageLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    ImageMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2453,12 +2453,12 @@ protected:
 //@ num_instr = integer: 0..255
 //@ num_channel = integer: 0..15
 
-class InfoMidiLmdAnalyser : public LmdElementAnalyser
+class InfoMidiMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    InfoMidiLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    InfoMidiMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                        ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2517,12 +2517,12 @@ protected:
 //@ <instrName> = <textString>
 //@ <instrAbbrev> = <textString>
 
-class InstrumentLmdAnalyser : public LmdElementAnalyser
+class InstrumentMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    InstrumentLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    InstrumentMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                        ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2592,12 +2592,12 @@ protected:
 //@                   E- | B- | F | a | e | b | f+ | c+ | g+ | d+ | a+ | a- |
 //@                   e- | b- | f | c | g | d }
 
-class KeySignatureLmdAnalyser : public LmdElementAnalyser
+class KeySignatureMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    KeySignatureLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    KeySignatureMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                          ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2621,7 +2621,7 @@ public:
     int get_key_type()
     {
         string value = get_value(m_pChildToAnalyse);
-        int type = LmdAnalyser::ldp_name_to_key_type(value);
+        int type = MxlAnalyser::ldp_name_to_key_type(value);
         if (type == k_key_undefined)
         {
             report_msg(get_line_number(m_pChildToAnalyse),
@@ -2634,12 +2634,12 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class LdpmusicLmdAnalyser : public LmdElementAnalyser
+class LdpmusicMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    LdpmusicLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    LdpmusicMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                         ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2660,11 +2660,11 @@ public:
 };
 
 //---------------------------------------------------------------------------------------
-class LenmusdocLmdAnalyser : public LmdElementAnalyser
+class LenmusdocMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    LenmusdocLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope) {}
+    LenmusdocMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope) {}
 
     ImoObj* do_analysis()
     {
@@ -2743,12 +2743,12 @@ protected:
 //@           (lineCapStart arrowhead)(lineCapEnd none) )
 //@
 
-class LineLmdAnalyser : public LmdElementAnalyser
+class LineMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    LineLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    LineMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                  ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2802,12 +2802,12 @@ public:
 //$     <link url='#TheoryHarmony_ch3.lms'>Harmony exercise</link>
 
 
-class LinkLmdAnalyser : public LmdElementAnalyser
+class LinkMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    LinkLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    LinkMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                  ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2841,12 +2841,12 @@ public:
 //@--------------------------------------------------------------------------------------
 //@ <list> = ("itemizedlist" | "orderedlist" [<style>] <listitem>* )
 //@
-class ListLmdAnalyser : public LmdElementAnalyser
+class ListMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    ListLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    ListMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                  ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2873,12 +2873,12 @@ public:
 //@--------------------------------------------------------------------------------------
 //@ <listitem> = (listitem [<style>] {<inlineObject> | <blockObject>}* )
 //@
-class ListItemLmdAnalyser : public LmdElementAnalyser
+class ListItemMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    ListItemLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    ListItemMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                      ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2908,12 +2908,12 @@ public:
 //@    (metronome q 80 parenthesis)    -->  (quarter_note_sign = 80)
 //@    (metronome 120 noVisible)       -->  nothing displayed
 
-class MetronomeLmdAnalyser : public LmdElementAnalyser
+class MetronomeMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    MetronomeLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    MetronomeMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                       ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -2997,12 +2997,12 @@ public:
 //@ spacer or other staffobj
 
 
-class MusicDataLmdAnalyser : public LmdElementAnalyser
+class MusicDataMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    MusicDataLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    MusicDataMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                       ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -3058,7 +3058,7 @@ public:
 //@ <voice> = (voice num)
 //@ <staffNum> = (p num)
 
-class NoteRestLmdAnalyser : public LmdElementAnalyser
+class NoteRestMxlAnalyser : public MxlElementAnalyser
 {
 protected:
     ImoTieDto* m_pTieDto;
@@ -3070,9 +3070,9 @@ protected:
     std::string m_srcOldTuplet;
 
 public:
-    NoteRestLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    NoteRestMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                      ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
         , m_pTieDto(NULL)
         , m_pTupletInfo(NULL)
         , m_pBeamInfo(NULL)
@@ -3294,7 +3294,7 @@ protected:
             pNote->set_notated_pitch(k_no_pitch, 4, k_no_accidentals);
         else
         {
-            if (LmdAnalyser::ldp_pitch_to_components(pitch, &step, &octave, &accidentals))
+            if (MxlAnalyser::ldp_pitch_to_components(pitch, &step, &octave, &accidentals))
             {
                 report_msg(get_line_number(m_pChildToAnalyse),
                     "Unknown note pitch '" + pitch + "'. Replaced by 'c4'.");
@@ -3593,12 +3593,12 @@ protected:
 //@ <name> = label
 //@ <value> = { number | label | string }
 
-class OptLmdAnalyser : public LmdElementAnalyser
+class OptMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    OptLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    OptMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                 ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -3737,12 +3737,12 @@ public:
 //@ <pageOrientation> = [ "portrait" | "landscape" ]
 //@ width, height, left, top right, bottom, binding = <num> in LUnits
 
-class PageLayoutLmdAnalyser : public LmdElementAnalyser
+class PageLayoutMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    PageLayoutLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    PageLayoutMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                        ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -3795,12 +3795,12 @@ protected:
 //@--------------------------------------------------------------------------------------
 //@ <pageMargins> = (pageMargins left top right bottom binding)     LUnits
 
-class PageMarginsLmdAnalyser : public LmdElementAnalyser
+class PageMarginsMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    PageMarginsLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    PageMarginsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                         ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -3841,12 +3841,12 @@ public:
 //@--------------------------------------------------------------------------------------
 //@ <pageSize> = (pageSize width height)        LUnits
 
-class PageSizeLmdAnalyser : public LmdElementAnalyser
+class PageSizeMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    PageSizeLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    PageSizeMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                      ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -3888,12 +3888,12 @@ public:
 //$   >
 
 
-class ParagraphLmdAnalyser : public LmdElementAnalyser
+class ParagraphMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    ParagraphLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    ParagraphMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -3914,12 +3914,12 @@ public:
 //@--------------------------------------------------------------------------------------
 // <param name='name'>value</param>
 
-class ParamLmdAnalyser : public LmdElementAnalyser
+class ParamMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    ParamLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    ParamMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -3945,12 +3945,12 @@ public:
 //@--------------------------------------------------------------------------------------
 //@ <point> = (tag (dx value)(dy value))
 
-class PointLmdAnalyser : public LmdElementAnalyser
+class PointMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    PointLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    PointMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -3974,12 +3974,12 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-class SectionLmdAnalyser : public LmdElementAnalyser
+class SectionMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    SectionLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    SectionMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4012,12 +4012,12 @@ public:
 //@--------------------------------------------------------------------------------------
 //@ <settings> = (settings [<cursor>][<undoData>])
 
-class SettingsLmdAnalyser : public LmdElementAnalyser
+class SettingsMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    SettingsLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    SettingsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                      ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4040,12 +4040,12 @@ public:
 //@                  [<defineStyle>*][<title>*][<pageLayout>*][<systemLayout>*]
 //@                  [<option>*]{<instrument> | <group>}* )
 
-class ScoreLmdAnalyser : public LmdElementAnalyser
+class ScoreMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    ScoreLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    ScoreMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4155,44 +4155,6 @@ protected:
 
 };
 
-//---------------------------------------------------------------------------------------
-class ScorePlayerLmdAnalyser : public LmdElementAnalyser
-{
-public:
-    ScorePlayerLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                        ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-
-    ImoObj* do_analysis()
-    {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoScorePlayer* pSP = static_cast<ImoScorePlayer*>(
-                        ImFactory::inject(k_imo_score_player, pDoc, get_node_id()) );
-        ScorePlayerCtrl* pPlayer = LOMSE_NEW ScorePlayerCtrl(m_libraryScope, pSP, pDoc);
-        pSP->attach_player(pPlayer);
-        pSP->attach_score( m_pAnalyser->get_last_analysed_score() );
-
-        // attr: [style]
-        analyse_optional_style(pSP);
-
-        // playLabel?
-        if (get_optional(k_playLabel))
-            pSP->set_play_label( get_string_value() );
-
-        // stopLabel?
-        if (get_optional(k_stopLabel))
-            pSP->set_stop_label( get_string_value() );
-
-        // mm?
-        if (get_optional(k_mm))
-            pSP->set_metronome_mm( get_integer_value(60) );
-
-        error_if_more_elements();
-
-        add_to_model(pSP);
-        return pSP;
-    }
-};
 
 //@--------------------------------------------------------------------------------------
 //@ <size> = (size <width><height>)
@@ -4200,12 +4162,12 @@ public:
 //@ <height> = (height number)      value in LUnits
 //@     i.e.; (size (width 160)(height 100.7))
 
-class SizeLmdAnalyser : public LmdElementAnalyser
+class SizeMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    SizeLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    SizeMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                  ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4237,12 +4199,12 @@ public:
 //@     (slur 27 start (bezier (ctrol2-x -25)(start-y 36.765)) )
 //@
 
-class SlurLmdAnalyser : public LmdElementAnalyser
+class SlurMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    SlurLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    SlurMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                 ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4292,12 +4254,12 @@ protected:
 //@ ImoSpacer StaffObj
 //@ <spacer> = (spacer <width>[<staffobjOptions>*][<attachments>*])     width in Tenths
 
-class SpacerLmdAnalyser : public LmdElementAnalyser
+class SpacerMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    SpacerLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    SpacerMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                    ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4345,12 +4307,12 @@ public:
 //@              (staffDistance 2000.00)(lineThickness 15.00))
 //@
 
-class StaffLmdAnalyser : public LmdElementAnalyser
+class StaffMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    StaffLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    StaffMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4444,12 +4406,12 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-class StylesLmdAnalyser : public LmdElementAnalyser
+class StylesMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    StylesLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    StylesMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                    ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4470,12 +4432,12 @@ public:
 //@--------------------------------------------------------------------------------------
 //@ <systemLayout> = (systemLayout {first | other} <systemMargins>)
 
-class SystemLayoutLmdAnalyser : public LmdElementAnalyser
+class SystemLayoutMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    SystemLayoutLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    SystemLayoutMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                          ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4516,12 +4478,12 @@ public:
 //@                                  <topSystemDistance>)
 //@ <leftMargin>, <rightMargin>, <systemDistance>, <topSystemDistance> = number (Tenths)
 
-class SystemMarginsLmdAnalyser : public LmdElementAnalyser
+class SystemMarginsMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    SystemMarginsLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    SystemMarginsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                           ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4556,12 +4518,12 @@ public:
 //@ (table [<style>] [<tableColumn>*] [<tableHead>] <tableBody> )
 //@
 
-class TableLmdAnalyser : public LmdElementAnalyser
+class TableMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    TableLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    TableMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4592,12 +4554,12 @@ public:
 //@ <tableBody> = (tableBody <tableRow>* )
 //@
 
-class TableBodyLmdAnalyser : public LmdElementAnalyser
+class TableBodyMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    TableBodyLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    TableBodyMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                       ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4624,12 +4586,12 @@ public:
 //@
 // <tableCell><rowspan>2</rowspan>This is a cell</tableCell>
 
-class TableCellLmdAnalyser : public LmdElementAnalyser
+class TableCellMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    TableCellLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    TableCellMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                       ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4666,91 +4628,6 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <tableColumn> = (tableColumn <style>)
-//@
-
-class TableColumnLmdAnalyser : public LmdElementAnalyser
-{
-public:
-    TableColumnLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter,
-                        LibraryScope& libraryScope, ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-
-    ImoObj* do_analysis()
-    {
-        // <style>
-        if (has_attribute("style") && m_pAnchor->is_table())
-        {
-            ImoStyle* pStyle = get_doc_text_style( get_attribute("style") );
-            ImoTable* pTable = static_cast<ImoTable*>(m_pAnchor);
-            pTable->add_column_style(pStyle);
-        }
-
-        error_if_more_elements();
-        return NULL;
-    }
-};
-
-//@--------------------------------------------------------------------------------------
-//@ <tableHead> = (tableHead <tableRow>* )
-//@
-
-class TableHeadLmdAnalyser : public LmdElementAnalyser
-{
-public:
-    TableHeadLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                      ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-
-    ImoObj* do_analysis()
-    {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoTableHead* pHead = static_cast<ImoTableHead*>(
-                        ImFactory::inject(k_imo_table_head, pDoc, get_node_id()) );
-
-        // <tableRow>*
-        while( more_children_to_analyse() )
-        {
-            analyse_mandatory(k_table_row, pHead);
-        }
-
-        add_to_model(pHead);
-        return pHead;
-    }
-};
-
-//@--------------------------------------------------------------------------------------
-//@ <tableRow> = (tableRow [<style>] <tableCell>* )
-//@
-
-class TableRowLmdAnalyser : public LmdElementAnalyser
-{
-public:
-    TableRowLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                     ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-
-    ImoObj* do_analysis()
-    {
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoTableRow* pRow = static_cast<ImoTableRow*>(
-                        ImFactory::inject(k_imo_table_row, pDoc, get_node_id()) );
-
-        // [<style>]
-        analyse_optional_style(pRow);
-
-        // <tableCell>*
-        while( more_children_to_analyse() )
-        {
-            analyse_mandatory(k_table_cell, pRow);
-        }
-
-        add_to_model(pRow);
-        return pRow;
-    }
-};
-
-//@--------------------------------------------------------------------------------------
 //@ <textbox> = (textbox <location><size>[<bgColor>][<border>]<text>[<anchorLine>])
 //@ <location> = (dx value)(dy value)       values in Tenths, relative to cur.pos
 //@     i.e.: (dx 50.0)(dy 5)
@@ -4776,12 +4653,12 @@ public:
 //@     )
 //@
 
-class TextBoxLmdAnalyser : public LmdElementAnalyser
+class TextBoxMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    TextBoxLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    TextBoxMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                     ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -4873,12 +4750,12 @@ protected:
 //$ Example:
 //$     <txt style='bold'>This is a text.</txt>
 //$
-class TextItemLmdAnalyser : public LmdElementAnalyser
+class TextItemMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    TextItemLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    TextItemMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                        ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
     {
     }
 
@@ -4920,15 +4797,15 @@ public:
 //@     For compatibility with 1.5, if no style is specified default style is
 //@     assigned.
 //@
-class TextStringLmdAnalyser : public LmdElementAnalyser
+class TextStringMxlAnalyser : public MxlElementAnalyser
 {
 protected:
     string m_styleName;
 
 public:
-    TextStringLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    TextStringMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                        ImoObj* pAnchor, const string& styleName="Default style")
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
         , m_styleName(styleName)
     {
     }
@@ -4978,12 +4855,12 @@ public:
 
 };
 
-class InstrNameLmdAnalyser : public TextStringLmdAnalyser
+class InstrNameMxlAnalyser : public TextStringMxlAnalyser
 {
 public:
-    InstrNameLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    InstrNameMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                       ImoObj* pAnchor)
-        : TextStringLmdAnalyser(pAnalyser, reporter, libraryScope, pAnchor,
+        : TextStringMxlAnalyser(pAnalyser, reporter, libraryScope, pAnchor,
                              "Instrument names") {}
 };
 
@@ -4992,12 +4869,12 @@ public:
 //@ <tie> = (tie num <tieType>[<bezier>][color] )   ;num = tie number. integer
 //@ <tieType> = { start | stop }
 
-class TieLmdAnalyser : public LmdElementAnalyser
+class TieMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    TieLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    TieMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                 ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -5047,12 +4924,12 @@ protected:
 //@ <top> = <num>
 //@ <bottom> = <num>
 
-class TimeSignatureLmdAnalyser : public LmdElementAnalyser
+class TimeSignatureMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    TimeSignatureLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    TimeSignatureMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                           ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -5091,12 +4968,12 @@ public:
 //@     (title center "Op. 28, No. 20" (style "Subtitle")
 //@     (title right "F. Chopin" (style "Composer"(dy 30))
 
-class TitleLmdAnalyser : public LmdElementAnalyser
+class TitleMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    TitleLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    TitleMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                   ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -5165,12 +5042,12 @@ public:
 //@ <displayBracket> = (displayBracket { yes | no })
 //@ <displayNumber> = (displayNumber { none | actual | both })
 
-class TupletLmdAnalyser : public LmdElementAnalyser
+class TupletMxlAnalyser : public MxlElementAnalyser
 {
 public:
-    TupletLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+    TupletMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
                    ImoObj* pAnchor)
-        : LmdElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
     ImoObj* do_analysis()
     {
@@ -5335,9 +5212,9 @@ protected:
 
 
 //=======================================================================================
-// LmdElementAnalyser implementation
+// MxlElementAnalyser implementation
 //=======================================================================================
-ImoObj* LmdElementAnalyser::analyse_node(XmlNode* pNode)
+ImoObj* MxlElementAnalyser::analyse_node(XmlNode* pNode)
 {
     m_pAnalysedNode = pNode;
     move_to_first_child();
@@ -5345,7 +5222,7 @@ ImoObj* LmdElementAnalyser::analyse_node(XmlNode* pNode)
 }
 
 //---------------------------------------------------------------------------------------
-bool LmdElementAnalyser::error_missing_element(ELdpElement type)
+bool MxlElementAnalyser::error_missing_element(ELdpElement type)
 {
     string parentName = get_name(m_pAnalysedNode);
     const string& name = m_pLdpFactory->get_name(type);
@@ -5355,31 +5232,31 @@ bool LmdElementAnalyser::error_missing_element(ELdpElement type)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdElementAnalyser::report_msg(int numLine, const std::stringstream& msg)
+void MxlElementAnalyser::report_msg(int numLine, const std::stringstream& msg)
 {
     report_msg(numLine, msg.str());
 }
 
 //---------------------------------------------------------------------------------------
-void LmdElementAnalyser::report_msg(int numLine, const std::string& msg)
+void MxlElementAnalyser::report_msg(int numLine, const std::string& msg)
 {
     m_reporter << "Line " << numLine << ". " << msg << endl;
 }
 
 //---------------------------------------------------------------------------------------
-bool LmdElementAnalyser::has_attribute(const string& name)
+bool MxlElementAnalyser::has_attribute(const string& name)
 {
     return has_attribute(m_pAnalysedNode, name);
 }
 
 //---------------------------------------------------------------------------------------
-string LmdElementAnalyser::get_attribute(const string& name)
+string MxlElementAnalyser::get_attribute(const string& name)
 {
     return get_attribute(m_pAnalysedNode, name);
 }
 
 //---------------------------------------------------------------------------------------
-string LmdElementAnalyser::get_mandatory_string_attribute(const string& name,
+string MxlElementAnalyser::get_mandatory_string_attribute(const string& name,
                                   const string& sDefault, const string& element)
 {
     string attrb = sDefault;
@@ -5397,7 +5274,7 @@ string LmdElementAnalyser::get_mandatory_string_attribute(const string& name,
 }
 
 //---------------------------------------------------------------------------------------
-string LmdElementAnalyser::get_optional_string_attribute(const string& name,
+string MxlElementAnalyser::get_optional_string_attribute(const string& name,
                                                          const string& sDefault)
 {
     if (has_attribute(m_pAnalysedNode, name))
@@ -5407,7 +5284,7 @@ string LmdElementAnalyser::get_optional_string_attribute(const string& name,
 }
 
 //---------------------------------------------------------------------------------------
-int LmdElementAnalyser::get_attribute_as_integer(const string& name, int nDefault)
+int MxlElementAnalyser::get_attribute_as_integer(const string& name, int nDefault)
 {
     string number = get_attribute(m_pAnalysedNode, name);
     long nNumber;
@@ -5426,7 +5303,7 @@ int LmdElementAnalyser::get_attribute_as_integer(const string& name, int nDefaul
 }
 
 //---------------------------------------------------------------------------------------
-bool LmdElementAnalyser::get_mandatory(ELdpElement type)
+bool MxlElementAnalyser::get_mandatory(ELdpElement type)
 {
     if (!more_children_to_analyse())
     {
@@ -5446,14 +5323,14 @@ bool LmdElementAnalyser::get_mandatory(ELdpElement type)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdElementAnalyser::analyse_mandatory(ELdpElement type, ImoObj* pAnchor)
+void MxlElementAnalyser::analyse_mandatory(ELdpElement type, ImoObj* pAnchor)
 {
     if (get_mandatory(type))
         m_pAnalyser->analyse_node(m_pChildToAnalyse, pAnchor);
 }
 
 //---------------------------------------------------------------------------------------
-bool LmdElementAnalyser::get_optional(ELdpElement type)
+bool MxlElementAnalyser::get_optional(ELdpElement type)
 {
     if (more_children_to_analyse())
     {
@@ -5468,7 +5345,7 @@ bool LmdElementAnalyser::get_optional(ELdpElement type)
 }
 
 //---------------------------------------------------------------------------------------
-bool LmdElementAnalyser::get_optional(const string& type)
+bool MxlElementAnalyser::get_optional(const string& type)
 {
     if (more_children_to_analyse())
     {
@@ -5483,7 +5360,7 @@ bool LmdElementAnalyser::get_optional(const string& type)
 }
 
 //---------------------------------------------------------------------------------------
-bool LmdElementAnalyser::analyse_optional(ELdpElement type, ImoObj* pAnchor)
+bool MxlElementAnalyser::analyse_optional(ELdpElement type, ImoObj* pAnchor)
 {
     if (get_optional(type))
     {
@@ -5494,7 +5371,7 @@ bool LmdElementAnalyser::analyse_optional(ELdpElement type, ImoObj* pAnchor)
 }
 
 //---------------------------------------------------------------------------------------
-bool LmdElementAnalyser::analyse_optional(const string& name, ImoObj* pAnchor)
+bool MxlElementAnalyser::analyse_optional(const string& name, ImoObj* pAnchor)
 {
     if (get_optional(name))
     {
@@ -5505,7 +5382,7 @@ bool LmdElementAnalyser::analyse_optional(const string& name, ImoObj* pAnchor)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdElementAnalyser::analyse_one_or_more(ELdpElement* pValid, int nValid)
+void MxlElementAnalyser::analyse_one_or_more(ELdpElement* pValid, int nValid)
 {
     while(more_children_to_analyse())
     {
@@ -5528,7 +5405,7 @@ void LmdElementAnalyser::analyse_one_or_more(ELdpElement* pValid, int nValid)
 }
 
 //---------------------------------------------------------------------------------------
-bool LmdElementAnalyser::contains(ELdpElement type, ELdpElement* pValid, int nValid)
+bool MxlElementAnalyser::contains(ELdpElement type, ELdpElement* pValid, int nValid)
 {
     for (int i=0; i < nValid; i++, pValid++)
         if (*pValid == type) return true;
@@ -5536,7 +5413,7 @@ bool LmdElementAnalyser::contains(ELdpElement type, ELdpElement* pValid, int nVa
 }
 
 //---------------------------------------------------------------------------------------
-void LmdElementAnalyser::error_invalid_child()
+void MxlElementAnalyser::error_invalid_child()
 {
     string name = get_name(m_pChildToAnalyse);
     if (name == "label")
@@ -5546,13 +5423,13 @@ void LmdElementAnalyser::error_invalid_child()
 }
 
 //---------------------------------------------------------------------------------------
-void LmdElementAnalyser::error_msg(const string& msg)
+void MxlElementAnalyser::error_msg(const string& msg)
 {
     report_msg(get_line_number(m_pAnalysedNode), msg);
 }
 
 //---------------------------------------------------------------------------------------
-void LmdElementAnalyser::error_if_more_elements()
+void MxlElementAnalyser::error_if_more_elements()
 {
     if (more_children_to_analyse())
     {
@@ -5567,7 +5444,7 @@ void LmdElementAnalyser::error_if_more_elements()
 }
 
 //---------------------------------------------------------------------------------------
-void LmdElementAnalyser::analyse_staffobjs_options(ImoStaffObj* pSO)
+void MxlElementAnalyser::analyse_staffobjs_options(ImoStaffObj* pSO)
 {
     //@----------------------------------------------------------------------------
     //@ <staffobjOptions> = { <staffNum> | <componentOptions> }
@@ -5591,7 +5468,7 @@ void LmdElementAnalyser::analyse_staffobjs_options(ImoStaffObj* pSO)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdElementAnalyser::analyse_scoreobj_options(ImoScoreObj* pSO)
+void MxlElementAnalyser::analyse_scoreobj_options(ImoScoreObj* pSO)
 {
     //@----------------------------------------------------------------------------
     //@ <componentOptions> = { <visible> | <location> | <color> }
@@ -5636,7 +5513,7 @@ void LmdElementAnalyser::analyse_scoreobj_options(ImoScoreObj* pSO)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdElementAnalyser::add_to_model(ImoObj* pImo)
+void MxlElementAnalyser::add_to_model(ImoObj* pImo)
 {
     int ldpNodeType = get_type(m_pAnalysedNode);
     //pImo->set_id(get_id(m_pAnalysedNode));        //transfer id
@@ -5648,9 +5525,9 @@ void LmdElementAnalyser::add_to_model(ImoObj* pImo)
 
 
 //=======================================================================================
-// LmdAnalyser implementation
+// MxlAnalyser implementation
 //=======================================================================================
-LmdAnalyser::LmdAnalyser(ostream& reporter, LibraryScope& libraryScope, Document* pDoc,
+MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document* pDoc,
                          XmlParser* parser)
     : Analyser()
     , m_reporter(reporter)
@@ -5675,41 +5552,41 @@ LmdAnalyser::LmdAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_nShowTupletNumber(k_yesno_default)
     , m_pLastNote(NULL)
 {
-    m_NameToTag["clef"] = k_tag_clef;
-    m_NameToTag["content"] = k_tag_content;
-    m_NameToTag["color"] = k_tag_color;
-    m_NameToTag["defineStyle"] = k_tag_defineStyle;
-    m_NameToTag["dynamic"] = k_tag_dynamic;
-    m_NameToTag["image"] = k_tag_image;
-    m_NameToTag["itemizedlist"] = k_tag_itemizedlist;
-    m_NameToTag["ldpmusic"] = k_tag_ldpmusic;
-    m_NameToTag["lenmusdoc"] = k_tag_lenmusdoc;
-    m_NameToTag["link"] = k_tag_link;
-    m_NameToTag["listitem"] = k_tag_listitem;
-    m_NameToTag["orderedlist"] = k_tag_orderedlist;
-    m_NameToTag["para"] = k_tag_para;
-    m_NameToTag["param"] = k_tag_param;
-    m_NameToTag["scorePlayer"] = k_tag_scorePlayer;
-    m_NameToTag["section"] = k_tag_section;
-    m_NameToTag["styles"] = k_tag_styles;
-    m_NameToTag["table"] = k_tag_table;
-    m_NameToTag["tableCell"] = k_tag_tableCell;
-    m_NameToTag["tableColumn"] = k_tag_tableColumn;
-    m_NameToTag["tableBody"] = k_tag_tableBody;
-    m_NameToTag["tableHead"] = k_tag_tableHead;
-    m_NameToTag["tableRow"] = k_tag_tableRow;
-    m_NameToTag["txt"] = k_tag_txt;
+    m_NameToTag["clef"] = k_mxl_tag_clef;
+    m_NameToTag["content"] = k_mxl_tag_content;
+    m_NameToTag["color"] = k_mxl_tag_color;
+    m_NameToTag["defineStyle"] = k_mxl_tag_defineStyle;
+    m_NameToTag["dynamic"] = k_mxl_tag_dynamic;
+    m_NameToTag["image"] = k_mxl_tag_image;
+    m_NameToTag["itemizedlist"] = k_mxl_tag_itemizedlist;
+    m_NameToTag["ldpmusic"] = k_mxl_tag_ldpmusic;
+    m_NameToTag["lenmusdoc"] = k_mxl_tag_lenmusdoc;
+    m_NameToTag["link"] = k_mxl_tag_link;
+    m_NameToTag["listitem"] = k_mxl_tag_listitem;
+    m_NameToTag["orderedlist"] = k_mxl_tag_orderedlist;
+    m_NameToTag["para"] = k_mxl_tag_para;
+    m_NameToTag["param"] = k_mxl_tag_param;
+    m_NameToTag["scorePlayer"] = k_mxl_tag_scorePlayer;
+    m_NameToTag["section"] = k_mxl_tag_section;
+    m_NameToTag["styles"] = k_mxl_tag_styles;
+    m_NameToTag["table"] = k_mxl_tag_table;
+    m_NameToTag["tableCell"] = k_mxl_tag_tableCell;
+    m_NameToTag["tableColumn"] = k_mxl_tag_tableColumn;
+    m_NameToTag["tableBody"] = k_mxl_tag_tableBody;
+    m_NameToTag["tableHead"] = k_mxl_tag_tableHead;
+    m_NameToTag["tableRow"] = k_mxl_tag_tableRow;
+    m_NameToTag["txt"] = k_mxl_tag_txt;
 }
 
 //---------------------------------------------------------------------------------------
-LmdAnalyser::~LmdAnalyser()
+MxlAnalyser::~MxlAnalyser()
 {
     delete_relation_builders();
     m_NameToTag.clear();
 }
 
 //---------------------------------------------------------------------------------------
-void LmdAnalyser::delete_relation_builders()
+void MxlAnalyser::delete_relation_builders()
 {
     delete m_pTiesBuilder;
     delete m_pOldTiesBuilder;
@@ -5720,16 +5597,16 @@ void LmdAnalyser::delete_relation_builders()
 }
 
 //---------------------------------------------------------------------------------------
-ImoObj* LmdAnalyser::analyse_tree_and_get_object(XmlNode* root)
+ImoObj* MxlAnalyser::analyse_tree_and_get_object(XmlNode* root)
 {
     //TODO_X
     delete_relation_builders();
-    m_pTiesBuilder = LOMSE_NEW LmdTiesBuilder(m_reporter, this);
-    m_pOldTiesBuilder = LOMSE_NEW OldLmdTiesBuilder(m_reporter, this);
-    m_pBeamsBuilder = LOMSE_NEW LmdBeamsBuilder(m_reporter, this);
-    m_pOldBeamsBuilder = LOMSE_NEW OldLmdBeamsBuilder(m_reporter, this);
-    m_pTupletsBuilder = LOMSE_NEW LmdTupletsBuilder(m_reporter, this);
-    m_pSlursBuilder = LOMSE_NEW LmdSlursBuilder(m_reporter, this);
+    m_pTiesBuilder = LOMSE_NEW MxlTiesBuilder(m_reporter, this);
+    m_pOldTiesBuilder = LOMSE_NEW OldMxlTiesBuilder(m_reporter, this);
+    m_pBeamsBuilder = LOMSE_NEW MxlBeamsBuilder(m_reporter, this);
+    m_pOldBeamsBuilder = LOMSE_NEW OldMxlBeamsBuilder(m_reporter, this);
+    m_pTupletsBuilder = LOMSE_NEW MxlTupletsBuilder(m_reporter, this);
+    m_pSlursBuilder = LOMSE_NEW MxlSlursBuilder(m_reporter, this);
 
     m_pTree = root;
     m_curStaff = 0;
@@ -5738,7 +5615,7 @@ ImoObj* LmdAnalyser::analyse_tree_and_get_object(XmlNode* root)
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LmdAnalyser::analyse_tree(XmlNode* tree, const string& locator)
+InternalModel* MxlAnalyser::analyse_tree(XmlNode* tree, const string& locator)
 {
     m_fileLocator = locator;
     ImoObj* pRoot = analyse_tree_and_get_object(tree);
@@ -5746,22 +5623,22 @@ InternalModel* LmdAnalyser::analyse_tree(XmlNode* tree, const string& locator)
 }
 
 ////---------------------------------------------------------------------------------------
-//void LmdAnalyser::analyse_node(LdpTree::iterator itNode)
+//void MxlAnalyser::analyse_node(LdpTree::iterator itNode)
 //{
 //    analyse_node(*itNode);
 //}
 
 //---------------------------------------------------------------------------------------
-ImoObj* LmdAnalyser::analyse_node(XmlNode* pNode, ImoObj* pAnchor)
+ImoObj* MxlAnalyser::analyse_node(XmlNode* pNode, ImoObj* pAnchor)
 {
-    LmdElementAnalyser* a = new_analyser( get_name(pNode), pAnchor );
+    MxlElementAnalyser* a = new_analyser( get_name(pNode), pAnchor );
     ImoObj* pImo = a->analyse_node(pNode);
     delete a;
     return pImo;
 }
 
 //---------------------------------------------------------------------------------------
-void LmdAnalyser::add_relation_info(ImoObj* pDto)
+void MxlAnalyser::add_relation_info(ImoObj* pDto)
 {
     // factory method to deal withh all relations
 
@@ -5776,7 +5653,7 @@ void LmdAnalyser::add_relation_info(ImoObj* pDto)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdAnalyser::clear_pending_relations()
+void MxlAnalyser::clear_pending_relations()
 {
     m_pTiesBuilder->clear_pending_items();
     m_pSlursBuilder->clear_pending_items();
@@ -5786,7 +5663,7 @@ void LmdAnalyser::clear_pending_relations()
 }
 
 //---------------------------------------------------------------------------------------
-int LmdAnalyser::set_score_version(const string& version)
+int MxlAnalyser::set_score_version(const string& version)
 {
     //version is a string "major.minor". Extract major and minor and compose
     //and integer 100*major+minor
@@ -5810,7 +5687,7 @@ int LmdAnalyser::set_score_version(const string& version)
 }
 
 //---------------------------------------------------------------------------------------
-bool LmdAnalyser::to_integer(const string& text, int* pResult)
+bool MxlAnalyser::to_integer(const string& text, int* pResult)
 {
     //return true if error
 
@@ -5829,7 +5706,7 @@ bool LmdAnalyser::to_integer(const string& text, int* pResult)
 }
 
 //---------------------------------------------------------------------------------------
-int LmdAnalyser::ldp_name_to_key_type(const string& value)
+int MxlAnalyser::ldp_name_to_key_type(const string& value)
 {
     if (value == "C")
         return k_key_C;
@@ -5896,7 +5773,7 @@ int LmdAnalyser::ldp_name_to_key_type(const string& value)
 }
 
 //---------------------------------------------------------------------------------------
-int LmdAnalyser::ldp_name_to_clef_type(const string& value)
+int MxlAnalyser::ldp_name_to_clef_type(const string& value)
 {
     if (value == "G")
         return k_clef_G2;
@@ -5949,7 +5826,7 @@ int LmdAnalyser::ldp_name_to_clef_type(const string& value)
 }
 
 //---------------------------------------------------------------------------------------
-bool LmdAnalyser::ldp_pitch_to_components(const string& pitch, int *step, int* octave,
+bool MxlAnalyser::ldp_pitch_to_components(const string& pitch, int *step, int* octave,
                                        EAccidentals* accidentals)
 {
     // Analyzes string pitch (LDP format), extracts its parts (step, octave and
@@ -5991,7 +5868,7 @@ bool LmdAnalyser::ldp_pitch_to_components(const string& pitch, int *step, int* o
 }
 
 //---------------------------------------------------------------------------------------
-int LmdAnalyser::to_step(const char& letter)
+int MxlAnalyser::to_step(const char& letter)
 {
 	switch (letter)
     {
@@ -6007,7 +5884,7 @@ int LmdAnalyser::to_step(const char& letter)
 }
 
 //---------------------------------------------------------------------------------------
-int LmdAnalyser::to_octave(const char& letter)
+int MxlAnalyser::to_octave(const char& letter)
 {
 	switch (letter)
     {
@@ -6026,7 +5903,7 @@ int LmdAnalyser::to_octave(const char& letter)
 }
 
 //---------------------------------------------------------------------------------------
-EAccidentals LmdAnalyser::to_accidentals(const std::string& accidentals)
+EAccidentals MxlAnalyser::to_accidentals(const std::string& accidentals)
 {
     switch (accidentals.length())
     {
@@ -6064,107 +5941,103 @@ EAccidentals LmdAnalyser::to_accidentals(const std::string& accidentals)
 }
 
 //---------------------------------------------------------------------------------------
-LmdElementAnalyser* LmdAnalyser::new_analyser(const string& name, ImoObj* pAnchor)
+MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAnchor)
 {
     //Factory method to create analysers
 
     switch ( name_to_tag(name) )
     {
-//        case k_tag_abbrev:          return LOMSE_NEW InstrNameLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_anchorLine:      return LOMSE_NEW AnchorLineLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_barline:         return LOMSE_NEW BarlineLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_beam:            return LOMSE_NEW BeamLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_bezier:          return LOMSE_NEW BezierLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_border:          return LOMSE_NEW BorderLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_chord:           return LOMSE_NEW ChordLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_clef:            return LOMSE_NEW ClefLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_content:         return LOMSE_NEW ContentLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-////        case k_tag_creationMode:    return LOMSE_NEW ContentLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_color:           return LOMSE_NEW ColorLmdAnalyser(this, m_reporter, m_libraryScope);
-//        case k_tag_cursor:          return LOMSE_NEW CursorLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_defineStyle:     return LOMSE_NEW DefineStyleLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_endPoint:        return LOMSE_NEW PointLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_dynamic:         return LOMSE_NEW DynamicLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_fermata:         return LOMSE_NEW FermataLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_figuredBass:     return LOMSE_NEW FiguredBassLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_font:            return LOMSE_NEW FontLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_goBack:          return LOMSE_NEW GoBackFwdLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_goFwd:           return LOMSE_NEW GoBackFwdLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_group:           return LOMSE_NEW GroupLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_image:           return LOMSE_NEW ImageLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_itemizedlist:    return LOMSE_NEW ListLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_infoMIDI:        return LOMSE_NEW InfoMidiLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_instrument:      return LOMSE_NEW InstrumentLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_key_signature:   return LOMSE_NEW KeySignatureLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_ldpmusic:        return LOMSE_NEW LdpmusicLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_lenmusdoc:       return LOMSE_NEW LenmusdocLmdAnalyser(this, m_reporter, m_libraryScope);
-//        case k_tag_line:            return LOMSE_NEW LineLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_link:            return LOMSE_NEW LinkLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_listitem:        return LOMSE_NEW ListItemLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_metronome:       return LOMSE_NEW MetronomeLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_musicData:       return LOMSE_NEW MusicDataLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_na:              return LOMSE_NEW NoteRestLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_name:            return LOMSE_NEW InstrNameLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_newSystem:       return LOMSE_NEW ControlLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_note:            return LOMSE_NEW NoteRestLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_opt:             return LOMSE_NEW OptLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_orderedlist:     return LOMSE_NEW ListLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_pageLayout:      return LOMSE_NEW PageLayoutLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_pageMargins:     return LOMSE_NEW PageMarginsLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_pageSize:        return LOMSE_NEW PageSizeLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_para:            return LOMSE_NEW ParagraphLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_param:           return LOMSE_NEW ParamLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_rest:            return LOMSE_NEW NoteRestLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_settings:        return LOMSE_NEW SettingsLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_score:           return LOMSE_NEW ScoreLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_scorePlayer:     return LOMSE_NEW ScorePlayerLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_section:         return LOMSE_NEW SectionLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_size:            return LOMSE_NEW SizeLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_slur:            return LOMSE_NEW SlurLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_spacer:          return LOMSE_NEW SpacerLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_staff:           return LOMSE_NEW StaffLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-////        case k_tag_symbol:          return LOMSE_NEW XxxxxxxLmdAnalyser(this, m_reporter, m_libraryScope);
-////        case k_tag_symbolSize:      return LOMSE_NEW XxxxxxxLmdAnalyser(this, m_reporter, m_libraryScope);
-//        case k_tag_startPoint:      return LOMSE_NEW PointLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_styles:          return LOMSE_NEW StylesLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_systemLayout:    return LOMSE_NEW SystemLayoutLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_systemMargins:   return LOMSE_NEW SystemMarginsLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_table:           return LOMSE_NEW TableLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_tableCell:       return LOMSE_NEW TableCellLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_tableColumn:     return LOMSE_NEW TableColumnLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_tableBody:       return LOMSE_NEW TableBodyLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_tableHead:       return LOMSE_NEW TableHeadLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_tableRow:        return LOMSE_NEW TableRowLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        case k_tag_txt:             return LOMSE_NEW TextItemLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_text:            return LOMSE_NEW TextStringLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_textbox:         return LOMSE_NEW TextBoxLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_time_signature:  return LOMSE_NEW TimeSignatureLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_tie:             return LOMSE_NEW TieLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_title:           return LOMSE_NEW TitleLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_tuplet:          return LOMSE_NEW TupletLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-////        case k_tag_undoData:        return LOMSE_NEW XxxxxxxLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_abbrev:          return LOMSE_NEW InstrNameMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_anchorLine:      return LOMSE_NEW AnchorLineMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_barline:         return LOMSE_NEW BarlineMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_beam:            return LOMSE_NEW BeamMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_bezier:          return LOMSE_NEW BezierMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_border:          return LOMSE_NEW BorderMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_chord:           return LOMSE_NEW ChordMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_clef:            return LOMSE_NEW ClefMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_content:         return LOMSE_NEW ContentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+////        case k_mxl_tag_creationMode:    return LOMSE_NEW ContentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_color:           return LOMSE_NEW ColorMxlAnalyser(this, m_reporter, m_libraryScope);
+//        case k_mxl_tag_cursor:          return LOMSE_NEW CursorMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_defineStyle:     return LOMSE_NEW DefineStyleMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_endPoint:        return LOMSE_NEW PointMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_dynamic:         return LOMSE_NEW DynamicMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_fermata:         return LOMSE_NEW FermataMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_figuredBass:     return LOMSE_NEW FiguredBassMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_font:            return LOMSE_NEW FontMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_goBack:          return LOMSE_NEW GoBackFwdMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_goFwd:           return LOMSE_NEW GoBackFwdMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_group:           return LOMSE_NEW GroupMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_image:           return LOMSE_NEW ImageMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_itemizedlist:    return LOMSE_NEW ListMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_infoMIDI:        return LOMSE_NEW InfoMidiMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_instrument:      return LOMSE_NEW InstrumentMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_key_signature:   return LOMSE_NEW KeySignatureMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_ldpmusic:        return LOMSE_NEW LdpmusicMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_lenmusdoc:       return LOMSE_NEW LenmusdocMxlAnalyser(this, m_reporter, m_libraryScope);
+//        case k_mxl_tag_line:            return LOMSE_NEW LineMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_link:            return LOMSE_NEW LinkMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_listitem:        return LOMSE_NEW ListItemMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_metronome:       return LOMSE_NEW MetronomeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_musicData:       return LOMSE_NEW MusicDataMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_na:              return LOMSE_NEW NoteRestMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_name:            return LOMSE_NEW InstrNameMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_newSystem:       return LOMSE_NEW ControlMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_note:            return LOMSE_NEW NoteRestMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_opt:             return LOMSE_NEW OptMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_orderedlist:     return LOMSE_NEW ListMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_pageLayout:      return LOMSE_NEW PageLayoutMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_pageMargins:     return LOMSE_NEW PageMarginsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_pageSize:        return LOMSE_NEW PageSizeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_para:            return LOMSE_NEW ParagraphMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_param:           return LOMSE_NEW ParamMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_rest:            return LOMSE_NEW NoteRestMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_settings:        return LOMSE_NEW SettingsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_score:           return LOMSE_NEW ScoreMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_section:         return LOMSE_NEW SectionMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_size:            return LOMSE_NEW SizeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_slur:            return LOMSE_NEW SlurMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_spacer:          return LOMSE_NEW SpacerMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_staff:           return LOMSE_NEW StaffMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+////        case k_mxl_tag_symbol:          return LOMSE_NEW XxxxxxxMxlAnalyser(this, m_reporter, m_libraryScope);
+////        case k_mxl_tag_symbolSize:      return LOMSE_NEW XxxxxxxMxlAnalyser(this, m_reporter, m_libraryScope);
+//        case k_mxl_tag_startPoint:      return LOMSE_NEW PointMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_styles:          return LOMSE_NEW StylesMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_systemLayout:    return LOMSE_NEW SystemLayoutMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_systemMargins:   return LOMSE_NEW SystemMarginsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_table:           return LOMSE_NEW TableMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_tableCell:       return LOMSE_NEW TableCellMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_tableBody:       return LOMSE_NEW TableBodyMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_txt:             return LOMSE_NEW TextItemMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_text:            return LOMSE_NEW TextStringMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_textbox:         return LOMSE_NEW TextBoxMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_time_signature:  return LOMSE_NEW TimeSignatureMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_tie:             return LOMSE_NEW TieMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_title:           return LOMSE_NEW TitleMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+//        case k_mxl_tag_tuplet:          return LOMSE_NEW TupletMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+////        case k_mxl_tag_undoData:        return LOMSE_NEW XxxxxxxMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 
         default:
-            return LOMSE_NEW NullLmdAnalyser(this, m_reporter, m_libraryScope, name);
+            return LOMSE_NEW NullMxlAnalyser(this, m_reporter, m_libraryScope, name);
     }
 }
 
 //---------------------------------------------------------------------------------------
-int LmdAnalyser::name_to_tag(const string& name) const
+int MxlAnalyser::name_to_tag(const string& name) const
 {
 	map<string, int>::const_iterator it = m_NameToTag.find(name);
 	if (it != m_NameToTag.end())
 		return it->second;
     else
-        return k_tag_undefined;
+        return k_mxl_tag_undefined;
 }
 
 
 
 //=======================================================================================
-// LmdTiesBuilder implementation
+// MxlTiesBuilder implementation
 //=======================================================================================
-void LmdTiesBuilder::add_relation_to_notes_rests(ImoTieDto* pEndDto)
+void MxlTiesBuilder::add_relation_to_notes_rests(ImoTieDto* pEndDto)
 {
     ImoTieDto* pStartDto = m_matches.front();
     ImoNote* pStartNote = pStartDto->get_note();
@@ -6176,7 +6049,7 @@ void LmdTiesBuilder::add_relation_to_notes_rests(ImoTieDto* pEndDto)
 }
 
 //---------------------------------------------------------------------------------------
-bool LmdTiesBuilder::notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote)
+bool MxlTiesBuilder::notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote)
 {
     return (pStartNote->get_voice() == pEndNote->get_voice())
             && (pStartNote->get_staff() == pEndNote->get_staff())
@@ -6186,7 +6059,7 @@ bool LmdTiesBuilder::notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdTiesBuilder::tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto)
+void MxlTiesBuilder::tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto)
 {
     ImoNote* pStartNote = pStartDto->get_note();
     ImoNote* pEndNote = pEndDto->get_note();
@@ -6207,7 +6080,7 @@ void LmdTiesBuilder::tie_notes(ImoTieDto* pStartDto, ImoTieDto* pEndDto)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdTiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
+void MxlTiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
 {
     m_reporter << "Line " << pEndInfo->get_line_number()
                << ". Requesting to tie notes of different voice or pitch. Tie number "
@@ -6216,7 +6089,7 @@ void LmdTiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
 }
 
 //---------------------------------------------------------------------------------------
-void LmdTiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNewInfo)
+void MxlTiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* pNewInfo)
 {
     m_reporter << "Line " << pNewInfo->get_line_number()
                << ". This tie has the same number than that defined in line "
@@ -6226,9 +6099,9 @@ void LmdTiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* p
 
 
 //=======================================================================================
-// OldLmdTiesBuilder implementation
+// OldMxlTiesBuilder implementation
 //=======================================================================================
-OldLmdTiesBuilder::OldLmdTiesBuilder(ostream& reporter, LmdAnalyser* pAnalyser)
+OldMxlTiesBuilder::OldMxlTiesBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
     : m_reporter(reporter)
     , m_pAnalyser(pAnalyser)
     , m_pStartNoteTieOld(NULL)
@@ -6236,7 +6109,7 @@ OldLmdTiesBuilder::OldLmdTiesBuilder(ostream& reporter, LmdAnalyser* pAnalyser)
 }
 
 //---------------------------------------------------------------------------------------
-bool OldLmdTiesBuilder::notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote)
+bool OldMxlTiesBuilder::notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote)
 {
     return (pStartNote->get_voice() == pEndNote->get_voice())
             && (pStartNote->get_staff() == pEndNote->get_staff())
@@ -6246,7 +6119,7 @@ bool OldLmdTiesBuilder::notes_can_be_tied(ImoNote* pStartNote, ImoNote* pEndNote
 }
 
 //---------------------------------------------------------------------------------------
-void OldLmdTiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
+void OldMxlTiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
 {
     m_reporter << "Line " << pEndInfo->get_line_number()
                << ". Requesting to tie notes of different voice or pitch. Tie number "
@@ -6255,14 +6128,14 @@ void OldLmdTiesBuilder::error_notes_can_not_be_tied(ImoTieDto* pEndInfo)
 }
 
 //---------------------------------------------------------------------------------------
-void OldLmdTiesBuilder::error_invalid_tie_old_syntax(int line)
+void OldMxlTiesBuilder::error_invalid_tie_old_syntax(int line)
 {
     m_reporter << "Line " << line
                << ". No note found to match old syntax tie. Tie ignored." << endl;
 }
 
 //---------------------------------------------------------------------------------------
-void OldLmdTiesBuilder::start_old_tie(ImoNote* pNote, XmlNode* pOldTie)
+void OldMxlTiesBuilder::start_old_tie(ImoNote* pNote, XmlNode* pOldTie)
 {
     if (m_pStartNoteTieOld)
         create_tie_if_old_syntax_tie_pending(pNote);
@@ -6272,7 +6145,7 @@ void OldLmdTiesBuilder::start_old_tie(ImoNote* pNote, XmlNode* pOldTie)
 }
 
 //---------------------------------------------------------------------------------------
-void OldLmdTiesBuilder::create_tie_if_old_syntax_tie_pending(ImoNote* pEndNote)
+void OldMxlTiesBuilder::create_tie_if_old_syntax_tie_pending(ImoNote* pEndNote)
 {
     if (!m_pStartNoteTieOld)
         return;
@@ -6292,7 +6165,7 @@ void OldLmdTiesBuilder::create_tie_if_old_syntax_tie_pending(ImoNote* pEndNote)
 }
 
 //---------------------------------------------------------------------------------------
-void OldLmdTiesBuilder::tie_notes(ImoNote* pStartNote, ImoNote* pEndNote)
+void OldMxlTiesBuilder::tie_notes(ImoNote* pStartNote, ImoNote* pEndNote)
 {
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
     ImoTie* pTie = static_cast<ImoTie*>(ImFactory::inject(k_imo_tie, pDoc));
@@ -6314,9 +6187,9 @@ void OldLmdTiesBuilder::tie_notes(ImoNote* pStartNote, ImoNote* pEndNote)
 
 
 //=======================================================================================
-// LmdSlursBuilder implementation
+// MxlSlursBuilder implementation
 //=======================================================================================
-void LmdSlursBuilder::add_relation_to_notes_rests(ImoSlurDto* pEndInfo)
+void MxlSlursBuilder::add_relation_to_notes_rests(ImoSlurDto* pEndInfo)
 {
     m_matches.push_back(pEndInfo);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -6334,9 +6207,9 @@ void LmdSlursBuilder::add_relation_to_notes_rests(ImoSlurDto* pEndInfo)
 
 
 //=======================================================================================
-// LmdBeamsBuilder implementation
+// MxlBeamsBuilder implementation
 //=======================================================================================
-void LmdBeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
+void MxlBeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
 {
     m_matches.push_back(pEndInfo);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -6351,34 +6224,34 @@ void LmdBeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
     }
 
     //AWARE: LDP v1.6 requires full item description, Autobeamer is not needed
-    //LmdAutoBeamer autobeamer(pBeam);
+    //MxlAutoBeamer autobeamer(pBeam);
     //autobeamer.do_autobeam();
 }
 
 
 //=======================================================================================
-// OldLmdBeamsBuilder implementation
+// OldMxlBeamsBuilder implementation
 //=======================================================================================
-OldLmdBeamsBuilder::OldLmdBeamsBuilder(ostream& reporter, LmdAnalyser* pAnalyser)
+OldMxlBeamsBuilder::OldMxlBeamsBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
     : m_reporter(reporter)
     , m_pAnalyser(pAnalyser)
 {
 }
 
 //---------------------------------------------------------------------------------------
-OldLmdBeamsBuilder::~OldLmdBeamsBuilder()
+OldMxlBeamsBuilder::~OldMxlBeamsBuilder()
 {
     clear_pending_old_beams();
 }
 
 //---------------------------------------------------------------------------------------
-void OldLmdBeamsBuilder::add_old_beam(ImoBeamDto* pInfo)
+void OldMxlBeamsBuilder::add_old_beam(ImoBeamDto* pInfo)
 {
     m_pendingOldBeams.push_back(pInfo);
 }
 
 //---------------------------------------------------------------------------------------
-void OldLmdBeamsBuilder::clear_pending_old_beams()
+void OldMxlBeamsBuilder::clear_pending_old_beams()
 {
     std::list<ImoBeamDto*>::iterator it;
     for (it = m_pendingOldBeams.begin(); it != m_pendingOldBeams.end(); ++it)
@@ -6390,27 +6263,27 @@ void OldLmdBeamsBuilder::clear_pending_old_beams()
 }
 
 //---------------------------------------------------------------------------------------
-bool OldLmdBeamsBuilder::is_old_beam_open()
+bool OldMxlBeamsBuilder::is_old_beam_open()
 {
     return m_pendingOldBeams.size() > 0;
 }
 
 //---------------------------------------------------------------------------------------
-void OldLmdBeamsBuilder::error_no_end_old_beam(ImoBeamDto* pInfo)
+void OldMxlBeamsBuilder::error_no_end_old_beam(ImoBeamDto* pInfo)
 {
     m_reporter << "Line " << pInfo->get_line_number()
                << ". No matching 'g-' element for 'g+'. Beam ignored." << endl;
 }
 
 //---------------------------------------------------------------------------------------
-void OldLmdBeamsBuilder::close_old_beam(ImoBeamDto* pInfo)
+void OldMxlBeamsBuilder::close_old_beam(ImoBeamDto* pInfo)
 {
     add_old_beam(pInfo);
     do_create_old_beam();
 }
 
 //---------------------------------------------------------------------------------------
-void OldLmdBeamsBuilder::do_create_old_beam()
+void OldMxlBeamsBuilder::do_create_old_beam()
 {
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
     ImoBeam* pBeam = static_cast<ImoBeam*>(ImFactory::inject(k_imo_beam, pDoc));
@@ -6424,16 +6297,16 @@ void OldLmdBeamsBuilder::do_create_old_beam()
     }
     m_pendingOldBeams.clear();
 
-    LmdAutoBeamer autobeamer(pBeam);
+    MxlAutoBeamer autobeamer(pBeam);
     autobeamer.do_autobeam();
 }
 
 
 
 //=======================================================================================
-// LmdTupletsBuilder implementation
+// MxlTupletsBuilder implementation
 //=======================================================================================
-void LmdTupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
+void MxlTupletsBuilder::add_relation_to_notes_rests(ImoTupletDto* pEndDto)
 {
     m_matches.push_back(pEndDto);
     Document* pDoc = m_pAnalyser->get_document_being_analysed();

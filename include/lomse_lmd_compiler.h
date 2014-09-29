@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -31,7 +31,7 @@
 #define __LOMSE_LMD_COMPILER_H__
 
 #include "lomse_compiler.h"
-#include "lomse_lmd_parser.h"
+#include "lomse_xml_parser.h"
 
 using namespace std;
 
@@ -39,7 +39,7 @@ namespace lomse
 {
 
 //forward declarations
-class LmdParser;
+class XmlParser;
 class LmdAnalyser;
 class LibraryScope;
 class InternalModel;
@@ -51,11 +51,11 @@ class Document;
 class LmdCompiler : public Compiler
 {
 protected:
-    LmdParser* m_pLmdParser;
+    XmlParser* m_pXmlParser;
     LmdAnalyser* m_pLmdAnalyser;
 
 public:
-    LmdCompiler(LmdParser* p, LmdAnalyser* a, ModelBuilder* mb, Document* pDoc);
+    LmdCompiler(XmlParser* p, LmdAnalyser* a, ModelBuilder* mb, Document* pDoc);
     ~LmdCompiler();
 
     //constructor for testing: direct construction

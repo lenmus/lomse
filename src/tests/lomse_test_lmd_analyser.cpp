@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -34,7 +34,7 @@
 //classes related to these tests
 #include "lomse_injectors.h"
 #include "lomse_document.h"
-#include "lomse_lmd_parser.h"
+#include "lomse_xml_parser.h"
 #include "lomse_lmd_analyser.h"
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
@@ -55,7 +55,7 @@ class MyLmdAnalyser : public LmdAnalyser
 {
 public:
     MyLmdAnalyser(ostream& reporter, LibraryScope& libScope, Document* pDoc,
-                  LmdParser* parser)
+                  XmlParser* parser)
         : LmdAnalyser(reporter, libScope, pDoc, parser)
     {
     }
@@ -112,7 +112,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         expected << "Line 0. lenmusdoc: missing mandatory element 'content'." << endl;
         parser.parse_text("<lenmusdoc vers='0.0'></lenmusdoc>");
@@ -136,7 +136,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text("<lenmusdoc vers='0.0'><content/></lenmusdoc>");
@@ -160,7 +160,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text("<lenmusdoc vers='0.0' id='10'><content/></lenmusdoc>");
@@ -181,7 +181,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         string src =
@@ -203,7 +203,7 @@ SUITE(LmdAnalyserTest)
     TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_get_content_item)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         string src =
             "<lenmusdoc vers='0.0'><content><para>Hello world</para></content></lenmusdoc>";
         parser.parse_text(src);
@@ -222,7 +222,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         expected << "Line 0. lenmusdoc: Missing mandatory attribute 'vers'. Value '0.0' assumed." << endl;
         string src =
@@ -244,7 +244,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text("<lenmusdoc vers='0.0' language='zh_CN'><content/></lenmusdoc>");
@@ -270,7 +270,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. score: missing mandatory element 'vers'." << endl
 //                 << "Line 0. score: missing mandatory element 'instrument'." << endl;
@@ -289,7 +289,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. score: missing mandatory element 'vers'." << endl
 //                 << "Line 0. score: missing mandatory element 'instrument'." << endl;
@@ -310,7 +310,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. score: missing mandatory element 'instrument'." << endl;
 //        parser.parse_text("(score (vers 1.6))");
@@ -330,7 +330,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Barline_OptionalElementMissing)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(barline)");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -347,7 +347,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Barline_OptionalElementPresent)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(barline double)");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -367,7 +367,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Unknown barline type 'invalid'. 'simple' barline assumed." << endl;
 //        parser.parse_text("(barline invalid)");
@@ -389,7 +389,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Barline_Visible)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(barline double (visible yes))");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -405,7 +405,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Barline_NoVisible)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(barline double noVisible)");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -422,7 +422,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'label:invisible' unknown or not possible here. Ignored." << endl;
 //        parser.parse_text("(barline double invisible)");
@@ -443,7 +443,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Barline_LocationX)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(barline double (dx 70))");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -461,7 +461,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Barline_LocationY)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(barline double (dy 60.5))");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -479,7 +479,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Barline_LocationXY)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(barline double (dx 70)(dy 20.3))");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -498,7 +498,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid real number 'seven'. Replaced by '0'." << endl;
 //        parser.parse_text("(barline double (dx seven))");
@@ -522,7 +522,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid real number 'six'. Replaced by '0'." << endl;
 //        parser.parse_text("(barline double (dy six))");
@@ -546,7 +546,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Element 'barline': too many parameters. Extra parameters from 'number' have been ignored." << endl;
 //        parser.parse_text("(barline double (dy 70)(dx 20.3))");
@@ -570,7 +570,7 @@ SUITE(LmdAnalyserTest)
 //    {
 ////        stringstream errormsg;
 ////        Document doc(m_libraryScope);
-////        LmdParser parser;
+////        XmlParser parser;
 ////        stringstream expected;
 ////        //expected << "Line 0. " << endl;
 ////        parser.parse_text("(barline#7 double)");
@@ -586,7 +586,7 @@ SUITE(LmdAnalyserTest)
 ////        delete tree->get_root();
 ////        delete pIModel;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(barline#7 double)");
 //        LdpElement* pBarline = tree->get_root();
 //
@@ -602,7 +602,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. score: missing mandatory element 'instrument'." << endl;
 //        parser.parse_text("(score (vers 1.6))");
@@ -624,7 +624,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(score (vers 1.6)(instrument (musicData)))");
@@ -645,7 +645,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(score (vers 1.6)(instrument (musicData))(instrument (musicData)))");
@@ -668,7 +668,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'instrument' unknown or not possible here. Ignored." << endl;
 //        parser.parse_text("(musicData (n c4 q)(instrument 3))");
@@ -687,7 +687,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'instrument' unknown or not possible here. Ignored." << endl;
 //        parser.parse_text("(musicData (n c4 q)(instrument 3)(n d4 e))");
@@ -705,7 +705,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(musicData (n c4 q)(n d4 e.))");
@@ -723,7 +723,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(musicData (n c4 q)(text \"Hello world\"))");
@@ -743,7 +743,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(n +d3 e.)");
@@ -773,7 +773,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Unknown note pitch 'j17'. Replaced by 'c4'." << endl;
 //        parser.parse_text("(n j17 q)");
@@ -798,7 +798,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Unknown note/rest duration 'j.'. Replaced by 'q'." << endl;
 //        parser.parse_text("(n c4 j.)");
@@ -823,7 +823,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
 //        parser.parse_text("(n c4 e.1)");
@@ -848,7 +848,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
 //        parser.parse_text("(n c4 e p7)");
@@ -874,7 +874,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid staff 'pz'. Replaced by 'p1'." << endl;
 //        parser.parse_text("(n c4 e pz)");
@@ -898,7 +898,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
 //        parser.parse_text("(n c4 e v3)");
@@ -925,7 +925,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid voice 'vx'. Replaced by 'v1'." << endl;
 //        parser.parse_text("(n c4 e vx)");
@@ -950,7 +950,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(n c4 e v3 (text \"andante\"))");
@@ -977,7 +977,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. No 'end' element for tie number 12. Tie ignored." << endl;
 //        parser.parse_text("(n c4 e (tie 12 start))");
@@ -1000,7 +1000,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. No 'start/continue' elements for tie number 12. Tie ignored." << endl;
 //        parser.parse_text("(n c4 e (tie 12 stop))");
@@ -1022,7 +1022,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. No 'start' element for tie number 12. Tie ignored." << endl;
 //        parser.parse_text("(musicData (n c4 q (tie 12 start)) (n c4 e (tie 12 stop)))");
@@ -1059,7 +1059,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Requesting to tie notes of different voice or pitch. Tie number 12 will be ignored." << endl;
 //        parser.parse_text("(musicData (n c4 q (tie 12 start)) (n c3 e (tie 12 stop)))");
@@ -1093,7 +1093,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. No 'start' element for tie number 12. Tie ignored." << endl;
 //        parser.parse_text("(musicData (n c4 q)(n d4 q)(n e4 q))");
@@ -1122,7 +1122,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. ?" << endl;
 //        parser.parse_text("(n c4 e (stem up))");
@@ -1143,7 +1143,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. ?" << endl;
 //        parser.parse_text("(n c4 e (stem down))");
@@ -1164,7 +1164,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid value 'no' for stem type. Default stem asigned." << endl;
 //        parser.parse_text("(n c4 e (stem no))");
@@ -1189,7 +1189,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(musicData (n c4 q (tie 12 start)(stem down)) (n c4 e (stem up)(tie 12 stop)))");
@@ -1225,7 +1225,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(n +d3 e. g+ p2)");
@@ -1255,7 +1255,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(musicData (n c4 e l)(n c4 q))");
@@ -1298,7 +1298,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. No note found to match old syntax tie. Tie ignored." << endl;
 //        parser.parse_text("(musicData (n c4 e l)(n d4 q))");
@@ -1332,7 +1332,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. No 'start' element for tie number 12. Tie ignored." << endl;
 //        parser.parse_text("(musicData (n c4 q v1 l)(n e4 q v2)(n c4 e v1))");
@@ -1370,7 +1370,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. No 'start' element for tie number 12. Tie ignored." << endl;
 //        parser.parse_text("(musicData (n c4 q v1 l)(barline simple)(n c4 e v1))");
@@ -1409,7 +1409,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(musicData (n c4 q l)(n c4 e l)(n c4 e))");
@@ -1467,7 +1467,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
 //        parser.parse_text("(tie 12 stop)");
@@ -1492,7 +1492,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
 //        parser.parse_text("(tie 15 start)");
@@ -1516,7 +1516,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
 //        parser.parse_text("(tie 15 start (bezier (ctrol2-x -25)(start-y 36.765)) )");
@@ -1549,7 +1549,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing or invalid tie type. Tie ignored." << endl;
 //        parser.parse_text("(tie 15 end)");
@@ -1567,7 +1567,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(tie 12 stop <color>#00ff00))");
@@ -1595,7 +1595,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
 //        parser.parse_text("(bezier ctrol1-x:-25 (start-x 36.765) ctrol1-y:55)");
@@ -1632,7 +1632,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Unknown tag 'startx'." << endl <<
 //            "Line 0. Element 'undefined' unknown or not possible here. Ignored." << endl;
@@ -1669,7 +1669,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
 //        parser.parse_text("(bezier (start-x 36.765))");
@@ -1708,7 +1708,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(slur 12 stop)");
@@ -1733,7 +1733,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(slur 15 start)");
@@ -1757,7 +1757,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(slur 15 continue)");
@@ -1781,7 +1781,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Unknown note/rest duration 'e.1'. Replaced by 'q'." << endl;
 //        parser.parse_text("(slur 27 start (bezier (ctrol2-x -25)(start-y 36.765)) )");
@@ -1814,7 +1814,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(slur 12 start <color>#00ff00))");
@@ -1840,7 +1840,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing or invalid slur type. Slur ignored." << endl;
 //        parser.parse_text("(slur 15 end)");
@@ -1858,7 +1858,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(musicData (n c4 q (slur 12 start)) (n c4 e (slur 12 stop)))");
@@ -1897,7 +1897,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(r e.)");
@@ -1921,7 +1921,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(r e. p2)");
@@ -1944,7 +1944,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(r e.)");
@@ -1967,7 +1967,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(musicData (r e. p2)(n c4 q)(n d4 e p3)(r q))");
@@ -2009,7 +2009,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(r e. (text \"andante\"))");
@@ -2034,7 +2034,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(fermata below)");
@@ -2056,7 +2056,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Unknown fermata placement 'under'. Replaced by 'above'." << endl;
 //        parser.parse_text("(fermata under)");
@@ -2077,7 +2077,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Invalid voice 'vx'. Replaced by 'v1'." << endl;
 //        parser.parse_text("(fermata above (dx 70))");
@@ -2100,7 +2100,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'fermata': too many parameters. Extra parameters from 'fermata' have been ignored." << endl;
 //        parser.parse_text("(fermata above (dx 70)(fermata below))");
@@ -2123,7 +2123,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. ?" << endl;
 //        parser.parse_text("(n c4 e (stem up)(fermata above (dx 70)))");
@@ -2153,7 +2153,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Invalid voice 'vx'. Replaced by 'v1'." << endl;
 //        parser.parse_text("(goBack start)");
@@ -2175,7 +2175,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'goBack' has an incoherent value: go backwards to end?. Element ignored." << endl;
 //        parser.parse_text("(goBack end)");
@@ -2193,7 +2193,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Element 'goBack' has an incoherent value: go backwards to end?. Element ignored." << endl;
 //        parser.parse_text("(goBack q)");
@@ -2216,7 +2216,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Invalid voice 'vx'. Replaced by 'v1'." << endl;
 //        parser.parse_text("(goFwd end)");
@@ -2237,7 +2237,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'goFwd' has an incoherent value: go forward to start?. Element ignored." << endl;
 //        parser.parse_text("(goFwd start)");
@@ -2255,7 +2255,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Element 'goBack' has an incoherent value: go backwards to end?. Element ignored." << endl;
 //        parser.parse_text("(goFwd h)");
@@ -2278,7 +2278,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Element 'goBack' has an incoherent value: go backwards to end?. Element ignored." << endl;
 //        parser.parse_text("(goFwd 128)");
@@ -2301,7 +2301,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Negative value for element 'goFwd/goBack'. Element ignored." << endl;
 //        parser.parse_text("(goFwd -128.3)");
@@ -2319,7 +2319,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. Element 'goBack' has an incoherent value: go backwards to end?. Element ignored." << endl;
 //        parser.parse_text("(goBack 21.3)");
@@ -2344,7 +2344,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text("<clef><type>G</type></clef>");
@@ -2366,7 +2366,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         expected << "Line 0. Unknown clef type 'Fa4'. Assumed 'G'." << endl;
         parser.parse_text("<clef><type>Fa4</type></clef>");
@@ -2386,7 +2386,7 @@ SUITE(LmdAnalyserTest)
     TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Clef_LocationX)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         parser.parse_text("<clef><type>G</type><dx>70</dx></clef>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
@@ -2404,7 +2404,7 @@ SUITE(LmdAnalyserTest)
     TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Clef_NoVisible)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         parser.parse_text("<clef><type>C2</type><visible>no</visible></clef>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
@@ -2423,7 +2423,7 @@ SUITE(LmdAnalyserTest)
     TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Clef_NoVisible_Staff2)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         parser.parse_text(
             "<clef>"
                 "<type>C2</type>"
@@ -2449,7 +2449,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Clef_SymbolSizeOk)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(clef C2 (symbolSize cue))");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -2470,7 +2470,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid symbol size 'small'. 'full' size assumed." << endl;
 //        parser.parse_text("(clef C2 (symbolSize small))");
@@ -2499,7 +2499,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(key G)");
@@ -2522,7 +2522,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Unknown key 'Sol'. Assumed 'C'." << endl;
 //        parser.parse_text("(key Sol)");
@@ -2542,7 +2542,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Key_LocationX)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(key d (dx 70))");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -2561,7 +2561,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Key_NoVisible)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(key E- noVisible)");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -2583,7 +2583,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(instrument (staves 2)(musicData))");
@@ -2606,7 +2606,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid value 'two' for staves. Replaced by 1." << endl;
 //        parser.parse_text("(instrument (staves two)(musicData))");
@@ -2628,7 +2628,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(score (vers 1.6)(instrument (musicData)))");
@@ -2653,7 +2653,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(instrument (name \"Guitar\")(musicData))");
@@ -2678,7 +2678,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(instrument (abbrev \"G.\")(musicData))");
@@ -2703,7 +2703,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(instrument (name \"Guitar\")(abbrev \"G.\")(musicData))");
@@ -2728,7 +2728,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing or invalid MIDI instrument (0..255). MIDI info ignored." << endl;
 //        parser.parse_text("(infoMIDI piano 1)");
@@ -2750,7 +2750,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing or invalid MIDI instrument (0..255). MIDI info ignored." << endl;
 //        parser.parse_text("(infoMIDI 315 1)");
@@ -2772,7 +2772,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(infoMIDI 56)");
@@ -2797,7 +2797,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid MIDI channel (0..15). Channel info ignored." << endl;
 //        parser.parse_text("(infoMIDI 56 25)");
@@ -2821,7 +2821,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(infoMIDI 56 10)");
@@ -2845,7 +2845,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(instrument (infoMIDI 56 12)(musicData))");
@@ -2874,7 +2874,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(time 6 8)");
@@ -2897,7 +2897,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. time: missing mandatory element 'number'." << endl;
 //        parser.parse_text("(time 2)");
@@ -2918,7 +2918,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_TimeSignature_LocationX)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(time 3 4 (dx 70))");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -2937,7 +2937,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_TimeSignature_NoVisible)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(time 6 8 noVisible)");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -2959,7 +2959,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Expected 'first' or 'other' value but found 'third'. 'first' assumed." << endl;
 //        parser.parse_text("(systemLayout third (systemMargins 0 0 0 2000))");
@@ -2985,7 +2985,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. systemLayout: missing mandatory element 'systemMargins'." << endl;
 //        parser.parse_text("(systemLayout other)");
@@ -3010,7 +3010,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(systemLayout other (systemMargins 0 100 0 2000))");
@@ -3036,7 +3036,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. systemInfo: missing mandatory element 'systemMargins'." << endl;
 //        parser.parse_text("(systemLayout other (systemMargins 0 100 0 2000))");
@@ -3059,7 +3059,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. systemInfo: missing mandatory element 'systemMargins'." << endl;
 //        parser.parse_text("(text \"This is a text\")");
@@ -3081,7 +3081,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. text: missing mandatory element 'string'." << endl;
 //        parser.parse_text("(text)");
@@ -3101,7 +3101,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(text \"Moonlight sonata\" (style \"Header1\"))");
@@ -3126,7 +3126,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(text \"F. Chopin\" (style \"Composer\")(dy 30)(dx 20))");
@@ -3155,7 +3155,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(metronome 88)");
@@ -3180,7 +3180,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing metronome parameters. Replaced by '(metronome 60)'." << endl;
 //        parser.parse_text("(metronome)");
@@ -3204,7 +3204,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(metronome e. 77)");
@@ -3230,7 +3230,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(metronome e. s)");
@@ -3257,7 +3257,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Error in metronome parameters. Replaced by '(metronome 60)'." << endl;
 //        parser.parse_text("(metronome e. \"s\")");
@@ -3280,7 +3280,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Metronome_LocationX)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(metronome 88 (dx 70))");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -3301,7 +3301,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Metronome_NoVisible)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(metronome 88 noVisible)");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -3321,7 +3321,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Metronome_Parenthesis)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(metronome 88 parenthesis (visible no))");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -3342,7 +3342,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. ?" << endl;
 //        parser.parse_text("(metronome 88 parenthesis (dx 7) noVisible)");
@@ -3368,7 +3368,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'label:parentesis' unknown or not possible here. Ignored." << endl;
 //        parser.parse_text("(metronome 88 parentesis (dx 7))");
@@ -3396,7 +3396,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(opt StaffLines.StopAtFinalBarline true)");
@@ -3420,7 +3420,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid value for option 'StaffLines.StopAtFinalBarline'. Option ignored." << endl;
 //        parser.parse_text("(opt StaffLines.StopAtFinalBarline perhaps)");
@@ -3438,7 +3438,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid option 'StaffLines.Funny'. Option ignored." << endl;
 //        parser.parse_text("(opt StaffLines.Funny funny thing)");
@@ -3456,7 +3456,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(opt Render.SpacingValue 40)");
@@ -3479,7 +3479,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid value for option 'Render.SpacingValue'. Option ignored." << endl;
 //        parser.parse_text("(opt Render.SpacingValue perhaps)");
@@ -3497,7 +3497,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(opt Render.SpacingFactor 0.536)");
@@ -3520,7 +3520,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid value for option 'Render.SpacingFactor'. Option ignored." << endl;
 //        parser.parse_text("(opt Render.SpacingFactor perhaps)");
@@ -3538,7 +3538,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing value for option 'Render.SpacingFactor'. Option ignored." << endl;
 //        parser.parse_text("(opt Render.SpacingFactor)");
@@ -3556,7 +3556,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(score (vers 1.6)(opt StaffLines.StopAtFinalBarline true)(instrument (musicData)))");
@@ -3582,7 +3582,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(score (vers 1.6)"
@@ -3616,7 +3616,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(score (vers 1.6)"
@@ -3647,7 +3647,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'label:instrument' unknown or not possible here. Ignored." << endl;
 //        parser.parse_text("(n c4 q instrument)");
@@ -3670,7 +3670,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid option 'StaffLines.Funny'. Option ignored." << endl;
 //        parser.parse_text("(opt StaffLines.Funny true)");
@@ -3688,7 +3688,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(spacer 70.5)");
@@ -3711,7 +3711,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing width for spacer. Spacer ignored." << endl;
 //        parser.parse_text("(spacer)");
@@ -3729,7 +3729,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(spacer 70.5 p3)");
@@ -3751,7 +3751,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid staff 'pan'. Replaced by 'p1'." << endl;
 //        parser.parse_text("(spacer 70.5 pan)");
@@ -3773,7 +3773,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'label:more' unknown or not possible here. Ignored." << endl;
 //        parser.parse_text("(spacer 70.5 more)");
@@ -3795,7 +3795,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(spacer 70 (text \"andante\"))");
@@ -3818,7 +3818,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'r' unknown or not possible here. Ignored." << endl;
 //        parser.parse_text("(spacer 70 (r q))");
@@ -3841,7 +3841,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'r' unknown or not possible here. Ignored." << endl;
 //        parser.parse_text("(spacer 70 (r q)(text \"andante\"))");
@@ -4011,7 +4011,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. No 'end' element for tie number 12. Tie ignored." << endl
 //                 << "Line 0. No 'start/continue' elements for tie number 12. Tie ignored." << endl;
@@ -4058,7 +4058,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(beam 12 +)");
@@ -4082,7 +4082,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(beam 12 ++f)");
@@ -4109,7 +4109,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing or invalid beam number. Beam ignored." << endl;
 //        parser.parse_text("(beam +)");
@@ -4128,7 +4128,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing or invalid beam type. Beam ignored." << endl;
 //        parser.parse_text("(beam 34 empieza)");
@@ -4147,7 +4147,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
 //        parser.parse_text("(n c4 e (beam 14 +))");
@@ -4171,7 +4171,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. No 'start/continue' elements for beam number 13. Beam ignored." << endl
 //                 << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
@@ -4206,7 +4206,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
 //        parser.parse_text("(musicData (n c4 q. (beam 14 +)) (n d4 s (beam 14 -b)))");
@@ -4244,7 +4244,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. No 'end' element for beam number 14. Beam ignored." << endl;
 //        parser.parse_text("(score (vers 1.6) (instrument (musicData (n c4 q. (beam 14 +)))) (instrument (musicData (n c4 e))))" );
@@ -4276,7 +4276,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid parameter 'g+7'. Ignored." << endl;
 //        parser.parse_text("(n c4 e g+7)");
@@ -4300,7 +4300,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Requesting beaming a note longer than eighth. Beam ignored." << endl;
 //        parser.parse_text("(n c4 w g+)");
@@ -4324,7 +4324,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Requesting to start a beam (g+) but there is already an open beam. Beam ignored." << endl;
 //        parser.parse_text("(musicData (n c4 s g+) (n e4 e g+))");
@@ -4345,7 +4345,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. No 'start' element for beam number 12. Tie ignored." << endl;
 //        parser.parse_text("(musicData (n c4 s g+)(n e4 e)(n c4 s g-))");
@@ -4482,7 +4482,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing or invalid tuplet type. Tuplet ignored." << endl;
 //        parser.parse_text("(t 5 start 3)");
@@ -4502,7 +4502,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(t + 3)");
@@ -4528,7 +4528,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Tuplet: Missing or invalid normal notes number. Tuplet ignored." << endl;
 //        parser.parse_text("(t 4 + 7)");
@@ -4548,7 +4548,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(t 2 + 7 4)");
@@ -4574,7 +4574,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(t 2 + 3 2 (displayBracket no))");
@@ -4600,7 +4600,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(t 1 + 3 2 (displayNumber none))");
@@ -4626,7 +4626,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid yes/no value 'false'. Replaced by default." << endl;
 //        parser.parse_text("(t 1 + 3 2 (displayBracket false))");
@@ -4653,7 +4653,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing or invalid tuplet type. Tuplet ignored." << endl;
 //        parser.parse_text("(t start 3)");
@@ -4673,7 +4673,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(t + 3)");
@@ -4699,7 +4699,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Tuplet: Missing or invalid normal notes number. Tuplet ignored." << endl;
 //        parser.parse_text("(t + 7)");
@@ -4719,7 +4719,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(t + 7 4)");
@@ -4744,7 +4744,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(t + 3 noBracket)");
@@ -4769,7 +4769,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'label:blue' unknown or not possible here. Ignored." << endl;
 //        parser.parse_text("(t + 3 noBracket blue)");
@@ -4794,7 +4794,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'color' unknown or not possible here. Ignored." << endl;
 //        parser.parse_text("(t + 3 <color>blue) noBracket)");
@@ -4819,7 +4819,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. No 'end' element for tuplet number 0. Tuplet ignored." << endl;
 //        parser.parse_text("(n c4 e (t + 3))");
@@ -4841,7 +4841,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(musicData "
@@ -4903,7 +4903,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. No 'end' element for tuplet number 0. Tuplet ignored." << endl;
 //        parser.parse_text("(score (vers 1.6) (instrument "
@@ -4936,7 +4936,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid parameter 't-7'. Ignored." << endl;
 //        parser.parse_text("(n c4 e t-7)");
@@ -4959,7 +4959,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(n c4 e t3)");
@@ -4977,7 +4977,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(n c4 e t7/6)");
@@ -4996,7 +4996,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Requesting to start a tuplet but there is already an open tuplet. Tuplet ignored." << endl;
 //        parser.parse_text("(musicData (n c4 s t3) (n d4 e) (n e4 e t3))");
@@ -5023,7 +5023,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(musicData (n c4 e t3) (n e4 e) (n d4 e t-))");
@@ -5077,7 +5077,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. ?" << endl;
 //        parser.parse_text("(n c4 e (voice 7))");
@@ -5098,7 +5098,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid integer number 'no'. Replaced by '1'." << endl;
 //        parser.parse_text("(n c4 e (voice no))");
@@ -5121,7 +5121,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. ?" << endl;
 //        parser.parse_text("(n c4 e (staffNum 2))");
@@ -5142,7 +5142,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid integer number 'alpha'. Replaced by '1'." << endl;
 //        parser.parse_text("(n c4 e (staffNum alpha))");
@@ -5165,7 +5165,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(musicData "
@@ -5270,7 +5270,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         expected << "Line 0. Missing or invalid color value. Must be #rrggbbaa. Color ignored." << endl;
         parser.parse_text("<color>321700</color>");
@@ -5289,7 +5289,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text("<color>#f0457f</color>");
@@ -5313,7 +5313,7 @@ SUITE(LmdAnalyserTest)
     //{
     //    stringstream errormsg;
     //    Document doc(m_libraryScope);
-    //    LmdParser parser;
+    //    XmlParser parser;
     //    stringstream expected;
     //    //expected << "Line 0. " << endl;
     //    parser.parse_text("(n c4 e <color>#f0457f))");
@@ -5338,7 +5338,7 @@ SUITE(LmdAnalyserTest)
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Barline_Color)
 //    {
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        parser.parse_text("(barline double <color>#ff0000))");
 //        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -5358,7 +5358,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(group (name \"Group\")(abbrev \"G.\")"
@@ -5395,7 +5395,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(group (abbrev \"G.\")"
@@ -5431,7 +5431,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(group (name \"Group\")"
@@ -5467,7 +5467,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(group (symbol bracket)(joinBarlines no)"
@@ -5502,7 +5502,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing or invalid group symbol. Must be 'none', 'brace' or 'bracket'. Group ignored." << endl;
 //        parser.parse_text("(group (symbol good)(joinBarlines no)"
@@ -5526,7 +5526,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid boolean value 'perhaps'. Replaced by '1'." << endl;
 //        parser.parse_text("(group (symbol brace)(joinBarlines perhaps)"
@@ -5561,7 +5561,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing instruments in group!. Group ignored." << endl;
 //        parser.parse_text("(group (symbol brace)(joinBarlines true))");
@@ -5581,7 +5581,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'n' unknown or not possible here. Ignored." << endl;
 //        parser.parse_text("(group (symbol brace)(joinBarlines no)"
@@ -5617,7 +5617,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(musicData (chord (n c4 q)(n e4 q)(n g4 q)))");
@@ -5662,7 +5662,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(musicData (n c4 q)(na e4 q)(na g4 q))");
@@ -5707,7 +5707,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(musicData "
@@ -5767,7 +5767,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(pageLayout (pageSize 14000 10000)(pageMargins 1000 1200 3000 2500 4000) landscape)");
@@ -5798,7 +5798,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(score (vers 1.6)(pageLayout (pageSize 14000 10000)(pageMargins 1000 1200 3000 2500 4000) landscape)(instrument (musicData)))");
@@ -5831,7 +5831,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("<lenmusdoc vers='0.0'>(pageLayout (pageSize 14000 10000)(pageMargins 1000 1200 3000 2500 4000) landscape)(content))");
@@ -5866,7 +5866,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("<defineStyle><name>Composer\" "
@@ -5895,7 +5895,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(score (vers 1.6)<defineStyle><name>Header1\" <font><font-name>Times New Roman\" 14pt bold-italic) <color>#00fe0f7f))(instrument (musicData)))");
@@ -5925,7 +5925,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("<defineStyle><name>Composer\" "
@@ -5951,7 +5951,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -5988,7 +5988,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("<defineStyle><name>Composer\" "
@@ -6016,7 +6016,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("<defineStyle><name>Composer\" "
@@ -6044,7 +6044,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("<defineStyle><name>Composer\" "
@@ -6072,7 +6072,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. title: missing mandatory element 'label'." << endl
 //                 << "Line 0. title: missing mandatory element 'string'." << endl;
@@ -6092,7 +6092,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. title: missing mandatory element 'string'." << endl;
 //        parser.parse_text("(title center)");
@@ -6111,7 +6111,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(title center \"Moonlight sonata\")");
@@ -6135,7 +6135,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(score (vers 1.6)(title center \"Moonlight sonata\")(instrument (musicData)))");
@@ -6164,7 +6164,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(title center \"Moonlight sonata\" (style \"Header1\"))");
@@ -6190,7 +6190,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(score (vers 1.6)"
@@ -6230,7 +6230,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(title right \"F. Chopin\" (style \"Composer\")(dy 30))");
@@ -6260,7 +6260,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))"
@@ -6293,7 +6293,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0)))");
@@ -6324,7 +6324,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0))(width 2.0)(lineStyle solid)(lineCapStart arrowhead)(lineCapEnd diamond))");
@@ -6355,7 +6355,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'lineCap': Invalid value 'diamont'. Replaced by 'none'." << endl;
 //        parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0))(width 2.0)(lineStyle dot)(lineCapStart arrowhead)(lineCapEnd diamont))");
@@ -6386,7 +6386,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Element 'lineStyle': Invalid value 'simple'. Replaced by 'solid'." << endl;
 //        parser.parse_text("(line (startPoint (dx 5.0)(dy 6.0))(endPoint (dx 80.0)(dy -10.0))(width 2.0)(lineStyle simple))");
@@ -6419,7 +6419,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. textbox: missing mandatory element 'dx'." << endl
 //        //         << "Line 0. textbox: missing mandatory element 'dy'." << endl;
@@ -6456,7 +6456,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. textbox: missing mandatory element 'dx'." << endl
 //        //         << "Line 0. textbox: missing mandatory element 'dy'." << endl;
@@ -6511,7 +6511,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(n c4 q (textbox (dx 50)(dy 5)"
@@ -6554,7 +6554,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(cursor 1 2 64.0 34)");
@@ -6580,7 +6580,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. 'cursor' in score is obsolete. Now must be in 'lenmusdoc' element. Ignored." << endl;
 //        parser.parse_text("(score (vers 1.6)(cursor 1 2 64.0 34)(instrument (musicData)))");
@@ -6605,7 +6605,7 @@ SUITE(LmdAnalyserTest)
 //    //TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Cursor_AddedToDocument)
 //    //{
 //    //    stringstream errormsg;
-//    //    LmdParser parser;
+//    //    XmlParser parser;
 //    //    stringstream expected;
 //    //    //expected << "Line 0. " << endl;
 //    //    parser.parse_text("<lenmusdoc vers='0.0'>"
@@ -6634,7 +6634,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(figuredBass \"7 5 2\")");
@@ -6660,7 +6660,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Missing or invalid staff number. Staff info ignored." << endl;
 //        parser.parse_text("(staff (staffType ossia))");
@@ -6686,7 +6686,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid staff type 'bonito'. 'regular' staff assumed." << endl;
 //        parser.parse_text("(staff 2 (staffType bonito))");
@@ -6715,7 +6715,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid staff. Num lines must be greater than zero. Five assumed." << endl;
 //        parser.parse_text("(staff 2 (staffType ossia)(staffLines 0))");
@@ -6744,7 +6744,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Invalid real number 'five'. Replaced by '180'." << endl;
 //        parser.parse_text("(staff 2 (staffType ossia)(staffLines 5)"
@@ -6774,7 +6774,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(staff 2 (staffType ossia)(staffLines 5)"
@@ -6804,7 +6804,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(staff 2 (staffType ossia)(staffLines 4)"
@@ -6834,7 +6834,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(instrument (staves 2)(staff 2 (staffType ossia)"
@@ -6869,7 +6869,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text("<txt>This is a text</txt>");
@@ -6891,7 +6891,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text("<txt id='10'>This is a text</txt>");
@@ -6912,7 +6912,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         expected << "Line 0. txt: missing mandatory value 'string'. Element <txt> ignored." << endl;
         parser.parse_text("<txt></txt>");
@@ -6932,7 +6932,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -6972,7 +6972,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src = "<para>This is a paragraph</para>";
@@ -6993,7 +6993,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text("<para id='10'>This is a paragraph</para>");
@@ -7014,7 +7014,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text("<para>This is a paragraph</para>");
@@ -7037,7 +7037,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text(
@@ -7065,7 +7065,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text(
@@ -7087,7 +7087,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src = "<para>This is a paragraph <txt style='bold'>with two items.</txt></para>";
@@ -7116,7 +7116,7 @@ SUITE(LmdAnalyserTest)
     TEST_FIXTURE(LmdAnalyserTestFixture, Paragraph_RecognizedAsContent)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         parser.parse_text("<lenmusdoc vers='0.0'><content>"
             "<para>Hello world!</para></content></lenmusdoc>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
@@ -7136,7 +7136,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -7172,7 +7172,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text("<lenmusdoc vers='0.0'><content>"
@@ -7203,7 +7203,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text("<section level='1'>This is a header</section>");
@@ -7223,7 +7223,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text("<section id='10' level='1'>This is a header</section>");
@@ -7244,7 +7244,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text("<section level='3'>This is a header</section>");
@@ -7268,7 +7268,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         expected << "Line 0. section: missing 'level' attribute. Level 1 assumed." << endl;
         parser.parse_text("<section>This is a header</section>");
@@ -7292,7 +7292,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         expected << "Line 0. Invalid integer number 'apple'. Replaced by '1'." << endl;
         parser.parse_text("<section level='apple'>This is a header</section>");
@@ -7316,7 +7316,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text("<section level='1'>This is a header"
@@ -7343,7 +7343,7 @@ SUITE(LmdAnalyserTest)
     TEST_FIXTURE(LmdAnalyserTestFixture, Section_RecognizedAsContent)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         parser.parse_text("<lenmusdoc vers='0.0'><content>"
             "<section level='1'>Hello world!</section></content></lenmusdoc>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
@@ -7363,7 +7363,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -7398,7 +7398,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("<lenmusdoc vers='0.0'> <content>"
@@ -7429,7 +7429,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -7470,7 +7470,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -7575,7 +7575,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -7624,7 +7624,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("<lenmusdoc vers='0.0'> "
@@ -7654,7 +7654,7 @@ SUITE(LmdAnalyserTest)
     TEST_FIXTURE(LmdAnalyserTestFixture, ParamInfo_Ok)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         parser.parse_text("<param name='green'>this is green</param>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
@@ -7672,7 +7672,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         expected << "Line 0. Missing name for element 'param'. Element ignored." << endl;
         parser.parse_text("<param>this is green</param>");
@@ -7696,7 +7696,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text("<dynamic classid='test' />");
@@ -7720,7 +7720,7 @@ SUITE(LmdAnalyserTest)
     TEST_FIXTURE(LmdAnalyserTestFixture, Dynamic_AddedToContent)
     {
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         parser.parse_text("<lenmusdoc vers='0.0'><content>"
             "<dynamic classid='test' /></content></lenmusdoc>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
@@ -7737,7 +7737,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text(
@@ -7764,7 +7764,7 @@ SUITE(LmdAnalyserTest)
         pDoorway->set_request_callback(this, wrapper_lomse_request);
 
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         parser.parse_text("<lenmusdoc vers='0.0'><content>"
             "<dynamic classid='test' /></content></lenmusdoc>");
         LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
@@ -7783,7 +7783,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -7816,7 +7816,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text(
@@ -7844,7 +7844,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         expected << "Line 0. link: Missing mandatory attribute 'url'." << endl;
         parser.parse_text(
@@ -7872,7 +7872,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -7914,7 +7914,7 @@ SUITE(LmdAnalyserTest)
 ////    {
 ////        stringstream errormsg;
 ////        Document doc(m_libraryScope);
-////        LmdParser parser;
+////        XmlParser parser;
 ////        stringstream expected;
 ////        //expected << "Line 0. " << endl;
 ////        parser.parse_text(
@@ -7940,7 +7940,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. link: missing mandatory element 'url'." << endl;
         parser.parse_text(
@@ -7967,7 +7967,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text(
@@ -7989,7 +7989,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. link: missing mandatory element 'url'." << endl;
         parser.parse_text(
@@ -8023,7 +8023,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text(
@@ -8050,7 +8050,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        expected << "Line 0. Unknown type 'circle'. Element 'graphic' ignored." << endl;
 //        parser.parse_text("(graphic circle 0.0 0.67)");
@@ -8071,7 +8071,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text("(graphic line 0.0 7.0 17.0 3.5)");
@@ -8108,7 +8108,7 @@ SUITE(LmdAnalyserTest)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
-//        LmdParser parser;
+//        XmlParser parser;
 //        stringstream expected;
 //        //expected << "" << endl;
 //        parser.parse_text("(musicData "
@@ -8145,7 +8145,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text("<lenmusdoc vers='0.0'> <content>"
@@ -8171,7 +8171,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text("<lenmusdoc vers='0.0'> <content>"
@@ -8196,7 +8196,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text(
@@ -8224,7 +8224,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text(
@@ -8260,7 +8260,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text(
@@ -8289,7 +8289,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text(
@@ -8311,7 +8311,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text(
@@ -8340,7 +8340,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         parser.parse_text(
@@ -8371,7 +8371,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -8400,7 +8400,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text(
@@ -8427,7 +8427,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -8457,7 +8457,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text(
@@ -8484,7 +8484,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -8513,7 +8513,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text(
@@ -8540,7 +8540,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -8573,7 +8573,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "" << endl;
         parser.parse_text(
@@ -8599,7 +8599,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -8645,7 +8645,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -8708,7 +8708,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =
@@ -8749,7 +8749,7 @@ SUITE(LmdAnalyserTest)
     {
         stringstream errormsg;
         Document doc(m_libraryScope);
-        LmdParser parser;
+        XmlParser parser;
         stringstream expected;
         //expected << "Line 0. " << endl;
         string src =

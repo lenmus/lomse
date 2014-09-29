@@ -27,11 +27,11 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
-#include "lomse_lmd_compiler.h"
+#include "lomse_mxl_compiler.h"
 
 #include <sstream>
 #include "lomse_xml_parser.h"
-#include "lomse_lmd_analyser.h"
+#include "lomse_mxl_analyser.h"
 #include "lomse_model_builder.h"
 #include "lomse_injectors.h"
 #include "lomse_internal_model.h"
@@ -46,37 +46,37 @@ namespace lomse
 {
 
 //=======================================================================================
-// LmdCompiler implementation
+// MxlCompiler implementation
 //=======================================================================================
-LmdCompiler::LmdCompiler(XmlParser* p, LmdAnalyser* a, ModelBuilder* mb, Document* pDoc)
+MxlCompiler::MxlCompiler(XmlParser* p, MxlAnalyser* a, ModelBuilder* mb, Document* pDoc)
     : Compiler(p, a, mb, pDoc)
     , m_pXmlParser(p)
-    , m_pLmdAnalyser(a)
+    , m_pMxlAnalyser(a)
 {
 }
 
 //---------------------------------------------------------------------------------------
 //constructor for testing: direct construction
-LmdCompiler::LmdCompiler(LibraryScope& libraryScope, Document* pDoc)
+MxlCompiler::MxlCompiler(LibraryScope& libraryScope, Document* pDoc)
     : Compiler()
 {
     m_pXmlParser = Injector::inject_XmlParser(libraryScope, pDoc->get_scope());
-    m_pLmdAnalyser = Injector::inject_LmdAnalyser(libraryScope, pDoc, m_pXmlParser);
+    m_pMxlAnalyser = Injector::inject_MxlAnalyser(libraryScope, pDoc, m_pXmlParser);
 
     m_pParser = m_pXmlParser;
-    m_pAnalyser = m_pLmdAnalyser;
+    m_pAnalyser = m_pMxlAnalyser;
     m_pModelBuilder = Injector::inject_ModelBuilder(pDoc->get_scope());
     m_pDoc = pDoc;
     m_fileLocator = "";
 }
 
 //---------------------------------------------------------------------------------------
-LmdCompiler::~LmdCompiler()
+MxlCompiler::~MxlCompiler()
 {
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LmdCompiler::compile_file(const std::string& filename)
+InternalModel* MxlCompiler::compile_file(const std::string& filename)
 {
     m_fileLocator = filename;
     DocLocator locator(m_fileLocator);
@@ -102,7 +102,7 @@ InternalModel* LmdCompiler::compile_file(const std::string& filename)
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LmdCompiler::compile_string(const std::string& source)
+InternalModel* MxlCompiler::compile_string(const std::string& source)
 {
     m_fileLocator = "string:";
     m_pXmlParser->parse_text(source);
@@ -110,7 +110,7 @@ InternalModel* LmdCompiler::compile_string(const std::string& source)
 }
 
 ////---------------------------------------------------------------------------------------
-//InternalModel* LmdCompiler::compile_input(LdpReader& reader)
+//InternalModel* MxlCompiler::compile_input(LdpReader& reader)
 //{
 //    m_fileLocator = reader.get_locator();
 //    m_pFinalTree = m_pParser->parse_input(reader);
@@ -118,14 +118,14 @@ InternalModel* LmdCompiler::compile_string(const std::string& source)
 //}
 
 //---------------------------------------------------------------------------------------
-InternalModel* LmdCompiler::create_empty()
+InternalModel* MxlCompiler::create_empty()
 {
     m_pParser->parse_text("<lenmusdoc vers='0.0'><content/></lenmusdoc>");
     return compile_parsed_tree( m_pXmlParser->get_tree_root() );
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LmdCompiler::create_with_empty_score()
+InternalModel* MxlCompiler::create_with_empty_score()
 {
 //    m_pFinalTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6)(instrument (musicData)))))");
 //    return compile_parsed_tree(m_pFinalTree);
@@ -133,16 +133,16 @@ InternalModel* LmdCompiler::create_with_empty_score()
 }
 
 //---------------------------------------------------------------------------------------
-InternalModel* LmdCompiler::compile_parsed_tree(XmlNode* root)
+InternalModel* MxlCompiler::compile_parsed_tree(XmlNode* root)
 {
-    InternalModel* pIModel = m_pLmdAnalyser->analyse_tree(root, m_fileLocator);
+    InternalModel* pIModel = m_pMxlAnalyser->analyse_tree(root, m_fileLocator);
     if (pIModel)
         m_pModelBuilder->build_model(pIModel);
     return pIModel;
 }
 
 ////---------------------------------------------------------------------------------------
-//SpLdpTree LmdCompiler::wrap_score_in_lenmusdoc(SpLdpTree pParseTree)
+//SpLdpTree MxlCompiler::wrap_score_in_lenmusdoc(SpLdpTree pParseTree)
 //{
 //    SpLdpTree pFinalTree = parse_empty_doc();
 //
@@ -155,7 +155,7 @@ InternalModel* LmdCompiler::compile_parsed_tree(XmlNode* root)
 //}
 //
 ////---------------------------------------------------------------------------------------
-//SpLdpTree LmdCompiler::parse_empty_doc()
+//SpLdpTree MxlCompiler::parse_empty_doc()
 //{
 //    SpLdpTree pTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content ))");
 //    return pTree;

@@ -54,6 +54,7 @@ protected:
 
 public:
     LdpGenerator(LdpExporter* pExporter) : m_pExporter(pExporter) {}
+    virtual ~LdpGenerator() {}
 
     virtual string generate_source(ImoObj* pParent=NULL) = 0;
 

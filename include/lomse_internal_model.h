@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -2703,6 +2703,7 @@ protected:
     }
     friend class ImageAnalyser;
     friend class ImageLmdAnalyser;
+    friend class ImageMxlAnalyser;
     inline void set_content(SpImage img) { m_image = img; }
 
 public:

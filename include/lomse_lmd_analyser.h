@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -31,7 +31,7 @@
 #define __LOMSE_LMD_ANALYSER_H__
 
 #include <list>
-#include "lomse_lmd_parser.h"
+#include "lomse_xml_parser.h"
 #include "lomse_analyser.h"
 #include "lomse_ldp_elements.h"
 #include "lomse_relation_builder.h"
@@ -176,7 +176,7 @@ protected:
     ostream&        m_reporter;
     LibraryScope&   m_libraryScope;
     Document*       m_pDoc;
-    LmdParser*      m_pParser;
+    XmlParser*      m_pParser;
     LdpFactory*     m_pLdpFactory;
     LmdTiesBuilder*    m_pTiesBuilder;
     OldLmdTiesBuilder* m_pOldTiesBuilder;
@@ -208,7 +208,7 @@ protected:
 
 public:
     LmdAnalyser(ostream& reporter, LibraryScope& libraryScope, Document* pDoc,
-                LmdParser* parser);
+                XmlParser* parser);
     virtual ~LmdAnalyser();
 
     //access to results
