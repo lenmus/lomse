@@ -92,7 +92,7 @@ protected:
 protected:
     friend class LenmusdocAnalyser;
     friend class LenmusdocLmdAnalyser;
-    friend class LenmusdocMxlAnalyser;
+    friend class ScorePartwiseMxlAnalyser;
     void set_imo_doc(ImoDocument* pImoDoc);
 
 public:

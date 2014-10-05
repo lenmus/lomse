@@ -282,8 +282,8 @@ int GraphicModel::get_system_for(ImoId scoreId, int instr, int measure, TimeUnit
 {
     //if not found returns -1
 
-    ScoreStub* pStub = get_stub_for(scoreId);
-    vector<GmoBoxScorePage*>& pages = pStub->get_pages();
+//    ScoreStub* pStub = get_stub_for(scoreId);
+//    vector<GmoBoxScorePage*>& pages = pStub->get_pages();
 
 //    //find page with end time greater or equal than requested time
 //    int maxPage = int(pages.size());

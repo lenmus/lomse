@@ -51,7 +51,6 @@ class LdpCompiler;
 class XmlParser;
 class LmdAnalyser;
 class LmdCompiler;
-class XmlParser;
 class MxlAnalyser;
 class MxlCompiler;
 class ModelBuilder;

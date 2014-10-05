@@ -821,7 +821,9 @@ protected:
 
     void add_music_data()
     {
-        add_source_for( m_pObj->get_musicdata() );
+        ImoObj* pImo = m_pObj->get_musicdata();
+        if (pImo)
+            add_source_for(pImo);
     }
 
     bool has_default_values(ImoStaffInfo* pStaff)
