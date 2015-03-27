@@ -179,10 +179,14 @@ if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
     link_libraries( ${Boost_LIBRARIES} )
     link_directories( ${Boost_LIBRARY_DIRS} )
-    message("Boost found: version= ${Boost_LIB_VERSION}" )
-    string(REGEX REPLACE "_" "." Boost_LIB_VERSION "${Boost_LIB_VERSION}" )
+    set(BOOST_VERSION   "${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}" )
+    if (NOT ".${Boost_SUBMINOR_VERSION}" STREQUAL "." )
+	    set(BOOST_VERSION   "${BOOST_VERSION}.${Boost_SUBMINOR_VERSION}" )
+	endif()
+    message("Boost found: lib version= ${Boost_LIB_VERSION}, version=${BOOST_VERSION}" )
+    #string(REGEX REPLACE "_" "." Boost_LIB_VERSION "${Boost_LIB_VERSION}" )
     set(BOOST_DEPENDENCIES 
-        "libboost-thread${Boost_LIB_VERSION}, libboost-date-time${Boost_LIB_VERSION}")
+        "libboost-thread${BOOST_VERSION}, libboost-date-time${BOOST_VERSION}")
     message("Boost found: libraries: ${Boost_LIBRARIES}" )
     message("Boost found: include= ${Boost_INCLUDE_DIRS}" )
     message("Boost found: libdir= ${Boost_LIBRARY_DIRS}" )
@@ -307,28 +311,6 @@ include( ${LOMSE_ROOT_DIR}/add-sources.cmake )
 set (LOMSE_GROUP_FOLDER "lomse/" )
 include( ${LOMSE_ROOT_DIR}/add-group-folders.cmake )
 
-
-
-#=====================================================================================
-
-
-# Adds folders for Visual Studio and other IDEs
-source_group( "agg"             FILES ${AGG_FILES} ${PLATFORM_FILES} )
-source_group( "document"        FILES ${DOCUMENT_FILES} )
-source_group( "exporters"       FILES ${EXPORTERS_FILES} )
-source_group( "file_system"     FILES ${FILE_SYSTEM_FILES} )
-source_group( "graphic_model"   FILES ${GRAPHIC_MODEL_FILES} )
-source_group( "gui_controls"    FILES ${GUI_CONTROLS_FILES} )
-source_group( "internal_model"  FILES ${INTERNAL_MODEL_FILES} )
-source_group( "module"          FILES ${MODULE_FILES} )
-source_group( "mvc"             FILES ${MVC_FILES} )
-source_group( "parser"          FILES ${PARSER_FILES} )
-source_group( "render"          FILES ${RENDER_FILES} )
-source_group( "score"           FILES ${SCORE_FILES} )
-source_group( "sound"           FILES ${SOUND_FILES} )
-source_group( "packages"        FILES ${PACKAGES_FILES} )
-
-#=====================================================================================
 
 
 
