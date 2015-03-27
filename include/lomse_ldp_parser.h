@@ -92,7 +92,6 @@ protected:
     bool PopNode();
     void Do_WaitingForStartOfElement();
     void Do_WaitingForName();
-    void Do_WaitingForParameter();
     void Do_ProcessingParameter();
     bool must_replace_tag(const std::string& nodename);
     void replace_current_tag();

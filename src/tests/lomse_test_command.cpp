@@ -39,10 +39,34 @@
 #include "lomse_im_note.h"
 #include "lomse_im_attributes.h"
 #include "lomse_selections.h"
+#include "lomse_ldp_exporter.h"
 
 using namespace UnitTest;
 using namespace std;
 using namespace lomse;
+
+
+//---------------------------------------------------------------------------------------
+// helper class
+class MySelectionSet : public SelectionSet
+{
+public:
+    MySelectionSet(Document* pDoc) : SelectionSet(pDoc) {}
+    ~MySelectionSet() {}
+
+    void debug_add(ImoObj* pImo)
+    {
+        if (pImo)
+        {
+            m_imos.push_back(pImo);
+            m_ids.push_back( pImo->get_id() );
+
+            if (pImo->is_staffobj())
+                add_staffobj_to_collection( static_cast<ImoStaffObj*>(pImo) );
+        }
+    }
+
+};
 
 //---------------------------------------------------------------------------------------
 // helper macros
@@ -134,7 +158,8 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v1)", k_edit_mode_replace);
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -169,10 +194,11 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to end of score
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v1)", k_edit_mode_replace);
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
-        executer.redo(&cursor);
+        executer.undo(&cursor, &sel);
+        executer.redo(&cursor, &sel);
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -216,7 +242,8 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v1)", k_edit_mode_replace);
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -252,10 +279,11 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to e4 e
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v1)", k_edit_mode_replace);
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
-        executer.redo(&cursor);
+        executer.undo(&cursor, &sel);
+        executer.redo(&cursor, &sel);
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -302,7 +330,7 @@ SUITE(DocCommandTest)
 //        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 s v1)", k_edit_mode_replace);
 //        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 //
-//        executer.execute(&cursor, pCmd, NULL);
+//        executer.execute(&cursor, pCmd, &sel);
 //
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 ////        cout << pSC->dump_cursor() << endl;
@@ -343,10 +371,10 @@ SUITE(DocCommandTest)
 //
 //        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 s v1)", k_edit_mode_replace);
 //
-//        executer.execute(&cursor, pCmd, NULL);
+//        executer.execute(&cursor, pCmd, &sel);
 //
-//        executer.undo(&cursor);
-//        executer.redo(&cursor);
+//        executer.undo(&cursor, &sel);
+//        executer.redo(&cursor, &sel);
 //
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 ////        cout << pSC->dump_cursor() << endl;
@@ -394,7 +422,8 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 s v1)", k_edit_mode_replace);
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -431,10 +460,11 @@ SUITE(DocCommandTest)
 
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 s v1)", k_edit_mode_replace);
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
-        executer.redo(&cursor);
+        executer.undo(&cursor, &sel);
+        executer.redo(&cursor, &sel);
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -479,7 +509,8 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e. v1)", k_edit_mode_replace);
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -516,10 +547,11 @@ SUITE(DocCommandTest)
 
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e. v1)", k_edit_mode_replace);
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(m_pDoc);
+        executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
-        executer.redo(&cursor);
+        executer.undo(&cursor, &sel);
+        executer.redo(&cursor, &sel);
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -565,7 +597,7 @@ SUITE(DocCommandTest)
 //        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 h v1)", k_edit_mode_replace);
 //        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 //
-//        executer.execute(&cursor, pCmd, NULL);
+//        executer.execute(&cursor, pCmd, &sel);
 //
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 ////        cout << pSC->dump_cursor() << endl;
@@ -605,10 +637,10 @@ SUITE(DocCommandTest)
 //
 //        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 h v1)", k_edit_mode_replace);
 //
-//        executer.execute(&cursor, pCmd, NULL);
+//        executer.execute(&cursor, pCmd, &sel);
 //
-//        executer.undo(&cursor);
-//        executer.redo(&cursor);
+//        executer.undo(&cursor, &sel);
+//        executer.redo(&cursor, &sel);
 //
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 ////        cout << pSC->dump_cursor() << endl;
@@ -657,7 +689,8 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v2)", k_edit_mode_replace);
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -701,10 +734,11 @@ SUITE(DocCommandTest)
 
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v2)", k_edit_mode_replace);
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
-        executer.redo(&cursor);
+        executer.undo(&cursor, &sel);
+        executer.redo(&cursor, &sel);
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -761,7 +795,7 @@ SUITE(DocCommandTest)
 //        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v2)", k_edit_mode_replace);
 //        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 //
-//        executer.execute(&cursor, pCmd, NULL);
+//        executer.execute(&cursor, pCmd, &sel);
 //
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -812,10 +846,10 @@ SUITE(DocCommandTest)
 //
 //        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v2)", k_edit_mode_replace);
 //
-//        executer.execute(&cursor, pCmd, NULL);
+//        executer.execute(&cursor, pCmd, &sel);
 //
-//        executer.undo(&cursor);
-//        executer.redo(&cursor);
+//        executer.undo(&cursor, &sel);
+//        executer.redo(&cursor, &sel);
 //
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -872,7 +906,7 @@ SUITE(DocCommandTest)
 //        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v2)", k_edit_mode_replace);
 //        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
 //
-//        executer.execute(&cursor, pCmd, NULL);
+//        executer.execute(&cursor, pCmd, &sel);
 //
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -917,10 +951,10 @@ SUITE(DocCommandTest)
 //
 //        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n a4 e v2)", k_edit_mode_replace);
 //
-//        executer.execute(&cursor, pCmd, NULL);
+//        executer.execute(&cursor, pCmd, &sel);
 //
-//        executer.undo(&cursor);
-//        executer.redo(&cursor);
+//        executer.undo(&cursor, &sel);
+//        executer.redo(&cursor, &sel);
 //
 //        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
 ////        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -944,6 +978,183 @@ SUITE(DocCommandTest)
 //        CHECK( (*cursor)->to_string() == "(goFwd e v2 p1)" );
 //    }
 
+    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0401)
+    {
+		//0401. if replaced note is beamed new note (< quarter) should continue beamed
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(key C)(time 6 8)"
+            "(n e4 e v1 p1 (beam 27 +))(n g4 e v1 p1 (beam 27 =))(n c5 e v1 p1 (beam 27 -))"
+            "(n c4 e v1 p1 (beam 37 +))(n e4 e v1 p1 (beam 37 =))(n g4 e v1 p1 (beam 37 -))"
+            "(barline simple)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.point_to(24L);       //points to first note
+
+        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n c4 e. v1 p1)", k_edit_mode_replace);
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
+
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        //ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+        //cout << pSC->dump_cursor() << endl;
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 10 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 6 8)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e. v1  p1 (beam 48 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  48,     0, "(n g4 s v1  p1 (beam 48 =b))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 (beam 48 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n c4 e v1  p1 (beam 37 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(n e4 e v1  p1 (beam 37 =))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1  p1 (beam 37 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 192,     0, "(barline simple)" );
+        //cout << pTable->dump() << endl;
+     }
+
+    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0402)
+    {
+		//0402. if replaced note is beamed new note (> eighth) should not be beamed. Beam rearranged
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(key C)(time 2 4)"
+            "(n e4 e v1 p1 (beam 27 +))(n g4 e v1 p1 (beam 27 =))"
+            "(n c5 e v1 p1 (beam 27 =))(n e5 e v1 p1 (beam 27 -))"
+            "(barline simple)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.point_to(24L);       //points to first note
+
+        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n c4 q v1 p1)", k_edit_mode_replace);
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
+
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        //ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+        //cout << pSC->dump_cursor() << endl;
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 7 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 2 4)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 (beam 28 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n e5 e v1  p1 (beam 28 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(barline simple)" );
+        //cout << pTable->dump() << endl;
+     }
+
+    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0403)
+    {
+		//0403. if replaced note is beamed new note (> eighth) should not be beamed. Beam removed
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(key C)(time 6 8)"
+            "(n e4 e v1 p1 (beam 27 +))(n g4 e v1 p1 (beam 27 =))(n c5 e v1 p1 (beam 27 -))"
+            "(n c4 e v1 p1 (beam 37 +))(n e4 e v1 p1 (beam 37 =))(n g4 e v1 p1 (beam 37 -))"
+            "(barline simple)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.point_to(24L);       //points to first note
+
+        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n c4 q v1 p1)", k_edit_mode_replace);
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
+
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        //ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+        //cout << pSC->dump_cursor() << endl;
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 9 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 6 8)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n c4 e v1  p1 (beam 37 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(n e4 e v1  p1 (beam 37 =))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1  p1 (beam 37 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 192,     0, "(barline simple)" );
+        //cout << pTable->dump() << endl;
+     }
+
+    TEST_FIXTURE(DocCommandTestFixture, add_noterest_0900)
+    {
+		//0900. bug. replace triplet eighth note by eight dotted
+
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(key C)(time 6 8)"
+            "(n e4 e v1 p1 (beam 27 +))(n g4 e v1 p1 (beam 27 =))(n c5 e v1 p1 (beam 27 -))"
+            "(n c4 e v1 p1 (beam 37 +))(n e4 e v1 p1 (beam 37 =))(n g4 e v1 p1 (beam 37 -))"
+            "(barline simple)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.point_to(34L);       //points to first note of second beamed group
+
+        DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n d4 e. v1 p1)", k_edit_mode_replace);
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
+
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
+
+        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        //ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+        //cout << pSC->dump_cursor() << endl;
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        CHECK( pTable->num_lines() == 1 );
+        CHECK( pTable->num_entries() == 10 );
+        CHECK( pTable->is_anacrusis_start() == false );
+
+        ColStaffObjsIterator it = pTable->begin();
+        //              instr, staff, meas. time, line, scr
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 6 8)" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1  p1 (beam 27 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g4 e v1  p1 (beam 27 =))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 (beam 27 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n d4 e. v1  p1 (beam 48 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 144,     0, "(n e4 s v1  p1 (beam 48 =b))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1  p1 (beam 48 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 192,     0, "(barline simple)" );
+        //cout << pTable->dump() << endl;
+     }
+
 
     // CmdAddTie ------------------------------------------------------------------------
 
@@ -964,7 +1175,7 @@ SUITE(DocCommandTest)
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
         DocCommand* pCmd = LOMSE_NEW CmdAddTie();
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pNote1);
         sel.debug_add(pNote2);
         executer.execute(&cursor, pCmd, &sel);
@@ -1009,7 +1220,7 @@ SUITE(DocCommandTest)
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
         DocCommand* pCmd = LOMSE_NEW CmdAddTuplet("(t + 2 3)");
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pNote1);
         sel.debug_add(pNote2);
         executer.execute(&cursor, pCmd, &sel);
@@ -1047,7 +1258,7 @@ SUITE(DocCommandTest)
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
         DocCommand* pCmd = LOMSE_NEW CmdAddTuplet("(t = 2 3)");  // "(t % 2 3)");
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pNote1);
         sel.debug_add(pNote2);
         int result = executer.execute(&cursor, pCmd, &sel);
@@ -1081,12 +1292,12 @@ SUITE(DocCommandTest)
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
         DocCommand* pCmd = LOMSE_NEW CmdAddTuplet("(t + 2 3)");
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pNote1);
         sel.debug_add(pNote2);
         executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -1098,7 +1309,7 @@ SUITE(DocCommandTest)
 //        ColStaffObjs* pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
-        executer.redo(&cursor);
+        executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -1129,7 +1340,8 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to n a4
         DocCommand* pCmd = LOMSE_NEW CmdBreakBeam();
 
-        int result = executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        int result = executer.execute(&cursor, pCmd, &sel);
 
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
         CHECK ( result == k_success );
@@ -1167,7 +1379,8 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to n f4
         DocCommand* pCmd = LOMSE_NEW CmdBreakBeam();
 
-        int result = executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        int result = executer.execute(&cursor, pCmd, &sel);
 
         CHECK ( result == k_success );
         CHECK( doc.is_dirty() == true );
@@ -1218,7 +1431,8 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to n a4
         DocCommand* pCmd = LOMSE_NEW CmdBreakBeam();
 
-        int result = executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        int result = executer.execute(&cursor, pCmd, &sel);
 
         CHECK ( result == k_success );
         CHECK( doc.is_dirty() == true );
@@ -1270,7 +1484,8 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to n g4
         DocCommand* pCmd = LOMSE_NEW CmdBreakBeam();
 
-        int result = executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        int result = executer.execute(&cursor, pCmd, &sel);
 
         CHECK ( result == k_success );
         CHECK( doc.is_dirty() == true );
@@ -1333,7 +1548,7 @@ SUITE(DocCommandTest)
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         DocCommand* pCmd = LOMSE_NEW CmdChangeAccidentals(k_sharp);
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pNote);
         executer.execute(&cursor, pCmd, &sel);
 
@@ -1362,12 +1577,12 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to n g4 s
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
         DocCommand* pCmd = LOMSE_NEW CmdChangeAccidentals(k_flat_flat);
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pNote1);
         sel.debug_add(pNote2);
         executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote2->get_notated_accidentals() == 0 );
@@ -1375,7 +1590,7 @@ SUITE(DocCommandTest)
         CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote1->get_notated_accidentals() == 0 );
 
-        executer.redo(&cursor);
+        executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote2->get_notated_accidentals() == k_flat_flat );
@@ -1409,7 +1624,8 @@ SUITE(DocCommandTest)
                                                         k_barline_double,
                                                         "Change barline type");
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
         CHECK( doc.is_dirty() == true );
@@ -1438,9 +1654,10 @@ SUITE(DocCommandTest)
                                                         k_barline_double,
                                                         "Change barline type");
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_barline() == true );
@@ -1448,7 +1665,7 @@ SUITE(DocCommandTest)
         ImoBarline* pBar = static_cast<ImoBarline*>(pImo);
         CHECK( pBar->get_type() == k_barline_simple );
 
-        executer.redo(&cursor);
+        executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_barline() == true );
@@ -1474,7 +1691,8 @@ SUITE(DocCommandTest)
                                                         k_stem_down,
                                                         "Toggle note stem");
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         CHECK( doc.is_dirty() == true );
         CHECK( pCmd->get_name() == "Toggle note stem" );
@@ -1502,9 +1720,10 @@ SUITE(DocCommandTest)
                                                         k_stem_down,
                                                         "Toggle note stem");
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -1512,7 +1731,7 @@ SUITE(DocCommandTest)
         ImoNote* pNote = static_cast<ImoNote*>(pImo);
         CHECK( pNote->get_stem_direction() == k_stem_up );
 
-        executer.redo(&cursor);
+        executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -1538,7 +1757,7 @@ SUITE(DocCommandTest)
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         DocCommand* pCmd = LOMSE_NEW CmdChangeDots(1);
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pNote);
         executer.execute(&cursor, pCmd, &sel);
 
@@ -1568,12 +1787,12 @@ SUITE(DocCommandTest)
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
         DocCommand* pCmd = LOMSE_NEW CmdChangeDots(2);
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pNote1);
         sel.debug_add(pNote2);
         executer.execute(&cursor, pCmd, &sel);      //cursor is pointing to note2
 
-        executer.undo(&cursor);     //cursor restored to note2
+        executer.undo(&cursor, &sel);     //cursor restored to note2
         CHECK( doc.is_dirty() == true );
         CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote2->get_dots() == 0 );
@@ -1581,7 +1800,7 @@ SUITE(DocCommandTest)
         CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote1->get_dots() == 0 );
 
-        executer.redo(&cursor);     //cursor pointing to note1 but redo restores original pos
+        executer.redo(&cursor, &sel);     //cursor pointing to note1 but redo restores original pos
         CHECK( doc.is_dirty() == true );
         CHECK( pNote2 == static_cast<ImoNote*>( *cursor ) );
         CHECK( pNote2->get_dots() == 2 );
@@ -1607,7 +1826,8 @@ SUITE(DocCommandTest)
         CHECK( m_pDoc->is_dirty() == false );
         DocCommand* pCmd = LOMSE_NEW CmdCursor(CmdCursor::k_point_to, 25L);    //first note
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(m_pDoc);
+        executer.execute(&cursor, pCmd, &sel);
 
 //        cout << "cmd name = " << pCmd->get_name() << endl;
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
@@ -1629,7 +1849,8 @@ SUITE(DocCommandTest)
 
         //cout << m_pDoc->to_string(true) << endl;
         cursor.point_to(15L);   //score
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(m_pDoc);
+        executer.execute(&cursor, pCmd, &sel);
 //        cout << m_pDoc->to_string(true) << endl;
 //        cout << "cmd name = " << pCmd->get_name() << endl;
 
@@ -1654,14 +1875,15 @@ SUITE(DocCommandTest)
 //             << ", pointee=" << cursor.get_pointee_id()
 //             << ", delegating?=" << (cursor.is_inside_terminal_node() ? "Yes" : "No")
 //             << endl;
-        executer.execute(&cursor, pCmd, NULL);
-        executer.undo(&cursor);
+        MySelectionSet sel(m_pDoc);
+        executer.execute(&cursor, pCmd, &sel);
+        executer.undo(&cursor, &sel);
         CHECK( m_pDoc->get_imodoc()->get_num_content_items() == 2 );
         CHECK( m_pDoc->is_dirty() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_score() == true );
 
-        executer.redo(&cursor);
+        executer.redo(&cursor, &sel);
 
         CHECK( m_pDoc->get_imodoc()->get_num_content_items() == 1 );
         CHECK( m_pDoc->is_dirty() == true );
@@ -1687,7 +1909,7 @@ SUITE(DocCommandTest)
         ImoTuplet* pTuplet = pNote1->get_tuplet();
         DocCommand* pCmd = LOMSE_NEW CmdDeleteRelation();
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pTuplet);
         executer.execute(&cursor, pCmd, &sel);
 
@@ -1722,7 +1944,7 @@ SUITE(DocCommandTest)
         ImoBeam* pBeam = pNote1->get_beam();
         DocCommand* pCmd = LOMSE_NEW CmdDeleteRelation();
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pBeam);
         executer.execute(&cursor, pCmd, &sel);
 
@@ -1759,11 +1981,11 @@ SUITE(DocCommandTest)
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         ImoBeam* pBeam = pNote->get_beam();
         DocCommand* pCmd = LOMSE_NEW CmdDeleteRelation();
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pBeam);
         executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -1774,7 +1996,7 @@ SUITE(DocCommandTest)
         cursor.move_next();
         CHECK( static_cast<ImoNote*>( *cursor )->is_beamed() == true );
 
-        executer.redo(&cursor);
+        executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -1812,7 +2034,7 @@ SUITE(DocCommandTest)
 //        cout << doc.to_string(true) << endl;
         DocCommand* pCmd = LOMSE_NEW CmdDeleteRelation();
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pTie);
         executer.execute(&cursor, pCmd, &sel);
 
@@ -1827,7 +2049,7 @@ SUITE(DocCommandTest)
         CHECK( pNote->is_tied_next() == false );
         CHECK( pNote->is_tied_prev() == false );
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -1842,7 +2064,7 @@ SUITE(DocCommandTest)
 //        cout << "After undo: id=" << pTie->get_id() << endl;
 //        cout << doc.to_string(true) << endl;
 
-        executer.redo(&cursor);
+        executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -1884,7 +2106,7 @@ SUITE(DocCommandTest)
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pTie);
         executer.execute(&cursor, pCmd, &sel);
 
@@ -1913,7 +2135,7 @@ SUITE(DocCommandTest)
 //        pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );      // f4
@@ -1931,7 +2153,7 @@ SUITE(DocCommandTest)
 //        pTable = pScore->get_staffobjs_table();
 //        cout << pTable->dump();
 
-        executer.redo(&cursor);
+        executer.redo(&cursor, &sel);
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );      //f4
@@ -1967,7 +2189,7 @@ SUITE(DocCommandTest)
         ImoTuplet* pTuplet = pNote1->get_tuplet();
         DocCommand* pCmd = LOMSE_NEW CmdDeleteRelation(k_imo_tuplet);
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pTuplet);
         sel.debug_add(pNote1);
         executer.execute(&cursor, pCmd, &sel);
@@ -1997,7 +2219,7 @@ SUITE(DocCommandTest)
             "(clef G)(n e4 e g+)(n f4 e g-)(n g4 q)"
             ")))");
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         ++cursor;       //n e4
@@ -2038,7 +2260,7 @@ SUITE(DocCommandTest)
             "(clef G)(n e4 e g+)(n f4 e g-)(n g4 q)"
             ")))");
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         sel.debug_add(*cursor);
@@ -2078,7 +2300,7 @@ SUITE(DocCommandTest)
             "(clef G)(n e4 e g+)(n f4 e g-)(n g4 q)"
             ")))");
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         ++cursor;       //n e4
@@ -2122,7 +2344,7 @@ SUITE(DocCommandTest)
             "(clef G)(n e4 e (text \"This is a note\"))(n f4 e)(n g4 q)"
             ")))");
 
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         DocCursor cursor(&doc);
         cursor.enter_element();     //points to clef
         ++cursor;       //n e4
@@ -2169,7 +2391,8 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(m_pDoc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(m_pDoc);
+        executer.execute(&cursor, pCmd, &sel);
         //cout << m_pDoc->to_string(true) << endl;
         //ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
         //cout << pScore->get_staffobjs_table()->dump() << endl;
@@ -2195,8 +2418,9 @@ SUITE(DocCommandTest)
         cursor.point_to(24L);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        executer.execute(&cursor, pCmd, NULL);
-        executer.undo(&cursor);
+        MySelectionSet sel(m_pDoc);
+        executer.execute(&cursor, pCmd, &sel);
+        executer.undo(&cursor, &sel);
 
 //        cout << m_pDoc->to_string(true) << endl;
 //        ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
@@ -2225,7 +2449,8 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -2266,8 +2491,9 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        executer.execute(&cursor, pCmd, NULL);
-        executer.undo(&cursor);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
+        executer.undo(&cursor, &sel);
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -2309,7 +2535,8 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -2351,8 +2578,9 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        executer.execute(&cursor, pCmd, NULL);
-        executer.undo(&cursor);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
+        executer.undo(&cursor, &sel);
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -2395,7 +2623,8 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -2437,7 +2666,8 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -2480,7 +2710,8 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -2526,7 +2757,8 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
@@ -2573,7 +2805,8 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
@@ -2613,7 +2846,8 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -2644,7 +2878,8 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ColStaffObjs* pTable = pScore->get_staffobjs_table();
@@ -2672,7 +2907,8 @@ SUITE(DocCommandTest)
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
         CHECK( doc.is_dirty() == false );
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 //        cout << doc.to_string() << endl;
 //        cout << "cmd name = " << pCmd->get_name() << endl;
         CHECK( pCmd->get_name() == "Insert paragraph" );
@@ -2682,18 +2918,18 @@ SUITE(DocCommandTest)
         CHECK( pContent->get_first_child()->get_obj_type() == k_imo_para );
         CHECK( doc.is_dirty() == true );
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_imodoc()->get_num_content_items() == 0 );
         CHECK( doc.is_dirty() == true );
 
-        executer.redo(&cursor);
+        executer.redo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_imodoc()->get_num_content_items() == 1 );
         CHECK( pContent->get_first_child()->get_obj_type() == k_imo_para );
         CHECK( doc.is_dirty() == true );
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_imodoc()->get_num_content_items() == 0 );
         CHECK( doc.is_dirty() == true );
@@ -2708,14 +2944,15 @@ SUITE(DocCommandTest)
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertBlockLevelObj(k_imo_para);
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         --cursor;
         CHECK( (*cursor)->is_paragraph() == true );
         CmdInsertBlockLevelObj* pCmd2 =
             LOMSE_NEW CmdInsertBlockLevelObj(k_imo_score);
 
-        executer.execute(&cursor, pCmd2);
+        executer.execute(&cursor, pCmd2, &sel);
         CHECK( pCmd2->get_name() == "Insert score" );
 //        cout << doc.to_string() << endl;
         ImoDocument* pImoDoc = doc.get_imodoc();
@@ -2725,7 +2962,7 @@ SUITE(DocCommandTest)
         CHECK( pScore->get_obj_type() == k_imo_score );
         CHECK( doc.is_dirty() == true );
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         pImoDoc = doc.get_imodoc();
         pContent = pImoDoc->get_child_of_type(k_imo_content);
@@ -2733,7 +2970,7 @@ SUITE(DocCommandTest)
         CHECK( pContent->get_first_child()->get_obj_type() == k_imo_para );
         CHECK( doc.is_dirty() == true );
 
-        executer.redo(&cursor);
+        executer.redo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         pImoDoc = doc.get_imodoc();
         pContent = pImoDoc->get_child_of_type(k_imo_content);
@@ -2742,8 +2979,8 @@ SUITE(DocCommandTest)
         CHECK( pScore->get_obj_type() == k_imo_score );
         CHECK( doc.is_dirty() == true );
 
-        executer.undo(&cursor);
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
+        executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         pImoDoc = doc.get_imodoc();
         pContent = pImoDoc->get_child_of_type(k_imo_content);
@@ -2763,7 +3000,8 @@ SUITE(DocCommandTest)
         //DocCommand* pCmd = LOMSE_NEW CmdInsertBlockLevelObj("(para (txt \"Hello world!\"))");
         CHECK( doc.is_dirty() == false );
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 //        cout << doc.to_string() << endl;
 //        cout << "cmd name = " << pCmd->get_name() << endl;
         CHECK( pCmd->get_name() == "Insert block" );
@@ -2773,18 +3011,18 @@ SUITE(DocCommandTest)
         CHECK( pContent->get_first_child()->get_obj_type() == k_imo_para );
         CHECK( doc.is_dirty() == true );
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_imodoc()->get_num_content_items() == 0 );
         CHECK( doc.is_dirty() == true );
 
-        executer.redo(&cursor);
+        executer.redo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_imodoc()->get_num_content_items() == 1 );
         CHECK( pContent->get_first_child()->get_obj_type() == k_imo_para );
         CHECK( doc.is_dirty() == true );
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
 //        cout << doc.to_string() << endl;
         CHECK( doc.get_imodoc()->get_num_content_items() == 0 );
         CHECK( doc.is_dirty() == true );
@@ -2807,7 +3045,8 @@ SUITE(DocCommandTest)
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
         CHECK( pSC->is_at_end_of_empty_score() == true );
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         CHECK( pCmd->get_name() == "Insert staff objects" );
         CHECK( *cursor == NULL );
@@ -2836,10 +3075,11 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW CmdInsertManyStaffObjs("(clef G)(n e4 e g+)(n c4 e g-)");
         DocCursor cursor(&doc);
         cursor.enter_element();
-        executer.execute(&cursor, pCmd, NULL);
-        cout << doc.to_string() << endl;
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
+//        cout << doc.to_string() << endl;
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
         CHECK( pSC->is_at_end_of_empty_score() == true );
@@ -2850,7 +3090,7 @@ SUITE(DocCommandTest)
         CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content  (score (vers 2.0)(instrument (staves 1)(musicData )))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 0 );
-        cout << doc.to_string() << endl;
+//        cout << doc.to_string() << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
     }
 
@@ -2864,11 +3104,12 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW CmdInsertManyStaffObjs("(clef G)(n e4 e g+)(n c4 e g-)");
         DocCursor cursor(&doc);
         cursor.enter_element();
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
 
-        executer.redo(&cursor);
+        executer.redo(&cursor, &sel);
 
         CHECK( *cursor == NULL );
         CHECK( doc.is_dirty() == true );
@@ -2895,36 +3136,38 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW CmdInsertManyStaffObjs("(clef G)(n e4 e g+)(n c4 e g-)");
         DocCursor cursor(&doc);
         cursor.enter_element();
-
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         pCmd = LOMSE_NEW CmdCursor(CmdCursor::k_point_to, 23);     //point to first note
-        executer.execute(&cursor, pCmd, NULL);
+        executer.execute(&cursor, pCmd, &sel);
         ImoObj* pNoteE4 = *cursor;
 
         pCmd = LOMSE_NEW CmdInsertStaffObj("(n d4 q)");
-        executer.execute(&cursor, pCmd, NULL);
+        executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);    //remove note d4. Cursor points to note e4
+        executer.undo(&cursor, &sel);    //remove note d4. Cursor points to note e4
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->get_id() == pNoteE4->get_id() );
 
-        executer.undo(&cursor);    //remove initial insertions
+        pCmd = LOMSE_NEW CmdCursor(CmdCursor::k_move_next);     //point note c4
+        executer.execute(&cursor, pCmd, &sel);
+        CHECK ( (*cursor)->is_note() );
+        ImoNote* pNoteC4 = static_cast<ImoNote*>(*cursor);
+        CHECK ( pNoteC4->get_fpitch() == C4_FPITCH );
+
+        executer.undo(&cursor, &sel);    //remove initial insertions
         CHECK( *cursor == NULL );
 
-        executer.redo(&cursor);    //insert again all staffobjs. Cursor points to end of score
+        executer.redo(&cursor, &sel);    //insert again all staffobjs. Cursor points to end of score
         CHECK( *cursor == NULL );
 
-        executer.redo(&cursor);    //insert note d4. Cursor points to note e4
-        pNoteE4 = *cursor;
-        CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->get_id() == pNoteE4->get_id() );
+        executer.redo(&cursor, &sel);    //insert note d4. Cursor points to end of score
+        CHECK( *cursor == NULL );
 
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 4 );
-//        cout << doc.to_string() << endl;
-//        cout << pScore->get_staffobjs_table()->dump() << endl;
     }
 
     // CmdInsertStaffObj ----------------------------------------------------------------
@@ -2944,7 +3187,8 @@ SUITE(DocCommandTest)
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
         CHECK( pSC->is_at_end_of_empty_score() == true );
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
         CHECK( pCmd->get_name() == "Insert clef" );
         CHECK( *cursor == NULL );
@@ -2969,9 +3213,10 @@ SUITE(DocCommandTest)
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(clef G)");
         DocCursor cursor(&doc);
         cursor.enter_element();
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
         CHECK( pSC->is_at_end_of_empty_score() == true );
@@ -2996,7 +3241,8 @@ SUITE(DocCommandTest)
         DocCursor cursor(&doc);
         cursor.enter_element();
 
-        int result = executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        int result = executer.execute(&cursor, pCmd, &sel);
 
         CHECK( result == k_failure );
         string expected = "Line 0. Unknown tag 'clof'.\n"
@@ -3016,27 +3262,28 @@ SUITE(DocCommandTest)
         cursor.enter_element();
 
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(clef G)");
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
         pCmd = LOMSE_NEW CmdInsertStaffObj("(n c4 q)");
-        executer.execute(&cursor, pCmd, NULL);
+        executer.execute(&cursor, pCmd, &sel);
         pCmd = LOMSE_NEW CmdCursor(CmdCursor::k_move_prev);     //to inserted note
-        executer.execute(&cursor, pCmd, NULL);
+        executer.execute(&cursor, pCmd, &sel);
         ImoObj* pNoteC4 = *cursor;
         pCmd = LOMSE_NEW CmdInsertStaffObj("(n d4 q)");
-        executer.execute(&cursor, pCmd, NULL);
+        executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);    //remove note d4. Cursor points to note c4
+        executer.undo(&cursor, &sel);    //remove note d4. Cursor points to note c4
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->get_id() == pNoteC4->get_id() );
 
-        executer.undo(&cursor);    //remove note c4. Cursor points to end of score
+        executer.undo(&cursor, &sel);    //remove note c4. Cursor points to end of score
         CHECK( *cursor == NULL );
 
-        executer.redo(&cursor);    //insert note c4. Cursor points to end of score
+        executer.redo(&cursor, &sel);    //insert note c4. Cursor points to end of score
         CHECK( *cursor == NULL );
 
-        executer.redo(&cursor);    //insert note d4. Cursor points to note c4
+        executer.redo(&cursor, &sel);    //insert note d4. Cursor points to note c4
         pNoteC4 = *cursor;
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->get_id() == pNoteC4->get_id() );
@@ -3055,7 +3302,8 @@ SUITE(DocCommandTest)
         cursor.enter_element();
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("clef G)");
 
-        int result = executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        int result = executer.execute(&cursor, pCmd, &sel);
 
         CHECK( result == k_failure );
         //cout << "Error: '" << executer.get_error() << "'" << endl;
@@ -3073,7 +3321,8 @@ SUITE(DocCommandTest)
         cursor.enter_element();
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(clef G)(n e4 e g+)(n c4 e g-)");
 
-        int result = executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        int result = executer.execute(&cursor, pCmd, &sel);
 
         CHECK( result == k_failure );
         //cout << "Error: '" << executer.get_error() << "'" << endl;
@@ -3091,7 +3340,8 @@ SUITE(DocCommandTest)
         cursor.enter_element();
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(n e4 e (stem up)");
 
-        int result = executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        int result = executer.execute(&cursor, pCmd, &sel);
 
         CHECK( result == k_failure );
         //cout << "Error: '" << executer.get_error() << "'" << endl;
@@ -3112,7 +3362,8 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(n e4 e v2)");
 
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
         //cout << cursor.dump_cursor();
 
         CHECK( pCmd->get_name() == "Insert note" );
@@ -3154,9 +3405,10 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to n c4 q
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(n e4 e v2)");
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
 
         CHECK( doc.is_dirty() == true );
 
@@ -3194,11 +3446,12 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to n c4 q
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(n e4 e v2)");
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
 
-        executer.redo(&cursor);
+        executer.redo(&cursor, &sel);
 
         CHECK( doc.is_dirty() == true );
 
@@ -3239,7 +3492,8 @@ SUITE(DocCommandTest)
         cursor.move_next();         //points to n c4 q
         DocCommandExecuter executer(&doc);
         DocCommand* pCmd = LOMSE_NEW CmdInsertStaffObj("(n e4 e v2)");
-        executer.execute(&cursor, pCmd, NULL);
+        MySelectionSet sel(&doc);
+        executer.execute(&cursor, pCmd, &sel);
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
 
@@ -3255,12 +3509,12 @@ SUITE(DocCommandTest)
         CHECK_ENTRY0(it, 0,    0,      0,   0,     1, "(n c4 q v1  p1 )" );
         //Fcout << pTable->dump();
 
-        executer.undo(&cursor);    //remove note e4. Cursor points to note c4
+        executer.undo(&cursor, &sel);    //remove note e4. Cursor points to note c4
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 2 );
 
-        executer.redo(&cursor);    //add note e4. Cursor points to note c4
+        executer.redo(&cursor, &sel);    //add note e4. Cursor points to note c4
         CHECK( (*cursor)->is_note() == true );
         CHECK( (*cursor)->to_string() == "(n c4 q v1  p1 )" );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
@@ -3281,7 +3535,7 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to e4
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         sel.debug_add(pNote);
         cursor.move_next();         //points to f4
@@ -3332,7 +3586,7 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to e4
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         sel.debug_add(pNote);
         cursor.move_next();         //points to f4
@@ -3388,7 +3642,7 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to e4
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         sel.debug_add(pNote);
         cursor.move_next();         //points to f4
@@ -3405,7 +3659,7 @@ SUITE(DocCommandTest)
 
         executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
 
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
@@ -3443,7 +3697,7 @@ SUITE(DocCommandTest)
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
         cursor.move_next();         //points to e4
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         ImoNote* pNote = static_cast<ImoNote*>( *cursor );
         sel.debug_add(pNote);
         cursor.move_next();         //points to f4
@@ -3460,8 +3714,8 @@ SUITE(DocCommandTest)
 
         executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
-        executer.redo(&cursor);
+        executer.undo(&cursor, &sel);
+        executer.redo(&cursor, &sel);
 
         CHECK( doc.is_dirty() == true );
         CHECK( *cursor != NULL );
@@ -3503,7 +3757,7 @@ SUITE(DocCommandTest)
         ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
         cursor.move_next();         //points to e4 q
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pNote1);
         sel.debug_add(pNote2);
 
@@ -3552,7 +3806,7 @@ SUITE(DocCommandTest)
         ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
         cursor.move_next();         //points to e4 q
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pNote1);
         sel.debug_add(pNote2);
 
@@ -3564,7 +3818,7 @@ SUITE(DocCommandTest)
 
         executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
+        executer.undo(&cursor, &sel);
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
@@ -3601,7 +3855,7 @@ SUITE(DocCommandTest)
         ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
         cursor.move_next();         //points to e4 q
         ImoNote* pNote2 = static_cast<ImoNote*>( *cursor );
-        SelectionSet sel;
+        MySelectionSet sel(&doc);
         sel.debug_add(pNote1);
         sel.debug_add(pNote2);
 
@@ -3613,8 +3867,8 @@ SUITE(DocCommandTest)
 
         executer.execute(&cursor, pCmd, &sel);
 
-        executer.undo(&cursor);
-        executer.redo(&cursor);
+        executer.undo(&cursor, &sel);
+        executer.redo(&cursor, &sel);
 
 //        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
 //        cout << pSC->dump_cursor() << endl;
@@ -3634,6 +3888,464 @@ SUITE(DocCommandTest)
         CHECK( pNote1->is_tied_prev() == false );
         CHECK( pNote1->is_tied_next() == true );
         CHECK( pNote1->get_dots() == 1 );
+    }
+
+    // CmdSelection ---------------------------------------------------------------------
+
+    TEST_FIXTURE(DocCommandTestFixture, selection_2601)
+    {
+        //2601. create selection with given objects
+        create_document_1();
+        //        "(instrument#19 (musicData#20 (clef#21 G)(key#22 C)"
+        //        "(time#23 2 4)(n#24 c4 q)(r#25 q) )))"
+        DocCursor cursor(m_pDoc);
+        DocCommandExecuter executer(m_pDoc);
+        CHECK( m_pDoc->is_dirty() == false );
+        DocCommand* pCmd = LOMSE_NEW CmdSelection(CmdSelection::k_set, 25L);    //rest
+
+        MySelectionSet sel(m_pDoc);
+        executer.execute(&cursor, pCmd, &sel);
+
+        //cout << "cmd name = " << pCmd->get_name() << endl;
+        //cout << sel.dump_selection() << endl;
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_name() == "Selection: set selection" );
+        CHECK( sel.num_selected() == 1 );
+        ImoObj* pObj = m_pDoc->get_pointer_to_imo(25L);
+        CHECK( sel.contains(pObj) == true );
+        CHECK( m_pDoc->is_dirty() == false );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, selection_2602)
+    {
+        //2602. add object
+        create_document_1();
+        //        "(instrument#19 (musicData#20 (clef#21 G)(key#22 C)"
+        //        "(time#23 2 4)(n#24 c4 q)(r#25 q) )))"
+        DocCursor cursor(m_pDoc);
+        DocCommandExecuter executer(m_pDoc);
+        MySelectionSet sel(m_pDoc);
+        ImoObj* pObj = m_pDoc->get_pointer_to_imo(25L);     //rest
+        sel.debug_add(pObj);
+
+        DocCommand* pCmd = LOMSE_NEW CmdSelection(CmdSelection::k_add, 24L);    //first note
+        executer.execute(&cursor, pCmd, &sel);
+
+//        cout << "cmd name = " << pCmd->get_name() << endl;
+//        cout << sel.dump_selection() << endl;
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_name() == "Selection: add obj. to selection" );
+        CHECK( sel.num_selected() == 2 );
+        pObj = m_pDoc->get_pointer_to_imo(24L);
+        CHECK( sel.contains(pObj) == true );
+        pObj = m_pDoc->get_pointer_to_imo(25L);
+        CHECK( sel.contains(pObj) == true );
+        CHECK( m_pDoc->is_dirty() == false );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, selection_2603)
+    {
+        //2603. remove object
+        create_document_1();
+        //        "(instrument#19 (musicData#20 (clef#21 G)(key#22 C)"
+        //        "(time#23 2 4)(n#24 c4 q)(r#25 q) )))"
+        DocCursor cursor(m_pDoc);
+        DocCommandExecuter executer(m_pDoc);
+        MySelectionSet sel(m_pDoc);
+        ImoObj* pObj = m_pDoc->get_pointer_to_imo(25L);     //rest
+        sel.debug_add(pObj);
+        pObj = m_pDoc->get_pointer_to_imo(24L);             //note
+        sel.debug_add(pObj);
+
+        DocCommand* pCmd = LOMSE_NEW CmdSelection(CmdSelection::k_remove, 25L);
+        executer.execute(&cursor, pCmd, &sel);
+
+//        cout << "cmd name = " << pCmd->get_name() << endl;
+//        cout << sel.dump_selection() << endl;
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_name() == "Selection: remove obj. from selection" );
+        CHECK( sel.num_selected() == 1 );
+        pObj = m_pDoc->get_pointer_to_imo(24L);
+        CHECK( sel.contains(pObj) == true );
+        CHECK( m_pDoc->is_dirty() == false );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, selection_2604)
+    {
+        //2604. clear selection
+        create_document_1();
+        //        "(instrument#19 (musicData#20 (clef#21 G)(key#22 C)"
+        //        "(time#23 2 4)(n#24 c4 q)(r#25 q) )))"
+        DocCursor cursor(m_pDoc);
+        DocCommandExecuter executer(m_pDoc);
+        MySelectionSet sel(m_pDoc);
+        ImoObj* pObj = m_pDoc->get_pointer_to_imo(25L);     //rest
+        sel.debug_add(pObj);
+        pObj = m_pDoc->get_pointer_to_imo(24L);             //note
+        sel.debug_add(pObj);
+
+        DocCommand* pCmd = LOMSE_NEW CmdSelection(CmdSelection::k_clear);
+        executer.execute(&cursor, pCmd, &sel);
+
+//        cout << "cmd name = " << pCmd->get_name() << endl;
+//        cout << sel.dump_selection() << endl;
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_name() == "Selection: clear selection" );
+        CHECK( sel.num_selected() == 0 );
+        CHECK( m_pDoc->is_dirty() == false );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, selection_2605)
+    {
+        //2605. add object: not added if duplicate
+        create_document_1();
+        //        "(instrument#19 (musicData#20 (clef#21 G)(key#22 C)"
+        //        "(time#23 2 4)(n#24 c4 q)(r#25 q) )))"
+        DocCursor cursor(m_pDoc);
+        DocCommandExecuter executer(m_pDoc);
+        MySelectionSet sel(m_pDoc);
+        ImoObj* pObj = m_pDoc->get_pointer_to_imo(25L);     //rest
+        sel.debug_add(pObj);
+        pObj = m_pDoc->get_pointer_to_imo(24L);             //note
+        sel.debug_add(pObj);
+
+        DocCommand* pCmd = LOMSE_NEW CmdSelection(CmdSelection::k_add, 25L);
+        executer.execute(&cursor, pCmd, &sel);
+
+//        cout << "cmd name = " << pCmd->get_name() << endl;
+//        cout << sel.dump_selection() << endl;
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_specific );
+        CHECK( pCmd->get_name() == "Selection: add obj. to selection" );
+        CHECK( sel.num_selected() == 2 );
+        pObj = m_pDoc->get_pointer_to_imo(24L);
+        CHECK( sel.contains(pObj) == true );
+        pObj = m_pDoc->get_pointer_to_imo(25L);
+        CHECK( sel.contains(pObj) == true );
+        CHECK( m_pDoc->is_dirty() == false );
+    }
+
+
+    // CmdAddChordNote ------------------------------------------------------------------
+
+    TEST_FIXTURE(DocCommandTestFixture, add_chord_note_2701)
+    {
+        //2701. To note in middle. Success. Added note selected. Cursor doesn't move.
+        create_document_2();
+        //(score#15 (vers 2.0)(instrument#19 (musicData#20
+        //(clef#21 G)(key#22 C)(time#23 2 4)(n#24 c4 q)(r#25 q)
+        DocCursor cursor(m_pDoc);
+        DocCommandExecuter executer(m_pDoc);
+        CHECK( m_pDoc->is_dirty() == false );
+        cursor.point_to(24L);
+        ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        DocCommand* pCmd = LOMSE_NEW CmdAddChordNote("e4");
+        CHECK( pCmd->get_cursor_update_policy() == DocCommand::k_refresh );
+        CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
+
+        MySelectionSet sel(m_pDoc);
+        sel.debug_add(pNote1);
+        executer.execute(&cursor, pCmd, &sel);
+
+//        ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        cout << m_pDoc->to_string(true) << endl;
+//        cout << pScore->get_staffobjs_table()->dump() << endl;
+//        cout << cursor.dump_cursor();
+
+        //cursor has not moved
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
+        CHECK( cursor.get_pointee_id() == 24L );
+
+        //selection only contains added note
+        CHECK( sel.num_selected() == 1 );
+        ImoNote* pNote2 = static_cast<ImoNote*>( sel.front() );
+        CHECK( pNote2->get_fpitch() == FPitch("e4") );
+        CHECK( pNote2->is_in_chord() == true );
+
+        //chord formed, document dirty
+        CHECK( pNote1->is_in_chord() == true );
+        CHECK( m_pDoc->is_dirty() == true );
+        ImoChord* pChord = pNote2->get_chord();
+        CHECK( pChord->get_num_objects() == 2 );
+        CHECK( pChord->get_start_object() == pNote1 );
+        CHECK( pChord->get_end_object() == pNote2 );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, add_chord_note_2701u)
+    {
+        //2701. undo/redo
+        create_document_2();
+        //(score#15 (vers 2.0)(instrument#19 (musicData#20
+        //(clef#21 G)(key#22 C)(time#23 2 4)(n#24 c4 q)(r#25 q)
+        DocCursor cursor(m_pDoc);
+        DocCommandExecuter executer(m_pDoc);
+        cursor.point_to(24L);
+        ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        DocCommand* pCmd = LOMSE_NEW CmdAddChordNote("e4");
+
+        MySelectionSet sel(m_pDoc);
+        sel.debug_add(pNote1);
+        executer.execute(&cursor, pCmd, &sel);
+
+//        cout << "After excute command:" << endl;
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+//        cout << sel.dump_selection() << endl;
+
+        executer.undo(&cursor, &sel);
+
+        CHECK( m_pDoc->is_dirty() == true );
+
+//        cout << "After undo:" << endl;
+//        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+//        cout << sel.dump_selection() << endl;
+
+        //cursor has not moved
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( cursor.get_pointee_id() == 24L );
+
+        //selection only contains base note
+        CHECK( sel.num_selected() == 1 );
+        ImoNote* pNote2 = static_cast<ImoNote*>( sel.front() );
+        CHECK( pNote2->get_fpitch() == FPitch("c4") );
+        CHECK( pNote2->is_in_chord() == false );
+        CHECK( pNote2->get_id() == 24L );
+
+        executer.redo(&cursor, &sel);
+
+//        cout << "After redo:" << endl;
+//        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+//        pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+        //cout << sel.dump_selection() << endl;
+
+        //cursor has not moved
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( cursor.get_pointee_id() == 24L );
+
+        //selection only contains added note
+        CHECK( sel.num_selected() == 1 );
+        pNote2 = static_cast<ImoNote*>( sel.front() );
+        CHECK( pNote2->get_fpitch() == FPitch("e4") );
+        CHECK( pNote2->is_in_chord() == true );
+
+        //chord formed, document dirty
+        pNote1 = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote1->is_in_chord() == true );
+        CHECK( m_pDoc->is_dirty() == true );
+        ImoChord* pChord = pNote2->get_chord();
+        CHECK( pChord->get_num_objects() == 2 );
+        CHECK( pChord->get_start_object() == pNote1 );
+        CHECK( pChord->get_end_object() == pNote2 );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, add_chord_note_2702)
+    {
+        //2702. To note at end. Success. Added note selected. Cursor doesn't move.
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to e4 e
+        cursor.move_next();         //points to f4 e
+        cursor.move_next();         //points to g4 e
+
+        ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        ImoId idNote1 = cursor.get_pointee_id();
+        DocCommand* pCmd = LOMSE_NEW CmdAddChordNote("c5");
+
+        MySelectionSet sel(&doc);
+        sel.debug_add(pNote1);
+        executer.execute(&cursor, pCmd, &sel);
+
+//        cout << "After excute command:" << endl;
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+//        cout << sel.dump_selection() << endl;
+
+        executer.undo(&cursor, &sel);
+
+        CHECK( doc.is_dirty() == true );
+
+//        cout << "After undo:" << endl;
+//        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+//        cout << sel.dump_selection() << endl;
+
+        //cursor has not moved
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( cursor.get_pointee_id() == idNote1 );
+
+        //selection only contains base note
+        CHECK( sel.num_selected() == 1 );
+        ImoNote* pNote2 = static_cast<ImoNote*>( sel.front() );
+        CHECK( pNote2->get_fpitch() == FPitch("g4") );
+        CHECK( pNote2->is_in_chord() == false );
+        CHECK( pNote2->get_id() == idNote1 );
+
+        executer.redo(&cursor, &sel);
+
+//        cout << "After redo:" << endl;
+//        pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+//        cout << sel.dump_selection() << endl;
+
+        //cursor has not moved
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( cursor.get_pointee_id() == idNote1 );
+
+        //selection only contains added note
+        CHECK( sel.num_selected() == 1 );
+        pNote2 = static_cast<ImoNote*>( sel.front() );
+        CHECK( pNote2->get_fpitch() == FPitch("c5") );
+        CHECK( pNote2->is_in_chord() == true );
+
+        //chord formed, document dirty
+        pNote1 = static_cast<ImoNote*>( *cursor );
+        CHECK( pNote1->is_in_chord() == true );
+        CHECK( doc.is_dirty() == true );
+        ImoChord* pChord = pNote2->get_chord();
+        CHECK( pChord->get_num_objects() == 2 );
+        CHECK( pChord->get_start_object() == pNote1 );
+        CHECK( pChord->get_end_object() == pNote2 );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, add_chord_note_2703)
+    {
+        //2703. Add chord note fails. No note selected
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e v1)(n f4 e v1)(n g4 e v1)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to e4 e
+        cursor.move_next();         //points to f4 e
+        cursor.move_next();         //points to g4 e
+
+        ImoId idNote1 = cursor.get_pointee_id();
+        DocCommand* pCmd = LOMSE_NEW CmdAddChordNote("c5");
+
+        MySelectionSet sel(&doc);
+        int result = executer.execute(&cursor, pCmd, &sel);
+
+        CHECK( result == k_failure );
+        CHECK( executer.get_error() == "Command ignored. No note selected or more than one." );
+
+//        cout << "msg=[" << executer.get_error() << "]" << endl;
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+//        cout << sel.dump_selection() << endl;
+
+        //cursor has not moved
+        CHECK( *cursor != NULL );
+        CHECK( (*cursor)->is_note() == true );
+        CHECK( cursor.get_pointee_id() == idNote1 );
+
+        //selection is empty
+        CHECK( sel.num_selected() == 0 );
+    }
+
+    TEST_FIXTURE(DocCommandTestFixture, add_chord_note_2704)
+    {
+        //2704. Add two notes to chord
+        Document doc(m_libraryScope);
+        doc.from_string("(score (vers 2.0)(instrument (musicData "
+            "(clef G)(n e4 e v1)(n f4 e v1)(n c4 e v1)"
+            ")))");
+        doc.clear_dirty();
+        DocCursor cursor(&doc);
+        DocCommandExecuter executer(&doc);
+        cursor.enter_element();     //points to clef
+        cursor.move_next();         //points to e4 e
+        cursor.move_next();         //points to f4 e
+        cursor.move_next();         //points to c4 e
+
+        ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
+        ImoId idNote1 = cursor.get_pointee_id();
+
+        cursor.move_next();         //now at end of score
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end_of_child );
+
+        DocCommand* pCmd = LOMSE_NEW CmdAddChordNote("g4");
+
+        MySelectionSet sel(&doc);
+        sel.debug_add(pNote1);
+        executer.execute(&cursor, pCmd, &sel);
+
+        CHECK( sel.num_selected() == 1 );
+        ImoNote* pNote2 = static_cast<ImoNote*>( sel.front() );
+        CHECK( pNote2->get_fpitch() == FPitch("g4") );
+        CHECK( pNote2->is_in_chord() == true );
+
+//        ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+//        cout << sel.dump_selection() << endl;
+//        LdpExporter exporter(&m_libraryScope);
+//        //exporter.set_remove_newlines(true);
+//        exporter.set_add_id(true);
+//        cout << exporter.get_source(pScore) << endl;
+
+        pCmd = LOMSE_NEW CmdAddChordNote("e4");
+        executer.execute(&cursor, pCmd, &sel);
+
+//        cout << "msg=[" << executer.get_error() << "]" << endl;
+//        ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
+//        cout << pSC->dump_cursor() << endl;
+//        pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+//        pTable = pScore->get_staffobjs_table();
+//        cout << pTable->dump();
+//        cout << exporter.get_source(pScore) << endl;
+//        cout << sel.dump_selection() << endl;
+
+        //cursor has not moved
+        CHECK( cursor.get_pointee_id() == k_cursor_at_end_of_child );
+
+        //selection only contains added note
+        CHECK( sel.num_selected() == 1 );
+        pNote2 = static_cast<ImoNote*>( sel.front() );
+        CHECK( pNote2->get_fpitch() == FPitch("e4") );
+        CHECK( pNote2->is_in_chord() == true );
+
+        //chord formed, document dirty
+        CHECK( doc.is_dirty() == true );
+        ImoChord* pChord = pNote2->get_chord();
+        CHECK( pChord->get_num_objects() == 3 );
+        CHECK( pChord->get_start_object()->get_id() == idNote1 );
+        CHECK( pChord->get_end_object() == pNote2 );
     }
 
 }

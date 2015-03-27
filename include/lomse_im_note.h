@@ -154,7 +154,6 @@ protected:
     int     m_stemDirection;
     ImoTie* m_pTieNext;
     ImoTie* m_pTiePrev;
-    ImoChord* m_pChord;
 
     friend class ImFactory;
     ImoNote();
@@ -216,9 +215,6 @@ public:
     ImoChord* get_chord();
     bool is_start_of_chord();
     bool is_end_of_chord();
-
-    ////in chord
-    //inline void set_in_chord(bool value) { m_inChord = value; }
 
     //pitch. Only valid when m_actual_acc is computed
     FPitch get_fpitch();            //FPitch. Ignores fractional part of actual accidentals

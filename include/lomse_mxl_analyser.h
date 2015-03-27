@@ -171,6 +171,7 @@ class PartList
 {
 protected:
     vector<ImoInstrument*> m_instruments;
+    vector<bool> m_partAdded;
     map<string, int> m_locators;
     int m_numInstrs;
     bool m_fInstrumentsAdded;
@@ -182,11 +183,15 @@ public:
     int get_num_items() { return static_cast<int>(m_locators.size()); }
     void add_score_part(const string& id, ImoInstrument* pInstrument);
     ImoInstrument* get_instrument(const string& id);
+    bool mark_part_as_added(const string& id);
     void add_all_instruments(ImoScore* pScore);
+    void check_if_missing_parts(ostream& reporter);
 
     //for unit tests
     void do_not_delete_instruments_in_destructor() { m_fInstrumentsAdded = true; }
 
+protected:
+    int find_index_for(const string& id);
 
 };
 
@@ -219,18 +224,18 @@ protected:
 
     // information maintained in MxlAnalyser
     ImoScore*       m_pCurScore;        //the score under construction
+    ImoNote*        m_pLastNote;        //last note added to the score
 //    ImoScore*       m_pLastScore;
     ImoDocument*    m_pImoDoc;          //the document containing the score
     PartList        m_partList;         //the list of instruments and their grouping
+    TimeUnits   m_time;             //time-position counter
+    float       m_divisions;        //fractions of quarter note to use as units for 'duration' values
 
 //    //inherited values
 //    int m_curStaff;
 //    int m_curVoice;
 //    int m_nShowTupletBracket;
 //    int m_nShowTupletNumber;
-
-//    //saved values
-//    ImoNote* m_pLastNote;
 
     //conversion from xml element name to int
     std::map<std::string, int>	m_NameToEnum;
@@ -247,8 +252,10 @@ public:
     //analysis
     //void analyse_node(LdpTree::iterator itNode);
     ImoObj* analyse_node(XmlNode* pNode, ImoObj* pAnchor=NULL);
+    void prepare_for_new_instrument_content();
+        //m_pAnalyser->clear_pending_relations();
 
-    //global info: setters and getters
+    //global info: setters, getters and checkers
     int set_musicxml_version(const string& version);
     inline int get_musicxml_version() { return m_musicxmlVersion; }
     void add_all_instruments(ImoScore* pScore) { m_partList.add_all_instruments(pScore); }
@@ -258,6 +265,16 @@ public:
             m_partList.add_score_part(id, pInstrument);
     }
     ImoInstrument* get_instrument(const string& id) { return m_partList.get_instrument(id); }
+    bool mark_part_as_added(const string& id) {
+        return m_partList.mark_part_as_added(id);
+    }
+    void check_if_missing_parts() { m_partList.check_if_missing_parts(m_reporter); }
+    void shift_time(float amount) { m_time += amount; }
+    TimeUnits get_current_time() { return m_time; }
+    void set_current_time(float value) { m_time = value; }
+    float current_divisions() { return m_divisions; }
+    void set_current_divisions(float value) { m_divisions = value; }
+    TimeUnits duration_to_timepos(int duration);
 
 //    //inherited and saved values setters & getters
 //    inline void set_current_staff(int nStaff) { m_curStaff = nStaff; }
@@ -271,10 +288,10 @@ public:
 //
 //    inline void set_current_show_tuplet_number(int value) { m_nShowTupletNumber = value; }
 //    inline int get_current_show_tuplet_number() { return m_nShowTupletNumber; }
-//
-//    inline void save_last_note(ImoNote* pNote) { m_pLastNote = pNote; }
-//    inline ImoNote* get_last_note() { return m_pLastNote; }
-//
+
+    inline void save_last_note(ImoNote* pNote) { m_pLastNote = pNote; }
+    inline ImoNote* get_last_note() { return m_pLastNote; }
+
 //    //interface for building relations
 //    void add_relation_info(ImoObj* pDto);
 //    void clear_pending_relations();

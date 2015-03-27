@@ -126,6 +126,9 @@ public:
     void create_with_empty_score();
     inline SharedPtr<Document> get_shared_ptr_from_this() { return shared_from_this(); }
 
+    //properties
+    bool is_editable();
+
     //dirty
     inline void clear_dirty() { m_flags &= ~k_dirty; }
     inline bool is_dirty() { return (m_flags & k_dirty) != 0; }

@@ -79,6 +79,7 @@ PartList::~PartList()
     }
     m_instruments.clear();
     m_locators.clear();
+    m_partAdded.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -86,16 +87,31 @@ void PartList::add_score_part(const string& id, ImoInstrument* pInstrument)
 {
     m_locators[id] = m_numInstrs++;
     m_instruments.push_back(pInstrument);
+    m_partAdded.push_back(false);
+}
+
+//---------------------------------------------------------------------------------------
+bool PartList::mark_part_as_added(const string& id)
+{
+    int i = find_index_for(id);
+    if (m_partAdded[i])
+        return true;    //if instrument is already marked!
+    m_partAdded[i] = true;
+    return false;
 }
 
 //---------------------------------------------------------------------------------------
 ImoInstrument* PartList::get_instrument(const string& id)
 {
+	int i = find_index_for(id);
+	return (i != -1 ? m_instruments[i] : NULL);
+}
+
+//---------------------------------------------------------------------------------------
+int PartList::find_index_for(const string& id)
+{
 	map<string, int>::const_iterator it = m_locators.find(id);
-	if (it != m_locators.end())
-        return m_instruments[it->second];
-    else
-        return NULL;
+	return (it != m_locators.end() ? it->second : -1);
 }
 
 //---------------------------------------------------------------------------------------
@@ -106,6 +122,20 @@ void PartList::add_all_instruments(ImoScore* pScore)
         pScore->add_instrument(m_instruments[i]);
 }
 
+//---------------------------------------------------------------------------------------
+void PartList::check_if_missing_parts(ostream& reporter)
+{
+    map<string, int>::const_iterator it;
+    for (it = m_locators.begin(); it != m_locators.end(); ++it)
+    {
+        if (!m_partAdded[it->second])
+        {
+            reporter << "Error: missing <part> for <score-part id='"
+                     << it->first << "'>." << endl;
+        }
+    }
+}
+
 
 //=======================================================================================
 // Enum to assign a int to each valid MusicXML element
@@ -114,13 +144,17 @@ enum EMxlTag
     k_mxl_tag_undefined = -1,
 
     k_mxl_tag_attributes,
-    k_mxl_tag_key,
+    k_mxl_tag_backup,
+    k_mxl_tag_barline,
     k_mxl_tag_clef,
+    k_mxl_tag_forward,
+    k_mxl_tag_key,
     k_mxl_tag_measure,
     k_mxl_tag_note,
     k_mxl_tag_part,
     k_mxl_tag_part_list,
     k_mxl_tag_part_name,
+    k_mxl_tag_pitch,
     k_mxl_tag_rest,
     k_mxl_tag_score_part,
     k_mxl_tag_score_partwise,
@@ -178,10 +212,6 @@ protected:
     bool get_mandatory(const string& tag);
 //    bool get_optional(EMxlTag type);
     bool get_optional(const string& type);
-    string get_attribute(const string& name);
-    string get_mandatory_string_attribute(const string& name, const string& sDefault,
-                                          const string& element);
-    string get_optional_string_attribute(const string& name, const string& sDefault);
 
     // 'analyse' methods do a 'get' and, if found, analyse the found element
     void analyse_mandatory(const string& tag, ImoObj* pAnchor=NULL);
@@ -194,9 +224,16 @@ protected:
     //methods to analyse attributes of current node
     bool has_attribute(const string& name);
     int get_attribute_as_integer(const string& name, int nNumber);
+    string get_attribute(const string& name);
+    string get_mandatory_string_attribute(const string& name, const string& sDefault,
+                                          const string& element);
+    string get_optional_string_attribute(const string& name, const string& sDefault);
+    int get_mandatory_integer_attribute(const string& name, int nDefault,
+                                        const string& element);
+    int get_optional_integer_attribute(const string& name, int nDefault);
 
     //building the model
-    void add_to_model(ImoObj* pImo);
+    void add_to_model(ImoObj* pImo, int type=-1);
 
     //auxiliary
 //    inline ImoId get_node_id() { return get_node_id(m_pAnalysedNode); }
@@ -894,6 +931,35 @@ int MxlElementAnalyser::get_attribute_as_integer(const string& name, int nDefaul
 }
 
 //---------------------------------------------------------------------------------------
+int MxlElementAnalyser::get_optional_integer_attribute(const string& name,
+                                                       int nDefault)
+{
+    if (has_attribute(m_pAnalysedNode, name))
+        return get_attribute_as_integer(name, nDefault);
+    else
+        return nDefault;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlElementAnalyser::get_mandatory_integer_attribute(const string& name, int nDefault,
+                                                        const string& element)
+{
+    int attrb = nDefault;
+    if (has_attribute(m_pAnalysedNode, name))
+        attrb = get_attribute_as_integer(name, nDefault);
+    else
+    {
+        stringstream replacement;
+        replacement << nDefault;
+        report_msg(get_line_number(m_pAnalysedNode),
+            element + ": missing mandatory attribute '" + name + "'. Value '"
+            + replacement.str() + "' assumed.");
+    }
+
+    return attrb;
+}
+
+//---------------------------------------------------------------------------------------
 bool MxlElementAnalyser::get_mandatory(const string& tag)
 {
     if (!more_children_to_analyse())
@@ -1104,12 +1170,12 @@ void MxlElementAnalyser::error_if_more_elements()
 //}
 
 //---------------------------------------------------------------------------------------
-void MxlElementAnalyser::add_to_model(ImoObj* pImo)
+void MxlElementAnalyser::add_to_model(ImoObj* pImo, int type)
 {
     //int ldpNodeType = get_type(m_pAnalysedNode);
     //pImo->set_id(get_id(m_pAnalysedNode));        //transfer id
     Linker linker( m_pAnalyser->get_document_being_analysed() );
-    linker.add_child_to_model(m_pAnchor, pImo, pImo->get_obj_type());
+    linker.add_child_to_model(m_pAnchor, pImo, type == -1 ? pImo->get_obj_type() : type);
 }
 
 
@@ -1140,8 +1206,16 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <atribbutes> = <clef> ???
+//@ <attributes> = [<divisions>]<key>*<time>*[<staves>][<part-symbol>][<instruments>]
+//@                <clef>*<staff-details>*<transpose>*<directive>*<measure-style>*
+
+//@ <atribbutes> = (%editorial;, divisions?, key?, time?,
+//        staves?, instruments?, clef*, staff-details*, transpose?,
+//        directive*, measure-style*)
 //@ attrb:   ??
+//@ Doc:    The attributes element contains musical information that typically changes
+//@         on measure boundaries. This includes key and time signatures, clefs,
+//@         transpositions, and staving.
 
 class AtribbutesMxlAnalyser : public MxlElementAnalyser
 {
@@ -1154,30 +1228,181 @@ public:
 
     ImoObj* do_analysis()
     {
+        //In MusicXML. Clefs, time signatures and key signatures are
+        //treated as attributes of a measure, not as objects and, therefore, ordering
+        //is not important for MusicXML and there are examples in which this information is
+        //coded in reversed orders (i.e. first time signature, then clef).
+        //As LenMus expects that this objects are defined in right order,
+        //objects creation will be delayed until all attributes are parsed.
+        vector<ImoObj*> times;
+        vector<ImoObj*> keys;
+        vector<ImoObj*> clefs;
+
         // [{<xxxx>|<yyyy>|<zzzz>}*]    alternatives: zero or more
         while (more_children_to_analyse())
         {
-            if (! (analyse_optional("clef")
-                   || analyse_optional("divisions")
-                   || analyse_optional("time")
-                   || analyse_optional("key")
-                  ))
+            if (get_optional("clef"))
+                clefs.push_back( m_pAnalyser->analyse_node(m_pChildToAnalyse, NULL) );
+            else if (get_optional("divisions"))
+                set_divisions();
+            else if (get_optional("time"))
+                times.push_back( m_pAnalyser->analyse_node(m_pChildToAnalyse, NULL) );
+            else if (get_optional("key"))
+                keys.push_back( m_pAnalyser->analyse_node(m_pChildToAnalyse, NULL) );
+            else if (get_optional("staves"))
+            {
+                int staves = get_integer_value(1);
+                ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor->get_parent_imo());
+                for(; staves > 1; --staves)
+                    pInstr->add_staff();
+            }
+            else
             {
                 error_invalid_child();
                 move_to_next_child();
             }
         }
-
-
         error_if_more_elements();
 
+        //add elements to model, in right order
+        vector<ImoObj*>::const_iterator it;
+        for (it = clefs.begin(); it != clefs.end(); ++it)
+        {
+            if (*it)
+                add_to_model(*it);
+        }
+        for (it = keys.begin(); it != keys.end(); ++it)
+        {
+            if (*it)
+                add_to_model(*it);
+        }
+        for (it = times.begin(); it != times.end(); ++it)
+        {
+            if (*it)
+                add_to_model(*it);
+        }
         return m_pAnchor;
     }
+
+protected:
+    void set_divisions()
+    {
+        // Musical notation duration is commonly represented as fractions. The divisions
+        // element indicates how many divisions per quarter note are used to indicate a
+        // note's duration. For example, if duration = 1 and divisions = 2, this is an
+        // eighth note duration. Duration and divisions are used directly for generating
+        // sound output, so they must be chosen to take tuplets into account. Using a
+        // divisions element lets us use just one number to represent a duration for
+        // each note in the score, while retaining the full power of a fractional
+        // representation. If maximum compatibility with Standard MIDI 1.0 files is
+        // important, do not have the divisions value exceed 16383.
+
+        int divisions = get_integer_value(4);
+        m_pAnalyser->set_current_divisions( float(divisions) );
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <barline> = [<bar-style>]
+//@ attrb:
+
+class BarlineMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    BarlineMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                    ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+
+    ImoObj* do_analysis()
+    {
+        //ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoBarline* pBarline = static_cast<ImoBarline*>(
+                                    ImFactory::inject(k_imo_barline, pDoc) );
+        pBarline->set_type(k_barline_simple);
+        add_to_model(pBarline);
+
+
+        // [<bar-style>]
+        if (get_optional("bar-style"))
+            set_barline_type(pBarline);
+
+//        error_if_more_elements();
+
+        return pBarline;
+    }
+
+protected:
+
+    void set_barline_type(ImoBarline* pBarline)
+    {
+        EBarline type;
+        string barType = get_value(m_pChildToAnalyse);
+        if (barType == "regular")
+            type = k_barline_simple;
+//        else if (barType == "dotted")
+//            type = ?
+//        else if (barType == "dashed")
+//            type = ?
+//        else if (barType == "heavy")
+//            type = ?
+        else if (barType == "light-light")
+            type = k_barline_double;
+        else if (barType == "light-heavy")
+            type = k_barline_end;
+        else if (barType == "heavy-light")
+            type = k_barline_start;
+//        else if (barType == "heavy-heavy")
+//            type = ?
+//        else if (barType == "tick")  //a short stroke through the top line
+//            type = ?
+//        else if (barType == "short")  //a partial barline between the 2nd and 4th lines
+//            type = ?
+//        else if (barType == "none")
+//            type =
+
+        else
+        {
+            report_msg(get_line_number(m_pChildToAnalyse),
+                "Invalid or not supported <bar-style> value '" + barType
+                + "'. Replaced by 'regular'.");
+        }
+        pBarline->set_type(type);
+    }
+
 };
 
 //@--------------------------------------------------------------------------------------
 //@ <clef> = <sign>[<line>][<clef-octave-change>]
-//@ attrb:   ??
+//@ attrb: none is mandatory:
+//    number  	    staff-number  	The optional number attribute refers to staff numbers
+//                                  within the part. A value of 1 is assumed if not present.
+//    additional  	yes-no  	    Sometimes clefs are added to the staff in non-standard
+//                                  line positions, either to indicate cue passages, or
+//                                  when there are multiple clefs present simultaneously
+//                                  on one staff. In this situation, the additional
+//                                  attribute is set to "yes" and the line value is ignored.
+//    size  	    symbol-size  	The size attribute is used for clefs where the additional
+//                                  attribute is "yes". It is typically used to indicate
+//                                  cue clefs. The after-barline attribute is set to "yes"
+//                                  in this situation. The attribute is ignored for
+//                                  mid-measure clefs.
+//    after-barline yes-no  	    Sometimes clefs at the start of a measure need to
+//                                  appear after the barline rather than before, as for
+//                                  cues or for use after a repeated section.
+//    default-x  	tenths
+//    default-y  	tenths
+//    relative-x  	tenths
+//    relative-y  	tenths
+//    font-family  	comma-separated-text
+//    font-style  	font-style
+//    font-size  	font-size
+//    font-weight  	font-weight
+//    color  	    color
+//    print-object 	yes-no
 
 class ClefMxlAnalyser : public MxlElementAnalyser
 {
@@ -1198,6 +1423,14 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoClef* pClef = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, pDoc) );
+
+        //attributes:
+
+        // staff number
+        int nStaffNum = get_optional_integer_attribute("number", 1);
+        pClef->set_staff(nStaffNum - 1);
+
+        //content:
 
         // <sign>
         if (get_optional("sign"))
@@ -1226,9 +1459,6 @@ public:
 //        analyse_staffobjs_options(pClef);
 
         error_if_more_elements();
-
-//        //set values that can be inherited
-//        pClef->set_staff( m_pAnalyser->get_current_staff() );
 
         add_to_model(pClef);
         return pClef;
@@ -1337,8 +1567,70 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <key> = <fifths> ????
+//@ <forward> = <duration> ?
+//@ <backup> = <duration> ?
+//@ attrb: ?
+
+class FwdBackMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    FwdBackMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope) {}
+
+
+    ImoObj* do_analysis()
+    {
+        bool fBackup = (get_name(m_pAnalysedNode) == "backup");
+
+        // <duration>
+        if (get_mandatory("duration"))
+        {
+            TimeUnits shift = m_pAnalyser->duration_to_timepos( get_float_value() )
+                              * (fBackup ? -1.0f : 1.0f);
+            m_pAnalyser->shift_time(shift);
+        }
+        return NULL;
+    }
+
+protected:
+
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <key> = <fifths><mode> ????
 //@ attrb:   ??
+//            /*
+//            Traditional key signatures are represented by the number
+//            of flats and sharps, plus an optional mode for major/minor mode
+//            distinctions. Negative numbers are used for
+//            flats and positive numbers for sharps, reflecting the
+//            key's placement within the circle of fifths (hence the
+//            element name). A cancel element indicates that the old
+//            key signature should be cancelled before the new one
+//            appears. This will always happen when changing to C major
+//            or A minor and need not be specified then. The cancel
+//            value matches the fifths value of the cancelled key
+//            signature (e.g., a cancel of -2 will provide an explicit
+//            cancellation for changing from B flat major to F major).
+//
+//            Non-traditional key signatures can be represented using
+//            the Humdrum/Scot concept of a list of altered tones.
+//            The key-step and key-alter elements are represented the
+//            same way as the step and alter elements are in the pitch
+//            element in note.dtd. The different element names indicate
+//            the different meaning of altering notes in a scale versus
+//            altering a sounding pitch.
+//
+//            Valid mode values include major, minor, dorian, phrygian,
+//            lydian, mixolydian, aeolian, ionian, and locrian.
+//
+//            <!ELEMENT key ((cancel?, fifths, mode?) |
+//                ((key-step, key-alter)*))>
+//            <!ELEMENT cancel (#PCDATA)>
+//            <!ELEMENT fifths (#PCDATA)>
+//            <!ELEMENT mode (#PCDATA)>
+//            <!ELEMENT key-step (#PCDATA)>
+//            <!ELEMENT key-alter (#PCDATA)>
 
 class KeyMxlAnalyser : public MxlElementAnalyser
 {
@@ -1354,11 +1646,25 @@ public:
         ImoKeySignature* pKey = static_cast<ImoKeySignature*>(
                                     ImFactory::inject(k_imo_key_signature, pDoc) );
 
+        //TODO: Here we are dealing only with "traditional" key signatures:
+        //      chromatic scale in major and minor modes).
+
+        int fifths = 0;
+        bool fMajor = true;
+
         // <fifths> (num)
         if (get_mandatory("fifths"))
-            pKey->set_key_type( get_key_type() );
+            fifths = get_integer_value(0);
+
+        // <mode>
+        if (get_optional("mode"))
+            fMajor = (get_string_value() == "major");
+
 
         error_if_more_elements();
+
+        //set key
+        pKey->set_key_type( fifths_to_key_signature(fifths, fMajor) );
 
         add_to_model(pKey);
         return pKey;
@@ -1366,76 +1672,110 @@ public:
 
 protected:
 
-    int get_key_type()
+    int fifths_to_key_signature(int fifths, bool fMajor)
     {
-        return fifths_to_key_signature( get_integer_value(0) );
-    }
+        // Returns the key signature for the given number of fifths and mode
 
-    int fifths_to_key_signature(int fifths)
-    {
-        // Returns the major key signature for the given number of fifths
-
-        switch(fifths)
+        if (fMajor)
         {
-            case 0:
-                return k_key_C;
-                //case k_key_a;
-
-            //Sharps ---------------------------------------
-            case 1:
-                return k_key_G;
-                //return k_key_e;
-            case 2:
-                return k_key_D;
-                //return k_key_b:
-            case 3:
-                return k_key_A;
-                //return k_key_fs;
-            case 4:
-                return k_key_E;
-                //return k_key_cs;
-            case 5:
-                return k_key_B;
-                //return k_key_gs;
-            case 6:
-                return k_key_Fs;
-                //return k_key_ds;
-            case 7:
-                return k_key_Cs;
-                //return k_key_as;
-
-            //Flats -------------------------------------------
-            case -1:
-                return k_key_F;
-                //return k_key_d;
-            case -2:
-                return k_key_Bf;
-                //return k_key_g;
-            case -3:
-                return k_key_Ef;
-                //return k_key_c;
-            case -4:
-                return k_key_Af;
-                //return k_key_f;
-            case -5:
-                return k_key_Df;
-                //return k_key_bf;
-            case -6:
-                return k_key_Gf;
-                //return k_key_ef;
-            case -7:
-                return k_key_Cf;
-                //return k_key_af;
-
-            default:
+            switch(fifths)
             {
-                string msg = str( boost::format(
-                                    "Invalid number of fifths %d")
-                                    % fifths );
-                error_msg(msg);
-//                LOMSE_LOG_ERROR(msg);
-//                throw runtime_error(msg);
-                return k_key_C;
+                case 0:
+                    return k_key_C;
+
+                //Sharps ---------------------------------------
+                case 1:
+                    return k_key_G;
+                case 2:
+                    return k_key_D;
+                case 3:
+                    return k_key_A;
+                case 4:
+                    return k_key_E;
+                case 5:
+                    return k_key_B;
+                case 6:
+                    return k_key_Fs;
+                case 7:
+                    return k_key_Cs;
+
+                //Flats -------------------------------------------
+                case -1:
+                    return k_key_F;
+                case -2:
+                    return k_key_Bf;
+                case -3:
+                    return k_key_Ef;
+                case -4:
+                    return k_key_Af;
+                case -5:
+                    return k_key_Df;
+                case -6:
+                    return k_key_Gf;
+                case -7:
+                    return k_key_Cf;
+
+                default:
+                {
+                    string msg = str( boost::format(
+                                        "Invalid number of fifths %d")
+                                        % fifths );
+                    error_msg(msg);
+    //                LOMSE_LOG_ERROR(msg);
+    //                throw runtime_error(msg);
+                    return k_key_C;
+                }
+            }
+        }
+        else
+        {
+            switch(fifths)
+            {
+                case 0:
+                    return k_key_a;
+
+                //Sharps ---------------------------------------
+                case 1:
+                    return k_key_e;
+                case 2:
+                    return k_key_b;
+                case 3:
+                    return k_key_fs;
+                case 4:
+                    return k_key_cs;
+                case 5:
+                    return k_key_gs;
+                case 6:
+                    return k_key_ds;
+                case 7:
+                    return k_key_as;
+
+                //Flats -------------------------------------------
+                case -1:
+                    return k_key_d;
+                case -2:
+                    return k_key_g;
+                case -3:
+                    return k_key_c;
+                case -4:
+                    return k_key_f;
+                case -5:
+                    return k_key_bf;
+                case -6:
+                    return k_key_ef;
+                case -7:
+                    return k_key_af;
+
+                default:
+                {
+                    string msg = str( boost::format(
+                                        "Invalid number of fifths %d")
+                                        % fifths );
+                    error_msg(msg);
+    //                LOMSE_LOG_ERROR(msg);
+    //                throw runtime_error(msg);
+                    return k_key_a;
+                }
             }
         }
     }
@@ -1446,6 +1786,9 @@ protected:
 //@--------------------------------------------------------------------------------------
 //@ <measure> = group ref="music-data"/>
 //@ attrb:   attributeGroup ref="measure-attributes"/>
+//    <!ELEMENT measure (note | backup | forward | direction | attributes |
+//        harmony | figured-bass | print | sound | barline |
+//        grouping | link | bookmark)*
 
 class MeasureMxlAnalyser : public MxlElementAnalyser
 {
@@ -1457,32 +1800,26 @@ public:
 
     ImoObj* do_analysis()
     {
-        //ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
+        ImoMusicData* pMD = dynamic_cast<ImoMusicData*>(m_pAnchor);
+        bool fSomethingAdded = false;
+        bool fBarline = false;
 
         // [{<xxxx>|<yyyy>|<zzzz>}*]    alternatives: zero or more
         while (more_children_to_analyse())
         {
-            if (! (analyse_optional("attributes")
-                   || analyse_optional("note")
-                   || analyse_optional("rest")
-//                   || analyse_optional(k_na)
-//                   || analyse_optional(k_chord)
-//                   || analyse_optional(k_barline)
-//                   || analyse_optional(k_clef)
-//                   || analyse_optional(k_figuredBass)
-//                   || analyse_optional(k_key_signature)
-//                   || analyse_optional(k_metronome)
-//                   || analyse_optional(k_newSystem)
-//                   || analyse_optional(k_spacer)
-//                   || analyse_optional(k_time_signature)
-//                   || analyse_optional(k_goFwd)
-//                   || analyse_optional(k_goBack)
-//#if LOMSE_COMPATIBILITY_LDP_1_5
-//                   || analyse_optional(k_graphic)
-//                   || analyse_optional(k_line)
-//                   || analyse_optional(k_text)
-//#endif
-                  ))
+            if (analyse_optional("attributes", pMD))
+                fSomethingAdded |= true;
+            else if (analyse_optional("barline", pMD))
+                fBarline |= true;
+            else if (analyse_optional("direction", pMD))
+                fSomethingAdded |= true;
+            else if (analyse_optional("note", pMD))
+                fSomethingAdded |= true;
+            else if (analyse_optional("forward"))
+                ;
+            else if (analyse_optional("backup"))
+                ;
+            else
             {
                 error_invalid_child();
                 move_to_next_child();
@@ -1492,17 +1829,59 @@ public:
 
         error_if_more_elements();
 
-        return m_pAnchor;
+        if (fSomethingAdded && !fBarline)
+            add_barline(pMD);
+        return pMD;
     }
+
+protected:
+
+    void add_barline(ImoMusicData* pMD)
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoBarline* pBarline = static_cast<ImoBarline*>(
+                                    ImFactory::inject(k_imo_barline, pDoc) );
+        pBarline->set_type(k_barline_simple);
+        add_to_model(pBarline);
+    }
+
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <note> = <pitch><duration><type>
-// <note>
-//    <pitch><step>C</step><octave>4</octave></pitch>
-//    <duration>4</duration>
-//    <type>whole</type>
-// </note>
+//@ <note> = { %grace | %cue | %regular-note }
+//@      [<instrument>] %editorial-voice [<type>] <dot>* [<accidental>]
+//@      [<time-modification>] [<stem>] [<notehead>] [<staff>] <beam>*
+//@      <notations>* <lyric>*
+//@ %grace = (grace, %full-note;, (tie, tie?)?)
+//@ %cue = (cue, %full-note;, duration)
+//@ %regular-note = (%full-note;, duration, (tie, tie?)?)
+//@ %full-note = <chord> {<pitch>|<unpitched>|<rest>} <duration> <voice>
+//@
+//@
+//@ - Grace notes do not have a duration element.
+//@ - Cue notes have a duration element, as do forward elements, but no tie elements.
+//@
+//@ attrb: (none is mandatory)
+//    Name  	    Type
+//    default-x  	tenths
+//    default-y  	tenths
+//    relative-x  	tenths
+//    relative-y  	tenths
+//    font-family  	comma-separated-text
+//    font-style  	font-style
+//    font-size  	font-size
+//    font-weight  	font-weight
+//    color  	    color
+//    print-object  yes-no
+//    print-dot  	yes-no
+//    print-spacing yes-no
+//    print-lyric  	yes-no
+//    dynamics  	non-negative-decimal  	The dynamics and end-dynamics attributes correspond to MIDI 1.0's Note On and Note Off velocities, respectively. They are expressed in terms of percentages of the default forte value (90 for MIDI 1.0).
+//    end-dynamics  non-negative-decimal  	The dynamics and end-dynamics attributes correspond to MIDI 1.0's Note On and Note Off velocities, respectively. They are expressed in terms of percentages of the default forte value (90 for MIDI 1.0).
+//    attack  	    divisions  	    		The attack and release attributes are used to alter the starting and stopping time of the note from when it would otherwise occur based on the flow of durations - information that is specific to a performance. They are expressed in terms of divisions, either positive or negative. A note that starts a tie should not have a release attribute, and a note that stops a tie should not have an attack attribute.
+//    release  	    divisions  	            The attack and release attributes are used to alter the starting and stopping time of the note from when it would otherwise occur based on the flow of durations - information that is specific to a performance. They are expressed in terms of divisions, either positive or negative. A note that starts a tie should not have a release attribute, and a note that stops a tie should not have an attack attribute.
+//    time-only  	time-only  	      		If a note is played only particular times through a repeat, the time-only attribute shows which times to play the note.
+//    pizzicato  	yes-no
 
 class NoteRestMxlAnalyser : public MxlElementAnalyser
 {
@@ -1531,36 +1910,74 @@ public:
 
     ImoObj* do_analysis()
     {
-//        bool fIsRest = is_type(m_pAnalysedNode, k_rest);
-//        bool fInChord = !fIsRest && is_type(m_pAnalysedNode, k_na);
+        bool fIsCue = get_optional("cue");
+        bool fIsGrace = get_optional("grace");
+        bool fIsRest = get_optional("rest");
+        bool fInChord = false;
 
-        // create object note or rest
+        // create object for note or rest
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoNoteRest* pNR = NULL;
         ImoNote* pNote = NULL;
-//        ImoRest* pRest = NULL;
-//        if (fIsRest)
-//        {
-//            pRest = static_cast<ImoRest*>(ImFactory::inject(k_imo_rest, pDoc));
-//            pNR = pRest;
-//        }
-//        else
-//        {
+        ImoRest* pRest = NULL;
+        if (fIsRest)
+        {
+            pRest = static_cast<ImoRest*>(ImFactory::inject(k_imo_rest, pDoc));
+            pNR = pRest;
+        }
+        else
+        {
             pNote = static_cast<ImoNote*>(ImFactory::inject(k_imo_note, pDoc));
             pNR = pNote;
-//        }
-//
-//        //pitch
-//        if (!fIsRest)
-//        {
-            // <pitch>
-            if (get_mandatory("pitch"))
-                set_notated_pitch(pNote);
-//        }
+        }
 
-//        // <duration> (num)
-//        if (get_mandatory("duration"))
-            set_duration(pNR);
+        // [<chord>]
+        if (!fIsRest && get_optional("chord"))
+        {
+            //The chord element indicates that this note is an additional chord tone
+            //with the preceding note. The duration of this note can be no longer
+            //than the preceding note.
+            fInChord = true;
+        }
+
+        // <pitch> | <unpitched>
+        if (!fIsRest)
+        {
+            if (get_optional("unpitched"))
+                pNote->set_notated_pitch(k_no_pitch, 4, k_no_accidentals);
+            else
+                analyse_mandatory("pitch", pNote);
+        }
+
+        // <duration>
+        if (get_optional("duration"))
+            ;   //set_duration(pNR);
+
+        //TODO <voice>
+        get_optional("voice");
+
+        // [<type>]
+        if (get_optional("type"))
+            set_type(pNR);
+
+        // [<dot>*]
+        while (get_optional("dot"))
+        {
+
+        }
+
+        // [<accidentals>]
+        if (!fIsRest && get_optional("accidental"))
+            set_notated_accidentals(pNote);
+
+        //<stem>
+        if (!fIsRest && get_optional("stem"))
+            set_stem(pNote);
+
+        // [<staff>]
+        if (get_optional("staff"))
+            set_staff(pNR);
+
 
 //        bool fStartOldTie = false;
 //        bool fAddOldBeam = false;
@@ -1591,7 +2008,14 @@ public:
 //        // [<componentOptions>*]
 //        analyse_scoreobj_options(pNR);
 
-        add_to_model(pNR);
+        //for now, ignore cue & grace notes
+        if (!(fIsCue || fIsGrace))
+            add_to_model(pNR);
+        else
+        {
+            delete pNote;
+            return NULL;
+        }
 
 //        // [<attachments>*]
 //        analyse_attachments(pNR);
@@ -1626,29 +2050,27 @@ public:
 //
 //        //slur
 //        add_slur_info(pNote);
-//
-//        //chord
-//        if (!fIsRest && fInChord)
-//        {
-//            ImoNote* pStartOfChordNote = m_pAnalyser->get_last_note();
-//            ImoChord* pChord;
-//            if (pStartOfChordNote->is_in_chord())
-//            {
-//                //chord already created. just add note to it
-//                pChord = pStartOfChordNote->get_chord();
-//            }
-//            else
-//            {
-//                //previous note is the base note. Create the chord
-//                pChord = static_cast<ImoChord*>(ImFactory::inject(k_imo_chord, pDoc));
-//                Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//                pStartOfChordNote->include_in_relation(pDoc, pChord);
-//            }
-//
-//            //add current note to chord
-//            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//            pNote->include_in_relation(pDoc, pChord);
-//
+
+        //deal with notes in chord
+        if (!fIsRest && fInChord)
+        {
+            ImoNote* pPrevNote = m_pAnalyser->get_last_note();
+            ImoChord* pChord;
+            if (pPrevNote->is_in_chord())
+            {
+                //chord already created. just add note to it
+                pChord = pPrevNote->get_chord();
+            }
+            else
+            {
+                //previous note is the base note. Create the chord
+                pChord = static_cast<ImoChord*>(ImFactory::inject(k_imo_chord, pDoc));
+                pPrevNote->include_in_relation(pDoc, pChord);
+            }
+
+            //add current note to chord
+            pNote->include_in_relation(pDoc, pChord);
+
 //        //TODO: check if note in chord has the same duration than base note
 //      //  if (fInChord && m_pLastNote
 //      //      && !IsEqualTime(m_pLastNote->GetDuration(), rDuration) )
@@ -1658,16 +2080,172 @@ public:
 //      //      nNoteType = m_pLastNote->GetNoteType();
 //      //      nDots = m_pLastNote->GetNumDots();
 //      //  }
-//        }
-//
-//        //save this note as last note
-//        if (!fIsRest)
-//            m_pAnalyser->save_last_note(pNote);
+        }
+
+        //save this note as last note
+        if (!fIsRest)
+            m_pAnalyser->save_last_note(pNote);
 
         return pNR;
     }
 
 protected:
+
+    void set_notated_accidentals(ImoNote* pNote)
+    {
+        EAccidentals accidentals = k_no_accidentals;
+        string acc = get_value(m_pChildToAnalyse);  //get_string_value();
+        if (acc == "sharp")
+            accidentals = k_sharp;
+        else if (acc == "natural")
+            accidentals = k_natural;
+        else if (acc == "flat")
+            accidentals = k_flat;
+        else if (acc == "double-sharp")
+            accidentals = k_double_sharp;
+        else if (acc == "sharp-sharp")
+            accidentals = k_sharp_sharp;
+        else if (acc == "flat-flat")
+            accidentals = k_flat_flat;
+        else if (acc == "natural-sharp")
+            accidentals = k_natural_sharp;
+        else if (acc == "natural-flat")
+            accidentals = k_natural_flat;
+
+//        //Tartini-style quarter-tone accidentals
+//        else if (acc == "quarter-flat")
+//        else if (acc == "quarter-sharp")
+//        else if (acc == "three-quarters-flat")
+//        else if (acc == "three-quarters-sharp")
+//        //quarter-tone accidentals that include arrows pointing down or up
+//        else if (acc == "sharp-down")
+//        else if (acc == "sharp-up")
+//        else if (acc == "natural-down")
+//        else if (acc == "natural-up")
+//        else if (acc == "flat-down")
+//        else if (acc == "flat-up")
+//        else if (acc == "triple-sharp")
+//        else if (acc == "triple-flat")
+//        //used in Turkish classical music
+//        else if (acc == "slash-quarter-sharp")
+//        else if (acc == "slash-sharp")
+//        else if (acc == "slash-flat")
+//        else if (acc == "double-slash-flat")
+//        //superscripted versions of the accidental signs, used in Turkish folk music
+//        else if (acc == "sharp-1")
+//        else if (acc == "sharp-2")
+//        else if (acc == "sharp-3")
+//        else if (acc == "sharp-5")
+//        else if (acc == "flat-1")
+//        else if (acc == "flat-2")
+//        else if (acc == "flat-3")
+//        else if (acc == "flat-4")
+//        //microtonal sharp and flat accidentals used in Iranian and Persian music
+//        else if (acc == "sori")
+//        else if (acc == "koron")
+
+        else
+        {
+            report_msg(get_line_number(m_pChildToAnalyse),
+                "Invalid or not supported <accidentals> value '" + acc + "'. Ignored.");
+        }
+        pNote->set_notated_accidentals(accidentals);
+    }
+
+//    Editorial and cautionary indications are indicated
+//    by attributes. Values for these attributes are "no" if not
+//    present. Specific graphic display such as parentheses,
+//    brackets, and size are controlled by the level-display
+//    entity defined in the common.mod file.
+//-->
+//<!ELEMENT accidental (#PCDATA)>
+//<!ATTLIST accidental
+//    cautionary %yes-no; #IMPLIED
+//    editorial %yes-no; #IMPLIED
+//    %level-display;
+//    %print-style;
+//>
+
+//     <note default-x="83">
+//        <pitch>
+//          <step>A</step>
+//          <alter>1</alter>
+//          <octave>4</octave>
+//        </pitch>
+//        <duration>2</duration>
+//        <voice>1</voice>
+//        <type>quarter</type>
+//        <accidental>sharp</accidental>
+//        <stem default-y="10.5">up</stem>
+//      </note>
+
+    void set_type(ImoNoteRest* pNR)
+    {
+        int noteType = k_quarter;
+
+        string type = get_value(m_pChildToAnalyse);
+        if (type == "quarter")
+            noteType = k_quarter;
+        else if (type == "eighth")
+            noteType = k_eighth;
+        else if (type == "16th")
+            noteType = k_16th;
+        else if (type == "half")
+            noteType = k_half;
+        else if (type == "32nd")
+            noteType = k_32th;
+        else if (type == "64th")
+            noteType = k_64th;
+        else if (type == "whole")
+            noteType = k_whole;
+        else if (type == "long")
+            noteType = k_longa;
+        else if (type == "128th")
+            noteType = k_128th;
+        else if (type == "256th")
+            noteType = k_256th;
+        else if (type == "breve")
+            noteType = k_breve;
+//        else if (type == "512th")
+//            noteType = k_512th;
+//        else if (type == "1024th")
+//            noteType = k_1024th;
+//        else if (type == "maxima")
+//            noteType = k_maxima;
+        else
+        {
+            report_msg(get_line_number(m_pChildToAnalyse),
+                "Invalid or not supported <type> value '" + type + "'. Replaced by 'eighth'.");
+        }
+        pNR->set_note_type_and_dots(noteType, 0);
+    }
+
+    void set_staff(ImoNoteRest* pNR)
+    {
+        int i = get_integer_value(1) - 1;
+        pNR->set_staff(i);
+    }
+
+    void set_stem(ImoNote* pNote)
+    {
+        string type = get_value(m_pChildToAnalyse);
+        ENoteStem value = k_stem_default;
+
+        if (type == "none")
+            value = k_stem_none;
+        else if (type == "up")
+            value = k_stem_up;
+        else if (type == "down")
+            value = k_stem_down;
+        else if (type == "double")
+            value = k_stem_double;
+        else
+        {
+            report_msg(get_line_number(m_pChildToAnalyse),
+                "Invalid or not supported <stem> value '" + type + "'. Replaced by 'default'.");
+        }
+        pNote->set_stem_direction(value);
+    }
 
 //    void analyse_note_rest_options(ImoNoteRest* pNR)
 //    {
@@ -1706,27 +2284,6 @@ protected:
 //            move_to_next_child();
 //        }
 //    }
-
-    void set_notated_pitch(ImoNote* pNote)
-    {
-//        string pitch = get_value(m_pChildToAnalyse);
-        int step = 0;
-        int octave = 4;
-        EAccidentals accidentals = k_no_accidentals;
-//        if (pitch == "*")
-//            pNote->set_notated_pitch(k_no_pitch, 4, k_no_accidentals);
-//        else
-//        {
-//            if (MxlAnalyser::ldp_pitch_to_components(pitch, &step, &octave, &accidentals))
-//            {
-//                report_msg(get_line_number(m_pChildToAnalyse),
-//                    "Unknown note pitch '" + pitch + "'. Replaced by 'c4'.");
-//                pNote->set_notated_pitch(k_step_C, 4, k_no_accidentals);
-//            }
-//            else
-                pNote->set_notated_pitch(step, octave, accidentals);
-//        }
-    }
 
     void set_duration(ImoNoteRest* pNR)
     {
@@ -2039,8 +2596,13 @@ public:
             error_msg("No <score-part> found for part id='" + id + "'. <part> content will be ignored.");
             return NULL;
         }
+        if (m_pAnalyser->mark_part_as_added(id))
+        {
+            error_msg("Duplicated <part> for part id='" + id + "'. <part> content will be ignored.");
+            return NULL;
+        }
 
-        //m_pAnalyser->clear_pending_relations();
+        m_pAnalyser->prepare_for_new_instrument_content();
         ImoMusicData* pMD = pInstr->get_musicdata();
 
         // <measure>*
@@ -2051,6 +2613,7 @@ public:
         add_to_model(pMD);
         return pMD;
     }
+
 };
 
 //@--------------------------------------------------------------------------------------
@@ -2119,9 +2682,17 @@ public:
         analyse_mandatory("score-part");
 
         // { <part-group> | <score-part> }*
-        while (get_optional("part-group") || get_optional("score-part"))
+        while (more_children_to_analyse())
         {
-            ;   //TODO: add part-group to table
+            if (analyse_optional("score-part"))
+                ;
+            else if (analyse_optional("part-group"))
+                ;   //TODO: add part-group to table
+            else
+            {
+                error_invalid_child();
+                move_to_next_child();
+            }
         }
 
         error_if_more_elements();
@@ -2147,10 +2718,43 @@ public:
 
     ImoObj* do_analysis()
     {
-        string name = get_value(m_pAnalysedNode);  //get_string_value();
+        string name = get_value(m_pAnalysedNode);
+        if (!name.empty())
+        {
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            ImoScoreText* pText = static_cast<ImoScoreText*>(
+                        ImFactory::inject(k_imo_score_text, pDoc));
+            pText->set_text(name);
 
-        ImoInstrument* pInstr = dynamic_cast<ImoInstrument*>(m_pAnchor);
-        pInstr->set_name(name);
+            // [<style>]
+            ImoStyle* pStyle = NULL;
+//            if (get_optional(k_style))
+//                pStyle = get_text_style_param(m_styleName);
+//            else
+            {
+                ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
+                if (pScore)     //in unit tests the score might not exist
+                    pStyle = pScore->get_default_style();
+            }
+            pText->set_style(pStyle);
+
+//            // [<location>]
+//            while (more_params_to_analyse())
+//            {
+//                if (get_optional(k_dx))
+//                    pText->set_user_location_x( get_location_param() );
+//                else if (get_optional(k_dy))
+//                    pText->set_user_location_y( get_location_param() );
+//                else
+//                {
+//                    error_invalid_param();
+//                    move_to_next_param();
+//                }
+//            }
+//            error_if_more_elements();
+
+            add_to_model(pText, k_name);
+        }
 
         return NULL;
     }
@@ -2214,6 +2818,134 @@ public:
 //};
 
 //@--------------------------------------------------------------------------------------
+//@ <pitch> = <step>[<alter>]<octave>
+//@ attrb:   none
+
+class PitchMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    PitchMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                    ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+
+    ImoObj* do_analysis()
+    {
+        //anchor object is ImoNote
+
+        // <step>
+        string step = (get_mandatory("step") ? get_value(m_pChildToAnalyse) : "C");
+
+        // [<alter>]
+        string accidentals = (get_optional("alter") ? get_value(m_pChildToAnalyse) : "0");
+
+        // <octave>
+        string octave = (get_mandatory("octave") ? get_value(m_pChildToAnalyse) : "4");
+
+        error_if_more_elements();
+
+        ImoNote* pNote = dynamic_cast<ImoNote*>(m_pAnchor);
+        int nStep = mxl_step_to_step(step);
+        EAccidentals nAcc = mxl_alter_to_accidentals(accidentals);
+        int nOctave = mxl_octave_to_octave(octave);
+        pNote->set_step(nStep);
+        pNote->set_octave(nOctave);
+        pNote->set_actual_accidentals(nAcc);
+        return pNote;
+    }
+
+protected:
+
+    int mxl_step_to_step(const string& step)
+    {
+        switch (step[0])
+        {
+            case 'A':	return k_step_A;
+            case 'B':	return k_step_B;
+            case 'C':	return k_step_C;
+            case 'D':	return k_step_D;
+            case 'E':	return k_step_E;
+            case 'F':	return k_step_F;
+            case 'G':	return k_step_G;
+            default:
+            {
+                report_msg(get_line_number(m_pChildToAnalyse),
+                    "Unknown note step '" + step + "'. Replaced by 'C'.");
+                return k_step_C;
+            }
+        }
+    }
+
+    int mxl_octave_to_octave(const string& octave)
+    {
+        //@ MusicXML octaves are represented by the numbers 0 to 9, where 4
+        //@ indicates the octave started by middle C.
+
+        switch (octave[0])
+        {
+            case '0':	return 0;
+            case '1':	return 1;
+            case '2':	return 2;
+            case '3':	return 3;
+            case '4':	return 4;
+            case '5':	return 5;
+            case '6':	return 6;
+            case '7':	return 7;
+            case '8':	return 8;
+            case '9':	return 9;
+            default:
+            {
+                report_msg(get_line_number(m_pChildToAnalyse),
+                    "Unknown octave '" + octave + "'. Replaced by '4'.");
+                return 4;
+            }
+        }
+    }
+
+    EAccidentals mxl_alter_to_accidentals(const string& accidentals)
+    {
+        //@ The <alter> element is needed for the sounding pitch, whether the
+        //@ accidental is in the key signature or not. If you want to see an
+        //@ accidental, you need to use the <accidental> element. The <alter> is
+        //@ for what you hear; the <accidental> is for what you see.
+        //@
+        //@ The alter element represents chromatic alteration in number of
+        //@ semitones (e.g., -1 for flat, 1 for sharp). Decimal values like 0.5
+        //@ (quarter tone sharp) are used for microtones.
+        //@ AWARE: <alter> is for pitch, not for displayed accidental. The displayed
+        //@ accidentals is encoded in an <accidental> element
+
+        //TODO: only integer accidentals -2..+2 supported. Modify for more.
+
+        long nNumber;
+        std::istringstream iss(accidentals);
+        if ((iss >> std::dec >> nNumber).fail() || nNumber > 2 || nNumber < -2)
+        {
+            report_msg(get_line_number(m_pChildToAnalyse),
+                "Invalid or not supported <alter> value '" + accidentals + "'. Ignored.");
+            return k_no_accidentals;
+        }
+
+        switch(nNumber)
+        {
+            case 0:
+                return k_no_accidentals;
+            case 1:
+                return k_sharp;
+            case 2:
+                return k_double_sharp;
+            case -1:
+                return k_flat;
+            case -2:
+                return k_flat_flat;
+        }
+        return k_no_accidentals;        //should not reach this
+    }
+
+};
+
+
+//@--------------------------------------------------------------------------------------
 //@ <score-part> = [<identification>]<part-name>[<part-name-display>][<part-abbreviation>]
 //@                [<part-abbreviation-display>]<group>*
 //@                <score-instrument>* { [<midi-device>][<midi-instrument>] }*
@@ -2241,7 +2973,7 @@ public:
         // [<identification>]
         analyse_optional("identification", pInstrument);
 
-        // [<part-name>] Introduced in 1.1, but deprecated in 2.0 in favor of the new part-name-display
+        // [<part-name>]
         analyse_optional("part-name", pInstrument);
 
         // [<part-name-display>]
@@ -2482,6 +3214,7 @@ public:
         //compatible, I prefer to be practical and deal with version differences
         //in each specific MxlElementAnalyser.
 
+        ImoScore* pScore = create_score();
 
         //TODO: deal with ignored elements
         // [<work>]
@@ -2505,27 +3238,25 @@ public:
         if (!analyse_optional("part-list"))
         {
             error_missing_element("part-list");
+            remove_score(pImoDoc, pScore);
             return pImoDoc;
         }
         if (!m_pAnalyser->part_list_is_valid())
         {
             error_msg("errors in <part-list>. Analysis stopped.");
+            remove_score(pImoDoc, pScore);
             return pImoDoc;
         }
-        ImoScore* pScore = create_score();
         add_all_instruments(pScore);
 
         // <part>*
-        if (!more_children_to_analyse())
-            error_missing_element("part");
-        else
+        while (more_children_to_analyse())
         {
-            while (more_children_to_analyse())
-            {
-                analyse_mandatory("part", pScore);
-            }
+            analyse_mandatory("part", pScore);
         }
         error_if_more_elements();
+
+        check_if_missing_parts();
 
         //m_pAnalyser->score_analysis_end();
         return pImoDoc;
@@ -2554,7 +3285,13 @@ protected:
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, pDoc));
         m_pAnalyser->score_analysis_begin(pScore);
         add_to_model(pScore);
+        pScore->set_version(160);   //use version 1.6 to allow using ImoFwdBack
         return pScore;
+    }
+
+    void remove_score(ImoDocument* pImoDoc, ImoScore* pScore)
+    {
+        pImoDoc->delete_block_level_obj(pScore);
     }
 
     void add_all_instruments(ImoScore* pScore)
@@ -2562,11 +3299,79 @@ protected:
         m_pAnalyser->add_all_instruments(pScore);
     }
 
+    void check_if_missing_parts()
+    {
+        m_pAnalyser->check_if_missing_parts();
+    }
+
 };
 
 //@--------------------------------------------------------------------------------------
 //@ <time> = <beats><beat-type> ????
 //@ attrb:   ??
+//         // <time> tag -----------------------------------------------------
+//        else if (sTag == _T("time")) {
+//            /*
+//            Time signatures are represented by two elements. The
+//            beats element indicates the number of beats, as found in
+//            the numerator of a time signature. The beat-type element
+//            indicates the beat unit, as found in the denominator of
+//            a time signature. The symbol attribute is used to
+//            indicate another notation beyond a fraction: the common
+//            and cut time symbols, as well as a single number with an
+//            implied denominator. Normal (a fraction) is the implied
+//            symbol type if none is specified. Multiple pairs of
+//            beat and beat-type elements are used for composite
+//            time signatures with multiple denominators, such as
+//            2/4 + 3/8. A composite such as 3+2/8 requires only one
+//            beat/beat-type pair. A senza-misura element explicitly
+//            indicates that no time signature is present.
+//
+//            <!ELEMENT time ((beats, beat-type)+ | senza-misura)>
+//            <!ATTLIST time
+//                symbol (common | cut | single-number | normal) #IMPLIED
+//            >
+//            <!ELEMENT beats (#PCDATA)>
+//            <!ELEMENT beat-type (#PCDATA)>
+//            <!ELEMENT senza-misura EMPTY>
+//
+//            */
+//
+//            wxString sBeats = _T("4");            //<time> default value: 4/4
+//            wxString sBeatType = _T("4");
+//            // get data
+//            wxXmlNode* pChild = GetFirstChild(pNode);
+//            wxXmlNode* pElmnt = pChild;
+//            while (pElmnt) {
+//                if (pElmnt->GetName() == _T("beats"))
+//                    sBeats = GetText(pElmnt);
+//                else if (pElmnt->GetName() == _T("beat-type"))
+//                    sBeatType = GetText(pElmnt);
+//                else
+//                    TagError(sElement + sDbgTag, pElmnt->GetName());
+//                pChild = GetNextSibling(pChild);
+//                pElmnt = pChild;
+//            }
+//            //Log results
+//            g_pLogger->LogTrace(_T("lmMusicXMLParser"),
+//                _("Parsing <time>: beats=%s, beat-type=%s"),
+//                sBeats.c_str(), sBeatType.c_str() );
+//
+//            //TODO Change this for a more general treatment
+//            bool fError = !sBeats.ToLong(&nBeats) || !sBeatType.ToLong(&nBeatType);
+//
+//            if (fError) {
+//                g_pLogger->LogDataError(
+//                    _T("Time signature %s / %s not supported. Assumed 4 / 4"),
+//                    sBeats.c_str(), sBeatType.c_str() );
+//                nBeats = 4;
+//                nBeatType = 4;
+//            }
+//
+//            //create the time signature object
+//            fTimeSignature = true;        //dealy its creation
+//
+//        }
 
 class TimeMxlAnalyser : public MxlElementAnalyser
 {
@@ -2649,70 +3454,6 @@ public:
 //
 //        add_to_model( pLine );
 //        return pLine;
-//    }
-//
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ ImoBarline StaffObj
-////@ <barline> = (barline) | (barline <type>[<visible>][<location>])
-////@ <type> = label: { start | end | double | simple | startRepetition |
-////@                   endRepetition | doubleRepetition }
-//
-//class BarlineMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    BarlineMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                    ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoBarline* pBarline = static_cast<ImoBarline*>(
-//                                    ImFactory::inject(k_imo_barline, pDoc) );
-//        pBarline->set_type(k_barline_simple);
-//
-//        // <type> (label)
-//        if (get_optional(k_label))
-//            pBarline->set_type( get_barline_type() );
-//
-//        // [<visible>][<location>]
-//        analyse_staffobjs_options(pBarline);
-//
-//        error_if_more_elements();
-//
-//        add_to_model(pBarline);
-//        return pBarline;
-//    }
-//
-//protected:
-//
-//    int get_barline_type()
-//    {
-//        string value = get_value(m_pChildToAnalyse);
-//        int type = k_barline_simple;
-//        if (value == "simple")
-//            type = k_barline_simple;
-//        else if (value == "double")
-//            type = k_barline_double;
-//        else if (value == "start")
-//            type = k_barline_start;
-//        else if (value == "end")
-//            type = k_barline_end;
-//        else if (value == "endRepetition")
-//            type = k_barline_end_repetition;
-//        else if (value == "startRepetition")
-//            type = k_barline_start_repetition;
-//        else if (value == "doubleRepetition")
-//            type = k_barline_double_repetition;
-//        else
-//        {
-//            report_msg(get_line_number(m_pChildToAnalyse),
-//                    "Unknown barline type '" + value + "'. 'simple' barline assumed.");
-//        }
-//
-//        return type;
 //    }
 //
 //};
@@ -5874,21 +6615,26 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_fileLocator("")
 //    , m_nShowTupletBracket(k_yesno_default)
 //    , m_nShowTupletNumber(k_yesno_default)
-//    , m_pLastNote(NULL)
     , m_pCurScore(NULL)
+    , m_pLastNote(NULL)
 //    , m_pLastScore(NULL)
     , m_pImoDoc(NULL)
+    , m_time(0.0)
+    , m_divisions(1.0f)
 {
     //populate the name to enum conversion map
     m_NameToEnum["attributes"] = k_mxl_tag_attributes;
+    m_NameToEnum["backup"] = k_mxl_tag_backup;
+    m_NameToEnum["barline"] = k_mxl_tag_barline;
     m_NameToEnum["clef"] = k_mxl_tag_clef;
+    m_NameToEnum["forward"] = k_mxl_tag_forward;
     m_NameToEnum["key"] = k_mxl_tag_key;
     m_NameToEnum["measure"] = k_mxl_tag_measure;
     m_NameToEnum["note"] = k_mxl_tag_note;
     m_NameToEnum["part"] = k_mxl_tag_part;
     m_NameToEnum["part-list"] = k_mxl_tag_part_list;
     m_NameToEnum["part-name"] = k_mxl_tag_part_name;
-    m_NameToEnum["rest"] = k_mxl_tag_rest;
+    m_NameToEnum["pitch"] = k_mxl_tag_pitch;
     m_NameToEnum["score-part"] = k_mxl_tag_score_part;
     m_NameToEnum["score-partwise"] = k_mxl_tag_score_partwise;
     m_NameToEnum["time"] = k_mxl_tag_time;
@@ -5947,10 +6693,19 @@ InternalModel* MxlAnalyser::analyse_tree(XmlNode* tree, const string& locator)
 //---------------------------------------------------------------------------------------
 ImoObj* MxlAnalyser::analyse_node(XmlNode* pNode, ImoObj* pAnchor)
 {
+    //m_reporter << "DBG. Analysing node: " << get_name(pNode) << endl;
     MxlElementAnalyser* a = new_analyser( get_name(pNode), pAnchor );
     ImoObj* pImo = a->analyse_node(pNode);
     delete a;
     return pImo;
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::prepare_for_new_instrument_content()
+{
+    //clear_pending_relations();
+    m_divisions = 4.0f;
+    m_time = 0.0;
 }
 
 ////---------------------------------------------------------------------------------------
@@ -5977,6 +6732,14 @@ ImoObj* MxlAnalyser::analyse_node(XmlNode* pNode, ImoObj* pAnchor)
 //    m_pOldBeamsBuilder->clear_pending_old_beams();
 //    m_pTupletsBuilder->clear_pending_items();
 //}
+
+//---------------------------------------------------------------------------------------
+TimeUnits MxlAnalyser::duration_to_timepos(int duration)
+{
+    //AWARE divisions indicates how many divisions per quarter note
+    float LdpTimeUnitsPerDivision = k_duration_64th / m_divisions;
+    return TimeUnits( (float(duration)/m_divisions) * LdpTimeUnitsPerDivision);
+}
 
 //---------------------------------------------------------------------------------------
 int MxlAnalyser::set_musicxml_version(const string& version)
@@ -6296,14 +7059,17 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
     switch ( name_to_enum(name) )
     {
         case k_mxl_tag_attributes:           return LOMSE_NEW AtribbutesMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_backup:               return LOMSE_NEW FwdBackMxlAnalyser(this, m_reporter, m_libraryScope);
+        case k_mxl_tag_barline:              return LOMSE_NEW BarlineMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_clef:                 return LOMSE_NEW ClefMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_forward:              return LOMSE_NEW FwdBackMxlAnalyser(this, m_reporter, m_libraryScope);
         case k_mxl_tag_key:                  return LOMSE_NEW KeyMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_measure:              return LOMSE_NEW MeasureMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_note:                 return LOMSE_NEW NoteRestMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part:                 return LOMSE_NEW PartMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part_list:            return LOMSE_NEW PartListMxlAnalyser(this, m_reporter, m_libraryScope);
         case k_mxl_tag_part_name:            return LOMSE_NEW PartNameMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-        //case k_mxl_tag_rest:                 return LOMSE_NEW RestMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_pitch:                return LOMSE_NEW PitchMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_score_part:           return LOMSE_NEW ScorePartMxlAnalyser(this, m_reporter, m_libraryScope);
         case k_mxl_tag_score_partwise:       return LOMSE_NEW ScorePartwiseMxlAnalyser(this, m_reporter, m_libraryScope);
         case k_mxl_tag_time:                 return LOMSE_NEW TimeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);

@@ -94,14 +94,14 @@ void XmlParser::parse_char_string(char* str)
         // since we have parsed the XML declaration, it is the first node (if exists).
         // Otherwise the first will be the root node
         m_root = m_doc.first_node();
+        m_encoding = "unknown";
         if (m_root->type() == rapidxml::node_declaration)
         {
-            m_encoding = m_root->first_attribute("encoding")->value();
+            if (m_root->first_attribute("encoding") != NULL)
+                m_encoding = m_root->first_attribute("encoding")->value();
             while (m_root && m_root->type() != rapidxml::node_element)
                 m_root = m_root->next_sibling();
         }
-        else
-            m_encoding = "unknown";
     }
 
     catch( rapidxml::parse_error& e)

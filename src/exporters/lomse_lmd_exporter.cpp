@@ -708,9 +708,10 @@ public:
 
     string generate_source()
     {
-        start_element("TODO: ", m_pImo);
+        start_element("TODO", m_pImo);
         close_start_tag();
-        m_source << m_pImo->get_name() << "   type=" << m_pImo->get_obj_type()
+        m_source << "Error: no LmdExporter for Imo. Imo name=" << m_pImo->get_name()
+                 << ", Imo type=" << m_pImo->get_obj_type()
                  << ", id=" << m_pImo->get_id();
         end_element(k_in_same_line);
         return m_source.str();

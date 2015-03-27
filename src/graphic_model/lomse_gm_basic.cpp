@@ -906,7 +906,7 @@ GmoObj* GmoBoxDocPage::hit_test(LUnits x, LUnits y)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoBoxDocPage::select_objects_in_rectangle(SelectionSet& selection,
+void GmoBoxDocPage::select_objects_in_rectangle(SelectionSet* selection,
                                                 const URect& selRect,
                                                 unsigned flags)
 {
@@ -917,7 +917,7 @@ void GmoBoxDocPage::select_objects_in_rectangle(SelectionSet& selection,
         URect bbox = (*it)->get_bounds();
         if (selRect.contains(bbox))
         {
-            selection.add(*it);
+            selection->add(*it);
             fSomethingSelected = true;
         }
     }
@@ -927,7 +927,7 @@ void GmoBoxDocPage::select_objects_in_rectangle(SelectionSet& selection,
     {
         GmoShape* pShape = find_shape_at(selRect.get_x(), selRect.get_y());
         if (pShape)
-            selection.add(pShape);
+            selection->add(pShape);
     }
 
 }

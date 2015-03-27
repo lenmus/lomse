@@ -145,6 +145,9 @@ public:
     char get_version_type();
     long get_revision() { return LOMSE_REVISION; }
 
+protected:
+    void clear_forensic_log();
+
 };
 
 }   //namespace lomse

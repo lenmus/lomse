@@ -65,12 +65,9 @@ public:
     InternalModel* compile_file(const std::string& filename);
     InternalModel* compile_string(const std::string& source);
 //    InternalModel* compile_input(LdpReader& reader);
-    InternalModel* create_empty();
-    InternalModel* create_with_empty_score();
 
 protected:
     InternalModel* compile_parsed_tree(XmlNode* root);
-//    SpLdpTree parse_empty_doc();
 
 };
 

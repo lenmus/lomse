@@ -47,12 +47,21 @@ LomseDoorway::LomseDoorway()
     , m_pFunc_notify(null_notify_function)
     , m_pFunc_request(null_request_function)
 {
+    clear_forensic_log();
 }
 
 //---------------------------------------------------------------------------------------
 LomseDoorway::~LomseDoorway()
 {
     delete m_pLibraryScope;
+}
+
+//---------------------------------------------------------------------------------------
+void LomseDoorway::clear_forensic_log()
+{
+    ofstream logger;
+    logger.open("forensic_log.txt");
+    logger.close();
 }
 
 //---------------------------------------------------------------------------------------

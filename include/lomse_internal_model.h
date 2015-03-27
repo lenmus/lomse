@@ -2842,6 +2842,7 @@ public:
     //score edition API
     void delete_staffobj(ImoStaffObj* pImo);
     void insert_staffobj(ImoStaffObj* pPos, ImoStaffObj* pImo);
+    void insert_staffobj_after(ImoStaffObj* pPos, ImoStaffObj* pImo);
     ImoStaffObj* insert_staffobj_at(ImoStaffObj* pAt, ImoStaffObj* pImo);
     ImoStaffObj* insert_staffobj_at(ImoStaffObj* pAt, const string& ldpsource,
                                     ostream& reporter=cout);

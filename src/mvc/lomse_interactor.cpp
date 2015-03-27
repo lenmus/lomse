@@ -73,8 +73,8 @@ Interactor::Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView
     , m_pGraphicModel(NULL)
     , m_pTask(NULL)
     , m_pCursor(NULL)
+    , m_pSelections(NULL)
     , m_pExec(pExec)
-    , m_selections()
     , m_grefLastMouseOver(k_no_gmo_ref)
     , m_operatingMode(k_mode_read_only)
     , m_fEditionEnabled(false)
@@ -89,12 +89,13 @@ Interactor::Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView
         LOMSE_LOG_DEBUG(Logger::k_mvc, "Creating Interactor. Document is valid");
         Document* pDoc = spDoc.get();
         m_pCursor = Injector::inject_DocCursor(pDoc);
+        m_pSelections = Injector::inject_SelectionSet(pDoc);
 
         GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
         if (pGView)
         {
             pGView->use_cursor(m_pCursor);
-            pGView->use_selection_set(&m_selections);
+            pGView->use_selection_set(m_pSelections);
         }
     }
     LOMSE_LOG_DEBUG(Logger::k_mvc, "Interactor created.");
@@ -108,6 +109,7 @@ Interactor::~Interactor()
     delete m_pTask;
     delete m_pView;
     delete m_pCursor;
+    delete m_pSelections;
     LOMSE_LOG_DEBUG(Logger::k_mvc, "Interactor is deleted");
 }
 
@@ -148,6 +150,7 @@ void Interactor::create_graphic_model()
             layouter.layout_document();
             m_pGraphicModel = layouter.get_graphic_model();
             m_pGraphicModel->build_main_boxes_table();
+            m_pSelections->graphic_model_changed(m_pGraphicModel);
         }
         spDoc->clear_dirty();
 
@@ -213,9 +216,9 @@ void Interactor::handle_event(SpEventInfo pEvent)
 //---------------------------------------------------------------------------------------
 void Interactor::delete_graphic_model()
 {
-    m_selections.clear();
     delete m_pGraphicModel;
     m_pGraphicModel = NULL;
+    m_pSelections->graphic_model_changed(NULL);
 //    m_idLastMouseOver = k_no_imoid;
     set_drag_image(NULL, k_do_not_get_ownership, UPoint(0.0, 0.0));
     LOMSE_LOG_DEBUG(Logger::k_render, "GModel deleted.");
@@ -275,23 +278,33 @@ void Interactor::on_mouse_button_up(Pixels x, Pixels y, unsigned flags)
 void Interactor::select_object(GmoObj* pGmo, bool fClearSelection)
 {
     if (fClearSelection)
-        m_selections.clear();
-    m_selections.add(pGmo);
+        m_pSelections->clear();
+    m_pSelections->add(pGmo);
     send_update_UI_event(k_selection_set_change);
 }
 
+////---------------------------------------------------------------------------------------
+//void Interactor::select_object(ImoObj* pImo, bool fClearSelection)
+//{
+//    GraphicModel* pGM = get_graphic_model();
+//    GmoObj* pGmo = pGM->find_shape_for_object( static_cast<ImoStaffObj*>(pImo) );
+//    select_object(pGmo, fClearSelection);
+//}
+
 //---------------------------------------------------------------------------------------
-void Interactor::select_object(ImoObj* pImo, bool fClearSelection)
+void Interactor::select_object(ImoId id, bool fClearSelection)
 {
-    GraphicModel* pGM = get_graphic_model();
-    GmoObj* pGmo = pGM->find_shape_for_object( static_cast<ImoStaffObj*>(pImo) );
-    select_object(pGmo, fClearSelection);
+    if (fClearSelection)
+        m_pSelections->clear();
+
+    m_pSelections->add(id, get_graphic_model());
+    send_update_UI_event(k_selection_set_change);
 }
 
 //---------------------------------------------------------------------------------------
 bool Interactor::is_in_selection(GmoObj* pGmo)
 {
-    return m_selections.contains(pGmo);
+    return m_pSelections->contains( pGmo->get_creator_imo() );
 }
 
 //---------------------------------------------------------------------------------------
@@ -329,7 +342,7 @@ void Interactor::task_action_click_at_screen_point(Pixels x, Pixels y, unsigned 
 
     //mouse left click when in selection mode
 
-//    m_selections.clear();
+//    m_pSelections->clear();
     GmoObj* pGmo = find_object_at(x, y);
 
 //    stringstream msg;
@@ -529,14 +542,14 @@ void Interactor::task_action_mouse_in_out(Pixels x, Pixels y, unsigned flags)
 ////        set_drag_image(pShape, k_do_not_get_ownership, offset);
 ////        show_drag_image(true);
 ////
-////        m_selections.clear();
+////        m_pSelections->clear();
 ////        switch_task(TaskFactory::k_task_move_object);
 ////        static_cast<TaskMoveObject*>(m_pTask)->set_first_point(x, y);
 ////    }
 ////    else
 //    {
 //        //click at other areas: start a selection rectangle
-//        m_selections.clear();
+//        m_pSelections->clear();
 //        start_selection_rectangle(x, y);
 //
 ////        switch_task(TaskFactory::k_task_selection_rectangle);
@@ -745,10 +758,10 @@ void Interactor::task_action_select_objects_in_screen_rectangle(Pixels x1, Pixel
 
     GraphicModel* pGM = get_graphic_model();
     list<PageRectangle*>::iterator it;
-    m_selections.clear();
+    m_pSelections->clear();
     for (it = rectangles.begin(); it != rectangles.end(); ++it)
     {
-        pGM->select_objects_in_rectangle((*it)->iPage, m_selections, (*it)->rect, flags);
+        pGM->select_objects_in_rectangle((*it)->iPage, m_pSelections, (*it)->rect, flags);
         delete *it;
     }
 
@@ -798,14 +811,14 @@ void Interactor::task_action_decide_on_switching_task(Pixels x, Pixels y, unsign
         set_drag_image(pShape, k_do_not_get_ownership, offset);
         show_drag_image(true);
 
-//        m_selections.clear();
+//        m_pSelections->clear();
         switch_task(TaskFactory::k_task_move_object);
         static_cast<TaskMoveObject*>(m_pTask)->set_first_point(x, y);
     }
     else
     {
         //click at other areas: start a selection rectangle
-        m_selections.clear();
+        m_pSelections->clear();
         start_selection_rectangle(x, y);
 
         switch_task(TaskFactory::k_task_selection_rectangle);
@@ -1413,6 +1426,15 @@ void Interactor::update_view_if_needed()
 }
 
 //---------------------------------------------------------------------------------------
+bool Interactor::is_document_editable()
+{
+    if (SpDocument spDoc = m_wpDoc.lock())
+        return spDoc->is_editable();
+    else
+        return false;
+}
+
+//---------------------------------------------------------------------------------------
 void Interactor::send_mouse_out_event(GmoRef gref, Pixels x, Pixels y)
 {
     if (SpDocument spDoc = m_wpDoc.lock())
@@ -1459,7 +1481,7 @@ void Interactor::send_update_UI_event(EEventType type)
         SpInteractor sp = get_shared_ptr_from_this();
         WpInteractor wp(sp);
         SpEventUpdateUI pEvent(
-            LOMSE_NEW EventUpdateUI(type, wp, m_wpDoc, &m_selections, m_pCursor) );
+            LOMSE_NEW EventUpdateUI(type, wp, m_wpDoc, m_pSelections, m_pCursor) );
 
         //AWARE: update UI events are sent directly to the application global handler.
         //It is assumed that this event is of interest only for application main frame.
@@ -1758,7 +1780,7 @@ void Interactor::set_drag_image(GmoShape* pShape, bool fGetOwnership, UPoint off
 //---------------------------------------------------------------------------------------
 void Interactor::exec_command(DocCommand* pCmd)
 {
-    m_pExec->execute(m_pCursor, pCmd, &m_selections);
+    m_pExec->execute(m_pCursor, pCmd, m_pSelections);
     update_caret_and_view();
     send_update_UI_event(k_pointed_object_change);
 }
@@ -1766,7 +1788,7 @@ void Interactor::exec_command(DocCommand* pCmd)
 //---------------------------------------------------------------------------------------
 void Interactor::exec_undo()
 {
-    m_pExec->undo(m_pCursor);
+    m_pExec->undo(m_pCursor, m_pSelections);
     update_caret_and_view();
     send_update_UI_event(k_pointed_object_change);
 }
@@ -1774,7 +1796,7 @@ void Interactor::exec_undo()
 //---------------------------------------------------------------------------------------
 void Interactor::exec_redo()
 {
-    m_pExec->redo(m_pCursor);
+    m_pExec->redo(m_pCursor, m_pSelections);
     update_caret_and_view();
     send_update_UI_event(k_pointed_object_change);
 }
@@ -1805,6 +1827,18 @@ bool Interactor::should_enable_edit_redo()
 //    switch_task(m_fEditionEnabled ? TaskFactory::k_task_selection
 //                                  : TaskFactory::k_task_only_clicks);
 //}
+
+//---------------------------------------------------------------------------------------
+string Interactor::dump_cursor()
+{
+    return m_pCursor->dump_cursor();
+}
+
+//---------------------------------------------------------------------------------------
+string Interactor::dump_selection()
+{
+    return m_pSelections->dump_selection();
+}
 
 
 ////=======================================================================================

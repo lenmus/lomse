@@ -36,56 +36,94 @@
 #include "lomse_gm_basic.h"
 #include "lomse_selections.h"
 #include "lomse_shapes.h"
+#include "lomse_document.h"
 
 using namespace UnitTest;
 using namespace std;
 using namespace lomse;
 
 
+
 //---------------------------------------------------------------------------------------
-class SelectionsTestFixture
+// helper class for accessing protected members
+class MySelectionSet : public SelectionSet
+{
+public:
+    MySelectionSet(Document* pDoc) : SelectionSet(pDoc) {}
+    ~MySelectionSet() {}
+
+    void clear_valid() { m_fValid = false; }
+
+};
+
+//---------------------------------------------------------------------------------------
+class SelectionSetTestFixture
 {
 public:
     LibraryScope m_libraryScope;
 
-    SelectionsTestFixture()     //SetUp fixture
+    SelectionSetTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
     {
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
-    ~SelectionsTestFixture()    //TearDown fixture
+    ~SelectionSetTestFixture()    //TearDown fixture
     {
     }
 };
 
-SUITE(SelectionsTest)
+SUITE(SelectionSetTest)
 {
 
-    TEST_FIXTURE(SelectionsTestFixture, SelectionsTest_Add)
+    TEST_FIXTURE(SelectionSetTestFixture, SelectionSetTest_0000)
     {
-        SelectionSet set;
-        GmoShapeClef clef(NULL, 1, 1, UPoint(0.0f, 0.0f), Color(0,0,0),
-                          m_libraryScope, 21.0);
+        //0000. Initially empty and valid
+        Document doc(m_libraryScope);
+        MySelectionSet sel(&doc);
 
-        CHECK( set.contains(&clef) == false );
-//        CHECK( clef.is_selected() == false );
-
-        set.add(&clef);
-
-        CHECK( set.contains(&clef) == true );
-//        CHECK( clef.is_selected() == true );
+        CHECK( sel.is_valid() == true );
+        CHECK( sel.empty() == true );
     }
 
-    TEST_FIXTURE(SelectionsTestFixture, SelectionsTest_Clear)
+    TEST_FIXTURE(SelectionSetTestFixture, SelectionSetTest_0001)
     {
-        SelectionSet set;
+        //0001. clearing not valid set, sets it as valid
+        Document doc(m_libraryScope);
+        MySelectionSet sel(&doc);
+        sel.clear_valid();
+        CHECK( sel.is_valid() == false );
+
+        sel.clear();
+
+        CHECK( sel.is_valid() == true );
+    }
+
+    TEST_FIXTURE(SelectionSetTestFixture, SelectionSetTest_0101)
+    {
+        //0101. Adding GmoObj to valid set, keeps it valid
+        Document doc(m_libraryScope);
+        MySelectionSet sel(&doc);
         GmoShapeClef clef(NULL, 1, 1, UPoint(0.0f, 0.0f), Color(0,0,0),
                           m_libraryScope, 21.0);
-        set.add(&clef);
-        set.clear();
+        //CHECK( sel.contains(&clef) == false );
 
-        CHECK( set.contains(&clef) == false );
+        sel.add(&clef);
+
+        //CHECK( sel.contains(&clef) == true );
+        CHECK( sel.is_valid() == true );
+    }
+
+    TEST_FIXTURE(SelectionSetTestFixture, SelectionSetTest_Clear)
+    {
+        Document doc(m_libraryScope);
+        MySelectionSet sel(&doc);
+        GmoShapeClef clef(NULL, 1, 1, UPoint(0.0f, 0.0f), Color(0,0,0),
+                          m_libraryScope, 21.0);
+        sel.add(&clef);
+        sel.clear();
+
+        //CHECK( sel.contains(&clef) == false );
 //        CHECK( clef.is_selected() == false );
     }
 

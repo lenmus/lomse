@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------------------
 # This file is part of the Lomse library.
-# Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+# Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
@@ -167,7 +167,7 @@ endif(0)
 
 # Check for Boost >= 1.42.0
 set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0"
-    "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0""1.49" "1.49.0"
+    "1.45" "1.45.0" "1.46" "1.46.0" "1.47" "1.47.0" "1.48" "1.48.0" "1.49" "1.49.0"
     "1.50" "1.50.0" "1.51" "1.51.0" "1.52" "1.52.0" "1.53" "1.53.0" "1.54" "1.54.0" )
 #set(Boost_USE_STATIC_LIBS       OFF)
 #set(Boost_USE_MULTITHREADED     OFF)
@@ -301,210 +301,15 @@ include( ${LOMSE_ROOT_DIR}/add-sources.cmake )
 
 
 
-if(0) #=====================================================================================
-set(AGG_FILES
-    ${LOMSE_SRC_DIR}/agg/src/agg_arc.cpp
-    ${LOMSE_SRC_DIR}/agg/src/agg_bezier_arc.cpp
-    ${LOMSE_SRC_DIR}/agg/src/agg_curves.cpp
-    ${LOMSE_SRC_DIR}/agg/src/agg_gsv_text.cpp
-    ${LOMSE_SRC_DIR}/agg/src/agg_line_aa_basics.cpp
-    ${LOMSE_SRC_DIR}/agg/src/agg_rounded_rect.cpp
-    ${LOMSE_SRC_DIR}/agg/src/agg_trans_affine.cpp
-    ${LOMSE_SRC_DIR}/agg/src/agg_vcgen_contour.cpp
-    ${LOMSE_SRC_DIR}/agg/src/agg_vcgen_markers_term.cpp
-    ${LOMSE_SRC_DIR}/agg/src/agg_vcgen_stroke.cpp
-)
-
-set(DOCUMENT_FILES
-    ${LOMSE_SRC_DIR}/document/lomse_command.cpp
-    ${LOMSE_SRC_DIR}/document/lomse_document.cpp
-    ${LOMSE_SRC_DIR}/document/lomse_document_cursor.cpp
-    ${LOMSE_SRC_DIR}/document/lomse_document_iterator.cpp
-    ${LOMSE_SRC_DIR}/document/lomse_id_assigner.cpp
-)
-
-set(EXPORTERS_FILES
-    ${LOMSE_SRC_DIR}/exporters/lomse_ldp_exporter.cpp
-    ${LOMSE_SRC_DIR}/exporters/lomse_lmd_exporter.cpp
-)
-
-set(FILE_SYSTEM_FILES
-    ${LOMSE_SRC_DIR}/file_system/lomse_file_system.cpp
-    ${LOMSE_SRC_DIR}/file_system/lomse_image_reader.cpp
-    ${LOMSE_SRC_DIR}/file_system/lomse_zip_stream.cpp
-)
-
-set(GRAPHIC_MODEL_FILES
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_box_score_page.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_box_slice.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_box_slice_instr.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_box_system.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_caret.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_caret_positioner.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_glyphs.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_gm_basic.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_graphical_model.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_handler.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_overlays_generator.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_selections.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_barline.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_base.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_beam.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_brace_bracket.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_line.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_note.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_staff.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_text.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_tie.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_shape_tuplet.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_shapes.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_shapes_storage.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_sizers.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_time_grid.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/lomse_visual_effect.cpp
-    
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_accidentals_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_beam_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_barline_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_chord_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_clef_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_engrouters.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_fermata_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_instrument_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_key_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_line_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_metronome_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_note_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_rest_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_slur_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_text_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_tie_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_time_engraver.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_tuplet_engraver.cpp
-
-    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_blocks_container_layouter.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_document_layouter.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_inlines_container_layouter.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_layouter.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_score_layouter.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_score_meter.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_staffobjs_cursor.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_system_layouter.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_table_layouter.cpp
-    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_text_splitter.cpp
-)
-
-set(GUI_CONTROLS_FILES
-    ${LOMSE_SRC_DIR}/gui_controls/lomse_button_ctrl.cpp
-    ${LOMSE_SRC_DIR}/gui_controls/lomse_checkbox_ctrl.cpp
-    ${LOMSE_SRC_DIR}/gui_controls/lomse_hyperlink_ctrl.cpp
-    ${LOMSE_SRC_DIR}/gui_controls/lomse_score_player_ctrl.cpp
-    ${LOMSE_SRC_DIR}/gui_controls/lomse_static_text_ctrl.cpp
-    ${LOMSE_SRC_DIR}/gui_controls/lomse_progress_bar_ctrl.cpp
-)
-
-set(INTERNAL_MODEL_FILES
-    ${LOMSE_SRC_DIR}/internal_model/lomse_im_algorithms.cpp
-    ${LOMSE_SRC_DIR}/internal_model/lomse_im_attributes.cpp
-    ${LOMSE_SRC_DIR}/internal_model/lomse_im_factory.cpp
-    ${LOMSE_SRC_DIR}/internal_model/lomse_im_figured_bass.cpp
-    ${LOMSE_SRC_DIR}/internal_model/lomse_im_note.cpp
-    ${LOMSE_SRC_DIR}/internal_model/lomse_internal_model.cpp
-    ${LOMSE_SRC_DIR}/internal_model/lomse_score_utilities.cpp
-)
-
-set(MODULE_FILES
-    ${LOMSE_SRC_DIR}/module/lomse_doorway.cpp
-    ${LOMSE_SRC_DIR}/module/lomse_events.cpp
-    ${LOMSE_SRC_DIR}/module/lomse_events_dispatcher.cpp
-    ${LOMSE_SRC_DIR}/module/lomse_image.cpp
-    ${LOMSE_SRC_DIR}/module/lomse_injectors.cpp
-    ${LOMSE_SRC_DIR}/module/lomse_logger.cpp
-    ${LOMSE_SRC_DIR}/module/lomse_pitch.cpp
-    ${LOMSE_SRC_DIR}/module/lomse_time.cpp
-)
-
-set(MVC_FILES
-    ${LOMSE_SRC_DIR}/mvc/lomse_graphic_view.cpp
-    ${LOMSE_SRC_DIR}/mvc/lomse_interactor.cpp
-    ${LOMSE_SRC_DIR}/mvc/lomse_presenter.cpp 
-    ${LOMSE_SRC_DIR}/mvc/lomse_tasks.cpp
-    ${LOMSE_SRC_DIR}/mvc/lomse_view.cpp
-)
-
-set(PARSER_FILES
-    ${LOMSE_SRC_DIR}/parser/lomse_analyser.cpp
-    ${LOMSE_SRC_DIR}/parser/lomse_compiler.cpp
-    ${LOMSE_SRC_DIR}/parser/lomse_ldp_analyser.cpp
-    ${LOMSE_SRC_DIR}/parser/lomse_ldp_compiler.cpp
-    ${LOMSE_SRC_DIR}/parser/lomse_ldp_elements.cpp
-    ${LOMSE_SRC_DIR}/parser/lomse_ldp_factory.cpp
-    ${LOMSE_SRC_DIR}/parser/lomse_ldp_parser.cpp
-    ${LOMSE_SRC_DIR}/parser/lomse_linker.cpp
-    ${LOMSE_SRC_DIR}/parser/lomse_model_builder.cpp
-    ${LOMSE_SRC_DIR}/parser/lomse_reader.cpp
-    ${LOMSE_SRC_DIR}/parser/lomse_staffobjs_table.cpp
-    ${LOMSE_SRC_DIR}/parser/lomse_tokenizer.cpp
-)
-
-set(LMD_FILES
-    ${LOMSE_SRC_DIR}/parser/lmd/lomse_lmd_analyser.cpp
-    ${LOMSE_SRC_DIR}/parser/lmd/lomse_lmd_compiler.cpp
-    ${LOMSE_SRC_DIR}/parser/lmd/lomse_lmd_parser.cpp
-)
-
-set(RENDER_FILES
-    ${LOMSE_SRC_DIR}/render/lomse_calligrapher.cpp
-    ${LOMSE_SRC_DIR}/render/lomse_font_freetype.cpp
-    ${LOMSE_SRC_DIR}/render/lomse_font_storage.cpp
-    ${LOMSE_SRC_DIR}/render/lomse_renderer.cpp
-    ${LOMSE_SRC_DIR}/render/lomse_screen_drawer.cpp
-)
-
-set(SCORE_FILES
-    ${LOMSE_SRC_DIR}/score/lomse_score_iterator.cpp
-)
-
-set(SOUND_FILES
-    ${LOMSE_SRC_DIR}/sound/lomse_midi_table.cpp
-    ${LOMSE_SRC_DIR}/sound/lomse_score_player.cpp
-)
-
-set(PACKAGES_FILES
-    ${LOMSE_PKG_DIR}/minizip/unzip.c
-    ${LOMSE_PKG_DIR}/minizip/ioapi.c
-)
-
-if(WIN32)
-    set(PLATFORM_FILES
-        ${LOMSE_SRC_DIR}/agg/src/platform/win32/agg_win32_bmp.cpp
-    )
-elseif(UNIX)
-    set(PLATFORM_FILES
-        
-    )
-endif()
-
-set(ALL_SOURCES 
-    ${AGG_FILES} ${DOCUMENT_FILES} ${EXPORTERS_FILES} ${FILE_SYSTEM_FILES}
-    ${GRAPHIC_MODEL_FILES} ${GUI_CONTROLS_FILES} ${INTERNAL_MODEL_FILES} 
-    ${MODULE_FILES} ${MVC_FILES}
-    ${PARSER_FILES} ${LMD_FILES} ${RENDER_FILES} ${SCORE_FILES} 
-    ${SOUND_FILES} ${PLATFORM_FILES} ${PACKAGES_FILES}
-)
-
-endif() #=====================================================================================
+#=====================================================================================
 
 # Adds folders for Visual Studio and other IDEs
 set (LOMSE_GROUP_FOLDER "lomse/" )
 include( ${LOMSE_ROOT_DIR}/add-group-folders.cmake )
 
-set(ALL_SOURCES ${ALL_LENMUS_SOURCES} )
 
 
-
-if(0) #=====================================================================================
+#=====================================================================================
 
 
 # Adds folders for Visual Studio and other IDEs
@@ -518,13 +323,12 @@ source_group( "internal_model"  FILES ${INTERNAL_MODEL_FILES} )
 source_group( "module"          FILES ${MODULE_FILES} )
 source_group( "mvc"             FILES ${MVC_FILES} )
 source_group( "parser"          FILES ${PARSER_FILES} )
-source_group( "parser/lmd"      FILES ${LMD_FILES} )
 source_group( "render"          FILES ${RENDER_FILES} )
 source_group( "score"           FILES ${SCORE_FILES} )
 source_group( "sound"           FILES ${SOUND_FILES} )
 source_group( "packages"        FILES ${PACKAGES_FILES} )
 
-endif() #=====================================================================================
+#=====================================================================================
 
 
 
@@ -536,7 +340,7 @@ endif() #=======================================================================
 
 set(LOMSE  lomse)
 
-add_library( ${LOMSE} STATIC ${ALL_SOURCES} )
+add_library( ${LOMSE} STATIC ${ALL_LOMSE_SOURCES} )
 set_target_properties(${LOMSE} PROPERTIES VERSION ${LOMSE_VERSION}
                                           SOVERSION ${LOMSE_VERSION} )
 
@@ -572,7 +376,7 @@ get_target_property(VAR ${LOMSE} LINK_FLAGS)
 
 set(LOMSE_DYN  lomse-dyn)
 
-add_library( ${LOMSE_DYN} SHARED ${ALL_SOURCES} )
+add_library( ${LOMSE_DYN} SHARED ${ALL_LOMSE_SOURCES} )
 set_target_properties(${LOMSE_DYN} 
                       PROPERTIES VERSION ${LOMSE_VERSION}
                                  SOVERSION ${LOMSE_VERSION}
@@ -633,16 +437,18 @@ if(LOMSE_BUILD_TESTS)
             ${LOMSE_SRC_DIR}/tests/lomse_test_lmd_analyser.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_lmd_compiler.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_lmd_exporter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_lmd_parser.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_midi_table.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_model_builder.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_multicolumn_layouter.cpp
+            ${LOMSE_SRC_DIR}/tests/lomse_test_xml_analyser.cpp
+            ${LOMSE_SRC_DIR}/tests/lomse_test_xml_compiler.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_note_engraver.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_pitch.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_presenter.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_reader.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_rest_engraver.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_score_algorithms.cpp
+            ${LOMSE_SRC_DIR}/tests/lomse_test_score_cursor.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_score_iterator.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_score_layouter.cpp
             ${LOMSE_SRC_DIR}/tests/lomse_test_score_meter.cpp

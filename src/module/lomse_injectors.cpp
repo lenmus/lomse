@@ -390,6 +390,12 @@ DocCursor* Injector::inject_DocCursor(Document* pDoc)
 }
 
 //---------------------------------------------------------------------------------------
+SelectionSet* Injector::inject_SelectionSet(Document* pDoc)
+{
+    return LOMSE_NEW SelectionSet(pDoc);
+}
+
+//---------------------------------------------------------------------------------------
 DocCommandExecuter* Injector::inject_DocCommandExecuter(Document* pDoc)
 {
     return LOMSE_NEW DocCommandExecuter(pDoc);

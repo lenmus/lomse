@@ -380,7 +380,7 @@ LdpToken* LdpTokenizer::parse_new_token()
             case k_CMT02:
                 tokendata << curChar;
                 curChar = get_next_char();
-                if (curChar == chLF) {
+                if (curChar == chLF || curChar == nEOF) {
                     return LOMSE_NEW LdpToken(tkComment, tokendata.str(), numLine);
                 }
                 //else continue in this state
@@ -389,7 +389,7 @@ LdpToken* LdpTokenizer::parse_new_token()
             case k_CMT03:
                 tokendata << curChar;
                 curChar = get_next_char();
-                if (curChar == chAsterisk) {
+                if (curChar == chAsterisk || curChar == nEOF) {
                     state = k_CMT04;
                 }
                 //else continue in this state
@@ -398,7 +398,7 @@ LdpToken* LdpTokenizer::parse_new_token()
             case k_CMT04:
                 tokendata << curChar;
                 curChar = get_next_char();
-                if (curChar == chSlash) {
+                if (curChar == chSlash || curChar == nEOF) {
                     tokendata << curChar;
                     return LOMSE_NEW LdpToken(tkComment, tokendata.str(), numLine);
                 }

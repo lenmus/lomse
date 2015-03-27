@@ -101,8 +101,8 @@ protected:
     GraphicModel*   m_pGraphicModel;
     Task*           m_pTask;
     DocCursor*      m_pCursor;
+    SelectionSet*   m_pSelections;
     DocCommandExecuter* m_pExec;
-    SelectionSet    m_selections;
     GmoRef          m_grefLastMouseOver;
     int             m_operatingMode;
     bool            m_fEditionEnabled;
@@ -129,12 +129,13 @@ public:
     inline int get_operating_mode() { return m_operatingMode; }
     enum { k_mode_read_only=0, k_mode_edition, k_mode_playback, };     //operating modes
     void enable_edition_restricted_to(ImoId id);
+    bool is_document_editable();
 
     //access to collaborators
     GraphicModel* get_graphic_model();
     inline View* get_view() { return m_pView; }
     inline DocCursor* get_cursor() { return m_pCursor; }
-    inline SelectionSet& get_selection_set() { return m_selections; }
+    inline SelectionSet* get_selection_set() { return m_pSelections; }
 
     //mandatory override required by EventHandler
 	void handle_event(SpEventInfo pEvent);
@@ -195,6 +196,8 @@ public:
 
     //interface to SelectionSet
     virtual void select_object(GmoObj* pGmo, bool fClearSelection=true);
+    virtual void select_object(ImoId id, bool fClearSelection=true);
+//    void select_object(ImoObj* pImo, bool fClearSelection=true);
     virtual bool is_in_selection(GmoObj* pGmo);
 
     //mandatory overrides from Observable
@@ -223,6 +226,8 @@ public:
     bool should_enable_edit_redo();
 //    void enable_edition(bool value);
 //    inline bool is_edition_enabled() { return m_fEditionEnabled; }
+    string dump_cursor();
+    string dump_selection();
 
     // event handlers for user actions. Library API
     virtual void on_mouse_move(Pixels x, Pixels y, unsigned flags);
@@ -241,8 +246,6 @@ public:
 
     //-----------------------------------------------------------------------------------
     //commands
-
-    void select_object(ImoObj* pImo, bool fClearSelection=true);
 
     //actions requested by Task objects
     virtual void task_action_click_at_screen_point(Pixels x, Pixels y, unsigned flags);

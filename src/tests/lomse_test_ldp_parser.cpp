@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -227,6 +227,52 @@ SUITE(LdpParserTest)
         LdpTree* score = parser.get_ldp_tree();
         //cout << score->get_root()->to_string() << endl;
         CHECK( score->get_root()->to_string() == "(heading 1 (style \"header\") (txt \"普通练习\"))" );
+        delete score->get_root();
+    }
+
+    TEST_FIXTURE(LdpParserTestFixture, ParserUnclosedComment_1)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        expected << "** LDP ERROR **: Syntax error. State 2, TkType 6, tkValue <>" << endl;
+        parser.parse_text("(clef G noVisible (dx //comment 70))");
+        LdpTree* score = parser.get_ldp_tree();
+        //cout << errormsg.str();
+        //cout << expected.str();
+        //cout << score->get_root()->to_string() << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( score->get_root()->to_string() == "(clef G (visible no) (dx ))" );
+        delete score->get_root();
+    }
+
+    TEST_FIXTURE(LdpParserTestFixture, ParserUnclosedComment_2)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        expected << "** LDP ERROR **: Syntax error. State 2, TkType 6, tkValue <>" << endl;
+        parser.parse_text("(clef G noVisible (dx /*comment 70))*");
+        LdpTree* score = parser.get_ldp_tree();
+        //cout << errormsg.str();
+        //cout << expected.str();
+        //cout << score->get_root()->to_string() << endl;
+        CHECK( score->get_root()->to_string() == "(clef G (visible no) (dx ))" );
+        delete score->get_root();
+    }
+
+    TEST_FIXTURE(LdpParserTestFixture, ParserUnclosedComment_3)
+    {
+        stringstream errormsg;
+        LdpParser parser(errormsg, m_pLibraryScope->ldp_factory());
+        stringstream expected;
+        expected << "** LDP ERROR **: Syntax error. State 2, TkType 6, tkValue <>" << endl;
+        parser.parse_text("(clef G noVisible (dx /*comment 70))");
+        LdpTree* score = parser.get_ldp_tree();
+        //cout << errormsg.str();
+        //cout << expected.str();
+        //cout << score->get_root()->to_string() << endl;
+        CHECK( score->get_root()->to_string() == "(clef G (visible no) (dx ))" );
         delete score->get_root();
     }
 

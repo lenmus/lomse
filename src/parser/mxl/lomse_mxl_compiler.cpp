@@ -38,6 +38,7 @@
 #include "lomse_document.h"
 #include "lomse_file_system.h"
 #include "lomse_zip_stream.h"
+#include "lomse_ldp_compiler.h"
 
 
 using namespace std;
@@ -118,21 +119,6 @@ InternalModel* MxlCompiler::compile_string(const std::string& source)
 //}
 
 //---------------------------------------------------------------------------------------
-InternalModel* MxlCompiler::create_empty()
-{
-    m_pParser->parse_text("<lenmusdoc vers='0.0'><content/></lenmusdoc>");
-    return compile_parsed_tree( m_pXmlParser->get_tree_root() );
-}
-
-//---------------------------------------------------------------------------------------
-InternalModel* MxlCompiler::create_with_empty_score()
-{
-//    m_pFinalTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content (score (vers 1.6)(instrument (musicData)))))");
-//    return compile_parsed_tree(m_pFinalTree);
-    return NULL;    //TODO: Probably this method is not needed
-}
-
-//---------------------------------------------------------------------------------------
 InternalModel* MxlCompiler::compile_parsed_tree(XmlNode* root)
 {
     InternalModel* pIModel = m_pMxlAnalyser->analyse_tree(root, m_fileLocator);
@@ -140,26 +126,6 @@ InternalModel* MxlCompiler::compile_parsed_tree(XmlNode* root)
         m_pModelBuilder->build_model(pIModel);
     return pIModel;
 }
-
-////---------------------------------------------------------------------------------------
-//SpLdpTree MxlCompiler::wrap_score_in_lenmusdoc(SpLdpTree pParseTree)
-//{
-//    SpLdpTree pFinalTree = parse_empty_doc();
-//
-//    LdpTree::depth_first_iterator it = pFinalTree->begin();
-//    while (it != pFinalTree->end() && !(*it)->is_type(k_content))
-//        ++it;
-//    (*it)->append_child(pParseTree->get_root());
-//
-//    return pFinalTree;
-//}
-//
-////---------------------------------------------------------------------------------------
-//SpLdpTree MxlCompiler::parse_empty_doc()
-//{
-//    SpLdpTree pTree = m_pParser->parse_text("(lenmusdoc (vers 0.0) (content ))");
-//    return pTree;
-//}
 
 
 }  //namespace lomse

@@ -3294,9 +3294,10 @@ bool ScoreCursor::p_is_at_start_of_staff()
 
     ColStaffObjsIterator itSave = m_it;
     if (!p_there_is_iter_object())
-            m_it = ColStaffObjsIterator( m_pColStaffObjs->back() );
+        m_it = ColStaffObjsIterator( m_pColStaffObjs->back() );
+    else
+        p_move_iterator_to_prev();
 
-    p_move_iterator_to_prev();
     while (p_there_is_iter_object() && is_equal_time(p_iter_object_time(), 0.0))
     {
         if (p_iter_object_staff() == m_currentState.staff()

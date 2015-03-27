@@ -213,6 +213,7 @@ public:
     static ScorePlayer* inject_ScorePlayer(LibraryScope& libraryScope,
                                            MidiServerBase* pSoundServer);
     static DocCursor* inject_DocCursor(Document* pDoc);
+    static SelectionSet* inject_SelectionSet(Document* pDoc);
     static DocCommandExecuter* inject_DocCommandExecuter(Document* pDoc);
 };
 

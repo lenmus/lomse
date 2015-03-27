@@ -165,6 +165,8 @@ public:
     inline void trace_column(int iCol) { m_iColumnToTrace = iCol; }
 
 protected:
+    void add_error_message(const string& msg);
+
     friend class ColumnsBuilder;
     friend class SystemLayouter;
 
@@ -189,6 +191,7 @@ protected:
     void page_initializations(GmoBox* pContainerBox);
     void decide_line_sizes();
     void fill_page_with_empty_systems_if_required();
+    bool score_page_is_the_only_content_of_parent_box();
 
     void delete_instrument_engravers();
     void delete_system_layouters();

@@ -1171,6 +1171,24 @@ SUITE(ScoreCursorTest)
         CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 21L, 21L);
     }
 
+    TEST_FIXTURE(ScoreCursorTestFixture, move_prev_206)
+    {
+        //206. bug: only clef, at end.
+        m_pDoc = LOMSE_NEW Document(m_libraryScope);
+        m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 2.0)(instrument (musicData (clef G))))))" );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+        cursor.point_to(21L);   //clef
+        cursor.move_next();
+        CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 0, 0, 0.0f);
+        CHECK( cursor.is_at_end_of_score() == true );
+
+        cursor.move_prev();
+
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 21L, 21L);
+    }
+
     TEST_FIXTURE(ScoreCursorTestFixture, move_prev_211)
     {
         //211. skips notes in chord: simple note before chord moves to first in chord
@@ -1942,170 +1960,100 @@ SUITE(ScoreCursorTest)
     // integrity preservation after score modifications
     //----------------------------------------------------------------------------
 
-//    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_501)
-//    {
-//        //501. after deletion. previous object exists
-//        create_document_1();
-//        MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cursor.point_to(24L);       //move to first note
-//        ImoStaffObj* pImo = static_cast<ImoStaffObj*>( *cursor );
-//        ImoInstrument* pInstr = m_pScore->get_instrument(0);
-//        pInstr->delete_staffobj(pImo);
-//        m_pScore->close();
-//        //dump_col_staff_objs();
-//
-//        cursor.update_after_deletion();
-//
-////        cout << cursor.dump_cursor();
-//        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 25L, 25L);
-//    }
+    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_501)
+    {
+        //501. reset_and_point_to
+        create_document_empty_score();
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+        CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 0, 0, 0.0f);
+        CHECK( cursor.is_at_end_of_score() == true );
 
-//    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_2)
-//    {
-//        //2. after deletion. previous is before start
-//        create_document_2_v16();
-//        MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cursor.point_to(21L);       //clef in staff 1
-//        ImoStaffObj* pImo = static_cast<ImoStaffObj*>( *cursor );
-//        ImoInstrument* pInstr = m_pScore->get_instrument(0);
-//        pInstr->delete_staffobj(pImo);
-//        m_pScore->close();
-////        dump_col_staff_objs();
-//
-//        cursor.update_after_deletion();
-//
-////        cout << cursor.dump_cursor();
-//        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 23L, 23L);
-//        CHECK_PREVIOUS_STATE(cursor, -1, -1, -1, -1.0, k_cursor_before_start_of_child, -1L);
-//    }
-//
-//    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_3)
-//    {
-//        //3. after deletion. previous is end of previous staff
-//        create_document_2_v16();
-//        MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cursor.point_to(22L);       //clef in staff 2
-//        ImoStaffObj* pImo = static_cast<ImoStaffObj*>( *cursor );
-//        ImoInstrument* pInstr = m_pScore->get_instrument(0);
-//        pInstr->delete_staffobj(pImo);
-//        m_pScore->close();
-//        //dump_col_staff_objs();
-//
-//        cursor.update_after_deletion();
-//
-////        cout << cursor.dump_cursor();
-//        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 23L, 23L);
-//        CHECK_PREVIOUS_STATE_AT_END_OF_STAFF(cursor, 0, 0, 2, 256.0f);
-//    }
-//
-//    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_4)
-//    {
-//        //4. after deletion. previous is empty place
-//        create_document_2_v16();
-//        MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cursor.point_to(22L);       //clef in staff 2
-//        ImoStaffObj* pImo = static_cast<ImoStaffObj*>( *cursor );
-//        ImoInstrument* pInstr = m_pScore->get_instrument(0);
-//        pInstr->delete_staffobj(pImo);
-//        m_pScore->close();
-//        //dump_col_staff_objs();
-//
-//        cursor.update_after_deletion();
-//
-////        cout << cursor.dump_cursor();
-//        CHECK_CURRENT_STATE(cursor, 0, 1, 0, 0.0, 23L, 23L);
-//        CHECK_PREVIOUS_STATE_AT_END_OF_STAFF(cursor, 0, 0, 2, 256.0f);
-//    }
-//
-//    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_5)
-//    {
-//        //5. after deletion. next is end of score
-//        create_document_3();
-//        MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cursor.point_to(49L);       //clef in staff 2
-//        ImoStaffObj* pImo = static_cast<ImoStaffObj*>( *cursor );
-//        ImoInstrument* pInstr = m_pScore->get_instrument(0);
-//        pInstr->delete_staffobj(pImo);
-//        m_pScore->close();
-//        //dump_col_staff_objs();
-//
-//        cursor.update_after_deletion();
-//
-////        cout << cursor.dump_cursor();
-//        CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 1, 1, 192.0f);
-//        CHECK( cursor.is_at_end_of_score() == true );
-//        CHECK_PREVIOUS_STATE(cursor, 0, 1, 1, 128.0, 48L, 48L);
-//    }
-//
-//    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_6)
-//    {
-//        //6. after deleting the only existing object.
-//        m_pDoc = LOMSE_NEW Document(m_libraryScope);
-//        m_pDoc->from_string("(score (vers 2.0)(instrument (musicData (clef G))))" );
-//        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
-//        MyScoreCursor cursor(m_pDoc, m_pScore);
-//        ImoStaffObj* pImo = static_cast<ImoStaffObj*>( *cursor );
-//        ImoInstrument* pInstr = m_pScore->get_instrument(0);
-//        pInstr->delete_staffobj(pImo);
-//        m_pScore->close();
-//        //dump_col_staff_objs();
-//
-//        cursor.update_after_deletion();
-//
-////        cout << cursor.dump_cursor();
-//        CHECK_CURRENT_STATE_AT_END_OF_STAFF(cursor, 0, 0, 0, 0.0f);
-//        CHECK( cursor.is_at_end_of_score() == true );
-//        CHECK_PREVIOUS_STATE(cursor, -1, -1, -1, -1.0, k_cursor_before_start_of_child, -1L);
-//    }
-//
-//    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_7)
-//    {
-//        //7. after insertion. current object exists
-//        create_document_1();
-//        MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cursor.point_to(27L);       //first note second measure
-//        ImoStaffObj* pImo = static_cast<ImoStaffObj*>(
-//                                ImFactory::inject_note(m_pDoc,3,4,k_32th) );
-//        ImoId id = pImo->get_id();
-//        ImoInstrument* pInstr = m_pScore->get_instrument(0);
-//        ImoStaffObj* pPos = static_cast<ImoStaffObj*>( cursor.staffobj_internal() );
-//        pInstr->insert_staffobj(pPos, pImo);
-//        m_pScore->close();
-////        dump_col_staff_objs();
-//
-//        cursor.update_after_insertion(id);
-//
-////        cout << cursor.dump_cursor();
-//        CHECK_CURRENT_STATE(cursor, 0, 0, 1, 136.0, 27L, 27L);
-//        CHECK_PREVIOUS_STATE(cursor, 0, 0, 1, 128.0, id, id);
-//    }
-//
-//    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_8)
-//    {
-//        //8. after insertion. current is empty place
-//        create_document_2();
-//        MyScoreCursor cursor(m_pDoc, m_pScore);
-//        cursor.point_to(26L);       //2nd note, staff 1, measure 1
-//        cursor.move_next();
-//        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 64.0, k_cursor_at_empty_place, 39L);
-//        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 32.0, 26L, 26L);
-//
-//        ImoNote* pImo = static_cast<ImoNote*>(
-//                                ImFactory::inject_note(m_pDoc,3,4,k_32th) );
-//        pImo->set_voice(1);
-//        ImoId id = pImo->get_id();
-//        ImoInstrument* pInstr = m_pScore->get_instrument(0);
-//        ImoStaffObj* pPos = static_cast<ImoStaffObj*>( cursor.staffobj_internal() );
-//        pInstr->insert_staffobj(pPos, pImo);
-//        m_pScore->close();
-////        dump_col_staff_objs();
-//
-//        cursor.update_after_insertion(id);
-//
-////        cout << cursor.dump_cursor();
-//        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 72.0, k_cursor_at_empty_place, 40L);
-//        CHECK_PREVIOUS_STATE(cursor, 0, 0, 0, 64.0, id, id);
-//    }
+        ImoClef* pImo = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, m_pDoc) );
+        ImoId id = pImo->get_id();
+        ImoInstrument* pInstr = m_pScore->get_instrument(0);
+        pInstr->insert_staffobj_at(NULL /*at start*/, pImo);
+        m_pScore->close();
+        //dump_col_staff_objs();
+
+        cursor.reset_and_point_to(id);
+
+        //cout << cursor.dump_cursor();
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0f, id, id);
+    }
+
+    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_510)
+    {
+        //510. reset and point after: previous at end_of_score
+        create_document_empty_score();
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+        CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 0, 0, 0.0f);
+        CHECK( cursor.is_at_end_of_score() == true );
+        ImoId idPrev = cursor.get_pointee_id();
+
+        cursor.reset_and_point_after(idPrev);
+
+        CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 0, 0, 0.0f);
+        CHECK( cursor.is_at_end_of_score() == true );
+    }
+
+    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_511)
+    {
+        //511. reset and point after: previous before_start_of_child
+        m_pDoc = LOMSE_NEW Document(m_libraryScope);
+        m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 2.0)(instrument (musicData (clef G))))))" );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+        cursor.point_to(21L);   //clef
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 21L, 21L);
+        SpElementCursorState spState = cursor.find_previous_pos_state();
+        ImoId idPrev = spState->pointee_id();
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 21L, 21L);
+        ImoClef* pImo = static_cast<ImoClef*>( cursor.get_pointee() );
+
+        ImoInstrument* pInstr = m_pScore->get_instrument(0);
+        pInstr->delete_staffobj(pImo);
+        m_pScore->close();
+
+        cursor.reset_and_point_after(idPrev);
+
+        CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 0, 0, 0.0f);
+        CHECK( cursor.is_at_end_of_score() == true );
+    }
+
+    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_512)
+    {
+        //512. reset and point after: previous an Imo and next Imo exists
+        m_pDoc = LOMSE_NEW Document(m_libraryScope);
+        m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 2.0)(instrument (musicData (clef G)(key C))))))" );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+        cursor.point_to(21L);   //clef
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 21L, 21L);
+
+        cursor.reset_and_point_after(21L);
+
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0f, 22L, 22L);
+    }
+
+    TEST_FIXTURE(ScoreCursorTestFixture, survives_updates_513)
+    {
+        //513. reset and point after: previous an Imo and next is end of score
+        m_pDoc = LOMSE_NEW Document(m_libraryScope);
+        m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
+            "(score (vers 2.0)(instrument (musicData (clef G))))))" );
+        m_pScore = static_cast<ImoScore*>( m_pDoc->get_imodoc()->get_content_item(0) );
+        MyScoreCursor cursor(m_pDoc, m_pScore);
+        cursor.point_to(21L);   //clef
+        CHECK_CURRENT_STATE(cursor, 0, 0, 0, 0.0, 21L, 21L);
+
+        cursor.reset_and_point_after(21L);
+
+        CHECK_CURRENT_STATE_AT_END_OF_SCORE(cursor, 0, 0, 0, 0.0f);
+        CHECK( cursor.is_at_end_of_score() == true );
+    }
+
 
     //----------------------------------------------------------------------------
     // Cursor collects information for computing time and timecode

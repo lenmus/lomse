@@ -33,6 +33,11 @@
 #include "lomse_internal_model.h"
 #include "lomse_im_note.h"
 #include "lomse_staffobjs_table.h"
+#include "lomse_document.h"
+#include "lomse_graphical_model.h"
+
+#include <sstream>
+using namespace std;
 
 
 namespace lomse
@@ -41,10 +46,13 @@ namespace lomse
 //=======================================================================================
 // SelectionSet implementation
 //=======================================================================================
-SelectionSet::SelectionSet()
+SelectionSet::SelectionSet(Document* pDoc)
     : m_pValidator( LOMSE_NEW SelectionValidator() )
     , m_pMasterCollection(NULL)
     , m_pCollection(NULL)
+    , m_fValid(true)
+    , m_pGModel(NULL)
+    , m_pDoc(pDoc)
 {
 }
 
@@ -53,6 +61,7 @@ SelectionSet::~SelectionSet()
 {
     m_gmos.clear();
     m_imos.clear();
+    m_ids.clear();
     delete m_pValidator;
     delete m_pCollection;
 }
@@ -65,26 +74,102 @@ void SelectionSet::set_validator(SelectionValidator* pValidator)
 }
 
 //---------------------------------------------------------------------------------------
+void SelectionSet::graphic_model_changed(GraphicModel* pGModel)
+{
+    m_pGModel = pGModel;
+    m_fValid = false;
+}
+
+//---------------------------------------------------------------------------------------
+void SelectionSet::ensure_set_is_valid()
+{
+    if (!m_fValid)
+    {
+        if (m_pDoc)
+        {
+            m_gmos.clear();
+            m_imos.clear();
+            delete m_pCollection;
+            m_pCollection = NULL;
+            m_pMasterCollection = NULL;
+            m_fValid = true;
+
+            list<ImoId>::iterator it = m_ids.begin();
+            while (it != m_ids.end())
+            {
+                ImoObj* pImo = m_pDoc->get_pointer_to_imo(*it);
+                if (pImo)
+                {
+                    m_imos.push_back(pImo);
+                    if (pImo->is_staffobj())
+                        add_staffobj_to_collection( static_cast<ImoStaffObj*>(pImo) );
+
+                    if (m_pGModel)      //In some unit tests, there is no GModel
+                    {
+                        GmoObj* pGmo = m_pGModel->get_main_shape_for_imo( pImo->get_id() );
+                        //TODO: When adding a GmoObj, its Shape Id should be saved so that
+                        //      following method can be used:
+                        // GmoShape* get_shape_for_imo(ImoId imoId, ShapeId shapeId);
+
+                        m_gmos.push_back(pGmo);
+                    }
+                    ++it;
+                }
+                else
+                    it = m_ids.erase(it);
+            }
+        }
+        else
+            clear();
+    }
+}
+
+//---------------------------------------------------------------------------------------
 void SelectionSet::add(GmoObj* pGmo)
 {
+    add_gmo(pGmo, true /*save ImoId*/);
+}
+
+//---------------------------------------------------------------------------------------
+void SelectionSet::add(ImoId id, GraphicModel* pGM)
+{
+    list<ImoId>::iterator it = std::find(m_ids.begin(), m_ids.end(), id);
+    if (it == m_ids.end())
+    {
+        if (pGM != NULL && pGM == m_pGModel)
+        {
+            add( m_pGModel->get_main_shape_for_imo(id) );
+        }
+        else
+        {
+            m_fValid = false;
+            if (pGM != NULL)        //in some UnitTest there is no GM
+                m_pGModel = pGM;
+            m_ids.push_back(id);
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void SelectionSet::remove(ImoId id)
+{
+    m_fValid = false;
+    m_ids.remove(id);
+}
+
+//---------------------------------------------------------------------------------------
+void SelectionSet::add_gmo(GmoObj* pGmo, bool fSaveImoId)
+{
+    ensure_set_is_valid();
+
     m_gmos.push_back(pGmo);
 
     ImoObj* pImo = pGmo->get_creator_imo();
     if (pImo)
     {
         m_imos.push_back(pImo);
-
-        if (pImo->is_staffobj())
-            add_staffobj_to_collection( static_cast<ImoStaffObj*>(pImo) );
-    }
-}
-
-//---------------------------------------------------------------------------------------
-void SelectionSet::debug_add(ImoObj* pImo)
-{
-    if (pImo)
-    {
-        m_imos.push_back(pImo);
+        if (fSaveImoId)
+            m_ids.push_back( pImo->get_id() );
 
         if (pImo->is_staffobj())
             add_staffobj_to_collection( static_cast<ImoStaffObj*>(pImo) );
@@ -123,15 +208,16 @@ void SelectionSet::add_staffobj_to_collection(ImoStaffObj* pSO)
 }
 
 //---------------------------------------------------------------------------------------
-bool SelectionSet::contains(GmoObj* pGmo)
+bool SelectionSet::contains(ImoObj* pImo)
 {
-    std::list<GmoObj*>::iterator it;
-    for (it = m_gmos.begin(); it != m_gmos.end(); ++it)
-    {
-        if (*it == pGmo)
-            return true;
-    }
-    return false;
+    return contains( pImo->get_id() );
+}
+
+//---------------------------------------------------------------------------------------
+bool SelectionSet::contains(ImoId id)
+{
+    list<ImoId>::iterator it = std::find(m_ids.begin(), m_ids.end(), id);
+    return it != m_ids.end();
 }
 
 //---------------------------------------------------------------------------------------
@@ -139,14 +225,26 @@ void SelectionSet::clear()
 {
     m_gmos.clear();
     m_imos.clear();
+    m_ids.clear();
     delete m_pCollection;
     m_pCollection = NULL;
     m_pMasterCollection = NULL;
+    m_fValid = true;
+}
+
+//---------------------------------------------------------------------------------------
+void SelectionSet::restore_state(const SelectionState& state)
+{
+    clear();
+    m_ids = state.m_ids;
+    m_fValid = false;
 }
 
 //---------------------------------------------------------------------------------------
 list<ImoId> SelectionSet::filter(int type)
 {
+    ensure_set_is_valid();
+
     list<ImoId> objects;
     list<ImoObj*>::iterator it;
     for (it = m_imos.begin(); it != m_imos.end(); ++it)
@@ -162,6 +260,8 @@ list<ImoId> SelectionSet::filter(int type)
 list<ImoId> SelectionSet::filter_notes_rests()
 {
     //note/rests are returned in order
+
+    ensure_set_is_valid();
 
     list<ImoId> notes;
     ColStaffObjs* pCollection = get_staffobjs_collection();
@@ -181,7 +281,11 @@ list<ImoId> SelectionSet::filter_notes_rests()
 //---------------------------------------------------------------------------------------
 list<ImoObj*> SelectionSet::filter_deletable()
 {
+    ensure_set_is_valid();
+
     list<ImoObj*> objects;
+
+    //TODO: ?
 //    list<GmoObj*>::iterator it;
 //    for (it = m_gmos.begin(); it != m_gmos.end(); ++it)
 //    {
@@ -204,36 +308,48 @@ list<ImoObj*> SelectionSet::filter_deletable()
 //---------------------------------------------------------------------------------------
 bool SelectionSet::is_valid_to_add_tie(ImoNote** ppStartNote, ImoNote** ppEndNote)
 {
+    ensure_set_is_valid();
+
     return m_pValidator->is_valid_to_add_tie(this, ppStartNote, ppEndNote);
 }
 
 //---------------------------------------------------------------------------------------
 bool SelectionSet::is_valid_to_remove_tie()
 {
+    ensure_set_is_valid();
+
     return m_pValidator->is_valid_to_remove_tie(this);
 }
 
 //---------------------------------------------------------------------------------------
 bool SelectionSet::is_valid_to_add_tuplet()
 {
+    ensure_set_is_valid();
+
     return m_pValidator->is_valid_to_add_tuplet(this);
 }
 
 //---------------------------------------------------------------------------------------
 bool SelectionSet::is_valid_to_remove_tuplet()
 {
+    ensure_set_is_valid();
+
     return m_pValidator->is_valid_to_remove_tuplet(this);
 }
 
 //---------------------------------------------------------------------------------------
 bool SelectionSet::is_valid_for_join_beam()
 {
+    ensure_set_is_valid();
+
     return m_pValidator->is_valid_for_join_beam(this);
 }
 
 //---------------------------------------------------------------------------------------
 bool SelectionSet::is_valid_for_toggle_stem()
 {
+    ensure_set_is_valid();
+
     return m_pValidator->is_valid_for_toggle_stem(this);
 }
 
@@ -241,6 +357,8 @@ bool SelectionSet::is_valid_for_toggle_stem()
 void SelectionSet::get_start_end_note_rests(ImoNoteRest** ppStart,
                                             ImoNoteRest** ppEnd)
 {
+    ensure_set_is_valid();
+
     ImoNoteRest* pStart = NULL;
     ImoNoteRest* pEnd = NULL;
 
@@ -265,6 +383,28 @@ void SelectionSet::get_start_end_note_rests(ImoNoteRest** ppStart,
         *ppStart = pStart;
     if (ppEnd)
         *ppEnd = pEnd;
+}
+
+//---------------------------------------------------------------------------------------
+string SelectionSet::dump_selection()
+{
+    if (this->empty())
+        return "No objects selected.";
+
+    ensure_set_is_valid();
+
+    if (m_pDoc)
+    {
+        stringstream msg;
+        list<ImoId>::iterator it;
+        for (it = m_ids.begin(); it != m_ids.end(); ++it)
+        {
+            ImoObj* pImo = m_pDoc->get_pointer_to_imo(*it);
+            msg << pImo->get_id() << ": " << pImo->get_name() << endl;
+        }
+        return msg.str();
+    }
+    return "Error: can't access to Document!";
 }
 
 

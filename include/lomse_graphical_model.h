@@ -162,7 +162,7 @@ public:
     AreaInfo* get_info_for_point(int iPage, LUnits x, LUnits y);
 
     //selection
-    void select_objects_in_rectangle(int iPage, SelectionSet& selection,
+    void select_objects_in_rectangle(int iPage, SelectionSet* pSelection,
                                      const URect& selRect, unsigned flags=0);
     GmoShape* find_shape_for_object(ImoStaffObj* pSO);
     GmoShape* get_shape_for_noterest(ImoNoteRest* pNR);

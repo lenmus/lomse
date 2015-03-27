@@ -2234,6 +2234,20 @@ void ImoInstrument::insert_staffobj(ImoStaffObj* pPos, ImoStaffObj* pImo)
 }
 
 //---------------------------------------------------------------------------------------
+void ImoInstrument::insert_staffobj_after(ImoStaffObj* pPos, ImoStaffObj* pImo)
+{
+    //insert pImo after pPos
+
+    TreeNode<ImoObj>::iterator it( pPos->get_next_sibling() );
+    ImoMusicData* pMD = get_musicdata();
+    if (*it)
+        pMD->insert(it, pImo);
+    else
+        pMD->append_child(pImo);
+    set_dirty(true);
+}
+
+//---------------------------------------------------------------------------------------
 list<ImoStaffObj*> ImoInstrument::insert_staff_objects_at(ImoStaffObj* pAt,
                                             const string& ldpsource, ostream& reporter)
 {
@@ -2267,7 +2281,7 @@ list<ImoStaffObj*> ImoInstrument::insert_staff_objects_at(ImoStaffObj* pAt,
         if (pAt)
             pMD->insert(itPos, pImo);
         else
-            pMD->append_child_imo(pImo);
+            pMD->append_child(pImo);
         objects.push_back(pImo);
         it = pObjects->begin();
     }

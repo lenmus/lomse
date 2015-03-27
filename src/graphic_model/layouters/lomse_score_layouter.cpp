@@ -146,6 +146,37 @@ void ScoreLayouter::layout_in_box()
         move_cursor_after_headers();
     }
 
+    if (!enough_space_in_page())
+    {
+        // AWARE: For documents containing not only a single score but texts, paragraphs, etc.,
+        // ScorePage is like a paragraph: a portion of parent box. When having to render a
+        // score and current parent box (probably a DocPageContent box) is nearly full,
+        // ScorePage will have insufficient height. Before assuming that paper height is smaller
+        // that system height, it is then necessary to ask parent layouter for allocating
+        // a empty page. as_headers() && !enough_space_in_page())
+        if (score_page_is_the_only_content_of_parent_box())
+        {
+            //TODO: ScoreLayouter::layout_in_box()
+            //  If paper height is smaller than system height it is impossible to fit
+            //  one system in a page. We have to split system horizontally (some staves in
+            //  one page and the others in next page).
+            //  For now, just an error message.
+            add_error_message("ERROR: Not enough space for drawing just one system!");
+            stringstream msg;
+            msg << "  Page size too small for " << m_pScore->get_num_instruments()
+                << " instruments.";
+            add_error_message(msg.str());
+            set_layout_is_finished(true);
+            return;
+        }
+        else
+        {
+            //inform parent layouter for allocating a new page.
+            set_layout_is_finished(false);
+            return;
+        }
+    }
+
     while(enough_space_in_page() && m_iCurColumn < get_num_columns())
     {
         create_system();
@@ -315,11 +346,6 @@ void ScoreLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width
 //---------------------------------------------------------------------------------------
 bool ScoreLayouter::enough_space_in_page()
 {
-    //TODO: ScoreLayouter::enough_space_in_page
-    //  If paper height is smaller than system height it is impossible to fit
-    //  one system in a page. We have to split system horizontally (some staves in
-    //  one page and the others in next page).
-
     LUnits height = m_pColsBuilder->get_staves_height();
     height += distance_to_top_of_system(m_iCurSystem+1, m_fFirstSystemInPage);
     height += determine_system_top_margin();
@@ -330,6 +356,13 @@ bool ScoreLayouter::enough_space_in_page()
 LUnits ScoreLayouter::remaining_height()
 {
     return m_pCurBoxPage->get_height() - (m_cursor.y - m_startTop);
+}
+
+//---------------------------------------------------------------------------------------
+bool ScoreLayouter::score_page_is_the_only_content_of_parent_box()
+{
+    GmoBox* pParent = m_pCurBoxPage->get_parent_box();
+    return m_pCurBoxPage->get_height() == pParent->get_height();
 }
 
 //---------------------------------------------------------------------------------------
@@ -355,7 +388,6 @@ void ScoreLayouter::add_score_titles()
 void ScoreLayouter::move_cursor_after_headers()
 {
     //TODO: ScoreLayouter::move_cursor_after_headers
-    move_cursor_to_top_left_corner();
     //m_cursor.y += m_pScore->GetHeadersHeight();
 }
 
@@ -625,6 +657,18 @@ bool ScoreLayouter::column_has_system_break(int iCol)
 float ScoreLayouter::get_column_penalty(int iCol)
 {
     return m_ColLayouters[iCol]->get_penalty_factor();
+}
+
+//---------------------------------------------------------------------------------------
+void ScoreLayouter::add_error_message(const string& msg)
+{
+    ImoStyle* pStyle = m_pScore->get_default_style();
+    TextEngraver engrv(m_libraryScope, m_pScoreMeter, msg, "en", pStyle);
+    LUnits x = m_pageCursor.x + 400.0;
+    LUnits y = m_pageCursor.y + 800.0;
+    GmoShape* pText = engrv.create_shape(NULL, x, y);
+    m_pItemMainBox->add_shape(pText, GmoShape::k_layer_top);
+    m_pageCursor.y += pText->get_height();
 }
 
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -68,8 +68,6 @@ public:
     //compilation
     virtual InternalModel* compile_file(const std::string& filename)=0;
     virtual InternalModel* compile_string(const std::string& source)=0;
-    virtual InternalModel* create_empty()=0;
-    virtual InternalModel* create_with_empty_score()=0;
 
     //info
     int get_num_errors();

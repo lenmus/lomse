@@ -35,6 +35,7 @@
 #include "lomse_document_cursor.h"
 #include "lomse_pitch.h"            //EAccidentals
 #include "lomse_im_attributes.h"
+#include "lomse_selections.h"
 
 #include <sstream>
 using namespace std;
@@ -95,6 +96,14 @@ public:
     };
     virtual int get_undo_policy() = 0;
 
+    //selection set update policy to be used with this command
+    enum {
+        k_sel_do_nothing=0,
+        k_sel_clear,
+        k_sel_command_specific,
+    };
+    virtual int get_selection_update_policy() = 0;
+
     //information
     inline std::string get_name() { return m_name; }
     inline bool is_reversible() { return m_flags &  k_reversible; }
@@ -103,6 +112,7 @@ public:
     inline bool is_included_in_composite_cmd() { return m_flags &  k_included_in_composite_cmd; }
     inline string get_error() { return m_error; }
     virtual bool is_composite() = 0;
+    virtual void update_selection(SelectionSet* pSelection) {}
 
     //settings
     inline void mark_as_included_in_composite_cmd() { m_flags |= k_included_in_composite_cmd; }
@@ -114,9 +124,10 @@ public:
 
 protected:
     void create_checkpoint(Document* pDoc);
-    void log_forensic_data();
+    void log_forensic_data(Document* pDoc, DocCursor* pCursor);
     void set_command_name(const string& name, ImoObj* pImo);
     int validate_source(const string& source);
+    virtual void log_command(ofstream &logger);
 
 };
 
@@ -163,10 +174,12 @@ public:
     //overrides
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return m_undoPolicy; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
     bool is_composite() { return true; }
 
     //operations delegated by DocCommandExecuter
     void update_cursor(DocCursor* pCursor, DocCommandExecuter* pExecuter);
+    void update_selection(SelectionSet* pSelection, DocCommandExecuter* pExecuter);
 
 protected:
 
@@ -180,10 +193,11 @@ class UndoElement
 public:
     DocCommand*         pCmd;
     DocCursorState      cursorState;
+    SelectionState      selState;
 
 public:
-    UndoElement(DocCommand* cmd, DocCursorState state)
-        : pCmd(cmd), cursorState(state)
+    UndoElement(DocCommand* cmd, DocCursorState state, SelectionState sel)
+        : pCmd(cmd), cursorState(state), selState(sel)
     {
     }
 };
@@ -208,9 +222,9 @@ public:
     DocCommandExecuter(Document* target);
     virtual ~DocCommandExecuter() {}
     virtual int execute(DocCursor* pCursor, DocCommand* pCmd,
-                        SelectionSet* pSelection=NULL);
-    virtual void undo(DocCursor* pCursor);
-    virtual void redo(DocCursor* pCursor);
+                        SelectionSet* pSelection);
+    virtual void undo(DocCursor* pCursor, SelectionSet* pSelection);
+    virtual void redo(DocCursor* pCursor, SelectionSet* pSelection);
     inline string get_error() { return m_error; }
 
     //info
@@ -222,6 +236,37 @@ public:
 protected:
     friend class DocCmdComposite;
     void update_cursor(DocCursor* pCursor, DocCommand* pCmd);
+    void update_selection(SelectionSet* pSelection, DocCommand* pCmd);
+
+};
+
+//---------------------------------------------------------------------------------------
+class CmdAddChordNote : public DocCmdSimple
+{
+protected:
+    ImoId m_baseId;
+    ImoId m_noteId;
+    string m_pitch;
+    int m_step;
+    int m_octave;
+    EAccidentals m_accidentals;
+    int m_type;
+    int m_dots;
+    int m_voice;
+
+public:
+    CmdAddChordNote(const string& pitch, const string& name="Add chord note");
+    virtual ~CmdAddChordNote() {};
+
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_refresh; }
+    int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
+    int get_selection_update_policy() { return k_sel_command_specific; }
+
+protected:
+    void update_selection(SelectionSet* pSelection);
+    void log_command(ofstream &logger);
 
 };
 
@@ -240,6 +285,7 @@ public:
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
+    int get_selection_update_policy() { return k_sel_command_specific; }
 
 protected:
     //temporary data and helper methods using it
@@ -257,20 +303,25 @@ protected:
     list<OverlappedNoteRest*> m_overlaps;
     string m_finalSrc;
     list<ImoStaffObj*> m_insertedObjs;
+    ImoNoteRest* m_pLastOverlapped;
 
     void get_data_about_insertion_point();
     void get_data_about_noterest_to_insert();
     void find_and_classify_overlapped_noterests();
     void determine_insertion_point();
+    void add_new_note_to_existing_beam_if_necessary();
     void reduce_duration_of_overlapped_at_end();
     void remove_fully_overlapped();
     void insert_new_content();
     void reduce_duration_of_overlapped_at_start();
     void update_cursor();
+    void update_selection(SelectionSet* pSelection);
     void clear_temporary_objects();
     void add_go_fwd_if_needed();
 
+    //overrides and mandatory virtual methods
     void set_command_name();
+    void log_command(ofstream &logger);
 
 };
 
@@ -291,8 +342,10 @@ public:
     int get_cursor_update_policy() { return k_do_nothing; }
     void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_undo_policy() { return k_undo_policy_specific; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
 
-//    int set_target(ImoId startNR, ImoId endNR);
+protected:
+    void log_command(ofstream &logger);
 };
 
 //---------------------------------------------------------------------------------------
@@ -313,6 +366,10 @@ public:
     int get_cursor_update_policy() { return k_do_nothing; }
     void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_undo_policy() { return k_undo_policy_specific; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
+
+protected:
+    void log_command(ofstream &logger);
 };
 
 //---------------------------------------------------------------------------------------
@@ -329,6 +386,10 @@ public:
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
+
+protected:
+    void log_command(ofstream &logger);
 };
 
 //---------------------------------------------------------------------------------------
@@ -348,7 +409,10 @@ public:
     int get_cursor_update_policy() { return k_do_nothing; }
     void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_undo_policy() { return k_undo_policy_specific; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
 
+protected:
+    void log_command(ofstream &logger);
 };
 
 //---------------------------------------------------------------------------------------
@@ -393,6 +457,7 @@ public:
     void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_specific; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
 
 protected:
     void set_default_name();
@@ -418,6 +483,7 @@ public:
     int get_cursor_update_policy() { return k_refresh; }
     void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_undo_policy() { return k_undo_policy_specific; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
 
 };
 
@@ -443,13 +509,15 @@ public:
     virtual ~CmdCursor() {};
 
     enum { k_move_next=0, k_move_prev, k_enter, k_exit, k_point_to,
-           k_to_state, k_to_measure, k_to_time, k_move_up, k_move_down, };
+           k_to_state, k_to_measure, k_to_time, k_move_up, k_move_down,
+           k_cursor_dump, };
 
     int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
     void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_specific; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
 
 protected:
     void set_default_name();
@@ -489,6 +557,7 @@ public:
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_update_after_deletion; }
     int get_undo_policy() { return k_undo_policy_full_checkpoint; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -507,6 +576,7 @@ public:
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
 
 private:
     int set_score_id(Document* pDoc);
@@ -530,6 +600,7 @@ public:
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_update_after_deletion; }
     int get_undo_policy() { return k_undo_policy_full_checkpoint; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
 
 protected:
     list<ImoId> m_relIds;   //when the action is performed, all relations in deleted
@@ -560,6 +631,7 @@ public:
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_update_after_deletion; }
     int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -599,6 +671,7 @@ public:
     void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_refresh; }  //k_update_after_insertion; }
     int get_undo_policy() { return k_undo_policy_specific; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
 
 protected:
     void perform_action_from_source(Document* pDoc, DocCursor* pCursor);
@@ -621,6 +694,7 @@ public:
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_refresh; }  //k_update_after_insertion; }
     int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
 
 protected:
     void save_source_code_with_ids(Document* pDoc, const list<ImoStaffObj*>& objects);
@@ -641,6 +715,7 @@ public:
     void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_refresh; }  //k_update_after_insertion; }
     int get_undo_policy() { return k_undo_policy_specific; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
 };
 
 //---------------------------------------------------------------------------------------
@@ -657,6 +732,10 @@ public:
     int perform_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_full_checkpoint; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
+
+protected:
+    void log_command(ofstream &logger);
 };
 
 //---------------------------------------------------------------------------------------
@@ -678,6 +757,38 @@ public:
     void undo_action(Document* pDoc, DocCursor* pCursor);
     int get_cursor_update_policy() { return k_do_nothing; }
     int get_undo_policy() { return k_undo_policy_specific; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
+};
+
+//---------------------------------------------------------------------------------------
+class CmdSelection : public DocCmdSimple
+{
+protected:
+    int             m_operation;
+    ImoId           m_targetId;
+//    DocCursorState  m_curState;
+//    DocCursorState  m_targetState;
+    SelectionSet*   m_pSelection;
+
+public:
+    CmdSelection(int cmd, const string& name="");
+    CmdSelection(int cmd, ImoId id, const string& name="");
+    //CmdSelection(DocCursorState& state, const string& name="");
+    virtual ~CmdSelection() {};
+
+    enum { k_set=0, k_add, k_remove, k_clear, };
+
+    int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
+    int perform_action(Document* pDoc, DocCursor* pCursor);
+    void undo_action(Document* pDoc, DocCursor* pCursor);
+    int get_cursor_update_policy() { return k_do_nothing; }
+    int get_undo_policy() { return k_undo_policy_specific; }
+    int get_selection_update_policy() { return k_sel_do_nothing; }
+
+protected:
+    void set_default_name();
+    void initialize();
+
 };
 
 

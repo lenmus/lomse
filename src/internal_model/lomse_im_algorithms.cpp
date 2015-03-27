@@ -32,6 +32,7 @@
 #include "lomse_im_note.h"
 #include "lomse_staffobjs_table.h"
 #include "lomse_document.h"
+#include "lomse_im_factory.h"
 
 namespace lomse
 {
@@ -111,6 +112,29 @@ list<ImoStaffObj*> ImoTreeAlgoritms::insert_staffobjs(ImoInstrument* pInstr,
         pScore->close();        //update ColStaffObjs table
 
     return objects;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoTreeAlgoritms::add_note_to_chord(ImoNote* pBaseNote, ImoNote* pNewNote,
+                                         Document* pDoc)
+{
+    //AWARE: new note must have been added to Imo tree
+    //This method just "joins" the notes into a chord
+
+    //create/update the chord
+    ImoChord* pChord;
+    if (pBaseNote->is_in_chord())
+    {
+        //chord already created. Get it
+        pChord = pBaseNote->get_chord();
+    }
+    else
+    {
+        //chord didn't exist. Create it
+        pChord = static_cast<ImoChord*>(ImFactory::inject(k_imo_chord, pDoc));
+        pBaseNote->include_in_relation(pDoc, pChord);
+    }
+    pNewNote->include_in_relation(pDoc, pChord);
 }
 
 //---------------------------------------------------------------------------------------

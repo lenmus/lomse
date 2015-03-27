@@ -51,6 +51,7 @@
 #include "lomse_document.h"
 #include "lomse_image_reader.h"
 #include "lomse_score_player_ctrl.h"
+#include "lomse_im_algorithms.h"
 
 using namespace std;
 
@@ -2140,7 +2141,7 @@ protected:
         bool fFwd = m_pAnalysedNode->is_type(k_goFwd);
         pImo->set_forward(fFwd);
 
-        // <duration> |start | end (label) or <number>
+        // <duration> | start | end (label) or <number>
         if (get_optional(k_label))
         {
             string duration = m_pParamToAnalyse->get_value();
@@ -3302,33 +3303,34 @@ public:
         if (!fIsRest && fInChord)
         {
             ImoNote* pStartOfChordNote = m_pAnalyser->get_last_note();
-            ImoChord* pChord;
-            if (pStartOfChordNote->is_in_chord())
-            {
-                //chord already created. just add note to it
-                pChord = pStartOfChordNote->get_chord();
-            }
-            else
-            {
-                //previous note is the base note. Create the chord
-                pChord = static_cast<ImoChord*>(ImFactory::inject(k_imo_chord, pDoc));
-                Document* pDoc = m_pAnalyser->get_document_being_analysed();
-                pStartOfChordNote->include_in_relation(pDoc, pChord);
-            }
 
-            //add current note to chord
-            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            pNote->include_in_relation(pDoc, pChord);
-
-        //TODO: check if note in chord has the same duration than base note
+        //TODO: check if new note the same duration and voice than base note
       //  if (fInChord && m_pLastNote
-      //      && !IsEqualTime(m_pLastNote->GetDuration(), rDuration) )
+      //      && !IsEqualTime(pStartOfChordNote->GetDuration(), rDuration) )
       //  {
       //      report_msg("Error: note in chord has different duration than base note. Duration changed.");
-		    //rDuration = m_pLastNote->GetDuration();
-      //      nNoteType = m_pLastNote->GetNoteType();
-      //      nDots = m_pLastNote->GetNumDots();
+		    //rDuration = pStartOfChordNote->GetDuration();
+      //      nNoteType = pStartOfChordNote->GetNoteType();
+      //      nDots = pStartOfChordNote->GetNumDots();
       //  }
+
+            ImoTreeAlgoritms::add_note_to_chord(pStartOfChordNote, pNote, pDoc);
+
+//            ImoChord* pChord;
+//            if (pStartOfChordNote->is_in_chord())
+//            {
+//                //chord already created. just add note to it
+//                pChord = pStartOfChordNote->get_chord();
+//            }
+//            else
+//            {
+//                //previous note is the base note. Create the chord
+//                pChord = static_cast<ImoChord*>(ImFactory::inject(k_imo_chord, pDoc));
+//                pStartOfChordNote->include_in_relation(pDoc, pChord);
+//            }
+//
+//            //add current note to chord
+//            pNote->include_in_relation(pDoc, pChord);
         }
 
         //save this note as last note

@@ -46,6 +46,9 @@ class ImoNote;
 class ImoNoteRest;
 class ImoStaffObj;
 class SelectionSet;
+class Document;
+typedef SharedPtr<Document>     SpDocument;
+typedef WeakPtr<Document>       WpDocument;
 
 
 //---------------------------------------------------------------------------------------
@@ -72,6 +75,20 @@ public:
 
 };
 
+//---------------------------------------------------------------------------------------
+// SelectionState: class for saving the state of a SelectionSet
+class SelectionState
+{
+public:
+    list<ImoId> m_ids;
+
+public:
+    SelectionState(const list<ImoId>& ids)
+        : m_ids(ids)
+    {
+    }
+
+};
 
 //---------------------------------------------------------------------------------------
 typedef list<ImoObj*>::iterator     SelectionSetIterator;
@@ -82,24 +99,37 @@ class SelectionSet
 protected:
     list<GmoObj*> m_gmos;
     list<ImoObj*> m_imos;
+    list<ImoId> m_ids;
     SelectionValidator* m_pValidator;
     ColStaffObjs* m_pMasterCollection;
     ColStaffObjs* m_pCollection;
+    bool m_fValid;
+    GraphicModel* m_pGModel;
+    Document* m_pDoc;
 
 public:
-    SelectionSet();
-    ~SelectionSet();
+    SelectionSet(Document* pDoc);
+    virtual ~SelectionSet();
 
     ///change default validation rules
     void set_validator(SelectionValidator* pValidator);
 
     //operations
     void add(GmoObj* pGmo);
-    bool contains(GmoObj* pGmo);
+    void add(ImoId id, GraphicModel* pGM=NULL);
+    void remove(ImoId id);
+    bool contains(ImoObj* pImo);
+    bool contains(ImoId id);
     void clear();
+    void graphic_model_changed(GraphicModel* pGModel);
+    void restore_state(const SelectionState& state);
 
     ///true if no objects selected
-    inline bool empty() { return m_imos.size() == 0; }
+    inline bool empty() { return m_ids.size() == 0; }
+    inline int num_selected() { return static_cast<int>(m_ids.size()); }
+
+    ///true if GmoObj and ImoObj are valid
+    inline bool is_valid() { return m_fValid; }
 
     ///filter selection, only returning objects of requested types
     list<ImoId> filter(int type);
@@ -116,21 +146,22 @@ public:
     bool is_valid_for_toggle_stem();
 
     //iterator and iterator related
-	inline SelectionSetIterator begin() { return m_imos.begin(); }
-	inline SelectionSetIterator end() { return m_imos.end(); }
-    inline ImoObj* back() { return m_imos.back(); }
-    inline ImoObj* front() { return m_imos.front(); }
+	inline SelectionSetIterator begin() { ensure_set_is_valid(); return m_imos.begin(); }
+	inline SelectionSetIterator end() { ensure_set_is_valid(); return m_imos.end(); }
+    inline ImoObj* back() { ensure_set_is_valid(); return m_imos.back(); }
+    inline ImoObj* front() { ensure_set_is_valid(); return m_imos.front(); }
 
     //accessors
-    inline ColStaffObjs* get_staffobjs_collection() { return m_pCollection; }
-    inline list<ImoObj*>& get_all_objects() { return m_imos; }
-    inline list<GmoObj*>& get_all_gmo_objects() { return m_gmos; }
-
-    //only for unit tests
-    void debug_add(ImoObj* pImo);
+    inline ColStaffObjs* get_staffobjs_collection() { ensure_set_is_valid(); return m_pCollection; }
+    inline list<ImoObj*>& get_all_objects() { ensure_set_is_valid(); return m_imos; }
+    inline list<GmoObj*>& get_all_gmo_objects() { ensure_set_is_valid(); return m_gmos; }
+    inline SelectionState get_state() { return SelectionState(m_ids); };
+    string dump_selection();
 
 protected:
     void add_staffobj_to_collection(ImoStaffObj* pSO);
+    void ensure_set_is_valid();             //virtual for unit tests
+    void add_gmo(GmoObj* pGmo, bool fSaveImoId);
 
 };
 

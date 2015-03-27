@@ -78,8 +78,11 @@ public:
 ImoDocument* ModelBuilder::build_model(InternalModel* IModel)
 {
     ImoDocument* pDoc = static_cast<ImoDocument*>( IModel->get_root() );
-    VisitorForStructurizables v(this);
-    pDoc->accept_visitor(v);
+    if (pDoc)
+    {
+        VisitorForStructurizables v(this);
+        pDoc->accept_visitor(v);
+    }
     return pDoc;
 }
 

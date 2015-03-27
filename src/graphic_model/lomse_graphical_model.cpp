@@ -126,10 +126,10 @@ GmoBox* GraphicModel::find_inner_box_at(int iPage, LUnits x, LUnits y)
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicModel::select_objects_in_rectangle(int iPage, SelectionSet& selection,
+void GraphicModel::select_objects_in_rectangle(int iPage, SelectionSet* selection,
                                                const URect& selRect, unsigned flags)
 {
-    selection.clear();
+    selection->clear();
     get_page(iPage)->select_objects_in_rectangle(selection, selRect, flags);
 }
 

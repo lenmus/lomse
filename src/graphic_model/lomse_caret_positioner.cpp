@@ -347,7 +347,7 @@ void ScoreCaretPositioner::caret_at_end_of_staff(Caret* pCaret)
 {
     //cursor is at end of a staff or end of score. Score is not empty.
     //No current staffobj but a previous one must exist.
-    //Place cursor two lines (20 tenths) at the right of last staffobj
+    //Place cursor 0.8 lines (8 tenths) at the right of last staffobj
 
     //get info for prev object
     SpElementCursorState spState = m_pScoreCursor->get_state();
@@ -358,11 +358,11 @@ void ScoreCaretPositioner::caret_at_end_of_staff(Caret* pCaret)
 
     URect bounds = get_bounds_for_imo(id, staff);
 
-    bounds.x += tenths_to_logical(20);
+    bounds.x += tenths_to_logical(8);
     set_caret_y_pos_and_height(&bounds, id, staff);
 
     pCaret->set_type(Caret::k_line);
-    pCaret->set_position( bounds.get_top_left() );
+    pCaret->set_position( UPoint(bounds.right(), bounds.top()) );
     pCaret->set_size( USize(bounds.get_width(), bounds.get_height()) );
     set_caret_timecode(pCaret);
 }

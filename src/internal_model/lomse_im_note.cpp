@@ -191,7 +191,6 @@ ImoNote::ImoNote()
     , m_stemDirection(k_stem_default)
     , m_pTieNext(NULL)
     , m_pTiePrev(NULL)
-    , m_pChord(NULL)
 {
 }
 
@@ -206,7 +205,6 @@ ImoNote::ImoNote(int step, int octave, int noteType, EAccidentals accidentals, i
     , m_stemDirection(stem)
     , m_pTieNext(NULL)
     , m_pTiePrev(NULL)
-    , m_pChord(NULL)
 {
     m_nNoteType = noteType;
     m_nDots = dots;

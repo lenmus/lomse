@@ -487,7 +487,7 @@ public:
     GmoShape* find_shape_at(LUnits x, LUnits y);
 
     //selection
-    void select_objects_in_rectangle(SelectionSet& selection, const URect& selRect,
+    void select_objects_in_rectangle(SelectionSet* selection, const URect& selRect,
                                      unsigned flags=0);
 
 protected:

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -237,50 +237,6 @@ void LdpParser::Do_WaitingForName()
 }
 
 //---------------------------------------------------------------------------------------
-void LdpParser::Do_WaitingForParameter()
-{
-    //switch (m_pTk->get_type())
-    //{
-    //    case tkStartOfElement:
-    //        PushNode(A3_ProcessingParameter);    // add current node (name of element or parameter) to the tree
-    //        m_pTokenizer->repeat_token();
-    //        m_state = A0_WaitingForStartOfElement;
-    //        break;
-    //    case tkLabel:
-    //        //m_curNode->append_child( m_pLdpFactory->new_label(m_pTk->get_value(),
-    //        //                                                  m_pTk->get_line_number()) );
-    //        //m_state = A3_ProcessingParameter;
-    //        //break;
-    //        if ( must_replace_tag(m_pTk->get_value()) )
-    //            replace_current_tag();
-    //        else
-    //        {
-    //            m_curNode->append_child( m_pLdpFactory->new_label(m_pTk->get_value(),
-    //                                                              m_pTk->get_line_number()) );
-    //            m_state = A3_ProcessingParameter;
-    //        }
-    //        break;
-    //    case tkIntegerNumber:
-    //    case tkRealNumber:
-    //        m_curNode->append_child( m_pLdpFactory->new_number(m_pTk->get_value(),
-    //                                                           m_pTk->get_line_number()) );
-    //        m_state = A3_ProcessingParameter;
-    //        break;
-    //    case tkString:
-    //        m_curNode->append_child( m_pLdpFactory->new_string(m_pTk->get_value(),
-    //                                                           m_pTk->get_line_number()) );
-    //        m_state = A3_ProcessingParameter;
-    //        break;
-    //    default:
-    //        report_error(m_state, m_pTk);
-    //        if (m_pTk->get_type() == tkEndOfFile)
-    //            m_state = A4_Exit;
-    //        else
-    //            m_state = A2_WaitingForParameter;
-    //}
-}
-
-//---------------------------------------------------------------------------------------
 void LdpParser::Do_ProcessingParameter()
 {
     switch (m_pTk->get_type())
@@ -320,6 +276,7 @@ void LdpParser::Do_ProcessingParameter()
             break;
         default:
             report_error(m_state, m_pTk);
+            terminate_current_parameter();
             if (m_pTk->get_type() == tkEndOfFile)
                 m_state = A4_Exit;
             else

@@ -39,6 +39,16 @@
 #include <sstream>
 using namespace std;
 
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include "boost/date_time/local_time/local_time.hpp"
+
+using namespace std;
+using namespace boost::gregorian;
+using namespace boost::posix_time;
+using namespace boost::local_time;
+
+
 
 namespace lomse
 {
@@ -636,8 +646,9 @@ public:
 
     string generate_source(ImoObj* pParent=NULL)
     {
-        start_element("TODO: No generator for ", m_pImo->get_id());
-        m_source << m_pImo->get_name() << "   type=" << m_pImo->get_obj_type()
+        start_element("TODO: ", m_pImo->get_id());
+        m_source << "No LdpGenerator for Imo. Imo name=" << m_pImo->get_name()
+                 << ", Imo type=" << m_pImo->get_obj_type()
                  << ", id=" << m_pImo->get_id();
         end_element(k_in_same_line);
         return m_source.str();
@@ -973,7 +984,11 @@ protected:
             if (!version.empty())
                 m_source << ", version " << version;
             m_source << ". Date: ";
-    //        m_source << (wxDateTime::Now()).Format(_T("%Y-%m-%d"));
+
+            boost::local_time::local_date_time currentTime(
+                boost::posix_time::second_clock::local_time(),
+                boost::local_time::time_zone_ptr());
+            m_source << to_simple_string( currentTime.local_time() );
             end_comment();
         }
     }

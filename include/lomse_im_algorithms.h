@@ -68,6 +68,8 @@ public:
     static void change_noterest_duration(ImoNoteRest* pNR, TimeUnits duration);
     static list<ImoStaffObj*> insert_staffobjs(ImoInstrument* pInstr, ImoStaffObj* pAt,
                                                const string& ldpsource);
+    static void add_note_to_chord(ImoNote* pBaseNote, ImoNote* pNewNote,
+                                  Document* pDoc);
 
 
 

@@ -121,7 +121,11 @@ int Document::from_file(const string& filename, int format)
     }
 
     if (m_pIModel)
+    {
         m_pImoDoc = dynamic_cast<ImoDocument*>(m_pIModel->get_root());
+        if (m_pImoDoc == NULL)
+            create_empty();
+    }
     else
         create_empty();
 
@@ -274,7 +278,7 @@ string Document::get_checkpoint_data_for(ImoId id)
     //TODO: check that ImoObj is a terminal node?
 
     LmdExporter exporter(m_libraryScope);
-    //exporter.set_remove_newlines(true);   //Commented out to facilitate debugging
+    //exporter.set_remove_newlines(true);   //TODO: Commented out to facilitate debugging
     exporter.set_add_id(true);
     exporter.set_score_format(LmdExporter::k_format_ldp);
     return exporter.get_source(pImo);
@@ -283,7 +287,7 @@ string Document::get_checkpoint_data_for(ImoId id)
         //LdpExporter exporter;
         //exporter.set_remove_newlines(true);
         //exporter.set_add_id(true);
-        //return exporter.get_source(m_pImoDoc);
+        //return exporter.get_source(m_pImo);
 }
 
 //---------------------------------------------------------------------------------------
@@ -304,6 +308,14 @@ Compiler* Document::get_compiler_for_format(int format)
             return NULL;
     }
     return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+bool Document::is_editable()
+{
+    //TODO: How to mark a document as 'not editable'?
+    //For now, all documets are editable
+    return true;
 }
 
 //---------------------------------------------------------------------------------------
