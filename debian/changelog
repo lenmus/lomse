@@ -1,5 +1,5 @@
-liblomse (0.14.0) precise; urgency=low
+liblomse (0.15.0) precise; urgency=low
 
-  * New upstream release required for LenMus 5.3.1
+  * New upstream release
 
- -- Cecilio Salmeron <s.cecilio@gmail.com>  Tue, 23 Apr 2013 16:41:35 +0200
+ -- Cecilio Salmeron <s.cecilio@gmail.com>  Fri, 27 Mar 2015 17:06:51 +0100
