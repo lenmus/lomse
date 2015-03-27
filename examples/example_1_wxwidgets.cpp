@@ -388,9 +388,9 @@ void MyCanvas::open_test_document()
     //simple example we will create an empty document and define its content
     //from a text string
 
-    //first, we will create a 'presenter'. It takes care of cretaing and maintaining
+    //first, we will create a 'presenter'. It takes care of creating and maintaining
     //all objects and relationships between the document, its views and the interactors
-    //to interct with the view
+    //to interact with the view
     delete m_pPresenter;
     m_pPresenter = m_lomse.new_document(ViewFactory::k_view_vertical_book,
         "(lenmusdoc (vers 0.0)"
@@ -399,7 +399,8 @@ void MyCanvas::open_test_document()
                 "(score (vers 1.6) "
                     "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q) )))"
             ")"
-        ")" );
+        ")",
+        Document::k_format_ldp);    //0.15.0
 
     //get the pointer to the interactor, set the rendering buffer and register for
     //receiving desired events
@@ -408,8 +409,8 @@ void MyCanvas::open_test_document()
         //connect the View with the window buffer
         spInteractor->set_rendering_buffer(&m_rbuf_window);
 
-        //hide edition caret
-        spInteractor->hide_caret();
+//        //hide edition caret            //0.15.0
+//        spInteractor->hide_caret();
     }
 }
 

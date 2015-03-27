@@ -7,7 +7,7 @@ Name: liblomse
 Description: LenMus open music score edition library
 Version: @LOMSE_VERSION_STRING@
 Requires: @LOMSE_REQUIRES@
-Libs: -L${libdir} -llomse
+Libs: -L${libdir} -llomse -lboost_system -lboost_thread -lboost_date_time
 Cflags: -I${includedir}
 
 

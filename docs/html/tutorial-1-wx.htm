@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2013/05/04 -->
+<!-- $Updated: 2015/03/27 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -466,7 +466,8 @@ void MyCanvas::open_test_document()
                 "(score (vers 1.6) "
                     "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q) )))"
             ")"
-        ")" );
+        ")",
+        Document::k_format_ldp);
 
     //get the pointer to the interactor, set the rendering buffer and register for
     //receiving desired events
@@ -474,9 +475,6 @@ void MyCanvas::open_test_document()
     {
         //connect the View with the window buffer
         spInteractor->set_rendering_buffer(&m_rbuf_window);
-
-        //hide edition caret
-        spInteractor->hide_caret();
     }
 }
 </pre>
@@ -489,7 +487,10 @@ void MyCanvas::open_test_document()
 <p>The View type is just a Lomse enum. In this example, value <code>ViewFactory::k_view_vertical_book</code> means that we would like to display the score as book pages, one page after the other in a vertical layout. Other View formats are possible out-of-the-box, such as horizontal book or not paginated (the score in a single system) but, in any case, its not complex to develop your own View format.
 </p>
 
-<p>The next parameter is a C string containing the score. It is written in LenMus LDP language. Let's split it into lines, and let's analyse it:
+<p>The next parameter is a C string containing the score. The last parameter is a constant <code>Document::k_format_ldp</code> that specifies the language in this score is written. In this example it is written in LenMus LDP language. I have plans for supporting scores in MusicXML format. Lomse is starting to support MusicXML but the importer is not yet finished and currently it only can deal with very very simple scores.
+</p>
+
+<p>Let's analyse the string with the score. Fort this, I will split it into lines:
 </p>
 <pre class="code">
 (lenmusdoc (vers 0.0)
@@ -515,8 +516,7 @@ void MyCanvas::open_test_document()
 <p>The score element contains one instrument (this implies, by default, one staff). Finally, element 'musicData' describes the content for this instrument. In the example, a G clef, a C key signature, a 2/4 time signature and a quarter C4 note.
 </p>
 
-<p>For a detailed description of the LDP language see the <a href="###ldp_full###">LDP Reference Manual</a>. I have plans for supporting scores in MusicXML format, as well as to move the LDP language to XML syntax. But other more urgent task force me to always postpone these objectives. Any help is welcome!
-</p>
+<p>For a detailed description of the LDP language see the <a href="###ldp_full###">LDP Reference Manual</a>.</p>
 
 <p>Once the Document and a View for it are created, we just get pointers to the Interactor, so that we can 'communicate' with the Document and its View. But Presenter returns a weak_pointer that has to be converted to a valid pointer before using it:
 </p>
@@ -530,7 +530,7 @@ void MyCanvas::open_test_document()
 <p>Lomse architecture is based on the Model-View-Controller pattern, and supports multiple simultaneous Views for a Document. By default, when creating a Document also a View and its associated <tt>Interactor</tt> are created. So, parameter <code>'0'</code> in <code>get_interactor(0)</code> refers to first <tt>Interactor</tt>, in this case, the only one created.
 </p>
 
-<p>Once we've got the <tt>Interactor</tt> we only have two <b>important</b> tasks to do: to inform the <tt>Interactor</tt> about the rendering buffer that must be used for its associated View:
+<p>Once we've got the <tt>Interactor</tt> we only have just one <b>important</b> task to do: to inform the <tt>Interactor</tt> about the rendering buffer that must be used for its associated View:
 </p>
 
 <pre class="code">
@@ -538,12 +538,6 @@ void MyCanvas::open_test_document()
     spInteractor->set_rendering_buffer(&m_rbuf_window);
 </pre>
 
-<p>And the second one is to hide the document caret, as we are not going to enable document edition:
-</p>
-<pre class="code">
-    //hide edition caret
-    spInteractor->hide_caret();
-</pre>
 
 
 <h2><a name="bitmap">9. Creating the bitmap for the rendering buffer</a></h2>
@@ -762,7 +756,7 @@ Also, do not forget to add paths and options for wxWidgets. The best approach is
 `wx-config --cflags`
 </pre>
 
-<p>As to the libraries to link, you will have to include the Lomse library and the wxWidgets libraries. Again, the best approach is using <code>pkg-config</code> command for Lomse and the <code>wx-config</code> command as follows:
+<p>As to the libraries to link, you will have to include the Lomse library and the wxWidgets libraries. wxWidgets also requires the X11 library. Again, the best approach is using <code>pkg-config</code> command for Lomse and the <code>wx-config</code> command as follows:
 <code>`pkg-config --libs liblomse` `wx-config --libs`</code>
 </p>
 
@@ -773,7 +767,8 @@ Ok, lets's do it. Open a terminal window, move to the directory containing the s
 <pre class="console">
 gcc example_1_wxwidgets.cpp -o example-1-wx    \
     `pkg-config --cflags liblomse` `wx-config --cflags`   \
-    `pkg-config --libs liblomse` `wx-config --libs`
+    `pkg-config --libs liblomse` `wx-config --libs` \
+    -lX11
 </pre>
 
 <p>
@@ -813,7 +808,7 @@ Your project makefile must include the following path for Lomse header files. Fo
 Finally, do not forget to add paths and options for wxWidgets.
 </p>
 
-<p>As to the libraries to link, you will have to include Lomse and the wxWidgets libraries. Take into account that the Lomse library needs to be linked with all the required libraries, such as boost, zlib, libpng or freetype2. Therefore, if you built it as dynamic DLL you will have to include all these libraries when building your program. For zlib and libpng you can use the wxWidgets equivalent libraries, wxzlib and wxpng.
+<p>As to the libraries to link, you will have to include Lomse and the wxWidgets libraries,. Take into account that the Lomse library needs to be linked with all the required libraries, such as boost, zlib, libpng or freetype2. Therefore, if you built it as dynamic DLL you will have to include all these libraries when building your program. For zlib and libpng you can use the wxWidgets equivalent libraries, wxzlib and wxpng.
 </p>
 
 
