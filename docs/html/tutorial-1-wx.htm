@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2015/03/27 -->
+<!-- $Updated: 2015/04/27 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -487,7 +487,7 @@ void MyCanvas::open_test_document()
 <p>The View type is just a Lomse enum. In this example, value <code>ViewFactory::k_view_vertical_book</code> means that we would like to display the score as book pages, one page after the other in a vertical layout. Other View formats are possible out-of-the-box, such as horizontal book or not paginated (the score in a single system) but, in any case, its not complex to develop your own View format.
 </p>
 
-<p>The next parameter is a C string containing the score. The last parameter is a constant <code>Document::k_format_ldp</code> that specifies the language in this score is written. In this example it is written in LenMus LDP language. I have plans for supporting scores in MusicXML format. Lomse is starting to support MusicXML but the importer is not yet finished and currently it only can deal with very very simple scores.
+<p>The next parameter is a C string containing the score, and the last parameter is a constant <code>Document::k_format_ldp</code> that specifies the language in this score is written. In this example it is written in LenMus LDP language. I have plans for supporting scores in MusicXML format. Lomse is starting to support MusicXML but the importer is not yet finished and currently it only can deal with very very simple scores.
 </p>
 
 <p>Let's analyse the string with the score. Fort this, I will split it into lines:
@@ -756,8 +756,12 @@ Also, do not forget to add paths and options for wxWidgets. The best approach is
 `wx-config --cflags`
 </pre>
 
-<p>As to the libraries to link, you will have to include the Lomse library and the wxWidgets libraries. wxWidgets also requires the X11 library. Again, the best approach is using <code>pkg-config</code> command for Lomse and the <code>wx-config</code> command as follows:
+<p>As to the libraries to link, you will have to include the Lomse library and the wxWidgets libraries. Again, the best approach is using <code>pkg-config</code> command for Lomse and the <code>wx-config</code> command as follows:
 <code>`pkg-config --libs liblomse` `wx-config --libs`</code>
+</p>
+
+<p>Finally, the GCC compiler requires the GNU Standard C++ Library (libstc++):
+<code>-lstdc++</code>
 </p>
 
 <p>
@@ -768,7 +772,7 @@ Ok, lets's do it. Open a terminal window, move to the directory containing the s
 gcc example_1_wxwidgets.cpp -o example-1-wx    \
     `pkg-config --cflags liblomse` `wx-config --cflags`   \
     `pkg-config --libs liblomse` `wx-config --libs` \
-    -lX11
+    -lstdc++
 </pre>
 
 <p>

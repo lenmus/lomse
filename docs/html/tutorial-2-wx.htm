@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2013/05/04 -->
+<!-- $Updated: 2015/04/27 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -450,9 +450,6 @@ void MyCanvas::open_file(const wxString& fullname)
 
         //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
-
-        //hide edition caret
-        spInteractor->hide_caret();
     }
 
     //render the new score
@@ -482,7 +479,7 @@ You can download the full source code for this example from
 <!--====================================================-->
 
 <p>
-Please, for now follow the instructions in Tutorial 1. For maintainability of these tutorials I would prefer not copy-paste texts having high probability of requiring updates. Thank you.
+Please, follow the instructions in Tutorial 1. For maintainability of these tutorials I would prefer not copy-paste texts having high probability of requiring updates. Thank you.
 </p>
 
 <p>I didn't say it but in method <code>open_test_document()</code> I've replace the trivial score used in example-1 by a more complex score. When executing example-2 you should see something as:

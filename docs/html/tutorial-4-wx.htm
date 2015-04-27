@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2013/05/05 -->
+<!-- $Updated: 2015/04/27 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -269,8 +269,8 @@ At this point, we could compile and tests all these changes. Open a terminal win
 
 <pre class="console">
 gcc example_4_wxwidgets.cpp ./wxMidi/wxMidi.cpp ./wxMidi/wxMidiDatabase.cpp -o example-4-wx \
-    `wx2812-config --cflags` `pkg-config --cflags liblomse`  -I ./wxMidi/    \
-    `pkg-config --libs liblomse` -lportmidi -lporttime `wx2812-config --libs`
+    `wx-config --cflags` `pkg-config --cflags liblomse`  -I ./wxMidi/    \
+    `pkg-config --libs liblomse` -lstdc++ -lportmidi -lporttime `wx-config --libs`
 </pre>
 
 <p>

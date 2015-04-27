@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -43,6 +43,7 @@
     #include <wx/image.h>
     #include <wx/dc.h>
     #include <wx/dcmemory.h>
+    #include <wx/dcclient.h>
     #include <wx/event.h>
     #include <wx/sizer.h>
     #include <wx/choicdlg.h>
@@ -60,6 +61,7 @@
 #include <lomse_events.h>
 #include <lomse_score_player.h>
 #include <lomse_player_gui.h>
+#include <lomse_tasks.h>
 
 
 using namespace lomse;
@@ -667,9 +669,6 @@ void MyCanvas::open_file(const wxString& fullname)
 
         //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
-
-        //hide edition caret
-        spInteractor->hide_caret();
     }
 
     //render the new score
@@ -773,7 +772,8 @@ void MyCanvas::open_test_document()
         "(chord (n g3 q)(n e3 q)(n c3 q))"
         "(barline)"
         "))"
-        ")))" );
+        ")))",
+        Document::k_format_ldp);
 
     //get the pointer to the interactor, set the rendering buffer and register for
     //receiving desired events
@@ -784,9 +784,6 @@ void MyCanvas::open_test_document()
 
         //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, this, wrapper_update_window);
-
-        //hide edition caret
-        spInteractor->hide_caret();
     }
 }
 

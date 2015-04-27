@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -43,6 +43,7 @@
 #include <lomse_interactor.h>
 #include <lomse_presenter.h>
 #include <lomse_events.h>
+#include <lomse_tasks.h>
 
 using namespace lomse;
 
@@ -179,7 +180,8 @@ void open_document()
         "(n c4 e t3/2)(n e4 e)(n d4 e t-)(n g4 q)"
         "(barline)"
         "))"
-        ")))" );
+        ")))",
+        Document::k_format_ldp);
 
     //get the pointer to the interactor, set the rendering buffer and register for
     //receiving desired events
@@ -190,9 +192,6 @@ void open_document()
 
         //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, update_window);
-
-        //hide edition caret
-        spInteractor->hide_caret();
     }
 }
 

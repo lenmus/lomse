@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -165,7 +165,8 @@ void open_test_document()
                 "(score (vers 1.6) "
                     "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q) )))"
             ")"
-        ")" );
+        ")",
+        Document::k_format_ldp);
 
     //get the pointer to the interactor, set the rendering buffer and register for
     //receiving desired events
@@ -173,9 +174,6 @@ void open_test_document()
     {
         //connect the View with the window buffer
         spInteractor->set_rendering_buffer(&m_rbuf_window);
-
-        //hide edition caret
-        spInteractor->hide_caret();
     }
 }
 

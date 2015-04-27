@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2013/05/05 -->
+<!-- $Updated: 2015/04/27 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -290,7 +290,8 @@ void open_test_document()
                 "(score (vers 1.6) "
                     "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q) )))"
             ")"
-        ")" );
+        ")",
+        Document::k_format_ldp);
 
     //get the pointer to the interactor, set the rendering buffer and register for
     //receiving desired events
@@ -298,9 +299,6 @@ void open_test_document()
     {
         //connect the View with the window buffer
         spInteractor->set_rendering_buffer(&m_rbuf_window);
-
-        //hide edition caret
-        spInteractor->hide_caret();
     }
 }
 </pre>
@@ -313,7 +311,10 @@ void open_test_document()
 <p>The View type is just a Lomse enum. In this example, value <code>ViewFactory::k_view_vertical_book</code> means that we would like to display the score as book pages, one page after the other in a vertical layout. Other View formats are possible out-of-the-box, such as horizontal book or not paginated (the score in a single system) but, in any case, its not complex to develop your own View format.
 </p>
 
-<p>The next parameter is a C string containing the score. It is written in LenMus LDP language. Let's split it into lines, and let's analyse it:
+<p>The next parameter is a C string containing the score, and the last parameter is a constant <code>Document::k_format_ldp</code> that specifies the language in this score is written. In this example it is written in LenMus LDP language. I have plans for supporting scores in MusicXML format. Lomse is starting to support MusicXML but the importer is not yet finished and currently it only can deal with very very simple scores.
+</p>
+
+<p>Let's analyse the string with the score. Fort this, I will split it into lines:
 </p>
 <pre class="code">
 (lenmusdoc (vers 0.0)

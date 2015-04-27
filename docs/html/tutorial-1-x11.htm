@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2013/05/04 -->
+<!-- $Updated: 2015/04/27 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -379,7 +379,8 @@ void open_document()
                 "(score (vers 1.6) "
                     "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q) )))"
             ")"
-        ")" );
+        ")",
+        Document::k_format_ldp);
 
     //get the pointer to the interactor, set the rendering buffer and register for
     //receiving desired events
@@ -390,9 +391,6 @@ void open_document()
 
         //ask to receive desired events
         spInteractor->add_event_handler(k_update_window_event, update_window);
-
-        //hide edition caret
-        spInteractor->hide_caret();
     }
 }
 </pre>
@@ -405,7 +403,10 @@ void open_document()
 <p>The View type is just a Lomse enum. In this example, value <code>ViewFactory::k_view_vertical_book</code> means that we would like to display the score as book pages, one page after the other in a vertical layout. Other View formats are possible out-of-the-box, such as horizontal book or not paginated (the score in a single system) but, in any case, its not complex to develop your own View format.
 </p>
 
-<p>The next parameter is a C string containing the score. It is written in LenMus LDP language. Let's cut it into lines, and let's analyse it:
+<p>The next parameter is a C string containing the score, and the last parameter is a constant <code>Document::k_format_ldp</code> that specifies the language in this score is written. In this example it is written in LenMus LDP language. I have plans for supporting scores in MusicXML format. Lomse is starting to support MusicXML but the importer is not yet finished and currently it only can deal with very very simple scores.
+</p>
+
+<p>Let's analyse the string with the score. Fort this, I will split it into lines:
 </p>
 <pre class="code">
 (lenmusdoc (vers 0.0)
@@ -446,7 +447,7 @@ void open_document()
 <p>Lomse architecture is based on the Model-View-Controller pattern, and supports multiple simultaneous Views for a Document. By default, when creating a Document also a View and its associated Interactor are created. So, parameter <code>'0'</code> in <code>get_interactor(0)</code> refers to first Interactor, in this case, the only one created.
 </p>
 
-<p>Once we've got the Interactor we have three <b>important</b> tasks to do, The first one is to inform the Interactor about the rendering buffer that must be used for its associated View:
+<p>Once we've got the Interactor we have two <b>important</b> tasks to do, The first one is to inform the Interactor about the rendering buffer that must be used for its associated View:
 </p>
 
 <pre class="code">
@@ -454,18 +455,11 @@ void open_document()
     spInteractor->set_rendering_buffer(&m_rbuf_window);
 </pre>
 
-<p>The second one is to set up a handler for receiving Lomse events related to the associated View:
+<p>And the other one is to set up a handler for receiving Lomse events related to the associated View:
 </p>
 <pre class="code">
     //ask to receive desired events
     spInteractor->add_event_handler(k_update_window_event, update_window);
-</pre>
-
-<p>And the last one is to hide the document caret, as we are not going to enable document edition:
-</p>
-<pre class="code">
-    //hide edition caret
-    spInteractor->hide_caret();
 </pre>
 
 <p>In this example, we are interested in receiving a notification each time the View changes, so that we can display the updated bitmap in the window. We will see this in more detail later.</p>
@@ -665,11 +659,11 @@ In the next section we are going to build and run our sample.
 <!--====================================================-->
 
 <p>
-Now for the fun (an sometimes troubling) part. Compiling your code and running it! Your proyect makefile must include the paths for the headers of used libraries: Lomse and X11. The best way of doing it is by using the <code>pkg-config</code> tool:
+Now for the fun (an sometimes troubling) part. Compiling your code and running it! Your proyect makefile must include the paths for the headers of used libraries: Lomse, X11 and the GNU Standard C++ Library (libstc++). The best way of doing it is by using the <code>pkg-config</code> tool:
 </p>
 
 <pre class="console">
-`pkg-config --cflags x11` `pkg-config --cflags liblomse`
+`pkg-config --cflags x11` `pkg-config --cflags liblomse` -lstdc++
 </pre>
 
 <p>It will generate something as <code>-I/usr/include/freetype2 -I/usr/include/libpng12 -I/usr/include/lomse</code>.
@@ -681,7 +675,7 @@ Now for the fun (an sometimes troubling) part. Compiling your code and running i
 <pre class="console">
 gcc example_1_x11.cpp -o example-1-x11  \
     `pkg-config --cflags x11` `pkg-config --cflags liblomse`   \
-    `pkg-config --libs liblomse` `pkg-config --libs x11`
+    `pkg-config --libs liblomse` `pkg-config --libs x11` -lstdc++
 </pre>
 
 <p>

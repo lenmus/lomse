@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2013/05/05 -->
+<!-- $Updated: 2015/04/27 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -932,8 +932,8 @@ With these changes, your build command in Linux will be something as (adjust pat
 
 <pre class="console">
 gcc example_3_wxwidgets.cpp ./wxMidi/wxMidi.cpp ./wxMidi/wxMidiDatabase.cpp -o example-3-wx \
-    `wx2812-config --cflags` `pkg-config --cflags liblomse`  -I ./wxMidi/    \
-    `pkg-config --libs liblomse` -lportmidi -lporttime `wx2812-config --libs`
+    `wx-config --cflags` `pkg-config --cflags liblomse`  -I ./wxMidi/    \
+    `pkg-config --libs liblomse` -lstdc++ -lportmidi -lporttime `wx-config --libs`
 </pre>
 
 <p>

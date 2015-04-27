@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2013/05/05 -->
+<!-- $Updated: 2015/04/27 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -306,12 +306,13 @@ You can download the full source code for this example from
 <!--====================================================-->
 
 <p>
-As usual, your proyect makefile must include the paths for the headers of used libraries: Lomse and X11. The best way of doing it is by using the <code>pkg-config</code> tool:
+As usual, your proyect makefile must include the paths for the headers of used libraries: Lomse, X11 and the GNU Standard C++ Library (libstc++). The best way of doing it is by using the <code>pkg-config</code> tool:
 </p>
 
 <pre class="console">
-`pkg-config --cflags x11` `pkg-config --cflags liblomse`
+`pkg-config --cflags x11` `pkg-config --cflags liblomse` -lstdc++
 </pre>
+
 
 <p>It will generate something as <code>-I/usr/include/freetype2 -I/usr/include/libpng12 -I/usr/include/lomse</code>.
 </p>
@@ -322,7 +323,7 @@ As usual, your proyect makefile must include the paths for the headers of used l
 <pre class="console">
 gcc example_2_x11.cpp -o example-2-x11  \
     `pkg-config --cflags x11` `pkg-config --cflags liblomse`   \
-    `pkg-config --libs liblomse` `pkg-config --libs x11`
+    `pkg-config --libs liblomse` `pkg-config --libs x11` -lstdc++
 </pre>
 
 <p>I didn't say but in method <code>open_document()</code> I've changed the score, replacing the trivial score used in example-1 by a more complex score. When executing example-2 you should see something as:
