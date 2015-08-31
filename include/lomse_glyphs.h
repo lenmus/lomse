@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -36,6 +36,7 @@ namespace lomse
 {
 
 //forward declarations
+class LibraryScope;
 
 
 //---------------------------------------------------------------------------------------
@@ -46,20 +47,16 @@ struct GlyphData
     // all measurements in tenths
     unsigned int GlyphChar;
     Tenths GlyphOffset;
-    Tenths SelRectShift;        //NU
-    Tenths SelRectHeight;       //NU
-    Tenths Top;                 //for rests flags. In NoteEngraver
-    Tenths Bottom;              //for rests flags. In NoteEngraver
-	Tenths thxPos;      //NU
-	Tenths thyPos;      //NU
-	Tenths thWidth;     //NU
-	Tenths thHeight;    //NU
-	Tenths txDrag;
-	Tenths tyDrag;
+    Tenths Top;                 //for rests flags. Only in StemFlagEngraver::cut_stem_size_to_add_flag()
+    Tenths Bottom;              //for rests flags. Only in StemFlagEngraver::cut_stem_size_to_add_flag()
 
-    GlyphData(const unsigned int glyph, Tenths yOffset, int yShift, int selHeight,
-              int top, int bottom, int xPos, int yPos, int width, int height,
-              int xDrag, int yDrag);
+    GlyphData(const unsigned int glyph, Tenths yOffset=0.0f, int top=0.0f, int bottom=0.0f)
+        : GlyphChar(glyph)
+        , GlyphOffset(Tenths(yOffset))
+        , Top(Tenths(top))
+        , Bottom(Tenths(bottom))
+    {
+    }
 
 };
 
@@ -94,6 +91,46 @@ enum EGlyphIndex
     k_glyph_128th_note_up,
     k_glyph_256th_note_down,      //256th semigarrapatea
     k_glyph_256th_note_up,
+    k_glyph_dot,                  //augmentation dot, for dotted notes
+
+    //Articulation (U+E4A0 - U+E4BF)
+    k_glyph_accent_above,
+    k_glyph_accent_below,
+    k_glyph_staccato_above,
+    k_glyph_staccato_below,
+    k_glyph_tenuto_above,
+    k_glyph_tenuto_below,
+    k_glyph_staccatissimo_above,
+    k_glyph_staccatissimo_below,
+    k_glyph_staccatissimo_wedge_above,
+    k_glyph_staccatissimo_wedge_below,
+    k_glyph_staccatissimo_stroke_above,
+    k_glyph_staccatissimo_stroke_below,
+    k_glyph_marcato_above,
+    k_glyph_marcato_below,
+    k_glyph_marcato_staccato_above,
+    k_glyph_marcato_staccato_below,
+    k_glyph_accent_staccato_above,
+    k_glyph_accent_staccato_below,
+    k_glyph_tenuto_staccato_above,
+    k_glyph_tenuto_staccato_below,
+    k_glyph_tenuto_accent_above,
+    k_glyph_tenuto_accent_below,
+    k_glyph_stress_above,
+    k_glyph_stress_below,
+    k_glyph_unstress_above,
+    k_glyph_unstress_below,
+    k_glyph_laissez_vibrer_above,
+    k_glyph_laissez_vibrer_below,
+    k_glyph_marcato_tenuto_above,
+    k_glyph_marcato_tenuto_below,
+
+    //Holds and pauses (U+E4C0 - U+E4DF)
+    k_glyph_fermata_above,
+    k_glyph_fermata_below,
+    k_glyph_long_fermata_above,
+    k_glyph_long_fermata_below,
+	k_glyph_breath_mark_v,      //breath-mark  V
 
     // rests
     k_glyph_longa_rest,       //longa
@@ -161,22 +198,26 @@ enum EGlyphIndex
     k_glyph_common_time,
     k_glyph_cut_time,
 
-    //signs
-    k_glyph_dot,                          //dot, for dotted notes
-    k_glyph_small_quarter_note,           //small quarter note up, for metronome marks
-    k_glyph_small_quarter_note_dotted,    //small dotted quarter note up
-    k_glyph_small_eighth_note,            //small eighth note up
-    k_glyph_small_eighth_note_dotted,     //small dotted eighth note up
-    k_glyph_small_equal_sign,             //small equal sign, for metronome marks
+    //Metronome marks
+    k_glyph_small_whole_note,
+    k_glyph_small_half_note,
+    k_glyph_small_quarter_note,
+    k_glyph_small_eighth_note,
+    k_glyph_small_16th_note,
+    k_glyph_small_32th_note,
+    k_glyph_small_64th_note,
+    k_glyph_small_128th_note,
+    k_glyph_small_256th_note,
+    k_glyph_metronome_augmentation_dot,
 
-	k_glyph_breath_mark_v,				//breath-mark  V
+    //Repeats (U+E040 - U+E04F)
     k_glyph_dacapo,
     k_glyph_dalsegno,
     k_glyph_coda,
     k_glyph_segno,
+
+    //Octaves (U+E510 - U+E51F)
     k_glyph_octava,
-    k_glyph_fermata_above,
-    k_glyph_fermata_below,
 
     //figured bass. Numbers and other symbols
     k_glyph_figured_bass_0,                   //number 0
@@ -200,19 +241,27 @@ enum EGlyphIndex
 
 };
 
-//class MusicGlyphs
-//{
-//protected:
-//    const GlyphData* m_glyphs;
-//
-//public:
-//    MusicGlyphs();
-//    ~MusicGlyphs() {}
-//
-//    inline const GlyphData& get_glyph_data(int iGlyph) { return *(m_glyphs+iGlyph); }
-//};
+//---------------------------------------------------------------------------------------
+// Encapsulate access to glyphs table. A singleton with library scope
+class MusicGlyphs
+{
+protected:
+    LibraryScope* m_pLibScope;
+    const GlyphData* m_glyphs;
 
-extern const GlyphData glyphs_lmbasic2[];     //the glyphs table
+public:
+    MusicGlyphs(LibraryScope* pLibScope);
+    ~MusicGlyphs() {}
+
+    void update();
+
+    inline const unsigned int glyph_code(int iGlyph) { return (*(m_glyphs+iGlyph)).GlyphChar; }
+    inline const Tenths glyph_offset(int iGlyph) { return (*(m_glyphs+iGlyph)).GlyphOffset; }
+    inline const Tenths glyph_top(int iGlyph) { return (*(m_glyphs+iGlyph)).Top; }
+    inline const Tenths glyph_bottom(int iGlyph) { return (*(m_glyphs+iGlyph)).Bottom; }
+    inline const GlyphData& get_glyph_data(int iGlyph) { return *(m_glyphs+iGlyph); }
+};
+
 
 
 }   //namespace lomse

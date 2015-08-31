@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -463,7 +463,12 @@ Tenths NoteEngraver::get_standard_stem_length(int nPosOnStaff, bool fStemDown)
 //---------------------------------------------------------------------------------------
 Tenths NoteEngraver::get_glyph_offset(int iGlyph)
 {
-    return glyphs_lmbasic2[iGlyph].GlyphOffset;
+    //AWARE: notehead registration is as follows:
+    // * Vertically centered on the baseline.
+    // * Noteheads should be positioned as if on the bottom line of the staff.
+    // * The leftmost point coincides with x = 0.
+
+    return m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph) + 50.0f;
 }
 
 //---------------------------------------------------------------------------------------
@@ -594,10 +599,14 @@ void StemFlagEngraver::add_stem_shape()
 //---------------------------------------------------------------------------------------
 void StemFlagEngraver::add_flag_shape_if_required()
 {
+    //AWARE: Flags registration is as follows:
+    // * y=0 corresponds to the end of a stem of normal length
+    // * x=0 corresponds to the left-hand side of the stem.
+
     if (m_fWithFlag)
     {
         int iGlyph = get_glyph_for_flag();
-        LUnits x = (m_fStemDown ? m_uxStem : m_uxStem + m_uStemThickness);
+        LUnits x = m_uxStem;    //(m_fStemDown ? m_uxStem : m_uxStem + m_uStemThickness);
         LUnits y = m_uyStemFlag + get_glyph_offset(iGlyph);
         GmoShapeFlag* pShape = LOMSE_NEW GmoShapeFlag(m_pCreatorImo, 0, iGlyph,
                                                       UPoint(x, y), m_color,
@@ -619,30 +628,31 @@ void StemFlagEngraver::determine_position_and_size_of_stem()
 //---------------------------------------------------------------------------------------
 void StemFlagEngraver::cut_stem_size_to_add_flag()
 {
-    int iGlyph = get_glyph_for_flag();
-    // Glyph data is in FUnits. As 512 FU are 1 line (10 tenths), to convert
-    // FUnits into tenths just divide FU by 51.2
-    Tenths rFlag, rMinStem;
-    if (m_fStemDown)
-    {
-        rFlag = fabs((2048.0f - glyphs_lmbasic2[iGlyph].Bottom) / 51.2f );
-        rMinStem = (glyphs_lmbasic2[iGlyph].Top - 2048.0f + 128.0f) / 51.2f ;
-    }
-    else
-    {
-        if (m_noteType == k_eighth)
-            rFlag = (glyphs_lmbasic2[iGlyph].Top) / 51.2f ;
-        else if (m_noteType == k_16th)
-            rFlag = (glyphs_lmbasic2[iGlyph].Top + 128.0f) / 51.2f;
-        else
-            rFlag = (glyphs_lmbasic2[iGlyph].Top + 512.0f) / 51.2f;
-
-        rMinStem = fabs(glyphs_lmbasic2[iGlyph].Bottom / 51.2f);
-    }
-    LUnits uFlag = tenths_to_logical(rFlag);
-    LUnits uMinStem = tenths_to_logical(rMinStem);
-
-    m_uStemLength = max((m_uStemLength > uFlag ? m_uStemLength-uFlag : 0), uMinStem);
+//    int iGlyph = get_glyph_for_flag();
+//    // Glyph data is in FUnits. As 512 FU are 1 line (10 tenths), to convert
+//    // FUnits into tenths just divide FU by 51.2
+//    MusicGlyphs* pGlyphs = m_libraryScope.get_glyphs_table();
+//    Tenths rFlag, rMinStem;
+//    if (m_fStemDown)
+//    {
+//        rFlag = fabs((2048.0f - pGlyphs->glyph_bottom(iGlyph)) / 51.2f );
+//        rMinStem = (pGlyphs->glyph_top(iGlyph) - 2048.0f + 128.0f) / 51.2f ;
+//    }
+//    else
+//    {
+//        if (m_noteType == k_eighth)
+//            rFlag = pGlyphs->glyph_top(iGlyph) / 51.2f ;
+//        else if (m_noteType == k_16th)
+//            rFlag = (pGlyphs->glyph_top(iGlyph) + 128.0f) / 51.2f;
+//        else
+//            rFlag = (pGlyphs->glyph_top(iGlyph) + 512.0f) / 51.2f;
+//
+//        rMinStem = fabs(pGlyphs->glyph_bottom(iGlyph) / 51.2f);
+//    }
+//    LUnits uFlag = tenths_to_logical(rFlag);
+//    LUnits uMinStem = tenths_to_logical(rMinStem);
+//
+//    m_uStemLength = max((m_uStemLength > uFlag ? m_uStemLength-uFlag : 0), uMinStem);
 }
 
 //---------------------------------------------------------------------------------------
@@ -692,7 +702,7 @@ int StemFlagEngraver::get_glyph_for_flag()
 //---------------------------------------------------------------------------------------
 LUnits StemFlagEngraver::get_glyph_offset(int iGlyph)
 {
-    Tenths tenths = glyphs_lmbasic2[iGlyph].GlyphOffset;
+    Tenths tenths = m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph);
     return m_pMeter->tenths_to_logical(tenths, m_iInstr, m_iStaff);
 }
 

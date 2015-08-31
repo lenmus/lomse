@@ -389,7 +389,7 @@ void MyCanvas::open_file(const wxString& fullname)
     //create a new View
     std::string filename( fullname.mb_str(wxConvUTF8) );
     delete m_pPresenter;
-    m_pPresenter = m_lomse.open_document(ViewFactory::k_view_horizontal_book,
+    m_pPresenter = m_lomse.open_document(ViewFactory::k_view_vertical_book,
                                          filename);
 
     //get the pointer to the interactor, set the rendering buffer and register for

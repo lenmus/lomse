@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2015/04/27 -->
+<!-- $Updated: 2015/08/23 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -845,7 +845,7 @@ The main doubt you should have is how to get the score to play. In these tutoria
 </p>
 <pre class="code">
     Document* pDoc = m_pPresenter->get_document_raw_ptr();
-    ImoScore* pScore = static_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
+    ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
 </pre>
 
 <p>
@@ -858,7 +858,13 @@ void MyCanvas::play_start()
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
         Document* pDoc = m_pPresenter->get_document_raw_ptr();
+
+        //AWARE: Then next line of code is just an example, in which it is assumed that
+        //the score to play is the first element in the document.
+        //In a real application, as the document could contain texts, images and many
+        //scores, you shoud get the pointer to the score to play in a suitable way.
         ImoScore* pScore = static_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
+
         if (pScore)
         {
             m_pPlayer->load_score(pScore, this);

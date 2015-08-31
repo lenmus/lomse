@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -86,7 +86,8 @@ void KeyEngraver::add_accidentals(int numAccidentals, int iGlyph, UPoint uPos)
     LUnits x = uPos.x;
     for (int i=1; i <= numAccidentals; i++)
     {
-        Tenths yOffset = glyphs_lmbasic2[iGlyph].GlyphOffset + m_tPos[i] + 40.0f;
+        Tenths yOffset = m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph)
+                         + m_tPos[i] + 50.0f;
         LUnits y = uPos.y + m_pMeter->tenths_to_logical(yOffset, m_iInstr, m_iStaff);
         GmoShape* pSA = LOMSE_NEW GmoShapeAccidental(m_pCreatorImo, 0, iGlyph, UPoint(x, y),
                                                m_color, m_libraryScope, m_fontSize);

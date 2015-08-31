@@ -231,7 +231,7 @@ enum ELdpElement
     k_bold_italic,
     k_center,
     k_down,
-    k_italic,
+    k_font_style_italic,
     k_portrait,
     k_right,
     k_no,

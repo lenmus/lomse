@@ -1,0 +1,31 @@
+(score
+   (vers 2.0)
+   (instrument
+      (musicData
+         (clef G)
+         (clef G1)
+         (clef F5)
+         (clef F4)
+         (clef F3)
+         (clef C1)
+         (clef C2)
+         (clef C3)
+         (clef C4)
+         (clef C5)
+         (clef percussion)
+
+         (clef G (symbolSize cue))
+         (clef G1 (symbolSize cue))
+         (clef F5 (symbolSize cue))
+         (clef F4 (symbolSize cue))
+         (clef F3 (symbolSize cue))
+         (clef C1 (symbolSize cue))
+         (clef C2 (symbolSize cue))
+         (clef C3 (symbolSize cue))
+         (clef C4 (symbolSize cue))
+         (clef C5 (symbolSize cue))
+         (clef percussion (symbolSize cue))
+
+      )
+   )
+)

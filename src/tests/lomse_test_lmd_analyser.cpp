@@ -5883,8 +5883,8 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pStyle->get_name() == "Composer" );
 //        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
 //        CHECK( pStyle->font_name() == "Times New Roman" );
-//        CHECK( pStyle->font_style() == ImoStyle::k_italic );
-//        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+//        CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
+//        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
 //        CHECK( pStyle->font_size() == 14 );
 //
 //        delete tree->get_root();
@@ -5913,8 +5913,8 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pStyle->get_name() == "Header1" );
 //        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
 //        CHECK( pStyle->font_name() == "Times New Roman" );
-//        CHECK( pStyle->font_style() == ImoStyle::k_italic );
-//        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+//        CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
+//        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
 //        CHECK( pStyle->font_size() == 14 );
 //
 //        delete tree->get_root();
@@ -5978,8 +5978,8 @@ SUITE(LmdAnalyserTest)
         CHECK( pStyle->font_name() == "Arial" );
         CHECK( pStyle->font_file() == "FreeSans.ttf" );
         CHECK( pStyle->font_size() == 14 );
-        CHECK( pStyle->font_style() == ImoStyle::k_italic );
-        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+        CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
+        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
 
         delete pIModel;
     }
@@ -6218,8 +6218,8 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pStyle->get_name() == "Header1" );
 //        CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
 //        CHECK( pStyle->font_name() == "Times New Roman" );
-//        CHECK( pStyle->font_style() == ImoStyle::k_italic );
-//        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+//        CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
+//        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
 //        CHECK( pStyle->font_size() == 14 );
 //
 //        delete tree->get_root();
@@ -7459,8 +7459,8 @@ SUITE(LmdAnalyserTest)
         CHECK( pStyle->get_name() == "Header1" );
         CHECK( is_equal(pStyle->color(), Color(0, 254,15, 127)) );
         CHECK( pStyle->font_name() == "Times New Roman" );
-        CHECK( pStyle->font_style() == ImoStyle::k_italic );
-        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+        CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
+        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
         CHECK( pStyle->font_size() == 14 );
 
         delete pIModel;
@@ -7535,8 +7535,8 @@ SUITE(LmdAnalyserTest)
         CHECK( is_equal(pStyle->background_color(), Color(0, 252 ,12, 124)) );
             // font
         CHECK( pStyle->font_name() == "Times New Roman" );
-        CHECK( pStyle->font_style() == ImoStyle::k_italic );
-        CHECK( pStyle->font_weight() == ImoStyle::k_bold );
+        CHECK( pStyle->font_style() == ImoStyle::k_font_style_italic );
+        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_bold );
         CHECK( pStyle->font_size() == 14 );
             // border width
         CHECK( pStyle->border_width_top() == 20.0f );

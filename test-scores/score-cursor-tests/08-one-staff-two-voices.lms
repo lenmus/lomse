@@ -1,0 +1,7 @@
+(score (vers 2.0)(instrument (musicData 
+    (clef G)(key F)(time 4 4)
+    (n c5 q v1 (stem up))(goFwd q v1)(n d5 q v1 (stem up))(n e5 e v1 (stem up))
+    (n g4 e v2 (stem down))(n a4 q v2 (stem down))(n f4 e v2 (stem down))
+        (n e4 e v2 (stem down))(r e v2)(n d4 q v2 (stem down))
+    (barline)
+)))

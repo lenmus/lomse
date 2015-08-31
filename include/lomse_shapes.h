@@ -279,13 +279,13 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
-class GmoShapeTimeDigit : public GmoShapeGlyph
+class GmoShapeTimeGlyph : public GmoShapeGlyph
 {
 protected:
     friend class TimeEngraver;
-    GmoShapeTimeDigit(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
+    GmoShapeTimeGlyph(ImoObj* pCreatorImo, ShapeId idx, unsigned int iGlyph, UPoint pos,
                   Color color, LibraryScope& libraryScope, double fontSize)
-        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_time_signature_digit, idx, iGlyph,
+        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_time_signature_glyph, idx, iGlyph,
                         pos, color, libraryScope, fontSize)
     {
     }

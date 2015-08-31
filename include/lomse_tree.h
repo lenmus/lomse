@@ -178,6 +178,8 @@ protected:
                    m_prevSibling(NULL), m_nextSibling(NULL), m_nModified(0) {};
 
 public:
+    virtual ~TreeNode() {}
+
     //getters
     virtual T* get_parent() { return m_parent; }
     virtual T* get_first_child() { return m_firstChild; }

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -77,6 +77,7 @@ class IdAssigner;
 class DocCursor;
 class DocCommandExecuter;
 class CaretPositioner;
+class MusicGlyphs;
 
 //---------------------------------------------------------------------------------------
 class LOMSE_EXPORT LibraryScope
@@ -87,10 +88,13 @@ protected:
     LomseDoorway* m_pNullDoorway;
     LdpFactory* m_pLdpFactory;
     FontStorage* m_pFontStorage;
-    string m_sFontsPath;
-    //MusicGlyphs* m_pMusicGlyphs;
     Metronome* m_pGlobalMetronome;
     EventsDispatcher* m_pDispatcher;
+    string m_sMusicFontFile;
+    string m_sMusicFontName;
+    string m_sMusicFontPath;
+    string m_sFontsPath;
+    MusicGlyphs* m_pMusicGlyphs;
 
     //options
     bool m_fJustifySystems;
@@ -121,7 +125,6 @@ public:
 
     double get_screen_ppi() const;
     int get_pixel_format() const;
-    //MusicGlyphs* music_glyphs();
 
     //library info
     static string get_version_string();
@@ -131,10 +134,19 @@ public:
     static char get_version_type();
     static long get_revision();
 
-    //global options
+    //fonts
+    MusicGlyphs* get_glyphs_table();
     inline void set_default_fonts_path(const string& fontsPath) {
         m_sFontsPath = fontsPath;
     }
+    void set_music_font(const string& fontFile, const string& fontName,
+                        const string& path="");
+    inline const string& get_music_font_name() { return m_sMusicFontName; }
+    inline const string& get_music_font_file() { return m_sMusicFontFile; }
+    const string& get_music_font_path();
+    bool is_music_font_smufl_compliant();
+
+    //global options
     inline void set_global_metronome_and_replace_local(Metronome* pMtr) {
         m_pGlobalMetronome = pMtr;
         m_fReplaceLocalMetronome = true;

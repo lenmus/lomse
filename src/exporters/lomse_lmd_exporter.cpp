@@ -562,9 +562,9 @@ protected:
         start_element("font-style", NULL);
         close_start_tag();
 
-        if (value == ImoStyle::k_font_normal)
+        if (value == ImoStyle::k_font_style_normal)
             m_source << "normal";
-        else if (value == ImoStyle::k_italic)
+        else if (value == ImoStyle::k_font_style_italic)
             m_source << "italic";
         else
             m_source << "invalid value " << value;
@@ -577,9 +577,9 @@ protected:
         start_element("font-weight", NULL);
         close_start_tag();
 
-        if (value == ImoStyle::k_font_normal)
+        if (value == ImoStyle::k_font_weight_normal)
             m_source << "normal";
-        else if (value == ImoStyle::k_bold)
+        else if (value == ImoStyle::k_font_weight_bold)
             m_source << "bold";
         else
             m_source << "invalid value " << value;

@@ -74,6 +74,7 @@ protected:
     int find_glyph();
     LUnits get_glyph_offset(int iGlyph);
     LUnits add_dot_shape(LUnits x, LUnits y, Color color);
+    Tenths get_offset_for_dot();
 
     LUnits m_uxLeft, m_uyTop;       //current position
     int m_iGlyph;

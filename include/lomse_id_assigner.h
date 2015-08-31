@@ -44,7 +44,7 @@ class ImoObj;
 class Control;
 
 //---------------------------------------------------------------------------------------
-//IdAssigner: responsible for assigning/re-assingning ids to ImoObj and Control
+//IdAssigner: responsible for assigning/re-assigning ids to ImoObj and Control
 // objects and providing access to them by Id
 class IdAssigner
 {
@@ -61,13 +61,15 @@ public:
 
     void assign_id(ImoObj* pImo);
     void assign_id(Control* pControl);
+    ImoId reserve_id(ImoId id);
     ImoObj* get_pointer_to_imo(ImoId id) const;
     Control* get_pointer_to_control(ImoId id) const;
     void remove(ImoObj* pImo);
-    void copy_ids_to(IdAssigner* assigner);
+    void copy_ids_to(IdAssigner* assigner, ImoId idMin);
 
     //debug
     string dump() const;
+    inline size_t size() const { return m_idToImo.size(); }
 
 protected:
     void add_id(ImoId id, ImoObj* pImo);

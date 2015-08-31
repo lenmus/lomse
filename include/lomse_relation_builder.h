@@ -63,7 +63,7 @@ public:
     RelationBuilder(ostream& reporter, A* pAnalyser,
                     const std::string& relationNameLowerCase,
                     const std::string& relationNameUpperCase);
-    ~RelationBuilder();
+    virtual ~RelationBuilder();
 
     void add_item_info(T* pInfo);
     void clear_pending_items();

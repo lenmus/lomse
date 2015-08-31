@@ -48,6 +48,10 @@ ImoObj* ImFactory::inject(Document* pDoc, const std::string& ldpSource)
 ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
 {
     ImoObj* pObj = NULL;
+
+    if (!(type > k_imo_dto && type < k_imo_dto_last))
+        id = pDoc->reserve_id(id);
+
     switch(type)
     {
         case k_imo_anonymous_block:     pObj = LOMSE_NEW ImoAnonymousBlock();     break;

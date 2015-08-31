@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -1663,14 +1663,14 @@ protected:
     {
         const string value = get_string_param();
         if (value == "normal")
-            return ImoStyle::k_font_normal;
+            return ImoStyle::k_font_style_normal;
         else if (value == "italic")
-            return ImoStyle::k_italic;
+            return ImoStyle::k_font_style_italic;
         else
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Unknown font-style '" + value + "'. Replaced by 'normal'.");
-            return ImoStyle::k_font_normal;
+            return ImoStyle::k_font_style_normal;
         }
     }
 
@@ -1678,14 +1678,14 @@ protected:
     {
         const string value = get_string_param();
         if (value == "normal")
-            return ImoStyle::k_font_normal;
+            return ImoStyle::k_font_weight_normal;
         else if (value == "bold")
-            return ImoStyle::k_bold;
+            return ImoStyle::k_font_weight_bold;
         else
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Unknown font-weight '" + value + "'. Replaced by 'normal'.");
-            return ImoStyle::k_font_normal;
+            return ImoStyle::k_font_weight_normal;
         }
     }
 
@@ -1983,13 +1983,13 @@ public:
 ////        {
 ////            if (nFBL > 1)
 ////                AnalysisError(pX, "[Element '%s'. More than two 'fbline'. Ignored.",
-////                            sElmName.c_str() );
+////                            sElmName.c_str()() );
 ////            else
 ////                pFBLineInfo[nFBL++] = AnalyzeFBLine(pX, pVStaff);
 ////        }
 ////        else
 ////            AnalysisError(pX, "[Element '%s'. Invalid parameter '%s'. Ignored.",
-////                          sElmName.c_str(), sName.c_str() );
+////                          sElmName.c_str(), sName.c_str()() );
 ////    }
 ////
 ////    //analyze remaining optional parameters: <location>, <cursorPoint>
@@ -2073,30 +2073,30 @@ public:
         const string& value = m_pParamToAnalyse->get_value();
         if (value == "bold")
         {
-            pFont->weight = ImoStyle::k_bold;
-            pFont->style = ImoStyle::k_font_normal;
+            pFont->weight = ImoStyle::k_font_weight_bold;
+            pFont->style = ImoStyle::k_font_style_normal;
         }
         else if (value == "normal")
         {
-            pFont->weight = ImoStyle::k_font_normal;
-            pFont->style = ImoStyle::k_font_normal;
+            pFont->weight = ImoStyle::k_font_weight_normal;
+            pFont->style = ImoStyle::k_font_style_normal;
         }
         else if (value == "italic")
         {
-            pFont->weight = ImoStyle::k_font_normal;
-            pFont->style = ImoStyle::k_italic;
+            pFont->weight = ImoStyle::k_font_weight_normal;
+            pFont->style = ImoStyle::k_font_style_italic;
         }
         else if (value == "bold-italic")
         {
-            pFont->weight = ImoStyle::k_bold;
-            pFont->style = ImoStyle::k_italic;
+            pFont->weight = ImoStyle::k_font_weight_bold;
+            pFont->style = ImoStyle::k_font_style_italic;
         }
         else
         {
             report_msg(m_pParamToAnalyse->get_line_number(),
                 "Unknown font style '" + value + "'. Replaced by 'normal'.");
-            pFont->weight = ImoStyle::k_font_normal;
-            pFont->style = ImoStyle::k_font_normal;
+            pFont->weight = ImoStyle::k_font_weight_normal;
+            pFont->style = ImoStyle::k_font_style_normal;
         }
     }
 
@@ -5136,9 +5136,28 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <timeSignature> = (time <top><bottom>[<visible>][<location>])
+//@ <timeSignature> = (time [<type>] { (<top><bottom>)+ | "senza-misura" }
+//@                    [<visible>] [<location>])
+//@
+//@ <type> = {"normal" | "common" | "cut" | "single-number"}  default: "normal"
 //@ <top> = <num>
 //@ <bottom> = <num>
+//@
+//@ Examples:
+//@     (time 2 4)
+//@     (time 3 8)
+//@     (time 2 4 3 8) = 2/4 + 3/8
+//@     (time 3 8 2 8) = 3+2/8
+//@     (time common)
+//@     (time cut)
+//@     (time single-number 3)
+//@     (time senza-misura)
+//@
+//@ TODO: CURRENTLY ONLY IMPLEMENTED:
+//@     (time [normal] <top> <bottom> [<visible>] [<location>])
+//@     (time common [<visible>] [<location>])
+//@     (time cut [<visible>] [<location>])
+
 
 class TimeSignatureAnalyser : public ElementAnalyser
 {
@@ -5153,18 +5172,65 @@ public:
         ImoTimeSignature* pTime = static_cast<ImoTimeSignature*>(
                     ImFactory::inject(k_imo_time_signature, pDoc, get_node_id()) );
 
-        // <top> (num)
-        if (get_mandatory(k_number))
-            pTime->set_top_number( get_integer_value(2) );
+        // [<type>]
+        if (get_optional(k_label))
+            set_type(pTime);
 
-        // <bottom> (num)
-        if (get_mandatory(k_number))
-            pTime->set_bottom_number( get_integer_value(4) );
+        // <top><bottom>
+        if (pTime->get_type() == ImoTimeSignature::k_normal)
+        {
+            // <top> (num)
+            if (get_mandatory(k_number))
+                pTime->set_top_number( get_integer_value(2) );
+
+            // <bottom> (num)
+            if (get_mandatory(k_number))
+                pTime->set_bottom_number( get_integer_value(4) );
+        }
+        else if (pTime->get_type() == ImoTimeSignature::k_single_number)
+        {
+            // <top> (num)
+            if (get_mandatory(k_number))
+                pTime->set_top_number( get_integer_value(2) );
+            pTime->set_bottom_number(0);
+        }
 
         // [<visible>][<location>]
         analyse_staffobjs_options(pTime);
 
         add_to_model(pTime);
+    }
+
+protected:
+
+    void set_type(ImoTimeSignature* pTime)
+    {
+        const std::string& type = m_pParamToAnalyse->get_value();
+        if (type == "normal")
+            return;
+        else if (type == "common")
+        {
+            pTime->set_type(ImoTimeSignature::k_common);
+            pTime->set_top_number(4);
+            pTime->set_bottom_number(4);
+            return;
+        }
+        else if (type == "cut")
+        {
+            pTime->set_type(ImoTimeSignature::k_cut);
+            pTime->set_top_number(2);
+            pTime->set_bottom_number(2);
+            return;
+        }
+        else if (type == "single-number")
+        {
+            pTime->set_type(ImoTimeSignature::k_single_number);
+            return;
+        }
+        else
+            error_msg("Time signature: invalid type '" + type + "'. 'normal' assumed.");
+
+        return;
     }
 
 };
@@ -5831,7 +5897,7 @@ ImoTie* LdpAnalyser::create_tie(ImoNote* pStart, ImoNote* pEnd)
 //---------------------------------------------------------------------------------------
 void LdpAnalyser::add_relation_info(ImoObj* pDto)
 {
-    // factory method to deal withh all relations
+    // factory method to deal with all relations
 
     if (pDto->is_tie_dto())
         m_pTiesBuilder->add_item_info(static_cast<ImoTieDto*>(pDto));
@@ -5972,6 +6038,8 @@ int LdpAnalyser::ldp_name_to_clef_type(const string& value)
         return k_clef_F4;
     else if (value == "F3")
         return k_clef_F3;
+    else if (value == "F5")
+        return k_clef_F5;
     else if (value == "C1")
         return k_clef_C1;
     else if (value == "C2")
@@ -5980,14 +6048,10 @@ int LdpAnalyser::ldp_name_to_clef_type(const string& value)
         return k_clef_C3;
     else if (value == "C4")
         return k_clef_C4;
-    else if (value == "percussion")
-        return k_clef_percussion;
-    else if (value == "C3")
-        return k_clef_C3;
     else if (value == "C5")
         return k_clef_C5;
-    else if (value == "F5")
-        return k_clef_F5;
+    else if (value == "percussion")
+        return k_clef_percussion;
     else if (value == "G1")
         return k_clef_G1;
     else if (value == "8_G")

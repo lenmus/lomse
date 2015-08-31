@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -48,14 +48,17 @@ GmoShapeGlyph::GmoShapeGlyph(ImoObj* pCreatorImo, int type, ShapeId idx,
     , m_pFontStorage( libraryScope.font_storage() )
     , m_libraryScope(libraryScope)
 {
-    m_glyph = glyphs_lmbasic2[nGlyph].GlyphChar;
+    m_glyph = m_libraryScope.get_glyphs_table()->glyph_code(nGlyph);
     compute_size_origin(fontHeight, pos);
 }
 
 //---------------------------------------------------------------------------------------
 void GmoShapeGlyph::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
-    pDrawer->select_font("any", "lmbasic2.ttf","LenMus basic", m_fontHeight);
+    pDrawer->select_font("any",
+                         m_libraryScope.get_music_font_file(),
+                         m_libraryScope.get_music_font_name(),
+                         m_fontHeight);
     pDrawer->set_text_color( determine_color_to_use(opt) );
     LUnits x = m_shiftToDraw.width + m_origin.x;
     LUnits y = m_shiftToDraw.height + m_origin.y;
@@ -70,7 +73,10 @@ void GmoShapeGlyph::compute_size_origin(double fontHeight, UPoint pos)
     m_fontHeight = fontHeight;
 
     TextMeter meter(m_libraryScope);
-    meter.select_font("any", "lmbasic2.ttf", "LenMus basic", m_fontHeight);
+    meter.select_font("any",
+                      m_libraryScope.get_music_font_file(),
+                      m_libraryScope.get_music_font_name(),
+                      m_fontHeight);
     URect bbox = meter.bounding_rectangle(m_glyph);
 
     m_origin.x = pos.x + bbox.x;

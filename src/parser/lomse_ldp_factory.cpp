@@ -129,7 +129,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_image] = "image";
     m_TypeToName[k_infoMIDI] = "infoMIDI";
     m_TypeToName[k_instrument] = "instrument";
-    m_TypeToName[k_italic] = "italic";
+    m_TypeToName[k_font_style_italic] = "italic";
     m_TypeToName[k_itemizedlist] = "itemizedlist";
     m_TypeToName[k_joinBarlines] = "joinBarlines";
     m_TypeToName[k_key_signature] = "key";
@@ -308,7 +308,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["image"] = LOMSE_NEW LdpElementFunctor<k_image>;
     m_NameToFunctor["infoMIDI"] = LOMSE_NEW LdpElementFunctor<k_infoMIDI>;
     m_NameToFunctor["instrument"] = LOMSE_NEW LdpElementFunctor<k_instrument>;
-    m_NameToFunctor["italic"] = LOMSE_NEW LdpElementFunctor<k_italic>;
+    m_NameToFunctor["italic"] = LOMSE_NEW LdpElementFunctor<k_font_style_italic>;
     m_NameToFunctor["itemizedlist"] = LOMSE_NEW LdpElementFunctor<k_itemizedlist>;
     m_NameToFunctor["joinBarlines"] = LOMSE_NEW LdpElementFunctor<k_joinBarlines>;
     m_NameToFunctor["key"] = LOMSE_NEW LdpElementFunctor<k_key_signature>;

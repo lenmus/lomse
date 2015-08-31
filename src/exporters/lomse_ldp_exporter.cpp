@@ -426,10 +426,10 @@ protected:
             create_text_align(iValue);
 
         if (m_pObj->get_lunits_property(ImoStyle::k_text_indent_length, &uValue))
-            create_lunits_element("", uValue);
+            create_lunits_element("text-indent-length", uValue);
 
         if (m_pObj->get_lunits_property(ImoStyle::k_word_spacing_length, &uValue))
-            create_lunits_element("", uValue);
+            create_lunits_element("word-spacing-length", uValue);
 
         if (m_pObj->get_float_property(ImoStyle::k_line_height, &rValue))
             create_float_element("line-height", rValue);
@@ -543,9 +543,9 @@ protected:
     {
         start_element("font-style", k_no_imoid);
 
-        if (value == ImoStyle::k_font_normal)
+        if (value == ImoStyle::k_font_style_normal)
             m_source << "normal";
-        else if (value == ImoStyle::k_italic)
+        else if (value == ImoStyle::k_font_style_italic)
             m_source << "italic";
         else
             m_source << "invalid value " << value;
@@ -557,9 +557,9 @@ protected:
     {
         start_element("font-weight", k_no_imoid);
 
-        if (value == ImoStyle::k_font_normal)
+        if (value == ImoStyle::k_font_weight_normal)
             m_source << "normal";
-        else if (value == ImoStyle::k_bold)
+        else if (value == ImoStyle::k_font_weight_bold)
             m_source << "bold";
         else
             m_source << "invalid value " << value;
@@ -1645,10 +1645,11 @@ protected:
         map<std::string, ImoStyle*>::const_iterator it;
         for (it = styles.begin(); it != styles.end(); ++it)
         {
-            if (!(it->first == "Default style"
-                  || it->first == "Instrument names"
-                  || it->first == "Tuplet numbers"
-                ))
+            if (! (it->second)->is_default_style_with_default_values() )
+//            if (!(it->first == "Default style"
+//                  || it->first == "Instrument names"
+//                  || it->first == "Tuplet numbers"
+//                ))
             {
                 DefineStyleLdpGenerator gen(it->second, m_pExporter);
                 m_source << gen.generate_source();
@@ -2123,7 +2124,7 @@ public:
     string generate_source(ImoObj* pParent=NULL)
     {
         start_element("time", m_pObj->get_id());
-        add_type();
+        add_content();
         source_for_base_staffobj(m_pObj);
         end_element(k_in_same_line);
         return m_source.str();
@@ -2131,9 +2132,16 @@ public:
 
 protected:
 
-    void add_type()
+    void add_content()
     {
-        m_source << m_pObj->get_top_number() << " " << m_pObj->get_bottom_number();
+        if (m_pObj->is_normal())
+            m_source << m_pObj->get_top_number() << " " << m_pObj->get_bottom_number();
+        else if (m_pObj->is_common())
+            m_source << "common";
+        else if (m_pObj->is_cut())
+            m_source << "cut";
+        else if (m_pObj->is_single_number())
+            m_source << "single-number " << m_pObj->get_top_number();
     }
 
 };

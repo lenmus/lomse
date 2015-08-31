@@ -103,7 +103,7 @@ SUITE(ColumnBreakerTest)
 
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 24L );
+        CHECK( soCursor.imo_object()->get_id() == 25L );
         CHECK( is_equal_time(soCursor.time(), 64.0f) );
     }
 
@@ -126,7 +126,7 @@ SUITE(ColumnBreakerTest)
 
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 36L );
+        CHECK( soCursor.imo_object()->get_id() == 37L );
         CHECK( is_equal_time(soCursor.time(), 64.0f) );
     }
 
@@ -149,7 +149,7 @@ SUITE(ColumnBreakerTest)
 
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 24L );
+        CHECK( soCursor.imo_object()->get_id() == 25L );
         CHECK( is_equal_time(soCursor.time(), 16.0f) );
     }
 
@@ -177,7 +177,7 @@ SUITE(ColumnBreakerTest)
 
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 25L );
+        CHECK( soCursor.imo_object()->get_id() == 26L );
         CHECK( is_equal_time(soCursor.time(), 256.0f) );
     }
 
@@ -200,7 +200,7 @@ SUITE(ColumnBreakerTest)
 
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 25L );
+        CHECK( soCursor.imo_object()->get_id() == 26L );
         CHECK( is_equal_time(soCursor.time(), 128.0f) );
     }
 
@@ -223,7 +223,7 @@ SUITE(ColumnBreakerTest)
 
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 34L );
+        CHECK( soCursor.imo_object()->get_id() == 35L );
         CHECK( is_equal_time(soCursor.time(), 64.0f) );
     }
 
@@ -246,7 +246,7 @@ SUITE(ColumnBreakerTest)
 
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 37L );
+        CHECK( soCursor.imo_object()->get_id() == 38L );
         CHECK( is_equal_time(soCursor.time(), 64.0f) );
     }
 
@@ -270,7 +270,7 @@ SUITE(ColumnBreakerTest)
 
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 35L );
+        CHECK( soCursor.imo_object()->get_id() == 36L );
         CHECK( is_equal_time(soCursor.time(), 64.0f) );
     }
 
@@ -294,7 +294,7 @@ SUITE(ColumnBreakerTest)
 
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 31L );
+        CHECK( soCursor.imo_object()->get_id() == 32L );
         CHECK( is_equal_time(soCursor.time(), 64.0f) );
     }
 
@@ -331,52 +331,52 @@ SUITE(ColumnBreakerTest)
 
         ColumnBreaker breaker1(pScore->get_num_instruments(), &soCursor);
         find_next_break(breaker1, soCursor);
-        CHECK( soCursor.imo_object()->get_id() == 29L );
+        CHECK( soCursor.imo_object()->get_id() == 30L );
         CHECK( is_equal_time(soCursor.time(), 64.0f) );
 
         ColumnBreaker breaker2(pScore->get_num_instruments(), &soCursor);
         find_next_break(breaker2, soCursor);
-        CHECK( soCursor.imo_object()->get_id() == 31L );
+        CHECK( soCursor.imo_object()->get_id() == 32L );
         CHECK( is_equal_time(soCursor.time(), 128.0f) );
 
         ColumnBreaker breaker3(pScore->get_num_instruments(), &soCursor);
         find_next_break(breaker3, soCursor);
-        CHECK( soCursor.imo_object()->get_id() == 42L );
+        CHECK( soCursor.imo_object()->get_id() == 43L );
         CHECK( is_equal_time(soCursor.time(), 192.0f) );
 
         ColumnBreaker breaker4(pScore->get_num_instruments(), &soCursor);
         find_next_break(breaker4, soCursor);
-        CHECK( soCursor.imo_object()->get_id() == 101L );
+        CHECK( soCursor.imo_object()->get_id() == 102L );
         CHECK( is_equal_time(soCursor.time(), 256.0f) );
 
         ColumnBreaker breaker5(pScore->get_num_instruments(), &soCursor);
         find_next_break(breaker5, soCursor);
-        CHECK( soCursor.imo_object()->get_id() == 111L );
+        CHECK( soCursor.imo_object()->get_id() == 112L );
         CHECK( is_equal_time(soCursor.time(), 320.0f) );
 
         ColumnBreaker breaker6(pScore->get_num_instruments(), &soCursor);
         find_next_break(breaker6, soCursor);
-        CHECK( soCursor.imo_object()->get_id() == 45L );
+        CHECK( soCursor.imo_object()->get_id() == 46L );
         CHECK( is_equal_time(soCursor.time(), 384.0f) );
 
         ColumnBreaker breaker7(pScore->get_num_instruments(), &soCursor);
         find_next_break(breaker7, soCursor);
-        CHECK( soCursor.imo_object()->get_id() == 50L );
+        CHECK( soCursor.imo_object()->get_id() == 51L );
         CHECK( is_equal_time(soCursor.time(), 512.0f) );
 
         ColumnBreaker breaker8(pScore->get_num_instruments(), &soCursor);
         find_next_break(breaker8, soCursor);
-        CHECK( soCursor.imo_object()->get_id() == 56L );
+        CHECK( soCursor.imo_object()->get_id() == 57L );
         CHECK( is_equal_time(soCursor.time(), 576.0f) );
 
         ColumnBreaker breaker9(pScore->get_num_instruments(), &soCursor);
         find_next_break(breaker9, soCursor);
-        CHECK( soCursor.imo_object()->get_id() == 60L );
+        CHECK( soCursor.imo_object()->get_id() == 61L );
         CHECK( is_equal_time(soCursor.time(), 640.0f) );
 
         ColumnBreaker breaker10(pScore->get_num_instruments(), &soCursor);
         find_next_break(breaker10, soCursor);
-        CHECK( soCursor.imo_object()->get_id() == 62L );
+        CHECK( soCursor.imo_object()->get_id() == 63L );
         CHECK( is_equal_time(soCursor.time(), 704.0f) );
     }
 

@@ -1,0 +1,21 @@
+(score (vers 2.0)
+    (instrument (staves 2)(musicData
+        (clef G p1)(clef F4 p2)(key D)(time 2 4)
+            (n f4 q v1 p1)(n g4 e g+ v1 p1)(n b4 e g- v1 p1)
+            (n c3 e g+ v2 p2)(n c3 e g- v2 p2)(n d3 q v2 p2)
+            (barline)
+            (n c4 e g+ v1 p1)(n c4 e g- v1 p1)(n d4 q v1 p1)
+            (n f3 h v2 p2)
+            (barline)
+    ))
+    (instrument (staves 2)(musicData 
+        (clef G p1)(clef F4 p2)(key D)(time 2 4)
+            (n f4 q v1 p1)
+            (n c3 s g+ v2 p2)(n d3 s v2 p2)(n e3 s v2 p2)(n f3 s g- v2 p2)(n g3 e g+ v2 p2)(n d3 e g- v2 p2)
+            (barline)
+            (n a4 e. v1 p1)
+            (n c3 q v2 p2)(n g3 q v2 p2)
+            (barline)
+    ))
+)
+

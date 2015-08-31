@@ -1,0 +1,13 @@
+(lenmusdoc (vers 0.0) (content 
+    (score (vers 2.0)
+       (instrument (musicData 
+       (clef G)(key C)(time 6 8)
+       (n e4 e g+)(n g4 e)(n c5 e g-)
+       (n c4 e g+)(n e4 e)(n g4 e g-)
+       (barline)
+       (n e4 e g+)(n g4 e)(n c5 e g-)
+       (n c4 e g+)(n e4 e)(n g4 e g-)
+       (barline) 
+    )))
+))
+

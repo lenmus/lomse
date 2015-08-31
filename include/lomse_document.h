@@ -208,6 +208,7 @@ public:
 
     //debug
     string dump_ids() const;
+    size_t id_assigner_size() const;
 
 protected:
     void initialize();
@@ -215,6 +216,7 @@ protected:
 
     friend class ImFactory;
     void assign_id(ImoObj* pImo);
+    ImoId reserve_id(ImoId id);
 
     friend class Control;
     void assign_id(Control* pControl);

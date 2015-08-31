@@ -194,8 +194,8 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_text]              = "text           ";
         m_typeToName[k_shape_time_signature]    = "time           ";
         m_typeToName[k_shape_tie]               = "tie            ";
-        m_typeToName[k_shape_time_signature_digit]
-                                                = "time-digit     ";
+        m_typeToName[k_shape_time_signature_glyph]
+                                                = "time-glyph     ";
         m_typeToName[k_shape_tuplet]            = "tuplet         ";
         m_typeToName[k_shape_word]              = "word           ";
 

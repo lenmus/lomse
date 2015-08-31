@@ -1,0 +1,24 @@
+<lenmusdoc vers='0.0'>
+    <styles>
+        <defineStyle>
+            <name>table1-col1</name>
+            <table-col-width>5000</table-col-width>
+        </defineStyle>
+        <defineStyle>
+            <name>table1-col2</name>
+            <table-col-width>4000</table-col-width>
+        </defineStyle>
+    </styles>
+    <content>
+        <table>
+            <tableColumn style='table1-col1' />
+            <tableColumn style='table1-col2' />
+            <tableBody>
+                <tableRow>
+                    <tableCell>That</tableCell>
+                    <tableCell>This is a cell</tableCell>
+                </tableRow>
+            </tableBody>
+        </table>
+    </content>
+</lenmusdoc>

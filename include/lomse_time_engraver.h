@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -63,12 +63,13 @@ public:
                  int iInstr, int iStaff);
     ~TimeEngraver() {}
 
-    GmoShape* create_shape_normal(ImoTimeSignature* pCreatorImo, UPoint uPos, int beats,
-                                  int beat_type, Color color=Color(0,0,0));
-    GmoShape* create_shape_common(ImoTimeSignature* pCreatorImo, UPoint uPos);
-    GmoShape* create_shape_cut(ImoTimeSignature* pCreatorImo, UPoint uPos);
+    GmoShape* create_shape(ImoTimeSignature* pCreatorImo, UPoint uPos,
+                           Color color=Color(0,0,0));
 
 protected:
+    GmoShape* create_symbol_shape(int iGlyph, ShapeId idx);
+    GmoShape* create_shape_normal(UPoint uPos, int beats, int beat_type);
+
     void create_main_container_shape(UPoint uPos);
     void create_top_digits(UPoint uPos, int beats);
     void create_bottom_digits(UPoint uPos, int beat_type);

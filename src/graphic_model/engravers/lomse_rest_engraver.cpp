@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -154,16 +154,26 @@ int RestEngraver::find_glyph()
 //---------------------------------------------------------------------------------------
 LUnits RestEngraver::get_glyph_offset(int iGlyph)
 {
-    return tenths_to_logical( glyphs_lmbasic2[iGlyph].GlyphOffset );
+    //AWARE: Rest registration is as follows:
+    // * Rests are registered on the center line of a five-line staff.
+    // * with the exception of the whole note rest, which should hang from the font baseline.
+
+    Tenths offset = m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph);
+    if (iGlyph == k_glyph_whole_rest)
+        return tenths_to_logical(offset + 10.0f);
+    else
+        return tenths_to_logical(offset + 20.0f);
 }
 
 //---------------------------------------------------------------------------------------
 void RestEngraver::add_shapes_for_dots_if_required()
 {
+    //AWARE: dots should be placed opposite to the highest hook (Gardner, p.199)
+
     if (m_numDots > 0)
     {
         LUnits uSpaceBeforeDot = tenths_to_logical(LOMSE_SPACE_BEFORE_DOT);
-        LUnits uyPos = m_uyTop;
+        LUnits uyPos = m_uyTop + tenths_to_logical( get_offset_for_dot() );
         for (int i = 0; i < m_numDots; i++)
         {
             m_uxLeft += uSpaceBeforeDot;
@@ -175,7 +185,7 @@ void RestEngraver::add_shapes_for_dots_if_required()
 //---------------------------------------------------------------------------------------
 LUnits RestEngraver::add_dot_shape(LUnits x, LUnits y, Color color)
 {
-    y += get_glyph_offset(k_glyph_dot) + tenths_to_logical(-75.0);
+    y += get_glyph_offset(k_glyph_dot);
     GmoShapeDot* pShape = LOMSE_NEW GmoShapeDot(m_pRest, 0, k_glyph_dot, UPoint(x, y),
                                                 color, m_libraryScope, m_fontSize);
     add_voice(pShape);
@@ -183,6 +193,20 @@ LUnits RestEngraver::add_dot_shape(LUnits x, LUnits y, Color color)
     return pShape->get_width();
 }
 
+//---------------------------------------------------------------------------------------
+Tenths RestEngraver::get_offset_for_dot()
+{
+    switch (m_restType)
+    {
+        case k_whole:        return -15.0f;
+        case k_32th:         return -35.0f;
+        case k_64th:         return -35.0f;
+        case k_128th:        return -45.0f;
+        case k_256th:        return -45.0f;
+        default:
+            return -25.0f;
+    }
+}
 
 
 }  //namespace lomse

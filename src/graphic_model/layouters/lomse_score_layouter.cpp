@@ -1170,11 +1170,9 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
         case k_imo_time_signature:
         {
             ImoTimeSignature* pImo = static_cast<ImoTimeSignature*>(pSO);
-            int beats = pImo->get_top_number();
-            int beat_type = pImo->get_bottom_number();
             TimeEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
             Color color = pImo->get_color();
-            return engrv.create_shape_normal(pImo, pos, beats, beat_type, color);
+            return engrv.create_shape(pImo, pos, color);
         }
         case k_imo_spacer:
         {

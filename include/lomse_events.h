@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -533,8 +533,8 @@ protected:
 
         m_fullName = LOMSE_FONTS_PATH;
 
-        if (m_fontname == "LenMus basic")
-            m_fullName += "lmbasic2.ttf";
+        if (m_fontname == "Bravura")
+            m_fullName += "Bravura.otf";
         else
             m_fullName += "LiberationSerif-Regular.ttf";
     }

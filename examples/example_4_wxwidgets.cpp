@@ -413,7 +413,7 @@ void MyFrame::OnQuit(wxCommandEvent& WXUNUSED(event))
 //---------------------------------------------------------------------------------------
 void MyFrame::OnAbout(wxCommandEvent& WXUNUSED(event))
 {
-    wxMessageBox(_T("Lomse: sample 1 for wxWidgets"),
+    wxMessageBox(_T("Lomse: sample 4 for wxWidgets"),
                  _T("About wxWidgets Lomse sample"),
                  wxOK | wxICON_INFORMATION, this);
 }
@@ -424,9 +424,9 @@ void MyFrame::initialize_lomse()
     // Lomse knows nothing about windows. It renders everything on bitmaps and the
     // user application uses them. For instance, to display it on a wxWindows.
     // Lomse supports a lot of bitmap formats and pixel formats. Therefore, before
-    // using the Lomse library you MUST specify which bitmap formap to use.
+    // using the Lomse library you MUST specify which bitmap format to use.
     //
-    // For wxWidgets, I would suggets using a platform independent format. So
+    // For wxWidgets, I would suggest using a platform independent format. So
     // I will use a wxImage as the rendering  buffer. wxImage is platform independent
     // and its buffer is an array of characters in RGBRGBRGB... format,  in the
     // top-to-bottom, left-to-right order. That is, the first RGB triplet corresponds
@@ -435,7 +435,7 @@ void MyFrame::initialize_lomse()
     // with second row following after it and so on.
     // Therefore, the pixel format is RGB 24 bits.
     //
-    // Let's define the requiered information:
+    // Let's define the required information:
 
         //the pixel format
         int pixel_format = k_pix_format_rgb24;  //RGB 24bits
@@ -444,8 +444,8 @@ void MyFrame::initialize_lomse()
         int resolution = 96;    //96 ppi
 
         //Normal y axis direction is 0 coordinate at top and increase downwards. You
-        //must specify if you would like just the opposite behaviour. For Windows and
-        //Linux the default behaviour is the right behaviour.
+        //must specify if you would like just the opposite behavior. For Windows and
+        //Linux the default behavior is the right behavior.
         bool reverse_y_axis = false;
 
     //Now, initialize the library with these values
@@ -657,7 +657,7 @@ void MyCanvas::open_file(const wxString& fullname)
     //create a new View
     std::string filename( fullname.mb_str(wxConvUTF8) );
     delete m_pPresenter;
-    m_pPresenter = m_lomse.open_document(ViewFactory::k_view_horizontal_book,
+    m_pPresenter = m_lomse.open_document(ViewFactory::k_view_vertical_book,
                                          filename);
 
     //get the pointer to the interactor, set the rendering buffer and register for
@@ -981,7 +981,13 @@ void MyCanvas::play_start()
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
         Document* pDoc = m_pPresenter->get_document_raw_ptr();
-        ImoScore* pScore = static_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
+
+        //AWARE: Then next line of code is just an example, in which it is assumed that
+        //the score to play is the first element in the document.
+        //In a real application, as the document could contain texts, images and many
+        //scores, you shoud get the pointer to the score to play in a suitable way.
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
+
         if (pScore)
         {
             m_pPlayer->load_score(pScore, this);

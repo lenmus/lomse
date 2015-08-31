@@ -63,20 +63,22 @@ void IdAssigner::assign_id(ImoObj* pImo)
     }
     else
     {
-//        //check if id already exists
-//        map<ImoId, ImoObj*>::const_iterator it = m_idToImo.find( id );
-//        if (it != m_idToImo.end())
-//        {
-//            //it is in use. Assign a new id
-//            pImo->set_id(++m_idCounter);
-//            m_idToImo[m_idCounter] = pImo;
-//        }
-//        else
-        {
-            //doesn't exist. use it
-            m_idToImo[id] = pImo;
-            m_idCounter = max(id, m_idCounter);
-        }
+        m_idToImo[id] = pImo;
+        m_idCounter = max(id, m_idCounter);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+ImoId IdAssigner::reserve_id(ImoId id)
+{
+    if (id == k_no_imoid)
+    {
+        return ++m_idCounter;
+    }
+    else
+    {
+        m_idCounter = max(id, m_idCounter);
+        return id;
     }
 }
 
@@ -130,22 +132,29 @@ string IdAssigner::dump() const
     data << "Imo: ";
 	map<ImoId, ImoObj*>::const_iterator it;
 	for (it = m_idToImo.begin(); it != m_idToImo.end(); ++it)
-		data << it->first << ", ";
+		data << it->first << "-" << it->second->get_name() << ", ";
+    data << endl;
 
-    data << endl << "Control: ";
-	map<ImoId, Control*>::const_iterator itC;
-	for (itC = m_idToControl.begin(); itC != m_idToControl.end(); ++itC)
-		data << itC->first << ", ";
+	map<ImoId, Control*>::const_iterator itC = m_idToControl.begin();
+	if (itC != m_idToControl.end())
+    {
+        data << "Control: ";
+        for (; itC != m_idToControl.end(); ++itC)
+            data << itC->first << ", ";
+    }
 
     return data.str();
 }
 
 //---------------------------------------------------------------------------------------
-void IdAssigner::copy_ids_to(IdAssigner* assigner)
+void IdAssigner::copy_ids_to(IdAssigner* assigner, ImoId idMin)
 {
 	map<ImoId, ImoObj*>::const_iterator it;
 	for (it = m_idToImo.begin(); it != m_idToImo.end(); ++it)
-        assigner->add_id(it->first, it->second);
+    {
+        if (it->first >= idMin)
+            assigner->add_id(it->first, it->second);
+    }
 
 	map<ImoId, Control*>::const_iterator itC;
 	for (itC = m_idToControl.begin(); itC != m_idToControl.end(); ++itC)

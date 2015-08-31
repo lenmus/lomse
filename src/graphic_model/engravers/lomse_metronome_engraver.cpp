@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -59,7 +59,8 @@ MetronomeMarkEngraver::MetronomeMarkEngraver(LibraryScope& libraryScope,
 GmoShape* MetronomeMarkEngraver::create_shape(ImoMetronomeMark* pImo, UPoint uPos,
                                               Color color)
 {
-    m_fontSize = determine_font_size();
+    ImoStyle* pStyle = m_pMeter->get_metronome_style_info();
+    m_fontSize = pStyle->font_size() * 1.5f;
     m_pCreatorImo = pImo;
     m_uPos = uPos;
     m_uPos.y -= m_pMeter->tenths_to_logical(20.0f, m_iInstr, m_iStaff);
@@ -111,9 +112,9 @@ GmoShape* MetronomeMarkEngraver::create_shape_note_note()
 
     if (fParenthesis)
         create_text_shape("(");
-    create_symbol_shape( select_glyph(leftNoteType, leftDots) );
+    create_symbol_shape(leftNoteType, leftDots);
     create_text_shape(" = ");
-    create_symbol_shape( select_glyph(rightNoteType, rightDots) );
+    create_symbol_shape(rightNoteType, rightDots);
     if (fParenthesis)
         create_text_shape(")");
     return m_pMainShape;
@@ -130,7 +131,7 @@ GmoShape* MetronomeMarkEngraver::create_shape_note_value()
 
     if (fParenthesis)
         create_text_shape("(");
-    create_symbol_shape( select_glyph(leftNoteType, leftDots) );
+    create_symbol_shape(leftNoteType, leftDots);
     string msg = str( fParenthesis ? boost::format(" = %d)") % ticksPerMinute
                                    : boost::format(" = %d") % ticksPerMinute );
     create_text_shape(msg);
@@ -148,7 +149,7 @@ void MetronomeMarkEngraver::create_main_container_shape()
 //---------------------------------------------------------------------------------------
 void MetronomeMarkEngraver::create_text_shape(const string& text)
 {
-    LUnits y = m_uPos.y + m_pMeter->tenths_to_logical(10.0f, m_iInstr, m_iStaff);
+    LUnits y = m_uPos.y + m_pMeter->tenths_to_logical(2.0f, m_iInstr, m_iStaff);
     ImoStyle* pStyle = m_pMeter->get_metronome_style_info();
     TextEngraver engr(m_libraryScope, m_pMeter, text, "", pStyle);
     GmoShape* pShape = engr.create_shape(m_pCreatorImo, m_uPos.x, y);
@@ -157,9 +158,10 @@ void MetronomeMarkEngraver::create_text_shape(const string& text)
 }
 
 //---------------------------------------------------------------------------------------
-void MetronomeMarkEngraver::create_symbol_shape(int iGlyph)
+void MetronomeMarkEngraver::create_symbol_shape(int noteType, int dots)
 {
-    Tenths yOffset = glyphs_lmbasic2[iGlyph].GlyphOffset + 5.0f;
+    int iGlyph = select_glyph(noteType);
+    Tenths yOffset = m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph);
     LUnits y = m_uPos.y + m_pMeter->tenths_to_logical(yOffset, m_iInstr, m_iStaff);
     ShapeId idx = 0;
     GmoShape* pShape = LOMSE_NEW GmoShapeMetronomeGlyph(m_pCreatorImo, idx, iGlyph,
@@ -167,24 +169,46 @@ void MetronomeMarkEngraver::create_symbol_shape(int iGlyph)
                                                m_libraryScope, m_fontSize);
 	m_pMainShape->add(pShape);
     m_uPos.x += pShape->get_width();
+
+    if (dots > 0)
+    {
+        LUnits space = m_pMeter->tenths_to_logical(2.0, m_iInstr, m_iStaff);
+        for (; dots > 0; dots--)
+        {
+            m_uPos.x += space;
+            pShape = LOMSE_NEW GmoShapeMetronomeGlyph(m_pCreatorImo, idx,
+                                               k_glyph_metronome_augmentation_dot,
+                                               m_uPos, m_color,
+                                               m_libraryScope, m_fontSize);
+            m_pMainShape->add(pShape);
+            m_uPos.x += pShape->get_width();
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------
-int MetronomeMarkEngraver::select_glyph(int noteType, int dots)
+int MetronomeMarkEngraver::select_glyph(int noteType)
 {
     switch (noteType)
 	{
+        case k_whole:
+            return k_glyph_small_whole_note;
+        case k_half:
+            return k_glyph_small_half_note;
         case k_quarter:
-            if (dots == 0)
-                return k_glyph_small_quarter_note;
-            else
-                return k_glyph_small_quarter_note_dotted;
-            break;
+            return k_glyph_small_quarter_note;
         case k_eighth:
-            if (dots == 0)
-                return k_glyph_small_eighth_note;
-            else
-                return k_glyph_small_eighth_note_dotted;
+            return k_glyph_small_eighth_note;
+        case k_16th:
+            return k_glyph_small_16th_note;
+        case k_32th:
+            return k_glyph_small_32th_note;
+        case k_64th:
+            return k_glyph_small_64th_note;
+        case k_128th:
+            return k_glyph_small_128th_note;
+        case k_256th:
+            return k_glyph_small_256th_note;
         default:
         {
             string msg = str( boost::format(

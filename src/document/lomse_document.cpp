@@ -201,7 +201,7 @@ int Document::replace_object_from_checkpoint_data(ImoId id, const string& data)
     delete pOldImo;
 
     //add new ids
-    assigner.copy_ids_to(m_pIdAssigner);
+    assigner.copy_ids_to(m_pIdAssigner, id);
 
     return 0;
 }
@@ -546,6 +546,12 @@ void Document::assign_id(ImoObj* pImo)
 }
 
 //---------------------------------------------------------------------------------------
+ImoId Document::reserve_id(ImoId id)
+{
+    return m_pIdAssigner->reserve_id(id);
+}
+
+//---------------------------------------------------------------------------------------
 void Document::assign_id(Control* pControl)
 {
     m_pIdAssigner->assign_id(pControl);
@@ -574,6 +580,13 @@ string Document::dump_ids() const
 {
     return m_pIdAssigner->dump();
 }
+
+//---------------------------------------------------------------------------------------
+size_t Document::id_assigner_size() const
+{
+    return m_pIdAssigner->size();
+}
+
 
 
 }  //namespace lomse

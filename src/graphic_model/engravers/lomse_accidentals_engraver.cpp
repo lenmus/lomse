@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -166,7 +166,12 @@ void AccidentalsEngraver::add_glyphs_to_container_shape(UPoint pos)
 //---------------------------------------------------------------------------------------
 LUnits AccidentalsEngraver::glyph_offset(int iGlyph)
 {
-    Tenths offset = glyphs_lmbasic2[iGlyph].GlyphOffset + 40.0f;
+    //AWARE: Accidentals registration is as follows:
+    // * Vertically centered on the baseline.
+    // * They are positioned as if they apply to a notehead on the bottom line of the staff.
+    // * the leftmost point coincides with x = 0.
+
+    Tenths offset = m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph) + 50.0f;
     return m_pMeter->tenths_to_logical(offset, m_iInstr, m_iStaff);
 }
 

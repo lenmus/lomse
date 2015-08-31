@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -64,6 +64,51 @@ LUnits pt_to_LUnits(float pt)
 static std::map<int, std::string> m_TypeToName;
 static bool m_fNamesRegistered;
 static string m_unknown = "unknown";
+
+
+//---------------------------------------------------------------------------------------
+//values for default style
+#define k_default_font_size         12.0f
+#define k_default_font_style        ImoStyle::k_font_style_normal
+#define k_default_font_weight       ImoStyle::k_font_weight_normal
+    //text
+#define k_default_word_spacing      ImoStyle::k_spacing_normal
+#define k_default_text_decoration   ImoStyle::k_decoration_none
+#define k_default_vertical_align    ImoStyle::k_valign_baseline
+#define k_default_text_align        ImoStyle::k_align_left
+#define k_default_text_indent_length    0.0f
+#define k_default_word_spacing_length   0.0f   //not applicable
+#define k_default_line_height           1.5f
+    //color and background
+#define k_default_color             Color(0,0,0)
+#define k_default_background_color  Color(255,255,255)
+    //margin
+#define k_default_margin_top        0.0f
+#define k_default_margin_bottom     0.0f
+#define k_default_margin_left       0.0f
+#define k_default_margin_right      0.0f
+    //padding
+#define k_default_padding_top       0.0f
+#define k_default_padding_bottom    0.0f
+#define k_default_padding_left      0.0f
+#define k_default_padding_right     0.0f
+    //border
+//    //&& set_lunits_property(ImoStyle::k_border_top, ImoStyle::k_default_border_top0.0f);
+//    //&& set_lunits_property(ImoStyle::k_border_bottom, ImoStyle::k_default_border_bottom0.0f);
+//    //&& set_lunits_property(ImoStyle::k_border_left, ImoStyle::k_default_border_left0.0f);
+//    //&& set_lunits_property(ImoStyle::k_border_right, ImoStyle::k_default_border_right0.0f);
+    //border width
+#define k_default_border_width_top      0.0f
+#define k_default_border_width_bottom   0.0f
+#define k_default_border_width_left     0.0f
+#define k_default_border_width_right    0.0f
+    //size
+#define k_default_min_height    0.0f
+#define k_default_max_height    0.0f
+#define k_default_height        0.0f
+#define k_default_min_width     0.0f
+#define k_default_max_width     0.0f
+#define k_default_width         0.0f
 
 
 //=======================================================================================
@@ -2744,8 +2789,7 @@ void ImoScore::set_float_option(const std::string& name, float value)
      }
      else
      {
-        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
-                                    ImFactory::inject(k_imo_option, m_pDoc) );
+        pOpt = static_cast<ImoOptionInfo*>(ImFactory::inject(k_imo_option, m_pDoc) );
         pOpt->set_name(name);
         pOpt->set_type(ImoOptionInfo::k_number_float);
         pOpt->set_float_value(value);
@@ -2763,8 +2807,7 @@ void ImoScore::set_bool_option(const std::string& name, bool value)
      }
      else
      {
-        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
-                                    ImFactory::inject(k_imo_option, m_pDoc) );
+        pOpt = static_cast<ImoOptionInfo*>(ImFactory::inject(k_imo_option, m_pDoc) );
         pOpt->set_name(name);
         pOpt->set_type(ImoOptionInfo::k_boolean);
         pOpt->set_bool_value(value);
@@ -2782,8 +2825,7 @@ void ImoScore::set_long_option(const std::string& name, long value)
      }
      else
      {
-        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
-                                    ImFactory::inject(k_imo_option, m_pDoc) );
+        pOpt = static_cast<ImoOptionInfo*>(ImFactory::inject(k_imo_option, m_pDoc) );
         pOpt->set_name(name);
         pOpt->set_type(ImoOptionInfo::k_number_long);
         pOpt->set_long_value(value);
@@ -3002,10 +3044,12 @@ ImoStyle* ImoScore::create_default_style()
 
     //BUG_BYPASS: Default style should use the right font file / font name for the current
     // document language. This block is a fix just for Chinese.language
+    //TODO: Fix for other languages
+    //TODO: How to get default values for comparisons (k_default_language) ?
     {
         //get document language
         ImoDocument* pImoDoc = m_pDoc->get_imodoc();
-        if (pImoDoc)    //AWARE: in untit tests there could be no ImoDoc
+        if (pImoDoc)    //AWARE: in unit tests there could be no ImoDoc
         {
             string& language = pImoDoc->get_language();
             if (language == "zh_CN")
@@ -3016,47 +3060,47 @@ ImoStyle* ImoScore::create_default_style()
         }
     }
 
-    pDefStyle->font_size( 12.0f);
-    pDefStyle->font_style( ImoStyle::k_font_normal);
-    pDefStyle->font_weight( ImoStyle::k_font_normal);
+    pDefStyle->font_size( k_default_font_size );
+    pDefStyle->font_style( k_default_font_style );
+    pDefStyle->font_weight( k_default_font_weight );
         //text
-    pDefStyle->word_spacing( ImoStyle::k_spacing_normal);
-    pDefStyle->text_decoration( ImoStyle::k_decoration_none);
-    pDefStyle->vertical_align( ImoStyle::k_valign_baseline);
-    pDefStyle->text_align( ImoStyle::k_align_left);
-    pDefStyle->text_indent_length( 0.0f);
-    pDefStyle->word_spacing_length( 0.0f);   //not applicable
-    pDefStyle->line_height( 1.5f);
+    pDefStyle->word_spacing( k_default_word_spacing );
+    pDefStyle->text_decoration( k_default_text_decoration );
+    pDefStyle->vertical_align( k_default_vertical_align );
+    pDefStyle->text_align( k_default_text_align );
+    pDefStyle->text_indent_length( k_default_text_indent_length );
+    pDefStyle->word_spacing_length( k_default_word_spacing_length );   //not applicable
+    pDefStyle->line_height( k_default_line_height );
         //color and background
-    pDefStyle->color( Color(0,0,0));
-    pDefStyle->background_color( Color(255,255,255));
+    pDefStyle->color( k_default_color );
+    pDefStyle->background_color( k_default_background_color );
         //margin
-    pDefStyle->margin_top( 0.0f);
-    pDefStyle->margin_bottom( 0.0f);
-    pDefStyle->margin_left( 0.0f);
-    pDefStyle->margin_right( 0.0f);
+    pDefStyle->margin_top( k_default_margin_top );
+    pDefStyle->margin_bottom( k_default_margin_bottom );
+    pDefStyle->margin_left( k_default_margin_left );
+    pDefStyle->margin_right( k_default_margin_right );
         //padding
-    pDefStyle->padding_top( 0.0f);
-    pDefStyle->padding_bottom( 0.0f);
-    pDefStyle->padding_left( 0.0f);
-    pDefStyle->padding_right( 0.0f);
+    pDefStyle->padding_top( k_default_padding_top );
+    pDefStyle->padding_bottom( k_default_padding_bottom );
+    pDefStyle->padding_left( k_default_padding_left );
+    pDefStyle->padding_right( k_default_padding_right );
         ////border
-    //pDefStyle->set_lunits_property(ImoStyle::k_border_top, 0.0f);
-    //pDefStyle->set_lunits_property(ImoStyle::k_border_bottom, 0.0f);
-    //pDefStyle->set_lunits_property(ImoStyle::k_border_left, 0.0f);
-    //pDefStyle->set_lunits_property(ImoStyle::k_border_right, 0.0f);
+    //pDefStyle->set_lunits_property(ImoStyle::k_border_top, k_default_border_top);
+    //pDefStyle->set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom);
+    //pDefStyle->set_lunits_property(ImoStyle::k_border_left, k_default_border_left);
+    //pDefStyle->set_lunits_property(ImoStyle::k_border_right, k_default_border_right);
         //border width
-    pDefStyle->border_width_top( 0.0f);
-    pDefStyle->border_width_bottom( 0.0f);
-    pDefStyle->border_width_left( 0.0f);
-    pDefStyle->border_width_right( 0.0f);
+    pDefStyle->border_width_top( k_default_border_width_top );
+    pDefStyle->border_width_bottom( k_default_border_width_bottom );
+    pDefStyle->border_width_left( k_default_border_width_left );
+    pDefStyle->border_width_right( k_default_border_width_right );
         //size
-    pDefStyle->min_height( 0.0f);
-    pDefStyle->max_height( 0.0f);
-    pDefStyle->height( 0.0f);
-    pDefStyle->min_width( 0.0f);
-    pDefStyle->max_width( 0.0f);
-    pDefStyle->width( 0.0f);
+    pDefStyle->min_height( k_default_min_height );
+    pDefStyle->max_height( k_default_max_height );
+    pDefStyle->height( k_default_height );
+    pDefStyle->min_width( k_default_min_width );
+    pDefStyle->max_width( k_default_max_width );
+    pDefStyle->width( k_default_width );
 
     m_nameToStyle[pDefStyle->get_name()] = pDefStyle;
     add_style(pDefStyle);
@@ -3066,6 +3110,9 @@ ImoStyle* ImoScore::create_default_style()
 //---------------------------------------------------------------------------------------
 void ImoScore::add_required_text_styles()
 {
+    //AWARE: When modifying this method check also method
+    //       ImoStyle::is_default_style_with_default_values()
+
     ImoStyle* pDefStyle = get_default_style();
 
     //For tuplets numbers
@@ -3074,10 +3121,9 @@ void ImoScore::add_required_text_styles()
 	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
         pStyle->set_name("Tuplet numbers");
         pStyle->set_parent_style(pDefStyle);
-	    pStyle->font_name( "Liberation serif");
 	    pStyle->font_size( 11.0f);
-        pStyle->font_style( ImoStyle::k_italic);
-        pStyle->font_weight( ImoStyle::k_font_normal);
+        pStyle->font_style( ImoStyle::k_font_style_italic);
+        pStyle->font_weight( ImoStyle::k_font_weight_normal);
         add_style(pStyle);
     }
 
@@ -3087,13 +3133,23 @@ void ImoScore::add_required_text_styles()
 	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
         pStyle->set_name("Instrument names");
         pStyle->set_parent_style(pDefStyle);
-	    pStyle->font_name( "Liberation serif");
 	    pStyle->font_size( 14.0f);
+        add_style(pStyle);
+    }
+
+    //For metronome marks
+    if (find_style("Metronome marks") == NULL)
+    {
+	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+        pStyle->set_name("Metronome marks");
+        pStyle->set_parent_style(pDefStyle);
+	    pStyle->font_size( 7.0f);
         add_style(pStyle);
     }
 
     //"Lyrics" - for lyrics
 }
+
 
 //---------------------------------------------------------------------------------------
 SoundEventsTable* ImoScore::get_midi_table()
@@ -3206,6 +3262,163 @@ int ImoScorePlayer::get_metronome_mm()
 }
 
 
+//=======================================================================================
+// ImoStyle implementation
+//=======================================================================================
+bool ImoStyle::is_default_style_with_default_values()
+{
+    //returns true if it is a default style and contains default values
+
+    //TODO: It should also be checked that the other defaults still maintain the value.
+
+    //Default style
+    if (m_name == "Default style")
+        return true;
+
+    //Tuplets numbers
+    if (m_name == "Tuplet numbers")
+        return font_size() == 11.0f
+               && font_style() == k_font_style_italic
+               && font_weight() == k_font_weight_normal
+               //inherited defaults:
+                   //text
+               && word_spacing() == k_default_word_spacing
+               && text_decoration() == k_default_text_decoration
+               && vertical_align() == k_default_vertical_align
+               && text_align() == k_default_text_align
+               && text_indent_length() == k_default_text_indent_length
+               && word_spacing_length() == k_default_word_spacing_length   //not applicable
+               && line_height() == k_default_line_height
+                   //color and background
+               && is_equal(color(), Color(0,0,0))
+               && is_equal(background_color(), Color(255,255,255))
+                   //margin
+               && margin_top() == k_default_margin_top
+               && margin_bottom() == k_default_margin_bottom
+               && margin_left() == k_default_margin_left
+               && margin_right() == k_default_margin_right
+                   //padding
+               && padding_top() == k_default_padding_top
+               && padding_bottom() == k_default_padding_bottom
+               && padding_left() == k_default_padding_left
+               && padding_right() == k_default_padding_right
+                   ////border
+               //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top0.0f
+               //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom0.0f
+               //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left0.0f
+               //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right0.0f
+                   //border width
+               && border_width_top() == k_default_border_width_top
+               && border_width_bottom() == k_default_border_width_bottom
+               && border_width_left() == k_default_border_width_left
+               && border_width_right() == k_default_border_width_right
+                   //size
+               && min_height() == k_default_min_height
+               && max_height() == k_default_max_height
+               && height() == k_default_height
+               && min_width() == k_default_min_width
+               && max_width() == k_default_max_width
+               && width() == k_default_width
+               ;
+
+    //Instrument names
+    if (m_name == "Instrument names")
+	    return font_size() == 14.0f
+               //inherited defaults:
+                    //font
+               && font_style() == k_default_font_style
+               && font_weight() == k_default_font_weight
+                   //text
+               && word_spacing() == k_default_word_spacing
+               && text_decoration() == k_default_text_decoration
+               && vertical_align() == k_default_vertical_align
+               && text_align() == k_default_text_align
+               && text_indent_length() == k_default_text_indent_length
+               && word_spacing_length() == k_default_word_spacing_length   //not applicable
+               && line_height() == k_default_line_height
+                   //color and background
+               && is_equal(color(), Color(0,0,0))
+               && is_equal(background_color(), Color(255,255,255))
+                   //margin
+               && margin_top() == k_default_margin_top
+               && margin_bottom() == k_default_margin_bottom
+               && margin_left() == k_default_margin_left
+               && margin_right() == k_default_margin_right
+                   //padding
+               && padding_top() == k_default_padding_top
+               && padding_bottom() == k_default_padding_bottom
+               && padding_left() == k_default_padding_left
+               && padding_right() == k_default_padding_right
+                   ////border
+               //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top0.0f
+               //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom0.0f
+               //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left0.0f
+               //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right0.0f
+                   //border width
+               && border_width_top() == k_default_border_width_top
+               && border_width_bottom() == k_default_border_width_bottom
+               && border_width_left() == k_default_border_width_left
+               && border_width_right() == k_default_border_width_right
+                   //size
+               && min_height() == k_default_min_height
+               && max_height() == k_default_max_height
+               && height() == k_default_height
+               && min_width() == k_default_min_width
+               && max_width() == k_default_max_width
+               && width() == k_default_width
+               ;
+
+    //Metronome marks
+    if (m_name == "Metronome marks")
+	    return font_size() == 7.0f
+               //inherited defaults:
+                    //font
+               && font_style() == k_default_font_style
+               && font_weight() == k_default_font_weight
+                   //text
+               && word_spacing() == k_default_word_spacing
+               && text_decoration() == k_default_text_decoration
+               && vertical_align() == k_default_vertical_align
+               && text_align() == k_default_text_align
+               && text_indent_length() == k_default_text_indent_length
+               && word_spacing_length() == k_default_word_spacing_length   //not applicable
+               && line_height() == k_default_line_height
+                   //color and background
+               && is_equal(color(), Color(0,0,0))
+               && is_equal(background_color(), Color(255,255,255))
+                   //margin
+               && margin_top() == k_default_margin_top
+               && margin_bottom() == k_default_margin_bottom
+               && margin_left() == k_default_margin_left
+               && margin_right() == k_default_margin_right
+                   //padding
+               && padding_top() == k_default_padding_top
+               && padding_bottom() == k_default_padding_bottom
+               && padding_left() == k_default_padding_left
+               && padding_right() == k_default_padding_right
+                   ////border
+               //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top0.0f
+               //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom0.0f
+               //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left0.0f
+               //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right0.0f
+                   //border width
+               && border_width_top() == k_default_border_width_top
+               && border_width_bottom() == k_default_border_width_bottom
+               && border_width_left() == k_default_border_width_left
+               && border_width_right() == k_default_border_width_right
+                   //size
+               && min_height() == k_default_min_height
+               && max_height() == k_default_max_height
+               && height() == k_default_height
+               && min_width() == k_default_min_width
+               && max_width() == k_default_max_width
+               && width() == k_default_width
+               ;
+
+
+    return false;
+}
+
 
 //=======================================================================================
 // ImoStyles implementation
@@ -3289,8 +3502,8 @@ ImoStyle* ImoStyles::create_default_styles()
     pDefStyle->font_file("");
     pDefStyle->font_name("Liberation serif");
     pDefStyle->font_size(12.0f);
-    pDefStyle->font_style(ImoStyle::k_font_normal);
-    pDefStyle->font_weight(ImoStyle::k_font_normal);
+    pDefStyle->font_style( ImoStyle::k_font_style_normal );
+    pDefStyle->font_weight( ImoStyle::k_font_weight_normal );
         //text
     pDefStyle->word_spacing(ImoStyle::k_spacing_normal);
     pDefStyle->text_decoration(ImoStyle::k_decoration_none);
@@ -3421,7 +3634,12 @@ ImoNote* ImoSlur::get_end_note()
 //---------------------------------------------------------------------------------------
 void ImoSlur::reorganize_after_object_deletion()
 {
-    //TODO
+    //TODO: slurs could involve more than two notes (i.e.: start,continue,continue,stop)
+    //Therefore, it is necessary to decide what to do and code this method.
+    //For ties, this is the code:  ;-)
+
+    //Nothing to do. As a tie involves only two objects, the tie is removed when
+    //one of the notes is deleted. Also, in note destructor, the other note is informed.
 }
 
 

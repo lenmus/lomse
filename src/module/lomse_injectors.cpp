@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -54,6 +54,7 @@
 #include "lomse_document_cursor.h"
 #include "lomse_command.h"
 #include "lomse_caret_positioner.h"
+#include "lomse_glyphs.h"
 
 #include <sstream>
 using namespace std;
@@ -70,9 +71,13 @@ LibraryScope::LibraryScope(ostream& reporter, LomseDoorway* pDoorway)
     , m_pNullDoorway(NULL)
     , m_pLdpFactory(NULL)       //lazzy instantiation. Singleton scope.
     , m_pFontStorage(NULL)      //lazzy instantiation. Singleton scope.
-    , m_sFontsPath(LOMSE_FONTS_PATH)
     , m_pGlobalMetronome(NULL)
     , m_pDispatcher(NULL)
+    , m_sMusicFontFile("Bravura.otf")
+    , m_sMusicFontName("Bravura")
+    , m_sMusicFontPath(LOMSE_FONTS_PATH)
+    , m_sFontsPath(LOMSE_FONTS_PATH)
+    , m_pMusicGlyphs(NULL)      //lazzy instantiation. Singleton scope.
     , m_fJustifySystems(true)
     , m_fDumpColumnTables(false)
     , m_fDrawAnchors(false)
@@ -93,13 +98,12 @@ LibraryScope::~LibraryScope()
     delete m_pLdpFactory;
     delete m_pFontStorage;
     delete m_pNullDoorway;
+    delete m_pMusicGlyphs;
     if (m_pDispatcher)
     {
         m_pDispatcher->stop_events_loop();
         delete m_pDispatcher;
     }
-
-//    delete m_pMusicGlyphs;
 }
 
 //---------------------------------------------------------------------------------------
@@ -116,6 +120,41 @@ FontStorage* LibraryScope::font_storage()
     if (!m_pFontStorage)
         m_pFontStorage = LOMSE_NEW FontStorage(this);
     return m_pFontStorage;
+}
+
+//---------------------------------------------------------------------------------------
+MusicGlyphs* LibraryScope::get_glyphs_table()
+{
+    if (!m_pMusicGlyphs)
+        m_pMusicGlyphs = LOMSE_NEW MusicGlyphs(this);
+    return m_pMusicGlyphs;
+}
+
+//---------------------------------------------------------------------------------------
+void LibraryScope::set_music_font(const string& fontFile, const string& fontName,
+                                  const string& path)
+{
+    m_sMusicFontName = fontName;
+    m_sMusicFontFile = fontFile;
+    m_sMusicFontPath = path;
+    //TODO: ensure that font path ends in path separator ("\" or "/" depending on platform)
+
+    get_glyphs_table()->update();
+}
+
+//---------------------------------------------------------------------------------------
+const string& LibraryScope::get_music_font_path()
+{
+    if (!m_sMusicFontPath.empty())
+        return m_sMusicFontPath;
+    else
+        return m_sFontsPath;
+}
+
+//---------------------------------------------------------------------------------------
+bool LibraryScope::is_music_font_smufl_compliant()
+{
+    return m_sMusicFontName != "lmbasic2.ttf";
 }
 
 //---------------------------------------------------------------------------------------

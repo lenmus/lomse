@@ -425,7 +425,7 @@ void ImoFiguredBassInfo::set_from_string(const std::string& sData)
             //Error state
             case k_FB_ERROR:
                 m_error = "Invalid char '%c', after '%s', in figured bass string %s. Figured bass ignored";
-                    //*p, sData.Left(size_t(p-pDataStart-1)).c_str(), sData.c_str() );
+                    //*p, sData.Left(size_t(p-pDataStart-1)).c_str(), sData.wx_str() );
                 fContinueParsing = false;
                 break;
 

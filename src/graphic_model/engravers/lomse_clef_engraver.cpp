@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -151,32 +151,42 @@ Tenths ClefEngraver::get_glyph_offset()
     // returns the y-axis offset from paper cursor position so that shape get correctly
     // positioned over a five-lines staff (units: tenths of inter-line space)
 
-    Tenths yOffset = glyphs_lmbasic2[m_iGlyph].GlyphOffset;
+    //AWARE: Clef registration is as follows:
+    // * The baseline is on the pitch the clef refers to (e.g. the F clef is placed such
+    //   that the upper dot is above and the lower dot below the baseline).
+    // * If a clef does not refer specifically to a pitch, its y=0 should coincide with
+    //   the center staff line on a five-line staff, or the visual center for staves with more or fewer than five lines (e.g. tablature staves).
+    // * The leftmost point coincides with x = 0.
+
+    Tenths yOffset = m_libraryScope.get_glyphs_table()->glyph_offset(m_iGlyph);
 
     //add offset to move the clef up/down the required lines
     if (m_symbolSize == k_size_cue)
     {
         switch(m_nClefType)
         {
-            case k_clef_G2:     return yOffset;
-            case k_clef_8_G2:   return yOffset;         //8 above
-            case k_clef_G2_8:   return yOffset;         //8 below
-            case k_clef_F4:     return yOffset - 7.0f;
-            case k_clef_F3:     return yOffset + 3.0f;
-            case k_clef_C1:     return yOffset + 16.0f;
-            case k_clef_C2:     return yOffset + 6.0f;
-            case k_clef_C3:     return yOffset - 4.0f;
-            case k_clef_C4:     return yOffset - 14.0f;
-            case k_clef_C5:     return yOffset - 24.0f;
-            case k_clef_F5:     return yOffset - 17.0f;
-            case k_clef_G1:     return yOffset;
-            case k_clef_8_F4:   return yOffset - 7.0f;  //8 above
-            case k_clef_F4_8:   return yOffset - 7.0f;  //8 below
-            case k_clef_15_G2:  return yOffset;         //15 above
-            case k_clef_G2_15:  return yOffset;         //15 below
-            case k_clef_15_F4:  return yOffset - 7.0f;  //15 above
-            case k_clef_F4_15:  return yOffset - 7.0f;  //15 below
-            case k_clef_percussion:     return yOffset - 6.0f;
+            case k_clef_G2:     return yOffset + 30.0f;
+            case k_clef_8_G2:   return yOffset + 30.0f;     //8 above
+            case k_clef_G2_8:   return yOffset + 30.0f;     //8 below
+            case k_clef_15_G2:  return yOffset + 30.0f;     //15 above
+            case k_clef_G2_15:  return yOffset + 30.0f;     //15 below
+            case k_clef_G1:     return yOffset + 40.0f;
+
+            case k_clef_F5:     return yOffset;
+            case k_clef_F4:     return yOffset + 9.0f;
+            case k_clef_8_F4:   return yOffset + 9.0f;      //8 above
+            case k_clef_F4_8:   return yOffset + 9.0f;      //8 below
+            case k_clef_15_F4:  return yOffset + 9.0f;      //15 above
+            case k_clef_F4_15:  return yOffset + 9.0f;      //15 below
+            case k_clef_F3:     return yOffset + 19.0f;
+
+            case k_clef_C1:     return yOffset + 39.0f;
+            case k_clef_C2:     return yOffset + 29.0f;
+            case k_clef_C3:     return yOffset + 19.0f;
+            case k_clef_C4:     return yOffset + 9.0f;
+            case k_clef_C5:     return yOffset - 1.0f;
+
+            case k_clef_percussion:     return yOffset + 20.0f;
             default:
                 return yOffset;
         }
@@ -185,25 +195,29 @@ Tenths ClefEngraver::get_glyph_offset()
     {
         switch(m_nClefType)
         {
-            case k_clef_G2:     return yOffset;
-            case k_clef_F4:     return yOffset;
-            case k_clef_F3:     return yOffset + 10.0f;
-            case k_clef_C1:     return yOffset + 20.0f;
-            case k_clef_C2:     return yOffset + 10.0f;
-            case k_clef_C3:     return yOffset;
-            case k_clef_C4:     return yOffset - 10.0f;
-            case k_clef_C5:     return yOffset - 20.0f;
-            case k_clef_F5:     return yOffset - 10.0f;
-            case k_clef_G1:     return yOffset + 10.0f;
-            case k_clef_8_G2:   return yOffset;     //8 above
-            case k_clef_G2_8:   return yOffset;     //8 below
-            case k_clef_8_F4:   return yOffset;     //8 above
-            case k_clef_F4_8:   return yOffset;     //8 below
-            case k_clef_15_G2:  return yOffset;     //15 above
-            case k_clef_G2_15:  return yOffset;     //15 below
-            case k_clef_15_F4:  return yOffset;     //15 above
-            case k_clef_F4_15:  return yOffset;     //15 below
-            case k_clef_percussion:     return yOffset - 1.0f;
+            case k_clef_G2:     return yOffset + 30.0f;
+            case k_clef_8_G2:   return yOffset + 30.0f;     //8 above
+            case k_clef_G2_8:   return yOffset + 30.0f;     //8 below
+            case k_clef_15_G2:  return yOffset + 30.0f;     //15 above
+            case k_clef_G2_15:  return yOffset + 30.0f;     //15 below
+            case k_clef_G1:     return yOffset + 40.0f;
+
+            case k_clef_F5:     return yOffset;
+            case k_clef_F4:     return yOffset + 10.0f;
+            case k_clef_8_F4:   return yOffset + 10.0f;     //8 above
+            case k_clef_F4_8:   return yOffset + 10.0f;     //8 below
+            case k_clef_15_F4:  return yOffset + 10.0f;     //15 above
+            case k_clef_F4_15:  return yOffset + 10.0f;     //15 below
+            case k_clef_F3:     return yOffset + 20.0f;
+
+            case k_clef_C1:     return yOffset + 40.0f;
+            case k_clef_C2:     return yOffset + 30.0f;
+            case k_clef_C3:     return yOffset + 20.0f;
+            case k_clef_C4:     return yOffset + 10.0f;
+            case k_clef_C5:     return yOffset;
+
+            case k_clef_percussion:     return yOffset + 20.0f;
+
             default:
                 return yOffset;
         }

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -67,8 +67,8 @@ protected:
     GmoShape* create_shape_note_note();
     GmoShape* create_shape_note_value();
     void create_text_shape(const string& text);
-    void create_symbol_shape(int iGlyph);
-    int select_glyph(int noteType, int dots);
+    void create_symbol_shape(int noteType, int dots);
+    int select_glyph(int noteType);
 
 };
 

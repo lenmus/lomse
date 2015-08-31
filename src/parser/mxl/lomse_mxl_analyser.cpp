@@ -3355,7 +3355,7 @@ protected:
 //            //Log results
 //            g_pLogger->LogTrace(_T("lmMusicXMLParser"),
 //                _("Parsing <time>: beats=%s, beat-type=%s"),
-//                sBeats.c_str(), sBeatType.c_str() );
+//                sBeats.c_str(), sBeatType.wx_str() );
 //
 //            //TODO Change this for a more general treatment
 //            bool fError = !sBeats.ToLong(&nBeats) || !sBeatType.ToLong(&nBeatType);
@@ -3363,7 +3363,7 @@ protected:
 //            if (fError) {
 //                g_pLogger->LogDataError(
 //                    _T("Time signature %s / %s not supported. Assumed 4 / 4"),
-//                    sBeats.c_str(), sBeatType.c_str() );
+//                    sBeats.c_str(), sBeatType.wx_str() );
 //                nBeats = 4;
 //                nBeatType = 4;
 //            }
@@ -3984,7 +3984,7 @@ public:
 //        if (value == "normal")
 //            return ImoStyle::k_font_normal;
 //        else if (value == "italic")
-//            return ImoStyle::k_italic;
+//            return ImoStyle::k_font_style_italic;
 //        else
 //        {
 //            report_msg(get_line_number(m_pChildToAnalyse),
@@ -3999,7 +3999,7 @@ public:
 //        if (value == "normal")
 //            return ImoStyle::k_font_normal;
 //        else if (value == "bold")
-//            return ImoStyle::k_bold;
+//            return ImoStyle::k_font_weight_bold;
 //        else
 //        {
 //            report_msg(get_line_number(m_pChildToAnalyse),
@@ -4304,13 +4304,13 @@ public:
 //////        {
 //////            if (nFBL > 1)
 //////                AnalysisError(pX, "[Element '%s'. More than two 'fbline'. Ignored.",
-//////                            sElmName.c_str() );
+//////                            sElmName.wx_str() );
 //////            else
 //////                pFBLineInfo[nFBL++] = AnalyzeFBLine(pX, pVStaff);
 //////        }
 //////        else
 //////            AnalysisError(pX, "[Element '%s'. Invalid parameter '%s'. Ignored.",
-//////                          sElmName.c_str(), sName.c_str() );
+//////                          sElmName.c_str(), sName.wx_str() );
 //////    }
 //////
 //////    //analyze remaining optional parameters: <location>, <cursorPoint>
@@ -4395,30 +4395,30 @@ public:
 //        const string& value = get_value(m_pChildToAnalyse);
 //        if (value == "bold")
 //        {
-//            pFont->weight = ImoStyle::k_bold;
-//            pFont->style = ImoStyle::k_font_normal;
+//            pFont->weight = ImoStyle::k_font_weight_bold;
+//            pFont->style = ImoStyle::k_font_style_normal;
 //        }
 //        else if (value == "normal")
 //        {
-//            pFont->weight = ImoStyle::k_font_normal;
-//            pFont->style = ImoStyle::k_font_normal;
+//            pFont->weight = ImoStyle::k_font_weight_normal;
+//            pFont->style = ImoStyle::k_font_style_normal;
 //        }
 //        else if (value == "italic")
 //        {
-//            pFont->weight = ImoStyle::k_font_normal;
-//            pFont->style = ImoStyle::k_italic;
+//            pFont->weight = ImoStyle::k_font_weight_normal;
+//            pFont->style = ImoStyle::k_font_style_italic;
 //        }
 //        else if (value == "bold-italic")
 //        {
-//            pFont->weight = ImoStyle::k_bold;
-//            pFont->style = ImoStyle::k_italic;
+//            pFont->weight = ImoStyle::k_font_weight_bold;
+//            pFont->style = ImoStyle::k_font_style_italic;
 //        }
 //        else
 //        {
 //            report_msg(get_line_number(m_pChildToAnalyse),
 //                "Unknown font style '" + value + "'. Replaced by 'normal'.");
-//            pFont->weight = ImoStyle::k_font_normal;
-//            pFont->style = ImoStyle::k_font_normal;
+//            pFont->weight = ImoStyle::k_font_weight_normal;
+//            pFont->style = ImoStyle::k_font_style_normal;
 //        }
 //    }
 //

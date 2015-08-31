@@ -566,7 +566,7 @@ void MyCanvas::open_file(const wxString& fullname)
     //create a new View
     std::string filename( fullname.mb_str(wxConvUTF8) );
     delete m_pPresenter;
-    m_pPresenter = m_lomse.open_document(ViewFactory::k_view_horizontal_book,
+    m_pPresenter = m_lomse.open_document(ViewFactory::k_view_vertical_book,
                                          filename);
 
     //get the pointer to the interactor, set the rendering buffer and register for
@@ -890,7 +890,13 @@ void MyCanvas::play_start()
     if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
     {
         Document* pDoc = m_pPresenter->get_document_raw_ptr();
-        ImoScore* pScore = static_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
+
+        //AWARE: Then next line of code is just an example, in which it is assumed that
+        //the score to play is the first element in the document.
+        //In a real application, as the document could contain texts, images and many
+        //scores, you shoud get the pointer to the score to play in a suitable way.
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_imodoc()->get_content_item(0) );
+
         if (pScore)
         {
             m_pPlayer->load_score(pScore, this);

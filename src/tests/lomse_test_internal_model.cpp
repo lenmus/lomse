@@ -910,8 +910,8 @@ SUITE(InternalModelTest)
         CHECK( is_equal(pStyle->color(), Color(0,0,0,255)) );
         CHECK( pStyle->font_file() == "" );
         CHECK( pStyle->font_name() == "Liberation serif" );
-        CHECK( pStyle->font_style() == ImoStyle::k_font_normal );
-        CHECK( pStyle->font_weight() == ImoStyle::k_font_normal );
+        CHECK( pStyle->font_style() == ImoStyle::k_font_style_normal );
+        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_normal );
         CHECK( pStyle->font_size() == 12.0f );
         CHECK( pStyle->line_height() == 1.5f );
         CHECK( pStyle->min_height() == 0.0f );
@@ -929,8 +929,8 @@ SUITE(InternalModelTest)
         pStyle->set_name("Test style");
 	    pStyle->font_name( "Callamet");
         pStyle->font_size( 12.0f);
-        pStyle->font_style( ImoStyle::k_font_normal);
-        pStyle->font_weight( ImoStyle::k_bold);
+        pStyle->font_style( ImoStyle::k_font_style_normal);
+        pStyle->font_weight( ImoStyle::k_font_weight_bold);
         pStyle->color( Color(15,16,27,132) );
         pScore->add_style(pStyle);
 
@@ -950,8 +950,8 @@ SUITE(InternalModelTest)
         CHECK( pStyle->get_name() == "Default style" );
         CHECK( is_equal(pStyle->color(), Color(0,0,0,255)) );
         CHECK( pStyle->font_name() == "Liberation serif" );
-        CHECK( pStyle->font_style() == ImoStyle::k_font_normal );
-        CHECK( pStyle->font_weight() == ImoStyle::k_font_normal );
+        CHECK( pStyle->font_style() == ImoStyle::k_font_style_normal );
+        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_normal );
         CHECK( pStyle->font_size() == 12.0f );
     }
 
@@ -970,8 +970,8 @@ SUITE(InternalModelTest)
         CHECK( pStyle->get_name() == "Default style" );
         CHECK( is_equal(pStyle->color(), Color(0,0,0,255)) );
         CHECK( pStyle->font_name() == "Liberation serif" );
-        CHECK( pStyle->font_style() == ImoStyle::k_font_normal );
-        CHECK( pStyle->font_weight() == ImoStyle::k_font_normal );
+        CHECK( pStyle->font_style() == ImoStyle::k_font_style_normal );
+        CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_normal );
         CHECK( pStyle->font_size() == 12.0f );
     }
 

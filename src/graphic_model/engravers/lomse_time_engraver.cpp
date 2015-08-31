@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -48,18 +48,49 @@ TimeEngraver::TimeEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* TimeEngraver::create_shape_normal(ImoTimeSignature* pCreatorImo,
-                                            UPoint uPos, int beats, int beat_type,
-                                            Color color)
+GmoShape* TimeEngraver::create_shape(ImoTimeSignature* pCreatorImo, UPoint uPos,
+                                     Color color)
 {
     m_fontSize = determine_font_size();
     m_pCreatorImo = pCreatorImo;
     m_color = color;
+    m_uPos = uPos;
 
+    if (pCreatorImo->is_normal())
+    {
+        int beats = pCreatorImo->get_top_number();
+        int beat_type = pCreatorImo->get_bottom_number();
+        return create_shape_normal(uPos, beats, beat_type);
+    }
+    else if (pCreatorImo->is_common())
+    {
+        create_main_container_shape(uPos);
+        create_symbol_shape(k_glyph_common_time, 0);
+        return m_pTimeShape;
+    }
+    else if (pCreatorImo->is_cut())
+    {
+        create_main_container_shape(uPos);
+        create_symbol_shape(k_glyph_cut_time, 0);
+        return m_pTimeShape;
+    }
+    else
+    {
+        string msg = str( boost::format(
+                        "[TimeEngraver::create_shape] unsupported time signature type %d")
+                        % pCreatorImo->get_type() );
+        LOMSE_LOG_ERROR(msg);
+        throw runtime_error(msg);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+GmoShape* TimeEngraver::create_shape_normal(UPoint uPos, int beats, int beat_type)
+{
+    create_main_container_shape(uPos);
     create_top_digits(uPos, beats);
     create_bottom_digits(uPos, beat_type);
     center_numbers();
-    create_main_container_shape(uPos);
     add_all_shapes_to_container();
 
     return m_pTimeShape;
@@ -110,10 +141,10 @@ void TimeEngraver::create_digits(int digits, GmoShape* pShape[])
 GmoShape* TimeEngraver::create_digit(int digit)
 {
     int iGlyph = k_glyph_number_0 + digit;
-    Tenths yOffset = glyphs_lmbasic2[iGlyph].GlyphOffset + 40.0f;
+    Tenths yOffset = m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph) + 10.0f;
     LUnits y = m_uPos.y + m_pMeter->tenths_to_logical(yOffset, m_iInstr, m_iStaff);
     GmoShape* pShape =
-        LOMSE_NEW GmoShapeTimeDigit(m_pCreatorImo, 0, iGlyph, UPoint(m_uPos.x, y),
+        LOMSE_NEW GmoShapeTimeGlyph(m_pCreatorImo, 0, iGlyph, UPoint(m_uPos.x, y),
                                     m_color, m_libraryScope, m_fontSize);
     m_uPos.x += pShape->get_width();
     return pShape;
@@ -153,35 +184,16 @@ void TimeEngraver::add_all_shapes_to_container()
 }
 
 //---------------------------------------------------------------------------------------
-GmoShape* TimeEngraver::create_shape_common(ImoTimeSignature* pCreatorImo, UPoint uPos)
+GmoShape* TimeEngraver::create_symbol_shape(int iGlyph, ShapeId idx)
 {
-    //TODO TimeEngraver::create_shape_common
-
-    create_main_container_shape(uPos);
-
-//        case eTS_Common:        // a C symbol
-//        case eTS_Cut:           // a C/ symbol
-//        {
-//            int nGlyph = (m_nType==eTS_Common ? GLYPH_COMMON_TIME : GLYPH_CUT_TIME);
-//		    LUnits uyPos = uyPosTop
-//						    + m_pVStaff->TenthsToLogical(aGlyphsInfo[nGlyph].GlyphOffset, m_nStaffNum );
-//            lmShape* pShape = LOMSE_NEW lmShapeGlyph(this, nShapeIdx, nGlyph, pPaper,
-//                                               UPoint(uxPosTop, uyPos),
-//									           _T("Time signature"), lmNO_DRAGGABLE,
-//                                               m_color );
-//		    uxPosTop += m_pVStaff->TenthsToLogical(aGlyphsInfo[nGlyph].thWidth, m_nStaffNum );
-//            return pShape;
-//        }
-    return m_pTimeShape;
+    Tenths yOffset = m_libraryScope.get_glyphs_table()->glyph_offset(iGlyph) + 20.0f;
+    LUnits y = m_uPos.y + m_pMeter->tenths_to_logical(yOffset, m_iInstr, m_iStaff);
+    GmoShape* pShape =
+        LOMSE_NEW GmoShapeTimeGlyph(m_pCreatorImo, idx, iGlyph, UPoint(m_uPos.x, y),
+                                    m_color, m_libraryScope, m_fontSize);
+	m_pTimeShape->add(pShape);
+    return pShape;
 }
 
-//---------------------------------------------------------------------------------------
-GmoShape* TimeEngraver::create_shape_cut(ImoTimeSignature* pCreatorImo, UPoint uPos)
-{
-    //TODO: TimeEngraver::create_shape_cut
-
-    create_main_container_shape(uPos);
-    return m_pTimeShape;
-}
 
 }  //namespace lomse

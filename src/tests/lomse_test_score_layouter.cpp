@@ -567,7 +567,7 @@ SUITE(ScoreLayouterTest)
         //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
 
         CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
-        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 583.14f) );
+        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 596.137f) );
 
         scoreLyt.my_delete_all();
     }
@@ -592,10 +592,9 @@ SUITE(ScoreLayouterTest)
 //        scoreLyt.dump_column_data(1);
         //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
         //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
-        //cout << "Gross width = " << pColLyt->get_gross_width() << endl;
 
         CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
-        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 583.14f) );
+        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 596.137f) );
 
         scoreLyt.my_delete_all();
     }
@@ -621,10 +620,9 @@ SUITE(ScoreLayouterTest)
         //scoreLyt.dump_column_data(1);
         //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
         //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
-        //cout << "Gross width = " << pColLyt->get_gross_width() << endl;
 
-        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 186.00f) );
-        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 583.14f) );
+        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 195.00f) );
+        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 596.137f) );
 
         scoreLyt.my_delete_all();
     }
@@ -679,10 +677,37 @@ SUITE(ScoreLayouterTest)
 //        scoreLyt.dump_column_data(0);
         //cout << "StartHook width = " << pColLyt->get_start_hook_width() << endl;
         //cout << "End Hook width = " << pColLyt->get_end_hook_width() << endl;
-        //cout << "Gross width = " << pColLyt->get_gross_width() << endl;
 
         CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
-        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 356.42f) );
+        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 369.425f) );
+
+        scoreLyt.my_delete_all();
+    }
+
+    TEST_FIXTURE(ScoreLayouterTestFixture, ColumnLayouter_bug80215)
+    {
+        // 80215. First goFwd doesn't work properly. The two initial notes
+        // get positioned at same timepos
+
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
+            "(instrument (musicData (clef G)(n c4 q)(n d4 q)"
+            "(goFwd h v2) )) )))" );
+
+        GraphicModel gmodel;
+        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
+        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+
+        int iCol = 0;
+        scoreLyt.trace_column(iCol);
+        scoreLyt.prepare_to_start_layout();     //this creates and layouts columns
+
+        ColumnLayouter* pColLyt = scoreLyt.my_get_column_layouter(iCol);
+
+        scoreLyt.dump_column_data(iCol, cout);
+
+//        CHECK( my_is_equal(pColLyt->get_start_hook_width(), 0.0f) );
+//        CHECK( my_is_equal(pColLyt->get_end_hook_width(), 596.137f) );
 
         scoreLyt.my_delete_all();
     }

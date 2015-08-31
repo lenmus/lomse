@@ -442,7 +442,7 @@ AreaInfo* GraphicModel::get_info_for_point(int iPage, LUnits x, LUnits y)
 //        //wxString sSO = (m_areaInfo.pGmo ? m_areaInfo.pGmo->GetName() : _T("No object"));
 //        //wxLogMessage(_T("[GraphicModel::get_info_for_point] LastBSI=0x%x, CurBSI=0x%x, LastStaff=0x%x, CurStaff=0x%x, Area=%d, Object=%s"),
 //        //             m_pLastBSI, m_areaInfo.pBSI, m_pLastShapeStaff, m_areaInfo.pShapeStaff,
-//        //             m_areaInfo.areaType, sSO.c_str() );
+//        //             m_areaInfo.areaType, sSO.wx_str() );
 //        ////END DBG ----------------------------------
 //
 //        }

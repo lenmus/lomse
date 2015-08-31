@@ -774,19 +774,20 @@ class ImoFontStyleDto : public ImoDto
 public:
     string name;
     float size;       // in points
-    int style;        // k_normal, k_italic
-    int weight;       // k_normal, k_bold
+    int style;        // k_font_style_normal, k_font_style_italic
+    int weight;       // k_font_weight_normal, k_font_weight_bold
 
     ImoFontStyleDto()
         : ImoDto(k_imo_font_style_dto)
         , name("Liberation serif")
         , size(12)
-        , style(k_normal)
-        , weight(k_normal)
+        , style(k_font_style_normal)
+        , weight(k_font_weight_normal)
     {
     }
 
-    enum { k_normal=0, k_italic, k_bold, };
+    enum { k_font_weight_normal=0, k_font_weight_bold,
+           k_font_style_normal, k_font_style_italic };
 };
 
 //---------------------------------------------------------------------------------------
@@ -891,7 +892,8 @@ public:
     enum { k_align_left, k_align_right, k_align_center, k_align_justify };
 
     //font style/weight
-    enum { k_font_normal=0, k_italic, k_bold, };
+    enum { k_font_style_normal=0, k_font_style_italic };
+    enum { k_font_weight_normal=0, k_font_weight_bold, };
 
     //style properties
     enum {
@@ -956,8 +958,11 @@ public:
     LUnits em_to_LUnits(float em) {
         return pt_to_LUnits( get_float_property(ImoStyle::k_font_size) * em );
     }
-    inline bool is_bold() { return get_int_property(ImoStyle::k_font_weight) == k_bold; }
-    inline bool is_italic() { return get_int_property(ImoStyle::k_font_style) == k_italic; }
+    inline bool is_bold() {
+        return get_int_property(ImoStyle::k_font_weight) == k_font_weight_bold; }
+    inline bool is_italic() {
+        return get_int_property(ImoStyle::k_font_style) == k_font_style_italic; }
+    bool is_default_style_with_default_values();
 
     //utility getters/setters to avoid stupid mistakes and to simplify source code
         //font
@@ -3847,9 +3852,16 @@ class ImoTimeSignature : public ImoStaffObj
 protected:
     int     m_top;
     int     m_bottom;
+    int     m_type;
 
     friend class ImFactory;
-    ImoTimeSignature() : ImoStaffObj(k_imo_time_signature), m_top(2), m_bottom(4) {}
+    ImoTimeSignature()
+        : ImoStaffObj(k_imo_time_signature)
+        , m_top(2)
+        , m_bottom(4)
+        , m_type(ImoTimeSignature::k_normal)
+    {
+    }
 
 public:
     virtual ~ImoTimeSignature() {}
@@ -3859,6 +3871,8 @@ public:
     inline void set_top_number(int num) { m_top = num; }
     inline int get_bottom_number() { return m_bottom; }
     inline void set_bottom_number(int num) { m_bottom = num; }
+    inline int get_type() { return m_type; }
+    inline void set_type(int type) { m_type = type; }
 
     //overrides: time signatures always in staff 0
     void set_staff(int staff) { m_staff = 0; }
@@ -3868,10 +3882,18 @@ public:
 
     //other
     inline bool is_compound_meter() { return (m_top==6 || m_top==9 || m_top==12); }
+    inline bool is_normal() { return m_type == k_normal; }
+    inline bool is_senza_misura() { return m_type == k_senza_misura; }
+    inline bool is_single_number() { return m_type == k_single_number; }
+    inline bool is_common() { return m_type == k_common; }
+    inline bool is_cut() { return m_type == k_cut; }
     int get_num_pulses();
     TimeUnits get_ref_note_duration();
     TimeUnits get_measure_duration();
     TimeUnits get_beat_duration();
+
+    //time signature type
+    enum { k_normal=0, k_common, k_cut, k_single_number, k_senza_misura, };
 
 };
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -81,8 +81,8 @@ FontStorage::FontStorage(LibraryScope* pLibScope)
     m_fontEngine.flip_y(m_fFlip_y);
 
     //load music font
-    string fullname = m_pLibScope->fonts_path();
-    fullname += "lmbasic2.ttf";
+    string fullname = m_pLibScope->get_music_font_path();
+    fullname += m_pLibScope->get_music_font_file();
     set_font(fullname, 24.0);
 }
 
@@ -196,9 +196,9 @@ std::string FontSelector::find_font(const std::string& language,
     string fontname = boost::to_upper_copy(name);
 
     //music font
-    if (fontname == "LENMUS BASIC")
+    if (fontname == "BRAVURA")
     {
-        fullpath += "lmbasic2.ttf";
+        fullpath += "Bravura.otf";
         return fullpath;
     }
 

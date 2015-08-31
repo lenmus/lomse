@@ -626,6 +626,7 @@ if( UNIX )
             DESTINATION ${FONTS_PATH}
             FILES_MATCHING PATTERN "*.ttf" 
                            PATTERN "*.ttc"
+                           PATTERN "Bravura.otf" 
                            PATTERN ".svn" EXCLUDE )
 
 elseif( WIN32 )
@@ -677,6 +678,7 @@ elseif( WIN32 )
             DESTINATION ${FONTS_PATH}
             FILES_MATCHING PATTERN "*.ttf" 
                            PATTERN "*.ttc"
+                           PATTERN "Bravura.otf" 
                            PATTERN ".svn" EXCLUDE )
 
 endif()
