@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2015/03/27 -->
+<!-- $Updated: 2015/09/07 -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Lomse changelog</title>
@@ -8,6 +8,49 @@
 <body>
 
 <h1>Lomse Library. Log of changes</h1>
+
+
+<!-- ============================================================================ -->
+<h3>Version 0.16.1 (7/Sep/2015)</h3>
+
+    <p>
+    Mainly, changes for using SMuFL compliant music fonts and for implementing support
+    for new features required by eBook L3_MusicReading in Phonascus. Some bug fixes.
+    </p>
+
+	<h5>BACKWARDS INCOMPATIBLE CHANGES WITH 0.15.0</h5>
+
+	<ul>
+		<li>Constants ImoStyle::k_bold and k_italics renamed as k_font_style_italic and
+            k_font_weight_bold. Constant k_font_normal splitted into k_font_style_normal
+            and k_font_weight_normal. Required changes: replace the renamed constants:
+            <ul>
+	            <li>ImoStyle::k_bold    &rarr; replace by  ImoStyle::k_font_weight_bold</li>
+	            <li>ImoStyle::k_italic  &rarr; replace by  ImoStyle::k_font_style_italic</li>
+	            <li>ImoStyle::k_normal  &rarr; replace by  ImoStyle::k_font_weight_normal or</li>
+                <li>ImoStyle::k_font_style_normal, depending on case.</li>
+            </ul></li>
+	</ul>
+
+	<h5>COMPATIBLE CHANGES</h5>
+
+	<ul>
+		<li>ImFactory modified to ensure that Id is assigned *before* the imo is created.
+            This fixes a design problem causing bug 80211.</li>
+		<li>Code modified for using SMuFL compliant music fonts. Default font changed to
+            Bravura font. LenMus font (lmbasic2.ttf) removed, and from now unsupported.</li>
+		<li>Defined default style for metronome marks. Added code for controlling that
+            default styles are not exported to source code unless they are modified.</li>
+		<li>Added support for common time and cut time signatures (LDP language, LdpAnalyser,
+            LdpExporter, TimeSignatureEngraver, ImoTimeSignature and other related changes).</li>
+		<li>Fixed bugs 80213 and 80214 in examples for tutorials</li>
+		<li>Score chopin_prelude_v20.lms updated for fixing bug 80212</li>
+		<li>Included all note symbols and dots in metronome marks</li>
+		<li>Trace levels added to spacing algorithms</li>
+		<li>Fixed bug 80215: First goFwd doesn't work properly and notes get overlapped.</li>
+		<li>Fixed bug 80217: Stem length in chords incorrectly computed: too long.</li>
+		<li>Fixed bug 80216: Fermata in note on second staff is positioned on first staff.</li>
+	</ul>
 
 
 <!-- ============================================================================ -->
@@ -22,18 +65,18 @@
 
 	<ul>
 		<li>enum EBarlines created.
-		  ==> Backwards compatibility: You have to replace all barline constants, 
+		  &rarr; Backwards compatibility: You have to replace all barline constants, 
 		      such as "ImoBarline::k_simple" by "k_barline_simple", etc</li>
 		<li>The update screen policy has been reviewed and clarified. As a consequence some
 		  changes has been made affecting, mainly, to Interactor class. 
-		  ==> Backwards compatibility: Interactor::new_viewport() and all Interactor
+		  &rarr; Backwards compatibility: Interactor::new_viewport() and all Interactor
 		      methods for changing scale and zooming factor, now force a redraw. A third
 		      parameter (bool fForceRedraw=true) has been added to these methods. You can 
 		      modify your existing code by specifying fForceRedraw=false for preventing
 		      redraws and keep the old behaviour</li>
 		<li>File format parameter added to LomseDorway::new_document() and 
 		  PresenterBuilder::new_document() for choosing source code format.
-		  ==> Backwards compatibility: You will have to review your code and add 
+		  &rarr; Backwards compatibility: You will have to review your code and add 
 		      this parameter with value 'Document::k_format_ldp' as that was the
 		      expected format in previous versions.</li>
 	</ul>

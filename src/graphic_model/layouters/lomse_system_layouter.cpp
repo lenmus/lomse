@@ -601,8 +601,7 @@ void ColumnLayouter::process_non_timed_at_prolog()
     if (m_nTraceLevel && k_trace_spacing)
     {
         dbgLogger << "After process_non_timed_at_prolog. m_uCurrentPos="
-            << m_uCurrentPos << ", m_rCurrentTime="
-            << (m_rCurrentTime >= LOMSE_NO_TIME ? "LOMSE_NO_TIME" : m_rCurrentTime) << endl;
+            << m_uCurrentPos << ", m_rCurrentTime=" << m_rCurrentTime << endl;
         dump_column_data(dbgLogger);
     }
 }
@@ -614,9 +613,7 @@ void ColumnLayouter::process_timed_at_current_timepos()
     {
         dbgLogger << "************ Entering ColumnLayouter"
             << "::process_timed_at_current_timepos. m_uCurrentPos="
-            << m_uCurrentPos << ", m_rCurrentTime="
-            << (m_rCurrentTime >= LOMSE_NO_TIME ? "LOMSE_NO_TIME" : m_rCurrentTime)
-            << endl;
+            << m_uCurrentPos << ", m_rCurrentTime=" << m_rCurrentTime << endl;
 
     }
 
@@ -655,9 +652,7 @@ void ColumnLayouter::process_timed_at_current_timepos()
     if (m_nTraceLevel && k_trace_spacing)
     {
         dbgLogger << "After process_timed_at_current_timepos. m_uCurrentPos="
-            << m_uCurrentPos << ", m_rCurrentTime="
-            << (m_rCurrentTime >= LOMSE_NO_TIME ? "LOMSE_NO_TIME" : m_rCurrentTime)
-            << endl;
+            << m_uCurrentPos << ", m_rCurrentTime=" << m_rCurrentTime << endl;
         dump_column_data(dbgLogger);
     }
 }
