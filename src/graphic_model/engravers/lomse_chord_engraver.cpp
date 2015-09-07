@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -150,7 +150,7 @@ void ChordEngraver::add_note(ImoStaffObj* pSO, GmoShape* pStaffObjShape)
 //---------------------------------------------------------------------------------------
 void ChordEngraver::decide_on_stem_direction()
 {
-    //  Rules (taken from www.coloradocollege.edu/dept/mu/mu2/musicpress/NotesStems.html
+    //  Rules (taken from ref. [2] www.coloradocollege.edu)
     //
     //  a) Two notes in chord:
     //    a1. If the interval above the middle line is greater than the interval below
@@ -469,6 +469,10 @@ LUnits ChordEngraver::check_if_accidentals_overlap(GmoShapeAccidentals* pPrevAcc
 //---------------------------------------------------------------------------------------
 void ChordEngraver::add_stem_and_flag()
 {
+    //  Rules (taken from ref. [1] Music Publishers' Association)
+    //
+    //  p.3, b) ... When there is more than one note head on a stem,as in a chord, the
+    //          stem length is calculated from the note closest to the end of the stem.
 
     if (!has_stem())
         return;
@@ -481,7 +485,7 @@ void ChordEngraver::add_stem_and_flag()
     LUnits uExtraLenght = pMinHeadShape->get_top() - pMaxHeadShape->get_top();
 
     //stem and the flag will computed for max/min note, depending on stem direction
-    ChordNoteData* pData = (is_stem_down() ? m_notes.back() : m_notes.front());
+    ChordNoteData* pData = (is_stem_down() ? m_notes.front() : m_notes.back());
     ImoNote* pNote = pData->pNote;
     GmoShapeNote* pNoteShape = pData->pNoteShape;
     int instr = pData->iInstr;
@@ -494,6 +498,7 @@ void ChordEngraver::add_stem_and_flag()
     LUnits stemLength = tenths_to_logical(length) + uExtraLenght;
     StemFlagEngraver engrv(m_libraryScope, m_pMeter, pNote, instr, staff);
 
+    pNoteShape = (is_stem_down() ? pMaxNoteShape : pMinNoteShape);
     engrv.add_stem_flag(pNoteShape, pBaseNoteShape, m_noteType, is_stem_down(),
                         has_flag(), stemLength, m_color);
 }

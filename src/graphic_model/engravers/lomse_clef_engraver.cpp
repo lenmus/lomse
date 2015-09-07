@@ -68,11 +68,16 @@ GmoShape* ClefEngraver::create_shape(ImoClef* pCreatorImo, UPoint uPos, int clef
     // get the shift to the staff on which the clef must be drawn
     LUnits y = uPos.y + m_pMeter->tenths_to_logical(get_glyph_offset(), m_iInstr, m_iStaff);
 
+    //Add minimum space before clef change
+    LUnits x = uPos.x;
+    if (symbolSize == k_size_cue)
+        x += m_pMeter->tenths_to_logical(20.0f, m_iInstr, m_iStaff);
+
     double fontSize = determine_font_size();
 
     //create the shape object
     ShapeId idx = 0;
-    m_pClefShape = LOMSE_NEW GmoShapeClef(pCreatorImo, idx, m_iGlyph, UPoint(uPos.x, y),
+    m_pClefShape = LOMSE_NEW GmoShapeClef(pCreatorImo, idx, m_iGlyph, UPoint(x, y),
                                         color, m_libraryScope, fontSize);
     return m_pClefShape;
 }

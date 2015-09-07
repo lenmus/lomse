@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -221,7 +221,7 @@ void LineEntry::dump(int iEntry, ostream& outStream)
     //if (m_pShape)
     //    outStream << "  " << setw(4) << m_pShape->GetOwnerIDX() << "\r\n";
     //else
-        outStream << "    --" << endl;  //\r\n";
+        outStream << "    --" << endl;
 }
 
 
@@ -319,13 +319,13 @@ void MusicLine::dump_music_line(ostream& outStream)
                 << ", voice=" << get_voice()
                 << ", xStart=" << setw(2) << get_line_start_position()
                 << ", FixedSpace=" << setw(2) << get_fixed_space_at_start()
-                << endl //"\r\n"
+                << endl
                 << "============================================================================================================="
-                << endl << endl;    //\r\n\r\n";
+                << endl << endl;
 
     if (size() == 0)
     {
-        outStream << "The table is empty." << endl; //\r\n";
+        outStream << "The table is empty." << endl;
         return;
     }
 
@@ -337,7 +337,7 @@ void MusicLine::dump_music_line(ostream& outStream)
     {
         if (i % 4 == 0) {
             outStream << "-------------------------------------------------------------------------------------------------------------"
-                      << endl;  //\r\n";
+                      << endl;
         }
         LineEntry* pTE = item(i);
         pTE->dump(i, outStream);
@@ -348,6 +348,18 @@ void MusicLine::dump_music_line(ostream& outStream)
               << fixed << setprecision(2) << setfill(' ')
               << "VarAfterSpace=" << setw(2) << get_end_hook_width()
               << endl << endl;  //"\r\n\r\n";
+}
+
+//---------------------------------------------------------------------------------------
+LineEntry* MusicLine::get_entry_for(ImoId id)
+{
+    for (int i = 0; i < (int)size(); i++)
+    {
+        LineEntry* pEntry = item(i);
+        if (pEntry->get_staffobj()->get_id() == id)
+            return pEntry;
+    }
+    return NULL;
 }
 
 //---------------------------------------------------------------------------------------
@@ -440,6 +452,7 @@ ColumnLayouter::ColumnLayouter(LibraryScope& libraryScope, ScoreMeter* pScoreMet
     , m_fHasShapes(false)
     , m_yMin(10000000.0f)
     , m_yMax(-10000000.0f)
+    , m_nTraceLevel(k_trace_off)
 {
     reserve_space_for_prolog_clefs_keys( m_pScoreMeter->num_staves() );
 }
@@ -499,13 +512,13 @@ bool ColumnLayouter::column_has_visible_barline()
 }
 
 //---------------------------------------------------------------------------------------
-void ColumnLayouter::do_spacing(bool fTrace)
+void ColumnLayouter::do_spacing(bool fTrace, int level)
 {
     //computes the minimum space required by this column
 
     if (fTrace || m_libraryScope.dump_column_tables())
     {
-        dbgLogger << "******************* Before spacing" << endl;  //\r\n";
+        dbgLogger << endl << "******************* Before spacing" << endl;
         m_pColStorage->dump_column_storage(dbgLogger);
     }
 
@@ -515,7 +528,7 @@ void ColumnLayouter::do_spacing(bool fTrace)
 
     if (fTrace || m_libraryScope.dump_column_tables())
     {
-        dbgLogger << "******************* After spacing" << endl;  //\r\n";
+        dbgLogger << "******************* After spacing" << endl;
         m_pColStorage->dump_column_storage(dbgLogger);
     }
 }
@@ -568,6 +581,12 @@ void ColumnLayouter::create_line_spacers()
 //---------------------------------------------------------------------------------------
 void ColumnLayouter::process_non_timed_at_prolog()
 {
+    if (m_nTraceLevel && k_trace_spacing)
+    {
+        dbgLogger << "************ Entering ColumnLayouter"
+            << "::process_non_timed_at_prolog." << endl;
+    }
+
     LUnits uSpaceAfterProlog =
         m_pScoreMeter->tenths_to_logical(LOMSE_SPACE_AFTER_PROLOG, 0, 0);
     m_rCurrentTime = LOMSE_NO_TIME;           //any impossible high value
@@ -578,14 +597,32 @@ void ColumnLayouter::process_non_timed_at_prolog()
         m_rCurrentTime = min(m_rCurrentTime, (*it)->get_next_available_time());
         m_uCurrentPos = max(m_uCurrentPos, (*it)->get_next_position());
     }
+
+    if (m_nTraceLevel && k_trace_spacing)
+    {
+        dbgLogger << "After process_non_timed_at_prolog. m_uCurrentPos="
+            << m_uCurrentPos << ", m_rCurrentTime="
+            << (m_rCurrentTime >= LOMSE_NO_TIME ? "LOMSE_NO_TIME" : m_rCurrentTime) << endl;
+        dump_column_data(dbgLogger);
+    }
 }
 
 //---------------------------------------------------------------------------------------
 void ColumnLayouter::process_timed_at_current_timepos()
 {
+    if (m_nTraceLevel && k_trace_spacing)
+    {
+        dbgLogger << "************ Entering ColumnLayouter"
+            << "::process_timed_at_current_timepos. m_uCurrentPos="
+            << m_uCurrentPos << ", m_rCurrentTime="
+            << (m_rCurrentTime >= LOMSE_NO_TIME ? "LOMSE_NO_TIME" : m_rCurrentTime)
+            << endl;
+
+    }
+
     m_fThereAreObjects = false;
-    TimeUnits rNextTime = LOMSE_NO_TIME;           //any impossible high value
-    LUnits uxPosForNextTime = LOMSE_NO_POSITION;    //any impossible high value
+    TimeUnits rNextTime = LOMSE_NO_TIME;            //any impossible high value
+    LUnits uxPosForNextTime = m_uCurrentPos;        //next position, at least current one
 
     //determine next valid position
     LUnits uNextPos = m_uCurrentPos;
@@ -603,7 +640,7 @@ void ColumnLayouter::process_timed_at_current_timepos()
         {
             (*it)->process_timed_at_current_timepos(m_uCurrentPos);
             LUnits uxNextPos = (*it)->get_next_position();
-            uxPosForNextTime = min(uxPosForNextTime, uxNextPos);
+            uxPosForNextTime = max(uxPosForNextTime, uxNextPos);
         }
         if ((*it)->are_there_more_objects())
         {
@@ -613,13 +650,28 @@ void ColumnLayouter::process_timed_at_current_timepos()
     }
 
     m_rCurrentTime = rNextTime;
-    if (uxPosForNextTime < LOMSE_NO_POSITION)
-        m_uCurrentPos = uxPosForNextTime;
+    m_uCurrentPos = uxPosForNextTime;
+
+    if (m_nTraceLevel && k_trace_spacing)
+    {
+        dbgLogger << "After process_timed_at_current_timepos. m_uCurrentPos="
+            << m_uCurrentPos << ", m_rCurrentTime="
+            << (m_rCurrentTime >= LOMSE_NO_TIME ? "LOMSE_NO_TIME" : m_rCurrentTime)
+            << endl;
+        dump_column_data(dbgLogger);
+    }
 }
 
 //---------------------------------------------------------------------------------------
 void ColumnLayouter::process_non_timed_at_current_timepos()
 {
+    if (m_nTraceLevel && k_trace_spacing)
+    {
+        dbgLogger << "************ Entering ColumnLayouter"
+            << "::process_non_timed_at_current_timepos. m_uCurrentPos="
+            << m_uCurrentPos << endl;
+    }
+
     LUnits uxPosForNextTime = 0.0f;
     for (LineSpacersIterator it=m_LineSpacers.begin(); it != m_LineSpacers.end(); ++it)
 	{
@@ -628,6 +680,13 @@ void ColumnLayouter::process_non_timed_at_current_timepos()
         uxPosForNextTime = max(uxPosForNextTime, uxNextPos);
     }
     m_uCurrentPos = uxPosForNextTime;
+
+    if (m_nTraceLevel && k_trace_spacing)
+    {
+        dbgLogger << "After process_non_timed_at_current_timepos. m_uCurrentPos="
+            << m_uCurrentPos << endl;
+        dump_column_data(dbgLogger);
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -724,6 +783,18 @@ void ColumnLayouter::include_object(int iLine, int iInstr, ImoStaffObj* pSO, Tim
     LUnits yUserShift =
         m_pScoreMeter->tenths_to_logical(pSO->get_user_location_y(), iInstr, iStaff);
 
+    if (m_nTraceLevel && k_trace_entries)
+    {
+        dbgLogger << "Including object: iLine=" << iLine
+            << ", iInstr=" << iInstr
+            << ", SO [" << pSO->get_id() << "] type=" << pSO->get_name()
+            << ", rTime=" << rTime
+            << ", iStaff=" << iStaff
+            << ", xUserShift=" << xUserShift
+            << ", yUserShift=" << yUserShift
+            << endl;
+    }
+
     m_pColStorage->include_object(iLine, iInstr, pSO, rTime, iStaff, pShape, fInProlog,
                                   xUserShift, yUserShift);
 }
@@ -738,6 +809,12 @@ void ColumnLayouter::finish_column_measurements(LUnits xStart)
 LUnits ColumnLayouter::get_start_of_column()
 {
     return m_pColStorage->get_start_of_column();
+}
+
+//---------------------------------------------------------------------------------------
+LineEntry* ColumnLayouter::get_entry_for(ImoId id)
+{
+    return m_pColStorage->get_entry_for(id);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1327,9 +1404,6 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
                                              int iCol, int iLine,
                                              ImoInstrument* pInstr)
 {
-    InstrumentEngraver* pInstrEngrv = m_instrEngravers[iInstr];
-    LUnits yTop = pInstrEngrv->get_staves_top_line();
-
     //rel objs
     if (pSO->get_num_relations() > 0)
     {
@@ -1374,7 +1448,7 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
 
             GmoShape* pAuxShape =
                         m_pShapesCreator->create_auxobj_shape(pAO, iInstr, iStaff,
-                                                            pMainShape, yTop);
+                                                              pMainShape);
 //            pMainShape->accept_link_from(pAuxShape);
             add_auxobj_shape_to_model(pAuxShape, GmoShape::k_layer_aux_objs, iSystem,
                                         iCol, iInstr);
@@ -1507,11 +1581,23 @@ MusicLine* ColumnStorage::open_new_line(int line, int instr, LUnits uxStart,
 //---------------------------------------------------------------------------------------
 void ColumnStorage::dump_column_storage(ostream& outStream)
 {
-    outStream << "Start of dump. ColumnStorage" << endl;    //\r\n";
+    outStream << "Start of dump. ColumnStorage" << endl;
 	for (LinesIterator it = m_Lines.begin(); it != m_Lines.end(); ++it)
 	{
         (*it)->dump_music_line(outStream);
     }
+}
+
+//---------------------------------------------------------------------------------------
+LineEntry* ColumnStorage::get_entry_for(ImoId id)
+{
+	for (LinesIterator it=m_Lines.begin(); it != m_Lines.end(); ++it)
+    {
+        LineEntry* pEntry = (*it)->get_entry_for(id);
+        if (pEntry != NULL)
+            return pEntry;
+    }
+    return NULL;
 }
 
 //---------------------------------------------------------------------------------------
@@ -2080,7 +2166,7 @@ void LineSpacer::assign_fixed_and_variable_space(LineEntry* pEntry)
 //			    LUnits fixed = m_pMeter->tenths_to_logical(LOMSE_EXCEPTIONAL_MIN_SPACE,
 //                                                            iInstr, iStaff);
             LUnits fixed = m_pMeter->tenths_to_logical(LOMSE_SPACE_AFTER_SMALL_CLEF,
-                                                        iInstr, iStaff);
+                                                       iInstr, iStaff);
             pEntry->set_fixed_space(fixed);
             pEntry->set_variable_space(
                 m_pMeter->tenths_to_logical(LOMSE_MIN_SPACE, iInstr, iStaff) - fixed );

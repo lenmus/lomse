@@ -420,16 +420,16 @@ LUnits NoteEngraver::get_pitch_shift()
 Tenths NoteEngraver::get_standard_stem_length(int nPosOnStaff, bool fStemDown)
 {
     // Returns the stem length that this note should have, according to engraving
-    // rules. It takes into account the `posiotion of the note on the staff.
+    // rules. It takes into account the position of the note on the staff.
     //
     // a1 - Normal length is one octave (3.5 spaces), but only for notes between the spaces
-    //      previous to first leger lines (b3 and b5, in Sol key, both inclusive).
+    //      previous to first ledger lines (b3 and b5, in Sol key, both inclusive).
     //
     // a2 - Notes with stems upwards from c5 inclusive, or with stems downwards from
-    //      g4 inclusive have a legth of 2.5 spaces.
+    //      g4 inclusive have a length of 2.5 spaces.
     //
-    // a3 - If a note is on or above the second leger line above the staff, or
-    //      on or below the second leger line below the staff: the end of stem
+    // a3 - If a note is on or above the second ledger line above the staff, or
+    //      on or below the second ledger line below the staff: the end of stem
     //      have to touch the middle staff line.
 
 

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -85,6 +85,7 @@ ScoreLayouter::ScoreLayouter(ImoContentObj* pItem, Layouter* pParent,
     , m_pCurBoxPage(NULL)
     , m_pCurBoxSystem(NULL)
     , m_iColumnToTrace(-1)
+    , m_nTraceLevel(k_trace_off)
 {
     m_pShapesCreator = LOMSE_NEW ShapesCreator(m_libraryScope, m_pScoreMeter,
                                          m_shapesStorage, m_instrEngravers);
@@ -118,7 +119,7 @@ void ScoreLayouter::prepare_to_start_layout()
     get_score_renderization_options();
     decide_systems_indentation();
 
-    m_pColsBuilder->trace_column(m_iColumnToTrace);
+    m_pColsBuilder->set_debug_options(m_iColumnToTrace, m_nTraceLevel);
     m_pColsBuilder->create_columns();
 
 	m_iCurPage = -1;
@@ -671,6 +672,13 @@ void ScoreLayouter::add_error_message(const string& msg)
     m_pageCursor.y += pText->get_height();
 }
 
+//---------------------------------------------------------------------------------------
+void ScoreLayouter::trace_column(int iCol, int level)
+{
+    m_iColumnToTrace = iCol;
+    m_nTraceLevel = level;
+}
+
 
 
 //=======================================================================================
@@ -692,6 +700,7 @@ ColumnsBuilder::ColumnsBuilder(LibraryScope& libraryScope, ScoreMeter* pScoreMet
     , m_instrEngravers(instrEngravers)
     , m_pSysCursor( LOMSE_NEW StaffObjsCursor(m_pScore) )
     , m_iColumnToTrace(-1)
+    , m_nTraceLevel(k_trace_off)
 {
 }
 
@@ -727,6 +736,9 @@ void ColumnsBuilder::create_column()
 //---------------------------------------------------------------------------------------
 void ColumnsBuilder::collect_content_for_this_column()
 {
+    if (m_iColumnToTrace == m_iColumn)
+        m_ColLayouters[m_iColumn]->set_trace_level(m_nTraceLevel);
+
 	int numInstruments = m_pScoreMeter->num_instruments();
 
     ColumnBreaker breaker(numInstruments, m_pSysCursor);
@@ -861,7 +873,9 @@ LUnits ColumnsBuilder::determine_initial_fixed_space()
 void ColumnsBuilder::layout_column()
 {
     bool fTrace = (m_iColumnToTrace == m_iColumn);
-    m_ColLayouters[m_iColumn]->do_spacing(fTrace);
+    if (fTrace)
+        m_ColLayouters[m_iColumn]->set_trace_level(m_nTraceLevel);
+    m_ColLayouters[m_iColumn]->do_spacing(fTrace, m_nTraceLevel);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1195,11 +1209,15 @@ GmoShape* ShapesCreator::create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int
 
 //---------------------------------------------------------------------------------------
 GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
-                                             GmoShape* pParentShape, LUnits yTopStaff)
+                                             GmoShape* pParentShape)
 {
     //factory method to create shapes for auxobjs
 
-    UPoint pos((pParentShape->get_left() + pParentShape->get_width() / 2.0f), yTopStaff);
+    InstrumentEngraver* pInstrEngrv = m_instrEngravers[iInstr];
+    //LUnits yTopStaff = pInstrEngrv->get_staves_top_line();
+    LUnits yTop = pInstrEngrv->get_top_line_of_staff(iStaff);
+
+    UPoint pos((pParentShape->get_left() + pParentShape->get_width() / 2.0f), yTop);
     switch (pAO->get_obj_type())
     {
         case k_imo_fermata:

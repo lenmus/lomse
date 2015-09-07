@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -67,7 +67,6 @@ class ColumnStorage;
 class ColumnsBuilder;
 class ShapesCreator;
 class ScoreStub;
-
 
 //---------------------------------------------------------------------------------------
 // helper struct to store data about aux objs to be engraved when the system is ready
@@ -138,6 +137,7 @@ protected:
 
     //support for debug and unit test
     int                 m_iColumnToTrace;
+    int                 m_nTraceLevel;
 
 public:
     ScoreLayouter(ImoContentObj* pImo, Layouter* pParent, GraphicModel* pGModel,
@@ -162,7 +162,7 @@ public:
     //support for debuggin and unit tests
     void dump_column_data(int iCol, ostream& outStream=dbgLogger);
     void delete_not_used_objects();
-    inline void trace_column(int iCol) { m_iColumnToTrace = iCol; }
+    void trace_column(int iCol, int level);
 
 protected:
     void add_error_message(const string& msg);
@@ -258,6 +258,7 @@ protected:
     int m_iColumn;   //[0..n-1] current column. (-1 if no column yet created!)
 
     int m_iColumnToTrace;   //support for debug and unit test
+    int m_nTraceLevel;
 
 public:
     ColumnsBuilder(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
@@ -273,7 +274,10 @@ public:
     inline LUnits get_staves_height() { return m_stavesHeight; }
 
     //support for debuggin and unit tests
-    inline void trace_column(int iCol) { m_iColumnToTrace = iCol; }
+    inline void set_debug_options(int iCol, int level) {
+        m_iColumnToTrace = iCol;
+        m_nTraceLevel = level;
+    }
 
 protected:
     void determine_staves_vertical_position();
@@ -349,7 +353,7 @@ public:
     GmoShape* create_staffobj_shape(ImoStaffObj* pSO, int iInstr, int iStaff,
                                     UPoint pos, int clefType=0, unsigned flags=0);
     GmoShape* create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iStaff,
-                                  GmoShape* pParentShape, LUnits yTopStaff);
+                                  GmoShape* pParentShape);
     GmoShape* create_invisible_shape(ImoObj* pSO, int iInstr, int iStaff,
                                      UPoint uPos, LUnits width);
 

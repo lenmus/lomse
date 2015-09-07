@@ -34,8 +34,8 @@
         (chord (n e3 q)(n g3 q)(n c4 q)(n e4 q))
         
         //second voice
-        //(goFwd h v2)
-        (r h v2)
+        (goFwd h v2)
+        //(r h v2)
         (chord (n e4 e. v2 (stem up)(beam 1 +))(n g4 e. v2))(chord (n d4 s v2 (stem up)(beam 1 -b))(n f4 s v2))
 
         //left hand

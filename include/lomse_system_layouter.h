@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -239,6 +239,7 @@ public:
 
     //Debug and Unit Tests
     void dump_music_line(ostream& outStream);
+    LineEntry* get_entry_for(ImoId id);
 
 protected:
     void determine_barline_type();
@@ -337,6 +338,7 @@ public:
 
     //debug
     void dump_column_storage(ostream& outStream);
+    LineEntry* get_entry_for(ImoId id);
 
     ////Public methods coded only for Unit Tests
     //inline int get_num_objects_in_line(int iLine) { return (int)m_Lines[iLine]->size(); }
@@ -392,7 +394,7 @@ public:
     inline GmoBoxSlice* get_slice_box() { return m_pBoxSlice; };
 
     //methods to compute results
-    void do_spacing(bool fTrace = false);
+    void do_spacing(bool fTrace=false, int level=k_trace_off);
     inline void set_trimmed_width(LUnits size) { m_pColStorage->set_trimmed_width(size); }
     inline void set_justified_width(LUnits size) { m_pColStorage->set_justified_width(size); }
     inline void increment_justified_width(LUnits uIncr) { m_pColStorage->increment_justified_width(uIncr); }
@@ -434,6 +436,8 @@ public:
     inline int get_num_lines() { return int(m_pColStorage->size()); }
     void dump_column_data(ostream& outStream);
     void delete_box_and_shapes(ShapesStorage* pStorage);
+    inline void set_trace_level(int level) { m_nTraceLevel = level; }
+    LineEntry* get_entry_for(ImoId id);
 
 protected:
     void reserve_space_for_prolog_clefs_keys(int numStaves);
@@ -453,6 +457,9 @@ protected:
     void process_timed_at_current_timepos();
     void process_non_timed_at_current_timepos();
     //----------------------------------------------------------------------------
+
+    //for debugging and testing
+    int m_nTraceLevel;
 
 };
 

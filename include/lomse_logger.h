@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -73,6 +73,17 @@ extern ofstream dbgLogger;
 
 #endif
 
+
+//---------------------------------------------------------------------------------------
+//trace levels, for all spacing algorithms
+enum {
+    k_trace_off     = 0x0000,   //No trace
+    k_trace_entries = 0x0001,   //data when an object is included in table
+    k_trace_table   = 0x0002,   //table before and after spacing algorithm
+    k_trace_spacing = 0x0004,   //table after each spacing step
+
+    k_trace_all     = 0xFFFF
+};
 
 
 //---------------------------------------------------------------------------------------
