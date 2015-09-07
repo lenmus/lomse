@@ -1,5 +1,5 @@
-liblomse (0.15.0) precise; urgency=low
+liblomse (0.16.1) vivid; urgency=low
 
   * New upstream release
 
- -- Cecilio Salmeron <s.cecilio@gmail.com>  Fri, 27 Mar 2015 17:06:51 +0100
+ -- Cecilio Salmeron <s.cecilio@gmail.com>  Mon, 07 Sep 2015 16:57:29 +0200
