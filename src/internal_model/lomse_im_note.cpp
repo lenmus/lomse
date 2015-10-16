@@ -46,6 +46,7 @@ ImoNoteRest::ImoNoteRest(int objtype)
     , m_nVoice(1)
     , m_timeModifierTop(1)
     , m_timeModifierBottom(1)
+    , m_duration(k_duration_quarter)
 {
 }
 
@@ -102,11 +103,13 @@ ImoTuplet* ImoNoteRest::get_tuplet()
 }
 
 //---------------------------------------------------------------------------------------
-TimeUnits ImoNoteRest::get_duration()
+void ImoNoteRest::set_time_modification(int numerator, int denominator)
 {
-    double modifier = double(m_timeModifierTop) / double(m_timeModifierBottom);
+    m_timeModifierTop = numerator;
+    m_timeModifierBottom = denominator;
 
-    return to_duration(m_nNoteType, m_nDots) * modifier;
+    double modifier = double(m_timeModifierTop) / double(m_timeModifierBottom);
+    m_duration = to_duration(m_nNoteType, m_nDots) * modifier;
 }
 
 //---------------------------------------------------------------------------------------
@@ -114,6 +117,18 @@ void ImoNoteRest::set_note_type_and_dots(int noteType, int dots)
 {
     m_nNoteType = noteType;
     m_nDots = dots;
+    m_duration = to_duration(m_nNoteType, m_nDots);
+}
+
+//---------------------------------------------------------------------------------------
+void ImoNoteRest::set_type_dots_duration(int noteType, int dots, TimeUnits duration)
+{
+    m_nNoteType = noteType;
+    m_nDots = dots;
+    m_duration = duration;
+
+    m_timeModifierTop = 1;
+    m_timeModifierBottom = 1;
 }
 
 //---------------------------------------------------------------------------------------
@@ -206,10 +221,9 @@ ImoNote::ImoNote(int step, int octave, int noteType, EAccidentals accidentals, i
     , m_pTieNext(NULL)
     , m_pTiePrev(NULL)
 {
-    m_nNoteType = noteType;
-    m_nDots = dots;
     m_nVoice = voice;
     m_staff = staff;
+    set_note_type_and_dots(noteType, dots);
 }
 
 //---------------------------------------------------------------------------------------

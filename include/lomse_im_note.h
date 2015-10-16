@@ -73,11 +73,12 @@ enum ENoteStem
 class ImoNoteRest : public ImoStaffObj
 {
 protected:
-    int     m_nNoteType;
-    int     m_nDots;
-    int     m_nVoice;
-    int     m_timeModifierTop;
-    int     m_timeModifierBottom;
+    int         m_nNoteType;
+    int         m_nDots;
+    int         m_nVoice;
+    int         m_timeModifierTop;
+    int         m_timeModifierBottom;
+    TimeUnits   m_duration;
 
 public:
     ImoNoteRest(int objtype);
@@ -85,7 +86,7 @@ public:
 
     //getters
     inline int get_note_type() { return m_nNoteType; }
-    TimeUnits get_duration();
+    inline TimeUnits get_duration() { return m_duration; }
     inline int get_dots() { return m_nDots; }
     inline int get_voice() { return m_nVoice; }
     inline int get_time_modifier_top() { return m_timeModifierTop; }
@@ -96,10 +97,8 @@ public:
     inline void set_dots(int dots) { m_nDots = dots; }
     inline void set_voice(int voice) { m_nVoice = voice; }
     void set_note_type_and_dots(int noteType, int dots);
-    inline void set_time_modification(int numerator, int denominator) {
-        m_timeModifierTop = numerator;
-        m_timeModifierBottom = denominator;
-    }
+    void set_time_modification(int numerator, int denominator);
+    void set_type_dots_duration(int noteType, int dots, TimeUnits duration);
 
     //beam
     ImoBeam* get_beam();
@@ -124,13 +123,18 @@ class ImoRest : public ImoNoteRest
 {
 protected:
     bool m_fGoFwd;
+    bool m_fFullMeasureRest;
 
     friend class ImFactory;
-    ImoRest() : ImoNoteRest(k_imo_rest), m_fGoFwd(false) {}
+    ImoRest() : ImoNoteRest(k_imo_rest), m_fGoFwd(false), m_fFullMeasureRest(false) {}
 
     friend class GoBackFwdAnalyser;
     friend class GoBackFwdLmdAnalyser;
+    friend class FwdBackMxlAnalyser;
     inline void mark_as_go_fwd() { m_fGoFwd = true; }
+
+    friend class NoteRestMxlAnalyser;
+    inline void mark_as_full_measure(bool value) { m_fFullMeasureRest = value; }
 
     //edition support
     virtual void set_int_attribute(TIntAttribute attrib, int value);
@@ -141,6 +145,7 @@ public:
     virtual ~ImoRest() {}
 
     inline bool is_go_fwd() { return m_fGoFwd; }
+    inline bool is_full_measure() { return m_fFullMeasureRest; }
 };
 
 //---------------------------------------------------------------------------------------

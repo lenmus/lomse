@@ -622,12 +622,14 @@ void StemFlagEngraver::determine_position_and_size_of_stem()
     determine_stem_x_left();
     determine_stem_y_note();
     if (m_fWithFlag)
-        cut_stem_size_to_add_flag();
+        adjust_stem_size_for_flag();
 }
 
 //---------------------------------------------------------------------------------------
-void StemFlagEngraver::cut_stem_size_to_add_flag()
+void StemFlagEngraver::adjust_stem_size_for_flag()
 {
+    //TODO: stem length must be, at least, equal to flag length
+
 //    int iGlyph = get_glyph_for_flag();
 //    // Glyph data is in FUnits. As 512 FU are 1 line (10 tenths), to convert
 //    // FUnits into tenths just divide FU by 51.2

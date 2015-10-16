@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -152,7 +152,7 @@ protected:
     void add_voice(VoiceRelatedShape* pVRS);
     void determine_stem_x_left();
     void determine_stem_y_note();
-    void cut_stem_size_to_add_flag();
+    void adjust_stem_size_for_flag();
 
     LUnits m_uStemThickness;
     LUnits m_uxStem;

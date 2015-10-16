@@ -3736,8 +3736,9 @@ public:
 class ImoTieData : public ImoRelDataObj
 {
 protected:
-    bool m_fStart;
-    int m_tieNum;
+    bool    m_fStart;
+    int     m_tieNum;
+    int     m_orientation;
     ImoBezierInfo* m_pBezier;
 
 	friend class ImFactory;
@@ -3749,6 +3750,7 @@ public:
     //getters
     inline bool is_start() { return m_fStart; }
     inline int get_tie_number() { return m_tieNum; }
+    inline int get_orientation() { return m_orientation; }
     inline ImoBezierInfo* get_bezier() { return m_pBezier; }
 
     //edition
@@ -3760,22 +3762,31 @@ class ImoTie : public ImoRelObj
 {
 protected:
     int     m_tieNum;
+    int     m_orientation;
     Color   m_color;
 
 	friend class ImFactory;
-    ImoTie() : ImoRelObj(k_imo_tie), m_tieNum(0) {}
-    ImoTie(int num) : ImoRelObj(k_imo_tie), m_tieNum(num) {}
+    ImoTie()
+        : ImoRelObj(k_imo_tie), m_tieNum(0), m_orientation(k_orientation_default)
+        {}
+    ImoTie(int num)
+        : ImoRelObj(k_imo_tie), m_tieNum(num), m_orientation(k_orientation_default)
+        {}
 
 public:
     virtual ~ImoTie() {}
 
+    enum { k_orientation_default=0, k_orientation_over, k_orientation_under };
+
     //getters
     inline int get_tie_number() { return m_tieNum; }
+    inline int get_orientation() { return m_orientation; }
     ImoNote* get_start_note();
     ImoNote* get_end_note();
 
     //setters
     inline void set_tie_number(int num) { m_tieNum = num; }
+    inline void set_orientation(int value) { m_orientation = value; }
     inline void set_color(Color value) { m_color = value; }
 
     //access to data objects
@@ -3794,19 +3805,23 @@ class ImoTieDto : public ImoSimpleObj
 protected:
     bool m_fStart;
     int m_tieNum;
+    int m_orientation;
     ImoNote* m_pNote;
     ImoBezierInfo* m_pBezier;
     LdpElement* m_pTieElm;
     Color m_color;
 
 public:
-    ImoTieDto() : ImoSimpleObj(k_imo_tie_dto), m_fStart(true), m_tieNum(0), m_pNote(NULL)
-                 , m_pBezier(NULL), m_pTieElm(NULL) {}
+    ImoTieDto() : ImoSimpleObj(k_imo_tie_dto), m_fStart(true)
+                , m_tieNum(0), m_orientation(k_orientation_default)
+                , m_pNote(NULL)
+                , m_pBezier(NULL), m_pTieElm(NULL) {}
     virtual ~ImoTieDto();
 
     //getters
     inline bool is_start() { return m_fStart; }
     inline int get_tie_number() { return m_tieNum; }
+    inline int get_orientation() { return m_orientation; }
     inline ImoNote* get_note() { return m_pNote; }
     inline ImoBezierInfo* get_bezier() { return m_pBezier; }
     inline LdpElement* get_tie_element() { return m_pTieElm; }
@@ -3816,6 +3831,7 @@ public:
     //setters
     inline void set_start(bool value) { m_fStart = value; }
     inline void set_tie_number(int num) { m_tieNum = num; }
+    inline void set_orientation(int value) { m_orientation = value; }
     inline void set_note(ImoNote* pNote) { m_pNote = pNote; }
     inline void set_bezier(ImoBezierInfo* pBezier) { m_pBezier = pBezier; }
     inline void set_tie_element(LdpElement* pElm) { m_pTieElm = pElm; }

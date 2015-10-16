@@ -202,7 +202,10 @@ void TieEngraver::compute_end_of_staff_point()
 //---------------------------------------------------------------------------------------
 void TieEngraver::decide_placement()
 {
-    m_fTieBelowNote = m_pStartNoteShape->is_up();
+    if (m_pTie->get_orientation() == ImoTie::k_orientation_default)
+        m_fTieBelowNote = m_pStartNoteShape->is_up();
+    else
+        m_fTieBelowNote = m_pTie->get_orientation() == ImoTie::k_orientation_under;
 }
 
 //---------------------------------------------------------------------------------------

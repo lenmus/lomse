@@ -2696,7 +2696,13 @@ string LdpExporter::notetype_to_string(int noteType, int dots)
         case k_64th:    source << "i";  break;
         case k_128th:   source << "o";  break;
         case k_256th:   source << "f";  break;
-        default:                        break;
+        default:
+        {
+            source << noteType << "?";
+            stringstream s;
+            s << "Invalid noteType. Value=" << noteType;
+            LOMSE_LOG_ERROR(s.str());
+        }
     }
 
     while (dots > 0)

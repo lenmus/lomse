@@ -2,7 +2,7 @@
 # This is part of CMake configuration file for building makefiles and installfiles
 # for the Lomse library
 #-------------------------------------------------------------------------------------
-# This moule is for defining build options and creating the
+# This module is for defining build options and creating the
 # include file "lomse_config.h"
 #
 # Various options that the user can select (var, msg, default value).
@@ -78,24 +78,12 @@ list (GET LOMSE_VERSION_LIST 5 MAJOR_LINE)
 list (GET LOMSE_VERSION_LIST 6 MINOR_LINE)
 list (GET LOMSE_VERSION_LIST 7 TYPE_LINE)
 list (GET LOMSE_VERSION_LIST 8 PATCH_LINE)
+list (GET LOMSE_VERSION_LIST 9 REVNO_LINE)
 string(REGEX REPLACE "\#define LOMSE_VERSION_MAJOR    " "" LOMSE_VERSION_MAJOR "${MAJOR_LINE}")
 string(REGEX REPLACE "\#define LOMSE_VERSION_MINOR    " "" LOMSE_VERSION_MINOR "${MINOR_LINE}")
 string(REGEX REPLACE "\#define LOMSE_VERSION_TYPE     " "" LOMSE_VERSION_TYPE "${TYPE_LINE}")
 string(REGEX REPLACE "\#define LOMSE_VERSION_PATCH    " "" LOMSE_VERSION_PATCH "${PATCH_LINE}")
-
-# revision. Get SVN revision number and use it in Lomse version string
-if (0)
-    include(FindSubversion)
-    if(Subversion_FOUND)
-        Subversion_WC_INFO(${LOMSE_ROOT_DIR} LOMSE)
-        message("Current Lomse revision is ${LOMSE_WC_REVISION}")
-        set( LOMSE_REVISION ${LOMSE_WC_REVISION})
-    else()
-        message("Subversion not found. Revision set to zero.")
-        set( LOMSE_REVISION "0")
-    endif()
-endif(0)
-set( LOMSE_REVISION "0")
+string(REGEX REPLACE "\#define LOMSE_VERSION_REVNO    " "" LOMSE_REVISION "${REVNO_LINE}")
 
 message ("major = '${LOMSE_VERSION_MAJOR}'") 
 message ("minor = '${LOMSE_VERSION_MINOR}'") 
@@ -119,10 +107,13 @@ else()
         set(LOMSE_VERSION_STRING "${LOMSE_VERSION_STRING}.${LOMSE_VERSION_PATCH}" )
     endif()
 endif()
+
+if (NOT("${LOMSE_REVISION}" STREQUAL ""))
+    set(LOMSE_VERSION_STRING "${LOMSE_VERSION_STRING}-${LOMSE_REVISION}" )
+endif()
+
 set(LOMSE_VERSION "${LOMSE_VERSION_STRING}" )
 message ("version = '${LOMSE_VERSION}'") 
-
-#set(LOMSE_VERSION_STRING "${LOMSE_VERSION_STRING}.${LOMSE_REVISION}" )
 message ("version string = '${LOMSE_VERSION_STRING}'") 
 
 

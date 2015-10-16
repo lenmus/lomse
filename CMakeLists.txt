@@ -121,31 +121,6 @@ set( FONTS_PATH   "${CMAKE_INSTALL_PREFIX}/share/lomse/fonts" )
 include( ${LOMSE_ROOT_DIR}/build-options.cmake )
 
 
-
-if (0)
-# Get SVN revision number and use it in Lomse version string
-# http://stackoverflow.com/questions/3780667/use-cmake-to-get-build-time-svn-revision
-#-------------------------------------------------------------------------
-
-# a custom target that is always built
-add_custom_target(svnheader ALL
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/svnheader.h)
-
-# creates svnheader.h using cmake script
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/svnheader.h
-    COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
-                         -P ${CMAKE_CURRENT_SOURCE_DIR}/getsvn.cmake)
-
-# svnversion.h is a generated file
-set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/svnversion.h
-    PROPERTIES GENERATED TRUE
-    HEADER_FILE_ONLY TRUE)
-
-# explicitly say that the executable depends on the svnheader
-add_dependencies(test svnheader)
-endif()
-
-
 ##########################################################################
 #
 # Dependencies

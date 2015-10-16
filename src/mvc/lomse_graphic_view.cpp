@@ -117,7 +117,7 @@ GraphicView::GraphicView(LibraryScope& libraryScope, ScreenDrawer* pDrawer)
     add_visual_effect(m_pDragImg);
     add_visual_effect(m_pHighlighted);
     add_visual_effect(m_pSelRect);
-    add_visual_effect(m_pTimeGrid);
+    //add_visual_effect(m_pTimeGrid);
 }
 
 //---------------------------------------------------------------------------------------

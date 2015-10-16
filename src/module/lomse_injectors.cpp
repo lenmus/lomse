@@ -222,7 +222,7 @@ int LibraryScope::get_version_patch() { return LOMSE_VERSION_PATCH; }
 char LibraryScope::get_version_type() { return LOMSE_VERSION_TYPE; }
 
 //---------------------------------------------------------------------------------------
-long LibraryScope::get_revision() { return LOMSE_REVISION; }
+long LibraryScope::get_revision() { return LOMSE_VERSION_REVNO; }
 
 //---------------------------------------------------------------------------------------
 string LibraryScope::get_version_string()
