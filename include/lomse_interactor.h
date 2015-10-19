@@ -193,6 +193,7 @@ public:
     virtual void set_printing_buffer(RenderingBuffer* rbuf);
     virtual void on_print_page(int page, double scale, VPoint viewport);
     virtual VSize get_page_size_in_pixels(int nPage);
+    virtual int get_num_pages();
 
     //interface to SelectionSet
     virtual void select_object(GmoObj* pGmo, bool fClearSelection=true);

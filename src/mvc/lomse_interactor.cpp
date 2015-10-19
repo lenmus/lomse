@@ -1289,6 +1289,17 @@ VSize Interactor::get_page_size_in_pixels(int nPage)
         return VSize(0, 0);
 }
 
+//---------------------------------------------------------------------------------------
+int Interactor::get_num_pages()
+{
+    GraphicModel* pGModel = get_graphic_model();
+    if (pGModel)
+        return pGModel->get_num_pages();
+    else
+        return 0;
+}
+
+
 ////---------------------------------------------------------------------------------------
 //void Interactor::on_resize(Pixels x, Pixels y)
 //{

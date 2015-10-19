@@ -406,7 +406,7 @@ void GraphicView::on_print_page(int page, double scale, VPoint viewport)
     set_scale(scale);
 
     //draw page
-    m_pDrawer->reset(*m_pPrintBuf, m_options.background_color);
+    m_pDrawer->reset(*m_pPrintBuf, Color(255, 255, 255));
     m_pDrawer->set_viewport(viewport.x, viewport.y);
     m_pDrawer->set_transform(m_transform);
 
