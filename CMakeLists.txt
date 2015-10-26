@@ -697,7 +697,7 @@ message("pkg-config install path: ${LOMSE_PKG_CONFIG_INSTALL}" )
 
 set(CPACK_PACKAGE_VENDOR "LenMus Project")
 set(CPACK_PACKAGE_VERSION ${LOMSE_VERSION_STRING} )
-set(CPACK_PACKAGE_NAME "liblomse_${LOMSE_VERSION_STRING}")
+set(CPACK_PACKAGE_NAME "liblomse")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Free open source library to render music scores")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${LOMSE_ROOT_DIR}/README")
 set(CPACK_PACKAGE_CONTACT "s.cecilio@gmail.com")
@@ -710,6 +710,8 @@ if(UNIX)
     set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Cecilio Salmeron") #required
     set(CPACK_DEBIAN_PACKAGE_NAME ${CPACK_PACKAGE_NAME} )
     set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION} )
+    set(CPACK_DEBIAN_PACKAGE_SECTION "Libraries")
+    set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://www.lenmus.org/en/lomse/intro")
 
     IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "^x86_64$|^amd64$")  
         set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
@@ -719,7 +721,7 @@ if(UNIX)
 
     set(CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}\r\rLomse is a free open source project to provide software developers with\r a C++ library for rendering, editing and playing back music scores.\r With it, you can add capabilities to any program for displaying and\r editing music scores. It is witten in C++, it is platform independent.\r\rLomse website: http://www.lenmus.org/en/lomse/intro")
 
-    set(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+    set(CPACK_PACKAGE_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS ${LOMSE_DEPENDENCIES})
