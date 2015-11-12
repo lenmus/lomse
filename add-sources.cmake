@@ -183,6 +183,7 @@ set(SOUND_FILES
 set(LOMSE_PACKAGES_FILES
     ${LOMSE_PKG_DIR}/minizip/unzip.c
     ${LOMSE_PKG_DIR}/minizip/ioapi.c
+    ${LOMSE_PKG_DIR}/pugixml/pugixml.cpp
 )
 
 if(WIN32)

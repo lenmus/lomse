@@ -731,7 +731,7 @@ SUITE(MxlAnalyserTest)
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_attributes_182)
     {
-        //@00182 if no divisions assume 4
+        //@00182 if no divisions assume 1
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -754,7 +754,7 @@ SUITE(MxlAnalyserTest)
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
-        CHECK( a.current_divisions() == 4.0f );
+        CHECK( a.current_divisions() == 1.0f );
 
         delete pIModel;
     }
@@ -808,7 +808,7 @@ SUITE(MxlAnalyserTest)
         stringstream expected;
         expected << "Line 0. Part '', measure ''. Unknown note step 'e'. Replaced by 'C'." << endl;
         parser.parse_text("<note><pitch><step>e</step><octave>4</octave></pitch>"
-            "<duration>4</duration><type>16th</type></note>");
+            "<duration>4</duration><type>whole</type></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -826,7 +826,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->get_note_type() == k_16th );
         CHECK( pNote->get_octave() == 4 );
         CHECK( pNote->get_step() == k_step_C );
-        CHECK( pNote->get_duration() == k_duration_16th );
+        CHECK( pNote->get_duration() == k_duration_whole );
         CHECK( pNote->is_in_chord() == false );
         CHECK( pNote->is_start_of_chord() == false );
         CHECK( pNote->is_end_of_chord() == false );
@@ -844,7 +844,7 @@ SUITE(MxlAnalyserTest)
         stringstream expected;
         expected << "Line 0. Part '', measure ''. Unknown octave 'e'. Replaced by '4'." << endl;
         parser.parse_text("<note><pitch><step>D</step><octave>e</octave></pitch>"
-            "<duration>4</duration><type>quarter</type></note>");
+            "<duration>1</duration><type>quarter</type></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");

@@ -291,27 +291,11 @@ public:
     //-----------------------------------------------------------------------------------
     long get_node_id(XmlNode* node)
     {
-        XmlAttribute* attr = node->first_attribute("id");
+        XmlAttribute attr = node->attribute("id");
         if (attr == NULL)
             return -1L;
         else
-            return std::atol( attr->value() );
-    }
-
-    //-----------------------------------------------------------------------------------
-    string get_value(XmlNode* node)
-    {
-        XmlNode* child = node->first_node();
-        if (!child)
-            return "";
-        else
-            return string( child->value() );
-    }
-
-    //-----------------------------------------------------------------------------------
-    string get_name(XmlNode* node)
-    {
-        return m_pParser->get_node_name_as_string(node);
+            return std::atol( attr.value() );
     }
 
     //-----------------------------------------------------------------------------------
@@ -324,10 +308,10 @@ public:
     //-----------------------------------------------------------------------------------
     ELdpElement get_type(XmlNode* node)
     {
-        if (node->type() == rapidxml::node_data)
+        if (node->type() == pugi::node_pcdata)
             return k_string;
 
-        string name = get_name(node);
+        string name = node->name();
         LdpElement* elm = m_pLdpFactory->create(name, 0);
         ELdpElement type = elm->get_type();
         delete elm;
@@ -348,7 +332,7 @@ public:
     }
 
     //-----------------------------------------------------------------------------------
-    inline int get_tag(XmlNode* node) { return name_to_tag( get_name(node) ); }
+    inline int get_tag(XmlNode* node) { return name_to_tag( node->name() ); }
 
     int name_to_tag(const string& name) const;
     bool to_integer(const string& text, int* pResult);

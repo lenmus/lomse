@@ -31,33 +31,87 @@
 #define __LOMSE_XML_PARSER_H__
 
 #include "lomse_parser.h"
+#include "lomse_internal_model.h"
 
 #include <string>
 using namespace std;
 
-#include "rapidxml/rapidxml.hpp"
-#include "rapidxml/rapidxml_utils.hpp"
-#include "lomse_internal_model.h"
+#include "pugixml/pugiconfig.hpp"
+#include "pugixml/pugixml.hpp"
+using namespace pugi;
+
 
 namespace lomse
 {
 
-//forward declarations
-//class LdpFactory;
-//class XmlNode;
+//forward declarations and definitions
+typedef pugi::xml_document          XmlDocument;
+typedef pugi::xml_attribute         XmlAttribute;
 
-typedef rapidxml::xml_node<>         XmlNode;
-typedef rapidxml::xml_attribute<>    XmlAttribute;
+
+//---------------------------------------------------------------------------------------
+class XmlNode
+{
+protected:
+    pugi::xml_node  m_node;
+
+    friend class XmlParser;
+    XmlNode(pugi::xml_node node) : m_node(node) {}
+
+public:
+    XmlNode() {}
+    XmlNode(const XmlNode& node) : m_node(node.m_node) {}
+    XmlNode(const XmlNode* node) : m_node(node->m_node) {}
+
+    string name() { return string(m_node.name()); }
+    string value();
+    XmlAttribute attribute(const string& name) {
+        return m_node.attribute(name.c_str());
+    }
+    int type();
+
+    enum {
+		k_node_null = 0,	// Empty (null) node handle
+		k_node_document,	// A document tree's absolute root
+		k_node_element,		// Element tag, i.e. '<node/>'
+		k_node_pcdata,		// Plain character data, i.e. 'text'
+		k_node_cdata,		// Character data, i.e. '<![CDATA[text]]>'
+		k_node_comment,		// Comment tag, i.e. '<!-- text -->'
+		k_node_pi,			// Processing instruction, i.e. '<?name?>'
+		k_node_declaration,	// Document declaration, i.e. '<?xml version="1.0"?>'
+		k_node_doctype,		// Document type declaration, i.e. '<!DOCTYPE doc>'
+        k_node_unknown
+    };
+
+    //XmlNode helper methods
+    inline bool is_null() { return ! bool(m_node); }
+	///get child with the specified name
+    inline XmlNode child(const string& name) {
+        return XmlNode( m_node.child(name.c_str()));
+    }
+    inline XmlNode first_child() { return XmlNode( m_node.first_child() ); }
+    inline XmlNode next_sibling() { return XmlNode( m_node.next_sibling() ); }
+    inline bool has_attribute(const string& name)
+    {
+        return m_node.attribute(name.c_str()) != NULL;
+    }
+	///get value of attribute with the specified name
+    inline string attribute_value(const string& name)
+    {
+        XmlAttribute attr = m_node.attribute(name.c_str());
+        return string( attr.value() );
+    }
+};
 
 //---------------------------------------------------------------------------------------
 class XmlParser : public Parser
 {
 private:
-    rapidxml::xml_document<> m_doc;
-    rapidxml::xml_node<>* m_root;
+    XmlDocument m_doc;
+    XmlNode m_root;
     string m_encoding;         //i.e. "utf-8"
-    string m_error;
-    rapidxml::file<>* m_file;
+    string m_errorMsg;
+    int m_errorOffset;
 
 public:
     XmlParser(ostream& reporter=cout);
@@ -67,18 +121,13 @@ public:
     void parse_text(const std::string& sourceText);
     void parse_cstring(char* sourceText);
 
-    inline const string& get_error() { return m_error; }
+    inline const string& get_error() { return m_errorMsg; }
     inline const string& get_encoding() { return m_encoding; }
-    inline XmlNode* get_tree_root() { return m_root; }
-
-    //node utility methods
-    string get_node_value(XmlNode* node);
-    string get_node_name_as_string(XmlNode* node);
-    inline const char* get_node_name(XmlNode* node) { return node->name(); }
+    inline XmlNode* get_tree_root() { return &m_root; }
 
 protected:
     void parse_char_string(char* string);
-
+    void find_root();
 
 };
 

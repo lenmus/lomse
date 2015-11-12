@@ -321,22 +321,6 @@ public:
 //                                        EAccidentals* accidentals);
 
     //-----------------------------------------------------------------------------------
-    string get_value(XmlNode* node)
-    {
-        XmlNode* child = node->first_node();
-        if (!child)
-            return "";
-        else
-            return string( child->value() );
-    }
-
-    //-----------------------------------------------------------------------------------
-    string get_name(XmlNode* node)
-    {
-        return m_pParser->get_node_name_as_string(node);
-    }
-
-    //-----------------------------------------------------------------------------------
     int get_line_number(XmlNode* node)
     {
         //TODO_X
@@ -346,10 +330,10 @@ public:
 //    //-----------------------------------------------------------------------------------
 //    ELdpElement get_type(XmlNode* node)
 //    {
-//        if (node->type() == rapidxml::node_data)
+//        if (node->type() == XmlNode::k_node_data)
 //            return k_string;
 //
-//        string name = get_name(node);
+//        string name = node.name();
 //        LdpElement* elm = m_pLdpFactory->create(name, 0);
 //        ELdpElement type = elm->get_type();
 //        delete elm;

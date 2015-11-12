@@ -67,7 +67,7 @@ SUITE(XmlParserTest)
         XmlParser parser;
         parser.parse_text("<score><vers>1.7</vers></score>");
         XmlNode* root = parser.get_tree_root();
-        CHECK( parser.get_node_name_as_string(root) == "score" );
+        CHECK( root->name() == "score" );
         CHECK( parser.get_encoding() == "unknown" );
     }
 
@@ -89,7 +89,8 @@ SUITE(XmlParserTest)
         );
         parser.parse_text(text);
         XmlNode* root = parser.get_tree_root();
-        CHECK( parser.get_node_name_as_string(root) == "lenmusdoc" );
+        CHECK( root->name() == "lenmusdoc" );
+        //cout << "encoding: " << parser.get_encoding() << endl;
         CHECK( parser.get_encoding() == "utf-8" );
     }
 
@@ -103,10 +104,8 @@ SUITE(XmlParserTest)
             "</score>"
         );
         parser.parse_text(text);
-        XmlNode* root = parser.get_tree_root();
-        CHECK( root == NULL );
         //cout << "error = [" << parser.get_error() << "]" << endl;
-        CHECK( parser.get_error() == "unexpected end of data" );
+        CHECK( parser.get_error() == "Start-end tags mismatch" );
     }
 
     TEST_FIXTURE(XmlParserTestFixture, read_doc_from_file)
@@ -115,8 +114,43 @@ SUITE(XmlParserTest)
         parser.parse_file(m_scores_path + "30001-paragraph.lmd");
         XmlNode* root = parser.get_tree_root();
 
-        CHECK( parser.get_node_name_as_string(root) == "lenmusdoc" );
+        CHECK( root->name() == "lenmusdoc" );
     }
+
+    TEST_FIXTURE(XmlParserTestFixture, read_chinese)
+    {
+        XmlParser parser;
+        string text(
+            "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+            "<lenmusdoc vers=\"0.0\">"
+            "<header>"
+                "<txt>普通练习</txt>"
+            "</header>"
+            "</lenmusdoc>"
+        );
+        parser.parse_text(text);
+        XmlNode* root = parser.get_tree_root();
+        CHECK( root->name() == "lenmusdoc" );
+        CHECK( parser.get_encoding() == "utf-8" );
+        XmlNode header = root->child("header");
+        XmlNode txt = header.child("txt");
+        //cout << "Node txt has value: '" << header.value() << "'" << endl;
+        CHECK( txt.value() == "普通练习" );
+
+    }
+
+    TEST_FIXTURE(XmlParserTestFixture, empty_element)
+    {
+        XmlParser parser;
+        parser.parse_text("<score-partwise version='3.0'><part-list/></score-partwise>");
+        XmlNode* root = parser.get_tree_root();
+        CHECK( root->name() == "score-partwise" );
+        XmlNode child = root->first_child();
+        cout << "Child name: '" << child.value() << "'" << endl;
+        CHECK( child.name() == "part-list" );
+
+    }
+
 
     //TEST_FIXTURE(XmlParserTestFixture, ParserFileHasLineNumbers)
     //{
@@ -268,16 +302,6 @@ SUITE(XmlParserTest)
     //    XmlNode* root = parser.get_tree_root();
     //    //cout << score->get_root()->to_string() << endl;
     //    CHECK( score->get_root()->to_string() == "(clef G (visible no))" );
-    //    delete score->get_root();
-    //}
-
-    //TEST_FIXTURE(XmlParserTestFixture, ParserReadChinese)
-    //{
-    //    XmlParser parser;
-    //    parser.parse_text("(heading 1 (style \"header\")(txt \"普通练习\"))");
-    //    XmlNode* root = parser.get_tree_root();
-    //    //cout << score->get_root()->to_string() << endl;
-    //    CHECK( score->get_root()->to_string() == "(heading 1 (style \"header\") (txt \"普通练习\"))" );
     //    delete score->get_root();
     //}
 

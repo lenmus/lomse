@@ -225,12 +225,14 @@ set( INCLUDES_LOMSE  ${LOMSE_ROOT_DIR}/include )
 set( INCLUDES_AGG  ${LOMSE_ROOT_DIR}/src/agg/include )
 set( INCLUDES_UTFCPP  ${LOMSE_ROOT_DIR}/packages/utfcpp )
 set( INCLUDES_MINIZIP  ${LOMSE_ROOT_DIR}/packages/minizip )
+set( INCLUDES_PUGIXML  ${LOMSE_ROOT_DIR}/packages )
 include_directories(
     ${INCLUDES_LOMSE}
     ${INCLUDES_AGG}
     ${LOMSE_ROOT_DIR}/src/agg/font_freetype
     ${INCLUDES_UTFCPP}
     ${INCLUDES_MINIZIP}
+    ${INCLUDES_PUGIXML}
 )
 
 
