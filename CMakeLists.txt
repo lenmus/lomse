@@ -89,6 +89,11 @@ cmake_minimum_required(VERSION 2.8)
 # project name
 project(lomse)
 
+#======================================================================
+# AWARE:
+# Options are defined in module 'lomse/trunk/build-options.cmake'
+#======================================================================
+
 # main directories 
 set( LOMSE_ROOT_DIR  ${CMAKE_CURRENT_SOURCE_DIR} )
 set( LOMSE_SRC_DIR  ${LOMSE_ROOT_DIR}/src )
@@ -129,16 +134,17 @@ include( ${LOMSE_ROOT_DIR}/build-options.cmake )
 ###############################################################################
 
 # Check for UnitTest++. Required for unit test
-if (0)
-if(WIN32)
-    set( UNITTEST_LIBDIR  ${LOMSE_ROOT_DIR}/packages/UnitTest++/lib )
-    set( UNITTEST_INCLUDE_DIRS  ${LOMSE_ROOT_DIR}/packages/UnitTest++/src )
-else()
-    include(FindPkgConfig)
-    pkg_check_modules(UNITTEST REQUIRED unittest++)
-endif()
-link_directories( ${UNITTEST_LIBDIR} )
-endif(0)
+if (LOMSE_BUILD_TESTS)
+    find_package(UnitTest++ REQUIRED)
+    if(UNITTEST++_FOUND)
+        include_directories(${UNITTEST++_INCLUDE_DIR})
+        link_directories( ${UNITTEST++_LIBRARY} )
+        message("UnitTest++ found: library: ${UNITTEST++_LIBRARY}" )
+        message("UnitTest++ found: include: ${UNITTEST++_INCLUDE_DIR}" )
+    else()
+        message(SEND_ERROR "UnitTest++ package not found." )
+    endif()
+endif(LOMSE_BUILD_TESTS)
 
 # Check for Boost >= 1.42.0
 set(Boost_ADDITIONAL_VERSIONS "1.42" "1.42.0" "1.43" "1.43.0" "1.44" "1.44.0"
@@ -171,6 +177,18 @@ else()
     message(SEND_ERROR "Boost package not found. Reason: ${Boost_ERROR_REASON}" )
 endif()
 
+
+#Additional Boost libraries required for unit tests
+if (LOMSE_BUILD_TESTS)
+    find_package(Boost 1.42.0 COMPONENTS system REQUIRED)
+    if(Boost_FOUND)
+        include_directories(${Boost_INCLUDE_DIRS})
+        link_libraries( ${Boost_LIBRARIES} )
+        link_directories( ${Boost_LIBRARY_DIRS} )
+    else()
+        message(SEND_ERROR "Boost 'system' package not found. Reason: ${Boost_ERROR_REASON}" )
+    endif()
+endif(LOMSE_BUILD_TESTS)
 
 # Check for FreeType
 find_package(Freetype REQUIRED)                    
@@ -269,21 +287,9 @@ endif(0)
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
-
-
-###############################################################################
-#
-# Target: Lomse library
-#
-###############################################################################
-
-
 # source files to compile
 include( ${LOMSE_ROOT_DIR}/add-sources.cmake )
 
-
-
-#=====================================================================================
 
 # Adds folders for Visual Studio and other IDEs
 set (LOMSE_GROUP_FOLDER "lomse/" )
@@ -291,187 +297,92 @@ include( ${LOMSE_ROOT_DIR}/add-group-folders.cmake )
 
 
 
-
 ###############################################################################
 #
-# Target: static library
+# Target: Lomse static library
 #
 ###############################################################################
+if(LOMSE_BUILD_STATIC_LIB)
 
-set(LOMSE  lomse)
+    set(LOMSE_STATIC  lomse-static)
 
-add_library( ${LOMSE} STATIC ${ALL_LOMSE_SOURCES} )
-set_target_properties(${LOMSE} PROPERTIES VERSION ${LOMSE_VERSION}
-                                          SOVERSION ${LOMSE_VERSION} )
+    add_library( ${LOMSE_STATIC} STATIC ${ALL_LOMSE_SOURCES} )
+    set_target_properties(${LOMSE_STATIC} PROPERTIES
+            VERSION ${LOMSE_VERSION}
+            SOVERSION ${LOMSE_VERSION}
+            OUTPUT_NAME "lomse"
+            RUNTIME_OUTPUT_DIRECTORY ${LOMSE_ROOT_DIR}/bin
+    )
 
+    # Force not to link with standard MSVC libraries: /NODEFAULTLIB
+    if(MSVC)
+        set_target_properties(${LOMSE_STATIC} PROPERTIES  LINK_FLAGS "/NODEFAULTLIB")
+    endif()
 
-# hack to remove 'Debug' subdirectory from output path. -------------
-# see: http://www.cmake.org/Bug/view.php?id=8243
-if(MSVC)
-    set_target_properties(${LOMSE} PROPERTIES  PREFIX "../")
-endif()
+    #get_target_property(VAR ${LOMSE_STATIC} LINK_FLAGS)
+    #message("library target properties=" ${VAR})
 
-# Force not to link with standard MSVC libraries: /NODEFAULTLIB
-if(MSVC)
-    set_target_properties(${LOMSE} PROPERTIES  LINK_FLAGS "/NODEFAULTLIB")
-endif()
-
-# once built, place library at lomse/bin
-set_target_properties(${LOMSE}  PROPERTIES
-                                RUNTIME_OUTPUT_DIRECTORY  ${LOMSE_ROOT_DIR}/bin )
-    
-get_target_property(VAR ${LOMSE} LINK_FLAGS)
-#message("library target properties=" ${VAR})
-
+endif(LOMSE_BUILD_STATIC_LIB)
 
 
 ###############################################################################
 #
-# Target: dynamic library 
+# Target: dynamic/shared library 
 #
 ###############################################################################
+if(LOMSE_BUILD_SHARED_LIB)
 
-# Cannot have two targets with the same name so the dynamic version has
-# '-dyn' appended and then the name of the output file is changed
+    set(LOMSE_SHARED  lomse-shared)
 
-set(LOMSE_DYN  lomse-dyn)
+    add_library( ${LOMSE_SHARED} SHARED ${ALL_LOMSE_SOURCES} )
+    set_target_properties(${LOMSE_SHARED} 
+                          PROPERTIES VERSION ${LOMSE_VERSION}
+                                     SOVERSION ${LOMSE_VERSION}
+                                     OUTPUT_NAME "lomse"
+                                     RUNTIME_OUTPUT_DIRECTORY  ${LOMSE_ROOT_DIR}/bin )
 
-add_library( ${LOMSE_DYN} SHARED ${ALL_LOMSE_SOURCES} )
-set_target_properties(${LOMSE_DYN} 
-                      PROPERTIES VERSION ${LOMSE_VERSION}
-                                 SOVERSION ${LOMSE_VERSION}
-                                 OUTPUT_NAME "lomse"
-                                 RUNTIME_OUTPUT_DIRECTORY  ${LOMSE_ROOT_DIR}/bin )
-
+endif(LOMSE_BUILD_SHARED_LIB)
 
 
 ###############################################################################
 #
-# Target: program for testing the library
+# Target: testlib. Program for running unit tests on the library
 #
 ###############################################################################
 if(LOMSE_BUILD_TESTS)
 
     set (TESTLIB  testlib)
 
-    # Dirty hack: I don't know why it conflicts with LIBCD. But for
-    # now I need to continue. See:
-    # http://mygoldenchariot.blogspot.com/2006/07/link-warning-lnk4098-defaultlib-libcd.html
-    if(MSVC)
-        set(CMAKE_LINKER_FLAGS_DEBUG
-             ${CMAKE_LINKER_FLAGS_DEBUG} "/NODEFAULTLIB:LIBCD"
-        )
-    endif()
-
-    # source files to compile
-    add_executable( ${TESTLIB} 
-            ${LOMSE_SRC_DIR}/tests/lomse_test_barline_engraver.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_beam_engraver.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_chord_engraver.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_column_breaker.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_column_layouter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_command.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_document.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_document_cursor.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_document_iterator.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_document_layouter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_elements.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_engrouters.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_events.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_file_system.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_gm_objects.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_graphic_model.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_image_reader.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_im_algorithms.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_inlines_container_layouter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_interactor.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_internal_model.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_ldp_analyser.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_ldp_compiler.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_ldp_exporter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_ldp_parser.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_lines_breaker.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_linkable.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_linker.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_list_layouter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_lmd_analyser.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_lmd_compiler.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_lmd_exporter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_midi_table.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_model_builder.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_multicolumn_layouter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_xml_analyser.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_xml_compiler.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_note_engraver.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_pitch.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_presenter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_reader.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_rest_engraver.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_score_algorithms.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_score_cursor.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_score_iterator.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_score_layouter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_score_meter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_score_player.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_selections.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_shapes.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_sizers.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_stack.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_staffobjs_table.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_system_cursor.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_system_layouter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_table_layouter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_text_engraver.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_text_splitter.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_tokenizer.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_tree.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_tuplet_engraver.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_view.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_test_zip_stream.cpp
-            ${LOMSE_SRC_DIR}/tests/lomse_the_test_runner.cpp
-    )
+    file(GLOB TESTLIB_SRC "${LOMSE_SRC_DIR}/tests/*.cpp" )
+    add_executable(${TESTLIB} ${TESTLIB_SRC})
 
     # libraries to link
-    if(UNIX)
-        target_link_libraries ( ${TESTLIB} liblomse.so libunittest++.a )
-    elseif(WIN32)
-        target_link_libraries ( ${TESTLIB} lomse.lib UnitTest++.vsnet2003.lib )
+    if (BUILD_SHARED_LIB)
+        target_link_libraries ( ${TESTLIB} lomse-shared libunittest++.a )
+    else()      
+        target_link_libraries ( ${TESTLIB} lomse.so libunittest++.a )
     endif()
-
-    # properties
-    if(MSVC)
-        set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:LIBCD" )
-        set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS "/MACHINE:X86" )
-        set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-        set_target_properties(${TESTLIB} PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
-
-        set_target_properties(${TESTLIB} PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-        set_target_properties(${TESTLIB} PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
-    endif()
-
 
     # dependencies
-    add_dependencies(testlib lomse)
-
+    add_dependencies(testlib lomse-shared)
 
     # once generated, run tests
-    if(WIN32)
-        set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/debug/${TESTLIB}.exe )
-    else()
-        set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB} )
-    endif()
+    if (LOMSE_RUN_TESTS)
+        if(WIN32)
+            set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/debug/${TESTLIB}.exe )
+        else()
+            set(TESTLIB_EXECUTABLE ${EXECUTABLE_OUTPUT_PATH}/${TESTLIB} )
+        endif()
 
-    #copy test scores and fonts
-    #file(COPY ${LOMSE_ROOT_DIR}/test-scores DESTINATION ${OUTDIR})
-    #file(COPY ${LOMSE_ROOT_DIR}/fonts DESTINATION ${OUTDIR})
-
-    add_custom_command(
-        TARGET ${TESTLIB} POST_BUILD
-        COMMAND ${TESTLIB_EXECUTABLE}
-        WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
-    )
+        add_custom_command(
+            TARGET ${TESTLIB} POST_BUILD
+            COMMAND ${TESTLIB_EXECUTABLE}
+            WORKING_DIRECTORY ${EXECUTABLE_OUTPUT_PATH}
+        )
+    endif(LOMSE_RUN_TESTS)
 
 endif(LOMSE_BUILD_TESTS)
+
 
 ###############################################################################
 #
@@ -533,9 +444,10 @@ if (LOMSE_BUILD_EXAMPLE)
     endif()
 
     # dependencies
-    add_dependencies(example_1 lomse)
+    add_dependencies(example_1 lomse-shared)
 
 endif(LOMSE_BUILD_EXAMPLE)
+
 
 ###############################################################################
 # library installation
@@ -560,11 +472,11 @@ if( UNIX )
 
     # copy generated libraries
     install( TARGETS ${LOMSE} DESTINATION ${LOMSE_LIBDIR} )
-    install( TARGETS ${LOMSE_DYN} LIBRARY DESTINATION ${LOMSE_LIBDIR} )
+    install( TARGETS ${LOMSE_SHARED} LIBRARY DESTINATION ${LOMSE_LIBDIR} )
 
     #create symlink to library
 	install( CODE
-        "EXECUTE_PROCESS(COMMAND ln -fs ${CMAKE_INSTALL_PREFIX}/lib/${LOMSE_DYN} 
+        "EXECUTE_PROCESS(COMMAND ln -fs ${CMAKE_INSTALL_PREFIX}/lib/${LOMSE_SHARED} 
                                         ${CMAKE_INSTALL_PREFIX}/lib/liblomse.so )" 
     )
 
@@ -616,7 +528,7 @@ elseif( WIN32 )
 
     # copy generated libraries
     install( TARGETS ${LOMSE} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
-    install( TARGETS ${LOMSE_DYN} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
+    install( TARGETS ${LOMSE_SHARED} DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" )
 
     # copy lomse includes
     install(DIRECTORY ${INCLUDES_LOMSE}/
