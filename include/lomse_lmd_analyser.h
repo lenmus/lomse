@@ -214,6 +214,7 @@ public:
     //access to results
     InternalModel* analyse_tree(XmlNode* tree, const string& locator);
     ImoObj* analyse_tree_and_get_object(XmlNode* tree);
+    int get_line_number(XmlNode* node);
 
     //analysis
     //void analyse_node(LdpTree::iterator itNode);
@@ -296,13 +297,6 @@ public:
             return -1L;
         else
             return std::atol( attr.value() );
-    }
-
-    //-----------------------------------------------------------------------------------
-    int get_line_number(XmlNode* node)
-    {
-        //TODO_X
-        return 0;
     }
 
     //-----------------------------------------------------------------------------------

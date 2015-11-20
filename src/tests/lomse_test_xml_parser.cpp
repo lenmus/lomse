@@ -152,30 +152,6 @@ SUITE(XmlParserTest)
     }
 
 
-    //TEST_FIXTURE(XmlParserTestFixture, ParserFileHasLineNumbers)
-    //{
-    //    XmlParser parser;
-
-    //    parser.parse_file(m_scores_path + "00011-empty-fill-page.lms");
-    //    XmlNode* root = parser.get_tree_root();
-    //    LdpElement* elm = score->get_root();
-    //    //cout << elm->get_name() << " in line " << elm->get_line_number() << endl;
-    //    CHECK( elm->get_name() == "score" && elm->get_line_number() == 1 );
-    //    elm = elm->get_first_child();
-    //    CHECK( elm->get_name() == "vers" && elm->get_line_number() == 2 );
-    //    elm = elm->get_next_sibling();
-    //    CHECK( elm->get_name() == "systemLayout" && elm->get_line_number() == 3 );
-    //    elm = elm->get_next_sibling();
-    //    CHECK( elm->get_name() == "systemLayout" && elm->get_line_number() == 4 );
-    //    elm = elm->get_next_sibling();
-    //    CHECK( elm->get_name() == "opt" && elm->get_line_number() == 5 );
-    //    elm = elm->get_next_sibling();
-    //    CHECK( elm->get_name() == "opt" && elm->get_line_number() == 6 );
-    //    elm = elm->get_next_sibling();
-    //    CHECK( elm->get_name() == "instrument" && elm->get_line_number() == 7 );
-
-    //    delete score->get_root();
-    //}
 
     //TEST_FIXTURE(XmlParserTestFixture, ParserReadScoreFromUnicodeFile)
     //{

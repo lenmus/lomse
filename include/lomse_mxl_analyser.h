@@ -302,6 +302,7 @@ public:
     string get_element_info();
     inline void save_current_part_id(const string& id) { m_curPartId = id; }
     inline void save_current_measure_num(const string& num) { m_curMeasureNum = num; }
+    int get_line_number(XmlNode* node);
 
     //access to score being analysed
     inline void score_analysis_begin(ImoScore* pScore) { m_pCurScore = pScore; }
@@ -319,39 +320,6 @@ public:
     static int xml_data_to_clef_type(const string& sign, int line, int octaveChange);
 //    static bool ldp_pitch_to_components(const string& pitch, int *step, int* octave,
 //                                        EAccidentals* accidentals);
-
-    //-----------------------------------------------------------------------------------
-    int get_line_number(XmlNode* node)
-    {
-        //TODO_X
-        return 0;
-    }
-
-//    //-----------------------------------------------------------------------------------
-//    ELdpElement get_type(XmlNode* node)
-//    {
-//        if (node->type() == XmlNode::k_node_data)
-//            return k_string;
-//
-//        string name = node.name();
-//        LdpElement* elm = m_pLdpFactory->create(name, 0);
-//        ELdpElement type = elm->get_type();
-//        delete elm;
-//        return type;
-//    }
-
-//    //-----------------------------------------------------------------------------------
-//    ImoObj* get_imo(XmlNode* node)
-//    {
-//        //TODO_X
-//        return NULL;
-//    }
-
-//    //-----------------------------------------------------------------------------------
-//    void set_imo(XmlNode* node, ImoObj* pImo)
-//    {
-//        m_pNodeImo = pImo;
-//    }
 
 
     int name_to_enum(const string& name) const;

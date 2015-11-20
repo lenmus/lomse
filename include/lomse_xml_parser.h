@@ -101,6 +101,9 @@ public:
         XmlAttribute attr = m_node.attribute(name.c_str());
         return string( attr.value() );
     }
+
+    ptrdiff_t offset();
+
 };
 
 //---------------------------------------------------------------------------------------
@@ -112,6 +115,9 @@ private:
     string m_encoding;         //i.e. "utf-8"
     string m_errorMsg;
     int m_errorOffset;
+    vector<ptrdiff_t> m_offsetData;     // offset -> line mapping
+    bool m_fOffsetDataReady;
+    string m_filename;
 
 public:
     XmlParser(ostream& reporter=cout);
@@ -124,10 +130,13 @@ public:
     inline const string& get_error() { return m_errorMsg; }
     inline const string& get_encoding() { return m_encoding; }
     inline XmlNode* get_tree_root() { return &m_root; }
+    int get_line_number(XmlNode* node);
 
 protected:
     void parse_char_string(char* string);
     void find_root();
+    bool build_offset_data(const char* file);
+    std::pair<int, int> get_location(ptrdiff_t offset);
 
 };
 

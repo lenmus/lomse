@@ -209,15 +209,15 @@ protected:
     void error_msg2(const string& msg);
 
     //helpers, to simplify writing grammar rules
-    XmlNode m_pAnalysedNode;
-    XmlNode m_pChildToAnalyse;
-    XmlNode m_pNextParam;
-    XmlNode m_pNextNextParam;
+    XmlNode m_analysedNode;
+    XmlNode m_childToAnalyse;
+    XmlNode m_nextParam;
+    XmlNode m_nextNextParam;
 
     // the main method to perform the analysis of a node
-    inline ImoObj* analyse_child() { return m_pAnalyser->analyse_node(&m_pChildToAnalyse, NULL); }
+    inline ImoObj* analyse_child() { return m_pAnalyser->analyse_node(&m_childToAnalyse, NULL); }
 
-    // 'get' methods just update m_pChildToAnalyse to point to the next node to analyse
+    // 'get' methods just update m_childToAnalyse to point to the next node to analyse
     bool get_mandatory(const string& tag);
 //    bool get_optional(EMxlTag type);
     bool get_optional(const string& type);
@@ -245,8 +245,6 @@ protected:
     void add_to_model(ImoObj* pImo, int type=-1);
 
     //auxiliary
-//    inline ImoId get_node_id() { return get_node_id(m_pAnalysedNode); }
-//    bool contains(ELdpElement type, ELdpElement* pValid, int nValid);
     inline const string& get_document_locator() {
         return m_pAnalyser->get_document_locator();
     }
@@ -255,8 +253,6 @@ protected:
 
     //-----------------------------------------------------------------------------------
     //XmlNode helper methods
-//    inline ImoId get_node_id(XmlNode* node) { return m_pAnalyser->get_node_id(node); }
-    inline int get_line_number(XmlNode* node) { return m_pAnalyser->get_line_number(node); }
     inline bool has_attribute(XmlNode* node, const string& name)
     {
         return node->attribute(name.c_str()) != NULL;
@@ -266,59 +262,47 @@ protected:
         XmlAttribute attr = node->attribute(name.c_str());
         return string( attr.value() );
     }
-//    inline ELdpElement get_type(XmlNode* node) { return m_pAnalyser->get_type(node); }
-    //inline ImoObj* get_imo(XmlNode* node) { return m_pAnalyser->get_imo(node); }
-    //inline void set_imo(XmlNode* node, ImoObj* pImo) { return m_pAnalyser->set_imo(node, pImo); }
-
-//    inline bool is_type(XmlNode* node, ELdpElement type) { return get_type(node) == type; }
-
-
-//    //-----------------------------------------------------------------------------------
-//    inline void post_event(SpEventInfo event)
-//    {
-//        m_libraryScope.post_event(event);
-//    }
 
     //-----------------------------------------------------------------------------------
     inline bool more_children_to_analyse() {
-        return !m_pNextParam.is_null();
+        return !m_nextParam.is_null();
     }
 
     //-----------------------------------------------------------------------------------
     inline XmlNode get_child_to_analyse() {
-        return m_pNextParam;
+        return m_nextParam;
     }
 
     //-----------------------------------------------------------------------------------
     inline void move_to_next_child() {
-        m_pNextParam = m_pNextNextParam;
+        m_nextParam = m_nextNextParam;
         prepare_next_one();
     }
 
     //-----------------------------------------------------------------------------------
     inline void prepare_next_one() {
-        if (!m_pNextParam.is_null())
-            m_pNextNextParam = m_pNextParam.next_sibling();
+        if (!m_nextParam.is_null())
+            m_nextNextParam = m_nextParam.next_sibling();
         else
-            m_pNextNextParam = XmlNode();
+            m_nextNextParam = XmlNode();
     }
 
     //-----------------------------------------------------------------------------------
     inline void move_to_first_child() {
-        m_pNextParam = m_pAnalysedNode.first_child();
+        m_nextParam = m_analysedNode.first_child();
         prepare_next_one();
     }
 
 //    //-----------------------------------------------------------------------------------
 //    void get_num_staff()
 //    {
-//        string staff = m_pChildToAnalyse.value();
+//        string staff = m_childToAnalyse.value();
 //        int nStaff;
 //        //http://www.codeguru.com/forum/showthread.php?t=231054
 //        std::istringstream iss(staff);
 //        if ((iss >> std::dec >> nStaff).fail())
 //        {
-//            report_msg(get_line_number(&m_pChildToAnalyse),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                "Invalid staff '" + staff + "'. Replaced by '1'.");
 //            m_pAnalyser->set_current_staff(0);
 //        }
@@ -329,7 +313,7 @@ protected:
     //-----------------------------------------------------------------------------------
     bool is_long_value()
     {
-        string number = m_pChildToAnalyse.value();
+        string number = m_childToAnalyse.value();
         long nNumber;
         std::istringstream iss(number);
         return !((iss >> std::dec >> nNumber).fail());
@@ -338,14 +322,14 @@ protected:
     //-----------------------------------------------------------------------------------
     long get_long_value(long nDefault=0L)
     {
-        string number = m_pChildToAnalyse.value();
+        string number = m_childToAnalyse.value();
         long nNumber;
         std::istringstream iss(number);
         if ((iss >> std::dec >> nNumber).fail())
         {
             stringstream replacement;
             replacement << nDefault;
-            report_msg(get_line_number(&m_pChildToAnalyse),
+            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
                 "Invalid integer number '" + number + "'. Replaced by '"
                 + replacement.str() + "'.");
             return nDefault;
@@ -363,7 +347,7 @@ protected:
     //-----------------------------------------------------------------------------------
     bool is_float_value()
     {
-        string number = m_pChildToAnalyse.value();
+        string number = m_childToAnalyse.value();
         float rNumber;
         std::istringstream iss(number);
         return !((iss >> std::dec >> rNumber).fail());
@@ -372,14 +356,14 @@ protected:
     //-----------------------------------------------------------------------------------
     float get_float_value(float rDefault=0.0f)
     {
-        string number = m_pChildToAnalyse.value();
+        string number = m_childToAnalyse.value();
         float rNumber;
         std::istringstream iss(number);
         if ((iss >> std::dec >> rNumber).fail())
         {
             stringstream replacement;
             replacement << rDefault;
-            report_msg(get_line_number(&m_pChildToAnalyse),
+            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
                 "Invalid real number '" + number + "'. Replaced by '"
                 + replacement.str() + "'.");
             return rDefault;
@@ -391,7 +375,7 @@ protected:
     //-----------------------------------------------------------------------------------
     bool is_bool_value()
     {
-        string value = string(m_pChildToAnalyse.value());
+        string value = string(m_childToAnalyse.value());
         return  value == "true" || value == "yes"
              || value == "false" || value == "no" ;
     }
@@ -399,7 +383,7 @@ protected:
     //-----------------------------------------------------------------------------------
     bool get_bool_value(bool fDefault=false)
     {
-        string value = string(m_pChildToAnalyse.value());
+        string value = string(m_childToAnalyse.value());
         if (value == "true" || value == "yes")
             return true;
         else if (value == "false" || value == "no")
@@ -408,7 +392,7 @@ protected:
         {
             stringstream replacement;
             replacement << fDefault;
-            report_msg(get_line_number(&m_pChildToAnalyse),
+            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
                 "Invalid boolean value '" + value + "'. Replaced by '"
                 + replacement.str() + "'.");
             return fDefault;
@@ -418,14 +402,14 @@ protected:
     //-----------------------------------------------------------------------------------
     int get_yes_no_value(int nDefault)
     {
-        string value = m_pChildToAnalyse.value();
+        string value = m_childToAnalyse.value();
         if (value == "yes")
             return k_yesno_yes;
         else if (value == "no")
             return k_yesno_no;
         else
         {
-            report_msg(get_line_number(&m_pChildToAnalyse),
+            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
                 "Invalid yes/no value '" + value + "'. Replaced by default.");
             return nDefault;
         }
@@ -434,13 +418,13 @@ protected:
     //-----------------------------------------------------------------------------------
     string get_string_value()
     {
-        return m_pChildToAnalyse.value();
+        return m_childToAnalyse.value();
     }
 
 //    //-----------------------------------------------------------------------------------
 //    EHAlign get_alignment_value(EHAlign defaultValue)
 //    {
-//        const std::string& value = m_pChildToAnalyse.value();
+//        const std::string& value = m_childToAnalyse.value();
 //        if (value == "left")
 //            return k_halign_left;
 //        else if (value == "right")
@@ -449,7 +433,7 @@ protected:
 //            return k_halign_center;
 //        else
 //        {
-//            report_msg(get_line_number(&m_pChildToAnalyse),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                    "Invalid alignment value '" + value + "'. Assumed 'center'.");
 //            return defaultValue;
 //        }
@@ -458,7 +442,7 @@ protected:
 //    //-----------------------------------------------------------------------------------
 //    Color get_color_child()
 //    {
-//        ImoObj* pImo = m_pAnalyser->analyse_node(&m_pChildToAnalyse, NULL);
+//        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
 //        Color color;
 //        if (pImo->is_color_dto())
 //        {
@@ -472,7 +456,7 @@ protected:
 //    //-----------------------------------------------------------------------------------
 //    Color get_color_value()
 //    {
-//        string value = m_pChildToAnalyse.value();
+//        string value = m_childToAnalyse.value();
 //        ImoColorDto* pColor = LOMSE_NEW ImoColorDto();
 //        pColor->set_from_string(value);
 //        if (!pColor->is_ok())
@@ -489,15 +473,15 @@ protected:
 //    //-----------------------------------------------------------------------------------
 //    float get_font_size_value()
 //    {
-//        const string value = m_pChildToAnalyse.value();
+//        const string value = m_childToAnalyse.value();
 //        int size = static_cast<int>(value.size()) - 2;
 //        string points = value.substr(0, size);
-//        string number = m_pChildToAnalyse.value();
+//        string number = m_childToAnalyse.value();
 //        float rNumber;
 //        std::istringstream iss(number);
 //        if ((iss >> std::dec >> rNumber).fail())
 //        {
-//            report_msg(get_line_number(&m_pChildToAnalyse),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                "Invalid size '" + number + "'. Replaced by '12'.");
 //            return 12.0f;
 //        }
@@ -508,7 +492,7 @@ protected:
 //    //-----------------------------------------------------------------------------------
 //    ImoStyle* get_text_style_child(const string& defaulName="Default style")
 //    {
-//        m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
+//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
 //        string styleName = get_string_value();
 //        ImoStyle* pStyle = NULL;
 //
@@ -526,7 +510,7 @@ protected:
 //            }
 //            if (!pStyle)
 //            {
-//                report_msg(get_line_number(&m_pChildToAnalyse),
+//                report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                        "Style '" + styleName + "' is not defined. Default style will be used.");
 //                pStyle = pScore->get_style_or_default(defaulName);
 //            }
@@ -538,7 +522,7 @@ protected:
 //    //-----------------------------------------------------------------------------------
 //    TPoint get_point_child()
 //    {
-//        ImoObj* pImo = m_pAnalyser->analyse_node(&m_pChildToAnalyse, NULL);
+//        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
 //        TPoint point;
 //        if (pImo->is_point_dto())
 //        {
@@ -552,7 +536,7 @@ protected:
 //    //-----------------------------------------------------------------------------------
 //    TSize get_size_child()
 //    {
-//        ImoObj* pImo = m_pAnalyser->analyse_node(&m_pChildToAnalyse, NULL);
+//        ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
 //        TSize size;
 //        if (pImo->is_size_info())
 //        {
@@ -604,7 +588,7 @@ protected:
 //            pStyle = pDoc->find_style(styleName);
 //            if (!pStyle)
 //            {
-//                report_msg(get_line_number(&m_pChildToAnalyse),
+//                report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                        "Style '" + styleName + "' is not defined. Default style will be used.");
 //                pStyle = pDoc->get_style_or_default(styleName);
 //            }
@@ -616,8 +600,8 @@ protected:
 //    //-----------------------------------------------------------------------------------
 //    ELineStyle get_line_style_child()
 //    {
-//        m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
-//        const std::string& value = m_pChildToAnalyse.value();
+//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
+//        const std::string& value = m_childToAnalyse.value();
 //        if (value == "none")
 //            return k_line_none;
 //        else if (value == "dot")
@@ -632,7 +616,7 @@ protected:
 //            return k_line_dot_dash;
 //        else
 //        {
-//            report_msg(get_line_number(&m_pAnalysedNode),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                "Element 'lineStyle': Invalid value '" + value
 //                + "'. Replaced by 'solid'." );
 //            return k_line_solid;
@@ -642,8 +626,8 @@ protected:
 //    //-----------------------------------------------------------------------------------
 //    ELineCap get_line_cap_child()
 //    {
-//        m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
-//        const std::string& value = m_pChildToAnalyse.value();
+//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
+//        const std::string& value = m_childToAnalyse.value();
 //        if (value == "none")
 //            return k_cap_none;
 //        else if (value == "arrowhead")
@@ -658,7 +642,7 @@ protected:
 //            return k_cap_diamond;
 //        else
 //        {
-//            report_msg(get_line_number(&m_pAnalysedNode),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                "Element 'lineCap': Invalid value '" + value
 //                + "'. Replaced by 'none'." );
 //            return k_cap_none;
@@ -668,7 +652,7 @@ protected:
 //    //-----------------------------------------------------------------------------------
 //    void check_visible(ImoInlinesContainer* pCO)
 //    {
-//        string value = m_pChildToAnalyse.value();
+//        string value = m_childToAnalyse.value();
 //        if (value == "visible")
 //            pCO->set_visible(true);
 //        else if (value == "noVisible")
@@ -683,11 +667,11 @@ protected:
 //    //-----------------------------------------------------------------------------------
 //    NoteTypeAndDots get_note_type_and_dots()
 //    {
-//        string duration = m_pChildToAnalyse.value();
+//        string duration = m_childToAnalyse.value();
 //        NoteTypeAndDots figdots = ldp_duration_to_components(duration);
 //        if (figdots.noteType == k_unknown_notetype)
 //        {
-//            report_msg(get_line_number(&m_pChildToAnalyse),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                "Unknown note/rest duration '" + duration + "'. Replaced by 'q'.");
 //            figdots.noteType = k_quarter;
 //        }
@@ -699,10 +683,10 @@ protected:
 //    {
 //        while( more_children_to_analyse() )
 //        {
-//            m_pChildToAnalyse = get_child_to_analyse();
-//            ELdpElement type = get_type(m_pChildToAnalyse);
+//            m_childToAnalyse = get_child_to_analyse();
+//            ELdpElement type = get_type(m_childToAnalyse);
 //            if (is_auxobj(type))
-//                m_pAnalyser->analyse_node(&m_pChildToAnalyse, pAnchor);
+//                m_pAnalyser->analyse_node(&m_childToAnalyse, pAnchor);
 //            else
 //                error_invalid_child();
 //
@@ -730,8 +714,8 @@ protected:
 //
 //        if(more_children_to_analyse())
 //        {
-//            m_pChildToAnalyse = get_child_to_analyse();
-//            ELdpElement type = get_type(m_pChildToAnalyse);
+//            m_childToAnalyse = get_child_to_analyse();
+//            ELdpElement type = get_type(m_childToAnalyse);
 //            if (   /*type == k_inlineWrapper
 //                ||*/ type == k_txt
 //                || type == k_image
@@ -739,7 +723,7 @@ protected:
 //               )
 //            {
 //                return static_cast<ImoInlineLevelObj*>(
-//                    m_pAnalyser->analyse_node(&m_pChildToAnalyse, NULL) );
+//                    m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
 //            }
 //            else if (type == k_string)
 //            {
@@ -747,7 +731,7 @@ protected:
 //                Document* pDoc = m_pAnalyser->get_document_being_analysed();
 //                ImoTextItem* pText = static_cast<ImoTextItem*>(
 //                                            ImFactory::inject(k_imo_text_item, pDoc) );
-//                pText->set_text( string(m_pChildToAnalyse.value()) );
+//                pText->set_text( string(m_childToAnalyse.value()) );
 //                return pText;
 //            }
 //            else
@@ -788,8 +772,8 @@ protected:
 //        // {<inlineObject> | <blockObject>}*
 //        while (more_children_to_analyse())
 //        {
-//            m_pChildToAnalyse = get_child_to_analyse();
-//            ELdpElement type = get_type(m_pChildToAnalyse);
+//            m_childToAnalyse = get_child_to_analyse();
+//            ELdpElement type = get_type(m_childToAnalyse);
 //
 //            if (
 //               // inline: { <inlineWrapper> | <link> | <textItem> | <image> | <button> }
@@ -805,7 +789,7 @@ protected:
 //                || type == k_score
 //               )
 //            {
-//                m_pAnalyser->analyse_node(&m_pChildToAnalyse, pParent);
+//                m_pAnalyser->analyse_node(&m_childToAnalyse, pParent);
 //            }
 //            else if (type == k_string)
 //            {
@@ -813,7 +797,7 @@ protected:
 //                Document* pDoc = m_pAnalyser->get_document_being_analysed();
 //                ImoTextItem* pText = static_cast<ImoTextItem*>(
 //                                            ImFactory::inject(k_imo_text_item, pDoc) );
-//                pText->set_text( string(m_pChildToAnalyse.value()) );
+//                pText->set_text( string(m_childToAnalyse.value()) );
 //                ImoObj* pSave = m_pAnchor;
 //                m_pAnchor = pParent;
 //                add_to_model(pText);
@@ -835,7 +819,7 @@ protected:
 //=======================================================================================
 ImoObj* MxlElementAnalyser::analyse_node(XmlNode* pNode)
 {
-    m_pAnalysedNode = *pNode;
+    m_analysedNode = *pNode;
     move_to_first_child();
     return do_analysis();
 }
@@ -843,8 +827,8 @@ ImoObj* MxlElementAnalyser::analyse_node(XmlNode* pNode)
 //---------------------------------------------------------------------------------------
 bool MxlElementAnalyser::error_missing_element(const string& tag)
 {
-    string parentName = m_pAnalysedNode.name();
-    report_msg(get_line_number(&m_pAnalysedNode),
+    string parentName = m_analysedNode.name();
+    report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
                "<" + parentName + ">: missing mandatory element <" + tag + ">.");
     return false;
 }
@@ -864,13 +848,13 @@ void MxlElementAnalyser::report_msg(int numLine, const std::string& msg)
 //---------------------------------------------------------------------------------------
 bool MxlElementAnalyser::has_attribute(const string& name)
 {
-    return has_attribute(&m_pAnalysedNode, name);
+    return has_attribute(&m_analysedNode, name);
 }
 
 //---------------------------------------------------------------------------------------
 string MxlElementAnalyser::get_attribute(const string& name)
 {
-    return m_pAnalysedNode.attribute_value(name);
+    return m_analysedNode.attribute_value(name);
 }
 
 //---------------------------------------------------------------------------------------
@@ -878,13 +862,13 @@ string MxlElementAnalyser::get_mandatory_string_attribute(const string& name,
                                   const string& sDefault, const string& element)
 {
     string attrb = sDefault;
-    if (has_attribute(&m_pAnalysedNode, name))
-        attrb = m_pAnalysedNode.attribute_value(name);
+    if (has_attribute(&m_analysedNode, name))
+        attrb = m_analysedNode.attribute_value(name);
     else if (sDefault.empty())
-        report_msg(get_line_number(&m_pAnalysedNode),
+        report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             element + ": missing mandatory attribute '" + name + "'." );
     else
-        report_msg(get_line_number(&m_pAnalysedNode),
+        report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             element + ": missing mandatory attribute '" + name + "'. Value '"
             + sDefault + "' assumed.");
 
@@ -895,8 +879,8 @@ string MxlElementAnalyser::get_mandatory_string_attribute(const string& name,
 string MxlElementAnalyser::get_optional_string_attribute(const string& name,
                                                          const string& sDefault)
 {
-    if (has_attribute(&m_pAnalysedNode, name))
-        return m_pAnalysedNode.attribute_value(name);
+    if (has_attribute(&m_analysedNode, name))
+        return m_analysedNode.attribute_value(name);
     else
         return sDefault;
 }
@@ -904,14 +888,14 @@ string MxlElementAnalyser::get_optional_string_attribute(const string& name,
 //---------------------------------------------------------------------------------------
 int MxlElementAnalyser::get_attribute_as_integer(const string& name, int nDefault)
 {
-    string number = m_pAnalysedNode.attribute_value(name);
+    string number = m_analysedNode.attribute_value(name);
     long nNumber;
     std::istringstream iss(number);
     if ((iss >> std::dec >> nNumber).fail())
     {
         stringstream replacement;
         replacement << nDefault;
-        report_msg(get_line_number(&m_pChildToAnalyse),
+        report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             "Invalid integer number '" + number + "'. Replaced by '"
             + replacement.str() + "'.");
         return nDefault;
@@ -924,7 +908,7 @@ int MxlElementAnalyser::get_attribute_as_integer(const string& name, int nDefaul
 int MxlElementAnalyser::get_optional_integer_attribute(const string& name,
                                                        int nDefault)
 {
-    if (has_attribute(&m_pAnalysedNode, name))
+    if (has_attribute(&m_analysedNode, name))
         return get_attribute_as_integer(name, nDefault);
     else
         return nDefault;
@@ -935,13 +919,13 @@ int MxlElementAnalyser::get_mandatory_integer_attribute(const string& name, int 
                                                         const string& element)
 {
     int attrb = nDefault;
-    if (has_attribute(&m_pAnalysedNode, name))
+    if (has_attribute(&m_analysedNode, name))
         attrb = get_attribute_as_integer(name, nDefault);
     else
     {
         stringstream replacement;
         replacement << nDefault;
-        report_msg(get_line_number(&m_pAnalysedNode),
+        report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             element + ": missing mandatory attribute '" + name + "'. Value '"
             + replacement.str() + "' assumed.");
     }
@@ -958,8 +942,8 @@ bool MxlElementAnalyser::get_mandatory(const string& tag)
         return NULL;
     }
 
-    m_pChildToAnalyse = get_child_to_analyse();
-    if (m_pChildToAnalyse.name() != tag)
+    m_childToAnalyse = get_child_to_analyse();
+    if (m_childToAnalyse.name() != tag)
     {
         error_missing_element(tag);
         return false;
@@ -973,7 +957,7 @@ bool MxlElementAnalyser::get_mandatory(const string& tag)
 void MxlElementAnalyser::analyse_mandatory(const string& tag, ImoObj* pAnchor)
 {
     if (get_mandatory(tag))
-        m_pAnalyser->analyse_node(&m_pChildToAnalyse, pAnchor);
+        m_pAnalyser->analyse_node(&m_childToAnalyse, pAnchor);
 }
 
 //---------------------------------------------------------------------------------------
@@ -981,8 +965,8 @@ bool MxlElementAnalyser::get_optional(const string& name)
 {
     if (more_children_to_analyse())
     {
-        m_pChildToAnalyse = get_child_to_analyse();
-        if (m_pChildToAnalyse.name() == name)
+        m_childToAnalyse = get_child_to_analyse();
+        if (m_childToAnalyse.name() == name)
         {
             move_to_next_child();
             return true;
@@ -996,7 +980,7 @@ bool MxlElementAnalyser::analyse_optional(const string& name, ImoObj* pAnchor)
 {
     if (get_optional(name))
     {
-        m_pAnalyser->analyse_node(&m_pChildToAnalyse, pAnchor);
+        m_pAnalyser->analyse_node(&m_childToAnalyse, pAnchor);
         return true;
     }
     return false;
@@ -1007,18 +991,18 @@ bool MxlElementAnalyser::analyse_optional(const string& name, ImoObj* pAnchor)
 //{
 //    while(more_children_to_analyse())
 //    {
-//        m_pChildToAnalyse = get_child_to_analyse();
+//        m_childToAnalyse = get_child_to_analyse();
 //
-//        ELdpElement type = get_type(m_pChildToAnalyse);
+//        ELdpElement type = get_type(m_childToAnalyse);
 //        if (contains(type, pValid, nValid))
 //        {
 //            move_to_next_child();
-//            m_pAnalyser->analyse_node(&m_pChildToAnalyse);
+//            m_pAnalyser->analyse_node(&m_childToAnalyse);
 //        }
 //        else
 //        {
-//            string name = m_pChildToAnalyse.name();
-//            report_msg(get_line_number(&m_pChildToAnalyse),
+//            string name = m_childToAnalyse.name();
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                "Element '" + name + "' unknown or not possible here. Ignored.");
 //        }
 //        move_to_next_child();
@@ -1036,17 +1020,17 @@ bool MxlElementAnalyser::analyse_optional(const string& name, ImoObj* pAnchor)
 //---------------------------------------------------------------------------------------
 void MxlElementAnalyser::error_invalid_child()
 {
-    string name = m_pChildToAnalyse.name();
+    string name = m_childToAnalyse.name();
     if (name == "label")
-        name += ":" + m_pChildToAnalyse.value();
-    report_msg(get_line_number(&m_pChildToAnalyse),
+        name += ":" + m_childToAnalyse.value();
+    report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
         "Element '" + name + "' unknown or not possible here. Ignored.");
 }
 
 //---------------------------------------------------------------------------------------
 void MxlElementAnalyser::error_msg(const string& msg)
 {
-    report_msg(get_line_number(&m_pAnalysedNode), msg);
+    report_msg(m_pAnalyser->get_line_number(&m_analysedNode), msg);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1060,12 +1044,12 @@ void MxlElementAnalyser::error_if_more_elements()
 {
     if (more_children_to_analyse())
     {
-        string next = m_pNextParam.next_sibling().name();
-        string name = m_pChildToAnalyse.name();
+        string next = m_nextParam.next_sibling().name();
+        string name = m_childToAnalyse.name();
         if (name == "label")
-            name += ":" + m_pChildToAnalyse.value();
-        report_msg(get_line_number(&m_pAnalysedNode),
-                "Element <" + m_pAnalysedNode.name()
+            name += ":" + m_childToAnalyse.value();
+        report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+                "Element <" + m_analysedNode.name()
                 + ">: too many children. Elements after <"
                 + name + "> have been ignored. First ignored: <"
                 + next + ">.");
@@ -1082,8 +1066,8 @@ void MxlElementAnalyser::error_if_more_elements()
 //    // [<numStaff>]
 //    if (more_children_to_analyse())
 //    {
-//        m_pChildToAnalyse = get_child_to_analyse();
-//        if (m_pChildToAnalyse.name() == "staff")
+//        m_childToAnalyse = get_child_to_analyse();
+//        if (m_childToAnalyse.name() == "staff")
 //        {
 //            get_num_staff();
 //            move_to_next_child();
@@ -1108,13 +1092,13 @@ void MxlElementAnalyser::error_if_more_elements()
 //    // [ { <visible> | <location> | <color> }* ]
 //    while( more_children_to_analyse() )
 //    {
-//        m_pChildToAnalyse = get_child_to_analyse();
-//        ELdpElement type = get_type(m_pChildToAnalyse);
+//        m_childToAnalyse = get_child_to_analyse();
+//        ELdpElement type = get_type(m_childToAnalyse);
 //        switch (type)
 //        {
 //            case k_visible:
 //            {
-//                m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
+//                m_childToAnalyse = get_child(m_childToAnalyse, 1);
 //                pSO->set_visible( get_bool_value(true) );
 //                break;
 //            }
@@ -1170,7 +1154,9 @@ public:
 
     ImoObj* do_analysis()
     {
-        cout << "Missing analyser for element '" << m_tag << "'. Node ignored." << endl;
+        cout << "Line " << m_pAnalyser->get_line_number(&m_analysedNode)
+             << ". Missing analyser for element '" << m_tag
+             << "'. Node ignored." << endl;
         return NULL;
     }
 };
@@ -1211,11 +1197,11 @@ public:
 
         // <key>*
         while (get_optional("key"))
-            keys.push_back( m_pAnalyser->analyse_node(&m_pChildToAnalyse, NULL) );
+            keys.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
 
         // <time>*
         while (get_optional("time"))
-            times.push_back( m_pAnalyser->analyse_node(&m_pChildToAnalyse, NULL) );
+            times.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
 
         // [<staves>]
         if (get_optional("staves"))
@@ -1236,7 +1222,7 @@ public:
 
         // <clef>*
         while (get_optional("clef"))
-            clefs.push_back( m_pAnalyser->analyse_node(&m_pChildToAnalyse, NULL) );
+            clefs.push_back( m_pAnalyser->analyse_node(&m_childToAnalyse, NULL) );
 
         // <staff-details>*
         while (get_optional("staff-details"))
@@ -1334,7 +1320,7 @@ public:
         // bar-style?
         string barStyle = "";
         if (get_optional("bar-style"))
-            barStyle = m_pChildToAnalyse.value();
+            barStyle = m_childToAnalyse.value();
 
         //TODO
         // %editorial;
@@ -1438,7 +1424,7 @@ protected:
 
         if (fError)
         {
-            //report_msg(get_line_number(&m_pChildToAnalyse),
+            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Invalid or not supported <bar-style> ('" + barType
                 + "') and/or <repeat> ('" + repeat
@@ -1459,8 +1445,8 @@ protected:
     {
         //attrb: direction
         string direction = "";
-        if (has_attribute(&m_pChildToAnalyse, "direction"))
-            direction = m_pChildToAnalyse.attribute_value("direction");
+        if (has_attribute(&m_childToAnalyse, "direction"))
+            direction = m_childToAnalyse.attribute_value("direction");
         return direction;
     }
 
@@ -1482,7 +1468,7 @@ protected:
             type = k_barline_double_repetition;
         else
         {
-            //report_msg(get_line_number(&m_pChildToAnalyse),
+            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Barlines combination not supported: left = "
                 + LdpExporter::barline_type_to_ldp(leftType)
@@ -1492,7 +1478,7 @@ protected:
             type = k_barline_double;
         }
 #if 0
-        report_msg(get_line_number(&m_pChildToAnalyse),
+        report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
                 "Combining barlines: left = "
                 + LdpExporter::barline_type_to_ldp(leftType)
                 + ", right = "
@@ -1583,18 +1569,18 @@ public:
 
         // <sign>
         if (get_optional("sign"))
-            m_sign = get_string_value();    //m_pChildToAnalyse.value();
+            m_sign = get_string_value();    //m_childToAnalyse.value();
 
         if (get_optional("line"))
-            m_line = get_integer_value(0);   //(m_pChildToAnalyse);
+            m_line = get_integer_value(0);   //(m_childToAnalyse);
 
         if (get_optional("clef-octave-change"))
-            m_octaveChange = get_integer_value(0);   //(m_pChildToAnalyse);
+            m_octaveChange = get_integer_value(0);   //(m_childToAnalyse);
 
         int type = determine_clef_type();
         if (type == k_clef_undefined)
         {
-            //report_msg(get_line_number(&m_pChildToAnalyse),
+            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                     "Unknown clef '" + m_sign + "'. Assumed 'G' in line 2.");
             type = k_clef_G2;
@@ -1700,7 +1686,7 @@ protected:
 
 //    void set_symbol_size(ImoClef* pClef)
 //    {
-//        const std::string& value = m_pChildToAnalyse.first_child().value();
+//        const std::string& value = m_childToAnalyse.first_child().value();
 //        if (value == "cue")
 //            pClef->set_symbol_size(k_size_cue);
 //        else if (value == "full")
@@ -1760,7 +1746,7 @@ public:
 
     ImoObj* do_analysis()
     {
-        bool fFwd = (m_pAnalysedNode.name() == "forward");
+        bool fFwd = (m_analysedNode.name() == "forward");
         ImoStaffObj* pSO = NULL;
 
         // <duration>
@@ -2144,16 +2130,16 @@ public:
             || analyse_optional("accidental-mark", m_pAnchor)
             || analyse_optional("other-notation", m_pAnchor);
         }
-//        m_pChildToAnalyse = get_child_to_analyse();
-//        const string& name = m_pChildToAnalyse.name();
+//        m_childToAnalyse = get_child_to_analyse();
+//        const string& name = m_childToAnalyse.name();
 //        if (name == "tuplet")
 //        {
-//            ImoObj* pImo = m_pAnalyser->analyse_node(&m_pChildToAnalyse, NULL);
+//            ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
 //            m_pTupletInfo = static_cast<ImoTupletDto*>( pImo );
 //        }
 //            if (name == "tuplet")
 //            {
-//                ImoObj* pImo = m_pAnalyser->analyse_node(&m_pChildToAnalyse, NULL);
+//                ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
 //                m_pTupletInfo = static_cast<ImoTupletDto*>( pImo );
 //            }
 //            else
@@ -2266,7 +2252,7 @@ public:
         // [<type>]
         string type;
         if (get_optional("type"))
-            type = m_pChildToAnalyse.value();
+            type = m_childToAnalyse.value();
 
         // <dot>*
         int dots = 0;
@@ -2384,9 +2370,9 @@ protected:
         //@ >
 
         //returns value of measure attrib. (true or false)
-        if (has_attribute(&m_pChildToAnalyse, "measure"))
+        if (has_attribute(&m_childToAnalyse, "measure"))
         {
-            const string& measure = m_pChildToAnalyse.attribute_value("measure");
+            const string& measure = m_childToAnalyse.attribute_value("measure");
             return measure == "yes";
         }
         else
@@ -2509,7 +2495,7 @@ protected:
 //            noteType = k_maxima;
         else
         {
-            //report_msg(get_line_number(&m_pChildToAnalyse),
+            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Invalid or not supported <type> value '" + type + "'. Replaced by 'eighth'.");
             noteType = k_eighth;
@@ -2528,7 +2514,7 @@ protected:
         //@           %print-style;
         //@>
         EAccidentals accidentals = k_no_accidentals;
-        string acc = m_pChildToAnalyse.value();  //get_string_value();
+        string acc = m_childToAnalyse.value();  //get_string_value();
         if (acc == "sharp")
             accidentals = k_sharp;
         else if (acc == "natural")
@@ -2587,7 +2573,7 @@ protected:
 
         else
         {
-            //report_msg(get_line_number(&m_pChildToAnalyse),
+            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Invalid or not supported <accidentals> value '" + acc + "'. Ignored.");
         }
@@ -2604,7 +2590,7 @@ protected:
     //----------------------------------------------------------------------------------
     void set_stem(ImoNote* pNote)
     {
-        string type = m_pChildToAnalyse.value();
+        string type = m_childToAnalyse.value();
         ENoteStem value = k_stem_default;
 
         if (type == "none")
@@ -2617,7 +2603,7 @@ protected:
             value = k_stem_double;
         else
         {
-            //report_msg(get_line_number(&m_pChildToAnalyse),
+            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Invalid or not supported <stem> value '" + type + "'. Replaced by 'default'.");
         }
@@ -2631,11 +2617,11 @@ protected:
 //
 //        while( more_children_to_analyse() )
 //        {
-//            m_pChildToAnalyse = get_child_to_analyse();
-//            ELdpElement type = get_type(m_pChildToAnalyse);
+//            m_childToAnalyse = get_child_to_analyse();
+//            ELdpElement type = get_type(m_childToAnalyse);
 //            if (type == k_tuplet)
 //            {
-//                ImoObj* pImo = m_pAnalyser->analyse_node(&m_pChildToAnalyse, NULL);
+//                ImoObj* pImo = m_pAnalyser->analyse_node(&m_childToAnalyse, NULL);
 //                m_pTupletInfo = static_cast<ImoTupletDto*>( pImo );
 //            }
 //            else
@@ -2658,11 +2644,11 @@ protected:
         //@ <!ATTLIST beam number %beam-level; "1" repeater %yes-no; #IMPLIED >
 
         // attrib: number
-        const string& level = m_pChildToAnalyse.attribute_value("number");
+        const string& level = m_childToAnalyse.attribute_value("number");
         int iLevel;
         if (m_pAnalyser->to_integer(level, &iLevel))
         {
-            //report_msg(get_line_number(&m_pChildToAnalyse),
+            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Missing or invalid beam number '" + level + "'. Beam ignored.");
             return;
@@ -2670,14 +2656,14 @@ protected:
 
         if (iLevel <= 0 || iLevel > 6)
         {
-            //report_msg(get_line_number(&m_pChildToAnalyse),
+            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Invalid beam number '" + level +"'. Beam ignored.");
             return;
         }
 
         // value: beam type
-        const string& type = m_pChildToAnalyse.value();
+        const string& type = m_childToAnalyse.value();
         int iType = ImoBeam::k_none;
         if (type == "begin")
             iType = ImoBeam::k_begin;
@@ -2691,7 +2677,7 @@ protected:
             iType = ImoBeam::k_backward;
         else
         {
-            //report_msg(get_line_number(&m_pChildToAnalyse),
+            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Invalid or not supported <beam> value '" + type + "'. Beam ignored");
             return;
@@ -2916,7 +2902,7 @@ public:
         if (fVisible)
         {
             //get value
-            string name = m_pAnalysedNode.value();
+            string name = m_analysedNode.value();
             if (!name.empty())
             {
                 Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -3019,13 +3005,13 @@ public:
         //anchor object is ImoNote
 
         // <step>
-        string step = (get_mandatory("step") ? m_pChildToAnalyse.value() : "C");
+        string step = (get_mandatory("step") ? m_childToAnalyse.value() : "C");
 
         // [<alter>]
-        string accidentals = (get_optional("alter") ? m_pChildToAnalyse.value() : "0");
+        string accidentals = (get_optional("alter") ? m_childToAnalyse.value() : "0");
 
         // <octave>
-        string octave = (get_mandatory("octave") ? m_pChildToAnalyse.value() : "4");
+        string octave = (get_mandatory("octave") ? m_childToAnalyse.value() : "4");
 
         error_if_more_elements();
 
@@ -3054,7 +3040,7 @@ protected:
             case 'G':	return k_step_G;
             default:
             {
-                //report_msg(get_line_number(&m_pChildToAnalyse),
+                //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
                 error_msg2(
                     "Unknown note step '" + step + "'. Replaced by 'C'.");
                 return k_step_C;
@@ -3081,7 +3067,7 @@ protected:
             case '9':	return 9;
             default:
             {
-                //report_msg(get_line_number(&m_pChildToAnalyse),
+                //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
                 error_msg2(
                     "Unknown octave '" + octave + "'. Replaced by '4'.");
                 return 4;
@@ -3108,7 +3094,7 @@ protected:
         std::istringstream iss(accidentals);
         if ((iss >> std::dec >> nNumber).fail() || nNumber > 2 || nNumber < -2)
         {
-            //report_msg(get_line_number(&m_pChildToAnalyse),
+            //report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
             error_msg2(
                 "Invalid or not supported <alter> value '" + accidentals + "'. Ignored.");
             return k_no_accidentals;
@@ -3300,7 +3286,7 @@ protected:
 //    {
 //        // <staves> = (staves <num>)
 //
-//        XmlNode* pValue = get_first_child(m_pChildToAnalyse);
+//        XmlNode* pValue = get_first_child(m_childToAnalyse);
 //        string staves = get_value(pValue);
 //        int nStaves;
 //        bool fError = !is_type(pValue, k_number);
@@ -3311,7 +3297,7 @@ protected:
 //        }
 //        if (fError)
 //        {
-//            report_msg(get_line_number(&m_pChildToAnalyse),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                "Invalid value '" + staves + "' for staves. Replaced by 1.");
 //        }
 //        else
@@ -3352,7 +3338,7 @@ protected:
 //        // [num_channel]
 //        if (get_optional(k_number) && !set_channel(pInfo))
 //        {
-//            report_msg(get_line_number(&m_pAnalysedNode),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                        "Invalid MIDI channel (0..15). Channel info ignored.");
 //        }
 //
@@ -3692,7 +3678,7 @@ public:
 //
 //    void set_x_in_point(int i, ImoBezierInfo* pBezier)
 //    {
-//        m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
+//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
 //        float value = get_float_value(0.0f);
 //        TPoint& point = pBezier->get_point(i);
 //        point.x = value;
@@ -3700,7 +3686,7 @@ public:
 //
 //    void set_y_in_point(int i, ImoBezierInfo* pBezier)
 //    {
-//        m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
+//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
 //        float value = get_float_value(0.0f);
 //        TPoint& point = pBezier->get_point(i);
 //        point.y = value;
@@ -3820,7 +3806,7 @@ public:
 //
 //    ImoObj* do_analysis()
 //    {
-//        string value = get_value(m_pAnalysedNode);
+//        string value = get_value(m_analysedNode);
 //        ImoColorDto* pColor = LOMSE_NEW ImoColorDto();
 //        pColor->set_from_string(value);
 //        if (!pColor->is_ok())
@@ -4004,7 +3990,7 @@ public:
 //            return ImoStyle::k_font_style_italic;
 //        else
 //        {
-//            report_msg(get_line_number(&m_pChildToAnalyse),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                "Unknown font-style '" + value + "'. Replaced by 'normal'.");
 //            return ImoStyle::k_font_normal;
 //        }
@@ -4019,7 +4005,7 @@ public:
 //            return ImoStyle::k_font_weight_bold;
 //        else
 //        {
-//            report_msg(get_line_number(&m_pChildToAnalyse),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                "Unknown font-weight '" + value + "'. Replaced by 'normal'.");
 //            return ImoStyle::k_font_normal;
 //        }
@@ -4038,7 +4024,7 @@ public:
 //            return ImoStyle::k_decoration_line_through;
 //        else
 //        {
-//            report_msg(get_line_number(&m_pChildToAnalyse),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                "Unknown text decoration value '" + value + "'. Replaced by 'none'.");
 //            return ImoStyle::k_decoration_none;
 //        }
@@ -4065,7 +4051,7 @@ public:
 //            return ImoStyle::k_valign_text_bottom;
 //        else
 //        {
-//            report_msg(get_line_number(&m_pChildToAnalyse),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                "Unknown vertical align '" + value + "'. Replaced by 'baseline'.");
 //            return ImoStyle::k_valign_baseline;
 //        }
@@ -4084,7 +4070,7 @@ public:
 //            return ImoStyle::k_align_justify;
 //        else
 //        {
-//            report_msg(get_line_number(&m_pChildToAnalyse),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                "Unknown text align '" + value + "'. Replaced by 'left'.");
 //            return ImoStyle::k_align_left;
 //        }
@@ -4180,7 +4166,7 @@ public:
             pImo->set_placement(k_placement_below);
         else
         {
-            report_msg(get_line_number(&m_pChildToAnalyse),
+            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
                 "Unknown fermata type '" + type + "'. Ignored.");
         }
     }
@@ -4374,7 +4360,7 @@ public:
 //
 //    void set_font_style_weight(ImoFontStyleDto* pFont)
 //    {
-//        const string& value = m_pChildToAnalyse.value();
+//        const string& value = m_childToAnalyse.value();
 //        if (value == "bold")
 //        {
 //            pFont->weight = ImoStyle::k_font_weight_bold;
@@ -4397,7 +4383,7 @@ public:
 //        }
 //        else
 //        {
-//            report_msg(get_line_number(&m_pChildToAnalyse),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                "Unknown font style '" + value + "'. Replaced by 'normal'.");
 //            pFont->weight = ImoStyle::k_font_weight_normal;
 //            pFont->style = ImoStyle::k_font_style_normal;
@@ -4474,7 +4460,7 @@ public:
 //
 //    bool set_symbol(ImoInstrGroup* pGrp)
 //    {
-//        m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
+//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
 //        string symbol = get_string_value();
 //        if (symbol == "brace")
 //            pGrp->set_symbol(ImoInstrGroup::k_brace);
@@ -4490,7 +4476,7 @@ public:
 //
 //    void set_join_barlines(ImoInstrGroup* pGrp)
 //    {
-//        m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
+//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
 //        pGrp->set_join_barlines( get_bool_value(true) );
 //    }
 //
@@ -4609,7 +4595,7 @@ public:
 //            }
 //            else
 //            {
-//                report_msg(get_line_number(&m_pAnalysedNode),
+//                report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                        "Error in metronome parameters. Replaced by '(metronome 60)'.");
 //                pMtr->set_ticks_per_minute(60);
 //                pMtr->set_mark_type(ImoMetronomeMark::k_value);
@@ -4625,7 +4611,7 @@ public:
 //        }
 //        else
 //        {
-//            report_msg(get_line_number(&m_pAnalysedNode),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                    "Missing metronome parameters. Replaced by '(metronome 60)'.");
 //            pMtr->set_ticks_per_minute(60);
 //            pMtr->set_mark_type(ImoMetronomeMark::k_value);
@@ -4636,7 +4622,7 @@ public:
 //        // [parenthesis]
 //        if (get_optional(k_label))
 //        {
-//            if (m_pChildToAnalyse.value() == "parenthesis")
+//            if (m_childToAnalyse.value() == "parenthesis")
 //                pMtr->set_parenthesis(true);
 //            else
 //                error_invalid_child();
@@ -4671,7 +4657,7 @@ public:
 //        // <name> (label)
 //        string name;
 //        if (get_mandatory(k_label))
-//            name = m_pChildToAnalyse.value();
+//            name = m_childToAnalyse.value();
 //
 //        // <value> { number | label | string }
 //        if (get_optional(k_label) || get_optional(k_number) || get_optional(k_string))
@@ -4683,10 +4669,10 @@ public:
 //            {
 //                if ( is_bool_option(name) || is_number_long_option(name)
 //                     || is_number_float_option(name) || is_string_option(name) )
-//                    report_msg(get_line_number(&m_pChildToAnalyse),
+//                    report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                        "Invalid value for option '" + name + "'. Option ignored.");
 //                else
-//                    report_msg(get_line_number(&m_pChildToAnalyse),
+//                    report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                        "Invalid option '" + name + "'. Option ignored.");
 //            }
 //        }
@@ -4786,7 +4772,7 @@ public:
 //
 //    bool set_string_value(ImoOptionInfo* pOpt)
 //    {
-//        string value = m_pChildToAnalyse.value();
+//        string value = m_childToAnalyse.value();
 //        pOpt->set_string_value( value );
 //        pOpt->set_type(ImoOptionInfo::k_string);
 //        return true;   //no error
@@ -4823,7 +4809,7 @@ public:
 //        // [ "portrait" | "landscape" ]
 //        if (!get_mandatory(k_label) || !set_orientation(pInfo))
 //        {
-//            report_msg(get_line_number(&m_pChildToAnalyse),
+//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                    "Invalid orientation. Expected 'portrait' or 'landscape'."
 //                    " 'portrait' assumed.");
 //            pInfo->set_portrait(true);
@@ -4840,7 +4826,7 @@ public:
 //    bool set_orientation(ImoPageInfo* pInfo)
 //    {
 //        // return true if ok
-//        string type = m_pChildToAnalyse.value();
+//        string type = m_childToAnalyse.value();
 //        if (type == "portrait")
 //        {
 //            pInfo->set_portrait(true);
@@ -5042,14 +5028,14 @@ public:
 //        if (get_optional(k_color))
 //            pInfo->set_color( get_color_child() );
 //
-//        return pInfo;   //set_imo(m_pAnalysedNode, pInfo);
+//        return pInfo;   //set_imo(m_analysedNode, pInfo);
 //    }
 //
 //protected:
 //
 //    bool set_slur_type(ImoSlurDto* pInfo)
 //    {
-//        const std::string& value = m_pChildToAnalyse.value();
+//        const std::string& value = m_childToAnalyse.value();
 //        if (value == "start")
 //            pInfo->set_slur_type(ImoSlurData::k_start);
 //        else if (value == "stop")
@@ -5151,21 +5137,21 @@ public:
 //        // [<staffSpacing>]
 //        if (get_optional(k_staffSpacing))
 //        {
-//            m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
+//            m_childToAnalyse = get_child(m_childToAnalyse, 1);
 //            pInfo->set_line_spacing( get_float_value(180.0f));
 //        }
 //
 //        //[<staffDistance>]
 //        if (get_optional(k_staffDistance))
 //        {
-//            m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
+//            m_childToAnalyse = get_child(m_childToAnalyse, 1);
 //            pInfo->set_staff_margin( get_float_value(1000.0f));
 //        }
 //
 //        //[<lineThickness>]
 //        if (get_optional(k_lineThickness))
 //        {
-//            m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
+//            m_childToAnalyse = get_child(m_childToAnalyse, 1);
 //            pInfo->set_line_thickness( get_float_value(15.0f));
 //        }
 //
@@ -5188,7 +5174,7 @@ public:
 //
 //    void set_staff_type(ImoStaffInfo* pInfo)
 //    {
-//        const std::string& value = get_value( get_child(m_pChildToAnalyse, 1) );
+//        const std::string& value = get_value( get_child(m_childToAnalyse, 1) );
 //        if (value == "ossia")
 //            pInfo->set_staff_type(ImoStaffInfo::k_staff_ossia);
 //        else if (value == "cue")
@@ -5205,7 +5191,7 @@ public:
 //
 //    void set_staff_lines(ImoStaffInfo* pInfo)
 //    {
-//        m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
+//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
 //
 //        int value = get_integer_value(0);
 //        if (value < 1)
@@ -5260,14 +5246,14 @@ public:
 //        // {first | other} <label>
 //        if (get_mandatory(k_label))
 //        {
-//            string type = m_pChildToAnalyse.value();
+//            string type = m_childToAnalyse.value();
 //            if (type == "first")
 //                pInfo->set_first(true);
 //            else if (type == "other")
 //                pInfo->set_first(false);
 //            else
 //            {
-//                report_msg(get_line_number(&m_pChildToAnalyse),
+//                report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
 //                        "Expected 'first' or 'other' value but found '" + type
 //                        + "'. 'first' assumed.");
 //                pInfo->set_first(true);
@@ -5355,7 +5341,7 @@ public:
 //            pStyle = get_doc_text_style( get_attribute("style") );
 //
 //        // <string>
-//        string value = get_value(m_pAnalysedNode);
+//        string value = get_value(m_analysedNode);
 //        if (value.empty())
 //        {
 //            error_msg("txt: missing mandatory value 'string'. Element <txt> ignored.");
@@ -5740,7 +5726,7 @@ protected:
 //            analyse_tuplet_options(pInfo);
 //        }
 //
-//        return pInfo;   //set_imo(m_pAnalysedNode, pInfo);
+//        return pInfo;   //set_imo(m_analysedNode, pInfo);
 //    }
 //
 //protected:
@@ -5760,7 +5746,7 @@ protected:
 //
 //    bool set_tuplet_type(ImoTupletDto* pInfo)
 //    {
-//        const std::string& value = m_pChildToAnalyse.value();
+//        const std::string& value = m_childToAnalyse.value();
 //        if (value == "+")
 //            pInfo->set_tuplet_type(ImoTupletDto::k_start);
 //        else if (value == "-")
@@ -5804,13 +5790,13 @@ protected:
 //        int nShowNumber = m_pAnalyser->get_current_show_tuplet_number();
 //        while( more_children_to_analyse() )
 //        {
-//            m_pChildToAnalyse = get_child_to_analyse();
-//            ELdpElement type = get_type(m_pChildToAnalyse);
+//            m_childToAnalyse = get_child_to_analyse();
+//            ELdpElement type = get_type(m_childToAnalyse);
 //            switch (type)
 //            {
 //                case k_label:
 //                {
-//                    const std::string& value = m_pChildToAnalyse.value();
+//                    const std::string& value = m_childToAnalyse.value();
 //                    if (value == "noBracket")
 //                        nShowBracket = k_yesno_no;
 //                    else
@@ -5820,15 +5806,15 @@ protected:
 //
 //                case k_displayBracket:
 //                {
-//                    m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
+//                    m_childToAnalyse = get_child(m_childToAnalyse, 1);
 //                    nShowBracket = get_yes_no_value(k_yesno_default);
 //                    break;
 //                }
 //
 //                case k_displayNumber:
 //                {
-//                    m_pChildToAnalyse = get_child(m_pChildToAnalyse, 1);
-//                    const std::string& value = m_pChildToAnalyse.value();
+//                    m_childToAnalyse = get_child(m_childToAnalyse, 1);
+//                    const std::string& value = m_childToAnalyse.value();
 //                    if (value == "none")
 //                        nShowNumber = ImoTuplet::k_number_none;
 //                    else if (value == "actual")
@@ -5960,6 +5946,12 @@ ImoObj* MxlAnalyser::analyse_node(XmlNode* pNode, ImoObj* pAnchor)
     ImoObj* pImo = a->analyse_node(pNode);
     delete a;
     return pImo;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::get_line_number(XmlNode* node)
+{
+    return m_pParser->get_line_number(node);
 }
 
 //---------------------------------------------------------------------------------------

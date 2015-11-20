@@ -81,6 +81,13 @@ string XmlNode::value()
     return "";
 }
 
+//---------------------------------------------------------------------------------------
+ptrdiff_t XmlNode::offset()
+{
+    return m_node.offset_debug();
+}
+
+
 //=======================================================================================
 // XmlParser implementation
 //=======================================================================================
@@ -88,6 +95,7 @@ XmlParser::XmlParser(ostream& reporter)
     : Parser(reporter)
     , m_root()
     , m_errorOffset(0)
+    , m_fOffsetDataReady(false)
 {
 }
 
@@ -111,6 +119,8 @@ void XmlParser::parse_cstring(char* sourceText)
 //---------------------------------------------------------------------------------------
 void XmlParser::parse_file(const std::string& filename, bool fErrorMsg)
 {
+    m_fOffsetDataReady = false;
+    m_filename = filename;
     pugi::xml_parse_result result = m_doc.load_file(filename.c_str());
 
     if (!result)
@@ -124,6 +134,8 @@ void XmlParser::parse_file(const std::string& filename, bool fErrorMsg)
 //---------------------------------------------------------------------------------------
 void XmlParser::parse_char_string(char* str)
 {
+    m_fOffsetDataReady = false;
+    m_filename.clear();
     pugi::xml_parse_result result = m_doc.load_string(str, pugi::parse_default | pugi::parse_declaration);
 
     if (!result)
@@ -148,6 +160,70 @@ void XmlParser::find_root()
         root = root.next_sibling();
 
     m_root = XmlNode(root);
+}
+
+//---------------------------------------------------------------------------------------
+bool XmlParser::build_offset_data(const char* file)
+{
+    //AWARE:
+    // * Windows and DOS use a pair of CR (\r) and LF (\n) chars to end lines
+    // * UNIX (including Linux and FreeBSD) uses only an LF char
+    // * OS X also uses a single LF character
+    // * The old classic Mac operating system used a single CR char
+    //This code does not handle old Mac-style line breaks but it is not expected
+    //to run in these old machines.
+    //Also, this code does not handle tabs, that are counted as 1 char
+
+    m_offsetData.clear();
+
+    FILE* f = fopen(file, "rb");
+    if (!f)
+        return false;
+
+    ptrdiff_t offset = 0;
+
+    char buffer[1024];
+    size_t size;
+
+    while ((size = fread(buffer, 1, sizeof(buffer), f)) > 0)
+    {
+        for (size_t i = 0; i < size; ++i)
+            if (buffer[i] == '\n')
+                m_offsetData.push_back(offset + i);
+
+        offset += size;
+    }
+
+    fclose(f);
+
+    return true;
+}
+
+//---------------------------------------------------------------------------------------
+std::pair<int, int> XmlParser::get_location(ptrdiff_t offset)
+{
+    vector<ptrdiff_t>::const_iterator it =
+        std::lower_bound(m_offsetData.begin(), m_offsetData.end(), offset);
+    size_t index = it - m_offsetData.begin();
+
+    return std::make_pair(1 + index, index == 0 ? offset + 1
+                                                : offset - m_offsetData[index - 1]);
+}
+
+//---------------------------------------------------------------------------------------
+int XmlParser::get_line_number(XmlNode* node)
+{
+    ptrdiff_t offset = node->offset();
+    if (!m_fOffsetDataReady && !m_filename.empty())
+        m_fOffsetDataReady = build_offset_data(m_filename.c_str());
+
+    if ( m_fOffsetDataReady)
+    {
+        std::pair<int, int> pos = get_location(offset);
+        return pos.first;
+    }
+    else
+        return 0;
 }
 
 
