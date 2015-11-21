@@ -1,6 +1,0 @@
-(lenmusdoc (vers 0.0) 
-    (content 
-        (para (image (file "metronome_image.png")) )
-    )
-)
-

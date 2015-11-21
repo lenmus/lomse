@@ -1,6 +1,6 @@
 (lenmusdoc (vers 0.0) 
     (content 
-        (para (image (file "test-image-rgb.jpg")) )
+        (para (image (file "test-image-2.jpg")) )
     )
 )
 

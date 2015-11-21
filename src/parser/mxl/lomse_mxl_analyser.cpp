@@ -56,6 +56,7 @@
 #include "lomse_score_player_ctrl.h"
 #include "lomse_ldp_parser.h"
 #include "lomse_ldp_analyser.h"
+#include "lomse_time.h"
 
 using namespace std;
 
@@ -2395,66 +2396,28 @@ protected:
         else
         {
             //<type> is not required in multi-metric rests. And, in any
-            //case it is not mandatory. If not present, <type> and <dots>
+            //case it is not mandatory. If not present, <type>
             //must be derived from <duration>.
-            dots = 0;
-            noteType = k_whole;
-            //TODO
-//            if (units >= k_duration_whole_dotted)
-//            {
-//                dots = 1;
-//                noteType = k_whole;
-//            }
-//            if (units >= k_duration_whole)
-//            {
-//                dots = 0;
-//                noteType = k_whole;
-//            }
-//            else if (units >= k_duration_half_dotted)
-//            {
-//                dots = 1;
-//                noteType = k_duration_half_dotted;
-//            }
-//            else if (units >= k_duration_half)
-//            {
-//                dots = 0;
-//                noteType = k_half;
-//            }
-//            else if (units >= k_duration_quarter_dotted)
-//            {
-//                dots = 1;
-//                noteType = k_duration_quarter_dotted;
-//            }
-//            else if (units >= k_duration_eighth_dotted)
-//            {
-//                dots = 1;
-//                noteType = k_duration_eighth_dotted;
-//            }
-//            else if (units >= k_duration_16th_dotted)
-//            {
-//                dots = 1;
-//                noteType = k_duration_16th_dotted;
-//            }
-//            else if (units >= k_duration_32th_dotted)
-//            {
-//                dots = 1;
-//                noteType = k_duration_32th_dotted;
-//            }
-//            else if (units >= k_duration_64th_dotted)
-//            {
-//                dots = 1;
-//                noteType = k_duration_64th_dotted;
-//            }
-//            else if (units >= k_duration_128th_dotted)
-//            {
-//                dots = 1;
-//                noteType = k_duration_128th_dotted;
-//            }
-//            else
-//            {
-//                dots = 0;
-//                noteType = k_duration_256th;
-//            }
+            if (is_equal_time(units, k_duration_longa))
+                noteType = k_longa;
+            else if (is_equal_time(units, k_duration_whole))
+                noteType = k_whole;
+            else if (is_equal_time(units, k_duration_half))
+                noteType = k_half;
+            else if (is_equal_time(units, k_duration_quarter))
+                noteType = k_duration_quarter;
+            else if (is_equal_time(units, k_duration_eighth))
+                noteType = k_duration_eighth;
+            else if (is_equal_time(units, k_duration_16th))
+                noteType = k_duration_16th;
+            else if (is_equal_time(units, k_duration_32th))
+                noteType = k_duration_32th;
+            else if (is_equal_time(units, k_duration_64th))
+                noteType = k_duration_64th;
+            else if (is_equal_time(units, k_duration_128th))
+                noteType = k_duration_128th;
+            else
+                noteType = k_duration_256th;
         }
 
         pNR->set_type_dots_duration(noteType, dots, units);

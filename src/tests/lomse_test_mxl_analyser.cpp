@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -823,7 +823,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote != NULL );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_16th );
+        CHECK( pNote->get_note_type() == k_whole );
         CHECK( pNote->get_octave() == 4 );
         CHECK( pNote->get_step() == k_step_C );
         CHECK( pNote->get_duration() == k_duration_whole );
@@ -873,7 +873,7 @@ SUITE(MxlAnalyserTest)
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_303)
     {
-        //@00303 alter
+        //@00303 alter. Duration different from type
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -899,7 +899,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->get_note_type() == k_eighth );
         CHECK( pNote->get_octave() == 5 );
         CHECK( pNote->get_step() == k_step_G );
-        CHECK( pNote->get_duration() == k_duration_eighth );
+        CHECK( pNote->get_duration() == k_duration_whole );
         CHECK( pNote->is_in_chord() == false );
         CHECK( pNote->is_start_of_chord() == false );
         CHECK( pNote->is_end_of_chord() == false );
@@ -917,7 +917,7 @@ SUITE(MxlAnalyserTest)
         stringstream expected;
         parser.parse_text("<note><pitch><step>B</step>"
             "<octave>1</octave></pitch>"
-            "<duration>4</duration><type>half</type>"
+            "<duration>1</duration><type>half</type>"
             "<accidental>sharp</accidental></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
@@ -937,7 +937,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->get_note_type() == k_half );
         CHECK( pNote->get_octave() == 1 );
         CHECK( pNote->get_step() == k_step_B );
-        CHECK( pNote->get_duration() == k_duration_half );
+        CHECK( pNote->get_duration() == k_duration_quarter );
         CHECK( pNote->is_in_chord() == false );
         CHECK( pNote->is_start_of_chord() == false );
         CHECK( pNote->is_end_of_chord() == false );
@@ -955,7 +955,7 @@ SUITE(MxlAnalyserTest)
         stringstream expected;
         parser.parse_text("<note><pitch><step>A</step>"
             "<octave>3</octave></pitch>"
-            "<duration>4</duration><type>16th</type>"
+            "<duration>4</duration><type>whole</type>"
             "<staff>2</staff></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
@@ -972,10 +972,10 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->get_actual_accidentals() == k_no_accidentals );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_16th );
+        CHECK( pNote->get_note_type() == k_whole );
         CHECK( pNote->get_octave() == 3 );
         CHECK( pNote->get_step() == k_step_A );
-        CHECK( pNote->get_duration() == k_duration_16th );
+        CHECK( pNote->get_duration() == k_duration_whole );
         CHECK( pNote->is_in_chord() == false );
         CHECK( pNote->is_start_of_chord() == false );
         CHECK( pNote->is_end_of_chord() == false );
@@ -994,7 +994,7 @@ SUITE(MxlAnalyserTest)
         stringstream expected;
         parser.parse_text("<note><pitch><step>A</step>"
             "<octave>3</octave></pitch>"
-            "<duration>4</duration><type>16th</type>"
+            "<duration>1</duration><type>quarter</type>"
             "<stem>down</stem></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
@@ -1011,10 +1011,10 @@ SUITE(MxlAnalyserTest)
         CHECK( pNote->get_actual_accidentals() == k_no_accidentals );
         CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
         CHECK( pNote->get_dots() == 0 );
-        CHECK( pNote->get_note_type() == k_16th );
+        CHECK( pNote->get_note_type() == k_quarter );
         CHECK( pNote->get_octave() == 3 );
         CHECK( pNote->get_step() == k_step_A );
-        CHECK( pNote->get_duration() == k_duration_16th );
+        CHECK( pNote->get_duration() == k_duration_quarter );
         CHECK( pNote->get_stem_direction() == k_stem_down );
 
         a.do_not_delete_instruments_in_destructor();
@@ -1138,6 +1138,43 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_309)
+    {
+        //@00309. Type implied by duration
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        parser.parse_text("<note><pitch><step>G</step><alter>-1</alter>"
+            "<octave>5</octave></pitch>"
+            "<duration>2</duration></note>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "Test 00303" << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_note() == true );
+        ImoNote* pNote = dynamic_cast<ImoNote*>( pIModel->get_root() );
+        CHECK( pNote != NULL );
+        CHECK( pNote->get_actual_accidentals() == k_flat );
+        CHECK( pNote->get_notated_accidentals() == k_no_accidentals );
+        CHECK( pNote->get_dots() == 0 );
+        CHECK( pNote->get_note_type() == k_half );
+        CHECK( pNote->get_octave() == 5 );
+        CHECK( pNote->get_step() == k_step_G );
+        CHECK( pNote->get_duration() == k_duration_half );
+        CHECK( pNote->is_in_chord() == false );
+        CHECK( pNote->is_start_of_chord() == false );
+        CHECK( pNote->is_end_of_chord() == false );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
 //    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_note_309)
 //    {
 //        //@00309 timepos is computed right
@@ -1248,7 +1285,7 @@ SUITE(MxlAnalyserTest)
         XmlParser parser;
         stringstream expected;
         parser.parse_text("<note><rest/>"
-            "<duration>4</duration><type>16th</type>"
+            "<duration>1</duration><type>quarter</type>"
             "<staff>2</staff></note>");
         MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
@@ -1263,8 +1300,8 @@ SUITE(MxlAnalyserTest)
         ImoRest* pRest = dynamic_cast<ImoRest*>( pIModel->get_root() );
         CHECK( pRest != NULL );
         CHECK( pRest->get_dots() == 0 );
-        CHECK( pRest->get_note_type() == k_16th );
-        CHECK( pRest->get_duration() == k_duration_16th );
+        CHECK( pRest->get_note_type() == k_quarter );
+        CHECK( pRest->get_duration() == k_duration_quarter );
         CHECK( pRest->get_staff() == 1 );
 
         a.do_not_delete_instruments_in_destructor();
