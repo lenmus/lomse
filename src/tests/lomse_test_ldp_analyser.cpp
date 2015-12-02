@@ -44,6 +44,7 @@
 #include "lomse_doorway.h"
 #include "lomse_im_factory.h"
 #include "lomse_time.h"
+#include "lomse_file_system.h"
 
 using namespace UnitTest;
 using namespace std;
@@ -54,6 +55,7 @@ class LdpAnalyserTestFixture
 {
 public:
     LibraryScope m_libraryScope;
+    string m_scores_path;
     int m_requestType;
     bool m_fRequestReceived;
     ImoDocument* m_pDoc;
@@ -61,6 +63,7 @@ public:
 
     LdpAnalyserTestFixture()     //SetUp fixture
         : m_libraryScope(cout)
+        , m_scores_path(TESTLIB_SCORES_PATH)
         , m_requestType(k_null_request)
         , m_fRequestReceived(false)
         , m_pDoc(NULL)
@@ -8884,30 +8887,29 @@ SUITE(LdpAnalyserTest)
 
     // image ----------------------------------------------------------------------------
 
-//    TEST_FIXTURE(LdpAnalyserTestFixture, Image_Ok)
-//    {
-//        stringstream errormsg;
-//        Document doc(m_libraryScope);
-//        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
-//        stringstream expected;
-//        //expected << "Line 0. " << endl;
-//        parser.parse_text(
-//            "(image (file \"test-image-1.png\"))");
-//        LdpTree* tree = parser.get_ldp_tree();
-//        LdpAnalyser a(errormsg, m_libraryScope, &doc);
-//        InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//
+    TEST_FIXTURE(LdpAnalyserTestFixture, Image_Ok)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text(
+            "(image (file \"test-image-1.png\"))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, m_scores_path);
+
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
-//        CHECK( errormsg.str() == expected.str() );
-//
-//        ImoImage* pImg = dynamic_cast<ImoImage*>( pIModel->get_root() );
-//        CHECK( pImg != NULL );
-//        //CHECK( pImg->get_locator() == "chopin.png" );
-//
-//        delete tree->get_root();
-//        delete pIModel;
-//    }
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoImage* pImg = dynamic_cast<ImoImage*>( pIModel->get_root() );
+        CHECK( pImg != NULL );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
 
     // list -----------------------------------------------------------------------------
 

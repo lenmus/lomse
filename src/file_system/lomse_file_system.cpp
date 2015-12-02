@@ -170,7 +170,7 @@ string LmbDocLocator::get_locator_for_image_lms_format(const string& imagename)
     if (m_innerProtocol != k_zip)
     {
         //support for tests (win & Linux): images in the same folder than lms file
-        return "file:" + m_path + imagename;
+        //return m_path + imagename;
 
         //remove lms file from path
         int iMax = int( m_path.length() );
@@ -178,7 +178,6 @@ string LmbDocLocator::get_locator_for_image_lms_format(const string& imagename)
         for (; i >=0 && !(m_path[i] == '/' || m_path[i] == '\\'); --i);
         if (i >= 0)
             return m_path.substr(0, i+1) + imagename;
-
     }
     //normal behaviour: zip assumed
     return get_protocol_string() + get_path() + "#zip:" + imagename;
