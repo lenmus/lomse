@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lenmusdoc id="0" vers="0.0" language="en">
+   <styles>
+      <defineStyle>
+         <name>eBook_heading_1</name>
+         <font-name>Liberation serif</font-name>
+         <font-size>16pt</font-size>
+         <font-style>normal</font-style>
+         <font-weight>bold</font-weight>
+         <color>#000000ff</color>
+         <margin-top>0</margin-top>
+         <margin-bottom>300</margin-bottom>
+      </defineStyle>
+      <defineStyle>
+         <name>eBook_para</name>
+         <margin-bottom>420</margin-bottom>
+      </defineStyle>
+   </styles>
+
+   <content> 
+      <section level="1" style="eBook_heading_1">2.1. Rhythmic dictation
+      </section> 
+      <para style="eBook_para">You first hear two measures of pulse and then a rhythmic phrase. Listen to the rhythmic phrase. Click on the correct rhythmic element, found under the place where it should be placed on the staf
+      </para> 
+      <content>     <!--<dynamic id="25" style="Default style">-->
+         <para>
+         </para>
+         <para>
+            This is a link      This is another link
+         </para>
+         <content>
+            <para style="Default style">
+            </para>
+            <ldpmusic>
+               (score#64 (vers 2.0)
+                  (systemLayout first 
+                     (systemMargins 0 0 2000 540))
+                  (instrument#65 
+                     (staves 1)
+                     (musicData#66 
+
+                        /* measure 1 */
+                        (clef#67 G p1 )
+                        (key#68 C)
+                        (time#69 2 4)
+                        (n#71 e4 q v1  p1 )
+                        (n#72 g4 q v1  p1 )
+                        (barline#73 simple)
+
+                        /* measure 2 */
+                        (r#75 q v1  p1 )
+                        (n#76 g4 q v1  p1 )
+                        (barline#77 simple)
+
+                        /* measure 3 */
+                        (n#79 g4 q v1  p1 )
+                        (n#80 g4 q v1  p1 )
+                        (barline#81 simple)
+
+                        /* measure 4 */
+                        (n#83 f4 q v1  p1 )
+                        (n#84 f4 q v1  p1 )
+                        (barline#85 simple)
+
+                        /* measure 5 */
+                        (n#87 f4 q v1  p1 )
+                        (r#88 q v1  p1 )
+                        (barline#89 simple)
+
+                        /* measure 6 */
+                        (r#91 q v1  p1 )
+                        (n#92 g4 q v1  p1 )
+                        (barline#93 simple)
+
+                        /* measure 7 */
+                        (n#95 f4 q v1  p1 )
+                        (n#96 f4 q v1  p1 )
+                        (barline#97 simple)
+
+                        /* measure 8 */
+                        (n#99 e4 q v1  p1 )
+                        (r#100 q v1  p1 )
+                        (barline#101 end)
+                     )
+                  )
+               )
+            </ldpmusic>
+         </content>
+      </content>    <!--</dynamic>-->
+     <para>A paragraph for testing cursor</para>
+   </content>
+</lenmusdoc>
