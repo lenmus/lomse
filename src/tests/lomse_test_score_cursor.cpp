@@ -1769,7 +1769,7 @@ SUITE(ScoreCursorTest)
 ////    {
 ////        //1. skip objects
 ////        Document doc(m_libraryScope);
-////        doc.from_file(m_scores_path + "90013-two-instruments-four-staves.lms" );
+////        doc.from_file(m_scores_path + "01013-two-instruments-four-staves.lms" );
 ////        DocCursor cursor(m_pDoc);
 ////        cursor.enter_element();
 ////        cursor.point_to(23L);

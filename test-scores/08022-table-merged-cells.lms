@@ -12,39 +12,8 @@
         (defineStyle "table1-col2" (table-col-width 2000))
         (defineStyle "table1-col3" (table-col-width 1500))
         (defineStyle "table1-col4" (table-col-width 4000))
-        )
-    
-    (pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape)
-    
+    )
     (content
-        (para
-            (txt "Hello gfyp World!")
-            (txt (style "red") " This is a test. WMtyqgpixmn")
-        )
-
-        (score
-           (vers 1.6)
-           (opt Render.SpacingMethod 1)
-           (opt Render.SpacingValue 30)
-           (instrument (staves 1)
-              (musicData
-                 (clef G)
-                 (n a4 w v1)
-                 (n a4 h v1)
-                 (n a4 h v1)
-                 (n a4 q v1)
-                 (n a4 q v1)
-                 (n a4 e g+ v1)
-                 (n a4 e g- v1)
-                 (n a4 s g+ v1)
-                 (n a4 s g- v1)
-                 (n a4 t g+ v1)
-                 (n a4 t g- v1)
-              )
-           )
-        )
-
-        (para (style "table-caption") (txt "Table 1. A table with merged cells"))
         (table (style "table-1")
             (tableColumn (style "table1-col1"))
             (tableColumn (style "table1-col2"))

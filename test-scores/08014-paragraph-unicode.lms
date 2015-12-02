@@ -11,7 +11,7 @@
 
   (content
     (para (style "texts")
-        (txt (style "texts") "音乐老师  Текст на кирилица Glyph code 38899")
+        (txt (style "texts") "Chinese: 音乐老师  Russian: Текст на кирилица")
     )
 ))
 

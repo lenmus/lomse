@@ -170,6 +170,7 @@ string LmbDocLocator::get_locator_for_image_lms_format(const string& imagename)
     if (m_innerProtocol != k_zip)
     {
         //support for tests (win & Linux): images in the same folder than lms file
+        return "file:" + m_path + imagename;
 
         //remove lms file from path
         int iMax = int( m_path.length() );

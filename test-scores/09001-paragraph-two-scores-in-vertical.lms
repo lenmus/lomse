@@ -1,0 +1,54 @@
+(lenmusdoc (vers 0.0) 
+    (styles (defineStyle "red" (font "Liberation serif" 14pt bold-italic)
+                               (color #ff0000))
+    )
+    
+    (content
+
+        (para
+            (txt "Hello World! ")
+            (txt (style "red") "This is a test of bold text in red.")
+        )
+
+        (score
+           (vers 1.6)
+           (opt Render.SpacingMethod 1)
+           (opt Render.SpacingValue 30)
+           (instrument (staves 1)
+              (musicData
+                 (clef G)
+                 (key C)
+                 (time 6 8)
+                 (n d4 e v1)
+                 (barline simple)
+
+                 //Measure 2
+                 (n f4 q v1)
+                 (n g4 e v1)
+                 (n a4 e. v1 (beam 14 +))
+                 (n b4 s v1 (beam 14 =b))
+                 (n a4 e v1 (beam 14 -))
+                 (barline simple)
+
+                 //Measure 3
+                 (n g4 q v1)
+                 (n e4 e v1)
+                 (n c4 e. v1 (beam 21 +))
+                 (n d4 s v1 (beam 21 =b))
+                 (n e4 e v1 (beam 21 -))
+                 (barline end)
+              )
+           )
+        )
+
+        (score
+           (vers 1.6)
+           (instrument
+              (musicData
+                 (clef G)
+                 (chord (n c4 w)(n e4 w)(n g4 w))
+                 (barline end)
+              )
+           )
+        )
+))

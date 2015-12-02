@@ -1,0 +1,101 @@
+(score
+    (vers 1.6)
+    (instrument 
+        (musicData
+
+            //measure 1
+            (clef G)(key C)(time 2 4)
+            (chord (n c5 q)(n e5 q)(n g5 q))
+            (chord (n c5 e (beam 1 +))(n f5 e)(n a5 e))
+            (chord (n d5 e (beam 1 -))(n g5 e)(n b5 e))
+            (barline)
+
+            //measure 2
+            (chord (n c5 s (beam 2 ++))(n e5 s)(n g5 s))
+            (chord (n c5 s (beam 2 ==))(n f5 s)(n a5 s))
+            (chord (n d5 s (beam 2 ==))(n g5 s)(n b5 s))
+            (chord (n g4 s (beam 2 --))(n e5 s)(n g5 s))
+            (chord (n c5 s (beam 3 ++))(n e5 s)(n g5 s))
+            (chord (n c5 s (beam 3 =-))(n f5 s)(n a5 s))
+            (chord (n d5 e (beam 3 -))(n g5 e)(n b5 e))
+            (barline)
+
+            //measure 3
+            (chord (n c5 e (beam 4 +))(n e5 e)(n g5 e))
+            (chord (n c5 s (beam 4 =+))(n f5 s)(n a5 s))
+            (chord (n d5 s (beam 4 --))(n g5 s)(n b5 s))
+            (chord (n c5 s (beam 5 +f))(n e5 s)(n g5 s))
+            (chord (n c5 e (beam 5 = ))(n f5 e)(n a5 e))
+            (chord (n d5 s (beam 5 -b))(n g5 s)(n b5 s))
+            (barline)
+
+            //measure 4
+            (chord (n c5 e. (beam 6 +))(n e5 e.)(n g5 e.))
+            (chord (n c5 s (beam 6 -b))(n f5 s)(n a5 s))
+            (chord (n c5 s (beam 7 +f))(n e5 s)(n g5 s))
+            (chord (n c5 e. (beam 7 -))(n f5 e.)(n a5 e.))
+            (barline)
+
+            //measure 5
+            (chord (n c5 e. (beam 8 +))(n e5 e.)(n g5 e.))
+            (chord (n c5 s (beam 8 =b))(n f5 s)(n a5 s))
+            (chord (n c5 e. (beam 8 =))(n f5 e.)(n a5 e.))
+            (chord (n c5 s (beam 8 -b))(n e5 s)(n g5 s))
+            (barline)
+
+            //measure 6
+            (chord (n c4 q)(n e4 q)(n g4 q))
+            (chord (n c4 e (beam 9 +))(n f4 e)(n a4 e))
+            (chord (n d4 e (beam 9 -))(n g4 e)(n b4 e))
+            (barline)
+
+            //measure 7
+            (chord (n c4 s (beam 10 ++))(n e4 s)(n g4 s))
+            (chord (n c4 s (beam 10 ==))(n f4 s)(n a4 s))
+            (chord (n d4 s (beam 10 ==))(n g4 s)(n b4 s))
+            (chord (n g3 s (beam 10 --))(n e4 s)(n g4 s))
+            (chord (n c4 s (beam 11 ++))(n e4 s)(n g4 s))
+            (chord (n c4 s (beam 11 =-))(n f4 s)(n a4 s))
+            (chord (n d4 e (beam 11 -))(n g4 e)(n b4 e))
+            (barline)
+
+            //measure 8
+            (chord (n c4 e (beam 12 +))(n e4 e)(n g4 e))
+            (chord (n c4 s (beam 12 =+))(n f4 s)(n a4 s))
+            (chord (n d4 s (beam 12 --))(n g4 s)(n b4 s))
+            (chord (n c4 s (beam 13 +f))(n e4 s)(n g4 s))
+            (chord (n c4 e (beam 13 =))(n f4 e)(n a4 e))
+            (chord (n d4 s (beam 13 -b))(n g4 s)(n b4 s))
+            (barline)
+
+            //measure 9
+            (chord (n c4 e. (beam 14 +))(n e4 e.)(n g4 e.))
+            (chord (n c4 s (beam 14 -b))(n f4 s)(n a4 s))
+            (chord (n c4 s (beam 15 +f))(n e4 s)(n g4 s))
+            (chord (n c4 e. (beam 15 -))(n f4 e.)(n a4 e.))
+            (barline)
+
+            //measure 10
+            (chord (n c4 e. (beam 16 +))(n e4 e.)(n g4 e.))
+            (chord (n c4 s (beam 16 =b))(n f4 s)(n a4 s))
+            (chord (n c4 e. (beam 16 =))(n f4 e.)(n a4 e.))
+            (chord (n c4 s (beam 16 -b))(n e4 s)(n g4 s))
+            (barline)
+
+            //measure 11
+            (chord (n c4 q)(n e4 q)(n g4 q))
+            (chord (n c4 e)(n f4 e)(n a4 e))
+            (chord (n d5 e)(n g5 e)(n b5 e))
+            (barline)
+
+            //measure 12
+            (chord (n c4 e (beam 17 +))(n f4 e))
+            (chord (n d4 e (beam 17 -))(n g4 e))
+            (chord (n c5 e (beam 18 +))(n f5 e))
+            (chord (n d5 e (beam 18 -))(n g5 e))
+            (barline -)
+
+        )
+    )
+)
+

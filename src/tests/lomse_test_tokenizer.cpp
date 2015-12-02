@@ -104,7 +104,7 @@ SUITE(LdpTokenizerTest)
     TEST_FIXTURE(LdpTokenizerTestFixture, TokenizerCanReadUnicodeString)
     {
         //cout << "'" << "Текст на кирилица" << "'" << endl;
-        LdpFileReader reader(m_scores_path + "00002-unicode-text.lms");
+        LdpFileReader reader(m_scores_path + "10021-unicode-text.lms");
         LdpTokenizer tokenizer(reader, cout);
         int numTokens = 0;
         LdpToken* token = tokenizer.read_token();

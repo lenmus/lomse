@@ -14,6 +14,8 @@
          (clef C5)
          (clef percussion)
 
+         (barline simple)
+
          (clef G (symbolSize cue))
          (clef G1 (symbolSize cue))
          (clef F5 (symbolSize cue))

@@ -194,7 +194,7 @@ SUITE(DocumentTest)
     {
         //002. from_file. valid file, lmd format
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "30001-paragraph.lmd", Document::k_format_lmd);
+        doc.from_file(m_scores_path + "08011-paragraph.lmd", Document::k_format_lmd);
         ImoDocument* pImoDoc = doc.get_imodoc();
         CHECK( pImoDoc != NULL );
         CHECK( pImoDoc->get_owner() == &doc );
@@ -425,7 +425,7 @@ SUITE(DocumentTest)
 //    {
 //        //210. get checkpoint data for score
 //        SpDocument spDoc( LOMSE_NEW Document(m_libraryScope) );
-//        spDoc->from_file(m_scores_path + "60011-score-in-exercise.lmd",
+//        spDoc->from_file(m_scores_path + "09007-score-in-exercise.lmd",
 //                         Document::k_format_lmd );
 //
 //        cout << "DocumentTest 210: " << spDoc->get_checkpoint_data_for(64L);     //score

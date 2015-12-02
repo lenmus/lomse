@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lenmusdoc vers="0.0" language="en">
+   <styles>
+   </styles>
+
+   <content> 
+      <ldpmusic>
+         (score (vers 2.0)
+            (instrument 
+               (staves 1)
+               (musicData 
+                  (spacer 30)
+                  (barline simple)
+                  (spacer 30)
+                  (barline double)
+                  (spacer 30)
+                  (barline startRepetition)
+                  (spacer 30)
+                  (barline endRepetition)
+                  (spacer 30)
+                  (barline doubleRepetition)
+                  (spacer 30)
+                  (barline start)
+                  (spacer 30)
+                  (barline end)
+                  (spacer 30)
+               )
+            )
+         )
+      </ldpmusic>
+   </content>
+</lenmusdoc>

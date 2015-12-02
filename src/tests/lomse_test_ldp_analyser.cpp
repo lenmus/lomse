@@ -8882,8 +8882,8 @@ SUITE(LdpAnalyserTest)
         delete pIModel;
     }
 
-//    // image ----------------------------------------------------------------------------
-//
+    // image ----------------------------------------------------------------------------
+
 //    TEST_FIXTURE(LdpAnalyserTestFixture, Image_Ok)
 //    {
 //        stringstream errormsg;
@@ -8893,11 +8893,12 @@ SUITE(LdpAnalyserTest)
 //        //expected << "Line 0. " << endl;
 //        parser.parse_text(
 //            "(image (file \"test-image-1.png\"))");
+//        LdpTree* tree = parser.get_ldp_tree();
 //        LdpAnalyser a(errormsg, m_libraryScope, &doc);
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //
-////        cout << "[" << errormsg.str() << "]" << endl;
-////        cout << "[" << expected.str() << "]" << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
 //
 //        ImoImage* pImg = dynamic_cast<ImoImage*>( pIModel->get_root() );

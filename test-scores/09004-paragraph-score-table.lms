@@ -1,0 +1,86 @@
+(lenmusdoc (vers 0.0)
+    (styles 
+        (defineStyle "red" (font "Liberation serif" 14pt bold-italic)
+                               (color #ff0000))
+        (defineStyle "table-1" (color #ff0000)) //(border-width 100.0f))
+        (defineStyle "table-caption" (font "Liberation serif" 14pt bold-italic)
+                               (color #ff0000))
+        (defineStyle "header-cell" (border-width 20.0f))
+        (defineStyle "odd-data-cell" (border-width 20.0f))      //100.0f))
+        (defineStyle "even-data-cell" (border-width 20.0f))      //100.0f))
+        (defineStyle "table1-col1" (table-col-width 3000))
+        (defineStyle "table1-col2" (table-col-width 2000))
+        (defineStyle "table1-col3" (table-col-width 1500))
+        (defineStyle "table1-col4" (table-col-width 4000))
+    )
+    
+    (pageLayout (pageSize 24000 35700)(pageMargins 1000 1500 3000 2500 4000) landscape)
+    
+    (content
+        (para
+            (txt "Hello gfyp World!")
+            (txt (style "red") " This is a test. WMtyqgpixmn")
+        )
+
+        (score
+           (vers 1.6)
+           (opt Render.SpacingMethod 1)
+           (opt Render.SpacingValue 30)
+           (instrument (staves 1)
+              (musicData
+                 (clef G)
+                 (n a4 w v1)
+                 (n a4 h v1)
+                 (n a4 h v1)
+                 (n a4 q v1)
+                 (n a4 q v1)
+                 (n a4 e g+ v1)
+                 (n a4 e g- v1)
+                 (n a4 s g+ v1)
+                 (n a4 s g- v1)
+                 (n a4 t g+ v1)
+                 (n a4 t g- v1)
+              )
+           )
+        )
+
+        (para (style "table-caption") (txt "Table 1. A table with merged cells"))
+        (table (style "table-1")
+            (tableColumn (style "table1-col1"))
+            (tableColumn (style "table1-col2"))
+            (tableColumn (style "table1-col3"))
+            (tableColumn (style "table1-col4"))
+            (tableHead
+                (tableRow
+                    (tableCell (style "header-cell") (rowspan 2) )
+                    (tableCell (style "header-cell") (colspan 2) (txt "Bolfgums") )
+                    (tableCell (style "header-cell") (rowspan 2) 
+                        (txt "A table with merged cells and Eesh data that occupy an egg") )
+                )
+                (tableRow
+                    (tableCell (style "header-cell") (txt "forward") )
+                    (tableCell (style "header-cell") (txt "back") )
+                )
+            )
+            (tableBody
+                (tableRow
+                    (tableCell (style "header-cell") (txt "Flumbos") )
+                    (tableCell (style "odd-data-cell") (txt "270") )
+                    (tableCell (style "odd-data-cell") (txt "177") )
+                    (tableCell (style "odd-data-cell") (rowspan 2) (txt "37%") )
+                )
+                (tableRow
+                    (tableCell (style "header-cell") (txt "Garblos") )
+                    (tableCell (style "even-data-cell") (txt "315") )
+                    (tableCell (style "even-data-cell") (txt "187") )
+                )
+                (tableRow
+                    (tableCell (style "header-cell") (txt "Barbies") )
+                    (tableCell (style "odd-data-cell") (txt "333") )
+                    (tableCell (style "odd-data-cell") (txt "666") )
+                    (tableCell (style "odd-data-cell") (txt "100%") )
+                )
+            )
+        )
+    )
+)

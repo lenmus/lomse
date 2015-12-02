@@ -1,7 +1,0 @@
-(score (vers 2.0) 
-    (instrument (musicData (clef G)(key C)(time 2 4)
-    (chord (n c4 q)(n e4 q)(n g4 q))(n c5 q)
-    (chord (n c4 q)(n e4 q)(n g4 q))
-    (chord (n c4 q)(n e4 q)(n g4 q))
-)))
-

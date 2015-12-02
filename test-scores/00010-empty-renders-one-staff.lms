@@ -1,5 +1,7 @@
 (score
-   (vers 1.6)
+   (vers 2.0)
+   //@Depending on options, an empty score will be rendered either as a 
+   //@single system or as page filled with empty systems (manuscript paper)
    (instrument
       (musicData
       )

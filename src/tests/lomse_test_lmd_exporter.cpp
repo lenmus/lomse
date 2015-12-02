@@ -93,7 +93,7 @@ SUITE(LmdExporterTest)
 //        //visual test to display the exported score
 //
 //        Document doc(m_libraryScope);
-//        doc.from_file(m_scores_path + "60004-ebook-example.lms" );
+//        doc.from_file(m_scores_path + "09002-ebook-example.lms" );
 //        ImoDocument* pRoot = doc.get_imodoc();
 //
 //        LmdExporter exporter(m_libraryScope);

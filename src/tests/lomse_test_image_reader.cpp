@@ -78,7 +78,7 @@ SUITE(ImageReaderTest)
 //    TEST_FIXTURE(ImageReaderTestFixture, ImageReader_1)
 //    {
 //        Document doc(m_libraryScope);
-//        doc.from_file(m_scores_path + "90100-read-jpg-image.lms");
+//        doc.from_file(m_scores_path + "08041-read-jpg-image.lms");
 //    }
 
     TEST_FIXTURE(ImageReaderTestFixture, ImageReader_can_decode_png_1)

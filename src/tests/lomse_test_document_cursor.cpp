@@ -409,14 +409,14 @@ public:
     void create_document_3()
     {
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
-        m_pDoc->from_file(m_scores_path + "60011-score-in-exercise.lmd",
+        m_pDoc->from_file(m_scores_path + "09007-score-in-exercise.lmd",
                           Document::k_format_lmd );
     }
 
     void create_document_4()
     {
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
-        m_pDoc->from_file(m_scores_path + "60012-score-in-exercise.lmd",
+        m_pDoc->from_file(m_scores_path + "09008-score-in-exercise.lmd",
                           Document::k_format_lmd );
     }
 

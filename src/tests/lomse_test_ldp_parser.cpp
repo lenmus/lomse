@@ -116,7 +116,7 @@ SUITE(LdpParserTest)
     TEST_FIXTURE(LdpParserTestFixture, ParserReadScoreFromUnicodeFile)
     {
         LdpParser parser(cout, m_pLibraryScope->ldp_factory());
-        parser.parse_file(m_scores_path + "00002-unicode-text.lms");
+        parser.parse_file(m_scores_path + "10021-unicode-text.lms");
         LdpTree* score = parser.get_ldp_tree();
         //cout << score->get_root()->to_string() << endl;
         CHECK( score->get_root()->to_string() ==

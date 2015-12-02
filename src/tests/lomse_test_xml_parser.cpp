@@ -111,7 +111,7 @@ SUITE(XmlParserTest)
     TEST_FIXTURE(XmlParserTestFixture, read_doc_from_file)
     {
         XmlParser parser;
-        parser.parse_file(m_scores_path + "30001-paragraph.lmd");
+        parser.parse_file(m_scores_path + "08011-paragraph.lmd");
         XmlNode* root = parser.get_tree_root();
 
         CHECK( root->name() == "lenmusdoc" );
@@ -146,7 +146,7 @@ SUITE(XmlParserTest)
         XmlNode* root = parser.get_tree_root();
         CHECK( root->name() == "score-partwise" );
         XmlNode child = root->first_child();
-        cout << "Child name: '" << child.value() << "'" << endl;
+        //cout << "Child name: '" << child.value() << "'" << endl;
         CHECK( child.name() == "part-list" );
 
     }

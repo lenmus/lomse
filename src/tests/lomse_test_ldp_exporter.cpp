@@ -221,7 +221,7 @@ SUITE(ImVisitorTest)
     TEST_FIXTURE(ImVisitorTestFixture, EbookExample)
     {
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "60004-ebook-example.lms" );
+        doc.from_file(m_scores_path + "09002-ebook-example.lms" );
         ImoDocument* pRoot = doc.get_imodoc();
 
         MyObjVisitor v(m_libraryScope);
@@ -255,7 +255,7 @@ SUITE(ImVisitorTest)
     TEST_FIXTURE(ImVisitorTestFixture, ParagraphVisitor)
     {
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "60004-ebook-example.lms" );
+        doc.from_file(m_scores_path + "09002-ebook-example.lms" );
         ImoDocument* pRoot = doc.get_imodoc();
 
         MyParaVisitor v(m_libraryScope);
@@ -272,7 +272,7 @@ SUITE(ImVisitorTest)
     TEST_FIXTURE(ImVisitorTestFixture, ParagraphHeadingVisitor)
     {
         Document doc(m_libraryScope);
-        doc.from_file(m_scores_path + "60004-ebook-example.lms" );
+        doc.from_file(m_scores_path + "09002-ebook-example.lms" );
         ImoDocument* pRoot = doc.get_imodoc();
 
         MyHPVisitor v(m_libraryScope);
@@ -333,12 +333,12 @@ SUITE(LdpExporterTest)
 //            "(chord (n d4 s g- v2 (stem up))(n f4 s v2))"
 //            ")))" );
 ////        doc.from_file(m_scores_path + "00205-multimetric.lms" );
-////        doc.from_file(m_scores_path + "80120-fermatas.lms" );
-////        doc.from_file(m_scores_path + "80051-tie-bezier.lms" );
+////        doc.from_file(m_scores_path + "50120-fermatas.lms" );
+////        doc.from_file(m_scores_path + "50051-tie-bezier.lms" );
 ////        doc.from_file(m_scores_path + "00110-triplet-against-5-tuplet-4.14.lms" );
-////        doc.from_file(m_scores_path + "80130-metronome.lms" );
-////        doc.from_file(m_scores_path + "80180-new-system-tag.lms" );
-////        doc.from_file(m_scores_path + "80110-graphic-line-text.lms" );
+////        doc.from_file(m_scores_path + "50130-metronome.lms" );
+////        doc.from_file(m_scores_path + "50180-new-system-tag.lms" );
+////        doc.from_file(m_scores_path + "50110-graphic-line-text.lms" );
 ////        doc.from_file("/datos/USR/Desarrollo_wx/lomse/samples/chopin_prelude20_v16.lms" );
 //        ImoDocument* pRoot = doc.get_imodoc();
 //

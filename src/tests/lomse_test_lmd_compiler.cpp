@@ -121,7 +121,7 @@ SUITE(LmdCompilerTest)
     {
         Document doc(m_libraryScope);
         LmdCompiler compiler(m_libraryScope, &doc);
-        string path = m_scores_path + "30001-paragraph.lmd";
+        string path = m_scores_path + "08011-paragraph.lmd";
         InternalModel* pIModel = compiler.compile_file(path);
         CHECK( compiler.get_file_locator() == path );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());

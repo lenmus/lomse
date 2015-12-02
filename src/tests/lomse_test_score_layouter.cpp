@@ -1260,700 +1260,700 @@ SUITE(ScoreLayouterTest)
 ////    //}
 
 #if 0
-    //-----------------------------------------------------------------------------------
-    //test using scores in file ---------------------------------------------------------
-    //-----------------------------------------------------------------------------------
-
-    //empty scores ----------------------------------------------------------------------
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00010_EmptyScoreRendersOneStaff)
-    {
-        //an empty score with no options only renders one staff
-
-        load_score_for_test("00010", "empty-renders-one-staff");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00011_EmptyScoreFillPage)
-    {
-        //an empty score with fill option renders a page full of staves (manuscript paper)
-
-        load_score_for_test("00011", "empty-fill-page");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00012_PageFilledWithEmptySystems)
-    {
-        //as 00011, but with some content in first system
-
-        load_score_for_test("00012", "page-filled-with-empty-systems");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00013_EmptyPianoFilledWithEmptySystems)
-    {
-        //as 00011, but for an instrument with more than one staff
-
-        load_score_for_test("00013", "empty-piano-filled-with-empty-systems");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    //-----------------------------------------------------------------------------------
-    // Tests for LineSpacer class
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00020_SpaceBeforeClef)
-    {
-        //some space before prolog and after clef. No final variable space
-
-        load_score_for_test("00020", "space-before-clef");
-        LOMSE_ASSERT_LINE_DATA_EQUAL(0, 0, 1);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00021_SpacingInProlog)
-    {
-        //some space before prolog, inter symbols and after time signature,
-        //no final variable space
-
-        load_score_for_test("00021", "spacing-in-prolog");
-        LOMSE_ASSERT_LINE_DATA_EQUAL(0, 0, 1);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00022_SpaceAfterPrologOneNote)
-    {
-        //fixed space after note. variable space at end of column
-
-        load_score_for_test("00022", "spacing-in-prolog-one-note");
-        LOMSE_ASSERT_LINE_DATA_EQUAL(0, 0, 1);
-        delete_test_data();
-    }
-
-    //-----------------------------------------------------------------------------------
-    // Tests for ColumnLayouter class
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00023_SameDurationNotesEquallySpaced)
-    {
-        //variable space from 1st column added at start of 2nd column
-        //variable space at start taken into account
-
-        load_score_for_test("00023", "same-duration-notes-equally-spaced");
-        LOMSE_ASSERT_LINE_DATA_EQUAL(0, 0, 3);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00024_NotesSpacingProportionalToNotesDuration)
-    {
-        load_score_for_test("00024", "notes-spacing-proportional-to-notes-duration");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00025_FixedSpacing)
-    {
-        load_score_for_test("00025", "notes-with-fixed-spacing");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00026_AccidentalsDoNotAlterSpacing)
-    {
-        //accidentals must consume previous variable space, so that noteheads are
-        //at the same distance
-
-        load_score_for_test("00026", "accidentals-do-no-alter-spacing");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00027_AccidentalsDoNotAlterFixedSpacing)
-    {
-        //accidentals must consume previous variable space, so that noteheads are
-        //at the same distance
-
-        load_score_for_test("00027", "accidentals-do-no-alter-fixed-spacing");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-////////    TEST_FIXTURE(ScoreLayouterTestFixture, T00028_Spacing_notes_with_figured_bass)
+//    //-----------------------------------------------------------------------------------
+//    //test using scores in file ---------------------------------------------------------
+//    //-----------------------------------------------------------------------------------
+//
+//    //empty scores ----------------------------------------------------------------------
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00010_EmptyScoreRendersOneStaff)
+//    {
+//        //an empty score with no options only renders one staff
+//
+//        load_score_for_test("00010", "empty-renders-one-staff");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00011_EmptyScoreFillPage)
+//    {
+//        //an empty score with fill option renders a page full of staves (manuscript paper)
+//
+//        load_score_for_test("00011", "empty-fill-page");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00012_PageFilledWithEmptySystems)
+//    {
+//        //as 00011, but with some content in first system
+//
+//        load_score_for_test("00012", "page-filled-with-empty-systems");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00013_EmptyPianoFilledWithEmptySystems)
+//    {
+//        //as 00011, but for an instrument with more than one staff
+//
+//        load_score_for_test("00013", "empty-piano-filled-with-empty-systems");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    //-----------------------------------------------------------------------------------
+//    // Tests for LineSpacer class
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00020_SpaceBeforeClef)
+//    {
+//        //some space before prolog and after clef. No final variable space
+//
+//        load_score_for_test("00020", "space-before-clef");
+//        LOMSE_ASSERT_LINE_DATA_EQUAL(0, 0, 1);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00021_SpacingInProlog)
+//    {
+//        //some space before prolog, inter symbols and after time signature,
+//        //no final variable space
+//
+//        load_score_for_test("00021", "spacing-in-prolog");
+//        LOMSE_ASSERT_LINE_DATA_EQUAL(0, 0, 1);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00022_SpaceAfterPrologOneNote)
+//    {
+//        //fixed space after note. variable space at end of column
+//
+//        load_score_for_test("00022", "spacing-in-prolog-one-note");
+//        LOMSE_ASSERT_LINE_DATA_EQUAL(0, 0, 1);
+//        delete_test_data();
+//    }
+//
+//    //-----------------------------------------------------------------------------------
+//    // Tests for ColumnLayouter class
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00023_SameDurationNotesEquallySpaced)
+//    {
+//        //variable space from 1st column added at start of 2nd column
+//        //variable space at start taken into account
+//
+//        load_score_for_test("00023", "same-duration-notes-equally-spaced");
+//        LOMSE_ASSERT_LINE_DATA_EQUAL(0, 0, 3);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00024_NotesSpacingProportionalToNotesDuration)
+//    {
+//        load_score_for_test("00024", "notes-spacing-proportional-to-notes-duration");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00025_FixedSpacing)
+//    {
+//        load_score_for_test("00025", "notes-with-fixed-spacing");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00026_AccidentalsDoNotAlterSpacing)
+//    {
+//        //accidentals must consume previous variable space, so that noteheads are
+//        //at the same distance
+//
+//        load_score_for_test("00026", "accidentals-do-no-alter-spacing");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00027_AccidentalsDoNotAlterFixedSpacing)
+//    {
+//        //accidentals must consume previous variable space, so that noteheads are
+//        //at the same distance
+//
+//        load_score_for_test("00027", "accidentals-do-no-alter-fixed-spacing");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//////////    TEST_FIXTURE(ScoreLayouterTestFixture, T00028_Spacing_notes_with_figured_bass)
+//////////    {
+//////////        load_score_for_test("00028", "spacing-notes-with-figured-bass");
+//////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//////////        delete_test_data();
+//////////    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00030_ChordNotesAreAligned)
+//    {
+//        load_score_for_test("00030", "chord-notes-are-aligned");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00031_ChordStemUpNoteReversedNoFlag)
+//    {
+//        load_score_for_test("00031", "chord-stem-up-note-reversed-no-flag");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00032_ChordStemDownNoteReversedNoFlag)
+//    {
+//        load_score_for_test("00032", "chord-stem-down-note-reversed-no-flag");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00033_ChordsWithReversedNotesDoNotOverlap)
+//    {
+//        load_score_for_test("00033", "chords-with-reversed-notes-do-not-overlap");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00034_ChordWithAccidentalsAligned)
+//    {
+//        load_score_for_test("00034", "chord-with-accidentals-aligned");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00038_ChordsWithAccidentalsAndReversedNotesAligned)
+//    {
+//        load_score_for_test("00038", "chords-with-accidentals-and-reversed-notes-aligned");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        //LOMSE_ASSERT_LINE_DATA_EQUAL(0, 1);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00040_ClefBetweenNotesProperlySpacedWhenEnoughSpace)
+//    {
+//        load_score_for_test("00040", "clef-between-notes-properly-spaced-when-enough-space");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00041_ClefBetweenNotesProperlySpacedWhenRemovingVariableSpace)
+//    {
+//        load_score_for_test("00041", "clef-between-notes-properly-spaced-when-removing-variable-space");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00042_ClefBetweenNotesAddsLittleSpacedWhenNotEnoughSpace)
+//    {
+//        load_score_for_test("00042", "clef-between-notes-adds-little-space-when-not-enough-space");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00051_ReversedNoteInChordBeforeNote)
+//    {
+//        load_score_for_test("00051", "reversed-note-in-chord-before-note");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//
+//        // vertical alignment
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00101_VerticalRightAlignmentPrologOneNote)
+//    {
+//        load_score_for_test("00101", "vertical-right-alignment-prolog-one-note");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00102_VerticalRightAlignmentSameTimePositions)
+//    {
+//        load_score_for_test("00102", "vertical-right-alignment-same-time-positions");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00103_VerticalRightAlignmentDifferentTimePositions)
+//    {
+//        load_score_for_test("00103", "vertical-right-alignment-different-time-positions");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00104_VerticalRightAlignmentWhenAccidentalRequiresMoreSpace)
+//    {
+//        load_score_for_test("00104", "vertical-right-alignment-when-accidental-requires-more-space");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00105_VerticalRightAlignmentWhenClefsBetweenNotes)
+//    {
+//        load_score_for_test("00105", "vertical-right-alignment-when-clefs-between-notes");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00106_ClefFollowsNoteWhenNoteDisplaced)
+//    {
+//        load_score_for_test("00106", "clef-follows-note-when-note-displaced");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00107_PrologProperlyAlignedInSecondSystem)
+//    {
+//        load_score_for_test("00107", "prolog-properly-aligned-in-second-system");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//        //Gourlays' algorithm spacing problems
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00110_triplet_against_5_tuplet_4_14)
+//    {
+//        load_score_for_test("00110", "triplet-against-5-tuplet-4.14");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00111_loose_spacing_4_16)
+//    {
+//        load_score_for_test("00111", "loose-spacing-4.16");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00112_triplet_against_s_e_dot_4_15a)
+//    {
+//        load_score_for_test("00112", "triplet-against-s-e-dot_4.15a");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//        // systems justification (lmLineResizer object)
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00200_BarsGoOneAfterTheOther)
+//    {
+//        load_score_for_test("00200", "bars-go-one-after-the-other");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00201_SystemsAreJustified)
+//    {
+//        load_score_for_test("00201", "systems-are-justified");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00202_LongSingleBarIsSplitted)
+//    {
+//        load_score_for_test("00202", "long-single-bar-is-splitted");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00203_repositioning_at_justification)
+//    {
+//        load_score_for_test("00203", "repositioning-at-justification");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00204_stop_at_final_barline)
+//    {
+//        load_score_for_test("00204", "stop-at-final-barline");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00205_multimetric)
+//    {
+//        load_score_for_test("00205", "multimetric");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T00206_long_bar_not_splitted)
+//    {
+//        load_score_for_test("00206", "long-bar-not-splitted");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//
+//        //other -------------------------------------------------------------------------
+//
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T00000_ErrorAlignRests)
 ////////    {
-////////        load_score_for_test("00028", "spacing-notes-with-figured-bass");
+////////        load_score_for_test("00000", "error-align-rests");
 ////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
 ////////        delete_test_data();
 ////////    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00030_ChordNotesAreAligned)
-    {
-        load_score_for_test("00030", "chord-notes-are-aligned");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00031_ChordStemUpNoteReversedNoFlag)
-    {
-        load_score_for_test("00031", "chord-stem-up-note-reversed-no-flag");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00032_ChordStemDownNoteReversedNoFlag)
-    {
-        load_score_for_test("00032", "chord-stem-down-note-reversed-no-flag");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00033_ChordsWithReversedNotesDoNotOverlap)
-    {
-        load_score_for_test("00033", "chords-with-reversed-notes-do-not-overlap");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00034_ChordWithAccidentalsAligned)
-    {
-        load_score_for_test("00034", "chord-with-accidentals-aligned");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00038_ChordsWithAccidentalsAndReversedNotesAligned)
-    {
-        load_score_for_test("00038", "chords-with-accidentals-and-reversed-notes-aligned");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        //LOMSE_ASSERT_LINE_DATA_EQUAL(0, 1);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00040_ClefBetweenNotesProperlySpacedWhenEnoughSpace)
-    {
-        load_score_for_test("00040", "clef-between-notes-properly-spaced-when-enough-space");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00041_ClefBetweenNotesProperlySpacedWhenRemovingVariableSpace)
-    {
-        load_score_for_test("00041", "clef-between-notes-properly-spaced-when-removing-variable-space");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00042_ClefBetweenNotesAddsLittleSpacedWhenNotEnoughSpace)
-    {
-        load_score_for_test("00042", "clef-between-notes-adds-little-space-when-not-enough-space");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00051_ReversedNoteInChordBeforeNote)
-    {
-        load_score_for_test("00051", "reversed-note-in-chord-before-note");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-
-        // vertical alignment
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00101_VerticalRightAlignmentPrologOneNote)
-    {
-        load_score_for_test("00101", "vertical-right-alignment-prolog-one-note");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00102_VerticalRightAlignmentSameTimePositions)
-    {
-        load_score_for_test("00102", "vertical-right-alignment-same-time-positions");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00103_VerticalRightAlignmentDifferentTimePositions)
-    {
-        load_score_for_test("00103", "vertical-right-alignment-different-time-positions");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00104_VerticalRightAlignmentWhenAccidentalRequiresMoreSpace)
-    {
-        load_score_for_test("00104", "vertical-right-alignment-when-accidental-requires-more-space");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00105_VerticalRightAlignmentWhenClefsBetweenNotes)
-    {
-        load_score_for_test("00105", "vertical-right-alignment-when-clefs-between-notes");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00106_ClefFollowsNoteWhenNoteDisplaced)
-    {
-        load_score_for_test("00106", "clef-follows-note-when-note-displaced");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00107_PrologProperlyAlignedInSecondSystem)
-    {
-        load_score_for_test("00107", "prolog-properly-aligned-in-second-system");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-        //Gourlays' algorithm spacing problems
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00110_triplet_against_5_tuplet_4_14)
-    {
-        load_score_for_test("00110", "triplet-against-5-tuplet-4.14");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00111_loose_spacing_4_16)
-    {
-        load_score_for_test("00111", "loose-spacing-4.16");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00112_triplet_against_s_e_dot_4_15a)
-    {
-        load_score_for_test("00112", "triplet-against-s-e-dot_4.15a");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-        // systems justification (lmLineResizer object)
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00200_BarsGoOneAfterTheOther)
-    {
-        load_score_for_test("00200", "bars-go-one-after-the-other");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00201_SystemsAreJustified)
-    {
-        load_score_for_test("00201", "systems-are-justified");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00202_LongSingleBarIsSplitted)
-    {
-        load_score_for_test("00202", "long-single-bar-is-splitted");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00203_repositioning_at_justification)
-    {
-        load_score_for_test("00203", "repositioning-at-justification");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00204_stop_at_final_barline)
-    {
-        load_score_for_test("00204", "stop-at-final-barline");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00205_multimetric)
-    {
-        load_score_for_test("00205", "multimetric");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T00206_long_bar_not_splitted)
-    {
-        load_score_for_test("00206", "long-bar-not-splitted");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-
-        //other -------------------------------------------------------------------------
-
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T00000_ErrorAlignRests)
-//////    {
-//////        load_score_for_test("00000", "error-align-rests");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-
-        //Regression tests ---------------------------------------------------
-        // not used to drive development. Consider them as "regression tests"
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T80010_accidental_after_barline)
-    {
-        load_score_for_test("80010", "accidental-after-barline");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80011_accidentals)
-//////    {
-//////        load_score_for_test("80011", "accidentals");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T80020_chord_no_stem_no_flag)
-    {
-        load_score_for_test("80020", "chord-no-stem-no-flag");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T80021_chord_stem_up_no_flag)
-    {
-        load_score_for_test("80021", "chord-stem-up-no-flag");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T80022_chord_stem_down_no_flag)
-    {
-        load_score_for_test("80022", "chord-stem-down-no-flag");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T80025_chord_stem_up_no_flag_accidental)
-    {
-        load_score_for_test("80025", "chord-stem-up-no-flag-accidental");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80026_chord_flags)
-//////    {
-//////        load_score_for_test("80026", "chord-flags");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80027_chord_spacing)
-//////    {
-//////        load_score_for_test("80027", "chord-spacing");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T80028_chord_notes_ordering)
-    {
-        load_score_for_test("80028", "chord-notes-ordering");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T80030_tuplet_triplets)
-    {
-        load_score_for_test("80030", "tuplet-triplets");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T80031_tuplet_duplets)
-    {
-        load_score_for_test("80031", "tuplet-duplets");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T80032_tuplet_tuplet)
-    {
-        load_score_for_test("80032", "tuplet-tuplet");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T80033_tuplet_only_bracket)
-    {
-        load_score_for_test("80033", "tuplet-only-bracket");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T80040_beams)
-    {
-        load_score_for_test("80040", "beams");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, T80041_chords_beamed)
-    {
-        load_score_for_test("80041", "chords-beamed");
-        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-        delete_test_data();
-    }
-
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80042_beams)
-//////    {
-//////        load_score_for_test("80042", "beams");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80043_beam_4s_q)
-//////    {
-//////        load_score_for_test("80043", "beam-4s-q");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80050_ties)
-//////    {
-//////        load_score_for_test("80050", "ties");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80051_tie_bezier)
-//////    {
-//////        load_score_for_test("80051", "tie-bezier");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80052_tie_bezier_break)
-//////    {
-//////        load_score_for_test("80052", "tie-bezier-break");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80053_tie_bezier_barline)
-//////    {
-//////        load_score_for_test("80053", "tie-bezier-barline");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80054_tie_after_barline)
-//////    {
-//////        load_score_for_test("80054", "tie-after-barline");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80060_go_back)
-//////    {
-//////        load_score_for_test("80060", "go-back");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80070_some_time_signatures)
-//////    {
-//////        load_score_for_test("80070", "some-time-signatures");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80071_12_8_time_signature)
-//////    {
-//////        load_score_for_test("80071", "12-8-time-signature");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80072_2_4_time_signature)
-//////    {
-//////        load_score_for_test("80072", "2-4-time-signature");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80080_one_instr_2_staves)
-//////    {
-//////        load_score_for_test("80080", "one-instr-2-staves");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80081_two_instr_3_staves)
-//////    {
-//////        load_score_for_test("80081", "two-instr-3-staves");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80082_choir_STB_piano)
-//////    {
-//////        load_score_for_test("80082", "choir-STB-piano");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80083_critical_line)
-//////    {
-//////        load_score_for_test("80083", "critical-line");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80090_all_rests)
-//////    {
-//////        load_score_for_test("80090", "all-rests");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80091_rests_in_beam)
-//////    {
-//////        load_score_for_test("80091", "rests-in-beam");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80092_short_rests_in_beam)
-//////    {
-//////        load_score_for_test("80092", "short-rests-in-beam");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80100_spacer)
-//////    {
-//////        load_score_for_test("80100", "spacer");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80110_graphic_line_text)
-//////    {
-//////        load_score_for_test("80110", "graphic-line-text");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80111_line_after_barline)
-//////    {
-//////        load_score_for_test("80111", "line-after-barline");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80120_fermatas)
-//////    {
-//////        load_score_for_test("80120", "fermatas");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80130_metronome)
-//////    {
-//////        load_score_for_test("80130", "metronome");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80131_metronome)
-//////    {
-//////        load_score_for_test("80131", "metronome");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80132_metronome)
-//////    {
-//////        load_score_for_test("80132", "metronome");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80140_text)
-//////    {
-//////        load_score_for_test("80140", "text");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80141_text_titles)
-//////    {
-//////        load_score_for_test("80141", "text-titles");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80150_all_clefs)
-//////    {
-//////        load_score_for_test("80150", "all-clefs");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80151_all_clefs)
-//////    {
-//////        load_score_for_test("80151", "all-clefs");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80160_textbox)
-//////    {
-//////        load_score_for_test("80160", "textbox");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80161_textbox_with_anchor_line)
-//////    {
-//////        load_score_for_test("80161", "textbox-with-anchor-line");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80162_stacked_textboxes)
-//////    {
-//////        load_score_for_test("80162", "stacked-textboxes");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80170_figured_bass)
-//////    {
-//////        load_score_for_test("80170", "figured-bass");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80171_figured_bass_several)
-//////    {
-//////        load_score_for_test("80171", "figured-bass-several");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80172_figured_bass_line)
-//////    {
-//////        load_score_for_test("80172", "figured-bass-line");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
-//////    TEST_FIXTURE(ScoreLayouterTestFixture, T80180_new_system_tag)
-//////    {
-//////        load_score_for_test("80180", "new-system-tag");
-//////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
-//////        delete_test_data();
-//////    }
-//////
+//
+//        //Regression tests ---------------------------------------------------
+//        // not used to drive development. Consider them as "regression tests"
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T50010_accidental_after_barline)
+//    {
+//        load_score_for_test("50010", "accidental-after-barline");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50011_accidentals)
+////////    {
+////////        load_score_for_test("50011", "accidentals");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T50020_chord_no_stem_no_flag)
+//    {
+//        load_score_for_test("50020", "chord-no-stem-no-flag");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T50021_chord_stem_up_no_flag)
+//    {
+//        load_score_for_test("50021", "chord-stem-up-no-flag");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T50022_chord_stem_down_no_flag)
+//    {
+//        load_score_for_test("50022", "chord-stem-down-no-flag");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T50025_chord_stem_up_no_flag_accidental)
+//    {
+//        load_score_for_test("50025", "chord-stem-up-no-flag-accidental");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50026_chord_flags)
+////////    {
+////////        load_score_for_test("50026", "chord-flags");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50027_chord_spacing)
+////////    {
+////////        load_score_for_test("50027", "chord-spacing");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T50028_chord_notes_ordering)
+//    {
+//        load_score_for_test("50028", "chord-notes-ordering");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T50030_tuplet_triplets)
+//    {
+//        load_score_for_test("50030", "tuplet-triplets");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T50031_tuplet_duplets)
+//    {
+//        load_score_for_test("50031", "tuplet-duplets");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T50032_tuplet_tuplet)
+//    {
+//        load_score_for_test("50032", "tuplet-tuplet");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T50033_tuplet_only_bracket)
+//    {
+//        load_score_for_test("50033", "tuplet-only-bracket");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T50040_beams)
+//    {
+//        load_score_for_test("50040", "beams");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+//    TEST_FIXTURE(ScoreLayouterTestFixture, T50041_chords_beamed)
+//    {
+//        load_score_for_test("50041", "chords-beamed");
+//        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+//        delete_test_data();
+//    }
+//
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50042_beams)
+////////    {
+////////        load_score_for_test("50042", "beams");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50043_beam_4s_q)
+////////    {
+////////        load_score_for_test("50043", "beam-4s-q");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50050_ties)
+////////    {
+////////        load_score_for_test("50050", "ties");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50051_tie_bezier)
+////////    {
+////////        load_score_for_test("50051", "tie-bezier");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50052_tie_bezier_break)
+////////    {
+////////        load_score_for_test("50052", "tie-bezier-break");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50053_tie_bezier_barline)
+////////    {
+////////        load_score_for_test("50053", "tie-bezier-barline");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50054_tie_after_barline)
+////////    {
+////////        load_score_for_test("50054", "tie-after-barline");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50060_go_back)
+////////    {
+////////        load_score_for_test("50060", "go-back");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50070_some_time_signatures)
+////////    {
+////////        load_score_for_test("50070", "some-time-signatures");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50071_12_8_time_signature)
+////////    {
+////////        load_score_for_test("50071", "12-8-time-signature");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50072_2_4_time_signature)
+////////    {
+////////        load_score_for_test("50072", "2-4-time-signature");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50080_one_instr_2_staves)
+////////    {
+////////        load_score_for_test("50080", "one-instr-2-staves");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50081_two_instr_3_staves)
+////////    {
+////////        load_score_for_test("50081", "two-instr-3-staves");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50082_choir_STB_piano)
+////////    {
+////////        load_score_for_test("50082", "choir-STB-piano");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50083_critical_line)
+////////    {
+////////        load_score_for_test("50083", "critical-line");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50090_all_rests)
+////////    {
+////////        load_score_for_test("50090", "all-rests");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50091_rests_in_beam)
+////////    {
+////////        load_score_for_test("50091", "rests-in-beam");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50092_short_rests_in_beam)
+////////    {
+////////        load_score_for_test("50092", "short-rests-in-beam");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50100_spacer)
+////////    {
+////////        load_score_for_test("50100", "spacer");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50110_graphic_line_text)
+////////    {
+////////        load_score_for_test("50110", "graphic-line-text");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50111_line_after_barline)
+////////    {
+////////        load_score_for_test("50111", "line-after-barline");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50120_fermatas)
+////////    {
+////////        load_score_for_test("50120", "fermatas");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50130_metronome)
+////////    {
+////////        load_score_for_test("50130", "metronome");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50131_metronome)
+////////    {
+////////        load_score_for_test("50131", "metronome");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50132_metronome)
+////////    {
+////////        load_score_for_test("50132", "metronome");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50140_text)
+////////    {
+////////        load_score_for_test("50140", "text");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50141_text_titles)
+////////    {
+////////        load_score_for_test("50141", "text-titles");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50150_all_clefs)
+////////    {
+////////        load_score_for_test("50150", "all-clefs");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50151_all_clefs)
+////////    {
+////////        load_score_for_test("50151", "all-clefs");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50160_textbox)
+////////    {
+////////        load_score_for_test("50160", "textbox");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50161_textbox_with_anchor_line)
+////////    {
+////////        load_score_for_test("50161", "textbox-with-anchor-line");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50162_stacked_textboxes)
+////////    {
+////////        load_score_for_test("50162", "stacked-textboxes");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50170_figured_bass)
+////////    {
+////////        load_score_for_test("50170", "figured-bass");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50171_figured_bass_several)
+////////    {
+////////        load_score_for_test("50171", "figured-bass-several");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50172_figured_bass_line)
+////////    {
+////////        load_score_for_test("50172", "figured-bass-line");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
+////////    TEST_FIXTURE(ScoreLayouterTestFixture, T50180_new_system_tag)
+////////    {
+////////        load_score_for_test("50180", "new-system-tag");
+////////        LOMSE_ASSERT_PAGE_DATA_EQUAL(0);
+////////        delete_test_data();
+////////    }
+////////
 
 #endif
 }
@@ -2196,7 +2196,7 @@ SUITE(TimeGridTableTest)
 ////
 ////    TEST_FIXTURE(TimeGridTableTestFixture, just_barline_creates_one_entry)
 ////    {
-////        load_score_for_test("90003-empty-bar-with-barline");
+////        load_score_for_test("01003-empty-bar-with-barline");
 ////        CHECK( m_pLine->GetSize() == 1 );
 ////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
 ////        CHECK( m_pLine->GetDuration(0) == 0.0f );
@@ -2242,7 +2242,7 @@ SUITE(TimeGridTableTest)
 ////
 ////    TEST_FIXTURE(TimeGridTableTestFixture, when_two_notes_at_same_time_choose_the_shortest_one)
 ////    {
-////        load_score_for_test("90001-two-notes-different-duration");
+////        load_score_for_test("01001-two-notes-different-duration");
 ////        CHECK( m_pLine->GetSize() == 2 );
 ////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
 ////        CHECK( m_pLine->GetDuration(0) == 32.0f );
@@ -2253,7 +2253,7 @@ SUITE(TimeGridTableTest)
 ////
 ////    TEST_FIXTURE(TimeGridTableTestFixture, interpolate_missing_time_between_two_notes)
 ////    {
-////        load_score_for_test("90004-two-voices-missing-timepos");
+////        load_score_for_test("01004-two-voices-missing-timepos");
 ////        CHECK( m_pLine->GetSize() == 4 );
 ////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
 ////        CHECK( m_pLine->GetDuration(0) == 32.0f );
@@ -2268,7 +2268,7 @@ SUITE(TimeGridTableTest)
 ////
 ////    TEST_FIXTURE(TimeGridTableTestFixture, several_lines_with_different_durations)
 ////    {
-////        load_score_for_test("90002-several-lines-with-different-durations");
+////        load_score_for_test("01002-several-lines-with-different-durations");
 ////        CHECK( m_pLine->GetSize() == 5 );
 ////        CHECK( m_pLine->GetTimepos(0) == 0.0f );
 ////        CHECK( m_pLine->GetDuration(0) == 64.0f );

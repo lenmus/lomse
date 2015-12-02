@@ -53,7 +53,6 @@ public:
         : m_libraryScope(cout)
     {
         m_scores_path = TESTLIB_SCORES_PATH;
-        m_scores_path += "MusicXML/";
         m_libraryScope.set_default_fonts_path(TESTLIB_FONTS_PATH);
     }
 
@@ -100,7 +99,7 @@ SUITE(MxlCompilerTest)
         //100 - compile raw xml file format
         Document doc(m_libraryScope);
         MxlCompiler compiler(m_libraryScope, &doc);
-        string path = m_scores_path + "00000-hello-world.xml";
+        string path = m_scores_path + "50000-hello-world.xml";
         InternalModel* pIModel = compiler.compile_file(path);
         CHECK( compiler.get_file_locator() == path );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
@@ -124,36 +123,6 @@ SUITE(MxlCompilerTest)
 
         delete pIModel;
     }
-
-//    TEST_FIXTURE(MxlCompilerTestFixture, MxlCompilerFromFile_200)
-//    {
-//        //200 - compile compressed file format
-//        Document doc(m_libraryScope);
-//        MxlCompiler compiler(m_libraryScope, &doc);
-//        string path = m_scores_path + "00001-chant.mxl";
-//        InternalModel* pIModel = compiler.compile_file(path);
-//        CHECK( compiler.get_file_locator() == path );
-//        ImoDocument* pDoc = dynamic_cast<ImoDocument*>(pIModel->get_root());
-//        CHECK( pDoc->get_version() == "0.0" );
-//        CHECK( pDoc->get_num_content_items() == 1 );
-//        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
-//        CHECK( pScore != NULL );
-//        CHECK( pScore->get_num_instruments() == 1 );
-//        CHECK( pScore->get_staffobjs_table() != NULL );
-//        ImoInstrument* pInstr = pScore->get_instrument(0);
-//        CHECK( pInstr != NULL );
-//        CHECK( pInstr->get_num_staves() == 1 );
-//        ImoMusicData* pMD = pInstr->get_musicdata();
-//        CHECK( pMD != NULL );
-//        CHECK( pMD->get_num_items() == 4 );
-//        ImoObj* pImo = pMD->get_first_child();
-//        CHECK( pImo->is_key_signature() == true );
-//
-//        cout << "Test: MxlCompilerFromFile_200" << endl;
-//        cout << doc.to_string() << endl;
-//
-//        delete pIModel;
-//    }
 
 };
 
