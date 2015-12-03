@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -48,13 +48,18 @@ DocLocator::DocLocator(const string& locator)
     : m_fullLocator(locator)
     , m_protocol(k_unknown)
     , m_innerProtocol(k_none)
+    , m_fullpath("")
     , m_path("")
-    , m_innerPath("")
+    , m_innerFullPath("")
     , m_innerFile("")
     , m_fValid(false)
 {
     split_locator(locator);
-    extract_file();
+    if (is_valid())
+    {
+        extract_file();
+        extract_path();
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -80,7 +85,7 @@ void DocLocator::split_locator(const string& locator)
     int sharp = int( locator.find('#') );
     if (sharp >= 0)
     {
-        m_path = locator.substr(pathStart, sharp - pathStart);
+        m_fullpath = locator.substr(pathStart, sharp - pathStart);
         int iMax = int( locator.length() );
         int i = sharp+1;
         for (; i < iMax && locator[i] != ':'; ++i);
@@ -92,15 +97,15 @@ void DocLocator::split_locator(const string& locator)
         string proto =  locator.substr(sharp+1, i - sharp - 1);
         m_innerProtocol = (proto == "zip" ? k_zip : k_unknown);
         if (i < iMax - 2)
-            m_innerPath = locator.substr(i+1);
+            m_innerFullPath = locator.substr(i+1);
     }
     else
     {
         //path
         if (pathStart > 0)
-            m_path = locator.substr(pathStart);
+            m_fullpath = locator.substr(pathStart);
         else
-            m_path = locator;
+            m_fullpath = locator;
     }
 
     m_fValid = true;
@@ -109,14 +114,24 @@ void DocLocator::split_locator(const string& locator)
 //---------------------------------------------------------------------------------------
 void DocLocator::extract_file()
 {
-    if (m_innerPath.empty())
+    if (m_innerFullPath.empty())
         return;
 
-    int iMax = int( m_innerPath.length() );
+    int iMax = int( m_innerFullPath.length() );
     int i = iMax-1;
-    for (; i >=0 && m_innerPath[i] != '/'; --i);
+    for (; i >=0 && m_innerFullPath[i] != '/'; --i);
     if (i >= 0)
-        m_innerFile = m_innerPath.substr(i+1);
+        m_innerFile = m_innerFullPath.substr(i+1);
+}
+
+//---------------------------------------------------------------------------------------
+void DocLocator::extract_path()
+{
+    int iMax = int( m_fullpath.length() );
+    int i = iMax-1;
+    for (; i >=0 && !(m_fullpath[i] == '/' || m_fullpath[i] == '\\'); --i);
+    if (i >= 0)
+        m_path = m_fullpath.substr(0, i+1);
 }
 
 //---------------------------------------------------------------------------------------
@@ -132,13 +147,37 @@ string DocLocator::get_protocol_string()
 }
 
 //---------------------------------------------------------------------------------------
-string DocLocator::get_locator_string()
+string DocLocator::get_locator_as_string()
 {
-    string loc = get_protocol_string() + get_path();
+    string loc = get_protocol_string() + get_full_path();
     if (m_innerProtocol == k_zip)
-        return loc + "#zip:" + get_inner_path();
+        return loc + "#zip:" + get_inner_fullpath();
     else
         return loc;
+}
+
+//---------------------------------------------------------------------------------------
+string DocLocator::get_locator_for_image(const string& imagename)
+{
+    if (m_innerProtocol != k_zip)
+    {
+        //images in the same folder than file referred by this locator
+        return get_protocol_string() + get_path() + imagename;
+
+//        //remove lms file from path
+//        int iMax = int( m_fullpath.length() );
+//        int i = iMax-1;
+//        for (; i >=0 && !(m_fullpath[i] == '/' || m_fullpath[i] == '\\'); --i);
+//        if (i >= 0)
+//            return get_protocol_string() + m_fullpath.substr(0, i+1) + imagename;
+    }
+    else
+    {
+        //zip file. It is assumed that image is in the inner root folder.
+        //Otherwise, for specific format using zip compression, you will
+        //need to override this method
+        return get_protocol_string() + get_full_path() + "#zip:" + imagename;
+    }
 }
 
 
@@ -148,39 +187,7 @@ string DocLocator::get_locator_string()
 //=======================================================================================
 string LmbDocLocator::get_locator_for_image(const string& imagename)
 {
-    if (m_innerProtocol != k_zip)
-    {
-        //support for tests (win & Linux): images in the same folder than lms file
-
-        //remove lms file from path
-        int iMax = int( m_path.length() );
-        int i = iMax-1;
-        for (; i >=0 && !(m_path[i] == '/' || m_path[i] == '\\'); --i);
-        if (i >= 0)
-            return m_path.substr(0, i+1) + imagename;
-
-    }
-    //normal behaviour: zip assumed
-    return get_protocol_string() + get_path() + "#zip:images/" + imagename;
-}
-
-//---------------------------------------------------------------------------------------
-string LmbDocLocator::get_locator_for_image_lms_format(const string& imagename)
-{
-    if (m_innerProtocol != k_zip)
-    {
-        //support for tests (win & Linux): images in the same folder than lms file
-        //return m_path + imagename;
-
-        //remove lms file from path
-        int iMax = int( m_path.length() );
-        int i = iMax-1;
-        for (; i >=0 && !(m_path[i] == '/' || m_path[i] == '\\'); --i);
-        if (i >= 0)
-            return m_path.substr(0, i+1) + imagename;
-    }
-    //normal behaviour: zip assumed
-    return get_protocol_string() + get_path() + "#zip:" + imagename;
+    return get_protocol_string() + get_full_path() + "#zip:images/" + imagename;
 }
 
 

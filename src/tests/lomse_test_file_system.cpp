@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -69,11 +69,12 @@ SUITE(DocLocatorTest)
         DocLocator loc("/data/books/book1.lms");
         CHECK( loc.is_valid() == true );
         CHECK( loc.get_protocol() == DocLocator::k_file );
-        CHECK( loc.get_path() == "/data/books/book1.lms" );
+        CHECK( loc.get_full_path() == "/data/books/book1.lms" );
+        CHECK( loc.get_path() == "/data/books/" );
         CHECK( loc.get_inner_protocol() == DocLocator::k_none );
-        CHECK( loc.get_inner_path() == "" );
+        CHECK( loc.get_inner_fullpath() == "" );
         CHECK( loc.get_inner_file() == "" );
-        CHECK( loc.get_locator_string() == "/data/books/book1.lms" );
+        CHECK( loc.get_locator_as_string() == "/data/books/book1.lms" );
     }
 
     TEST_FIXTURE(DocLocatorTestFixture, DocLocator_2)
@@ -81,11 +82,12 @@ SUITE(DocLocatorTest)
         DocLocator loc("c:\\data\\books\\book1.lms");
         CHECK( loc.is_valid() == true );
         CHECK( loc.get_protocol() == DocLocator::k_file );
-        CHECK( loc.get_path() == "c:\\data\\books\\book1.lms" );
+        CHECK( loc.get_full_path() == "c:\\data\\books\\book1.lms" );
+        CHECK( loc.get_path() == "c:\\data\\books\\" );
         CHECK( loc.get_inner_protocol() == DocLocator::k_none );
-        CHECK( loc.get_inner_path() == "" );
+        CHECK( loc.get_inner_fullpath() == "" );
         CHECK( loc.get_inner_file() == "" );
-        CHECK( loc.get_locator_string() == "c:\\data\\books\\book1.lms" );
+        CHECK( loc.get_locator_as_string() == "c:\\data\\books\\book1.lms" );
     }
 
     TEST_FIXTURE(DocLocatorTestFixture, DocLocator_3)
@@ -93,11 +95,12 @@ SUITE(DocLocatorTest)
         DocLocator loc("file:/data/books/book1.lms");
         CHECK( loc.is_valid() == true );
         CHECK( loc.get_protocol() == DocLocator::k_file );
-        CHECK( loc.get_path() == "/data/books/book1.lms" );
+        CHECK( loc.get_full_path() == "/data/books/book1.lms" );
+        CHECK( loc.get_path() == "/data/books/" );
         CHECK( loc.get_inner_protocol() == DocLocator::k_none );
-        CHECK( loc.get_inner_path() == "" );
+        CHECK( loc.get_inner_fullpath() == "" );
         CHECK( loc.get_inner_file() == "" );
-        CHECK( loc.get_locator_string() == "/data/books/book1.lms" );
+        CHECK( loc.get_locator_as_string() == "/data/books/book1.lms" );
     }
 
     TEST_FIXTURE(DocLocatorTestFixture, DocLocator_4)
@@ -105,11 +108,12 @@ SUITE(DocLocatorTest)
         DocLocator loc("file:c:\\data\\books\\book1.lms");
         CHECK( loc.is_valid() == true );
         CHECK( loc.get_protocol() == DocLocator::k_file );
-        CHECK( loc.get_path() == "c:\\data\\books\\book1.lms" );
+        CHECK( loc.get_full_path() == "c:\\data\\books\\book1.lms" );
+        CHECK( loc.get_path() == "c:\\data\\books\\" );
         CHECK( loc.get_inner_protocol() == DocLocator::k_none );
-        CHECK( loc.get_inner_path() == "" );
+        CHECK( loc.get_inner_fullpath() == "" );
         CHECK( loc.get_inner_file() == "" );
-        CHECK( loc.get_locator_string() == "c:\\data\\books\\book1.lms" );
+        CHECK( loc.get_locator_as_string() == "c:\\data\\books\\book1.lms" );
     }
 
     TEST_FIXTURE(DocLocatorTestFixture, DocLocator_5)
@@ -117,11 +121,11 @@ SUITE(DocLocatorTest)
         DocLocator loc("/data/books/book1.lmb#zip:images/picture1.png");
         CHECK( loc.is_valid() == true );
         CHECK( loc.get_protocol() == DocLocator::k_file );
-        CHECK( loc.get_path() == "/data/books/book1.lmb" );
+        CHECK( loc.get_full_path() == "/data/books/book1.lmb" );
         CHECK( loc.get_inner_protocol() == DocLocator::k_zip );
-        CHECK( loc.get_inner_path() == "images/picture1.png" );
+        CHECK( loc.get_inner_fullpath() == "images/picture1.png" );
         CHECK( loc.get_inner_file() == "picture1.png" );
-        CHECK( loc.get_locator_string() == "/data/books/book1.lmb#zip:images/picture1.png" );
+        CHECK( loc.get_locator_as_string() == "/data/books/book1.lmb#zip:images/picture1.png" );
     }
 
     TEST_FIXTURE(DocLocatorTestFixture, DocLocator_6)
@@ -129,11 +133,12 @@ SUITE(DocLocatorTest)
         DocLocator loc("/data/books/book1.lmb#zip:");
         CHECK( loc.is_valid() == true );
         CHECK( loc.get_protocol() == DocLocator::k_file );
-        CHECK( loc.get_path() == "/data/books/book1.lmb" );
+        CHECK( loc.get_full_path() == "/data/books/book1.lmb" );
+        CHECK( loc.get_path() == "/data/books/" );
         CHECK( loc.get_inner_protocol() == DocLocator::k_zip );
-        CHECK( loc.get_inner_path() == "" );
+        CHECK( loc.get_inner_fullpath() == "" );
         CHECK( loc.get_inner_file() == "" );
-        CHECK( loc.get_locator_string() == "/data/books/book1.lmb#zip:" );
+        CHECK( loc.get_locator_as_string() == "/data/books/book1.lmb#zip:" );
     }
 
     TEST_FIXTURE(DocLocatorTestFixture, DocLocator_string_1)
@@ -141,11 +146,12 @@ SUITE(DocLocatorTest)
         DocLocator loc("string:");
         CHECK( loc.is_valid() == true );
         CHECK( loc.get_protocol() == DocLocator::k_string );
+        CHECK( loc.get_full_path() == "" );
         CHECK( loc.get_path() == "" );
         CHECK( loc.get_inner_protocol() == DocLocator::k_none );
-        CHECK( loc.get_inner_path() == "" );
+        CHECK( loc.get_inner_fullpath() == "" );
         CHECK( loc.get_inner_file() == "" );
-        CHECK( loc.get_locator_string() == "string:" );
+        CHECK( loc.get_locator_as_string() == "string:" );
     }
 
 //    TEST_FIXTURE(DocLocatorTestFixture, DocLocator_error_1)

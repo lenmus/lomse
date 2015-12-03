@@ -73,7 +73,7 @@ ZipInputStream::~ZipInputStream()
 bool ZipInputStream::open_zip_archive(const std::string& filelocator)
 {
     DocLocator loc(filelocator);
-    string path = loc.get_path();
+    string path = loc.get_full_path();
     if (path.empty())
         return false;
 
@@ -108,7 +108,7 @@ int ZipInputStream::get_num_entries()
 void ZipInputStream::open_specified_entry_or_first(const std::string& filelocator)
 {
     DocLocator loc(filelocator);
-    string innerPath = loc.get_inner_path();
+    string innerPath = loc.get_inner_fullpath();
     if (innerPath.empty())
     {
         if (!move_to_first_entry())

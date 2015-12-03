@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -49,14 +49,60 @@ class LocalInputStream;
 
 //-------------------------------------------------------------------------------------
 // DocLocator: understands document locators
+//
+/// Document locator is an URI with the following structure:
+///
+///   [<protocol>]<fullpath>[<inner-protocol><inner-fullpath>]
+///
+///   protocol = { 'file:' | 'string:' }. If empty 'file:' is assumed.
+///   fullpath = platform dependent string, including filename and extension
+///     path = path part of <fullpath>, removing filename+extension
+///     filename = filename+extension part of <fullpath>
+///   inner-protocol = { #zip: }
+///   inner-fullpath = platform dependent string, including filename and extension
+///     inner-path = path part of <inner-fullpath>, removing filename+extension
+///     inner-filename = filename+extension part of <inner-fullpath>
+///
+/// Examples:
+///   * DocLocator (linux): "file:/user/data/lenmus/scores/score1.lms"
+///     protocol = "file:"
+///     fullpath = "/user/data/lenmus/scores/score1.lms"
+///         path = "/user/data/lenmus/scores/"
+///         filename: "score1.lms"
+///     inner-protocol = ""
+///     inner-fullpath = ""
+///         inner-path = ""
+///         inner-filename = ""
+///
+///   * DocLocator (Windows): "file:c:\data\lenmus\images\picture1.png"
+///     protocol = "file:"
+///     fullpath = "c:\data\lenmus\images\picture1.png"
+///         path = "c:\data\lenmus\images\"
+///         filename: "picture1.png"
+///     inner-protocol = ""
+///     inner-fullpath = ""
+///         inner-path = ""
+///         inner-filename = ""
+///
+///   * DocLocator (linux): "file:/user/data/lenmus/scores/test1.lmb#zip:content/score1.lms"
+///     protocol = "file:"
+///     fullpath = "/user/data/lenmus/scores/test1.lmb"
+///         path = "/user/data/lenmus/scores/"
+///         filename: "test1.lmb"
+///     inner-protocol = "zip:"
+///     inner-fullpath = "content/score1.lms"
+///         inner-path = "content/"
+///         inner-filename = "score1.lms"
+///
 class DocLocator
 {
 protected:
     string m_fullLocator;
     int m_protocol;
     int m_innerProtocol;
+    string m_fullpath;
     string m_path;
-    string m_innerPath;
+    string m_innerFullPath;
     string m_innerFile;
     bool m_fValid;
 
@@ -69,25 +115,32 @@ public:
     //info
     inline bool is_valid() { return m_fValid; }
     inline int get_protocol() { return m_protocol; }
+ 	///returns the full path with name and extension. Path ends with separator.
+    inline const string& get_full_path() { return m_fullpath; }
+ 	///returns the path part, without the filename, ended in separator if applicable
     inline const string& get_path() { return m_path; }
     inline int get_inner_protocol() { return m_innerProtocol; }
-    inline const string& get_inner_path() { return m_innerPath; }
+    inline const string& get_inner_fullpath() { return m_innerFullPath; }
     inline const string& get_inner_file() { return m_innerFile; }
-    string get_locator_string();
+    string get_locator_as_string();
 
     //modify locator
     inline void set_file(const string& filename) { m_innerFile = filename; }
 
+    //operations
+    virtual string get_locator_for_image(const string& imagename);
 
 protected:
     void split_locator(const string& filelocator);
     void extract_file();
+    void extract_path();
     string get_protocol_string();
 
 };
 
 //-------------------------------------------------------------------------------------
-// LmbDocLocator: a DocLocator that knows the LMB file structure
+// LmbDocLocator: a DocLocator that knows the LMB file structure.
+// In particular, knows about specific folders for images, etc.
 class LmbDocLocator : public DocLocator
 {
 protected:
@@ -102,9 +155,6 @@ public:
 
     //operations
     string get_locator_for_image(const string& imagename);
-
-    //TODO: remove after moving eBooks to new LMB format with LMD files
-    string get_locator_for_image_lms_format(const string& imagename);
 
 };
 
