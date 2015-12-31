@@ -1,0 +1,819 @@
+<html>
+<!-- $Updated: 2012/12/30 -->
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Lomse library. Tutorial 1 for Qt</title>
+<link rel="stylesheet" media="all" href="singledoc.css" type="text/css" />
+</head>
+<body>
+
+<h1>Lomse library. Tutorial 1 for Qt</h1>
+<!--====================================================-->
+
+<p>
+This is meant to be an introduction to using Lomse in a Qt program. Before starting, ensure that you have installed the Lomse library. See the <a href="install.htm">installation</a> page for detailed instructions.
+</p>
+
+
+<h2><a name="">Table of content</a></h2>
+<!--====================================================-->
+
+<ol>
+<li><a href="#lomse">How does Lomse work</a></li>
+<li><a href="#specifications">Specifications: displaying a score</li></a>
+<li><a href="#headers">Header files to use Lomse</a></li>
+<li><a href="#declarations">Declarations</a></li>
+<li><a href="#myapp">main() function implementation</a></li>
+<li><a href="#myframe">MainWindow constructor</a></li>
+<li><a href="#init-lomse">Initializing the Lomse library</a></li>
+<li><a href="#open-document">Creating the score and the View</a></li>
+<li><a href="#bitmap">Creating the bitmap for the rendering buffer</a></li>
+<li><a href="#paint">Painting the window</a></li>
+<li><a href="#close">Closing the application</a></li>
+<li><a href="#compile">Compiling your code and building</a>
+    <ul>
+        <li><a href="#compile-from-command-line">Building from command line</a></li>
+        <li><a href="#compile-with-qt-creator">Building from Qt Creator</a></li>
+    </ul></li>
+<li><a href="#conclusions">Conclusions</a></li>
+</ol>
+
+
+<h2><a name="lomse">1. How does Lomse work</a></h2>
+<!--====================================================-->
+
+<p>
+In this first example we are just going to open a window and display an score on it. You can download the full source code for this example from
+here: <a href="../../examples/example_1_qt.cpp">example_1_qt.cpp</a> and <a href="../../examples/example_1_qt.h">example_1_qt.h</a>.
+</p>
+
+<p>
+The first and most important thing to learn about Lomse is that is platform independent code, with no knowledge about your platform native windows. And, of course, Lomse knows nothing about Qt and its classes <tt>QMainWindow</tt>, <tt>QApplication</tt>, etc. Therefore, <b>Lomse can not directly render scores on any Qt object.</b>
+</p>
+
+<p>
+Lomse works by rendering the scores on a bitmap buffer, that is, on an array of consecutive memory bytes. As this buffer is provided by the user application, it can be any type of memory, such as a real bitmap, a window's buffer, etc. This implies that before using Lomse you should decide what is the best approach for using Lomse in your application.
+<p>
+
+<p>The simplest and usual way of rendering scores on a window is just passing Lomse a bitmap in memory, asking Lomse to render on that bitmap, and copying the bitmap onto the window. And this is the approach we will follow for our Qt application.
+</p>
+
+<p>
+But Lomse knows nothing about QBitmap, QImage, QLabel or other suitable Qt objects. For Lomse, a bitmap is just an array of bytes containing the image pixels. But a QImage object can be created from an array of bytes containing the image pixels:
+</p>
+
+<pre class="code">
+    QImage(uchar* data, int width, int height, Format format, 
+           QImageCleanupFunction cleanupFunction = 0, 
+           void* cleanupInfo = 0)
+</pre>
+
+<p>
+And this image can be rendered doing something as:
+</p>
+
+<pre class="code">
+        QPainter painter(this);
+        QImage image(...);
+        painter.drawImage(0, 0, image);
+</pre>
+
+<p>Therefore, for using Lomse in this Qt tutorial I will render the bitmap provided by Lomse by using a QImage object.
+</p>
+
+<p>The next step is deciding what pixel format should Lomse use. Lomse supports a lot of pixel formats but are
+platform dependent because byte order is different in
+big endian and little endian architectures. Doing some research on the formats supported by QImage, a suitable one
+is QImage::Format_RGBA8888. According to Qt documentation this format uses 32 bits per pixel (one byte per pixel) and, 
+as Lomse bitmap formats, the byte ordering differs between
+big endian and little endian architectures, being respectively (0xRRGGBBAA) 
+and (0xAABBGGRR). So this format matches Lomse format k_pix_format_rgba32.
+</p>
+
+<p>Therefore, I will use pixel format the pixel format k_pix_format_rgba32 for
+Lomse and QImage::Format_RGBA8888 for Qt. Both are internally the same format:
+an array of pixels in the top-to-bottom, left-to-right order, and each pixel is
+encoded in four bytes.
+</p>
+
+<p>So, once we've learn that Lomse renders on bitmaps and once we have found a solution for communicating Qt with Lomse, let's start with our application.
+</p>
+
+
+<h2><a name="specifications">2. Specifications: displaying a score</h2></a>
+<!--====================================================-->
+
+<p>
+In this first example we are just going to open a window and display an score on it. For displaying a score the work to do is minimal:</p>
+<ol>
+    <li>Initialize the Lomse library,</li>
+    <li>Pass Lomse the source code for the score to render and a buffer for the bitmap. Lomse will render the score on this memory.</li>
+    <li>Finally, open a window and display the bitmap on it</li>
+</ol>
+
+<p>In this example, the source code for the score is embedded in the source code. In a real program you normally will read a file containing the score to display or you will create, by program, the source code for the score. We will do that in a more advanced tutorial.
+</p>
+
+<p>With previous specifications, the structure of our program will be very simple. When the app starts running it will create the main window (class MainWindow, derived from QMainWindow) which, in turn, will create a window for displaying the score (class MyCanvas). For it, we will pass Lomse a bitmap, and will ask Lomse to create the score. Then we will render the bitmap on the window. And that's all.
+</p>
+<p>Let's start programming.</p>
+
+
+
+<h2><a name="headers">3. Header files to use Lomse</a></h2>
+<!--====================================================-->
+
+<p>
+Before we get into the heart of our basic example, we will include the needed headers. After the usual stuff and headers for Qt, I've included the Lomse needed headers. At the time of writing this the Lomse API is not yet fixed; therefore there is not a single header file (or set of headers) to include. Instead, the headers to include will depend on the classes and functions you would like to use. Anyway, with current API you will always include:
+</p>
+
+<pre class="code">
+#include &lt;lomse_doorway.h&gt;
+#include &lt;lomse_document.h&gt;
+#include &lt;lomse_graphic_view.h&gt;
+#include &lt;lomse_interactor.h&gt;
+#include &lt;lomse_presenter.h&gt;
+#include &lt;lomse_events.h&gt;
+
+using namespace Lomse;
+</pre>
+
+<p>
+<code>LomseDoorway</code> is the main interface with the Lomse library. <code>Document</code> represents the score to display and is part of the Lomse Model-View-Controller (MVC) architecture. <code>GraphicView</code> is a kind of <code>View</code> (the window in which the score is going to be displayed). <code>Interactor</code> is the controller for the <code>View</code>. <code>Presenter</code> is also part of the MVC model, and is responsible for maintaining the relationships between a <code>Document</code> and its different views and associated interactors. Finally, <code>lomse_events.h</code> is required to deal with events received from the Lomse library.
+</p>
+
+<p>
+These header files can be typically found in <code>/usr/local/include/lomse</code>.
+</p>
+
+
+
+<h2><a name="declarations">4. Declarations</a></h2>
+<!--====================================================-->
+
+<p>After headers we are going to declare our application classes: <code>MainWindow</code> and <code>MyCanvas</code>.
+</p>
+
+<p><code>MainWindow</code> is very simple. It has only a few methods. I will explain them when we arrive to the implementation part, so forget about them for now and let's focus on declaring the variables:
+</p>
+
+<pre class="code">
+LomseDoorway m_lomse;        //the Lomse library doorway
+MyCanvas* m_canvas;
+</pre>
+
+<p>
+<code>m_lomse</code> is an important variable as it is the main interface with the Lomse library. As we will see later, we have to use it for specifying certain Lomse initialization options. The other variable, <code>m_canvas</code> is just the window that we will use to render the score.
+</p>
+
+<p>With this we have finished declaring <code>MainWindow</code>. Here is the code:</p>
+
+<pre class="code">
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    MainWindow();
+
+private slots:
+    void on_about();
+
+public:
+    ~MainWindow();
+
+    //commands
+    void open_test_document();
+
+protected:
+    void create_actions();
+    void create_menu();
+
+    //lomse related
+    void initialize_lomse();
+
+protected:
+
+    //Qt stuff, for the GUI
+
+    MyCanvas* m_canvas;
+    QScrollArea* scrollArea;
+
+    QAction* m_aboutAction;
+    QAction* m_exitAction;
+
+    QMenu* m_fileMenu;
+    QMenu* m_helpMenu;
+
+    //Lomse stuff
+
+    LomseDoorway    m_lomse;        //the Lomse library doorway
+};
+</pre>
+
+
+<p>Next, we have the declaration of <code>MyCanvas</code> class. It is a window on which we show the scores. It derives from QWidget. All the functionality for rendering scores and interacting with them will be in this class. Therefore, we need to declare some event handlers and needed methods. Again, let's postpone the description of them until we arrive to the implementation part. And let's focus on declaring some important variables needed by Lomse:
+</p>
+
+<pre class="code">
+LomseDoorway&   m_lomse;        //the Lomse library doorway
+Presenter*      m_pPresenter;   //relates the View, the Document and the Interactor
+</pre>
+
+<p>
+<code>m_lomse</code> is the main interface with the Lomse library. It was created by <code>MainWindow</code>, and <code>MyCanvas</code> receives it as parameter in the constructor. The other variable, <code>m_pPresenter</code> is a pointers to one important component of the Lomse Model-View-Controller (MVC) architecture. The <code>Presenter</code> is responsible for maintaining the relationships between a Document and its different Views and associated interactors. Later, we will learn more about them.
+</p>
+
+<p>
+Next we are going to declare a rendering buffer and its associated bitmap:
+</p>
+
+<pre class="code">
+RenderingBuffer     m_rbuf_window;
+unsigned char*      m_pdata;                    //ptr to the bitmap
+int                 m_nBufWidth, m_nBufHeight;	//size of the bitmap
+</pre>
+
+<p>
+As learn, Lomse knows nothing about Qt, so the Lomse View renders the music scores on a raw bitmap in memory. To manage this bitmap, Lomse associates it to a <code>RenderingBuffer</code> object. It is responsibility of the application using Lomse to provide this RenderingBuffer object and its associated memory for the bitmap. Therefore, we had defined a variable, <code>m_pdata</code>, that will point to the memory that we will allocate for the raw bitmap, and we will use variables <code>m_nBufWidth</code> and <code>m_nBufHeight</code> to store the size of the needed bitmap.
+</p>
+
+<p>With this we have finished declaring <code>MyCanvas</code>. Here is the code:</p>
+
+<pre class="code">
+class MyCanvas : public QWidget
+{
+public:
+    MyCanvas(QWidget* parent, LomseDoorway& lomse);
+    ~MyCanvas();
+
+    void update_view_content();
+
+    //commands
+    void open_test_document();
+
+protected:
+    //event handlers
+    void paintEvent(QPaintEvent *event);
+    void resizeEvent(QResizeEvent* event);
+
+    void delete_rendering_buffer();
+    void create_rendering_buffer(int width, int height);
+    void update_rendering_buffer_if_needed();
+
+
+        //Lomse stuff
+
+    // In this first example we are just going to display an score on a window.
+    // Let's define the necessary variables:
+    LomseDoorway&   m_lomse;        //the Lomse library doorway
+    Presenter*      m_pPresenter;
+
+    //the Lomse View renders its content on a bitmap. To manage it, Lomse
+    //associates the bitmap to a RenderingBuffer object.
+    //It is your responsibility to render the bitmap on a window.
+    //Here you define the rendering buffer and its associated memory
+    //for this View
+    RenderingBuffer     m_rbuf_window;
+    unsigned char*      m_pdata;                    //ptr to the bitmap
+    int                 m_nBufWidth, m_nBufHeight;	//size of the bitmap
+
+    //some additional variables
+    bool    m_view_needs_redraw;      //to control when the View must be re-drawn
+};
+</pre>
+
+<p>
+With this, we have finished the declarations. Lets's go now to the implementation.
+</p>
+
+
+
+<h2><a name="myapp">5. main() function implementation</a></h2>
+<!--====================================================-->
+
+<p>The main() function is standard stuff in Qt. We only have to create the <code>MainWindow</code> instance and display it. Here is the code:
+</p>
+
+<pre class="code">
+int main(int argc, char* args[])
+{
+    QApplication app(argc, args);
+    app.setOrganizationName("LenMus");
+    app.setApplicationName("Lomse. Tutorial 1");
+
+    MainWindow window;
+    window.show();
+
+    return app.exec();
+}
+</pre>
+
+
+
+<h2><a name="myframe">6. MainWindow constructor</a></h2>
+<!--====================================================-->
+
+<p><tt>MainWindow</tt> is a simple class having the only responsibility of managing the GUI main controls: the menu and the window for displaying the scores. Therefore, in constructor we will do only a few things:
+</p>
+
+<pre class="code">
+MainWindow::MainWindow()
+    : QMainWindow()
+    , m_canvas(NULL)
+{
+    // create our one and only child: the canvas to display the score
+    m_canvas = new MyCanvas(this, m_lomse);
+    setCentralWidget(m_canvas);
+    m_canvas->setMinimumSize(100, 100);
+
+    setWindowTitle(tr("Lomse sample 1 for Qt"));
+    create_menu();
+    create_actions();
+    initialize_lomse();
+
+    resize(790, 400);
+
+    // load the score to display
+    open_test_document();
+}
+</pre>
+
+<p>As you can see it is just a few tasks: create the canvas window, create the main menu, initialize the Lomse library and open the score to display. Methods <code>create_menu()</code> and <code>create_actions</code> are the typical Qt stuff. In this first example, the menu is not necessary but I have included it to set up the foundations for adding more functionality in following tutorials. In this first tutorial we are going to include only two menu items "File > Exit" and "Help > About". Here is the code:
+</p>
+
+<pre class="code">
+void MainWindow::create_menu()
+{
+    m_fileMenu = menuBar()->addMenu(tr("&File"));
+    m_fileMenu->addAction(m_exitAction);
+
+    m_helpMenu = menuBar()->addMenu(tr("&Help"));
+    m_helpMenu->addAction(m_aboutAction);
+}
+
+void MainWindow::create_actions()
+{
+    m_aboutAction = new QAction(tr("&About"), this);
+    connect(m_aboutAction, SIGNAL(triggered()), this, SLOT(on_about()));
+
+    m_exitAction = new QAction(tr("E&xit"), this);
+    connect(m_exitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+}
+</pre>
+
+
+
+<h2><a name="init-lomse">7. Initializing the Lomse library</a></h2>
+<!--====================================================-->
+
+<p>
+The interesting part in <code>MainWindow</code> constructor is the initialization of the Lomse library. As Lomse renders music scores on a bitmap it is necessary to inform Lomse about the bitmap format to use, and about other related parameters that are platform dependent. As explained, for this Qt application I will use bitmaps in RGBA, 32 bits format (Lomse format k_pix_format_rgba32). Apart of specifying the bitmap format to use, Lomse needs to know the resolution to use and the y-axis orientation. In our application, the scores are going to be shown on screen. Therefore, we can use a value of 96ppi, typical for Linux and Windows systems. In a real application, probably you should get this value by invoking some operating system related methods.
+</p>
+
+<p>
+As to the y-axis orientation, Lomse needs to know if your presentation device follows the standard convention used in screen displays in which the y coordinates increases downwards, that is, y-axis coordinate 0 is at top of screen and increases downwards to bottom of screen. This convention is just the opposite of the normal convention for geometry, in which 0 coordinate is at bottom of paper and increases upwards. Lomse follows the standard convention used in displays (y-axis 0 coordinate at top and increases downwards). Therefore, in our application, we have to inform Lomse that the y-axis follows the standard convention for screens and, therefore, we won't Lomse to reverse it.
+</p>
+
+<p>
+One we have decided on the values to use, let's write the code:
+</p>
+
+<pre class="code">
+void MainWindow::initialize_lomse()
+{
+    //the pixel format
+    int pixel_format = k_pix_format_rgba32;
+
+    //the desired resolution. For Linux and Windows 96 pixels per inch works ok.
+    int resolution = 96;    //96 ppi
+
+    //Normal y axis direction is 0 coordinate at top and increase downwards. You
+    //must specify if you would like just the opposite behavior. For Windows and
+    //Linux the default behavior is the right behavior.
+    bool reverse_y_axis = false;
+
+    //Now, initialize the library with these values
+    m_lomse.init_library(pixel_format,resolution, reverse_y_axis);
+}
+</pre>
+
+
+<h2><a name="open-document">8. Creating the score and the View</a></h2>
+<!--====================================================-->
+
+<p>The final step in <tt>MainWindow</tt> constructor is to invoke method <tt>open_test_document()</tt>.
+This is a facade method that just delegates on the canvas:
+</p>
+
+<pre class="code">
+void MainWindow::open_test_document()
+{
+    m_canvas->open_test_document();
+}
+</pre>
+
+
+<p><code>open_test_document()</code> method is the equivalent for the typical <tt>open_document</tt> method in which your application opens a dialog for requesting the file to open, and then, processes and displays it. In our example, the score is in a string, so the only thing to do is to request Lomse to create a new document with the specified content. When creating a document, Lomse automatically, creates a View to display it and an Interactor (a kind of Controller for the View). The <code>open_documented()</code> method is as follows:
+</p>
+
+<pre class="code">
+void MyCanvas::open_test_document()
+{
+    //Normally you will load the content of a file. But in this
+    //simple example we will create an empty document and define its content
+    //from a text string
+
+    //First, we will create a 'Presenter' object. It takes care of creating 
+    //and maintaining all objects and relationships between the document, 
+    //its views and the interactors to interact with the view
+    delete m_pPresenter;
+    m_pPresenter = m_lomse.new_document(ViewFactory::k_view_vertical_book,
+        "(lenmusdoc (vers 0.0)"
+            "(content "
+                "(para (txt \"Hello world!\"))"
+                "(score (vers 2.0) "
+                    "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q) )))"
+            ")"
+        ")",
+        Document::k_format_ldp
+    );
+
+    //get the pointer to the interactor, set the rendering buffer and 
+    //register for receiving desired events
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+        //connect the View with the window buffer
+        spInteractor->set_rendering_buffer(&m_rbuf_window);
+    }
+}
+</pre>
+
+<p>The <code>Presenter</code> is the key object that relates a Document with its Views and Interactors. Also is the access point to get pointers to the Document and its Interactors. Deleting the Presenter also deletes all other related objects.</p>
+
+<p>For creating the Presenter (and associated objects) we invoke LomseDoorway method <code>new_document()</code>, passing as arguments, the type of View to create and the content for the document (note: there are other methods, oriented to create the View from a file or programatically, but we will not study them in this simple example).
+</p>
+
+<p>The View type is just a Lomse enum. In this example, value <code>ViewFactory::k_view_vertical_book</code> means that we would like to display the score as book pages, one page after the other in a vertical layout. Other View formats are possible out-of-the-box, such as horizontal book or not paginated (the score in a single system) but, in any case, its not complex to develop your own View format.
+</p>
+
+<p>The next parameter is a C string containing the score, and the last parameter is a constant <code>Document::k_format_ldp</code> that specifies the language in which this score is written. In this example it is written in LenMus LDP language. Currently, also scores in MusicXML format are supported, although the MusicXML importer is not yet finished and currently it only can deal with very very simple scores.
+</p>
+
+<p>Let's analyse the string with the score. Fort this, I will split it into lines:
+</p>
+<pre class="code">
+(lenmusdoc (vers 0.0)
+    (content
+        (para (txt "Hello world!"))
+        (score (vers 2.0)
+            (instrument
+                (musicData
+                    (clef G)
+                    (key C)
+                    (time 2 4)
+                    (n c4 q)
+                )
+            )
+        )
+    )
+)
+</pre>
+
+<p>First line means that it is a LenMus document, with version 0.0 format. Next line describes the content of the document. The content is just two elements: a paragraph ('para' element) containing text "Hello world!" and a 'score' element. Other types of content are possible: headers, images, tables, lists, etc. You can see LenMus documents as HTML documents, but allowing also a new type of content: scores.
+</p>
+
+<p>The score element contains one instrument (this implies, by default, one staff). Finally, element 'musicData' describes the content for this instrument. In the example, a G clef, a C key signature, a 2/4 time signature and a quarter C4 note.
+</p>
+
+<p>For a detailed description of the LDP language see the <a href="###ldp_full###">LDP Reference Manual</a>.
+</p>
+
+<p>Once the Document and a View for it are created, we just get pointers to the Interactor, so that we can 'communicate' with the Document and its View:
+<p>
+<pre class="code">
+    //get the pointer to the interactor
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+    {
+</pre>
+
+<p>Lomse architecture is based on the Model-View-Controller pattern, and supports multiple simultaneous Views for a Document. By default, when creating a Document also a View and its associated <tt>Interactor</tt> are created. So, parameter <code>'0'</code> in <code>get_interactor(0)</code> refers to first <tt>Interactor</tt>, in this case, the only one created.
+</p>
+
+<p>Once we've got the <tt>Interactor</tt> we only have one <b>important</b> tasks to do: to inform the <tt>Interactor</tt> about the rendering buffer that must be used for its associated View:
+</p>
+
+<pre class="code">
+    //connect the View with the window buffer
+    spInteractor->set_rendering_buffer(&m_rbuf_window);
+</pre>
+
+
+
+<h2><a name="bitmap">9. Creating the bitmap for the rendering buffer</a></h2>
+<!--====================================================-->
+
+<p>
+In last line of <code>open_test_document()</code> we passed to the interactor the address of the rendering buffer but, we have not yet allocated any memory for the bitmap! Don't worry, the bitmap will not be used until we ask Lomse to render something, so we can delay its creation until really needed. But let's study now the code for creating the rendering buffer. As we will render the bitmap on the QWidget area, the required bitmap size will change if the window is resized. Therefore, the method for creating the rendering buffer needs to receive as parameters the desired bitmap size. Here is the code:
+</p>
+
+<pre class="code">
+void MyCanvas::create_rendering_buffer(int width, int height)
+{
+    //allocate memory for the Lomse rendering buffer.
+    //Any existing buffer is automatically deleted by Lomse.
+
+    #define BYTES_PER_PIXEL 4   //the chosen format is RGBA, 32 bits
+
+    // allocate a new rendering buffer
+    delete_rendering_buffer();
+    m_nBufWidth = width;
+    m_nBufHeight = height;
+    m_pdata = (unsigned char*)malloc(m_nBufWidth * m_nBufHeight * BYTES_PER_PIXEL);
+
+    //Attach this memory to be used as Lomse rendering buffer
+    int stride = m_nBufWidth * BYTES_PER_PIXEL;     //number of bytes per row
+    m_rbuf_window.attach(m_pdata, m_nBufWidth, m_nBufHeight, stride);
+
+    m_view_needs_redraw = true;
+}
+</pre>
+
+<p>
+In this method we start allocating memory for the bitmap:
+</p>
+
+<pre class="code">
+    // allocate a new rendering buffer
+    delete_rendering_buffer();
+    m_nBufWidth = width;
+    m_nBufHeight = height;
+    m_pdata = (unsigned char*)malloc(m_nBufWidth * m_nBufHeight * BYTES_PER_PIXEL);
+</pre>
+
+<p>And then we attach this memory to the Lomse rendering buffer:
+</p>
+
+<pre class="code">
+    //Attach this memory to be used as Lomse rendering buffer
+    int stride = m_nBufWidth * BYTES_PER_PIXEL;     //number of bytes per row
+    m_rbuf_window.attach(m_pdata, m_nBufWidth, m_nBufHeight, stride);
+</pre>
+
+<p>The need to create a new rendering buffer comes from two events: either because the window is being created or because the window size has changed. And in any case, before displaying this new bitmap we need to ask Lomse to paint something on it! So, as a final step we raise a flag to signal that the window has to be repainted:
+</p>
+
+<pre class="code">
+    m_view_needs_redraw = true;
+</pre>
+
+<p>With this, we have finished this method.
+</p>
+
+
+
+<h2><a name="paint">10. Painting the window</a></h2>
+<!--====================================================-->
+
+
+<p>In function <code>open_test_document()</code> we have created a Lomse Document and its associated View. But Lomse has not yet rendered the score on the bitmap and nothing has been yet displayed in <tt>MyCanvas</tt>.  We will study now how the score is displayed in the window.
+</p>
+
+<p>After invocation of <code>open_test_document()</code>, instances of <tt>MainWindow</tt> and <tt>MyCanvas</tt> are already created and there are no more work to do. So the application enters in the main loop for handling events. In the queue there are several events waiting for execution. One of them is a <tt>QResizeEvent</tt> that takes place before painting the QWidget window. Therefore, this event is dispatched and finally arrives to <tt>MyCanvas::resizeEvent()</tt> handler method. Here is the code for dealing with it:
+</p>
+
+<pre class="code">
+void MyCanvas::resizeEvent(QResizeEvent* event)
+{
+    QSize size = event->size();
+    create_rendering_buffer(size.width(), size.height());
+}
+</pre>
+
+<p>The only thing to do whenever the window is resized is to create a new bitmap. After a QResizeEvent Qt will generate a QPaintEvent. And when the <tt>QPaintEvent</tt> arrives we only have to repaint the window. Here is the code for dealing with paint events:
+</p>
+
+
+<pre class="code">
+void MyCanvas::paintEvent(QPaintEvent* event)
+{
+    if (m_pPresenter)
+    {
+        update_rendering_buffer_if_needed();
+        if (!m_pdata)
+            return;
+
+        QPainter painter(this);
+        QImage image(m_pdata, m_nBufWidth, m_nBufHeight, QImage::Format_RGBA8888);
+        QRect dirtyRect = event->rect();
+        painter.drawImage(dirtyRect, image, dirtyRect);
+    }
+}
+</pre>
+
+<p>If there is no Presenter is because the window has just been created and nothing else has been done. In this case, just ignore the event, as there is nothing to paint. This can never happen in our sample code but it can be a safeguard to avoid spurious crashes in more complex applications.
+</p>
+
+<p>
+If the Presenter is already created, the only thing to do is to ask Lomse to paint the bitmap and then copy it to the window. But notice that we don't have to ask Lomse to paint the bitmap whenever a <tt>QPaintEvent</tt> event arrives. These events are generated because several reasons. The most frequent is when our window image is damaged (i.e. another window covering our window has moved). But in these cases the image is preserved in the bitmap so it is enough to re-display the bitmap. Other cases for receiving paint events are because the window has changed: when the window is created or when it is resized or when our program changes its content (i.e. because the if the user asks to open a different score). In our application this last case is not possible and so, the only source for additional paint event come from resize events.
+</p>
+
+<p>But as we have seen, whenever the window is resized a new bitmap is automatically created, and flag <tt>m_view_needs_redraw</tt> is set. Therefore, this flag can be used to determine if have to ask Lomse to repaint the bitmap. Here is the code:
+</p>
+
+
+<pre class="code">
+void MyCanvas::update_rendering_buffer_if_needed()
+{
+    if (m_view_needs_redraw)
+        update_view_content();
+
+    m_view_needs_redraw = false;
+}
+
+void MyCanvas::update_view_content()
+{
+    if (!m_pPresenter) return;
+
+    if (SpInteractor spInteractor = m_pPresenter->get_interactor(0).lock())
+        spInteractor->redraw_bitmap();
+}
+</pre>
+
+<p>
+Finally, the execution of method <tt>MyCanvas::paintEvent</tt> continues to refresh the display:
+</p>
+
+<pre class="code">
+    QPainter painter(this);
+    QImage image(m_pdata, m_nBufWidth, m_nBufHeight, QImage::Format_RGBA8888);
+    QRect dirtyRect = event->rect();
+    painter.drawImage(dirtyRect, image, dirtyRect);
+</pre>
+
+<p>That's all !</p>
+
+
+<h2><a name="close">11. Closing the application</a></h2>
+<!--====================================================-->
+
+<p>
+Finally, the last important point to comment is to remind you that, to avoid memory leaks, when closing the application it is necessary to delete the rendering buffer and the Presenter (which in turn will delete all Lomse related objects, such as the View, the Document and the Interactor). This code has been included in <code>MyCanvas</code> destructor:
+</p>
+
+<pre class="code">
+MyCanvas::~MyCanvas()
+{
+    delete_rendering_buffer();
+
+    //delete the Presenter. This will also delete the Document, the Interactor,
+    //the View and other related objects
+    delete m_pPresenter;
+}
+</pre>
+
+<p>
+With this, I finish the explanation of the code. You can download the full source code for this example from
+here: <a href="../../examples/example_1_qt.cpp">example_1_qt.cpp</a> and <a href="../../examples/example_1_qt.h">example_1_qt.h</a>.
+In the next section we are going to build and run our code.
+</p>
+
+
+<h2><a name="compile">12. Compiling your code and building</a></h2>
+<!--====================================================-->
+
+<p>Most Qt tutorials seem to assume you want to use Qt Creator. But the build process from the command line is simple and gives better understanding about what you are doing. Here, I will describe both approaches.
+</p>
+
+<h3><a name="compile-from-command-line">12.1 Building from the command line</a></h3>
+<!--====================================================-->
+
+<p>To build from the command line, normally you use a file, named MakeFile, which directs the compiler to compile and build your programs. And all you have to do is move into the directory containing the 'MakeFile' and your program, and run <tt>make</tt> command.
+</p>
+
+<p>
+So to build our example we need first to create a MakeFile.
+</p>
+
+<h4>Generating a MakeFile</h4>
+
+<p>
+Qt has an easy way of generating a MakeFile. Here is how you do it:
+</p>
+
+<p><b>Step 1</b>. Move into the directory containing the .cpp and .h files that we have just created:</p>
+<pre class="console">
+    cd /path-to-this-example-code/
+</pre>
+
+<p><b>Step 2</b>. Create a Qt project by running <tt>qmake</tt> command with option <tt>-project</tt>. The project will contain all the .cpp and .h files in current directory. Therefore, ensure that current folder <b>only contains</b> the sources for this example. Then execute:</p>
+<pre class="console">
+    qmake -project -o example-1-qt
+</pre>
+<p>This will create a project file called example-1-qt.pro and include our files example-1-qt.cpp and example-1-qt.h into it.
+</p>
+
+<p><b>Step 3</b>. The project file (.pro) has to be modified for including the Qt and Lomse headers and linking to the Qt and Lomse libraries. For this, the best way is to use the pkg-config tool. Open the .pro file created in previous step and add the following lines:
+</p>
+<pre class="console">
+    QT += core gui
+    greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+    CONFIG += link_pkgconfig
+    PKGCONFIG += liblomse
+</pre>
+
+<p><b>Step 4</b>. Save the file and call <tt>qmake</tt> on the project file (.pro) to create
+ a platform specific MakeFile:</p>
+<pre class="console">
+    qmake example-1-qt.pro
+</pre>
+<p>
+At this stage if you do a listing of the contents of the directory, you will find a new file named MakeFile.
+</p>
+
+<h4>Building the program</h4>
+
+<p>To compile and build our program, it is now as simple as running <tt>make</tt>:</p>
+<pre class="console">
+    make
+</pre>
+
+<h4>Executing your compiled program</h4>
+
+<p>
+After running make, you will find a executable file, named example-1-qt, in current directory. For executing your first Qt program using Lomse just do:
+</p>
+
+<pre class="console">
+    ./example-1-qt
+</pre>
+
+<p>You should see something as:
+</p>
+
+<img class="center" src="./images/example-1-qt.png" width="600px" />
+
+<p>&nbsp;</p>
+
+
+<h3><a name="compile-with-qt-creator">12.2 Building from Qt Creator</a></h3>
+<!--====================================================-->
+
+<p>
+The first step is to use the Project Wizards to create the project. Open QtCreator and click on "New Project" button.
+</p>
+
+<p>
+Select "Other Project" and "Empty qmake project" and click button "Choose" at bottom:
+</p>
+<img class="center" src="./images/qtcreator-01.png" width="600px" />
+
+<p>
+Next, you select the location for the project. In the "Name" specify the folder that contains the .cpp and .h files, and in "Create in" specify the path to that folder. A warning message in yellow will appear at bottom. Ignore it an click button "Next":
+</p>
+<img class="center" src="./images/qtcreator-02.png" width="600px" />
+
+<p>
+After a few more steps, Qt Creator automatically generates the project as defined by the wizard. And will create the project file example-1-qt.pro (see next image):
+</p>
+<img class="center" src="./images/qtcreator-03.png" width="600px" />
+
+<p>Add the files example-1-qt.cpp and example-1-qt.h to the project (right click on project folder and select "Add Existing Files ...").
+</p>
+
+<p>Finally, the project file, example-1-qt.pro has to be modified for including the Qt and Lomse headers and linking to the Qt and Lomse libraries. For this, the best way is to use the pkg-config tool. Open the .pro file created in previous step and add the following lines:
+</p>
+<pre class="console">
+    QT += core gui
+    greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+    CONFIG += link_pkgconfig
+    PKGCONFIG += liblomse
+</pre>
+
+<img class="center" src="./images/qtcreator-04.png" width="600px" />
+
+<p>Now build the program (a lot of warning messages will be displayed in the "Issues" panel but are not relevant). Now you are ready to run your first Qt program using Lomse. When running the program you should see something as:
+</p>
+
+<img class="center" src="./images/example-1-qt.png" width="600px" />
+
+<p>&nbsp;</p>
+
+
+<h2><a name="conclusions">13. Conclusions</a></h2>
+<!--====================================================-->
+
+<p>
+This document is a very basic introduction. In the <a href="tutorial-2-qt.htm">second tutorial</a> I will add more code to our sample application for opening files with scores and interacting with the scores (zooming, dragging, selecting objects, etc.).
+</p>
+
+<p>
+If you would like to contribute with more tutorials or by adapting this tutorial for other platforms, you are welcome!. Join the Lomse list and post me a message.
+</p>
+
+
+</body>
+</html>
