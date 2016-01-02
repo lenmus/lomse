@@ -55,13 +55,14 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
     switch(type)
     {
         case k_imo_anonymous_block:     pObj = LOMSE_NEW ImoAnonymousBlock();     break;
+        case k_imo_articulation_symbol: pObj = LOMSE_NEW ImoArticulationSymbol(); break;
+        case k_imo_articulation_line:   pObj = LOMSE_NEW ImoArticulationLine();   break;
         case k_imo_attachments:         pObj = LOMSE_NEW ImoAttachments();        break;
         case k_imo_barline:             pObj = LOMSE_NEW ImoBarline();            break;
         case k_imo_beam:                pObj = LOMSE_NEW ImoBeam();               break;
         case k_imo_beam_dto:            pObj = LOMSE_NEW ImoBeamDto();            break;
         case k_imo_bezier_info:         pObj = LOMSE_NEW ImoBezierInfo();         break;
 //        case k_imo_border_dto:      pObj = LOMSE_NEW ImoBorderDto();              break;
-        case k_imo_textblock_info:      pObj = LOMSE_NEW ImoTextBlockInfo();      break;
         case k_imo_button:              pObj = LOMSE_NEW ImoButton();             break;
         case k_imo_chord:               pObj = LOMSE_NEW ImoChord();              break;
         case k_imo_clef:                pObj = LOMSE_NEW ImoClef();               break;
@@ -120,6 +121,7 @@ ImoObj* ImFactory::inject(int type, Document* pDoc, ImoId id)
         case k_imo_table_body:          pObj = LOMSE_NEW ImoTableBody();          break;
         case k_imo_table_head:          pObj = LOMSE_NEW ImoTableHead();          break;
         case k_imo_table_row:           pObj = LOMSE_NEW ImoTableRow(pDoc);       break;
+        case k_imo_textblock_info:      pObj = LOMSE_NEW ImoTextBlockInfo();      break;
         case k_imo_text_box:            pObj = LOMSE_NEW ImoTextBox();            break;
         case k_imo_text_info:           pObj = LOMSE_NEW ImoTextInfo();           break;
         case k_imo_text_item:           pObj = LOMSE_NEW ImoTextItem();           break;

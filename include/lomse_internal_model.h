@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -166,6 +166,26 @@ class DtoObj;
     };
 
     //-----------------------------------------------------------------------------
+    //The line-type attribute distinguishes between solid, dashed, dotted, and
+    //wavy lines.
+    enum ELineType
+    {
+        k_line_type_solid = 0,
+        k_line_type_dashed,
+        k_line_type_dotted,
+        k_line_type_wavy,
+    };
+
+    //-----------------------------------------------------------------------------
+    //The line-shape attribute is used to distinguish between straight and curved lines.
+    enum ELineShape
+    {
+        k_line_shape_straight = 0,
+        k_line_shape_curved,
+    };
+
+
+    //-----------------------------------------------------------------------------
     //clefs
     enum EClef
     {
@@ -305,6 +325,30 @@ class DtoObj;
         k_max_barline,
     };
 
+    //-----------------------------------------------------------------------------
+    //Articulations
+    enum EArticulations
+    {
+        k_articulation_unknown = -1,
+        k_articulation_accent,
+        k_articulation_strong_accent,
+        k_articulation_staccato,
+        k_articulation_tenuto,
+        k_articulation_detached_legato,
+        k_articulation_staccatissimo,
+        k_articulation_spiccato,
+        k_articulation_scoop,
+        k_articulation_plop,
+        k_articulation_doit,
+        k_articulation_falloff,
+        k_articulation_breath_mark,
+        k_articulation_caesura,
+        k_articulation_stress,
+        k_articulation_unstress,
+
+        k_max_articulation,
+    };
+
 
     //-----------------------------------------------------------------------------
     //type for ImoObj objects
@@ -374,7 +418,15 @@ class DtoObj;
 
                     // ImoAuxObj (A)
                     k_imo_auxobj,
-                        k_imo_fermata, k_imo_line, k_imo_score_text,
+                        k_imo_fermata,
+
+                        // ImoArticulation (A)
+                        k_imo_articulation,
+                            k_imo_articulation_symbol,
+                            k_imo_articulation_line,
+                        k_imo_articulation_last,
+
+                        k_imo_line, k_imo_score_text,
                         k_imo_score_line, k_imo_score_title,
                         k_imo_text_box,
                     k_imo_auxobj_last,
@@ -658,9 +710,13 @@ public:
                                       && m_objtype < k_imo_box_inline_last; }
 	inline bool is_inline_level_obj() { return m_objtype > k_imo_inline_level_obj
                                             && m_objtype < k_imo_inline_level_obj_last; }
+	inline bool is_articulation() { return m_objtype > k_imo_articulation
+                                        && m_objtype < k_imo_articulation_last; }
 
     //items
     inline bool is_anonymous_block() { return m_objtype == k_imo_anonymous_block; }
+    inline bool is_articulation_symbol() { return m_objtype == k_imo_articulation_symbol; }
+    inline bool is_articulation_line() { return m_objtype == k_imo_articulation_line; }
     inline bool is_attachments() { return m_objtype == k_imo_attachments; }
     inline bool is_barline() { return m_objtype == k_imo_barline; }
     inline bool is_beam() { return m_objtype == k_imo_beam; }
@@ -1818,7 +1874,8 @@ public:
     virtual ~ImoAuxObj() {}
 
 protected:
-    ImoAuxObj(ImoContentObj* UNUSED(pOwner), ImoId id, int objtype)
+    //ImoAuxObj(ImoContentObj* UNUSED(pOwner), ImoId id, int objtype)
+    ImoAuxObj(ImoId id, int objtype)
         : ImoScoreObj(id, objtype)
     {
     }
@@ -2619,6 +2676,95 @@ public:
     //setters
     inline void set_placement(int placement) { m_placement = placement; }
     inline void set_symbol(int symbol) { m_symbol = symbol; }
+
+};
+
+//---------------------------------------------------------------------------------------
+class ImoArticulation : public ImoAuxObj
+{
+protected:
+    int m_articulationType;
+    int m_placement;
+
+    ImoArticulation(int objtype)
+        : ImoAuxObj(objtype)
+        , m_articulationType(k_articulation_unknown)
+        , m_placement(k_placement_default)
+    {
+    }
+
+public:
+    virtual ~ImoArticulation() {}
+
+    //getters
+    inline int get_placement() { return m_placement; }
+    inline int get_articulation_type() { return m_articulationType; }
+
+    //setters
+    inline void set_placement(int placement) { m_placement = placement; }
+    inline void set_articulation_type(int articulationType) {
+        m_articulationType = articulationType;
+    }
+
+};
+
+//---------------------------------------------------------------------------------------
+class ImoArticulationSymbol : public ImoArticulation
+{
+protected:
+    bool m_fUp;     //only for k_articulation_strong_accent
+
+    friend class ImFactory;
+    ImoArticulationSymbol()
+        : ImoArticulation(k_imo_articulation_symbol)
+        , m_fUp(true)
+    {
+    }
+
+public:
+    virtual ~ImoArticulationSymbol() {}
+
+    //getters
+    inline bool is_up() { return m_fUp; }
+
+    //setters
+    inline void set_up(bool value) { m_fUp = value; }
+
+};
+
+//---------------------------------------------------------------------------------------
+class ImoArticulationLine : public ImoArticulation
+{
+protected:
+    int m_lineShape;        //straight | curved
+    int m_lineType;         //solid | dashed | dotted | wavy
+    Tenths m_dashLength;    //only for dashed lines
+    Tenths m_dashSpace;     //only for dashed lines
+
+    friend class ImFactory;
+    ImoArticulationLine()
+        : ImoArticulation(k_imo_articulation_line)
+        , m_lineShape(k_line_shape_straight)
+        , m_lineType(k_line_type_solid)
+        , m_dashLength(4.0)
+        , m_dashSpace(2.0)
+    {
+    }
+
+public:
+    virtual ~ImoArticulationLine() {}
+
+    //getters
+    inline int get_line_shape() { return m_lineShape; }
+    inline int get_line_type() { return m_lineType; }
+    inline Tenths get_dash_length() { return m_dashLength; }
+    inline Tenths get_dash_space() { return m_dashSpace; }
+
+    //setters
+    inline void set_line_shape(int lineShape) { m_lineShape = lineShape; }
+    inline void set_line_type(int lineType) { m_lineType = lineType; }
+    inline void set_dash_length(Tenths length) { m_dashLength = length; }
+    inline void set_dash_space(Tenths space) { m_dashSpace = space; }
 
 };
 

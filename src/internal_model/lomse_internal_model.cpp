@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -401,6 +401,8 @@ const string& ImoObj::get_name(int type)
 
         // ImoAuxObj (A)
         m_TypeToName[k_imo_fermata] = "fermata";
+        m_TypeToName[k_imo_articulation_symbol] = "articulation symbol";
+        m_TypeToName[k_imo_articulation_line] = "articulation line";
         m_TypeToName[k_imo_line] = "line";
         m_TypeToName[k_imo_score_text] = "score text";
         m_TypeToName[k_imo_score_line] = "score line";
@@ -447,6 +449,8 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_box_inline_last] = "non-valid";
         m_TypeToName[k_imo_inline_level_obj_last] = "non-valid";
         m_TypeToName[k_imo_contentobj_last] = "non-valid";
+        m_TypeToName[k_imo_articulation] = "non-valid";
+        m_TypeToName[k_imo_articulation_last] = "non-valid";
         m_TypeToName[k_imo_last] = "non-valid";
 
         m_fNamesRegistered = true;
