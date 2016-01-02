@@ -157,7 +157,7 @@ void TaskDragView::do_drag(Event& event)
 }
 
 //---------------------------------------------------------------------------------------
-void TaskDragView::end_drag(Event& event)
+void TaskDragView::end_drag(Event& UNUSED(event))
 {
     m_drag_flag = false;
 }

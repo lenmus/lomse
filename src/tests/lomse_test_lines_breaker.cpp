@@ -81,7 +81,7 @@ public:
         return iSystem == 0 ? m_firstSystemSize : m_otherSystemsSize;
     }
     bool column_has_system_break(int iCol) { return m_hasSystemBreak[iCol]; }
-    float get_column_penalty(int iCol) { return 1.0f; }
+    float get_column_penalty(int UNUSED(iCol)) { return 1.0f; }
     LUnits get_main_width(int iCol) { return m_sizes[iCol]; }
     LUnits get_trimmed_width(int iCol) { return m_sizes[iCol]; }
 };

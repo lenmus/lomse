@@ -58,8 +58,8 @@ MainWindow::MainWindow()
     m_canvas->setMinimumSize(100, 100);
 
     setWindowTitle(tr("Lomse sample 1 for Qt"));
-    create_menu();
     create_actions();
+    create_menu();
     initialize_lomse();
 
     resize(790, 400);

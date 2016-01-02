@@ -140,7 +140,7 @@ GmoShapeSimpleLine::GmoShapeSimpleLine(ImoObj* pCreatorImo, int type,
 void GmoShapeSimpleLine::set_new_values(LUnits xStart, LUnits yStart,
                                         LUnits xEnd, LUnits yEnd,
                                         LUnits uWidth, LUnits uBoundsExtraWidth,
-                                        Color color, ELineEdge nEdge)
+                                        Color UNUSED(color), ELineEdge nEdge)
 {
     m_uWidth = uWidth;
 	m_uBoundsExtraWidth = uBoundsExtraWidth;
@@ -253,7 +253,7 @@ GmoShapeRectangle::GmoShapeRectangle(
                         ImoObj* pCreatorImo, int type, ShapeId idx,
                         const UPoint& pos, const USize& size,     //position and size
                         LUnits radius,              //for rounded corners
-                        ImoStyle* pStyle            //for line style & background color
+                        ImoStyle* UNUSED(pStyle)    //for line style & background color
                      )
 	: GmoSimpleShape(pCreatorImo, type, idx, Color(0,0,0))
 	, m_radius(radius)

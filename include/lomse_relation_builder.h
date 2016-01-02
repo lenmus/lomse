@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -203,7 +203,7 @@ void RelationBuilder<T, A>::delete_consumed_info_items(T* pEndInfo)
 
 //---------------------------------------------------------------------------------------
 template <class T, class A>
-void RelationBuilder<T, A>::delete_item_element(T* pInfo)
+void RelationBuilder<T, A>::delete_item_element(T* UNUSED(pInfo))
 {
     //Nothing to do: pInfo is deleted automatically when erasing node
 }

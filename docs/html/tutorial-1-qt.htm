@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2012/12/30 -->
+<!-- $Updated: 2016/01/01 -->
 
 <head>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
@@ -329,8 +329,8 @@ MainWindow::MainWindow()
     m_canvas->setMinimumSize(100, 100);
 
     setWindowTitle(tr("Lomse sample 1 for Qt"));
-    create_menu();
     create_actions();
+    create_menu();
     initialize_lomse();
 
     resize(790, 400);
@@ -340,19 +340,10 @@ MainWindow::MainWindow()
 }
 </pre>
 
-<p>As you can see it is just a few tasks: create the canvas window, create the main menu, initialize the Lomse library and open the score to display. Methods <code>create_menu()</code> and <code>create_actions</code> are the typical Qt stuff. In this first example, the menu is not necessary but I have included it to set up the foundations for adding more functionality in following tutorials. In this first tutorial we are going to include only two menu items "File > Exit" and "Help > About". Here is the code:
+<p>As you can see it is just a few tasks: create the canvas window, create the main menu, initialize the Lomse library and open the score to display. Methods <code>create_actions</code> and <code>create_menu()</code> are the typical Qt stuff. In this first example, the menu is not necessary but I have included it to set up the foundations for adding more functionality in following tutorials. In this first tutorial we are going to include only two menu items "File > Exit" and "Help > About". Here is the code:
 </p>
 
 <pre class="code">
-void MainWindow::create_menu()
-{
-    m_fileMenu = menuBar()->addMenu(tr("&File"));
-    m_fileMenu->addAction(m_exitAction);
-
-    m_helpMenu = menuBar()->addMenu(tr("&Help"));
-    m_helpMenu->addAction(m_aboutAction);
-}
-
 void MainWindow::create_actions()
 {
     m_aboutAction = new QAction(tr("&About"), this);
@@ -360,6 +351,15 @@ void MainWindow::create_actions()
 
     m_exitAction = new QAction(tr("E&xit"), this);
     connect(m_exitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+}
+
+void MainWindow::create_menu()
+{
+    m_fileMenu = menuBar()->addMenu(tr("&File"));
+    m_fileMenu->addAction(m_exitAction);
+
+    m_helpMenu = menuBar()->addMenu(tr("&Help"));
+    m_helpMenu->addAction(m_aboutAction);
 }
 </pre>
 
@@ -520,6 +520,8 @@ In last line of <code>open_test_document()</code> we passed to the interactor th
 
 <pre class="code">
 void MyCanvas::create_rendering_buffer(int width, int height)
+
+
 {
     //allocate memory for the Lomse rendering buffer.
     //Any existing buffer is automatically deleted by Lomse.
@@ -709,7 +711,7 @@ Qt has an easy way of generating a MakeFile. Here is how you do it:
 
 <p><b>Step 2</b>. Create a Qt project by running <tt>qmake</tt> command with option <tt>-project</tt>. The project will contain all the .cpp and .h files in current directory. Therefore, ensure that current folder <b>only contains</b> the sources for this example. Then execute:</p>
 <pre class="console">
-    qmake -project -o example-1-qt
+    qmake -project -o example-1-qt.pro
 </pre>
 <p>This will create a project file called example-1-qt.pro and include our files example-1-qt.cpp and example-1-qt.h into it.
 </p>

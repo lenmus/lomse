@@ -607,16 +607,16 @@ public:
     virtual bool can_generate_secondary_shapes() { return false; }
 
     //edition support
-    virtual void set_int_attribute(TIntAttribute attrib, int value) {}      //TODO pure virtual
-    virtual int get_int_attribute(TIntAttribute attrib) { return 0; }       //TODO pure virtual
-    virtual void set_color_attribute(TIntAttribute attrib, Color value) {}  //TODO pure virtual
-    virtual Color get_color_attribute(TIntAttribute attrib) { return Color(0,0,0); }    //TODO pure virtual
-    virtual void set_bool_attribute(TIntAttribute attrib, bool value) {}  //TODO pure virtual
-    virtual bool get_bool_attribute(TIntAttribute attrib) { return true; }    //TODO pure virtual
-    virtual void set_double_attribute(TIntAttribute attrib, double value) {}  //TODO pure virtual
-    virtual double get_double_attribute(TIntAttribute attrib) { return 0.0; }    //TODO pure virtual
-    virtual void set_string_attribute(TIntAttribute attrib, const string& value) {}  //TODO pure virtual
-    virtual string get_string_attribute(TIntAttribute attrib) { return ""; }    //TODO pure virtual
+    virtual void set_int_attribute(TIntAttribute UNUSED(attrib), int UNUSED(value)) {}      //TODO pure virtual
+    virtual int get_int_attribute(TIntAttribute UNUSED(attrib)) { return 0; }       //TODO pure virtual
+    virtual void set_color_attribute(TIntAttribute UNUSED(attrib), Color UNUSED(value)) {}  //TODO pure virtual
+    virtual Color get_color_attribute(TIntAttribute UNUSED(attrib)) { return Color(0,0,0); }    //TODO pure virtual
+    virtual void set_bool_attribute(TIntAttribute UNUSED(attrib), bool UNUSED(value)) {}  //TODO pure virtual
+    virtual bool get_bool_attribute(TIntAttribute UNUSED(attrib)) { return true; }    //TODO pure virtual
+    virtual void set_double_attribute(TIntAttribute UNUSED(attrib), double UNUSED(value)) {}  //TODO pure virtual
+    virtual double get_double_attribute(TIntAttribute UNUSED(attrib)) { return 0.0; }    //TODO pure virtual
+    virtual void set_string_attribute(TIntAttribute UNUSED(attrib), const string& UNUSED(value)) {}  //TODO pure virtual
+    virtual string get_string_attribute(TIntAttribute UNUSED(attrib)) { return ""; }    //TODO pure virtual
     virtual list<TIntAttribute> get_supported_attributes()
     {
         list<TIntAttribute> supported;
@@ -1818,7 +1818,10 @@ public:
     virtual ~ImoAuxObj() {}
 
 protected:
-    ImoAuxObj(ImoContentObj* pOwner, ImoId id, int objtype) : ImoScoreObj(id, objtype) {}
+    ImoAuxObj(ImoContentObj* UNUSED(pOwner), ImoId id, int objtype)
+        : ImoScoreObj(id, objtype)
+    {
+    }
 
 };
 
@@ -2312,7 +2315,7 @@ public:
     inline void set_type(int barlineType) { m_barlineType = barlineType; }
 
     //overrides: barlines always in staff 0
-    void set_staff(int staff) { m_staff = 0; }
+    void set_staff(int UNUSED(staff)) { m_staff = 0; }
 
     //edition support
     virtual void set_int_attribute(TIntAttribute attrib, int value);
@@ -2582,7 +2585,7 @@ public:
 
     //cursor
     //TODO: method add_cursor_info
-    void add_cursor_info(ImoCursorInfo* pCursor) {};
+    void add_cursor_info(ImoCursorInfo* UNUSED(pCursor)) {};
 
 protected:
     void add_private_style(ImoStyle* pStyle);
@@ -2900,7 +2903,7 @@ public:
     inline void set_key_type(int type) { m_keyType = type; }
 
     //overrides: key signatures always in staff 0
-    void set_staff(int staff) { m_staff = 0; }
+    void set_staff(int UNUSED(staff)) { m_staff = 0; }
 
     //properties
     bool can_generate_secondary_shapes() { return true; }
@@ -3891,7 +3894,7 @@ public:
     inline void set_type(int type) { m_type = type; }
 
     //overrides: time signatures always in staff 0
-    void set_staff(int staff) { m_staff = 0; }
+    void set_staff(int UNUSED(staff)) { m_staff = 0; }
 
     //properties
     bool can_generate_secondary_shapes() { return true; }

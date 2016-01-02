@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -36,6 +36,20 @@
 #include <vector>
 using namespace std;
 
+
+
+//---------------------------------------------------------------------------------------
+// macro for avoiding warnings when a parameter is not used
+#ifdef UNUSED
+#elif defined(__GNUC__)
+    #define UNUSED(x) UNUSED_ ## x __attribute__((unused))
+#elif defined(__LCLINT__)
+    #define UNUSED(x) /*@unused@*/ x
+#else
+    #define UNUSED(x) /* x */
+#endif
+
+//---------------------------------------------------------------------------------------
 //if it is a C++11 compliant compiler use std shared_ptr, else use boost shared_ptr
 #if __cplusplus > 199711L
     #include <memory>

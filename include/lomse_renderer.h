@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -329,7 +329,7 @@ public:
     }
 
     //-----------------------------------------------------------------------------------
-    void render_bitmap(RenderingBuffer& bmap, bool hasAlpha,
+    void render_bitmap(RenderingBuffer& bmap, bool UNUSED(hasAlpha),
                        double srcX1, double srcY1, double srcX2, double srcY2,
                        double dstX1, double dstY1, double dstX2, double dstY2,
                        EResamplingQuality resamplingMode,
@@ -480,12 +480,12 @@ protected:
     //-----------------------------------------------------------------------------------
     // Render a bitmap.
     template<class Renderer, bool hasAlpha>
-    void render_bitmap(Renderer& ren, RenderingBuffer& bmap,
+    void render_bitmap(Renderer& UNUSED(ren), RenderingBuffer& bmap,
                        double srcX1, double srcY1, double srcX2, double srcY2,
                        double dstX1, double dstY1, double dstX2, double dstY2,
                        EResamplingQuality quality,
-                       const TransAffine& mtx,
-                       double alpha=1.0)
+                       const TransAffine& UNUSED(mtx),
+                       double UNUSED(alpha) =1.0)
     {
         //pipeline:
         // the path to render is a rectangle, and the span generator fills it with

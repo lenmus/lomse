@@ -3993,7 +3993,7 @@ TimeUnits ImoTimeSignature::get_beat_duration()
 //=======================================================================================
 // ImoTupletData implementation
 //=======================================================================================
-ImoTupletData::ImoTupletData(ImoTupletDto* pDto)
+ImoTupletData::ImoTupletData(ImoTupletDto* UNUSED(pDto))
     : ImoRelDataObj(k_imo_tuplet_data)
 {
 }

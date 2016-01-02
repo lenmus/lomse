@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -79,7 +79,7 @@ void DocCommand::create_checkpoint(Document* pDoc)
 }
 
 //---------------------------------------------------------------------------------------
-void DocCommand::undo_action(Document* pDoc, DocCursor* pCursor)
+void DocCommand::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     //default implementation based on restoring from saved checkpoint data
 
@@ -112,7 +112,7 @@ void DocCommand::undo_action(Document* pDoc, DocCursor* pCursor)
 }
 
 //---------------------------------------------------------------------------------------
-void DocCommand::log_forensic_data(Document* pDoc, DocCursor* pCursor)
+void DocCommand::log_forensic_data(Document* UNUSED(pDoc), DocCursor* pCursor)
 {
     //save data for forensic analysis if a crash
 
@@ -506,7 +506,7 @@ void CmdAddChordNote::log_command(ofstream &logger)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdAddChordNote::set_target(Document* pDoc, DocCursor* pCursor,
+int CmdAddChordNote::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
                                 SelectionSet* pSelection)
 {
     m_baseId = k_no_imoid;
@@ -586,7 +586,8 @@ void CmdAddChordNote::update_selection(SelectionSet* pSelection)
 //=======================================================================================
 // CmdAddNoteRest implementation
 //=======================================================================================
-CmdAddNoteRest::CmdAddNoteRest(const string& source, int editMode, const string& name)
+CmdAddNoteRest::CmdAddNoteRest(const string& source, int UNUSED(editMode),
+                               const string& name)
     : DocCmdSimple(name)
 {
     m_source = source;
@@ -601,8 +602,8 @@ void CmdAddNoteRest::log_command(ofstream &logger)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdAddNoteRest::set_target(Document* pDoc, DocCursor* pCursor,
-                               SelectionSet* pSelection)
+int CmdAddNoteRest::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
+                               SelectionSet* UNUSED(pSelection))
 {
     //undo based on partial checkpoint: get id of element to save
     ImoObj* pParent = pCursor->get_parent_object();
@@ -899,7 +900,8 @@ CmdAddTie::CmdAddTie(const string& name)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdAddTie::set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection)
+int CmdAddTie::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
+                          SelectionSet* pSelection)
 {
     ImoNote* pStartNote;
     ImoNote* pEndNote;
@@ -920,7 +922,7 @@ void CmdAddTie::log_command(ofstream &logger)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdAddTie::perform_action(Document* pDoc, DocCursor* pCursor)
+int CmdAddTie::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     //Undo strategy: direct undo, as it only implies deleting the tuplet
 
@@ -942,7 +944,7 @@ int CmdAddTie::perform_action(Document* pDoc, DocCursor* pCursor)
 }
 
 //---------------------------------------------------------------------------------------
-void CmdAddTie::undo_action(Document* pDoc, DocCursor* pCursor)
+void CmdAddTie::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     if (m_tieId != k_no_imoid)
     {
@@ -968,7 +970,7 @@ CmdAddTuplet::CmdAddTuplet(const string& src, const string& name)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdAddTuplet::set_target(Document* pDoc, DocCursor* pCursor,
+int CmdAddTuplet::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
                              SelectionSet* pSelection)
 {
     if (pSelection && !pSelection->empty())
@@ -995,7 +997,7 @@ void CmdAddTuplet::log_command(ofstream &logger)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdAddTuplet::perform_action(Document* pDoc, DocCursor* pCursor)
+int CmdAddTuplet::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     //Undo strategy: direct undo, as it only implies deleting the tuplet
 
@@ -1017,7 +1019,7 @@ int CmdAddTuplet::perform_action(Document* pDoc, DocCursor* pCursor)
 }
 
 //---------------------------------------------------------------------------------------
-void CmdAddTuplet::undo_action(Document* pDoc, DocCursor* pCursor)
+void CmdAddTuplet::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     if (m_tupletId != k_no_imoid)
     {
@@ -1040,8 +1042,8 @@ CmdBreakBeam::CmdBreakBeam(const string& name)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdBreakBeam::set_target(Document* pDoc, DocCursor* pCursor,
-                             SelectionSet* pSelection)
+int CmdBreakBeam::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
+                             SelectionSet* UNUSED(pSelection))
 {
     ImoObj* pParent = pCursor->get_parent_object();
     if (pCursor->get_parent_object()->is_score())
@@ -1178,7 +1180,7 @@ CmdChangeAccidentals::CmdChangeAccidentals(EAccidentals acc, const string& name)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdChangeAccidentals::set_target(Document* pDoc, DocCursor* pCursor,
+int CmdChangeAccidentals::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
                                      SelectionSet* pSelection)
 {
     if (pSelection && !pSelection->empty())
@@ -1196,7 +1198,7 @@ void CmdChangeAccidentals::log_command(ofstream &logger)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdChangeAccidentals::perform_action(Document* pDoc, DocCursor* pCursor)
+int CmdChangeAccidentals::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     //Undo strategy: direct undo, as it only implies restoring accidentals
     //AWARE: changing accidentals in one note could affect many notes in the
@@ -1224,7 +1226,7 @@ int CmdChangeAccidentals::perform_action(Document* pDoc, DocCursor* pCursor)
 }
 
 //---------------------------------------------------------------------------------------
-void CmdChangeAccidentals::undo_action(Document* pDoc, DocCursor* pCursor)
+void CmdChangeAccidentals::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     //AWARE: restoring pitch of selected notes is not enough as changing accidentals
     // in one note could affect many notes in the same measure. Therefore, it is
@@ -1344,8 +1346,8 @@ CmdChangeAttribute::CmdChangeAttribute(ImoObj* pImo, EImoAttribute attrb,
 }
 
 //---------------------------------------------------------------------------------------
-int CmdChangeAttribute::set_target(Document* pDoc, DocCursor* pCursor,
-                                   SelectionSet* pSelection)
+int CmdChangeAttribute::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
+                                   SelectionSet* UNUSED(pSelection))
 {
     //TODO: treatment for selections
     ImoObj* pImo = pCursor->get_pointee();
@@ -1365,7 +1367,7 @@ int CmdChangeAttribute::set_target(ImoObj* pImo)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdChangeAttribute::perform_action(Document* pDoc, DocCursor* pCursor)
+int CmdChangeAttribute::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     //Undo strategy: direct undo, as it only implies restoring attrib value
 
@@ -1389,7 +1391,7 @@ int CmdChangeAttribute::perform_action(Document* pDoc, DocCursor* pCursor)
 }
 
 //---------------------------------------------------------------------------------------
-void CmdChangeAttribute::undo_action(Document* pDoc, DocCursor* pCursor)
+void CmdChangeAttribute::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     ImoObj* pImo = pDoc->get_pointer_to_imo( m_targetId );
     switch (m_dataType)
@@ -1442,7 +1444,7 @@ CmdChangeDots::CmdChangeDots(int dots, const string& name)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdChangeDots::set_target(Document* pDoc, DocCursor* pCursor,
+int CmdChangeDots::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
                               SelectionSet* pSelection)
 {
     if (pSelection && !pSelection->empty())
@@ -1554,14 +1556,15 @@ void CmdCursor::initialize()
 }
 
 //---------------------------------------------------------------------------------------
-int CmdCursor::set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection)
+int CmdCursor::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
+                          SelectionSet* UNUSED(pSelection))
 {
     //CmdCursor does not need a target. It is set in constructor.
     return k_success;
 }
 
 //---------------------------------------------------------------------------------------
-int CmdCursor::perform_action(Document* pDoc, DocCursor* pCursor)
+int CmdCursor::perform_action(Document* UNUSED(pDoc), DocCursor* pCursor)
 {
     //Undo strategy: this command is not reversible
 
@@ -1620,7 +1623,7 @@ int CmdCursor::perform_action(Document* pDoc, DocCursor* pCursor)
 }
 
 //---------------------------------------------------------------------------------------
-void CmdCursor::undo_action(Document* pDoc, DocCursor* pCursor)
+void CmdCursor::undo_action(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor))
 {
     //CmdCursor is not reversible. Nothing to do here.
     ////pCursor->restore_state(m_curState);
@@ -1686,8 +1689,8 @@ CmdDeleteBlockLevelObj::CmdDeleteBlockLevelObj(const string& name)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdDeleteBlockLevelObj::set_target(Document* pDoc, DocCursor* pCursor,
-                                       SelectionSet* pSelection)
+int CmdDeleteBlockLevelObj::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
+                                       SelectionSet* UNUSED(pSelection))
 {
     //TODO: treatment for selections
     ImoBlockLevelObj* pImo = dynamic_cast<ImoBlockLevelObj*>( **pCursor );
@@ -1742,7 +1745,7 @@ CmdDeleteRelation::CmdDeleteRelation(int type, const string& name)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdDeleteRelation::set_target(Document* pDoc, DocCursor* pCursor,
+int CmdDeleteRelation::set_target(Document* pDoc, DocCursor* UNUSED(pCursor),
                                   SelectionSet* pSelection)
 {
     if (pSelection && !pSelection->empty())
@@ -1818,7 +1821,7 @@ CmdDeleteSelection::CmdDeleteSelection(const string& name)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdDeleteSelection::set_target(Document* pDoc, DocCursor* pCursor,
+int CmdDeleteSelection::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
                                     SelectionSet* pSelection)
 {
     if (pSelection && !pSelection->empty())
@@ -2011,7 +2014,7 @@ void CmdDeleteSelection::delete_auxobjs(Document* pDoc)
 }
 
 //---------------------------------------------------------------------------------------
-void CmdDeleteSelection::delete_other(Document* pDoc)
+void CmdDeleteSelection::delete_other(Document* UNUSED(pDoc))
 {
     //TODO: what to delete and how?
 //    list<ImoId>::iterator it;
@@ -2039,8 +2042,8 @@ CmdDeleteStaffObj::CmdDeleteStaffObj(const string& name)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdDeleteStaffObj::set_target(Document* pDoc, DocCursor* pCursor,
-                                  SelectionSet* pSelection)
+int CmdDeleteStaffObj::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
+                                  SelectionSet* UNUSED(pSelection))
 {
     //TODO: treatment for selections
     ImoStaffObj* pImo = dynamic_cast<ImoStaffObj*>( pCursor->get_pointee() );
@@ -2115,8 +2118,8 @@ int CmdDeleteStaffObj::perform_action(Document* pDoc, DocCursor* pCursor)
 //=======================================================================================
 // CmdInsert implementation
 //=======================================================================================
-int CmdInsert::set_target(Document* pDoc, DocCursor* pCursor,
-                             SelectionSet* pSelection)
+int CmdInsert::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
+                             SelectionSet* UNUSED(pSelection))
 {
     ImoObj* pImo = pCursor->get_pointee();
     if (pImo)
@@ -2171,7 +2174,7 @@ CmdInsertBlockLevelObj::CmdInsertBlockLevelObj(const string& source,
 }
 
 //---------------------------------------------------------------------------------------
-void CmdInsertBlockLevelObj::undo_action(Document* pDoc, DocCursor* pCursor)
+void CmdInsertBlockLevelObj::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     if (m_lastInsertedId != k_no_imoid)
     {
@@ -2196,7 +2199,8 @@ int CmdInsertBlockLevelObj::perform_action(Document* pDoc, DocCursor* pCursor)
 }
 
 //---------------------------------------------------------------------------------------
-void CmdInsertBlockLevelObj::perform_action_from_type(Document* pDoc, DocCursor* pCursor)
+void CmdInsertBlockLevelObj::perform_action_from_type(Document* pDoc,
+                                                      DocCursor* UNUSED(pCursor))
 {
     ImoBlockLevelObj* pImo =
         static_cast<ImoBlockLevelObj*>( ImFactory::inject(m_blockType, pDoc) );
@@ -2210,7 +2214,8 @@ void CmdInsertBlockLevelObj::perform_action_from_type(Document* pDoc, DocCursor*
 }
 
 //---------------------------------------------------------------------------------------
-void CmdInsertBlockLevelObj::perform_action_from_source(Document* pDoc, DocCursor* pCursor)
+void CmdInsertBlockLevelObj::perform_action_from_source(Document* pDoc,
+                                                        DocCursor* UNUSED(pCursor))
 {
     //create object
     ImoObj* pImo = pDoc->create_object_from_lmd(m_source);
@@ -2243,8 +2248,8 @@ CmdInsertManyStaffObjs::CmdInsertManyStaffObjs(const string& source,  const stri
 }
 
 //---------------------------------------------------------------------------------------
-int CmdInsertManyStaffObjs::set_target(Document* pDoc, DocCursor* pCursor,
-                                       SelectionSet* pSelection)
+int CmdInsertManyStaffObjs::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
+                                       SelectionSet* UNUSED(pSelection))
 {
     ImoObj* pParent = pCursor->get_parent_object();
     if (pParent->is_score())
@@ -2293,8 +2298,8 @@ int CmdInsertManyStaffObjs::perform_action(Document* pDoc, DocCursor* pCursor)
 }
 
 //---------------------------------------------------------------------------------------
-void CmdInsertManyStaffObjs::save_source_code_with_ids(Document* pDoc,
-                                                       const list<ImoStaffObj*>& objects)
+void CmdInsertManyStaffObjs::save_source_code_with_ids(Document* UNUSED(pDoc),
+                                            const list<ImoStaffObj*>& UNUSED(objects))
 {
     //TODO: Remove this method
     //This is not necessary. As undo/redo is based on checkpoints, the undo operation
@@ -2322,8 +2327,8 @@ CmdInsertStaffObj::CmdInsertStaffObj(const string& source, const string& name)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdInsertStaffObj::set_target(Document* pDoc, DocCursor* pCursor,
-                                  SelectionSet* pSelection)
+int CmdInsertStaffObj::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
+                                  SelectionSet* UNUSED(pSelection))
 {
     if (pCursor->get_parent_object()->is_score())
     {
@@ -2421,7 +2426,7 @@ CmdJoinBeam::CmdJoinBeam(const string& name)
 }
 
 //---------------------------------------------------------------------------------------
-int CmdJoinBeam::set_target(Document* pDoc, DocCursor* pCursor,
+int CmdJoinBeam::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
                             SelectionSet* pSelection)
 {
     if (pSelection && !pSelection->empty())
@@ -2484,7 +2489,7 @@ CmdMoveObjectPoint::CmdMoveObjectPoint(int pointIndex, UPoint shift,
 }
 
 //---------------------------------------------------------------------------------------
-int CmdMoveObjectPoint::set_target(Document* pDoc, DocCursor* pCursor,
+int CmdMoveObjectPoint::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
                                    SelectionSet* pSelection)
 {
     if (pSelection && !pSelection->empty())
@@ -2500,7 +2505,7 @@ int CmdMoveObjectPoint::set_target(Document* pDoc, DocCursor* pCursor,
 }
 
 //---------------------------------------------------------------------------------------
-int CmdMoveObjectPoint::perform_action(Document* pDoc, DocCursor* pCursor)
+int CmdMoveObjectPoint::perform_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     //Undo strategy: direct undo, as it only implies restoring old position
 
@@ -2534,7 +2539,7 @@ int CmdMoveObjectPoint::perform_action(Document* pDoc, DocCursor* pCursor)
 }
 
 //---------------------------------------------------------------------------------------
-void CmdMoveObjectPoint::undo_action(Document* pDoc, DocCursor* pCursor)
+void CmdMoveObjectPoint::undo_action(Document* pDoc, DocCursor* UNUSED(pCursor))
 {
     ImoObj* pImo = pDoc->get_pointer_to_imo(m_targetId);
     //TODO: This code is just a test. Assumes it is a Tie and it is the first bezier
@@ -2590,14 +2595,15 @@ void CmdSelection::initialize()
 }
 
 //---------------------------------------------------------------------------------------
-int CmdSelection::set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection)
+int CmdSelection::set_target(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor),
+                             SelectionSet* pSelection)
 {
     m_pSelection = pSelection;
     return k_success;
 }
 
 //---------------------------------------------------------------------------------------
-int CmdSelection::perform_action(Document* pDoc, DocCursor* pCursor)
+int CmdSelection::perform_action(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor))
 {
     //Undo strategy: this command is not reversible
 
@@ -2631,7 +2637,7 @@ int CmdSelection::perform_action(Document* pDoc, DocCursor* pCursor)
 }
 
 //---------------------------------------------------------------------------------------
-void CmdSelection::undo_action(Document* pDoc, DocCursor* pCursor)
+void CmdSelection::undo_action(Document* UNUSED(pDoc), DocCursor* UNUSED(pCursor))
 {
     //CmdSelection is not reversible. Nothing to do here.
 }

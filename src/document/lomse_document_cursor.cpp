@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -278,7 +278,7 @@ SpElementCursorState DocContentCursor::get_state()
 }
 
 //---------------------------------------------------------------------------------------
-void DocContentCursor::restore_state(SpElementCursorState spState)
+void DocContentCursor::restore_state(SpElementCursorState UNUSED(spState))
 {
     //TODO
 }
@@ -1896,14 +1896,14 @@ TimeInfo::TimeInfo(TimeUnits curTimepos, TimeUnits totalDuration,
 }
 
 //---------------------------------------------------------------------------------------
-long TimeInfo::to_millisecs(int mm)
+long TimeInfo::to_millisecs(int UNUSED(mm))
 {
     //TODO
     return 0L;
 }
 
 //---------------------------------------------------------------------------------------
-float TimeInfo::get_metronome_mm_for_lasting(long millisecs)
+float TimeInfo::get_metronome_mm_for_lasting(long UNUSED(millisecs))
 {
     //TODO
     return 0.0f;
@@ -2068,7 +2068,9 @@ void ScoreCursor::p_to_next_staff()
     else if (p_more_instruments())
         p_to_start_of_next_instrument();
     else
-        ;   //we are at end of score: remain there
+    {
+        //we are at end of score: remain there
+    }
 }
 
 //---------------------------------------------------------------------------------------
@@ -2224,7 +2226,9 @@ void ScoreCursor::to_prev_staffobj(bool fSkipInChord)
         p_to_prev_position(fSkipInChord);
 
     else
-        ;   //Impossible: were are we?
+    {
+        //Impossible: were are we?
+    }
 
     p_find_start_of_measure_and_time_signature();
 }
@@ -2237,7 +2241,9 @@ void ScoreCursor::p_to_prev_staff()
     else if (!p_is_first_instrument())
         p_to_end_of_prev_instrument();
     else
-        ;   //we are are start of score: remain there
+    {
+        //we are are start of score: remain there
+    }
 }
 
 //---------------------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -137,7 +137,7 @@ public:
     }
 
     // operator to cast to an int
-    operator const int() { return m_dp; }
+    operator int() { return m_dp; }
 
     // conversion
     MidiPitch to_midi_pitch();
@@ -248,7 +248,7 @@ public:
     MidiPitch operator +(int i) { return MidiPitch(m_pitch + i); }
 
     // operator to cast to an int
-    operator const int() { return m_pitch; }
+    operator int() { return m_pitch; }
 
     string get_ldp_name();
     bool is_natural_note_for(EKeySignature nKey);
@@ -282,7 +282,7 @@ public:
     ~FPitch() {}
 
     // operator to cast to an int
-    operator const int() { return m_fp; }
+    operator int() { return m_fp; }
 
     // comparison operators
     bool operator ==(FPitch fp) { return m_fp == int(fp); }

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -117,7 +117,7 @@ void XmlParser::parse_cstring(char* sourceText)
 }
 
 //---------------------------------------------------------------------------------------
-void XmlParser::parse_file(const std::string& filename, bool fErrorMsg)
+void XmlParser::parse_file(const std::string& filename, bool UNUSED(fErrorMsg))
 {
     m_fOffsetDataReady = false;
     m_filename = filename;

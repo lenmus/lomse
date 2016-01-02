@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -248,9 +248,9 @@ public:
     //support for handlers
     inline bool has_handlers() { return get_num_handlers() > 0; }
     virtual int get_num_handlers() { return 0; }
-    virtual UPoint get_handler_point(int i) { return UPoint(0.0, 0.0); }
-    virtual void on_handler_dragged(int iHandler, UPoint newPos) {}
-    virtual void on_end_of_handler_drag(int iHandler, UPoint newPos) {}
+    virtual UPoint get_handler_point(int UNUSED(i)) { return UPoint(0.0, 0.0); }
+    virtual void on_handler_dragged(int UNUSED(iHandler), UPoint UNUSED(newPos)) {}
+    virtual void on_end_of_handler_drag(int UNUSED(iHandler), UPoint UNUSED(newPos)) {}
 
     //tests & debug
     virtual void dump(ostream& outStream, int level);

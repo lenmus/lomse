@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -1275,7 +1275,7 @@ void SimpleView::collect_page_bounds()
 }
 
 //---------------------------------------------------------------------------------------
-int SimpleView::page_at_screen_point(double x, double y)
+int SimpleView::page_at_screen_point(double UNUSED(x), double UNUSED(y))
 {
     return 0;       //simple view is only one page
 }
@@ -1288,7 +1288,7 @@ void SimpleView::set_viewport_for_page_fit_full(Pixels screenWidth)
 }
 
 //---------------------------------------------------------------------------------------
-void SimpleView::get_view_size(Pixels* xWidth, Pixels* yHeight)
+void SimpleView::get_view_size(Pixels* UNUSED(xWidth), Pixels* UNUSED(yHeight))
 {
     //TODO: SimpleView::get_view_size
 }
@@ -1389,7 +1389,7 @@ void HorizontalBookView::collect_page_bounds()
 }
 
 //---------------------------------------------------------------------------------------
-void HorizontalBookView::set_viewport_for_page_fit_full(Pixels screenWidth)
+void HorizontalBookView::set_viewport_for_page_fit_full(Pixels UNUSED(screenWidth))
 {
     //Do nothing, so that vertical position of first displayed page is maintained
 //    //TODO: sample image to determine first visible page

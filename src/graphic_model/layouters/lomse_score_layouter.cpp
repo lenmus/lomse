@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -403,7 +403,7 @@ LUnits ScoreLayouter::get_target_size_for_system(int iSystem)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits ScoreLayouter::space_used_by_prolog(int iSystem)
+LUnits ScoreLayouter::space_used_by_prolog(int UNUSED(iSystem))
 {
     //TODO. Prolog width should be computed on each column.
     //For now, an estimation: the height of ten lines (two staff)
@@ -1259,8 +1259,8 @@ void ShapesCreator::start_engraving_relobj(ImoRelObj* pRO,
                                            ImoStaffObj* pSO,
                                            GmoShape* pStaffObjShape,
                                            int iInstr, int iStaff, int iSystem,
-                                           int iCol, int iLine,
-                                           ImoInstrument* pInstr)
+                                           int iCol, int UNUSED(iLine),
+                                           ImoInstrument* UNUSED(pInstr))
 {
     //factory method to create the engraver for relation auxobjs
 
@@ -1320,7 +1320,8 @@ void ShapesCreator::continue_engraving_relobj(ImoRelObj* pRO,
                                               ImoStaffObj* pSO,
                                               GmoShape* pStaffObjShape, int iInstr,
                                               int iStaff, int iSystem, int iCol,
-                                              int iLine, ImoInstrument* pInstr)
+                                              int UNUSED(iLine),
+                                              ImoInstrument* UNUSED(pInstr))
 {
     RelAuxObjEngraver* pEngrv
         = static_cast<RelAuxObjEngraver*>(m_shapesStorage.get_engraver(pRO));
@@ -1332,8 +1333,9 @@ void ShapesCreator::finish_engraving_relobj(ImoRelObj* pRO,
                                             ImoStaffObj* pSO,
                                             GmoShape* pStaffObjShape,
                                             int iInstr, int iStaff, int iSystem,
-                                            int iCol, int iLine, LUnits prologWidth,
-                                            ImoInstrument* pInstr)
+                                            int iCol, int UNUSED(iLine),
+                                            LUnits prologWidth,
+                                            ImoInstrument* UNUSED(pInstr))
 {
     RelAuxObjEngraver* pEngrv
         = static_cast<RelAuxObjEngraver*>(m_shapesStorage.get_engraver(pRO));

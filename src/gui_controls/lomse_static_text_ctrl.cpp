@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -82,7 +82,7 @@ USize StaticTextCtrl::measure()
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxControl* StaticTextCtrl::layout(LibraryScope& libraryScope, UPoint pos)
+GmoBoxControl* StaticTextCtrl::layout(LibraryScope& UNUSED(libraryScope), UPoint pos)
 {
     m_pos = pos;
     m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, m_style);
@@ -144,13 +144,13 @@ URect StaticTextCtrl::determine_text_position_and_size()
 }
 
 //---------------------------------------------------------------------------------------
-void StaticTextCtrl::set_tooltip(const string& text)
+void StaticTextCtrl::set_tooltip(const string& UNUSED(text))
 {
     //TODO: StaticTextCtrl::set_tooltip
 }
 
 //---------------------------------------------------------------------------------------
-void StaticTextCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
+void StaticTextCtrl::on_draw(Drawer* pDrawer, RenderOptions& UNUSED(opt))
 {
     select_font();
     Color color = m_style->color();

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -160,7 +160,9 @@ void InlinesContainerLayouter::prepare_line()
         else
         {
             if (!fSomethingAdded)
+            {
                 LOMSE_LOG_TRACE(Logger::k_layout, "No engrouter created.");
+            }
             break;
         }
     }
@@ -397,7 +399,8 @@ void InlinesContainerLayouter::update_line_references(LineReferences& engr, LUni
 }
 
 //---------------------------------------------------------------------------------------
-void InlinesContainerLayouter::add_engrouter_shape(Engrouter* pEngrouter, LUnits lineHeight)
+void InlinesContainerLayouter::add_engrouter_shape(Engrouter* pEngrouter,
+                                                   LUnits UNUSED(lineHeight))
 {
     GmoObj* pGmo = pEngrouter->create_gm_object(m_pageCursor, get_line_refs());
 

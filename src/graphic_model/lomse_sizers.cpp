@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -109,7 +109,7 @@ void FlowSizer::layout(LUnits width, LUnits height)
         layout_horizontal(width, height);
 }
 
-void FlowSizer::layout_vertical(LUnits width, LUnits height)
+void FlowSizer::layout_vertical(LUnits width, LUnits UNUSED(height))
 {
     std::list<SizerChild*>::iterator it;
     for (it = m_children.begin(); it != m_children.end(); ++it)
@@ -119,7 +119,7 @@ void FlowSizer::layout_vertical(LUnits width, LUnits height)
     }
 }
 
-void FlowSizer::layout_horizontal(LUnits width, LUnits height)
+void FlowSizer::layout_horizontal(LUnits UNUSED(width), LUnits height)
 {
     std::list<SizerChild*>::iterator it;
     for (it = m_children.begin(); it != m_children.end(); ++it)

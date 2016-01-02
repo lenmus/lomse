@@ -59,7 +59,7 @@ public:
               , m_typeLinkedTo(-1), m_typeHandle(-1)
     {}
 
-    void handle_link_event(Linkable<int>* ref, int type, int data) {
+    void handle_link_event(Linkable<int>* ref, int type, int UNUSED(data)) {
         m_refHandle = ref;
         m_typeHandle = type;
     }

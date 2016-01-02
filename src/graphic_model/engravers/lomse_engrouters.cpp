@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -175,7 +175,7 @@ Engrouter* EngroutersCreator::create_engrouter_for(ImoInlineLevelObj* pImo)
 
 //---------------------------------------------------------------------------------------
 Engrouter* EngroutersCreator::create_wrapper_engrouter_for(ImoBoxInline* pIB,
-                                                           LUnits maxSpace)
+                                                           LUnits UNUSED(maxSpace))
 {
     BoxEngrouter* pBoxEngr = LOMSE_NEW BoxEngrouter(pIB, m_libraryScope);
 
@@ -597,7 +597,8 @@ InlineWrapperEngrouter::InlineWrapperEngrouter(ImoContentObj* pCreatorImo, Libra
 }
 
 //---------------------------------------------------------------------------------------
-GmoObj* InlineWrapperEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
+GmoObj* InlineWrapperEngrouter::create_gm_object(UPoint UNUSED(pos),
+                                                 LineReferences& UNUSED(refs))
 {
     //create box
     GmoBoxInline* pBox = LOMSE_NEW GmoBoxInline(m_pCreatorImo);

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -85,7 +85,7 @@ USize ButtonCtrl::measure()
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxControl* ButtonCtrl::layout(LibraryScope& libraryScope, UPoint pos)
+GmoBoxControl* ButtonCtrl::layout(LibraryScope& UNUSED(libraryScope), UPoint pos)
 {
     m_pos = pos;
     m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, m_style);
@@ -140,13 +140,13 @@ void ButtonCtrl::center_text()
 }
 
 //---------------------------------------------------------------------------------------
-void ButtonCtrl::set_tooltip(const string& text)
+void ButtonCtrl::set_tooltip(const string& UNUSED(text))
 {
     //TODO: ButtonCtrl::set_tooltip
 }
 
 //---------------------------------------------------------------------------------------
-void ButtonCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
+void ButtonCtrl::on_draw(Drawer* pDrawer, RenderOptions& UNUSED(opt))
 {
     if (!is_visible())
         return;

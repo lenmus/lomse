@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -255,13 +255,15 @@ void Interactor::on_mouse_move(Pixels x, Pixels y, unsigned flags)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::on_mouse_enter_window(Pixels x, Pixels y, unsigned flags)
+void Interactor::on_mouse_enter_window(Pixels UNUSED(x), Pixels UNUSED(y),
+                                       unsigned UNUSED(flags))
 {
     enable_drag_image(true);
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::on_mouse_leave_window(Pixels x, Pixels y, unsigned flags)
+void Interactor::on_mouse_leave_window(Pixels UNUSED(x), Pixels UNUSED(y),
+                                       unsigned UNUSED(flags))
 {
     enable_drag_image(false);
 }
@@ -453,7 +455,8 @@ DiatonicPitch Interactor::get_pitch_at(Pixels x, Pixels y)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::task_action_mouse_in_out(Pixels x, Pixels y, unsigned flags)
+void Interactor::task_action_mouse_in_out(Pixels x, Pixels y,
+                                          unsigned UNUSED(flags))
 {
     GmoObj* pGmo = find_object_at(x, y);
     if (pGmo == NULL)
@@ -772,7 +775,8 @@ void Interactor::task_action_select_objects_in_screen_rectangle(Pixels x1, Pixel
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::task_action_decide_on_switching_task(Pixels x, Pixels y, unsigned flags)
+void Interactor::task_action_decide_on_switching_task(Pixels x, Pixels y,
+                                                      unsigned UNUSED(flags))
 {
     LOMSE_LOG_DEBUG(Logger::k_mvc, "");
 
@@ -833,7 +837,7 @@ void Interactor::task_action_switch_to_default_task()
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::task_action_move_object(Pixels x, Pixels y)
+void Interactor::task_action_move_object(Pixels UNUSED(x), Pixels UNUSED(y))
 {
     //TODO
     show_drag_image(false);
@@ -1327,7 +1331,7 @@ bool Interactor::discard_score_highlight_event_if_not_valid(SpEventScoreHighligh
 }
 
 //---------------------------------------------------------------------------------------
-bool Interactor::is_valid_play_score_event(SpEventPlayScore pEvent)
+bool Interactor::is_valid_play_score_event(SpEventPlayScore UNUSED(pEvent))
 {
     LOMSE_LOG_ERROR("TODO: Method not implemented");
     //TODO
@@ -1527,7 +1531,9 @@ void Interactor::notify_event(SpEventInfo pEvent, GmoObj* pGmo)
         {
             LOMSE_LOG_DEBUG(Logger::k_events, "Notify to Document");
             if (!spDoc->notify_observers(pEvent, pEvent->get_source() ))
+            {
                 LOMSE_LOG_DEBUG(Logger::k_events, "Event discarded");
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -85,7 +85,7 @@ USize ScorePlayerCtrl::measure()
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxControl* ScorePlayerCtrl::layout(LibraryScope& libraryScope, UPoint pos)
+GmoBoxControl* ScorePlayerCtrl::layout(LibraryScope& UNUSED(libraryScope), UPoint pos)
 {
     m_pos = pos;
     m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, m_style);
@@ -168,13 +168,13 @@ void ScorePlayerCtrl::set_play_button_state(int value)
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayerCtrl::set_tooltip(const string& text)
+void ScorePlayerCtrl::set_tooltip(const string& UNUSED(text))
 {
     //TODO: method ScorePlayerCtrl::set_tooltip
 }
 
 //---------------------------------------------------------------------------------------
-void ScorePlayerCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
+void ScorePlayerCtrl::on_draw(Drawer* pDrawer, RenderOptions& UNUSED(opt))
 {
     Color color = (m_fEnabled ? m_currentColor : Color(192, 192, 192));
     Color white(255, 255, 255);

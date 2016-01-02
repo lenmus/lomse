@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2014-2015 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2014-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -1215,11 +1215,15 @@ public:
 
         // [<part-symbol>]
         if (get_optional("part-symbol"))
-            ; //TODO <part-symbol>
+        {
+            //TODO <part-symbol>
+        }
 
         // [<instruments>]
         if (get_optional("instruments"))
-            ; //TODO <instruments>
+        {
+            //TODO <instruments>
+        }
 
         // <clef>*
         while (get_optional("clef"))
@@ -1333,7 +1337,8 @@ public:
         //TODO
         // ending?
         if (get_optional("ending"))
-            ;
+        {
+        }
 
         // repeat?
         string repeat = "";
@@ -2061,7 +2066,7 @@ public:
 
 protected:
 
-    void add_barline(ImoMusicData* pMD)
+    void add_barline(ImoMusicData* UNUSED(pMD))
     {
         advance_timepos_if_required();
 
@@ -2236,13 +2241,16 @@ public:
         //tie, except for cue notes
         //AWARE: <tie> is for sound
         if (!fIsCue && get_optional("tie"))
-            ;
+        {
+        }
         if (!fIsCue && get_optional("tie"))
-            ;
+        {
+        }
 
         // [<instrument>]
         if (get_optional("instrument"))
-            ;
+        {
+        }
 
         // [<voice>]
         int voice = m_pAnalyser->get_current_voice();
@@ -2268,7 +2276,8 @@ public:
 
         // [<time-modification>]
         if (get_optional("time-modification"))
-            ;
+        {
+        }
 
         // [<stem>]
         if (!fIsRest && get_optional("stem"))
@@ -2276,11 +2285,13 @@ public:
 
         // [<notehead>]
         if (get_optional("notehead"))
-            ;
+        {
+        }
 
         // [<notehead-text>]
         if (get_optional("notehead-text"))
-            ;
+        {
+        }
 
         // [<staff>]
         if (get_optional("staff"))
@@ -2299,7 +2310,8 @@ public:
 
         // [<play>]
         if (get_optional("play"))
-            ;
+        {
+        }
 
         error_if_more_elements();
 
@@ -5951,20 +5963,20 @@ void MxlAnalyser::clear_pending_relations()
 }
 
 //---------------------------------------------------------------------------------------
-int MxlAnalyser::new_tie_id(int numTie, FPitch fp)
+int MxlAnalyser::new_tie_id(int UNUSED(numTie), FPitch fp)
 {
     m_tieIds[int(fp)] = ++m_tieNum;
     return m_tieNum;
 }
 
 //---------------------------------------------------------------------------------------
-int MxlAnalyser::get_tie_id(int numTie, FPitch fp)
+int MxlAnalyser::get_tie_id(int UNUSED(numTie), FPitch fp)
 {
     return m_tieIds[int(fp)];
 }
 
 //---------------------------------------------------------------------------------------
-int MxlAnalyser::get_tie_id_and_close(int numTie, FPitch fp)
+int MxlAnalyser::get_tie_id_and_close(int UNUSED(numTie), FPitch fp)
 {
     return m_tieIds[int(fp)];
 }
@@ -6104,7 +6116,8 @@ bool MxlAnalyser::to_integer(const string& text, int* pResult)
 //}
 
 //---------------------------------------------------------------------------------------
-int MxlAnalyser::xml_data_to_clef_type(const string& m_sign, int line, int m_octaveChange)
+int MxlAnalyser::xml_data_to_clef_type(const string& UNUSED(m_sign), int UNUSED(line),
+                                       int UNUSED(m_octaveChange))
 {
 //    if (m_octaveChange==1 && !(m_sign == "F" || m_sign == "G"))
 //    {

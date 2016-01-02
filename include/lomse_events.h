@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -629,7 +629,11 @@ public:
     void add_event_handler(int childType, ImoId childId, int eventType,
                            void (*pt2Func)(SpEventInfo event) );
 
-    virtual Observable* get_observable_child(int childType, ImoId childId) { return NULL; }
+    virtual Observable* get_observable_child(int UNUSED(childType),
+                                             ImoId UNUSED(childId))
+    {
+        return NULL;
+    }
 
 };
 

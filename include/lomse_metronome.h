@@ -49,7 +49,7 @@ protected:
         : m_fMuted(false)
         , m_fRunning(false)
     {
-        set_mm(60L);
+        set_mm(nMM);
     }
 
 public:

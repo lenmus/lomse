@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -179,10 +179,9 @@ void Caret::draw_caret_as_line(ScreenDrawer* pDrawer)
 }
 
 //---------------------------------------------------------------------------------------
-void Caret::draw_caret_as_block(ScreenDrawer* pDrawer)
+void Caret::draw_caret_as_block(ScreenDrawer* UNUSED(pDrawer))
 {
     //TODO
-
     m_bounds = m_box;
 }
 

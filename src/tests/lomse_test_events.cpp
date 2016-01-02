@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -91,7 +91,7 @@ public:
         static_cast<MyEventHandler*>(pThis)->my_on_event_received(pEvent);
     }
 
-    void my_on_event_received(SpEventInfo pEvent)
+    void my_on_event_received(SpEventInfo UNUSED(pEvent))
     {
         m_fEventReceived = true;
     }
@@ -110,7 +110,7 @@ public:
     ~MyEventHandlerCPP() {}
 
     //mandatory override
-    void handle_event(SpEventInfo pEvent)
+    void handle_event(SpEventInfo UNUSED(pEvent))
     {
         m_fEventReceived = true;
     }

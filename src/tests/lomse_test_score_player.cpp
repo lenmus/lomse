@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -73,8 +73,8 @@ public:
     //std::vector<SoundEvent*>& my_get_events() { return m_events; }
     SoundEventsTable* my_get_table() { return m_pTable; }
     bool my_play_segment_invoked() { return m_fPlaySegmentInvoked; }
-    void my_do_play(int nEvStart, int nEvEnd, int playMode, bool fVisualTracking,
-                    bool fCountOff, long nMM, Interactor* pInteractor )
+    void my_do_play(int nEvStart, int nEvEnd, int UNUSED(playMode), bool fVisualTracking,
+                    bool UNUSED(fCountOff), long nMM, Interactor* pInteractor )
     {
         m_fVisualTracking = fVisualTracking;
         m_nMM = nMM;
@@ -83,12 +83,12 @@ public:
     }
 
     //overrides
-    void play_segment(int nEvStart, int nEvEnd)
+    void play_segment(int UNUSED(nEvStart), int UNUSED(nEvEnd))
     {
         m_fPlaySegmentInvoked = true;
     }
 
-    static void my_callback(void* pThis, SpEventInfo event)
+    static void my_callback(void* UNUSED(pThis), SpEventInfo event)
     {
         m_notifications.push_back(event);
     }
@@ -146,16 +146,20 @@ public:
            k_all_sounds_off, };
 
     //overrides
-    void program_change(int channel, int instr) {
+    void program_change(int UNUSED(channel), int UNUSED(instr))
+    {
         m_events.push_back(k_program_change);
     }
-    void voice_change(int channel, int instr) {
+    void voice_change(int UNUSED(channel), int UNUSED(instr))
+    {
         m_events.push_back(k_voice_change);
     }
-    void note_on(int channel, int pitch, int volume) {
+    void note_on(int UNUSED(channel), int UNUSED(pitch), int UNUSED(volume))
+    {
         m_events.push_back(k_note_on);
     }
-    void note_off(int channel, int pitch, int volume) {
+    void note_off(int UNUSED(channel), int UNUSED(pitch), int UNUSED(volume))
+    {
         m_events.push_back(k_note_off);
     }
     void all_sounds_off() {

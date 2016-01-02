@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -112,7 +112,8 @@ protected:
     //ImoXXXXX* m_pObj;
 
 public:
-    xxxxxxLmdGenerator(ImoObj* pImo, LmdExporter* pExporter) : LmdGenerator(pExporter)
+    xxxxxxLmdGenerator(ImoObj* UNUSED(pImo), LmdExporter* pExporter)
+        : LmdGenerator(pExporter)
     {
         //m_pObj = static_cast<ImoXXXXX*>(pImo);
     }
@@ -1751,7 +1752,8 @@ void LmdGenerator::source_for_auxobj(ImoObj* pImo)
 
 //---------------------------------------------------------------------------------------
 void LmdGenerator::source_for_inline_level_object(ImoInlineLevelObj* pImo,
-                                                bool fFirstItem, ImoStyle* pParentStyle)
+                                                  bool UNUSED(fFirstItem),
+                                                  ImoStyle* pParentStyle)
 {
     //TODO: source code for these objects. This is just an skeleton
 
@@ -1979,7 +1981,7 @@ string LmdExporter::color_to_ldp(Color color)
 }
 
 //---------------------------------------------------------------------------------------
-string LmdExporter::float_to_string(float num)
+string LmdExporter::float_to_string(float UNUSED(num))
 {
     return "(TODO: float_to_string)";
 }

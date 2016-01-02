@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -76,18 +76,20 @@ void BeamEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
 }
 
 //---------------------------------------------------------------------------------------
-void BeamEngraver::set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                         GmoShape* pStaffObjShape, int iInstr,
-                                         int iStaff, int iSystem, int iCol)
+void BeamEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
+                                       GmoShape* pStaffObjShape, int UNUSED(iInstr),
+                                       int UNUSED(iStaff), int UNUSED(iSystem),
+                                       int UNUSED(iCol))
 {
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
 }
 
 //---------------------------------------------------------------------------------------
-void BeamEngraver::set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
-                                      GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                      int iSystem, int iCol)
+void BeamEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
+                                    GmoShape* pStaffObjShape, int UNUSED(iInstr),
+                                    int UNUSED(iStaff),
+                                    int UNUSED(iSystem), int UNUSED(iCol))
 {
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );

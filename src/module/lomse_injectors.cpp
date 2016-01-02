@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -278,7 +278,7 @@ LdpCompiler* Injector::inject_LdpCompiler(LibraryScope& libraryScope,
 }
 
 //---------------------------------------------------------------------------------------
-XmlParser* Injector::inject_XmlParser(LibraryScope& libraryScope,
+XmlParser* Injector::inject_XmlParser(LibraryScope& UNUSED(libraryScope),
                                       DocumentScope& documentScope)
 {
     return LOMSE_NEW XmlParser(documentScope.default_reporter());
@@ -323,7 +323,7 @@ MxlCompiler* Injector::inject_MxlCompiler(LibraryScope& libraryScope,
 }
 
 //---------------------------------------------------------------------------------------
-ModelBuilder* Injector::inject_ModelBuilder(DocumentScope& documentScope)
+ModelBuilder* Injector::inject_ModelBuilder(DocumentScope& UNUSED(documentScope))
 {
     return LOMSE_NEW ModelBuilder();
 }
@@ -379,8 +379,8 @@ HorizontalBookView* Injector::inject_HorizontalBookView(LibraryScope& librarySco
 }
 
 //---------------------------------------------------------------------------------------
-View* Injector::inject_View(LibraryScope& libraryScope, int viewType, Document* pDoc)
-                            //UserCommandExecuter* pExec)
+View* Injector::inject_View(LibraryScope& libraryScope, int viewType,
+                            Document* UNUSED(pDoc))
 {
     ScreenDrawer* pDrawer = Injector::inject_ScreenDrawer(libraryScope);
     return ViewFactory::create_view(libraryScope, viewType, pDrawer);

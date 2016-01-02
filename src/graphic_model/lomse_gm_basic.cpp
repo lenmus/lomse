@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -811,7 +811,7 @@ void GmoBoxDocPage::on_draw(Drawer* pDrawer, RenderOptions& opt)
 }
 
 //---------------------------------------------------------------------------------------
-void GmoBoxDocPage::draw_page_background(Drawer* pDrawer, RenderOptions& opt)
+void GmoBoxDocPage::draw_page_background(Drawer* pDrawer, RenderOptions& UNUSED(opt))
 {
     pDrawer->begin_path();
     pDrawer->fill( Color(255, 255, 255) );     //background white
@@ -908,7 +908,7 @@ GmoObj* GmoBoxDocPage::hit_test(LUnits x, LUnits y)
 //---------------------------------------------------------------------------------------
 void GmoBoxDocPage::select_objects_in_rectangle(SelectionSet* selection,
                                                 const URect& selRect,
-                                                unsigned flags)
+                                                unsigned UNUSED(flags))
 {
     bool fSomethingSelected = false;
     std::list<GmoShape*>::reverse_iterator it;
@@ -1038,7 +1038,9 @@ void GmoBoxLink::notify_event(SpEventInfo pEvent)
 //        m_prevColor = m_visitedColor;
     }
     else
+    {
         LOMSE_LOG_DEBUG(Logger::k_events, "event ignored");
+    }
 }
 
 

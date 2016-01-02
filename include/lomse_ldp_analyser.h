@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -264,7 +264,7 @@ public:
 
     //access to score being analysed
     int set_score_version(const string& version);
-    inline const int get_score_version() { return m_scoreVersion; }
+    inline int get_score_version() { return m_scoreVersion; }
     inline void score_analysis_begin(ImoScore* pScore) { m_pCurScore = pScore; }
     inline void score_analysis_end() {
         m_pLastScore = m_pCurScore;

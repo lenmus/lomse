@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -398,7 +398,7 @@ protected:
     //inline void set_imo(XmlNode* node, ImoObj* pImo) { return m_pAnalyser->set_imo(node, pImo); }
 
     inline bool is_type(XmlNode* node, ELdpElement type) { return get_type(node) == type; }
-    float get_value_as_float(XmlNode* node)
+    float get_value_as_float(XmlNode* UNUSED(node))
     {
         //TODO_X
         return 0.0f;
@@ -3662,7 +3662,7 @@ public:
         return (name == "Render.SpacingFactor");
     }
 
-    bool is_string_option(const string& name)
+    bool is_string_option(const string& UNUSED(name))
     {
         return false;       //no options for now
     }
@@ -5205,7 +5205,7 @@ protected:
         pInfo->set_placement(k_placement_default);
     }
 
-    void set_tuplet_id(ImoTupletDto* pInfo)
+    void set_tuplet_id(ImoTupletDto* UNUSED(pInfo))
     {
         //TODO. For now tuplet id is not needed. Perhaps when implementing nested
         //      tuplets it will have any use.
@@ -6268,7 +6268,9 @@ void OldLmdTiesBuilder::create_tie_if_old_syntax_tie_pending(ImoNote* pEndNote)
         m_pStartNoteTieOld = NULL;
     }
     else
-        ;   //  wait to see if it is possible to tie with next note
+    {
+        //  wait to see if it is possible to tie with next note
+    }
 }
 
 //---------------------------------------------------------------------------------------

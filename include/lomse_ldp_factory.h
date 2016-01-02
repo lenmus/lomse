@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -62,7 +62,7 @@ public:
     const std::string& get_name(ELdpElement type) const;
 
     //utility methods
-    LdpElement* new_element(ELdpElement type, LdpElement* value, int numLine=0)
+    LdpElement* new_element(ELdpElement type, LdpElement* value, int UNUSED(numLine) =0)
     {
 	    LdpElement* elm = create(type);
 	    elm->append_child(value);

@@ -66,7 +66,7 @@ public:
     void start_visit(ImoScore* pImo) { m_builder->structurize(pImo); }
     //void start_visit(ImoOtherStructurizable* pImo) { m_builder->structurize(pImo); }
 
-	void end_visit(ImoScore* pImo) {}
+	void end_visit(ImoScore* UNUSED(pImo)) {}
     //void end_visit(ImoOtherStructurizable* pImo) {}
 
 };

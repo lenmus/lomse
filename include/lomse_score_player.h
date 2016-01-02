@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -29,6 +29,8 @@
 
 #ifndef __LOMSE_SCORE_PLAYER_H__        //to avoid nested includes
 #define __LOMSE_SCORE_PLAYER_H__
+
+#include "lomse_basic.h"
 
 
 #include <vector>
@@ -74,10 +76,10 @@ public:
     MidiServerBase() {}
     virtual ~MidiServerBase() {}
 
-    virtual void program_change(int channel, int instr) {}
-    virtual void voice_change(int channel, int instr) {}
-    virtual void note_on(int channel, int pitch, int volume) {}
-    virtual void note_off(int channel, int pitch, int volume) {}
+    virtual void program_change(int UNUSED(channel), int UNUSED(instr)) {}
+    virtual void voice_change(int UNUSED(channel), int UNUSED(instr)) {}
+    virtual void note_on(int UNUSED(channel), int UNUSED(pitch), int UNUSED(volume)) {}
+    virtual void note_off(int UNUSED(channel), int UNUSED(pitch), int UNUSED(volume)) {}
     virtual void all_sounds_off() {}
 };
 

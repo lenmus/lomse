@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -256,7 +256,8 @@ class GmoShapeAccidentals : public GmoCompositeShape, public VoiceRelatedShape
 {
 protected:
     friend class AccidentalsEngraver;
-    GmoShapeAccidentals(ImoObj* pCreatorImo, ShapeId idx, UPoint pos, Color color)
+    GmoShapeAccidentals(ImoObj* pCreatorImo, ShapeId idx, UPoint UNUSED(pos),
+                        Color color)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_accidentals, idx, color)
         , VoiceRelatedShape()
     {
@@ -298,8 +299,8 @@ protected:
     LibraryScope& m_libraryScope;
 
     friend class KeyEngraver;
-    GmoShapeKeySignature(ImoObj* pCreatorImo, ShapeId idx, UPoint pos, Color color,
-                         LibraryScope& libraryScope)
+    GmoShapeKeySignature(ImoObj* pCreatorImo, ShapeId idx, UPoint UNUSED(pos),
+                         Color color, LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_key_signature, idx, color)
         , m_libraryScope(libraryScope)
     {
@@ -313,7 +314,7 @@ protected:
     LibraryScope& m_libraryScope;
 
     friend class TimeEngraver;
-    GmoShapeTimeSignature(ImoObj* pCreatorImo, ShapeId idx, UPoint pos,
+    GmoShapeTimeSignature(ImoObj* pCreatorImo, ShapeId idx, UPoint UNUSED(pos),
                           Color color, LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_time_signature, idx, color)
         , m_libraryScope(libraryScope)
@@ -328,8 +329,8 @@ protected:
     LibraryScope& m_libraryScope;
 
     friend class MetronomeMarkEngraver;
-    GmoShapeMetronomeMark(ImoObj* pCreatorImo, ShapeId idx, UPoint pos, Color color,
-                          LibraryScope& libraryScope)
+    GmoShapeMetronomeMark(ImoObj* pCreatorImo, ShapeId idx, UPoint UNUSED(pos),
+                          Color color, LibraryScope& libraryScope)
         : GmoCompositeShape(pCreatorImo, GmoObj::k_shape_metronome_mark, idx, color)
         , m_libraryScope(libraryScope)
     {

@@ -88,7 +88,7 @@ void LdpParser::parse_text(const std::string& sourceText)
 }
 
 //---------------------------------------------------------------------------------------
-void LdpParser::parse_file(const std::string& filename, bool fErrorMsg)
+void LdpParser::parse_file(const std::string& filename, bool UNUSED(fErrorMsg))
 {
     LdpFileReader reader(filename);
     parse_input(reader);

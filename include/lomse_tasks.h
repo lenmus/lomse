@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -151,7 +151,7 @@ public:
     TaskNull(Interactor* pIntor) : Task(TaskFactory::k_task_null, pIntor) {}
     ~TaskNull() {}
 
-    void process_event(Event event) {}
+    void process_event(Event UNUSED(event)) {}
 
 };
 

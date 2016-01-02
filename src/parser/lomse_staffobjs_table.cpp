@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -912,7 +912,7 @@ TimeUnits ScoreAlgorithms::find_end_time_for_voice(ImoScore* pScore,
 
 //---------------------------------------------------------------------------------------
 ColStaffObjsIterator ScoreAlgorithms::find_barline_with_time_lower_or_equal(
-            ImoScore* pScore, int instr, TimeUnits maxTime)
+            ImoScore* pScore, int UNUSED(instr), TimeUnits maxTime)
 {
     ColStaffObjs* pColStaffObjs = pScore->get_staffobjs_table();
     ColStaffObjsIterator it = pColStaffObjs->begin();

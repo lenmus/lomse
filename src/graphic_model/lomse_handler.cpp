@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -83,7 +83,7 @@ void HandlerCircle::on_draw(ScreenDrawer* pDrawer)
 }
 
 //---------------------------------------------------------------------------------------
-void HandlerCircle::compute_radius(ScreenDrawer* pDrawer)
+void HandlerCircle::compute_radius(ScreenDrawer* UNUSED(pDrawer))
 {
     //TODO. The idea is to compute the needed value so that it is at least painted
     // with 0.7 mm radius

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -61,7 +61,7 @@ public:
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 
     //VertexSource
-    void rewind(int pathId = 0) { m_nCurVertex = 0; }
+    void rewind(int UNUSED(pathId) = 0) { m_nCurVertex = 0; }
 
 
 protected:

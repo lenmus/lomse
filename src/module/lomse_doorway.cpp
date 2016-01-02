@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -130,14 +130,14 @@ void LomseDoorway::set_default_fonts_path(const string& fontsPath)
 }
 
 //---------------------------------------------------------------------------------------
-void LomseDoorway::null_notify_function(void* pObj, SpEventInfo event)
+void LomseDoorway::null_notify_function(void* UNUSED(pObj), SpEventInfo UNUSED(event))
 {
     //This is just a mock method to avoid crashes when using the libary without
     //initializing it
 }
 
 //---------------------------------------------------------------------------------------
-void LomseDoorway::null_request_function(void* pObj, Request* pRequest)
+void LomseDoorway::null_request_function(void* UNUSED(pObj), Request* UNUSED(pRequest))
 {
     //This is just a mock method to avoid crashes when using the libary without
     //initializing it

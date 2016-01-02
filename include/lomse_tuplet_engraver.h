@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -82,7 +82,11 @@ public:
                           int iSystem, int iCol);
     int create_shapes(Color color=Color(0,0,0));
     int get_num_shapes() { return m_numShapes; }
-    ShapeBoxInfo* get_shape_box_info(int i) { return &m_shapesInfo[0]; }
+    ShapeBoxInfo* get_shape_box_info(int UNUSED(i))
+    {
+        //TODO: is this correct? Parameter i?
+        return &m_shapesInfo[0];
+    }
 
 protected:
     void add_text_shape();

@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -278,7 +278,8 @@ GmoShapeStaff* GraphicModel::get_shape_for_first_staff_in_first_system(ImoId sco
 }
 
 //---------------------------------------------------------------------------------------
-int GraphicModel::get_system_for(ImoId scoreId, int instr, int measure, TimeUnits time)
+int GraphicModel::get_system_for(ImoId UNUSED(scoreId), int UNUSED(instr),
+                                 int UNUSED(measure), TimeUnits UNUSED(time))
 {
     //if not found returns -1
 
@@ -301,7 +302,7 @@ int GraphicModel::get_system_for(ImoId scoreId, int instr, int measure, TimeUnit
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxSystem* GraphicModel::get_system_box(int iSystem)
+GmoBoxSystem* GraphicModel::get_system_box(int UNUSED(iSystem))
 {
     //TODO
     return NULL;

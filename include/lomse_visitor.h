@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -30,6 +30,19 @@
 #ifndef __LOMSE_VISITOR_H__
 #define __LOMSE_VISITOR_H__
 
+//---------------------------------------------------------------------------------------
+// macro for avoiding warnings when a parameter is not used
+#ifdef UNUSED
+#elif defined(__GNUC__)
+    #define UNUSED(x) UNUSED_ ## x __attribute__((unused))
+#elif defined(__LCLINT__)
+    #define UNUSED(x) /*@unused@*/ x
+#else
+    #define UNUSED(x) /* x */
+#endif
+
+
+
 namespace lomse
 {
 
@@ -53,8 +66,8 @@ class Visitor : virtual public BaseVisitor
 {
 public:
 	virtual ~Visitor() {}
-	virtual void start_visit(T* pElement) {}
-	virtual void end_visit(T* pElement) {}
+	virtual void start_visit(T* UNUSED(pElement)) {}
+	virtual void end_visit(T* UNUSED(pElement)) {}
 
 protected:
     Visitor() : BaseVisitor() {}

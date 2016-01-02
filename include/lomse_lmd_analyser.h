@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -313,14 +313,14 @@ public:
     }
 
     //-----------------------------------------------------------------------------------
-    ImoObj* get_imo(XmlNode* node)
+    ImoObj* get_imo(XmlNode* UNUSED(node))
     {
         //TODO_X
         return NULL;
     }
 
     //-----------------------------------------------------------------------------------
-    void set_imo(XmlNode* node, ImoObj* pImo)
+    void set_imo(XmlNode* UNUSED(node), ImoObj* pImo)
     {
         m_pNodeImo = pImo;
     }

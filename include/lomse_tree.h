@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -38,6 +38,17 @@
 
 #include "lomse_visitor.h"
 
+//---------------------------------------------------------------------------------------
+// macro for avoiding warnings when a parameter is not used
+#ifdef UNUSED
+#elif defined(__GNUC__)
+    #define UNUSED(x) UNUSED_ ## x __attribute__((unused))
+#elif defined(__LCLINT__)
+    #define UNUSED(x) /*@unused@*/ x
+#else
+    #define UNUSED(x) /* x */
+#endif
+
 
 namespace lomse
 {
@@ -69,7 +80,7 @@ public:
         public:
             depth_first_iterator(Tree<T>* tree)
                 : m_tree(tree), m_currentNode(tree->get_root()) {}
-            depth_first_iterator(Tree<T>* tree, bool fLast)
+            depth_first_iterator(Tree<T>* tree, bool UNUSED(fLast))
                 : m_tree(tree), m_currentNode(NULL)  {}
             depth_first_iterator() : m_tree(NULL), m_currentNode(NULL)  {}
             depth_first_iterator(T* node) : m_tree(NULL), m_currentNode(node)  {}

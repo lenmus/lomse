@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -131,13 +131,14 @@ public:
     {
     }
     //selection
-    void task_action_select_object_and_show_contextual_menu(Pixels x, Pixels y, unsigned flags=0)
+    void task_action_select_object_and_show_contextual_menu(Pixels x, Pixels y,
+                                                            unsigned UNUSED(flags) =0)
     {
         m_fSelObjInvoked = true;
         m_selPoint = Point<Pixels>(x, y);
     }
     void task_action_select_objects_in_screen_rectangle(Pixels x1, Pixels y1, Pixels x2, Pixels y2,
-                                            unsigned flags=0)
+                                            unsigned UNUSED(flags) =0)
     {
         m_fSelRectInvoked = true;
         m_selRectangle.set_top_left( Point<Pixels>(x1, y1) );

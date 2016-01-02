@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -94,7 +94,7 @@ USize HyperlinkCtrl::measure()
 }
 
 //---------------------------------------------------------------------------------------
-GmoBoxControl* HyperlinkCtrl::layout(LibraryScope& libraryScope, UPoint pos)
+GmoBoxControl* HyperlinkCtrl::layout(LibraryScope& UNUSED(libraryScope), UPoint pos)
 {
     m_pos = pos;
     m_pMainBox = LOMSE_NEW GmoBoxControl(this, m_pos, m_width, m_height, m_style);
@@ -177,13 +177,13 @@ URect HyperlinkCtrl::determine_text_position_and_size()
 }
 
 //---------------------------------------------------------------------------------------
-void HyperlinkCtrl::set_tooltip(const string& text)
+void HyperlinkCtrl::set_tooltip(const string& UNUSED(text))
 {
     //TODO: HyperlinkCtrl::set_tooltip
 }
 
 //---------------------------------------------------------------------------------------
-void HyperlinkCtrl::on_draw(Drawer* pDrawer, RenderOptions& opt)
+void HyperlinkCtrl::on_draw(Drawer* pDrawer, RenderOptions& UNUSED(opt))
 {
     select_font();
     Color color = (m_fEnabled ? m_currentColor : Color(192, 192, 192));

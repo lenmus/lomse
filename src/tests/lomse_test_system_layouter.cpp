@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -53,7 +53,7 @@ class MyColumnStorage1 : public ColumnStorage
 private:
 
 public:
-    MyColumnStorage1(LUnits startHook, LUnits bodyWidth, LUnits endHook)
+    MyColumnStorage1(LUnits startHook, LUnits UNUSED(bodyWidth), LUnits endHook)
         : ColumnStorage()
     {
         m_uEndHookWidth = endHook;

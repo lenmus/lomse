@@ -782,7 +782,8 @@ void ScreenDrawer::miter_limit(double ml)
 }
 
 //---------------------------------------------------------------------------------------
-void ScreenDrawer::add_path(VertexSource& vs,  unsigned path_id, bool solid_path)
+void ScreenDrawer::add_path(VertexSource& vs,  unsigned path_id,
+                            bool UNUSED(solid_path))
 {
     m_path.concat_path(vs, path_id);
 }

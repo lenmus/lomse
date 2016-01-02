@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -330,7 +330,8 @@ protected:
     void analyse_one_or_more(ELdpElement* pValid, int nValid);
     void analyse_staffobjs_options(ImoStaffObj* pSO);
     void analyse_scoreobj_options(ImoScoreObj* pSO);
-    inline ImoObj* proceed(ELdpElement type, ImoObj* pAnchor) {
+    inline ImoObj* proceed(ELdpElement UNUSED(type), ImoObj* pAnchor)
+    {
         return m_pAnalyser->analyse_node(m_pParamToAnalyse, pAnchor);
     }
 
@@ -3766,7 +3767,7 @@ public:
         return (name == "Render.SpacingFactor");
     }
 
-    bool is_string_option(const string& name)
+    bool is_string_option(const string& UNUSED(name))
     {
         return false;       //no options for now
     }
@@ -5382,7 +5383,7 @@ protected:
         pInfo->set_placement(k_placement_default);
     }
 
-    void set_tuplet_id(ImoTupletDto* pInfo)
+    void set_tuplet_id(ImoTupletDto* UNUSED(pInfo))
     {
         //TODO. For now tuplet id is not needed. Perhaps when implementing nested
         //      tuplets it will have any use.

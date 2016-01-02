@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -512,7 +512,7 @@ bool ColumnLayouter::column_has_visible_barline()
 }
 
 //---------------------------------------------------------------------------------------
-void ColumnLayouter::do_spacing(bool fTrace, int level)
+void ColumnLayouter::do_spacing(bool fTrace, int UNUSED(level))
 {
     //computes the minimum space required by this column
 
@@ -1083,7 +1083,8 @@ LUnits SystemLayouter::determine_column_size(int iCol)
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::reposition_and_add_slice_boxes(int iCol, LUnits pos, LUnits size)
+void SystemLayouter::reposition_and_add_slice_boxes(int iCol, LUnits pos,
+                                                    LUnits UNUSED(size))
 {
     LUnits ySystem = m_pBoxSystem->get_top();
     m_ColLayouters[iCol]->set_slice_final_position(pos, ySystem);
@@ -1453,7 +1454,8 @@ void SystemLayouter::engrave_attached_objects(ImoStaffObj* pSO, GmoShape* pMainS
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::add_auxobjs_shapes_to_model(ImoObj* pAO, GmoShape* pStaffObjShape,
+void SystemLayouter::add_auxobjs_shapes_to_model(ImoObj* pAO,
+                                                 GmoShape* UNUSED(pStaffObjShape),
                                                  int layer)
 {
     RelAuxObjEngraver* pEngrv
@@ -1477,8 +1479,9 @@ void SystemLayouter::add_auxobjs_shapes_to_model(ImoObj* pAO, GmoShape* pStaffOb
 }
 
 //---------------------------------------------------------------------------------------
-void SystemLayouter::add_auxobj_shape_to_model(GmoShape* pShape, int layer, int iSystem,
-                                              int iCol, int iInstr)
+void SystemLayouter::add_auxobj_shape_to_model(GmoShape* pShape, int layer,
+                                               int UNUSED(iSystem),
+                                               int iCol, int iInstr)
 {
     pShape->set_layer(layer);
     GmoBoxSliceInstr* pBox = m_ColLayouters[iCol]->get_slice_instr(iInstr);
@@ -1696,7 +1699,7 @@ void ColumnStorage::delete_shapes()
 }
 
 //---------------------------------------------------------------------------------------
-void ColumnStorage::close_all_lines(LUnits xStart)
+void ColumnStorage::close_all_lines(LUnits UNUSED(xStart))
 {
 	for (LinesIterator it=m_Lines.begin(); it != m_Lines.end(); ++it)
     {
@@ -1722,7 +1725,7 @@ void ColumnStorage::finish_column_measurements(LUnits xStart)
 
 //---------------------------------------------------------------------------------------
 bool ColumnStorage::include_object(int line, int instr, ImoStaffObj* pSO, TimeUnits rTime,
-                                  int nStaff, GmoShape* pShape, bool fInProlog,
+                                  int UNUSED(nStaff), GmoShape* pShape, bool fInProlog,
                                   LUnits xUserShift, LUnits yUserShift)
 {
     //if doesn't exist, start it
@@ -2021,7 +2024,7 @@ void LineSpacer::process_non_timed_at_prolog(LUnits uSpaceAfterProlog)
 }
 
 //---------------------------------------------------------------------------------------
-LUnits LineSpacer::determine_next_feasible_position_after(LUnits uxPos)
+LUnits LineSpacer::determine_next_feasible_position_after(LUnits UNUSED(uxPos))
 {
     return m_uxCurPos + compute_shift_to_avoid_overlap_with_previous();
 }

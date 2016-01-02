@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -45,6 +45,11 @@ using ::free;
 
 namespace lomse
 {
+
+//declaration of some internal functions, to avoid compiler warnings
+void read_callback(png_structp png, png_bytep data, png_size_t length);
+void error_callback (png_structp, png_const_charp);
+
 
 //=======================================================================================
 // ImageReader implementation
@@ -275,7 +280,7 @@ SpImage PngImageDecoder::decode_file(InputStream* file)
 //=======================================================================================
 // JpgImageDecoder implementation
 //=======================================================================================
-bool JpgImageDecoder::can_decode(InputStream* file)
+bool JpgImageDecoder::can_decode(InputStream* UNUSED(file))
 {
 //    unsigned char hdr[2];
 //
@@ -301,7 +306,7 @@ bool JpgImageDecoder::can_decode(InputStream* file)
 }
 
 //---------------------------------------------------------------------------------------
-SpImage JpgImageDecoder::decode_file(InputStream* file)
+SpImage JpgImageDecoder::decode_file(InputStream* UNUSED(file))
 {
     //TODO: JpgImageDecoder::decode_file
     return SpImage( LOMSE_NEW Image() );

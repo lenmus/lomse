@@ -40,6 +40,7 @@
 
 #include "lomse_font_freetype.h"
 #include "lomse_build_options.h"
+#include "lomse_basic.h"
 
 #include <stdio.h>
 #include "agg_bitset_iterator.h"
@@ -742,7 +743,7 @@ unsigned font_engine_freetype_base::num_faces() const
 }
 
 //---------------------------------------------------------------------------------------
-bool font_engine_freetype_base::char_map(FT_Encoding char_map)
+bool font_engine_freetype_base::char_map(FT_Encoding UNUSED(char_map))
 {
     if(m_cur_face)
     {

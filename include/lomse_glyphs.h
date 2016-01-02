@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -255,10 +255,10 @@ public:
 
     void update();
 
-    inline const unsigned int glyph_code(int iGlyph) { return (*(m_glyphs+iGlyph)).GlyphChar; }
-    inline const Tenths glyph_offset(int iGlyph) { return (*(m_glyphs+iGlyph)).GlyphOffset; }
-    inline const Tenths glyph_top(int iGlyph) { return (*(m_glyphs+iGlyph)).Top; }
-    inline const Tenths glyph_bottom(int iGlyph) { return (*(m_glyphs+iGlyph)).Bottom; }
+    inline unsigned int glyph_code(int iGlyph) { return (*(m_glyphs+iGlyph)).GlyphChar; }
+    inline Tenths glyph_offset(int iGlyph) { return (*(m_glyphs+iGlyph)).GlyphOffset; }
+    inline Tenths glyph_top(int iGlyph) { return (*(m_glyphs+iGlyph)).Top; }
+    inline Tenths glyph_bottom(int iGlyph) { return (*(m_glyphs+iGlyph)).Bottom; }
     inline const GlyphData& get_glyph_data(int iGlyph) { return *(m_glyphs+iGlyph); }
 };
 

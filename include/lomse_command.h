@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2015 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -112,7 +112,7 @@ public:
     inline bool is_included_in_composite_cmd() { return m_flags &  k_included_in_composite_cmd; }
     inline string get_error() { return m_error; }
     virtual bool is_composite() = 0;
-    virtual void update_selection(SelectionSet* pSelection) {}
+    virtual void update_selection(SelectionSet* UNUSED(pSelection)) {}
 
     //settings
     inline void mark_as_included_in_composite_cmd() { m_flags |= k_included_in_composite_cmd; }

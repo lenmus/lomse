@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -132,7 +132,7 @@ void TableLayouter::layout_in_box()
 
 //---------------------------------------------------------------------------------------
 void TableLayouter::create_main_box(GmoBox* pParentBox, UPoint pos,
-                                    LUnits width, LUnits height)
+                                    LUnits UNUSED(width), LUnits height)
 {
     m_pItemMainBox = LOMSE_NEW GmoBoxTable(m_pTable);
     pParentBox->add_child_box(m_pItemMainBox);
@@ -315,8 +315,9 @@ void TableSectionLayouter::layout_in_box()
 }
 
 //---------------------------------------------------------------------------------------
-void TableSectionLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
-                                      LUnits height)
+void TableSectionLayouter::create_main_box(GmoBox* UNUSED(pParentBox),
+                                           UPoint UNUSED(pos), LUnits UNUSED(width),
+                                           LUnits UNUSED(height))
 {
     LOMSE_LOG_DEBUG(Logger::k_layout, "");
 }
@@ -490,7 +491,7 @@ int TableCellLayouter::get_rowspan()
 }
 
 //---------------------------------------------------------------------------------------
-void TableCellLayouter::increment_colspan(int incrColSpan, int iCell, int iCol,
+void TableCellLayouter::increment_colspan(int incrColSpan, int UNUSED(iCell), int iCol,
                                           vector<LUnits>& colWidths)
 {
     m_width = 0.0f;
@@ -570,8 +571,8 @@ void TableRowLayouter::layout_in_box()
 }
 
 //---------------------------------------------------------------------------------------
-void TableRowLayouter::create_main_box(GmoBox* pParentBox, UPoint pos, LUnits width,
-                                       LUnits height)
+void TableRowLayouter::create_main_box(GmoBox* UNUSED(pParentBox), UPoint pos,
+                                       LUnits width, LUnits height)
 {
     m_pItemMainBox = LOMSE_NEW GmoBoxTableRows(m_pTable);
 
