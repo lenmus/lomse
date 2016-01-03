@@ -64,6 +64,7 @@
 #include "lomse_tie_engraver.h"
 #include "lomse_time_engraver.h"
 #include "lomse_tuplet_engraver.h"
+#include "lomse_articulation_engraver.h"
 
 
 namespace lomse
@@ -1220,6 +1221,14 @@ GmoShape* ShapesCreator::create_auxobj_shape(ImoAuxObj* pAO, int iInstr, int iSt
     UPoint pos((pParentShape->get_left() + pParentShape->get_width() / 2.0f), yTop);
     switch (pAO->get_obj_type())
     {
+        case k_imo_articulation_line:
+        case k_imo_articulation_symbol:
+        {
+            ImoArticulation* pImo = static_cast<ImoArticulation*>(pAO);
+            ArticulationEngraver engrv(m_libraryScope, m_pScoreMeter, iInstr, iStaff);
+            Color color = pImo->get_color();
+            return engrv.create_shape(pImo, pos, color, pParentShape);
+        }
         case k_imo_fermata:
         {
             ImoFermata* pImo = static_cast<ImoFermata*>(pAO);

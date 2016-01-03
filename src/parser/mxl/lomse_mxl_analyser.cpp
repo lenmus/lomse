@@ -146,6 +146,7 @@ enum EMxlTag
 {
     k_mxl_tag_undefined = -1,
 
+    k_mxl_tag_articulations,
     k_mxl_tag_attributes,
     k_mxl_tag_backup,
     k_mxl_tag_barline,
@@ -1160,6 +1161,198 @@ public:
              << "'. Node ignored." << endl;
         return NULL;
     }
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <articulations> = (articulations <articulation>+)
+//@ <articulation> = [accent | strong-accent | staccato | tenuto |
+//@                   detached-legato | staccatissimo | spiccato |
+//@                   scoop | plop | doit | falloff | breath-mark |
+//@                   caesura | stress | unstress | other-articulation ]
+//
+// Examples:
+//    <articulations>
+//        <accent placement="below"/>
+//        <tenuto placement="below"/>
+//        <staccato placement="above"/>
+//    </articulations>
+//
+//    <articulations><accent/></articulations>
+
+class ArticulationsMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    ArticulationsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                            LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+        ImoNoteRest* pNR = NULL;
+        if (m_pAnchor && m_pAnchor->is_note_rest())
+            pNR = static_cast<ImoNoteRest*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNoteRest");
+            return NULL;
+        }
+
+        while (more_children_to_analyse())
+        {
+            m_childToAnalyse = get_child_to_analyse();
+            if (m_childToAnalyse.name() == "accent")
+            {
+                get_articulation_symbol(pNR, k_articulation_accent);
+            }
+            else if (m_childToAnalyse.name() == "staccato")
+            {
+                get_articulation_symbol(pNR, k_articulation_staccato);
+            }
+            else if (m_childToAnalyse.name() == "tenuto")
+            {
+                get_articulation_symbol(pNR, k_articulation_tenuto);
+            }
+            else if (m_childToAnalyse.name() == "detached-legato")
+            {
+                get_articulation_symbol(pNR, k_articulation_detached_legato);
+            }
+            else if (m_childToAnalyse.name() == "staccatissimo")
+            {
+                get_articulation_symbol(pNR, k_articulation_staccatissimo);
+            }
+            else if (m_childToAnalyse.name() == "spiccato")
+            {
+                get_articulation_symbol(pNR, k_articulation_spiccato);
+            }
+            else if (m_childToAnalyse.name() == "breath-mark")
+            {
+                get_articulation_symbol(pNR, k_articulation_breath_mark);
+            }
+            else if (m_childToAnalyse.name() == "caesura")
+            {
+                get_articulation_symbol(pNR, k_articulation_caesura);
+            }
+            else if (m_childToAnalyse.name() == "stress")
+            {
+                get_articulation_symbol(pNR, k_articulation_stress);
+            }
+            else if (m_childToAnalyse.name() == "unstress")
+            {
+                get_articulation_symbol(pNR, k_articulation_unstress);
+            }
+            else if (m_childToAnalyse.name() == "strong-accent")
+            {
+                get_articulation_strong_accent(pNR);
+            }
+                // articulation line
+            else if (m_childToAnalyse.name() == "scoop")
+            {
+                get_articulation_line(pNR, k_articulation_scoop);
+            }
+            else if (m_childToAnalyse.name() == "plop")
+            {
+                get_articulation_line(pNR, k_articulation_plop);
+            }
+            else if (m_childToAnalyse.name() == "doit")
+            {
+                get_articulation_line(pNR, k_articulation_doit);
+            }
+            else if (m_childToAnalyse.name() == "falloff")
+            {
+                get_articulation_line(pNR, k_articulation_falloff);
+            }
+            else        //other-articulation
+            {
+                error_invalid_child();
+            }
+            move_to_next_child();
+        }
+
+        error_if_more_elements();
+
+        return NULL;
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    ImoArticulationSymbol* get_articulation_symbol(ImoNoteRest* pNR, int type)
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoArticulationSymbol* pImo = static_cast<ImoArticulationSymbol*>(
+                                ImFactory::inject(k_imo_articulation_symbol, pDoc) );
+        pImo->set_articulation_type(type);
+
+        // [atrrib]: placement (above | below)
+        if (has_attribute(&m_childToAnalyse, "placement"))
+            set_placement(pImo);
+
+        pNR->add_attachment(pDoc, pImo);
+        return pImo;
+    }
+
+    //-----------------------------------------------------------------------------------
+    void get_articulation_strong_accent(ImoNoteRest* pNR)
+    {
+        ImoArticulationSymbol* pImo =
+            get_articulation_symbol(pNR, k_articulation_strong_accent);
+
+        // [atrrib]: type (up | down)
+        if (has_attribute(&m_childToAnalyse, "type"))
+            set_type(pImo);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void get_articulation_line(ImoNoteRest* pNR, int type)
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoArticulationLine* pImo = static_cast<ImoArticulationLine*>(
+                                ImFactory::inject(k_imo_articulation_line, pDoc) );
+        pImo->set_articulation_type(type);
+
+        // [atrrib]: placement (above | below)
+        if (has_attribute(&m_childToAnalyse, "placement"))
+            set_placement(pImo);
+
+        //TODO
+        //%line-shape;
+        //%line-type;
+        //%dashed-formatting;
+
+
+        pNR->add_attachment(pDoc, pImo);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_placement(ImoArticulation* pImo)
+    {
+        string value = get_attribute(&m_childToAnalyse, "placement");
+        if (value == "above")
+            pImo->set_placement(k_placement_above);
+        else if (value == "below")
+            pImo->set_placement(k_placement_below);
+        else
+        {
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+                "Unknown placement attrib. '" + value + "'. Ignored.");
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_type(ImoArticulationSymbol* pImo)
+    {
+        string value = get_attribute(&m_childToAnalyse, "type");
+        if (value == "up")
+            pImo->set_up(true);
+        else if (value == "below")
+            pImo->set_up(false);
+        else
+        {
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+                "Unknown type attrib. '" + value + "'. Ignored.");
+        }
+    }
+
 };
 
 //@--------------------------------------------------------------------------------------
@@ -4114,7 +4307,7 @@ public:
             pNR = static_cast<ImoNoteRest*>(m_pAnchor);
         else
         {
-            LOMSE_LOG_ERROR("NULL pAchor or it is not ImoNoteRest");
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNoteRest");
             return NULL;
         }
 
@@ -5850,6 +6043,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_divisions(1.0f)
 {
     //populate the name to enum conversion map
+    m_NameToEnum["articulations"] = k_mxl_tag_articulations;
     m_NameToEnum["attributes"] = k_mxl_tag_attributes;
     m_NameToEnum["backup"] = k_mxl_tag_backup;
     m_NameToEnum["barline"] = k_mxl_tag_barline;
@@ -6316,6 +6510,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
 
     switch ( name_to_enum(name) )
     {
+        case k_mxl_tag_articulations:        return LOMSE_NEW ArticulationsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_attributes:           return LOMSE_NEW AtribbutesMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_backup:               return LOMSE_NEW FwdBackMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_barline:              return LOMSE_NEW BarlineMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);

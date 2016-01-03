@@ -69,6 +69,20 @@ protected:
 };
 
 //---------------------------------------------------------------------------------------
+class GmoShapeArticulation : public GmoShapeGlyph, public VoiceRelatedShape
+{
+protected:
+    friend class ArticulationEngraver;
+    GmoShapeArticulation(ImoObj* pCreatorImo, ShapeId idx, int nGlyph, UPoint pos,
+                    Color color, LibraryScope& libraryScope, double fontSize)
+        : GmoShapeGlyph(pCreatorImo, GmoObj::k_shape_articulation, idx, nGlyph, pos, color,
+                        libraryScope, fontSize )
+        , VoiceRelatedShape()
+    {
+    }
+};
+
+//---------------------------------------------------------------------------------------
 class GmoShapeClef : public GmoShapeGlyph
 {
 //protected:

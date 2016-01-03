@@ -168,6 +168,7 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape]                   = "shape (A)      ";
         m_typeToName[k_shape_accidentals]       = "accidentals    ";
         m_typeToName[k_shape_accidental_sign]   = "accidental-sign";
+        m_typeToName[k_shape_articulation]      = "articulation   ";
         m_typeToName[k_shape_barline]           = "barline        ";
         m_typeToName[k_shape_beam]              = "beam           ";
         m_typeToName[k_shape_brace]             = "brace          ";

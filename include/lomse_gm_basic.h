@@ -142,6 +142,7 @@ public:
                 k_shape_barline,
                 k_shape_beam, k_shape_brace,
                 k_shape_bracket, k_shape_button,
+                k_shape_articulation,
                 k_shape_clef, k_shape_dot, k_shape_fermata, k_shape_flag, k_shape_image,
                 k_shape_invisible, k_shape_key_signature,
                 k_shape_metronome_glyph, k_shape_metronome_mark,
@@ -179,6 +180,7 @@ public:
     inline bool is_box_system() { return m_objtype == k_box_system; }
     inline bool is_box_table_rows() { return m_objtype == k_box_table_rows; }
 
+    inline bool is_shape_articulation() { return m_objtype == k_shape_articulation; }
     inline bool is_shape_accidentals() { return m_objtype == k_shape_accidentals; }
     inline bool is_shape_accidental_sign() { return m_objtype == k_shape_accidental_sign; }
     inline bool is_shape_barline() { return m_objtype == k_shape_barline; }
