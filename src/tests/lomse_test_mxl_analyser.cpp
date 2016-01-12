@@ -128,7 +128,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00001" << endl;
+//        cout << "MxlAnalyser Test  00001" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -155,7 +155,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00002" << endl;
+//        cout << "MxlAnalyser Test  00002" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( a.get_musicxml_version() == 100 );
@@ -179,7 +179,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << "Test 00003" << endl;
+//        cout << "MxlAnalyser Test  00003" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -207,7 +207,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << "Test 00004" << endl;
+//        cout << "MxlAnalyser Test  00004" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -244,7 +244,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << "Test 00005" << endl;
+//        cout << "MxlAnalyser Test  00005" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -280,7 +280,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << "Test 00006" << endl;
+//        cout << "MxlAnalyser Test  00006" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -310,7 +310,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << "Test 00007" << endl;
+//        cout << "MxlAnalyser Test  00007" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -343,7 +343,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << "Test 00008" << endl;
+//        cout << "MxlAnalyser Test  00008" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -381,7 +381,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00009" << endl;
+//        cout << "MxlAnalyser Test  00009" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -425,7 +425,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00101" << endl;
+//        cout << "MxlAnalyser Test  00101" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -462,7 +462,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00120" << endl;
+//        cout << "MxlAnalyser Test  00120" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -490,7 +490,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00121" << endl;
+//        cout << "MxlAnalyser Test  00121" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -516,7 +516,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00120" << endl;
+//        cout << "MxlAnalyser Test  00120" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -545,7 +545,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00140" << endl;
+//        cout << "MxlAnalyser Test  00140" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -555,6 +555,8 @@ SUITE(MxlAnalyserTest)
         CHECK( pTimeSignature != NULL );
         CHECK( pTimeSignature->get_top_number() == 6 );
         CHECK( pTimeSignature->get_bottom_number() == 8 );
+//        cout << "MxlAnalyser Test  00140: top number=" << pTimeSignature->get_top_number()
+//             << ", bottom: " << pTimeSignature->get_bottom_number() << endl;
 
         a.do_not_delete_instruments_in_destructor();
         delete pIModel;
@@ -573,7 +575,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00141" << endl;
+//        cout << "MxlAnalyser Test  00141" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -604,7 +606,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00160" << endl;
+//        cout << "MxlAnalyser Test  00160" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -631,7 +633,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00160" << endl;
+//        cout << "MxlAnalyser Test  00160" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -674,7 +676,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00180" << endl;
+//        cout << "MxlAnalyser Test  00180" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -719,7 +721,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00181" << endl;
+//        cout << "MxlAnalyser Test  00181" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -749,7 +751,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00182" << endl;
+//        cout << "MxlAnalyser Test  00182" << endl;
 //        cout << "divisons:" << a.current_divisions() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -776,7 +778,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00300" << endl;
+//        cout << "MxlAnalyser Test  00300" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -813,7 +815,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00301" << endl;
+//        cout << "MxlAnalyser Test  00301" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -849,7 +851,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00302" << endl;
+//        cout << "MxlAnalyser Test  00302" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -885,7 +887,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00303" << endl;
+//        cout << "MxlAnalyser Test  00303" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -923,7 +925,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00304" << endl;
+//        cout << "MxlAnalyser Test  00304" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -961,7 +963,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00305" << endl;
+//        cout << "MxlAnalyser Test  00305" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1000,7 +1002,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00306" << endl;
+//        cout << "MxlAnalyser Test  00306" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1044,7 +1046,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00307" << endl;
+//        cout << "MxlAnalyser Test  00307" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1100,7 +1102,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00308" << endl;
+//        cout << "MxlAnalyser Test  00308" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1152,7 +1154,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00303" << endl;
+//        cout << "MxlAnalyser Test  00303" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1200,7 +1202,7 @@ SUITE(MxlAnalyserTest)
 //        XmlNode* tree = parser.get_tree_root();
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //
-////        cout << "Test 00309" << endl;
+////        cout << "MxlAnalyser Test  00309" << endl;
 ////        cout << "[" << errormsg.str() << "]" << endl;
 ////        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
@@ -1291,7 +1293,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00352" << endl;
+//        cout << "MxlAnalyser Test  00352" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1324,7 +1326,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 00400" << endl;
+//        cout << "MxlAnalyser Test  00400" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1356,7 +1358,7 @@ SUITE(MxlAnalyserTest)
 //        XmlNode* tree = parser.get_tree_root();
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //
-//        cout << "Test 00420" << endl;
+//        cout << "MxlAnalyser Test  00420" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
@@ -1397,7 +1399,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "Test 99999" << endl;
+//        cout << "MxlAnalyser Test  99999" << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );

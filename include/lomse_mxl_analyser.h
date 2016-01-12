@@ -85,20 +85,20 @@ public:
 };
 
 
-////---------------------------------------------------------------------------------------
-//// helper class to save slur info items, match them and build the slurs
-//class MxlSlursBuilder : public RelationBuilder<ImoSlurDto, MxlAnalyser>
-//{
-//public:
-//    MxlSlursBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
-//        : RelationBuilder<ImoSlurDto, MxlAnalyser>(reporter, pAnalyser, "slur", "Slur") {}
-//    virtual ~MxlSlursBuilder() {}
-//
-//    void add_relation_to_notes_rests(ImoSlurDto* pEndInfo);
-//};
-//
-//
-//
+//---------------------------------------------------------------------------------------
+// helper class to save slur info items, match them and build the slurs
+class MxlSlursBuilder : public RelationBuilder<ImoSlurDto, MxlAnalyser>
+{
+public:
+    MxlSlursBuilder(ostream& reporter, MxlAnalyser* pAnalyser)
+        : RelationBuilder<ImoSlurDto, MxlAnalyser>(reporter, pAnalyser, "slur", "Slur") {}
+    virtual ~MxlSlursBuilder() {}
+
+    void add_relation_to_notes_rests(ImoSlurDto* pEndInfo);
+};
+
+
+
 ////---------------------------------------------------------------------------------------
 //// helper class to save beam info items, match them and build the beams
 //// For old g+/g- syntax
@@ -187,11 +187,15 @@ protected:
     MxlTiesBuilder*    m_pTiesBuilder;
     MxlBeamsBuilder*   m_pBeamsBuilder;
 //    MxlTupletsBuilder* m_pTupletsBuilder;
-//    MxlSlursBuilder*   m_pSlursBuilder;
+    MxlSlursBuilder*   m_pSlursBuilder;
+    map<string, ImoLyrics*> m_lyrics;
+
     int             m_musicxmlVersion;
     ImoObj*         m_pNodeImo;
     map<int, ImoId> m_tieIds;
     int             m_tieNum;
+    map<int, ImoId> m_slurIds;
+    int             m_slurNum;
 
     //analysis input
     XmlNode* m_pTree;
@@ -287,10 +291,18 @@ public:
     void add_relation_info(ImoObj* pDto);
     void clear_pending_relations();
 
+    //interface for building lyric lines
+    void add_lyrics_data(ImoNote* pNote, ImoLyricsData* pData);
+
     //interface for building ties
     int new_tie_id(int numTie, FPitch fp);
     int get_tie_id(int numTie, FPitch fp);
     int get_tie_id_and_close(int numTie, FPitch fp);
+
+    //interface for building slurs
+    int new_slur_id(int numSlur);
+    int get_slur_id(int numSlur);
+    int get_slur_id_and_close(int numSlur);
 
 //    //interface for MxlTupletsBuilder
 //    inline bool is_tuplet_open() { return m_pTupletsBuilder->is_tuplet_open(); }

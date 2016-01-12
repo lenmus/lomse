@@ -74,18 +74,21 @@ public:
     //implementation of virtual methods from RelAuxObjEngraver
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                            int iSystem, int iCol);
+                            int iSystem, int iCol,
+                            LUnits xRight, LUnits xLeft, LUnits yTop);
     void set_middle_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                              GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                             int iSystem, int iCol);
+                             int iSystem, int iCol,
+                             LUnits xRight, LUnits xLeft, LUnits yTop);
     void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                          int iSystem, int iCol);
+                          int iSystem, int iCol,
+                          LUnits xRight, LUnits xLeft, LUnits yTop);
     int create_shapes(Color color=Color(0,0,0));
     int get_num_shapes() { return 1; }
     ShapeBoxInfo* get_shape_box_info(int UNUSED(i))
     {
-        //TODO: Is this correct? Parameter i unused?
+        //AWARE: Only one shape. Param i MUST be always 0
         return &m_shapesInfo[0];
     }
 

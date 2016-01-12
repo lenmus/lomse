@@ -18,6 +18,7 @@
 
 #include <math.h>
 #include "agg_basics.h"
+#include "agg_gamma_functions.h"
 
 namespace agg
 {
@@ -115,6 +116,184 @@ namespace agg
         double m_gamma;
         HiResT* m_dir_gamma;
         LoResT* m_inv_gamma;
+    };
+
+    //
+    // sRGB support classes
+    //
+
+    // sRGB_lut - implements sRGB conversion for the various types.
+    // Base template is undefined, specializations are provided below.
+    template<class LinearType>
+    class sRGB_lut;
+
+    template<>
+    class sRGB_lut<float>
+    {
+    public:
+		sRGB_lut()
+		{
+			// Generate lookup tables.
+			for (int i = 0; i <= 255; ++i)
+			{
+				m_dir_table[i] = float(sRGB_to_linear(i / 255.0));
+			}
+			for (int i = 0; i <= 65535; ++i)
+			{
+				m_inv_table[i] = uround(255.0 * linear_to_sRGB(i / 65535.0));
+			}
+		}
+
+		float dir(int8u v) const
+		{
+			return m_dir_table[v];
+		}
+
+		int8u inv(float v) const
+		{
+			return m_inv_table[int16u(0.5 + v * 65535)];
+		}
+
+	private:
+		float m_dir_table[256];
+		int8u m_inv_table[65536];
+    };
+
+    template<>
+    class sRGB_lut<int16u>
+    {
+    public:
+        sRGB_lut()
+        {
+            // Generate lookup tables.
+            for (int i = 0; i <= 255; ++i)
+            {
+                m_dir_table[i] = uround(65535.0 * sRGB_to_linear(i / 255.0));
+            }
+			for (int i = 0; i <= 65535; ++i)
+			{
+				m_inv_table[i] = uround(255.0 * linear_to_sRGB(i / 65535.0));
+			}
+		}
+
+		int16u dir(int8u v) const
+		{
+			return m_dir_table[v];
+		}
+
+		int8u inv(int16u v) const
+		{
+			return m_inv_table[v];
+		}
+
+	private:
+		int16u m_dir_table[256];
+		int8u m_inv_table[65536];
+	};
+
+    template<>
+    class sRGB_lut<int8u>
+    {
+    public:
+        sRGB_lut()
+        {
+            // Generate lookup tables. 
+            for (int i = 0; i <= 255; ++i)
+            {
+                m_dir_table[i] = uround(255.0 * sRGB_to_linear(i / 255.0));
+                m_inv_table[i] = uround(255.0 * linear_to_sRGB(i / 255.0));
+            }
+        }
+
+		int8u dir(int8u v) const
+		{
+			return m_dir_table[v];
+		}
+
+		int8u inv(int8u v) const
+        {
+            return m_inv_table[v];
+        }
+
+	private:
+		int8u m_dir_table[256];
+		int8u m_inv_table[256];
+	};
+
+    // Common base class for sRGB_conv objects. Defines an internal 
+    // sRGB_lut object so that users don't have to.
+    template<class T>
+    class sRGB_conv_base
+    {
+    public:
+        static T rgb_from_sRGB(int8u x)
+        {
+            return lut.dir(x);
+        }
+
+        static int8u rgb_to_sRGB(T x)
+        {
+            return lut.inv(x);
+        }
+
+    private:
+        static sRGB_lut<T> lut;
+    };
+
+    // Definition of sRGB_conv_base::lut. Due to the fact that this a template, 
+    // we don't need to place the definition in a cpp file. Hurrah.
+    template<class T>
+    sRGB_lut<T> sRGB_conv_base<T>::lut;
+
+    // Wrapper for sRGB-linear conversion. 
+    // Base template is undefined, specializations are provided below.
+    template<class T>
+    class sRGB_conv;
+
+    template<>
+    class sRGB_conv<float> : public sRGB_conv_base<float>
+    {
+    public:
+        static float alpha_from_sRGB(int8u x)
+        {
+			static const double y = 1 / 255.0;
+            return float(x * y);
+        }
+
+        static int8u alpha_to_sRGB(float x)
+        {
+            return int8u(0.5 + x * 255);
+        }
+    };
+
+    template<>
+    class sRGB_conv<int16u> : public sRGB_conv_base<int16u>
+    {
+    public:
+        static int16u alpha_from_sRGB(int8u x)
+        {
+            return (x << 8) | x;
+        }
+
+        static int8u alpha_to_sRGB(int16u x)
+        {
+            return x >> 8;
+        }
+    };
+
+    template<>
+    class sRGB_conv<int8u> : public sRGB_conv_base<int8u>
+    {
+    public:
+        static int8u alpha_from_sRGB(int8u x)
+        {
+            return x;
+        }
+
+        static int8u alpha_to_sRGB(int8u x)
+        {
+            return x;
+        }
     };
 }
 

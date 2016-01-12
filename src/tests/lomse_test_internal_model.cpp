@@ -1115,6 +1115,111 @@ SUITE(InternalModelTest)
 //        delete pClef;
 //    }
 
+
+    // ImoDynamicsMark ------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, dynamics_mark_0)
+    {
+        //0. defaults ok
+
+        Document doc(m_libraryScope);
+        ImoDynamicsMark* pDM = static_cast<ImoDynamicsMark*>(
+                            ImFactory::inject(k_imo_dynamics_mark, &doc));
+
+        CHECK( pDM->get_mark_type() == "" );
+        CHECK( pDM->get_placement() == k_placement_default );
+        CHECK( pDM->is_dynamics_mark() == true );
+        CHECK( pDM->is_auxobj() == true );
+
+        delete pDM;
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, dynamics_mark_1)
+    {
+        //1. settings
+
+        Document doc(m_libraryScope);
+        ImoDynamicsMark* pDM = static_cast<ImoDynamicsMark*>(
+                            ImFactory::inject(k_imo_dynamics_mark, &doc));
+        pDM->set_mark_type("sfz");
+        pDM->set_placement(k_placement_below);
+
+        CHECK( pDM->get_mark_type() == "sfz" );
+        CHECK( pDM->get_placement() == k_placement_below );
+
+        delete pDM;
+    }
+
+
+    // ImoOrnament ----------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, ornament_0)
+    {
+        //0. defaults ok
+
+        Document doc(m_libraryScope);
+        ImoOrnament* pOrnament = static_cast<ImoOrnament*>(
+                            ImFactory::inject(k_imo_ornament, &doc));
+
+        CHECK( pOrnament->get_ornament_type() == k_ornament_unknown );
+        CHECK( pOrnament->get_placement() == k_placement_default );
+        CHECK( pOrnament->is_ornament() == true );
+        CHECK( pOrnament->is_auxobj() == true );
+
+        delete pOrnament;
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, ornament_1)
+    {
+        //1. settings
+
+        Document doc(m_libraryScope);
+        ImoOrnament* pOrnament = static_cast<ImoOrnament*>(
+                            ImFactory::inject(k_imo_ornament, &doc));
+        pOrnament->set_ornament_type(k_ornament_turn);
+        pOrnament->set_placement(k_placement_below);
+
+        CHECK( pOrnament->get_ornament_type() == k_ornament_turn );
+        CHECK( pOrnament->get_placement() == k_placement_below );
+
+        delete pOrnament;
+    }
+
+
+    // ImoTechnical ----------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, technical_0)
+    {
+        //0. defaults ok
+
+        Document doc(m_libraryScope);
+        ImoTechnical* pTechnical = static_cast<ImoTechnical*>(
+                            ImFactory::inject(k_imo_technical, &doc));
+
+        CHECK( pTechnical->get_technical_type() == k_technical_unknown );
+        CHECK( pTechnical->get_placement() == k_placement_default );
+        CHECK( pTechnical->is_technical() == true );
+        CHECK( pTechnical->is_auxobj() == true );
+
+        delete pTechnical;
+    }
+
+//    TEST_FIXTURE(InternalModelTestFixture, technical_1)
+//    {
+//        //1. settings
+//
+//        Document doc(m_libraryScope);
+//        ImoTechnical* pTechnical = static_cast<ImoTechnical*>(
+//                            ImFactory::inject(k_imo_technical, &doc));
+//        pTechnical->set_technical_type(k_technical_turn);
+//        pTechnical->set_placement(k_placement_below);
+//
+//        CHECK( pTechnical->get_technical_type() == k_technical_turn );
+//        CHECK( pTechnical->get_placement() == k_placement_below );
+//
+//        delete pTechnical;
+//    }
+
     // API ------------------------------------------------------------------------------
 
     TEST_FIXTURE(InternalModelTestFixture, API_AddParagraphToDocument)

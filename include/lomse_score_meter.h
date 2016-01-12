@@ -69,6 +69,7 @@ protected:
     //info about text styles
     ImoStyle* m_tupletsStyle;
     ImoStyle* m_metronomeStyle;
+    ImoStyle* m_lyricsStyle;
 
 public:
     ScoreMeter(ImoScore* pScore);
@@ -105,6 +106,7 @@ public:
     //info about text styles
     inline ImoStyle* get_tuplets_style_info() { return m_tupletsStyle; }
     inline ImoStyle* get_metronome_style_info() { return m_metronomeStyle; }
+    inline ImoStyle* get_lyrics_style_info() { return m_lyricsStyle; }
 
 
 protected:

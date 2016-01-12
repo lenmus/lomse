@@ -133,6 +133,13 @@ void GmoObj::shift_origin(const USize& shift)
 }
 
 //---------------------------------------------------------------------------------------
+void GmoObj::shift_origin(LUnits x, LUnits y)
+{
+    m_origin.x += x;
+    m_origin.y += y;
+}
+
+//---------------------------------------------------------------------------------------
 void GmoObj::dump(ostream& outStream, int level)
 {
     outStream << setw(level*3) << level << " [" << setw(3) << m_objtype << "] "
@@ -176,22 +183,26 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_button]            = "button         ";
         m_typeToName[k_shape_clef]              = "clef           ";
         m_typeToName[k_shape_dot]               = "dot            ";
+        m_typeToName[k_shape_dynamics_mark]     = "dynamics-mark  ";
         m_typeToName[k_shape_fermata]           = "fermata        ";
         m_typeToName[k_shape_flag]              = "flag           ";
         m_typeToName[k_shape_image]             = "image          ";
         m_typeToName[k_shape_invisible]         = "invisible      ";
         m_typeToName[k_shape_key_signature]     = "key            ";
         m_typeToName[k_shape_line]              = "line           ";
+        m_typeToName[k_shape_lyrics]            = "lyrics         ";
         m_typeToName[k_shape_metronome_glyph]   = "metronome-glyph";
         m_typeToName[k_shape_metronome_mark]    = "metronome-mark ";
         m_typeToName[k_shape_note]              = "note           ";
         m_typeToName[k_shape_notehead]          = "notehead       ";
+        m_typeToName[k_shape_ornament]          = "ornament       ";
         m_typeToName[k_shape_rectangle]         = "rectangle      ";
         m_typeToName[k_shape_rest]              = "rest           ";
         m_typeToName[k_shape_rest_glyph]        = "rest-glyph     ";
         m_typeToName[k_shape_slur]              = "slur           ";
         m_typeToName[k_shape_stem]              = "stem           ";
         m_typeToName[k_shape_staff]             = "staff          ";
+        m_typeToName[k_shape_technical]         = "technical      ";
         m_typeToName[k_shape_text]              = "text           ";
         m_typeToName[k_shape_time_signature]    = "time           ";
         m_typeToName[k_shape_tie]               = "tie            ";

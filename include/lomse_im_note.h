@@ -209,6 +209,7 @@ public:
     inline void set_tie_prev(ImoTie* pEndTie) { m_pTiePrev = pEndTie; }
 
     //stem
+    inline bool has_stem() { return m_nNoteType >= k_half; }
     inline int get_stem_direction() { return m_stemDirection; }
     inline void set_stem_direction(int value) { m_stemDirection = value; }
     inline bool is_stem_up() { return m_stemDirection == k_stem_up; }

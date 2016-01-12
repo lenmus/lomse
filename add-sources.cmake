@@ -71,20 +71,25 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/lomse_visual_effect.cpp
     
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_accidentals_engraver.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_articulation_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_beam_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_barline_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_chord_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_clef_engraver.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_dynamics_mark_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_engrouters.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_fermata_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_instrument_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_key_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_line_engraver.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_lyrics_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_metronome_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_note_engraver.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_ornament_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_rest_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_slur_engraver.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_technical_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_text_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_tie_engraver.cpp
     ${LOMSE_SRC_DIR}/graphic_model/engravers/lomse_time_engraver.cpp

@@ -71,10 +71,12 @@ public:
 
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                            int iSystem, int iCol);
+                            int iSystem, int iCol,
+                            LUnits xRight, LUnits xLeft, LUnits yTop);
     void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                          int iSystem, int iCol);
+                          int iSystem, int iCol,
+                          LUnits xRight, LUnits xLeft, LUnits yTop);
     int create_shapes(Color color=Color(0,0,0));
     int get_num_shapes();
     ShapeBoxInfo* get_shape_box_info(int i);

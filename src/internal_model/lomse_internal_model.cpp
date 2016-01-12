@@ -312,15 +312,15 @@ const string& ImoObj::get_name(int type)
         // ImoStaffObj (A)
         m_TypeToName[k_imo_barline] = "barline";
         m_TypeToName[k_imo_clef] = "clef";
-        m_TypeToName[k_imo_key_signature] = "key signature";
-        m_TypeToName[k_imo_time_signature] = "time signature";
+        m_TypeToName[k_imo_key_signature] = "key-signature";
+        m_TypeToName[k_imo_time_signature] = "time-signature";
         m_TypeToName[k_imo_note] = "note";
         m_TypeToName[k_imo_rest] = "rest";
-        m_TypeToName[k_imo_go_back_fwd] = "go_back_fwd";
-        m_TypeToName[k_imo_metronome_mark] = "metronome mark";
-        m_TypeToName[k_imo_system_break] = "system break";
+        m_TypeToName[k_imo_go_back_fwd] = "go-back-fwd";
+        m_TypeToName[k_imo_metronome_mark] = "metronome-mark";
+        m_TypeToName[k_imo_system_break] = "system-break";
         m_TypeToName[k_imo_spacer] = "spacer";
-        m_TypeToName[k_imo_figured_bass] = "figured bass";
+        m_TypeToName[k_imo_figured_bass] = "figured-bass";
 
         // ImoBlocksContainer (A)
         m_TypeToName[k_imo_content] = "content";
@@ -330,8 +330,8 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_listitem] = "listitem";
         m_TypeToName[k_imo_multicolumn] = "multicolumn";
         m_TypeToName[k_imo_table] = "table";
-        m_TypeToName[k_imo_table_cell] = "table cell";
-        m_TypeToName[k_imo_table_row] = "table row";
+        m_TypeToName[k_imo_table_cell] = "table-cell";
+        m_TypeToName[k_imo_table_row] = "table-row";
         m_TypeToName[k_imo_score] = "score";
 
         // ImoInlinesContainer (A)
@@ -341,7 +341,7 @@ const string& ImoObj::get_name(int type)
 
         // ImoInlineLevelObj
         m_TypeToName[k_imo_image] = "image";
-        m_TypeToName[k_imo_score_player] = "score player";
+        m_TypeToName[k_imo_score_player] = "score-player";
         m_TypeToName[k_imo_control] = "control";
         m_TypeToName[k_imo_button] = "buttom";
         m_TypeToName[k_imo_text_item] = "text";
@@ -361,6 +361,8 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_font_style_dto] = "font-style";
         m_TypeToName[k_imo_instr_group] = "instr-group";
         m_TypeToName[k_imo_line_style] = "line-style";
+        m_TypeToName[k_imo_lyrics_extend_info] = "lyric-extend";
+        m_TypeToName[k_imo_lyrics_text_info] = "lyric-text";
         m_TypeToName[k_imo_midi_info] = "midi-info";
         m_TypeToName[k_imo_option] = "opt";
         m_TypeToName[k_imo_page_info] = "page-info";
@@ -379,6 +381,7 @@ const string& ImoObj::get_name(int type)
 
         // ImoRelDataObj (A)
         m_TypeToName[k_imo_beam_data] = "beam-data";
+        m_TypeToName[k_imo_lyrics_data] = "lyrics-data";
         m_TypeToName[k_imo_slur_data] = "slur-data";
         m_TypeToName[k_imo_tie_data] = "tie-data";
         m_TypeToName[k_imo_tuplet_data] = "tuplet-data";
@@ -389,8 +392,8 @@ const string& ImoObj::get_name(int type)
         m_TypeToName[k_imo_music_data] = "musicData";
         m_TypeToName[k_imo_options] = "options";
         m_TypeToName[k_imo_styles] = "styles";
-        m_TypeToName[k_imo_table_head] = "table head";
-        m_TypeToName[k_imo_table_body] = "table body";
+        m_TypeToName[k_imo_table_head] = "table-head";
+        m_TypeToName[k_imo_table_body] = "table-body";
 
         // Special collections
         m_TypeToName[k_imo_attachments] = "attachments";
@@ -401,17 +404,21 @@ const string& ImoObj::get_name(int type)
 
         // ImoAuxObj (A)
         m_TypeToName[k_imo_fermata] = "fermata";
-        m_TypeToName[k_imo_articulation_symbol] = "articulation symbol";
-        m_TypeToName[k_imo_articulation_line] = "articulation line";
+        m_TypeToName[k_imo_dynamics_mark] = "dynamics-mark";
+        m_TypeToName[k_imo_ornament] = "ornament";
+        m_TypeToName[k_imo_technical] = "technical";
+        m_TypeToName[k_imo_articulation_symbol] = "articulation-symbol";
+        m_TypeToName[k_imo_articulation_line] = "articulation-line";
         m_TypeToName[k_imo_line] = "line";
-        m_TypeToName[k_imo_score_text] = "score text";
-        m_TypeToName[k_imo_score_line] = "score line";
+        m_TypeToName[k_imo_score_text] = "score-text";
+        m_TypeToName[k_imo_score_line] = "score-line";
         m_TypeToName[k_imo_score_title] = "title";
-        m_TypeToName[k_imo_text_box] = "text box";
+        m_TypeToName[k_imo_text_box] = "text-box";
 
         // ImoRelObj (A)
         m_TypeToName[k_imo_beam] = "beam";
         m_TypeToName[k_imo_chord] = "chord";
+        m_TypeToName[k_imo_lyrics] = "lyrics";
         m_TypeToName[k_imo_slur] = "slur";
         m_TypeToName[k_imo_tie] = "tie";
         m_TypeToName[k_imo_tuplet] = "tuplet";
@@ -551,7 +558,6 @@ ImoContentObj* ImoObj::get_contentobj_parent()
                 if (pImo && pImo->is_attachments())
                     pImo = pImo->get_parent();
             }
-
 
             if (pImo->is_contentobj())
                 return static_cast<ImoContentObj*>(pImo);
@@ -2482,6 +2488,51 @@ ImoListItem::ImoListItem(Document* pDoc)
 
 
 //=======================================================================================
+// ImoLyrics implementation
+//=======================================================================================
+void ImoLyrics::reorganize_after_object_deletion()
+{
+    //Nothing to do. The lyrics will be removed when only one note.
+    //TODO: But this is wrong!
+}
+
+
+//=======================================================================================
+// ImoLyricsData implementation
+//=======================================================================================
+ImoLyricsTextInfo* ImoLyricsData::get_text_item(int iText)
+{
+    if (iText >= m_numTextItems)
+        return NULL;
+
+    for (int i=0; i < m_numTextItems; ++i)
+    {
+        ImoObj* pChild = get_child(i);
+        if (pChild->is_lyrics_text_info() && i==iText)
+            return static_cast<ImoLyricsTextInfo*>(pChild);
+    }
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+void ImoLyricsData::add_text_item(ImoLyricsTextInfo* pText)
+{
+    append_child_imo(pText);
+    m_numTextItems++;
+}
+
+
+//=======================================================================================
+// ImoLyricsTextInfo implementation
+//=======================================================================================
+ImoStyle* ImoLyricsTextInfo::get_syllable_style()
+{
+    ImoStyle* pStyle = m_text.get_style();
+    return pStyle;
+}
+
+
+//=======================================================================================
 // ImoMusicData implementation
 //=======================================================================================
 ImoInstrument* ImoMusicData::get_instrument()
@@ -3151,7 +3202,17 @@ void ImoScore::add_required_text_styles()
         add_style(pStyle);
     }
 
-    //"Lyrics" - for lyrics
+    //for lyrics
+    if (find_style("Lyrics") == NULL)
+    {
+	    ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, m_pDoc));
+        pStyle->set_name("Lyrics");
+        pStyle->set_parent_style(pDefStyle);
+	    pStyle->font_size(10.0f);
+        add_style(pStyle);
+    }
+    //<lyric-font font-family="Times New Roman" font-size="10"/>
+
 }
 
 
@@ -3419,6 +3480,52 @@ bool ImoStyle::is_default_style_with_default_values()
                && width() == k_default_width
                ;
 
+    //Lyrics
+    if (m_name == "Lyrics")
+	    return font_size() == 10.0f
+               //inherited defaults:
+                    //font
+               && font_style() == k_default_font_style
+               && font_weight() == k_default_font_weight
+                   //text
+               && word_spacing() == k_default_word_spacing
+               && text_decoration() == k_default_text_decoration
+               && vertical_align() == k_default_vertical_align
+               && text_align() == k_default_text_align
+               && text_indent_length() == k_default_text_indent_length
+               && word_spacing_length() == k_default_word_spacing_length   //not applicable
+               && line_height() == k_default_line_height
+                   //color and background
+               && is_equal(color(), Color(0,0,0))
+               && is_equal(background_color(), Color(255,255,255))
+                   //margin
+               && margin_top() == k_default_margin_top
+               && margin_bottom() == k_default_margin_bottom
+               && margin_left() == k_default_margin_left
+               && margin_right() == k_default_margin_right
+                   //padding
+               && padding_top() == k_default_padding_top
+               && padding_bottom() == k_default_padding_bottom
+               && padding_left() == k_default_padding_left
+               && padding_right() == k_default_padding_right
+                   ////border
+               //&& set_lunits_property(ImoStyle::k_border_top, k_default_border_top0.0f
+               //&& set_lunits_property(ImoStyle::k_border_bottom, k_default_border_bottom0.0f
+               //&& set_lunits_property(ImoStyle::k_border_left, k_default_border_left0.0f
+               //&& set_lunits_property(ImoStyle::k_border_right, k_default_border_right0.0f
+                   //border width
+               && border_width_top() == k_default_border_width_top
+               && border_width_bottom() == k_default_border_width_bottom
+               && border_width_left() == k_default_border_width_left
+               && border_width_right() == k_default_border_width_right
+                   //size
+               && min_height() == k_default_min_height
+               && max_height() == k_default_max_height
+               && height() == k_default_height
+               && min_width() == k_default_min_width
+               && max_width() == k_default_max_width
+               && width() == k_default_width
+               ;
 
     return false;
 }
@@ -3619,11 +3726,6 @@ string& ImoScoreText::get_language()
 //=======================================================================================
 // ImoSlur implementation
 //=======================================================================================
-ImoSlur::~ImoSlur()
-{
-}
-
-//---------------------------------------------------------------------------------------
 ImoNote* ImoSlur::get_start_note()
 {
     return static_cast<ImoNote*>( get_start_object() );
@@ -3636,15 +3738,46 @@ ImoNote* ImoSlur::get_end_note()
 }
 
 //---------------------------------------------------------------------------------------
+ImoBezierInfo* ImoSlur::get_start_bezier()
+{
+    ImoSlurData* pData = static_cast<ImoSlurData*>( get_start_data() );
+    return pData->get_bezier();
+}
+
+//---------------------------------------------------------------------------------------
+ImoBezierInfo* ImoSlur::get_start_bezier_or_create()
+{
+    ImoSlurData* pData = static_cast<ImoSlurData*>( get_start_data() );
+    ImoBezierInfo* pInfo = pData->get_bezier();
+    if (!pInfo)
+        pInfo = pData->add_bezier();
+    return pInfo;
+}
+
+//---------------------------------------------------------------------------------------
+ImoBezierInfo* ImoSlur::get_stop_bezier()
+{
+    ImoSlurData* pData = static_cast<ImoSlurData*>( get_end_data() );
+    return pData->get_bezier();
+}
+
+//---------------------------------------------------------------------------------------
+ImoBezierInfo* ImoSlur::get_stop_bezier_or_create()
+{
+    ImoSlurData* pData = static_cast<ImoSlurData*>( get_end_data() );
+    ImoBezierInfo* pInfo = pData->get_bezier();
+    if (!pInfo)
+        pInfo = pData->add_bezier();
+    return pInfo;
+}
+
+//---------------------------------------------------------------------------------------
 void ImoSlur::reorganize_after_object_deletion()
 {
-    //TODO: slurs could involve more than two notes (i.e.: start,continue,continue,stop)
-    //Therefore, it is necessary to decide what to do and code this method.
-    //For ties, this is the code:  ;-)
-
-    //Nothing to do. As a tie involves only two objects, the tie is removed when
+    //Nothing to do. As a slur involves only two objects, the slur is removed when
     //one of the notes is deleted. Also, in note destructor, the other note is informed.
 }
+
 
 
 //=======================================================================================
@@ -3652,14 +3785,27 @@ void ImoSlur::reorganize_after_object_deletion()
 //=======================================================================================
 ImoSlurData::ImoSlurData(ImoSlurDto* pDto)
     : ImoRelDataObj(k_imo_slur_data)
-    , m_slurType( pDto->get_slur_type() )
+    , m_fStart( pDto->is_start() )
     , m_slurNum( pDto->get_slur_number() )
-    , m_pBezier( pDto->get_bezier() )
-    , m_color( pDto->get_color() )
+    , m_pBezier(NULL)
 {
+    if (pDto->get_bezier())
+        m_pBezier = LOMSE_NEW ImoBezierInfo( pDto->get_bezier() );
 }
 
+//---------------------------------------------------------------------------------------
+ImoSlurData::~ImoSlurData()
+{
+    delete m_pBezier;
+}
 
+//---------------------------------------------------------------------------------------
+ImoBezierInfo* ImoSlurData::add_bezier()
+{
+    if (!m_pBezier)
+        m_pBezier = LOMSE_NEW ImoBezierInfo(NULL);
+    return m_pBezier;
+}
 
 //=======================================================================================
 // ImoSlurDto implementation
@@ -3672,10 +3818,7 @@ ImoSlurDto::~ImoSlurDto()
 //---------------------------------------------------------------------------------------
 int ImoSlurDto::get_line_number()
 {
-    if (m_pSlurElm)
-        return m_pSlurElm->get_line_number();
-    else
-        return 0;
+    return 0;
 }
 
 

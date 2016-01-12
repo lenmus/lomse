@@ -190,7 +190,7 @@ struct RenderOptions
     };
 
     //-------------------------------------------------------------------------
-    enum EBlendMode
+    enum EBlendMode     //agg constants in agg_pixfmt_rgba.h
     {
         k_blend_alpha       = agg::end_of_comp_op_e,
         k_blend_clear       = agg::comp_op_clear,
@@ -206,7 +206,7 @@ struct RenderOptions
         k_blend_dst_atop    = agg::comp_op_dst_atop,
         k_blend_xor         = agg::comp_op_xor,
         k_blend_plus        = agg::comp_op_plus,
-        k_blend_minus       = agg::comp_op_minus,
+        //k_blend_minus       = agg::comp_op_minus,
         k_blend_multiply    = agg::comp_op_multiply,
         k_blend_screen      = agg::comp_op_screen,
         k_blend_overlay     = agg::comp_op_overlay,
@@ -218,7 +218,7 @@ struct RenderOptions
         k_blend_soft_light  = agg::comp_op_soft_light,
         k_blend_difference  = agg::comp_op_difference,
         k_blend_exclusion   = agg::comp_op_exclusion,
-        k_blend_contrast    = agg::comp_op_contrast,
+        //k_blend_contrast    = agg::comp_op_contrast,
     };
 
     //-------------------------------------------------------------------------

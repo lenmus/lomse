@@ -451,7 +451,7 @@ Tenths NoteEngraver::get_standard_stem_length(int nPosOnStaff, bool fStemDown)
         length = 25.0f;     // 2.5 spaces
     }
 
-    // rule a1 and any other case not covered (I did not analyze completness)
+    // rule a1 and any other case not covered (I did not analyze completeness)
     else
     {
         length = 35.0f;     // 3.5 spaces
@@ -518,7 +518,8 @@ void NoteEngraver::create_chord()
         LOMSE_NEW ChordEngraver(m_libraryScope, m_pMeter, numNotes);
     m_pShapesStorage->save_engraver(pEngrv, pChord);
 
-    pEngrv->set_start_staffobj(pChord, m_pNote, m_pNoteShape, m_iInstr, m_iStaff, 0, 0);
+    pEngrv->set_start_staffobj(pChord, m_pNote, m_pNoteShape, m_iInstr, m_iStaff,
+                               0, 0, 0.0f, 0.0f, 0.0f);
 }
 
 //---------------------------------------------------------------------------------------
@@ -528,8 +529,8 @@ void NoteEngraver::add_to_chord()
     ChordEngraver* pEngrv
         = dynamic_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
 
-    //pEngrv->add_note(m_pNote, m_pNoteShape, m_nPosOnStaff, m_iInstr);
-    pEngrv->set_middle_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0);
+    pEngrv->set_middle_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0,
+                                0.0f, 0.0f, 0.0f);
 }
 
 //---------------------------------------------------------------------------------------
@@ -538,11 +539,9 @@ void NoteEngraver::layout_chord()
     ImoChord* pChord = m_pNote->get_chord();
     ChordEngraver* pEngrv
         = dynamic_cast<ChordEngraver*>(m_pShapesStorage->get_engraver(pChord));
-    //pEngrv->layout_chord();
-//    pEngrv->set_end_staffobj(pAO, pSO, pStaffObjShape, iInstr, iStaff, iSystem, iCol);
-    pEngrv->set_end_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0);
-//    pEngrv->set_prolog_width( prologWidth );
-//
+    pEngrv->set_end_staffobj(pChord, m_pNote, m_pNoteShape, 0, 0, 0, 0,
+                             0.0f, 0.0f, 0.0f);
+
     pEngrv->create_shapes(pChord->get_color());
 
     m_pShapesStorage->remove_engraver(pChord);

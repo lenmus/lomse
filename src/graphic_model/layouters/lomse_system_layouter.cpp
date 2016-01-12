@@ -565,6 +565,8 @@ void ColumnLayouter::compute_penalty_factor()
             barlines++;
     }
     m_penalty = barlines == 0 ? 0.4f : (barlines < lines ? 0.6f : 1.0f);
+    //m_penalty = barlines == 0 ? 1000000.0f :  (1.0f - barlines / lines);
+
 }
 
 //---------------------------------------------------------------------------------------
@@ -1466,12 +1468,15 @@ void SystemLayouter::add_auxobjs_shapes_to_model(ImoObj* pAO,
     {
         ShapeBoxInfo* pInfo = pEngrv->get_shape_box_info(i);
         GmoShape* pAuxShape = pInfo->pShape;
-        int iSystem = pInfo->iSystem;
-        int iCol = pInfo->iCol;
-        int iInstr = pInfo->iInstr;
+        if (pAuxShape)
+        {
+            int iSystem = pInfo->iSystem;
+            int iCol = pInfo->iCol;
+            int iInstr = pInfo->iInstr;
 
-        //pStaffObjShape->accept_link_from(pAuxShape);
-        add_auxobj_shape_to_model(pAuxShape, layer, iSystem, iCol, iInstr);
+            //pStaffObjShape->accept_link_from(pAuxShape);
+            add_auxobj_shape_to_model(pAuxShape, layer, iSystem, iCol, iInstr);
+        }
    }
 
     m_shapesStorage.remove_engraver(pAO);

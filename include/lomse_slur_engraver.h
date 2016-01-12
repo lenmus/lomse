@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -44,54 +44,65 @@ class ImoNote;
 class GmoShapeSlur;
 class GmoShapeNote;
 class ScoreMeter;
+class InstrumentEngraver;
 
 //---------------------------------------------------------------------------------------
 class SlurEngraver : public RelAuxObjEngraver
 {
 protected:
-    LUnits m_uStaffLeft;
-    LUnits m_uStaffRight;
+    InstrumentEngraver* m_pInstrEngrv;
+    LUnits m_uStaffTopStart;    //top line of start system
+    LUnits m_uStaffTopEnd;      //top line of end system
+
     int m_numShapes;
     ImoSlur* m_pSlur;
     bool m_fSlurBelow;
-    std::vector< pair<ImoNote*, GmoShapeNote*> > m_notes;
+    LUnits m_uPrologWidth;
 
-    //bool m_fTwoArches;
+    ImoNote* m_pStartNote;
+    ImoNote* m_pEndNote;
+    GmoShapeNote* m_pStartNoteShape;
+    GmoShapeNote* m_pEndNoteShape;
+
+    bool m_fTwoArches;
     UPoint m_points1[4];    //bezier points for first arch
-    //UPoint m_points2[4];    //bezier points for second arch
+    UPoint m_points2[4];    //bezier points for second arch
     LUnits m_thickness;
     ShapeBoxInfo m_shapesInfo[2];
 
 public:
     SlurEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                LUnits uStaffLeft, LUnits uStaffRight);
+                 InstrumentEngraver* pInstrEngrv);
     ~SlurEngraver() {}
 
     void set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                             GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                            int iSystem, int iCol);
+                            int iSystem, int iCol,
+                            LUnits xRight, LUnits xLeft, LUnits yTop);
     void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                           GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                          int iSystem, int iCol);
+                          int iSystem, int iCol,
+                          LUnits xRight, LUnits xLeft, LUnits yTop);
     int create_shapes(Color color=Color(0,0,0));
     int get_num_shapes();
     ShapeBoxInfo* get_shape_box_info(int i);
 
-    inline void set_prolog_width(LUnits width) { m_uStaffLeft += width; }
-
+    void set_prolog_width(LUnits width);
 
 protected:
     void decide_placement();
-    //void decide_if_one_or_two_arches();
-    //inline bool two_arches_needed() { return m_fTwoArches; }
-    //void create_two_shapes();
+    void decide_if_one_or_two_arches();
+    inline bool two_arches_needed() { return m_fTwoArches; }
+    void create_two_shapes();
     void create_one_shape();
 
     void compute_ref_point(GmoShapeNote* pNoteShape, UPoint* point);
-    //void compute_start_of_staff_point();
-    //void compute_end_of_staff_point();
+    void compute_start_point();
+    void compute_end_point(UPoint* point);
+    void compute_start_of_staff_point();
+    void compute_end_of_staff_point();
     void compute_default_control_points(UPoint* points);
-    //void add_user_displacements(int iTie, UPoint* points);
+    //void add_user_displacements(int iSlur, UPoint* points);
 
 };
 

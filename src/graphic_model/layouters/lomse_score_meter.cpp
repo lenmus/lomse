@@ -45,6 +45,8 @@ namespace lomse
 ScoreMeter::ScoreMeter(ImoScore* pScore)
     : m_numInstruments( pScore->get_num_instruments() )
     , m_tupletsStyle(NULL)
+    , m_metronomeStyle(NULL)
+    , m_lyricsStyle(NULL)
 {
     get_options(pScore);
     get_staff_spacing(pScore);
@@ -63,6 +65,8 @@ ScoreMeter::ScoreMeter(int numInstruments, int numStaves, LUnits lineSpacing,
     , m_rUpperLegerLinesDisplacement(0.0f)
     , m_fDrawLeftBarline(fDrawLeftBarline)
     , m_tupletsStyle(NULL)
+    , m_metronomeStyle(NULL)
+    , m_lyricsStyle(NULL)
 {
     //constructor for using in unit tests. numStaves is for each instrument
     m_staffIndex.reserve(numInstruments);
@@ -119,6 +123,7 @@ void ScoreMeter::get_styles(ImoScore* pScore)
 {
     m_tupletsStyle = pScore->get_style_or_default("Tuplet numbers");
     m_metronomeStyle = pScore->get_style_or_default("Metronome marks");
+    m_lyricsStyle = pScore->get_style_or_default("Lyrics");
 }
 
 //---------------------------------------------------------------------------------------

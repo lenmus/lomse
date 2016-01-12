@@ -209,6 +209,7 @@ public:
     //debug
     string dump_ids() const;
     size_t id_assigner_size() const;
+    string dump_tree() const;
 
 protected:
     void initialize();

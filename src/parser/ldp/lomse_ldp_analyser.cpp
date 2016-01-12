@@ -4331,11 +4331,11 @@ protected:
     {
         const std::string& value = m_pParamToAnalyse->get_value();
         if (value == "start")
-            pInfo->set_slur_type(ImoSlurData::k_start);
+            pInfo->set_start(true);
         else if (value == "stop")
-            pInfo->set_slur_type(ImoSlurData::k_stop);
+            pInfo->set_start(false);
         else if (value == "continue")
-            pInfo->set_slur_type(ImoSlurData::k_continue);
+            pInfo->set_start(false);        //TODO: Continue?
         else
             return false;   //error
         return true;    //ok

@@ -55,6 +55,84 @@ using namespace std;
 namespace lomse
 {
 
+
+//=======================================================================================
+// DumpVisitor:  Helper class for traversing the document and printing a dump
+//=======================================================================================
+class DumpVisitor : public Visitor<ImoObj>
+{
+protected:
+    LibraryScope& m_libraryScope;
+    ostream& m_reporter;
+
+    int m_indent;
+    int m_nodesIn;
+    int m_nodesOut;
+    int m_maxDepth;
+
+public:
+    DumpVisitor(LibraryScope& libraryScope, ostream& reporter)
+        : Visitor<ImoObj>()
+        , m_libraryScope(libraryScope)
+        , m_reporter(reporter)
+        , m_indent(0)
+        , m_nodesIn(0)
+        , m_nodesOut(0)
+        , m_maxDepth(0)
+    {
+    }
+
+	virtual ~DumpVisitor() {}
+
+    int num_in_nodes() { return m_nodesIn; }
+    int num_out_nodes() { return m_nodesOut; }
+    int max_depth() { return m_maxDepth; }
+
+    void start_visit(ImoObj* pImo)
+    {
+        int type = pImo->get_obj_type();
+        const string& name = pImo->get_name();
+        if (pImo->has_visitable_children())
+        {
+            m_reporter << indent() << "(" << name << " type " << type
+                 << ", id=" << pImo->get_id() << endl;
+
+        }
+        else
+        {
+            m_reporter << indent() << "(" << name << " type " << type
+                 << ", id=" << pImo->get_id() << ")" << endl;
+        }
+
+        m_indent++;
+        m_nodesIn++;
+        if (m_maxDepth < m_indent)
+            m_maxDepth = m_indent;
+    }
+
+	void end_visit(ImoObj* pImo)
+    {
+        m_indent--;
+        m_nodesOut++;
+        if (!pImo->has_visitable_children())
+            return;
+        m_reporter << indent() << ")" << endl;
+    }
+
+
+protected:
+
+    string indent()
+    {
+        string spaces = "";
+        for (int i=0; i < 3*m_indent; ++i)
+            spaces += " ";
+        return spaces;
+    }
+
+};
+
+
 //=======================================================================================
 // Document implementation
 //=======================================================================================
@@ -585,6 +663,18 @@ string Document::dump_ids() const
 size_t Document::id_assigner_size() const
 {
     return m_pIdAssigner->size();
+}
+
+//---------------------------------------------------------------------------------------
+string Document::dump_tree() const
+{
+    stringstream data;
+
+    DumpVisitor v(m_libraryScope, data);
+    ImoDocument* pRoot = get_imodoc();
+    pRoot->accept_visitor(v);
+
+    return data.str();
 }
 
 

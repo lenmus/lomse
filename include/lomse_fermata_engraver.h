@@ -67,6 +67,7 @@ protected:
     UPoint compute_location(UPoint pos);
     void center_on_parent();
     void add_voice();
+    int find_glyph();
 
 };
 

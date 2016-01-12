@@ -69,7 +69,9 @@ ChordEngraver::~ChordEngraver()
 //---------------------------------------------------------------------------------------
 void ChordEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                        GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                       int UNUSED(iSystem), int UNUSED(iCol))
+                                       int UNUSED(iSystem), int UNUSED(iCol),
+                                       LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
+                                       LUnits UNUSED(yTop))
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
@@ -82,7 +84,8 @@ void ChordEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
 void ChordEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                         GmoShape* pStaffObjShape, int UNUSED(iInstr),
                                         int UNUSED(iStaff), int UNUSED(iSystem),
-                                        int UNUSED(iCol))
+                                        int UNUSED(iCol), LUnits UNUSED(xRight),
+                                        LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
 {
     add_note(pSO, pStaffObjShape);
 }
@@ -91,7 +94,8 @@ void ChordEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO
 void ChordEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                      GmoShape* pStaffObjShape, int UNUSED(iInstr),
                                      int UNUSED(iStaff), int UNUSED(iSystem),
-                                     int UNUSED(iCol))
+                                     int UNUSED(iCol), LUnits UNUSED(xRight),
+                                     LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
 {
     add_note(pSO, pStaffObjShape);
     if (m_numNotesMissing != 0)

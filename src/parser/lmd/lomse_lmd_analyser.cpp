@@ -4255,13 +4255,21 @@ protected:
 
     bool set_slur_type(ImoSlurDto* pInfo)
     {
+//        const std::string& value = m_childToAnalyse.value();
+//        if (value == "start")
+//            pInfo->set_slur_type(ImoSlurData::k_start);
+//        else if (value == "stop")
+//            pInfo->set_slur_type(ImoSlurData::k_stop);
+//        else if (value == "continue")
+//            pInfo->set_slur_type(ImoSlurData::k_continue);
+//        else
+//            return false;   //error
+//        return true;    //ok
         const std::string& value = m_childToAnalyse.value();
         if (value == "start")
-            pInfo->set_slur_type(ImoSlurData::k_start);
+            pInfo->set_start(true);
         else if (value == "stop")
-            pInfo->set_slur_type(ImoSlurData::k_stop);
-        else if (value == "continue")
-            pInfo->set_slur_type(ImoSlurData::k_continue);
+            pInfo->set_start(false);
         else
             return false;   //error
         return true;    //ok

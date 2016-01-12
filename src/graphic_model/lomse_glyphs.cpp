@@ -103,11 +103,16 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xE4BD),  // marcato_tenuto_below,
 
 //Holds and pauses (U+E4C0 - U+E4DF)
-    GlyphData(0xE4C0),  // Fermata over (arch)
-    GlyphData(0xE4C1),  // Fermata under (arch)
-    GlyphData(0xE4C6),  // long_fermata_above,
-    GlyphData(0xE4C7),  // long_fermata_below,
-    GlyphData(0xE4D0),  // V breath-mark
+    GlyphData(0xE4C0),  // Fermata above (arch)
+    GlyphData(0xE4C1),  // Fermata below (arch)
+    GlyphData(0xE4C4),  // Fermata above (angled)
+    GlyphData(0xE4C5),  // Fermata below (angled)
+    GlyphData(0xE4C6),  // Fermata above (quare)
+    GlyphData(0xE4C7),  // Fermata below (quare)
+    GlyphData(0xE4CE),  // breath-mark (comma)
+    GlyphData(0xE4CF),  // breath-mark (tick)
+    GlyphData(0xE4D0),  // breath-mark (V)
+    GlyphData(0xE4D1),  // caesura
 
 //Rests (U+E4E0 - U+E4FF)
     GlyphData(0xE4E1),  // Longa rest     //larga
@@ -194,6 +199,12 @@ const GlyphData m_glyphs_smufl[] =
 //Octaves (U+E510 - U+E51F)
     GlyphData(0xE510),  // Ottava alta sign
 
+//Brass techniques (U+E5D0 - U+E5EF)
+    GlyphData(0xE5D0),  // Scoop
+    GlyphData(0xE5D5),  // Doit, medium
+    GlyphData(0xE5D8),  // Lip fall, medium
+    GlyphData(0xE5E0),  // Plop
+
 //figured bass (U+EA50 - U+EA6F)
     GlyphData(0xEA50),  // Figured bass. Number 0
     GlyphData(0xEA51),  // Figured bass. Number 1
@@ -214,6 +225,113 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xEA6A),  // GLYPH_FIGURED_BASS_OPEN_PARENTHESIS,    // (
     GlyphData(0xEA6B),  // GLYPH_FIGURED_BASS_CLOSE_PARENTHESIS,   // )
     GlyphData(0xEA5F),  // GLYPH_FIGURED_BASS_7_STRIKED,           // 7 with overlayered /
+
+//Dynamics (U+E520 - U+E54F)
+    GlyphData(0xE520),  // dynamic Piano                p
+    GlyphData(0xE521),  // dynamic Mezzo                m
+    GlyphData(0xE522),  // dynamic Forte                f
+    GlyphData(0xE523),  // dynamic Rinforzando          r
+    GlyphData(0xE524),  // dynamic Sforzando            s
+    GlyphData(0xE525),  // dynamic Z                    z
+    GlyphData(0xE526),  // dynamic Niente               n
+    GlyphData(0xE527),  // dynamic PPPPPP               pppppp
+    GlyphData(0xE528),  // dynamic PPPPP                ppppp
+    GlyphData(0xE529),  // dynamic PPPP                 pppp
+    GlyphData(0xE52A),  // dynamic PPP                  ppp
+    GlyphData(0xE52B),  // dynamic PP                   pp
+    GlyphData(0xE52C),  // dynamic MP                   mp
+    GlyphData(0xE52D),  // dynamic MF                   mf
+    GlyphData(0xE52E),  // dynamic PF                   pf
+    GlyphData(0xE52F),  // dynamic FF                   ff
+    GlyphData(0xE530),  // dynamic FFF                  fff
+    GlyphData(0xE531),  // dynamic FFFF                 ffff
+    GlyphData(0xE532),  // dynamic FFFFF                fffff
+    GlyphData(0xE533),  // dynamic FFFFFF               ffffff
+    GlyphData(0xE534),  // dynamic FortePiano           fp
+    GlyphData(0xE535),  // dynamic Forzando             fz
+    GlyphData(0xE536),  // dynamic Sforzando1           sf
+    GlyphData(0xE537),  // dynamic SforzandoPiano       sfp
+    GlyphData(0xE538),  // dynamic SforzandoPianissimo  sfpp
+    GlyphData(0xE539),  // dynamic Sforzato             sfz
+    GlyphData(0xE53A),  // dynamic SforzatoPiano        sfzp
+    GlyphData(0xE53B),  // dynamic SforzatoFF           sffz
+    GlyphData(0xE53C),  // dynamic Rinforzando1         rf
+    GlyphData(0xE53D),  // dynamic Rinforzando2         rfz
+
+//Common ornaments (U+E560 - U+E56F)
+    GlyphData(0xE560),  // Slashed grace note stem up
+    GlyphData(0xE561),  // Slashed grace note stem down
+    GlyphData(0xE562),  // Grace note stem up
+    GlyphData(0xE563),  // Grace note stem down
+    GlyphData(0xE564),  // Slash for stem up grace note
+    GlyphData(0xE565),  // Slash for stem down grace note
+    GlyphData(0xE566),  // Trill
+    GlyphData(0xE567),  // Turn
+    GlyphData(0xE568),  // Inverted Turn
+    GlyphData(0xE569),  // Turn with slash
+    GlyphData(0xE56A),  // Turn up
+    GlyphData(0xE56B),  // Inverted turn up
+    GlyphData(0xE56C),  // Mordent
+    GlyphData(0xE56D),  // Inverted mordent
+    GlyphData(0xE56E),  // Tremblement
+    GlyphData(0xE56F),  // Haydn ornament
+
+//Other baroque ornaments (U+E570 - U+E58F)
+    GlyphData(0xE587),  // Schleifer
+
+//Multi-segment lines (U+EAA0 - U+EB0F)
+    GlyphData(0xEAA4),  // Trill wiggle segment
+
+//Tremolos (U+E220 - U+E23F)
+    GlyphData(0xE220),  // Combining tremolo 1
+    GlyphData(0xE221),  // Combining tremolo 2
+    GlyphData(0xE222),  // Combining tremolo 3
+    GlyphData(0xE223),  // Combining tremolo 4
+    GlyphData(0xE224),  // Combining tremolo 5
+
+//Wind techniques (U+E5F0 - U+E60F)
+    GlyphData(0xE5F0),  // Double-tongue above
+    GlyphData(0xE5F1),  // Double-tongue below
+    GlyphData(0xE5F2),  // Triple-tongue above
+    GlyphData(0xE5F3),  // Triple-tongue below
+    GlyphData(0xE5F4),  // Closed hole
+    GlyphData(0xE5F5),  // Three-quarters closed hole
+    GlyphData(0xE5F6),  // Half-closed hole
+    GlyphData(0xE5F7),  // Half-closed hole 2
+    GlyphData(0xE5F8),  // Half-open hole
+    GlyphData(0xE5F9),  // Open hole
+
+//String techniques (U+E610 - U+E62F)
+    GlyphData(0xE610),  // Down bow
+    GlyphData(0xE612),  // Up bow
+    GlyphData(0xE614),  // Harmonic
+    GlyphData(0xE615),  // Half-harmonic
+
+//Keyboard techniques (U+E650 - U+E67F)
+    GlyphData(0xE650),  // Pedal mark
+    GlyphData(0xE655),  // Pedal up mark
+    GlyphData(0xE656),  // Half-pedal mark
+
+//Handbells (U+E810 - U+E82F)
+    GlyphData(0xE810),  // Martellato
+    GlyphData(0xE811),  // Martellato lift
+    GlyphData(0xE812),  // Hand martellato
+    GlyphData(0xE813),  // Muted martellato
+    GlyphData(0xE814),  // Mallet, bell suspended
+    GlyphData(0xE815),  // Mallet, bell on table
+    GlyphData(0xE816),  // Mallet lift
+    GlyphData(0xE817),  // Pluck lift
+    GlyphData(0xE818),  // Swing up
+    GlyphData(0xE819),  // Swing down
+    GlyphData(0xE81A),  // Swing
+    GlyphData(0xE81B),  // Echo
+    GlyphData(0xE81C),  // Echo 2
+    GlyphData(0xE81D),  // Gyro
+    GlyphData(0xE81E),  // Damp 3
+    GlyphData(0xE81F),  // Belltree
+    GlyphData(0xE820),  // Table single handbell
+    GlyphData(0xE821),  // Table pair of handbells
+
 };
 
 

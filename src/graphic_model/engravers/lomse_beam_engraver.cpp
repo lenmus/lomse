@@ -61,7 +61,9 @@ BeamEngraver::~BeamEngraver()
 //---------------------------------------------------------------------------------------
 void BeamEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                       GmoShape* pStaffObjShape, int iInstr, int iStaff,
-                                      int iSystem, int iCol)
+                                      int iSystem, int iCol,
+                                      LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
+                                      LUnits UNUSED(yTop))
 {
     m_iInstr = iInstr;
     m_iStaff = iStaff;
@@ -79,7 +81,8 @@ void BeamEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
 void BeamEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                        GmoShape* pStaffObjShape, int UNUSED(iInstr),
                                        int UNUSED(iStaff), int UNUSED(iSystem),
-                                       int UNUSED(iCol))
+                                       int UNUSED(iCol), LUnits UNUSED(xRight),
+                                       LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
 {
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );
@@ -88,8 +91,9 @@ void BeamEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
 //---------------------------------------------------------------------------------------
 void BeamEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
                                     GmoShape* pStaffObjShape, int UNUSED(iInstr),
-                                    int UNUSED(iStaff),
-                                    int UNUSED(iSystem), int UNUSED(iCol))
+                                    int UNUSED(iStaff), int UNUSED(iSystem),
+                                    int UNUSED(iCol), LUnits UNUSED(xRight),
+                                    LUnits UNUSED(xLeft), LUnits UNUSED(yTop))
 {
     ImoNoteRest* pNR = dynamic_cast<ImoNoteRest*>(pSO);
     m_noteRests.push_back( make_pair(pNR, pStaffObjShape) );

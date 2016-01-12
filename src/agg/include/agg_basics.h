@@ -143,9 +143,17 @@ namespace agg
         __asm mov eax, dword ptr [t]
     }
 #pragma warning(pop)
+    AGG_INLINE int ifloor(double v)
+    {
+        return int(floor(v));
+    }
     AGG_INLINE unsigned ufloor(double v)         //-------ufloor
     {
         return unsigned(floor(v));
+    }
+    AGG_INLINE int iceil(double v)
+    {
+        return int(ceil(v));
     }
     AGG_INLINE unsigned uceil(double v)          //--------uceil
     {
@@ -160,9 +168,17 @@ namespace agg
     {
         return unsigned(v);
     }
+    AGG_INLINE int ifloor(double v)
+    {
+        return int(floor(v));
+    }
     AGG_INLINE unsigned ufloor(double v)
     {
         return unsigned(floor(v));
+    }
+    AGG_INLINE int iceil(double v)
+    {
+        return int(ceil(v));
     }
     AGG_INLINE unsigned uceil(double v)
     {
@@ -177,9 +193,18 @@ namespace agg
     {
         return unsigned(v + 0.5);
     }
+    AGG_INLINE int ifloor(double v)
+    {
+        int i = int(v);
+        return i - (i > v);
+    }
     AGG_INLINE unsigned ufloor(double v)
     {
         return unsigned(v);
+    }
+    AGG_INLINE int iceil(double v)
+    {
+        return int(ceil(v));
     }
     AGG_INLINE unsigned uceil(double v)
     {
@@ -203,7 +228,7 @@ namespace agg
     {
         AGG_INLINE static unsigned mul(unsigned a, unsigned b)
         {
-            register unsigned q = a * b + (1 << (Shift-1));
+            unsigned q = a * b + (1 << (Shift-1));
             return (q + (q >> Shift)) >> Shift;
         }
     };
@@ -229,7 +254,7 @@ namespace agg
     {
         poly_subpixel_shift = 8,                      //----poly_subpixel_shift
         poly_subpixel_scale = 1<<poly_subpixel_shift, //----poly_subpixel_scale 
-        poly_subpixel_mask  = poly_subpixel_scale-1,  //----poly_subpixel_mask 
+        poly_subpixel_mask  = poly_subpixel_scale-1   //----poly_subpixel_mask 
     };
 
     //----------------------------------------------------------filling_rule_e
@@ -295,6 +320,12 @@ namespace agg
         bool hit_test(T x, T y) const
         {
             return (x >= x1 && x <= x2 && y >= y1 && y <= y2);
+        }
+        
+        bool overlaps(const self_type& r) const
+        {
+            return !(r.x1 > x2 || r.x2 < x1
+                  || r.y1 > y2 || r.y2 < y1);
         }
     };
 
@@ -522,7 +553,6 @@ namespace agg
     {
         return fabs(v1 - v2) <= double(epsilon);
     }
-
 }
 
 

@@ -58,7 +58,7 @@ GmoShapeFermata* FermataEngraver::create_shape(ImoFermata* pFermata, UPoint pos,
     m_pParentShape = pParentShape;
     m_fAbove = determine_if_above();
 
-    int iGlyph = (m_fAbove ? k_glyph_fermata_above : k_glyph_fermata_below);
+    int iGlyph = find_glyph();
     double fontSize = determine_font_size();
     UPoint position = compute_location(pos);
     ShapeId idx = 0;
@@ -164,5 +164,24 @@ bool FermataEngraver::determine_if_above()
     }
 }
 
+//---------------------------------------------------------------------------------------
+int FermataEngraver::find_glyph()
+{
+    switch( m_pFermata->get_symbol())
+    {
+        case ImoFermata::k_angled:
+            return (m_fAbove ? k_glyph_fermata_above_angle
+                             : k_glyph_fermata_below_angle);
+
+        case ImoFermata::k_square:
+            return (m_fAbove ? k_glyph_fermata_above_square
+                             : k_glyph_fermata_below_square);
+
+        case ImoFermata::k_normal:
+        default:
+            return (m_fAbove ? k_glyph_fermata_above
+                             : k_glyph_fermata_below);
+    }
+}
 
 }  //namespace lomse

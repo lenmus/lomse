@@ -152,12 +152,15 @@ enum EMxlTag
     k_mxl_tag_barline,
     k_mxl_tag_clef,
     k_mxl_tag_direction,
+    k_mxl_tag_dynamics,
     k_mxl_tag_fermata,
     k_mxl_tag_forward,
     k_mxl_tag_key,
+    k_mxl_tag_lyric,
     k_mxl_tag_measure,
     k_mxl_tag_notations,
     k_mxl_tag_note,
+    k_mxl_tag_ornaments,
     k_mxl_tag_part,
     k_mxl_tag_part_list,
     k_mxl_tag_part_name,
@@ -166,7 +169,10 @@ enum EMxlTag
     k_mxl_tag_rest,
     k_mxl_tag_score_part,
     k_mxl_tag_score_partwise,
+    k_mxl_tag_slur,
     k_mxl_tag_sound,
+    k_mxl_tag_technical,
+    k_mxl_tag_text,
     k_mxl_tag_tied,
     k_mxl_tag_time,
 };
@@ -225,7 +231,7 @@ protected:
     bool get_optional(const string& type);
 
     // 'analyse' methods do a 'get' and, if found, analyse the found element
-    void analyse_mandatory(const string& tag, ImoObj* pAnchor=NULL);
+    bool analyse_mandatory(const string& tag, ImoObj* pAnchor=NULL);
 //    bool analyse_optional(EMxlTag type, ImoObj* pAnchor=NULL);
     bool analyse_optional(const string& name, ImoObj* pAnchor=NULL);
 //    void analyse_one_or_more(EMxlTag* pValid, int nValid);
@@ -956,10 +962,12 @@ bool MxlElementAnalyser::get_mandatory(const string& tag)
 }
 
 //---------------------------------------------------------------------------------------
-void MxlElementAnalyser::analyse_mandatory(const string& tag, ImoObj* pAnchor)
+bool MxlElementAnalyser::analyse_mandatory(const string& tag, ImoObj* pAnchor)
 {
     if (get_mandatory(tag))
-        m_pAnalyser->analyse_node(&m_childToAnalyse, pAnchor);
+        return (m_pAnalyser->analyse_node(&m_childToAnalyse, pAnchor) != NULL);
+    else
+        return false;
 }
 
 //---------------------------------------------------------------------------------------
@@ -1226,7 +1234,7 @@ public:
             }
             else if (m_childToAnalyse.name() == "breath-mark")
             {
-                get_articulation_symbol(pNR, k_articulation_breath_mark);
+                get_articulation_breath_mark(pNR);
             }
             else if (m_childToAnalyse.name() == "caesura")
             {
@@ -1303,6 +1311,17 @@ protected:
     }
 
     //-----------------------------------------------------------------------------------
+    void get_articulation_breath_mark(ImoNoteRest* pNR)
+    {
+        ImoArticulationSymbol* pImo =
+            get_articulation_symbol(pNR, k_articulation_breath_mark);
+
+        // [atrrib]: type (up | down)
+        if (has_attribute(&m_childToAnalyse, "type"))
+            set_breath_mark_type(pImo);
+    }
+
+    //-----------------------------------------------------------------------------------
     void get_articulation_line(ImoNoteRest* pNR, int type)
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
@@ -1353,6 +1372,21 @@ protected:
         }
     }
 
+    //-----------------------------------------------------------------------------------
+    void set_breath_mark_type(ImoArticulationSymbol* pImo)
+    {
+        //The breath-mark element may have a text value to
+        //indicate the symbol used for the mark. Valid values are
+        //comma, tick, and an empty string.
+
+        string value = m_analysedNode.value();
+        if (value == "comma")
+            pImo->set_symbol(ImoArticulationSymbol::k_comma);
+        else if (value == "tick")
+            pImo->set_symbol(ImoArticulationSymbol::k_tick);
+        else
+            pImo->set_symbol(ImoArticulationSymbol::k_default);
+    }
 };
 
 //@--------------------------------------------------------------------------------------
@@ -1920,6 +1954,188 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <dynamics> = (fermata [<type>* | <other-dynamics>])
+//@ <placement> = { above | below }
+//<!--
+//  Dynamics can be associated either with a note or a general
+//  musical direction. To avoid inconsistencies between and
+//  amongst the letter abbreviations for dynamics (what is sf
+//  vs. sfz, standing alone or with a trailing dynamic that is
+//  not always piano), we use the actual letters as the names
+//  of these dynamic elements. The other-dynamics element
+//  allows other dynamic marks that are not covered here, but
+//  many of those should perhaps be included in a more general
+//  musical direction element. Dynamics may also be combined as
+//  in <sf/><mp/>.
+//-->
+//<!ELEMENT dynamics ((p | pp | ppp | pppp | ppppp | pppppp |
+//    f | ff | fff | ffff | fffff | ffffff | mp | mf | sf |
+//    sfp | sfpp | fp | rf | rfz | sfz | sffz | fz |
+//    other-dynamics)*)>
+//<!ATTLIST dynamics
+//    %print-style-align;
+//    %placement;
+//    %text-decoration;
+//    %enclosure;
+//>
+
+class DynamicsMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    DynamicsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                    ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+        ImoNoteRest* pNR = NULL;
+        if (m_pAnchor && m_pAnchor->is_note_rest())
+            pNR = static_cast<ImoNoteRest*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNoteRest");
+            return NULL;
+        }
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoDynamicsMark* pImo = static_cast<ImoDynamicsMark*>(
+                                ImFactory::inject(k_imo_dynamics_mark, pDoc) );
+
+        // atrrib: placement
+        if (has_attribute("placement"))
+            set_placement(pImo);
+
+        //content
+        while (more_children_to_analyse())
+        {
+            m_childToAnalyse = get_child_to_analyse();
+            string type = m_childToAnalyse.name();
+            if (type == "other-dynamics")
+            {
+                pImo->set_mark_type( m_childToAnalyse.value() );
+            }
+            else
+            {
+                //TODO: can have many marks. Need to append then
+                pImo->set_mark_type(type);
+            }
+            move_to_next_child();
+        }
+
+        error_if_more_elements();
+
+        pNR->add_attachment(pDoc, pImo);
+        return pImo;
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    void set_placement(ImoDynamicsMark* pImo)
+    {
+        string value = get_attribute(&m_childToAnalyse, "placement");
+        if (value == "above")
+            pImo->set_placement(k_placement_above);
+        else if (value == "below")
+            pImo->set_placement(k_placement_below);
+        else
+        {
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+                "Unknown placement attrib. '" + value + "'. Ignored.");
+        }
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
+//@ <fermata> = (fermata <placement>[<componentOptions>*])
+//@ <placement> = { above | below }
+//<!--
+//    Fermata and wavy-line elements can be applied both to
+//    notes and to measures. Wavy
+//    lines are one way to indicate trills; when used with a
+//    measure element, they should always have type="continue"
+//    set. The fermata text content represents the shape of the
+//    fermata sign and may be normal, angled, or square.
+//    An empty fermata element represents a normal fermata.
+//    The fermata type is upright if not specified.
+//-->
+//<!ELEMENT fermata  (#PCDATA)>
+//<!ATTLIST fermata
+//    type (upright | inverted) #IMPLIED
+//    %print-style;
+//>
+
+class FermataMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    FermataMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                    ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+        ImoNoteRest* pNR = NULL;
+        if (m_pAnchor && m_pAnchor->is_note_rest())
+            pNR = static_cast<ImoNoteRest*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNoteRest");
+            return NULL;
+        }
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoFermata* pImo = static_cast<ImoFermata*>(
+                                ImFactory::inject(k_imo_fermata, pDoc) );
+
+        // atrrib: type (upright | inverted) #IMPLIED
+        if (has_attribute("type"))
+            set_type(pImo);
+
+        set_shape_type(pImo);
+
+//        error_if_more_elements();
+
+        pNR->add_attachment(pDoc, pImo);
+        return pImo;
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    void set_type(ImoFermata* pImo)
+    {
+        string type = get_attribute("type");
+        if (type == "upright")
+            pImo->set_placement(k_placement_above);
+        else if (type == "inverted")
+            pImo->set_placement(k_placement_below);
+        else
+        {
+            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+                "Unknown fermata type '" + type + "'. Ignored.");
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_shape_type(ImoFermata* pImo)
+    {
+        //text content (optional) indicates the shape of the
+        //fermata sign and may be normal, angled, or square.
+        //If not present, normal is implied.
+
+        string shape = m_analysedNode.value();
+        if (shape == "angled")
+            pImo->set_symbol(ImoFermata::k_angled);
+        else if (shape == "square")
+            pImo->set_symbol(ImoFermata::k_square);
+        else
+            pImo->set_symbol(ImoFermata::k_normal);
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <!ELEMENT backup (duration, %editorial;)>
 //@ <!ELEMENT forward
 //@     (duration, %editorial-voice;, staff?)>
@@ -2182,6 +2398,112 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ lyric = ([syllabic] text [ ([elision] [syllabic] text)* [extend] |
+//@                            extend | laughing | humming ] )
+//@         [end-line] [end-paragraph] [%editorial]
+
+//<!ELEMENT lyric
+//    ((((syllabic?, text),
+//       (elision?, syllabic?, text)*, extend?) |
+//       extend | laughing | humming),
+//      end-line?, end-paragraph?, %editorial;)>
+
+class LyricMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    LyricMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                     LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+
+    ImoObj* do_analysis()
+    {
+        ImoNote* pNote = NULL;
+        if (m_pAnchor && m_pAnchor->is_note())
+            pNote = static_cast<ImoNote*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNote");
+            return NULL;
+        }
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoLyricsData* pData = static_cast<ImoLyricsData*>(
+                                    ImFactory::inject(k_imo_lyrics_data, pDoc));
+
+        // atrrib: number
+        int num = 1;
+        if (has_attribute("number"))
+            num = get_attribute_as_integer("number", 1);
+        pData->set_number(num);
+
+        // atrrib: type (upright | inverted) #IMPLIED
+        if (has_attribute("placement"))
+            set_placement(pData);
+
+        ImoLyricsTextInfo* pText = static_cast<ImoLyricsTextInfo*>(
+                ImFactory::inject(k_imo_lyrics_text_info, pDoc) );
+        pData->add_text_item(pText);
+
+        // [syllabic]
+        if (get_optional("syllabic"))
+            set_syllabic(pText);
+
+        // text
+        if (!analyse_mandatory("text", pText))
+        {
+            delete pData;
+            return NULL;
+        }
+
+        // [extend]
+        if (get_optional("extend"))
+            pData->set_extend(true);
+
+        m_pAnalyser->add_lyrics_data(pNote, pData);
+        return pData;
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    void set_placement(ImoLyricsData* pImo)
+    {
+        string type = get_attribute("placement");
+        if (type == "above")
+            pImo->set_placement(k_placement_above);
+        else if (type == "below")
+            pImo->set_placement(k_placement_below);
+        else
+        {
+            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+                "Unknown placement value '" + type + "'. Ignored.");
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_syllabic(ImoLyricsTextInfo* pImo)
+    {
+        string value = m_childToAnalyse.value();
+        if (value == "single")
+            pImo->set_syllable_type(ImoLyricsTextInfo::k_single);
+        else if (value == "begin")
+            pImo->set_syllable_type(ImoLyricsTextInfo::k_begin);
+        else if (value == "end")
+            pImo->set_syllable_type(ImoLyricsTextInfo::k_end);
+        else if (value == "middle")
+            pImo->set_syllable_type(ImoLyricsTextInfo::k_middle);
+        else
+        {
+            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
+                "Unknown syllabic value '" + value + "'. Ignored.");
+        }
+    }
+
+};
+
+
+//@--------------------------------------------------------------------------------------
 //@ <!ELEMENT measure (%music-data;)>
 //@ <!ENTITY % music-data
 //@     "(note | backup | forward | direction | attributes |
@@ -2394,6 +2716,10 @@ public:
         bool fInChord = false;
         bool fIsRest = false;
 
+        //for now, ignore cue & grace notes
+        if (fIsCue || fIsGrace)
+            return NULL;
+
         // [<chord>]
         if (get_optional("chord"))
         {
@@ -2508,23 +2834,13 @@ public:
 
         error_if_more_elements();
 
-        //for now, ignore cue & grace notes
-        if (!(fIsCue || fIsGrace))
-            add_to_model(pNR);
-        else
-        {
-            delete pNote;
-            return NULL;
-        }
+        add_to_model(pNR);
 
 //        //tuplet
 //        if (m_pTupletInfo==NULL && m_pAnalyser->is_tuplet_open())
 //            add_to_current_tuplet(pNR);
 //
 //        add_tuplet_info(pNR);
-
-//        //slur
-//        add_slur_info(pNote);
 
         //deal with notes in chord
         if (!fIsRest && fInChord)
@@ -2781,7 +3097,7 @@ protected:
     //----------------------------------------------------------------------------------
 //    void analyse_note_rest_options(ImoNoteRest* pNR)
 //    {
-//        // { <beam> | <tuplet> | | <fermata> }
+//        // { <beam> | <tuplet> | }
 //
 //        while( more_children_to_analyse() )
 //        {
@@ -2894,22 +3210,6 @@ protected:
 //        }
 //    }
 
-    //----------------------------------------------------------------------------------
-//    void add_slur_info(ImoNote* pNR)
-//    {
-//        if (m_pSlurDto)
-//        {
-//            m_pSlurDto->set_note(pNR);
-//            m_pAnalyser->add_relation_info(m_pSlurDto);
-//        }
-//    }
-//
-    //----------------------------------------------------------------------------------
-//    void add_attachment(ImoNoteRest* pNR, ImoFermata* pFermata)
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        pNR->add_attachment(pDoc, pFermata);
-//    }
 
 };
 
@@ -3000,6 +3300,189 @@ public:
 //        <xs:attribute name="number" type="xs:token" default="1"/>
 //    </xs:complexType>
 
+
+
+
+//@--------------------------------------------------------------------------------------
+//@ <ornaments> = (ornaments [<ornament> | <accidental-mark>+ ]+ )
+//@ <ornament> = [trill-mark | turn | delayed-turn | inverted-turn |
+//@               delayed-inverted-turn | vertical-turn | shake |
+//@               wavy-line | mordent | inverted-mordent | schleifer |
+//@               tremolo | other-ornament]
+// Examples:
+//      <ornaments><tremolo>3</tremolo></ornaments>
+//      <ornaments>
+//          <turn/>
+//          <accidental-mark>natural</accidental-mark>
+//      </ornaments>
+//      <ornaments>
+//          <wavy-line placement="below" type="stop"/>
+//      </ornaments>
+//      <ornaments><mordent/></ornaments>
+//      <ornaments>
+//          <inverted-mordent long="yes" placement="above"/>
+//      </ornaments>
+
+class OrnamentsMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    OrnamentsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                            LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+        ImoNoteRest* pNR = NULL;
+        if (m_pAnchor && m_pAnchor->is_note_rest())
+            pNR = static_cast<ImoNoteRest*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNoteRest");
+            return NULL;
+        }
+
+        while (more_children_to_analyse())
+        {
+            m_childToAnalyse = get_child_to_analyse();
+            if (m_childToAnalyse.name() == "trill-mark")
+            {
+                get_ornament_symbol(pNR, k_ornament_trill_mark);
+            }
+            else if (m_childToAnalyse.name() == "delayed-inverted-turn")
+            {
+                get_ornament_symbol(pNR, k_ornament_delayed_inverted_turn);
+            }
+            else if (m_childToAnalyse.name() == "vertical-turn")
+            {
+                get_ornament_symbol(pNR, k_ornament_vertical_turn);
+            }
+            else if (m_childToAnalyse.name() == "shake")
+            {
+                get_ornament_symbol(pNR, k_ornament_shake);
+            }
+            else if (m_childToAnalyse.name() == "wavy-line")
+            {
+                get_ornament_wavy_line(pNR);
+            }
+            else if (m_childToAnalyse.name() == "turn")
+            {
+                get_ornament_symbol(pNR, k_ornament_turn);
+            }
+            else if (m_childToAnalyse.name() == "delayed-turn")
+            {
+                get_ornament_symbol(pNR, k_ornament_delayed_turn);
+            }
+            else if (m_childToAnalyse.name() == "inverted-turn")
+            {
+                get_ornament_symbol(pNR, k_ornament_inverted_turn);
+            }
+            else if (m_childToAnalyse.name() == "mordent")
+            {
+                get_ornament_symbol(pNR, k_ornament_mordent);
+            }
+            else if (m_childToAnalyse.name() == "inverted-mordent")
+            {
+                get_ornament_symbol(pNR, k_ornament_inverted_mordent);
+            }
+            else if (m_childToAnalyse.name() == "schleifer")
+            {
+                get_ornament_symbol(pNR, k_ornament_schleifer);
+            }
+            else if (m_childToAnalyse.name() == "tremolo")
+            {
+                get_ornament_symbol(pNR, k_ornament_tremolo);
+            }
+            else if (m_childToAnalyse.name() == "other-ornament")
+            {
+                get_ornament_symbol(pNR, k_ornament_other);
+            }
+            else if (m_childToAnalyse.name() == "accidental-mark")
+            {
+                get_accidental_mark(pNR);
+            }
+            else
+            {
+                error_invalid_child();
+            }
+            move_to_next_child();
+        }
+
+        error_if_more_elements();
+
+        return NULL;
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    ImoOrnament* get_ornament_symbol(ImoNoteRest* pNR, int type)
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoOrnament* pImo = static_cast<ImoOrnament*>(
+                                ImFactory::inject(k_imo_ornament, pDoc) );
+        pImo->set_ornament_type(type);
+
+        // [atrrib]: placement (above | below)
+        if (has_attribute(&m_childToAnalyse, "placement"))
+            set_placement(pImo);
+
+        pNR->add_attachment(pDoc, pImo);
+        return pImo;
+    }
+
+    //-----------------------------------------------------------------------------------
+    void get_ornament_wavy_line(ImoNoteRest* pNR)
+    {
+        //ImoOrnament* pImo =
+            get_ornament_symbol(pNR, k_ornament_wavy_line);
+
+//        // [atrrib]: type (up | down)
+//        if (has_attribute(&m_childToAnalyse, "type"))
+//            set_type(pImo);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void get_accidental_mark(ImoNoteRest* UNUSED(pNR))
+    {
+//        ImoOrnament* pImo =
+//            get_ornament_symbol(pNR, k_ornament_breath_mark);
+//
+//        // [atrrib]: type (up | down)
+//        if (has_attribute(&m_childToAnalyse, "type"))
+//            set_breath_mark_type(pImo);
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_placement(ImoOrnament* pImo)
+    {
+        string value = get_attribute(&m_childToAnalyse, "placement");
+        if (value == "above")
+            pImo->set_placement(k_placement_above);
+        else if (value == "below")
+            pImo->set_placement(k_placement_below);
+        else
+        {
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+                "Unknown placement attrib. '" + value + "'. Ignored.");
+        }
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_type(ImoOrnament* UNUSED(pImo))
+    {
+//        string value = get_attribute(&m_childToAnalyse, "type");
+//        if (value == "up")
+//            pImo->set_up(true);
+//        else if (value == "below")
+//            pImo->set_up(false);
+//        else
+//        {
+//            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+//                "Unknown type attrib. '" + value + "'. Ignored.");
+//        }
+    }
+
+};
 
 
 //@--------------------------------------------------------------------------------------
@@ -3098,63 +3581,6 @@ public:
         return NULL;
     }
 };
-//class TextStringMxlAnalyser : public MxlElementAnalyser
-//{
-//protected:
-//    string m_styleName;
-//
-//public:
-//    TextStringMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                       ImoObj* pAnchor, const string& styleName="Default style")
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-//        , m_styleName(styleName)
-//    {
-//    }
-//
-//    ImoObj* do_analysis()
-//    {
-//        // <string>
-//        if (get_mandatory(k_string))
-//        {
-//            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//            ImoScoreText* pText = static_cast<ImoScoreText*>(
-//                                        ImFactory::inject(k_imo_score_text, pDoc));
-//            pText->set_text(get_string_value());
-//
-//            // [<style>]
-//            ImoStyle* pStyle = NULL;
-//            if (get_optional(k_style))
-//                pStyle = get_text_style_child(m_styleName);
-//            else
-//            {
-//                ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
-//                if (pScore)     //in unit tests the score might not exist
-//                    pStyle = pScore->get_default_style();
-//            }
-//            pText->set_style(pStyle);
-//
-//            // [<location>]
-//            while (more_children_to_analyse())
-//            {
-//                if (get_optional(k_dx))
-//                    pText->set_user_location_x( get_location_child() );
-//                else if (get_optional(k_dy))
-//                    pText->set_user_location_y( get_location_child() );
-//                else
-//                {
-//                    error_invalid_child();
-//                    move_to_next_child();
-//                }
-//            }
-//            error_if_more_elements();
-//
-//            add_to_model(pText);
-//            return pText;
-//        }
-//        return NULL;
-//    }
-//
-//};
 
 //@--------------------------------------------------------------------------------------
 //@ <pitch> = <step>[<alter>]<octave>
@@ -3401,145 +3827,6 @@ protected:
 
 };
 
-//
-////@--------------------------------------------------------------------------------------
-////@ <instrument> = (instrument [<instrName>][<instrAbbrev>][<staves>][<staff>]*
-////@                            [<infoMIDI>] <musicData> )
-////@ <instrName> = <textString>
-////@ <instrAbbrev> = <textString>
-//
-//class InstrumentMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    InstrumentMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                       ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        m_pAnalyser->clear_pending_relations();
-//
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoInstrument* pInstrument = static_cast<ImoInstrument*>(
-//                                        ImFactory::inject(k_imo_instrument, pDoc) );
-//
-//        // [<name>]
-//        analyse_optional(k_name, pInstrument);
-//
-//        // [<abbrev>]
-//        analyse_optional(k_abbrev, pInstrument);
-//
-//        // [<staves>]
-//        if (get_optional(k_staves))
-//            set_staves(pInstrument);
-//
-//        // [<staff>]*
-//        while (analyse_optional(k_staff, pInstrument));
-//
-//        // [<infoMIDI>]
-//        analyse_optional(k_infoMIDI, pInstrument);
-//
-//        // <musicData>
-//        analyse_mandatory(k_musicData, pInstrument);
-//
-//        error_if_more_elements();
-//
-//        add_to_model(pInstrument);
-//        return pInstrument;
-//    }
-//
-//protected:
-//
-//    void set_staves(ImoInstrument* pInstrument)
-//    {
-//        // <staves> = (staves <num>)
-//
-//        XmlNode* pValue = get_first_child(m_childToAnalyse);
-//        string staves = get_value(pValue);
-//        int nStaves;
-//        bool fError = !is_type(pValue, k_number);
-//        if (!fError)
-//        {
-//            std::istringstream iss(staves);
-//            fError = (iss >> std::dec >> nStaves).fail();
-//        }
-//        if (fError)
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Invalid value '" + staves + "' for staves. Replaced by 1.");
-//        }
-//        else
-//        {
-//            for(; nStaves > 1; --nStaves)
-//                pInstrument->add_staff();
-//        }
-//    }
-//
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ <infoMIDI> = (infoMIDI num_instr [num_channel])
-////@ num_instr = integer: 0..255
-////@ num_channel = integer: 0..15
-//
-//class InfoMidiMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    InfoMidiMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                       ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoMidiInfo* pInfo = static_cast<ImoMidiInfo*>(
-//                                    ImFactory::inject(k_imo_midi_info, pDoc) );
-//
-//        // num_instr
-//        if (!get_optional(k_number) || !set_instrument(pInfo))
-//        {
-//            error_msg("Missing or invalid MIDI instrument (0..255). MIDI info ignored.");
-//            delete pInfo;
-//            return NULL;
-//        }
-//
-//        // [num_channel]
-//        if (get_optional(k_number) && !set_channel(pInfo))
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                        "Invalid MIDI channel (0..15). Channel info ignored.");
-//        }
-//
-//        error_if_more_elements();
-//
-//        add_to_model(pInfo);
-//        return pInfo;
-//    }
-//
-//protected:
-//
-//    bool set_instrument(ImoMidiInfo* pInfo)
-//    {
-//        int value = get_integer_value(0);
-//        if (value < 0 || value > 255)
-//            return false;   //error
-//
-//        pInfo->set_instrument(value);
-//        return true;
-//    }
-//
-//    bool set_channel(ImoMidiInfo* pInfo)
-//    {
-//        int value = get_integer_value(0);
-//        if (value < 0 || value > 15)
-//            return false;   //error
-//
-//        pInfo->set_channel(value);
-//        return true;
-//    }
-//
-//};
-
 //@--------------------------------------------------------------------------------------
 //@ <score-partwise> = [<work>][<movement-number>][<movement-title>][<identification>]
 //@                    [<defaults>][<credit>*]<part-list><part>+
@@ -3684,6 +3971,263 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <technical> = (technical <tech-mark>+)
+//@ <tech-mark> = [ up-bow | down-bow | harmonic | open-string |
+//@                 thumb-position | fingering | pluck | double-tongue |
+//@                 triple-tongue | stopped | snap-pizzicato | fret |
+//@                 string | hammer-on | pull-off | bend | tap | heel |
+//@                 toe | fingernails | hole | arrow | handbell |
+//@                 other-technical ]
+//@
+
+class TecnicalMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    TecnicalMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                        LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+        ImoNoteRest* pNR = NULL;
+        if (m_pAnchor && m_pAnchor->is_note_rest())
+            pNR = static_cast<ImoNoteRest*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNoteRest");
+            return NULL;
+        }
+
+        while (more_children_to_analyse())
+        {
+            m_childToAnalyse = get_child_to_analyse();
+            if (m_childToAnalyse.name() == "up-bow")
+            {
+                get_technical_symbol(pNR, k_technical_up_bow);
+            }
+            else if (m_childToAnalyse.name() == "down-bow")
+            {
+                get_technical_symbol(pNR, k_technical_down_bow);
+            }
+            else if (m_childToAnalyse.name() == "double-tongue")
+            {
+                get_technical_symbol(pNR, k_technical_double_tongue);
+            }
+            else if (m_childToAnalyse.name() == "triple-tongue")
+            {
+                get_technical_symbol(pNR, k_technical_triple_tongue);
+            }
+
+        //not properly supported:
+            else if (m_childToAnalyse.name() == "harmonic")
+            {
+                get_technical_symbol(pNR, k_technical_harmonic);
+            }
+//            else if (m_childToAnalyse.name() == "fingering")
+//            {
+//                get_technical_symbol(pNR, k_technical_fingering);
+//            }
+            else if (m_childToAnalyse.name() == "hole")
+            {
+                get_technical_symbol(pNR, k_technical_hole);
+            }
+            else if (m_childToAnalyse.name() == "handbell")
+            {
+                get_technical_symbol(pNR, k_technical_handbell);
+            }
+            else        //other-technical
+            {
+                error_invalid_child();
+            }
+            move_to_next_child();
+        }
+
+        error_if_more_elements();
+
+        return NULL;
+    }
+
+protected:
+
+    //-----------------------------------------------------------------------------------
+    ImoTechnical* get_technical_symbol(ImoNoteRest* pNR, int type)
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoTechnical* pImo = static_cast<ImoTechnical*>(
+                                ImFactory::inject(k_imo_technical, pDoc) );
+        pImo->set_technical_type(type);
+
+        // [atrrib]: placement (above | below)
+        if (has_attribute(&m_childToAnalyse, "placement"))
+            set_placement(pImo);
+
+        pNR->add_attachment(pDoc, pImo);
+        return pImo;
+    }
+
+    //-----------------------------------------------------------------------------------
+    void set_placement(ImoTechnical* pImo)
+    {
+        string value = get_attribute(&m_childToAnalyse, "placement");
+        if (value == "above")
+            pImo->set_placement(k_placement_above);
+        else if (value == "below")
+            pImo->set_placement(k_placement_below);
+        else
+        {
+            report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
+                "Unknown placement attrib. '" + value + "'. Ignored.");
+        }
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
+//@
+//    Slur elements are empty. Most slurs are represented with
+//    two elements: one with a start type, and one with a stop
+//    type. Slurs can add more elements using a continue type.
+//    This is typically used to specify the formatting of cross-
+//    system slurs, or to specify the shape of very complex slurs.
+//
+//<!ELEMENT slur EMPTY>
+//<!ATTLIST slur
+//    type %start-stop-continue; #REQUIRED
+//    number %number-level; "1"
+//    %line-type;
+//    %dashed-formatting;
+//    %position;
+//    %placement;
+//    %orientation;
+//    %bezier;
+//    %color;
+//>
+
+class SlurMxlAnalyser : public MxlElementAnalyser
+{
+protected:
+    ImoSlurDto* m_pInfo1;
+    ImoSlurDto* m_pInfo2;
+
+public:
+    SlurMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                    ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
+        , m_pInfo1(NULL)
+        , m_pInfo2(NULL)
+    {
+    }
+
+    ImoObj* do_analysis()
+    {
+        ImoNote* pNote = NULL;
+        if (m_pAnchor && m_pAnchor->is_note())
+            pNote = static_cast<ImoNote*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("NULL pAnchor or it is not ImoNote");
+            return NULL;
+        }
+
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        m_pInfo1 = static_cast<ImoSlurDto*>(
+                                ImFactory::inject(k_imo_slur_dto, pDoc));
+
+        // arrib: type %start-stop-continue; #REQUIRED
+        const string& type = get_mandatory_string_attribute("type", "", "slur");
+
+        // attrib: number %number-level; #IMPLIED
+        int num = get_optional_integer_attribute("number", 0);
+
+//        // attrib: %line-type;
+//        if (get_mandatory(k_number))
+//            pInfo->set_slur_number( get_integer_value(0) );
+
+//        // attrib: %dashed-formatting;
+//        if (get_mandatory(k_number))
+//            pInfo->set_slur_number( get_integer_value(0) );
+
+//        // attrib: %position;
+//        if (get_mandatory(k_number))
+//            pInfo->set_slur_number( get_integer_value(0) );
+
+//        // attrib: %placement;
+//        if (get_mandatory(k_number))
+//            pInfo->set_slur_number( get_integer_value(0) );
+
+        // attrib: %orientation;
+        if (has_attribute("orientation"))
+        {
+            string orientation = get_attribute("orientation");
+
+            //AWARE: must be type == "start"
+            if (orientation == "over")
+                m_pInfo1->set_orientation(k_orientation_over);
+            else
+                m_pInfo1->set_orientation(k_orientation_under);
+        }
+
+//        // attrib: %bezier;
+//        analyse_optional(k_bezier, pInfo);
+//
+//        // attrib: %color;
+//        if (get_optional(k_color))
+//            pInfo->set_color( get_color_child() );
+
+        set_slur_type_and_id(type, num);
+
+        m_pInfo1->set_note(pNote);
+        m_pAnalyser->add_relation_info(m_pInfo1);
+
+        if (m_pInfo2)
+        {
+            m_pInfo2->set_note(pNote);
+            m_pAnalyser->add_relation_info(m_pInfo2);
+        }
+
+        return m_pInfo1;
+    }
+
+protected:
+
+    void set_slur_type_and_id(const string& value, int num)
+    {
+        if (value == "start")
+        {
+            m_pInfo1->set_start(true);
+            int slurId =  m_pAnalyser->new_slur_id(num);
+            m_pInfo1->set_slur_number(slurId);
+        }
+        else if (value == "stop")
+        {
+            m_pInfo1->set_start(false);
+            int slurId =  m_pAnalyser->get_slur_id_and_close(num);
+            m_pInfo1->set_slur_number(slurId);
+        }
+        else if (value == "continue")
+        {
+            m_pInfo1->set_start(false);
+            int slurId =  m_pAnalyser->get_slur_id_and_close(num);
+            m_pInfo1->set_slur_number(slurId);
+
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            m_pInfo2 = static_cast<ImoSlurDto*>(
+                                ImFactory::inject(k_imo_slur_dto, pDoc));
+            m_pInfo2->set_start(true);
+            slurId =  m_pAnalyser->new_slur_id(num);
+            m_pInfo2->set_slur_number(slurId);
+        }
+        else
+        {
+            error_msg("Missing or invalid slur type. Slur ignored.");
+            delete m_pInfo1;
+            m_pInfo1 = NULL;
+        }
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
 //@ sound
 
 class SoundMxlAnalyser : public MxlElementAnalyser
@@ -3724,1888 +4268,100 @@ public:
         ImoTimeSignature* pTime = static_cast<ImoTimeSignature*>(
                                     ImFactory::inject(k_imo_time_signature, pDoc) );
 
+        // atrrib: symbol (common | cut | single-number | normal)
+        if (has_attribute("symbol"))
+            set_symbol(pTime);
+
         // <beats> (num)
         if (get_mandatory("beats"))
             pTime->set_top_number( get_integer_value(2) );
 
         // <beat-type> (num)
-        if (get_mandatory("beat-type"))
+        if (pTime->get_type() != ImoTimeSignature::k_single_number
+             && get_mandatory("beat-type"))
             pTime->set_bottom_number( get_integer_value(4) );
 
         add_to_model(pTime);
         return pTime;
     }
 
-};
+protected:
 
-
-
-
-////@--------------------------------------------------------------------------------------
-////@ <anchorLine> = (anchorLine <destination-point>[<lineStyle>][<color>][<width>]
-////@                            [<lineCapEnd>])
-////@ <destination-point> = <location>    in Tenths
-////@     i.e.: (anchorLine (dx value)(dy value)(lineStyle value)(color value)(width value))
-////@
-//
-//class AnchorLineMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    AnchorLineMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                       ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoLineStyle* pLine = static_cast<ImoLineStyle*>(
-//                                    ImFactory::inject(k_imo_line_style, pDoc) );
-//        pLine->set_start_point( TPoint(0.0f, 0.0f) );
-//        pLine->set_start_edge(k_edge_normal);
-//        pLine->set_start_cap(k_cap_none);
-//        pLine->set_end_edge(k_edge_normal);
-//
-//        // <destination-point> = <dx><dy>
-//        TPoint point;
-//        if (get_mandatory(k_dx))
-//            point.x = get_location_child();
-//        if (get_mandatory(k_dy))
-//            point.y = get_location_child();
-//        pLine->set_end_point( point );
-//
-//        // [<lineStyle>]
-//        if (get_optional(k_lineStyle))
-//            pLine->set_line_style( get_line_style_child() );
-//
-//        // [<color>])
-//        if (get_optional(k_color))
-//            pLine->set_color( get_color_child() );
-//
-//        // [<width>]
-//        if (get_optional(k_width))
-//            pLine->set_width( get_width_child(1.0f) );
-//
-//        // [<lineCapEnd>])
-//        if (get_optional(k_lineCapEnd))
-//            pLine->set_end_cap( get_line_cap_child() );
-//
-//        add_to_model( pLine );
-//        return pLine;
-//    }
-//
-//};
-//
-//
-////@--------------------------------------------------------------------------------------
-////@ <bezier> = (bezier <bezier-location>* )
-////@ <bezier-location> = { (start-x num) | (start-y num) | (end-x num) | (end-y num) |
-////@                       (ctrol1-x num) | (ctrol1-y num) | (ctrol2-x num) | (ctrol2-y num) }
-////@ <num> = real number, in tenths
-//
-//class BezierMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    BezierMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                   ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoBezierInfo* pBezier = static_cast<ImoBezierInfo*>(
-//                                    ImFactory::inject(k_imo_bezier_info, pDoc));
-//
-//        while (more_children_to_analyse())
-//        {
-//            if (get_optional(k_start_x))
-//                set_x_in_point(ImoBezierInfo::k_start, pBezier);
-//            else if (get_optional(k_end_x))
-//                set_x_in_point(ImoBezierInfo::k_end, pBezier);
-//            else if (get_optional(k_ctrol1_x))
-//                set_x_in_point(ImoBezierInfo::k_ctrol1, pBezier);
-//            else if (get_optional(k_ctrol2_x))
-//                set_x_in_point(ImoBezierInfo::k_ctrol2, pBezier);
-//            else if (get_optional(k_start_y))
-//                set_y_in_point(ImoBezierInfo::k_start, pBezier);
-//            else if (get_optional(k_end_y))
-//                set_y_in_point(ImoBezierInfo::k_end, pBezier);
-//            else if (get_optional(k_ctrol1_y))
-//                set_y_in_point(ImoBezierInfo::k_ctrol1, pBezier);
-//            else if (get_optional(k_ctrol2_y))
-//                set_y_in_point(ImoBezierInfo::k_ctrol2, pBezier);
-//            else
-//            {
-//                error_invalid_child();
-//                move_to_next_child();
-//            }
-//        }
-//
-//        add_to_model(pBezier);
-//        return pBezier;
-//    }
-//
-//    void set_x_in_point(int i, ImoBezierInfo* pBezier)
-//    {
-//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//        float value = get_float_value(0.0f);
-//        TPoint& point = pBezier->get_point(i);
-//        point.x = value;
-//    }
-//
-//    void set_y_in_point(int i, ImoBezierInfo* pBezier)
-//    {
-//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//        float value = get_float_value(0.0f);
-//        TPoint& point = pBezier->get_point(i);
-//        point.y = value;
-//    }
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ <border> = (border <width><lineStyle><color>)
-////@     i.e.: (border (width 2.5)(lineStyle solid)(color #ff0000))
-//
-//class BorderMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    BorderMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                   ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        ImoBorderDto* border = LOMSE_NEW ImoBorderDto();
-//
-//        // <width>
-//        if (get_mandatory(k_width))
-//            border->set_width( get_width_child(1.0f) );
-//
-//        // <lineStyle>
-//        if (get_mandatory(k_lineStyle))
-//            border->set_style( get_line_style_child() );
-//
-//        // <color>
-//        if (get_mandatory(k_color))
-//            border->set_color( get_color_child() );
-//
-//        add_to_model(border);
-//        return border;
-//    }
-//
-//protected:
-//
-//        void set_box_border(ImoTextBlockInfo& box)
-//        {
-//            ImoObj* pImo = analyse_child();
-//            if (pImo)
-//            {
-//                if (pImo->is_border_dto())
-//                    box.set_border( static_cast<ImoBorderDto*>(pImo) );
-//                delete pImo;
-//            }
-//        }
-//
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ <chord> = (chord <note>+ )
-//
-//class ChordMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    ChordMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                  ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoChord* pChord = static_cast<ImoChord*>( ImFactory::inject(k_imo_chord, pDoc) );
-//
-//        // <note>*
-//        while (more_children_to_analyse())
-//        {
-//            if (!analyse_optional(k_note, pChord))
-//            {
-//                error_invalid_child();
-//                move_to_next_child();
-//            }
-//        }
-//
-//        add_notes_to_music_data(pChord);
-//        return pChord;
-//    }
-//
-//protected:
-//
-//    void add_notes_to_music_data(ImoChord* pChord)
-//    {
-//        //get anchor musicData
-//        if (m_pAnchor && m_pAnchor->is_music_data())
-//        {
-//            ImoMusicData* pMD = static_cast<ImoMusicData*>(m_pAnchor);
-//
-//            //add notes to musicData
-//            std::list< pair<ImoStaffObj*, ImoRelDataObj*> >& notes
-//                = pChord->get_related_objects();
-//            std::list< pair<ImoStaffObj*, ImoRelDataObj*> >::iterator it;
-//            for (it = notes.begin(); it != notes.end(); ++it)
-//            {
-//                ImoNote* pNote = static_cast<ImoNote*>( (*it).first );
-//                pMD->append_child_imo(pNote);
-//            }
-//
-//            add_to_model(pChord);
-//        }
-//    }
-//
-//};
-//
-//
-////@--------------------------------------------------------------------------------------
-////@ <color> = (color <rgba>}
-////@ <rgba> = label: { #rrggbb | #rrggbbaa }
-//
-//class ColorMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    ColorMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        string value = get_value(m_analysedNode);
-//        ImoColorDto* pColor = LOMSE_NEW ImoColorDto();
-//        pColor->set_from_string(value);
-//        if (!pColor->is_ok())
-//        {
-//            error_msg("Missing or invalid color value. Must be #rrggbbaa. Color ignored.");
-//            delete pColor;
-//            return NULL;
-//        }
-//        return pColor;
-//    }
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ <newSystem> = (newSystem}
-//
-//class ControlMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    ControlMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                    ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoSystemBreak* pCtrl = static_cast<ImoSystemBreak*>(
-//                                    ImFactory::inject(k_imo_system_break, pDoc) );
-//        add_to_model(pCtrl);
-//        return pCtrl;
-//    }
-//};
-//
-//
-////---------------------------------------------------------------------------------------
-//class DefineStyleMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    DefineStyleMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                        ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        ImoStyle* pStyle;
-//        string name;
-//
-//        //<name>
-//        if (get_mandatory(k_name))
-//            name = get_string_value();
-//        else
-//            return NULL;
-//        string parent = (name == "Default style" ? "" : "Default style");
-//
-//        pStyle = create_style(name, parent);
-//
-//        bool fHasFontFile = false;
-//        while (more_children_to_analyse())
-//        {
-//            // color and background
-//            if (get_optional(k_color))
-//                pStyle->color( get_color_value() );
-//            else if (get_optional(k_background_color))
-//                pStyle->background_color( get_color_value() );
-//
-//            // font
-//            else if (get_optional("font-file"))
-//            {
-//                pStyle->font_file( get_string_value() );
-//                fHasFontFile = true;
-//            }
-//            else if (get_optional(k_font_name))
-//            {
-//                pStyle->font_name( get_string_value() );
-//                if (!fHasFontFile)
-//                    pStyle->font_file("");
-//            }
-//            else if (get_optional(k_font_size))
-//                pStyle->font_size( get_font_size_value() );
-//            else if (get_optional(k_font_style))
-//                pStyle->font_style( get_font_style() );
-//            else if (get_optional(k_font_weight))
-//                pStyle->font_weight( get_font_weight() );
-//
-////                // border
-////                else if (get_optional(k_border))
-////                    pStyle->border( get_lenght_child() );
-////                else if (get_optional(k_border_top))
-////                    pStyle->border_top( get_lenght_child() );
-////                else if (get_optional(k_border_right))
-////                    pStyle->border_right( get_lenght_child() );
-////                else if (get_optional(k_border_bottom))
-////                    pStyle->border_bottom( get_lenght_child() );
-////                else if (get_optional(k_border_left))
-////                    pStyle->border_left( get_lenght_child() );
-//
-//            // border width
-//            else if (get_optional(k_border_width))
-//                pStyle->border_width( get_lenght_child() );
-//            else if (get_optional(k_border_width_top))
-//                pStyle->border_width_top( get_lenght_child() );
-//            else if (get_optional(k_border_width_right))
-//                pStyle->border_width_right( get_lenght_child() );
-//            else if (get_optional(k_border_width_bottom))
-//                pStyle->border_width_bottom( get_lenght_child() );
-//            else if (get_optional(k_border_width_left))
-//                pStyle->border_width_left( get_lenght_child() );
-//
-//            // margin
-//            else if (get_optional(k_margin))
-//                pStyle->margin( get_lenght_child() );
-//            else if (get_optional(k_margin_top))
-//                pStyle->margin_top( get_lenght_child() );
-//            else if (get_optional(k_margin_right))
-//                pStyle->margin_right( get_lenght_child() );
-//            else if (get_optional(k_margin_bottom))
-//                pStyle->margin_bottom( get_lenght_child() );
-//            else if (get_optional(k_margin_left))
-//                pStyle->margin_left( get_lenght_child() );
-//
-//            // padding
-//            else if (get_optional(k_padding))
-//                pStyle->padding( get_lenght_child() );
-//            else if (get_optional(k_padding_top))
-//                pStyle->padding_top( get_lenght_child() );
-//            else if (get_optional(k_padding_right))
-//                pStyle->padding_right( get_lenght_child() );
-//            else if (get_optional(k_padding_bottom))
-//                pStyle->padding_bottom( get_lenght_child() );
-//            else if (get_optional(k_padding_left))
-//                pStyle->padding_left( get_lenght_child() );
-//
-//            //text
-//            else if (get_optional(k_text_decoration))
-//                pStyle->text_decoration( get_text_decoration() );
-//            else if (get_optional(k_vertical_align))
-//                pStyle->vertical_align( get_valign() );
-//            else if (get_optional(k_text_align))
-//                pStyle->text_align( get_text_align() );
-//            else if (get_optional(k_line_height))
-//                pStyle->line_height( get_float_child(1.5f) );
-//
-//            //size
-//            else if (get_optional(k_min_height))
-//                pStyle->min_height( get_lenght_child() );
-//            else if (get_optional(k_min_width))
-//                pStyle->min_width( get_lenght_child() );
-//            else if (get_optional(k_max_height))
-//                pStyle->max_height( get_lenght_child() );
-//            else if (get_optional(k_max_width))
-//                pStyle->max_width( get_lenght_child() );
-//            else if (get_optional(k_height))
-//                pStyle->height( get_lenght_child() );
-//            else if (get_optional(k_width))
-//                pStyle->width( get_lenght_child() );
-//
-//            //table
-//            else if (get_optional(k_table_col_width))
-//                pStyle->table_col_width( get_lenght_child() );
-//
-//            else
-//            {
-//                error_invalid_child();
-//                move_to_next_child();
-//            }
-//        }
-//
-//        if (pStyle->get_name() != "Default style")
-//            add_to_model(pStyle);
-//
-//        return pStyle;
-//    }
-//
-//protected:
-//
-//    int get_font_style()
-//    {
-//        const string value = get_string_value();
-//        if (value == "normal")
-//            return ImoStyle::k_font_normal;
-//        else if (value == "italic")
-//            return ImoStyle::k_font_style_italic;
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Unknown font-style '" + value + "'. Replaced by 'normal'.");
-//            return ImoStyle::k_font_normal;
-//        }
-//    }
-//
-//    int get_font_weight()
-//    {
-//        const string value = get_string_value();
-//        if (value == "normal")
-//            return ImoStyle::k_font_normal;
-//        else if (value == "bold")
-//            return ImoStyle::k_font_weight_bold;
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Unknown font-weight '" + value + "'. Replaced by 'normal'.");
-//            return ImoStyle::k_font_normal;
-//        }
-//    }
-//
-//    int get_text_decoration()
-//    {
-//        const string value = get_string_value();
-//        if (value == "none")
-//            return ImoStyle::k_decoration_none;
-//        else if (value == "underline")
-//            return ImoStyle::k_decoration_underline;
-//        else if (value == "overline")
-//            return ImoStyle::k_decoration_overline;
-//        else if (value == "line-through")
-//            return ImoStyle::k_decoration_line_through;
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Unknown text decoration value '" + value + "'. Replaced by 'none'.");
-//            return ImoStyle::k_decoration_none;
-//        }
-//    }
-//
-//    int get_valign()
-//    {
-//        const string value = get_string_value();
-//        if (value == "baseline")
-//            return ImoStyle::k_valign_baseline;
-//        else if (value == "sub")
-//            return ImoStyle::k_valign_sub;
-//        else if (value == "super")
-//            return ImoStyle::k_valign_super;
-//        else if (value == "top")
-//            return ImoStyle::k_valign_top;
-//        else if (value == "text-top")
-//            return ImoStyle::k_valign_text_top;
-//        else if (value == "middle")
-//            return ImoStyle::k_valign_middle;
-//        else if (value == "bottom")
-//            return ImoStyle::k_valign_bottom;
-//        else if (value == "text-bottom")
-//            return ImoStyle::k_valign_text_bottom;
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Unknown vertical align '" + value + "'. Replaced by 'baseline'.");
-//            return ImoStyle::k_valign_baseline;
-//        }
-//    }
-//
-//    int get_text_align()
-//    {
-//        const string value = get_string_value();
-//        if (value == "left")
-//            return ImoStyle::k_align_left;
-//        else if (value == "right")
-//            return ImoStyle::k_align_right;
-//        else if (value == "center")
-//            return ImoStyle::k_align_center;
-//        else if (value == "justify")
-//            return ImoStyle::k_align_justify;
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Unknown text align '" + value + "'. Replaced by 'left'.");
-//            return ImoStyle::k_align_left;
-//        }
-//    }
-//
-//    ImoStyle* create_style(const string& name, const string& parent)
-//    {
-//        ImoStyle* pDefault = NULL;
-//        ImoStyles* pStyles = NULL;
-//        if (m_pAnchor && m_pAnchor->is_styles())
-//        {
-//            pStyles = static_cast<ImoStyles*>(m_pAnchor);
-//            pDefault = pStyles->get_default_style();
-//        }
-//
-//        if (name == "Default style")
-//        {
-//            return pDefault;
-//        }
-//        else
-//        {
-//            ImoStyle* pParent = pDefault;
-//            if (pStyles)
-//                pParent = pStyles->get_style_or_default(parent);
-//
-//            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//            ImoStyle* pStyle = static_cast<ImoStyle*>(ImFactory::inject(k_imo_style, pDoc));
-//            pStyle->set_name(name);
-//            pStyle->set_parent_style(pParent);
-//            return pStyle;
-//        }
-//    }
-//
-//};
-
-//@--------------------------------------------------------------------------------------
-//@ <fermata> = (fermata <placement>[<componentOptions>*])
-//@ <placement> = { above | below }
-//<!--
-//    Fermata and wavy-line elements can be applied both to
-//    notes and to measures. Wavy
-//    lines are one way to indicate trills; when used with a
-//    measure element, they should always have type="continue"
-//    set. The fermata text content represents the shape of the
-//    fermata sign and may be normal, angled, or square.
-//    An empty fermata element represents a normal fermata.
-//    The fermata type is upright if not specified.
-//-->
-//<!ELEMENT fermata  (#PCDATA)>
-//<!ATTLIST fermata
-//    type (upright | inverted) #IMPLIED
-//    %print-style;
-//>
-
-class FermataMxlAnalyser : public MxlElementAnalyser
-{
-public:
-    FermataMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                    ImoObj* pAnchor)
-        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-
-    ImoObj* do_analysis()
+    //-----------------------------------------------------------------------------------
+    void set_symbol(ImoTimeSignature* pImo)
     {
-        ImoNoteRest* pNR = NULL;
-        if (m_pAnchor && m_pAnchor->is_note_rest())
-            pNR = static_cast<ImoNoteRest*>(m_pAnchor);
-        else
-        {
-            LOMSE_LOG_ERROR("pAnchor is NULL or it is not ImoNoteRest");
-            return NULL;
-        }
+        // atrrib: symbol (common | cut | single-number | normal)
 
-        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoFermata* pImo = static_cast<ImoFermata*>(
-                                ImFactory::inject(k_imo_fermata, pDoc) );
-
-        // atrrib: type (upright | inverted) #IMPLIED
-        if (has_attribute("type"))
-            set_type(pImo);
-
-//        error_if_more_elements();
-
-        pNR->add_attachment(pDoc, pImo);
-        return pImo;
-    }
-
-    void set_type(ImoFermata* pImo)
-    {
-        string type = get_attribute("type");
-        if (type == "upright")
-            pImo->set_placement(k_placement_above);
-        else if (type == "inverted")
-            pImo->set_placement(k_placement_below);
+        string value = get_attribute("symbol");
+        if (value == "common")
+            pImo->set_type(ImoTimeSignature::k_common);
+        else if (value == "cut")
+            pImo->set_type(ImoTimeSignature::k_cut);
+        else if (value == "single-number")
+            pImo->set_type(ImoTimeSignature::k_single_number);
+        else if (value == "normal")
+            pImo->set_type(ImoTimeSignature::k_normal);
         else
         {
             report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-                "Unknown fermata type '" + type + "'. Ignored.");
+                "Unknown time signature type '" + value + "'. Ignored.");
         }
     }
-
 };
 
-////@--------------------------------------------------------------------------------------
-////@ <figuredBass> = (figuredBass <figuredBassSymbols>[<parenthesis>][<fbline>]
-////@                              [<componentOptions>*] )
-////@ <parenthesis> = (parenthesis { yes | no })  default: no
-////@
-////@ <fbline> = (fbline <numLine> start <startPoint><endPoint><width><color>)
-////@ <fbline> = (fbline num {start | stop} [<startPoint>][<endPoint>][<width>][<color>])
-//
-////@ <figuredBassSymbols> = an string.
-////@        It is formed by concatenation of individual strings for each interval.
-////@        Each interval string is separated by a blank space from the previous one.
-////@        And it can be enclosed in parenthesis.
-////@        Each interval string is a combination of prefix, number and suffix,
-////@        such as  "#3", "5/", "(3)", "2+" or "#".
-////@        Valid values for prefix and suffix are:
-////@            prefix = { + | - | # | b | = | x | bb | ## }
-////@            suffix = { + | - | # | b | = | x | bb | ## | / | \ }
-////@
-////@ examples:
-////@
-////@        b6              (figuredBass "b6 b")
-////@        b
-////@
-////@        7 ________      (figuredBass "7 5 2" (fbline 15 start))
-////@        5
-////@        2
-////@
-////@        6               (figuredBass "6 (3)")
-////@        (3)
-////@
-//
-//class FiguredBassMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    FiguredBassMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                        ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//
-//        // <figuredBassSymbols> (string)
-//        if (get_mandatory(k_string))
-//        {
-//        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//            ImoFiguredBassInfo info( get_string_value() );
-//
-//            // [<parenthesis>]
-//            if (get_optional(k_parenthesis))
-//            {
-//                //TODO: Not yet necessary. Not implemented in LenMus
-//            }
-//
-//            // [<fbline>]
-//            if (get_optional(k_fbline))
-//            {}
-//
-//            // [<componentOptions>*]
-//            //analyse_scoreobj_options(dto);
-//
-//            error_if_more_elements();
-//
-//            ImoFiguredBass* pImo = LOMSE_NEW ImoFiguredBass(info);
-//            add_to_model(pImo);
-//            return pImo;
-//        }
-//        return NULL;
-//    }
-//};
-//
-//////    //get figured bass string and split it into components
-//////    std::string sData = GetNodeName(pNode->GetParameter(1));
-//////    ImoFiguredBassInfo oFBData(sData);
-//////    if (oFBData.get_error_msg() != "")
-//////    {
-//////        AnalysisError(pNode, oFBData.get_error_msg());
-//////        return (ImoFiguredBass*)NULL;    //error
-//////    }
-//////
-//////    //initialize options with default values
-//////    //AWARE: There can be two fblines, one starting in this FB and another
-//////    //one ending in it.
-//////    int nFBL=0;     //index to next fbline
-//////    lmFBLineInfo* pFBLineInfo[2];
-//////    pFBLineInfo[0] = (lmFBLineInfo*)NULL;
-//////    pFBLineInfo[1] = (lmFBLineInfo*)NULL;
-//////
-//////    //get options: <parenthesis> & <fbline>
-//////    int iP;
-//////    for(iP=2; iP <= nNumParms; ++iP)
-//////    {
-//////        lmLDPNode* pX = pNode->GetParameter(iP);
-//////        std::string sName = GetNodeName(pX);
-//////        if (sName == "parenthesis")
-//////            ;   //TODO
-//////        else if (sName == "fbline")     //start/end of figured bass line
-//////        {
-//////            if (nFBL > 1)
-//////                AnalysisError(pX, "[Element '%s'. More than two 'fbline'. Ignored.",
-//////                            sElmName.wx_str() );
-//////            else
-//////                pFBLineInfo[nFBL++] = AnalyzeFBLine(pX, pVStaff);
-//////        }
-//////        else
-//////            AnalysisError(pX, "[Element '%s'. Invalid parameter '%s'. Ignored.",
-//////                          sElmName.c_str(), sName.wx_str() );
-//////    }
-//////
-//////    //analyze remaining optional parameters: <location>, <cursorPoint>
-//////	lmLDPOptionalTags oOptTags(this);
-//////	oOptTags.SetValid(lm_eTag_Location_x, lm_eTag_Location_y, -1);		//finish list with -1
-//////	lmLocation tPos = g_tDefaultPos;
-//////	oOptTags.AnalyzeCommonOptions(pNode, iP, pVStaff, NULL, NULL, &tPos);
-//////
-//////	//create the Figured Bass object
-//////    ImoFiguredBass* pFB = pVStaff->AddFiguredBass(&oFBData, nId);
-//////	pFB->SetUserLocation(tPos);
-//////
-//////    //save cursor data
-//////    if (m_fCursorData && m_nCursorObjID == nId)
-//////        m_pCursorSO = pFB;
-//////
-//////    //add FB line, if exists
-//////    for(int i=0; i < 2; i++)
-//////    {
-//////        if (pFBLineInfo[i])
-//////        {
-//////            if (pFBLineInfo[i]->fStart)
-//////            {
-//////                //start of FB line. Save the information
-//////                pFBLineInfo[i]->pFB = pFB;
-//////                m_PendingFBLines.push_back(pFBLineInfo[i]);
-//////            }
-//////            else
-//////            {
-//////                //end of FB line. Add it to the internal model
-//////                AddFBLine(pFB, pFBLineInfo[i]);
-//////            }
-//////        }
-//////    }
-//////
-//////    return pFB;       //no error
-//////}
-//
-////@--------------------------------------------------------------------------------------
-////@ <font> = (font <font_name> <font_size> <font_style>)
-////@ <font_name> = string   i.e. "Times New Roman", "Trebuchet"
-////@ <font_size> = num      in points
-////@ <font_style> = { "bold" | "normal" | "italic" | "bold-italic" }
-////@
-////@ Compatibility 1.5
-////@     size is a number followed by 'pt'. i.e.: 12pt
-//
-//
-//class FontMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    FontMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                 ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        ImoFontStyleDto* pFont = LOMSE_NEW ImoFontStyleDto();
-//
-//        //<font_name> = string
-//        if (get_mandatory(k_string))
-//            pFont->name = get_string_value();
-//
-//        //<font_size> = num
-//        if (get_optional(k_number))
-//            pFont->size = get_float_value(8.0f);
-//        //<font_size>. Compatibility 1.5
-//        else if (get_mandatory(k_label))
-//            pFont->size = get_font_size_value();
-//
-//        //<font_style>
-//        if (get_mandatory(k_label))
-//            set_font_style_weight(pFont);
-//
-//        //add font info to parent
-//        add_to_model(pFont);
-//        return pFont;
-//    }
-//
-//    void set_font_style_weight(ImoFontStyleDto* pFont)
-//    {
-//        const string& value = m_childToAnalyse.value();
-//        if (value == "bold")
-//        {
-//            pFont->weight = ImoStyle::k_font_weight_bold;
-//            pFont->style = ImoStyle::k_font_style_normal;
-//        }
-//        else if (value == "normal")
-//        {
-//            pFont->weight = ImoStyle::k_font_weight_normal;
-//            pFont->style = ImoStyle::k_font_style_normal;
-//        }
-//        else if (value == "italic")
-//        {
-//            pFont->weight = ImoStyle::k_font_weight_normal;
-//            pFont->style = ImoStyle::k_font_style_italic;
-//        }
-//        else if (value == "bold-italic")
-//        {
-//            pFont->weight = ImoStyle::k_font_weight_bold;
-//            pFont->style = ImoStyle::k_font_style_italic;
-//        }
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                "Unknown font style '" + value + "'. Replaced by 'normal'.");
-//            pFont->weight = ImoStyle::k_font_weight_normal;
-//            pFont->style = ImoStyle::k_font_style_normal;
-//        }
-//    }
-//
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ <group> = (group [<grpName>][<grpAbbrev>]<grpSymbol>[<joinBarlines>]
-////@                  <instrument>+ )
-////@
-////@ <grpName> = <textString>
-////@ <grpAbbrev> = <textString>
-////@ <grpSymbol> = (symbol {none | brace | bracket} )
-////@ <joinBarlines> = (joinBarlines {yes | no} )
-//
-//class GroupMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    GroupMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                  ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
-//                                    ImFactory::inject(k_imo_instr_group, pDoc));
-//
-//
-//        // [<grpName>]
-//        analyse_optional(k_name, pGrp);
-//
-//        // [<grpAbbrev>]
-//        analyse_optional(k_abbrev, pGrp);
-//
-//        // <grpSymbol>
-//        if (!get_optional(k_symbol) || !set_symbol(pGrp))
-//        {
-//            error_msg("Missing or invalid group symbol. Must be 'none', 'brace' or 'bracket'. Group ignored.");
-//            delete pGrp;
-//            return NULL;
-//        }
-//
-//        // [<joinBarlines>]
-//        if (get_optional(k_joinBarlines))
-//            set_join_barlines(pGrp);
-//
-//        // <instrument>+
-//        if (!more_children_to_analyse())
-//        {
-//            error_msg("Missing instruments in group!. Group ignored.");
-//            delete pGrp;
-//            return NULL;
-//        }
-//        else
-//        {
-//            while (more_children_to_analyse())
-//            {
-//                if (!analyse_optional(k_instrument, pGrp))
-//                {
-//                    error_invalid_child();
-//                    move_to_next_child();
-//                }
-//            }
-//        }
-//
-//        add_to_model(pGrp);
-//        return pGrp;
-//    }
-//
-//protected:
-//
-//    bool set_symbol(ImoInstrGroup* pGrp)
-//    {
-//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//        string symbol = get_string_value();
-//        if (symbol == "brace")
-//            pGrp->set_symbol(ImoInstrGroup::k_brace);
-//        else if (symbol == "bracket")
-//            pGrp->set_symbol(ImoInstrGroup::k_bracket);
-//        else if (symbol == "none")
-//            pGrp->set_symbol(ImoInstrGroup::k_none);
-//        else
-//            return false;   //error
-//
-//        return true;    //ok
-//    }
-//
-//    void set_join_barlines(ImoInstrGroup* pGrp)
-//    {
-//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//        pGrp->set_join_barlines( get_bool_value(true) );
-//    }
-//
-//};
-//
-//
+//@--------------------------------------------------------------------------------------
+//<!ELEMENT text (#PCDATA)>
+//<!ATTLIST text
+//    %font;
+//    %color;
+//    %text-decoration;
+//    %text-rotation;
+//    %letter-spacing;
+//    xml:lang NMTOKEN #IMPLIED
+//    %text-direction;
+//>
 
-////@--------------------------------------------------------------------------------------
-////@ <line> = (line <startPoint><endPoint>[<width>][<color>]
-////@                [<lineStyle>][<startCap>][<endCap>])
-////@ <startPoint> = (startPoint <location>)      (coordinates in tenths)
-////@ <endPoint> = (endPoint <location>)      (coordinates in tenths)
-////@ <lineStyle> = (lineStyle { none | solid | longDash | shortDash | dot | dotDash } )
-////@ <startCap> = (lineCapStart <capType>)
-////@ <endCap> = (lineCapEnd <capType>)
-////@ <capType> = label: { none | arrowhead | arrowtail | circle | square | diamond }
-////@
-////@ Example:
-////@     (line (startPoint (dx 5.0)(dy 5.0)) (endPoint (dx 80.0)(dy -10.0))
-////@           (width 1.0)(color #000000)(lineStyle solid)
-////@           (lineCapStart arrowhead)(lineCapEnd none) )
-////@
-//
-//class LineMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    LineMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                 ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoScoreLine* pLine = static_cast<ImoScoreLine*>(
-//                                    ImFactory::inject(k_imo_score_line, pDoc) );
-//
-//        // <startPoint>
-//        if (get_mandatory(k_startPoint))
-//            pLine->set_start_point( get_point_child() );
-//
-//        // <endPoint>
-//        if (get_mandatory(k_endPoint))
-//            pLine->set_end_point( get_point_child() );
-//
-//        // [<width>]
-//        if (get_optional(k_width))
-//            pLine->set_width( get_width_child(1.0f) );
-//
-//        // [<color>])
-//        if (get_optional(k_color))
-//            pLine->set_color( get_color_child() );
-//
-//        // [<lineStyle>]
-//        if (get_optional(k_lineStyle))
-//            pLine->set_line_style( get_line_style_child() );
-//
-//        // [<startCap>]
-//        if (get_optional(k_lineCapStart))
-//            pLine->set_start_cap( get_line_cap_child() );
-//
-//        // [<endCap>]
-//        if (get_optional(k_lineCapEnd))
-//            pLine->set_end_cap( get_line_cap_child() );
-//
-//        add_to_model(pLine);
-//        return pLine;
-//    }
-//
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ <metronome> = (metronome { <NoteType><TicksPerMinute> | <NoteType><NoteType> |
-////@                            <TicksPerMinute> }
-////@                          [parenthesis][<componentOptions>*] )
-////@
-////@ examples:
-////@    (metronome q 80)                -->  quarter_note_sign = 80
-////@    (metronome q q.)                -->  quarter_note_sign = dotted_quarter_note_sign
-////@    (metronome 80)                  -->  m.m. = 80
-////@    (metronome q 80 parenthesis)    -->  (quarter_note_sign = 80)
-////@    (metronome 120 noVisible)       -->  nothing displayed
-//
-//class MetronomeMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    MetronomeMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                      ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoMetronomeMark* pMtr = static_cast<ImoMetronomeMark*>(
-//                                    ImFactory::inject(k_imo_metronome_mark, pDoc) );
-//
-//        // { <NoteType><TicksPerMinute> | <NoteType><NoteType> | <TicksPerMinute> }
-//        if (get_optional(k_label))
-//        {
-//            NoteTypeAndDots figdots = get_note_type_and_dots();
-//            pMtr->set_left_note_type( figdots.noteType );
-//            pMtr->set_left_dots( figdots.dots );
-//
-//            if (get_optional(k_number))
-//            {
-//                // case 1: <NoteType><TicksPerMinute>
-//                pMtr->set_ticks_per_minute( get_integer_value(60) );
-//                pMtr->set_mark_type(ImoMetronomeMark::k_note_value);
-//            }
-//            else if (get_optional(k_label))
-//            {
-//                // case 2: <NoteType><NoteType>
-//                NoteTypeAndDots figdots = get_note_type_and_dots();
-//                pMtr->set_right_note_type( figdots.noteType );
-//                pMtr->set_right_dots( figdots.dots );
-//                pMtr->set_mark_type(ImoMetronomeMark::k_note_note);
-//            }
-//            else
-//            {
-//                report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                        "Error in metronome parameters. Replaced by '(metronome 60)'.");
-//                pMtr->set_ticks_per_minute(60);
-//                pMtr->set_mark_type(ImoMetronomeMark::k_value);
-//                add_to_model(pMtr);
-//                return NULL;
-//            }
-//        }
-//        else if (get_optional(k_number))
-//        {
-//            // case 3: <TicksPerMinute>
-//            pMtr->set_ticks_per_minute( get_integer_value(60) );
-//            pMtr->set_mark_type(ImoMetronomeMark::k_value);
-//        }
-//        else
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                    "Missing metronome parameters. Replaced by '(metronome 60)'.");
-//            pMtr->set_ticks_per_minute(60);
-//            pMtr->set_mark_type(ImoMetronomeMark::k_value);
-//            add_to_model(pMtr);
-//            return NULL;
-//        }
-//
-//        // [parenthesis]
-//        if (get_optional(k_label))
-//        {
-//            if (m_childToAnalyse.value() == "parenthesis")
-//                pMtr->set_parenthesis(true);
-//            else
-//                error_invalid_child();
-//        }
-//
-//        // [<componentOptions>*]
-//        analyse_scoreobj_options(pMtr);
-//
-//        error_if_more_elements();
-//
-//        add_to_model(pMtr);
-//        return pMtr;
-//    }
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ <option> = (opt <name><value>)
-////@ <name> = label
-////@ <value> = { number | label | string }
-//
-//class OptMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    OptMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        ImoOptionInfo* pOpt = NULL;
-//
-//        // <name> (label)
-//        string name;
-//        if (get_mandatory(k_label))
-//            name = m_childToAnalyse.value();
-//
-//        // <value> { number | label | string }
-//        if (get_optional(k_label) || get_optional(k_number) || get_optional(k_string))
-//        {
-//            pOpt =  set_option(name);
-//            if (pOpt)
-//                error_if_more_elements();
-//            else
-//            {
-//                if ( is_bool_option(name) || is_number_long_option(name)
-//                     || is_number_float_option(name) || is_string_option(name) )
-//                    report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                        "Invalid value for option '" + name + "'. Option ignored.");
-//                else
-//                    report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                        "Invalid option '" + name + "'. Option ignored.");
-//            }
-//        }
-//        else
-//            error_msg("Missing value for option '" + name + "'. Option ignored.");
-//
-//        return pOpt;
-//    }
-//
-//
-//    ImoOptionInfo* set_option(string& name)
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
-//                                        ImFactory::inject(k_imo_option, pDoc) );
-//        pOpt->set_name(name);
-//
-//        bool fOk = false;
-//        if (is_bool_option(name))
-//            fOk = set_bool_value(pOpt);
-//        else if (is_number_long_option(name))
-//            fOk= set_long_value(pOpt);
-//        else if (is_number_float_option(name))
-//            fOk = set_float_value(pOpt);
-//        else if (is_string_option(name))
-//            fOk = set_string_value(pOpt);
-//
-//        if (fOk)
-//        {
-//            add_to_model(pOpt);
-//            return pOpt;
-//        }
-//        else
-//            delete pOpt;
-//
-//        return NULL;
-//    }
-//
-//    bool is_bool_option(const string& name)
-//    {
-//        return (name == "StaffLines.StopAtFinalBarline")
-//            || (name == "StaffLines.Hide")
-//            || (name == "Staff.DrawLeftBarline")
-//            || (name == "Score.FillPageWithEmptyStaves")
-//            || (name == "Score.JustifyFinalBarline");
-//    }
-//
-//    bool is_number_long_option(const string& name)
-//    {
-//        return (name == "Staff.UpperLegerLines.Displacement")
-//                 || (name == "Render.SpacingMethod")
-//                 || (name == "Render.SpacingValue");
-//    }
-//
-//    bool is_number_float_option(const string& name)
-//    {
-//        return (name == "Render.SpacingFactor");
-//    }
-//
-//    bool is_string_option(const string& name)
-//    {
-//        return false;       //no options for now
-//    }
-//
-//    bool set_bool_value(ImoOptionInfo* pOpt)
-//    {
-//        if (is_bool_value())
-//        {
-//            pOpt->set_bool_value( get_bool_value() );
-//            pOpt->set_type(ImoOptionInfo::k_boolean);
-//            return true;    //ok
-//        }
-//        return false;   //error
-//    }
-//
-//    bool set_long_value(ImoOptionInfo* pOpt)
-//    {
-//        if (is_long_value())
-//        {
-//            pOpt->set_long_value( get_long_value() );
-//            pOpt->set_type(ImoOptionInfo::k_number_long);
-//            return true;    //ok
-//        }
-//        return false;   //error
-//    }
-//
-//    bool set_float_value(ImoOptionInfo* pOpt)
-//    {
-//        if (is_float_value())
-//        {
-//            pOpt->set_float_value( get_float_value() );
-//            pOpt->set_type(ImoOptionInfo::k_number_float);
-//            return true;    //ok
-//        }
-//        return false;   //error
-//    }
-//
-//    bool set_string_value(ImoOptionInfo* pOpt)
-//    {
-//        string value = m_childToAnalyse.value();
-//        pOpt->set_string_value( value );
-//        pOpt->set_type(ImoOptionInfo::k_string);
-//        return true;   //no error
-//    }
-//
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ <pageLayout> = (pageLayout <pageSize><pageMargins><pageOrientation>)
-////@ <pageSize> = (pageSize width height)
-////@ <pageMargins> = (pageMargins left top right bottom binding)
-////@ <pageOrientation> = [ "portrait" | "landscape" ]
-////@ width, height, left, top right, bottom, binding = <num> in LUnits
-//
-//class PageLayoutMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    PageLayoutMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                       ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoPageInfo* pInfo = static_cast<ImoPageInfo*>(
-//                                        ImFactory::inject(k_imo_page_info, pDoc) );
-//
-//        // <pageSize>
-//        analyse_mandatory(k_pageSize, pInfo);
-//
-//        // <pageMargins>
-//        analyse_mandatory(k_pageMargins, pInfo);
-//
-//        // [ "portrait" | "landscape" ]
-//        if (!get_mandatory(k_label) || !set_orientation(pInfo))
-//        {
-//            report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                    "Invalid orientation. Expected 'portrait' or 'landscape'."
-//                    " 'portrait' assumed.");
-//            pInfo->set_portrait(true);
-//        }
-//
-//        error_if_more_elements();
-//
-//        add_to_model(pInfo);
-//        return pInfo;
-//    }
-//
-//protected:
-//
-//    bool set_orientation(ImoPageInfo* pInfo)
-//    {
-//        // return true if ok
-//        string type = m_childToAnalyse.value();
-//        if (type == "portrait")
-//        {
-//            pInfo->set_portrait(true);
-//            return true;
-//        }
-//        else if (type == "landscape")
-//        {
-//            pInfo->set_portrait(false);
-//            return true;
-//        }
-//        return false;
-//    }
-//
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ <pageMargins> = (pageMargins left top right bottom binding)     LUnits
-//
-//class PageMarginsMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    PageMarginsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                        ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        //ImoPageInfo dto;
-//        ImoPageInfo* pDto;
-//        if (m_pAnchor && m_pAnchor->is_page_info())
-//            pDto = static_cast<ImoPageInfo*>(m_pAnchor);
-//        else
-//            return NULL;         //what is this for?
-//            //pDto = &dto;
-//
-//        //left
-//        if (get_mandatory(k_number))
-//            pDto->set_left_margin( get_float_value(2000.0f) );
-//
-//        //top
-//        if (get_mandatory(k_number))
-//            pDto->set_top_margin( get_float_value(2000.0f) );
-//
-//        //right
-//        if (get_mandatory(k_number))
-//            pDto->set_right_margin( get_float_value(1500.0f) );
-//
-//        //bottom
-//        if (get_mandatory(k_number))
-//            pDto->set_bottom_margin( get_float_value(2000.0f) );
-//
-//        //binding
-//        if (get_mandatory(k_number))
-//            pDto->set_binding_margin( get_float_value(0.0f) );
-//
-//        return pDto;
-//    }
-//
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ <pageSize> = (pageSize width height)        LUnits
-//
-//class PageSizeMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    PageSizeMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                     ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        //ImoPageInfo dto;
-//        ImoPageInfo* pDto;
-//        if (m_pAnchor && m_pAnchor->is_page_info())
-//            pDto = static_cast<ImoPageInfo*>(m_pAnchor);
-//        else
-//            return NULL;     //what is this for?
-//            //pDto = &dto;
-//
-//        //width
-//        if (get_mandatory(k_number))
-//            pDto->set_page_width( get_float_value(21000.0f) );
-//
-//        //height
-//        if (get_mandatory(k_number))
-//            pDto->set_page_height( get_float_value(29700.0f) );
-//
-//        return pDto;
-//    }
-//};
-//
-//
-////@--------------------------------------------------------------------------------------
-////@ <point> = (tag (dx value)(dy value))
-//
-//class PointMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    PointMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                  ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoPointDto point;
-//
-//        // <dx>
-//        if (get_mandatory(k_dx))
-//            point.set_x( get_location_child() );
-//
-//        // <dy>
-//        if (get_mandatory(k_dy))
-//            point.set_y( get_location_child() );
-//
-//        error_if_more_elements();
-//
-//        ImoPointDto* pImo = LOMSE_NEW ImoPointDto(point);
-//        add_to_model(pImo);
-//        return pImo;
-//    }
-//};
-//
-//
-////@--------------------------------------------------------------------------------------
-////@ <size> = (size <width><height>)
-////@ <width> = (width number)        value in LUnits
-////@ <height> = (height number)      value in LUnits
-////@     i.e.; (size (width 160)(height 100.7))
-//
-//class SizeMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    SizeMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                 ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoSizeDto size;
-//
-//        // <width>
-//        if (get_mandatory(k_width))
-//            size.set_width( get_width_child() );
-//
-//        // <height>
-//        if (get_mandatory(k_height))
-//            size.set_height( get_height_child() );
-//
-//        error_if_more_elements();
-//
-//        ImoSizeDto* pImo = LOMSE_NEW ImoSizeDto(size);
-//        add_to_model(pImo);
-//        return pImo;
-//    }
-//};
-//
-//
-////@--------------------------------------------------------------------------------------
-////@ <slur> = (slur num <slurType>[<bezier>][color] )   ;num = slur number. integer
-////@ <slurType> = { start | continue | stop }
-////@
-////@ Example:
-////@     (slur 27 start (bezier (ctrol2-x -25)(start-y 36.765)) )
-////@
-//
-//class SlurMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    SlurMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoSlurDto* pInfo = LOMSE_NEW ImoSlurDto();
-//
-//        // num
-//        if (get_mandatory(k_number))
-//            pInfo->set_slur_number( get_integer_value(0) );
-//
-//        // <slurType> (label)
-//        if (!get_mandatory(k_label) || !set_slur_type(pInfo))
-//        {
-//            error_msg("Missing or invalid slur type. Slur ignored.");
-//            delete pInfo;
-//            return NULL;
-//        }
-//
-//        // [<bezier>]
-//        analyse_optional(k_bezier, pInfo);
-//
-//        // [<color>]
-//        if (get_optional(k_color))
-//            pInfo->set_color( get_color_child() );
-//
-//        return pInfo;   //set_imo(m_analysedNode, pInfo);
-//    }
-//
-//protected:
-//
-//    bool set_slur_type(ImoSlurDto* pInfo)
-//    {
-//        const std::string& value = m_childToAnalyse.value();
-//        if (value == "start")
-//            pInfo->set_slur_type(ImoSlurData::k_start);
-//        else if (value == "stop")
-//            pInfo->set_slur_type(ImoSlurData::k_stop);
-//        else if (value == "continue")
-//            pInfo->set_slur_type(ImoSlurData::k_continue);
-//        else
-//            return false;   //error
-//        return true;    //ok
-//    }
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ ImoSpacer StaffObj
-////@ <spacer> = (spacer <width>[<staffobjOptions>*][<attachments>*])     width in Tenths
-//
-//class SpacerMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    SpacerMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                   ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoSpacer* pSpacer = static_cast<ImoSpacer*>(
-//                                    ImFactory::inject(k_imo_spacer, pDoc) );
-//
-//        // <width>
-//        if (get_optional(k_number))
-//        {
-//            pSpacer->set_width( get_float_value() );
-//        }
-//        else
-//        {
-//            error_msg("Missing width for spacer. Spacer ignored.");
-//            delete pSpacer;
-//            return NULL;
-//        }
-//
-//        // [<staffobjOptions>*]
-//        analyse_staffobjs_options(pSpacer);
-//
-//        add_to_model(pSpacer);
-//
-//       // [<attachments>*]
-//        analyse_attachments(pSpacer);
-//        return pSpacer;
-//    }
-//
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ ImoStaffInfo SimpleObj
-////@ <staff> = (staff <num> [<staffType>][<staffLines>][<staffSpacing>]
-////@                        [<staffDistance>][<lineThickness>] )
-////@
-////@ <staffType> = (staffType { ossia | cue | editorial | regular | alternate } )
-////@ <staffLines> = (staffLines <integer_num>)
-////@ <staffSpacing> = (staffSpacing <real_num>)      LUnits (cents of millimeter)
-////@ <staffDistance> = (staffDistance <real_num>)    LUnits (cents of millimeter)
-////@ <lineThickness> = (lineThickness <real_num>)    LUnits (cents of millimeter)
-////@
-////@ Example:
-////@     (staff 1 (staffType regular)(staffLines 5)(staffSpacing 180.00)
-////@              (staffDistance 2000.00)(lineThickness 15.00))
-////@
-//
-//class StaffMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    StaffMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                  ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoStaffInfo* pInfo = static_cast<ImoStaffInfo*>(
-//                                    ImFactory::inject(k_imo_staff_info, pDoc) );
-//
-//        // num_instr
-//        if (!get_optional(k_number) || !set_staff_number(pInfo))
-//        {
-//            error_msg("Missing or invalid staff number. Staff info ignored.");
-//            delete pInfo;
-//            return NULL;
-//        }
-//
-//        // [<staffType>]
-//        if (get_optional(k_staffType))
-//            set_staff_type(pInfo);
-//
-//        // [<staffLines>]
-//        if (get_optional(k_staffLines))
-//            set_staff_lines(pInfo);
-//
-//        // [<staffSpacing>]
-//        if (get_optional(k_staffSpacing))
-//        {
-//            m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//            pInfo->set_line_spacing( get_float_value(180.0f));
-//        }
-//
-//        //[<staffDistance>]
-//        if (get_optional(k_staffDistance))
-//        {
-//            m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//            pInfo->set_staff_margin( get_float_value(1000.0f));
-//        }
-//
-//        //[<lineThickness>]
-//        if (get_optional(k_lineThickness))
-//        {
-//            m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//            pInfo->set_line_thickness( get_float_value(15.0f));
-//        }
-//
-//        error_if_more_elements();
-//
-//        add_to_model(pInfo);
-//        return pInfo;
-//    }
-//
-//protected:
-//
-//    bool set_staff_number(ImoStaffInfo* pInfo)
-//    {
-//        int value = get_integer_value(0);
-//        if (value < 1)
-//            return false;   //error
-//        pInfo->set_staff_number(value-1);
-//        return true;
-//    }
-//
-//    void set_staff_type(ImoStaffInfo* pInfo)
-//    {
-//        const std::string& value = get_value( get_child(m_childToAnalyse, 1) );
-//        if (value == "ossia")
-//            pInfo->set_staff_type(ImoStaffInfo::k_staff_ossia);
-//        else if (value == "cue")
-//            pInfo->set_staff_type(ImoStaffInfo::k_staff_cue);
-//        else if (value == "editorial")
-//            pInfo->set_staff_type(ImoStaffInfo::k_staff_editorial);
-//        else if (value == "regular")
-//            pInfo->set_staff_type(ImoStaffInfo::k_staff_regular);
-//        else if (value == "alternate")
-//            pInfo->set_staff_type(ImoStaffInfo::k_staff_alternate);
-//        else
-//            error_msg("Invalid staff type '" + value + "'. 'regular' staff assumed.");
-//    }
-//
-//    void set_staff_lines(ImoStaffInfo* pInfo)
-//    {
-//        m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//
-//        int value = get_integer_value(0);
-//        if (value < 1)
-//            error_msg("Invalid staff. Num lines must be greater than zero. Five assumed.");
-//        else
-//            pInfo->set_num_lines(value);
-//    }
-//
-//
-//};
-//
-////---------------------------------------------------------------------------------------
-//class StylesMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    StylesMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                   ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoStyles* pStyles = static_cast<ImoStyles*>(ImFactory::inject(k_imo_styles, pDoc));
-//
-//        // [<defineStyle>*]
-//        while (analyse_optional(k_defineStyle, pStyles));
-//
-//        error_if_more_elements();
-//
-//        add_to_model(pStyles);
-//        return pStyles;
-//    }
-//
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ <systemLayout> = (systemLayout {first | other} <systemMargins>)
-//
-//class SystemLayoutMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    SystemLayoutMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                         ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoSystemInfo* pInfo = static_cast<ImoSystemInfo*>(
-//                                        ImFactory::inject(k_imo_system_info, pDoc));
-//
-//        // {first | other} <label>
-//        if (get_mandatory(k_label))
-//        {
-//            string type = m_childToAnalyse.value();
-//            if (type == "first")
-//                pInfo->set_first(true);
-//            else if (type == "other")
-//                pInfo->set_first(false);
-//            else
-//            {
-//                report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-//                        "Expected 'first' or 'other' value but found '" + type
-//                        + "'. 'first' assumed.");
-//                pInfo->set_first(true);
-//            }
-//        }
-//
-//        // <systemMargins>
-//        analyse_mandatory(k_systemMargins, pInfo);
-//
-//        error_if_more_elements();
-//
-//        add_to_model(pInfo);
-//        return pInfo;
-//    }
-//
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ <systemMargins> = (systemMargins <leftMargin><rightMargin><systemDistance>
-////@                                  <topSystemDistance>)
-////@ <leftMargin>, <rightMargin>, <systemDistance>, <topSystemDistance> = number (Tenths)
-//
-//class SystemMarginsMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    SystemMarginsMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                          ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        //ImoSystemInfo dto;
-//        ImoSystemInfo* pDto;
-//        if (m_pAnchor && m_pAnchor->is_system_info())
-//            pDto = static_cast<ImoSystemInfo*>(m_pAnchor);
-//        else
-//            return NULL;     //what is this for?
-//            //pDto = &dto;
-//
-//        if (get_mandatory(k_number))
-//            pDto->set_left_margin(get_float_value());
-//
-//        if (get_mandatory(k_number))
-//            pDto->set_right_margin(get_float_value());
-//
-//        if (get_mandatory(k_number))
-//            pDto->set_system_distance(get_float_value());
-//
-//        if (get_mandatory(k_number))
-//            pDto->set_top_system_distance(get_float_value());
-//
-//        error_if_more_elements();
-//        return pDto;
-//    }
-//
-//};
-//
-//
-////@--------------------------------------------------------------------------------------
-////@ <textItem> = (txt [<style>] string)
-////@ <style> = (style <name>)
-////@     if no style is specified it will inherit from parent style
-////@
-////$ <!ELEMENT txt %String;>
-////$ <!ATTLIST txt %styleName;>
-////$
-////$ Example:
-////$     <txt style='bold'>This is a text.</txt>
-////$
-//class TextItemMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    TextItemMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                       ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-//    {
-//    }
-//
-//    ImoObj* do_analysis()
-//    {
-//        // [<style>]
-//        ImoStyle* pStyle = NULL;
-//        if (has_attribute("style"))
-//            pStyle = get_doc_text_style( get_attribute("style") );
-//
-//        // <string>
-//        string value = get_value(m_analysedNode);
-//        if (value.empty())
-//        {
-//            error_msg("txt: missing mandatory value 'string'. Element <txt> ignored.");
-//            return NULL;
-//        }
-//        else
-//        {
-//            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//            ImoTextItem* pText = static_cast<ImoTextItem*>(
-//                            ImFactory::inject(k_imo_text_item, pDoc, get_node_id()) );
-//            pText->set_text(value);
-//            pText->set_style(pStyle);
-//
-//            add_to_model(pText);
-//            return pText;
-//        }
-//    }
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ <textString> = (<textTag> string [<style>][<location>])
-////@ <textTag> = { name | abbrev | text }
-////@ <style> = (style <name>)
-////@
-////@ Compatibility 1.5:
-////@ <style> is now mandatory
-////@     For compatibility with 1.5, if no style is specified default style is
-////@     assigned.
-////@
-//class TextStringMxlAnalyser : public MxlElementAnalyser
-//{
-//protected:
-//    string m_styleName;
-//
-//public:
-//    TextStringMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                       ImoObj* pAnchor, const string& styleName="Default style")
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor)
-//        , m_styleName(styleName)
-//    {
-//    }
-//
-//    ImoObj* do_analysis()
-//    {
-//        // <string>
-//        if (get_mandatory(k_string))
-//        {
-//            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//            ImoScoreText* pText = static_cast<ImoScoreText*>(
-//                                        ImFactory::inject(k_imo_score_text, pDoc));
-//            pText->set_text(get_string_value());
-//
-//            // [<style>]
-//            ImoStyle* pStyle = NULL;
-//            if (get_optional(k_style))
-//                pStyle = get_text_style_child(m_styleName);
-//            else
-//            {
-//                ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
-//                if (pScore)     //in unit tests the score might not exist
-//                    pStyle = pScore->get_default_style();
-//            }
-//            pText->set_style(pStyle);
-//
-//            // [<location>]
-//            while (more_children_to_analyse())
-//            {
-//                if (get_optional(k_dx))
-//                    pText->set_user_location_x( get_location_child() );
-//                else if (get_optional(k_dy))
-//                    pText->set_user_location_y( get_location_child() );
-//                else
-//                {
-//                    error_invalid_child();
-//                    move_to_next_child();
-//                }
-//            }
-//            error_if_more_elements();
-//
-//            add_to_model(pText);
-//            return pText;
-//        }
-//        return NULL;
-//    }
-//
-//};
-//
-//class InstrNameMxlAnalyser : public TextStringMxlAnalyser
-//{
-//public:
-//    InstrNameMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                      ImoObj* pAnchor)
-//        : TextStringMxlAnalyser(pAnalyser, reporter, libraryScope, pAnchor,
-//                             "Instrument names") {}
-//};
+class TextMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    TextMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                    ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
 
+
+    ImoObj* do_analysis()
+    {
+        ImoLyricsTextInfo* pParent = NULL;
+        if (m_pAnchor && m_pAnchor->is_lyrics_text_info())
+            pParent = static_cast<ImoLyricsTextInfo*>(m_pAnchor);
+        else
+        {
+            LOMSE_LOG_ERROR("NULL pAnchor or it is not ImoLyricsTextInfo");
+            return NULL;
+        }
+
+        //ATTLIST
+        //    %font;
+        //    %color;
+        //    %text-decoration;
+        //    %text-rotation;
+        //    %letter-spacing;
+        //    xml:lang NMTOKEN #IMPLIED
+        //    %text-direction;
+
+        // <string>
+        string value = m_analysedNode.value();
+        if (value.empty())
+        {
+            error_msg("text: missing mandatory string in element <text>.");
+            return NULL;
+        }
+
+        pParent->set_syllable_text(value);
+
+        return pParent;
+    }
+};
 
 //@--------------------------------------------------------------------------------------
 //@    The tied element represents the notated tie. The tie element
@@ -5688,9 +4444,9 @@ public:
 
             //AWARE: must be type == "start"
             if (orientation == "over")
-                m_pInfo1->set_orientation(ImoTie::k_orientation_over);
+                m_pInfo1->set_orientation(k_orientation_over);
             else
-                m_pInfo1->set_orientation(ImoTie::k_orientation_under);
+                m_pInfo1->set_orientation(k_orientation_under);
         }
 
 //        // attrib: %position;
@@ -5757,260 +4513,6 @@ protected:
 
 };
 
-////@--------------------------------------------------------------------------------------
-////@ <title> = (title <h-alignment> string [<style>][<location>])
-////@ <h-alignment> = label: {left | center | right }
-////@ <style> = (style name)
-////@         name = string.  Must be a style name defined with defineStyle
-////@
-////@ Note:
-////@     <h-alignment> overrides <style> (but doesn't modify it)
-////@
-////@ Examples:
-////@     (title center "Prelude" (style "Title")
-////@     (title center "Op. 28, No. 20" (style "Subtitle")
-////@     (title right "F. Chopin" (style "Composer"(dy 30))
-//
-//class TitleMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    TitleMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                  ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        // [<h-alignment>]
-//        int nAlignment = k_halign_left;
-//        if (get_mandatory(k_label))
-//            nAlignment = get_alignment_value(k_halign_center);
-//
-//        // <string>
-//        if (get_mandatory(k_string))
-//        {
-//            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//            ImoScoreTitle* pTitle = static_cast<ImoScoreTitle*>(
-//                ImFactory::inject(k_imo_score_title, pDoc) );
-//            pTitle->set_text( get_string_value() );
-//            pTitle->set_h_align(nAlignment);
-//
-//            // [<style>]
-//            if (get_optional(k_style))
-//                pTitle->set_style( get_text_style_child() );
-//
-//            // [<location>]
-//            while (more_children_to_analyse())
-//            {
-//                if (get_optional(k_dx))
-//                    pTitle->set_user_location_x( get_location_child() );
-//                else if (get_optional(k_dy))
-//                    pTitle->set_user_location_y( get_location_child() );
-//                else
-//                {
-//                    error_invalid_child();
-//                    move_to_next_child();
-//                }
-//            }
-//            error_if_more_elements();
-//
-//            add_to_model(pTitle);
-//            return pTitle;
-//        }
-//        return NULL;
-//    }
-//
-//};
-//
-////@--------------------------------------------------------------------------------------
-////@ Old syntax: v1.5
-////@ <tuplet> = (t { - | + <actualNotes>[<normalNotes>][<tupletOptions>] } )
-////@ <actualNotes> = num
-////@ <normalNotes> = num
-////@ <tupletOptions> = noBracket
-////@    future options: squaredBracket | curvedBracket |
-////@                    numNone | numActual | numBoth
-////@
-////@ Abbreviations (old syntax. Deprecated since 1.6):
-////@      (t -)     --> t-
-////@      (t + n)   --> tn
-////@      (t + n m) --> tn/m
-////@
-////@ New syntax: v1.6
-////@ <tuplet> = (t <tupletID> { - | + <actualNotes>[<normalNotes>][<tupletOptions>] } )
-////@ <tupletID> = integer number
-////@ <actualNotes> = integer number
-////@ <normalNotes> = integer number
-////@ <tupletOptions> =  [<bracketType>] [<displayBracket>] [<displayNumber>]
-////@ <bracketType> = (bracketType { squaredBracket | curvedBracket })
-////@ <displayBracket> = (displayBracket { yes | no })
-////@ <displayNumber> = (displayNumber { none | actual | both })
-//
-//class TupletMxlAnalyser : public MxlElementAnalyser
-//{
-//public:
-//    TupletMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-//                   ImoObj* pAnchor)
-//        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
-//
-//    ImoObj* do_analysis()
-//    {
-//        //Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//        ImoTupletDto* pInfo = LOMSE_NEW ImoTupletDto();
-//        set_default_values(pInfo);
-//
-//        // [<tupletID>]     //optional for 1.5 compatibility. TO BE REMOVED
-//        if (get_optional(k_number))
-//            set_tuplet_id(pInfo);
-//
-//        // { + | - }
-//        if (!get_mandatory(k_label) || !set_tuplet_type(pInfo))
-//        {
-//            error_msg("Missing or invalid tuplet type. Tuplet ignored.");
-//            delete pInfo;
-//            return NULL;
-//        }
-//
-//        if (pInfo->is_start_of_tuplet())
-//        {
-//            // <actualNotes>
-//            if (!get_mandatory(k_number) || !set_actual_notes(pInfo))
-//            {
-//                error_msg("Tuplet: missing or invalid actual notes number. Tuplet ignored.");
-//                delete pInfo;
-//                return NULL;
-//            }
-//
-//            // [<normalNotes>]
-//            if (get_optional(k_number))
-//                set_normal_notes(pInfo);
-//            if (pInfo->get_normal_number() == 0)
-//            {
-//                error_msg("Tuplet: Missing or invalid normal notes number. Tuplet ignored.");
-//                delete pInfo;
-//                return NULL;
-//            }
-//
-//            // [<tupletOptions>]
-//            analyse_tuplet_options(pInfo);
-//        }
-//
-//        return pInfo;   //set_imo(m_analysedNode, pInfo);
-//    }
-//
-//protected:
-//
-//    void set_default_values(ImoTupletDto* pInfo)
-//    {
-//        pInfo->set_show_bracket( m_pAnalyser->get_current_show_tuplet_bracket() );
-//        pInfo->set_placement(k_placement_default);
-//    }
-//
-//    void set_tuplet_id(ImoTupletDto* pInfo)
-//    {
-//        //TODO. For now tuplet id is not needed. Perhaps when implementing nested
-//        //      tuplets it will have any use.
-//        get_integer_value(0);
-//    }
-//
-//    bool set_tuplet_type(ImoTupletDto* pInfo)
-//    {
-//        const std::string& value = m_childToAnalyse.value();
-//        if (value == "+")
-//            pInfo->set_tuplet_type(ImoTupletDto::k_start);
-//        else if (value == "-")
-//            pInfo->set_tuplet_type(ImoTupletDto::k_stop);
-//        else
-//            return false;   //error
-//        return true;    //ok
-//    }
-//
-//    bool set_actual_notes(ImoTupletDto* pInfo)
-//    {
-//        int actual = get_integer_value(0);
-//        pInfo->set_actual_number(actual);
-//        if (actual == 2)
-//            pInfo->set_normal_number(3);   //duplet
-//        else if (actual == 3)
-//            pInfo->set_normal_number(2);   //triplet
-//        else if (actual == 4)
-//            pInfo->set_normal_number(6);
-//        else if (actual == 5)
-//            pInfo->set_normal_number(6);
-//        else
-//            pInfo->set_normal_number(0);  //required
-//        return true;    //ok
-//    }
-//
-//    void set_normal_notes(ImoTupletDto* pInfo)
-//    {
-//        int normal = get_integer_value(0);
-//        pInfo->set_normal_number(normal);
-//    }
-//
-//    void analyse_tuplet_options(ImoTupletDto* pInfo)
-//    {
-//        //@ <tupletOptions> =  [<bracketType>] [<displayBracket>] [<displayNumber>]
-//        //@ <bracketType> = (bracketType { squaredBracket | curvedBracket })
-//        //@ <displayBracket> = (displayBracket { yes | no })
-//        //@ <displayNumber> = (displayNumber { none | actual | both })
-//
-//        int nShowBracket = m_pAnalyser->get_current_show_tuplet_bracket();
-//        int nShowNumber = m_pAnalyser->get_current_show_tuplet_number();
-//        while( more_children_to_analyse() )
-//        {
-//            m_childToAnalyse = get_child_to_analyse();
-//            ELdpElement type = get_type(m_childToAnalyse);
-//            switch (type)
-//            {
-//                case k_label:
-//                {
-//                    const std::string& value = m_childToAnalyse.value();
-//                    if (value == "noBracket")
-//                        nShowBracket = k_yesno_no;
-//                    else
-//                        error_invalid_child();
-//                    break;
-//                }
-//
-//                case k_displayBracket:
-//                {
-//                    m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//                    nShowBracket = get_yes_no_value(k_yesno_default);
-//                    break;
-//                }
-//
-//                case k_displayNumber:
-//                {
-//                    m_childToAnalyse = get_child(m_childToAnalyse, 1);
-//                    const std::string& value = m_childToAnalyse.value();
-//                    if (value == "none")
-//                        nShowNumber = ImoTuplet::k_number_none;
-//                    else if (value == "actual")
-//                        nShowNumber = ImoTuplet::k_number_actual;
-//                    else if (value == "both")
-//                        nShowNumber = ImoTuplet::k_number_both;
-//                    else
-//                    {
-//                        error_invalid_child();
-//                        nShowNumber = ImoTuplet::k_number_actual;
-//                    }
-//                    break;
-//                }
-//
-//                default:
-//                    error_invalid_child();
-//            }
-//
-//            move_to_next_child();
-//        }
-//
-//        pInfo->set_show_bracket(nShowBracket);
-//        pInfo->set_show_number(nShowNumber);
-//        m_pAnalyser->set_current_show_tuplet_bracket(nShowBracket);
-//        m_pAnalyser->set_current_show_tuplet_number(nShowNumber);
-//    }
-//
-//};
 
 
 //=======================================================================================
@@ -6027,10 +4529,11 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_pTiesBuilder(NULL)
     , m_pBeamsBuilder(NULL)
 //    , m_pTupletsBuilder(NULL)
-//    , m_pSlursBuilder(NULL)
+    , m_pSlursBuilder(NULL)
     , m_musicxmlVersion(0)
     , m_pNodeImo(NULL)
     , m_tieNum(0)
+    , m_slurNum(0)
     , m_pTree()
     , m_fileLocator("")
 //    , m_nShowTupletBracket(k_yesno_default)
@@ -6049,12 +4552,15 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["barline"] = k_mxl_tag_barline;
     m_NameToEnum["clef"] = k_mxl_tag_clef;
     m_NameToEnum["direction"] = k_mxl_tag_direction;
+    m_NameToEnum["dynamics"] = k_mxl_tag_dynamics;
     m_NameToEnum["fermata"] = k_mxl_tag_fermata;
     m_NameToEnum["forward"] = k_mxl_tag_forward;
     m_NameToEnum["key"] = k_mxl_tag_key;
+    m_NameToEnum["lyric"] = k_mxl_tag_lyric;
     m_NameToEnum["measure"] = k_mxl_tag_measure;
     m_NameToEnum["notations"] = k_mxl_tag_notations;
     m_NameToEnum["note"] = k_mxl_tag_note;
+    m_NameToEnum["ornaments"] = k_mxl_tag_ornaments;
     m_NameToEnum["part"] = k_mxl_tag_part;
     m_NameToEnum["part-list"] = k_mxl_tag_part_list;
     m_NameToEnum["part-name"] = k_mxl_tag_part_name;
@@ -6063,7 +4569,10 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["rest"] = k_mxl_tag_rest;
     m_NameToEnum["score-part"] = k_mxl_tag_score_part;
     m_NameToEnum["score-partwise"] = k_mxl_tag_score_partwise;
+    m_NameToEnum["slur"] = k_mxl_tag_slur;
     m_NameToEnum["sound"] = k_mxl_tag_sound;
+    m_NameToEnum["technical"] = k_mxl_tag_technical;
+    m_NameToEnum["text"] = k_mxl_tag_text;
     m_NameToEnum["tied"] = k_mxl_tag_tied;
     m_NameToEnum["time"] = k_mxl_tag_time;
 }
@@ -6073,6 +4582,7 @@ MxlAnalyser::~MxlAnalyser()
 {
     delete_relation_builders();
     m_NameToEnum.clear();
+    m_lyrics.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -6081,7 +4591,7 @@ void MxlAnalyser::delete_relation_builders()
     delete m_pTiesBuilder;
     delete m_pBeamsBuilder;
 //    delete m_pTupletsBuilder;
-//    delete m_pSlursBuilder;
+    delete m_pSlursBuilder;
 }
 
 //---------------------------------------------------------------------------------------
@@ -6091,7 +4601,7 @@ ImoObj* MxlAnalyser::analyse_tree_and_get_object(XmlNode* root)
     m_pTiesBuilder = LOMSE_NEW MxlTiesBuilder(m_reporter, this);
     m_pBeamsBuilder = LOMSE_NEW MxlBeamsBuilder(m_reporter, this);
 //    m_pTupletsBuilder = LOMSE_NEW MxlTupletsBuilder(m_reporter, this);
-//    m_pSlursBuilder = LOMSE_NEW MxlSlursBuilder(m_reporter, this);
+    m_pSlursBuilder = LOMSE_NEW MxlSlursBuilder(m_reporter, this);
 
     m_pTree = root;
 //    m_curStaff = 0;
@@ -6141,8 +4651,8 @@ void MxlAnalyser::add_relation_info(ImoObj* pDto)
         m_pBeamsBuilder->add_item_info(static_cast<ImoBeamDto*>(pDto));
     else if (pDto->is_tie_dto())
         m_pTiesBuilder->add_item_info(static_cast<ImoTieDto*>(pDto));
-//    else if (pDto->is_slur_dto())
-//        m_pSlursBuilder->add_item_info(static_cast<ImoSlurDto*>(pDto));
+    else if (pDto->is_slur_dto())
+        m_pSlursBuilder->add_item_info(static_cast<ImoSlurDto*>(pDto));
 //    else if (pDto->is_tuplet_dto())
 //        m_pTupletsBuilder->add_item_info(static_cast<ImoTupletDto*>(pDto));
 }
@@ -6151,9 +4661,41 @@ void MxlAnalyser::add_relation_info(ImoObj* pDto)
 void MxlAnalyser::clear_pending_relations()
 {
     m_pTiesBuilder->clear_pending_items();
-//    m_pSlursBuilder->clear_pending_items();
+    m_pSlursBuilder->clear_pending_items();
     m_pBeamsBuilder->clear_pending_items();
 //    m_pTupletsBuilder->clear_pending_items();
+
+    m_lyrics.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::add_lyrics_data(ImoNote* pNote, ImoLyricsData* pData)
+{
+    //build hash code from number & voice. Instrument is not needed as
+    //the lyrics map is cleared when a new instrument is analysed.
+    stringstream tag;
+    int num = pData->get_number();
+    tag << num << "-" << pNote->get_voice();
+
+    //get ImoLyrics for this instr-voice-number. If none, create one
+    ImoLyrics* pLyrics = NULL;
+    Document* pDoc = get_document_being_analysed();
+
+    map<string, ImoLyrics*>::iterator it = m_lyrics.find(tag.str());
+    if (it == m_lyrics.end())
+    {
+        pLyrics = static_cast<ImoLyrics*>(ImFactory::inject(k_imo_lyrics, pDoc));
+        pLyrics->set_number(num);
+        m_lyrics[tag.str()] = pLyrics;
+
+        //inform Instrument about the new lyrics line
+//    ImoInstrument* pInstr = get_instrument(m_curPartId);
+    }
+    else
+        pLyrics = it->second;
+
+    //add pData & pNote to the relation
+    pNote->include_in_relation(pDoc, pLyrics, pData);
 }
 
 //---------------------------------------------------------------------------------------
@@ -6173,6 +4715,25 @@ int MxlAnalyser::get_tie_id(int UNUSED(numTie), FPitch fp)
 int MxlAnalyser::get_tie_id_and_close(int UNUSED(numTie), FPitch fp)
 {
     return m_tieIds[int(fp)];
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::new_slur_id(int numSlur)
+{
+    m_slurIds[numSlur] = ++m_slurNum;
+    return m_slurNum;
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::get_slur_id(int numSlur)
+{
+    return m_slurIds[numSlur];
+}
+
+//---------------------------------------------------------------------------------------
+int MxlAnalyser::get_slur_id_and_close(int numSlur)
+{
+    return m_slurIds[numSlur];
 }
 
 //---------------------------------------------------------------------------------------
@@ -6516,12 +5077,15 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_barline:              return LOMSE_NEW BarlineMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_clef:                 return LOMSE_NEW ClefMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_direction:            return LOMSE_NEW DirectionMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_dynamics:             return LOMSE_NEW DynamicsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_fermata:              return LOMSE_NEW FermataMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_forward:              return LOMSE_NEW FwdBackMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_key:                  return LOMSE_NEW KeyMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_lyric:                return LOMSE_NEW LyricMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_measure:              return LOMSE_NEW MeasureMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_notations:            return LOMSE_NEW NotationsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_note:                 return LOMSE_NEW NoteRestMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_ornaments:            return LOMSE_NEW OrnamentsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part:                 return LOMSE_NEW PartMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part_list:            return LOMSE_NEW PartListMxlAnalyser(this, m_reporter, m_libraryScope);
         case k_mxl_tag_part_name:            return LOMSE_NEW PartNameMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
@@ -6529,7 +5093,10 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_print:                return LOMSE_NEW PrintMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_score_part:           return LOMSE_NEW ScorePartMxlAnalyser(this, m_reporter, m_libraryScope);
         case k_mxl_tag_score_partwise:       return LOMSE_NEW ScorePartwiseMxlAnalyser(this, m_reporter, m_libraryScope);
+        case k_mxl_tag_slur:                 return LOMSE_NEW SlurMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_sound:                return LOMSE_NEW SoundMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_technical:            return LOMSE_NEW TecnicalMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_text:                 return LOMSE_NEW TextMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_tied:                 return LOMSE_NEW TiedMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_time:                 return LOMSE_NEW TimeMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 
@@ -6616,24 +5183,25 @@ void MxlTiesBuilder::error_duplicated_tie(ImoTieDto* pExistingInfo, ImoTieDto* p
 }
 
 
-////=======================================================================================
-//// MxlSlursBuilder implementation
-////=======================================================================================
-//void MxlSlursBuilder::add_relation_to_notes_rests(ImoSlurDto* pEndInfo)
-//{
-//    m_matches.push_back(pEndInfo);
-//    Document* pDoc = m_pAnalyser->get_document_being_analysed();
-//    ImoSlur* pSlur = static_cast<ImoSlur*>(ImFactory::inject(k_imo_slur, pDoc));
-//    pSlur->set_slur_number( pEndInfo->get_slur_number() );
-//    std::list<ImoSlurDto*>::iterator it;
-//    for (it = m_matches.begin(); it != m_matches.end(); ++it)
-//    {
-//        ImoNote* pNote = (*it)->get_note();
-//        ImoSlurData* pData = ImFactory::inject_slur_data(pDoc, *it);
-//        pNote->include_in_relation(pDoc, pSlur, pData);
-//    }
-//}
+//=======================================================================================
+// MxlSlursBuilder implementation
+//=======================================================================================
+void MxlSlursBuilder::add_relation_to_notes_rests(ImoSlurDto* pEndInfo)
+{
+    m_matches.push_back(pEndInfo);
+    Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
+    ImoSlur* pSlur = static_cast<ImoSlur*>(ImFactory::inject(k_imo_slur, pDoc));
+    pSlur->set_slur_number( pEndInfo->get_slur_number() );
+
+    std::list<ImoSlurDto*>::iterator it;
+    for (it = m_matches.begin(); it != m_matches.end(); ++it)
+    {
+        ImoNote* pNote = (*it)->get_note();
+        ImoSlurData* pData = ImFactory::inject_slur_data(pDoc, *it);
+        pNote->include_in_relation(pDoc, pSlur, pData);
+    }
+}
 
 
 //=======================================================================================
@@ -6645,6 +5213,7 @@ void MxlBeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
     Document* pDoc = m_pAnalyser->get_document_being_analysed();
 
     ImoBeam* pBeam = static_cast<ImoBeam*>(ImFactory::inject(k_imo_beam, pDoc));
+
     std::list<ImoBeamDto*>::iterator it;
     for (it = m_matches.begin(); it != m_matches.end(); ++it)
     {

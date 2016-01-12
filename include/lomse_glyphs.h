@@ -128,11 +128,16 @@ enum EGlyphIndex
     //Holds and pauses (U+E4C0 - U+E4DF)
     k_glyph_fermata_above,
     k_glyph_fermata_below,
-    k_glyph_long_fermata_above,
-    k_glyph_long_fermata_below,
-	k_glyph_breath_mark_v,      //breath-mark  V
+    k_glyph_fermata_above_angle,
+    k_glyph_fermata_below_angle,
+    k_glyph_fermata_above_square,
+    k_glyph_fermata_below_square,
+    k_glyph_breath_mark_comma,  //breath-mark (comma)
+	k_glyph_breath_mark_tick,   //breath-mark (tick)
+	k_glyph_breath_mark_v,      //breath-mark (V)
+	k_glyph_caesura,
 
-    // rests
+    //Rests
     k_glyph_longa_rest,       //longa
     k_glyph_breve_rest,       //breve, cuadrada
     k_glyph_whole_rest,       //whole, redonda
@@ -145,7 +150,7 @@ enum EGlyphIndex
     k_glyph_128th_rest,       //128th, garrapatea
     k_glyph_256th_rest,       //256th, semigarrapatea
 
-    //note flags
+    //Note flags
     k_glyph_eighth_flag_down,     //eighth, corchea
     k_glyph_16th_flag_down,       //16th, semicorchea
     k_glyph_32nd_flag_down,       //32nd, fusa
@@ -159,7 +164,7 @@ enum EGlyphIndex
     k_glyph_128th_flag_up,
     k_glyph_256th_flag_up,
 
-    //accidentals
+    //Accidentals
     k_glyph_natural_accidental,
     k_glyph_sharp_accidental,
     k_glyph_flat_accidental,
@@ -168,7 +173,7 @@ enum EGlyphIndex
     k_glyph_open_cautionary_accidental,
     k_glyph_close_cautionary_accidental,
 
-    //clefs
+    //Clefs
     k_glyph_g_clef,
     k_glyph_f_clef,
     k_glyph_c_clef,
@@ -182,7 +187,7 @@ enum EGlyphIndex
     k_glyph_f_clef_quindicesima_bassa,
     k_glyph_f_clef_quindicesima_alta,
 
-    //numbers for time signatures
+    //Numbers for time signatures
     k_glyph_number_0,
     k_glyph_number_1,
     k_glyph_number_2,
@@ -194,7 +199,7 @@ enum EGlyphIndex
     k_glyph_number_8,
     k_glyph_number_9,
 
-    //other for time signatures
+    //Other for time signatures
     k_glyph_common_time,
     k_glyph_cut_time,
 
@@ -219,7 +224,13 @@ enum EGlyphIndex
     //Octaves (U+E510 - U+E51F)
     k_glyph_octava,
 
-    //figured bass. Numbers and other symbols
+    //Brass techniques (U+E5D0 - U+E5EF)
+    k_glyph_scoop,
+    k_glyph_doit_medium,
+    k_glyph_lip_fall_medium,
+    k_glyph_plop,
+
+    //Figured bass. Numbers and other symbols
     k_glyph_figured_bass_0,                   //number 0
     k_glyph_figured_bass_1,                   //number 1
     k_glyph_figured_bass_2,                   //number 2
@@ -238,6 +249,112 @@ enum EGlyphIndex
     k_glyph_figured_bass_open_parenthesis,    // (
     k_glyph_figured_bass_close_parenthesis,   // )
     k_glyph_figured_bass_7_striked,           // 7 with overlayered /
+
+    //Dynamics (0xE520 - 0xE54F)
+    k_glyph_dynamic_p,          //Piano
+    k_glyph_dynamic_m,          //Mezzo
+    k_glyph_dynamic_f,          //Forte
+    k_glyph_dynamic_r,          //Rinforzando
+    k_glyph_dynamic_s,          //Sforzando
+    k_glyph_dynamic_z,          //Z
+    k_glyph_dynamic_n,          //Niente
+    k_glyph_dynamic_6p,         //pppppp
+    k_glyph_dynamic_5p,         //ppppp
+    k_glyph_dynamic_4p,         //pppp
+    k_glyph_dynamic_3p,         //ppp
+    k_glyph_dynamic_2p,         //pp
+    k_glyph_dynamic_mp,         //mp
+    k_glyph_dynamic_mf,         //mf
+    k_glyph_dynamic_pf,         //pf
+    k_glyph_dynamic_2f,         //ff
+    k_glyph_dynamic_3f,         //fff
+    k_glyph_dynamic_4f,         //ffff
+    k_glyph_dynamic_5f,         //fffff
+    k_glyph_dynamic_6f,         //ffffff
+    k_glyph_dynamic_fp,         //FortePiano
+    k_glyph_dynamic_fz,         //Forzando
+    k_glyph_dynamic_sf,         //Sforzando1
+    k_glyph_dynamic_sfp,        //SforzandoPiano
+    k_glyph_dynamic_sfpp,       //SforzandoPianissimo
+    k_glyph_dynamic_sfz,        //Sforzato
+    k_glyph_dynamic_sfzp,       //SforzatoPiano
+    k_glyph_dynamic_sffz,       //SforzatoFF
+    k_glyph_dynamic_rf,         //Rinforzando1
+    k_glyph_dynamic_rfz,        //Rinforzando2
+
+    //Common ornaments (U+E560 - U+E56F)
+    k_glyph_slashed_grace_note_stem_up,     // Slashed grace note stem up
+    k_glyph_slashed_grace_note_stem_down,   // Slashed grace note stem down
+    k_glyph_grace_note_stem_up,             // Grace note stem up
+    k_glyph_grace_note_stem_down,           // Grace note stem down
+    k_glyph_slash_for_stem_up_grace_note,   // Slash for stem up grace note
+    k_glyph_slash_for_stem_down_grace_note, // Slash for stem down grace note
+    k_glyph_trill,                          // Trill
+    k_glyph_turn,                           // Turn
+    k_glyph_inverted_turn,                  // Inverted Turn
+    k_glyph_turn_with_slash,                // Turn with slash
+    k_glyph_turn_up,                        // Turn up
+    k_glyph_inverted_turn_up,               // Inverted turn up
+    k_glyph_mordent,                        // Mordent
+    k_glyph_inverted_mordent,               // Inverted mordent
+    k_glyph_tremblement,                    // Tremblement
+    k_glyph_haydn_ornament,                 // Haydn ornament
+
+    //Other baroque ornaments (U+E570 - U+E58F)
+    k_glyph_schleifer_ornament,             // Schleifer ornament
+
+    //Multi-segment lines (U+EAA0 - U+EB0F)
+    k_glyph_trill_wiggle_segment,           // Trill wiggle segment
+
+    //Tremolos (U+E220 - U+E23F)
+    k_glyph_tremolo_1,     // Combining tremolo 1
+    k_glyph_tremolo_2,     // Combining tremolo 2
+    k_glyph_tremolo_3,     // Combining tremolo 3
+    k_glyph_tremolo_4,     // Combining tremolo 4
+    k_glyph_tremolo_5,     // Combining tremolo 5
+
+    //Wind techniques (U+E5F0 - U+E60F)
+    k_glyph_double_tongue_above,            // Double-tongue above
+    k_glyph_double_tongue_below,            // Double-tongue below
+    k_glyph_triple_tongue_above,            // Triple-tongue above
+    k_glyph_triple_tongue_below,            // Triple-tongue below
+    k_glyph_wind_closed_hole,               // Closed hole
+    k_glyph_wind_three_quarters_close_hole, // Three-quarters closed hole
+    k_glyph_wind_half_closed_hole,          // Half-closed hole
+    k_glyph_wind_half_closed_hole_2,        // Half-closed hole 2
+    k_glyph_wind_half_open_hole,            // Half-open hole
+    k_glyph_wind_open_hole,                 // Open hole
+
+    //String techniques (U+E610 - U+E62F)
+    k_glyph_string_down_bow,        // Down bow
+    k_glyph_string_up_bow,          // Up bow
+    k_glyph_string_harmonic,        // Harmonic
+    k_glyph_string_half_harmonic,   // Half-harmonic
+
+    //Keyboard techniques (U+E650 - U+E67F)
+    k_glyph_pedal_mark,         // Pedal mark
+    k_glyph_pedal_up_mark,      // Pedal up mark
+    k_glyph_half_pedal_mark,    // Half-pedal mark
+
+    //Handbells (U+E810 - U+E82F)
+    k_glyph_bells_martellato,               // Martellato
+    k_glyph_bells_martellato_lift,          // Martellato lift
+    k_glyph_bells_hand_martellato,          // Hand martellato
+    k_glyph_bells_muted_martellato,         // Muted martellato
+    k_glyph_mallet_bell_suspended,          // Mallet, bell suspended
+    k_glyph_mallet_bell_on_table,           // Mallet, bell on table
+    k_glyph_mallet_lift,                    // Mallet lift
+    k_glyph_pluck_lift,                     // Pluck lift
+    k_glyph_swing_up,                       // Swing up
+    k_glyph_swing_down,                     // Swing down
+    k_glyph_swing,                          // Swing
+    k_glyph_echo,                           // Echo
+    k_glyph_echo_2,                         // Echo 2
+    k_glyph_gyro,                           // Gyro
+    k_glyph_damp_3,                         // Damp 3
+    k_glyph_belltree,                       // Belltree
+    k_glyph_table_single_handbell,          // Table single handbell
+    k_glyph_table_pair_of_handbells,        // Table pair of handbells
 
 };
 
