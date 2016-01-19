@@ -985,8 +985,8 @@ SUITE(DocCommandTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)(instrument (musicData "
             "(clef G)(key C)(time 6 8)"
-            "(n e4 e v1 p1 (beam 28 +))(n g4 e v1 p1 (beam 28 =))(n c5 e v1 p1 (beam 28 -))"
-            "(n c4 e v1 p1 (beam 38 +))(n e4 e v1 p1 (beam 38 =))(n g4 e v1 p1 (beam 38 -))"
+            "(n e4 e v1 p1 (beam 29 +))(n g4 e v1 p1 (beam 29 =))(n c5 e v1 p1 (beam 29 -))"
+            "(n c4 e v1 p1 (beam 39 +))(n e4 e v1 p1 (beam 39 =))(n g4 e v1 p1 (beam 39 -))"
             "(barline simple)"
             ")))");
         doc.clear_dirty();
@@ -1013,12 +1013,12 @@ SUITE(DocCommandTest)
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 6 8)" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e. v1  p1 (beam 49 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  48,     0, "(n g4 s v1  p1 (beam 49 =b))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 (beam 49 -))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n c4 e v1  p1 (beam 38 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(n e4 e v1  p1 (beam 38 =))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1  p1 (beam 38 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e. v1  p1 (beam 50 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  48,     0, "(n g4 s v1  p1 (beam 50 =b))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 (beam 50 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n c4 e v1  p1 (beam 39 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(n e4 e v1  p1 (beam 39 =))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1  p1 (beam 39 -))" );
         CHECK_ENTRY0(it, 0,    0,      0, 192,     0, "(barline simple)" );
         //cout << pTable->dump() << endl;
      }
@@ -1030,8 +1030,8 @@ SUITE(DocCommandTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)(instrument (musicData "
             "(clef G)(key C)(time 2 4)"
-            "(n e4 e v1 p1 (beam 28 +))(n g4 e v1 p1 (beam 28 =))"
-            "(n c5 e v1 p1 (beam 28 =))(n e5 e v1 p1 (beam 28 -))"
+            "(n e4 e v1 p1 (beam 29 +))(n g4 e v1 p1 (beam 29 =))"
+            "(n c5 e v1 p1 (beam 29 =))(n e5 e v1 p1 (beam 29 -))"
             "(barline simple)"
             ")))");
         doc.clear_dirty();
@@ -1059,8 +1059,8 @@ SUITE(DocCommandTest)
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 2 4)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 (beam 29 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n e5 e v1  p1 (beam 29 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 (beam 30 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n e5 e v1  p1 (beam 30 -))" );
         CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(barline simple)" );
         //cout << pTable->dump() << endl;
      }
@@ -1072,8 +1072,8 @@ SUITE(DocCommandTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)(instrument (musicData "
             "(clef G)(key C)(time 6 8)"
-            "(n e4 e v1 p1 (beam 28 +))(n g4 e v1 p1 (beam 28 =))(n c5 e v1 p1 (beam 28 -))"
-            "(n c4 e v1 p1 (beam 38 +))(n e4 e v1 p1 (beam 38 =))(n g4 e v1 p1 (beam 38 -))"
+            "(n e4 e v1 p1 (beam 29 +))(n g4 e v1 p1 (beam 29 =))(n c5 e v1 p1 (beam 29 -))"
+            "(n c4 e v1 p1 (beam 39 +))(n e4 e v1 p1 (beam 39 =))(n g4 e v1 p1 (beam 39 -))"
             "(barline simple)"
             ")))");
         doc.clear_dirty();
@@ -1102,9 +1102,9 @@ SUITE(DocCommandTest)
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 6 8)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 q v1  p1 )" );
         CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n c4 e v1  p1 (beam 38 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(n e4 e v1  p1 (beam 38 =))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1  p1 (beam 38 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n c4 e v1  p1 (beam 39 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 128,     0, "(n e4 e v1  p1 (beam 39 =))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1  p1 (beam 39 -))" );
         CHECK_ENTRY0(it, 0,    0,      0, 192,     0, "(barline simple)" );
         //cout << pTable->dump() << endl;
      }
@@ -1116,15 +1116,15 @@ SUITE(DocCommandTest)
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 2.0)(instrument (musicData "
             "(clef G)(key C)(time 6 8)"
-            "(n e4 e v1 p1 (beam 28 +))(n g4 e v1 p1 (beam 28 =))(n c5 e v1 p1 (beam 28 -))"
-            "(n c4 e v1 p1 (beam 38 +))(n e4 e v1 p1 (beam 38 =))(n g4 e v1 p1 (beam 38 -))"
+            "(n e4 e v1 p1 (beam 29 +))(n g4 e v1 p1 (beam 29 =))(n c5 e v1 p1 (beam 29 -))"
+            "(n c4 e v1 p1 (beam 39 +))(n e4 e v1 p1 (beam 39 =))(n g4 e v1 p1 (beam 39 -))"
             "(barline simple)"
             ")))");
         doc.clear_dirty();
         DocCursor cursor(&doc);
         DocCommandExecuter executer(&doc);
         cursor.enter_element();     //points to clef
-        cursor.point_to(35L);       //points to first note of second beamed group
+        cursor.point_to(36L);       //points to first note of second beamed group
 
         DocCommand* pCmd = LOMSE_NEW CmdAddNoteRest("(n d4 e. v1 p1)", k_edit_mode_replace);
         CHECK( pCmd->get_undo_policy() == DocCommand::k_undo_policy_partial_checkpoint );
@@ -1145,12 +1145,12 @@ SUITE(DocCommandTest)
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(key C)" );
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(time 6 8)" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1  p1 (beam 28 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g4 e v1  p1 (beam 28 =))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 (beam 28 -))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n d4 e. v1  p1 (beam 49 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 144,     0, "(n e4 s v1  p1 (beam 49 =b))" );
-        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1  p1 (beam 49 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n e4 e v1  p1 (beam 29 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g4 e v1  p1 (beam 29 =))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  64,     0, "(n c5 e v1  p1 (beam 29 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  96,     0, "(n d4 e. v1  p1 (beam 50 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 144,     0, "(n e4 s v1  p1 (beam 50 =b))" );
+        CHECK_ENTRY0(it, 0,    0,      0, 160,     0, "(n g4 e v1  p1 (beam 50 -))" );
         CHECK_ENTRY0(it, 0,    0,      0, 192,     0, "(barline simple)" );
         //cout << pTable->dump() << endl;
      }
@@ -2447,7 +2447,7 @@ SUITE(DocCommandTest)
         //delete object. cursor points to next one
         create_document_1();
         DocCursor cursor(m_pDoc);
-        cursor.point_to(25L);
+        cursor.point_to(26L);
         DocCommandExecuter executer(m_pDoc);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
@@ -2475,7 +2475,7 @@ SUITE(DocCommandTest)
         DocCursor cursor(m_pDoc);
         DocCommandExecuter executer(m_pDoc);
         CHECK( m_pDoc->is_dirty() == false );
-        cursor.point_to(25L);
+        cursor.point_to(26L);
         DocCommand* pCmd = LOMSE_NEW CmdDeleteStaffObj();
 
         MySelectionSet sel(m_pDoc);
@@ -2489,7 +2489,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->get_id() == 25L );
+        CHECK( (*cursor)->get_id() == 26L );
         CHECK( m_pDoc->is_dirty() == true );
     }
 
@@ -2557,7 +2557,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n c4 e v1  p1 (beam 25 +))" );
+        CHECK( (*cursor)->to_string() == "(n c4 e v1  p1 (beam 26 +))" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -2573,8 +2573,8 @@ SUITE(DocCommandTest)
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e v1  p1 (beam 25 +))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n e4 e v1  p1 (beam 25 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n c4 e v1  p1 (beam 26 +))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n e4 e v1  p1 (beam 26 -))" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -2600,7 +2600,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n f5 s v1  p1 (beam 26 +f))" );
+        CHECK( (*cursor)->to_string() == "(n f5 s v1  p1 (beam 27 +f))" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -2616,8 +2616,8 @@ SUITE(DocCommandTest)
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f5 s v1  p1 (beam 26 +f))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  16,     0, "(n g5 e v1  p1 (beam 26 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n f5 s v1  p1 (beam 27 +f))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  16,     0, "(n g5 e v1  p1 (beam 27 -))" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -2644,7 +2644,7 @@ SUITE(DocCommandTest)
 
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( (*cursor)->to_string() == "(n g5 s v1  p1 (beam 26 ++))" );
+        CHECK( (*cursor)->to_string() == "(n g5 s v1  p1 (beam 27 ++))" );
 //        cout << "cursor: " << (*cursor)->to_string() << endl;
 
         ScoreCursor* pSC = static_cast<ScoreCursor*>( cursor.get_inner_cursor() );
@@ -2660,9 +2660,9 @@ SUITE(DocCommandTest)
         ColStaffObjsIterator it = pTable->begin();
         //              instr, staff, meas. time, line, scr
         CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(clef G p1 )" );
-        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g5 s v1  p1 (beam 26 ++))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  16,     0, "(n f5 s v1  p1 (beam 26 =-))" );
-        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g5 e v1  p1 (beam 26 -))" );
+        CHECK_ENTRY0(it, 0,    0,      0,   0,     0, "(n g5 s v1  p1 (beam 27 ++))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  16,     0, "(n f5 s v1  p1 (beam 27 =-))" );
+        CHECK_ENTRY0(it, 0,    0,      0,  32,     0, "(n g5 e v1  p1 (beam 27 -))" );
 //        cout << pTable->dump();
 //        cout << doc.to_string() << endl;
     }
@@ -3118,7 +3118,7 @@ SUITE(DocCommandTest)
         CHECK( pSC->is_at_end_of_staff() == true );
         CHECK( pSC->time() == 64 );
 
-        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content  (score (vers 2.0)(instrument (staves 1)(musicData (clef G p1 )(n e4 e v1  p1 (beam 26 +))(n c4 e v1  p1 (beam 26 -)))))))" );
+        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content  (score (vers 2.0)(instrument (staves 1)(musicData (clef G p1 )(n e4 e v1  p1 (beam 27 +))(n c4 e v1  p1 (beam 27 -)))))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
 //        cout << doc.to_string() << endl;
@@ -3179,7 +3179,7 @@ SUITE(DocCommandTest)
         CHECK( pSC->is_at_end_of_empty_score() == false );
         CHECK( pSC->is_at_end_of_staff() == true );
 
-        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content  (score (vers 2.0)(instrument (staves 1)(musicData (clef G p1 )(n e4 e v1  p1 (beam 35 +))(n c4 e v1  p1 (beam 35 -)))))))" );
+        CHECK( doc.to_string() == "(lenmusdoc (vers 0.0)(content  (score (vers 2.0)(instrument (staves 1)(musicData (clef G p1 )(n e4 e v1  p1 (beam 36 +))(n c4 e v1  p1 (beam 36 -)))))))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         CHECK( pScore->get_staffobjs_table()->num_entries() == 3 );
 //        cout << doc.to_string() << endl;
@@ -3199,7 +3199,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        pCmd = LOMSE_NEW CmdCursor(CmdCursor::k_point_to, 24L);     //point to first note
+        pCmd = LOMSE_NEW CmdCursor(CmdCursor::k_point_to, 25L);     //point to first note
         executer.execute(&cursor, pCmd, &sel);
         ImoObj* pNoteE4 = *cursor;
 
@@ -4091,12 +4091,12 @@ SUITE(DocCommandTest)
     {
         //2701. To note in middle. Success. Added note selected. Cursor doesn't move.
         create_document_2();
-        //(score#5 (vers 2.0)(instrument#20 (musicData#21
-        //(clef#22 G)(key#23 C)(time#24 2 4)(n#25 c4 q)(r#26 q)
+        //(score#5 (vers 2.0)(instrument#21 (musicData#22
+        //(clef#23 G)(key#24 C)(time#25 2 4)(n#26 c4 q)(r#27 q)
         DocCursor cursor(m_pDoc);
         DocCommandExecuter executer(m_pDoc);
         CHECK( m_pDoc->is_dirty() == false );
-        cursor.point_to(25L);
+        cursor.point_to(26L);
         ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
         DocCommand* pCmd = LOMSE_NEW CmdAddChordNote("e4");
         CHECK( pCmd->get_cursor_update_policy() == DocCommand::k_refresh );
@@ -4115,7 +4115,7 @@ SUITE(DocCommandTest)
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
         CHECK( pNote1 == static_cast<ImoNote*>( *cursor ) );
-        CHECK( cursor.get_pointee_id() == 25L );
+        CHECK( cursor.get_pointee_id() == 26L );
 
         //selection only contains added note
         CHECK( sel.num_selected() == 1 );
@@ -4136,11 +4136,11 @@ SUITE(DocCommandTest)
     {
         //2701. undo/redo
         create_document_2();
-        //(score#5 (vers 2.0)(instrument#20 (musicData#21
-        //(clef#22 G)(key#23 C)(time#24 2 4)(n#25 c4 q)(r#26 q)
+        //(score#5 (vers 2.0)(instrument#21 (musicData#22
+        //(clef#23 G)(key#24 C)(time#25 2 4)(n#26 c4 q)(r#27 q)
         DocCursor cursor(m_pDoc);
         DocCommandExecuter executer(m_pDoc);
-        cursor.point_to(25L);
+        cursor.point_to(26L);
         ImoNote* pNote1 = static_cast<ImoNote*>( *cursor );
         DocCommand* pCmd = LOMSE_NEW CmdAddChordNote("e4");
 
@@ -4171,14 +4171,14 @@ SUITE(DocCommandTest)
         //cursor has not moved
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( cursor.get_pointee_id() == 25L );
+        CHECK( cursor.get_pointee_id() == 26L );
 
         //selection only contains base note
         CHECK( sel.num_selected() == 1 );
         ImoNote* pNote2 = static_cast<ImoNote*>( sel.front() );
         CHECK( pNote2->get_fpitch() == FPitch("c4") );
         CHECK( pNote2->is_in_chord() == false );
-        CHECK( pNote2->get_id() == 25L );
+        CHECK( pNote2->get_id() == 26L );
 
         executer.redo(&cursor, &sel);
 
@@ -4193,7 +4193,7 @@ SUITE(DocCommandTest)
         //cursor has not moved
         CHECK( *cursor != NULL );
         CHECK( (*cursor)->is_note() == true );
-        CHECK( cursor.get_pointee_id() == 25L );
+        CHECK( cursor.get_pointee_id() == 26L );
 
         //selection only contains added note
         CHECK( sel.num_selected() == 1 );

@@ -164,6 +164,9 @@ protected:
         }
         else
             m_source << name;
+
+        if (m_pObj->is_middle())
+            m_source << " middle";
     }
 
 };

@@ -143,7 +143,7 @@ SUITE(LdpExporterTest)
         exporter.set_add_id(true);
         string source = exporter.get_source(pImo);
         //cout << "\"" << source << "\"" << endl;
-        CHECK( source == "(barline#22 end)" );
+        CHECK( source == "(barline#23 end)" );
     }
 
     // BeamLdpGenerator -----------------------------------------------------------------
@@ -166,8 +166,8 @@ SUITE(LdpExporterTest)
         string source = exporter.get_source(pMD);
         //cout << "\"" << source << "\"" << endl;
         string expected =
-            "(musicData (clef G p1 )(n g5 s v1  p1 (beam 26 ++))"
-            "(n f5 s v1  p1 (beam 26 =-))(n g5 e v1  p1 (beam 26 -))(barline simple))";
+            "(musicData (clef G p1 )(n g5 s v1  p1 (beam 27 ++))"
+            "(n f5 s v1  p1 (beam 27 =-))(n g5 e v1  p1 (beam 27 -))(barline simple))";
         CHECK( source == expected );
     }
 
@@ -189,8 +189,8 @@ SUITE(LdpExporterTest)
         string source = exporter.get_source(pMD);
         //cout << "\"" << source << "\"" << endl;
         string expected = "(musicData (clef G p1 )"
-            "(chord (n e4 e. v1  (stem up) p1 (beam 31 +))(n g4 e. v1  p1 ))"
-            "(chord (n d4 s v1  (stem up) p1 (beam 31 -b))(n f4 s v1  p1 )))";
+            "(chord (n e4 e. v1  (stem up) p1 (beam 32 +))(n g4 e. v1  p1 ))"
+            "(chord (n d4 s v1  (stem up) p1 (beam 32 -b))(n f4 s v1  p1 )))";
         CHECK( source == expected );
     }
 
@@ -214,8 +214,8 @@ SUITE(LdpExporterTest)
         //cout << "\"" << source << "\"" << endl;
         string expected = "(musicData (clef G p1 )"
             "(n c4 q v1  p1 )(n e4 q v1  p1 )(goFwd 64 v2 p1)"
-            "(chord (n e4 e. v2  (stem up) p1 (beam 34 +))(n g4 e. v2  p1 ))"
-            "(chord (n d4 s v2  (stem up) p1 (beam 34 -b))(n f4 s v2  p1 )))";
+            "(chord (n e4 e. v2  (stem up) p1 (beam 35 +))(n g4 e. v2  p1 ))"
+            "(chord (n d4 s v2  (stem up) p1 (beam 35 -b))(n f4 s v2  p1 )))";
         CHECK( source == expected );
     }
 
@@ -237,8 +237,8 @@ SUITE(LdpExporterTest)
         string source = exporter.get_source(pMD);
         //cout << "\"" << source << "\"" << endl;
         string expected = "(musicData (clef F4 p1 )"
-            "(n e3 e v1  p1 (beam 26 +))(n c2 w v3  p1 )(n g3 e v1  p1 (beam 26 =))"
-            "(n c4 e v1  p1 (beam 26 -))(barline simple))";
+            "(n e3 e v1  p1 (beam 27 +))(n c2 w v3  p1 )(n g3 e v1  p1 (beam 27 =))"
+            "(n c4 e v1  p1 (beam 27 -))(barline simple))";
         CHECK( source == expected );
     }
 
@@ -558,8 +558,8 @@ SUITE(LdpExporterTest)
         //cout << "\"" << source << "\"" << endl;
         string expected =
             "(musicData (clef G p1 )(key G)(time 3 4)(chord (n g3 q v1  p1 )(n d4 q v1  p1 ))"
-            "(r e v1  p1 )(n g5 e v1  p1 )(n g5 s v1  p1 (beam 35 ++))(n f5 s v1  p1 (beam 35 =-))"
-            "(n g5 e v1  p1 (beam 35 -))(barline simple)"
+            "(r e v1  p1 )(n g5 e v1  p1 )(n g5 s v1  p1 (beam 36 ++))(n f5 s v1  p1 (beam 36 =-))"
+            "(n g5 e v1  p1 (beam 36 -))(barline simple)"
             "(chord (n a4 q v1  p1 )(n e5 q v1  p1 ))(r q v1  p1 )"
             "(chord (n d4 q v1  p1 )(n g4 q v1  p1 )(n f5 q v1  p1 ))(barline simple))";
         CHECK( source == expected );

@@ -704,6 +704,8 @@ ColumnsBuilder::ColumnsBuilder(LibraryScope& libraryScope, ScoreMeter* pScoreMet
     , m_ColLayouters(colLayouters)
     , m_instrEngravers(instrEngravers)
     , m_pSysCursor( LOMSE_NEW StaffObjsCursor(m_pScore) )
+    , m_pBreaker( LOMSE_NEW ColumnBreaker(m_pScoreMeter->num_instruments(),
+                                          m_pSysCursor) )
     , m_iColumnToTrace(-1)
     , m_nTraceLevel(k_trace_off)
 {
@@ -713,6 +715,7 @@ ColumnsBuilder::ColumnsBuilder(LibraryScope& libraryScope, ScoreMeter* pScoreMet
 ColumnsBuilder::~ColumnsBuilder()
 {
     delete m_pSysCursor;
+    delete m_pBreaker;
 }
 
 //---------------------------------------------------------------------------------------
@@ -744,12 +747,11 @@ void ColumnsBuilder::collect_content_for_this_column()
     if (m_iColumnToTrace == m_iColumn)
         m_ColLayouters[m_iColumn]->set_trace_level(m_nTraceLevel);
 
-	int numInstruments = m_pScoreMeter->num_instruments();
+//	int numInstruments = m_pScoreMeter->num_instruments();
+//
+//    ColumnBreaker breaker(numInstruments, m_pSysCursor);
 
-    ColumnBreaker breaker(numInstruments, m_pSysCursor);
-
-    //ask system layouter to prepare to receive data for this instrument objects in
-    //this column
+    //ask system layouter to prepare for receiving data for objects in this column
     LUnits uxStart = m_pagePos.x;
     LUnits fixedSpace = determine_initial_fixed_space();
     start_column_measurements(m_iColumn, uxStart, fixedSpace);
@@ -766,9 +768,12 @@ void ColumnsBuilder::collect_content_for_this_column()
         ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
         m_pagePos.y = m_instrEngravers[iInstr]->get_top_line_of_staff(iStaff);
         GmoShape* pShape = NULL;
+        //TimeUnits rNextTime = m_pSysCursor->next_staffobj_timepos();
 
-        if ( breaker.column_should_be_finished(pSO, rTime, iLine) )
+        //if feasible column break, exit loop
+        if ( m_pBreaker->feasible_break_before_this_obj(pSO, rTime, iInstr, iLine) )
             break;
+
 
         if (pSO->is_system_break())
         {
@@ -786,7 +791,7 @@ void ColumnsBuilder::collect_content_for_this_column()
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                                                                  m_pagePos, clefType, flags);
                 pShape->assign_id_as_main_shape();
-                include_object(m_iColumn, iLine, iInstr, pSO, -1.0, iStaff, pShape, fInProlog);
+                include_object(m_iColumn, iLine, iInstr, pSO, -1.0f, iStaff, pShape, fInProlog);
             }
 
             else if (pSO->is_key_signature() || pSO->is_time_signature())
@@ -797,15 +802,23 @@ void ColumnsBuilder::collect_content_for_this_column()
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                                                                  m_pagePos, clefType, flags);
                 pShape->assign_id_as_main_or_implicit_shape(iStaff);
-                include_object(m_iColumn, iLine, iInstr, pSO, -1.0, iStaff, pShape, fInProlog);
+                include_object(m_iColumn, iLine, iInstr, pSO, -1.0f, iStaff, pShape, fInProlog);
             }
+
+//            else if (pSO->is_barline())
+//            {
+//                int clefType = m_pSysCursor->get_applicable_clef_type();
+//                pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
+//                                                                 m_pagePos, clefType);
+//                include_object(m_iColumn, iLine, iInstr, pSO, rTime-0.5f, iStaff, pShape);
+//            }
 
             else
             {
                 int clefType = m_pSysCursor->get_applicable_clef_type();
                 pShape = m_pShapesCreator->create_staffobj_shape(pSO, iInstr, iStaff,
                                                                  m_pagePos, clefType);
-                TimeUnits time = (pSO->is_spacer() ? -1.0 : rTime);
+                TimeUnits time = (pSO->is_spacer() ? -1.0f : rTime);
                 include_object(m_iColumn, iLine, iInstr, pSO, time, iStaff, pShape);
             }
 
@@ -1034,52 +1047,115 @@ bool ColumnsBuilder::determine_if_is_in_prolog(TimeUnits rTime)
 //=======================================================================================
 ColumnBreaker::ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor)
     : m_numInstruments(numInstruments)
-    , m_fBarlineFound(false)
-    , m_targetBreakTime(1.0f)
+    , m_consecutiveBarlines(0)
+    , m_numInstrWithTS(0)
+    , m_targetBreakTime(0.0f)
+    , m_lastBarlineTime(0.0f)
+    , m_maxMeasureDuration(0.0f)
+    , m_lastBreakTime(0.0f)
 {
     m_numLines = pSysCursor->get_num_lines();
-    m_staffObjs.reserve(m_numLines);
-    m_staffObjs.assign(m_numLines, (ImoStaffObj*)NULL);
+    m_measures.reserve(numInstruments);
+    m_measures.assign(numInstruments, 0.0f);
     m_beamed.reserve(m_numLines);
     m_beamed.assign(m_numLines, false);
+    m_tied.reserve(m_numLines);
+    m_tied.assign(m_numLines, false);
 }
 
 //---------------------------------------------------------------------------------------
-bool ColumnBreaker::column_should_be_finished(ImoStaffObj* pSO, TimeUnits rTime, int iLine)
+bool ColumnBreaker::feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits rTime,
+                                                   int iInstr, int iLine)
 {
     bool fBreak = false;
-    if (m_fBarlineFound && !pSO->is_barline())
-        return true;
-
-    ImoStaffObj* pPrevSO = m_staffObjs[iLine];
-    if (pPrevSO && !pSO->is_barline() && pPrevSO->is_note_rest())
+    if (!pSO->is_barline()
+        && m_consecutiveBarlines > 0
+        && m_consecutiveBarlines >= m_numInstrWithTS
+       )
     {
-        fBreak = true;      //assume it is a suitable point
-
-        //not suitable if breaks a beam
-        for (int i=0; i < m_numLines; ++i)
-        {
-            fBreak &= !m_beamed[i];
-        }
-
-        //not suitable if next note is within a previous voice duration
-        fBreak &= !is_lower_time(rTime, m_targetBreakTime);
+        fBreak = true;
+    }
+    else if (pSO->is_note_rest()
+             && rTime > m_lastBreakTime
+             && rTime > m_lastBarlineTime + m_maxMeasureDuration
+            )
+    {
+        fBreak = is_suitable_note_rest(pSO, rTime);
     }
 
-    m_staffObjs[iLine] = pSO;
+    //save data
     if (pSO->is_note_rest())
     {
         ImoNoteRest* pNR = static_cast<ImoNoteRest*>(pSO);
+        m_beamed[iLine] = pNR->is_beamed() && !pNR->is_end_of_beam();
+
+        if (pSO->is_note())
+            m_tied[iLine] = static_cast<ImoNote*>(pSO)->is_tied_next();
+        else
+            m_tied[iLine] = false;
+
         TimeUnits rNextTime = rTime + pNR->get_duration();
         m_targetBreakTime = max(m_targetBreakTime, rNextTime);
+    }
 
-        m_beamed[iLine] = pNR->is_beamed() && !pNR->is_end_of_beam();
+    if (pSO->is_time_signature())
+    {
+        ImoTimeSignature* pTS = static_cast<ImoTimeSignature*>(pSO);
+        m_measures[iInstr] = pTS->get_measure_duration();
+        m_maxMeasureDuration = 0.0f;
+        m_numInstrWithTS = 0;
+        for (int i=0; i < m_numInstruments; ++i)
+        {
+            m_maxMeasureDuration = max(m_maxMeasureDuration, m_measures[i]);
+            m_numInstrWithTS += (m_measures[i] > 0.0f ? 1 : 0);
+        }
     }
 
     if (pSO->is_barline())
-        m_fBarlineFound = true;
+    {
+        if (!static_cast<ImoBarline*>(pSO)->is_middle())
+        {
+            m_lastBarlineTime = rTime;
+            ++m_consecutiveBarlines;
+        }
+    }
+    else
+        m_consecutiveBarlines = 0;
+
+    //if suitable point, save and clear data
+    if (fBreak)
+    {
+        m_lastBreakTime = rTime;
+        m_consecutiveBarlines = 0;
+    }
 
     return fBreak;
+}
+
+//---------------------------------------------------------------------------------------
+bool ColumnBreaker::is_suitable_note_rest(ImoStaffObj* pSO, TimeUnits rTime)
+{
+    if (pSO->is_note_rest())
+    {
+        bool fBreak = true;      //assume it is a suitable point
+
+        //not suitable if breaks a beam or a tie
+        for (int i=0; i < m_numLines; ++i)
+        {
+            fBreak &= !m_beamed[i];
+            fBreak &= !m_tied[i];
+        }
+
+        //not suitable if is tied to prev note
+        if (pSO->is_note())
+            fBreak &= !static_cast<ImoNote*>(pSO)->is_tied_prev();
+
+        //not suitable if next note is within a previous voice duration
+        fBreak &= !is_lower_time(rTime, m_targetBreakTime);
+
+        return fBreak;
+    }
+    return false;
 }
 
 

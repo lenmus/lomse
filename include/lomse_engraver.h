@@ -113,7 +113,8 @@ public:
                                      GmoShape* UNUSED(pStaffObjShape),
                                      int UNUSED(iInstr), int UNUSED(iStaff),
                                      int UNUSED(iSystem), int UNUSED(iCol),
-                                     LUnits xRight, LUnits xLeft, LUnits yTop) {}
+                                     LUnits UNUSED(xRight), LUnits UNUSED(xLeft),
+                                     LUnits UNUSED(yTop)) {}
     virtual void set_end_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
                                   GmoShape* pStaffObjShape, int iInstr, int iStaff,
                                   int iSystem, int iCol,

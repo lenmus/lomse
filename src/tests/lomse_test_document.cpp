@@ -435,11 +435,11 @@ SUITE(DocumentTest)
     {
         //211. replace object from checkpoint data
         create_document_1();
-        ImoObj* pImo = m_pDoc->get_pointer_to_imo(22L);
+        ImoObj* pImo = m_pDoc->get_pointer_to_imo(23L);
         CHECK( pImo->is_clef() );
         string data =
             "<ldpmusic>"
-            "(score#4 (vers 2.0)(instrument#20 (musicData#21 (n#42 c4 q) )))"
+            "(score#4 (vers 2.0)(instrument#21 (musicData#22 (n#43 c4 q) )))"
             "</ldpmusic>";
 
         m_pDoc->replace_object_from_checkpoint_data(4L, data);
@@ -452,9 +452,9 @@ SUITE(DocumentTest)
         //"))"
 
         //cout << m_pDoc->get_checkpoint_data();
-        pImo = m_pDoc->get_pointer_to_imo(22L);
+        pImo = m_pDoc->get_pointer_to_imo(23L);
         CHECK( pImo == NULL );
-        pImo = m_pDoc->get_pointer_to_imo(42L);
+        pImo = m_pDoc->get_pointer_to_imo(43L);
         CHECK( pImo->is_note() );
     }
 

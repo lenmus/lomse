@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -47,31 +47,11 @@ StaffObjsCursor::StaffObjsCursor(ImoScore* pScore)
     , m_pLastBarline(NULL)
 {
     initialize_clefs_keys_times(pScore);
-
-//    //create iterators and point to start of each instrument
-//    lmInstrument* pInstr = pScore->GetFirstInstrument();
-//    for (; pInstr; pInstr = pScore->GetNextInstrument())
-//    {
-//        StaffObjsIterator* pIT = pInstr->GetVStaff()->CreateIterator();
-//        pIT->AdvanceToMeasure(1);
-//        m_iterators.push_back(pIT);
-//        m_savedIterators.push_back( new StaffObjsIterator(pIT) );
-//    }
-//
-//    m_rBreakTime = _LOMSE_NO_BREAK_TIME;
 }
 
 //---------------------------------------------------------------------------------------
 StaffObjsCursor::~StaffObjsCursor()
 {
-//    std::vector<StaffObjsIterator*>::iterator it;
-//    for (it = m_iterators.begin(); it != m_iterators.end(); ++it)
-//        delete *it;
-//    m_iterators.clear();
-//
-//    for (it = m_savedIterators.begin(); it != m_savedIterators.end(); ++it)
-//        delete *it;
-//    m_savedIterators.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -86,7 +66,7 @@ void StaffObjsCursor::initialize_clefs_keys_times(ImoScore* pScore)
     }
 
     m_clefs.reserve(staves);
-    m_clefs.assign(staves, (ColStaffObjsEntry*)NULL);     //GCC complais if NULL not casted
+    m_clefs.assign(staves, (ColStaffObjsEntry*)NULL);     //GCC complains if NULL not casted
 
     m_keys.reserve(staves);
     m_keys.assign(staves, (ColStaffObjsEntry*)NULL);
@@ -274,35 +254,17 @@ void StaffObjsCursor::go_back_to_saved_position()
 }
 
 //---------------------------------------------------------------------------------------
-//int StaffObjsCursor::GetNumMeasure(int iInstr)
-//{
-//    //returns current absolute measure number (1..n) for VStaff
-//
-//    return m_iterators[iInstr]->GetNumMeasure() + 1;
-//}
-//
-//---------------------------------------------------------------------------------------
-//void StaffObjsCursor::AdvanceAfterTimepos(TimeUnits rTimepos)
-//{
-//    //advance all iterators so that last processed timepos is rTimepos. That is, pointed
-//    //objects will be the firsts ones with timepos > rTimepos.
-//
-//    //THIS METHOD IS NO LONGER USED. BUT IT WORKS.
-//    //Leaved just in case there is a need to use it again
-//
-//    for (int i=0; i < (int)m_iterators.size(); ++i)
-//    {
-//        StaffObjsIterator* pIT = m_iterators[i];
-//        pIT->ResetFlags();
-//        while (!pIT->ChangeOfMeasure() && !pIT->EndOfCollection())
-//        {
-//            lmStaffObj* pSO = pIT->GetCurrent();
-//            if (is_greater_time(pSO->GetTimePos(), rTimepos))
-//                break;
-//            pIT->MoveNext();
-//        }
-//    }
-//}
+TimeUnits StaffObjsCursor::next_staffobj_timepos()
+{
+    ColStaffObjsEntry* pNextEntry = next_entry();
+    if (pNextEntry)
+        return pNextEntry->time();
+    else
+    {
+        ImoStaffObj* pSO = get_staffobj();
+        return time() + pSO->get_duration();
+    }
+}
 
 
 }  //namespace lomse

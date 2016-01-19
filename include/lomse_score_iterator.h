@@ -74,6 +74,11 @@ public:
  //                   return pCSO == m_pColStaffObjs; }
 
 
+    //access to prev/next element without changing iterator position
+    inline ColStaffObjsEntry* next() { return m_it.next(); }
+    inline ColStaffObjsEntry* prev() { return m_it.prev(); }
+
+
  //   void AdvanceToMeasure(int nBar);
     void first();
     inline void operator ++() { ++m_it; }

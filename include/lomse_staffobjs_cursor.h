@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -68,16 +68,10 @@ private:
     std::vector<ColStaffObjsEntry*> m_keys;
     std::vector<ColStaffObjsEntry*> m_times;
 
-    //std::vector<StaffObjsIterator*> m_iterators;
-    //std::vector<StaffObjsIterator*> m_savedIterators;
-    //TimeUnits m_rBreakTime;       //last time to include in current column
-
 public:
     StaffObjsCursor(ImoScore* pScore);
     ~StaffObjsCursor();
 
-//    bool ThereAreObjects();
-//
     //positioning
     void move_next();
 
@@ -87,15 +81,22 @@ public:
 
     //access to info
     inline int num_instrument() { return (*m_scoreIt)->num_instrument(); }
+    inline bool is_empty_score() { return m_fScoreIsEmpty; }
+    inline TimeUnits anacrusis_missing_time() {
+        return m_pColStaffObjs->anacrusis_missing_time();
+    }
+
+    //access to current pointed object
     inline int staff() { return (*m_scoreIt)->staff(); }
     inline int line() { return (*m_scoreIt)->line(); }
     inline TimeUnits time() { return (*m_scoreIt)->time(); }
     inline ImoObj* imo_object() { return (*m_scoreIt)->imo_object(); }
     ImoStaffObj* get_staffobj();
-    inline bool is_empty_score() { return m_fScoreIsEmpty; }
-    inline TimeUnits anacrusis_missing_time() {
-        return m_pColStaffObjs->anacrusis_missing_time();
-    }
+
+    //access next/prev object without moving cursor position
+    inline ColStaffObjsEntry* next_entry() { return m_scoreIt.next(); }
+    inline ColStaffObjsEntry* prev_entry() { return m_scoreIt.prev(); }
+    TimeUnits next_staffobj_timepos();
 
     //context
     inline int get_num_instruments() { return m_numInstruments; }
@@ -116,18 +117,9 @@ public:
 
     inline ImoBarline* get_previous_barline() { return m_pLastBarline; }
 
-//    //returns current absolute measure number (1..n) for VStaff
-//    int GetNumMeasure(int iInstr);
-//
-//    //break time
-//    inline TimeUnits GetBreakTime() { return m_rBreakTime; }
-//    inline void SetBreakTime(TimeUnits rBreakTime) { m_rBreakTime = rBreakTime; }
-//
     //iterators management
-//    inline StaffObjsIterator* get_iterator(int iInstr) { return m_iterators[iInstr]; }
     void go_back_to_saved_position();
     void save_position();
-//    void AdvanceAfterTimepos(TimeUnits rTimepos);
 
 protected:
     void initialize_clefs_keys_times(ImoScore* pScore);

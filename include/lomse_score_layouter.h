@@ -67,6 +67,7 @@ class ColumnStorage;
 class ColumnsBuilder;
 class ShapesCreator;
 class ScoreStub;
+class ColumnBreaker;
 
 //---------------------------------------------------------------------------------------
 // helper struct to store data about aux objs to be engraved when the system is ready
@@ -248,9 +249,10 @@ protected:
     ImoScore*       m_pScore;
     ShapesStorage&  m_shapesStorage;
     ShapesCreator*  m_pShapesCreator;
-    std::vector<ColumnLayouter*>& m_ColLayouters;    //layouter for each column
+    std::vector<ColumnLayouter*>& m_ColLayouters;   //layouter for each column
     std::vector<InstrumentEngraver*>& m_instrEngravers;
-    StaffObjsCursor* m_pSysCursor;                     //cursor for traversing the score
+    StaffObjsCursor* m_pSysCursor;  //cursor for traversing the score
+    ColumnBreaker*  m_pBreaker;
     std::vector<LUnits> m_SliceInstrHeights;
     LUnits m_stavesHeight;      //system height without top and bottom margins
     UPoint m_pagePos;           //to track current position
@@ -318,17 +320,28 @@ class ColumnBreaker
 {
 protected:
     int m_numInstruments;
-    bool m_fBarlineFound;
+    int m_consecutiveBarlines;
+    int m_numInstrWithTS;
     TimeUnits m_targetBreakTime;
+    TimeUnits m_lastBarlineTime;
+    TimeUnits m_maxMeasureDuration;
+    TimeUnits m_lastBreakTime;
+
     int m_numLines;
-    std::vector<ImoStaffObj*> m_staffObjs;
+    std::vector<TimeUnits> m_measures;
     std::vector<bool> m_beamed;
+    std::vector<bool> m_tied;
 
 public:
     ColumnBreaker(int numInstruments, StaffObjsCursor* pSysCursor);
     ~ColumnBreaker() {}
 
-    bool column_should_be_finished(ImoStaffObj* pSO, TimeUnits rTime, int iLine);
+    bool feasible_break_before_this_obj(ImoStaffObj* pSO, TimeUnits rTime,
+                                        int iInstr, int iLine);
+
+protected:
+    bool is_suitable_note_rest(ImoStaffObj* pSO, TimeUnits rTime);
+
 };
 
 

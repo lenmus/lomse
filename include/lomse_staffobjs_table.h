@@ -158,29 +158,9 @@ public:
 
         public:
             iterator() : m_pCurrent(NULL), m_pPrev(NULL), m_pNext(NULL) {}
-            iterator(ColStaffObjsEntry* pEntry) { init(pEntry); }
-            virtual ~iterator() {}
 
-            iterator& operator =(const iterator& it) {
-                init(it.m_pCurrent);
-                return *this;
-            }
-
-	        ColStaffObjsEntry* operator *() const { return m_pCurrent; }
-
-            iterator& operator ++() {
-                init(m_pNext);
-                return *this;
-            }
-            iterator& operator --() {
-                init(m_pPrev);
-                return *this;
-            }
-		    bool operator ==(const iterator& it) const { return m_pCurrent == it.m_pCurrent; }
-		    bool operator !=(const iterator& it) const { return m_pCurrent != it.m_pCurrent; }
-
-        protected:
-            void init(ColStaffObjsEntry* pEntry)
+            ///AWARE: This constructor requires pEntry != NULL.
+            iterator(ColStaffObjsEntry* pEntry)
             {
                 m_pCurrent = pEntry;
                 if (m_pCurrent)
@@ -190,9 +170,52 @@ public:
                 }
                 else
                 {
+                    //is at end. But it is impossible to access any element!!!
                     m_pPrev = NULL;
                     m_pNext = NULL;
                 }
+            }
+
+            virtual ~iterator() {}
+
+            iterator& operator =(const iterator& it) {
+                m_pCurrent = it.m_pCurrent;
+                m_pNext = it.m_pNext;
+                m_pPrev = it.m_pPrev;
+                return *this;
+            }
+
+	        ColStaffObjsEntry* operator *() const { return m_pCurrent; }
+
+            iterator& operator ++() {
+                move_next();
+                return *this;
+            }
+            iterator& operator --() {
+                move_prev();
+                return *this;
+            }
+		    bool operator ==(const iterator& it) const { return m_pCurrent == it.m_pCurrent; }
+		    bool operator !=(const iterator& it) const { return m_pCurrent != it.m_pCurrent; }
+
+		    //access to prev/next element without changing iterator position
+		    inline ColStaffObjsEntry* next() { return m_pNext; }
+		    inline ColStaffObjsEntry* prev() { return m_pPrev; }
+
+        protected:
+            void move_next()
+            {
+                m_pPrev = m_pCurrent;
+                m_pCurrent = m_pNext;
+                if (m_pCurrent)
+                    m_pNext = m_pCurrent->get_next();
+            }
+            void move_prev()
+            {
+                m_pNext = m_pCurrent;
+                m_pCurrent = m_pPrev;
+                if (m_pCurrent)
+                    m_pPrev = m_pCurrent->get_prev();
             }
     };
 

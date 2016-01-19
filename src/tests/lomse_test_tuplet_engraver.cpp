@@ -164,20 +164,23 @@ public:
                 //first note
                 m_pTupletEngrv = LOMSE_NEW MyTupletEngraver(m_libraryScope, m_pMeter);
                 m_pTupletEngrv->set_start_staffobj(pTuplet, pNR, m_shapes[i],
-                                                 iInstr, iStaff, iSystem, iCol);
+                                                 iInstr, iStaff, iSystem, iCol,
+                                                 0.0f, 0.0f, 0.0f);
                 m_pStorage->save_engraver(m_pTupletEngrv, pTuplet);
             }
             else if (i == numNotes-1)
             {
                 //last note
                 m_pTupletEngrv->set_end_staffobj(pTuplet, pNR, m_shapes[i],
-                                               iInstr, iStaff, iSystem, iCol);
+                                               iInstr, iStaff, iSystem, iCol,
+                                               0.0f, 0.0f, 0.0f);
             }
             else
             {
                 //intermediate note
                 m_pTupletEngrv->set_middle_staffobj(pTuplet, pNR, m_shapes[i],
-                                                  iInstr, iStaff, iSystem, iCol);
+                                                  iInstr, iStaff, iSystem, iCol,
+                                                  0.0f, 0.0f, 0.0f);
             }
         }
     }

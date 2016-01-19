@@ -969,7 +969,7 @@ public:
 
 //@--------------------------------------------------------------------------------------
 //@ ImoBarline StaffObj
-//@ <barline> = (barline) | (barline <type>[<visible>][<location>])
+//@ <barline> = (barline) | (barline <type>[middle][<visible>][<location>])
 //@ <type> = label: { start | end | double | simple | startRepetition |
 //@                   endRepetition | doubleRepetition }
 
@@ -990,6 +990,16 @@ public:
         // <type> (label)
         if (get_optional(k_label))
             pBarline->set_type( get_barline_type() );
+
+        // [middle] (label)
+        if (get_optional(k_label))
+        {
+            string label = m_pParamToAnalyse->get_value();
+            if (label == "middle" )
+                pBarline->set_middle(true);
+            else
+                error_invalid_param();
+        }
 
         // [<visible>][<location>]
         analyse_staffobjs_options(pBarline);

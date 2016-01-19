@@ -2413,9 +2413,13 @@ class ImoBarline : public ImoStaffObj
 {
 protected:
     int m_barlineType;
+    bool m_fMiddle;
 
     friend class ImFactory;
-    ImoBarline(): ImoStaffObj(k_imo_barline), m_barlineType(k_barline_simple) {}
+    ImoBarline()
+        : ImoStaffObj(k_imo_barline), m_barlineType(k_barline_simple), m_fMiddle(false)
+    {
+    }
 
 public:
     virtual ~ImoBarline() {}
@@ -2423,6 +2427,8 @@ public:
     //barline type
     inline int get_type() { return m_barlineType; }
     inline void set_type(int barlineType) { m_barlineType = barlineType; }
+    inline bool is_middle() { return m_fMiddle; }
+    inline void set_middle(bool value) { m_fMiddle = value; }
 
     //overrides: barlines always in staff 0
     void set_staff(int UNUSED(staff)) { m_staff = 0; }

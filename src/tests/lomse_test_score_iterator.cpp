@@ -171,5 +171,142 @@ SUITE(ScoreIteratorTest)
         CHECK( sit.is_first() == true );
     }
 
+    TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_prev_0)
+    {
+        //@ prev() returns NULL if at start
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (n c4 q) (r q)) ))))" );
+        DocIterator it(&doc);
+        it.start_of_content();
+        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        StaffObjsIterator sit(pTable);
+
+        CHECK( sit.prev() == NULL );
+        CHECK( (*sit)->imo_object()->is_note() == true );
+        CHECK( sit.is_first() == true );
+    }
+
+    TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_prev_1)
+    {
+        //@ prev() returns prev object at intermediate position
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (n c4 q) (r q)) ))))" );
+        DocIterator it(&doc);
+        it.start_of_content();
+        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        StaffObjsIterator sit(pTable);
+        ColStaffObjsEntry* pEntry = *sit;
+        ++sit;
+
+        CHECK( sit.prev() == pEntry );
+        CHECK( (*sit)->imo_object()->is_rest() == true );
+        CHECK( sit.is_first() == false );
+    }
+
+    TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_prev_2)
+    {
+        //@ prev() returns prev object at end
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (n c4 q) (r q)) ))))" );
+        DocIterator it(&doc);
+        it.start_of_content();
+        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        StaffObjsIterator sit(pTable);
+        ++sit;
+        ColStaffObjsEntry* pEntry = *sit;
+        ++sit;
+
+        CHECK( sit.prev() == pEntry );
+        CHECK( sit.is_end() == true );
+    }
+
+    TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_next_0)
+    {
+        //@ next() returns NULL if at end.
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (n c4 q) (r q)) ))))" );
+        DocIterator it(&doc);
+        it.start_of_content();
+        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        StaffObjsIterator sit(pTable);
+        ++sit;
+        ++sit;
+
+        CHECK( sit.next() == NULL );
+        CHECK( sit.is_end() == true );
+    }
+
+    TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_next_1)
+    {
+        //@ next() returns next object at start.
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (n c4 q) (r q)) ))))" );
+        DocIterator it(&doc);
+        it.start_of_content();
+        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        StaffObjsIterator sit(pTable);
+        ColStaffObjsEntry* pEntry = sit.next();
+        ++sit;
+
+        CHECK( *sit == pEntry );
+        CHECK( (*sit)->imo_object()->is_rest() == true );
+        CHECK( sit.is_first() == false );
+    }
+
+    TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_next_2)
+    {
+        //@ next() returns next object at start. Moving backwards
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (n c4 q) (r q)) ))))" );
+        DocIterator it(&doc);
+        it.start_of_content();
+        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        StaffObjsIterator sit(pTable);
+        ++sit;
+        ++sit;
+        CHECK( sit.is_end() == true );
+
+        --sit;
+        --sit;
+        CHECK( sit.is_first() == true );
+        ColStaffObjsEntry* pEntry = sit.next();
+        ++sit;
+        CHECK( *sit == pEntry );
+        CHECK( (*sit)->imo_object()->is_rest() == true );
+    }
+
+    TEST_FIXTURE(ScoreIteratorTestFixture, score_iterator_next_3)
+    {
+        //@ next() returns next object at intermediate position
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+            "(instrument (musicData (clef F4) (n c4 q) (r q)) ))))" );
+        DocIterator it(&doc);
+        it.start_of_content();
+        ImoScore* pScore = dynamic_cast<ImoScore*>(*it);
+        ColStaffObjs* pTable = pScore->get_staffobjs_table();
+        StaffObjsIterator sit(pTable);
+        ++sit;
+        CHECK( (*sit)->imo_object()->is_note() == true );
+
+        ColStaffObjsEntry* pEntry = sit.next();
+        ++sit;
+
+        CHECK( *sit == pEntry );
+        CHECK( pEntry->imo_object()->is_rest() == true );
+    }
+
 }
 

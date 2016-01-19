@@ -151,20 +151,23 @@ public:
                 //first note
                 m_pBeamEngrv = LOMSE_NEW MyBeamEngraver(m_libraryScope, m_pMeter);
                 m_pBeamEngrv->set_start_staffobj(pBeam, pNote, m_shapes[i],
-                                                 iInstr, iStaff, iSystem, iCol);
+                                                 iInstr, iStaff, iSystem, iCol,
+                                                 0.0f, 0.0f, 0.0f);
                 m_pStorage->save_engraver(m_pBeamEngrv, pBeam);
             }
             else if (i == numNotes-1)
             {
                 //last note
                 m_pBeamEngrv->set_end_staffobj(pBeam, pNote, m_shapes[i],
-                                               iInstr, iStaff, iSystem, iCol);
+                                               iInstr, iStaff, iSystem, iCol,
+                                               0.0f, 0.0f, 0.0f);
             }
             else
             {
                 //intermediate note
                 m_pBeamEngrv->set_middle_staffobj(pBeam, pNote, m_shapes[i],
-                                                  iInstr, iStaff, iSystem, iCol);
+                                                  iInstr, iStaff, iSystem, iCol,
+                                                  0.0f, 0.0f, 0.0f);
             }
         }
     }

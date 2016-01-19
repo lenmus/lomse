@@ -3950,7 +3950,19 @@ protected:
         m_pAnalyser->score_analysis_begin(pScore);
         add_to_model(pScore);
         pScore->set_version(160);   //use version 1.6 to allow using ImoFwdBack
+        set_options();
         return pScore;
+    }
+
+    void set_options()
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoOptionInfo* pOpt = static_cast<ImoOptionInfo*>(
+                                        ImFactory::inject(k_imo_option, pDoc) );
+        pOpt->set_name("Render.SpacingFactor");
+        pOpt->set_float_value(0.35f);
+        pOpt->set_type(ImoOptionInfo::k_number_float);
+        add_to_model(pOpt);
     }
 
     void remove_score(ImoDocument* pImoDoc, ImoScore* pScore)
