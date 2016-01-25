@@ -295,42 +295,11 @@ SUITE(ScoreLayouterTest)
     TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_Creation)
     {
         Document doc(m_libraryScope);
-        //unsigned *pStack;
-        //_asm {mov pStack, esp}
-        //cout << "The stack is at " << pStack << endl;
-        //cout << "doc is at " << &doc << endl;
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
             "(instrument (musicData ))) ))" );
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-
-        //cout << "test precision 5798.12500: "
-        //          << fixed << setprecision(2) << setfill(' ')
-        //          << setw(10) << 5798.12500 << endl;
-
-        //cout << "test precision 5798.87500: "
-        //          << fixed << setprecision(2) << setfill(' ')
-        //          << setw(10) << 5798.87500 << endl;
-
-        //char buffer[250];
-        //sprintf(buffer, "%.2f", 5798.12500);
-        //cout << "test precison printf 5798.12500: " << buffer << endl;
-        //sprintf(buffer, "%.2f", 5798.87500);
-        //cout << "test precison printf 5798.87500: " << buffer << endl;
-
-        //float num = 5798.12500f;
-        //float p = floor(num * 100.0f + 0.5f) / 100.0f;
-        //cout << "test precision floor 5798.12500: "
-        //          << fixed << setprecision(2) << setfill(' ')
-        //          << setw(10) << p << endl;
-        //num = 5798.87500f;
-        //p = floor(num * 100.0f + 0.5f) / 100.0f;
-        //cout << "test precision floor 5798.87500: "
-        //          << fixed << setprecision(2) << setfill(' ')
-        //          << setw(10) << p << endl;
-
-
 
         CHECK( scoreLyt.my_get_columns_builder() != NULL);
         CHECK( scoreLyt.my_shapes_creator() != NULL );

@@ -209,7 +209,7 @@ void ScoreCaretPositioner::layout_caret(Caret* pCaret, DocCursor* pCursor)
 
     //get score cursor state
     DocCursorState state = m_pDocCursor->get_state();
-    m_spState = SpScoreCursorState( boost::static_pointer_cast<ScoreCursorState>(
+    m_spState = SpScoreCursorState( static_pointer_cast<ScoreCursorState>(
                                         state.get_delegate_state() ));
 
     //get score

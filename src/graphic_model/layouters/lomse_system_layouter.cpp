@@ -516,9 +516,12 @@ void ColumnLayouter::do_spacing(bool fTrace, int UNUSED(level))
 {
     //computes the minimum space required by this column
 
+    m_spacingStartTime = microsec_clock::universal_time();
+
     if (fTrace || m_libraryScope.dump_column_tables())
     {
-        dbgLogger << endl << "******************* Before spacing" << endl;
+        dbgLogger << endl << to_simple_string( microsec_clock::local_time() )
+                  << " ******************* Before spacing" << endl;
         m_pColStorage->dump_column_storage(dbgLogger);
     }
 
@@ -528,7 +531,11 @@ void ColumnLayouter::do_spacing(bool fTrace, int UNUSED(level))
 
     if (fTrace || m_libraryScope.dump_column_tables())
     {
-        dbgLogger << "******************* After spacing" << endl;
+        ptime now = microsec_clock::universal_time();
+        time_duration diff = now - m_spacingStartTime;
+        dbgLogger << to_simple_string( microsec_clock::local_time() )
+                  << " - (" << diff.total_microseconds()
+                  << "µs) ******************* After spacing" << endl;
         m_pColStorage->dump_column_storage(dbgLogger);
     }
 }
@@ -542,10 +549,12 @@ void ColumnLayouter::compute_spacing()
     {
         create_line_spacers();
         process_non_timed_at_prolog();
+        process_barlines_at_current_timepos();
         process_timed_at_current_timepos();
         while (there_are_objects())
         {
             process_non_timed_at_current_timepos();
+            process_barlines_at_current_timepos();
             process_timed_at_current_timepos();
         }
 
@@ -603,6 +612,57 @@ void ColumnLayouter::process_non_timed_at_prolog()
     if (m_nTraceLevel && k_trace_spacing)
     {
         dbgLogger << "After process_non_timed_at_prolog. m_uCurrentPos="
+            << m_uCurrentPos << ", m_rCurrentTime=" << m_rCurrentTime << endl;
+        dump_column_data(dbgLogger);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void ColumnLayouter::process_barlines_at_current_timepos()
+{
+    if (m_nTraceLevel && k_trace_spacing)
+    {
+        dbgLogger << "************ Entering ColumnLayouter"
+            << "::process_barlines_at_current_timepos. m_uCurrentPos="
+            << m_uCurrentPos << ", m_rCurrentTime=" << m_rCurrentTime << endl;
+
+    }
+
+    LUnits uxPosForNextTime = m_uCurrentPos;        //next position, at least current one
+
+    //determine next valid position
+    LUnits uNextPos = m_uCurrentPos;
+    bool fBarline = false;
+    for (LineSpacersIterator it=m_LineSpacers.begin(); it != m_LineSpacers.end(); ++it)
+	{
+        if ((*it)->current_time_is(m_rCurrentTime) && (*it)->is_middle_barline())
+        {
+            fBarline = true;
+            uNextPos = max(uNextPos, (*it)->determine_next_feasible_position_after(m_uCurrentPos));
+        }
+    }
+
+    if (fBarline)
+    {
+        m_uCurrentPos = uNextPos;
+
+        //position barlines
+        for (LineSpacersIterator it=m_LineSpacers.begin(); it != m_LineSpacers.end(); ++it)
+        {
+            if ((*it)->current_time_is(m_rCurrentTime) && (*it)->is_middle_barline())
+            {
+                (*it)->process_barline_at_current_timepos(m_uCurrentPos);
+                LUnits uxNextPos = (*it)->get_next_position();
+                uxPosForNextTime = max(uxPosForNextTime, uxNextPos);
+            }
+        }
+
+        m_uCurrentPos = uxPosForNextTime;
+    }
+
+    if (m_nTraceLevel && k_trace_spacing)
+    {
+        dbgLogger << "After process_barlines_at_current_timepos. m_uCurrentPos="
             << m_uCurrentPos << ", m_rCurrentTime=" << m_rCurrentTime << endl;
         dump_column_data(dbgLogger);
     }
@@ -2035,6 +2095,34 @@ LUnits LineSpacer::determine_next_feasible_position_after(LUnits UNUSED(uxPos))
 }
 
 //---------------------------------------------------------------------------------------
+void LineSpacer::process_barline_at_current_timepos(LUnits uxPos)
+{
+    //Current position is a barline in this line. Set its position.
+
+    //update current pos with new xPos required for column alignment
+    m_uxRemovable += uxPos - m_uxCurPos;
+    m_uxCurPos = uxPos;
+
+    //proceed to process this barline
+    LUnits uxRequiredPos = m_uxCurPos;  // + compute_shift_to_avoid_overlap_with_previous();
+
+    drag_any_previous_clef_to_place_it_near_this_one();
+
+    //AssignPositionToCurrentEntry();
+    LineEntry* pEntry = *m_itCur;
+    LUnits xPos = uxRequiredPos + pEntry->get_anchor();
+    pEntry->set_position(xPos);
+
+    assign_fixed_and_variable_space(pEntry);
+
+    m_uxCurPos = pEntry->get_x_final();
+    m_uxRemovable = pEntry->get_variable_space();
+
+    //AdvanceToNextEntry();
+    m_itCur++;
+}
+
+//---------------------------------------------------------------------------------------
 void LineSpacer::process_timed_at_current_timepos(LUnits uxPos)
 {
 	//Starting at current position, explores the line to set the position of all timed
@@ -2082,6 +2170,14 @@ void LineSpacer::process_timed_at_current_timepos(LUnits uxPos)
 
     m_uxRemovable = uxMargin;
     m_rCurTime = get_next_available_time();
+}
+
+//---------------------------------------------------------------------------------------
+bool LineSpacer::is_middle_barline()
+{
+    return (m_itCur != m_pLine->end())
+            && !(*m_itCur)->is_barline_entry()
+            && (*m_itCur)->get_staffobj()->is_barline();
 }
 
 //---------------------------------------------------------------------------------------
@@ -2181,8 +2277,15 @@ void LineSpacer::assign_fixed_and_variable_space(LineEntry* pEntry)
         }
         else if (pSO->is_barline())
         {
-            pEntry->set_fixed_space(0.0f);
-            pEntry->set_variable_space(0.0f);
+            LUnits space = 0.0f;
+            if (!pEntry->is_barline_entry())
+            {
+                int iInstr = m_pLine->get_instrument();
+                space = m_pMeter->tenths_to_logical(LOMSE_SPACE_AFTER_BARLINE / 2.0f,
+                                                    iInstr, 0);
+            }
+            pEntry->set_fixed_space(space);
+            pEntry->set_variable_space(space);
         }
         else
             assign_no_space(pEntry);

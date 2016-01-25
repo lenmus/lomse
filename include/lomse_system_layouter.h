@@ -39,6 +39,12 @@
 #include <vector>
 using namespace std;
 
+//For performance measurements (timing)
+#include <ctime>   //clock
+#include <boost/date_time/posix_time/posix_time.hpp>
+using namespace boost::posix_time;
+
+
 namespace lomse
 {
 
@@ -454,12 +460,14 @@ protected:
 
     void create_line_spacers();
     void process_non_timed_at_prolog();
+    void process_barlines_at_current_timepos();
     void process_timed_at_current_timepos();
     void process_non_timed_at_current_timepos();
     //----------------------------------------------------------------------------
 
-    //for debugging and testing
+    //for debugging, testing and performance measurements
     int m_nTraceLevel;
+    ptime m_spacingStartTime;
 
 };
 
@@ -610,6 +618,7 @@ public:
 
     void process_non_timed_at_prolog(LUnits uSpaceAfterProlog);
     void process_non_timed_at_current_timepos(LUnits uxPos);
+    void process_barline_at_current_timepos(LUnits uxPos);
     void process_timed_at_current_timepos(LUnits uxPos);
     LUnits determine_next_feasible_position_after(LUnits uxPos);
 	inline bool current_time_is(TimeUnits rTime) { return is_equal_time(m_rCurTime, rTime); }
@@ -618,6 +627,7 @@ public:
                && is_equal_time((*m_itCur)->get_timepos(), m_rCurTime);
     }
     inline bool are_there_more_objects() { return (m_itCur != m_pLine->end()); }
+    bool is_middle_barline();
     TimeUnits get_next_available_time();
     LUnits get_next_position();
 

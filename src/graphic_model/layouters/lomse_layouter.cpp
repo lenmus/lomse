@@ -94,6 +94,12 @@ void Layouter::layout_item(ImoContentObj* pItem, GmoBox* pParentBox)
 
     m_pCurLayouter = create_layouter(pItem);
 
+//    //set trace options, for debugging
+//    if (pItem->is_score() && m_libraryScope.dump_column_tables())
+//    {
+//        static_cast<ScoreLayouter*>(m_pCurLayouter)->trace_column(0, k_trace_spacing);
+//    }
+
     m_pCurLayouter->prepare_to_start_layout();
     while (!m_pCurLayouter->is_item_layouted())
     {

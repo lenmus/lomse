@@ -49,6 +49,7 @@ using namespace std;
     #define UNUSED(x) /* x */
 #endif
 
+
 //---------------------------------------------------------------------------------------
 //if it is a C++11 compliant compiler use std shared_ptr, else use boost shared_ptr
 #if __cplusplus > 199711L
@@ -72,7 +73,6 @@ using namespace std;
         #define EnableSharedFromThis  boost::enable_shared_from_this
     }
 #endif
-
 
 namespace lomse
 {
