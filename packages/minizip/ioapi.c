@@ -82,6 +82,7 @@ static int     ZCALLBACK ferror_file_func OF((voidpf opaque, voidpf stream));
 
 static voidpf ZCALLBACK fopen_file_func (voidpf opaque, const char* filename, int mode)
 {
+    (void *)opaque;     //CSG. Fix for warning due to unused param
     FILE* file = NULL;
     const char* mode_fopen = NULL;
     if ((mode & ZLIB_FILEFUNC_MODE_READWRITEFILTER)==ZLIB_FILEFUNC_MODE_READ)
