@@ -6,7 +6,7 @@
 
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -53,7 +53,11 @@
 //---------------------------------------------------------------------------------------
 // library version 
 //---------------------------------------------------------------------------------------
-#define LOMSE_REVISION          @LOMSE_REVISION@
+#define LOMSE_VERSION_MAJOR     @LOMSE_VERSION_MAJOR@
+#define LOMSE_VERSION_MINOR     @LOMSE_VERSION_MINOR@
+#define LOMSE_VERSION_PATCH     @LOMSE_VERSION_PATCH@
+#define LOMSE_VERSION_SHA1      "@LOMSE_VERSION_SHA1@"
+#define LOMSE_BUILD_DATE        "@LOMSE_BUILD_DATE@"
 
 
 //---------------------------------------------------------------------------------------

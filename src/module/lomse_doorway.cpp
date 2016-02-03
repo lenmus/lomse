@@ -162,15 +162,21 @@ int LomseDoorway::get_version_patch()
 }
 
 //---------------------------------------------------------------------------------------
-char LomseDoorway::get_version_type()
-{
-    return m_pLibraryScope->get_version_type();
-}
-
-//---------------------------------------------------------------------------------------
 string LomseDoorway::get_version_string()
 {
     return m_pLibraryScope->get_version_string();
+}
+
+//---------------------------------------------------------------------------------------
+string LomseDoorway::get_version_long_string()
+{
+    return m_pLibraryScope->get_version_long_string();
+}
+
+//---------------------------------------------------------------------------------------
+string LomseDoorway::get_build_date()
+{
+    return m_pLibraryScope->get_build_date();
 }
 
 //---------------------------------------------------------------------------------------

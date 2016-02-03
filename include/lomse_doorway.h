@@ -139,11 +139,12 @@ public:
 
     //library info
     string get_version_string();
+    string get_version_long_string();
+    string get_build_date();
     int get_version_major();
     int get_version_minor();
     int get_version_patch();
-    char get_version_type();
-    long get_revision() { return LOMSE_REVISION; }
+    long get_version_sha1();
 
 protected:
     void clear_forensic_log();

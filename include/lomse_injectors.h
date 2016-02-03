@@ -128,11 +128,12 @@ public:
 
     //library info
     static string get_version_string();
+    static string get_version_long_string();
     static int get_version_major();
     static int get_version_minor();
     static int get_version_patch();
-    static char get_version_type();
-    static long get_revision();
+    static string get_version_sha1();
+    static string get_build_date();
 
     //fonts
     MusicGlyphs* get_glyphs_table();

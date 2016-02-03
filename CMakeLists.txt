@@ -84,7 +84,7 @@
 #
 #-------------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.11)
 
 # project name
 project(lomse)
@@ -101,12 +101,12 @@ set( LOMSE_PKG_DIR  ${LOMSE_ROOT_DIR}/packages )
 set( OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/bin )
 set( EXECUTABLE_OUTPUT_PATH ${OUTDIR})
 set( LIBRARY_OUTPUT_PATH ${OUTDIR})
-message("LOMSE_ROOT_DIR: ${LOMSE_ROOT_DIR}")
-message("CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
-message("LOMSE_SRC_DIR: ${LOMSE_SRC_DIR}")
-message("EXECUTABLE_OUTPUT_PATH: ${EXECUTABLE_OUTPUT_PATH}")
-message("LIBRARY_OUTPUT_PATH: ${LIBRARY_OUTPUT_PATH}")
-message("OUTDIR: ${OUTDIR}")
+message(STATUS "** LOMSE_ROOT_DIR: ${LOMSE_ROOT_DIR}")
+message(STATUS "** CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
+message(STATUS "** LOMSE_SRC_DIR: ${LOMSE_SRC_DIR}")
+message(STATUS "** EXECUTABLE_OUTPUT_PATH: ${EXECUTABLE_OUTPUT_PATH}")
+message(STATUS "** LIBRARY_OUTPUT_PATH: ${LIBRARY_OUTPUT_PATH}")
+message(STATUS "** OUTDIR: ${OUTDIR}")
 
 # check that compiler supports namespace sdt
 include(TestForSTDNamespace)
@@ -118,9 +118,12 @@ endif()
 # directories to search for CMake modules
 set( CMAKE_MODULE_PATH "${LOMSE_ROOT_DIR}/cmake-modules" )
 
-
 #define path were fonts will be installed.
 set( FONTS_PATH   "${CMAKE_INSTALL_PREFIX}/share/lomse/fonts" )
+
+
+# Get version information from Git repository
+include( ${LOMSE_ROOT_DIR}/lomse-version-from-git.cmake )
 
 # define build options and create the include file "lomse_config.h"
 include( ${LOMSE_ROOT_DIR}/build-options.cmake )
@@ -139,8 +142,8 @@ if (LOMSE_BUILD_TESTS)
     if(UNITTEST++_FOUND)
         include_directories(${UNITTEST++_INCLUDE_DIR})
         link_directories( ${UNITTEST++_LIBRARY} )
-        message("UnitTest++ found: library: ${UNITTEST++_LIBRARY}" )
-        message("UnitTest++ found: include: ${UNITTEST++_INCLUDE_DIR}" )
+        #message("UnitTest++ found: library: ${UNITTEST++_LIBRARY}" )
+        #message("UnitTest++ found: include: ${UNITTEST++_INCLUDE_DIR}" )
     else()
         message(SEND_ERROR "UnitTest++ package not found." )
     endif()
@@ -165,14 +168,14 @@ if(Boost_FOUND)
     if (NOT ".${Boost_SUBMINOR_VERSION}" STREQUAL "." )
 	    set(BOOST_VERSION   "${BOOST_VERSION}.${Boost_SUBMINOR_VERSION}" )
 	endif()
-    message("Boost found: lib version= ${Boost_LIB_VERSION}, version=${BOOST_VERSION}" )
+    message(STATUS "Boost found: lib version= ${Boost_LIB_VERSION}, version=${BOOST_VERSION}" )
     #string(REGEX REPLACE "_" "." Boost_LIB_VERSION "${Boost_LIB_VERSION}" )
     set(BOOST_DEPENDENCIES 
         "libboost-thread${BOOST_VERSION}, libboost-date-time${BOOST_VERSION}")
-    message("Boost found: libraries: ${Boost_LIBRARIES}" )
-    message("Boost found: include= ${Boost_INCLUDE_DIRS}" )
-    message("Boost found: libdir= ${Boost_LIBRARY_DIRS}" )
-    message("Boost dependencies: ${BOOST_DEPENDENCIES}" )
+    message(STATUS "Boost found: libraries: ${Boost_LIBRARIES}" )
+    message(STATUS "Boost found: include= ${Boost_INCLUDE_DIRS}" )
+    message(STATUS "Boost found: libdir= ${Boost_LIBRARY_DIRS}" )
+    message(STATUS "Boost dependencies: ${BOOST_DEPENDENCIES}" )
 else()
     message(SEND_ERROR "Boost package not found. Reason: ${Boost_ERROR_REASON}" )
 endif()
@@ -196,9 +199,9 @@ if( FREETYPE_FOUND )
     include_directories( ${FREETYPE_INCLUDE_DIRS} )
     link_libraries( ${FREETYPE_LIBRARIES} )
     link_directories( ${FREETYPE_LINK_DIR} )        
-    message("Freetype found: libraries= ${FREETYPE_LIBRARIES}" )
-    message("Freetype found: include= ${FREETYPE_INCLUDE_DIRS}" )
-    message("Freetype found: libdir= ${FREETYPE_LINK_DIR}" )
+    message(STATUS "Freetype found: libraries= ${FREETYPE_LIBRARIES}" )
+    message(STATUS "Freetype found: include= ${FREETYPE_INCLUDE_DIRS}" )
+    message(STATUS "Freetype found: libdir= ${FREETYPE_LINK_DIR}" )
 else()
     message(SEND_ERROR "FreeType package not found.")
 endif()
@@ -210,9 +213,9 @@ if( PNG_FOUND )
     include_directories( ${PNG_INCLUDE_DIRS} )
     link_libraries( ${PNG_LIBRARIES} )
     link_directories( ${PNG_LINK_DIR} )        
-    message("libpng found: libraries= ${PNG_LIBRARIES}" )
-    message("libpng found: include= ${PNG_INCLUDE_DIRS}" )
-    message("libpng found: libdir= ${PNG_LINK_DIR}" )
+    message(STATUS "libpng found: libraries= ${PNG_LIBRARIES}" )
+    message(STATUS "libpng found: include= ${PNG_INCLUDE_DIRS}" )
+    message(STATUS "libpng found: libdir= ${PNG_LINK_DIR}" )
 else()
     message(SEND_ERROR "libpng package not found.")
 endif()
@@ -224,10 +227,10 @@ if( ZLIB_FOUND )
     include_directories( ${ZLIB_INCLUDE_DIR} )
     link_libraries( ${ZLIB_LIBRARIES} )
     link_directories( ${ZLIB_LINK_DIR} )        
-    message("zlib found: libraries= ${ZLIB_LIBRARIES}" )
-    message("zlib found: include= ${ZLIB_INCLUDE_DIRS}" )
-    message("zlib found: libdir= ${ZLIB_LINK_DIR}" )
-    message("zlib version: ${ZLIB_VERSION_STRING}" )
+    message(STATUS "zlib found: libraries= ${ZLIB_LIBRARIES}" )
+    message(STATUS "zlib found: include= ${ZLIB_INCLUDE_DIRS}" )
+    message(STATUS "zlib found: libdir= ${ZLIB_LINK_DIR}" )
+    message(STATUS "zlib version: ${ZLIB_VERSION_STRING}" )
 else()
     message(SEND_ERROR "zlib package not found.")
 endif()
@@ -308,8 +311,8 @@ if(LOMSE_BUILD_STATIC_LIB)
 
     add_library( ${LOMSE_STATIC} STATIC ${ALL_LOMSE_SOURCES} )
     set_target_properties(${LOMSE_STATIC} PROPERTIES
-            VERSION ${LOMSE_VERSION}
-            SOVERSION ${LOMSE_VERSION}
+            VERSION ${LOMSE_PACKAGE_VERSION}
+            SOVERSION ${LOMSE_PACKAGE_VERSION}
             OUTPUT_NAME "lomse"
             RUNTIME_OUTPUT_DIRECTORY ${LOMSE_ROOT_DIR}/bin
     )
@@ -336,8 +339,8 @@ if(LOMSE_BUILD_SHARED_LIB)
 
     add_library( ${LOMSE_SHARED} SHARED ${ALL_LOMSE_SOURCES} )
     set_target_properties(${LOMSE_SHARED} 
-                          PROPERTIES VERSION ${LOMSE_VERSION}
-                                     SOVERSION ${LOMSE_VERSION}
+                          PROPERTIES VERSION ${LOMSE_PACKAGE_VERSION}
+                                     SOVERSION ${LOMSE_PACKAGE_VERSION}
                                      OUTPUT_NAME "lomse"
                                      RUNTIME_OUTPUT_DIRECTORY  ${LOMSE_ROOT_DIR}/bin )
 
@@ -462,7 +465,7 @@ endif(LOMSE_BUILD_EXAMPLE)
 #
 ###############################################################################
 
-message("CMAKE_INSTALL_PREFIX = " ${CMAKE_INSTALL_PREFIX} )
+message(STATUS "CMAKE_INSTALL_PREFIX = " ${CMAKE_INSTALL_PREFIX} )
 
 if( UNIX )
 
@@ -598,7 +601,7 @@ configure_file(
 install(FILES  ${CMAKE_CURRENT_BINARY_DIR}/liblomse.pc
         DESTINATION ${LOMSE_PKG_CONFIG_INSTALL} )
 
-message("pkg-config install path: ${LOMSE_PKG_CONFIG_INSTALL}" )
+message(STATUS "pkg-config install path: ${LOMSE_PKG_CONFIG_INSTALL}" )
 
 
 ###############################################################################
@@ -610,7 +613,7 @@ message("pkg-config install path: ${LOMSE_PKG_CONFIG_INSTALL}" )
 ###############################################################################
 
 set(CPACK_PACKAGE_VENDOR "LenMus Project")
-set(CPACK_PACKAGE_VERSION ${LOMSE_VERSION_STRING} )
+set(CPACK_PACKAGE_VERSION ${LOMSE_PACKAGE_VERSION} )
 set(CPACK_PACKAGE_NAME "liblomse")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Free open source library to render music scores")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${LOMSE_ROOT_DIR}/README")
@@ -639,7 +642,7 @@ if(UNIX)
 
     set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS ${LOMSE_DEPENDENCIES})
-    message("Package dependencies: ${CPACK_DEBIAN_PACKAGE_DEPENDS}" )
+    message(STATUS "Package dependencies: ${CPACK_DEBIAN_PACKAGE_DEPENDS}" )
 
 #elseif( WIN32 )
 #    # MS Windows package

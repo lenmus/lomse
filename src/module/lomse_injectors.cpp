@@ -28,8 +28,8 @@
 //---------------------------------------------------------------------------------------
 
 #include "lomse_injectors.h"
-#include "lomse_version.h"
 
+#include "lomse_config.h"
 #include "lomse_ldp_parser.h"
 #include "lomse_ldp_analyser.h"
 #include "lomse_ldp_compiler.h"
@@ -219,35 +219,31 @@ int LibraryScope::get_version_minor() { return LOMSE_VERSION_MINOR; }
 int LibraryScope::get_version_patch() { return LOMSE_VERSION_PATCH; }
 
 //---------------------------------------------------------------------------------------
-char LibraryScope::get_version_type() { return LOMSE_VERSION_TYPE; }
-
-//---------------------------------------------------------------------------------------
-long LibraryScope::get_revision() { return LOMSE_VERSION_REVNO; }
+string LibraryScope::get_version_sha1() { return LOMSE_VERSION_SHA1; }
 
 //---------------------------------------------------------------------------------------
 string LibraryScope::get_version_string()
 {
-    //i.e. "0.7 (rev.48)", "0.7 beta 48 (rev.56)", "1.0 (rev.75)", "1.0.2 (rev.77)"
-
     stringstream s;
-    s << get_version_major() << "." << get_version_minor();
-    if (get_version_type() != ' ')
-    {
-        if (get_version_type() == 'a')
-            s << " alpha ";
-        else
-            s << " beta ";
-        s << get_version_patch();
-    }
-    else
-    {
-        if (get_version_patch() > 0)
-            s << "." << get_version_patch();
-    }
-
-    s << " (rev." << get_revision() << ")";
+    s << get_version_major()
+      << "." << get_version_minor()
+      << "." << get_version_patch();
     return s.str();
 }
+
+//---------------------------------------------------------------------------------------
+string LibraryScope::get_version_long_string()
+{
+    stringstream s;
+    s << get_version_major()
+      << "." << get_version_minor()
+      << "." << get_version_patch()
+      << "-" << get_version_sha1();
+    return s.str();
+}
+
+//---------------------------------------------------------------------------------------
+string LibraryScope::get_build_date() { return LOMSE_BUILD_DATE; }
 
 
 

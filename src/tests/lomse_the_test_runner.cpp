@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -54,9 +54,10 @@ int main(int argc, char** argv)
     //or single suite
     //  testlib suite MySuite
 
-    cout << "Lomse version " << LibraryScope::get_version_string()
+    cout << "Lomse version " << LibraryScope::get_version_long_string()
          << ". Library tests runner." << endl << endl;
 
+    cout << "Lomse build date: " << LibraryScope::get_build_date() << endl;
     cout << "Path for tests scores: '" << TESTLIB_SCORES_PATH << "'" << endl << endl;
 
     int nErrors = 0;
