@@ -21,6 +21,32 @@ Lomse is distributed under the BSD 2-clause license, a permissive open source li
 * Music renderization is based on fonts compliant with the Standard Music Font Layout (SMuFL) specification
 
 
+## Installation
+
+~~~~
+# download lomse repository
+cd <projects-path>
+git clone -b master --single-branch https.//github.com/lenmus/lomse.git
+
+# create folder for building and move there
+mkdir build
+cd build
+
+#build lomse and testlib
+cmake -G "Unix Makefiles" ../lomse
+make
+
+#run tests
+./bin/testlib
+
+#install library
+sudo make install
+~~~~
+
+For more info, packages, or other options see [this](http://www.lenmus.org/en/lomse/install)
+
+
+
 ## Contributing
 
 Lomse is a free open source project and contributions are welcome. Get involved in making it better! Any code submission must be under the terms of the BSD 2-clause license. 
