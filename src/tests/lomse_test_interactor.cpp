@@ -54,7 +54,7 @@ using namespace lomse;
 
 
 //---------------------------------------------------------------------------------------
-//MyDoorway: Derived class to avoid platform depentent code
+//MyDoorway: Derived class to avoid platform dependent code
 class MyDoorway : public LomseDoorway
 {
 protected:
@@ -162,6 +162,7 @@ public:
 
 
 };
+
 
 //---------------------------------------------------------------------------------------
 class InteractorTestFixture
