@@ -1,0 +1,19 @@
+<html>
+<!-- $Updated: ${today} -->
+
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<title>Lomse unit tests</title>
+<link rel="stylesheet" media="all" href="singledoc.css" type="text/css" />
+</head>
+<body>
+
+<h1>Lomse unit tests</h1>
+<!--====================================================-->
+
+<p>Lomse comes with an extensive set of unit tests to make sure each core component of Lomse works properly. This page shows the results and is automatically updated each time I build the library.</p>
+
+<p>Test date: ${date-time}</p>
+
+
+

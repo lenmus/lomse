@@ -51,16 +51,6 @@
 
 
 //---------------------------------------------------------------------------------------
-// library version 
-//---------------------------------------------------------------------------------------
-#define LOMSE_VERSION_MAJOR     @LOMSE_VERSION_MAJOR@
-#define LOMSE_VERSION_MINOR     @LOMSE_VERSION_MINOR@
-#define LOMSE_VERSION_PATCH     @LOMSE_VERSION_PATCH@
-#define LOMSE_VERSION_SHA1      "@LOMSE_VERSION_SHA1@"
-#define LOMSE_BUILD_DATE        "@LOMSE_BUILD_DATE@"
-
-
-//---------------------------------------------------------------------------------------
 // platform and compiler
 //---------------------------------------------------------------------------------------
 #define LOMSE_PLATFORM_WIN32      @LOMSE_PLATFORM_WIN32@

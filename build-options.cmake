@@ -49,13 +49,13 @@ endif()
 option(LOMSE_BUILD_EXAMPLE "Build the example-1 program" OFF)
 
 
-message(STATUS "** Build the static library = ${LOMSE_BUILD_STATIC_LIB}")
-message(STATUS "** Build the shared library = ${LOMSE_BUILD_SHARED_LIB}")
-message(STATUS "** Build testlib program = ${LOMSE_BUILD_TESTS}")
-message(STATUS "** Run tests after building = ${LOMSE_RUN_TESTS}")
-message(STATUS "** Create Debug build = ${LOMSE_DEBUG}")
-message(STATUS "** Enable debug logs = ${LOMSE_ENABLE_DEBUG_LOGS}")
-message(STATUS "** Compatibility for LDP v1.5 = ${LOMSE_COMPATIBILITY_LDP_1_5}")
+message("Build the static library = ${LOMSE_BUILD_STATIC_LIB}")
+message("Build the shared library = ${LOMSE_BUILD_SHARED_LIB}")
+message("Build testlib program = ${LOMSE_BUILD_TESTS}")
+message("Run tests after building = ${LOMSE_RUN_TESTS}")
+message("Create Debug build = ${LOMSE_DEBUG}")
+message("Enable debug logs = ${LOMSE_ENABLE_DEBUG_LOGS}")
+message("Compatibility for LDP v1.5 = ${LOMSE_COMPATIBILITY_LDP_1_5}")
 
 
 
@@ -76,6 +76,30 @@ message(STATUS "** Compatibility for LDP v1.5 = ${LOMSE_COMPATIBILITY_LDP_1_5}")
 #    set( LOMSE_USE_DLL "1")
 #    set( LOMSE_CREATE_DLL "1")
 #endif()
+
+# version. Extract values from lomse_version.h header file
+file(STRINGS ${LOMSE_ROOT_DIR}/include/lomse_version.h LOMSE_VERSION_LIST)
+list (GET LOMSE_VERSION_LIST 5 MAJOR_LINE)
+list (GET LOMSE_VERSION_LIST 6 MINOR_LINE)
+list (GET LOMSE_VERSION_LIST 7 PATCH_LINE)
+list (GET LOMSE_VERSION_LIST 8 SHA1_LINE)
+string(REGEX REPLACE "\#define LOMSE_VERSION_MAJOR    " "" LOMSE_VERSION_MAJOR "${MAJOR_LINE}")
+string(REGEX REPLACE "\#define LOMSE_VERSION_MINOR    " "" LOMSE_VERSION_MINOR "${MINOR_LINE}")
+string(REGEX REPLACE "\#define LOMSE_VERSION_PATCH    " "" LOMSE_VERSION_PATCH "${PATCH_LINE}")
+string(REGEX REPLACE "\#define LOMSE_VERSION_SHA1     " "" LOMSE_VERSION_SHA1  "${SHA1_LINE}")
+
+message ("major = '${LOMSE_VERSION_MAJOR}'") 
+message ("minor = '${LOMSE_VERSION_MINOR}'") 
+message ("patch = '${LOMSE_VERSION_PATCH}'") 
+message ("sha1  = '${LOMSE_VERSION_SHA1}'") 
+
+
+#build version string for installer name
+set(LOMSE_PACKAGE_VERSION "${LOMSE_VERSION_MAJOR}.${LOMSE_VERSION_MINOR}.${LOMSE_VERSION_PATCH}" )
+
+set(LOMSE_VERSION "${LOMSE_PACKAGE_VERSION}" )
+message ("version = '${LOMSE_VERSION}'") 
+message ("version string = '${LOMSE_PACKAGE_VERSION}'") 
 
 
 # platform

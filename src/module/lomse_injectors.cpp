@@ -29,7 +29,7 @@
 
 #include "lomse_injectors.h"
 
-#include "lomse_config.h"
+#include "lomse_version.h"
 #include "lomse_ldp_parser.h"
 #include "lomse_ldp_analyser.h"
 #include "lomse_ldp_compiler.h"
@@ -61,6 +61,7 @@ using namespace std;
 
 namespace lomse
 {
+
 
 //=======================================================================================
 // LibraryScope implementation
@@ -243,7 +244,18 @@ string LibraryScope::get_version_long_string()
 }
 
 //---------------------------------------------------------------------------------------
-string LibraryScope::get_build_date() { return LOMSE_BUILD_DATE; }
+string LibraryScope::get_build_date()
+{
+    //__DATE__ string: contains eleven characters and looks like "Feb 12 1996".
+    // If the day of the month is less than 10, it is padded with a space on the
+    // left, i.e. "Oct  8 2013"
+    //__TIME__ : the time at which the preprocessor is being run. The string
+    // contains eight characters and looks like "23:59:01"
+
+    string date(__DATE__);
+    return date.substr(4,2) + "-" + date.substr(0,3) + "-" + date.substr(7,4)
+           + " " + string(__TIME__);
+}
 
 
 
