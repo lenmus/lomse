@@ -5,6 +5,6 @@
 //                             | All values aligned here
 #define LOMSE_VERSION_MAJOR    0
 #define LOMSE_VERSION_MINOR    17
-#define LOMSE_VERSION_PATCH    5
-#define LOMSE_VERSION_SHA1     "b8d511b"
+#define LOMSE_VERSION_PATCH    7
+#define LOMSE_VERSION_SHA1     "8115931"
 
