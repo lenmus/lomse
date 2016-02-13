@@ -1,5 +1,6 @@
-liblomse (0.16.1) vivid; urgency=low
+lomse (0.17.5) stable; urgency=low
 
-  * New upstream release
+  * Latest release
 
- -- Cecilio Salmeron <s.cecilio@gmail.com>  Mon, 07 Sep 2015 16:57:29 +0200
+ -- Cecilio Salmeron <s.cecilio@gmail.com>  Sat, 13 Feb 2016 16:43:48 +0100
+

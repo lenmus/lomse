@@ -1,5 +1,5 @@
 <html>
-<!-- $Updated: 2015/09/07 -->
+<!-- $Updated: 2016/02/13 -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Lomse changelog</title>
@@ -8,6 +8,99 @@
 <body>
 
 <h1>Lomse Library. Log of changes</h1>
+
+
+<!-- ============================================================================ -->
+<h3>Since last version</h3>
+
+    <p>
+    Mainly, changes for improving the MusicXML importer, for supporting
+    more music notation elements and for implementing visual regression tests.
+    </p>
+
+	<h5>BACKWARDS INCOMPATIBLE CHANGES WITH 0.16.1</h5>
+
+	<ul><li>none</li></ul>
+
+	<h5>COMPATIBLE CHANGES</h5>
+
+	<ul>
+		<li>Version numbering scheme modified to add last commit sha1. Patch level
+            automatically increased with every commit.</li>
+		<li>Added method Interactor::get_num_pages() for improving the print API</li>
+		<li>The XML parser (rapidxml) has been replaced by pugixml for better
+            Unicode support.</li>
+		<li>Line number added to error messages related to XML files, for better
+            error reporting.</li>
+
+		<li>Score layouting improved:
+        <ul>
+		    <li>Fixed bug 80222: Some measures are splitted in two systems</li>
+		    <li>Fixed bug 80223: lack of space after intermediate barlines</li>
+		    <li>ColumnsBreaker algorithm reviewed and fixed. More tests added.</li>
+        </ul></li>
+
+		<li>Added support for more music notation elements:
+        <ul>
+		    <li>articulations</li>
+		    <li>ornaments</li>
+		    <li>technical notations (just a few)</li>
+		    <li>dynamics notations</li>
+		    <li>slurs</li>
+		    <li>lyrics</li>
+        </ul></li>
+
+		<li>Continue development of MusicXML importer:
+        <ul>
+    		<li>barlines, repetition barlines and barlines at start of measures</li>
+    		<li>augmentation dots for notes and rests</li>
+    		<li>beams</li>
+    		<li>backup/forward</li>
+    		<li>full-measure rests</li>
+    		<li>fermatas</li>
+    		<li>ties</li>
+		    <li>articulations</li>
+		    <li>ornaments</li>
+		    <li>technical notations (just a few)</li>
+		    <li>dynamics notations</li>
+		    <li>slurs</li>
+		    <li>lyrics</li>
+		    <li>derive note type from duration when type not present</li>
+        </ul></li>
+
+		<li>Modifications in internal model:
+        <ul>
+    		<li>duration now explicit value for note/rest in internal model</li>
+    		<li>explicit mark in rests for full measure rests</li>
+    		<li>orientation flag added to ties, for avoiding having to use a bezier 
+                element for changing default orientation.</li>
+		    <li>added several classes for supporting the added elements.</li>
+        </ul></li>
+
+		<li>Renderization:
+        <ul>
+		    <li>Added engravers and all need objects (glyphs, shapes, etc) for
+	            the new added music notation elements.</li>
+        </ul></li>
+
+		<li>Small fixes:
+        <ul>
+    		<li>Removed background borders in document images generated for printing.</li>
+        </ul></li>
+
+		<li>Other chages:
+        <ul>
+		    <li>CMakeLists.txt build script modified so that library name will be
+	            always 'liblomse', without version numbers.</li>
+		    <li>CmakeLists.txt  build script modified so that by default, the unit
+                tests runner program (testlib) is always built.</li>
+		    <li>All tests files reviewed and reorganized for visual regression
+                tests. Scripts for this created, so that regression tests will now
+                systematically be run after every library build.</li>
+		    <li>Added tutorial 1 for using Lomse in Qt applications.</li>
+		    <li>Fixed all warnings due to 'unused parameter'</li>
+        </ul></li>
+    </ul>
 
 
 <!-- ============================================================================ -->
