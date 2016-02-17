@@ -47,27 +47,8 @@ For more info, packages, or other options see [this](http://www.lenmus.org/en/lo
 
 
 
-## Contributing
-
-Lomse is a free open source project and contributions are welcome. Get involved in making it better! Any code submission must be under the terms of the BSD 2-clause license. 
-
-Here’s the suggested way for proposing a change to this project:
-
-1. [Fork this project][fork] to your account.
-2. [Create a branch][branch] for the change you intend to make.
-3. Make your changes to your fork.
-4. [Send a pull request][pr] from your fork’s branch to our `master` branch.
-
-Using the web-based interface to make changes is fine too, and will help you
-by automatically forking the project and prompting to send a pull request too.
-
-[fork]: https://help.github.com/articles/fork-a-repo/
-[branch]: https://help.github.com/articles/creating-and-deleting-branches-within-your-repository
-[pr]: https://help.github.com/articles/using-pull-requests/
-
-
-
 ## More info
+* [Contributing](https://github.com/lenmus/lomse/blob/master/CONTRIBUTING.md)
 * [Lomse homepage](http://www.lenmus.org/en/lomse/intro)
 * [Lomse PPA](https://launchpad.net/~lomse/+archive/ubuntu/ppa/+packages)
 * [Installation](http://www.lenmus.org/en/lomse/install)

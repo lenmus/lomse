@@ -22,10 +22,20 @@ Send your feedback to improve the library and fix the bugs you find. Thank you!
 
 ### Programming
 
+Lomse is a free open source project and contributions are welcome. Get involved in making it better! Any code submission must be under the terms of the BSD 2-clause license. 
+
 Unsure where to begin contributing to lomse? You can start by looking through these issues:
 
 * [Beginner issues][beginner] - Issues labeled with `beginner` do not require deep knowledge of lomse internals so they are suitable for start contributing with code to this project.
 * [Help wanted issues][help-wanted] - To do or complete issues labeled as `help-wanted` I need help (advice, explanations or code) because I do not have enough knowledge for doing the task. Perhaps you have the knowledge and can help me!
+
+Here’s the suggested way for proposing a change to this project:
+
+1. [Fork this project][fork] to your account.
+2. [Create a branch][branch] for the change you intend to make.
+3. Make your changes to your fork.
+4. [Send a pull request][pr] from your fork’s branch to our `master` branch.
+
 
 If you would like to join this project, you are welcome. I'm currently the only developer, so I would like to find a few committed developers to create a core team. If you are interested and would like to take this project as your own project, you are welcome. The project has no commercial aim, so do not expect any money. I do this in my free time, for learning and for creating useful free software for the community. And costs me money!
 
@@ -36,5 +46,9 @@ If you would like to join this project, you are welcome. I'm currently the only 
 
 [beginner]:https://github.com/lenmus/lomse/labels/beginner
 [help-wanted]:https://github.com/lenmus/lomse/labels/help%20wanted
+
+[fork]: https://help.github.com/articles/fork-a-repo/
+[branch]: https://help.github.com/articles/creating-and-deleting-branches-within-your-repository
+[pr]: https://help.github.com/articles/using-pull-requests/
 
 
