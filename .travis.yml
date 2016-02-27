@@ -20,7 +20,7 @@ script:
   - make
 
 after_success:
-  - ./testlib
+  - ./bin/testlib
 
 notifications:
   email:
