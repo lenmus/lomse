@@ -220,27 +220,15 @@ int LibraryScope::get_version_minor() { return LOMSE_VERSION_MINOR; }
 int LibraryScope::get_version_patch() { return LOMSE_VERSION_PATCH; }
 
 //---------------------------------------------------------------------------------------
-string LibraryScope::get_version_sha1() { return LOMSE_VERSION_SHA1; }
-
-//---------------------------------------------------------------------------------------
 string LibraryScope::get_version_string()
 {
-    stringstream s;
-    s << get_version_major()
-      << "." << get_version_minor()
-      << "." << get_version_patch();
-    return s.str();
+    return LOMSE_VERSION;
 }
 
 //---------------------------------------------------------------------------------------
 string LibraryScope::get_version_long_string()
 {
-    stringstream s;
-    s << get_version_major()
-      << "." << get_version_minor()
-      << "." << get_version_patch()
-      << "-" << get_version_sha1();
-    return s.str();
+    return LOMSE_VERSION_LONG;
 }
 
 //---------------------------------------------------------------------------------------

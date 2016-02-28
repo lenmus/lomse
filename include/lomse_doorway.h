@@ -144,7 +144,6 @@ public:
     int get_version_major();
     int get_version_minor();
     int get_version_patch();
-    long get_version_sha1();
 
 protected:
     void clear_forensic_log();

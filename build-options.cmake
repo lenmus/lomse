@@ -77,29 +77,45 @@ message("Compatibility for LDP v1.5 = ${LOMSE_COMPATIBILITY_LDP_1_5}")
 #    set( LOMSE_CREATE_DLL "1")
 #endif()
 
+message (STATUS "get lomse version information")
 # version. Extract values from lomse_version.h header file
 file(STRINGS ${LOMSE_ROOT_DIR}/include/lomse_version.h LOMSE_VERSION_LIST)
-list (GET LOMSE_VERSION_LIST 5 MAJOR_LINE)
-list (GET LOMSE_VERSION_LIST 6 MINOR_LINE)
-list (GET LOMSE_VERSION_LIST 7 PATCH_LINE)
-list (GET LOMSE_VERSION_LIST 8 SHA1_LINE)
-string(REGEX REPLACE "\#define LOMSE_VERSION_MAJOR    " "" LOMSE_VERSION_MAJOR "${MAJOR_LINE}")
-string(REGEX REPLACE "\#define LOMSE_VERSION_MINOR    " "" LOMSE_VERSION_MINOR "${MINOR_LINE}")
-string(REGEX REPLACE "\#define LOMSE_VERSION_PATCH    " "" LOMSE_VERSION_PATCH "${PATCH_LINE}")
-string(REGEX REPLACE "\#define LOMSE_VERSION_SHA1     " "" LOMSE_VERSION_SHA1  "${SHA1_LINE}")
-
-message ("major = '${LOMSE_VERSION_MAJOR}'") 
-message ("minor = '${LOMSE_VERSION_MINOR}'") 
-message ("patch = '${LOMSE_VERSION_PATCH}'") 
-message ("sha1  = '${LOMSE_VERSION_SHA1}'") 
-
+foreach ( LINE ${LOMSE_VERSION_LIST} )
+  if ( ${LINE} MATCHES "\#define[ \t]+LOMSE_VERSION_(MAJOR|MINOR|PATCH)[ \t]+(.+)[ \t]*" )
+    set( LOMSE_VERSION_${CMAKE_MATCH_1} ${CMAKE_MATCH_2} )
+  endif()
+endforeach()
 
 #build version string for installer name
 set(LOMSE_PACKAGE_VERSION "${LOMSE_VERSION_MAJOR}.${LOMSE_VERSION_MINOR}.${LOMSE_VERSION_PATCH}" )
+set(LOMSE_VERSION "${LOMSE_PACKAGE_VERSION}")
+set(LOMSE_VERSION_LONG "${LOMSE_VERSION}")
 
-set(LOMSE_VERSION "${LOMSE_PACKAGE_VERSION}" )
-message ("version = '${LOMSE_VERSION}'") 
-message ("version string = '${LOMSE_PACKAGE_VERSION}'") 
+message (STATUS "  version        = '${LOMSE_VERSION}'")
+message (STATUS "  version string = '${LOMSE_PACKAGE_VERSION}'")
+
+if (EXISTS ${LOMSE_ROOT_DIR}/.git)
+  find_package (Git)
+  if (NOT GIT_FOUND)
+    message(SEND_ERROR "Git package not found." )
+  else()
+    # get sha1 and dirty status directly from git
+    execute_process(COMMAND "${GIT_EXECUTABLE}" log -1 --format=%h
+      WORKING_DIRECTORY "${LOMSE_ROOT_DIR}"
+      OUTPUT_VARIABLE LOMSE_VERSION_BUILD
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND "${GIT_EXECUTABLE}" describe --tags --long --dirty
+      WORKING_DIRECTORY "${LOMSE_ROOT_DIR}"
+      OUTPUT_VARIABLE LOMSE_VERSION_GIT
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    message (STATUS "  version git    = '${LOMSE_VERSION_GIT}'")
+    if ( ${LOMSE_VERSION_GIT} MATCHES "-dirty$" )
+      set (LOMSE_VERSION_BUILD "${LOMSE_VERSION_BUILD}-dirty")
+    endif()
+    set(LOMSE_VERSION_LONG "${LOMSE_PACKAGE_VERSION}+${LOMSE_VERSION_BUILD}")
+    message ( STATUS "  version long   = '${LOMSE_VERSION_LONG}'" )
+  endif()
+endif()
 
 
 # platform
