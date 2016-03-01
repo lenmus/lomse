@@ -1,4 +1,4 @@
-CREDITS
+AUTHORS
 =======
 
 Lomse is written and maintained by [Cecilio Salmerón](https://github.com/cecilios)

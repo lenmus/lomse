@@ -1,9 +1,3 @@
-//Lines before Copyright header are for cmake module FindLomse. *DO NOT CHANGE POSITION* 
-//---------------------------------------------------------------------------------------
-//..+....1....+....20
-//VERSION          @LOMSE_VERSION@
-//DEPENDENCIES     @LOMSE_DEPENDENCIES@
-
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
 // Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
