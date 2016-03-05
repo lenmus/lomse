@@ -1,12 +1,18 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.16.1
-============================
+[Since last version] 0.17.20
+=============================
 
+-none
+
+
+Version [0.17.20] (5/Mar/2016)
+==============================
 
 Mainly, changes for improving the MusicXML importer, for supporting
 more music notation elements and for implementing visual regression tests.
+Development moved to GitHub.
     
 
 ##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.16.1
@@ -326,7 +332,8 @@ Version 0.10.b1
 - Initial public release, used in Phonascus 5.0 beta for Linux.
 
 
-[Since last version]: https://github.com/lenmus/lomse/compare/0.16.1...HEAD
+[Since last version]: https://github.com/lenmus/lomse/compare/0.17.20...HEAD
+[0.17.20]: https://github.com/lenmus/lomse/compare/0.16.1...0.17.20
 [0.16.1]: https://github.com/lenmus/lomse/compare/0.15.0...0.16.1
 [0.15.0]: https://github.com/lenmus/lomse/compare/0.14.0...0.15.0
 [0.14.0]: https://github.com/lenmus/lomse/compare/0.13.1...0.14.0

@@ -44,7 +44,6 @@ if [[ ! -e "${root_path}/src" ]]; then
     exit $E_BADPATH
 fi
 
-#paths for building
 #path for building
 build_path="${root_path}/build-area"
 sources="${root_path}"
