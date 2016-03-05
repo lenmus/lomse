@@ -38,7 +38,7 @@ echo "-- Done"
 #find new package name
 library=`ls | grep 'liblomse_[0-9]*.[0-9]*.[0-9]*_[a-zA-Z0-9]*.deb'`
 if [ -z "$library" ]; then
-    echo -e "${enhanced}New package not found!. Aboted.${reset}"
+    echo -e "${enhanced}New package not found!. Aborted.${reset}"
     exit $E_ERROR
 fi
 
