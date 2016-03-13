@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>Lomse library. API documentation: Overview</title>
+<title>Lomse library. API documentation: Rendering and interacting with documents</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -46,8 +46,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </script>
   <div id="navrow1" class="tabs">
     <ul class="tablist">
-      <li class="current"><a href="index.html"><span>Overview</span></a></li>
-      <li><a href="pages.html"><span>Topics</span></a></li>
+      <li><a href="index.html"><span>Overview</span></a></li>
+      <li class="current"><a href="pages.html"><span>Topics</span></a></li>
       <li><a href="modules.html"><span>Types&#160;and&#160;constants</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li>
@@ -80,7 +80,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('index.html','');});
+$(document).ready(function(){initNavTree('mvc-model.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -99,24 +99,43 @@ $(document).ready(function(){initNavTree('index.html','');});
 
 <div class="header">
   <div class="headertitle">
-<div class="title">Overview </div>  </div>
+<div class="title">Rendering and interacting with documents </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><dl class="section attention"><dt>Attention</dt><dd>This documentation is correct but it is a work in progress. <b>Completed work</b>: 2 headers of 146</dd></dl>
-<p>Lomse is a free open source library for adding capabilities to any program for rendering, editing and playing back music scores. It is written in C++ and it is platform independent. Lomse stands for "LenMus Open Music Score Edition Library".</p>
-<p>Please be aware that Lomse is a work in progress, not having yet reached version 1.0. This means that the library is operative but with limitations. In particular, support for music scores is currently limited. You are welcome to join this non-commercial project and collaborate in its development.</p>
-<h2>License</h2>
-<p>Lomse is distributed under the BSD 2-clause license, a permissive open source license to allow Lomse to be used in any projects, whether open source or proprietary. This license is a GPL compatible license, so you can use Lomse in GPL licensed projects.</p>
-<h2>Lomse usage</h2>
-<ul>
-<li><a class="el" href="sound_generation.html">Scores playback</a> </li>
-<li><a class="el" href="mvc-model.html">Rendering and interacting with documents</a> </li>
-</ul>
+<div class="textblock"><dl class="section attention"><dt>Attention</dt><dd>This topic is not yet finished. This document is just initial draft content.</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Review and finish this topic</dd></dl>
+<p>The lomse library uses a Model-View-Controller (MVC) architecture for providing isolation between the various functions of the GUI: maintaining the document (the Model), displaying all or a portion of the document (the View), and handling events that affect the model or the view(s) (the Controller).</p>
+<p>Lomse MVC model has four components: the <code>Model</code> (the document), the <code>View</code>, the <code>Interactor</code> (a kind of Controller) and the <code>Presenter</code> (the 'glue' to join all the pieces).</p>
+<p>The following figure shows the main involved objects and its relationships:</p>
+<div class="image">
+<img src="mvc-model.png" alt="mvc-model.png"/>
+<div class="caption">
+The Lomse MVC model</div></div>
+<h2>Involved objects </h2>
+<h3>Document (the Model)</h3>
+<p>It is responsible for storing the document content (music score or other) and for notifying other objects when changes occur to the document.</p>
+<p>It is owned by the Presenter.</p>
+<h3>Presenter</h3>
+<p>The Presenter (short for 'document presenter') is a façade object responsible for coordinating all MVC involved classes within an application. It maintains the life cycle and relationships between Views, Interactors, Commands, Selections, and the Document. There is generally a single View per Presenter, though a Presenter may manage multiple logically related Views.</p>
+<p>It is owned by your application that creates it when invoking any of the methods for opnenig/creating documents in LomseDorway</p>
+<dl class="section attention"><dt>Attention</dt><dd>As Presenter ownership is transferred to user application, you have to take care of deleting the Presenter when no longer needed. Deleting the Presenter will automaticall cause deletion of all MVC involved objets: the Document, all existing Views and Interactors, etc.</dd></dl>
+<h3>View</h3>
+<p>The Document is presented to the user by a View. It normally has an associated window where the document is rendered. The Lomse library doesn’t provide any support for building windows or any other kind of GUI controls (all this must be part of your application). The library just provides: the bitmaps with the renderized score, and support for interacting with them.</p>
+<p>The View is responsible for providing bitmaps with the rendered score. It is user application responsibility to present this bitmap to the user (i.e. render it on a window, save it in a file, print it, or produce any other desired output).</p>
+<p>The Document and its Views (there could be more than one), are related by the observer pattern.</p>
+<p>The View is responsible: for providing output for your application, usually bitmaps with the rendered music score. for providing coordinates conversion between the bitmap and the world, and viceversa.</p>
+<p>It is owned by the Interactor.</p>
+<h3>Interactor</h3>
+<p>It addresses how user actions, such as mouse movements, keyboard input, and the selection of checkboxes or menu items, are mapped onto operations performed on the Document. The interactor plays the role of the Controller in the MVC model and is responsible for intercepting all the events from the user interface and interpreting them into Commands and Selections that manipulate the Document.</p>
+<p>It is responsible for re-directing requests to the appropriate objects.</p>
+<p>It is a facade object for receiving user events and user application requests and returning any requested data.</p>
+<p>It is owned by the Presenter. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
+    <li class="navelem"><a class="el" href="index.html">Overview</a></li>
     <li class="footer">Generated on Sun Mar 13 2016 17:11:13 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>

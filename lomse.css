@@ -1,0 +1,109 @@
+/* extra CSS for lomse. doxygen 1.8.6 */
+
+/* change style of header titles */
+h1, h2, h3, h4, h5, h6 
+{
+    color: #616FDC;
+    font-weight: normal;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    padding-top: 8px;
+    padding-bottom: 4px;
+    width: 100%;
+}
+
+/* doxygen headers also with the same color */
+h1.groupheader, h2.groupheader, h3.groupheader, h4.groupheader, h5.groupheader, h6.groupheader
+{
+    color: #616FDC;
+}
+
+/* background for page banner */
+div#titlearea
+{
+    background-color: #505a6b;  /* gris azulado */
+    color: #ffffff;
+}
+
+/* links in orange */
+a.el:link, a.el:visited { 
+	text-decoration: none;
+	color: #ff6000;
+}
+a.el:hover {
+    color: #ff0000;
+	border-bottom: 1px dotted #ff0000;
+}
+
+/* background of member prototypes *//*
+.memproto, dl.reflist dt
+{
+    background-image: none;
+    background-repeat: no-repeat;
+    background-color: #f0f0f0;
+    border-top: 1px solid #d0d0d0;
+    border-left: 1px solid #d0d0d0;
+    border-right: 1px solid #d0d0d0;
+}
+
+.memdoc, dl.reflist dd {
+    border-top: 1px solid #d0d0d0;
+    border-left: 1px solid #d0d0d0;
+    border-right: 1px solid #d0d0d0;
+    background-image: none;
+    background-repeat: no-repeat;
+    background-color: #ffffff;
+}
+*/
+
+/* change colors in pages TOC box */
+div.toc
+{
+    background-color: #f7f7f7;
+    border: 1px solid #dbdbdb;
+}
+
+/* remove background color in footer */
+.navpath ul         /* empty space */
+{
+	background-image: none;
+	background-repeat: no-repeat;
+	background-color: #ffffff;
+    border: none;
+    border-top: 1px solid #dddddd;
+}
+
+.navpath li          /* content */
+{
+	background-image: none;
+	background-repeat: no-repeat;
+	background-color: #ffffff;
+    border: none;
+}
+
+/* items in left navigation panel */
+span.label a, span.label a:visited {
+	color: #000000;
+}
+
+span.label a:hover {
+	color: #ff0000;
+}
+
+/* remove background color in left navigation panel */
+#nav-tree               /* background (empty space) in left navigation menu */
+{
+	background-image: none;
+	background-repeat: no-repeat;
+	background-color: #ffffff;
+    border: none;
+}
+
+#nav-tree-contents      /* lines in left navigation menu */
+{
+	background-image: none;
+	background-repeat: no-repeat;
+	background-color: #ffffff;
+    border: none;
+}
+
