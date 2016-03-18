@@ -18,52 +18,35 @@ E_NOARGS=65         # no arguments
 E_BADPATH=66        # not running from <root>/scripts
 
 #get current directory and check we are running from <root>/scripts.
-#For this I jaust check that "src" folder exists
-scripts_path="${PWD}"
-lomse_path=$(dirname "${PWD}")
+#For this I just check that "src" folder exists
+scripts_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+lomse_path=$(dirname "${scripts_path}")
 if [[ ! -e "${lomse_path}/src" ]]; then
-    echo "Error: not running from <root>/scripts"
+    echo "Error: cannot find src folder" 1>&2
     exit $E_BADPATH
 fi
 
-#get lomse version
+source ${scripts_path}/helper.sh
+
+# get lomse version from repo tags
 echo "Getting lomse version"
 cd "${lomse_path}"
-description=`git describe --tags`
-pattern="([0-9]+)\.*"
-if [[ $description =~ $pattern ]]; then
-    major=${BASH_REMATCH[1]}
-fi
-pattern="[0-9]+\.([0-9]+)\.*"
-if [[ $description =~ $pattern ]]; then
-    minor=${BASH_REMATCH[1]}
-fi
-pattern="[0-9]+\.[0-9]+\-([0-9]+)\-*"
-if [[ $description =~ $pattern ]]; then
-    patch=${BASH_REMATCH[1]}
-fi
-pattern="[0-9]+\.[0-9]+\-[0-9]+\-g([a-f0-9]+)"
-if [[ $description =~ $pattern ]]; then
-    sha1=${BASH_REMATCH[1]}
-fi
-package="${major}.${minor}.${patch}"
+
+description="$(git describe --tags --long)"
+parseDescription "$description"
+
 echo "-- git description = ${description}"
 echo "-- package = ${package}"
 echo "-- major=${major}, minor=${minor}, patch=${patch}, sha1=${sha1}"
 
-#update version file
-file="${lomse_path}/include/lomse_version.h"
+# update version file from latest tag
+file="${lomse_path}/build-version.cmake"
 if [ -f $file ]; then
     echo "Updating version in file ${file}"
-    FILE=`sed -n '1,2p' ${file}`
-    FILE+=$'\n'
-    FILE+="#define LOMSE_VERSION_MAJOR    ${major}"
-    FILE+=$'\n'
-    FILE+="#define LOMSE_VERSION_MINOR    ${minor}"
-    FILE+=$'\n'
-    FILE+="#define LOMSE_VERSION_PATCH    ${patch}"
-    FILE+=$'\n'
-    echo "$FILE" > ${file}
+    sed -i -e 's/\(set( LOMSE_VERSION_MAJOR \)\([01-9]*\)\(.*\)/\1'$major'\3/' \
+	-e 's/\(set( LOMSE_VERSION_MINOR \)\([01-9]*\)\(.*\)/\1'$minor'\3/' \
+	-e 's/\(set( LOMSE_VERSION_PATCH \)\([01-9]*\)\(.*\)/\1'$patch'\3/' \
+	$file
     echo "-- Done"
 else
     echo "ERROR: File ${file} not found. Aborted."
