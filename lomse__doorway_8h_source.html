@@ -47,9 +47,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Overview</span></a></li>
-      <li><a href="pages.html"><span>Topics</span></a></li>
-      <li><a href="modules.html"><span>Types&#160;and&#160;constants</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li><a href="modules.html"><span>Types&#160;and&#160;constants</span></a></li>
+      <li><a href="pages.html"><span>Other</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -88,7 +88,7 @@ $(document).ready(function(){initNavTree('lomse__doorway_8h_source.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -103,83 +103,85 @@ $(document).ready(function(){initNavTree('lomse__doorway_8h_source.html','');});
 </div><!--header-->
 <div class="contents">
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;</div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="keyword">typedef</span> void (*pt2NotifyFunction)(<span class="keywordtype">void</span>*, SpEventInfo);</div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="keyword">typedef</span> void (*pt2RequestFunction)(<span class="keywordtype">void</span>*, Request*);</div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;</div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno"><a class="line" href="classLomseDoorway.html">   15</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classLomseDoorway.html">LomseDoorway</a></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;{</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;    <a class="code" href="classLomseDoorway.html#a3c49065371b1185e0d04b690c1cb6b05">LomseDoorway</a>();</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    <span class="keyword">virtual</span> <a class="code" href="classLomseDoorway.html#a417b8c6b8895ce980c3eed82fa8cae7b">~LomseDoorway</a>();</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;</div>
-<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="classLomseDoorway.html#a88195b52e6d777edd400609128759167">   34</a></span>&#160;    <span class="keyword">enum</span> <a class="code" href="classLomseDoorway.html#a88195b52e6d777edd400609128759167">EViewType</a> { k_view_simple=0, k_view_vertical_book, k_view_horizontal_book, };</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f">init_library</a>(<span class="keywordtype">int</span> pixel_format, <span class="keywordtype">int</span> ppi, <span class="keywordtype">bool</span> reverse_y_axis,</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                      ostream&amp; reporter=cout);</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15">set_notify_callback</a>(<span class="keywordtype">void</span>* pThis, <span class="keywordtype">void</span> (*pt2Func)(<span class="keywordtype">void</span>*, SpEventInfo));</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classLomseDoorway.html#a747d3488b15dfda96c5f7477a28525da">set_request_callback</a>(<span class="keywordtype">void</span>* pThis, <span class="keywordtype">void</span> (*pt2Func)(<span class="keywordtype">void</span>*, Request*));</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classLomseDoorway.html#a080627915c615fa809fc0d78561ac9ec">set_default_fonts_path</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; fontsPath);</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classLomseDoorway.html#a27e0f90ab48d79d5ad464e1461411579">set_global_metronome_and_replace_local</a>(Metronome* pMtr);</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    ScorePlayer* <a class="code" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">create_score_player</a>(MidiServerBase* pSoundServer);</div>
+<div class="line"><a name="l00012"></a><span class="lineno"><a class="line" href="group__typedefs.html#ga181f35b41b4e59a8a126bb8d71d6919d">   12</a></span>&#160;<span class="comment"></span><span class="keyword">typedef</span> void (*<a class="code" href="group__typedefs.html#ga181f35b41b4e59a8a126bb8d71d6919d">pt2NotifyFunction</a>)(<span class="keywordtype">void</span>*, SpEventInfo);</div>
+<div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="group__typedefs.html#gaa9ebd8fde9709536464d35a96f108cbf">   23</a></span>&#160;<span class="keyword">typedef</span> void (*<a class="code" href="group__typedefs.html#gaa9ebd8fde9709536464d35a96f108cbf">pt2RequestFunction</a>)(<span class="keywordtype">void</span>*, Request*);</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="classLomseDoorway.html">   32</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classLomseDoorway.html">LomseDoorway</a></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;{</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <a class="code" href="classLomseDoorway.html#a3c49065371b1185e0d04b690c1cb6b05">LomseDoorway</a>();</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">virtual</span> <a class="code" href="classLomseDoorway.html#a417b8c6b8895ce980c3eed82fa8cae7b">~LomseDoorway</a>();</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;</div>
+<div class="line"><a name="l00051"></a><span class="lineno"><a class="line" href="classLomseDoorway.html#a88195b52e6d777edd400609128759167">   51</a></span>&#160;    <span class="keyword">enum</span> <a class="code" href="classLomseDoorway.html#a88195b52e6d777edd400609128759167">EViewType</a> { k_view_simple=0, k_view_vertical_book, k_view_horizontal_book, };</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f">init_library</a>(<span class="keywordtype">int</span> pixel_format, <span class="keywordtype">int</span> ppi, <span class="keywordtype">bool</span> reverse_y_axis,</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                      ostream&amp; reporter=cout);</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15">set_notify_callback</a>(<span class="keywordtype">void</span>* pThis, <span class="keywordtype">void</span> (*pt2Func)(<span class="keywordtype">void</span>*, SpEventInfo));</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classLomseDoorway.html#a747d3488b15dfda96c5f7477a28525da">set_request_callback</a>(<span class="keywordtype">void</span>* pThis, <span class="keywordtype">void</span> (*pt2Func)(<span class="keywordtype">void</span>*, Request*));</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classLomseDoorway.html#a080627915c615fa809fc0d78561ac9ec">set_default_fonts_path</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; fontsPath);</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;</div>
 <div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;</div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;    Presenter* <a class="code" href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">new_document</a>(<span class="keywordtype">int</span> viewType);</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;</div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;    Presenter* <a class="code" href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">new_document</a>(<span class="keywordtype">int</span> viewType, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; source, <span class="keywordtype">int</span> format,</div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;                            ostream&amp; reporter = cout);</div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;</div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;    Presenter* <a class="code" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">open_document</a>(<span class="keywordtype">int</span> viewType, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; filename,</div>
-<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;                             ostream&amp; reporter = cout);</div>
-<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;</div>
-<div class="line"><a name="l00260"></a><span class="lineno">  260</span>&#160;    Presenter* <a class="code" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">open_document</a>(<span class="keywordtype">int</span> viewType, LdpReader&amp; reader,</div>
-<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;                             ostream&amp; reporter = cout);</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;</div>
-<div class="line"><a name="l00266"></a><span class="lineno"><a class="line" href="classLomseDoorway.html#ab34d07713083fd7c37f940661bb098f7">  266</a></span>&#160;    <span class="keyword">inline</span> LibraryScope* <a class="code" href="classLomseDoorway.html#ab34d07713083fd7c37f940661bb098f7">get_library_scope</a>() { <span class="keywordflow">return</span> m_pLibraryScope; }</div>
-<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;</div>
-<div class="line"><a name="l00272"></a><span class="lineno"><a class="line" href="classLomseDoorway.html#a5e9ffe4284808df79d09353e17d56a65">  272</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">double</span> <a class="code" href="classLomseDoorway.html#a5e9ffe4284808df79d09353e17d56a65">get_screen_ppi</a>() { <span class="keywordflow">return</span> m_platform.screen_ppi; }</div>
-<div class="line"><a name="l00277"></a><span class="lineno"><a class="line" href="classLomseDoorway.html#a1651657c00515a6f97bf259dd12246de">  277</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code" href="classLomseDoorway.html#a1651657c00515a6f97bf259dd12246de">get_pixel_format</a>() { <span class="keywordflow">return</span> m_platform.pixel_format; }</div>
-<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;</div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="classLomseDoorway.html#aca4a1ae563c5f278dcc069281afc5541">get_version_string</a>();</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classLomseDoorway.html#a27e0f90ab48d79d5ad464e1461411579">set_global_metronome_and_replace_local</a>(Metronome* pMtr);</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;    ScorePlayer* <a class="code" href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">create_score_player</a>(MidiServerBase* pSoundServer);</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;</div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;    <a class="code" href="classPresenter.html">Presenter</a>* <a class="code" href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">new_document</a>(<span class="keywordtype">int</span> viewType);</div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;    <a class="code" href="classPresenter.html">Presenter</a>* <a class="code" href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">new_document</a>(<span class="keywordtype">int</span> viewType, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; source, <span class="keywordtype">int</span> format,</div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;                            ostream&amp; reporter = cout);</div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;</div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;    <a class="code" href="classPresenter.html">Presenter</a>* <a class="code" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">open_document</a>(<span class="keywordtype">int</span> viewType, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; filename,</div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;                             ostream&amp; reporter = cout);</div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;    <a class="code" href="classPresenter.html">Presenter</a>* <a class="code" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">open_document</a>(<span class="keywordtype">int</span> viewType, LdpReader&amp; reader,</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;                             ostream&amp; reporter = cout);</div>
 <div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;</div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="classLomseDoorway.html#aaaa2b02ebab2ea3943fd7b3823c634b0">get_version_long_string</a>();</div>
+<div class="line"><a name="l00288"></a><span class="lineno"><a class="line" href="classLomseDoorway.html#ab34d07713083fd7c37f940661bb098f7">  288</a></span>&#160;    <span class="keyword">inline</span> LibraryScope* <a class="code" href="classLomseDoorway.html#ab34d07713083fd7c37f940661bb098f7">get_library_scope</a>() { <span class="keywordflow">return</span> m_pLibraryScope; }</div>
 <div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="classLomseDoorway.html#a04f6acdbe6ec410f5fac17aa6d82ec1a">get_build_date</a>();</div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;</div>
+<div class="line"><a name="l00294"></a><span class="lineno"><a class="line" href="classLomseDoorway.html#a5e9ffe4284808df79d09353e17d56a65">  294</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">double</span> <a class="code" href="classLomseDoorway.html#a5e9ffe4284808df79d09353e17d56a65">get_screen_ppi</a>() { <span class="keywordflow">return</span> m_platform.screen_ppi; }</div>
+<div class="line"><a name="l00299"></a><span class="lineno"><a class="line" href="classLomseDoorway.html#a1651657c00515a6f97bf259dd12246de">  299</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code" href="classLomseDoorway.html#a1651657c00515a6f97bf259dd12246de">get_pixel_format</a>() { <span class="keywordflow">return</span> m_platform.pixel_format; }</div>
 <div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;</div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classLomseDoorway.html#af7b2996e6d55a4bf319b33d9e5cf3b3d">get_version_major</a>();</div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classLomseDoorway.html#a7f97ca250c048affbd748278cb655b09">get_version_minor</a>();</div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classLomseDoorway.html#a3a36010468381eb7f8bcd7cebdd2c152">get_version_patch</a>();</div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;</div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;};</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;</div>
-<div class="ttc" id="classLomseDoorway_html_a5e9ffe4284808df79d09353e17d56a65"><div class="ttname"><a href="classLomseDoorway.html#a5e9ffe4284808df79d09353e17d56a65">LomseDoorway::get_screen_ppi</a></div><div class="ttdeci">double get_screen_ppi()</div><div class="ttdef"><b>Definition:</b> lomse_doorway.h:272</div></div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="classLomseDoorway.html#aca4a1ae563c5f278dcc069281afc5541">get_version_string</a>();</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;</div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="classLomseDoorway.html#aaaa2b02ebab2ea3943fd7b3823c634b0">get_version_long_string</a>();</div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;</div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="classLomseDoorway.html#a04f6acdbe6ec410f5fac17aa6d82ec1a">get_build_date</a>();</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;</div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classLomseDoorway.html#af7b2996e6d55a4bf319b33d9e5cf3b3d">get_version_major</a>();</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classLomseDoorway.html#a7f97ca250c048affbd748278cb655b09">get_version_minor</a>();</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;    <span class="keywordtype">int</span> <a class="code" href="classLomseDoorway.html#a3a36010468381eb7f8bcd7cebdd2c152">get_version_patch</a>();</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;</div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;};</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;</div>
+<div class="ttc" id="classLomseDoorway_html_a5e9ffe4284808df79d09353e17d56a65"><div class="ttname"><a href="classLomseDoorway.html#a5e9ffe4284808df79d09353e17d56a65">LomseDoorway::get_screen_ppi</a></div><div class="ttdeci">double get_screen_ppi()</div><div class="ttdef"><b>Definition:</b> lomse_doorway.h:294</div></div>
 <div class="ttc" id="classLomseDoorway_html_a5bb03ca7f58b797ce095354457e9070e"><div class="ttname"><a href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">LomseDoorway::open_document</a></div><div class="ttdeci">Presenter * open_document(int viewType, const string &amp;filename, ostream &amp;reporter=cout)</div></div>
-<div class="ttc" id="classLomseDoorway_html_a1651657c00515a6f97bf259dd12246de"><div class="ttname"><a href="classLomseDoorway.html#a1651657c00515a6f97bf259dd12246de">LomseDoorway::get_pixel_format</a></div><div class="ttdeci">int get_pixel_format()</div><div class="ttdef"><b>Definition:</b> lomse_doorway.h:277</div></div>
+<div class="ttc" id="group__typedefs_html_gaa9ebd8fde9709536464d35a96f108cbf"><div class="ttname"><a href="group__typedefs.html#gaa9ebd8fde9709536464d35a96f108cbf">pt2RequestFunction</a></div><div class="ttdeci">void(* pt2RequestFunction)(void *, Request *)</div><div class="ttdef"><b>Definition:</b> lomse_doorway.h:23</div></div>
+<div class="ttc" id="classLomseDoorway_html_a1651657c00515a6f97bf259dd12246de"><div class="ttname"><a href="classLomseDoorway.html#a1651657c00515a6f97bf259dd12246de">LomseDoorway::get_pixel_format</a></div><div class="ttdeci">int get_pixel_format()</div><div class="ttdef"><b>Definition:</b> lomse_doorway.h:299</div></div>
 <div class="ttc" id="classLomseDoorway_html_a04f6acdbe6ec410f5fac17aa6d82ec1a"><div class="ttname"><a href="classLomseDoorway.html#a04f6acdbe6ec410f5fac17aa6d82ec1a">LomseDoorway::get_build_date</a></div><div class="ttdeci">string get_build_date()</div></div>
+<div class="ttc" id="classPresenter_html"><div class="ttname"><a href="classPresenter.html">Presenter</a></div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:51</div></div>
 <div class="ttc" id="classLomseDoorway_html_aca4a1ae563c5f278dcc069281afc5541"><div class="ttname"><a href="classLomseDoorway.html#aca4a1ae563c5f278dcc069281afc5541">LomseDoorway::get_version_string</a></div><div class="ttdeci">string get_version_string()</div></div>
 <div class="ttc" id="classLomseDoorway_html_a50dbce970b84945868887966a0708634"><div class="ttname"><a href="classLomseDoorway.html#a50dbce970b84945868887966a0708634">LomseDoorway::create_score_player</a></div><div class="ttdeci">ScorePlayer * create_score_player(MidiServerBase *pSoundServer)</div></div>
 <div class="ttc" id="classLomseDoorway_html_a3c49065371b1185e0d04b690c1cb6b05"><div class="ttname"><a href="classLomseDoorway.html#a3c49065371b1185e0d04b690c1cb6b05">LomseDoorway::LomseDoorway</a></div><div class="ttdeci">LomseDoorway()</div></div>
-<div class="ttc" id="classLomseDoorway_html"><div class="ttname"><a href="classLomseDoorway.html">LomseDoorway</a></div><div class="ttdef"><b>Definition:</b> lomse_doorway.h:15</div></div>
+<div class="ttc" id="classLomseDoorway_html"><div class="ttname"><a href="classLomseDoorway.html">LomseDoorway</a></div><div class="ttdef"><b>Definition:</b> lomse_doorway.h:32</div></div>
 <div class="ttc" id="classLomseDoorway_html_a27e0f90ab48d79d5ad464e1461411579"><div class="ttname"><a href="classLomseDoorway.html#a27e0f90ab48d79d5ad464e1461411579">LomseDoorway::set_global_metronome_and_replace_local</a></div><div class="ttdeci">void set_global_metronome_and_replace_local(Metronome *pMtr)</div></div>
 <div class="ttc" id="classLomseDoorway_html_af7b2996e6d55a4bf319b33d9e5cf3b3d"><div class="ttname"><a href="classLomseDoorway.html#af7b2996e6d55a4bf319b33d9e5cf3b3d">LomseDoorway::get_version_major</a></div><div class="ttdeci">int get_version_major()</div></div>
-<div class="ttc" id="classLomseDoorway_html_a88195b52e6d777edd400609128759167"><div class="ttname"><a href="classLomseDoorway.html#a88195b52e6d777edd400609128759167">LomseDoorway::EViewType</a></div><div class="ttdeci">EViewType</div><div class="ttdef"><b>Definition:</b> lomse_doorway.h:34</div></div>
+<div class="ttc" id="classLomseDoorway_html_a88195b52e6d777edd400609128759167"><div class="ttname"><a href="classLomseDoorway.html#a88195b52e6d777edd400609128759167">LomseDoorway::EViewType</a></div><div class="ttdeci">EViewType</div><div class="ttdef"><b>Definition:</b> lomse_doorway.h:51</div></div>
 <div class="ttc" id="classLomseDoorway_html_a3a36010468381eb7f8bcd7cebdd2c152"><div class="ttname"><a href="classLomseDoorway.html#a3a36010468381eb7f8bcd7cebdd2c152">LomseDoorway::get_version_patch</a></div><div class="ttdeci">int get_version_patch()</div></div>
 <div class="ttc" id="classLomseDoorway_html_aaaa2b02ebab2ea3943fd7b3823c634b0"><div class="ttname"><a href="classLomseDoorway.html#aaaa2b02ebab2ea3943fd7b3823c634b0">LomseDoorway::get_version_long_string</a></div><div class="ttdeci">string get_version_long_string()</div></div>
+<div class="ttc" id="group__typedefs_html_ga181f35b41b4e59a8a126bb8d71d6919d"><div class="ttname"><a href="group__typedefs.html#ga181f35b41b4e59a8a126bb8d71d6919d">pt2NotifyFunction</a></div><div class="ttdeci">void(* pt2NotifyFunction)(void *, SpEventInfo)</div><div class="ttdef"><b>Definition:</b> lomse_doorway.h:12</div></div>
 <div class="ttc" id="classLomseDoorway_html_ab5e0a00a93e25a7d8b51b39302f41a15"><div class="ttname"><a href="classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15">LomseDoorway::set_notify_callback</a></div><div class="ttdeci">void set_notify_callback(void *pThis, void(*pt2Func)(void *, SpEventInfo))</div></div>
 <div class="ttc" id="classLomseDoorway_html_a080627915c615fa809fc0d78561ac9ec"><div class="ttname"><a href="classLomseDoorway.html#a080627915c615fa809fc0d78561ac9ec">LomseDoorway::set_default_fonts_path</a></div><div class="ttdeci">void set_default_fonts_path(const string &amp;fontsPath)</div></div>
 <div class="ttc" id="classLomseDoorway_html_a747d3488b15dfda96c5f7477a28525da"><div class="ttname"><a href="classLomseDoorway.html#a747d3488b15dfda96c5f7477a28525da">LomseDoorway::set_request_callback</a></div><div class="ttdeci">void set_request_callback(void *pThis, void(*pt2Func)(void *, Request *))</div></div>
@@ -187,14 +189,14 @@ $(document).ready(function(){initNavTree('lomse__doorway_8h_source.html','');});
 <div class="ttc" id="classLomseDoorway_html_a417b8c6b8895ce980c3eed82fa8cae7b"><div class="ttname"><a href="classLomseDoorway.html#a417b8c6b8895ce980c3eed82fa8cae7b">LomseDoorway::~LomseDoorway</a></div><div class="ttdeci">virtual ~LomseDoorway()</div></div>
 <div class="ttc" id="classLomseDoorway_html_a01e4f12682054e5a96afa236501ac80f"><div class="ttname"><a href="classLomseDoorway.html#a01e4f12682054e5a96afa236501ac80f">LomseDoorway::init_library</a></div><div class="ttdeci">void init_library(int pixel_format, int ppi, bool reverse_y_axis, ostream &amp;reporter=cout)</div></div>
 <div class="ttc" id="classLomseDoorway_html_a1b00546f591c2041df5ed86ea0681948"><div class="ttname"><a href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">LomseDoorway::new_document</a></div><div class="ttdeci">Presenter * new_document(int viewType)</div></div>
-<div class="ttc" id="classLomseDoorway_html_ab34d07713083fd7c37f940661bb098f7"><div class="ttname"><a href="classLomseDoorway.html#ab34d07713083fd7c37f940661bb098f7">LomseDoorway::get_library_scope</a></div><div class="ttdeci">LibraryScope * get_library_scope()</div><div class="ttdef"><b>Definition:</b> lomse_doorway.h:266</div></div>
+<div class="ttc" id="classLomseDoorway_html_ab34d07713083fd7c37f940661bb098f7"><div class="ttname"><a href="classLomseDoorway.html#ab34d07713083fd7c37f940661bb098f7">LomseDoorway::get_library_scope</a></div><div class="ttdeci">LibraryScope * get_library_scope()</div><div class="ttdef"><b>Definition:</b> lomse_doorway.h:288</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_0188a3e6da905bc60aceb35bf790b8c9.html">api</a></li><li class="navelem"><b>lomse_doorway.h</b></li>
-    <li class="footer">Generated on Sun Mar 13 2016 17:11:13 for Lomse library. API documentation by
+    <li class="footer">Generated on Sun Mar 20 2016 18:44:47 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

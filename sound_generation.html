@@ -47,9 +47,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Overview</span></a></li>
-      <li class="current"><a href="pages.html"><span>Topics</span></a></li>
-      <li><a href="modules.html"><span>Types&#160;and&#160;constants</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li><a href="modules.html"><span>Types&#160;and&#160;constants</span></a></li>
+      <li class="current"><a href="pages.html"><span>Other</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -88,7 +88,7 @@ $(document).ready(function(){initNavTree('sound_generation.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -113,7 +113,7 @@ $(document).ready(function(){initNavTree('sound_generation.html','');});
 </div>
 <div class="textblock"><h1><a class="anchor" id="sound-generation-overview"></a>
 How Lomse playback works</h1>
-<p>Lomse is platform independent code and cannot generate sounds for your specific platform. Therefore, lomse implements playback by generating events and sending them to your application. It is responsibility of your application to handle these events and do whatever is needed, i.e. transform sound events into real sounds or doing whatever you would like with the sound events.</p>
+<p>Lomse is platform independent code and cannot generate sounds for your specific platform. Therefore, lomse implements playback by generating real-time events and sending them to your application. It is responsibility of your application to handle these events and do whatever is needed, i.e. transform sound events into real sounds or doing whatever you would like with the sound events.</p>
 <p>From Lomse internal point of view, playing back an score involves, basically, two steps:</p>
 <ul>
 <li>The score internal model is parsed to build the sound model.</li>
@@ -188,7 +188,7 @@ How to play an score</h1>
 <div class="line">    <span class="keywordtype">bool</span> fVisualTracking = <span class="keyword">true</span>;    <span class="comment">//generate visual tracking effects</span></div>
 <div class="line">    <span class="keywordtype">bool</span> fCountOff = <span class="keyword">false</span>          <span class="comment">//no count off before start play</span></div>
 <div class="line">    <span class="keywordtype">long</span> nMM = 60;                  <span class="comment">//beats per minute</span></div>
-<div class="line">    Interactor* pInteractor = ...   <span class="comment">//get the interactor for this document</span></div>
+<div class="line">    <a class="code" href="classInteractor.html">Interactor</a>* pInteractor = ...   <span class="comment">//get the interactor for this document</span></div>
 <div class="line"></div>
 <div class="line">    <span class="comment">//start playback</span></div>
 <div class="line">    pPlayer-&gt;play(fVisualTracking, fCountOff, k_play_normal_instrument, nMM, pInteractor);</div>
@@ -248,7 +248,7 @@ The PlayerGui object</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Sun Mar 13 2016 17:11:13 for Lomse library. API documentation by
+    <li class="footer">Generated on Sun Mar 20 2016 18:44:47 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -1,4 +1,6 @@
 var annotated =
 [
-    [ "LomseDoorway", "classLomseDoorway.html", "classLomseDoorway" ]
+    [ "Interactor", "classInteractor.html", "classInteractor" ],
+    [ "LomseDoorway", "classLomseDoorway.html", "classLomseDoorway" ],
+    [ "Presenter", "classPresenter.html", "classPresenter" ]
 ];

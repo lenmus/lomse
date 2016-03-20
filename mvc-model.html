@@ -47,9 +47,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Overview</span></a></li>
-      <li class="current"><a href="pages.html"><span>Topics</span></a></li>
-      <li><a href="modules.html"><span>Types&#160;and&#160;constants</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li><a href="modules.html"><span>Types&#160;and&#160;constants</span></a></li>
+      <li class="current"><a href="pages.html"><span>Other</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -88,7 +88,7 @@ $(document).ready(function(){initNavTree('mvc-model.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -105,7 +105,7 @@ $(document).ready(function(){initNavTree('mvc-model.html','');});
 <div class="textblock"><dl class="section attention"><dt>Attention</dt><dd>This topic is not yet finished. This document is just initial draft content.</dd></dl>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Review and finish this topic</dd></dl>
 <p>The lomse library uses a Model-View-Controller (MVC) architecture for providing isolation between the various functions of the GUI: maintaining the document (the Model), displaying all or a portion of the document (the View), and handling events that affect the model or the view(s) (the Controller).</p>
-<p>Lomse MVC model has four components: the <code>Model</code> (the document), the <code>View</code>, the <code>Interactor</code> (a kind of Controller) and the <code>Presenter</code> (the 'glue' to join all the pieces).</p>
+<p>Lomse MVC model has four components: the <code>Model</code> (the document), the <code>View</code>, the <code><a class="el" href="classInteractor.html">Interactor</a></code> (a kind of Controller) and the <code><a class="el" href="classPresenter.html">Presenter</a></code> (the 'glue' to join all the pieces).</p>
 <p>The following figure shows the main involved objects and its relationships:</p>
 <div class="image">
 <img src="mvc-model.png" alt="mvc-model.png"/>
@@ -114,29 +114,29 @@ The Lomse MVC model</div></div>
 <h2>Involved objects </h2>
 <h3>Document (the Model)</h3>
 <p>It is responsible for storing the document content (music score or other) and for notifying other objects when changes occur to the document.</p>
-<p>It is owned by the Presenter.</p>
-<h3>Presenter</h3>
-<p>The Presenter (short for 'document presenter') is a façade object responsible for coordinating all MVC involved classes within an application. It maintains the life cycle and relationships between Views, Interactors, Commands, Selections, and the Document. There is generally a single View per Presenter, though a Presenter may manage multiple logically related Views.</p>
+<p>It is owned by the <a class="el" href="classPresenter.html">Presenter</a>.</p>
+<h3><a class="el" href="classPresenter.html">Presenter</a></h3>
+<p>The <a class="el" href="classPresenter.html">Presenter</a> (short for 'document presenter') is a façade object responsible for coordinating all MVC involved classes within an application. It maintains the life cycle and relationships between Views, Interactors, Commands, Selections, and the Document. There is generally a single View per <a class="el" href="classPresenter.html">Presenter</a>, though a <a class="el" href="classPresenter.html">Presenter</a> may manage multiple logically related Views.</p>
 <p>It is owned by your application that creates it when invoking any of the methods for opnenig/creating documents in LomseDorway</p>
-<dl class="section attention"><dt>Attention</dt><dd>As Presenter ownership is transferred to user application, you have to take care of deleting the Presenter when no longer needed. Deleting the Presenter will automaticall cause deletion of all MVC involved objets: the Document, all existing Views and Interactors, etc.</dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>As <a class="el" href="classPresenter.html">Presenter</a> ownership is transferred to user application, you have to take care of deleting the <a class="el" href="classPresenter.html">Presenter</a> when no longer needed. Deleting the <a class="el" href="classPresenter.html">Presenter</a> will automaticall cause deletion of all MVC involved objets: the Document, all existing Views and Interactors, etc.</dd></dl>
 <h3>View</h3>
 <p>The Document is presented to the user by a View. It normally has an associated window where the document is rendered. The Lomse library doesn’t provide any support for building windows or any other kind of GUI controls (all this must be part of your application). The library just provides: the bitmaps with the renderized score, and support for interacting with them.</p>
 <p>The View is responsible for providing bitmaps with the rendered score. It is user application responsibility to present this bitmap to the user (i.e. render it on a window, save it in a file, print it, or produce any other desired output).</p>
 <p>The Document and its Views (there could be more than one), are related by the observer pattern.</p>
 <p>The View is responsible: for providing output for your application, usually bitmaps with the rendered music score. for providing coordinates conversion between the bitmap and the world, and viceversa.</p>
-<p>It is owned by the Interactor.</p>
-<h3>Interactor</h3>
+<p>It is owned by the <a class="el" href="classInteractor.html">Interactor</a>.</p>
+<h3><a class="el" href="classInteractor.html">Interactor</a></h3>
 <p>It addresses how user actions, such as mouse movements, keyboard input, and the selection of checkboxes or menu items, are mapped onto operations performed on the Document. The interactor plays the role of the Controller in the MVC model and is responsible for intercepting all the events from the user interface and interpreting them into Commands and Selections that manipulate the Document.</p>
 <p>It is responsible for re-directing requests to the appropriate objects.</p>
 <p>It is a facade object for receiving user events and user application requests and returning any requested data.</p>
-<p>It is owned by the Presenter. </p>
+<p>It is owned by the <a class="el" href="classPresenter.html">Presenter</a>. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Sun Mar 13 2016 17:11:13 for Lomse library. API documentation by
+    <li class="footer">Generated on Sun Mar 20 2016 18:44:47 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

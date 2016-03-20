@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['overview',['Overview',['../index.html',1,'']]]
+  ['events_20sent_20by_20lomse',['Events sent by Lomse',['../lomse-events.html',1,'index']]]
 ];

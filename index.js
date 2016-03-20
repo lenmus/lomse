@@ -1,5 +1,14 @@
 var index =
 [
+    [ "Introduction", "lomse-introduction.html", [
+      [ "Lomse philosophy", "lomse-introduction.html#lomse-philosophy", null ],
+      [ "Class LomseDoorway", "lomse-introduction.html#overview-doorway", null ],
+      [ "The Document and related classes", "lomse-introduction.html#overview-mvc", null ],
+      [ "The sound engine", "lomse-introduction.html#overview-sound-engine", null ],
+      [ "The rendering engine", "lomse-introduction.html#overview-rendering-engine", null ],
+      [ "Editing documents", "lomse-introduction.html#overview-edition", null ],
+      [ "rendering-documents", "lomse-introduction.html#rendering-documents", null ]
+    ] ],
     [ "Scores playback", "sound_generation.html", [
       [ "How Lomse playback works", "sound_generation.html#sound-generation-overview", null ],
       [ "Your application set-up: summary", "sound_generation.html#playback-summary", null ],
@@ -8,5 +17,7 @@ var index =
       [ "Handling highlight events", "sound_generation.html#handling-highlight-events", null ],
       [ "The PlayerGui object", "sound_generation.html#implementing-player-gui", null ]
     ] ],
-    [ "Rendering and interacting with documents", "mvc-model.html", null ]
+    [ "Rendering and interacting with documents", "mvc-model.html", null ],
+    [ "How Lomse callbacks work", "lomse-callbacks.html", null ],
+    [ "Events sent by Lomse", "lomse-events.html", null ]
 ];

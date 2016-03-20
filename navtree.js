@@ -2,17 +2,18 @@ var NAVTREE =
 [
   [ "Lomse library. API documentation", "index.html", [
     [ "Overview", "index.html", "index" ],
-    [ "Todo List", "todo.html", null ],
-    [ "Types and constants", "modules.html", "modules" ],
     [ "Classes", null, [
       [ "Class List", "annotated.html", "annotated" ],
       [ "Class Index", "classes.html", null ],
+      [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", null ],
         [ "Functions", "functions_func.html", null ],
         [ "Enumerations", "functions_enum.html", null ]
       ] ]
-    ] ]
+    ] ],
+    [ "Types and constants", "modules.html", "modules" ],
+    [ "Todo List", "todo.html", null ]
   ] ]
 ];
 

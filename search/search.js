@@ -7,13 +7,14 @@
 
 var indexSectionsWithContent =
 {
-  0: "cegiklnoprst~",
-  1: "l",
-  2: "cgilnos~",
-  3: "e",
-  4: "k",
-  5: "p",
-  6: "orst"
+  0: "cefghiklnoprstvw~",
+  1: "ilp",
+  2: "cefgilnorsv~",
+  3: "psw",
+  4: "e",
+  5: "k",
+  6: "p",
+  7: "ehiorst"
 };
 
 var indexSectionNames =
@@ -21,10 +22,11 @@ var indexSectionNames =
   0: "all",
   1: "classes",
   2: "functions",
-  3: "enums",
-  4: "enumvalues",
-  5: "groups",
-  6: "pages"
+  3: "typedefs",
+  4: "enums",
+  5: "enumvalues",
+  6: "groups",
+  7: "pages"
 };
 
 function convertToId(search)

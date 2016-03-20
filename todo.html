@@ -47,9 +47,9 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Overview</span></a></li>
-      <li class="current"><a href="pages.html"><span>Topics</span></a></li>
-      <li><a href="modules.html"><span>Types&#160;and&#160;constants</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
+      <li><a href="modules.html"><span>Types&#160;and&#160;constants</span></a></li>
+      <li class="current"><a href="pages.html"><span>Other</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -88,7 +88,7 @@ $(document).ready(function(){initNavTree('todo.html','');});
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Pages</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Classes</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Enumerations</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Enumerator</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Groups</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(7)"><span class="SelectionMark">&#160;</span>Pages</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -103,6 +103,16 @@ $(document).ready(function(){initNavTree('todo.html','');});
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><dl class="reflist">
+<dt><a class="anchor" id="_todo000010"></a>Member <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">Interactor::force_redraw</a>  ()</dt>
+<dd>Clarify the need of methods force_redraw(), redraw_bitmap() and enable_forced_view_updates(). Probably This code has to be refactored. </dd>
+<dt><a class="anchor" id="_todo000008"></a>Member <a class="el" href="classInteractor.html#a7f68d9df4df24a71f02b4cc906c71a56">Interactor::get_cursor</a>  ()</dt>
+<dd>Explain DocCursor and how to use it.  </dd>
+<dt><a class="anchor" id="_todo000009"></a>Member <a class="el" href="classInteractor.html#aaf1d978d7d7e4ef3e6e6b6495cf9d2d0">Interactor::get_selection_set</a>  ()</dt>
+<dd>Explain SelectionSet and how it works.  </dd>
+<dt><a class="anchor" id="_todo000007"></a>Member <a class="el" href="classInteractor.html#acb5d21578acde66c5da165f1fa808fb6">Interactor::set_operating_mode</a>  (int mode)</dt>
+<dd>Explain <a class="el" href="classInteractor.html">Interactor</a> operation modes </dd>
+<dt><a class="anchor" id="_todo000006"></a>Member <a class="el" href="classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f">Interactor::switch_task</a>  (int taskType)</dt>
+<dd>Explain tasks </dd>
 <dt><a class="anchor" id="_todo000005"></a>Member <a class="el" href="classLomseDoorway.html#a27e0f90ab48d79d5ad464e1461411579">LomseDoorway::set_global_metronome_and_replace_local</a>  (Metronome *pMtr)</dt>
 <dd>Clarify the purpose and usage of this method </dd>
 <dt><a class="anchor" id="_todo000004"></a>Member <a class="el" href="classLomseDoorway.html#a747d3488b15dfda96c5f7477a28525da">LomseDoorway::set_request_callback</a>  (void *pThis, void(*pt2Func)(void *, Request *))</dt>
@@ -119,7 +129,7 @@ $(document).ready(function(){initNavTree('todo.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Mar 13 2016 17:11:13 for Lomse library. API documentation by
+    <li class="footer">Generated on Sun Mar 20 2016 18:44:47 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
