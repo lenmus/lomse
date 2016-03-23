@@ -13,10 +13,10 @@ set( LOMSE_VERSION_PATCH 21 )
 # build version string for installer name
 set( LOMSE_PACKAGE_VERSION "${LOMSE_VERSION_MAJOR}.${LOMSE_VERSION_MINOR}.${LOMSE_VERSION_PATCH}" )
 set( LOMSE_VERSION "${LOMSE_PACKAGE_VERSION}" )
-set( LOMSE_VERSION_LONG "${LOMSE_VERSION}" )
+set( LOMSE_VERSION_LONG "${LOMSE_VERSION}-nogit" )
 
-message (STATUS "  version        = '${LOMSE_VERSION}'")
-message (STATUS "  version string = '${LOMSE_PACKAGE_VERSION}'")
+message (STATUS "  Lomse version        = '${LOMSE_VERSION}'")
+message (STATUS "  Lomse version string = '${LOMSE_PACKAGE_VERSION}'")
 
 if (EXISTS ${LOMSE_ROOT_DIR}/.git)
   find_package (Git)
@@ -41,9 +41,9 @@ if (EXISTS ${LOMSE_ROOT_DIR}/.git)
     else()
       set(LOMSE_VERSION_LONG "${LOMSE_PACKAGE_VERSION}")
     endif()
-    message ( STATUS "  version long   = '${LOMSE_VERSION_LONG}'" )
   endif()
 endif()
+message (STATUS "  Lomse version long   = '${LOMSE_VERSION_LONG}'" )
 
 # define a header file to pass version information to source code
 configure_file(
