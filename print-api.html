@@ -110,13 +110,13 @@ $(document).ready(function(){initNavTree('print-api.html','');});
 </div>
 <div class="textblock"><h1><a class="anchor" id="print-overview"></a>
 The print API</h1>
-<p>Lomse is platform independen code and knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. In fact, implementing printing in your application is reduced to printing bitmaps.</p>
+<p>Lomse is platform independent code and knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. In fact, implementing printing in your application is just printing bitmaps.</p>
 <p>The Lomse print API consists in four methods, invoked in sequence:</p>
 <ol type="1">
 <li>First, determine how many pages to print. To know how many pages the document has you just call <a class="el" href="classInteractor.html#a4030a9cf2342d198a5890c30cecec4b7">Interactor::get_num_pages()</a>.</li>
 <li>In order to not interfere with screen display, a different rendering buffer is used by Lomse for printing. Therefore, the next thing to do is to determine the bitmap size that will be used. For this, method <a class="el" href="classInteractor.html#ad9a751be824b41e8b44a06ab73b549c9">Interactor::get_page_size_in_pixels()</a> can be used to get the page size, in pixels, for current resolution (the screen resolution you set up when initializing Lomse library, usually 96 ppi). For using other resolutions see <a class="el" href="print-api.html#print-buffer-size">Determining print buffer size</a>. Anyway, real resolution is not this value. Real resolution is given by the the bitmap size, as the score image is always scaled to fit in the bitmap</li>
 </ol>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>Clarify the need for method <a class="el" href="classInteractor.html#ad9a751be824b41e8b44a06ab73b549c9">Interactor::get_page_size_in_pixels()</a>. Should it accept a 'dpi' parameter?</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo:</a></b></dt><dd>Clarify the need for method <a class="el" href="classInteractor.html#ad9a751be824b41e8b44a06ab73b549c9">Interactor::get_page_size_in_pixels()</a>. Should it accept a 'dpi' parameter?</dd></dl>
 <ol type="1">
 <li>Once determined the buffer size to use, allocate memory for the buffer and inform Lomse by invoking <a class="el" href="classInteractor.html#aa09a83d8ad572065f83bbce47ed50066">Interactor::set_printing_buffer()</a>.</li>
 <li>Now, invoke <a class="el" href="classInteractor.html#af143b3e6d39b12eac393d5ba896edccf">Interactor::on_print_page()</a> to request Lomse to render a page in the provided buffer.</li>
@@ -146,14 +146,14 @@ Determining print buffer size</h1>
 Save memory by tiling</h1>
 <p>Using large size papers or printing at very high resolutions can require huge bitmaps. A technique for avoiding this is to split the page in tiles and print tile by tile. Here you have an example:</p>
 <div class="fragment"><div class="line">ejemplo</div>
-</div><!-- fragment --><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000003">Todo:</a></b></dt><dd>Print example</dd></dl>
+</div><!-- fragment --><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000005">Todo:</a></b></dt><dd>Print example</dd></dl>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Fri Mar 25 2016 19:33:30 for Lomse library. API documentation by
+    <li class="footer">Generated on Fri Mar 25 2016 19:53:41 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -107,9 +107,9 @@ $(document).ready(function(){initNavTree('lomse-introduction.html','');});
 <li class="level1"><a href="#overview-doorway">Class LomseDoorway</a></li>
 <li class="level1"><a href="#overview-mvc">The Document and related classes</a></li>
 <li class="level1"><a href="#overview-sound-engine">The sound engine</a></li>
-<li class="level1"><a href="#overview-rendering-engine">The rendering engine</a></li>
+<li class="level1"><a href="#overview-print">Printing documents</a></li>
 <li class="level1"><a href="#overview-edition">Editing documents</a></li>
-<li class="level1"><a href="#rendering-documents"></a></li>
+<li class="level1"><a href="#overview-rendering">Displaying documents</a></li>
 </ul>
 </div>
 <div class="textblock"><h1><a class="anchor" id="lomse-philosophy"></a>
@@ -148,49 +148,23 @@ The Document and related classes</h1>
 The sound engine</h1>
 <p>Lomse is platform independent code and cannot generate sounds for your specific platform. Therefore, lomse implements playback by generating real-time events and sending them to your application. It is responsibility of your application to handle these events and do whatever is needed, i.e. transform sound events into real sounds or doing whatever you would like with the sound events.</p>
 <p>The details and classes you have to use for scores playback are described in <a class="el" href="sound_generation.html">Scores playback</a>.</p>
-<h1><a class="anchor" id="overview-rendering-engine"></a>
-The rendering engine</h1>
-<p>It is responsible for transforming the information contained in the Document into a bitmap (or other format) for displaying it on the screen.</p>
+<h1><a class="anchor" id="overview-print"></a>
+Printing documents</h1>
+<p>Lomse is platform independent code and knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. In fact, implementing printing in your application is just printing bitmaps.</p>
+<p>The details and methods you have to use for printing are described in <a class="el" href="print-api.html">Printing</a>.</p>
 <h1><a class="anchor" id="overview-edition"></a>
 Editing documents</h1>
-<p>The <em>InternalModel</em> is a collection of 'internal model objects' (Imo objects) that form a purpose independent representation of the document content. From it, any other specific representation can be derived.</p>
-<p>For displaying a document, two steps are performed:</p>
-<ol type="1">
-<li>The <em>InternalModel</em> is traversed and a <em>GraphicModel</em> is built. It is a collection of <em>GmoBox</em> and <em>GmoShape</em> objects.</li>
-<li>The <em>GraphicModel</em> is traversed and its objects rendered to create a bitmap or other desired representation.</li>
-</ol>
-<p>Involved objects:</p>
-<ul>
-<li>Boxes and Shapes (<em>GmoBox</em> and <em>GmoShape</em> objects) - They are the 'bricks' that form the <em>GraphicModel</em>.</li>
-<li><em>Layouter</em> objects - Its main responsibility is to organise the space, creating areas for placing content. In practice, this implies that layouters main objective is to create the <em>GmoBox</em> objects.</li>
-<li><em>Engraver</em> objects - Its main responsibility is to create the symbols (lines, texts, music symbols, etc.) within the specified areas. In practice, this implies that their main objective is to create the <em>GmoShape</em> objects.</li>
-<li><em>Drawer</em> - The objects that form the <em>GraphicModel</em>, that is <em>GmoBox</em> and <em>GmoShape</em> objects, are responsible for rendering themselves by issuing drawing commands. The <em>Drawer</em> object is responsible for transforming these commands into something understandable by the underlying rendering engine. Currently only <em>ScreenDrawer</em> class is implemented and it behaves as a vertex source for <em>ScreenRenderer</em> class. But other derived classes would be possible, for instance to generate SVG commands.</li>
-<li><em>Calligrapher</em> - It is a helper class specialized in managing fonts and drawing texts.</li>
-<li><em>Renderer</em> - It is the front-end object for the desired rendering pipeline. For instance, class <em>ScreenRenderer</em> transforms vertices and paths received from <em>ScreenDrawer</em> into a bitmap.</li>
-</ul>
-<p>The result of this process is the creation of a bitmap (or other desired output) for displaying the document content.</p>
-<p>All these issues are described in render-root.</p>
-<h1><a class="anchor" id="rendering-documents"></a>
-rendering-documents</h1>
-<p>Lomse works by rendering the scores on a bitmap buffer, that is, on an array of consecutive memory bytes. As this buffer is provided by the user application, it can be any type of memory, such as a real bitmap, a window's buffer, etc. This implies that before using Lomse you should decide what is the best approach for using Lomse in your application.</p>
-<p>The simplest and usual way of rendering scores on a window is just passing Lomse a bitmap in memory, asking Lomse to render on that bitmap, and copying the bitmap onto the window. And this is the approach we will follow for our wxWidgets application.</p>
-<p>To render a bitmap in wxWidgets we usually would use a wxBitmap and do something as:</p>
-<pre class="code">
-wxMemoryDC memoryDC;
-wxBitmap* pBitmap;
-memoryDC.SelectObject(*pBitmap);
-dc.Blit(0, 0, width, height, &amp;memoryDC, 0, 0);
-</pre><p>But Lomse knows nothing about wxBitmap objects. For Lomse, a bitmap is just an array of bytes containing the image pixels, whereas wxBitmap is a platform dependent class containing a buffer for pixels (in a platform dependent format) and additional data.</p>
-<p>We could think on using a native Lomse bitmap and building later a wxBitmap object from it. This solution is complex, puts the work on the user application and also requires platform dependent code. Moreover, it requires internal knowledge about wxBitmap format.</p>
-<p>So the best approach I've found for using Lomse in wxWidgets applications is to use an wxImage object. First, wxImage is a platform independent class. Therefore, with this choice, we keep our application free of a lot of conditional compilation statements for supporting different platforms. Second, wxImage contains an internal buffer for the image. It is documented and publicly accessible. It is an array of characters in RGBRGBRGB... format, arranged in top-to-bottom, left-to-right order. That is, the first RGB triplet corresponds to the first pixel of the first row; the second RGB triplet corresponds to the second pixel of the first row, and so on until the end of the first row, with second row following after it and so on. In summary, wxImage contains a buffer for a bitmap in RGB, 24 bits format. Luckily, this is one of the bitmap formats supported by Lomse. And, as a bonus, wxImage can be easily converted to an wxBitmap and, therefore, it can be rendered by your application.</p>
-<p>So, once we've learn that Lomse renders on bitmaps and once we have found a solution for communicating wxWidgets with Lomse, let's start with our application. </p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Introduction to Editing documents</dd></dl>
+<h1><a class="anchor" id="overview-rendering"></a>
+Displaying documents</h1>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>Introduction to Displaying documents</dd></dl>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Fri Mar 25 2016 19:33:30 for Lomse library. API documentation by
+    <li class="footer">Generated on Fri Mar 25 2016 19:53:41 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

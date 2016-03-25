@@ -5,9 +5,9 @@ var index =
       [ "Class LomseDoorway", "lomse-introduction.html#overview-doorway", null ],
       [ "The Document and related classes", "lomse-introduction.html#overview-mvc", null ],
       [ "The sound engine", "lomse-introduction.html#overview-sound-engine", null ],
-      [ "The rendering engine", "lomse-introduction.html#overview-rendering-engine", null ],
+      [ "Printing documents", "lomse-introduction.html#overview-print", null ],
       [ "Editing documents", "lomse-introduction.html#overview-edition", null ],
-      [ "rendering-documents", "lomse-introduction.html#rendering-documents", null ]
+      [ "Displaying documents", "lomse-introduction.html#overview-rendering", null ]
     ] ],
     [ "Scores playback", "sound_generation.html", [
       [ "How Lomse playback works", "sound_generation.html#sound-generation-overview", null ],

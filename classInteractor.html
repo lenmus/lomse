@@ -325,7 +325,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_mouse_ente
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_mouse_leave_window</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
 <tr class="separator:afbfb111029c260532f849362bf3b15f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Actions requested by Task objects</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000013">Todo:</a></b></dt><dd>Should be restricted for internal use? </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000015">Todo:</a></b></dt><dd>Should be restricted for internal use? </dd></dl>
 </div></td></tr>
 <tr class="memitem:ac7ed97cbea54ce7bbf626149fbc85640"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac7ed97cbea54ce7bbf626149fbc85640"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_click_at_screen_point</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
@@ -505,7 +505,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 </div><div class="memdoc">
 <p>Invoking this method forces Lomse to render again the View and, therefore, the rendering buffer gets updated. After doing it, Lomse <b>will</b> generate a EventPaint event.</p>
 <dl class="section note"><dt>Note</dt><dd>Lomse will ignore the request if forced updates are disabled. See <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>.</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be refactored.</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000013">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be refactored.</dd></dl>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a>. </dd></dl>
 
 </div>
@@ -531,7 +531,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 </table>
 </div><div class="memdoc">
 <p>Returns the cursor associated to the View of this <a class="el" href="classInteractor.html">Interactor</a>. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>Explain DocCursor and how to use it. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Explain DocCursor and how to use it. </dd></dl>
 
 </div>
 </div>
@@ -716,7 +716,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 </table>
 </div><div class="memdoc">
 <p>Returns the selection set associated to the View of this <a class="el" href="classInteractor.html">Interactor</a>. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Explain SelectionSet and how it works. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000012">Todo:</a></b></dt><dd>Explain SelectionSet and how it works. </dd></dl>
 
 </div>
 </div>
@@ -1117,7 +1117,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000012">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document. </dd></dl>
 
 </div>
 </div>
@@ -1416,7 +1416,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
       </table>
 </div><div class="memdoc">
 <p>Switch the automata used by the <a class="el" href="classInteractor.html">Interactor</a> for interpreting mouse events. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo:</a></b></dt><dd>Explain tasks</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Explain tasks</dd></dl>
 <p>Example:</p>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandEventHandler::switch_interactor_mode_for_current_mouse_mode()</div>
 <div class="line">{</div>
@@ -1648,7 +1648,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Fri Mar 25 2016 19:33:30 for Lomse library. API documentation by
+    <li class="footer">Generated on Fri Mar 25 2016 19:53:41 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

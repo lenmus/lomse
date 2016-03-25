@@ -193,7 +193,7 @@ How to play an score</h1>
 <div class="line">    <span class="comment">//start playback</span></div>
 <div class="line">    pPlayer-&gt;play(fVisualTracking, fCountOff, k_play_normal_instrument, nMM, pInteractor);</div>
 <div class="line">}</div>
-</div><!-- fragment --><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000004">Todo:</a></b></dt><dd>Check example code: pPlayer-&gt;play(fVisualTracking, fCountOff, k_play_normal_instrument, nMM, pInteractor);</dd></dl>
+</div><!-- fragment --><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000006">Todo:</a></b></dt><dd>Check example code: pPlayer-&gt;play(fVisualTracking, fCountOff, k_play_normal_instrument, nMM, pInteractor);</dd></dl>
 <h1><a class="anchor" id="handling-highlight-events"></a>
 Handling highlight events</h1>
 <p>Apart from generating sound events, lomse also generates <em>highlight</em> events, that is, events to add visual tracking effects, synchronized with sound, on the displayed score.</p>
@@ -205,7 +205,7 @@ Handling highlight events</h1>
 <p><em>Highlight</em> events are sent to your application via the event handling callback, that you set up at Lomse initialization. When handling a <em>highlight</em> event, if your application would like to delegate in Lomse for visual effects generation, the only thing to do is to pass the event to the interactor:</p>
 <div class="fragment"><div class="line">pInteractor-&gt;handle_event(pEvent);</div>
 </div><!-- fragment --><p>Lomse will handle the event and will send an <em>update window</em> event to your application, for updating the display.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000005">Todo:</a></b></dt><dd>Advanced topic: direct modification of the graphic model.</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000007">Todo:</a></b></dt><dd>Advanced topic: direct modification of the graphic model.</dd></dl>
 <h1><a class="anchor" id="implementing-player-gui"></a>
 The PlayerGui object</h1>
 <p>For controlling playback some GUI controls (buttons, menu items, etc. to trigger start, stop, pause actions, sliders or other for setting tempo speed, etc.) are normally required.</p>
@@ -248,7 +248,7 @@ The PlayerGui object</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Fri Mar 25 2016 19:33:30 for Lomse library. API documentation by
+    <li class="footer">Generated on Fri Mar 25 2016 19:53:41 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
