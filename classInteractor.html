@@ -128,8 +128,10 @@ Inheritance diagram for Interactor:</div>
 <h1><a class="anchor" id="lomse_units"></a>
 Device and logical units</h1>
 <p>In Lomse there is a distinction between <em>logical</em> units and <em>device</em> units.</p>
-<p><b>Device</b> units are the units native to the particular device; e.g. for a screen, a device unit is a <em>pixel</em>. For a printer, the device unit is defined by the resolution of the printer (usually given in <code>DPI:</code> dots-per-inch).</p>
-<p>All Lomse functions use <b>logical</b> units, unless where explicitly stated. Logical units are arbitrary units mapped to device units using the current mapping mode (see wxDC::SetMapMode). </p>
+<p><b>Logical</b> units (<em>LUnits</em>) are real world units. A logical unit is one cent of a millimeter.</p>
+<p><b>Device</b> units are the units native to a particular device; e.g. for a screen, a device unit is a <em>pixel</em>. For a printer, the device unit is defined by the resolution of the printer (usually given in <code>DPI:</code> dots-per-inch).</p>
+<p>The Lomse graphic model uses logical units, but all coordinates in the graphic model are relative to current page origin.</p>
+<p>Logical units are mapped to device units (pixels) using the current rendering resolution. </p>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
@@ -758,7 +760,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the page number (0 .. num_pages - 1) that contains the point <em>(x, y)</em>. Variables <em>x</em> and <em>y</em> are in absolute device units (pixels, relative to view origin).</p>
+<p>Returns the page number (0 .. num_pages - 1) that contains the point <em>(x, y)</em> or -1 if point is out of page. Variables <em>x</em> and <em>y</em> are in absolute device units (pixels, relative to view origin).</p>
 <p>Example: </p>
 <div class="fragment"><div class="line"><span class="keywordtype">double</span> x = 4500.0;  <span class="comment">//pixels relative to view origin</span></div>
 <div class="line"><span class="keywordtype">double</span> y = 2700.0;  <span class="comment">//pixels</span></div>
@@ -1215,7 +1217,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Thu Mar 24 2016 19:27:33 for Lomse library. API documentation by
+    <li class="footer">Generated on Fri Mar 25 2016 16:07:21 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
