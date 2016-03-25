@@ -27,6 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
+#define LOMSE_INTERNAL_API
 #include <UnitTest++.h>
 #include <iostream>
 #include "lomse_build_options.h"

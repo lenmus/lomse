@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -27,6 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
+#define LOMSE_INTERNAL_API
 #include "lomse_presenter.h"
 
 #include "lomse_injectors.h"
@@ -141,11 +142,6 @@ Presenter::~Presenter()
 }
 
 //---------------------------------------------------------------------------------------
-void Presenter::close_document()
-{
-}
-
-//---------------------------------------------------------------------------------------
 SpInteractor Presenter::get_interactor_shared_ptr(int iIntor)
 {
     std::list<SpInteractor>::iterator it;
@@ -174,11 +170,11 @@ WpInteractor Presenter::get_interactor(int iIntor)
 }
 
 //---------------------------------------------------------------------------------------
-void Presenter::on_document_reloaded()
+void Presenter::on_document_updated()
 {
     std::list<SpInteractor>::iterator it;
     for (it=m_interactors.begin(); it != m_interactors.end(); ++it)
-        (*it)->on_document_reloaded();
+        (*it)->on_document_updated();
 }
 
 //---------------------------------------------------------------------------------------

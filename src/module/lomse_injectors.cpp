@@ -27,6 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
+#define LOMSE_INTERNAL_API
 #include "lomse_injectors.h"
 
 #include "lomse_version.h"

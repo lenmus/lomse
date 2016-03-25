@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2014 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -392,7 +392,7 @@ Compiler* Document::get_compiler_for_format(int format)
 bool Document::is_editable()
 {
     //TODO: How to mark a document as 'not editable'?
-    //For now, all documets are editable
+    //For now, all documents are editable
     return true;
 }
 

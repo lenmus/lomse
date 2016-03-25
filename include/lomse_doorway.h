@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -30,23 +30,11 @@
 #ifndef __LOMSE_DOORWAY_H__
 #define __LOMSE_DOORWAY_H__
 
-//---------------------------------------------------------------------------------------
-// This file MUST NOT include any system dependent .h files such as "windows.h" or
-// "X11.h", so the library do not depend on the platform.
-// All platform dependent code MUST be on the user application
-
-
 #include "lomse_build_options.h"
-#include "agg_basics.h"
-#include "agg_pixfmt_rgba.h"
-#include "agg_rendering_buffer.h"
-#include "agg_trans_viewport.h"
-//#include "lomse_tasks.h"
-#include "lomse_agg_types.h"
+
 #include "lomse_reader.h"
 #include "lomse_pixel_formats.h"
 #include "lomse_events.h"
-using namespace agg;
 
 #include <string>
 #include <iostream>
@@ -69,13 +57,6 @@ class MidiServerBase;
 class Metronome;
 
 
-//---------------------------------------------------------------------------------------
-struct PlatformInfo
-{
-    EPixelFormat    pixel_format;     //see enum EPixelFormat
-    bool            flip_y;     //true if you want to have the Y-axis flipped vertically
-    double          screen_ppi; //screen resolution in pixels per inch
-};
 
 
 //---------------------------------------------------------------------------------------
@@ -90,7 +71,12 @@ class LomseDoorway
 {
 protected:
     LibraryScope*       m_pLibraryScope;
-    PlatformInfo        m_platform;
+    struct
+    {
+        EPixelFormat    pixel_format;   //see enum EPixelFormat
+        bool            flip_y;         //true if you want to have the Y-axis flipped vertically
+        double          screen_ppi;     //screen resolution in pixels per inch
+    } m_platform;
     pt2NotifyFunction   m_pFunc_notify;
     pt2RequestFunction  m_pFunc_request;
     void*               m_pObj_notify;
@@ -108,20 +94,9 @@ public:
     void set_notify_callback(void* pThis, void (*pt2Func)(void*, SpEventInfo));
     void set_request_callback(void* pThis, void (*pt2Func)(void*, Request*));
     void set_default_fonts_path(const string& fontsPath);
-        //configuration of ScorePlayerCtrol
+        //playback related
     void set_global_metronome_and_replace_local(Metronome* pMtr);
-    //void set_global_metronome_and_duplicate_local(Metronome* pMtr);
-
-    //access to global objects
-    inline LibraryScope* get_library_scope() { return m_pLibraryScope; }
-
-    //communication with user application
-    inline void post_event(SpEventInfo pEvent) { m_pFunc_notify(m_pObj_notify, pEvent); }
-    inline void post_request(Request* pRequest) { m_pFunc_request(m_pObj_request, pRequest); }
-
-    //access to platform info
-    inline double get_screen_ppi() { return m_platform.screen_ppi; }
-    inline int get_pixel_format() { return m_platform.pixel_format; }
+    ScorePlayer* create_score_player(MidiServerBase* pSoundServer);
 
     //common operations on documents
     Presenter* new_document(int viewType);
@@ -131,11 +106,13 @@ public:
                              ostream& reporter = cout);
     Presenter* open_document(int viewType, LdpReader& reader,
                              ostream& reporter = cout);
-    ScorePlayer* create_score_player(MidiServerBase* pSoundServer);
 
+    //access to global objects
+    inline LibraryScope* get_library_scope() { return m_pLibraryScope; }
 
-    static void null_notify_function(void* pObj, SpEventInfo event);
-    static void null_request_function(void* pObj, Request* event);
+    //access to platform info
+    inline double get_screen_ppi() { return m_platform.screen_ppi; }
+    inline int get_pixel_format() { return m_platform.pixel_format; }
 
     //library info
     string get_version_string();
@@ -145,9 +122,21 @@ public:
     int get_version_minor();
     int get_version_patch();
 
+    //excluded from public API. Only for internal use.
+#ifdef LOMSE_INTERNAL_API
+
+    //default callbacks
+    static void null_notify_function(void* pObj, SpEventInfo event);
+    static void null_request_function(void* pObj, Request* event);
+
+    //communication with user application
+    inline void post_event(SpEventInfo pEvent) { m_pFunc_notify(m_pObj_notify, pEvent); }
+    inline void post_request(Request* pRequest) { m_pFunc_request(m_pObj_request, pRequest); }
+
 protected:
     void clear_forensic_log();
 
+#endif  //excluded from public API
 };
 
 }   //namespace lomse

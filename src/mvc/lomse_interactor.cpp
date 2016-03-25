@@ -27,6 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
+#define LOMSE_INTERNAL_API
 #include "lomse_interactor.h"
 
 #include "lomse_ldp_compiler.h"
@@ -165,12 +166,12 @@ void Interactor::create_graphic_model()
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::on_document_reloaded()
+void Interactor::on_document_updated()
 {
-    LOMSE_LOG_DEBUG(Logger::k_mvc, "[Interactor::on_document_reloaded]");
+    LOMSE_LOG_DEBUG(Logger::k_mvc, "[Interactor::on_document_updated]");
     delete_graphic_model();
     create_graphic_model();
-    //TODO: Interactor::on_document_reloaded. Update cursor
+    //TODO: Interactor::on_document_updated. Update cursor
     //DocCursor cursor(m_pDoc);
     //m_cursor = cursor;
 }
@@ -683,9 +684,6 @@ void Interactor::redraw_caret()
 //---------------------------------------------------------------------------------------
 bool Interactor::view_needs_repaint()
 {
-    //if (!m_fViewUpdatesEnabled)
-    //    return false;
-
     if (SpDocument spDoc = m_wpDoc.lock())
     {
         if (spDoc->is_dirty() || m_fViewParamsChanged)
