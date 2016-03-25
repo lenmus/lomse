@@ -17,6 +17,11 @@ var index =
       [ "Handling highlight events", "sound_generation.html#handling-highlight-events", null ],
       [ "The PlayerGui object", "sound_generation.html#implementing-player-gui", null ]
     ] ],
+    [ "Printing", "print-api.html", [
+      [ "The print API", "print-api.html#print-overview", null ],
+      [ "Determining print buffer size", "print-api.html#print-buffer-size", null ],
+      [ "Save memory by tiling", "print-api.html#print-tiles", null ]
+    ] ],
     [ "Rendering and interacting with documents", "mvc-model.html", null ],
     [ "How Lomse callbacks work", "lomse-callbacks.html", null ],
     [ "Events sent by Lomse", "lomse-events.html", null ]

@@ -8,9 +8,11 @@ var searchData=
   ['set_5fglobal_5fmetronome_5fand_5freplace_5flocal',['set_global_metronome_and_replace_local',['../classLomseDoorway.html#a27e0f90ab48d79d5ad464e1461411579',1,'LomseDoorway']]],
   ['set_5fnotify_5fcallback',['set_notify_callback',['../classLomseDoorway.html#ab5e0a00a93e25a7d8b51b39302f41a15',1,'LomseDoorway']]],
   ['set_5foperating_5fmode',['set_operating_mode',['../classInteractor.html#acb5d21578acde66c5da165f1fa808fb6',1,'Interactor']]],
+  ['set_5fprinting_5fbuffer',['set_printing_buffer',['../classInteractor.html#aa09a83d8ad572065f83bbce47ed50066',1,'Interactor']]],
   ['set_5frendering_5fbuffer',['set_rendering_buffer',['../classInteractor.html#a2494425c26d19946921e4b4e97f189f3',1,'Interactor']]],
   ['set_5frendering_5foption',['set_rendering_option',['../classInteractor.html#ab802d6e8a3fc482aa7f0fdf9029aecae',1,'Interactor']]],
   ['set_5frequest_5fcallback',['set_request_callback',['../classLomseDoorway.html#a747d3488b15dfda96c5f7477a28525da',1,'LomseDoorway']]],
+  ['set_5fscale',['set_scale',['../classInteractor.html#a5e7dbf2be635475f40ba9b723a902d37',1,'Interactor']]],
   ['set_5fuser_5fdata',['set_user_data',['../classPresenter.html#acd6f651583829e92d4d2d3566c94adad',1,'Presenter']]],
   ['switch_5ftask',['switch_task',['../classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f',1,'Interactor']]]
 ];
