@@ -249,12 +249,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>discard_all_h
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_visual_highlight</b> (SpEventScoreHighlight pEvent)</td></tr>
 <tr class="separator:a63f6da91ca760a12d8eea57c4e209d1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Print related</div></td></tr>
-<tr class="memitem:aa09a83d8ad572065f83bbce47ed50066"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#aa09a83d8ad572065f83bbce47ed50066">set_printing_buffer</a> (RenderingBuffer *rbuf)</td></tr>
-<tr class="separator:aa09a83d8ad572065f83bbce47ed50066"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af143b3e6d39b12eac393d5ba896edccf"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#af143b3e6d39b12eac393d5ba896edccf">on_print_page</a> (int page, double scale, VPoint viewport)</td></tr>
-<tr class="separator:af143b3e6d39b12eac393d5ba896edccf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad9a751be824b41e8b44a06ab73b549c9"><td class="memItemLeft" align="right" valign="top">virtual VSize&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ad9a751be824b41e8b44a06ab73b549c9">get_page_size_in_pixels</a> (int nPage)</td></tr>
-<tr class="separator:ad9a751be824b41e8b44a06ab73b549c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5402ba5556ee21c50bfab7a097cc5eb"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ab5402ba5556ee21c50bfab7a097cc5eb">set_print_buffer</a> (RenderingBuffer *rbuf)</td></tr>
+<tr class="separator:ab5402ba5556ee21c50bfab7a097cc5eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56006a47ef6164ad139c2d5bb1e17c3d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a56006a47ef6164ad139c2d5bb1e17c3d">set_print_ppi</a> (double ppi)</td></tr>
+<tr class="separator:a56006a47ef6164ad139c2d5bb1e17c3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45f7fb6d5f2a8b0b6d4b5e670c96e06d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a45f7fb6d5f2a8b0b6d4b5e670c96e06d">print_page</a> (int page, VPoint viewport=VPoint(0, 0))</td></tr>
+<tr class="separator:a45f7fb6d5f2a8b0b6d4b5e670c96e06d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4030a9cf2342d198a5890c30cecec4b7"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a4030a9cf2342d198a5890c30cecec4b7">get_num_pages</a> ()</td></tr>
 <tr class="separator:a4030a9cf2342d198a5890c30cecec4b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Selecting objects</div></td></tr>
@@ -325,7 +325,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_mouse_ente
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_mouse_leave_window</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
 <tr class="separator:afbfb111029c260532f849362bf3b15f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Actions requested by Task objects</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000015">Todo:</a></b></dt><dd>Should be restricted for internal use? </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000013">Todo:</a></b></dt><dd>Should be restricted for internal use? </dd></dl>
 </div></td></tr>
 <tr class="memitem:ac7ed97cbea54ce7bbf626149fbc85640"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac7ed97cbea54ce7bbf626149fbc85640"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_click_at_screen_point</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
@@ -505,7 +505,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 </div><div class="memdoc">
 <p>Invoking this method forces Lomse to render again the View and, therefore, the rendering buffer gets updated. After doing it, Lomse <b>will</b> generate a EventPaint event.</p>
 <dl class="section note"><dt>Note</dt><dd>Lomse will ignore the request if forced updates are disabled. See <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>.</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000013">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be refactored.</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be refactored.</dd></dl>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a>. </dd></dl>
 
 </div>
@@ -531,7 +531,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 </table>
 </div><div class="memdoc">
 <p>Returns the cursor associated to the View of this <a class="el" href="classInteractor.html">Interactor</a>. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Explain DocCursor and how to use it. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>Explain DocCursor and how to use it. </dd></dl>
 
 </div>
 </div>
@@ -597,38 +597,6 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 </table>
 </div><div class="memdoc">
 <p>Returns current operation mode for this <a class="el" href="classInteractor.html">Interactor</a>. Returned value is one of the values from enum EInteractorOpMode. </p>
-
-</div>
-</div>
-<a class="anchor" id="ad9a751be824b41e8b44a06ab73b549c9"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual VSize Interactor::get_page_size_in_pixels </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>nPage</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Returns the size (in pixels) of the specified page, based on resolution settings specified at Lomse initialization. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">nPage</td><td>The page whose size is requested (0..num_pages - 1)</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>See <a class="el" href="print-api.html">Printing</a> </p>
 
 </div>
 </div>
@@ -716,7 +684,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 </table>
 </div><div class="memdoc">
 <p>Returns the selection set associated to the View of this <a class="el" href="classInteractor.html">Interactor</a>. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000012">Todo:</a></b></dt><dd>Explain SelectionSet and how it works. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Explain SelectionSet and how it works. </dd></dl>
 
 </div>
 </div>
@@ -838,56 +806,6 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 
 </div>
 </div>
-<a class="anchor" id="af143b3e6d39b12eac393d5ba896edccf"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual void Interactor::on_print_page </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>page</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>scale</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">VPoint&#160;</td>
-          <td class="paramname"><em>viewport</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Request Lomse to render a page on current print buffer. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">page</td><td>The page to print (0..num_pages - 1) </td></tr>
-    <tr><td class="paramname">scale</td><td>The desired scaling factor </td></tr>
-    <tr><td class="paramname">viewport</td><td>The desired viewport. By changing the viewport in a loop of calls to this method your application can split the page in tiles, so that printing in large paper formats will not require huge buffer sizes.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>See <a class="el" href="print-api.html">Printing</a> </p>
-
-</div>
-</div>
 <a class="anchor" id="a75600fd031826c9ae48ca4ada8b7ddce"></a>
 <div class="memitem">
 <div class="memproto">
@@ -930,6 +848,49 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <div class="line">    <span class="comment">//Here @a iPage is the page number (0 .. num_pages - 1)</span></div>
 <div class="line">}</div>
 </div><!-- fragment --> 
+</div>
+</div>
+<a class="anchor" id="a45f7fb6d5f2a8b0b6d4b5e670c96e06d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Interactor::print_page </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>page</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">VPoint&#160;</td>
+          <td class="paramname"><em>viewport</em> = <code>VPoint(0,&#160;0)</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Request Lomse to render a page on current print buffer. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">page</td><td>The page to print (0..num_pages - 1) </td></tr>
+    <tr><td class="paramname">viewport</td><td>The desired viewport. By changing the viewport in a loop of calls to this method your application can split the page in tiles, so that printing in large paper formats will not require huge buffer sizes.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p>See <a class="el" href="print-api.html">Printing</a> </p>
+
 </div>
 </div>
 <a class="anchor" id="a06e3f55dc1042e165adc50493d0f90b4"></a>
@@ -1117,7 +1078,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000012">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document. </dd></dl>
 
 </div>
 </div>
@@ -1191,7 +1152,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 </div><!-- fragment --> 
 </div>
 </div>
-<a class="anchor" id="aa09a83d8ad572065f83bbce47ed50066"></a>
+<a class="anchor" id="ab5402ba5556ee21c50bfab7a097cc5eb"></a>
 <div class="memitem">
 <div class="memproto">
 <table class="mlabels">
@@ -1199,7 +1160,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">virtual void Interactor::set_printing_buffer </td>
+          <td class="memname">virtual void Interactor::set_print_buffer </td>
           <td>(</td>
           <td class="paramtype">RenderingBuffer *&#160;</td>
           <td class="paramname"><em>rbuf</em></td><td>)</td>
@@ -1214,6 +1175,32 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 </div><div class="memdoc">
 <p>Sets the memory area to be used as buffer for printing operations.</p>
 <p>In order to not interfere with screen display, a different rendering buffer is used for printing.</p>
+<p>See <a class="el" href="print-api.html">Printing</a> </p>
+
+</div>
+</div>
+<a class="anchor" id="a56006a47ef6164ad139c2d5bb1e17c3d"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Interactor::set_print_ppi </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>ppi</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Sets the resolution (in dots per inch, dpi) to use for printing.</p>
 <p>See <a class="el" href="print-api.html">Printing</a> </p>
 
 </div>
@@ -1416,7 +1403,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
       </table>
 </div><div class="memdoc">
 <p>Switch the automata used by the <a class="el" href="classInteractor.html">Interactor</a> for interpreting mouse events. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Explain tasks</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo:</a></b></dt><dd>Explain tasks</dd></dl>
 <p>Example:</p>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandEventHandler::switch_interactor_mode_for_current_mouse_mode()</div>
 <div class="line">{</div>
@@ -1648,7 +1635,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Fri Mar 25 2016 19:53:41 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Mar 26 2016 17:31:37 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
