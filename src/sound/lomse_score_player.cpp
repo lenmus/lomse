@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -27,6 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
+#define LOMSE_INTERNAL_API
 #include "lomse_score_player.h"
 
 #include "lomse_midi_table.h"
@@ -203,7 +204,7 @@ void ScorePlayer::thread_main(int nEvStart, int nEvEnd, bool fVisualTracking,
     try
     {
         if (pInteractor && !m_fPostEvents)
-            pInteractor->enable_view_updates(false);
+            pInteractor->enable_forced_view_updates(false);
         fVisualTracking &= (pInteractor != NULL);
         do_play(nEvStart, nEvEnd, fVisualTracking, nMM, pInteractor);
     }
@@ -803,7 +804,7 @@ void ScorePlayer::end_of_playback_housekeeping(bool fVisualTracking,
 
     // allow view updates
     if (pInteractor)
-        pInteractor->enable_view_updates(true);
+        pInteractor->enable_forced_view_updates(true);
 
     //update player gui
     if (m_pPlayerGui)

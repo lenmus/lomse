@@ -27,10 +27,19 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
+#define LOMSE_INTERNAL_API
 #include "lomse_doorway.h"
 
 #include "lomse_injectors.h"
 #include "lomse_presenter.h"
+
+#include "agg_basics.h"
+#include "agg_pixfmt_rgba.h"
+#include "agg_rendering_buffer.h"
+#include "agg_trans_viewport.h"
+//#include "lomse_tasks.h"
+#include "lomse_agg_types.h"
+using namespace agg;
 
 #include <sstream>
 using namespace std;

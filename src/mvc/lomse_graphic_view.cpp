@@ -27,6 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
+#define LOMSE_INTERNAL_API
 #include "lomse_graphic_view.h"
 
 #include <cstdio>       //for sprintf
@@ -399,10 +400,11 @@ string GraphicView::get_caret_timecode()
 }
 
 //---------------------------------------------------------------------------------------
-void GraphicView::on_print_page(int page, double scale, VPoint viewport)
+void GraphicView::print_page(int page, VPoint viewport)
 {
     //save and replace scale
     double screenScale = get_scale();
+    double scale = m_print_ppi / get_resolution();
     set_scale(scale);
 
     //draw page
@@ -782,6 +784,13 @@ double GraphicView::get_scale()
 }
 
 //---------------------------------------------------------------------------------------
+double GraphicView::get_resolution()
+{
+    LomseDoorway* pDoorway = m_libraryScope.platform_interface();
+    return pDoorway->get_screen_ppi();
+}
+
+//---------------------------------------------------------------------------------------
 void GraphicView::screen_point_to_page_point(double* x, double* y)
 {
     m_pDrawer->screen_point_to_model(x, y);
@@ -1129,18 +1138,6 @@ void GraphicView::change_cursor_voice(int voice)
         ScoreCursor* pSC = static_cast<ScoreCursor*>(m_pCursor->get_inner_cursor());
         pSC->change_voice_to(voice);
     }
-}
-
-//---------------------------------------------------------------------------------------
-VSize GraphicView::get_page_size_in_pixels(int nPage)
-{
-    GraphicModel* pGModel = get_graphic_model();
-    GmoBoxDocPage* pPage = pGModel->get_page(nPage-1);
-    URect rect = pPage->get_bounds();
-    VSize size;
-    size.width = m_pDrawer->LUnits_to_Pixels(rect.width);
-    size.height = m_pDrawer->LUnits_to_Pixels(rect.height);
-    return size;
 }
 
 //---------------------------------------------------------------------------------------

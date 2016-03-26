@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -117,28 +117,26 @@ protected:
     ImoId       m_idControlledImo;
 
 public:
-    Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView,
-               DocCommandExecuter* pExec);
-    virtual ~Interactor();
 
-    inline SharedPtr<Interactor> get_shared_ptr_from_this() { return shared_from_this(); }
+    //enums
+    enum EInteractorOpMode { k_mode_read_only=0, k_mode_edition, k_mode_playback, };
+    enum ETimingTarget { k_timing_gmodel_build_time=0, k_timing_gmodel_draw_time,
+       k_timing_visual_effects_draw_time, k_timing_total_render_time,
+       k_timing_repaint_time, k_timing_max_value, };
 
-    virtual void on_document_reloaded();
-    void switch_task(int taskType);
+
+    //operating modes and related
     void set_operating_mode(int mode);
     inline int get_operating_mode() { return m_operatingMode; }
-    enum { k_mode_read_only=0, k_mode_edition, k_mode_playback, };     //operating modes
     void enable_edition_restricted_to(ImoId id);
-    bool is_document_editable();
+    bool is_document_editable();    //not yet implemented. Made private
+    void switch_task(int taskType);
 
-    //access to collaborators
+    //access to collaborators in MVC model
     GraphicModel* get_graphic_model();
     inline View* get_view() { return m_pView; }
     inline DocCursor* get_cursor() { return m_pCursor; }
     inline SelectionSet* get_selection_set() { return m_pSelections; }
-
-    //mandatory override required by EventHandler
-	void handle_event(SpEventInfo pEvent);
 
     //interface to View
     virtual void redraw_bitmap();
@@ -149,21 +147,19 @@ public:
     virtual void send_end_of_play_event(ImoScore* pScore, PlayerGui* pPlayCtrl);
 
     //play back
-    inline void enable_view_updates(bool value) { m_fViewUpdatesEnabled = value; }
+    inline void enable_forced_view_updates(bool value) { m_fViewUpdatesEnabled = value; }
 
 
     //interface to GraphicView
         //renderization
     virtual void set_rendering_buffer(RenderingBuffer* rbuf);
     virtual void set_rendering_option(int option, bool value);
-    virtual void set_box_to_draw(int boxType);
-    virtual void reset_boxes_to_draw();
-    virtual void highlight_voice(int voice);
         //units conversion and related
     virtual void screen_point_to_page_point(double* x, double* y);
     virtual void model_point_to_screen(double* x, double* y, int iPage);
     virtual int page_at_screen_point(double x, double y);
     virtual UPoint screen_point_to_model_point(Pixels x, Pixels y);
+    DiatonicPitch get_pitch_at(Pixels x, Pixels y);
         //wiewport / scroll
     virtual void new_viewport(Pixels x, Pixels y, bool fForceRedraw=true);
     virtual void set_viewport_at_page_center(Pixels screenWidth);
@@ -190,9 +186,9 @@ public:
     virtual void discard_all_highlight();
     virtual void on_visual_highlight(SpEventScoreHighlight pEvent);
         //printing
-    virtual void set_printing_buffer(RenderingBuffer* rbuf);
-    virtual void on_print_page(int page, double scale, VPoint viewport);
-    virtual VSize get_page_size_in_pixels(int nPage);
+    virtual void set_print_buffer(RenderingBuffer* rbuf);
+    virtual void set_print_ppi(double ppi);
+    virtual void print_page(int page, VPoint viewport=VPoint(0, 0));
     virtual int get_num_pages();
 
     //interface to SelectionSet
@@ -200,9 +196,6 @@ public:
     virtual void select_object(ImoId id, bool fClearSelection=true);
 //    void select_object(ImoObj* pImo, bool fClearSelection=true);
     virtual bool is_in_selection(GmoObj* pGmo);
-
-    //mandatory overrides from Observable
-    EventNotifier* get_event_notifier() { return this; }
 
     //caret
     void blink_caret();
@@ -227,10 +220,9 @@ public:
     bool should_enable_edit_redo();
 //    void enable_edition(bool value);
 //    inline bool is_edition_enabled() { return m_fEditionEnabled; }
-    string dump_cursor();
-    string dump_selection();
 
-    // event handlers for user actions. Library API
+    // event handlers for user actions and related
+    virtual void on_document_updated();
     virtual void on_mouse_move(Pixels x, Pixels y, unsigned flags);
     virtual void on_mouse_button_down(Pixels x, Pixels y, unsigned flags);
     virtual void on_mouse_button_up(Pixels x, Pixels y, unsigned flags);
@@ -242,11 +234,6 @@ public:
     //virtual void on_key(Pixels x, Pixels y, unsigned key, unsigned flags);
     //virtual void on_ctrl_change();
 
-    //miscellaneous
-    DiatonicPitch get_pitch_at(Pixels x, Pixels y);
-
-    //-----------------------------------------------------------------------------------
-    //commands
 
     //actions requested by Task objects
     virtual void task_action_click_at_screen_point(Pixels x, Pixels y, unsigned flags);
@@ -275,17 +262,47 @@ public:
 //                                           Pixels xTotalShift, Pixels yTotalShift);
 
     //for performance measurements
-    enum { k_timing_gmodel_build_time=0, k_timing_gmodel_draw_time,
-           k_timing_visual_effects_draw_time, k_timing_total_render_time,
-           k_timing_repaint_time, k_timing_max_value, };
+    void timing_repaint_done();
+    inline double* get_ellapsed_times() { return &m_ellapsedTimes[0]; }
+
+    //Debugging
+    virtual void set_box_to_draw(int boxType);
+    virtual void reset_boxes_to_draw();
+    string dump_cursor();
+    string dump_selection();
+
+
+//excluded from public API. Only for internal use.
+#ifdef LOMSE_INTERNAL_API
+public:
+    Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView,
+               DocCommandExecuter* pExec);
+    virtual ~Interactor();
+
+    inline SharedPtr<Interactor> get_shared_ptr_from_this() { return shared_from_this(); }
+
+    //mandatory override required by EventHandler
+	void handle_event(SpEventInfo pEvent);
+
+    //Deprecated ?
+    virtual void highlight_voice(int voice);
+
+    //mandatory overrides from Observable
+    EventNotifier* get_event_notifier() { return this; }
+
+    //for performance measurements
     void timing_start_measurements();
     void timing_graphic_model_build_end();
     void timing_graphic_model_render_end();
     void timing_visual_effects_start();
     void timing_renderization_end();
-    void timing_repaint_done();
-    inline double* get_ellapsed_times() { return &m_ellapsedTimes[0]; }
 
+#else
+protected:
+    Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView,
+               DocCommandExecuter* pExec);
+
+#endif  //excluded from public API
 
 protected:
     //for performance measurements

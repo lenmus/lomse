@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -33,8 +33,6 @@
 #include <list>
 #include <iostream>
 
-#include "lomse_reader.h"
-#include "lomse_basic.h"
 #include "lomse_document.h"
 
 using namespace std;
@@ -59,6 +57,8 @@ typedef WeakPtr<Interactor>     WpInteractor;
 
 
 //---------------------------------------------------------------------------------------
+//excluded from public API. Only for internal use.
+#ifdef LOMSE_INTERNAL_API
 // PresenterBuilder: responsible for creating Presenter objects
 class PresenterBuilder
 {
@@ -79,10 +79,11 @@ public:
                              ostream& reporter = cout);
 
 };
+#endif  //excluded from public API
 
 
 //---------------------------------------------------------------------------------------
-//Presenter: A façade object responsible for maintaining the life cycle and
+//Presenter: A facade object responsible for maintaining the life cycle and
 //relationships between MVC objects: Views, Interactors, Commands, Selections and the
 //Document.
 class Presenter
@@ -95,35 +96,42 @@ protected:
     void (*m_callback)(Notification* event);
 
 public:
-    Presenter(SpDocument spDoc, Interactor* pIntor, DocCommandExecuter* pExec);
     virtual ~Presenter();
-
-    void close_document();
-    void on_document_reloaded();
 
     //interactors management
     inline int get_num_interactors() { return static_cast<int>( m_interactors.size() ); }
     SpInteractor get_interactor_shared_ptr(int iIntor);
-    Interactor* get_interactor_raw_ptr(int iIntor);
     WpInteractor get_interactor(int iIntor);
 
     //accessors
-    inline Document* get_document_raw_ptr() { return m_spDoc.get(); }
     inline SpDocument get_document_shared_ptr() { return m_spDoc; }
     WpDocument get_document_weak_ptr();
-    inline DocCommandExecuter* get_command_executer() { return m_pExec; }
-
-    //to sent notifications to user application
-    void set_callback( void (*pt2Func)(Notification* event) );
-    void notify_user_application(Notification* event);
+    inline Document* get_document_raw_ptr() { return m_spDoc.get(); }
 
     //to save user data
     inline void set_user_data(void* pData) { m_userData = pData; }
     inline void* get_user_data() { return m_userData; }
 
+//excluded from public API. Only for internal use.
+#ifdef LOMSE_INTERNAL_API
+    Presenter(SpDocument spDoc, Interactor* pIntor, DocCommandExecuter* pExec);
+
+    Interactor* get_interactor_raw_ptr(int iIntor);
+    inline DocCommandExecuter* get_command_executer() { return m_pExec; }
+
+    void on_document_updated();
+
+    //to sent notifications to user application
+    void set_callback( void (*pt2Func)(Notification* event) );
+    void notify_user_application(Notification* event);
+
+#endif  //excluded from public API
+
 };
 
 //---------------------------------------------------------------------------------------
+//excluded from public API. Only for internal use.
+#ifdef LOMSE_INTERNAL_API
 class Notification
 {
 protected:
@@ -151,6 +159,7 @@ public:
     inline void set_presenter(Presenter* pPresenter) { m_pPresenter = pPresenter; }
 
 };
+#endif  //excluded from public API
 
 
 }   //namespace lomse
