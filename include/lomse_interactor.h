@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------
 // This file is part of the Lomse library.
-// Copyright (c) 2010-2013 Cecilio Salmeron. All rights reserved.
+// Copyright (c) 2010-2016 Cecilio Salmeron. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -186,9 +186,9 @@ public:
     virtual void discard_all_highlight();
     virtual void on_visual_highlight(SpEventScoreHighlight pEvent);
         //printing
-    virtual void set_printing_buffer(RenderingBuffer* rbuf);
-    virtual void on_print_page(int page, double scale, VPoint viewport);
-    virtual VSize get_page_size_in_pixels(int nPage);
+    virtual void set_print_buffer(RenderingBuffer* rbuf);
+    virtual void set_print_ppi(double ppi);
+    virtual void print_page(int page, VPoint viewport=VPoint(0, 0));
     virtual int get_num_pages();
 
     //interface to SelectionSet

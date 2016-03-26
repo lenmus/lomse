@@ -147,6 +147,7 @@ protected:
 
     //for printing
     RenderingBuffer* m_pPrintBuf;
+    double           m_print_ppi;     //printer resolution in pixels per inch
 
 public:
     virtual ~GraphicView();
@@ -238,6 +239,7 @@ public:
     void zoom_fit_width(Pixels width);
     void set_scale(double scale, Pixels x=0, Pixels y=0);
     double get_scale();
+    double get_resolution();
 
     //rendering options
     void set_rendering_option(int option, bool value);
@@ -246,9 +248,9 @@ public:
     void highlight_voice(int voice);
 
     //support for printing
-    void set_printing_buffer(RenderingBuffer* rbuf) { m_pPrintBuf = rbuf; }
-    virtual void on_print_page(int page, double scale, VPoint viewport);
-    VSize get_page_size_in_pixels(int nPage);
+    void set_print_buffer(RenderingBuffer* rbuf) { m_pPrintBuf = rbuf; }
+    void set_print_ppi(double ppi) { m_print_ppi = ppi; }
+    virtual void print_page(int page, VPoint viewport);
 
     //info
     AreaInfo* get_info_for_point(Pixels x, Pixels y);

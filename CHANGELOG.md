@@ -1,10 +1,39 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.17.20
+[Since last version] 0.18.0
 =============================
 
 -none
+
+
+Version [0.18.0] (26/Mar/2016)
+==============================
+
+The public API of Lomse is being defined and documented.
+API documentation is available at http://lenmus.github.io/lomse/
+  
+
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.17.20
+
+Version 0.18.0 includes changes for defining the public API of the
+following classes:
+
+- LomseDoorway
+- Interactor
+- Presenter
+
+This implies that some methods are no longer available in public API.
+
+Also, the API for printing has been reviewed:
+
+- Removed method Interactor::get_page_size_in_pixels().
+- Added method Interactor::set_print-ppi().
+- Method Interactor::set_printing_buffer() renamed as 
+     Interactor::set_print_buffer().
+- Method Interactor::on_print_page() renamed as Interactor::print_page().
+  Parameter 'scale' has been removed.
+
 
 
 Version [0.17.20] (5/Mar/2016)
@@ -332,7 +361,8 @@ Version 0.10.b1
 - Initial public release, used in Phonascus 5.0 beta for Linux.
 
 
-[Since last version]: https://github.com/lenmus/lomse/compare/0.17.20...HEAD
+[Since last version]: https://github.com/lenmus/lomse/compare/0.18.0...HEAD
+[0.18.0]: https://github.com/lenmus/lomse/compare/0.17.20...0.18.0
 [0.17.20]: https://github.com/lenmus/lomse/compare/0.16.1...0.17.20
 [0.16.1]: https://github.com/lenmus/lomse/compare/0.15.0...0.16.1
 [0.15.0]: https://github.com/lenmus/lomse/compare/0.14.0...0.15.0

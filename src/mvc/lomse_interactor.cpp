@@ -1266,29 +1266,27 @@ void Interactor::select_voice(int voice)
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::set_printing_buffer(RenderingBuffer* rbuf)
+void Interactor::set_print_buffer(RenderingBuffer* rbuf)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->set_printing_buffer(rbuf);
+        pGView->set_print_buffer(rbuf);
 }
 
 //---------------------------------------------------------------------------------------
-void Interactor::on_print_page(int page, double scale, VPoint viewport)
+void Interactor::set_print_ppi(double ppi)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        pGView->on_print_page(page, scale, viewport);
+        pGView->set_print_ppi(ppi);
 }
 
 //---------------------------------------------------------------------------------------
-VSize Interactor::get_page_size_in_pixels(int nPage)
+void Interactor::print_page(int page, VPoint viewport)
 {
     GraphicView* pGView = dynamic_cast<GraphicView*>(m_pView);
     if (pGView)
-        return pGView->get_page_size_in_pixels(nPage);
-    else
-        return VSize(0, 0);
+        pGView->print_page(page, viewport);
 }
 
 //---------------------------------------------------------------------------------------
