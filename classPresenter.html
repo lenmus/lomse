@@ -49,6 +49,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="index.html"><span>Overview</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="modules.html"><span>Types&#160;and&#160;constants</span></a></li>
+      <li><a href="examples.html"><span>Examples</span></a></li>
       <li><a href="pages.html"><span>Other</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -124,11 +125,12 @@ Inheritance diagram for Presenter:</div>
 </map>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The <a class="el" href="classPresenter.html">Presenter</a> is a facade object responsible for maintaining the life cycle and relationships between the objects in the Lomse MVC model: Views, Interactors and the Document.</p>
+<div class="textblock"><p>The Presenter is a facade object responsible for maintaining the life cycle and relationships between the objects in the Lomse MVC model: Views, Interactors and the Document.</p>
 <p>All these objects are created when invoking one of the <a class="el" href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">LomseDoorway::new_document()</a> or <a class="el" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">LomseDoorway::open_document()</a> methods.</p>
-<p>The <a class="el" href="classPresenter.html">Presenter</a>, returned by previous methods, gives acess to the Document and to the Interactors associated to the existing Views for the Document.</p>
-<p>See <a class="el" href="mvc-model.html">Rendering and interacting with documents</a>. </p>
-</div><table class="memberdecls">
+<p>The Presenter, returned by previous methods, gives acess to the Document and to the Interactors associated to the existing View objects for the Document.</p>
+<p>See <a class="el" href="render-overview.html">Rendering documents</a>. </p>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="example_1_qt_8h-example.html#_a1">example_1_qt.h</a>.</dd>
+</dl></div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a07b9bfdb69702b53e0797001e242fa9f"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPresenter.html#a07b9bfdb69702b53e0797001e242fa9f">~Presenter</a> ()</td></tr>
@@ -172,7 +174,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <p>Destructor </p>
-<dl class="section attention"><dt>Attention</dt><dd>As <a class="el" href="classPresenter.html">Presenter</a> ownership is transferred to the user application, you have to take care of deleting the <a class="el" href="classPresenter.html">Presenter</a> when no longer needed. Deleting the <a class="el" href="classPresenter.html">Presenter</a> will automatically cause deletion of all MVC involved objects: the Document, all existing Views and their Interactors, selection sets, undo/redo stack, etc. </dd></dl>
+<dl class="section attention"><dt>Attention</dt><dd>As Presenter ownership is transferred to the user application, you have to take care of deleting the Presenter when no longer needed. Deleting the Presenter will automatically cause deletion of all MVC involved objects: the Document, all existing Views and their Interactors, selection sets, undo/redo stack, etc. </dd></dl>
 
 </div>
 </div>
@@ -197,7 +199,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the raw pointer to the Document associated to this <a class="el" href="classPresenter.html">Presenter</a>. </p>
+<p>Returns the raw pointer to the Document associated to this Presenter. </p>
 
 </div>
 </div>
@@ -221,7 +223,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns a shared pointer to the Document associated to this <a class="el" href="classPresenter.html">Presenter</a>. </p>
+<p>Returns a shared pointer to the Document associated to this Presenter. </p>
 
 </div>
 </div>
@@ -237,7 +239,7 @@ Public Member Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns a shared pointer to the Document associated to this <a class="el" href="classPresenter.html">Presenter</a>. </p>
+<p>Returns a shared pointer to the Document associated to this Presenter. </p>
 
 </div>
 </div>
@@ -307,7 +309,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the number of Interactors associated to the <a class="el" href="classPresenter.html">Presenter</a>, at least 1. There exist as many interactors as document Views. </p>
+<p>Returns the number of Interactors associated to the Presenter, at least 1. There exist as many interactors as document Views. </p>
 
 </div>
 </div>
@@ -331,7 +333,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns a pointer to the user data associated with this <a class="el" href="classPresenter.html">Presenter</a> (if any). </p>
+<p>Returns a pointer to the user data associated with this Presenter (if any). </p>
 <dl class="section return"><dt>Returns</dt><dd>A pointer to the user data, or NULL if no data saved. </dd></dl>
 
 </div>
@@ -357,15 +359,15 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Associates the given untyped application data pointer with this <a class="el" href="classPresenter.html">Presenter</a>. </p>
+<p>Associates the given untyped application data pointer with this Presenter. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">pData</td><td>The application data to associate with the <a class="el" href="classPresenter.html">Presenter</a>.</td></tr>
+    <tr><td class="paramname">pData</td><td>The application data to associate with the Presenter.</td></tr>
   </table>
   </dd>
 </dl>
-<p>This method is a commodity for your application, in case you would like to save some data associated to <a class="el" href="classPresenter.html">Presenter</a> objects, i.e. for Document identification or other.</p>
-<dl class="section attention"><dt>Attention</dt><dd>Your application has the ownership of the associated data. Therefore, this data will not be deleted when the <a class="el" href="classPresenter.html">Presenter</a> is deleted. </dd></dl>
+<p>This method is a commodity for your application, in case you would like to save some data associated to Presenter objects, i.e. for Document identification or other.</p>
+<dl class="section attention"><dt>Attention</dt><dd>Your application has the ownership of the associated data. Therefore, this data will not be deleted when the Presenter is deleted. </dd></dl>
 
 </div>
 </div>
@@ -375,7 +377,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classPresenter.html">Presenter</a></li>
-    <li class="footer">Generated on Sat Mar 26 2016 17:31:37 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Mar 31 2016 17:51:55 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

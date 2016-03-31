@@ -169,7 +169,8 @@ span.label a:hover {
     text-decoration: none;
 }
 
-.tablist li.current a {
+.tablist li.current a 
+{
     background-image: none; /*url('tab_a.png');*/
     background-color: #505a6b;     /**/
     background-repeat:repeat-x;
@@ -177,3 +178,21 @@ span.label a:hover {
     /*text-shadow: 0px 1px 1px rgba(0, 0, 0, 1.0);*/
     text-shadow: none;  /**/
 }
+
+/* add some space between lits items */
+div.textblock ul li, div.textblock ol li
+{
+	margin-top:10px;
+}
+
+
+/* links in orange when inside text */
+div.textblock a:link, div.textblock a:visited { 
+	text-decoration: none;
+	color: #ff6000;
+}
+div.textblock a:hover {
+    color: #ff0000;
+	border-bottom: 1px dotted #ff0000;
+}
+

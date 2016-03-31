@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['scores_20playback',['Scores playback',['../sound_generation.html',1,'index']]]
+  ['printing_20documents',['Printing documents',['../print-api.html',1,'index']]]
 ];

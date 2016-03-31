@@ -13,6 +13,9 @@ var NAVTREE =
       ] ]
     ] ],
     [ "Types and constants", "modules.html", "modules" ],
+    [ "Examples", "examples.html", "examples" ],
+    [ "License for code samples", "samples-license.html", null ],
+    [ "Library license", "library-license.html", null ],
     [ "Todo List", "todo.html", null ]
   ] ]
 ];

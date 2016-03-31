@@ -10,10 +10,10 @@ var hierarchy =
       [ "Interactor", "classInteractor.html", null ]
     ] ],
     [ "LomseDoorway", "classLomseDoorway.html", null ],
-    [ "mvc-model", null, [
-      [ "Presenter", "classPresenter.html", null ]
-    ] ],
     [ "Observable", null, [
       [ "Interactor", "classInteractor.html", null ]
+    ] ],
+    [ "render-overview", null, [
+      [ "Presenter", "classPresenter.html", null ]
     ] ]
 ];

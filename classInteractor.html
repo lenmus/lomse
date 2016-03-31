@@ -49,6 +49,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="index.html"><span>Overview</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="modules.html"><span>Types&#160;and&#160;constants</span></a></li>
+      <li><a href="examples.html"><span>Examples</span></a></li>
       <li><a href="pages.html"><span>Other</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -124,14 +125,13 @@ Inheritance diagram for Interactor:</div>
 </map>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Abstract class from which all Interactors must derive</p>
-<h1><a class="anchor" id="lomse_units"></a>
-Device and logical units</h1>
-<p>In Lomse there is a distinction between <em>logical</em> units and <em>device</em> units.</p>
-<p><b>Logical</b> units (<em>LUnits</em>) are real world units. A logical unit is one cent of a millimeter.</p>
-<p><b>Device</b> units are the units native to a particular device; e.g. for a screen, a device unit is a <em>pixel</em>. For a printer, the device unit is defined by the resolution of the printer (usually given in <code>DPI:</code> dots-per-inch).</p>
-<p>The Lomse graphic model uses logical units, but all coordinates in the graphic model are relative to current page origin.</p>
-<p>Logical units are mapped to device units (pixels) using the current rendering resolution. </p>
+<div class="textblock"><p>The Interactor is the interface between your application, the associated View and the Document. It is responsible for translating your application requests into commands that manipulate the associated View and/or the Document, coordinating all the necessary actions.</p>
+<p>The Interactor plays the role of the Controller in the MVC model. Each View has an associated Interactor (in fact the View is owned by the Interactor). The Interactor is owned by the <a class="el" href="classPresenter.html">Presenter</a>.</p>
+<p>See:</p>
+<ul>
+<li><a class="el" href="render-overview.html#mvc-overview">The Lomse Model-View-Controller</a>.</li>
+<li><a class="el" href="viewport-overview.html">Coordinate systems, units, scaling and viewport</a> </li>
+</ul>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
@@ -190,17 +190,13 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3dcd4218ab368cfba17ca1ef6974c012"><td class="memItemLeft" align="right" valign="top">DiatonicPitch&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a3dcd4218ab368cfba17ca1ef6974c012">get_pitch_at</a> (Pixels x, Pixels y)</td></tr>
 <tr class="separator:a3dcd4218ab368cfba17ca1ef6974c012"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Viewport (for scrolling)</div></td></tr>
-<tr class="memitem:a0eb3195aed54028cc3f250c38029e8f8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a0eb3195aed54028cc3f250c38029e8f8"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>new_viewport</b> (Pixels x, Pixels y, bool fForceRedraw=true)</td></tr>
+<tr class="memitem:a0eb3195aed54028cc3f250c38029e8f8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a0eb3195aed54028cc3f250c38029e8f8">new_viewport</a> (Pixels x, Pixels y, bool fForceRedraw=true)</td></tr>
 <tr class="separator:a0eb3195aed54028cc3f250c38029e8f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a81455e8a584d8dff982c3f43e92e7f34"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a81455e8a584d8dff982c3f43e92e7f34"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>set_viewport_at_page_center</b> (Pixels screenWidth)</td></tr>
+<tr class="memitem:a81455e8a584d8dff982c3f43e92e7f34"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a81455e8a584d8dff982c3f43e92e7f34">set_viewport_at_page_center</a> (Pixels screenWidth)</td></tr>
 <tr class="separator:a81455e8a584d8dff982c3f43e92e7f34"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afc7dac3c7d8b7d629f38b79750e34905"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afc7dac3c7d8b7d629f38b79750e34905"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>get_viewport</b> (Pixels *x, Pixels *y)</td></tr>
+<tr class="memitem:afc7dac3c7d8b7d629f38b79750e34905"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#afc7dac3c7d8b7d629f38b79750e34905">get_viewport</a> (Pixels *x, Pixels *y)</td></tr>
 <tr class="separator:afc7dac3c7d8b7d629f38b79750e34905"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a331181fe34d2f9399578bbe4be3f5f65"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a331181fe34d2f9399578bbe4be3f5f65"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>get_view_size</b> (Pixels *xWidth, Pixels *yHeight)</td></tr>
+<tr class="memitem:a331181fe34d2f9399578bbe4be3f5f65"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a331181fe34d2f9399578bbe4be3f5f65">get_view_size</a> (Pixels *xWidth, Pixels *yHeight)</td></tr>
 <tr class="separator:a331181fe34d2f9399578bbe4be3f5f65"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Scale</div></td></tr>
 <tr class="memitem:ad79a50661807b829755219e4bdf21121"><td class="memItemLeft" align="right" valign="top">virtual double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ad79a50661807b829755219e4bdf21121">get_scale</a> ()</td></tr>
@@ -325,7 +321,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_mouse_ente
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_mouse_leave_window</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
 <tr class="separator:afbfb111029c260532f849362bf3b15f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Actions requested by Task objects</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000013">Todo:</a></b></dt><dd>Should be restricted for internal use? </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Should be restricted for internal use? </dd></dl>
 </div></td></tr>
 <tr class="memitem:ac7ed97cbea54ce7bbf626149fbc85640"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac7ed97cbea54ce7bbf626149fbc85640"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_click_at_screen_point</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
@@ -397,7 +393,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Valid operating modes for the <a class="el" href="classInteractor.html">Interactor</a>:</p>
+<p>Valid operating modes for the Interactor:</p>
 <ul>
 <li><b>k_mode_read_only</b> - Read only mode: no changes allowed in the document.</li>
 <li><b>k_mode_edition</b> - Edition mode: changes allowed in the document.</li>
@@ -505,7 +501,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 </div><div class="memdoc">
 <p>Invoking this method forces Lomse to render again the View and, therefore, the rendering buffer gets updated. After doing it, Lomse <b>will</b> generate a EventPaint event.</p>
 <dl class="section note"><dt>Note</dt><dd>Lomse will ignore the request if forced updates are disabled. See <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>.</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be refactored.</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be refactored.</dd></dl>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a>. </dd></dl>
 
 </div>
@@ -530,8 +526,8 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the cursor associated to the View of this <a class="el" href="classInteractor.html">Interactor</a>. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>Explain DocCursor and how to use it. </dd></dl>
+<p>Returns the cursor associated to the View of this Interactor. </p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000007">Todo:</a></b></dt><dd>Explain DocCursor and how to use it. </dd></dl>
 
 </div>
 </div>
@@ -547,7 +543,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns the graphic model object associated to the View of this <a class="el" href="classInteractor.html">Interactor</a>. </p>
+<p>Returns the graphic model object associated to the View of this Interactor. </p>
 
 </div>
 </div>
@@ -572,7 +568,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 </table>
 </div><div class="memdoc">
 <p>Returns the number of pages in current document.</p>
-<p>See <a class="el" href="print-api.html">Printing</a> </p>
+<p>See <a class="el" href="print-api.html">Printing documents</a> </p>
 
 </div>
 </div>
@@ -596,7 +592,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns current operation mode for this <a class="el" href="classInteractor.html">Interactor</a>. Returned value is one of the values from enum EInteractorOpMode. </p>
+<p>Returns current operation mode for this Interactor. Returned value is one of the values from enum EInteractorOpMode. </p>
 
 </div>
 </div>
@@ -629,7 +625,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <div class="line">{</div>
 <div class="line">    <span class="keywordflow">if</span> (m_pPresenter)</div>
 <div class="line">    {</div>
-<div class="line">        <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
+<div class="line">        <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">        {</div>
 <div class="line">            <span class="keywordflow">return</span> spInteractor-&gt;get_pitch_at(x, y);</div>
 <div class="line">        }</div>
@@ -659,7 +655,8 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the current scale factor. </p>
+<p>Returns the current scale factor.</p>
+<p>See <a class="el" href="viewport-overview.html#scale-factor">Scaling</a> </p>
 
 </div>
 </div>
@@ -683,8 +680,8 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the selection set associated to the View of this <a class="el" href="classInteractor.html">Interactor</a>. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Explain SelectionSet and how it works. </dd></dl>
+<p>Returns the selection set associated to the View of this Interactor. </p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo:</a></b></dt><dd>Explain SelectionSet and how it works. </dd></dl>
 
 </div>
 </div>
@@ -708,7 +705,77 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the View associated to this <a class="el" href="classInteractor.html">Interactor</a>. </p>
+<p>Returns the View associated to this Interactor. </p>
+
+</div>
+</div>
+<a class="anchor" id="a331181fe34d2f9399578bbe4be3f5f65"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Interactor::get_view_size </td>
+          <td>(</td>
+          <td class="paramtype">Pixels *&#160;</td>
+          <td class="paramname"><em>xWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Pixels *&#160;</td>
+          <td class="paramname"><em>yHeight</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>See <a class="el" href="viewport-overview.html#viewport-concept">Scrolling: the Viewport</a> </p>
+
+</div>
+</div>
+<a class="anchor" id="afc7dac3c7d8b7d629f38b79750e34905"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Interactor::get_viewport </td>
+          <td>(</td>
+          <td class="paramtype">Pixels *&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Pixels *&#160;</td>
+          <td class="paramname"><em>y</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>See <a class="el" href="viewport-overview.html#viewport-concept">Scrolling: the Viewport</a> </p>
 
 </div>
 </div>
@@ -771,7 +838,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <div class="fragment"><div class="line"><span class="keywordtype">int</span> iPage = 4;      <span class="comment">//in fact page 5. Remember iPage = 0..num_pages-1</span></div>
 <div class="line"><span class="keywordtype">double</span> x = 4500.0;  <span class="comment">//LUnits relative to page 5 origin</span></div>
 <div class="line"><span class="keywordtype">double</span> y = 2700.0;</div>
-<div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
+<div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">{</div>
 <div class="line">    spInteractor-&gt;model_point_to_screen(&amp;x, &amp;y, iPage);</div>
 <div class="line"></div>
@@ -779,6 +846,47 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <div class="line">    <span class="comment">//view origin</span></div>
 <div class="line">}</div>
 </div><!-- fragment --> 
+</div>
+</div>
+<a class="anchor" id="a0eb3195aed54028cc3f250c38029e8f8"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Interactor::new_viewport </td>
+          <td>(</td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>fForceRedraw</em> = <code>true</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>See <a class="el" href="viewport-overview.html#viewport-concept">Scrolling: the Viewport</a> </p>
+
 </div>
 </div>
 <a class="anchor" id="aed88fd6863f5cfff75bb53424a70a7b0"></a>
@@ -841,7 +949,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <p>Example: </p>
 <div class="fragment"><div class="line"><span class="keywordtype">double</span> x = 4500.0;  <span class="comment">//pixels relative to view origin</span></div>
 <div class="line"><span class="keywordtype">double</span> y = 2700.0;  <span class="comment">//pixels</span></div>
-<div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
+<div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">{</div>
 <div class="line">    <span class="keywordtype">int</span> iPage = spInteractor-&gt;page_at_screen_point(x, y);</div>
 <div class="line"></div>
@@ -889,7 +997,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </table>
   </dd>
 </dl>
-<p>See <a class="el" href="print-api.html">Printing</a> </p>
+<p>See <a class="el" href="print-api.html">Printing documents</a> </p>
 
 </div>
 </div>
@@ -982,7 +1090,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <div class="line">    <span class="keywordflow">if</span> (!m_pPresenter)</div>
 <div class="line">        <span class="keywordflow">return</span>;</div>
 <div class="line"></div>
-<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">    {</div>
 <div class="line">        <a class="code" href="classInteractor.html">Interactor</a>* pInteractor = spInteractor.get();</div>
 <div class="line">        <span class="keywordflow">if</span> (!pInteractor) <span class="keywordflow">return</span>;</div>
@@ -1035,7 +1143,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <p>Example: </p>
 <div class="fragment"><div class="line"><span class="keywordtype">double</span> x = 4500.0;  <span class="comment">//pixels relative to view origin</span></div>
 <div class="line"><span class="keywordtype">double</span> y = 2700.0;  <span class="comment">//pixels</span></div>
-<div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
+<div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">{</div>
 <div class="line">    <span class="keywordtype">int</span> iPage = spInteractor-&gt;page_at_screen_point(x, y);</div>
 <div class="line">    spInteractor-&gt;screen_point_to_page_point(&amp;x, &amp;y);</div>
@@ -1078,7 +1186,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000012">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document. </dd></dl>
 
 </div>
 </div>
@@ -1132,7 +1240,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <p>Example:</p>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::play_score(SpEventInfo pEvent)</div>
 <div class="line">{</div>
-<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">    {</div>
 <div class="line">        spInteractor-&gt;set_operating_mode(Interactor::k_mode_playback);</div>
 <div class="line"></div>
@@ -1175,7 +1283,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 </div><div class="memdoc">
 <p>Sets the memory area to be used as buffer for printing operations.</p>
 <p>In order to not interfere with screen display, a different rendering buffer is used for printing.</p>
-<p>See <a class="el" href="print-api.html">Printing</a> </p>
+<p>See <a class="el" href="print-api.html">Printing documents</a> </p>
 
 </div>
 </div>
@@ -1201,7 +1309,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 </table>
 </div><div class="memdoc">
 <p>Sets the resolution (in dots per inch, dpi) to use for printing.</p>
-<p>See <a class="el" href="print-api.html">Printing</a> </p>
+<p>See <a class="el" href="print-api.html">Printing documents</a> </p>
 
 </div>
 </div>
@@ -1226,7 +1334,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Associate a rendering buffer to the View related to this interactor. </p>
+<p>Associate a rendering buffer to the View related to this Interactor. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">rbuf</td><td>A ptr to the memory to be used as rendering buffer.</td></tr>
@@ -1247,10 +1355,10 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <div class="line">    <span class="comment">//delete current document, view, etc. associated to this window</span></div>
 <div class="line">    <span class="keyword">delete</span> m_pPresenter; </div>
 <div class="line">    <span class="comment">//and load file           </span></div>
-<div class="line">    m_pPresenter = m_lomse.new_document(viewType, filename, reporter);</div>
+<div class="line">    m_pPresenter = m_lomse.<a class="code" href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">new_document</a>(viewType, filename, reporter);</div>
 <div class="line"></div>
 <div class="line">    set_zoom_mode(k_zoom_fit_width);</div>
-<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">    {</div>
 <div class="line">        <span class="comment">//connect the View with the window buffer</span></div>
 <div class="line">        spInteractor-&gt;set_rendering_buffer(&amp;m_rbuf_window);</div>
@@ -1261,7 +1369,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <div class="line">        spInteractor-&gt;add_event_handler(k_pause_score_event, <span class="keyword">this</span>, wrapper_play_score);</div>
 <div class="line">        spInteractor-&gt;add_event_handler(k_stop_playback_event, <span class="keyword">this</span>, wrapper_play_score);</div>
 <div class="line">        spInteractor-&gt;add_event_handler(k_control_point_moved_event, <span class="keyword">this</span>, wrapper_on_command_event);</div>
-<div class="line">        Document* pDoc = m_pPresenter-&gt;get_document_raw_ptr();</div>
+<div class="line">        Document* pDoc = m_pPresenter-&gt;<a class="code" href="classPresenter.html#aedd747e959be4ba2ba249f9078623ac9">get_document_raw_ptr</a>();</div>
 <div class="line">        pDoc-&gt;add_event_handler(k_on_click_event, <span class="keyword">this</span>, wrapper_on_click_event);</div>
 <div class="line"></div>
 <div class="line">        <span class="comment">// display any errors</span></div>
@@ -1310,7 +1418,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Set/reset a rendering option for the view associated to this interactor.</p>
+<p>Set/reset a rendering option for the view associated to this Interactor.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">option</td><td>The option to set or reset. Valid values for this param are defined by enum #ERenderOptions </td></tr>
@@ -1324,7 +1432,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <div class="line">    <span class="keywordflow">if</span> (!m_pPresenter)</div>
 <div class="line">        <span class="keywordflow">return</span>;</div>
 <div class="line"></div>
-<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">    {</div>
 <div class="line">        spInteractor-&gt;set_rendering_option(k_option_display_voices_in_colours, value);</div>
 <div class="line">        Refresh();    <span class="comment">//force to repaint this window</span></div>
@@ -1385,7 +1493,33 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </table>
   </dd>
 </dl>
+<p>See <a class="el" href="viewport-overview.html#scale-factor">Scaling</a></p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a4ec8ec1d6b84a74d656f2773c741e222">zoom_in()</a>, <a class="el" href="classInteractor.html#a6fc96dec0a3767152cd953d2ec68ec96">zoom_out()</a>, <a class="el" href="classInteractor.html#ac83345221209221be48169f01a4cd253">zoom_fit_full()</a>, <a class="el" href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">zoom_fit_width()</a>, <a class="el" href="classInteractor.html#ad79a50661807b829755219e4bdf21121">get_scale()</a> </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a81455e8a584d8dff982c3f43e92e7f34"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Interactor::set_viewport_at_page_center </td>
+          <td>(</td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>screenWidth</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>See <a class="el" href="viewport-overview.html#viewport-concept">Scrolling: the Viewport</a> </p>
 
 </div>
 </div>
@@ -1402,8 +1536,8 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Switch the automata used by the <a class="el" href="classInteractor.html">Interactor</a> for interpreting mouse events. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo:</a></b></dt><dd>Explain tasks</dd></dl>
+<p>Switch the automata used by the Interactor for interpreting mouse events. </p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000006">Todo:</a></b></dt><dd>Explain tasks</dd></dl>
 <p>Example:</p>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandEventHandler::switch_interactor_mode_for_current_mouse_mode()</div>
 <div class="line">{</div>
@@ -1484,6 +1618,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </table>
   </dd>
 </dl>
+<p>See <a class="el" href="viewport-overview.html#scale-factor">Scaling</a></p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a4ec8ec1d6b84a74d656f2773c741e222">zoom_in()</a>, <a class="el" href="classInteractor.html#a6fc96dec0a3767152cd953d2ec68ec96">zoom_out()</a>, <a class="el" href="classInteractor.html#ac83345221209221be48169f01a4cd253">zoom_fit_full()</a>, <a class="el" href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">zoom_fit_width()</a>, <a class="el" href="classInteractor.html#ad79a50661807b829755219e4bdf21121">get_scale()</a> </dd></dl>
 
 </div>
@@ -1527,6 +1662,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </table>
   </dd>
 </dl>
+<p>See <a class="el" href="viewport-overview.html#scale-factor">Scaling</a></p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a4ec8ec1d6b84a74d656f2773c741e222">zoom_in()</a>, <a class="el" href="classInteractor.html#a6fc96dec0a3767152cd953d2ec68ec96">zoom_out()</a>, <a class="el" href="classInteractor.html#ac83345221209221be48169f01a4cd253">zoom_fit_full()</a>, <a class="el" href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">zoom_fit_width()</a>, <a class="el" href="classInteractor.html#ad79a50661807b829755219e4bdf21121">get_scale()</a> </dd></dl>
 
 </div>
@@ -1576,6 +1712,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </table>
   </dd>
 </dl>
+<p>See <a class="el" href="viewport-overview.html#scale-factor">Scaling</a></p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a4ec8ec1d6b84a74d656f2773c741e222">zoom_in()</a>, <a class="el" href="classInteractor.html#a6fc96dec0a3767152cd953d2ec68ec96">zoom_out()</a>, <a class="el" href="classInteractor.html#ac83345221209221be48169f01a4cd253">zoom_fit_full()</a>, <a class="el" href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">zoom_fit_width()</a>, <a class="el" href="classInteractor.html#ad79a50661807b829755219e4bdf21121">get_scale()</a> </dd></dl>
 
 </div>
@@ -1625,6 +1762,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
   </table>
   </dd>
 </dl>
+<p>See <a class="el" href="viewport-overview.html#scale-factor">Scaling</a></p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a4ec8ec1d6b84a74d656f2773c741e222">zoom_in()</a>, <a class="el" href="classInteractor.html#a6fc96dec0a3767152cd953d2ec68ec96">zoom_out()</a>, <a class="el" href="classInteractor.html#ac83345221209221be48169f01a4cd253">zoom_fit_full()</a>, <a class="el" href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">zoom_fit_width()</a>, <a class="el" href="classInteractor.html#ad79a50661807b829755219e4bdf21121">get_scale()</a> </dd></dl>
 
 </div>
@@ -1635,7 +1773,7 @@ string&#160;</td><td class="memItemRight" valign="bottom"><b>dump_selection</b> 
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Sat Mar 26 2016 17:31:37 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Mar 31 2016 17:51:55 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -49,6 +49,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="index.html"><span>Overview</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="modules.html"><span>Types&#160;and&#160;constants</span></a></li>
+      <li><a href="examples.html"><span>Examples</span></a></li>
       <li class="current"><a href="pages.html"><span>Other</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -139,32 +140,39 @@ The Document and related classes</h1>
 <p>Class Document represents a document with any kind of content: music scores, texts, paragraphs, images, tables, lists, etc. Documents are created by invoking <a class="el" href="classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948">LomseDoorway::new_document()</a> and <a class="el" href="classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e">LomseDoorway::open_document()</a> methods.</p>
 <p>When a Document is created, additional objects for marshaling the actions between your application and the Document are created. These additional objects are part of the Lomse Model-View-Controller (MVC) architecture. The main objects associated to a Document are:</p>
 <ul>
-<li>The <em><a class="el" href="classInteractor.html">Interactor</a></em>: It is the interface for interacting with the Document. You can consider it as the controller in the MVC model.</li>
-<li>The <em>View</em>: It is an observer of the Document, and its main responsibility is to render it. The rendering type depends on the specific view class used. For instance, class <em>GraphicView</em> renders the document on a bitmap. Other classes would be possible (i.e. a view class to render the document as an SVG stream, a view for rendering as Braille code, a view for rendering as source code, etc.) but currently Lomse only has implemented several variations of <em>GraphicView</em> (<em>VerticalBookView</em>, <em>HorizontalBookView</em>, and <em>SimpleView</em> ). The Lomse MVC model supports having many simultaneous views for a document. The <em><a class="el" href="classInteractor.html">Interactor</a></em> is the owner of the <em>View</em>, and there is an <em><a class="el" href="classInteractor.html">Interactor</a></em> per <em>View</em>.</li>
-<li>The <em><a class="el" href="classPresenter.html">Presenter</a></em> - It is the owner of the Document and of all its <em><a class="el" href="classInteractor.html">Interactor</a></em> objects. The <em><a class="el" href="classPresenter.html">Presenter</a></em>'s main responsibility is to build (and delete) the MVC model for a Document.</li>
+<li>The <a class="el" href="classInteractor.html">Interactor</a>: It is the interface for interacting with the Document. You can consider it as the controller in the MVC model.</li>
+<li>The View: It is an observer of the Document, and its main responsibility is to render it. The rendering type depends on the specific view class used. For instance, class <em>GraphicView</em> renders the document on a bitmap. Other classes would be possible (i.e. a view class to render the document as an SVG stream, a view for rendering as Braille code, a view for rendering as source code, etc.) but currently Lomse only has implemented several variations of <em>GraphicView</em> (<em>VerticalBookView</em>, <em>HorizontalBookView</em>, and <em>SimpleView</em> ). The Lomse MVC model supports having many simultaneous views for a document. The <a class="el" href="classInteractor.html">Interactor</a> is the owner of the View, and there is an <a class="el" href="classInteractor.html">Interactor</a> per View.</li>
+<li>The <a class="el" href="classPresenter.html">Presenter</a> - It is the owner of the Document and of all its <a class="el" href="classInteractor.html">Interactor</a> objects. The <a class="el" href="classPresenter.html">Presenter</a>'s main responsibility is to build (and delete) the MVC model for a Document.</li>
 </ul>
-<p>All these issues are described in <a class="el" href="mvc-model.html">Rendering and interacting with documents</a>.</p>
+<p>All these issues are described in <a class="el" href="render-overview.html#mvc-overview">The Lomse Model-View-Controller</a>.</p>
 <h1><a class="anchor" id="overview-sound-engine"></a>
 The sound engine</h1>
 <p>Lomse is platform independent code and cannot generate sounds for your specific platform. Therefore, lomse implements playback by generating real-time events and sending them to your application. It is responsibility of your application to handle these events and do whatever is needed, i.e. transform sound events into real sounds or doing whatever you would like with the sound events.</p>
-<p>The details and classes you have to use for scores playback are described in <a class="el" href="sound_generation.html">Scores playback</a>.</p>
+<p>The details and classes you have to use for scores playback are described in <a class="el" href="sound-generation.html">Scores playback</a>.</p>
 <h1><a class="anchor" id="overview-print"></a>
 Printing documents</h1>
 <p>Lomse is platform independent code and knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. In fact, implementing printing in your application is just printing bitmaps.</p>
-<p>The details and methods you have to use for printing are described in <a class="el" href="print-api.html">Printing</a>.</p>
+<p>The details and methods you have to use for printing are described in <a class="el" href="print-api.html">Printing documents</a>.</p>
 <h1><a class="anchor" id="overview-edition"></a>
 Editing documents</h1>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Introduction to Editing documents</dd></dl>
 <h1><a class="anchor" id="overview-rendering"></a>
 Displaying documents</h1>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>Introduction to Displaying documents</dd></dl>
+<p>Lomse is platform independent code and knows nothing about how to create a window or how to display a document on the screen. Lomse works by rendering the documents on a bitmap buffer, that is, on an array of consecutive memory bytes. This buffer can be any type of memory, such as a real bitmap, a window's buffer, etc. The simplest and usual way of rendering documents on a window is:</p>
+<ol type="1">
+<li>Create a new empty bitmap when necessary (i.e when the window is created or resized),</li>
+<li>Ask Lomse to render the desired portion of the document on this bitmap, and</li>
+<li>Copy the bitmap onto the window.</li>
+</ol>
+<p>These operations are usually triggered by your application when handling some operating system events, such as <b>window paint</b> events.</p>
+<p>The details and methods you have to use for displaying documents are described in <a class="el" href="render-overview.html">Rendering documents</a>. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Sat Mar 26 2016 17:31:37 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Mar 31 2016 17:51:55 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

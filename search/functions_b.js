@@ -15,5 +15,6 @@ var searchData=
   ['set_5frequest_5fcallback',['set_request_callback',['../classLomseDoorway.html#a747d3488b15dfda96c5f7477a28525da',1,'LomseDoorway']]],
   ['set_5fscale',['set_scale',['../classInteractor.html#a5e7dbf2be635475f40ba9b723a902d37',1,'Interactor']]],
   ['set_5fuser_5fdata',['set_user_data',['../classPresenter.html#acd6f651583829e92d4d2d3566c94adad',1,'Presenter']]],
+  ['set_5fviewport_5fat_5fpage_5fcenter',['set_viewport_at_page_center',['../classInteractor.html#a81455e8a584d8dff982c3f43e92e7f34',1,'Interactor']]],
   ['switch_5ftask',['switch_task',['../classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f',1,'Interactor']]]
 ];

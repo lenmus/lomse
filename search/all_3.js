@@ -23,5 +23,7 @@ var searchData=
   ['get_5fversion_5fminor',['get_version_minor',['../classLomseDoorway.html#a7f97ca250c048affbd748278cb655b09',1,'LomseDoorway']]],
   ['get_5fversion_5fpatch',['get_version_patch',['../classLomseDoorway.html#a3a36010468381eb7f8bcd7cebdd2c152',1,'LomseDoorway']]],
   ['get_5fversion_5fstring',['get_version_string',['../classLomseDoorway.html#aca4a1ae563c5f278dcc069281afc5541',1,'LomseDoorway']]],
-  ['get_5fview',['get_view',['../classInteractor.html#aaac9826efeddfba9c2ed3f8d1db0f96a',1,'Interactor']]]
+  ['get_5fview',['get_view',['../classInteractor.html#aaac9826efeddfba9c2ed3f8d1db0f96a',1,'Interactor']]],
+  ['get_5fview_5fsize',['get_view_size',['../classInteractor.html#a331181fe34d2f9399578bbe4be3f5f65',1,'Interactor']]],
+  ['get_5fviewport',['get_viewport',['../classInteractor.html#afc7dac3c7d8b7d629f38b79750e34905',1,'Interactor']]]
 ];
