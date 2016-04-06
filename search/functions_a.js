@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['redraw_5fbitmap',['redraw_bitmap',['../classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4',1,'Interactor']]],
-  ['reset_5fboxes_5fto_5fdraw',['reset_boxes_to_draw',['../classInteractor.html#af189f66901e4afab55d90407b12cb350',1,'Interactor']]]
+  ['page_5fat_5fscreen_5fpoint',['page_at_screen_point',['../classInteractor.html#a75600fd031826c9ae48ca4ada8b7ddce',1,'Interactor']]],
+  ['print_5fpage',['print_page',['../classInteractor.html#a45f7fb6d5f2a8b0b6d4b5e670c96e06d',1,'Interactor']]]
 ];

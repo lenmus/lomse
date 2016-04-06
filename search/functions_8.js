@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['on_5fdocument_5fupdated',['on_document_updated',['../classInteractor.html#aed88fd6863f5cfff75bb53424a70a7b0',1,'Interactor']]],
-  ['open_5fdocument',['open_document',['../classLomseDoorway.html#a5bb03ca7f58b797ce095354457e9070e',1,'LomseDoorway::open_document(int viewType, const string &amp;filename, ostream &amp;reporter=cout)'],['../classLomseDoorway.html#a2dad5f6bcce3d56e363d176bfc60f3f9',1,'LomseDoorway::open_document(int viewType, LdpReader &amp;reader, ostream &amp;reporter=cout)']]]
+  ['new_5fdocument',['new_document',['../classLomseDoorway.html#a1b00546f591c2041df5ed86ea0681948',1,'LomseDoorway::new_document(int viewType)'],['../classLomseDoorway.html#aeb01dedc72fc5e973e3dcf65a26a68ed',1,'LomseDoorway::new_document(int viewType, const string &amp;source, int format, ostream &amp;reporter=cout)']]],
+  ['new_5fviewport',['new_viewport',['../classInteractor.html#a0eb3195aed54028cc3f250c38029e8f8',1,'Interactor']]]
 ];

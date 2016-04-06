@@ -1,4 +1,29 @@
 var searchData=
 [
-  ['how_20lomse_20callbacks_20work',['How Lomse callbacks work',['../lomse-callbacks.html',1,'index']]]
+  ['get_5fbuild_5fdate',['get_build_date',['../classLomseDoorway.html#a04f6acdbe6ec410f5fac17aa6d82ec1a',1,'LomseDoorway']]],
+  ['get_5fcursor',['get_cursor',['../classInteractor.html#a7f68d9df4df24a71f02b4cc906c71a56',1,'Interactor']]],
+  ['get_5fdocument_5fraw_5fptr',['get_document_raw_ptr',['../classPresenter.html#aedd747e959be4ba2ba249f9078623ac9',1,'Presenter']]],
+  ['get_5fdocument_5fshared_5fptr',['get_document_shared_ptr',['../classPresenter.html#a1d7ee74efa842fc99274ee0f6abb5ba8',1,'Presenter']]],
+  ['get_5fdocument_5fweak_5fptr',['get_document_weak_ptr',['../classPresenter.html#af3935244d12adf2de9973953d7fa444b',1,'Presenter']]],
+  ['get_5fgraphic_5fmodel',['get_graphic_model',['../classInteractor.html#ab5192c9307818200f5b08e93892c61ed',1,'Interactor']]],
+  ['get_5finteractor',['get_interactor',['../classPresenter.html#a3542802890a4615d251a5a786cee62b5',1,'Presenter']]],
+  ['get_5finteractor_5fshared_5fptr',['get_interactor_shared_ptr',['../classPresenter.html#ab61977fd47123e876eed8ccb839bf3c8',1,'Presenter']]],
+  ['get_5flibrary_5fscope',['get_library_scope',['../classLomseDoorway.html#ab34d07713083fd7c37f940661bb098f7',1,'LomseDoorway']]],
+  ['get_5fnum_5finteractors',['get_num_interactors',['../classPresenter.html#a8eb9209a170a3d2877d4a1b763236d9d',1,'Presenter']]],
+  ['get_5fnum_5fpages',['get_num_pages',['../classInteractor.html#a4030a9cf2342d198a5890c30cecec4b7',1,'Interactor']]],
+  ['get_5foperating_5fmode',['get_operating_mode',['../classInteractor.html#a0b25e85a6074cc637ea6bd2a30e5bead',1,'Interactor']]],
+  ['get_5fpitch_5fat',['get_pitch_at',['../classInteractor.html#a3dcd4218ab368cfba17ca1ef6974c012',1,'Interactor']]],
+  ['get_5fpixel_5fformat',['get_pixel_format',['../classLomseDoorway.html#a1651657c00515a6f97bf259dd12246de',1,'LomseDoorway']]],
+  ['get_5fscale',['get_scale',['../classInteractor.html#ad79a50661807b829755219e4bdf21121',1,'Interactor']]],
+  ['get_5fscreen_5fppi',['get_screen_ppi',['../classLomseDoorway.html#a5e9ffe4284808df79d09353e17d56a65',1,'LomseDoorway']]],
+  ['get_5fselection_5fset',['get_selection_set',['../classInteractor.html#aaf1d978d7d7e4ef3e6e6b6495cf9d2d0',1,'Interactor']]],
+  ['get_5fuser_5fdata',['get_user_data',['../classPresenter.html#ae3bea16ee1a9c3194525d433ec56cc9f',1,'Presenter']]],
+  ['get_5fversion_5flong_5fstring',['get_version_long_string',['../classLomseDoorway.html#aaaa2b02ebab2ea3943fd7b3823c634b0',1,'LomseDoorway']]],
+  ['get_5fversion_5fmajor',['get_version_major',['../classLomseDoorway.html#af7b2996e6d55a4bf319b33d9e5cf3b3d',1,'LomseDoorway']]],
+  ['get_5fversion_5fminor',['get_version_minor',['../classLomseDoorway.html#a7f97ca250c048affbd748278cb655b09',1,'LomseDoorway']]],
+  ['get_5fversion_5fpatch',['get_version_patch',['../classLomseDoorway.html#a3a36010468381eb7f8bcd7cebdd2c152',1,'LomseDoorway']]],
+  ['get_5fversion_5fstring',['get_version_string',['../classLomseDoorway.html#aca4a1ae563c5f278dcc069281afc5541',1,'LomseDoorway']]],
+  ['get_5fview',['get_view',['../classInteractor.html#aaac9826efeddfba9c2ed3f8d1db0f96a',1,'Interactor']]],
+  ['get_5fview_5fsize',['get_view_size',['../classInteractor.html#a331181fe34d2f9399578bbe4be3f5f65',1,'Interactor']]],
+  ['get_5fviewport',['get_viewport',['../classInteractor.html#afc7dac3c7d8b7d629f38b79750e34905',1,'Interactor']]]
 ];

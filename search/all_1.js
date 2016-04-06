@@ -1,10 +1,5 @@
 var searchData=
 [
-  ['einteractoropmode',['EInteractorOpMode',['../classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8',1,'Interactor']]],
-  ['enable_5fedition_5frestricted_5fto',['enable_edition_restricted_to',['../classInteractor.html#ad4bb24b0a1deda5216e35ee111328fba',1,'Interactor']]],
-  ['enable_5fforced_5fview_5fupdates',['enable_forced_view_updates',['../classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b',1,'Interactor']]],
-  ['epixelformat',['EPixelFormat',['../group__enumerations.html#gafb559e26bc610db43ba605230a142898',1,'lomse_pixel_formats.h']]],
-  ['etimingtarget',['ETimingTarget',['../classInteractor.html#ad8858370241ddad5b8a36300b22f5665',1,'Interactor']]],
-  ['eviewtype',['EViewType',['../classLomseDoorway.html#a88195b52e6d777edd400609128759167',1,'LomseDoorway']]],
-  ['events_20sent_20by_20lomse',['Events sent by Lomse',['../lomse-events.html',1,'index']]]
+  ['dump_5fcursor',['dump_cursor',['../classInteractor.html#a77ba1f1700deaf912f80f7b460ab508f',1,'Interactor']]],
+  ['dump_5fselection',['dump_selection',['../classInteractor.html#ace1d2c30aa1f16e2cd5c8c9a1b7c9659',1,'Interactor']]]
 ];
