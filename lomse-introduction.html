@@ -107,10 +107,10 @@ $(document).ready(function(){initNavTree('lomse-introduction.html','');});
 <ul><li class="level1"><a href="#lomse-philosophy">Lomse philosophy</a></li>
 <li class="level1"><a href="#overview-doorway">Class LomseDoorway</a></li>
 <li class="level1"><a href="#overview-mvc">The Document and related classes</a></li>
-<li class="level1"><a href="#overview-sound-engine">The sound engine</a></li>
+<li class="level1"><a href="#overview-rendering">Displaying documents</a></li>
 <li class="level1"><a href="#overview-print">Printing documents</a></li>
 <li class="level1"><a href="#overview-edition">Editing documents</a></li>
-<li class="level1"><a href="#overview-rendering">Displaying documents</a></li>
+<li class="level1"><a href="#overview-sound-engine">The sound engine</a></li>
 </ul>
 </div>
 <div class="textblock"><h1><a class="anchor" id="lomse-philosophy"></a>
@@ -145,17 +145,6 @@ The Document and related classes</h1>
 <li>The <a class="el" href="classPresenter.html">Presenter</a> - It is the owner of the Document and of all its <a class="el" href="classInteractor.html">Interactor</a> objects. The <a class="el" href="classPresenter.html">Presenter</a>'s main responsibility is to build (and delete) the MVC model for a Document.</li>
 </ul>
 <p>All these issues are described in <a class="el" href="render-overview.html#mvc-overview">The Lomse Model-View-Controller</a>.</p>
-<h1><a class="anchor" id="overview-sound-engine"></a>
-The sound engine</h1>
-<p>Lomse is platform independent code and cannot generate sounds for your specific platform. Therefore, lomse implements playback by generating real-time events and sending them to your application. It is responsibility of your application to handle these events and do whatever is needed, i.e. transform sound events into real sounds or doing whatever you would like with the sound events.</p>
-<p>The details and classes you have to use for scores playback are described in <a class="el" href="sound-generation.html">Scores playback</a>.</p>
-<h1><a class="anchor" id="overview-print"></a>
-Printing documents</h1>
-<p>Lomse is platform independent code and knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. In fact, implementing printing in your application is just printing bitmaps.</p>
-<p>The details and methods you have to use for printing are described in <a class="el" href="print-api.html">Printing documents</a>.</p>
-<h1><a class="anchor" id="overview-edition"></a>
-Editing documents</h1>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Introduction to Editing documents</dd></dl>
 <h1><a class="anchor" id="overview-rendering"></a>
 Displaying documents</h1>
 <p>Lomse is platform independent code and knows nothing about how to create a window or how to display a document on the screen. Lomse works by rendering the documents on a bitmap buffer, that is, on an array of consecutive memory bytes. This buffer can be any type of memory, such as a real bitmap, a window's buffer, etc. The simplest and usual way of rendering documents on a window is:</p>
@@ -165,14 +154,33 @@ Displaying documents</h1>
 <li>Copy the bitmap onto the window.</li>
 </ol>
 <p>These operations are usually triggered by your application when handling some operating system events, such as <b>window paint</b> events.</p>
-<p>The details and methods you have to use for displaying documents are described in <a class="el" href="render-overview.html">Rendering documents</a>. </p>
+<p>The details and methods you have to use for displaying documents are described in <a class="el" href="render-overview.html">Rendering documents overview</a>.</p>
+<h1><a class="anchor" id="overview-print"></a>
+Printing documents</h1>
+<p>As Lomse is platform independent code, it knows nothing about how to print in the operating system used by your application. Therefore, it is your application responsibility to implement printing. Lomse just offers some supporting methods so that implementing printing does not require much work. In fact, implementing printing in your application is just printing bitmaps.</p>
+<p>The details and methods you have to use for printing are described in <a class="el" href="print-api.html">Printing documents overview</a>.</p>
+<h1><a class="anchor" id="overview-edition"></a>
+Editing documents</h1>
+<p>Editing documents in Lomse is very simple: just invoke Interactor::exec_command() method and pass the command to execute, e.g. <em>insert note</em> or <em>delete paragraph</em>.</p>
+<p>Lomse supports undo/redo operations and takes care of all the houskeeping for this. In your application just invoke:</p>
+<ul>
+<li>Interactor::exec_undo() method for undoing the last command, and</li>
+<li>Interactor::exec_redo() method for redoing the last undone command.</li>
+</ul>
+<p>Most edition commands require a reference point in the document. For this, Lomse maintains two objects: a Cursor and a set of selected objects (the SelectionSet object).</p>
+<p>For moving the cursor to another position and for selecting or deselecting objects your application just issue specific edition commands, such as <em>advance cursor</em>, <em>move cursor to start of score</em> or <em>select object</em>.</p>
+<p>And this is, basically, the document edition API. It is very simple and gives full freedom to your application for implementing the GUI as you'd like, or for not a having a GUI! For more details see <a class="el" href="document-edition-overview.html">Editing documents overview</a>.</p>
+<h1><a class="anchor" id="overview-sound-engine"></a>
+The sound engine</h1>
+<p>Lomse is platform independent code and cannot generate sounds for your specific platform. Therefore, lomse implements playback by generating real-time events and sending them to your application. It is responsibility of your application to handle these events and do whatever is needed, i.e. transform sound events into real sounds or doing whatever you would like with the sound events.</p>
+<p>The details and classes you have to use for scores playback are described in <a class="el" href="sound-generation.html">Scores playback overview</a>. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Wed Apr 6 2016 16:53:37 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Apr 7 2016 17:03:25 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.8.6"/>
-<title>Lomse library. API documentation: Class List</title>
+<title>Lomse library. API documentation: Editing documents overview</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -47,10 +47,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Overview</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
+      <li><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="modules.html"><span>Types&#160;and&#160;constants</span></a></li>
       <li><a href="examples.html"><span>Examples</span></a></li>
-      <li><a href="pages.html"><span>Other</span></a></li>
+      <li class="current"><a href="pages.html"><span>Other</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
         <span class="left">
@@ -69,14 +69,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
-  <div id="navrow2" class="tabs2">
-    <ul class="tablist">
-      <li class="current"><a href="annotated.html"><span>Class&#160;List</span></a></li>
-      <li><a href="classes.html"><span>Class&#160;Index</span></a></li>
-      <li><a href="hierarchy.html"><span>Class&#160;Hierarchy</span></a></li>
-      <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
-    </ul>
-  </div>
 </div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
@@ -89,7 +81,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   </div>
 </div>
 <script type="text/javascript">
-$(document).ready(function(){initNavTree('annotated.html','');});
+$(document).ready(function(){initNavTree('document-edition-overview.html','');});
 </script>
 <div id="doc-content">
 <!-- window showing the filter options -->
@@ -108,21 +100,41 @@ $(document).ready(function(){initNavTree('annotated.html','');});
 
 <div class="header">
   <div class="headertitle">
-<div class="title">Class List</div>  </div>
+<div class="title">Editing documents overview </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock">Here are the classes, structs, unions and interfaces with brief descriptions:</div><div class="directory">
-<table class="directory">
-<tr id="row_0_" class="even"><td class="entry"><img src="ftv2node.png" alt="o" width="16" height="22" /><img src="ftv2cl.png" alt="C" width="24" height="22" /><a class="el" href="classInteractor.html" target="_self">Interactor</a></td><td class="desc"></td></tr>
-<tr id="row_1_"><td class="entry"><img src="ftv2node.png" alt="o" width="16" height="22" /><img src="ftv2cl.png" alt="C" width="24" height="22" /><a class="el" href="classLomseDoorway.html" target="_self">LomseDoorway</a></td><td class="desc"></td></tr>
-<tr id="row_2_" class="even"><td class="entry"><img src="ftv2lastnode.png" alt="\" width="16" height="22" /><img src="ftv2cl.png" alt="C" width="24" height="22" /><a class="el" href="classPresenter.html" target="_self">Presenter</a></td><td class="desc"></td></tr>
-</table>
-</div><!-- directory -->
-</div><!-- contents -->
+<div class="toc"><h3>Table of Contents</h3>
+<ul><li class="level1"><a href="#edit-overview">The edition API</a></li>
+<li class="level1"><a href="#edit-commands">Edition commands</a></li>
+</ul>
+</div>
+<div class="textblock"><h1><a class="anchor" id="edit-overview"></a>
+The edition API</h1>
+<p>Document elements (texts, music scores, headers, tables, etc.) can be created and modified using the edition API. This API is very simple: for your application editing a document is just invoking Interactor::exec_command() method and pass the command to execute, such as <em>insert note</em> or <em>delete paragraph</em>. See <a class="el" href="document-edition-overview.html#edit-commands">Edition commands</a>.</p>
+<p>For supporting undo/redo operations Lomse maintains two queues: the history of issued commands and the list of commands that can be re-done. And Lomse provides two methods for undo/redo operations:</p>
+<ul>
+<li>For undoing the last command just invoke Interactor::exec_undo() method.</li>
+<li>For redoing the operation just invoke Interactor::exec_redo() method.</li>
+</ul>
+<p>In addition, for supporting enabling/disabling undo/redo buttons, commands and other GUI widgets in your application, Lomse provides information about the undo and redo history:</p>
+<ul>
+<li>method Interactor::should_enable_edit_undo() returns <span class="literal">true</span> if there are commands in the undo queue, and</li>
+<li>method Interactor::should_enable_edit_redo() returns <span class="literal">true</span> if there are commands in the redo queue.</li>
+</ul>
+<p>Most edition commands require a reference point in the document. For instance, a command such as <em>delete paragraph</em> would require a pointer to the paragraph to delete. Or a command <em>insert note</em> would require a pointer to the point in which the note must be inserted. For providing these references, Lomse maintains two objects: a Cursor object and a SelectionSet object.</p>
+<p>The Cursor object is just a pointer to an element in the document. You can think of it as the graphic cursor in text edition applications, but in Lomse, there are two objects: the Cursor and the Caret. The cursor is just an internal invisible pointer; and the caret is the graphical representation of the cursor position. Lomse maintains the synchronization between the cursor and the caret, so advancing the cursor automatically forces Lomse to render the caret for pointing to the new cursor position. The cursor is always necessary, as it provides a reference point for edition commands. But the caret is just a graphical widget that your application can use or not, depending of the needs. For instance, in a batch application it would be non-sense to use a Caret! For moving the cursor to another position your application just issue specific edition commands, such as <em>advance cursor</em> or <em>move cursor to start of score</em>.</p>
+<p>Your application can also issue edition commands for selecting and deselecting document elements, such as paragraphs, words, notes, rests, clefs, staves, etc. Object SelectionSet is just the collection of current <em>selected</em> elements.</p>
+<p>The Cursor and the SelectionSet are not parameters of the commands. These objects are maintained by Lomse and when a command is going to be executed the necessary information about target objects and context is extracted from the cursor and/or the current selection.</p>
+<p>And this is, basically, the document edition API. It is very simple and gives full freedom to your application for implementing the GUI as you'd like, or for not a having a GUI!</p>
+<h1><a class="anchor" id="edit-commands"></a>
+Edition commands</h1>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Describe edition commands</dd></dl>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
+    <li class="navelem"><a class="el" href="index.html">Overview</a></li>
     <li class="footer">Generated on Thu Apr 7 2016 17:03:25 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>

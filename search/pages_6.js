@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['printing_20documents',['Printing documents',['../print-api.html',1,'index']]]
+  ['printing_20documents_20overview',['Printing documents overview',['../print-api.html',1,'index']]]
 ];

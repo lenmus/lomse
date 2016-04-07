@@ -4,24 +4,28 @@ var index =
       [ "Lomse philosophy", "lomse-introduction.html#lomse-philosophy", null ],
       [ "Class LomseDoorway", "lomse-introduction.html#overview-doorway", null ],
       [ "The Document and related classes", "lomse-introduction.html#overview-mvc", null ],
-      [ "The sound engine", "lomse-introduction.html#overview-sound-engine", null ],
+      [ "Displaying documents", "lomse-introduction.html#overview-rendering", null ],
       [ "Printing documents", "lomse-introduction.html#overview-print", null ],
       [ "Editing documents", "lomse-introduction.html#overview-edition", null ],
-      [ "Displaying documents", "lomse-introduction.html#overview-rendering", null ]
+      [ "The sound engine", "lomse-introduction.html#overview-sound-engine", null ]
     ] ],
-    [ "Rendering documents", "render-overview.html", [
+    [ "Rendering documents overview", "render-overview.html", [
       [ "How to render a document", "render-overview.html#mvc-rendering", null ],
       [ "The Lomse Model-View-Controller", "render-overview.html#mvc-overview", null ],
       [ "The rendering buffer for the View", "render-overview.html#rendering-buffer", null ],
       [ "Initializing the Lomse library", "render-overview.html#init-lomse", null ],
       [ "Displaying the document", "render-overview.html#rendering-display", null ]
     ] ],
-    [ "Printing documents", "print-api.html", [
+    [ "Printing documents overview", "print-api.html", [
       [ "The print API", "print-api.html#print-overview", null ],
       [ "Determining print buffer size", "print-api.html#print-buffer-size", null ],
       [ "Save memory by tiling", "print-api.html#print-tiles", null ]
     ] ],
-    [ "Scores playback", "sound-generation.html", [
+    [ "Editing documents overview", "document-edition-overview.html", [
+      [ "The edition API", "document-edition-overview.html#edit-overview", null ],
+      [ "Edition commands", "document-edition-overview.html#edit-commands", null ]
+    ] ],
+    [ "Scores playback overview", "sound-generation.html", [
       [ "How Lomse playback works", "sound-generation.html#sound-generation-overview", null ],
       [ "Your application set-up: summary", "sound-generation.html#playback-summary", null ],
       [ "How to handle sound events", "sound-generation.html#handling-sound-events", null ],
