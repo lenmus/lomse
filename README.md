@@ -23,6 +23,20 @@ Lomse is distributed under the BSD 2-clause license, a permissive open source li
 * Music renderization is based on fonts compliant with the Standard Music Font Layout (SMuFL) specification
 
 
+
+## Contributing
+
+If you would like to contribute or to join this project, you are welcome. The project has no commercial aim and all contributions are welcomed!
+
+By contributing to the Lomse repository through pull-request, comment,
+or otherwise, the contributor releases their content to the
+license and copyright terms as described in the [LICENSE][].
+Each contributor holds copyright over their contributions to Lomse.
+
+Read [Contributing][] for information about how to contribute.
+
+
+
 ## Installation
 
 ~~~~

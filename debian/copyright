@@ -4,11 +4,11 @@ Upstream-Contact: Cecilio Salmeron <cecilios@gmail.com>
 Source: https://launchpad.net/lomse
 
 Files: *
-Copyright: Copyright 2010-2012 Cecilio Salmeron
+Copyright: Copyright 2010-2016 Cecilio Salmeron and others
 License: BSD-2-Clause
 
 Files: debian/*
-Copyright: Copyright 2010-2012 Cecilio Salmeron
+Copyright: Copyright 2010-2016 Cecilio Salmeron and others
 License: BSD-2-Clause
 
 License: BSD-2-Clause
