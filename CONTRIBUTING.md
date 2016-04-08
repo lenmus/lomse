@@ -5,7 +5,7 @@ Thanks for taking the time to contribute!
 
 ## Do you have questions about the project?
 
-Feel free to ask any question in the [lomse mail list](https://sourceforge.net/p/lomse/mailman/). I always answer the posts.
+Feel free to go to the lomse [issues page](https://github.com/lenmus/lomse/issues) and create a new issue.
 
 
 ## How can I contribute?
@@ -37,8 +37,15 @@ Here’s the suggested way for proposing a change to this project:
 4. [Send a pull request][pr] from your fork’s branch to our `master` branch.
 
 
-If you would like to join this project, you are welcome. I'm currently the only developer, so I would like to find a few committed developers to create a core team. If you are interested and would like to take this project as your own project, you are welcome. The project has no commercial aim, so do not expect any money. I do this in my free time, for learning and for creating useful free software for the community. And costs me money!
+If you would like to join this project, you are welcome. I'm currently the only developer, so I would like to find a few committed developers to create a core team. If you are interested and would like to take this project as your own project, you are welcome. The project has no commercial aim. I do this in my free time, for learning and for creating useful free software for the community. 
 
+
+### Contribution agreement
+
+By contributing to the Lomse repository through pull-request, comment,
+or otherwise, you accept to release your contribution to the
+license and copyright terms as described in the [LICENSE][].
+Each contributor holds copyright over their contributions to Lomse.
 
 
 #### Thanks for contributing !!!!!!!
