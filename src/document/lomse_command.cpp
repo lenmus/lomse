@@ -159,7 +159,7 @@ void DocCommand::set_command_name(const string& name, ImoObj* pImo)
 int DocCommand::validate_source(const string& source)
 {
     //TODO: refactor. Source code exploration must be done by LdpParser. It should return
-    //the number of top level elements and a flag for signaling no parenthesis missmatch.
+    //the number of top level elements and a flag for signaling no parenthesis mismatch.
     //Here, we should only ask parser for a quick check and validate num of top level
     //elements
 
@@ -187,7 +187,7 @@ int DocCommand::validate_source(const string& source)
     }
     if (open != 0)
     {
-        m_error = "Parenthesis missmatch";
+        m_error = "Parenthesis mismatch";
         return k_failure;
     }
     if (fPerhapsMoreThanOneElement)

@@ -3391,7 +3391,7 @@ SUITE(DocCommandTest)
 
     TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_2307)
     {
-        //validate source code: parenthesis missmatch
+        //validate source code: parenthesis mismatch
         Document doc(m_libraryScope);
         doc.from_string("(score (vers 1.6)(instrument (musicData )))");
         doc.clear_dirty();
@@ -3405,7 +3405,7 @@ SUITE(DocCommandTest)
 
         CHECK( result == k_failure );
         //cout << "Error: '" << executer.get_error() << "'" << endl;
-        CHECK( executer.get_error() == "Parenthesis missmatch" );
+        CHECK( executer.get_error() == "Parenthesis mismatch" );
     }
 
     TEST_FIXTURE(DocCommandTestFixture, insert_staffobj_2308)
