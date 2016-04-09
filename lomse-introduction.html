@@ -161,11 +161,11 @@ Printing documents</h1>
 <p>The details and methods you have to use for printing are described in <a class="el" href="print-api.html">Printing documents overview</a>.</p>
 <h1><a class="anchor" id="overview-edition"></a>
 Editing documents</h1>
-<p>Editing documents in Lomse is very simple: just invoke Interactor::exec_command() method and pass the command to execute, e.g. <em>insert note</em> or <em>delete paragraph</em>.</p>
+<p>Editing documents in Lomse is very simple: just invoke <a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">Interactor::exec_command()</a> method and pass the command to execute, e.g. <em>insert note</em> or <em>delete paragraph</em>.</p>
 <p>Lomse supports undo/redo operations and takes care of all the houskeeping for this. In your application just invoke:</p>
 <ul>
-<li>Interactor::exec_undo() method for undoing the last command, and</li>
-<li>Interactor::exec_redo() method for redoing the last undone command.</li>
+<li><a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">Interactor::exec_undo()</a> method for undoing the last command, and</li>
+<li><a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">Interactor::exec_redo()</a> method for redoing the last undone command.</li>
 </ul>
 <p>Most edition commands require a reference point in the document. For this, Lomse maintains two objects: a Cursor and a set of selected objects (the SelectionSet object).</p>
 <p>For moving the cursor to another position and for selecting or deselecting objects your application just issue specific edition commands, such as <em>advance cursor</em>, <em>move cursor to start of score</em> or <em>select object</em>.</p>
@@ -180,7 +180,7 @@ The sound engine</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Thu Apr 7 2016 17:03:25 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Apr 9 2016 16:55:17 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

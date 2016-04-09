@@ -110,22 +110,23 @@ $(document).ready(function(){initNavTree('document-edition-overview.html','');})
 </div>
 <div class="textblock"><h1><a class="anchor" id="edit-overview"></a>
 The edition API</h1>
-<p>Document elements (texts, music scores, headers, tables, etc.) can be created and modified using the edition API. This API is very simple: for your application editing a document is just invoking Interactor::exec_command() method and pass the command to execute, such as <em>insert note</em> or <em>delete paragraph</em>. See <a class="el" href="document-edition-overview.html#edit-commands">Edition commands</a>.</p>
+<p>Document elements (texts, music scores, headers, tables, etc.) can be created and modified using the edition API. This API is very simple: for your application editing a document is just invoking <a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">Interactor::exec_command()</a> method and pass the command to execute, such as <em>insert note</em> or <em>delete paragraph</em>. See <a class="el" href="document-edition-overview.html#edit-commands">Edition commands</a>.</p>
 <p>For supporting undo/redo operations Lomse maintains two queues: the history of issued commands and the list of commands that can be re-done. And Lomse provides two methods for undo/redo operations:</p>
 <ul>
-<li>For undoing the last command just invoke Interactor::exec_undo() method.</li>
-<li>For redoing the operation just invoke Interactor::exec_redo() method.</li>
+<li>For undoing the last command just invoke <a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">Interactor::exec_undo()</a> method.</li>
+<li>For redoing the operation just invoke <a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">Interactor::exec_redo()</a> method.</li>
 </ul>
 <p>In addition, for supporting enabling/disabling undo/redo buttons, commands and other GUI widgets in your application, Lomse provides information about the undo and redo history:</p>
 <ul>
-<li>method Interactor::should_enable_edit_undo() returns <span class="literal">true</span> if there are commands in the undo queue, and</li>
-<li>method Interactor::should_enable_edit_redo() returns <span class="literal">true</span> if there are commands in the redo queue.</li>
+<li>method <a class="el" href="classInteractor.html#abd162053d322ad64eb94159e1437ce1e">Interactor::should_enable_edit_undo()</a> returns <span class="literal">true</span> if there are commands in the undo queue, and</li>
+<li>method <a class="el" href="classInteractor.html#a1fb104713775c65888909f3f1404faad">Interactor::should_enable_edit_redo()</a> returns <span class="literal">true</span> if there are commands in the redo queue.</li>
 </ul>
-<p>Most edition commands require a reference point in the document. For instance, a command such as <em>delete paragraph</em> would require a pointer to the paragraph to delete. Or a command <em>insert note</em> would require a pointer to the point in which the note must be inserted. For providing these references, Lomse maintains two objects: a Cursor object and a SelectionSet object.</p>
-<p>The Cursor object is just a pointer to an element in the document. You can think of it as the graphic cursor in text edition applications, but in Lomse, there are two objects: the Cursor and the Caret. The cursor is just an internal invisible pointer; and the caret is the graphical representation of the cursor position. Lomse maintains the synchronization between the cursor and the caret, so advancing the cursor automatically forces Lomse to render the caret for pointing to the new cursor position. The cursor is always necessary, as it provides a reference point for edition commands. But the caret is just a graphical widget that your application can use or not, depending of the needs. For instance, in a batch application it would be non-sense to use a Caret! For moving the cursor to another position your application just issue specific edition commands, such as <em>advance cursor</em> or <em>move cursor to start of score</em>.</p>
+<p>Most edition commands require a reference point in the document. For instance, a command such as <em>delete paragraph</em> would require a pointer to the paragraph to delete. Or a command <em>insert note</em> would require a pointer to the point in which the note must be inserted. For providing these references, Lomse maintains two objects: a DocCursor object and a SelectionSet object.</p>
+<p>The DocCursor object is just a pointer to an element in the document. You can think of it as the graphic cursor in text edition applications, but in Lomse, there are two objects: the DocCursor and the Caret.</p>
+<p>The cursor is just an internal invisible pointer; and the caret is the graphical representation of the cursor position. Lomse maintains the synchronization between the cursor and the caret, so advancing the cursor automatically forces Lomse to render the caret on the new cursor position. The cursor is always necessary, as it provides a reference point for edition commands. But the caret is just a graphical widget that your application can use or not, depending of the needs. For instance, in a batch application it would be non-sense to use a Caret! For moving the cursor to another position your application just issue specific edition commands, such as <em>advance cursor</em> or <em>move cursor to start of score</em>.</p>
 <p>Your application can also issue edition commands for selecting and deselecting document elements, such as paragraphs, words, notes, rests, clefs, staves, etc. Object SelectionSet is just the collection of current <em>selected</em> elements.</p>
-<p>The Cursor and the SelectionSet are not parameters of the commands. These objects are maintained by Lomse and when a command is going to be executed the necessary information about target objects and context is extracted from the cursor and/or the current selection.</p>
-<p>And this is, basically, the document edition API. It is very simple and gives full freedom to your application for implementing the GUI as you'd like, or for not a having a GUI!</p>
+<p>The DocCursor and the SelectionSet are not parameters of the commands. These objects are maintained by Lomse and when a command is going to be executed the necessary information about target objects and context is extracted from current cursor position and/or from current set of selected objects.</p>
+<p>And this is, basically, the document edition API. It is very simple and gives full freedom to your application for implementing the edition GUI as you'd like, or for not a having it at all!</p>
 <h1><a class="anchor" id="edit-commands"></a>
 Edition commands</h1>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Describe edition commands</dd></dl>
@@ -135,7 +136,7 @@ Edition commands</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Thu Apr 7 2016 17:03:25 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Apr 9 2016 16:55:17 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['enable_5fedition_5frestricted_5fto',['enable_edition_restricted_to',['../classInteractor.html#ad4bb24b0a1deda5216e35ee111328fba',1,'Interactor']]],
-  ['enable_5fforced_5fview_5fupdates',['enable_forced_view_updates',['../classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b',1,'Interactor']]]
+  ['dump_5fcursor',['dump_cursor',['../classInteractor.html#a77ba1f1700deaf912f80f7b460ab508f',1,'Interactor']]],
+  ['dump_5fselection',['dump_selection',['../classInteractor.html#ace1d2c30aa1f16e2cd5c8c9a1b7c9659',1,'Interactor']]]
 ];

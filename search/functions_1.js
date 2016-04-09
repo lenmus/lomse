@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['dump_5fcursor',['dump_cursor',['../classInteractor.html#a77ba1f1700deaf912f80f7b460ab508f',1,'Interactor']]],
-  ['dump_5fselection',['dump_selection',['../classInteractor.html#ace1d2c30aa1f16e2cd5c8c9a1b7c9659',1,'Interactor']]]
+  ['click_5fevent_5fto_5fcursor_5fstate',['click_event_to_cursor_state',['../classInteractor.html#a077b8554590f3ae5890e3d42f6d779f2',1,'Interactor']]],
+  ['create_5fscore_5fplayer',['create_score_player',['../classLomseDoorway.html#a50dbce970b84945868887966a0708634',1,'LomseDoorway']]]
 ];

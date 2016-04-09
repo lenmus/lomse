@@ -127,10 +127,16 @@ Inheritance diagram for Interactor:</div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The Interactor is the interface between your application, the associated View and the Document. It is responsible for translating your application requests into commands that manipulate the associated View and/or the Document, coordinating all the necessary actions.</p>
 <p>The Interactor plays the role of the Controller in the MVC model. Each View has an associated Interactor (in fact the View is owned by the Interactor). The Interactor is owned by the <a class="el" href="classPresenter.html">Presenter</a>.</p>
-<p>See:</p>
+<p>The Interactor for a View is provided by the <a class="el" href="classPresenter.html">Presenter</a>. It is best practise not to save pointers to the Interactor because when processing a Lomse event the Document (and thus, the <a class="el" href="classInteractor.html">Interactor</a>) could have been deleted (i.e. because your application has closed the window displaying the document). Therefore, it is always recommended to get the pointer when needed:</p>
+<div class="fragment"><div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">//use the Interactor</span></div>
+<div class="line">    spInteractor-&gt;some_method();</div>
+<div class="line">    ...</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>See:</p>
 <ul>
-<li><a class="el" href="render-overview.html#mvc-overview">The Lomse Model-View-Controller</a>.</li>
-<li><a class="el" href="viewport-overview.html">Coordinate systems, units, scaling and viewport</a> </li>
+<li><a class="el" href="render-overview.html#mvc-overview">The Lomse Model-View-Controller</a>. </li>
 </ul>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
@@ -158,8 +164,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab5192c9307818200f5b08e93892c61ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaac9826efeddfba9c2ed3f8d1db0f96a"><td class="memItemLeft" align="right" valign="top">View *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#aaac9826efeddfba9c2ed3f8d1db0f96a">get_view</a> ()</td></tr>
 <tr class="separator:aaac9826efeddfba9c2ed3f8d1db0f96a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7f68d9df4df24a71f02b4cc906c71a56"><td class="memItemLeft" align="right" valign="top">DocCursor *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a7f68d9df4df24a71f02b4cc906c71a56">get_cursor</a> ()</td></tr>
-<tr class="separator:a7f68d9df4df24a71f02b4cc906c71a56"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf1d978d7d7e4ef3e6e6b6495cf9d2d0"><td class="memItemLeft" align="right" valign="top">SelectionSet *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#aaf1d978d7d7e4ef3e6e6b6495cf9d2d0">get_selection_set</a> ()</td></tr>
 <tr class="separator:aaf1d978d7d7e4ef3e6e6b6495cf9d2d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to View</div></td></tr>
@@ -212,7 +216,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8d486a75231279d13370cb9744f8cf11"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">zoom_fit_width</a> (Pixels width, bool fForceRedraw=true)</td></tr>
 <tr class="separator:a8d486a75231279d13370cb9744f8cf11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Selection rectangle</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Selection rectangle methods and explanation </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Selection rectangle methods and explanation </dd></dl>
 </div></td></tr>
 <tr class="memitem:a9de671ca65612c859732ad6434428733"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9de671ca65612c859732ad6434428733"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>start_selection_rectangle</b> (Pixels x1, Pixels y1)</td></tr>
@@ -221,7 +225,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>start_selecti
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>hide_selection_rectangle</b> ()</td></tr>
 <tr class="separator:a4d304039336565267cd3a6d201dc2813"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Playback effects: tempo line</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000012">Todo:</a></b></dt><dd>Tempo line methods and Playback effects explanation </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Tempo line methods and Playback effects explanation </dd></dl>
 </div></td></tr>
 <tr class="memitem:a2def330212e2b83cbfabae9ed9b20cb0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2def330212e2b83cbfabae9ed9b20cb0"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>show_tempo_line</b> (Pixels x1, Pixels y1, Pixels x2, Pixels y2)</td></tr>
@@ -233,7 +237,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>hide_tempo_li
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>update_tempo_line</b> (Pixels x2, Pixels y2)</td></tr>
 <tr class="separator:a3b33f9e7acfbd40f4b5d0178d2f634c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Playback effects: highlight played notes/rests</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000013">Todo:</a></b></dt><dd>Highlight methods and Playback effects explanation </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000012">Todo:</a></b></dt><dd>Highlight methods and Playback effects explanation </dd></dl>
 </div></td></tr>
 <tr class="memitem:ab4dcd3324a54fa2055aa0bf1b9d732e2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab4dcd3324a54fa2055aa0bf1b9d732e2"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>highlight_object</b> (ImoStaffObj *pSO)</td></tr>
@@ -259,35 +263,19 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_visual_hig
 <tr class="separator:a45f7fb6d5f2a8b0b6d4b5e670c96e06d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4030a9cf2342d198a5890c30cecec4b7"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a4030a9cf2342d198a5890c30cecec4b7">get_num_pages</a> ()</td></tr>
 <tr class="separator:a4030a9cf2342d198a5890c30cecec4b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader">Selecting objects</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo:</a></b></dt><dd>Methods for selecting objects. Should be edition commands! Are these private methods? </dd></dl>
-</div></td></tr>
-<tr class="memitem:aebba0fb0a6483b1af0aabc5645e1613d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aebba0fb0a6483b1af0aabc5645e1613d"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>select_object</b> (GmoObj *pGmo, bool fClearSelection=true)</td></tr>
-<tr class="separator:aebba0fb0a6483b1af0aabc5645e1613d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2c6b3ce83695bce48e6cd7cc09af1ac"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac2c6b3ce83695bce48e6cd7cc09af1ac"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>select_object</b> (ImoId id, bool fClearSelection=true)</td></tr>
-<tr class="separator:ac2c6b3ce83695bce48e6cd7cc09af1ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a901a77452757aa871ab77a14193d08e3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a901a77452757aa871ab77a14193d08e3"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_in_selection</b> (GmoObj *pGmo)</td></tr>
-<tr class="separator:a901a77452757aa871ab77a14193d08e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader">Caret related methods</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000015">Todo:</a></b></dt><dd>Caret explanation and caret realeted methods </dd></dl>
-</div></td></tr>
-<tr class="memitem:ab0eb1b3b36c719575bb4309f78ae40f1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab0eb1b3b36c719575bb4309f78ae40f1"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>blink_caret</b> ()</td></tr>
+<tr><td colspan="2"><div class="groupHeader">Cursor and caret related methods</div></td></tr>
+<tr class="memitem:a7f68d9df4df24a71f02b4cc906c71a56"><td class="memItemLeft" align="right" valign="top">DocCursor *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a7f68d9df4df24a71f02b4cc906c71a56">get_cursor</a> ()</td></tr>
+<tr class="separator:a7f68d9df4df24a71f02b4cc906c71a56"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab0eb1b3b36c719575bb4309f78ae40f1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ab0eb1b3b36c719575bb4309f78ae40f1">blink_caret</a> ()</td></tr>
 <tr class="separator:ab0eb1b3b36c719575bb4309f78ae40f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac30c10982952f57d03a3e992e90eaca0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac30c10982952f57d03a3e992e90eaca0"></a>
-string&#160;</td><td class="memItemRight" valign="bottom"><b>get_caret_timecode</b> ()</td></tr>
+<tr class="memitem:ac30c10982952f57d03a3e992e90eaca0"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ac30c10982952f57d03a3e992e90eaca0">get_caret_timecode</a> ()</td></tr>
 <tr class="separator:ac30c10982952f57d03a3e992e90eaca0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a077b8554590f3ae5890e3d42f6d779f2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a077b8554590f3ae5890e3d42f6d779f2"></a>
-DocCursorState&#160;</td><td class="memItemRight" valign="bottom"><b>click_event_to_cursor_state</b> (SpEventMouse event)</td></tr>
+<tr class="memitem:a077b8554590f3ae5890e3d42f6d779f2"><td class="memItemLeft" align="right" valign="top">DocCursorState&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a077b8554590f3ae5890e3d42f6d779f2">click_event_to_cursor_state</a> (SpEventMouse event)</td></tr>
 <tr class="separator:a077b8554590f3ae5890e3d42f6d779f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a81cf3a31b6c7e7bd4c6b22c20bb87f73"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a81cf3a31b6c7e7bd4c6b22c20bb87f73"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>select_voice</b> (int voice)</td></tr>
+<tr class="memitem:a81cf3a31b6c7e7bd4c6b22c20bb87f73"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a81cf3a31b6c7e7bd4c6b22c20bb87f73">select_voice</a> (int voice)</td></tr>
 <tr class="separator:a81cf3a31b6c7e7bd4c6b22c20bb87f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Drag image associated to mouse cursor</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000016">Todo:</a></b></dt><dd>Drag images explanation and methods for dragging images </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo:</a></b></dt><dd>Drag images explanation and methods for dragging images </dd></dl>
 </div></td></tr>
 <tr class="memitem:ae1718f600ea3dec0017e200e1f00869a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae1718f600ea3dec0017e200e1f00869a"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>show_drag_image</b> (bool value)</td></tr>
@@ -299,25 +287,20 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>set_drag_image</b> (G
 void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b> (bool fEnabled)</td></tr>
 <tr class="separator:a0579315896d75bfd6f54df2cad4f9d82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Document edition</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000017">Todo:</a></b></dt><dd>Methods for document edition </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000015">Todo:</a></b></dt><dd>Explain available DocCommands </dd></dl>
 </div></td></tr>
-<tr class="memitem:ac0f2b87ac27d4d4a4692dc9ce5b42291"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac0f2b87ac27d4d4a4692dc9ce5b42291"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>exec_command</b> (DocCommand *pCmd)</td></tr>
+<tr class="memitem:ac0f2b87ac27d4d4a4692dc9ce5b42291"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command</a> (DocCommand *pCmd)</td></tr>
 <tr class="separator:ac0f2b87ac27d4d4a4692dc9ce5b42291"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a827410e940b1c1d7bcc42414d73a33aa"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a827410e940b1c1d7bcc42414d73a33aa"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>exec_undo</b> ()</td></tr>
+<tr class="memitem:a827410e940b1c1d7bcc42414d73a33aa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">exec_undo</a> ()</td></tr>
 <tr class="separator:a827410e940b1c1d7bcc42414d73a33aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6571c803f6a3626793756119821101e8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6571c803f6a3626793756119821101e8"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>exec_redo</b> ()</td></tr>
+<tr class="memitem:a6571c803f6a3626793756119821101e8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">exec_redo</a> ()</td></tr>
 <tr class="separator:a6571c803f6a3626793756119821101e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abd162053d322ad64eb94159e1437ce1e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abd162053d322ad64eb94159e1437ce1e"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>should_enable_edit_undo</b> ()</td></tr>
+<tr class="memitem:abd162053d322ad64eb94159e1437ce1e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#abd162053d322ad64eb94159e1437ce1e">should_enable_edit_undo</a> ()</td></tr>
 <tr class="separator:abd162053d322ad64eb94159e1437ce1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1fb104713775c65888909f3f1404faad"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1fb104713775c65888909f3f1404faad"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>should_enable_edit_redo</b> ()</td></tr>
+<tr class="memitem:a1fb104713775c65888909f3f1404faad"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a1fb104713775c65888909f3f1404faad">should_enable_edit_redo</a> ()</td></tr>
 <tr class="separator:a1fb104713775c65888909f3f1404faad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">User application: to inform Lomse about certain events</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000018">Todo:</a></b></dt><dd>Explain event handlers methods for user actions </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000016">Todo:</a></b></dt><dd>Explain event handlers methods for user actions </dd></dl>
 </div></td></tr>
 <tr class="memitem:aed88fd6863f5cfff75bb53424a70a7b0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#aed88fd6863f5cfff75bb53424a70a7b0">on_document_updated</a> ()</td></tr>
 <tr class="separator:aed88fd6863f5cfff75bb53424a70a7b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -337,7 +320,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_mouse_ente
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_mouse_leave_window</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
 <tr class="separator:afbfb111029c260532f849362bf3b15f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Actions requested by Task objects</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000019">Todo:</a></b></dt><dd>Should be restricted for internal use? </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000017">Todo:</a></b></dt><dd>Should be restricted for internal use? </dd></dl>
 </div></td></tr>
 <tr class="memitem:ac7ed97cbea54ce7bbf626149fbc85640"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac7ed97cbea54ce7bbf626149fbc85640"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_click_at_screen_point</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
@@ -379,14 +362,14 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_m
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_update_selection_rectangle</b> (Pixels x2, Pixels y2)</td></tr>
 <tr class="separator:aa342dc7765aa449d03f68f7507bc33fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">For performance measurements</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000020">Todo:</a></b></dt><dd>Document methods for performance measurements </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000018">Todo:</a></b></dt><dd>Document methods for performance measurements </dd></dl>
 </div></td></tr>
 <tr class="memitem:a8fa25043ac4be5ed9b5ebfb1368599de"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8fa25043ac4be5ed9b5ebfb1368599de"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>timing_repaint_done</b> ()</td></tr>
 <tr class="separator:a8fa25043ac4be5ed9b5ebfb1368599de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aed556537dedb76250b1c039645956d5c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aed556537dedb76250b1c039645956d5c"></a>
-double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_times</b> ()</td></tr>
-<tr class="separator:aed556537dedb76250b1c039645956d5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab87619c91a3ff8cb323815c2b3c088a2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab87619c91a3ff8cb323815c2b3c088a2"></a>
+double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times</b> ()</td></tr>
+<tr class="separator:ab87619c91a3ff8cb323815c2b3c088a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Debugging</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><p>These methods are oriented to debug Lomse and should not be in the public API. If you use them be aware that they might be removed from public API in future. </p>
 </div></td></tr>
@@ -427,19 +410,101 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_time
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Method Interactor::get_ellapsed_times() returns a vector of ellapsed times. This enum is used as index on that vector for identifying the operation to which each vector element refers. So, for instance, times[0] is the time for building the graphic model (0 = <em>k_timing_gmodel_build_time</em>), times[1] is the time for rendering the graphic model (1 = <em>k_timing_gmodel_draw_time</em>), etc, according to this:</p>
+<p>Method Interactor::get_elapsed_times() returns a vector of elapsed times. This enum is used as index on that vector for identifying the operation to which each vector element refers. So, for instance, times[0] is the time for building the graphic model (0 = <em>k_timing_gmodel_build_time</em>), times[1] is the time for rendering the graphic model (1 = <em>k_timing_gmodel_draw_time</em>), etc, according to this:</p>
 <ul>
-<li><b>k_timing_gmodel_build_time = 0</b> - ellapsed time for building the graphic model.</li>
-<li><b>k_timing_gmodel_draw_time = 1</b> - ellapsed time for rendering the graphic model</li>
-<li><b>k_timing_visual_effects_draw_time = 2</b> - ellapsed time for rendering the visual effects</li>
-<li><b>k_timing_total_render_time = 3</b> - total ellapsed time for rederization</li>
-<li><b>k_timing_repaint_time = 4</b> - ellapsed time for repainting the view</li>
+<li><b>k_timing_gmodel_build_time = 0</b> - elapsed time for building the graphic model.</li>
+<li><b>k_timing_gmodel_draw_time = 1</b> - elapsed time for rendering the graphic model</li>
+<li><b>k_timing_visual_effects_draw_time = 2</b> - elapsed time for rendering the visual effects</li>
+<li><b>k_timing_total_render_time = 3</b> - total elapsed time for renderization</li>
+<li><b>k_timing_repaint_time = 4</b> - elapsed time for repainting the view</li>
 <li><b>k_timing_max_value</b> - Not used as index. This value is for knowing how many items you should expect in the returned vector, for allocating space. </li>
 </ul>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a class="anchor" id="ab0eb1b3b36c719575bb4309f78ae40f1"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Interactor::blink_caret </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Switch the state of the caret: if it is visible, hide it; if it is hidden, show it. Lomse caret does not blink and this method is oriented to implement a blinking caret in your application.</p>
+<p>See <a class="el" href="document-edition-overview.html">Editing documents overview</a></p>
+<dl class="section remark"><dt>Remarks</dt><dd><ul>
+<li>Caret is always shown when document edition is enabled. and it is hidden when edition is disabled.</li>
+<li>This method has no effect when document edition is disabled. That is, if edition is not enabled, you cannot use this method for forcing to display the caret.</li>
+<li>See <a class="el" href="classInteractor.html#acb5d21578acde66c5da165f1fa808fb6">set_operating_mode()</a>.</li>
+</ul>
+</dd></dl>
+<p>If your application would like a blinking caret, you will have to use a timer for the caret and switch the caret state on each timer event. This is an example:</p>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> MainFrame::on_caret_timer_event()</div>
+<div class="line">{</div>
+<div class="line">    <a class="code" href="classInteractor.html">Interactor</a>* pInteractor = get_active_canvas_interactor();</div>
+<div class="line">    <span class="keywordflow">if</span> (pInteractor)</div>
+<div class="line">        pInteractor-&gt;<a class="code" href="classInteractor.html#ab0eb1b3b36c719575bb4309f78ae40f1">blink_caret</a>();</div>
+<div class="line">}</div>
+</div><!-- fragment --> 
+</div>
+</div>
+<a class="anchor" id="a077b8554590f3ae5890e3d42f6d779f2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">DocCursorState Interactor::click_event_to_cursor_state </td>
+          <td>(</td>
+          <td class="paramtype">SpEventMouse&#160;</td>
+          <td class="paramname"><em>event</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns a DocCursorState object pointing to the nearest valid position to the mouse click point.</p>
+<p>This is a support method for applications wishing to get cursor related information from mouse clicks. For instance, to move the caret by pointing with the mouse and clicking:</p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000013">Todo:</a></b></dt><dd>Clarify example or change: Why user has to discriminate the kind of top level object?</dd></dl>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::process_on_click_event(SpEventMouse event)</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">if</span> (is_edition_enabled())</div>
+<div class="line">    {</div>
+<div class="line">        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spIntor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock();</div>
+<div class="line">        DocCursorState state = spIntor-&gt;click_event_to_cursor_state(event);</div>
+<div class="line">        ImoId <span class="keywordtype">id</span> = state.get_parent_level_id();</div>
+<div class="line">        <span class="keywordflow">if</span> (<span class="keywordtype">id</span> != k_no_imoid)</div>
+<div class="line">        {</div>
+<div class="line">            Document* pDoc = m_cursor-&gt;get_document();</div>
+<div class="line">            ImoObj* pImo = pDoc-&gt;get_pointer_to_imo(<span class="keywordtype">id</span>);</div>
+<div class="line">            <span class="keywordflow">if</span> (pImo-&gt;is_score())</div>
+<div class="line">                m_pController-&gt;exec_lomse_command(</div>
+<div class="line">                                        LENMUS_NEW CmdCursor(state),</div>
+<div class="line">                                        k_no_show_busy );</div>
+<div class="line">            <span class="keywordflow">else</span></div>
+<div class="line">                m_pController-&gt;exec_lomse_command(</div>
+<div class="line">                                        LENMUS_NEW CmdCursor(CmdCursor::k_point_to, <span class="keywordtype">id</span>),</div>
+<div class="line">                                        k_no_show_busy );</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+<div class="line"></div>
+<div class="line"><span class="keywordtype">bool</span> DocumentWindow::is_edition_enabled()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">if</span> (!m_pPresenter)</div>
+<div class="line">        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"></div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spIntor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
+<div class="line">        <span class="keywordflow">return</span> spIntor-&gt;get_operating_mode() == Interactor::k_mode_edition;</div>
+<div class="line">    <span class="keywordflow">else</span></div>
+<div class="line">        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">}</div>
+</div><!-- fragment --> 
+</div>
+</div>
 <a class="anchor" id="a77ba1f1700deaf912f80f7b460ab508f"></a>
 <div class="memitem">
 <div class="memproto">
@@ -518,14 +583,78 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_time
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Invoking this method controls the behaviour of method <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>. If disabled, Lomse will ignore any invocation to <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>.</p>
+<p>Invoking this method controls the behavior of method <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>. If disabled, Lomse will ignore any invocation to <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">value</td><td><span class="literal">true</span> for enabling method <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>. <span class="literal">false</span> for ignoring invokations to this method.</td></tr>
+    <tr><td class="paramname">value</td><td><span class="literal">true</span> for enabling method <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>. <span class="literal">false</span> for ignoring invocations to this method.</td></tr>
   </table>
   </dd>
 </dl>
 <p>By default, <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a> method is enabled. </p>
+
+</div>
+</div>
+<a class="anchor" id="ac0f2b87ac27d4d4a4692dc9ce5b42291"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Interactor::exec_command </td>
+          <td>(</td>
+          <td class="paramtype">DocCommand *&#160;</td>
+          <td class="paramname"><em>pCmd</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Execute an edition command for modifying the document content, the current set of selected objects or the cursor position. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pCmd</td><td>The command to execute.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>Remarks</dt><dd>This method has no effect when document edition is disabled. See <a class="el" href="classInteractor.html#acb5d21578acde66c5da165f1fa808fb6">set_operating_mode()</a>.</dd></dl>
+<p>See <a class="el" href="document-edition-overview.html#edit-overview">The edition API</a></p>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">exec_undo()</a>, <a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">exec_redo()</a> </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a6571c803f6a3626793756119821101e8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Interactor::exec_redo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Redo the last edition command undone via <a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">exec_undo()</a>.</p>
+<dl class="section remark"><dt>Remarks</dt><dd>This method has no effect when document edition is disabled. See <a class="el" href="classInteractor.html#acb5d21578acde66c5da165f1fa808fb6">set_operating_mode()</a>.</dd></dl>
+<p>See <a class="el" href="document-edition-overview.html#edit-overview">The edition API</a></p>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command()</a>, <a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">exec_undo()</a>, <a class="el" href="classInteractor.html#a1fb104713775c65888909f3f1404faad">should_enable_edit_redo()</a>, </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a827410e940b1c1d7bcc42414d73a33aa"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Interactor::exec_undo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Undo the last edition command executed via <a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command()</a>.</p>
+<dl class="section remark"><dt>Remarks</dt><dd>This method has no effect when document edition is disabled. See <a class="el" href="classInteractor.html#acb5d21578acde66c5da165f1fa808fb6">set_operating_mode()</a>.</dd></dl>
+<p>See <a class="el" href="document-edition-overview.html#edit-overview">The edition API</a></p>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command()</a>, <a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">exec_redo()</a>, <a class="el" href="classInteractor.html#abd162053d322ad64eb94159e1437ce1e">should_enable_edit_undo()</a> </dd></dl>
 
 </div>
 </div>
@@ -551,8 +680,38 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_time
 </div><div class="memdoc">
 <p>Invoking this method forces Lomse to render again the View and, therefore, the rendering buffer gets updated. After doing it, Lomse <b>will</b> generate a EventPaint event.</p>
 <dl class="section note"><dt>Note</dt><dd>Lomse will ignore the request if forced updates are disabled. See <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>.</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be refactored.</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be refactored.</dd></dl>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a>. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ac30c10982952f57d03a3e992e90eaca0"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">string Interactor::get_caret_timecode </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns a string with the timecode (measure, beat, part) for current position, when caret on a music score. If caret is not on a music score, the returned string is empty.</p>
+<p>See <a class="el" href="document-edition-overview.html">Editing documents overview</a></p>
+<p>This method can be useful for displaying the timecode of the caret. For example:</p>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::update_status_bar_caret_timepos()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">if</span> (is_edition_enabled())</div>
+<div class="line">    {</div>
+<div class="line">        <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
+<div class="line">        {</div>
+<div class="line">            StatusReporter* pStatus = m_appScope.get_status_reporter();</div>
+<div class="line">            pStatus-&gt;report_caret_time( spInteractor-&gt;get_caret_timecode() );</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --><dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#ab0eb1b3b36c719575bb4309f78ae40f1">blink_caret()</a> </dd></dl>
 
 </div>
 </div>
@@ -576,8 +735,8 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_time
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the cursor associated to the View of this Interactor. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000007">Todo:</a></b></dt><dd>Explain DocCursor and how to use it. </dd></dl>
+<p>Returns the cursor associated to the View of this Interactor.</p>
+<p>See <a class="el" href="document-edition-overview.html">Editing documents overview</a> </p>
 
 </div>
 </div>
@@ -731,7 +890,7 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_time
 </table>
 </div><div class="memdoc">
 <p>Returns the selection set associated to the View of this Interactor. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo:</a></b></dt><dd>Explain SelectionSet and how it works. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000007">Todo:</a></b></dt><dd>Explain SelectionSet and how it works. </dd></dl>
 
 </div>
 </div>
@@ -955,11 +1114,11 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_time
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">x,y</td><td>new coordinates (in pixels) for the viewport. </td></tr>
-    <tr><td class="paramname">fForceRedraw</td><td>If <span class="literal">false</span> prevents redrawing the new viewport into the rendering buffer; this is usefull for saving time when several consecutive changes are going to be done. If not specified <span class="literal">true</span> is assumed.</td></tr>
+    <tr><td class="paramname">fForceRedraw</td><td>If <span class="literal">false</span> prevents redrawing the new viewport into the rendering buffer; this is useful for saving time when several consecutive changes are going to be done. If not specified <span class="literal">true</span> is assumed.</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section remark"><dt>Remarks</dt><dd>The size of viewport (heigh, width) is always determined by rendering buffer size.</dd></dl>
+<dl class="section remark"><dt>Remarks</dt><dd>The size of viewport (height, width) is always determined by rendering buffer size.</dd></dl>
 <p>See <a class="el" href="viewport-overview.html#viewport-concept">Scrolling: the Viewport</a></p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a81455e8a584d8dff982c3f43e92e7f34">set_viewport_at_page_center()</a>, <a class="el" href="classInteractor.html#afc7dac3c7d8b7d629f38b79750e34905">get_viewport()</a>, <a class="el" href="classInteractor.html#a331181fe34d2f9399578bbe4be3f5f65">get_view_size()</a> </dd></dl>
 
@@ -986,7 +1145,7 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_time
 </table>
 </div><div class="memdoc">
 <p>Force to re-create all the data associated to a document and to refresh its views.</p>
-<p>Normally you don't have to use this method. But it can be convenient for forcing Lomse to redraw it. </p>
+<dl class="section remark"><dt>Remarks</dt><dd>Normally you don't have to use this method. But it can be convenient for forcing Lomse to redraw it. </dd></dl>
 
 </div>
 </div>
@@ -1122,7 +1281,7 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_time
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Instructs Lomse renderer to not render sorrounding rectangles around any element.</p>
+<p>Instructs Lomse renderer to not render surrounding rectangles around any element.</p>
 <p>See: <a class="el" href="classInteractor.html#a49da5398dca0fe4f7d15c5cceac23309">set_box_to_draw()</a>.</p>
 <dl class="section attention"><dt>Attention</dt><dd>This method is oriented to debug Lomse. It might be removed from public API in future. </dd></dl>
 
@@ -1231,6 +1390,34 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_time
 </div><!-- fragment --> 
 </div>
 </div>
+<a class="anchor" id="a81cf3a31b6c7e7bd4c6b22c20bb87f73"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Interactor::select_voice </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>voice</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Restrict document cursor so that it only moves to positions occupied by the selected voice. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">voice</td><td>The new voice to be tracked (0 ... num_voices - 1)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section remark"><dt>Remarks</dt><dd><ul>
+<li>As a consequence of this operation the selected voice will be rendered highlighted.</li>
+<li>This method only has effects is object beign edited is a music score. For other top level objects the method does nothing. </li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a3108aa6a66e6db48008e8863f4604232"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1262,7 +1449,7 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_time
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document. </dd></dl>
 
 </div>
 </div>
@@ -1290,7 +1477,7 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_time
 <p>Instructs Lomse renderer to draw a rectangle around the area occupied by elements of type <em>boxType</em>.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">boxType</td><td>The elements for which it is requested to draw a sorrounding rectangle. Valid values are given by enum constants <em>GmoObj::k_box_xxxxxxx</em> defined in GmoObj class.</td></tr>
+    <tr><td class="paramname">boxType</td><td>The elements for which it is requested to draw a surrounding rectangle. Valid values are given by enum constants <em>GmoObj::k_box_xxxxxxx</em> defined in GmoObj class.</td></tr>
   </table>
   </dd>
 </dl>
@@ -1608,6 +1795,44 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_time
 
 </div>
 </div>
+<a class="anchor" id="a1fb104713775c65888909f3f1404faad"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Interactor::should_enable_edit_redo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns <span class="literal">true</span> if there are commands in the redo queue.</p>
+<dl class="section remark"><dt>Remarks</dt><dd>This method is oriented for applications wishing to validate that <a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">exec_redo()</a> can be invoked.</dd></dl>
+<p>See <a class="el" href="document-edition-overview.html#edit-overview">The edition API</a></p>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command()</a>, <a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">exec_undo()</a>, <a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">exec_redo()</a>, <a class="el" href="classInteractor.html#abd162053d322ad64eb94159e1437ce1e">should_enable_edit_undo()</a>, </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="abd162053d322ad64eb94159e1437ce1e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Interactor::should_enable_edit_undo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Returns <span class="literal">true</span> if there are commands in the undo queue.</p>
+<dl class="section remark"><dt>Remarks</dt><dd>This method is oriented for applications wishing to validate that <a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">exec_undo()</a> can be invoked.</dd></dl>
+<p>See <a class="el" href="document-edition-overview.html#edit-overview">The edition API</a></p>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command()</a>, <a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">exec_undo()</a>, <a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">exec_redo()</a>, <a class="el" href="classInteractor.html#a1fb104713775c65888909f3f1404faad">should_enable_edit_redo()</a>, </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="af7c4afa0e8fd9136b5d1f2a52666c44f"></a>
 <div class="memitem">
 <div class="memproto">
@@ -1858,7 +2083,7 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_ellapsed_time
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Thu Apr 7 2016 17:03:25 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Apr 9 2016 16:55:17 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
