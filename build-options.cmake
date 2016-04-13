@@ -79,8 +79,8 @@ message("Compatibility for LDP v1.5 = ${LOMSE_COMPATIBILITY_LDP_1_5}")
 
 include( ${LOMSE_ROOT_DIR}/build-version.cmake )
 
-#add_custom_target(build-version ALL
-  COMMAND ${CMAKE_COMMAND} -D LOMSE_ROOT_DIR=${LOMSE_ROOT_DIR} -P ${LOMSE_ROOT_DIR}/build-version.cmake
+add_custom_target (build-version ALL
+  COMMAND ${CMAKE_COMMAND} -D LOMSE_ROOT_DIR=${CMAKE_SOURCE_DIR} -P ${CMAKE_SOURCE_DIR}/build-version.cmake
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
   COMMENT "setting Lomse version information ...")
 
