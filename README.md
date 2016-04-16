@@ -64,6 +64,7 @@ For more info, packages, or other options see [this](http://www.lenmus.org/en/lo
 
 
 ## More info
+* [API Documentation](https://lenmus.github.io/lomse/)
 * [Contributing](https://github.com/lenmus/lomse/blob/master/CONTRIBUTING.md)
 * [Lomse homepage](http://www.lenmus.org/en/lomse/intro)
 * [Lomse PPA](https://launchpad.net/~lomse/+archive/ubuntu/ppa/+packages)
