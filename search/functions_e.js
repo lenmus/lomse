@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['view_5fneeds_5frepaint',['view_needs_repaint',['../classInteractor.html#add8da1fe0fd8adddf1b30bcebf608636',1,'Interactor']]]
+  ['timing_5frepaint_5fdone',['timing_repaint_done',['../classInteractor.html#a8fa25043ac4be5ed9b5ebfb1368599de',1,'Interactor']]]
 ];

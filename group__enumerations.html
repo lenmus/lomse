@@ -110,10 +110,46 @@ $(document).ready(function(){initNavTree('group__enumerations.html','');});
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
+<tr class="memitem:ga6f553cc68bf4f84707dce1f1145d2107"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">EEventFlag</a> </td></tr>
+<tr class="separator:ga6f553cc68bf4f84707dce1f1145d2107"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafb559e26bc610db43ba605230a142898"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gafb559e26bc610db43ba605230a142898">EPixelFormat</a> </td></tr>
 <tr class="separator:gafb559e26bc610db43ba605230a142898"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
+<a class="anchor" id="ga6f553cc68bf4f84707dce1f1145d2107"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">EEventFlag</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This enum describes the flags for mouse events, indicating which mouse buttons and keyboard keys are pressed when the mouse event takes place.</p>
+<p>#include &lt;<a class="el" href="lomse__interactor_8h_source.html">lomse_interactor.h</a>&gt; </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="gga6f553cc68bf4f84707dce1f1145d2107abe591d30a7cff0359685ffb8e135b70b"></a>k_mouse_left</em>&#160;</td><td class="fielddoc">
+<p>0x01. Mouse left button pressed or released </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="gga6f553cc68bf4f84707dce1f1145d2107a61c5b8b06ae88e059d24936e8cf20dd9"></a>k_mouse_right</em>&#160;</td><td class="fielddoc">
+<p>0x02. Mouse right button pressed or released </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="gga6f553cc68bf4f84707dce1f1145d2107af91b693b25124d36610313db3de40642"></a>k_mouse_middle</em>&#160;</td><td class="fielddoc">
+<p>0x04. Mouse middle button pressed or released </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="gga6f553cc68bf4f84707dce1f1145d2107a83b0895bb73b36f537c11777efbcd269"></a>k_kbd_shift</em>&#160;</td><td class="fielddoc">
+<p>0x08. Keyboard Shift key pressed while mouse event </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="gga6f553cc68bf4f84707dce1f1145d2107a1c9b6811f8bbd4483d0effc68a26653f"></a>k_kbd_ctrl</em>&#160;</td><td class="fielddoc">
+<p>0x10. Keyboard Ctrol key pressed while mouse event </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="gga6f553cc68bf4f84707dce1f1145d2107a94c322b82de5f9421f9be07ee6d0293f"></a>k_kbd_alt</em>&#160;</td><td class="fielddoc">
+<p>0x20. Keyboard Alt key pressed while mouse event </p>
+</td></tr>
+</table>
+
+</div>
+</div>
 <a class="anchor" id="gafb559e26bc610db43ba605230a142898"></a>
 <div class="memitem">
 <div class="memproto">
@@ -136,22 +172,22 @@ Enumerations</h2></td></tr>
 <p>Simple 65535 level grayscale. </p>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggafb559e26bc610db43ba605230a142898a6bc9dbd1200a63f27353713c63a3521d"></a>k_pix_format_rgb555</em>&#160;</td><td class="fielddoc">
-<p>15 bit rgb. Depends on the byte ordering! </p>
+<p>15 bit rgb. Architecture dependent due to byte ordering! </p>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggafb559e26bc610db43ba605230a142898a687d9509c5c062fed60cbeae22465e39"></a>k_pix_format_rgb565</em>&#160;</td><td class="fielddoc">
-<p>16 bit rgb. Depends on the byte ordering! </p>
+<p>16 bit rgb. Architecture dependent due to byte ordering! </p>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggafb559e26bc610db43ba605230a142898afc1729500350cdf9d23dedd64a752b8c"></a>k_pix_format_rgbAAA</em>&#160;</td><td class="fielddoc">
-<p>30 bit rgb. Depends on the byte ordering! </p>
+<p>30 bit rgb. Architecture dependent due to byte ordering! </p>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggafb559e26bc610db43ba605230a142898a6103f8665026d2c1f2ba6cf63a971560"></a>k_pix_format_rgbBBA</em>&#160;</td><td class="fielddoc">
-<p>32 bit rgb. Depends on the byte ordering! </p>
+<p>32 bit rgb. Architecture dependent due to byte ordering! </p>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggafb559e26bc610db43ba605230a142898ae08a284498019c3e44da73f6decf84a5"></a>k_pix_format_bgrAAA</em>&#160;</td><td class="fielddoc">
-<p>30 bit bgr. Depends on the byte ordering! </p>
+<p>30 bit bgr. Architecture dependent due to byte ordering! </p>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggafb559e26bc610db43ba605230a142898a34195fccfe1917ded4e10b0e98f600f8"></a>k_pix_format_bgrABB</em>&#160;</td><td class="fielddoc">
-<p>32 bit bgr. Depends on the byte ordering! </p>
+<p>32 bit bgr. Architecture dependent due to byte ordering! </p>
 </td></tr>
 <tr><td class="fieldname"><em><a class="anchor" id="ggafb559e26bc610db43ba605230a142898a048c5c0cc2b0abf5dc1b0354b6ea0005"></a>k_pix_format_rgb24</em>&#160;</td><td class="fielddoc">
 <p>R-G-B, one byte per color component. </p>
@@ -198,7 +234,7 @@ Enumerations</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat Apr 9 2016 16:55:17 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Apr 16 2016 17:13:58 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

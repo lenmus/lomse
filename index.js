@@ -33,6 +33,18 @@ var index =
       [ "Handling highlight events", "sound-generation.html#handling-highlight-events", null ],
       [ "The PlayerGui object", "sound-generation.html#implementing-player-gui", null ]
     ] ],
+    [ "Interaction with your application GUI", "tasks-page.html", [
+      [ "Interactors and Tasks", "tasks-page.html#gui-interaction", null ],
+      [ "Task objects", "tasks-page.html#tasks-overview", [
+        [ "TaskDragView class", "tasks-page.html#task-drag-view", null ],
+        [ "TaskOnlyClicks class", "tasks-page.html#task-only-clicks", null ],
+        [ "TaskSelection class", "tasks-page.html#task-selection", null ],
+        [ "TaskSelectionRectangle class", "tasks-page.html#task-selection-rectangle", null ],
+        [ "TaskMoveObject class", "tasks-page.html#task-move-object", null ],
+        [ "TaskMoveHandler class", "tasks-page.html#task-move-handler", null ],
+        [ "TaskDataEntry class", "tasks-page.html#task-data-entry", null ]
+      ] ]
+    ] ],
     [ "Coordinate systems, units, scaling and viewport", "viewport-overview.html", [
       [ "Device and logical units", "viewport-overview.html#lomse-units", null ],
       [ "Scaling", "viewport-overview.html#scale-factor", null ],

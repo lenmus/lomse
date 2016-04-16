@@ -1,5 +1,13 @@
 var group__enumerations =
 [
+    [ "EEventFlag", "group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107", [
+      [ "k_mouse_left", "group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107abe591d30a7cff0359685ffb8e135b70b", null ],
+      [ "k_mouse_right", "group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a61c5b8b06ae88e059d24936e8cf20dd9", null ],
+      [ "k_mouse_middle", "group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107af91b693b25124d36610313db3de40642", null ],
+      [ "k_kbd_shift", "group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a83b0895bb73b36f537c11777efbcd269", null ],
+      [ "k_kbd_ctrl", "group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a1c9b6811f8bbd4483d0effc68a26653f", null ],
+      [ "k_kbd_alt", "group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a94c322b82de5f9421f9be07ee6d0293f", null ]
+    ] ],
     [ "EPixelFormat", "group__enumerations.html#gafb559e26bc610db43ba605230a142898", [
       [ "k_pix_format_undefined", "group__enumerations.html#ggafb559e26bc610db43ba605230a142898a0a8e233d72c2d66ca39207b151d7e18f", null ],
       [ "k_pix_format_gray8", "group__enumerations.html#ggafb559e26bc610db43ba605230a142898a2f83422ee812cbca20c9d080f783f702", null ],

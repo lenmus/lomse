@@ -116,376 +116,392 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor"></span></div>
 <div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
 <div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment">// Event flags for mouse and keyboard pressed keys</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="keyword">enum</span> EEventFlag</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;{</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;    k_mouse_left  = 1,</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;    k_mouse_right = 2,</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;    k_mouse_middle = 4,</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    k_kbd_shift   = 8,</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    k_kbd_ctrl    = 16,</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    k_kbd_alt     = 32,</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;};</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment">//Abstract class from which all Interactors must derive</span></div>
-<div class="line"><a name="l00047"></a><span class="lineno"><a class="line" href="classInteractor.html">   47</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classInteractor.html">Interactor</a> : <span class="keyword">public</span> EventHandler</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                 , <span class="keyword">public</span> EventNotifier</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;                 , <span class="keyword">public</span> Observable</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;                 , <span class="keyword">public</span> EnableSharedFromThis&lt;Interactor&gt;</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;{</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="comment">//enums</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno"><a class="line" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8">   61</a></span>&#160;<span class="comment"></span>    <span class="keyword">enum</span> <a class="code" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8">EInteractorOpMode</a> { k_mode_read_only=0, k_mode_edition, k_mode_playback, };</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;</div>
-<div class="line"><a name="l00077"></a><span class="lineno"><a class="line" href="classInteractor.html#ad8858370241ddad5b8a36300b22f5665">   77</a></span>&#160;    <span class="keyword">enum</span> <a class="code" href="classInteractor.html#ad8858370241ddad5b8a36300b22f5665">ETimingTarget</a> { k_timing_gmodel_build_time=0, k_timing_gmodel_draw_time,</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;           k_timing_visual_effects_draw_time, k_timing_total_render_time,</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;           k_timing_repaint_time, k_timing_max_value, };</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    </div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        <span class="comment">//operating modes</span></div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#acb5d21578acde66c5da165f1fa808fb6">set_operating_mode</a>(<span class="keywordtype">int</span> mode);</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;</div>
-<div class="line"><a name="l00127"></a><span class="lineno"><a class="line" href="classInteractor.html#a0b25e85a6074cc637ea6bd2a30e5bead">  127</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code" href="classInteractor.html#a0b25e85a6074cc637ea6bd2a30e5bead">get_operating_mode</a>() { <span class="keywordflow">return</span> m_operatingMode; }</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ad4bb24b0a1deda5216e35ee111328fba">enable_edition_restricted_to</a>(ImoId <span class="keywordtype">id</span>);</div>
+<div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">   23</a></span>&#160;<span class="comment"></span><span class="keyword">enum</span> <a class="code" href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">EEventFlag</a></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;{</div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107abe591d30a7cff0359685ffb8e135b70b">   25</a></span>&#160;    <a class="code" href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107abe591d30a7cff0359685ffb8e135b70b">k_mouse_left</a>  = 1,      </div>
+<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a61c5b8b06ae88e059d24936e8cf20dd9">   26</a></span>&#160;    <a class="code" href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a61c5b8b06ae88e059d24936e8cf20dd9">k_mouse_right</a> = 2,      </div>
+<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107af91b693b25124d36610313db3de40642">   27</a></span>&#160;    <a class="code" href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107af91b693b25124d36610313db3de40642">k_mouse_middle</a> = 4,     </div>
+<div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a83b0895bb73b36f537c11777efbcd269">   28</a></span>&#160;    <a class="code" href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a83b0895bb73b36f537c11777efbcd269">k_kbd_shift</a>   = 8,      </div>
+<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a1c9b6811f8bbd4483d0effc68a26653f">   29</a></span>&#160;    <a class="code" href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a1c9b6811f8bbd4483d0effc68a26653f">k_kbd_ctrl</a>    = 16,     </div>
+<div class="line"><a name="l00030"></a><span class="lineno"><a class="line" href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a94c322b82de5f9421f9be07ee6d0293f">   30</a></span>&#160;    <a class="code" href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a94c322b82de5f9421f9be07ee6d0293f">k_kbd_alt</a>     = 32,     </div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;};</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="comment">//Abstract class from which all Interactors must derive</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="classInteractor.html">   62</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classInteractor.html">Interactor</a> : <span class="keyword">public</span> EventHandler</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                 , <span class="keyword">public</span> EventNotifier</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                 , <span class="keyword">public</span> Observable</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                 , <span class="keyword">public</span> EnableSharedFromThis&lt;Interactor&gt;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;{</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="comment">//enums</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno"><a class="line" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8">   76</a></span>&#160;<span class="comment"></span>    <span class="keyword">enum</span> <a class="code" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8">EInteractorOpMode</a> { k_mode_read_only=0, k_mode_edition, k_mode_playback, };</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;</div>
+<div class="line"><a name="l00092"></a><span class="lineno"><a class="line" href="classInteractor.html#ad8858370241ddad5b8a36300b22f5665">   92</a></span>&#160;    <span class="keyword">enum</span> <a class="code" href="classInteractor.html#ad8858370241ddad5b8a36300b22f5665">ETimingTarget</a> { k_timing_gmodel_build_time=0, k_timing_gmodel_draw_time,</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;           k_timing_visual_effects_draw_time, k_timing_total_render_time,</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;           k_timing_repaint_time, k_timing_max_value, };</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    </div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        <span class="comment">//operating modes</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#acb5d21578acde66c5da165f1fa808fb6">set_operating_mode</a>(<span class="keywordtype">int</span> mode);</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;</div>
 <div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="classInteractor.html#a3e96befa4410ffe879ed55fc09d6c62b">is_document_editable</a>();</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f">switch_task</a>(<span class="keywordtype">int</span> taskType);</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;</div>
+<div class="line"><a name="l00156"></a><span class="lineno"><a class="line" href="classInteractor.html#a0b25e85a6074cc637ea6bd2a30e5bead">  156</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code" href="classInteractor.html#a0b25e85a6074cc637ea6bd2a30e5bead">get_operating_mode</a>() { <span class="keywordflow">return</span> m_operatingMode; }</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ad4bb24b0a1deda5216e35ee111328fba">enable_edition_restricted_to</a>(ImoId <span class="keywordtype">id</span>);</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="classInteractor.html#a3e96befa4410ffe879ed55fc09d6c62b">is_document_editable</a>();</div>
 <div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;        <span class="comment">//access to collaborators</span></div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;    GraphicModel* <a class="code" href="classInteractor.html#ab5192c9307818200f5b08e93892c61ed">get_graphic_model</a>();</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;</div>
-<div class="line"><a name="l00192"></a><span class="lineno"><a class="line" href="classInteractor.html#aaac9826efeddfba9c2ed3f8d1db0f96a">  192</a></span>&#160;    <span class="keyword">inline</span> View* <a class="code" href="classInteractor.html#aaac9826efeddfba9c2ed3f8d1db0f96a">get_view</a>() { <span class="keywordflow">return</span> m_pView; }</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;</div>
-<div class="line"><a name="l00199"></a><span class="lineno"><a class="line" href="classInteractor.html#aaf1d978d7d7e4ef3e6e6b6495cf9d2d0">  199</a></span>&#160;    <span class="keyword">inline</span> SelectionSet* <a class="code" href="classInteractor.html#aaf1d978d7d7e4ef3e6e6b6495cf9d2d0">get_selection_set</a>() { <span class="keywordflow">return</span> m_pSelections; }</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;</div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;        <span class="comment">//interface to View</span></div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap</a>();</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f">switch_task</a>(<span class="keywordtype">int</span> taskType);</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        <span class="comment">//access to collaborators</span></div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;    GraphicModel* <a class="code" href="classInteractor.html#ab5192c9307818200f5b08e93892c61ed">get_graphic_model</a>();</div>
 <div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;</div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw</a>();</div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;</div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;</div>
+<div class="line"><a name="l00226"></a><span class="lineno"><a class="line" href="classInteractor.html#aaac9826efeddfba9c2ed3f8d1db0f96a">  226</a></span>&#160;    <span class="keyword">inline</span> View* <a class="code" href="classInteractor.html#aaac9826efeddfba9c2ed3f8d1db0f96a">get_view</a>() { <span class="keywordflow">return</span> m_pView; }</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;</div>
+<div class="line"><a name="l00234"></a><span class="lineno"><a class="line" href="classInteractor.html#aaf1d978d7d7e4ef3e6e6b6495cf9d2d0">  234</a></span>&#160;    <span class="keyword">inline</span> SelectionSet* <a class="code" href="classInteractor.html#aaf1d978d7d7e4ef3e6e6b6495cf9d2d0">get_selection_set</a>() { <span class="keywordflow">return</span> m_pSelections; }</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;</div>
 <div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="classInteractor.html#add8da1fe0fd8adddf1b30bcebf608636">view_needs_repaint</a>();</div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;</div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;</div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;    <span class="comment">//creating events</span></div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;<span class="comment"></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a3108aa6a66e6db48008e8863f4604232">send_end_of_play_event</a>(ImoScore* pScore, PlayerGui* pPlayCtrl);</div>
-<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;</div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;        <span class="comment">//interface to View</span></div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap</a>();</div>
 <div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;</div>
-<div class="line"><a name="l00265"></a><span class="lineno"><a class="line" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">  265</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates</a>(<span class="keywordtype">bool</span> value) { m_fViewUpdatesEnabled = value; }</div>
-<div class="line"><a name="l00266"></a><span class="lineno">  266</span>&#160;</div>
-<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;</div>
-<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;</div>
-<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;</div>
-<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;        <span class="comment">//interface to GraphicView. Renderization</span></div>
-<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;</div>
-<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a2494425c26d19946921e4b4e97f189f3">set_rendering_buffer</a>(RenderingBuffer* rbuf);</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;</div>
-<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;</div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ab802d6e8a3fc482aa7f0fdf9029aecae">set_rendering_option</a>(<span class="keywordtype">int</span> option, <span class="keywordtype">bool</span> value);</div>
-<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;</div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;</div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;</div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;</div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;        <span class="comment">//interface to GraphicView. Units conversion and related</span></div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#aaa5e88bd7eaa484ae2f0c11ab29e34ff">screen_point_to_page_point</a>(<span class="keywordtype">double</span>* x, <span class="keywordtype">double</span>* y);</div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw</a>();</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;</div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="classInteractor.html#add8da1fe0fd8adddf1b30bcebf608636">view_needs_repaint</a>();</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;    <span class="comment">//creating events</span></div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;<span class="comment"></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a3108aa6a66e6db48008e8863f4604232">send_end_of_play_event</a>(ImoScore* pScore, PlayerGui* pPlayCtrl);</div>
+<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;</div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;</div>
+<div class="line"><a name="l00300"></a><span class="lineno"><a class="line" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">  300</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates</a>(<span class="keywordtype">bool</span> value) { m_fViewUpdatesEnabled = value; }</div>
+<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;        <span class="comment">//interface to GraphicView. Renderization</span></div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;</div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a2494425c26d19946921e4b4e97f189f3">set_rendering_buffer</a>(RenderingBuffer* rbuf);</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ab802d6e8a3fc482aa7f0fdf9029aecae">set_rendering_option</a>(<span class="keywordtype">int</span> option, <span class="keywordtype">bool</span> value);</div>
 <div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;</div>
-<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;</div>
-<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ae27a39c9cdbce876919dcd2a2205492e">model_point_to_screen</a>(<span class="keywordtype">double</span>* x, <span class="keywordtype">double</span>* y, <span class="keywordtype">int</span> iPage);</div>
-<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;</div>
-<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;</div>
-<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code" href="classInteractor.html#a75600fd031826c9ae48ca4ada8b7ddce">page_at_screen_point</a>(<span class="keywordtype">double</span> x, <span class="keywordtype">double</span> y);</div>
-<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;</div>
-<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;</div>
-<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;    <span class="keyword">virtual</span> UPoint <a class="code" href="classInteractor.html#a986167b680f97ad5914c69343a7d15c5">screen_point_to_model_point</a>(Pixels x, Pixels y);</div>
-<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;</div>
-<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;</div>
-<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;    DiatonicPitch <a class="code" href="classInteractor.html#a3dcd4218ab368cfba17ca1ef6974c012">get_pitch_at</a>(Pixels x, Pixels y);</div>
-<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;</div>
-<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;</div>
-<div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;</div>
-<div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;</div>
-<div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160;        <span class="comment">//interface to GraphicView. Viewport / scroll</span></div>
-<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a0eb3195aed54028cc3f250c38029e8f8">new_viewport</a>(Pixels x, Pixels y, <span class="keywordtype">bool</span> fForceRedraw=<span class="keyword">true</span>);</div>
-<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a81455e8a584d8dff982c3f43e92e7f34">set_viewport_at_page_center</a>(Pixels screenWidth);</div>
-<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#afc7dac3c7d8b7d629f38b79750e34905">get_viewport</a>(Pixels* x, Pixels* y);</div>
-<div class="line"><a name="l00545"></a><span class="lineno">  545</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a331181fe34d2f9399578bbe4be3f5f65">get_view_size</a>(Pixels* xWidth, Pixels* yHeight);</div>
-<div class="line"><a name="l00546"></a><span class="lineno">  546</span>&#160;</div>
-<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160;</div>
-<div class="line"><a name="l00549"></a><span class="lineno">  549</span>&#160;</div>
-<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;</div>
-<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160;        <span class="comment">//interface to GraphicView. Scale</span></div>
-<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code" href="classInteractor.html#ad79a50661807b829755219e4bdf21121">get_scale</a>();</div>
-<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;</div>
-<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160;</div>
-<div class="line"><a name="l00578"></a><span class="lineno">  578</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a5e7dbf2be635475f40ba9b723a902d37">set_scale</a>(<span class="keywordtype">double</span> scale, Pixels x=0, Pixels y=0, <span class="keywordtype">bool</span> fForceRedraw=<span class="keyword">true</span>);</div>
-<div class="line"><a name="l00579"></a><span class="lineno">  579</span>&#160;</div>
-<div class="line"><a name="l00580"></a><span class="lineno">  580</span>&#160;</div>
-<div class="line"><a name="l00593"></a><span class="lineno">  593</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a4ec8ec1d6b84a74d656f2773c741e222">zoom_in</a>(Pixels x=0, Pixels y=0, <span class="keywordtype">bool</span> fForceRedraw=<span class="keyword">true</span>);</div>
-<div class="line"><a name="l00594"></a><span class="lineno">  594</span>&#160;</div>
-<div class="line"><a name="l00595"></a><span class="lineno">  595</span>&#160;</div>
-<div class="line"><a name="l00609"></a><span class="lineno">  609</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a6fc96dec0a3767152cd953d2ec68ec96">zoom_out</a>(Pixels x=0, Pixels y=0, <span class="keywordtype">bool</span> fForceRedraw=<span class="keyword">true</span>);</div>
-<div class="line"><a name="l00610"></a><span class="lineno">  610</span>&#160;</div>
-<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160;</div>
-<div class="line"><a name="l00625"></a><span class="lineno">  625</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ac83345221209221be48169f01a4cd253">zoom_fit_full</a>(Pixels width, Pixels height, <span class="keywordtype">bool</span> fForceRedraw=<span class="keyword">true</span>);</div>
-<div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;</div>
-<div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;</div>
-<div class="line"><a name="l00641"></a><span class="lineno">  641</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">zoom_fit_width</a>(Pixels width, <span class="keywordtype">bool</span> fForceRedraw=<span class="keyword">true</span>);</div>
-<div class="line"><a name="l00642"></a><span class="lineno">  642</span>&#160;</div>
-<div class="line"><a name="l00644"></a><span class="lineno">  644</span>&#160;</div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;</div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;</div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;</div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;        <span class="comment">//interface to GraphicView. Units conversion and related</span></div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#aaa5e88bd7eaa484ae2f0c11ab29e34ff">screen_point_to_page_point</a>(<span class="keywordtype">double</span>* x, <span class="keywordtype">double</span>* y);</div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;</div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;</div>
+<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ae27a39c9cdbce876919dcd2a2205492e">model_point_to_screen</a>(<span class="keywordtype">double</span>* x, <span class="keywordtype">double</span>* y, <span class="keywordtype">int</span> iPage);</div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;</div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;</div>
+<div class="line"><a name="l00468"></a><span class="lineno">  468</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code" href="classInteractor.html#a75600fd031826c9ae48ca4ada8b7ddce">page_at_screen_point</a>(<span class="keywordtype">double</span> x, <span class="keywordtype">double</span> y);</div>
+<div class="line"><a name="l00469"></a><span class="lineno">  469</span>&#160;</div>
+<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;</div>
+<div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160;    <span class="keyword">virtual</span> UPoint <a class="code" href="classInteractor.html#a986167b680f97ad5914c69343a7d15c5">screen_point_to_model_point</a>(Pixels x, Pixels y);</div>
+<div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;</div>
+<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;</div>
+<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;    DiatonicPitch <a class="code" href="classInteractor.html#a3dcd4218ab368cfba17ca1ef6974c012">get_pitch_at</a>(Pixels x, Pixels y);</div>
+<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;</div>
+<div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160;</div>
+<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;</div>
+<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160;</div>
+<div class="line"><a name="l00531"></a><span class="lineno">  531</span>&#160;        <span class="comment">//interface to GraphicView. Viewport / scroll</span></div>
+<div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a0eb3195aed54028cc3f250c38029e8f8">new_viewport</a>(Pixels x, Pixels y, <span class="keywordtype">bool</span> fForceRedraw=<span class="keyword">true</span>);</div>
+<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a81455e8a584d8dff982c3f43e92e7f34">set_viewport_at_page_center</a>(Pixels screenWidth);</div>
+<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#afc7dac3c7d8b7d629f38b79750e34905">get_viewport</a>(Pixels* x, Pixels* y);</div>
+<div class="line"><a name="l00580"></a><span class="lineno">  580</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a331181fe34d2f9399578bbe4be3f5f65">get_view_size</a>(Pixels* xWidth, Pixels* yHeight);</div>
+<div class="line"><a name="l00581"></a><span class="lineno">  581</span>&#160;</div>
+<div class="line"><a name="l00583"></a><span class="lineno">  583</span>&#160;</div>
+<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160;</div>
+<div class="line"><a name="l00585"></a><span class="lineno">  585</span>&#160;</div>
+<div class="line"><a name="l00586"></a><span class="lineno">  586</span>&#160;        <span class="comment">//interface to GraphicView. Scale</span></div>
+<div class="line"><a name="l00591"></a><span class="lineno">  591</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00597"></a><span class="lineno">  597</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">double</span> <a class="code" href="classInteractor.html#ad79a50661807b829755219e4bdf21121">get_scale</a>();</div>
+<div class="line"><a name="l00598"></a><span class="lineno">  598</span>&#160;</div>
+<div class="line"><a name="l00599"></a><span class="lineno">  599</span>&#160;</div>
+<div class="line"><a name="l00613"></a><span class="lineno">  613</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a5e7dbf2be635475f40ba9b723a902d37">set_scale</a>(<span class="keywordtype">double</span> scale, Pixels x=0, Pixels y=0, <span class="keywordtype">bool</span> fForceRedraw=<span class="keyword">true</span>);</div>
+<div class="line"><a name="l00614"></a><span class="lineno">  614</span>&#160;</div>
+<div class="line"><a name="l00615"></a><span class="lineno">  615</span>&#160;</div>
+<div class="line"><a name="l00628"></a><span class="lineno">  628</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a4ec8ec1d6b84a74d656f2773c741e222">zoom_in</a>(Pixels x=0, Pixels y=0, <span class="keywordtype">bool</span> fForceRedraw=<span class="keyword">true</span>);</div>
+<div class="line"><a name="l00629"></a><span class="lineno">  629</span>&#160;</div>
+<div class="line"><a name="l00630"></a><span class="lineno">  630</span>&#160;</div>
+<div class="line"><a name="l00644"></a><span class="lineno">  644</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a6fc96dec0a3767152cd953d2ec68ec96">zoom_out</a>(Pixels x=0, Pixels y=0, <span class="keywordtype">bool</span> fForceRedraw=<span class="keyword">true</span>);</div>
 <div class="line"><a name="l00645"></a><span class="lineno">  645</span>&#160;</div>
 <div class="line"><a name="l00646"></a><span class="lineno">  646</span>&#160;</div>
-<div class="line"><a name="l00647"></a><span class="lineno">  647</span>&#160;        <span class="comment">//interface to GraphicView. Selection rectangle</span></div>
-<div class="line"><a name="l00654"></a><span class="lineno">  654</span>&#160;<span class="comment"></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> start_selection_rectangle(Pixels x1, Pixels y1);</div>
-<div class="line"><a name="l00655"></a><span class="lineno">  655</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> hide_selection_rectangle();</div>
-<div class="line"><a name="l00656"></a><span class="lineno">  656</span>&#160;</div>
-<div class="line"><a name="l00658"></a><span class="lineno">  658</span>&#160;</div>
-<div class="line"><a name="l00659"></a><span class="lineno">  659</span>&#160;</div>
-<div class="line"><a name="l00660"></a><span class="lineno">  660</span>&#160;</div>
-<div class="line"><a name="l00661"></a><span class="lineno">  661</span>&#160;        <span class="comment">//tempo line</span></div>
-<div class="line"><a name="l00668"></a><span class="lineno">  668</span>&#160;<span class="comment"></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> show_tempo_line(Pixels x1, Pixels y1, Pixels x2, Pixels y2);</div>
-<div class="line"><a name="l00669"></a><span class="lineno">  669</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> hide_tempo_line();</div>
-<div class="line"><a name="l00670"></a><span class="lineno">  670</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> update_tempo_line(Pixels x2, Pixels y2);</div>
-<div class="line"><a name="l00671"></a><span class="lineno">  671</span>&#160;</div>
-<div class="line"><a name="l00673"></a><span class="lineno">  673</span>&#160;</div>
-<div class="line"><a name="l00674"></a><span class="lineno">  674</span>&#160;</div>
-<div class="line"><a name="l00675"></a><span class="lineno">  675</span>&#160;</div>
-<div class="line"><a name="l00676"></a><span class="lineno">  676</span>&#160;        <span class="comment">//highlight</span></div>
-<div class="line"><a name="l00683"></a><span class="lineno">  683</span>&#160;<span class="comment"></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> highlight_object(ImoStaffObj* pSO);</div>
-<div class="line"><a name="l00684"></a><span class="lineno">  684</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> remove_highlight_from_object(ImoStaffObj* pSO);</div>
-<div class="line"><a name="l00685"></a><span class="lineno">  685</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> remove_all_highlight();</div>
-<div class="line"><a name="l00686"></a><span class="lineno">  686</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> discard_all_highlight();</div>
-<div class="line"><a name="l00687"></a><span class="lineno">  687</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> on_visual_highlight(SpEventScoreHighlight pEvent);</div>
-<div class="line"><a name="l00688"></a><span class="lineno">  688</span>&#160;</div>
-<div class="line"><a name="l00690"></a><span class="lineno">  690</span>&#160;</div>
+<div class="line"><a name="l00660"></a><span class="lineno">  660</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ac83345221209221be48169f01a4cd253">zoom_fit_full</a>(Pixels width, Pixels height, <span class="keywordtype">bool</span> fForceRedraw=<span class="keyword">true</span>);</div>
+<div class="line"><a name="l00661"></a><span class="lineno">  661</span>&#160;</div>
+<div class="line"><a name="l00662"></a><span class="lineno">  662</span>&#160;</div>
+<div class="line"><a name="l00676"></a><span class="lineno">  676</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">zoom_fit_width</a>(Pixels width, <span class="keywordtype">bool</span> fForceRedraw=<span class="keyword">true</span>);</div>
+<div class="line"><a name="l00677"></a><span class="lineno">  677</span>&#160;</div>
+<div class="line"><a name="l00679"></a><span class="lineno">  679</span>&#160;</div>
+<div class="line"><a name="l00680"></a><span class="lineno">  680</span>&#160;</div>
+<div class="line"><a name="l00681"></a><span class="lineno">  681</span>&#160;</div>
+<div class="line"><a name="l00682"></a><span class="lineno">  682</span>&#160;        <span class="comment">//interface to GraphicView. Selection rectangle</span></div>
+<div class="line"><a name="l00689"></a><span class="lineno">  689</span>&#160;<span class="comment"></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> start_selection_rectangle(Pixels x1, Pixels y1);</div>
+<div class="line"><a name="l00690"></a><span class="lineno">  690</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> hide_selection_rectangle();</div>
 <div class="line"><a name="l00691"></a><span class="lineno">  691</span>&#160;</div>
-<div class="line"><a name="l00692"></a><span class="lineno">  692</span>&#160;</div>
-<div class="line"><a name="l00693"></a><span class="lineno">  693</span>&#160;        <span class="comment">//interface to GraphicView. Printing</span></div>
-<div class="line"><a name="l00698"></a><span class="lineno">  698</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00707"></a><span class="lineno">  707</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ab5402ba5556ee21c50bfab7a097cc5eb">set_print_buffer</a>(RenderingBuffer* rbuf);</div>
+<div class="line"><a name="l00693"></a><span class="lineno">  693</span>&#160;</div>
+<div class="line"><a name="l00694"></a><span class="lineno">  694</span>&#160;</div>
+<div class="line"><a name="l00695"></a><span class="lineno">  695</span>&#160;</div>
+<div class="line"><a name="l00696"></a><span class="lineno">  696</span>&#160;        <span class="comment">//tempo line</span></div>
+<div class="line"><a name="l00703"></a><span class="lineno">  703</span>&#160;<span class="comment"></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> show_tempo_line(Pixels x1, Pixels y1, Pixels x2, Pixels y2);</div>
+<div class="line"><a name="l00704"></a><span class="lineno">  704</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> hide_tempo_line();</div>
+<div class="line"><a name="l00705"></a><span class="lineno">  705</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> update_tempo_line(Pixels x2, Pixels y2);</div>
+<div class="line"><a name="l00706"></a><span class="lineno">  706</span>&#160;</div>
 <div class="line"><a name="l00708"></a><span class="lineno">  708</span>&#160;</div>
 <div class="line"><a name="l00709"></a><span class="lineno">  709</span>&#160;</div>
-<div class="line"><a name="l00715"></a><span class="lineno">  715</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a56006a47ef6164ad139c2d5bb1e17c3d">set_print_ppi</a>(<span class="keywordtype">double</span> ppi);</div>
-<div class="line"><a name="l00716"></a><span class="lineno">  716</span>&#160;</div>
-<div class="line"><a name="l00717"></a><span class="lineno">  717</span>&#160;</div>
-<div class="line"><a name="l00726"></a><span class="lineno">  726</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a45f7fb6d5f2a8b0b6d4b5e670c96e06d">print_page</a>(<span class="keywordtype">int</span> page, VPoint viewport=VPoint(0, 0));</div>
+<div class="line"><a name="l00710"></a><span class="lineno">  710</span>&#160;</div>
+<div class="line"><a name="l00711"></a><span class="lineno">  711</span>&#160;        <span class="comment">//highlight</span></div>
+<div class="line"><a name="l00718"></a><span class="lineno">  718</span>&#160;<span class="comment"></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> highlight_object(ImoStaffObj* pSO);</div>
+<div class="line"><a name="l00719"></a><span class="lineno">  719</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> remove_highlight_from_object(ImoStaffObj* pSO);</div>
+<div class="line"><a name="l00720"></a><span class="lineno">  720</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> remove_all_highlight();</div>
+<div class="line"><a name="l00721"></a><span class="lineno">  721</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> discard_all_highlight();</div>
+<div class="line"><a name="l00722"></a><span class="lineno">  722</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> on_visual_highlight(SpEventScoreHighlight pEvent);</div>
+<div class="line"><a name="l00723"></a><span class="lineno">  723</span>&#160;</div>
+<div class="line"><a name="l00725"></a><span class="lineno">  725</span>&#160;</div>
+<div class="line"><a name="l00726"></a><span class="lineno">  726</span>&#160;</div>
 <div class="line"><a name="l00727"></a><span class="lineno">  727</span>&#160;</div>
-<div class="line"><a name="l00728"></a><span class="lineno">  728</span>&#160;</div>
-<div class="line"><a name="l00734"></a><span class="lineno">  734</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code" href="classInteractor.html#a4030a9cf2342d198a5890c30cecec4b7">get_num_pages</a>();</div>
-<div class="line"><a name="l00735"></a><span class="lineno">  735</span>&#160;</div>
-<div class="line"><a name="l00737"></a><span class="lineno">  737</span>&#160;</div>
-<div class="line"><a name="l00738"></a><span class="lineno">  738</span>&#160;</div>
-<div class="line"><a name="l00739"></a><span class="lineno">  739</span>&#160;</div>
-<div class="line"><a name="l00740"></a><span class="lineno">  740</span>&#160;        <span class="comment">//cursor / caret</span></div>
-<div class="line"><a name="l00745"></a><span class="lineno">  745</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00751"></a><span class="lineno"><a class="line" href="classInteractor.html#a7f68d9df4df24a71f02b4cc906c71a56">  751</a></span>&#160;    <span class="keyword">inline</span> DocCursor* <a class="code" href="classInteractor.html#a7f68d9df4df24a71f02b4cc906c71a56">get_cursor</a>() { <span class="keywordflow">return</span> m_pCursor; }</div>
+<div class="line"><a name="l00728"></a><span class="lineno">  728</span>&#160;        <span class="comment">//interface to GraphicView. Printing</span></div>
+<div class="line"><a name="l00733"></a><span class="lineno">  733</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00742"></a><span class="lineno">  742</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ab5402ba5556ee21c50bfab7a097cc5eb">set_print_buffer</a>(RenderingBuffer* rbuf);</div>
+<div class="line"><a name="l00743"></a><span class="lineno">  743</span>&#160;</div>
+<div class="line"><a name="l00744"></a><span class="lineno">  744</span>&#160;</div>
+<div class="line"><a name="l00750"></a><span class="lineno">  750</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a56006a47ef6164ad139c2d5bb1e17c3d">set_print_ppi</a>(<span class="keywordtype">double</span> ppi);</div>
+<div class="line"><a name="l00751"></a><span class="lineno">  751</span>&#160;</div>
 <div class="line"><a name="l00752"></a><span class="lineno">  752</span>&#160;</div>
-<div class="line"><a name="l00781"></a><span class="lineno">  781</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ab0eb1b3b36c719575bb4309f78ae40f1">blink_caret</a>();</div>
-<div class="line"><a name="l00782"></a><span class="lineno">  782</span>&#160;<span class="comment">//    void show_caret(bool fShow=true);</span></div>
-<div class="line"><a name="l00783"></a><span class="lineno">  783</span>&#160;<span class="comment">//    void hide_caret();</span></div>
-<div class="line"><a name="l00784"></a><span class="lineno">  784</span>&#160;</div>
-<div class="line"><a name="l00809"></a><span class="lineno">  809</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="classInteractor.html#ac30c10982952f57d03a3e992e90eaca0">get_caret_timecode</a>();</div>
-<div class="line"><a name="l00810"></a><span class="lineno">  810</span>&#160;</div>
-<div class="line"><a name="l00855"></a><span class="lineno">  855</span>&#160;    DocCursorState <a class="code" href="classInteractor.html#a077b8554590f3ae5890e3d42f6d779f2">click_event_to_cursor_state</a>(SpEventMouse event);</div>
-<div class="line"><a name="l00856"></a><span class="lineno">  856</span>&#160;</div>
-<div class="line"><a name="l00869"></a><span class="lineno">  869</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a81cf3a31b6c7e7bd4c6b22c20bb87f73">select_voice</a>(<span class="keywordtype">int</span> voice);</div>
+<div class="line"><a name="l00761"></a><span class="lineno">  761</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a45f7fb6d5f2a8b0b6d4b5e670c96e06d">print_page</a>(<span class="keywordtype">int</span> page, VPoint viewport=VPoint(0, 0));</div>
+<div class="line"><a name="l00762"></a><span class="lineno">  762</span>&#160;</div>
+<div class="line"><a name="l00763"></a><span class="lineno">  763</span>&#160;</div>
+<div class="line"><a name="l00769"></a><span class="lineno">  769</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code" href="classInteractor.html#a4030a9cf2342d198a5890c30cecec4b7">get_num_pages</a>();</div>
+<div class="line"><a name="l00770"></a><span class="lineno">  770</span>&#160;</div>
+<div class="line"><a name="l00772"></a><span class="lineno">  772</span>&#160;</div>
+<div class="line"><a name="l00773"></a><span class="lineno">  773</span>&#160;</div>
+<div class="line"><a name="l00774"></a><span class="lineno">  774</span>&#160;</div>
+<div class="line"><a name="l00775"></a><span class="lineno">  775</span>&#160;        <span class="comment">//cursor / caret</span></div>
+<div class="line"><a name="l00780"></a><span class="lineno">  780</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00786"></a><span class="lineno"><a class="line" href="classInteractor.html#a7f68d9df4df24a71f02b4cc906c71a56">  786</a></span>&#160;    <span class="keyword">inline</span> DocCursor* <a class="code" href="classInteractor.html#a7f68d9df4df24a71f02b4cc906c71a56">get_cursor</a>() { <span class="keywordflow">return</span> m_pCursor; }</div>
+<div class="line"><a name="l00787"></a><span class="lineno">  787</span>&#160;</div>
+<div class="line"><a name="l00816"></a><span class="lineno">  816</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ab0eb1b3b36c719575bb4309f78ae40f1">blink_caret</a>();</div>
+<div class="line"><a name="l00817"></a><span class="lineno">  817</span>&#160;<span class="comment">//    void show_caret(bool fShow=true);</span></div>
+<div class="line"><a name="l00818"></a><span class="lineno">  818</span>&#160;<span class="comment">//    void hide_caret();</span></div>
+<div class="line"><a name="l00819"></a><span class="lineno">  819</span>&#160;</div>
+<div class="line"><a name="l00844"></a><span class="lineno">  844</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="classInteractor.html#ac30c10982952f57d03a3e992e90eaca0">get_caret_timecode</a>();</div>
+<div class="line"><a name="l00845"></a><span class="lineno">  845</span>&#160;</div>
+<div class="line"><a name="l00869"></a><span class="lineno">  869</span>&#160;    DocCursorState <a class="code" href="classInteractor.html#a077b8554590f3ae5890e3d42f6d779f2">click_event_to_cursor_state</a>(SpEventMouse event);</div>
 <div class="line"><a name="l00870"></a><span class="lineno">  870</span>&#160;</div>
-<div class="line"><a name="l00872"></a><span class="lineno">  872</span>&#160;</div>
-<div class="line"><a name="l00873"></a><span class="lineno">  873</span>&#160;</div>
-<div class="line"><a name="l00874"></a><span class="lineno">  874</span>&#160;</div>
-<div class="line"><a name="l00875"></a><span class="lineno">  875</span>&#160;        <span class="comment">//dragged image associated to mouse cursor</span></div>
-<div class="line"><a name="l00882"></a><span class="lineno">  882</span>&#160;<span class="comment"></span>    <span class="keywordtype">void</span> show_drag_image(<span class="keywordtype">bool</span> value);</div>
-<div class="line"><a name="l00883"></a><span class="lineno">  883</span>&#160;    <span class="keywordtype">void</span> set_drag_image(GmoShape* pShape, <span class="keywordtype">bool</span> fGetOwnership, UPoint offset);</div>
-<div class="line"><a name="l00884"></a><span class="lineno">  884</span>&#160;    <span class="keywordtype">void</span> enable_drag_image(<span class="keywordtype">bool</span> fEnabled);</div>
-<div class="line"><a name="l00885"></a><span class="lineno">  885</span>&#160;</div>
+<div class="line"><a name="l00883"></a><span class="lineno">  883</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a81cf3a31b6c7e7bd4c6b22c20bb87f73">select_voice</a>(<span class="keywordtype">int</span> voice);</div>
+<div class="line"><a name="l00884"></a><span class="lineno">  884</span>&#160;</div>
+<div class="line"><a name="l00886"></a><span class="lineno">  886</span>&#160;</div>
 <div class="line"><a name="l00887"></a><span class="lineno">  887</span>&#160;</div>
 <div class="line"><a name="l00888"></a><span class="lineno">  888</span>&#160;</div>
-<div class="line"><a name="l00889"></a><span class="lineno">  889</span>&#160;</div>
-<div class="line"><a name="l00890"></a><span class="lineno">  890</span>&#160;        <span class="comment">//edition</span></div>
-<div class="line"><a name="l00909"></a><span class="lineno">  909</span>&#160;<span class="comment"></span>    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command</a>(DocCommand* pCmd);</div>
-<div class="line"><a name="l00910"></a><span class="lineno">  910</span>&#160;</div>
-<div class="line"><a name="l00921"></a><span class="lineno">  921</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">exec_undo</a>();</div>
-<div class="line"><a name="l00922"></a><span class="lineno">  922</span>&#160;</div>
-<div class="line"><a name="l00933"></a><span class="lineno">  933</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a6571c803f6a3626793756119821101e8">exec_redo</a>();</div>
-<div class="line"><a name="l00934"></a><span class="lineno">  934</span>&#160;</div>
-<div class="line"><a name="l00935"></a><span class="lineno">  935</span>&#160;    <span class="comment">//edition related info</span></div>
-<div class="line"><a name="l00946"></a><span class="lineno">  946</span>&#160;<span class="comment"></span>    <span class="keywordtype">bool</span> <a class="code" href="classInteractor.html#abd162053d322ad64eb94159e1437ce1e">should_enable_edit_undo</a>();</div>
-<div class="line"><a name="l00947"></a><span class="lineno">  947</span>&#160;</div>
-<div class="line"><a name="l00958"></a><span class="lineno">  958</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="classInteractor.html#a1fb104713775c65888909f3f1404faad">should_enable_edit_redo</a>();</div>
-<div class="line"><a name="l00959"></a><span class="lineno">  959</span>&#160;<span class="comment">//    void enable_edition(bool value);</span></div>
-<div class="line"><a name="l00960"></a><span class="lineno">  960</span>&#160;<span class="comment">//    inline bool is_edition_enabled() { return m_fEditionEnabled; }</span></div>
-<div class="line"><a name="l00961"></a><span class="lineno">  961</span>&#160;</div>
-<div class="line"><a name="l00963"></a><span class="lineno">  963</span>&#160;</div>
-<div class="line"><a name="l00964"></a><span class="lineno">  964</span>&#160;        <span class="comment">//event handlers for user actions. Library API</span></div>
-<div class="line"><a name="l00971"></a><span class="lineno">  971</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l00978"></a><span class="lineno">  978</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#aed88fd6863f5cfff75bb53424a70a7b0">on_document_updated</a>();</div>
-<div class="line"><a name="l00979"></a><span class="lineno">  979</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> on_mouse_move(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
-<div class="line"><a name="l00980"></a><span class="lineno">  980</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> on_mouse_button_down(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
-<div class="line"><a name="l00981"></a><span class="lineno">  981</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> on_mouse_button_up(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
-<div class="line"><a name="l00982"></a><span class="lineno">  982</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> on_mouse_enter_window(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
-<div class="line"><a name="l00983"></a><span class="lineno">  983</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> on_mouse_leave_window(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
-<div class="line"><a name="l00984"></a><span class="lineno">  984</span>&#160;    <span class="comment">//virtual void on_init();</span></div>
-<div class="line"><a name="l00985"></a><span class="lineno">  985</span>&#160;<span class="comment">//    virtual void on_resize(Pixels x, Pixels y);</span></div>
-<div class="line"><a name="l00986"></a><span class="lineno">  986</span>&#160;    <span class="comment">//virtual void on_idle();</span></div>
-<div class="line"><a name="l00987"></a><span class="lineno">  987</span>&#160;    <span class="comment">//virtual void on_key(Pixels x, Pixels y, unsigned key, unsigned flags);</span></div>
-<div class="line"><a name="l00988"></a><span class="lineno">  988</span>&#160;    <span class="comment">//virtual void on_ctrl_change();</span></div>
-<div class="line"><a name="l00989"></a><span class="lineno">  989</span>&#160;</div>
-<div class="line"><a name="l00991"></a><span class="lineno">  991</span>&#160;</div>
-<div class="line"><a name="l00992"></a><span class="lineno">  992</span>&#160;</div>
-<div class="line"><a name="l00993"></a><span class="lineno">  993</span>&#160;</div>
-<div class="line"><a name="l00994"></a><span class="lineno">  994</span>&#160;        <span class="comment">//actions requested by Task objects</span></div>
-<div class="line"><a name="l01000"></a><span class="lineno"> 1000</span>&#160;<span class="comment"></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_click_at_screen_point(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
-<div class="line"><a name="l01001"></a><span class="lineno"> 1001</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_select_objects_in_screen_rectangle(Pixels x1, Pixels y1,</div>
-<div class="line"><a name="l01002"></a><span class="lineno"> 1002</span>&#160;                                                                Pixels x2, Pixels y2,</div>
-<div class="line"><a name="l01003"></a><span class="lineno"> 1003</span>&#160;                                                                <span class="keywordtype">unsigned</span> flags);</div>
-<div class="line"><a name="l01004"></a><span class="lineno"> 1004</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_select_object_and_show_contextual_menu(Pixels x, Pixels y,</div>
-<div class="line"><a name="l01005"></a><span class="lineno"> 1005</span>&#160;                                                                    <span class="keywordtype">unsigned</span> flags);</div>
-<div class="line"><a name="l01006"></a><span class="lineno"> 1006</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_mouse_in_out(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
-<div class="line"><a name="l01007"></a><span class="lineno"> 1007</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_insert_object_at_point(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
-<div class="line"><a name="l01008"></a><span class="lineno"> 1008</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_drag_the_view(Pixels x, Pixels y);</div>
-<div class="line"><a name="l01009"></a><span class="lineno"> 1009</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_decide_on_switching_task(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
-<div class="line"><a name="l01010"></a><span class="lineno"> 1010</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_switch_to_default_task();</div>
-<div class="line"><a name="l01011"></a><span class="lineno"> 1011</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_move_drag_image(Pixels x, Pixels y);</div>
-<div class="line"><a name="l01012"></a><span class="lineno"> 1012</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_move_object(Pixels x, Pixels y);</div>
-<div class="line"><a name="l01013"></a><span class="lineno"> 1013</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_move_handler(Pixels x, Pixels y);</div>
-<div class="line"><a name="l01014"></a><span class="lineno"> 1014</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_move_handler_end_point(Pixels xFinal, Pixels yFinal,</div>
-<div class="line"><a name="l01015"></a><span class="lineno"> 1015</span>&#160;                                                    Pixels xTotalShift, Pixels yTotalShift);</div>
-<div class="line"><a name="l01016"></a><span class="lineno"> 1016</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_update_selection_rectangle(Pixels x2, Pixels y2);</div>
-<div class="line"><a name="l01017"></a><span class="lineno"> 1017</span>&#160;</div>
-<div class="line"><a name="l01018"></a><span class="lineno"> 1018</span>&#160;<span class="comment">//    virtual void task_action_single_click_at(Pixels x, Pixels y, bool fLeftButton);</span></div>
-<div class="line"><a name="l01019"></a><span class="lineno"> 1019</span>&#160;<span class="comment">//    virtual void task_action_double_click_at(Pixels x, Pixels y, bool fLeftButton);</span></div>
-<div class="line"><a name="l01020"></a><span class="lineno"> 1020</span>&#160;<span class="comment">//    virtual void task_action_start_move_drag(Pixels x, Pixels y, bool fLeftButton);</span></div>
-<div class="line"><a name="l01021"></a><span class="lineno"> 1021</span>&#160;<span class="comment">//    virtual void task_action_continue_move_drag(Pixels x, Pixels y, bool fLeftButton);</span></div>
-<div class="line"><a name="l01022"></a><span class="lineno"> 1022</span>&#160;<span class="comment">//    virtual void task_action_end_move_drag(Pixels x, Pixels y, bool fLeftButton,</span></div>
-<div class="line"><a name="l01023"></a><span class="lineno"> 1023</span>&#160;<span class="comment">//                                           Pixels xTotalShift, Pixels yTotalShift);</span></div>
+<div class="line"><a name="l00889"></a><span class="lineno">  889</span>&#160;        <span class="comment">//dragged image associated to mouse cursor</span></div>
+<div class="line"><a name="l00896"></a><span class="lineno">  896</span>&#160;<span class="comment"></span>    <span class="keywordtype">void</span> show_drag_image(<span class="keywordtype">bool</span> value);</div>
+<div class="line"><a name="l00897"></a><span class="lineno">  897</span>&#160;    <span class="keywordtype">void</span> set_drag_image(GmoShape* pShape, <span class="keywordtype">bool</span> fGetOwnership, UPoint offset);</div>
+<div class="line"><a name="l00898"></a><span class="lineno">  898</span>&#160;    <span class="keywordtype">void</span> enable_drag_image(<span class="keywordtype">bool</span> fEnabled);</div>
+<div class="line"><a name="l00899"></a><span class="lineno">  899</span>&#160;</div>
+<div class="line"><a name="l00901"></a><span class="lineno">  901</span>&#160;</div>
+<div class="line"><a name="l00902"></a><span class="lineno">  902</span>&#160;</div>
+<div class="line"><a name="l00903"></a><span class="lineno">  903</span>&#160;</div>
+<div class="line"><a name="l00904"></a><span class="lineno">  904</span>&#160;        <span class="comment">//edition</span></div>
+<div class="line"><a name="l00942"></a><span class="lineno">  942</span>&#160;<span class="comment"></span>    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command</a>(DocCommand* pCmd);</div>
+<div class="line"><a name="l00943"></a><span class="lineno">  943</span>&#160;</div>
+<div class="line"><a name="l00964"></a><span class="lineno">  964</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">exec_undo</a>();</div>
+<div class="line"><a name="l00965"></a><span class="lineno">  965</span>&#160;</div>
+<div class="line"><a name="l00976"></a><span class="lineno">  976</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a6571c803f6a3626793756119821101e8">exec_redo</a>();</div>
+<div class="line"><a name="l00977"></a><span class="lineno">  977</span>&#160;</div>
+<div class="line"><a name="l00978"></a><span class="lineno">  978</span>&#160;    <span class="comment">//edition related info</span></div>
+<div class="line"><a name="l00989"></a><span class="lineno">  989</span>&#160;<span class="comment"></span>    <span class="keywordtype">bool</span> <a class="code" href="classInteractor.html#abd162053d322ad64eb94159e1437ce1e">should_enable_edit_undo</a>();</div>
+<div class="line"><a name="l00990"></a><span class="lineno">  990</span>&#160;</div>
+<div class="line"><a name="l01001"></a><span class="lineno"> 1001</span>&#160;    <span class="keywordtype">bool</span> <a class="code" href="classInteractor.html#a1fb104713775c65888909f3f1404faad">should_enable_edit_redo</a>();</div>
+<div class="line"><a name="l01002"></a><span class="lineno"> 1002</span>&#160;<span class="comment">//    void enable_edition(bool value);</span></div>
+<div class="line"><a name="l01003"></a><span class="lineno"> 1003</span>&#160;<span class="comment">//    inline bool is_edition_enabled() { return m_fEditionEnabled; }</span></div>
+<div class="line"><a name="l01004"></a><span class="lineno"> 1004</span>&#160;</div>
+<div class="line"><a name="l01006"></a><span class="lineno"> 1006</span>&#160;</div>
+<div class="line"><a name="l01007"></a><span class="lineno"> 1007</span>&#160;        <span class="comment">//event handlers for user actions. Library API</span></div>
+<div class="line"><a name="l01012"></a><span class="lineno"> 1012</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l01023"></a><span class="lineno"> 1023</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#aed88fd6863f5cfff75bb53424a70a7b0">on_document_updated</a>();</div>
 <div class="line"><a name="l01024"></a><span class="lineno"> 1024</span>&#160;</div>
-<div class="line"><a name="l01026"></a><span class="lineno"> 1026</span>&#160;</div>
-<div class="line"><a name="l01027"></a><span class="lineno"> 1027</span>&#160;</div>
-<div class="line"><a name="l01028"></a><span class="lineno"> 1028</span>&#160;</div>
-<div class="line"><a name="l01029"></a><span class="lineno"> 1029</span>&#160;        <span class="comment">//for performance measurements</span></div>
-<div class="line"><a name="l01036"></a><span class="lineno"> 1036</span>&#160;<span class="comment"></span>    <span class="keywordtype">void</span> timing_repaint_done();</div>
-<div class="line"><a name="l01037"></a><span class="lineno"> 1037</span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">double</span>* get_elapsed_times() { <span class="keywordflow">return</span> &amp;m_elapsedTimes[0]; }</div>
+<div class="line"><a name="l01037"></a><span class="lineno"> 1037</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a7a50ff5b4d8e3f8892f9b096efe1f471">on_mouse_move</a>(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
 <div class="line"><a name="l01038"></a><span class="lineno"> 1038</span>&#160;</div>
-<div class="line"><a name="l01040"></a><span class="lineno"> 1040</span>&#160;</div>
-<div class="line"><a name="l01041"></a><span class="lineno"> 1041</span>&#160;</div>
-<div class="line"><a name="l01042"></a><span class="lineno"> 1042</span>&#160;</div>
-<div class="line"><a name="l01043"></a><span class="lineno"> 1043</span>&#160;        <span class="comment">//Debugging</span></div>
-<div class="line"><a name="l01050"></a><span class="lineno"> 1050</span>&#160;<span class="comment"></span></div>
-<div class="line"><a name="l01062"></a><span class="lineno"> 1062</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a49da5398dca0fe4f7d15c5cceac23309">set_box_to_draw</a>(<span class="keywordtype">int</span> boxType);</div>
-<div class="line"><a name="l01063"></a><span class="lineno"> 1063</span>&#160;</div>
-<div class="line"><a name="l01064"></a><span class="lineno"> 1064</span>&#160;</div>
-<div class="line"><a name="l01072"></a><span class="lineno"> 1072</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#af189f66901e4afab55d90407b12cb350">reset_boxes_to_draw</a>();</div>
-<div class="line"><a name="l01073"></a><span class="lineno"> 1073</span>&#160;</div>
-<div class="line"><a name="l01079"></a><span class="lineno"> 1079</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="classInteractor.html#a77ba1f1700deaf912f80f7b460ab508f">dump_cursor</a>();</div>
-<div class="line"><a name="l01085"></a><span class="lineno"> 1085</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="classInteractor.html#ace1d2c30aa1f16e2cd5c8c9a1b7c9659">dump_selection</a>();</div>
-<div class="line"><a name="l01086"></a><span class="lineno"> 1086</span>&#160;</div>
-<div class="line"><a name="l01088"></a><span class="lineno"> 1088</span>&#160;</div>
-<div class="line"><a name="l01089"></a><span class="lineno"> 1089</span>&#160;</div>
-<div class="line"><a name="l01090"></a><span class="lineno"> 1090</span>&#160;<span class="comment">//excluded from public API. Only for internal use.</span></div>
-<div class="line"><a name="l01091"></a><span class="lineno"> 1091</span>&#160;<span class="preprocessor">#ifdef LOMSE_INTERNAL_API</span></div>
-<div class="line"><a name="l01092"></a><span class="lineno"> 1092</span>&#160;<span class="preprocessor"></span>    <a class="code" href="classInteractor.html">Interactor</a>(LibraryScope&amp; libraryScope, WpDocument wpDoc, View* pView,</div>
-<div class="line"><a name="l01093"></a><span class="lineno"> 1093</span>&#160;               DocCommandExecuter* pExec);</div>
-<div class="line"><a name="l01094"></a><span class="lineno"> 1094</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classInteractor.html">Interactor</a>();</div>
-<div class="line"><a name="l01095"></a><span class="lineno"> 1095</span>&#160;</div>
-<div class="line"><a name="l01096"></a><span class="lineno"> 1096</span>&#160;    <span class="keyword">inline</span> SharedPtr&lt;Interactor&gt; get_shared_ptr_from_this() { <span class="keywordflow">return</span> shared_from_this(); }</div>
-<div class="line"><a name="l01097"></a><span class="lineno"> 1097</span>&#160;</div>
-<div class="line"><a name="l01098"></a><span class="lineno"> 1098</span>&#160;    <span class="comment">//mandatory override required by EventHandler</span></div>
-<div class="line"><a name="l01099"></a><span class="lineno"> 1099</span>&#160;    <span class="keywordtype">void</span> handle_event(SpEventInfo pEvent);</div>
-<div class="line"><a name="l01100"></a><span class="lineno"> 1100</span>&#160;</div>
-<div class="line"><a name="l01101"></a><span class="lineno"> 1101</span>&#160;    <span class="comment">//Deprecated ?</span></div>
-<div class="line"><a name="l01102"></a><span class="lineno"> 1102</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> highlight_voice(<span class="keywordtype">int</span> voice);</div>
+<div class="line"><a name="l01051"></a><span class="lineno"> 1051</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#aeeecb406ca9317f8febb34c5859fbf02">on_mouse_button_down</a>(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
+<div class="line"><a name="l01052"></a><span class="lineno"> 1052</span>&#160;</div>
+<div class="line"><a name="l01065"></a><span class="lineno"> 1065</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#adc49c6e8ed61a099d26fb807fa0799b8">on_mouse_button_up</a>(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
+<div class="line"><a name="l01066"></a><span class="lineno"> 1066</span>&#160;</div>
+<div class="line"><a name="l01079"></a><span class="lineno"> 1079</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a730f04bba76db217ff36512f63600470">on_mouse_enter_window</a>(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
+<div class="line"><a name="l01080"></a><span class="lineno"> 1080</span>&#160;</div>
+<div class="line"><a name="l01093"></a><span class="lineno"> 1093</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#afbfb111029c260532f849362bf3b15f9">on_mouse_leave_window</a>(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
+<div class="line"><a name="l01094"></a><span class="lineno"> 1094</span>&#160;    <span class="comment">//virtual void on_init();</span></div>
+<div class="line"><a name="l01095"></a><span class="lineno"> 1095</span>&#160;<span class="comment">//    virtual void on_resize(Pixels x, Pixels y);</span></div>
+<div class="line"><a name="l01096"></a><span class="lineno"> 1096</span>&#160;    <span class="comment">//virtual void on_idle();</span></div>
+<div class="line"><a name="l01097"></a><span class="lineno"> 1097</span>&#160;    <span class="comment">//virtual void on_key(Pixels x, Pixels y, unsigned key, unsigned flags);</span></div>
+<div class="line"><a name="l01098"></a><span class="lineno"> 1098</span>&#160;    <span class="comment">//virtual void on_ctrl_change();</span></div>
+<div class="line"><a name="l01099"></a><span class="lineno"> 1099</span>&#160;</div>
+<div class="line"><a name="l01101"></a><span class="lineno"> 1101</span>&#160;</div>
+<div class="line"><a name="l01102"></a><span class="lineno"> 1102</span>&#160;</div>
 <div class="line"><a name="l01103"></a><span class="lineno"> 1103</span>&#160;</div>
-<div class="line"><a name="l01104"></a><span class="lineno"> 1104</span>&#160;    <span class="comment">//mandatory overrides from Observable</span></div>
-<div class="line"><a name="l01105"></a><span class="lineno"> 1105</span>&#160;    EventNotifier* get_event_notifier() { <span class="keywordflow">return</span> <span class="keyword">this</span>; }</div>
-<div class="line"><a name="l01106"></a><span class="lineno"> 1106</span>&#160;</div>
-<div class="line"><a name="l01107"></a><span class="lineno"> 1107</span>&#160;    <span class="comment">//for performance measurements</span></div>
-<div class="line"><a name="l01108"></a><span class="lineno"> 1108</span>&#160;    <span class="keywordtype">void</span> timing_start_measurements();</div>
-<div class="line"><a name="l01109"></a><span class="lineno"> 1109</span>&#160;    <span class="keywordtype">void</span> timing_graphic_model_build_end();</div>
-<div class="line"><a name="l01110"></a><span class="lineno"> 1110</span>&#160;    <span class="keywordtype">void</span> timing_graphic_model_render_end();</div>
-<div class="line"><a name="l01111"></a><span class="lineno"> 1111</span>&#160;    <span class="keywordtype">void</span> timing_visual_effects_start();</div>
-<div class="line"><a name="l01112"></a><span class="lineno"> 1112</span>&#160;    <span class="keywordtype">void</span> timing_renderization_end();</div>
-<div class="line"><a name="l01113"></a><span class="lineno"> 1113</span>&#160;</div>
-<div class="line"><a name="l01114"></a><span class="lineno"> 1114</span>&#160;    <span class="comment">//interface to SelectionSet</span></div>
-<div class="line"><a name="l01115"></a><span class="lineno"> 1115</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> select_object(GmoObj* pGmo, <span class="keywordtype">bool</span> fClearSelection=<span class="keyword">true</span>);</div>
-<div class="line"><a name="l01116"></a><span class="lineno"> 1116</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> select_object(ImoId <span class="keywordtype">id</span>, <span class="keywordtype">bool</span> fClearSelection=<span class="keyword">true</span>);</div>
-<div class="line"><a name="l01117"></a><span class="lineno"> 1117</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> is_in_selection(GmoObj* pGmo);</div>
-<div class="line"><a name="l01118"></a><span class="lineno"> 1118</span>&#160;</div>
-<div class="line"><a name="l01119"></a><span class="lineno"> 1119</span>&#160;</div>
-<div class="line"><a name="l01120"></a><span class="lineno"> 1120</span>&#160;<span class="preprocessor">#endif  //excluded from public API</span></div>
-<div class="line"><a name="l01121"></a><span class="lineno"> 1121</span>&#160;<span class="preprocessor"></span>};</div>
-<div class="line"><a name="l01122"></a><span class="lineno"> 1122</span>&#160;</div>
+<div class="line"><a name="l01104"></a><span class="lineno"> 1104</span>&#160;        <span class="comment">//for performance measurements</span></div>
+<div class="line"><a name="l01116"></a><span class="lineno"> 1116</span>&#160;<span class="comment"></span>    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a8fa25043ac4be5ed9b5ebfb1368599de">timing_repaint_done</a>();</div>
+<div class="line"><a name="l01162"></a><span class="lineno"><a class="line" href="classInteractor.html#ab87619c91a3ff8cb323815c2b3c088a2"> 1162</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">double</span>* <a class="code" href="classInteractor.html#ab87619c91a3ff8cb323815c2b3c088a2">get_elapsed_times</a>() { <span class="keywordflow">return</span> &amp;m_elapsedTimes[0]; }</div>
+<div class="line"><a name="l01163"></a><span class="lineno"> 1163</span>&#160;</div>
+<div class="line"><a name="l01165"></a><span class="lineno"> 1165</span>&#160;</div>
+<div class="line"><a name="l01166"></a><span class="lineno"> 1166</span>&#160;</div>
+<div class="line"><a name="l01167"></a><span class="lineno"> 1167</span>&#160;</div>
+<div class="line"><a name="l01168"></a><span class="lineno"> 1168</span>&#160;        <span class="comment">//Debugging</span></div>
+<div class="line"><a name="l01175"></a><span class="lineno"> 1175</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l01187"></a><span class="lineno"> 1187</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a49da5398dca0fe4f7d15c5cceac23309">set_box_to_draw</a>(<span class="keywordtype">int</span> boxType);</div>
+<div class="line"><a name="l01188"></a><span class="lineno"> 1188</span>&#160;</div>
+<div class="line"><a name="l01189"></a><span class="lineno"> 1189</span>&#160;</div>
+<div class="line"><a name="l01197"></a><span class="lineno"> 1197</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#af189f66901e4afab55d90407b12cb350">reset_boxes_to_draw</a>();</div>
+<div class="line"><a name="l01198"></a><span class="lineno"> 1198</span>&#160;</div>
+<div class="line"><a name="l01204"></a><span class="lineno"> 1204</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="classInteractor.html#a77ba1f1700deaf912f80f7b460ab508f">dump_cursor</a>();</div>
+<div class="line"><a name="l01210"></a><span class="lineno"> 1210</span>&#160;    <span class="keywordtype">string</span> <a class="code" href="classInteractor.html#ace1d2c30aa1f16e2cd5c8c9a1b7c9659">dump_selection</a>();</div>
+<div class="line"><a name="l01211"></a><span class="lineno"> 1211</span>&#160;</div>
+<div class="line"><a name="l01213"></a><span class="lineno"> 1213</span>&#160;</div>
+<div class="line"><a name="l01214"></a><span class="lineno"> 1214</span>&#160;</div>
+<div class="line"><a name="l01215"></a><span class="lineno"> 1215</span>&#160;<span class="comment">//excluded from public API. Only for internal use.</span></div>
+<div class="line"><a name="l01216"></a><span class="lineno"> 1216</span>&#160;<span class="preprocessor">#ifdef LOMSE_INTERNAL_API</span></div>
+<div class="line"><a name="l01217"></a><span class="lineno"> 1217</span>&#160;<span class="preprocessor"></span>    <a class="code" href="classInteractor.html">Interactor</a>(LibraryScope&amp; libraryScope, WpDocument wpDoc, View* pView,</div>
+<div class="line"><a name="l01218"></a><span class="lineno"> 1218</span>&#160;               DocCommandExecuter* pExec);</div>
+<div class="line"><a name="l01219"></a><span class="lineno"> 1219</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classInteractor.html">Interactor</a>();</div>
+<div class="line"><a name="l01220"></a><span class="lineno"> 1220</span>&#160;</div>
+<div class="line"><a name="l01221"></a><span class="lineno"> 1221</span>&#160;    <span class="keyword">inline</span> SharedPtr&lt;Interactor&gt; get_shared_ptr_from_this() { <span class="keywordflow">return</span> shared_from_this(); }</div>
+<div class="line"><a name="l01222"></a><span class="lineno"> 1222</span>&#160;</div>
+<div class="line"><a name="l01223"></a><span class="lineno"> 1223</span>&#160;    <span class="comment">//mandatory override required by EventHandler</span></div>
+<div class="line"><a name="l01224"></a><span class="lineno"> 1224</span>&#160;    <span class="keywordtype">void</span> handle_event(SpEventInfo pEvent);</div>
+<div class="line"><a name="l01225"></a><span class="lineno"> 1225</span>&#160;</div>
+<div class="line"><a name="l01226"></a><span class="lineno"> 1226</span>&#160;    <span class="comment">//Deprecated ?</span></div>
+<div class="line"><a name="l01227"></a><span class="lineno"> 1227</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> highlight_voice(<span class="keywordtype">int</span> voice);</div>
+<div class="line"><a name="l01228"></a><span class="lineno"> 1228</span>&#160;</div>
+<div class="line"><a name="l01229"></a><span class="lineno"> 1229</span>&#160;    <span class="comment">//mandatory overrides from Observable</span></div>
+<div class="line"><a name="l01230"></a><span class="lineno"> 1230</span>&#160;    EventNotifier* get_event_notifier() { <span class="keywordflow">return</span> <span class="keyword">this</span>; }</div>
+<div class="line"><a name="l01231"></a><span class="lineno"> 1231</span>&#160;</div>
+<div class="line"><a name="l01232"></a><span class="lineno"> 1232</span>&#160;    <span class="comment">//for performance measurements</span></div>
+<div class="line"><a name="l01233"></a><span class="lineno"> 1233</span>&#160;    <span class="keywordtype">void</span> timing_start_measurements();</div>
+<div class="line"><a name="l01234"></a><span class="lineno"> 1234</span>&#160;    <span class="keywordtype">void</span> timing_graphic_model_build_end();</div>
+<div class="line"><a name="l01235"></a><span class="lineno"> 1235</span>&#160;    <span class="keywordtype">void</span> timing_graphic_model_render_end();</div>
+<div class="line"><a name="l01236"></a><span class="lineno"> 1236</span>&#160;    <span class="keywordtype">void</span> timing_visual_effects_start();</div>
+<div class="line"><a name="l01237"></a><span class="lineno"> 1237</span>&#160;    <span class="keywordtype">void</span> timing_renderization_end();</div>
+<div class="line"><a name="l01238"></a><span class="lineno"> 1238</span>&#160;</div>
+<div class="line"><a name="l01239"></a><span class="lineno"> 1239</span>&#160;    <span class="comment">//interface to SelectionSet</span></div>
+<div class="line"><a name="l01240"></a><span class="lineno"> 1240</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> select_object(GmoObj* pGmo, <span class="keywordtype">bool</span> fClearSelection=<span class="keyword">true</span>);</div>
+<div class="line"><a name="l01241"></a><span class="lineno"> 1241</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> select_object(ImoId <span class="keywordtype">id</span>, <span class="keywordtype">bool</span> fClearSelection=<span class="keyword">true</span>);</div>
+<div class="line"><a name="l01242"></a><span class="lineno"> 1242</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> is_in_selection(GmoObj* pGmo);</div>
+<div class="line"><a name="l01243"></a><span class="lineno"> 1243</span>&#160;</div>
+<div class="line"><a name="l01244"></a><span class="lineno"> 1244</span>&#160;    <span class="comment">//actions requested by Task objects</span></div>
+<div class="line"><a name="l01245"></a><span class="lineno"> 1245</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_click_at_screen_point(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
+<div class="line"><a name="l01246"></a><span class="lineno"> 1246</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_select_objects_in_screen_rectangle(Pixels x1, Pixels y1,</div>
+<div class="line"><a name="l01247"></a><span class="lineno"> 1247</span>&#160;                                                                Pixels x2, Pixels y2,</div>
+<div class="line"><a name="l01248"></a><span class="lineno"> 1248</span>&#160;                                                                <span class="keywordtype">unsigned</span> flags);</div>
+<div class="line"><a name="l01249"></a><span class="lineno"> 1249</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_select_object_and_show_contextual_menu(Pixels x, Pixels y,</div>
+<div class="line"><a name="l01250"></a><span class="lineno"> 1250</span>&#160;                                                                    <span class="keywordtype">unsigned</span> flags);</div>
+<div class="line"><a name="l01251"></a><span class="lineno"> 1251</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_mouse_in_out(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
+<div class="line"><a name="l01252"></a><span class="lineno"> 1252</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_insert_object_at_point(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
+<div class="line"><a name="l01253"></a><span class="lineno"> 1253</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_drag_the_view(Pixels x, Pixels y);</div>
+<div class="line"><a name="l01254"></a><span class="lineno"> 1254</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_decide_on_switching_task(Pixels x, Pixels y, <span class="keywordtype">unsigned</span> flags);</div>
+<div class="line"><a name="l01255"></a><span class="lineno"> 1255</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_switch_to_default_task();</div>
+<div class="line"><a name="l01256"></a><span class="lineno"> 1256</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_move_drag_image(Pixels x, Pixels y);</div>
+<div class="line"><a name="l01257"></a><span class="lineno"> 1257</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_move_object(Pixels x, Pixels y);</div>
+<div class="line"><a name="l01258"></a><span class="lineno"> 1258</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_move_handler(Pixels x, Pixels y);</div>
+<div class="line"><a name="l01259"></a><span class="lineno"> 1259</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_move_handler_end_point(Pixels xFinal, Pixels yFinal,</div>
+<div class="line"><a name="l01260"></a><span class="lineno"> 1260</span>&#160;                                                    Pixels xTotalShift, Pixels yTotalShift);</div>
+<div class="line"><a name="l01261"></a><span class="lineno"> 1261</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> task_action_update_selection_rectangle(Pixels x2, Pixels y2);</div>
+<div class="line"><a name="l01262"></a><span class="lineno"> 1262</span>&#160;</div>
+<div class="line"><a name="l01263"></a><span class="lineno"> 1263</span>&#160;<span class="comment">//    virtual void task_action_single_click_at(Pixels x, Pixels y, bool fLeftButton);</span></div>
+<div class="line"><a name="l01264"></a><span class="lineno"> 1264</span>&#160;<span class="comment">//    virtual void task_action_double_click_at(Pixels x, Pixels y, bool fLeftButton);</span></div>
+<div class="line"><a name="l01265"></a><span class="lineno"> 1265</span>&#160;<span class="comment">//    virtual void task_action_start_move_drag(Pixels x, Pixels y, bool fLeftButton);</span></div>
+<div class="line"><a name="l01266"></a><span class="lineno"> 1266</span>&#160;<span class="comment">//    virtual void task_action_continue_move_drag(Pixels x, Pixels y, bool fLeftButton);</span></div>
+<div class="line"><a name="l01267"></a><span class="lineno"> 1267</span>&#160;<span class="comment">//    virtual void task_action_end_move_drag(Pixels x, Pixels y, bool fLeftButton,</span></div>
+<div class="line"><a name="l01268"></a><span class="lineno"> 1268</span>&#160;<span class="comment">//                                           Pixels xTotalShift, Pixels yTotalShift);</span></div>
+<div class="line"><a name="l01269"></a><span class="lineno"> 1269</span>&#160;</div>
+<div class="line"><a name="l01270"></a><span class="lineno"> 1270</span>&#160;</div>
+<div class="line"><a name="l01271"></a><span class="lineno"> 1271</span>&#160;<span class="preprocessor">#endif  //excluded from public API</span></div>
+<div class="line"><a name="l01272"></a><span class="lineno"> 1272</span>&#160;<span class="preprocessor"></span>};</div>
+<div class="line"><a name="l01273"></a><span class="lineno"> 1273</span>&#160;</div>
 <div class="ttc" id="classInteractor_html_a6571c803f6a3626793756119821101e8"><div class="ttname"><a href="classInteractor.html#a6571c803f6a3626793756119821101e8">Interactor::exec_redo</a></div><div class="ttdeci">void exec_redo()</div></div>
+<div class="ttc" id="group__enumerations_html_gga6f553cc68bf4f84707dce1f1145d2107a61c5b8b06ae88e059d24936e8cf20dd9"><div class="ttname"><a href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a61c5b8b06ae88e059d24936e8cf20dd9">k_mouse_right</a></div><div class="ttdoc">0x02. Mouse right button pressed or released </div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:26</div></div>
 <div class="ttc" id="classInteractor_html_a45f7fb6d5f2a8b0b6d4b5e670c96e06d"><div class="ttname"><a href="classInteractor.html#a45f7fb6d5f2a8b0b6d4b5e670c96e06d">Interactor::print_page</a></div><div class="ttdeci">virtual void print_page(int page, VPoint viewport=VPoint(0, 0))</div></div>
 <div class="ttc" id="classInteractor_html_acb5d21578acde66c5da165f1fa808fb6"><div class="ttname"><a href="classInteractor.html#acb5d21578acde66c5da165f1fa808fb6">Interactor::set_operating_mode</a></div><div class="ttdeci">void set_operating_mode(int mode)</div></div>
 <div class="ttc" id="classInteractor_html_a2494425c26d19946921e4b4e97f189f3"><div class="ttname"><a href="classInteractor.html#a2494425c26d19946921e4b4e97f189f3">Interactor::set_rendering_buffer</a></div><div class="ttdeci">virtual void set_rendering_buffer(RenderingBuffer *rbuf)</div></div>
-<div class="ttc" id="classInteractor_html_aaf1d978d7d7e4ef3e6e6b6495cf9d2d0"><div class="ttname"><a href="classInteractor.html#aaf1d978d7d7e4ef3e6e6b6495cf9d2d0">Interactor::get_selection_set</a></div><div class="ttdeci">SelectionSet * get_selection_set()</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:199</div></div>
-<div class="ttc" id="classInteractor_html"><div class="ttname"><a href="classInteractor.html">Interactor</a></div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:47</div></div>
+<div class="ttc" id="classInteractor_html_aaf1d978d7d7e4ef3e6e6b6495cf9d2d0"><div class="ttname"><a href="classInteractor.html#aaf1d978d7d7e4ef3e6e6b6495cf9d2d0">Interactor::get_selection_set</a></div><div class="ttdeci">SelectionSet * get_selection_set()</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:234</div></div>
+<div class="ttc" id="classInteractor_html"><div class="ttname"><a href="classInteractor.html">Interactor</a></div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:62</div></div>
 <div class="ttc" id="classInteractor_html_a81cf3a31b6c7e7bd4c6b22c20bb87f73"><div class="ttname"><a href="classInteractor.html#a81cf3a31b6c7e7bd4c6b22c20bb87f73">Interactor::select_voice</a></div><div class="ttdeci">void select_voice(int voice)</div></div>
 <div class="ttc" id="classInteractor_html_a75600fd031826c9ae48ca4ada8b7ddce"><div class="ttname"><a href="classInteractor.html#a75600fd031826c9ae48ca4ada8b7ddce">Interactor::page_at_screen_point</a></div><div class="ttdeci">virtual int page_at_screen_point(double x, double y)</div></div>
 <div class="ttc" id="classInteractor_html_ac0f2b87ac27d4d4a4692dc9ce5b42291"><div class="ttname"><a href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">Interactor::exec_command</a></div><div class="ttdeci">void exec_command(DocCommand *pCmd)</div></div>
 <div class="ttc" id="classInteractor_html_ac30c10982952f57d03a3e992e90eaca0"><div class="ttname"><a href="classInteractor.html#ac30c10982952f57d03a3e992e90eaca0">Interactor::get_caret_timecode</a></div><div class="ttdeci">string get_caret_timecode()</div></div>
 <div class="ttc" id="classInteractor_html_abd162053d322ad64eb94159e1437ce1e"><div class="ttname"><a href="classInteractor.html#abd162053d322ad64eb94159e1437ce1e">Interactor::should_enable_edit_undo</a></div><div class="ttdeci">bool should_enable_edit_undo()</div></div>
-<div class="ttc" id="classInteractor_html_ad8858370241ddad5b8a36300b22f5665"><div class="ttname"><a href="classInteractor.html#ad8858370241ddad5b8a36300b22f5665">Interactor::ETimingTarget</a></div><div class="ttdeci">ETimingTarget</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:77</div></div>
+<div class="ttc" id="group__enumerations_html_ga6f553cc68bf4f84707dce1f1145d2107"><div class="ttname"><a href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">EEventFlag</a></div><div class="ttdeci">EEventFlag</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:23</div></div>
+<div class="ttc" id="classInteractor_html_a7a50ff5b4d8e3f8892f9b096efe1f471"><div class="ttname"><a href="classInteractor.html#a7a50ff5b4d8e3f8892f9b096efe1f471">Interactor::on_mouse_move</a></div><div class="ttdeci">virtual void on_mouse_move(Pixels x, Pixels y, unsigned flags)</div></div>
+<div class="ttc" id="classInteractor_html_ad8858370241ddad5b8a36300b22f5665"><div class="ttname"><a href="classInteractor.html#ad8858370241ddad5b8a36300b22f5665">Interactor::ETimingTarget</a></div><div class="ttdeci">ETimingTarget</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:92</div></div>
 <div class="ttc" id="classInteractor_html_a6fc96dec0a3767152cd953d2ec68ec96"><div class="ttname"><a href="classInteractor.html#a6fc96dec0a3767152cd953d2ec68ec96">Interactor::zoom_out</a></div><div class="ttdeci">virtual void zoom_out(Pixels x=0, Pixels y=0, bool fForceRedraw=true)</div></div>
 <div class="ttc" id="classInteractor_html_add8da1fe0fd8adddf1b30bcebf608636"><div class="ttname"><a href="classInteractor.html#add8da1fe0fd8adddf1b30bcebf608636">Interactor::view_needs_repaint</a></div><div class="ttdeci">bool view_needs_repaint()</div></div>
 <div class="ttc" id="classInteractor_html_a5e7dbf2be635475f40ba9b723a902d37"><div class="ttname"><a href="classInteractor.html#a5e7dbf2be635475f40ba9b723a902d37">Interactor::set_scale</a></div><div class="ttdeci">virtual void set_scale(double scale, Pixels x=0, Pixels y=0, bool fForceRedraw=true)</div></div>
+<div class="ttc" id="classInteractor_html_adc49c6e8ed61a099d26fb807fa0799b8"><div class="ttname"><a href="classInteractor.html#adc49c6e8ed61a099d26fb807fa0799b8">Interactor::on_mouse_button_up</a></div><div class="ttdeci">virtual void on_mouse_button_up(Pixels x, Pixels y, unsigned flags)</div></div>
 <div class="ttc" id="classInteractor_html_a986167b680f97ad5914c69343a7d15c5"><div class="ttname"><a href="classInteractor.html#a986167b680f97ad5914c69343a7d15c5">Interactor::screen_point_to_model_point</a></div><div class="ttdeci">virtual UPoint screen_point_to_model_point(Pixels x, Pixels y)</div></div>
 <div class="ttc" id="classInteractor_html_ac83345221209221be48169f01a4cd253"><div class="ttname"><a href="classInteractor.html#ac83345221209221be48169f01a4cd253">Interactor::zoom_fit_full</a></div><div class="ttdeci">virtual void zoom_fit_full(Pixels width, Pixels height, bool fForceRedraw=true)</div></div>
 <div class="ttc" id="classInteractor_html_ab0eb1b3b36c719575bb4309f78ae40f1"><div class="ttname"><a href="classInteractor.html#ab0eb1b3b36c719575bb4309f78ae40f1">Interactor::blink_caret</a></div><div class="ttdeci">void blink_caret()</div></div>
-<div class="ttc" id="classInteractor_html_a5d45c58e82e2de3c3bb31e414984923b"><div class="ttname"><a href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">Interactor::enable_forced_view_updates</a></div><div class="ttdeci">void enable_forced_view_updates(bool value)</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:265</div></div>
+<div class="ttc" id="classInteractor_html_a5d45c58e82e2de3c3bb31e414984923b"><div class="ttname"><a href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">Interactor::enable_forced_view_updates</a></div><div class="ttdeci">void enable_forced_view_updates(bool value)</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:300</div></div>
 <div class="ttc" id="classInteractor_html_a77ba1f1700deaf912f80f7b460ab508f"><div class="ttname"><a href="classInteractor.html#a77ba1f1700deaf912f80f7b460ab508f">Interactor::dump_cursor</a></div><div class="ttdeci">string dump_cursor()</div></div>
 <div class="ttc" id="classInteractor_html_a331181fe34d2f9399578bbe4be3f5f65"><div class="ttname"><a href="classInteractor.html#a331181fe34d2f9399578bbe4be3f5f65">Interactor::get_view_size</a></div><div class="ttdeci">virtual void get_view_size(Pixels *xWidth, Pixels *yHeight)</div></div>
+<div class="ttc" id="classInteractor_html_afbfb111029c260532f849362bf3b15f9"><div class="ttname"><a href="classInteractor.html#afbfb111029c260532f849362bf3b15f9">Interactor::on_mouse_leave_window</a></div><div class="ttdeci">virtual void on_mouse_leave_window(Pixels x, Pixels y, unsigned flags)</div></div>
+<div class="ttc" id="classInteractor_html_a8fa25043ac4be5ed9b5ebfb1368599de"><div class="ttname"><a href="classInteractor.html#a8fa25043ac4be5ed9b5ebfb1368599de">Interactor::timing_repaint_done</a></div><div class="ttdeci">void timing_repaint_done()</div></div>
 <div class="ttc" id="classInteractor_html_aed88fd6863f5cfff75bb53424a70a7b0"><div class="ttname"><a href="classInteractor.html#aed88fd6863f5cfff75bb53424a70a7b0">Interactor::on_document_updated</a></div><div class="ttdeci">virtual void on_document_updated()</div></div>
 <div class="ttc" id="classInteractor_html_ad4bb24b0a1deda5216e35ee111328fba"><div class="ttname"><a href="classInteractor.html#ad4bb24b0a1deda5216e35ee111328fba">Interactor::enable_edition_restricted_to</a></div><div class="ttdeci">void enable_edition_restricted_to(ImoId id)</div></div>
 <div class="ttc" id="classInteractor_html_a4ec8ec1d6b84a74d656f2773c741e222"><div class="ttname"><a href="classInteractor.html#a4ec8ec1d6b84a74d656f2773c741e222">Interactor::zoom_in</a></div><div class="ttdeci">virtual void zoom_in(Pixels x=0, Pixels y=0, bool fForceRedraw=true)</div></div>
 <div class="ttc" id="classInteractor_html_af7c4afa0e8fd9136b5d1f2a52666c44f"><div class="ttname"><a href="classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f">Interactor::switch_task</a></div><div class="ttdeci">void switch_task(int taskType)</div></div>
-<div class="ttc" id="classInteractor_html_aaac9826efeddfba9c2ed3f8d1db0f96a"><div class="ttname"><a href="classInteractor.html#aaac9826efeddfba9c2ed3f8d1db0f96a">Interactor::get_view</a></div><div class="ttdeci">View * get_view()</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:192</div></div>
+<div class="ttc" id="classInteractor_html_aaac9826efeddfba9c2ed3f8d1db0f96a"><div class="ttname"><a href="classInteractor.html#aaac9826efeddfba9c2ed3f8d1db0f96a">Interactor::get_view</a></div><div class="ttdeci">View * get_view()</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:226</div></div>
+<div class="ttc" id="group__enumerations_html_gga6f553cc68bf4f84707dce1f1145d2107a94c322b82de5f9421f9be07ee6d0293f"><div class="ttname"><a href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a94c322b82de5f9421f9be07ee6d0293f">k_kbd_alt</a></div><div class="ttdoc">0x20. Keyboard Alt key pressed while mouse event </div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:30</div></div>
+<div class="ttc" id="group__enumerations_html_gga6f553cc68bf4f84707dce1f1145d2107a83b0895bb73b36f537c11777efbcd269"><div class="ttname"><a href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a83b0895bb73b36f537c11777efbcd269">k_kbd_shift</a></div><div class="ttdoc">0x08. Keyboard Shift key pressed while mouse event </div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:28</div></div>
+<div class="ttc" id="classInteractor_html_aeeecb406ca9317f8febb34c5859fbf02"><div class="ttname"><a href="classInteractor.html#aeeecb406ca9317f8febb34c5859fbf02">Interactor::on_mouse_button_down</a></div><div class="ttdeci">virtual void on_mouse_button_down(Pixels x, Pixels y, unsigned flags)</div></div>
 <div class="ttc" id="classInteractor_html_a81455e8a584d8dff982c3f43e92e7f34"><div class="ttname"><a href="classInteractor.html#a81455e8a584d8dff982c3f43e92e7f34">Interactor::set_viewport_at_page_center</a></div><div class="ttdeci">virtual void set_viewport_at_page_center(Pixels screenWidth)</div></div>
 <div class="ttc" id="classInteractor_html_af189f66901e4afab55d90407b12cb350"><div class="ttname"><a href="classInteractor.html#af189f66901e4afab55d90407b12cb350">Interactor::reset_boxes_to_draw</a></div><div class="ttdeci">virtual void reset_boxes_to_draw()</div></div>
+<div class="ttc" id="classInteractor_html_ab87619c91a3ff8cb323815c2b3c088a2"><div class="ttname"><a href="classInteractor.html#ab87619c91a3ff8cb323815c2b3c088a2">Interactor::get_elapsed_times</a></div><div class="ttdeci">double * get_elapsed_times()</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:1162</div></div>
 <div class="ttc" id="classInteractor_html_ae27a39c9cdbce876919dcd2a2205492e"><div class="ttname"><a href="classInteractor.html#ae27a39c9cdbce876919dcd2a2205492e">Interactor::model_point_to_screen</a></div><div class="ttdeci">virtual void model_point_to_screen(double *x, double *y, int iPage)</div></div>
 <div class="ttc" id="classInteractor_html_a4030a9cf2342d198a5890c30cecec4b7"><div class="ttname"><a href="classInteractor.html#a4030a9cf2342d198a5890c30cecec4b7">Interactor::get_num_pages</a></div><div class="ttdeci">virtual int get_num_pages()</div></div>
 <div class="ttc" id="classInteractor_html_a1fb104713775c65888909f3f1404faad"><div class="ttname"><a href="classInteractor.html#a1fb104713775c65888909f3f1404faad">Interactor::should_enable_edit_redo</a></div><div class="ttdeci">bool should_enable_edit_redo()</div></div>
 <div class="ttc" id="classInteractor_html_ace1d2c30aa1f16e2cd5c8c9a1b7c9659"><div class="ttname"><a href="classInteractor.html#ace1d2c30aa1f16e2cd5c8c9a1b7c9659">Interactor::dump_selection</a></div><div class="ttdeci">string dump_selection()</div></div>
 <div class="ttc" id="classInteractor_html_a827410e940b1c1d7bcc42414d73a33aa"><div class="ttname"><a href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">Interactor::exec_undo</a></div><div class="ttdeci">void exec_undo()</div></div>
+<div class="ttc" id="group__enumerations_html_gga6f553cc68bf4f84707dce1f1145d2107abe591d30a7cff0359685ffb8e135b70b"><div class="ttname"><a href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107abe591d30a7cff0359685ffb8e135b70b">k_mouse_left</a></div><div class="ttdoc">0x01. Mouse left button pressed or released </div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:25</div></div>
 <div class="ttc" id="classInteractor_html_a3108aa6a66e6db48008e8863f4604232"><div class="ttname"><a href="classInteractor.html#a3108aa6a66e6db48008e8863f4604232">Interactor::send_end_of_play_event</a></div><div class="ttdeci">virtual void send_end_of_play_event(ImoScore *pScore, PlayerGui *pPlayCtrl)</div></div>
 <div class="ttc" id="classInteractor_html_ad79a50661807b829755219e4bdf21121"><div class="ttname"><a href="classInteractor.html#ad79a50661807b829755219e4bdf21121">Interactor::get_scale</a></div><div class="ttdeci">virtual double get_scale()</div></div>
 <div class="ttc" id="classInteractor_html_a06e3f55dc1042e165adc50493d0f90b4"><div class="ttname"><a href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">Interactor::redraw_bitmap</a></div><div class="ttdeci">virtual void redraw_bitmap()</div></div>
-<div class="ttc" id="classInteractor_html_a7f68d9df4df24a71f02b4cc906c71a56"><div class="ttname"><a href="classInteractor.html#a7f68d9df4df24a71f02b4cc906c71a56">Interactor::get_cursor</a></div><div class="ttdeci">DocCursor * get_cursor()</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:751</div></div>
+<div class="ttc" id="classInteractor_html_a7f68d9df4df24a71f02b4cc906c71a56"><div class="ttname"><a href="classInteractor.html#a7f68d9df4df24a71f02b4cc906c71a56">Interactor::get_cursor</a></div><div class="ttdeci">DocCursor * get_cursor()</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:786</div></div>
 <div class="ttc" id="classInteractor_html_ab5192c9307818200f5b08e93892c61ed"><div class="ttname"><a href="classInteractor.html#ab5192c9307818200f5b08e93892c61ed">Interactor::get_graphic_model</a></div><div class="ttdeci">GraphicModel * get_graphic_model()</div></div>
 <div class="ttc" id="classInteractor_html_a49da5398dca0fe4f7d15c5cceac23309"><div class="ttname"><a href="classInteractor.html#a49da5398dca0fe4f7d15c5cceac23309">Interactor::set_box_to_draw</a></div><div class="ttdeci">virtual void set_box_to_draw(int boxType)</div></div>
 <div class="ttc" id="classInteractor_html_a8d486a75231279d13370cb9744f8cf11"><div class="ttname"><a href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">Interactor::zoom_fit_width</a></div><div class="ttdeci">virtual void zoom_fit_width(Pixels width, bool fForceRedraw=true)</div></div>
 <div class="ttc" id="classInteractor_html_a3e96befa4410ffe879ed55fc09d6c62b"><div class="ttname"><a href="classInteractor.html#a3e96befa4410ffe879ed55fc09d6c62b">Interactor::is_document_editable</a></div><div class="ttdeci">bool is_document_editable()</div></div>
+<div class="ttc" id="group__enumerations_html_gga6f553cc68bf4f84707dce1f1145d2107a1c9b6811f8bbd4483d0effc68a26653f"><div class="ttname"><a href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a1c9b6811f8bbd4483d0effc68a26653f">k_kbd_ctrl</a></div><div class="ttdoc">0x10. Keyboard Ctrol key pressed while mouse event </div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:29</div></div>
 <div class="ttc" id="classInteractor_html_a077b8554590f3ae5890e3d42f6d779f2"><div class="ttname"><a href="classInteractor.html#a077b8554590f3ae5890e3d42f6d779f2">Interactor::click_event_to_cursor_state</a></div><div class="ttdeci">DocCursorState click_event_to_cursor_state(SpEventMouse event)</div></div>
 <div class="ttc" id="classInteractor_html_a3dcd4218ab368cfba17ca1ef6974c012"><div class="ttname"><a href="classInteractor.html#a3dcd4218ab368cfba17ca1ef6974c012">Interactor::get_pitch_at</a></div><div class="ttdeci">DiatonicPitch get_pitch_at(Pixels x, Pixels y)</div></div>
-<div class="ttc" id="classInteractor_html_a0b25e85a6074cc637ea6bd2a30e5bead"><div class="ttname"><a href="classInteractor.html#a0b25e85a6074cc637ea6bd2a30e5bead">Interactor::get_operating_mode</a></div><div class="ttdeci">int get_operating_mode()</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:127</div></div>
+<div class="ttc" id="classInteractor_html_a0b25e85a6074cc637ea6bd2a30e5bead"><div class="ttname"><a href="classInteractor.html#a0b25e85a6074cc637ea6bd2a30e5bead">Interactor::get_operating_mode</a></div><div class="ttdeci">int get_operating_mode()</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:156</div></div>
 <div class="ttc" id="classInteractor_html_ab5402ba5556ee21c50bfab7a097cc5eb"><div class="ttname"><a href="classInteractor.html#ab5402ba5556ee21c50bfab7a097cc5eb">Interactor::set_print_buffer</a></div><div class="ttdeci">virtual void set_print_buffer(RenderingBuffer *rbuf)</div></div>
 <div class="ttc" id="classInteractor_html_a0eb3195aed54028cc3f250c38029e8f8"><div class="ttname"><a href="classInteractor.html#a0eb3195aed54028cc3f250c38029e8f8">Interactor::new_viewport</a></div><div class="ttdeci">virtual void new_viewport(Pixels x, Pixels y, bool fForceRedraw=true)</div></div>
-<div class="ttc" id="classInteractor_html_ad4f899789a36ae984e9861aa6b91a6f8"><div class="ttname"><a href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8">Interactor::EInteractorOpMode</a></div><div class="ttdeci">EInteractorOpMode</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:61</div></div>
+<div class="ttc" id="classInteractor_html_ad4f899789a36ae984e9861aa6b91a6f8"><div class="ttname"><a href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8">Interactor::EInteractorOpMode</a></div><div class="ttdeci">EInteractorOpMode</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:76</div></div>
 <div class="ttc" id="classInteractor_html_a56006a47ef6164ad139c2d5bb1e17c3d"><div class="ttname"><a href="classInteractor.html#a56006a47ef6164ad139c2d5bb1e17c3d">Interactor::set_print_ppi</a></div><div class="ttdeci">virtual void set_print_ppi(double ppi)</div></div>
 <div class="ttc" id="classInteractor_html_ab802d6e8a3fc482aa7f0fdf9029aecae"><div class="ttname"><a href="classInteractor.html#ab802d6e8a3fc482aa7f0fdf9029aecae">Interactor::set_rendering_option</a></div><div class="ttdeci">virtual void set_rendering_option(int option, bool value)</div></div>
+<div class="ttc" id="group__enumerations_html_gga6f553cc68bf4f84707dce1f1145d2107af91b693b25124d36610313db3de40642"><div class="ttname"><a href="group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107af91b693b25124d36610313db3de40642">k_mouse_middle</a></div><div class="ttdoc">0x04. Mouse middle button pressed or released </div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:27</div></div>
+<div class="ttc" id="classInteractor_html_a730f04bba76db217ff36512f63600470"><div class="ttname"><a href="classInteractor.html#a730f04bba76db217ff36512f63600470">Interactor::on_mouse_enter_window</a></div><div class="ttdeci">virtual void on_mouse_enter_window(Pixels x, Pixels y, unsigned flags)</div></div>
 <div class="ttc" id="classInteractor_html_afc7dac3c7d8b7d629f38b79750e34905"><div class="ttname"><a href="classInteractor.html#afc7dac3c7d8b7d629f38b79750e34905">Interactor::get_viewport</a></div><div class="ttdeci">virtual void get_viewport(Pixels *x, Pixels *y)</div></div>
 <div class="ttc" id="classInteractor_html_aaa5e88bd7eaa484ae2f0c11ab29e34ff"><div class="ttname"><a href="classInteractor.html#aaa5e88bd7eaa484ae2f0c11ab29e34ff">Interactor::screen_point_to_page_point</a></div><div class="ttdeci">virtual void screen_point_to_page_point(double *x, double *y)</div></div>
 <div class="ttc" id="classInteractor_html_ae370a7f70f2ea4269f38f9361428d133"><div class="ttname"><a href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">Interactor::force_redraw</a></div><div class="ttdeci">virtual void force_redraw()</div></div>
@@ -495,7 +511,7 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_0188a3e6da905bc60aceb35bf790b8c9.html">api</a></li><li class="navelem"><b>lomse_interactor.h</b></li>
-    <li class="footer">Generated on Sat Apr 9 2016 16:55:17 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Apr 16 2016 17:13:57 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

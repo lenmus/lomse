@@ -6,6 +6,7 @@ var searchData=
   ['get_5fdocument_5fraw_5fptr',['get_document_raw_ptr',['../classPresenter.html#aedd747e959be4ba2ba249f9078623ac9',1,'Presenter']]],
   ['get_5fdocument_5fshared_5fptr',['get_document_shared_ptr',['../classPresenter.html#a1d7ee74efa842fc99274ee0f6abb5ba8',1,'Presenter']]],
   ['get_5fdocument_5fweak_5fptr',['get_document_weak_ptr',['../classPresenter.html#af3935244d12adf2de9973953d7fa444b',1,'Presenter']]],
+  ['get_5felapsed_5ftimes',['get_elapsed_times',['../classInteractor.html#ab87619c91a3ff8cb323815c2b3c088a2',1,'Interactor']]],
   ['get_5fgraphic_5fmodel',['get_graphic_model',['../classInteractor.html#ab5192c9307818200f5b08e93892c61ed',1,'Interactor']]],
   ['get_5finteractor',['get_interactor',['../classPresenter.html#a3542802890a4615d251a5a786cee62b5',1,'Presenter']]],
   ['get_5finteractor_5fshared_5fptr',['get_interactor_shared_ptr',['../classPresenter.html#ab61977fd47123e876eed8ccb839bf3c8',1,'Presenter']]],

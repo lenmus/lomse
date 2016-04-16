@@ -125,9 +125,11 @@ Inheritance diagram for Interactor:</div>
 </map>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The Interactor is the interface between your application, the associated View and the Document. It is responsible for translating your application requests into commands that manipulate the associated View and/or the Document, coordinating all the necessary actions.</p>
+<div class="textblock"><p>The Interactor is the key object to interact with the document (here the name 'Interactor'). It is the interface between your application, the associated View and the Document (see <a class="el" href="render-overview.html#mvc-overview">The Lomse Model-View-Controller</a>). It is responsible for translating your application requests into commands that manipulate the associated View and/or the Document, coordinating all the necessary actions. It also provides support for managing the user interaction with your application GUI (see <a class="el" href="tasks-page.html">Interaction with your application GUI</a>).</p>
 <p>The Interactor plays the role of the Controller in the MVC model. Each View has an associated Interactor (in fact the View is owned by the Interactor). The Interactor is owned by the <a class="el" href="classPresenter.html">Presenter</a>.</p>
-<p>The Interactor for a View is provided by the <a class="el" href="classPresenter.html">Presenter</a>. It is best practise not to save pointers to the Interactor because when processing a Lomse event the Document (and thus, the <a class="el" href="classInteractor.html">Interactor</a>) could have been deleted (i.e. because your application has closed the window displaying the document). Therefore, it is always recommended to get the pointer when needed:</p>
+<p>The Interactor for a View is provided by the <a class="el" href="classPresenter.html">Presenter</a>. It is best practise not to save pointers to the Interactor because when processing a Lomse event the Document (and thus, the <a class="el" href="classInteractor.html">Interactor</a>) could have been deleted (i.e. because your application has closed the window displaying the document).</p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000006">Todo:</a></b></dt><dd>Explain SpInteractor type</dd></dl>
+<p>It is always recommended to get the pointer to the Interactor when needed and to use smart pointers:</p>
 <div class="fragment"><div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">{</div>
 <div class="line">    <span class="comment">//use the Interactor</span></div>
@@ -136,7 +138,8 @@ Inheritance diagram for Interactor:</div>
 <div class="line">}</div>
 </div><!-- fragment --><p>See:</p>
 <ul>
-<li><a class="el" href="render-overview.html#mvc-overview">The Lomse Model-View-Controller</a>. </li>
+<li><a class="el" href="render-overview.html#mvc-overview">The Lomse Model-View-Controller</a>.</li>
+<li><a class="el" href="tasks-page.html">Interaction with your application GUI</a>. </li>
 </ul>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
@@ -216,7 +219,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8d486a75231279d13370cb9744f8cf11"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">zoom_fit_width</a> (Pixels width, bool fForceRedraw=true)</td></tr>
 <tr class="separator:a8d486a75231279d13370cb9744f8cf11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Selection rectangle</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Selection rectangle methods and explanation </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>Selection rectangle methods and explanation </dd></dl>
 </div></td></tr>
 <tr class="memitem:a9de671ca65612c859732ad6434428733"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9de671ca65612c859732ad6434428733"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>start_selection_rectangle</b> (Pixels x1, Pixels y1)</td></tr>
@@ -225,7 +228,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>start_selecti
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>hide_selection_rectangle</b> ()</td></tr>
 <tr class="separator:a4d304039336565267cd3a6d201dc2813"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Playback effects: tempo line</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Tempo line methods and Playback effects explanation </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Tempo line methods and Playback effects explanation </dd></dl>
 </div></td></tr>
 <tr class="memitem:a2def330212e2b83cbfabae9ed9b20cb0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2def330212e2b83cbfabae9ed9b20cb0"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>show_tempo_line</b> (Pixels x1, Pixels y1, Pixels x2, Pixels y2)</td></tr>
@@ -237,7 +240,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>hide_tempo_li
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>update_tempo_line</b> (Pixels x2, Pixels y2)</td></tr>
 <tr class="separator:a3b33f9e7acfbd40f4b5d0178d2f634c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Playback effects: highlight played notes/rests</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000012">Todo:</a></b></dt><dd>Highlight methods and Playback effects explanation </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Highlight methods and Playback effects explanation </dd></dl>
 </div></td></tr>
 <tr class="memitem:ab4dcd3324a54fa2055aa0bf1b9d732e2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab4dcd3324a54fa2055aa0bf1b9d732e2"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>highlight_object</b> (ImoStaffObj *pSO)</td></tr>
@@ -275,7 +278,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_visual_hig
 <tr class="memitem:a81cf3a31b6c7e7bd4c6b22c20bb87f73"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a81cf3a31b6c7e7bd4c6b22c20bb87f73">select_voice</a> (int voice)</td></tr>
 <tr class="separator:a81cf3a31b6c7e7bd4c6b22c20bb87f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Drag image associated to mouse cursor</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo:</a></b></dt><dd>Drag images explanation and methods for dragging images </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000012">Todo:</a></b></dt><dd>Drag images explanation and methods for dragging images </dd></dl>
 </div></td></tr>
 <tr class="memitem:ae1718f600ea3dec0017e200e1f00869a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae1718f600ea3dec0017e200e1f00869a"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>show_drag_image</b> (bool value)</td></tr>
@@ -287,8 +290,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>set_drag_image</b> (G
 void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b> (bool fEnabled)</td></tr>
 <tr class="separator:a0579315896d75bfd6f54df2cad4f9d82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Document edition</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000015">Todo:</a></b></dt><dd>Explain available DocCommands </dd></dl>
-</div></td></tr>
 <tr class="memitem:ac0f2b87ac27d4d4a4692dc9ce5b42291"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command</a> (DocCommand *pCmd)</td></tr>
 <tr class="separator:ac0f2b87ac27d4d4a4692dc9ce5b42291"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a827410e940b1c1d7bcc42414d73a33aa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">exec_undo</a> ()</td></tr>
@@ -300,75 +301,22 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <tr class="memitem:a1fb104713775c65888909f3f1404faad"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a1fb104713775c65888909f3f1404faad">should_enable_edit_redo</a> ()</td></tr>
 <tr class="separator:a1fb104713775c65888909f3f1404faad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">User application: to inform Lomse about certain events</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000016">Todo:</a></b></dt><dd>Explain event handlers methods for user actions </dd></dl>
-</div></td></tr>
 <tr class="memitem:aed88fd6863f5cfff75bb53424a70a7b0"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#aed88fd6863f5cfff75bb53424a70a7b0">on_document_updated</a> ()</td></tr>
 <tr class="separator:aed88fd6863f5cfff75bb53424a70a7b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7a50ff5b4d8e3f8892f9b096efe1f471"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7a50ff5b4d8e3f8892f9b096efe1f471"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_mouse_move</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
+<tr class="memitem:a7a50ff5b4d8e3f8892f9b096efe1f471"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a7a50ff5b4d8e3f8892f9b096efe1f471">on_mouse_move</a> (Pixels x, Pixels y, unsigned flags)</td></tr>
 <tr class="separator:a7a50ff5b4d8e3f8892f9b096efe1f471"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeeecb406ca9317f8febb34c5859fbf02"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aeeecb406ca9317f8febb34c5859fbf02"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_mouse_button_down</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
+<tr class="memitem:aeeecb406ca9317f8febb34c5859fbf02"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#aeeecb406ca9317f8febb34c5859fbf02">on_mouse_button_down</a> (Pixels x, Pixels y, unsigned flags)</td></tr>
 <tr class="separator:aeeecb406ca9317f8febb34c5859fbf02"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adc49c6e8ed61a099d26fb807fa0799b8"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="adc49c6e8ed61a099d26fb807fa0799b8"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_mouse_button_up</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
+<tr class="memitem:adc49c6e8ed61a099d26fb807fa0799b8"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#adc49c6e8ed61a099d26fb807fa0799b8">on_mouse_button_up</a> (Pixels x, Pixels y, unsigned flags)</td></tr>
 <tr class="separator:adc49c6e8ed61a099d26fb807fa0799b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a730f04bba76db217ff36512f63600470"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a730f04bba76db217ff36512f63600470"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_mouse_enter_window</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
+<tr class="memitem:a730f04bba76db217ff36512f63600470"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a730f04bba76db217ff36512f63600470">on_mouse_enter_window</a> (Pixels x, Pixels y, unsigned flags)</td></tr>
 <tr class="separator:a730f04bba76db217ff36512f63600470"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afbfb111029c260532f849362bf3b15f9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afbfb111029c260532f849362bf3b15f9"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_mouse_leave_window</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
+<tr class="memitem:afbfb111029c260532f849362bf3b15f9"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#afbfb111029c260532f849362bf3b15f9">on_mouse_leave_window</a> (Pixels x, Pixels y, unsigned flags)</td></tr>
 <tr class="separator:afbfb111029c260532f849362bf3b15f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr><td colspan="2"><div class="groupHeader">Actions requested by Task objects</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000017">Todo:</a></b></dt><dd>Should be restricted for internal use? </dd></dl>
-</div></td></tr>
-<tr class="memitem:ac7ed97cbea54ce7bbf626149fbc85640"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac7ed97cbea54ce7bbf626149fbc85640"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_click_at_screen_point</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
-<tr class="separator:ac7ed97cbea54ce7bbf626149fbc85640"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4251527617ac05e6928e2f4aae16dfbd"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4251527617ac05e6928e2f4aae16dfbd"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_select_objects_in_screen_rectangle</b> (Pixels x1, Pixels y1, Pixels x2, Pixels y2, unsigned flags)</td></tr>
-<tr class="separator:a4251527617ac05e6928e2f4aae16dfbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a03c2d89d35f73c821ca0c251cdb622b1"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a03c2d89d35f73c821ca0c251cdb622b1"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_select_object_and_show_contextual_menu</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
-<tr class="separator:a03c2d89d35f73c821ca0c251cdb622b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abdc4f5a1a50021a72ceaf1670fa0f4e9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abdc4f5a1a50021a72ceaf1670fa0f4e9"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_mouse_in_out</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
-<tr class="separator:abdc4f5a1a50021a72ceaf1670fa0f4e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a62db941ab0acfe9707692dd9a06818fb"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a62db941ab0acfe9707692dd9a06818fb"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_insert_object_at_point</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
-<tr class="separator:a62db941ab0acfe9707692dd9a06818fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c169209487292ef62e18ce11164b84a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9c169209487292ef62e18ce11164b84a"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_drag_the_view</b> (Pixels x, Pixels y)</td></tr>
-<tr class="separator:a9c169209487292ef62e18ce11164b84a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aad1ea548ca5724ae2a8d48bb3bfa7055"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aad1ea548ca5724ae2a8d48bb3bfa7055"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_decide_on_switching_task</b> (Pixels x, Pixels y, unsigned flags)</td></tr>
-<tr class="separator:aad1ea548ca5724ae2a8d48bb3bfa7055"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe4d5d48c769a2fb8553ea8003374708"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afe4d5d48c769a2fb8553ea8003374708"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_switch_to_default_task</b> ()</td></tr>
-<tr class="separator:afe4d5d48c769a2fb8553ea8003374708"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8490cd4bf7f3dc8050f594e91e4d30da"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8490cd4bf7f3dc8050f594e91e4d30da"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_move_drag_image</b> (Pixels x, Pixels y)</td></tr>
-<tr class="separator:a8490cd4bf7f3dc8050f594e91e4d30da"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4688790210293989169b711d59db443d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4688790210293989169b711d59db443d"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_move_object</b> (Pixels x, Pixels y)</td></tr>
-<tr class="separator:a4688790210293989169b711d59db443d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ade008204b0e6adcb52b3a5897d2d7f79"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ade008204b0e6adcb52b3a5897d2d7f79"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_move_handler</b> (Pixels x, Pixels y)</td></tr>
-<tr class="separator:ade008204b0e6adcb52b3a5897d2d7f79"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7f8b54e196337483700eb7b93f42a501"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7f8b54e196337483700eb7b93f42a501"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_move_handler_end_point</b> (Pixels xFinal, Pixels yFinal, Pixels xTotalShift, Pixels yTotalShift)</td></tr>
-<tr class="separator:a7f8b54e196337483700eb7b93f42a501"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa342dc7765aa449d03f68f7507bc33fe"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa342dc7765aa449d03f68f7507bc33fe"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>task_action_update_selection_rectangle</b> (Pixels x2, Pixels y2)</td></tr>
-<tr class="separator:aa342dc7765aa449d03f68f7507bc33fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">For performance measurements</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000018">Todo:</a></b></dt><dd>Document methods for performance measurements </dd></dl>
-</div></td></tr>
-<tr class="memitem:a8fa25043ac4be5ed9b5ebfb1368599de"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8fa25043ac4be5ed9b5ebfb1368599de"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>timing_repaint_done</b> ()</td></tr>
+<tr class="memitem:a8fa25043ac4be5ed9b5ebfb1368599de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a8fa25043ac4be5ed9b5ebfb1368599de">timing_repaint_done</a> ()</td></tr>
 <tr class="separator:a8fa25043ac4be5ed9b5ebfb1368599de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab87619c91a3ff8cb323815c2b3c088a2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab87619c91a3ff8cb323815c2b3c088a2"></a>
-double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times</b> ()</td></tr>
+<tr class="memitem:ab87619c91a3ff8cb323815c2b3c088a2"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#ab87619c91a3ff8cb323815c2b3c088a2">get_elapsed_times</a> ()</td></tr>
 <tr class="separator:ab87619c91a3ff8cb323815c2b3c088a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Debugging</div></td></tr>
 <tr><td colspan="2"><div class="groupText"><p>These methods are oriented to debug Lomse and should not be in the public API. If you use them be aware that they might be removed from public API in future. </p>
@@ -410,7 +358,7 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Method Interactor::get_elapsed_times() returns a vector of elapsed times. This enum is used as index on that vector for identifying the operation to which each vector element refers. So, for instance, times[0] is the time for building the graphic model (0 = <em>k_timing_gmodel_build_time</em>), times[1] is the time for rendering the graphic model (1 = <em>k_timing_gmodel_draw_time</em>), etc, according to this:</p>
+<p>Method <a class="el" href="classInteractor.html#ab87619c91a3ff8cb323815c2b3c088a2">Interactor::get_elapsed_times()</a> returns a vector of elapsed times. This enum is used as index on that vector for identifying the operation to which each vector element refers. So, for instance, times[0] is the time for building the graphic model (0 = <em>k_timing_gmodel_build_time</em>), times[1] is the time for rendering the graphic model (1 = <em>k_timing_gmodel_draw_time</em>), etc, according to this:</p>
 <ul>
 <li><b>k_timing_gmodel_build_time = 0</b> - elapsed time for building the graphic model.</li>
 <li><b>k_timing_gmodel_draw_time = 1</b> - elapsed time for rendering the graphic model</li>
@@ -468,39 +416,19 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
 </div><div class="memdoc">
 <p>Returns a DocCursorState object pointing to the nearest valid position to the mouse click point.</p>
 <p>This is a support method for applications wishing to get cursor related information from mouse clicks. For instance, to move the caret by pointing with the mouse and clicking:</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000013">Todo:</a></b></dt><dd>Clarify example or change: Why user has to discriminate the kind of top level object?</dd></dl>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::process_on_click_event(SpEventMouse event)</div>
-<div class="line">{</div>
-<div class="line">    <span class="keywordflow">if</span> (is_edition_enabled())</div>
-<div class="line">    {</div>
-<div class="line">        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spIntor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock();</div>
-<div class="line">        DocCursorState state = spIntor-&gt;click_event_to_cursor_state(event);</div>
-<div class="line">        ImoId <span class="keywordtype">id</span> = state.get_parent_level_id();</div>
-<div class="line">        <span class="keywordflow">if</span> (<span class="keywordtype">id</span> != k_no_imoid)</div>
-<div class="line">        {</div>
-<div class="line">            Document* pDoc = m_cursor-&gt;get_document();</div>
-<div class="line">            ImoObj* pImo = pDoc-&gt;get_pointer_to_imo(<span class="keywordtype">id</span>);</div>
-<div class="line">            <span class="keywordflow">if</span> (pImo-&gt;is_score())</div>
-<div class="line">                m_pController-&gt;exec_lomse_command(</div>
-<div class="line">                                        LENMUS_NEW CmdCursor(state),</div>
-<div class="line">                                        k_no_show_busy );</div>
-<div class="line">            <span class="keywordflow">else</span></div>
-<div class="line">                m_pController-&gt;exec_lomse_command(</div>
-<div class="line">                                        LENMUS_NEW CmdCursor(CmdCursor::k_point_to, <span class="keywordtype">id</span>),</div>
-<div class="line">                                        k_no_show_busy );</div>
-<div class="line">        }</div>
-<div class="line">    }</div>
-<div class="line">}</div>
-<div class="line"></div>
-<div class="line"><span class="keywordtype">bool</span> DocumentWindow::is_edition_enabled()</div>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::move_cursor_to_click_point(SpEventMouse event)</div>
 <div class="line">{</div>
 <div class="line">    <span class="keywordflow">if</span> (!m_pPresenter)</div>
-<div class="line">        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">        <span class="keywordflow">return</span>;</div>
 <div class="line"></div>
 <div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spIntor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
-<div class="line">        <span class="keywordflow">return</span> spIntor-&gt;get_operating_mode() == Interactor::k_mode_edition;</div>
-<div class="line">    <span class="keywordflow">else</span></div>
-<div class="line">        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">    {</div>
+<div class="line">        <span class="keywordflow">if</span> (spIntor-&gt;get_operating_mode() == Interactor::k_mode_edition)</div>
+<div class="line">        {</div>
+<div class="line">            DocCursorState state = spIntor-&gt;click_event_to_cursor_state(event);</div>
+<div class="line">            spIntor-&gt;exec_command(<span class="keyword">new</span> CmdCursor(state));</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
 <div class="line">}</div>
 </div><!-- fragment --> 
 </div>
@@ -615,7 +543,24 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
   </dd>
 </dl>
 <dl class="section remark"><dt>Remarks</dt><dd>This method has no effect when document edition is disabled. See <a class="el" href="classInteractor.html#acb5d21578acde66c5da165f1fa808fb6">set_operating_mode()</a>.</dd></dl>
-<p>See <a class="el" href="document-edition-overview.html#edit-overview">The edition API</a></p>
+<p>Example:</p>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandGenerator::insert_rest(ENoteType noteType, <span class="keywordtype">int</span> dots, <span class="keywordtype">int</span> voice, <span class="keywordtype">int</span> staff)</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">//insert a rest at current cursor position</span></div>
+<div class="line"></div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
+<div class="line">    {</div>
+<div class="line">        stringstream src;</div>
+<div class="line">        src &lt;&lt; <span class="stringliteral">&quot;(r &quot;</span></div>
+<div class="line">            <span class="stringliteral">&quot; &quot;</span> &lt;&lt; LdpExporter::notetype_to_string(noteType, dots)</div>
+<div class="line">            &lt;&lt; <span class="stringliteral">&quot; v&quot;</span> &lt;&lt; voice</div>
+<div class="line">            &lt;&lt; <span class="stringliteral">&quot; p&quot;</span> &lt;&lt; staff+1</div>
+<div class="line">            &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>;</div>
+<div class="line">        <span class="keywordtype">string</span> name = <span class="stringliteral">&quot;Insert rest&quot;</span>;</div>
+<div class="line">        spInteractor-&gt;exec_command( <span class="keyword">new</span> CmdInsertStaffObj(src.str(), name) );</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>See <a class="el" href="document-edition-overview.html#edit-overview">The edition API</a></p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">exec_undo()</a>, <a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">exec_redo()</a> </dd></dl>
 
 </div>
@@ -653,7 +598,13 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
 </div><div class="memdoc">
 <p>Undo the last edition command executed via <a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command()</a>.</p>
 <dl class="section remark"><dt>Remarks</dt><dd>This method has no effect when document edition is disabled. See <a class="el" href="classInteractor.html#acb5d21578acde66c5da165f1fa808fb6">set_operating_mode()</a>.</dd></dl>
-<p>See <a class="el" href="document-edition-overview.html#edit-overview">The edition API</a></p>
+<p>Example:</p>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::on_edit_undo()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
+<div class="line">        spInteractor-&gt;exec_undo();</div>
+<div class="line">}</div>
+</div><!-- fragment --><p>See <a class="el" href="document-edition-overview.html#edit-overview">The edition API</a></p>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command()</a>, <a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">exec_redo()</a>, <a class="el" href="classInteractor.html#abd162053d322ad64eb94159e1437ce1e">should_enable_edit_undo()</a> </dd></dl>
 
 </div>
@@ -680,7 +631,7 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
 </div><div class="memdoc">
 <p>Invoking this method forces Lomse to render again the View and, therefore, the rendering buffer gets updated. After doing it, Lomse <b>will</b> generate a EventPaint event.</p>
 <dl class="section note"><dt>Note</dt><dd>Lomse will ignore the request if forced updates are disabled. See <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>.</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be refactored.</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000007">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be refactored.</dd></dl>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a>. </dd></dl>
 
 </div>
@@ -738,6 +689,60 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
 <p>Returns the cursor associated to the View of this Interactor.</p>
 <p>See <a class="el" href="document-edition-overview.html">Editing documents overview</a> </p>
 
+</div>
+</div>
+<a class="anchor" id="ab87619c91a3ff8cb323815c2b3c088a2"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double* Interactor::get_elapsed_times </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Rerturns a vector of times, with the elapsed times for the different steps related to rendering a document. When a new renderization is necessary, Lomse resets all time counters and starts timing the different steps. Your application only has to inform lomse when the rendering buffer has been copied onto the application window (do this by invioking method <a class="el" href="classInteractor.html#a8fa25043ac4be5ed9b5ebfb1368599de">timing_repaint_done()</a>). Then all times are available to be accessed by using this method.</p>
+<p>Enum <a class="el" href="classInteractor.html#ad8858370241ddad5b8a36300b22f5665">Interactor::ETimingTarget</a> is used as index on the returned vector for identifying the operation to which each vector element refers.</p>
+<p>Example:</p>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::copy_buffer_on_dc(DC&amp; dc)</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
+<div class="line">    {</div>
+<div class="line">        <span class="comment">// draw lomse buffer onto DC</span></div>
+<div class="line">        ...</div>
+<div class="line"></div>
+<div class="line">        <span class="comment">//inform lomse that the buffer has been copied</span></div>
+<div class="line">        spInteractor-&gt;timing_repaint_done();</div>
+<div class="line"></div>
+<div class="line">        <span class="comment">//Display ellapsed times for the different renderization steps</span></div>
+<div class="line">        <span class="keywordtype">double</span>* pTimes = spInteractor-&gt;get_elapsed_times();</div>
+<div class="line">        std::ostringstream msg;</div>
+<div class="line">        msg &lt;&lt; std::fixed &lt;&lt; std::setprecision(2)</div>
+<div class="line">            &lt;&lt; <span class="stringliteral">&quot;Build graphic model = &quot;</span> </div>
+<div class="line">            &lt;&lt; *(pTimes + Interactor::k_timing_gmodel_build_time) &lt;&lt; <span class="stringliteral">&quot;msecs.&quot;</span> &lt;&lt; endl</div>
+<div class="line">            &lt;&lt; <span class="stringliteral">&quot;Render gaphic model = &quot;</span></div>
+<div class="line">            &lt;&lt; *(pTimes + Interactor::k_timing_gmodel_draw_time) &lt;&lt; <span class="stringliteral">&quot;msecs.&quot;</span> &lt;&lt; endl</div>
+<div class="line">            &lt;&lt; <span class="stringliteral">&quot;Render visual effects = &quot;</span></div>
+<div class="line">            &lt;&lt; *(pTimes + Interactor::k_timing_visual_effects_draw_time) &lt;&lt; <span class="stringliteral">&quot;msecs.&quot;</span> &lt;&lt; endl</div>
+<div class="line">            &lt;&lt; <span class="stringliteral">&quot;Total Lomse render time = &quot;</span></div>
+<div class="line">            &lt;&lt; *(pTimes + Interactor::k_timing_total_render_time) &lt;&lt; <span class="stringliteral">&quot;msecs.&quot;</span> &lt;&lt; endl</div>
+<div class="line">            &lt;&lt; <span class="stringliteral">&quot;Paint buffer on DC = &quot;</span></div>
+<div class="line">            &lt;&lt; *(pTimes + Interactor::k_timing_repaint_time) &lt;&lt; <span class="stringliteral">&quot;msecs.&quot;</span> &lt;&lt; endl;</div>
+<div class="line"></div>
+<div class="line">        ...</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --> 
 </div>
 </div>
 <a class="anchor" id="ab5192c9307818200f5b08e93892c61ed"></a>
@@ -801,8 +806,19 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns current operation mode for this Interactor. Returned value is one of the values from enum EInteractorOpMode. </p>
-
+<p>Returns current operation mode for this Interactor. Returned value is one of the values from enum EInteractorOpMode.</p>
+<p>Example: </p>
+<div class="fragment"><div class="line"><span class="keywordtype">bool</span> DocumentWindow::is_edition_enabled()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">if</span> (!m_pPresenter)</div>
+<div class="line">        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"></div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spIntor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
+<div class="line">        <span class="keywordflow">return</span> spIntor-&gt;get_operating_mode() == Interactor::k_mode_edition;</div>
+<div class="line">    <span class="keywordflow">else</span></div>
+<div class="line">        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">}</div>
+</div><!-- fragment --> 
 </div>
 </div>
 <a class="anchor" id="a3dcd4218ab368cfba17ca1ef6974c012"></a>
@@ -889,8 +905,8 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the selection set associated to the View of this Interactor. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000007">Todo:</a></b></dt><dd>Explain SelectionSet and how it works. </dd></dl>
+<p>Returns the selection set associated to the View of this Interactor.</p>
+<p>See <a class="el" href="document-edition-overview.html">Editing documents overview</a> </p>
 
 </div>
 </div>
@@ -1144,8 +1160,273 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Force to re-create all the data associated to a document and to refresh its views.</p>
-<dl class="section remark"><dt>Remarks</dt><dd>Normally you don't have to use this method. But it can be convenient for forcing Lomse to redraw it. </dd></dl>
+<p>Inform Lomse that the Document associated to this Interactor has been modified. This forces Lomse to rebuild all the internal data associated to the document (e.g. the graphic model) and to refresh all the views.</p>
+<dl class="section remark"><dt>Remarks</dt><dd>Normally you don't have to use this method. But in some applications that don't use edition commands but modify the Document by direct manipulation of its internal data structures, this method it is needed for informing Lomse and forcing to render again all the views associated to the document. </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="aeeecb406ca9317f8febb34c5859fbf02"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Interactor::on_mouse_button_down </td>
+          <td>(</td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>flags</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Inform Lomse that a mouse button down event received by your application has to be handled by Lomse in accordance to current selected Task. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x,y</td><td>Current mouse position, as reported by the mouse event received by your application. </td></tr>
+    <tr><td class="paramname">flags</td><td>Flags for keys pressed in the keyboard while the mouse button was pressed, as reported by the mouse event received by your application. Values for these flas are described by enum <a class="el" href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">EEventFlag</a>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See Also</dt><dd><ul>
+<li><a class="el" href="tasks-page.html">Interaction with your application GUI</a>.</li>
+<li><a class="el" href="classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f">switch_task()</a>. </li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="adc49c6e8ed61a099d26fb807fa0799b8"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Interactor::on_mouse_button_up </td>
+          <td>(</td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>flags</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Inform Lomse that a mouse button up event received by your application has to be handled by Lomse in accordance to current selected Task. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x,y</td><td>Current mouse position, as reported by the mouse event received by your application. </td></tr>
+    <tr><td class="paramname">flags</td><td>Flags for keys pressed in the keyboard while the mouse button was released, as reported by the mouse event received by your application. Values for these flas are described by enum <a class="el" href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">EEventFlag</a>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See Also</dt><dd><ul>
+<li><a class="el" href="tasks-page.html">Interaction with your application GUI</a>.</li>
+<li><a class="el" href="classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f">switch_task()</a>. </li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a730f04bba76db217ff36512f63600470"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Interactor::on_mouse_enter_window </td>
+          <td>(</td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>flags</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Inform Lomse that a mouse enter window event received by your application has to be handled by Lomse in accordance to current selected Task. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x,y</td><td>Current mouse position, as reported by the mouse event received by your application. </td></tr>
+    <tr><td class="paramname">flags</td><td>Flags for keys pressed in the keyboard while the mouse entered the window, as reported by the mouse event received by your application. Values for these flas are described by enum <a class="el" href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">EEventFlag</a>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See Also</dt><dd><ul>
+<li><a class="el" href="tasks-page.html">Interaction with your application GUI</a>.</li>
+<li><a class="el" href="classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f">switch_task()</a>. </li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="afbfb111029c260532f849362bf3b15f9"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Interactor::on_mouse_leave_window </td>
+          <td>(</td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>flags</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Inform Lomse that a mouse leave window event received by your application has to be handled by Lomse in accordance to current selected Task. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x,y</td><td>Current mouse position, as reported by the mouse event received by your application. </td></tr>
+    <tr><td class="paramname">flags</td><td>Flags for keys pressed in the keyboard while the mouse moved out of the window, as reported by the mouse event received by your application. Values for these flas are described by enum <a class="el" href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">EEventFlag</a>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See Also</dt><dd><ul>
+<li><a class="el" href="tasks-page.html">Interaction with your application GUI</a>.</li>
+<li><a class="el" href="classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f">switch_task()</a>. </li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a7a50ff5b4d8e3f8892f9b096efe1f471"></a>
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual void Interactor::on_mouse_move </td>
+          <td>(</td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Pixels&#160;</td>
+          <td class="paramname"><em>y</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned&#160;</td>
+          <td class="paramname"><em>flags</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Inform Lomse that a mouse move event received by your application has to be handled by Lomse in accordance to current selected Task. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">x,y</td><td>Current mouse position, as reported by the mouse event received by your application. </td></tr>
+    <tr><td class="paramname">flags</td><td>Flags for keys pressed in the keyboard while moving the mouse, as reported by the mouse event received by your application. Values for these flas are described by enum <a class="el" href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">EEventFlag</a>.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See Also</dt><dd><ul>
+<li><a class="el" href="tasks-page.html">Interaction with your application GUI</a>.</li>
+<li><a class="el" href="classInteractor.html#af7c4afa0e8fd9136b5d1f2a52666c44f">switch_task()</a>. </li>
+</ul>
+</dd></dl>
 
 </div>
 </div>
@@ -1336,7 +1617,7 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
 <div class="line">        UPoint uPos = pInteractor-&gt;<a class="code" href="classInteractor.html#a986167b680f97ad5914c69343a7d15c5">screen_point_to_model_point</a>(pos.x, pos.y);</div>
 <div class="line"></div>
 <div class="line">        <span class="comment">//inform Lomse</span></div>
-<div class="line">        pInteractor-&gt;on_mouse_move(pos.x, pos.y, flags);</div>
+<div class="line">        pInteractor-&gt;<a class="code" href="classInteractor.html#a7a50ff5b4d8e3f8892f9b096efe1f471">on_mouse_move</a>(pos.x, pos.y, flags);</div>
 <div class="line">    }</div>
 <div class="line">}</div>
 </div><!-- fragment --> 
@@ -1412,7 +1693,7 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
 </dl>
 <dl class="section remark"><dt>Remarks</dt><dd><ul>
 <li>As a consequence of this operation the selected voice will be rendered highlighted.</li>
-<li>This method only has effects is object beign edited is a music score. For other top level objects the method does nothing. </li>
+<li>This method only has effects is the object beign edited is a music score. For other top level objects this method does nothing. </li>
 </ul>
 </dd></dl>
 
@@ -1449,7 +1730,7 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000009">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000008">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document. </dd></dl>
 
 </div>
 </div>
@@ -1846,24 +2127,44 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Switch the automata used by the Interactor for interpreting mouse events. </p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000006">Todo:</a></b></dt><dd>Explain tasks</dd></dl>
+<p>Switch the Task used by the Interactor for interpreting mouse events.</p>
+<dl class="section remark"><dt>Remarks</dt><dd>When the Interactor is created it is initialized with an instace of TaskSelection class.</dd></dl>
+<p>See <a class="el" href="tasks-page.html">Interaction with your application GUI</a>.</p>
 <p>Example:</p>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandEventHandler::switch_interactor_mode_for_current_mouse_mode()</div>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::switch_mode_for_current_tool(<span class="keywordtype">int</span> toolType)</div>
 <div class="line">{</div>
-<div class="line">    <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pController-&gt;get_interactor_shared_ptr();</div>
-<div class="line">    <span class="keywordflow">switch</span>(m_toolsInfo.mouseMode)</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">    {</div>
-<div class="line">        <span class="keywordflow">case</span> k_mouse_mode_data_entry:</div>
-<div class="line">            spInteractor-&gt;switch_task(TaskFactory::k_task_data_entry);</div>
-<div class="line">            <span class="keywordflow">break</span>;</div>
+<div class="line">        <span class="keywordflow">switch</span>(toolType)</div>
+<div class="line">        {</div>
+<div class="line">            <span class="keywordflow">case</span> k_tool_data_entry:</div>
+<div class="line">                spInteractor-&gt;switch_task(TaskFactory::k_task_data_entry);</div>
+<div class="line">                <span class="keywordflow">break</span>;</div>
 <div class="line"></div>
-<div class="line">        <span class="keywordflow">case</span> k_mouse_mode_pointer:</div>
-<div class="line">        <span class="keywordflow">default</span>:</div>
-<div class="line">            spInteractor-&gt;switch_task(TaskFactory::k_task_selection);</div>
+<div class="line">            <span class="keywordflow">case</span> k_tool_selection:</div>
+<div class="line">            <span class="keywordflow">default</span>:</div>
+<div class="line">                spInteractor-&gt;switch_task(TaskFactory::k_task_selection);</div>
+<div class="line">        }</div>
 <div class="line">    }</div>
 <div class="line">}</div>
 </div><!-- fragment --> 
+</div>
+</div>
+<a class="anchor" id="a8fa25043ac4be5ed9b5ebfb1368599de"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Interactor::timing_repaint_done </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Invoke this method for informing Lomse when the rendering buffer has been copied onto the application window. See <a class="el" href="classInteractor.html#ab87619c91a3ff8cb323815c2b3c088a2">get_elapsed_times()</a> for more information.</p>
+<p>This method is oriented to performance measurements. </p>
+
 </div>
 </div>
 <a class="anchor" id="add8da1fe0fd8adddf1b30bcebf608636"></a>
@@ -2083,7 +2384,7 @@ double *&#160;</td><td class="memItemRight" valign="bottom"><b>get_elapsed_times
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Sat Apr 9 2016 16:55:17 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Apr 16 2016 17:13:58 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
