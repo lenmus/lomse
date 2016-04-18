@@ -23,6 +23,7 @@ var index =
     ] ],
     [ "Editing documents overview", "document-edition-overview.html", [
       [ "The edition API", "document-edition-overview.html#edit-overview", null ],
+      [ "Supported edition modes", "document-edition-overview.html#edit-modes", null ],
       [ "Edition commands", "document-edition-overview.html#edit-commands", null ]
     ] ],
     [ "Scores playback overview", "sound-generation.html", [

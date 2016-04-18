@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.17.20</span>
+   &#160;<span id="projectnumber">0.18.0</span>
    </div>
   </td>
  </tr>
@@ -105,6 +105,7 @@ $(document).ready(function(){initNavTree('document-edition-overview.html','');})
 <div class="contents">
 <div class="toc"><h3>Table of Contents</h3>
 <ul><li class="level1"><a href="#edit-overview">The edition API</a></li>
+<li class="level1"><a href="#edit-modes">Supported edition modes</a></li>
 <li class="level1"><a href="#edit-commands">Edition commands</a></li>
 </ul>
 </div>
@@ -127,6 +128,26 @@ The edition API</h1>
 <p>Your application can also issue edition commands for selecting and deselecting document elements, such as paragraphs, words, notes, rests, clefs, staves, etc. Object SelectionSet is just the collection of current <em>selected</em> elements.</p>
 <p>The DocCursor and the SelectionSet are not parameters of the commands. These objects are maintained by Lomse and when a command is going to be executed the necessary information about target objects and context is extracted from current cursor position and/or from current set of selected objects.</p>
 <p>And this is, basically, the document edition API. It is very simple and gives full freedom to your application for implementing the edition GUI as you'd like, or for not a having it at all!</p>
+<h1><a class="anchor" id="edit-modes"></a>
+Supported edition modes</h1>
+<p>What should be the behavior when inserting or deleting a note? For people with no previous experience with music edition software, the most intuitive behavior is one similar to what is expected from someone who comes from a pencil-and-paper background or from using a text processor: inserting/deleting a note or a rest shifts all the music that comes after it. But what about barlines? Should they be also shifted or should they remain at the same place? Each alternative has advantages and drawbacks:</p>
+<ol type="1">
+<li>If barlines are also shifted, current measure could result in an irregular measure. Let's name this behavior <em>limited ripple mode</em> (notes are shifted but limited to current measure because barline is also shifted).</li>
+<li>If barlines remains at the same place and only notes and rests are shifted and can cross barlines boundaries and get placed in another measure, this behavior can be useful in some scenarios. For instance when you need to make one (ore more) beats completely disappear (and thus shift the remainder of the composition to the left by one beat). Or need two insert some <em>blank space</em> (one or more beats o whole measures), shifting to the right the rest of the music, and then you can fill in that space with what you wanted to insert. But, in general, this behavior causes a lot of trouble in music score edition. Notice that removing a note/rest in one voice and shifting all other notes in that voice implies completely <em>altering</em> the music in all the score, because music in shifted voice and music in the other voices and instruments are no longer synchronized. Let's name this behavior <em>full ripple mode</em> (notes are shifted across all the score).</li>
+</ol>
+<p>To avoid problems, another possibility is to change the behavior when a note or rest is inserted or deleted. In most cases you don't need to shift music. What you need is to add notes and rests in empty measures, but in measures having content what you need is to change a few notes or rests, but always keeping measures duration and not shifting the music. Let's call this behavior <em>replace mode</em> (the notes are replaced and measure duration is preserved).</p>
+<p>None of these behaviors is perfect. What should be Lomse behavior? Although the most usual behavior in music edition programs is the <em>replace mode</em>, the other modes can be useful in some scenarios or for some applications. As Lomse aims at not creating unnecessary constrains to your application, it was decided to support the three behaviors. For this, all edition commands related to adding or removing notes and rests require a <em>edition mode</em> parameter for selecting the desired behavior:</p>
+<ul>
+<li><b>Limited ripple mode</b>: when inserting or deleting notes/rests the barlines are also shifted, and this could result in irregular measures, but other measures are not affected.</li>
+<li><b>Replace mode</b>: Notes and rests are not inserted. Instead they <em>overwrite</em> the music so that measure duration is maintained. Also, notes are not deleted but replaced by rests.</li>
+</ul>
+<p>For supporting full ripple mode, instead of adding more complexity to commands related to adding or removing notes and rests, it is simpler, more flexible and causes less troubles to end users, to use two specific insert/delete commands that always work in <em>full ripple mode</em>:</p>
+<ul>
+<li>insert blank space (beats or whole measures); and</li>
+<li>delete beats/measures.</li>
+</ul>
+<p>These commands accepts a parameter defining the scope: to affect only one or selected voices, one or selected staves, one or selected instruments or the whole score.</p>
+<dl class="section attention"><dt>Attention</dt><dd>Currently Lomse does not ensure the correctness of the music notation in operations resulting in music shifts. For instance, if a quarter note crosses a barline by the duration of a removed eighth note, the quarter note should be splitted into two tied eighth notes. Or when two tied notes in different measures are shifted an are now placed in the same measure, it is no longer clear if they should continue tied or should be replaced by a longer single note. As these decisions are not trivial, Lomse does not attempt (for now) to fix these situations and therefore the commands limit the operation to inserting or deleting the requested notes or rests without more considerations.</dd></dl>
 <h1><a class="anchor" id="edit-commands"></a>
 Edition commands</h1>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Describe edition commands</dd></dl>
@@ -136,7 +157,7 @@ Edition commands</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Sat Apr 16 2016 17:13:57 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Apr 18 2016 19:45:03 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
