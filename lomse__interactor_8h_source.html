@@ -325,7 +325,7 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div class="line"><a name="l00902"></a><span class="lineno">  902</span>&#160;</div>
 <div class="line"><a name="l00903"></a><span class="lineno">  903</span>&#160;</div>
 <div class="line"><a name="l00904"></a><span class="lineno">  904</span>&#160;        <span class="comment">//edition</span></div>
-<div class="line"><a name="l00942"></a><span class="lineno">  942</span>&#160;<span class="comment"></span>    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command</a>(DocCommand* pCmd);</div>
+<div class="line"><a name="l00942"></a><span class="lineno">  942</span>&#160;<span class="comment"></span>    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">exec_command</a>(<a class="code" href="classDocCommand.html">DocCommand</a>* pCmd);</div>
 <div class="line"><a name="l00943"></a><span class="lineno">  943</span>&#160;</div>
 <div class="line"><a name="l00964"></a><span class="lineno">  964</span>&#160;    <span class="keywordtype">void</span> <a class="code" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">exec_undo</a>();</div>
 <div class="line"><a name="l00965"></a><span class="lineno">  965</span>&#160;</div>
@@ -383,7 +383,7 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div class="line"><a name="l01215"></a><span class="lineno"> 1215</span>&#160;<span class="comment">//excluded from public API. Only for internal use.</span></div>
 <div class="line"><a name="l01216"></a><span class="lineno"> 1216</span>&#160;<span class="preprocessor">#ifdef LOMSE_INTERNAL_API</span></div>
 <div class="line"><a name="l01217"></a><span class="lineno"> 1217</span>&#160;<span class="preprocessor"></span>    <a class="code" href="classInteractor.html">Interactor</a>(LibraryScope&amp; libraryScope, WpDocument wpDoc, View* pView,</div>
-<div class="line"><a name="l01218"></a><span class="lineno"> 1218</span>&#160;               DocCommandExecuter* pExec);</div>
+<div class="line"><a name="l01218"></a><span class="lineno"> 1218</span>&#160;               <a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a>* pExec);</div>
 <div class="line"><a name="l01219"></a><span class="lineno"> 1219</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classInteractor.html">Interactor</a>();</div>
 <div class="line"><a name="l01220"></a><span class="lineno"> 1220</span>&#160;</div>
 <div class="line"><a name="l01221"></a><span class="lineno"> 1221</span>&#160;    <span class="keyword">inline</span> SharedPtr&lt;Interactor&gt; get_shared_ptr_from_this() { <span class="keywordflow">return</span> shared_from_this(); }</div>
@@ -452,6 +452,7 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div class="ttc" id="classInteractor_html_ac30c10982952f57d03a3e992e90eaca0"><div class="ttname"><a href="classInteractor.html#ac30c10982952f57d03a3e992e90eaca0">Interactor::get_caret_timecode</a></div><div class="ttdeci">string get_caret_timecode()</div></div>
 <div class="ttc" id="classInteractor_html_abd162053d322ad64eb94159e1437ce1e"><div class="ttname"><a href="classInteractor.html#abd162053d322ad64eb94159e1437ce1e">Interactor::should_enable_edit_undo</a></div><div class="ttdeci">bool should_enable_edit_undo()</div></div>
 <div class="ttc" id="group__enumerations_html_ga6f553cc68bf4f84707dce1f1145d2107"><div class="ttname"><a href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">EEventFlag</a></div><div class="ttdeci">EEventFlag</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:23</div></div>
+<div class="ttc" id="classDocCommand_html"><div class="ttname"><a href="classDocCommand.html">DocCommand</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:15</div></div>
 <div class="ttc" id="classInteractor_html_a7a50ff5b4d8e3f8892f9b096efe1f471"><div class="ttname"><a href="classInteractor.html#a7a50ff5b4d8e3f8892f9b096efe1f471">Interactor::on_mouse_move</a></div><div class="ttdeci">virtual void on_mouse_move(Pixels x, Pixels y, unsigned flags)</div></div>
 <div class="ttc" id="classInteractor_html_ad8858370241ddad5b8a36300b22f5665"><div class="ttname"><a href="classInteractor.html#ad8858370241ddad5b8a36300b22f5665">Interactor::ETimingTarget</a></div><div class="ttdeci">ETimingTarget</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:92</div></div>
 <div class="ttc" id="classInteractor_html_a6fc96dec0a3767152cd953d2ec68ec96"><div class="ttname"><a href="classInteractor.html#a6fc96dec0a3767152cd953d2ec68ec96">Interactor::zoom_out</a></div><div class="ttdeci">virtual void zoom_out(Pixels x=0, Pixels y=0, bool fForceRedraw=true)</div></div>
@@ -461,6 +462,7 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div class="ttc" id="classInteractor_html_a986167b680f97ad5914c69343a7d15c5"><div class="ttname"><a href="classInteractor.html#a986167b680f97ad5914c69343a7d15c5">Interactor::screen_point_to_model_point</a></div><div class="ttdeci">virtual UPoint screen_point_to_model_point(Pixels x, Pixels y)</div></div>
 <div class="ttc" id="classInteractor_html_ac83345221209221be48169f01a4cd253"><div class="ttname"><a href="classInteractor.html#ac83345221209221be48169f01a4cd253">Interactor::zoom_fit_full</a></div><div class="ttdeci">virtual void zoom_fit_full(Pixels width, Pixels height, bool fForceRedraw=true)</div></div>
 <div class="ttc" id="classInteractor_html_ab0eb1b3b36c719575bb4309f78ae40f1"><div class="ttname"><a href="classInteractor.html#ab0eb1b3b36c719575bb4309f78ae40f1">Interactor::blink_caret</a></div><div class="ttdeci">void blink_caret()</div></div>
+<div class="ttc" id="classDocCommandExecuter_html"><div class="ttname"><a href="classDocCommandExecuter.html">DocCommandExecuter</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:166</div></div>
 <div class="ttc" id="classInteractor_html_a5d45c58e82e2de3c3bb31e414984923b"><div class="ttname"><a href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">Interactor::enable_forced_view_updates</a></div><div class="ttdeci">void enable_forced_view_updates(bool value)</div><div class="ttdef"><b>Definition:</b> lomse_interactor.h:300</div></div>
 <div class="ttc" id="classInteractor_html_a77ba1f1700deaf912f80f7b460ab508f"><div class="ttname"><a href="classInteractor.html#a77ba1f1700deaf912f80f7b460ab508f">Interactor::dump_cursor</a></div><div class="ttdeci">string dump_cursor()</div></div>
 <div class="ttc" id="classInteractor_html_a331181fe34d2f9399578bbe4be3f5f65"><div class="ttname"><a href="classInteractor.html#a331181fe34d2f9399578bbe4be3f5f65">Interactor::get_view_size</a></div><div class="ttdeci">virtual void get_view_size(Pixels *xWidth, Pixels *yHeight)</div></div>
@@ -511,7 +513,7 @@ $(document).ready(function(){initNavTree('lomse__interactor_8h_source.html','');
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_0188a3e6da905bc60aceb35bf790b8c9.html">api</a></li><li class="navelem"><b>lomse_interactor.h</b></li>
-    <li class="footer">Generated on Mon Apr 18 2016 19:45:03 for Lomse library. API documentation by
+    <li class="footer">Generated on Wed Apr 20 2016 17:01:00 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

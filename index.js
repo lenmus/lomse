@@ -22,7 +22,10 @@ var index =
       [ "Save memory by tiling", "print-api.html#print-tiles", null ]
     ] ],
     [ "Editing documents overview", "document-edition-overview.html", [
-      [ "The edition API", "document-edition-overview.html#edit-overview", null ],
+      [ "The edition API", "document-edition-overview.html#edit-overview", [
+        [ "Undo/Redo", "document-edition-overview.html#edit-overview-undo", null ],
+        [ "Cursor and selections", "document-edition-overview.html#edit-overview-cursor", null ]
+      ] ],
       [ "Supported edition modes", "document-edition-overview.html#edit-modes", null ],
       [ "Edition commands", "document-edition-overview.html#edit-commands", null ]
     ] ],

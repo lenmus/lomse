@@ -1,4 +1,24 @@
 var searchData=
 [
-  ['interactor',['Interactor',['../classInteractor.html',1,'']]]
+  ['cmdaddchordnote',['CmdAddChordNote',['../classCmdAddChordNote.html',1,'']]],
+  ['cmdaddnoterest',['CmdAddNoteRest',['../classCmdAddNoteRest.html',1,'']]],
+  ['cmdaddtie',['CmdAddTie',['../classCmdAddTie.html',1,'']]],
+  ['cmdaddtuplet',['CmdAddTuplet',['../classCmdAddTuplet.html',1,'']]],
+  ['cmdbreakbeam',['CmdBreakBeam',['../classCmdBreakBeam.html',1,'']]],
+  ['cmdchangeaccidentals',['CmdChangeAccidentals',['../classCmdChangeAccidentals.html',1,'']]],
+  ['cmdchangeattribute',['CmdChangeAttribute',['../classCmdChangeAttribute.html',1,'']]],
+  ['cmdchangedots',['CmdChangeDots',['../classCmdChangeDots.html',1,'']]],
+  ['cmdcursor',['CmdCursor',['../classCmdCursor.html',1,'']]],
+  ['cmddelete',['CmdDelete',['../classCmdDelete.html',1,'']]],
+  ['cmddeleteblocklevelobj',['CmdDeleteBlockLevelObj',['../classCmdDeleteBlockLevelObj.html',1,'']]],
+  ['cmddeleterelation',['CmdDeleteRelation',['../classCmdDeleteRelation.html',1,'']]],
+  ['cmddeleteselection',['CmdDeleteSelection',['../classCmdDeleteSelection.html',1,'']]],
+  ['cmddeletestaffobj',['CmdDeleteStaffObj',['../classCmdDeleteStaffObj.html',1,'']]],
+  ['cmdinsert',['CmdInsert',['../classCmdInsert.html',1,'']]],
+  ['cmdinsertblocklevelobj',['CmdInsertBlockLevelObj',['../classCmdInsertBlockLevelObj.html',1,'']]],
+  ['cmdinsertmanystaffobjs',['CmdInsertManyStaffObjs',['../classCmdInsertManyStaffObjs.html',1,'']]],
+  ['cmdinsertstaffobj',['CmdInsertStaffObj',['../classCmdInsertStaffObj.html',1,'']]],
+  ['cmdjoinbeam',['CmdJoinBeam',['../classCmdJoinBeam.html',1,'']]],
+  ['cmdmoveobjectpoint',['CmdMoveObjectPoint',['../classCmdMoveObjectPoint.html',1,'']]],
+  ['cmdselection',['CmdSelection',['../classCmdSelection.html',1,'']]]
 ];

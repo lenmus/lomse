@@ -1,6 +1,27 @@
 var searchData=
 [
   ['click_5fevent_5fto_5fcursor_5fstate',['click_event_to_cursor_state',['../classInteractor.html#a077b8554590f3ae5890e3d42f6d779f2',1,'Interactor']]],
+  ['cmdaddchordnote',['CmdAddChordNote',['../classCmdAddChordNote.html',1,'CmdAddChordNote'],['../classCmdAddChordNote.html#a033c364e124e9e5bc484f6ca1e1b935b',1,'CmdAddChordNote::CmdAddChordNote()']]],
+  ['cmdaddnoterest',['CmdAddNoteRest',['../classCmdAddNoteRest.html',1,'']]],
+  ['cmdaddtie',['CmdAddTie',['../classCmdAddTie.html',1,'']]],
+  ['cmdaddtuplet',['CmdAddTuplet',['../classCmdAddTuplet.html',1,'']]],
+  ['cmdbreakbeam',['CmdBreakBeam',['../classCmdBreakBeam.html',1,'']]],
+  ['cmdchangeaccidentals',['CmdChangeAccidentals',['../classCmdChangeAccidentals.html',1,'']]],
+  ['cmdchangeattribute',['CmdChangeAttribute',['../classCmdChangeAttribute.html',1,'']]],
+  ['cmdchangedots',['CmdChangeDots',['../classCmdChangeDots.html',1,'']]],
+  ['cmdcursor',['CmdCursor',['../classCmdCursor.html',1,'']]],
+  ['cmddelete',['CmdDelete',['../classCmdDelete.html',1,'']]],
+  ['cmddeleteblocklevelobj',['CmdDeleteBlockLevelObj',['../classCmdDeleteBlockLevelObj.html',1,'']]],
+  ['cmddeleterelation',['CmdDeleteRelation',['../classCmdDeleteRelation.html',1,'']]],
+  ['cmddeleteselection',['CmdDeleteSelection',['../classCmdDeleteSelection.html',1,'']]],
+  ['cmddeletestaffobj',['CmdDeleteStaffObj',['../classCmdDeleteStaffObj.html',1,'']]],
+  ['cmdinsert',['CmdInsert',['../classCmdInsert.html',1,'']]],
+  ['cmdinsertblocklevelobj',['CmdInsertBlockLevelObj',['../classCmdInsertBlockLevelObj.html',1,'CmdInsertBlockLevelObj'],['../classCmdInsertBlockLevelObj.html#a41a1543420bc98413be17a75016a96a8',1,'CmdInsertBlockLevelObj::CmdInsertBlockLevelObj(int type, const string &amp;name)'],['../classCmdInsertBlockLevelObj.html#ac65c374bf4ba414985214ca3385e40fb',1,'CmdInsertBlockLevelObj::CmdInsertBlockLevelObj(const string &amp;source, const string &amp;name)']]],
+  ['cmdinsertmanystaffobjs',['CmdInsertManyStaffObjs',['../classCmdInsertManyStaffObjs.html',1,'']]],
+  ['cmdinsertstaffobj',['CmdInsertStaffObj',['../classCmdInsertStaffObj.html',1,'']]],
+  ['cmdjoinbeam',['CmdJoinBeam',['../classCmdJoinBeam.html',1,'']]],
+  ['cmdmoveobjectpoint',['CmdMoveObjectPoint',['../classCmdMoveObjectPoint.html',1,'']]],
+  ['cmdselection',['CmdSelection',['../classCmdSelection.html',1,'']]],
   ['create_5fscore_5fplayer',['create_score_player',['../classLomseDoorway.html#a50dbce970b84945868887966a0708634',1,'LomseDoorway']]],
   ['coordinate_20systems_2c_20units_2c_20scaling_20and_20viewport',['Coordinate systems, units, scaling and viewport',['../viewport-overview.html',1,'index']]]
 ];

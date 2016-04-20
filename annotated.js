@@ -1,6 +1,32 @@
 var annotated =
 [
+    [ "CmdAddChordNote", "classCmdAddChordNote.html", "classCmdAddChordNote" ],
+    [ "CmdAddNoteRest", "classCmdAddNoteRest.html", "classCmdAddNoteRest" ],
+    [ "CmdAddTie", "classCmdAddTie.html", "classCmdAddTie" ],
+    [ "CmdAddTuplet", "classCmdAddTuplet.html", "classCmdAddTuplet" ],
+    [ "CmdBreakBeam", "classCmdBreakBeam.html", "classCmdBreakBeam" ],
+    [ "CmdChangeAccidentals", "classCmdChangeAccidentals.html", "classCmdChangeAccidentals" ],
+    [ "CmdChangeAttribute", "classCmdChangeAttribute.html", "classCmdChangeAttribute" ],
+    [ "CmdChangeDots", "classCmdChangeDots.html", "classCmdChangeDots" ],
+    [ "CmdCursor", "classCmdCursor.html", "classCmdCursor" ],
+    [ "CmdDelete", "classCmdDelete.html", "classCmdDelete" ],
+    [ "CmdDeleteBlockLevelObj", "classCmdDeleteBlockLevelObj.html", "classCmdDeleteBlockLevelObj" ],
+    [ "CmdDeleteRelation", "classCmdDeleteRelation.html", "classCmdDeleteRelation" ],
+    [ "CmdDeleteSelection", "classCmdDeleteSelection.html", "classCmdDeleteSelection" ],
+    [ "CmdDeleteStaffObj", "classCmdDeleteStaffObj.html", "classCmdDeleteStaffObj" ],
+    [ "CmdInsert", "classCmdInsert.html", "classCmdInsert" ],
+    [ "CmdInsertBlockLevelObj", "classCmdInsertBlockLevelObj.html", "classCmdInsertBlockLevelObj" ],
+    [ "CmdInsertManyStaffObjs", "classCmdInsertManyStaffObjs.html", "classCmdInsertManyStaffObjs" ],
+    [ "CmdInsertStaffObj", "classCmdInsertStaffObj.html", "classCmdInsertStaffObj" ],
+    [ "CmdJoinBeam", "classCmdJoinBeam.html", "classCmdJoinBeam" ],
+    [ "CmdMoveObjectPoint", "classCmdMoveObjectPoint.html", "classCmdMoveObjectPoint" ],
+    [ "CmdSelection", "classCmdSelection.html", "classCmdSelection" ],
+    [ "DocCmdComposite", "classDocCmdComposite.html", "classDocCmdComposite" ],
+    [ "DocCmdSimple", "classDocCmdSimple.html", "classDocCmdSimple" ],
+    [ "DocCommand", "classDocCommand.html", "classDocCommand" ],
+    [ "DocCommandExecuter", "classDocCommandExecuter.html", "classDocCommandExecuter" ],
     [ "Interactor", "classInteractor.html", "classInteractor" ],
     [ "LomseDoorway", "classLomseDoorway.html", "classLomseDoorway" ],
-    [ "Presenter", "classPresenter.html", "classPresenter" ]
+    [ "Presenter", "classPresenter.html", "classPresenter" ],
+    [ "UndoElement", "classUndoElement.html", "classUndoElement" ]
 ];

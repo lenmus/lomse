@@ -9,7 +9,8 @@ var NAVTREE =
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", null ],
         [ "Functions", "functions_func.html", null ],
-        [ "Enumerations", "functions_enum.html", null ]
+        [ "Enumerations", "functions_enum.html", null ],
+        [ "Enumerator", "functions_eval.html", null ]
       ] ]
     ] ],
     [ "Types and constants", "modules.html", "modules" ],
@@ -22,7 +23,8 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"annotated.html"
+"annotated.html",
+"classInteractor.html#a45f7fb6d5f2a8b0b6d4b5e670c96e06d"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

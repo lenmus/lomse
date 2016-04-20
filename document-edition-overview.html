@@ -104,24 +104,47 @@ $(document).ready(function(){initNavTree('document-edition-overview.html','');})
 </div><!--header-->
 <div class="contents">
 <div class="toc"><h3>Table of Contents</h3>
-<ul><li class="level1"><a href="#edit-overview">The edition API</a></li>
+<ul><li class="level1"><a href="#edit-overview">The edition API</a><ul><li class="level2"><a href="#edit-overview-undo">Undo/Redo</a></li>
+<li class="level2"><a href="#edit-overview-cursor">Cursor and selections</a></li>
+</ul>
+</li>
 <li class="level1"><a href="#edit-modes">Supported edition modes</a></li>
 <li class="level1"><a href="#edit-commands">Edition commands</a></li>
 </ul>
 </div>
 <div class="textblock"><h1><a class="anchor" id="edit-overview"></a>
 The edition API</h1>
-<p>Document elements (texts, music scores, headers, tables, etc.) can be created and modified using the edition API. This API is very simple: for your application editing a document is just invoking <a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">Interactor::exec_command()</a> method and pass the command to execute, such as <em>insert note</em> or <em>delete paragraph</em>. See <a class="el" href="document-edition-overview.html#edit-commands">Edition commands</a>.</p>
-<p>For supporting undo/redo operations Lomse maintains two queues: the history of issued commands and the list of commands that can be re-done. And Lomse provides two methods for undo/redo operations:</p>
+<p>Edition commands work by modifying the internal model of the document. This model is often named the <em>DOM</em> (Document Object Model), but in Lomse it is named the <em>Internal Model</em>. This is to distiguish it from other internal structures also modeling the document, such as the <em>Graphic Model</em>.</p>
+<p>The source document (in LDP or MusicXML format) is parsed an the <em>Internal Model</em> is built. The <em>Internal Model</em> is, mainly, a tree structure in memory. The root element of the <em>Internal Model</em> tree represents the whole document. And the children of the root element represent the basic blocks for building a document: headers, paragraphs, music scores, lists, etc.</p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Explain the <em>Internal Model</em></dd></dl>
+<p>All edition commands are objects derived from base abstract class <a class="el" href="classDocCommand.html">DocCommand</a>, and they work by modifying the <em>Internal Model</em> tree, either by inserting or removing elements or by modifying the attributes of an element. For instance, <a class="el" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj()</a> is a command for inserting a block level object. This command, as well as most commands for inserting new elements, require a parameter with the source code of the element to insert. Currently the source code for all edition commands must be in LDP format, but it is not complex to support other formats such as MusicXML for music scores or HTML for other elements. In future, when the library is more advanced, other formats could be supported.</p>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>LDP manual</dd></dl>
+<p>Executing a command is just invoking <a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">Interactor::exec_command()</a> method and passing the command to execute, for instance:</p>
+<div class="fragment"><div class="line">    <span class="comment">//insert a paragraph and an empty music score</span></div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
+<div class="line">    {</div>
+<div class="line">        <span class="keywordtype">string</span> src = <span class="stringliteral">&quot;&lt;para&gt;This is a short paragraph&lt;/para&gt;&quot;</span>;</div>
+<div class="line">        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a>(src, <span class="stringliteral">&quot;Add paragraph&quot;</span>) );</div>
+<div class="line"></div>
+<div class="line">        src = <span class="stringliteral">&quot;&lt;ldpmusic&gt;(score (vers 2.0)(instrument (musicData)))&lt;/ldpmusic&gt;&quot;</span>;</div>
+<div class="line">        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a>(src, <span class="stringliteral">&quot;Add empty music score&quot;</span>) );</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --><h2><a class="anchor" id="edit-overview-undo"></a>
+Undo/Redo</h2>
+<p>Undo/redo operations refer, respectively, to reverting the last change done to the document and to reverting the undo by re-executing the undone command.</p>
+<p>Lomse provides full support for implementing undo/redo in your application. It maintains two queues: the history of executed commands and the list of commands that can be re-done. And Lomse provides two methods for undo/redo operations:</p>
 <ul>
-<li>For undoing the last command just invoke <a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">Interactor::exec_undo()</a> method.</li>
-<li>For redoing the operation just invoke <a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">Interactor::exec_redo()</a> method.</li>
+<li>For undoing the last command in the queue just invoke <a class="el" href="classInteractor.html#a827410e940b1c1d7bcc42414d73a33aa">Interactor::exec_undo()</a> method.</li>
+<li>For redoing the operation in the queue just invoke <a class="el" href="classInteractor.html#a6571c803f6a3626793756119821101e8">Interactor::exec_redo()</a> method.</li>
 </ul>
-<p>In addition, for supporting enabling/disabling undo/redo buttons, commands and other GUI widgets in your application, Lomse provides information about the undo and redo history:</p>
+<p>In addition, to facilitate that your application can enable and disable undo/redo buttons, commands and other GUI widgets related to undo/redo, Lomse provides information about the undo and redo history:</p>
 <ul>
 <li>method <a class="el" href="classInteractor.html#abd162053d322ad64eb94159e1437ce1e">Interactor::should_enable_edit_undo()</a> returns <span class="literal">true</span> if there are commands in the undo queue, and</li>
 <li>method <a class="el" href="classInteractor.html#a1fb104713775c65888909f3f1404faad">Interactor::should_enable_edit_redo()</a> returns <span class="literal">true</span> if there are commands in the redo queue.</li>
 </ul>
+<h2><a class="anchor" id="edit-overview-cursor"></a>
+Cursor and selections</h2>
 <p>Most edition commands require a reference point in the document. For instance, a command such as <em>delete paragraph</em> would require a pointer to the paragraph to delete. Or a command <em>insert note</em> would require a pointer to the point in which the note must be inserted. For providing these references, Lomse maintains two objects: a DocCursor object and a SelectionSet object.</p>
 <p>The DocCursor object is just a pointer to an element in the document. You can think of it as the graphic cursor in text edition applications, but in Lomse, there are two objects: the DocCursor and the Caret.</p>
 <p>The cursor is just an internal invisible pointer; and the caret is the graphical representation of the cursor position. Lomse maintains the synchronization between the cursor and the caret, so advancing the cursor automatically forces Lomse to render the caret on the new cursor position. The cursor is always necessary, as it provides a reference point for edition commands. But the caret is just a graphical widget that your application can use or not, depending of the needs. For instance, in a batch application it would be non-sense to use a Caret! For moving the cursor to another position your application just issue specific edition commands, such as <em>advance cursor</em> or <em>move cursor to start of score</em>.</p>
@@ -136,12 +159,12 @@ Supported edition modes</h1>
 <li>If barlines remains at the same place and only notes and rests are shifted and can cross barlines boundaries and get placed in another measure, this behavior can be useful in some scenarios. For instance when you need to make one (ore more) beats completely disappear (and thus shift the remainder of the composition to the left by one beat). Or need two insert some <em>blank space</em> (one or more beats o whole measures), shifting to the right the rest of the music, and then you can fill in that space with what you wanted to insert. But, in general, this behavior causes a lot of trouble in music score edition. Notice that removing a note/rest in one voice and shifting all other notes in that voice implies completely <em>altering</em> the music in all the score, because music in shifted voice and music in the other voices and instruments are no longer synchronized. Let's name this behavior <em>full ripple mode</em> (notes are shifted across all the score).</li>
 </ol>
 <p>To avoid problems, another possibility is to change the behavior when a note or rest is inserted or deleted. In most cases you don't need to shift music. What you need is to add notes and rests in empty measures, but in measures having content what you need is to change a few notes or rests, but always keeping measures duration and not shifting the music. Let's call this behavior <em>replace mode</em> (the notes are replaced and measure duration is preserved).</p>
-<p>None of these behaviors is perfect. What should be Lomse behavior? Although the most usual behavior in music edition programs is the <em>replace mode</em>, the other modes can be useful in some scenarios or for some applications. As Lomse aims at not creating unnecessary constrains to your application, it was decided to support the three behaviors. For this, all edition commands related to adding or removing notes and rests require a <em>edition mode</em> parameter for selecting the desired behavior:</p>
+<p>None of these behaviors is perfect. What should be Lomse behavior? Although the most usual behavior in music edition programs is the <em>replace mode</em>, the other modes can be useful in some scenarios or for some applications. As Lomse aims at not creating unnecessary constrains to your application, it was decided to support the three behaviors. For this, all edition commands related to adding or removing notes and rests require an <em>edition mode</em> parameter for selecting the desired behavior:</p>
 <ul>
 <li><b>Limited ripple mode</b>: when inserting or deleting notes/rests the barlines are also shifted, and this could result in irregular measures, but other measures are not affected.</li>
 <li><b>Replace mode</b>: Notes and rests are not inserted. Instead they <em>overwrite</em> the music so that measure duration is maintained. Also, notes are not deleted but replaced by rests.</li>
 </ul>
-<p>For supporting full ripple mode, instead of adding more complexity to commands related to adding or removing notes and rests, it is simpler, more flexible and causes less troubles to end users, to use two specific insert/delete commands that always work in <em>full ripple mode</em>:</p>
+<p>For supporting full ripple mode, instead of adding more complexity to commands related to adding or removing notes and rests, it is simpler, more flexible and causes less trouble to end users to use two specific insert/delete commands that always work in <em>full ripple mode</em>:</p>
 <ul>
 <li>insert blank space (beats or whole measures); and</li>
 <li>delete beats/measures.</li>
@@ -150,14 +173,42 @@ Supported edition modes</h1>
 <dl class="section attention"><dt>Attention</dt><dd>Currently Lomse does not ensure the correctness of the music notation in operations resulting in music shifts. For instance, if a quarter note crosses a barline by the duration of a removed eighth note, the quarter note should be splitted into two tied eighth notes. Or when two tied notes in different measures are shifted an are now placed in the same measure, it is no longer clear if they should continue tied or should be replaced by a longer single note. As these decisions are not trivial, Lomse does not attempt (for now) to fix these situations and therefore the commands limit the operation to inserting or deleting the requested notes or rests without more considerations.</dd></dl>
 <h1><a class="anchor" id="edit-commands"></a>
 Edition commands</h1>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Describe edition commands</dd></dl>
+<p>This section presents a list of available commands (but more commands need to be programmed). For more information on each command read the class documentation for the command.</p>
+<p><b>Document edition commands:</b></p>
+<ul>
+<li><a class="el" href="classCmdAddChordNote.html">CmdAddChordNote()</a> - Add a new note to an existing note or chord.</li>
+<li><a class="el" href="classCmdAddNoteRest.html">CmdAddNoteRest()</a></li>
+<li><a class="el" href="classCmdAddTie.html">CmdAddTie()</a></li>
+<li><a class="el" href="classCmdAddTuplet.html">CmdAddTuplet()</a></li>
+<li><a class="el" href="classCmdBreakBeam.html">CmdBreakBeam()</a></li>
+<li><a class="el" href="classCmdChangeAccidentals.html">CmdChangeAccidentals()</a></li>
+<li><a class="el" href="classCmdChangeAttribute.html">CmdChangeAttribute()</a></li>
+<li><a class="el" href="classCmdChangeDots.html">CmdChangeDots()</a></li>
+<li><a class="el" href="classCmdDeleteBlockLevelObj.html">CmdDeleteBlockLevelObj()</a></li>
+<li><a class="el" href="classCmdDeleteRelation.html">CmdDeleteRelation()</a></li>
+<li><a class="el" href="classCmdDeleteSelection.html">CmdDeleteSelection()</a></li>
+<li><a class="el" href="classCmdDeleteStaffObj.html">CmdDeleteStaffObj()</a></li>
+<li><a class="el" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj()</a> - Insert a new block level object (e.g. paragraph, music score, header, etc.).</li>
+<li><a class="el" href="classCmdInsertManyStaffObjs.html">CmdInsertManyStaffObjs()</a></li>
+<li><a class="el" href="classCmdInsertStaffObj.html">CmdInsertStaffObj()</a></li>
+<li><a class="el" href="classCmdJoinBeam.html">CmdJoinBeam()</a></li>
+<li><a class="el" href="classCmdMoveObjectPoint.html">CmdMoveObjectPoint()</a></li>
+</ul>
+<p><b>Selection set commands:</b></p>
+<ul>
+<li><a class="el" href="classCmdSelection.html">CmdSelection()</a></li>
+</ul>
+<p><b>Cursor commands:</b></p>
+<ul>
+<li><a class="el" href="classCmdCursor.html">CmdCursor()</a> </li>
+</ul>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Mon Apr 18 2016 19:45:03 for Lomse library. API documentation by
+    <li class="footer">Generated on Wed Apr 20 2016 17:01:00 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

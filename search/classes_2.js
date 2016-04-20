@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['presenter',['Presenter',['../classPresenter.html',1,'']]]
+  ['interactor',['Interactor',['../classInteractor.html',1,'']]]
 ];

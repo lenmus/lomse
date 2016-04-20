@@ -165,10 +165,10 @@ $(document).ready(function(){initNavTree('lomse__presenter_8h_source.html','');}
 <div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;</div>
 <div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;<span class="comment">//excluded from public API. Only for internal use.</span></div>
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;<span class="preprocessor">#ifdef LOMSE_INTERNAL_API</span></div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;<span class="preprocessor"></span>    <a class="code" href="classPresenter.html">Presenter</a>(SpDocument spDoc, <a class="code" href="classInteractor.html">Interactor</a>* pIntor, DocCommandExecuter* pExec);</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;<span class="preprocessor"></span>    <a class="code" href="classPresenter.html">Presenter</a>(SpDocument spDoc, <a class="code" href="classInteractor.html">Interactor</a>* pIntor, <a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a>* pExec);</div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
 <div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    <a class="code" href="classInteractor.html">Interactor</a>* get_interactor_raw_ptr(<span class="keywordtype">int</span> iIntor);</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    <span class="keyword">inline</span> DocCommandExecuter* get_command_executer() { <span class="keywordflow">return</span> m_pExec; }</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    <span class="keyword">inline</span> <a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a>* get_command_executer() { <span class="keywordflow">return</span> m_pExec; }</div>
 <div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;</div>
 <div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    <span class="keywordtype">void</span> on_document_reloaded();</div>
 <div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;</div>
@@ -219,6 +219,7 @@ $(document).ready(function(){initNavTree('lomse__presenter_8h_source.html','');}
 <div class="ttc" id="classPresenter_html_af3935244d12adf2de9973953d7fa444b"><div class="ttname"><a href="classPresenter.html#af3935244d12adf2de9973953d7fa444b">Presenter::get_document_weak_ptr</a></div><div class="ttdeci">WpDocument get_document_weak_ptr()</div></div>
 <div class="ttc" id="classPresenter_html"><div class="ttname"><a href="classPresenter.html">Presenter</a></div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:51</div></div>
 <div class="ttc" id="classPresenter_html_a8eb9209a170a3d2877d4a1b763236d9d"><div class="ttname"><a href="classPresenter.html#a8eb9209a170a3d2877d4a1b763236d9d">Presenter::get_num_interactors</a></div><div class="ttdeci">int get_num_interactors()</div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:64</div></div>
+<div class="ttc" id="classDocCommandExecuter_html"><div class="ttname"><a href="classDocCommandExecuter.html">DocCommandExecuter</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:166</div></div>
 <div class="ttc" id="classPresenter_html_ab61977fd47123e876eed8ccb839bf3c8"><div class="ttname"><a href="classPresenter.html#ab61977fd47123e876eed8ccb839bf3c8">Presenter::get_interactor_shared_ptr</a></div><div class="ttdeci">SpInteractor get_interactor_shared_ptr(int iIntor)</div></div>
 <div class="ttc" id="classPresenter_html_ae3bea16ee1a9c3194525d433ec56cc9f"><div class="ttname"><a href="classPresenter.html#ae3bea16ee1a9c3194525d433ec56cc9f">Presenter::get_user_data</a></div><div class="ttdeci">void * get_user_data()</div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:118</div></div>
 <div class="ttc" id="classPresenter_html_acd6f651583829e92d4d2d3566c94adad"><div class="ttname"><a href="classPresenter.html#acd6f651583829e92d4d2d3566c94adad">Presenter::set_user_data</a></div><div class="ttdeci">void set_user_data(void *pData)</div><div class="ttdef"><b>Definition:</b> lomse_presenter.h:110</div></div>
@@ -231,7 +232,7 @@ $(document).ready(function(){initNavTree('lomse__presenter_8h_source.html','');}
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_0188a3e6da905bc60aceb35bf790b8c9.html">api</a></li><li class="navelem"><b>lomse_presenter.h</b></li>
-    <li class="footer">Generated on Mon Apr 18 2016 19:45:03 for Lomse library. API documentation by
+    <li class="footer">Generated on Wed Apr 20 2016 17:01:00 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
