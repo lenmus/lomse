@@ -2,9 +2,9 @@ var searchData=
 [
   ['click_5fevent_5fto_5fcursor_5fstate',['click_event_to_cursor_state',['../classInteractor.html#a077b8554590f3ae5890e3d42f6d779f2',1,'Interactor']]],
   ['cmdaddchordnote',['CmdAddChordNote',['../classCmdAddChordNote.html',1,'CmdAddChordNote'],['../classCmdAddChordNote.html#a033c364e124e9e5bc484f6ca1e1b935b',1,'CmdAddChordNote::CmdAddChordNote()']]],
-  ['cmdaddnoterest',['CmdAddNoteRest',['../classCmdAddNoteRest.html',1,'']]],
-  ['cmdaddtie',['CmdAddTie',['../classCmdAddTie.html',1,'']]],
-  ['cmdaddtuplet',['CmdAddTuplet',['../classCmdAddTuplet.html',1,'']]],
+  ['cmdaddnoterest',['CmdAddNoteRest',['../classCmdAddNoteRest.html',1,'CmdAddNoteRest'],['../classCmdAddNoteRest.html#abfbe2be6deeb6a6437a2165344859309',1,'CmdAddNoteRest::CmdAddNoteRest()']]],
+  ['cmdaddtie',['CmdAddTie',['../classCmdAddTie.html',1,'CmdAddTie'],['../classCmdAddTie.html#a45dbe6f9f689921bca0c1e6231d25e27',1,'CmdAddTie::CmdAddTie()']]],
+  ['cmdaddtuplet',['CmdAddTuplet',['../classCmdAddTuplet.html',1,'CmdAddTuplet'],['../classCmdAddTuplet.html#a5f0ac3d3553f91b5bba3610507b24512',1,'CmdAddTuplet::CmdAddTuplet()']]],
   ['cmdbreakbeam',['CmdBreakBeam',['../classCmdBreakBeam.html',1,'']]],
   ['cmdchangeaccidentals',['CmdChangeAccidentals',['../classCmdChangeAccidentals.html',1,'']]],
   ['cmdchangeattribute',['CmdChangeAttribute',['../classCmdChangeAttribute.html',1,'']]],

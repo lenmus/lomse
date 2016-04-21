@@ -114,6 +114,8 @@ $(document).ready(function(){initNavTree('classCmdAddNoteRest.html','');});
 <div class="title">CmdAddNoteRest Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="lomse__command_8h_source.html">lomse_command.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for CmdAddNoteRest:</div>
 <div class="dyncontent">
@@ -124,27 +126,14 @@ Inheritance diagram for CmdAddNoteRest:</div>
 <area href="classDocCommand.html" alt="DocCommand" shape="rect" coords="0,0,110,24"/>
 </map>
  </div></div>
-<table class="memberdecls">
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A command for inserting a note or a rest.</p>
+<p>See constructor for details. </p>
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:abfbe2be6deeb6a6437a2165344859309"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abfbe2be6deeb6a6437a2165344859309"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CmdAddNoteRest</b> (const string &amp;source, int editMode, const string &amp;name=&quot;&quot;)</td></tr>
+<tr class="memitem:abfbe2be6deeb6a6437a2165344859309"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdAddNoteRest.html#abfbe2be6deeb6a6437a2165344859309">CmdAddNoteRest</a> (const string &amp;source, int editMode, const string &amp;name=&quot;&quot;)</td></tr>
 <tr class="separator:abfbe2be6deeb6a6437a2165344859309"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a161676fe15927a464e38fd74e4d16c79"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a161676fe15927a464e38fd74e4d16c79"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>set_target</b> (Document *pDoc, DocCursor *pCursor, SelectionSet *pSelection)</td></tr>
-<tr class="separator:a161676fe15927a464e38fd74e4d16c79"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1f7eb908db309d5b7189f800fea1f669"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1f7eb908db309d5b7189f800fea1f669"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>perform_action</b> (Document *pDoc, DocCursor *pCursor)</td></tr>
-<tr class="separator:a1f7eb908db309d5b7189f800fea1f669"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a16d9c1f5317ff9c53d384af690a336db"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a16d9c1f5317ff9c53d384af690a336db"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>get_cursor_update_policy</b> ()</td></tr>
-<tr class="separator:a16d9c1f5317ff9c53d384af690a336db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af252bde35edae8e6d6fd8dd094f04086"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af252bde35edae8e6d6fd8dd094f04086"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>get_undo_policy</b> ()</td></tr>
-<tr class="separator:af252bde35edae8e6d6fd8dd094f04086"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab7c56348b65a805e6f5142607e9556a2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab7c56348b65a805e6f5142607e9556a2"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>get_selection_update_policy</b> ()</td></tr>
-<tr class="separator:ab7c56348b65a805e6f5142607e9556a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classDocCmdSimple"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classDocCmdSimple')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classDocCmdSimple.html">DocCmdSimple</a></td></tr>
 <tr class="memitem:ac016a50407fb24cd87e3a361e4fa31fd inherit pub_methods_classDocCmdSimple"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac016a50407fb24cd87e3a361e4fa31fd"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_composite</b> ()</td></tr>
@@ -171,13 +160,88 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:a8f5897829747c5a527d7c7f410182e30 inherit pub_types_classDocCommand"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30">ECmdSelectionPolicy</a> </td></tr>
 <tr class="separator:a8f5897829747c5a527d7c7f410182e30 inherit pub_types_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="abfbe2be6deeb6a6437a2165344859309"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CmdAddNoteRest::CmdAddNoteRest </td>
+          <td>(</td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>source</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>editMode</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>name</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This command adds a new note or rest at current cursor position. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">source</td><td>LDP source code for the note or rest to insert. </td></tr>
+    <tr><td class="paramname">editMode</td><td>Edition mode for executing the command. It must be a value from #EEditMode, either <em>k_edit_mode_replace</em> or <em>k_edit_mode_ripple</em>. See <a class="el" href="document-edition-overview.html#edit-modes">Supported edition modes</a>. <b>Attention:</b> Currently this parameter is ignored and the command always work in replace mode. </td></tr>
+    <tr><td class="paramname">name</td><td>The displayable name for the command. If not specified or empty will default to "Add note" or "Add rest" depending on object to insert.</td></tr>
+  </table>
+  </dd>
+</dl>
+<p><b>Remarks</b></p>
+<ul>
+<li>The new note or rest will be inserted <b>before</b> the object currently pointed by the cursor.</li>
+<li>After executing the command:<ul>
+<li>the selection will be cleared and the added note or rest will be selected. That is, the selection will contain only the new added note or rest.</li>
+<li>the cursor will not change its position. The inserted note/rest will be just behind the cursor.</li>
+</ul>
+</li>
+</ul>
+<p><b>Example</b></p>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandHandler::insert_note(<span class="keywordtype">string</span> stepLetter, <span class="keywordtype">int</span> octave, EAccidentals acc,</div>
+<div class="line">                                 ENoteType noteType, <span class="keywordtype">int</span> dots,</div>
+<div class="line">                                 <span class="keywordtype">int</span> voice, <span class="keywordtype">int</span> staff)</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">//insert a note at current cursor position</span></div>
+<div class="line"></div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
+<div class="line">    {</div>
+<div class="line">        stringstream src;</div>
+<div class="line">        src &lt;&lt; <span class="stringliteral">&quot;(n &quot;</span>;</div>
+<div class="line">        <span class="keywordflow">if</span> (acc != k_no_accidentals)</div>
+<div class="line">            src &lt;&lt; LdpExporter::accidentals_to_string(acc);</div>
+<div class="line">        src &lt;&lt; stepLetter &lt;&lt; octave</div>
+<div class="line">            &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; LdpExporter::notetype_to_string(noteType, dots)</div>
+<div class="line">            &lt;&lt; <span class="stringliteral">&quot; v&quot;</span> &lt;&lt; voice</div>
+<div class="line">            &lt;&lt; <span class="stringliteral">&quot; p&quot;</span> &lt;&lt; staff+1</div>
+<div class="line">            &lt;&lt; <span class="stringliteral">&quot;)&quot;</span>;</div>
+<div class="line"></div>
+<div class="line">        <span class="keywordtype">string</span> name = gettext(<span class="stringliteral">&quot;Insert note&quot;</span>) + <span class="stringliteral">&quot; (&quot;</span> + stepLetter + octave + <span class="stringliteral">&quot;)&quot;</span>;</div>
+<div class="line">        <span class="keywordtype">int</span> editMode = k_edit_mode_replace;</div>
+<div class="line">        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdAddNoteRest.html#abfbe2be6deeb6a6437a2165344859309">CmdAddNoteRest</a>(src.str(), editMode, name) );</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --> 
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classCmdAddNoteRest.html">CmdAddNoteRest</a></li>
-    <li class="footer">Generated on Wed Apr 20 2016 17:01:00 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Apr 21 2016 16:55:09 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

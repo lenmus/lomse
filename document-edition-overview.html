@@ -114,8 +114,8 @@ $(document).ready(function(){initNavTree('document-edition-overview.html','');})
 </div>
 <div class="textblock"><h1><a class="anchor" id="edit-overview"></a>
 The edition API</h1>
-<p>Edition commands work by modifying the internal model of the document. This model is often named the <em>DOM</em> (Document Object Model), but in Lomse it is named the <em>Internal Model</em>. This is to distiguish it from other internal structures also modeling the document, such as the <em>Graphic Model</em>.</p>
-<p>The source document (in LDP or MusicXML format) is parsed an the <em>Internal Model</em> is built. The <em>Internal Model</em> is, mainly, a tree structure in memory. The root element of the <em>Internal Model</em> tree represents the whole document. And the children of the root element represent the basic blocks for building a document: headers, paragraphs, music scores, lists, etc.</p>
+<p>Edition commands work by modifying the internal model of the document. This model is often named the <em>DOM</em> (Document Object Model), but in Lomse it is named the <em>Internal Model</em>. This is to distinguish it from other internal structures also modeling the document, such as the <em>Graphic Model</em>.</p>
+<p>The source document (in LDP or MusicXML format) is parsed and the <em>Internal Model</em> is built. The <em>Internal Model</em> is, mainly, a tree structure in memory. The root element of the <em>Internal Model</em> tree represents the whole document. And the children of the root element represent the basic blocks for building a document: headers, paragraphs, music scores, lists, etc.</p>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Explain the <em>Internal Model</em></dd></dl>
 <p>All edition commands are objects derived from base abstract class <a class="el" href="classDocCommand.html">DocCommand</a>, and they work by modifying the <em>Internal Model</em> tree, either by inserting or removing elements or by modifying the attributes of an element. For instance, <a class="el" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj()</a> is a command for inserting a block level object. This command, as well as most commands for inserting new elements, require a parameter with the source code of the element to insert. Currently the source code for all edition commands must be in LDP format, but it is not complex to support other formats such as MusicXML for music scores or HTML for other elements. In future, when the library is more advanced, other formats could be supported.</p>
 <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>LDP manual</dd></dl>
@@ -177,9 +177,9 @@ Edition commands</h1>
 <p><b>Document edition commands:</b></p>
 <ul>
 <li><a class="el" href="classCmdAddChordNote.html">CmdAddChordNote()</a> - Add a new note to an existing note or chord.</li>
-<li><a class="el" href="classCmdAddNoteRest.html">CmdAddNoteRest()</a></li>
-<li><a class="el" href="classCmdAddTie.html">CmdAddTie()</a></li>
-<li><a class="el" href="classCmdAddTuplet.html">CmdAddTuplet()</a></li>
+<li><a class="el" href="classCmdAddNoteRest.html">CmdAddNoteRest()</a> - Add a new note or rest at current cursor position.</li>
+<li><a class="el" href="classCmdAddTie.html">CmdAddTie()</a> - Add a tie to the two selected notes.</li>
+<li><a class="el" href="classCmdAddTuplet.html">CmdAddTuplet()</a> - Add a tuplet to the selected notes/rests.</li>
 <li><a class="el" href="classCmdBreakBeam.html">CmdBreakBeam()</a></li>
 <li><a class="el" href="classCmdChangeAccidentals.html">CmdChangeAccidentals()</a></li>
 <li><a class="el" href="classCmdChangeAttribute.html">CmdChangeAttribute()</a></li>
@@ -208,7 +208,7 @@ Edition commands</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Wed Apr 20 2016 17:01:00 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Apr 21 2016 16:55:09 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
