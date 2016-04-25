@@ -114,6 +114,8 @@ $(document).ready(function(){initNavTree('classCmdChangeAccidentals.html','');})
 <div class="title">CmdChangeAccidentals Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="lomse__command_8h_source.html">lomse_command.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for CmdChangeAccidentals:</div>
 <div class="dyncontent">
@@ -124,30 +126,14 @@ Inheritance diagram for CmdChangeAccidentals:</div>
 <area href="classDocCommand.html" alt="DocCommand" shape="rect" coords="0,0,147,24"/>
 </map>
  </div></div>
-<table class="memberdecls">
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A command for changing the accidentals of the selected notes.</p>
+<p>See constructor for details. </p>
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a02dd90b985e80ff0c2006e22d7f21366"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a02dd90b985e80ff0c2006e22d7f21366"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CmdChangeAccidentals</b> (EAccidentals acc, const string &amp;name=&quot;Change accidentals&quot;)</td></tr>
+<tr class="memitem:a02dd90b985e80ff0c2006e22d7f21366"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdChangeAccidentals.html#a02dd90b985e80ff0c2006e22d7f21366">CmdChangeAccidentals</a> (EAccidentals acc, const string &amp;name=&quot;Change accidentals&quot;)</td></tr>
 <tr class="separator:a02dd90b985e80ff0c2006e22d7f21366"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a266a4e54974f4892e7a45799881e8f9d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a266a4e54974f4892e7a45799881e8f9d"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>set_target</b> (Document *pDoc, DocCursor *pCursor, SelectionSet *pSelection)</td></tr>
-<tr class="separator:a266a4e54974f4892e7a45799881e8f9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a082366978fe463a6d312d24e16f5ae"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1a082366978fe463a6d312d24e16f5ae"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>perform_action</b> (Document *pDoc, DocCursor *pCursor)</td></tr>
-<tr class="separator:a1a082366978fe463a6d312d24e16f5ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afdc3768e72763368cb3126875b22d34a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afdc3768e72763368cb3126875b22d34a"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>get_cursor_update_policy</b> ()</td></tr>
-<tr class="separator:afdc3768e72763368cb3126875b22d34a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a10d5ff02fcddea99575c8da76ae9c739"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a10d5ff02fcddea99575c8da76ae9c739"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>undo_action</b> (Document *pDoc, DocCursor *pCursor)</td></tr>
-<tr class="separator:a10d5ff02fcddea99575c8da76ae9c739"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abbf9d83a1d3428947b10ac4e641fc77a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abbf9d83a1d3428947b10ac4e641fc77a"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>get_undo_policy</b> ()</td></tr>
-<tr class="separator:abbf9d83a1d3428947b10ac4e641fc77a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a710e61b64b70bf3d06b28076ffa5af5c"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a710e61b64b70bf3d06b28076ffa5af5c"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>get_selection_update_policy</b> ()</td></tr>
-<tr class="separator:a710e61b64b70bf3d06b28076ffa5af5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classDocCmdSimple"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classDocCmdSimple')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classDocCmdSimple.html">DocCmdSimple</a></td></tr>
 <tr class="memitem:ac016a50407fb24cd87e3a361e4fa31fd inherit pub_methods_classDocCmdSimple"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac016a50407fb24cd87e3a361e4fa31fd"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_composite</b> ()</td></tr>
@@ -174,13 +160,70 @@ Additional Inherited Members</h2></td></tr>
 <tr class="memitem:a8f5897829747c5a527d7c7f410182e30 inherit pub_types_classDocCommand"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30">ECmdSelectionPolicy</a> </td></tr>
 <tr class="separator:a8f5897829747c5a527d7c7f410182e30 inherit pub_types_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a02dd90b985e80ff0c2006e22d7f21366"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CmdChangeAccidentals::CmdChangeAccidentals </td>
+          <td>(</td>
+          <td class="paramtype">EAccidentals&#160;</td>
+          <td class="paramname"><em>acc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>name</em> = <code>&quot;Change&#160;accidentals&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This command changes the accidentals of the selected notes. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">acc</td><td>The new accidentals to put on the selected notes. It must be a value from enum #EAccidentals. </td></tr>
+    <tr><td class="paramname">name</td><td>The displayable name for the command. If not specified will default to "Change accidentals".</td></tr>
+  </table>
+  </dd>
+</dl>
+<p><b>Remarks</b></p>
+<ul>
+<li>If the selection is empy or does not contain notes, the command will not be executed and will return a failure code.</li>
+<li>After executing the command:<ul>
+<li>the selection will not be changed.</li>
+<li>the cursor will not change its position.</li>
+</ul>
+</li>
+</ul>
+<p><b>Example</b></p>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandHandler::change_note_accidentals(EAccidentals acc)</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">//change note accidentals for current selected notes</span></div>
+<div class="line"></div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
+<div class="line">    {</div>
+<div class="line">            <span class="keywordtype">string</span> name = gettext(<span class="stringliteral">&quot;Change note accidentals&quot;</span>);</div>
+<div class="line">            <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdChangeAccidentals.html#a02dd90b985e80ff0c2006e22d7f21366">CmdChangeAccidentals</a>(acc, name) )</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000006">Todo:</a></b></dt><dd>Document EAccidentals</dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classCmdChangeAccidentals.html">CmdChangeAccidentals</a></li>
-    <li class="footer">Generated on Thu Apr 21 2016 16:55:09 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon Apr 25 2016 16:54:15 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
