@@ -115,6 +115,8 @@ $(document).ready(function(){initNavTree('classCmdCursor.html','');});
 <div class="title">CmdCursor Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="lomse__command_8h_source.html">lomse_command.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for CmdCursor:</div>
 <div class="dyncontent">
@@ -125,11 +127,14 @@ Inheritance diagram for CmdCursor:</div>
 <area href="classDocCommand.html" alt="DocCommand" shape="rect" coords="0,0,97,24"/>
 </map>
  </div></div>
-<table class="memberdecls">
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A command for moving the cursor to a new position.</p>
+<p>See constructors for details. There are different options for specifying the new cursor position. </p>
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a398e5cb627d6f28cc01ea045b90adb13"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"></td></tr>
-<tr class="separator:a398e5cb627d6f28cc01ea045b90adb13"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8041aac6663ce2523a6fbcea3201fa8"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">ECursorAction</a> </td></tr>
+<tr class="separator:ad8041aac6663ce2523a6fbcea3201fa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_types_classDocCommand"><td colspan="2" onclick="javascript:toggleInherit('pub_types_classDocCommand')"><img src="closed.png" alt="-"/>&#160;Public Types inherited from <a class="el" href="classDocCommand.html">DocCommand</a></td></tr>
 <tr class="memitem:a2ee82e62ad143d6c827a47312afd7add inherit pub_types_classDocCommand"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7add">ECmdCursorPolicy</a> </td></tr>
 <tr class="separator:a2ee82e62ad143d6c827a47312afd7add inherit pub_types_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -140,39 +145,16 @@ Public Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a46aea2623fc1f5b2321d7da8fcc21b69"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a46aea2623fc1f5b2321d7da8fcc21b69"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CmdCursor</b> (int cmd, const string &amp;name=&quot;&quot;)</td></tr>
-<tr class="separator:a46aea2623fc1f5b2321d7da8fcc21b69"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acd611afc34c8451a904122497fc7b06e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="acd611afc34c8451a904122497fc7b06e"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CmdCursor</b> (int cmd, ImoId id, const string &amp;name=&quot;&quot;)</td></tr>
-<tr class="separator:acd611afc34c8451a904122497fc7b06e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad467109ca620d5c881416983f14c51b0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad467109ca620d5c881416983f14c51b0"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CmdCursor</b> (int measure, int instr, int staff, const string &amp;name=&quot;&quot;)</td></tr>
+<tr class="memitem:a29b02390a6756f023d79818528812abe"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a> (<a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">ECursorAction</a> cmd, const string &amp;name=&quot;&quot;)</td></tr>
+<tr class="separator:a29b02390a6756f023d79818528812abe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53c56633153e9d43679907124b568404"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdCursor.html#a53c56633153e9d43679907124b568404">CmdCursor</a> (ImoId id, const string &amp;name=&quot;&quot;)</td></tr>
+<tr class="separator:a53c56633153e9d43679907124b568404"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad467109ca620d5c881416983f14c51b0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdCursor.html#ad467109ca620d5c881416983f14c51b0">CmdCursor</a> (int measure, int instr, int staff, const string &amp;name=&quot;&quot;)</td></tr>
 <tr class="separator:ad467109ca620d5c881416983f14c51b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a17311885bb708fffb61a83b6acb550e2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a17311885bb708fffb61a83b6acb550e2"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CmdCursor</b> (TimeUnits time, int instr, int staff, const string &amp;name=&quot;&quot;)</td></tr>
+<tr class="memitem:a17311885bb708fffb61a83b6acb550e2"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdCursor.html#a17311885bb708fffb61a83b6acb550e2">CmdCursor</a> (TimeUnits time, int instr, int staff, const string &amp;name=&quot;&quot;)</td></tr>
 <tr class="separator:a17311885bb708fffb61a83b6acb550e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a91b8348d36c7dc352249c03fde12c2f6"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a91b8348d36c7dc352249c03fde12c2f6"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CmdCursor</b> (DocCursorState &amp;state, const string &amp;name=&quot;&quot;)</td></tr>
+<tr class="memitem:a91b8348d36c7dc352249c03fde12c2f6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdCursor.html#a91b8348d36c7dc352249c03fde12c2f6">CmdCursor</a> (DocCursorState &amp;state, const string &amp;name=&quot;&quot;)</td></tr>
 <tr class="separator:a91b8348d36c7dc352249c03fde12c2f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a18727c281c1d181b290f974d266b1023"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a18727c281c1d181b290f974d266b1023"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>set_target</b> (Document *pDoc, DocCursor *pCursor, SelectionSet *pSelection)</td></tr>
-<tr class="separator:a18727c281c1d181b290f974d266b1023"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af0b17ae19ea9278d57d234cc1d17e7c3"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af0b17ae19ea9278d57d234cc1d17e7c3"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>perform_action</b> (Document *pDoc, DocCursor *pCursor)</td></tr>
-<tr class="separator:af0b17ae19ea9278d57d234cc1d17e7c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a18e2801d6e1767dc2e26ffe3445ca1fc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a18e2801d6e1767dc2e26ffe3445ca1fc"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>undo_action</b> (Document *pDoc, DocCursor *pCursor)</td></tr>
-<tr class="separator:a18e2801d6e1767dc2e26ffe3445ca1fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a06c379dc51e2982f185cdc72693767e9"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a06c379dc51e2982f185cdc72693767e9"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>get_cursor_update_policy</b> ()</td></tr>
-<tr class="separator:a06c379dc51e2982f185cdc72693767e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e08c9e6335207228bdd9bc9746845cf"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a6e08c9e6335207228bdd9bc9746845cf"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>get_undo_policy</b> ()</td></tr>
-<tr class="separator:a6e08c9e6335207228bdd9bc9746845cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3b3653268195b7dc434d28e3bd3cf423"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a3b3653268195b7dc434d28e3bd3cf423"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>get_selection_update_policy</b> ()</td></tr>
-<tr class="separator:a3b3653268195b7dc434d28e3bd3cf423"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classDocCmdSimple"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classDocCmdSimple')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classDocCmdSimple.html">DocCmdSimple</a></td></tr>
 <tr class="memitem:ac016a50407fb24cd87e3a361e4fa31fd inherit pub_methods_classDocCmdSimple"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac016a50407fb24cd87e3a361e4fa31fd"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_composite</b> ()</td></tr>
@@ -189,13 +171,430 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_composite</b> ()</
 <tr class="memitem:a4fcd738f3a6c0f375b44f16987a5937b inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a4fcd738f3a6c0f375b44f16987a5937b">get_error</a> ()</td></tr>
 <tr class="separator:a4fcd738f3a6c0f375b44f16987a5937b inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Enumeration Documentation</h2>
+<a class="anchor" id="ad8041aac6663ce2523a6fbcea3201fa8"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">CmdCursor::ECursorAction</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This enum describes the posible actions for <a class="el" href="classCmdCursor.html">CmdCursor</a> commands. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="ad8041aac6663ce2523a6fbcea3201fa8aedfbb4fe1effda85019b800a3258de2c"></a>k_move_next</em>&#160;</td><td class="fielddoc">
+<p>Move cursor to the next valid position. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ad8041aac6663ce2523a6fbcea3201fa8a0d8f3282a6d280fe4070174d47dfb7b3"></a>k_move_prev</em>&#160;</td><td class="fielddoc">
+<p>Move cursor to the previous valid position. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ad8041aac6663ce2523a6fbcea3201fa8a900ed49cd3c564b3854cae4acc0bea8f"></a>k_enter</em>&#160;</td><td class="fielddoc">
+<p>When cursor is pointing to a top level element, this action causes the cursor to enter into this top level element and point to first sub-element. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ad8041aac6663ce2523a6fbcea3201fa8afdce23cac5c729639e3623f4318f1aae"></a>k_exit</em>&#160;</td><td class="fielddoc">
+<p>When cursor is inside a top level element, this action causes the cursor to move up, out of this top level element, and to point to it. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ad8041aac6663ce2523a6fbcea3201fa8a396248433b812cdf7cb3cb9ceb9ea77c"></a>k_point_to</em>&#160;</td><td class="fielddoc">
+<p>Move cursor to the specified element. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ad8041aac6663ce2523a6fbcea3201fa8aae02b727a5b3f85ee51374697b1d0d9c"></a>k_to_state</em>&#160;</td><td class="fielddoc">
+<p>Move cursor to the specified state. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ad8041aac6663ce2523a6fbcea3201fa8a53258dae633b7b18d074e3aeb4039313"></a>k_to_measure</em>&#160;</td><td class="fielddoc">
+<p>When cursor is inside of a music score, this action moves the cursor to the specified measure. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ad8041aac6663ce2523a6fbcea3201fa8ae9bc640e47055c33ba94153bbee8d45c"></a>k_to_time</em>&#160;</td><td class="fielddoc">
+<p>When cursor is inside of a music score, this action moves the cursor to the specified time position. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ad8041aac6663ce2523a6fbcea3201fa8a15413e384ea656a771ef55dcfaafcf15"></a>k_move_up</em>&#160;</td><td class="fielddoc">
+<p>When cursor is inside of a music score, this action moves the cursor to the previous staff or system, pointing to the nearest note or rest to current vertical position. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ad8041aac6663ce2523a6fbcea3201fa8a1ea6d02c815b4dfbc8f562200c4403af"></a>k_move_down</em>&#160;</td><td class="fielddoc">
+<p>When cursor is inside of a music score, this action moves the cursor to the next staff or system, pointing to the nearest note or rest to current vertical position. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ad8041aac6663ce2523a6fbcea3201fa8a82a913a91cb3e7c7feab2a30e141222b"></a>k_cursor_dump</em>&#160;</td><td class="fielddoc">
+<p>This action is restricted for debugging Lomse. Your application should not use it. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a29b02390a6756f023d79818528812abe"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CmdCursor::CmdCursor </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">ECursorAction</a>&#160;</td>
+          <td class="paramname"><em>cmd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>name</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This command moves the cursor to a new position, as specified by parameter <em>cmd</em>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cmd</td><td>The action to be performed. It must be one of the following values from enum <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">ECursorAction</a>: <em>k_move_next</em>, <em>k_move_prev</em>, <em>k_enter</em>, <em>k_exit</em>, <em>k_move_up</em>, <em>k_move_down</em> or <em>k_cursor_dump</em>. </td></tr>
+    <tr><td class="paramname">cmdName</td><td>The displayable name for the command. If not specified or empty will default to one of the following vaues, depending on the requested action: "Cursor: move next", "Cursor: move prev", "Cursor: move up", "Cursor: move down", "Cursor: enter element" or "Cursor: exit element".</td></tr>
+  </table>
+  </dd>
+</dl>
+<p><b>Remarks</b></p>
+<ul>
+<li>After executing the command:<ul>
+<li>the selection will not be changed.</li>
+<li>the cursor will point to a new position.</li>
+</ul>
+</li>
+<li>CmdCursor is a non-reversible command, meaning that it is not saved in the undo/redo history and, therefore, undo and redo operations are not available for this command.</li>
+</ul>
+<p><b>Example</b></p>
+<div class="fragment"><div class="line"><span class="keywordtype">bool</span> CommandHandler::process_cursor_key_command(<span class="keywordtype">int</span> keyCmd)</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">//A key has been pressed in the keyboard. The command implied by the</span></div>
+<div class="line">    <span class="comment">//pressed key is passed to this method. If it is a cursor command</span></div>
+<div class="line">    <span class="comment">//it will be processed here and TRUE is returned.</span></div>
+<div class="line"></div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
+<div class="line">    {</div>
+<div class="line">        <span class="comment">//cursor is only valid if document edition is enabled</span></div>
+<div class="line">        <span class="keywordflow">if</span> (!spInteractor-&gt;is_edition_enabled())</div>
+<div class="line">            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"></div>
+<div class="line">        <span class="keywordflow">switch</span> (keyCmd)</div>
+<div class="line">        {</div>
+<div class="line">            <span class="comment">//cursor keys</span></div>
+<div class="line">            <span class="keywordflow">case</span> k_cmd_cursor_move_prev:</div>
+<div class="line">                <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(<a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a0d8f3282a6d280fe4070174d47dfb7b3">CmdCursor::k_move_prev</a>) );</div>
+<div class="line">                <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"></div>
+<div class="line">            <span class="keywordflow">case</span> k_cmd_cursor_move_next:</div>
+<div class="line">                <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(<a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aedfbb4fe1effda85019b800a3258de2c">CmdCursor::k_move_next</a>) );</div>
+<div class="line">                <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"></div>
+<div class="line">            <span class="keywordflow">case</span> k_cmd_cursor_exit:</div>
+<div class="line">                <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(<a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8afdce23cac5c729639e3623f4318f1aae">CmdCursor::k_exit</a>) );</div>
+<div class="line">                <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"></div>
+<div class="line">            <span class="keywordflow">case</span> k_cmd_cursor_enter:</div>
+<div class="line">            {</div>
+<div class="line">                <span class="keywordflow">if</span> (!m_cursor-&gt;is_inside_terminal_node())</div>
+<div class="line">                {</div>
+<div class="line">                    ImoObj* pImo = m_cursor-&gt;get_pointee();</div>
+<div class="line">                    <span class="keywordflow">if</span> (pImo &amp;&amp; pImo-&gt;is_score())</div>
+<div class="line">                    {</div>
+<div class="line">                        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(<a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a900ed49cd3c564b3854cae4acc0bea8f">CmdCursor::k_enter</a>) );</div>
+<div class="line">                        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line">                    }</div>
+<div class="line">                }</div>
+<div class="line">                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">            }</div>
+<div class="line"></div>
+<div class="line">            <span class="keywordflow">case</span> k_cmd_cursor_to_next_measure:</div>
+<div class="line">            <span class="keywordflow">case</span> k_cmd_cursor_to_prev_measure:</div>
+<div class="line">            <span class="keywordflow">case</span> k_cmd_cursor_to_first_measure:</div>
+<div class="line">            <span class="keywordflow">case</span> k_cmd_cursor_to_last_measure:</div>
+<div class="line">            {</div>
+<div class="line">                ImoObj* pImo = m_cursor-&gt;get_parent_object();</div>
+<div class="line">                <span class="keywordflow">if</span> (pImo &amp;&amp; pImo-&gt;is_score())</div>
+<div class="line">                {</div>
+<div class="line">                    ScoreCursor* pSC =</div>
+<div class="line">                        <span class="keyword">static_cast&lt;</span>ScoreCursor*<span class="keyword">&gt;</span>(m_cursor-&gt;get_inner_cursor());</div>
+<div class="line">                    <span class="keywordtype">int</span> measure = pSC-&gt;measure();</div>
+<div class="line">                    <span class="keywordflow">if</span> (keyCmd == k_cmd_cursor_to_next_measure)</div>
+<div class="line">                        ++measure;</div>
+<div class="line">                    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (keyCmd == k_cmd_cursor_to_prev_measure)</div>
+<div class="line">                    {</div>
+<div class="line">                        <span class="keywordflow">if</span> (measure &gt; 0) --measure;</div>
+<div class="line">                    }</div>
+<div class="line">                    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (keyCmd == k_cmd_cursor_to_first_measure)</div>
+<div class="line">                        measure = 0;</div>
+<div class="line">                    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (keyCmd == k_cmd_cursor_to_last_measure)</div>
+<div class="line">                        measure = 9999999;</div>
+<div class="line">                    <span class="keywordflow">else</span>;</div>
+<div class="line"></div>
+<div class="line">                    <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(measure, -1, -1) );</div>
+<div class="line">                    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line">                }</div>
+<div class="line">                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">            }</div>
+<div class="line"></div>
+<div class="line">            <span class="keywordflow">case</span> k_cmd_cursor_move_up:</div>
+<div class="line">            <span class="keywordflow">case</span> k_cmd_cursor_move_down:</div>
+<div class="line">            {</div>
+<div class="line">                ImoObj* pImo = m_cursor-&gt;get_parent_object();</div>
+<div class="line">                <span class="keywordflow">if</span> (pImo &amp;&amp; pImo-&gt;is_score())</div>
+<div class="line">                {</div>
+<div class="line">                    <span class="keywordflow">if</span> (keyCmd == k_cmd_cursor_move_up)</div>
+<div class="line">                        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(<a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a15413e384ea656a771ef55dcfaafcf15">CmdCursor::k_move_up</a>) );</div>
+<div class="line">                    <span class="keywordflow">else</span></div>
+<div class="line">                        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(<a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a1ea6d02c815b4dfbc8f562200c4403af">CmdCursor::k_move_down</a>) );</div>
+<div class="line">                    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line">                }</div>
+<div class="line">                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">            }</div>
+<div class="line"></div>
+<div class="line">            <span class="keywordflow">default</span>:</div>
+<div class="line">                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">        }</div>
+<div class="line">    }</div>
+<div class="line">    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">}</div>
+</div><!-- fragment --> 
+</div>
+</div>
+<a class="anchor" id="a53c56633153e9d43679907124b568404"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CmdCursor::CmdCursor </td>
+          <td>(</td>
+          <td class="paramtype">ImoId&#160;</td>
+          <td class="paramname"><em>id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>name</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This command moves the cursor for pointing to element specified by parameter <em>id</em>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cmdName</td><td>The displayable name for the command. If not specified or empty will default to "Cursor: point to".</td></tr>
+  </table>
+  </dd>
+</dl>
+<p><b>Remarks</b></p>
+<ul>
+<li>After executing the command:<ul>
+<li>the selection will not be changed.</li>
+<li>the cursor will point to a new position.</li>
+</ul>
+</li>
+<li>CmdCursor is a non-reversible command, meaning that it is not saved in the undo/redo history and, therefore, undo and redo operations are not available for this command. </li>
+</ul>
+
+</div>
+</div>
+<a class="anchor" id="ad467109ca620d5c881416983f14c51b0"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CmdCursor::CmdCursor </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>measure</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>instr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>staff</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>name</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>When the cursor is inside a music score, this command moves the cursor for pointing to the first element (note, rest, clef, etc.) in the measure specified by parameter <em>measure</em>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">measure</td><td>The measure to move the cursor to (0..n). </td></tr>
+    <tr><td class="paramname">instr</td><td>The instrument to move the cursor to. Value -1 means "remain in current instrumnent". For move to another instrument use instrument number (0 ... num_instruments - 1). </td></tr>
+    <tr><td class="paramname">staff</td><td>The staff to move the cursor to. Value -1 means "remain in current staff". For move to another staff use staff number (0 ... num_staves - 1). </td></tr>
+    <tr><td class="paramname">cmdName</td><td>The displayable name for the command. If not specified or empty will default to "Cursor: jump to new place".</td></tr>
+  </table>
+  </dd>
+</dl>
+<p><b>Remarks</b></p>
+<ul>
+<li>After executing the command:<ul>
+<li>the selection will not be changed.</li>
+<li>the cursor will point to a new position.</li>
+</ul>
+</li>
+<li>CmdCursor is a non-reversible command, meaning that it is not saved in the undo/redo history and, therefore, undo and redo operations are not available for this command.</li>
+</ul>
+<p><b>Example</b></p>
+<div class="fragment"><div class="line"><span class="keywordflow">switch</span> (keyCmd)</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">case</span> k_cmd_cursor_to_next_measure:</div>
+<div class="line">    <span class="keywordflow">case</span> k_cmd_cursor_to_prev_measure:</div>
+<div class="line">    <span class="keywordflow">case</span> k_cmd_cursor_to_first_measure:</div>
+<div class="line">    <span class="keywordflow">case</span> k_cmd_cursor_to_last_measure:</div>
+<div class="line">    {</div>
+<div class="line">        ImoObj* pImo = m_cursor-&gt;get_parent_object();</div>
+<div class="line">        <span class="keywordflow">if</span> (pImo &amp;&amp; pImo-&gt;is_score())</div>
+<div class="line">        {</div>
+<div class="line">            ScoreCursor* pSC =</div>
+<div class="line">                <span class="keyword">static_cast&lt;</span>ScoreCursor*<span class="keyword">&gt;</span>(m_cursor-&gt;get_inner_cursor());</div>
+<div class="line">            <span class="keywordtype">int</span> measure = pSC-&gt;measure();</div>
+<div class="line">            <span class="keywordflow">if</span> (keyCmd == k_cmd_cursor_to_next_measure)</div>
+<div class="line">                ++measure;</div>
+<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (keyCmd == k_cmd_cursor_to_prev_measure)</div>
+<div class="line">            {</div>
+<div class="line">                <span class="keywordflow">if</span> (measure &gt; 0) --measure;</div>
+<div class="line">            }</div>
+<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (keyCmd == k_cmd_cursor_to_first_measure)</div>
+<div class="line">                measure = 0;</div>
+<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span> (keyCmd == k_cmd_cursor_to_last_measure)</div>
+<div class="line">                measure = 9999999;</div>
+<div class="line">            <span class="keywordflow">else</span>;</div>
+<div class="line"></div>
+<div class="line">            <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(measure, -1, -1) );</div>
+<div class="line">            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line">        }</div>
+<div class="line">        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line">    }</div>
+<div class="line">    ...</div>
+<div class="line">}</div>
+</div><!-- fragment --> 
+</div>
+</div>
+<a class="anchor" id="a17311885bb708fffb61a83b6acb550e2"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CmdCursor::CmdCursor </td>
+          <td>(</td>
+          <td class="paramtype">TimeUnits&#160;</td>
+          <td class="paramname"><em>time</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>instr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>staff</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>name</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>When the cursor is inside a music score, this command moves the cursor for pointing to a time position equal than the specified by parameter <em>time</em>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">time</td><td>The new time position to move the cursor to. </td></tr>
+    <tr><td class="paramname">instr</td><td>The instrument to move the cursor to. Value -1 means "remain in current instrumnent". For move to another instrument use instrument number (0 ... num_instruments - 1). </td></tr>
+    <tr><td class="paramname">staff</td><td>The staff to move the cursor to. Value -1 means "remain in current staff". For move to another staff use staff number (0 ... num_staves - 1). </td></tr>
+    <tr><td class="paramname">cmdName</td><td>The displayable name for the command. If not specified or empty will default to "Cursor: jump to new place".</td></tr>
+  </table>
+  </dd>
+</dl>
+<p><b>Remarks</b></p>
+<ul>
+<li>After executing the command:<ul>
+<li>the selection will not be changed.</li>
+<li>the cursor will point to a new position.</li>
+</ul>
+</li>
+<li>CmdCursor is a non-reversible command, meaning that it is not saved in the undo/redo history and, therefore, undo and redo operations are not available for this command. </li>
+</ul>
+
+</div>
+</div>
+<a class="anchor" id="a91b8348d36c7dc352249c03fde12c2f6"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CmdCursor::CmdCursor </td>
+          <td>(</td>
+          <td class="paramtype">DocCursorState &amp;&#160;</td>
+          <td class="paramname"><em>state</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>name</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This command moves the cursor to the state specified by parameter <em>state</em>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state</td><td>The new state for the cursor. </td></tr>
+    <tr><td class="paramname">cmdName</td><td>The displayable name for the command. If not specified or empty will default to "Cursor: jump to new place".</td></tr>
+  </table>
+  </dd>
+</dl>
+<p><b>Remarks</b></p>
+<ul>
+<li>After executing the command:<ul>
+<li>the selection will not be changed.</li>
+<li>the cursor will point to a new position.</li>
+</ul>
+</li>
+<li>CmdCursor is a non-reversible command, meaning that it is not saved in the undo/redo history and, therefore, undo and redo operations are not available for this command. </li>
+</ul>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classCmdCursor.html">CmdCursor</a></li>
-    <li class="footer">Generated on Mon Apr 25 2016 16:54:15 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Apr 26 2016 17:34:10 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

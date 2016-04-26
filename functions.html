@@ -170,7 +170,13 @@ $(document).ready(function(){initNavTree('functions.html','');});
 : <a class="el" href="classCmdChangeAccidentals.html#a02dd90b985e80ff0c2006e22d7f21366">CmdChangeAccidentals</a>
 </li>
 <li>CmdChangeAttribute()
-: <a class="el" href="classCmdChangeAttribute.html#a73e1c5a734cbcbb473e18dd0b4f8b67a">CmdChangeAttribute</a>
+: <a class="el" href="classCmdChangeAttribute.html#a79a4d12c9accd4119bc4f49f287cc165">CmdChangeAttribute</a>
+</li>
+<li>CmdChangeDots()
+: <a class="el" href="classCmdChangeDots.html#addd6ad21bb5806e37556721ed951378e">CmdChangeDots</a>
+</li>
+<li>CmdCursor()
+: <a class="el" href="classCmdCursor.html#a17311885bb708fffb61a83b6acb550e2">CmdCursor</a>
 </li>
 <li>CmdInsertBlockLevelObj()
 : <a class="el" href="classCmdInsertBlockLevelObj.html#ac65c374bf4ba414985214ca3385e40fb">CmdInsertBlockLevelObj</a>
@@ -200,6 +206,9 @@ $(document).ready(function(){initNavTree('functions.html','');});
 </li>
 <li>ECmdUndoPolicy
 : <a class="el" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173b">DocCommand</a>
+</li>
+<li>ECursorAction
+: <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">CmdCursor</a>
 </li>
 <li>EInteractorOpMode
 : <a class="el" href="classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8">Interactor</a>
@@ -346,8 +355,32 @@ $(document).ready(function(){initNavTree('functions.html','');});
 
 
 <h3><a class="anchor" id="index_k"></a>- k -</h3><ul>
+<li>k_cursor_dump
+: <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a82a913a91cb3e7c7feab2a30e141222b">CmdCursor</a>
+</li>
 <li>k_do_nothing
 : <a class="el" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7addacb7d2c957a249b23d34dfb270e7d631f">DocCommand</a>
+</li>
+<li>k_enter
+: <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a900ed49cd3c564b3854cae4acc0bea8f">CmdCursor</a>
+</li>
+<li>k_exit
+: <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8afdce23cac5c729639e3623f4318f1aae">CmdCursor</a>
+</li>
+<li>k_move_down
+: <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a1ea6d02c815b4dfbc8f562200c4403af">CmdCursor</a>
+</li>
+<li>k_move_next
+: <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aedfbb4fe1effda85019b800a3258de2c">CmdCursor</a>
+</li>
+<li>k_move_prev
+: <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a0d8f3282a6d280fe4070174d47dfb7b3">CmdCursor</a>
+</li>
+<li>k_move_up
+: <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a15413e384ea656a771ef55dcfaafcf15">CmdCursor</a>
+</li>
+<li>k_point_to
+: <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a396248433b812cdf7cb3cb9ceb9ea77c">CmdCursor</a>
 </li>
 <li>k_refresh
 : <a class="el" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7adda98ced85e4c68d82628807d38f1c82eed">DocCommand</a>
@@ -360,6 +393,15 @@ $(document).ready(function(){initNavTree('functions.html','');});
 </li>
 <li>k_sel_do_nothing
 : <a class="el" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30ac492f71c4619a39a2e6bc17609d10ddb">DocCommand</a>
+</li>
+<li>k_to_measure
+: <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a53258dae633b7b18d074e3aeb4039313">CmdCursor</a>
+</li>
+<li>k_to_state
+: <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aae02b727a5b3f85ee51374697b1d0d9c">CmdCursor</a>
+</li>
+<li>k_to_time
+: <a class="el" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8ae9bc640e47055c33ba94153bbee8d45c">CmdCursor</a>
 </li>
 <li>k_undo_policy_full_checkpoint
 : <a class="el" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173ba1ab5572a41d7a3792fee7f3f2955579c">DocCommand</a>
@@ -558,7 +600,7 @@ $(document).ready(function(){initNavTree('functions.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Apr 25 2016 16:54:15 for Lomse library. API documentation by
+    <li class="footer">Generated on Tue Apr 26 2016 17:34:11 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
