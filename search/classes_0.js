@@ -19,6 +19,5 @@ var searchData=
   ['cmdinsertmanystaffobjs',['CmdInsertManyStaffObjs',['../classCmdInsertManyStaffObjs.html',1,'']]],
   ['cmdinsertstaffobj',['CmdInsertStaffObj',['../classCmdInsertStaffObj.html',1,'']]],
   ['cmdjoinbeam',['CmdJoinBeam',['../classCmdJoinBeam.html',1,'']]],
-  ['cmdmoveobjectpoint',['CmdMoveObjectPoint',['../classCmdMoveObjectPoint.html',1,'']]],
   ['cmdselection',['CmdSelection',['../classCmdSelection.html',1,'']]]
 ];

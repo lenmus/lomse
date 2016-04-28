@@ -105,485 +105,499 @@ $(document).ready(function(){initNavTree('lomse__command_8h_source.html','');});
 <div class="contents">
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;</div>
 <div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment">//edition modes</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="keyword">enum</span> EEditMode</div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;{</div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;    k_edit_mode_replace = 0,</div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;    k_edit_mode_ripple,</div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;};</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">// interface for any command to modify the document</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno"><a class="line" href="classDocCommand.html">   15</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classDocCommand.html">DocCommand</a></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;{</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00021"></a><span class="lineno"><a class="line" href="classDocCommand.html#a242c0e33ef744f0b1958ac0c4176f823">   21</a></span>&#160;    <span class="keyword">virtual</span> <a class="code" href="classDocCommand.html#a242c0e33ef744f0b1958ac0c4176f823">~DocCommand</a>() {}</div>
+<div class="line"><a name="l00012"></a><span class="lineno"><a class="line" href="group__enumerations.html#gac8538ac72eeeed032d54ce597bbb7d70">   12</a></span>&#160;<span class="comment"></span><span class="keyword">enum</span> <a class="code" href="group__enumerations.html#gac8538ac72eeeed032d54ce597bbb7d70">EEditMode</a></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;{</div>
+<div class="line"><a name="l00014"></a><span class="lineno"><a class="line" href="group__enumerations.html#ggac8538ac72eeeed032d54ce597bbb7d70a008fa35bf0c9fc83c63f3311581eee97">   14</a></span>&#160;    <a class="code" href="group__enumerations.html#ggac8538ac72eeeed032d54ce597bbb7d70a008fa35bf0c9fc83c63f3311581eee97">k_edit_mode_replace</a> = 0,    </div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
+<div class="line"><a name="l00018"></a><span class="lineno"><a class="line" href="group__enumerations.html#ggac8538ac72eeeed032d54ce597bbb7d70a1d9998199bd218f26d72781d091203d4">   18</a></span>&#160;    <a class="code" href="group__enumerations.html#ggac8538ac72eeeed032d54ce597bbb7d70a1d9998199bd218f26d72781d091203d4">k_edit_mode_ripple</a>,         </div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;};</div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;    <span class="comment">//cursor update policy to be used with this command</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7add">   27</a></span>&#160;<span class="comment"></span>    <span class="keyword">enum</span> <a class="code" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7add">ECmdCursorPolicy</a> {</div>
-<div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7addacb7d2c957a249b23d34dfb270e7d631f">   28</a></span>&#160;        <a class="code" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7addacb7d2c957a249b23d34dfb270e7d631f">k_do_nothing</a>=0,             </div>
-<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7addaeac986cda2b789c233284477ca789e95">   29</a></span>&#160;        <a class="code" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7addaeac986cda2b789c233284477ca789e95">k_update_after_deletion</a>,    </div>
-<div class="line"><a name="l00030"></a><span class="lineno"><a class="line" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7adda50c70dcd3a2a122248dfe14f2253e3f4">   30</a></span>&#160;        <a class="code" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7adda50c70dcd3a2a122248dfe14f2253e3f4">k_update_after_insertion</a>,   </div>
-<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7adda98ced85e4c68d82628807d38f1c82eed">   31</a></span>&#160;        <a class="code" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7adda98ced85e4c68d82628807d38f1c82eed">k_refresh</a>,                  </div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    };</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="comment">//undo policy used by this command</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173b">   38</a></span>&#160;<span class="comment"></span>    <span class="keyword">enum</span> <a class="code" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173b">ECmdUndoPolicy</a> {</div>
-<div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173ba1ab5572a41d7a3792fee7f3f2955579c">   39</a></span>&#160;        <a class="code" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173ba1ab5572a41d7a3792fee7f3f2955579c">k_undo_policy_full_checkpoint</a>=0,    </div>
-<div class="line"><a name="l00040"></a><span class="lineno"><a class="line" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173baeb8a0f5795c40e192a6024e8bf435bd0">   40</a></span>&#160;        <a class="code" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173baeb8a0f5795c40e192a6024e8bf435bd0">k_undo_policy_partial_checkpoint</a>,   </div>
-<div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173ba6d4c35909a655dd7597e871a801a8dad">   41</a></span>&#160;        <a class="code" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173ba6d4c35909a655dd7597e871a801a8dad">k_undo_policy_specific</a>,             </div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    };</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="comment">//selection set update policy to be used with this command</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30">   49</a></span>&#160;<span class="comment"></span>    <span class="keyword">enum</span> <a class="code" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30">ECmdSelectionPolicy</a> {</div>
-<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30ac492f71c4619a39a2e6bc17609d10ddb">   50</a></span>&#160;        <a class="code" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30ac492f71c4619a39a2e6bc17609d10ddb">k_sel_do_nothing</a>=0,         </div>
-<div class="line"><a name="l00051"></a><span class="lineno"><a class="line" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30a27b58554799cfc160494cbb36d42b247">   51</a></span>&#160;        <a class="code" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30a27b58554799cfc160494cbb36d42b247">k_sel_clear</a>,                </div>
-<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30a02dd5ef19d923df0381b730b8f1854aa">   52</a></span>&#160;        <a class="code" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30a02dd5ef19d923df0381b730b8f1854aa">k_sel_command_specific</a>,     </div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    };</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="comment">//information</span></div>
-<div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8">   59</a></span>&#160;<span class="comment"></span>    <span class="keyword">inline</span> std::string <a class="code" href="classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8">get_name</a>() { <span class="keywordflow">return</span> m_name; }</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;</div>
-<div class="line"><a name="l00065"></a><span class="lineno"><a class="line" href="classDocCommand.html#a83621dd7d28d0a6d474bfc14cbe5397d">   65</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="classDocCommand.html#a83621dd7d28d0a6d474bfc14cbe5397d">is_reversible</a>() { <span class="keywordflow">return</span> m_flags &amp;  k_reversible; }</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;</div>
-<div class="line"><a name="l00075"></a><span class="lineno"><a class="line" href="classDocCommand.html#ac1e21dc807ca0d323e046f7da6ac9ecf">   75</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="classDocCommand.html#ac1e21dc807ca0d323e046f7da6ac9ecf">is_recordable</a>() { <span class="keywordflow">return</span> m_flags &amp;  k_recordable; }</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
-<div class="line"><a name="l00081"></a><span class="lineno"><a class="line" href="classDocCommand.html#a4fcd738f3a6c0f375b44f16987a5937b">   81</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">string</span> <a class="code" href="classDocCommand.html#a4fcd738f3a6c0f375b44f16987a5937b">get_error</a>() { <span class="keywordflow">return</span> m_error; }</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="comment">//excluded from public API. Only for internal use.</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="preprocessor">#ifdef LOMSE_INTERNAL_API</span></div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="preprocessor"></span><span class="keyword">public</span>:</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">bool</span> is_target_set_in_constructor() { <span class="keywordflow">return</span> m_flags &amp;  k_target_set_in_constructor; }</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">bool</span> is_included_in_composite_cmd() { <span class="keywordflow">return</span> m_flags &amp;  k_included_in_composite_cmd; }</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    </div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="preprocessor">#endif  //excluded from public API</span></div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="preprocessor"></span></div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;};</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="comment">// interface for any simple command (atomic)</span></div>
-<div class="line"><a name="l00099"></a><span class="lineno"><a class="line" href="classDocCmdSimple.html">   99</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classDocCmdSimple.html">DocCmdSimple</a> : <span class="keyword">public</span> <a class="code" href="classDocCommand.html">DocCommand</a></div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;{</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classDocCmdSimple.html">DocCmdSimple</a>() {}</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;    <span class="keywordtype">bool</span> is_composite() { <span class="keywordflow">return</span> <span class="keyword">false</span>; }</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;};</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment">// interface for any command to modify the document</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno"><a class="line" href="classDocCommand.html">   29</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classDocCommand.html">DocCommand</a></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;{</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="comment">/*</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="comment">        Destructor.</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="comment">    */</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="comment">//virtual ~DocCommand() {}</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="comment">//cursor update policy to be used with this command</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="comment">/*</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="comment">        This enum describes the policies for updating the cursor after executing a command.</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="comment">    */</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="comment">/*</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="comment">    enum ECmdCursorPolicy {</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="comment">        k_do_nothing=0,             ///&lt; Do nothing. All cursor data remains valid after command execution.</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="comment">        k_update_after_deletion,    ///&lt; Update the cursor. Current pointed object has been deleted and cursor must now point to next object.</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="comment">        k_update_after_insertion,   ///&lt; Update the cursor. Cursor must point to inserted object.</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="comment">        k_refresh,                  ///&lt; Refresh cursor. Pointed object is valid but other related info. could have changed.</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="comment">    };</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment">    */</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="comment">//undo policy used by this command</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="comment">/*</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">        This enum describes the available undo policies for commands</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="comment">    */</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="comment">/*</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="comment">    enum ECmdUndoPolicy {</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="comment">        k_undo_policy_full_checkpoint=0,    ///&lt; Undo is based on a full checkpoint</span></div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="comment">        k_undo_policy_partial_checkpoint,   ///&lt; Undo is based on a partial checkpoint</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="comment">        k_undo_policy_specific,             ///&lt; Undo is implemented by the command</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="comment">    };</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="comment">    */</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="comment">//selection set update policy to be used with this command</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="comment">/*</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment">        This enum describes the available policies for updating the SelectionSet after executing</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="comment">        a command</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment">    */</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <span class="comment">/*</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="comment">    enum ECmdSelectionPolicy {</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="comment">        k_sel_do_nothing=0,         ///&lt; Do nothing. The selection is not changed after command execution.</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="comment">        k_sel_clear,                ///&lt; Clear the selection after executing the command.</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="comment">        k_sel_command_specific,     ///&lt; Specific. The command will do whatever is needed.</span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="comment">    };</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="comment">    */</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    <span class="comment">//information</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno"><a class="line" href="classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8">   83</a></span>&#160;<span class="comment"></span>    <span class="keyword">inline</span> std::string <a class="code" href="classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8">get_name</a>() { <span class="keywordflow">return</span> m_name; }</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <span class="comment">/*</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="comment">        Returns @true if the command is reversible, that is, if the command supports undo/redo (e.g. insert object),</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="comment">        and @false if it does not support undo/redo (e.g. print)</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="comment">    */</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <span class="comment">//inline bool is_reversible() { return m_flags &amp;  k_reversible; }</span></div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <span class="comment">/*</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="comment">        Returns @true if the command is recordable.</span></div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="comment">        Command sequences can be recorded and replayed at other point or on another document, allowing the creation</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="comment">        of &lt;i&gt;macros&lt;/i&gt; or &lt;i&gt;scripts&lt;/i&gt;. But not all commands are suitable to be recorded and replayed. </span></div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="comment">        Recordable commands are those that can be recorded and replayed safely. All reversible commands are</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="comment">        recordable by nature, as this is required for supporting redo. See is_reversible().</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="comment">    */</span></div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    <span class="comment">//inline bool is_recordable() { return m_flags &amp;  k_recordable; }</span></div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;</div>
+<div class="line"><a name="l00105"></a><span class="lineno"><a class="line" href="classDocCommand.html#a4fcd738f3a6c0f375b44f16987a5937b">  105</a></span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">string</span> <a class="code" href="classDocCommand.html#a4fcd738f3a6c0f375b44f16987a5937b">get_error</a>() { <span class="keywordflow">return</span> m_error; }</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;</div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="comment">// any composite command</span></div>
-<div class="line"><a name="l00113"></a><span class="lineno"><a class="line" href="classDocCmdComposite.html">  113</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classDocCmdComposite.html">DocCmdComposite</a> : <span class="keyword">public</span> <a class="code" href="classDocCommand.html">DocCommand</a></div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;{</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    <a class="code" href="classDocCmdComposite.html">DocCmdComposite</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name);</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classDocCmdComposite.html">DocCmdComposite</a>();</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <span class="comment">//change default settings</span></div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">void</span> mark_as_no_reversible() { m_flags &amp;= ~k_reversible; }</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">void</span> mark_as_no_recordable() { m_flags &amp;= ~k_recordable; }</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">void</span> mark_as_target_set_in_constructor() { m_flags |= k_target_set_in_constructor; }</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    <span class="comment">//children commands</span></div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    <span class="keywordtype">void</span> add_child_command(<a class="code" href="classDocCommand.html">DocCommand</a>* pCmd);</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;    <span class="comment">//mandatory interface implementation</span></div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="comment">//excluded from public API. Only for internal use.</span></div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="preprocessor">#ifdef LOMSE_INTERNAL_API</span></div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;<span class="preprocessor"></span><span class="keyword">public</span>:</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">bool</span> is_target_set_in_constructor() { <span class="keywordflow">return</span> m_flags &amp;  k_target_set_in_constructor; }</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">bool</span> is_included_in_composite_cmd() { <span class="keywordflow">return</span> m_flags &amp;  k_included_in_composite_cmd; }</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    </div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;<span class="preprocessor">#endif  //excluded from public API</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;<span class="preprocessor"></span></div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;};</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;<span class="comment">// interface for any simple command (atomic)</span></div>
+<div class="line"><a name="l00123"></a><span class="lineno"><a class="line" href="classDocCmdSimple.html">  123</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classDocCmdSimple.html">DocCmdSimple</a> : <span class="keyword">public</span> <a class="code" href="classDocCommand.html">DocCommand</a></div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;{</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    <span class="comment">//virtual ~DocCmdSimple() {}</span></div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    <span class="comment">//bool is_composite() { return false; }</span></div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;};</div>
 <div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    <span class="comment">//overrides</span></div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;    <span class="keywordtype">int</span> get_cursor_update_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7addacb7d2c957a249b23d34dfb270e7d631f">k_do_nothing</a>; }</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;    <span class="keywordtype">int</span> get_undo_policy() { <span class="keywordflow">return</span> m_undoPolicy; }</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;    <span class="keywordtype">int</span> get_selection_update_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30ac492f71c4619a39a2e6bc17609d10ddb">k_sel_do_nothing</a>; }</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    <span class="keywordtype">bool</span> is_composite() { <span class="keywordflow">return</span> <span class="keyword">true</span>; }</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;    <span class="comment">//operations delegated by DocCommandExecuter</span></div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    <span class="keywordtype">void</span> update_cursor(DocCursor* pCursor, <a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a>* pExecuter);</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;    <span class="keywordtype">void</span> update_selection(SelectionSet* pSelection, <a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a>* pExecuter);</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;};</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;<span class="comment">// undo/redo element: command and cursor</span></div>
-<div class="line"><a name="l00149"></a><span class="lineno"><a class="line" href="classUndoElement.html">  149</a></span>&#160;<span class="keyword">class </span><a class="code" href="classUndoElement.html">UndoElement</a></div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;{</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;    <a class="code" href="classDocCommand.html">DocCommand</a>*         pCmd;</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;    DocCursorState      cursorState;</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    SelectionState      selState;</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;</div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    <a class="code" href="classUndoElement.html">UndoElement</a>(<a class="code" href="classDocCommand.html">DocCommand</a>* cmd, DocCursorState state, SelectionState sel)</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;        : pCmd(cmd), cursorState(state), selState(sel)</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;    {</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    }</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;};</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;<span class="comment">// Helper, to manage the undo/redo stack</span></div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;<span class="keyword">typedef</span> UndoableStack&lt; UndoElement* &gt;   UndoStack;</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;<span class="comment">// Keeps the stack of executed commands and performs undo/redo</span></div>
-<div class="line"><a name="l00172"></a><span class="lineno"><a class="line" href="classDocCommandExecuter.html">  172</a></span>&#160;<span class="keyword">class </span><a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a></div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;{</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;    <a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a>(Document* target);</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classDocCommandExecuter.html">DocCommandExecuter</a>() {}</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">int</span> execute(DocCursor* pCursor, <a class="code" href="classDocCommand.html">DocCommand</a>* pCmd,</div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;                        SelectionSet* pSelection);</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> undo(DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">void</span> redo(DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">string</span> get_error() { <span class="keywordflow">return</span> m_error; }</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;    <span class="comment">//info</span></div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;    <span class="keywordtype">bool</span> is_undo_possible() { <span class="keywordflow">return</span> m_stack.size() &gt; 0; }</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;    <span class="keywordtype">bool</span> is_redo_possible() { <span class="keywordflow">return</span> m_stack.history_size() &gt; 0; }</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;    <span class="keyword">virtual</span> <span class="keywordtype">size_t</span> undo_stack_size() { <span class="keywordflow">return</span> m_stack.size(); }</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;};</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00198"></a><span class="lineno"><a class="line" href="classCmdAddChordNote.html">  198</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdAddChordNote.html">CmdAddChordNote</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;{</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;    <a class="code" href="classCmdAddChordNote.html#a033c364e124e9e5bc484f6ca1e1b935b">CmdAddChordNote</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; pitch, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Add chord note&quot;</span>);</div>
-<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;};</div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;</div>
-<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00254"></a><span class="lineno"><a class="line" href="classCmdAddNoteRest.html">  254</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdAddNoteRest.html">CmdAddNoteRest</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;{</div>
-<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;    <a class="code" href="classCmdAddNoteRest.html#abfbe2be6deeb6a6437a2165344859309">CmdAddNoteRest</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; source, <span class="keywordtype">int</span> editMode, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;};</div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;</div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00312"></a><span class="lineno"><a class="line" href="classCmdAddTie.html">  312</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdAddTie.html">CmdAddTie</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;{</div>
-<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;    <a class="code" href="classCmdAddTie.html#a45dbe6f9f689921bca0c1e6231d25e27">CmdAddTie</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Add tie&quot;</span>);</div>
-<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;};</div>
-<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;</div>
-<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00352"></a><span class="lineno"><a class="line" href="classCmdAddTuplet.html">  352</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdAddTuplet.html">CmdAddTuplet</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;{</div>
-<div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;    <a class="code" href="classCmdAddTuplet.html#a5f0ac3d3553f91b5bba3610507b24512">CmdAddTuplet</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; src, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Add tuplet&quot;</span>);</div>
-<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;};</div>
-<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;</div>
-<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00402"></a><span class="lineno"><a class="line" href="classCmdBreakBeam.html">  402</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdBreakBeam.html">CmdBreakBeam</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;{</div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;    <a class="code" href="classCmdBreakBeam.html#a124a0647866043d172bb02f8dcf3ec15">CmdBreakBeam</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Break beam&quot;</span>);</div>
-<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;};</div>
-<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;</div>
-<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00445"></a><span class="lineno"><a class="line" href="classCmdChangeAccidentals.html">  445</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdChangeAccidentals.html">CmdChangeAccidentals</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;{</div>
-<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;    <a class="code" href="classCmdChangeAccidentals.html#a02dd90b985e80ff0c2006e22d7f21366">CmdChangeAccidentals</a>(EAccidentals acc, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Change accidentals&quot;</span>);</div>
-<div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160;};</div>
-<div class="line"><a name="l00481"></a><span class="lineno">  481</span>&#160;</div>
-<div class="line"><a name="l00482"></a><span class="lineno">  482</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00489"></a><span class="lineno"><a class="line" href="classCmdChangeAttribute.html">  489</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdChangeAttribute.html">CmdChangeAttribute</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;{</div>
-<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160;    <span class="comment">// These constructors are defined but do not operate on selections but on cursor pointed object</span></div>
-<div class="line"><a name="l00493"></a><span class="lineno">  493</span>&#160;<span class="comment">//    CmdChangeAttribute(EImoAttribute attrb, const string&amp; value,</span></div>
-<div class="line"><a name="l00494"></a><span class="lineno">  494</span>&#160;<span class="comment">//                       const string&amp; cmdName=&quot;&quot;);</span></div>
-<div class="line"><a name="l00495"></a><span class="lineno">  495</span>&#160;<span class="comment">//    CmdChangeAttribute(EImoAttribute attrb, double value,</span></div>
-<div class="line"><a name="l00496"></a><span class="lineno">  496</span>&#160;<span class="comment">//                       const string&amp; cmdName=&quot;&quot;);</span></div>
-<div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160;<span class="comment">//    CmdChangeAttribute(EImoAttribute attrb, int value,</span></div>
-<div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160;<span class="comment">//                       const string&amp; cmdName=&quot;&quot;);</span></div>
-<div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;<span class="comment">//    CmdChangeAttribute(EImoAttribute attrb, Color value,</span></div>
-<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;<span class="comment">//                       const string&amp; cmdName=&quot;&quot;);</span></div>
-<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;</div>
-<div class="line"><a name="l00534"></a><span class="lineno">  534</span>&#160;    <a class="code" href="classCmdChangeAttribute.html#a79a4d12c9accd4119bc4f49f287cc165">CmdChangeAttribute</a>(ImoObj* pImo, EImoAttribute attrb, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; value,</div>
-<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; cmdName=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;</div>
-<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160;    <a class="code" href="classCmdChangeAttribute.html#a79a4d12c9accd4119bc4f49f287cc165">CmdChangeAttribute</a>(ImoObj* pImo, EImoAttribute attrb, <span class="keywordtype">double</span> value,</div>
-<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; cmdName=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160;</div>
-<div class="line"><a name="l00568"></a><span class="lineno">  568</span>&#160;    <a class="code" href="classCmdChangeAttribute.html#a79a4d12c9accd4119bc4f49f287cc165">CmdChangeAttribute</a>(ImoObj* pImo, EImoAttribute attrb, <span class="keywordtype">int</span> value,</div>
-<div class="line"><a name="l00569"></a><span class="lineno">  569</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; cmdName=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00570"></a><span class="lineno">  570</span>&#160;</div>
-<div class="line"><a name="l00585"></a><span class="lineno">  585</span>&#160;    <a class="code" href="classCmdChangeAttribute.html#a79a4d12c9accd4119bc4f49f287cc165">CmdChangeAttribute</a>(ImoObj* pImo, EImoAttribute attrb, Color value,</div>
-<div class="line"><a name="l00586"></a><span class="lineno">  586</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; cmdName=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00587"></a><span class="lineno">  587</span>&#160;</div>
-<div class="line"><a name="l00588"></a><span class="lineno">  588</span>&#160;};</div>
-<div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;</div>
-<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00596"></a><span class="lineno"><a class="line" href="classCmdChangeDots.html">  596</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdChangeDots.html">CmdChangeDots</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l00597"></a><span class="lineno">  597</span>&#160;{</div>
-<div class="line"><a name="l00598"></a><span class="lineno">  598</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;    <a class="code" href="classCmdChangeDots.html#addd6ad21bb5806e37556721ed951378e">CmdChangeDots</a>(<span class="keywordtype">int</span> dots, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Change dots&quot;</span>);</div>
-<div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;};</div>
-<div class="line"><a name="l00628"></a><span class="lineno">  628</span>&#160;</div>
-<div class="line"><a name="l00629"></a><span class="lineno">  629</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00636"></a><span class="lineno"><a class="line" href="classCmdCursor.html">  636</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdCursor.html">CmdCursor</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l00637"></a><span class="lineno">  637</span>&#160;{</div>
-<div class="line"><a name="l00638"></a><span class="lineno">  638</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00753"></a><span class="lineno">  753</span>&#160;    <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(<a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">ECursorAction</a> cmd, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00754"></a><span class="lineno">  754</span>&#160;</div>
-<div class="line"><a name="l00769"></a><span class="lineno">  769</span>&#160;    <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(ImoId <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00770"></a><span class="lineno">  770</span>&#160;</div>
-<div class="line"><a name="l00830"></a><span class="lineno">  830</span>&#160;    <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(<span class="keywordtype">int</span> measure, <span class="keywordtype">int</span> instr, <span class="keywordtype">int</span> staff, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00831"></a><span class="lineno">  831</span>&#160;</div>
-<div class="line"><a name="l00853"></a><span class="lineno">  853</span>&#160;    <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(TimeUnits time, <span class="keywordtype">int</span> instr, <span class="keywordtype">int</span> staff, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00854"></a><span class="lineno">  854</span>&#160;</div>
-<div class="line"><a name="l00870"></a><span class="lineno">  870</span>&#160;    <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(DocCursorState&amp; state, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00871"></a><span class="lineno">  871</span>&#160;</div>
-<div class="line"><a name="l00875"></a><span class="lineno"><a class="line" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">  875</a></span>&#160;    <span class="keyword">enum</span> <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">ECursorAction</a> {</div>
-<div class="line"><a name="l00876"></a><span class="lineno"><a class="line" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aedfbb4fe1effda85019b800a3258de2c">  876</a></span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aedfbb4fe1effda85019b800a3258de2c">k_move_next</a>=0,      </div>
-<div class="line"><a name="l00877"></a><span class="lineno"><a class="line" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a0d8f3282a6d280fe4070174d47dfb7b3">  877</a></span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a0d8f3282a6d280fe4070174d47dfb7b3">k_move_prev</a>,        </div>
-<div class="line"><a name="l00878"></a><span class="lineno"><a class="line" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a900ed49cd3c564b3854cae4acc0bea8f">  878</a></span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a900ed49cd3c564b3854cae4acc0bea8f">k_enter</a>,            </div>
-<div class="line"><a name="l00879"></a><span class="lineno">  879</span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8afdce23cac5c729639e3623f4318f1aae">k_exit</a>,             </div>
-<div class="line"><a name="l00882"></a><span class="lineno">  882</span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a396248433b812cdf7cb3cb9ceb9ea77c">k_point_to</a>,         </div>
-<div class="line"><a name="l00885"></a><span class="lineno"><a class="line" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aae02b727a5b3f85ee51374697b1d0d9c">  885</a></span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aae02b727a5b3f85ee51374697b1d0d9c">k_to_state</a>,         </div>
-<div class="line"><a name="l00886"></a><span class="lineno"><a class="line" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a53258dae633b7b18d074e3aeb4039313">  886</a></span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a53258dae633b7b18d074e3aeb4039313">k_to_measure</a>,       </div>
-<div class="line"><a name="l00887"></a><span class="lineno">  887</span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8ae9bc640e47055c33ba94153bbee8d45c">k_to_time</a>,          </div>
-<div class="line"><a name="l00889"></a><span class="lineno">  889</span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a15413e384ea656a771ef55dcfaafcf15">k_move_up</a>,          </div>
-<div class="line"><a name="l00891"></a><span class="lineno">  891</span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a1ea6d02c815b4dfbc8f562200c4403af">k_move_down</a>,        </div>
-<div class="line"><a name="l00894"></a><span class="lineno">  894</span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a82a913a91cb3e7c7feab2a30e141222b">k_cursor_dump</a>,      </div>
-<div class="line"><a name="l00897"></a><span class="lineno">  897</span>&#160;    };</div>
-<div class="line"><a name="l00899"></a><span class="lineno">  899</span>&#160;};</div>
-<div class="line"><a name="l00900"></a><span class="lineno">  900</span>&#160;</div>
-<div class="line"><a name="l00901"></a><span class="lineno">  901</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00902"></a><span class="lineno">  902</span>&#160;<span class="comment">// abstract, base class for all delete commands</span></div>
-<div class="line"><a name="l00906"></a><span class="lineno"><a class="line" href="classCmdDelete.html">  906</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdDelete.html">CmdDelete</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l00907"></a><span class="lineno">  907</span>&#160;{</div>
-<div class="line"><a name="l00908"></a><span class="lineno">  908</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00909"></a><span class="lineno">  909</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classCmdDelete.html">CmdDelete</a>() {}</div>
-<div class="line"><a name="l00910"></a><span class="lineno">  910</span>&#160;</div>
-<div class="line"><a name="l00911"></a><span class="lineno">  911</span>&#160;    <span class="keyword">inline</span> ImoId cursor_final_pos_id() { <span class="keywordflow">return</span> m_cursorFinalId; }</div>
-<div class="line"><a name="l00912"></a><span class="lineno">  912</span>&#160;</div>
-<div class="line"><a name="l00913"></a><span class="lineno">  913</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l00914"></a><span class="lineno">  914</span>&#160;};</div>
-<div class="line"><a name="l00915"></a><span class="lineno">  915</span>&#160;</div>
-<div class="line"><a name="l00916"></a><span class="lineno">  916</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00922"></a><span class="lineno"><a class="line" href="classCmdDeleteBlockLevelObj.html">  922</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdDeleteBlockLevelObj.html">CmdDeleteBlockLevelObj</a> : <span class="keyword">public</span> <a class="code" href="classCmdDelete.html">CmdDelete</a></div>
-<div class="line"><a name="l00923"></a><span class="lineno">  923</span>&#160;{</div>
-<div class="line"><a name="l00924"></a><span class="lineno">  924</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00938"></a><span class="lineno">  938</span>&#160;    <a class="code" href="classCmdDeleteBlockLevelObj.html#a28355a3b438842a612fe2ad06ae97496">CmdDeleteBlockLevelObj</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00939"></a><span class="lineno">  939</span>&#160;};</div>
-<div class="line"><a name="l00940"></a><span class="lineno">  940</span>&#160;</div>
-<div class="line"><a name="l00941"></a><span class="lineno">  941</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l00947"></a><span class="lineno"><a class="line" href="classCmdDeleteRelation.html">  947</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdDeleteRelation.html">CmdDeleteRelation</a> : <span class="keyword">public</span> <a class="code" href="classCmdDelete.html">CmdDelete</a></div>
-<div class="line"><a name="l00948"></a><span class="lineno">  948</span>&#160;{</div>
-<div class="line"><a name="l00949"></a><span class="lineno">  949</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l00963"></a><span class="lineno">  963</span>&#160;    <a class="code" href="classCmdDeleteRelation.html#a9afdd246e6481cb1f710a92eecc24fcb">CmdDeleteRelation</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00964"></a><span class="lineno">  964</span>&#160;</div>
-<div class="line"><a name="l00993"></a><span class="lineno">  993</span>&#160;    <a class="code" href="classCmdDeleteRelation.html#a9afdd246e6481cb1f710a92eecc24fcb">CmdDeleteRelation</a>(<span class="keywordtype">int</span> type, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l00994"></a><span class="lineno">  994</span>&#160;};</div>
-<div class="line"><a name="l00995"></a><span class="lineno">  995</span>&#160;</div>
-<div class="line"><a name="l00996"></a><span class="lineno">  996</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l01002"></a><span class="lineno"><a class="line" href="classCmdDeleteSelection.html"> 1002</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdDeleteSelection.html">CmdDeleteSelection</a> : <span class="keyword">public</span> <a class="code" href="classCmdDelete.html">CmdDelete</a></div>
-<div class="line"><a name="l01003"></a><span class="lineno"> 1003</span>&#160;{</div>
-<div class="line"><a name="l01004"></a><span class="lineno"> 1004</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l01032"></a><span class="lineno"> 1032</span>&#160;    <a class="code" href="classCmdDeleteSelection.html#a178447f44f0212c95bdc9120248b14e3">CmdDeleteSelection</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Delete selection&quot;</span>);</div>
-<div class="line"><a name="l01033"></a><span class="lineno"> 1033</span>&#160;};</div>
-<div class="line"><a name="l01034"></a><span class="lineno"> 1034</span>&#160;</div>
-<div class="line"><a name="l01035"></a><span class="lineno"> 1035</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l01042"></a><span class="lineno"><a class="line" href="classCmdDeleteStaffObj.html"> 1042</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdDeleteStaffObj.html">CmdDeleteStaffObj</a> : <span class="keyword">public</span> <a class="code" href="classCmdDelete.html">CmdDelete</a></div>
-<div class="line"><a name="l01043"></a><span class="lineno"> 1043</span>&#160;{</div>
-<div class="line"><a name="l01044"></a><span class="lineno"> 1044</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l01078"></a><span class="lineno"> 1078</span>&#160;    <a class="code" href="classCmdDeleteStaffObj.html#a80dcc7bd66ac43943e0118926ecec767">CmdDeleteStaffObj</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l01079"></a><span class="lineno"> 1079</span>&#160;};</div>
-<div class="line"><a name="l01080"></a><span class="lineno"> 1080</span>&#160;</div>
-<div class="line"><a name="l01081"></a><span class="lineno"> 1081</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l01082"></a><span class="lineno"> 1082</span>&#160;<span class="comment">// abstract, base for all CmdInsert commands</span></div>
-<div class="line"><a name="l01086"></a><span class="lineno"><a class="line" href="classCmdInsert.html"> 1086</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdInsert.html">CmdInsert</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l01087"></a><span class="lineno"> 1087</span>&#160;{</div>
-<div class="line"><a name="l01088"></a><span class="lineno"> 1088</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l01096"></a><span class="lineno"><a class="line" href="classCmdInsert.html#a29965b4a403df78be730cf7f050403d9"> 1096</a></span>&#160;    <span class="keyword">inline</span> ImoId <a class="code" href="classCmdInsert.html#a29965b4a403df78be730cf7f050403d9">last_inserted_id</a>() { <span class="keywordflow">return</span> m_lastInsertedId; }</div>
-<div class="line"><a name="l01097"></a><span class="lineno"> 1097</span>&#160;};</div>
-<div class="line"><a name="l01098"></a><span class="lineno"> 1098</span>&#160;</div>
-<div class="line"><a name="l01099"></a><span class="lineno"> 1099</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l01105"></a><span class="lineno"><a class="line" href="classCmdInsertBlockLevelObj.html"> 1105</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a> : <span class="keyword">public</span> <a class="code" href="classCmdInsert.html">CmdInsert</a></div>
-<div class="line"><a name="l01106"></a><span class="lineno"> 1106</span>&#160;{</div>
-<div class="line"><a name="l01107"></a><span class="lineno"> 1107</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l01137"></a><span class="lineno"> 1137</span>&#160;    <a class="code" href="classCmdInsertBlockLevelObj.html#a41a1543420bc98413be17a75016a96a8">CmdInsertBlockLevelObj</a>(<span class="keywordtype">int</span> type, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name);</div>
-<div class="line"><a name="l01138"></a><span class="lineno"> 1138</span>&#160;</div>
-<div class="line"><a name="l01163"></a><span class="lineno"> 1163</span>&#160;    <a class="code" href="classCmdInsertBlockLevelObj.html#a41a1543420bc98413be17a75016a96a8">CmdInsertBlockLevelObj</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; source, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name);</div>
-<div class="line"><a name="l01164"></a><span class="lineno"> 1164</span>&#160;</div>
-<div class="line"><a name="l01165"></a><span class="lineno"> 1165</span>&#160;};</div>
-<div class="line"><a name="l01166"></a><span class="lineno"> 1166</span>&#160;</div>
-<div class="line"><a name="l01167"></a><span class="lineno"> 1167</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l01168"></a><span class="lineno"><a class="line" href="classCmdInsertManyStaffObjs.html"> 1168</a></span>&#160;<span class="keyword">class </span><a class="code" href="classCmdInsertManyStaffObjs.html">CmdInsertManyStaffObjs</a> : <span class="keyword">public</span> <a class="code" href="classCmdInsert.html">CmdInsert</a></div>
-<div class="line"><a name="l01169"></a><span class="lineno"> 1169</span>&#160;{</div>
-<div class="line"><a name="l01170"></a><span class="lineno"> 1170</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l01171"></a><span class="lineno"> 1171</span>&#160;    <a class="code" href="classCmdInsertManyStaffObjs.html">CmdInsertManyStaffObjs</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; source,</div>
-<div class="line"><a name="l01172"></a><span class="lineno"> 1172</span>&#160;                           <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Insert staff objects&quot;</span>);</div>
-<div class="line"><a name="l01173"></a><span class="lineno"> 1173</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classCmdInsertManyStaffObjs.html">CmdInsertManyStaffObjs</a>() {};</div>
-<div class="line"><a name="l01174"></a><span class="lineno"> 1174</span>&#160;</div>
-<div class="line"><a name="l01175"></a><span class="lineno"> 1175</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01176"></a><span class="lineno"> 1176</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01177"></a><span class="lineno"> 1177</span>&#160;    <span class="keywordtype">int</span> get_cursor_update_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7adda98ced85e4c68d82628807d38f1c82eed">k_refresh</a>; }  <span class="comment">//k_update_after_insertion; }</span></div>
-<div class="line"><a name="l01178"></a><span class="lineno"> 1178</span>&#160;    <span class="keywordtype">int</span> get_undo_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173baeb8a0f5795c40e192a6024e8bf435bd0">k_undo_policy_partial_checkpoint</a>; }</div>
-<div class="line"><a name="l01179"></a><span class="lineno"> 1179</span>&#160;    <span class="keywordtype">int</span> get_selection_update_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30ac492f71c4619a39a2e6bc17609d10ddb">k_sel_do_nothing</a>; }</div>
-<div class="line"><a name="l01180"></a><span class="lineno"> 1180</span>&#160;</div>
-<div class="line"><a name="l01181"></a><span class="lineno"> 1181</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l01182"></a><span class="lineno"> 1182</span>&#160;</div>
-<div class="line"><a name="l01183"></a><span class="lineno"> 1183</span>&#160;};</div>
-<div class="line"><a name="l01184"></a><span class="lineno"> 1184</span>&#160;</div>
-<div class="line"><a name="l01185"></a><span class="lineno"> 1185</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l01186"></a><span class="lineno"><a class="line" href="classCmdInsertStaffObj.html"> 1186</a></span>&#160;<span class="keyword">class </span><a class="code" href="classCmdInsertStaffObj.html">CmdInsertStaffObj</a> : <span class="keyword">public</span> <a class="code" href="classCmdInsert.html">CmdInsert</a></div>
-<div class="line"><a name="l01187"></a><span class="lineno"> 1187</span>&#160;{</div>
-<div class="line"><a name="l01188"></a><span class="lineno"> 1188</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l01189"></a><span class="lineno"> 1189</span>&#160;    <a class="code" href="classCmdInsertStaffObj.html">CmdInsertStaffObj</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; source, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l01190"></a><span class="lineno"> 1190</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classCmdInsertStaffObj.html">CmdInsertStaffObj</a>() {};</div>
-<div class="line"><a name="l01191"></a><span class="lineno"> 1191</span>&#160;</div>
-<div class="line"><a name="l01192"></a><span class="lineno"> 1192</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01193"></a><span class="lineno"> 1193</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01194"></a><span class="lineno"> 1194</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01195"></a><span class="lineno"> 1195</span>&#160;    <span class="keywordtype">int</span> get_cursor_update_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7adda98ced85e4c68d82628807d38f1c82eed">k_refresh</a>; }  <span class="comment">//k_update_after_insertion; }</span></div>
-<div class="line"><a name="l01196"></a><span class="lineno"> 1196</span>&#160;    <span class="keywordtype">int</span> get_undo_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173ba6d4c35909a655dd7597e871a801a8dad">k_undo_policy_specific</a>; }</div>
-<div class="line"><a name="l01197"></a><span class="lineno"> 1197</span>&#160;    <span class="keywordtype">int</span> get_selection_update_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30ac492f71c4619a39a2e6bc17609d10ddb">k_sel_do_nothing</a>; }</div>
-<div class="line"><a name="l01198"></a><span class="lineno"> 1198</span>&#160;};</div>
-<div class="line"><a name="l01199"></a><span class="lineno"> 1199</span>&#160;</div>
-<div class="line"><a name="l01200"></a><span class="lineno"> 1200</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l01201"></a><span class="lineno"><a class="line" href="classCmdJoinBeam.html"> 1201</a></span>&#160;<span class="keyword">class </span><a class="code" href="classCmdJoinBeam.html">CmdJoinBeam</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l01202"></a><span class="lineno"> 1202</span>&#160;{</div>
-<div class="line"><a name="l01203"></a><span class="lineno"> 1203</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l01204"></a><span class="lineno"> 1204</span>&#160;    <a class="code" href="classCmdJoinBeam.html">CmdJoinBeam</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Join beam&quot;</span>);</div>
-<div class="line"><a name="l01205"></a><span class="lineno"> 1205</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classCmdJoinBeam.html">CmdJoinBeam</a>() {};</div>
-<div class="line"><a name="l01206"></a><span class="lineno"> 1206</span>&#160;</div>
-<div class="line"><a name="l01207"></a><span class="lineno"> 1207</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01208"></a><span class="lineno"> 1208</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01209"></a><span class="lineno"> 1209</span>&#160;    <span class="keywordtype">int</span> get_cursor_update_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7addacb7d2c957a249b23d34dfb270e7d631f">k_do_nothing</a>; }</div>
-<div class="line"><a name="l01210"></a><span class="lineno"> 1210</span>&#160;    <span class="keywordtype">int</span> get_undo_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173ba1ab5572a41d7a3792fee7f3f2955579c">k_undo_policy_full_checkpoint</a>; }</div>
-<div class="line"><a name="l01211"></a><span class="lineno"> 1211</span>&#160;    <span class="keywordtype">int</span> get_selection_update_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30ac492f71c4619a39a2e6bc17609d10ddb">k_sel_do_nothing</a>; }</div>
-<div class="line"><a name="l01212"></a><span class="lineno"> 1212</span>&#160;</div>
-<div class="line"><a name="l01213"></a><span class="lineno"> 1213</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l01214"></a><span class="lineno"> 1214</span>&#160;};</div>
-<div class="line"><a name="l01215"></a><span class="lineno"> 1215</span>&#160;</div>
-<div class="line"><a name="l01216"></a><span class="lineno"> 1216</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l01217"></a><span class="lineno"><a class="line" href="classCmdMoveObjectPoint.html"> 1217</a></span>&#160;<span class="keyword">class </span><a class="code" href="classCmdMoveObjectPoint.html">CmdMoveObjectPoint</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l01218"></a><span class="lineno"> 1218</span>&#160;{</div>
-<div class="line"><a name="l01219"></a><span class="lineno"> 1219</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l01220"></a><span class="lineno"> 1220</span>&#160;    <a class="code" href="classCmdMoveObjectPoint.html">CmdMoveObjectPoint</a>(<span class="keywordtype">int</span> pointIndex, UPoint shift,</div>
-<div class="line"><a name="l01221"></a><span class="lineno"> 1221</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Move object point&quot;</span>);</div>
-<div class="line"><a name="l01222"></a><span class="lineno"> 1222</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classCmdMoveObjectPoint.html">CmdMoveObjectPoint</a>() {};</div>
-<div class="line"><a name="l01223"></a><span class="lineno"> 1223</span>&#160;</div>
-<div class="line"><a name="l01224"></a><span class="lineno"> 1224</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01225"></a><span class="lineno"> 1225</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01226"></a><span class="lineno"> 1226</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01227"></a><span class="lineno"> 1227</span>&#160;    <span class="keywordtype">int</span> get_cursor_update_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7addacb7d2c957a249b23d34dfb270e7d631f">k_do_nothing</a>; }</div>
-<div class="line"><a name="l01228"></a><span class="lineno"> 1228</span>&#160;    <span class="keywordtype">int</span> get_undo_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173ba6d4c35909a655dd7597e871a801a8dad">k_undo_policy_specific</a>; }</div>
-<div class="line"><a name="l01229"></a><span class="lineno"> 1229</span>&#160;    <span class="keywordtype">int</span> get_selection_update_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30ac492f71c4619a39a2e6bc17609d10ddb">k_sel_do_nothing</a>; }</div>
-<div class="line"><a name="l01230"></a><span class="lineno"> 1230</span>&#160;};</div>
-<div class="line"><a name="l01231"></a><span class="lineno"> 1231</span>&#160;</div>
-<div class="line"><a name="l01232"></a><span class="lineno"> 1232</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
-<div class="line"><a name="l01233"></a><span class="lineno"><a class="line" href="classCmdSelection.html"> 1233</a></span>&#160;<span class="keyword">class </span><a class="code" href="classCmdSelection.html">CmdSelection</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
-<div class="line"><a name="l01234"></a><span class="lineno"> 1234</span>&#160;{</div>
-<div class="line"><a name="l01235"></a><span class="lineno"> 1235</span>&#160;<span class="keyword">public</span>:</div>
-<div class="line"><a name="l01236"></a><span class="lineno"> 1236</span>&#160;    <a class="code" href="classCmdSelection.html">CmdSelection</a>(<span class="keywordtype">int</span> cmd, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l01237"></a><span class="lineno"> 1237</span>&#160;    <a class="code" href="classCmdSelection.html">CmdSelection</a>(<span class="keywordtype">int</span> cmd, ImoId <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
-<div class="line"><a name="l01238"></a><span class="lineno"> 1238</span>&#160;    <span class="comment">//CmdSelection(DocCursorState&amp; state, const string&amp; name=&quot;&quot;);</span></div>
-<div class="line"><a name="l01239"></a><span class="lineno"> 1239</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classCmdSelection.html">CmdSelection</a>() {};</div>
-<div class="line"><a name="l01240"></a><span class="lineno"> 1240</span>&#160;</div>
-<div class="line"><a name="l01241"></a><span class="lineno"> 1241</span>&#160;    <span class="keyword">enum</span> { k_set=0, k_add, k_remove, k_clear, };</div>
-<div class="line"><a name="l01242"></a><span class="lineno"> 1242</span>&#160;</div>
-<div class="line"><a name="l01243"></a><span class="lineno"> 1243</span>&#160;    <span class="keywordtype">int</span> set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</div>
-<div class="line"><a name="l01244"></a><span class="lineno"> 1244</span>&#160;    <span class="keywordtype">int</span> perform_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01245"></a><span class="lineno"> 1245</span>&#160;    <span class="keywordtype">void</span> undo_action(Document* pDoc, DocCursor* pCursor);</div>
-<div class="line"><a name="l01246"></a><span class="lineno"> 1246</span>&#160;    <span class="keywordtype">int</span> get_cursor_update_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7addacb7d2c957a249b23d34dfb270e7d631f">k_do_nothing</a>; }</div>
-<div class="line"><a name="l01247"></a><span class="lineno"> 1247</span>&#160;    <span class="keywordtype">int</span> get_undo_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173ba6d4c35909a655dd7597e871a801a8dad">k_undo_policy_specific</a>; }</div>
-<div class="line"><a name="l01248"></a><span class="lineno"> 1248</span>&#160;    <span class="keywordtype">int</span> get_selection_update_policy() { <span class="keywordflow">return</span> <a class="code" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30ac492f71c4619a39a2e6bc17609d10ddb">k_sel_do_nothing</a>; }</div>
-<div class="line"><a name="l01249"></a><span class="lineno"> 1249</span>&#160;</div>
-<div class="line"><a name="l01250"></a><span class="lineno"> 1250</span>&#160;<span class="keyword">protected</span>:</div>
-<div class="line"><a name="l01251"></a><span class="lineno"> 1251</span>&#160;</div>
-<div class="line"><a name="l01252"></a><span class="lineno"> 1252</span>&#160;};</div>
-<div class="line"><a name="l01253"></a><span class="lineno"> 1253</span>&#160;</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;<span class="comment">// any composite command</span></div>
+<div class="line"><a name="l00137"></a><span class="lineno"><a class="line" href="classDocCmdComposite.html">  137</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classDocCmdComposite.html">DocCmdComposite</a> : <span class="keyword">public</span> <a class="code" href="classDocCommand.html">DocCommand</a></div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;{</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;<span class="comment">/*</span></div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;<span class="comment">    DocCmdComposite(const string&amp; name);</span></div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;<span class="comment">    virtual ~DocCmdComposite();</span></div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;<span class="comment">    //change default settings</span></div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;<span class="comment">    inline void mark_as_no_reversible() { m_flags &amp;= ~k_reversible; }</span></div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;<span class="comment">    inline void mark_as_no_recordable() { m_flags &amp;= ~k_recordable; }</span></div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;<span class="comment">    inline void mark_as_target_set_in_constructor() { m_flags |= k_target_set_in_constructor; }</span></div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;<span class="comment">    //children commands</span></div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;<span class="comment">    void add_child_command(DocCommand* pCmd);</span></div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;<span class="comment">    //mandatory interface implementation</span></div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;<span class="comment">    virtual int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);</span></div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;<span class="comment">    virtual int perform_action(Document* pDoc, DocCursor* pCursor);</span></div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;<span class="comment">    virtual void undo_action(Document* pDoc, DocCursor* pCursor);</span></div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;<span class="comment">    //overrides</span></div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;<span class="comment">    int get_cursor_update_policy() { return k_do_nothing; }</span></div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;<span class="comment">    int get_undo_policy() { return m_undoPolicy; }</span></div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;<span class="comment">    int get_selection_update_policy() { return k_sel_do_nothing; }</span></div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;<span class="comment">    bool is_composite() { return true; }</span></div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;<span class="comment">    //operations delegated by DocCommandExecuter</span></div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;<span class="comment">    void update_cursor(DocCursor* pCursor, DocCommandExecuter* pExecuter);</span></div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;<span class="comment">    void update_selection(SelectionSet* pSelection, DocCommandExecuter* pExecuter);</span></div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;<span class="comment">protected:</span></div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;<span class="comment">*/</span></div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;};</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;<span class="comment">/*</span></div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;<span class="comment">// undo/redo element: command and cursor</span></div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;<span class="comment">class UndoElement</span></div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;<span class="comment">{</span></div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;<span class="comment">public:</span></div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;<span class="comment">    DocCommand*         pCmd;</span></div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;<span class="comment">    DocCursorState      cursorState;</span></div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;<span class="comment">    SelectionState      selState;</span></div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;<span class="comment">public:</span></div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;<span class="comment">    UndoElement(DocCommand* cmd, DocCursorState state, SelectionState sel)</span></div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;<span class="comment">        : pCmd(cmd), cursorState(state), selState(sel)</span></div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;<span class="comment">    {</span></div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;<span class="comment">    }</span></div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;<span class="comment">};</span></div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;<span class="comment">// Helper, to manage the undo/redo stack</span></div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;<span class="comment">typedef UndoableStack&lt; UndoElement* &gt;   UndoStack;</span></div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;<span class="comment">// Keeps the stack of executed commands and performs undo/redo</span></div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;<span class="comment">class DocCommandExecuter</span></div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;<span class="comment">{</span></div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;<span class="comment">public:</span></div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;<span class="comment">    DocCommandExecuter(Document* target);</span></div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;<span class="comment">    virtual ~DocCommandExecuter() {}</span></div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;<span class="comment">    virtual int execute(DocCursor* pCursor, DocCommand* pCmd,</span></div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;<span class="comment">                        SelectionSet* pSelection);</span></div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;<span class="comment">    virtual void undo(DocCursor* pCursor, SelectionSet* pSelection);</span></div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;<span class="comment">    virtual void redo(DocCursor* pCursor, SelectionSet* pSelection);</span></div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;<span class="comment">    inline string get_error() { return m_error; }</span></div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;<span class="comment">    //info</span></div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;<span class="comment">    bool is_undo_possible() { return m_stack.size() &gt; 0; }</span></div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;<span class="comment">    bool is_redo_possible() { return m_stack.history_size() &gt; 0; }</span></div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;<span class="comment">    virtual size_t undo_stack_size() { return m_stack.size(); }</span></div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;<span class="comment">};</span></div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;<span class="comment">*/</span></div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00224"></a><span class="lineno"><a class="line" href="classCmdAddChordNote.html">  224</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdAddChordNote.html">CmdAddChordNote</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;{</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;    <a class="code" href="classCmdAddChordNote.html#a033c364e124e9e5bc484f6ca1e1b935b">CmdAddChordNote</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; pitch, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Add chord note&quot;</span>);</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;</div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;};</div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00280"></a><span class="lineno"><a class="line" href="classCmdAddNoteRest.html">  280</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdAddNoteRest.html">CmdAddNoteRest</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;{</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;    <a class="code" href="classCmdAddNoteRest.html#abfbe2be6deeb6a6437a2165344859309">CmdAddNoteRest</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; source, <span class="keywordtype">int</span> editMode, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;};</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00338"></a><span class="lineno"><a class="line" href="classCmdAddTie.html">  338</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdAddTie.html">CmdAddTie</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;{</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;    <a class="code" href="classCmdAddTie.html#a45dbe6f9f689921bca0c1e6231d25e27">CmdAddTie</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Add tie&quot;</span>);</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;};</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;</div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00378"></a><span class="lineno"><a class="line" href="classCmdAddTuplet.html">  378</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdAddTuplet.html">CmdAddTuplet</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;{</div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;    <a class="code" href="classCmdAddTuplet.html#a5f0ac3d3553f91b5bba3610507b24512">CmdAddTuplet</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; src, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Add tuplet&quot;</span>);</div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;};</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;</div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00428"></a><span class="lineno"><a class="line" href="classCmdBreakBeam.html">  428</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdBreakBeam.html">CmdBreakBeam</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
+<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;{</div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;    <a class="code" href="classCmdBreakBeam.html#a124a0647866043d172bb02f8dcf3ec15">CmdBreakBeam</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Break beam&quot;</span>);</div>
+<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;};</div>
+<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;</div>
+<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00471"></a><span class="lineno"><a class="line" href="classCmdChangeAccidentals.html">  471</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdChangeAccidentals.html">CmdChangeAccidentals</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
+<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;{</div>
+<div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160;    <a class="code" href="classCmdChangeAccidentals.html#a02dd90b985e80ff0c2006e22d7f21366">CmdChangeAccidentals</a>(EAccidentals acc, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Change accidentals&quot;</span>);</div>
+<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160;};</div>
+<div class="line"><a name="l00507"></a><span class="lineno">  507</span>&#160;</div>
+<div class="line"><a name="l00508"></a><span class="lineno">  508</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00515"></a><span class="lineno"><a class="line" href="classCmdChangeAttribute.html">  515</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdChangeAttribute.html">CmdChangeAttribute</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
+<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;{</div>
+<div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;    <span class="comment">// These constructors are defined but do not operate on selections but on cursor pointed object</span></div>
+<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160;<span class="comment">//    CmdChangeAttribute(EImoAttribute attrb, const string&amp; value,</span></div>
+<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;<span class="comment">//                       const string&amp; cmdName=&quot;&quot;);</span></div>
+<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160;<span class="comment">//    CmdChangeAttribute(EImoAttribute attrb, double value,</span></div>
+<div class="line"><a name="l00522"></a><span class="lineno">  522</span>&#160;<span class="comment">//                       const string&amp; cmdName=&quot;&quot;);</span></div>
+<div class="line"><a name="l00523"></a><span class="lineno">  523</span>&#160;<span class="comment">//    CmdChangeAttribute(EImoAttribute attrb, int value,</span></div>
+<div class="line"><a name="l00524"></a><span class="lineno">  524</span>&#160;<span class="comment">//                       const string&amp; cmdName=&quot;&quot;);</span></div>
+<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;<span class="comment">//    CmdChangeAttribute(EImoAttribute attrb, Color value,</span></div>
+<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;<span class="comment">//                       const string&amp; cmdName=&quot;&quot;);</span></div>
+<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160;</div>
+<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;    <a class="code" href="classCmdChangeAttribute.html#a79a4d12c9accd4119bc4f49f287cc165">CmdChangeAttribute</a>(ImoObj* pImo, EImoAttribute attrb, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; value,</div>
+<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; cmdName=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160;</div>
+<div class="line"><a name="l00582"></a><span class="lineno">  582</span>&#160;    <a class="code" href="classCmdChangeAttribute.html#a79a4d12c9accd4119bc4f49f287cc165">CmdChangeAttribute</a>(ImoObj* pImo, EImoAttribute attrb, <span class="keywordtype">double</span> value,</div>
+<div class="line"><a name="l00583"></a><span class="lineno">  583</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; cmdName=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160;</div>
+<div class="line"><a name="l00602"></a><span class="lineno">  602</span>&#160;    <a class="code" href="classCmdChangeAttribute.html#a79a4d12c9accd4119bc4f49f287cc165">CmdChangeAttribute</a>(ImoObj* pImo, EImoAttribute attrb, <span class="keywordtype">int</span> value,</div>
+<div class="line"><a name="l00603"></a><span class="lineno">  603</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; cmdName=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l00604"></a><span class="lineno">  604</span>&#160;</div>
+<div class="line"><a name="l00622"></a><span class="lineno">  622</span>&#160;    <a class="code" href="classCmdChangeAttribute.html#a79a4d12c9accd4119bc4f49f287cc165">CmdChangeAttribute</a>(ImoObj* pImo, EImoAttribute attrb, Color value,</div>
+<div class="line"><a name="l00623"></a><span class="lineno">  623</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; cmdName=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l00624"></a><span class="lineno">  624</span>&#160;</div>
+<div class="line"><a name="l00625"></a><span class="lineno">  625</span>&#160;};</div>
+<div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;</div>
+<div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00633"></a><span class="lineno"><a class="line" href="classCmdChangeDots.html">  633</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdChangeDots.html">CmdChangeDots</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
+<div class="line"><a name="l00634"></a><span class="lineno">  634</span>&#160;{</div>
+<div class="line"><a name="l00635"></a><span class="lineno">  635</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00663"></a><span class="lineno">  663</span>&#160;    <a class="code" href="classCmdChangeDots.html#addd6ad21bb5806e37556721ed951378e">CmdChangeDots</a>(<span class="keywordtype">int</span> dots, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Change dots&quot;</span>);</div>
+<div class="line"><a name="l00664"></a><span class="lineno">  664</span>&#160;};</div>
+<div class="line"><a name="l00665"></a><span class="lineno">  665</span>&#160;</div>
+<div class="line"><a name="l00666"></a><span class="lineno">  666</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00673"></a><span class="lineno"><a class="line" href="classCmdCursor.html">  673</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdCursor.html">CmdCursor</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
+<div class="line"><a name="l00674"></a><span class="lineno">  674</span>&#160;{</div>
+<div class="line"><a name="l00675"></a><span class="lineno">  675</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00790"></a><span class="lineno">  790</span>&#160;    <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(<a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">ECursorAction</a> cmd, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l00791"></a><span class="lineno">  791</span>&#160;</div>
+<div class="line"><a name="l00807"></a><span class="lineno">  807</span>&#160;    <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(ImoId <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l00808"></a><span class="lineno">  808</span>&#160;</div>
+<div class="line"><a name="l00868"></a><span class="lineno">  868</span>&#160;    <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(<span class="keywordtype">int</span> measure, <span class="keywordtype">int</span> instr, <span class="keywordtype">int</span> staff, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l00869"></a><span class="lineno">  869</span>&#160;</div>
+<div class="line"><a name="l00891"></a><span class="lineno">  891</span>&#160;    <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(TimeUnits time, <span class="keywordtype">int</span> instr, <span class="keywordtype">int</span> staff, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l00892"></a><span class="lineno">  892</span>&#160;</div>
+<div class="line"><a name="l00908"></a><span class="lineno">  908</span>&#160;    <a class="code" href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor</a>(DocCursorState&amp; state, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l00909"></a><span class="lineno">  909</span>&#160;</div>
+<div class="line"><a name="l00913"></a><span class="lineno"><a class="line" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">  913</a></span>&#160;    <span class="keyword">enum</span> <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">ECursorAction</a> {</div>
+<div class="line"><a name="l00914"></a><span class="lineno"><a class="line" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aedfbb4fe1effda85019b800a3258de2c">  914</a></span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aedfbb4fe1effda85019b800a3258de2c">k_move_next</a>=0,      </div>
+<div class="line"><a name="l00915"></a><span class="lineno"><a class="line" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a0d8f3282a6d280fe4070174d47dfb7b3">  915</a></span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a0d8f3282a6d280fe4070174d47dfb7b3">k_move_prev</a>,        </div>
+<div class="line"><a name="l00916"></a><span class="lineno"><a class="line" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a900ed49cd3c564b3854cae4acc0bea8f">  916</a></span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a900ed49cd3c564b3854cae4acc0bea8f">k_enter</a>,            </div>
+<div class="line"><a name="l00917"></a><span class="lineno">  917</span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8afdce23cac5c729639e3623f4318f1aae">k_exit</a>,             </div>
+<div class="line"><a name="l00920"></a><span class="lineno">  920</span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a396248433b812cdf7cb3cb9ceb9ea77c">k_point_to</a>,         </div>
+<div class="line"><a name="l00923"></a><span class="lineno"><a class="line" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aae02b727a5b3f85ee51374697b1d0d9c">  923</a></span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aae02b727a5b3f85ee51374697b1d0d9c">k_to_state</a>,         </div>
+<div class="line"><a name="l00924"></a><span class="lineno"><a class="line" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a53258dae633b7b18d074e3aeb4039313">  924</a></span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a53258dae633b7b18d074e3aeb4039313">k_to_measure</a>,       </div>
+<div class="line"><a name="l00925"></a><span class="lineno">  925</span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8ae9bc640e47055c33ba94153bbee8d45c">k_to_time</a>,          </div>
+<div class="line"><a name="l00927"></a><span class="lineno">  927</span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a15413e384ea656a771ef55dcfaafcf15">k_move_up</a>,          </div>
+<div class="line"><a name="l00929"></a><span class="lineno">  929</span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a1ea6d02c815b4dfbc8f562200c4403af">k_move_down</a>,        </div>
+<div class="line"><a name="l00932"></a><span class="lineno">  932</span>&#160;        <a class="code" href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a82a913a91cb3e7c7feab2a30e141222b">k_cursor_dump</a>,      </div>
+<div class="line"><a name="l00935"></a><span class="lineno">  935</span>&#160;    };</div>
+<div class="line"><a name="l00937"></a><span class="lineno">  937</span>&#160;};</div>
+<div class="line"><a name="l00938"></a><span class="lineno">  938</span>&#160;</div>
+<div class="line"><a name="l00939"></a><span class="lineno">  939</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00940"></a><span class="lineno">  940</span>&#160;<span class="comment">// abstract, base class for all delete commands</span></div>
+<div class="line"><a name="l00944"></a><span class="lineno"><a class="line" href="classCmdDelete.html">  944</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdDelete.html">CmdDelete</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
+<div class="line"><a name="l00945"></a><span class="lineno">  945</span>&#160;{</div>
+<div class="line"><a name="l00946"></a><span class="lineno">  946</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00947"></a><span class="lineno">  947</span>&#160;    <span class="keyword">virtual</span> ~<a class="code" href="classCmdDelete.html">CmdDelete</a>() {}</div>
+<div class="line"><a name="l00948"></a><span class="lineno">  948</span>&#160;</div>
+<div class="line"><a name="l00949"></a><span class="lineno">  949</span>&#160;    <span class="keyword">inline</span> ImoId cursor_final_pos_id() { <span class="keywordflow">return</span> m_cursorFinalId; }</div>
+<div class="line"><a name="l00950"></a><span class="lineno">  950</span>&#160;</div>
+<div class="line"><a name="l00951"></a><span class="lineno">  951</span>&#160;<span class="keyword">protected</span>:</div>
+<div class="line"><a name="l00952"></a><span class="lineno">  952</span>&#160;};</div>
+<div class="line"><a name="l00953"></a><span class="lineno">  953</span>&#160;</div>
+<div class="line"><a name="l00954"></a><span class="lineno">  954</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00960"></a><span class="lineno"><a class="line" href="classCmdDeleteBlockLevelObj.html">  960</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdDeleteBlockLevelObj.html">CmdDeleteBlockLevelObj</a> : <span class="keyword">public</span> <a class="code" href="classCmdDelete.html">CmdDelete</a></div>
+<div class="line"><a name="l00961"></a><span class="lineno">  961</span>&#160;{</div>
+<div class="line"><a name="l00962"></a><span class="lineno">  962</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l00976"></a><span class="lineno">  976</span>&#160;    <a class="code" href="classCmdDeleteBlockLevelObj.html#a28355a3b438842a612fe2ad06ae97496">CmdDeleteBlockLevelObj</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l00977"></a><span class="lineno">  977</span>&#160;};</div>
+<div class="line"><a name="l00978"></a><span class="lineno">  978</span>&#160;</div>
+<div class="line"><a name="l00979"></a><span class="lineno">  979</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l00985"></a><span class="lineno"><a class="line" href="classCmdDeleteRelation.html">  985</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdDeleteRelation.html">CmdDeleteRelation</a> : <span class="keyword">public</span> <a class="code" href="classCmdDelete.html">CmdDelete</a></div>
+<div class="line"><a name="l00986"></a><span class="lineno">  986</span>&#160;{</div>
+<div class="line"><a name="l00987"></a><span class="lineno">  987</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l01001"></a><span class="lineno"> 1001</span>&#160;    <a class="code" href="classCmdDeleteRelation.html#a9afdd246e6481cb1f710a92eecc24fcb">CmdDeleteRelation</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l01002"></a><span class="lineno"> 1002</span>&#160;</div>
+<div class="line"><a name="l01031"></a><span class="lineno"> 1031</span>&#160;    <a class="code" href="classCmdDeleteRelation.html#a9afdd246e6481cb1f710a92eecc24fcb">CmdDeleteRelation</a>(<span class="keywordtype">int</span> type, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l01032"></a><span class="lineno"> 1032</span>&#160;};</div>
+<div class="line"><a name="l01033"></a><span class="lineno"> 1033</span>&#160;</div>
+<div class="line"><a name="l01034"></a><span class="lineno"> 1034</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l01040"></a><span class="lineno"><a class="line" href="classCmdDeleteSelection.html"> 1040</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdDeleteSelection.html">CmdDeleteSelection</a> : <span class="keyword">public</span> <a class="code" href="classCmdDelete.html">CmdDelete</a></div>
+<div class="line"><a name="l01041"></a><span class="lineno"> 1041</span>&#160;{</div>
+<div class="line"><a name="l01042"></a><span class="lineno"> 1042</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l01070"></a><span class="lineno"> 1070</span>&#160;    <a class="code" href="classCmdDeleteSelection.html#a178447f44f0212c95bdc9120248b14e3">CmdDeleteSelection</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Delete selection&quot;</span>);</div>
+<div class="line"><a name="l01071"></a><span class="lineno"> 1071</span>&#160;};</div>
+<div class="line"><a name="l01072"></a><span class="lineno"> 1072</span>&#160;</div>
+<div class="line"><a name="l01073"></a><span class="lineno"> 1073</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l01080"></a><span class="lineno"><a class="line" href="classCmdDeleteStaffObj.html"> 1080</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdDeleteStaffObj.html">CmdDeleteStaffObj</a> : <span class="keyword">public</span> <a class="code" href="classCmdDelete.html">CmdDelete</a></div>
+<div class="line"><a name="l01081"></a><span class="lineno"> 1081</span>&#160;{</div>
+<div class="line"><a name="l01082"></a><span class="lineno"> 1082</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l01116"></a><span class="lineno"> 1116</span>&#160;    <a class="code" href="classCmdDeleteStaffObj.html#a80dcc7bd66ac43943e0118926ecec767">CmdDeleteStaffObj</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l01117"></a><span class="lineno"> 1117</span>&#160;};</div>
+<div class="line"><a name="l01118"></a><span class="lineno"> 1118</span>&#160;</div>
+<div class="line"><a name="l01119"></a><span class="lineno"> 1119</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l01120"></a><span class="lineno"> 1120</span>&#160;<span class="comment">// abstract, base for all CmdInsert commands</span></div>
+<div class="line"><a name="l01124"></a><span class="lineno"><a class="line" href="classCmdInsert.html"> 1124</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdInsert.html">CmdInsert</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
+<div class="line"><a name="l01125"></a><span class="lineno"> 1125</span>&#160;{</div>
+<div class="line"><a name="l01126"></a><span class="lineno"> 1126</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l01135"></a><span class="lineno"><a class="line" href="classCmdInsert.html#a29965b4a403df78be730cf7f050403d9"> 1135</a></span>&#160;    <span class="keyword">inline</span> ImoId <a class="code" href="classCmdInsert.html#a29965b4a403df78be730cf7f050403d9">last_inserted_id</a>() { <span class="keywordflow">return</span> m_lastInsertedId; }</div>
+<div class="line"><a name="l01136"></a><span class="lineno"> 1136</span>&#160;};</div>
+<div class="line"><a name="l01137"></a><span class="lineno"> 1137</span>&#160;</div>
+<div class="line"><a name="l01138"></a><span class="lineno"> 1138</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l01144"></a><span class="lineno"><a class="line" href="classCmdInsertBlockLevelObj.html"> 1144</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a> : <span class="keyword">public</span> <a class="code" href="classCmdInsert.html">CmdInsert</a></div>
+<div class="line"><a name="l01145"></a><span class="lineno"> 1145</span>&#160;{</div>
+<div class="line"><a name="l01146"></a><span class="lineno"> 1146</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l01176"></a><span class="lineno"> 1176</span>&#160;    <a class="code" href="classCmdInsertBlockLevelObj.html#a41a1543420bc98413be17a75016a96a8">CmdInsertBlockLevelObj</a>(<span class="keywordtype">int</span> type, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name);</div>
+<div class="line"><a name="l01177"></a><span class="lineno"> 1177</span>&#160;</div>
+<div class="line"><a name="l01202"></a><span class="lineno"> 1202</span>&#160;    <a class="code" href="classCmdInsertBlockLevelObj.html#a41a1543420bc98413be17a75016a96a8">CmdInsertBlockLevelObj</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; source, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name);</div>
+<div class="line"><a name="l01203"></a><span class="lineno"> 1203</span>&#160;</div>
+<div class="line"><a name="l01204"></a><span class="lineno"> 1204</span>&#160;};</div>
+<div class="line"><a name="l01205"></a><span class="lineno"> 1205</span>&#160;</div>
+<div class="line"><a name="l01206"></a><span class="lineno"> 1206</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l01212"></a><span class="lineno"><a class="line" href="classCmdInsertManyStaffObjs.html"> 1212</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdInsertManyStaffObjs.html">CmdInsertManyStaffObjs</a> : <span class="keyword">public</span> <a class="code" href="classCmdInsert.html">CmdInsert</a></div>
+<div class="line"><a name="l01213"></a><span class="lineno"> 1213</span>&#160;{</div>
+<div class="line"><a name="l01214"></a><span class="lineno"> 1214</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l01231"></a><span class="lineno"> 1231</span>&#160;    <a class="code" href="classCmdInsertManyStaffObjs.html#a0f81061adcebc8027dfb8a94f52dc71e">CmdInsertManyStaffObjs</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; source,</div>
+<div class="line"><a name="l01232"></a><span class="lineno"> 1232</span>&#160;                           <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Insert staff objects&quot;</span>);</div>
+<div class="line"><a name="l01233"></a><span class="lineno"> 1233</span>&#160;};</div>
+<div class="line"><a name="l01234"></a><span class="lineno"> 1234</span>&#160;</div>
+<div class="line"><a name="l01235"></a><span class="lineno"> 1235</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l01241"></a><span class="lineno"><a class="line" href="classCmdInsertStaffObj.html"> 1241</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdInsertStaffObj.html">CmdInsertStaffObj</a> : <span class="keyword">public</span> <a class="code" href="classCmdInsert.html">CmdInsert</a></div>
+<div class="line"><a name="l01242"></a><span class="lineno"> 1242</span>&#160;{</div>
+<div class="line"><a name="l01243"></a><span class="lineno"> 1243</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l01279"></a><span class="lineno"> 1279</span>&#160;    <a class="code" href="classCmdInsertStaffObj.html#a3d3a6f88d58a736ded9d0936decce57f">CmdInsertStaffObj</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; source, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l01280"></a><span class="lineno"> 1280</span>&#160;};</div>
+<div class="line"><a name="l01281"></a><span class="lineno"> 1281</span>&#160;</div>
+<div class="line"><a name="l01282"></a><span class="lineno"> 1282</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l01288"></a><span class="lineno"><a class="line" href="classCmdJoinBeam.html"> 1288</a></span>&#160;<span class="comment"></span><span class="keyword">class </span><a class="code" href="classCmdJoinBeam.html">CmdJoinBeam</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
+<div class="line"><a name="l01289"></a><span class="lineno"> 1289</span>&#160;{</div>
+<div class="line"><a name="l01290"></a><span class="lineno"> 1290</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l01322"></a><span class="lineno"> 1322</span>&#160;    <a class="code" href="classCmdJoinBeam.html#af66f8a719144270535bd2653a88214cd">CmdJoinBeam</a>(<span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;Join beam&quot;</span>);</div>
+<div class="line"><a name="l01323"></a><span class="lineno"> 1323</span>&#160;};</div>
+<div class="line"><a name="l01324"></a><span class="lineno"> 1324</span>&#160;</div>
+<div class="line"><a name="l01325"></a><span class="lineno"> 1325</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l01326"></a><span class="lineno"> 1326</span>&#160;<span class="comment">// This command is not fully coded. Current code assumes that the object is a Tie and</span></div>
+<div class="line"><a name="l01327"></a><span class="lineno"> 1327</span>&#160;<span class="comment">// the selected point is the first bezier</span></div>
+<div class="line"><a name="l01328"></a><span class="lineno"> 1328</span>&#160;<span class="comment">/*</span></div>
+<div class="line"><a name="l01329"></a><span class="lineno"> 1329</span>&#160;<span class="comment">    A command for moving an object to another position.</span></div>
+<div class="line"><a name="l01330"></a><span class="lineno"> 1330</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l01331"></a><span class="lineno"> 1331</span>&#160;<span class="comment">    See constructor for details.</span></div>
+<div class="line"><a name="l01332"></a><span class="lineno"> 1332</span>&#160;<span class="comment">*/</span></div>
+<div class="line"><a name="l01333"></a><span class="lineno"> 1333</span>&#160;<span class="comment">/*</span></div>
+<div class="line"><a name="l01334"></a><span class="lineno"> 1334</span>&#160;<span class="comment">class CmdMoveObjectPoint : public DocCmdSimple</span></div>
+<div class="line"><a name="l01335"></a><span class="lineno"> 1335</span>&#160;<span class="comment">{</span></div>
+<div class="line"><a name="l01336"></a><span class="lineno"> 1336</span>&#160;<span class="comment">public:</span></div>
+<div class="line"><a name="l01337"></a><span class="lineno"> 1337</span>&#160;<span class="comment">    //</span></div>
+<div class="line"><a name="l01338"></a><span class="lineno"> 1338</span>&#160;<span class="comment">        This command moves an object to another position.</span></div>
+<div class="line"><a name="l01339"></a><span class="lineno"> 1339</span>&#160;<span class="comment">        @param name The displayable name for the command. If not specified will be replaced</span></div>
+<div class="line"><a name="l01340"></a><span class="lineno"> 1340</span>&#160;<span class="comment">            by the string &quot;Join beam&quot;.</span></div>
+<div class="line"><a name="l01341"></a><span class="lineno"> 1341</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l01342"></a><span class="lineno"> 1342</span>&#160;<span class="comment">        &lt;b&gt;Remarks&lt;/b&gt;</span></div>
+<div class="line"><a name="l01343"></a><span class="lineno"> 1343</span>&#160;<span class="comment">        - The command will return a failure code if the selection is empty or the selected notes can not </span></div>
+<div class="line"><a name="l01344"></a><span class="lineno"> 1344</span>&#160;<span class="comment">            be on the same beam (e.g. notes in different voices):</span></div>
+<div class="line"><a name="l01345"></a><span class="lineno"> 1345</span>&#160;<span class="comment">        - After executing the command:</span></div>
+<div class="line"><a name="l01346"></a><span class="lineno"> 1346</span>&#160;<span class="comment">            - the selection will not be altered.</span></div>
+<div class="line"><a name="l01347"></a><span class="lineno"> 1347</span>&#160;<span class="comment">            - the cursor will not change its position.</span></div>
+<div class="line"><a name="l01348"></a><span class="lineno"> 1348</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l01349"></a><span class="lineno"> 1349</span>&#160;<span class="comment">        &lt;b&gt;Example&lt;/b&gt;</span></div>
+<div class="line"><a name="l01350"></a><span class="lineno"> 1350</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l01351"></a><span class="lineno"> 1351</span>&#160;<span class="comment">        @code</span></div>
+<div class="line"><a name="l01352"></a><span class="lineno"> 1352</span>&#160;<span class="comment">        void CommandHandler::join_beam()</span></div>
+<div class="line"><a name="l01353"></a><span class="lineno"> 1353</span>&#160;<span class="comment">        {</span></div>
+<div class="line"><a name="l01354"></a><span class="lineno"> 1354</span>&#160;<span class="comment">            //depending on current selection, either:</span></div>
+<div class="line"><a name="l01355"></a><span class="lineno"> 1355</span>&#160;<span class="comment">            // - create a beamed group with the selected notes,</span></div>
+<div class="line"><a name="l01356"></a><span class="lineno"> 1356</span>&#160;<span class="comment">            // - join two or more beamed groups</span></div>
+<div class="line"><a name="l01357"></a><span class="lineno"> 1357</span>&#160;<span class="comment">            // - or add a note to a beamed group</span></div>
+<div class="line"><a name="l01358"></a><span class="lineno"> 1358</span>&#160;<span class="comment"></span></div>
+<div class="line"><a name="l01359"></a><span class="lineno"> 1359</span>&#160;<span class="comment">            if (SpInteractor spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</span></div>
+<div class="line"><a name="l01360"></a><span class="lineno"> 1360</span>&#160;<span class="comment">            {</span></div>
+<div class="line"><a name="l01361"></a><span class="lineno"> 1361</span>&#160;<span class="comment">                string name = gettext(&quot;Add beam&quot;);</span></div>
+<div class="line"><a name="l01362"></a><span class="lineno"> 1362</span>&#160;<span class="comment">                SpInteractor-&gt;exec_command( new CmdJoinBeam(name) );</span></div>
+<div class="line"><a name="l01363"></a><span class="lineno"> 1363</span>&#160;<span class="comment">            }</span></div>
+<div class="line"><a name="l01364"></a><span class="lineno"> 1364</span>&#160;<span class="comment">        }</span></div>
+<div class="line"><a name="l01365"></a><span class="lineno"> 1365</span>&#160;<span class="comment">        @endcode</span></div>
+<div class="line"><a name="l01366"></a><span class="lineno"> 1366</span>&#160;<span class="comment">    //</span></div>
+<div class="line"><a name="l01367"></a><span class="lineno"> 1367</span>&#160;<span class="comment">    CmdMoveObjectPoint(int pointIndex, UPoint shift,</span></div>
+<div class="line"><a name="l01368"></a><span class="lineno"> 1368</span>&#160;<span class="comment">                       const string&amp; name=&quot;Move object point&quot;);</span></div>
+<div class="line"><a name="l01369"></a><span class="lineno"> 1369</span>&#160;<span class="comment">};</span></div>
+<div class="line"><a name="l01370"></a><span class="lineno"> 1370</span>&#160;<span class="comment">*/</span></div>
+<div class="line"><a name="l01371"></a><span class="lineno"> 1371</span>&#160;</div>
+<div class="line"><a name="l01372"></a><span class="lineno"> 1372</span>&#160;<span class="comment">//---------------------------------------------------------------------------------------</span></div>
+<div class="line"><a name="l01373"></a><span class="lineno"><a class="line" href="classCmdSelection.html"> 1373</a></span>&#160;<span class="keyword">class </span><a class="code" href="classCmdSelection.html">CmdSelection</a> : <span class="keyword">public</span> <a class="code" href="classDocCmdSimple.html">DocCmdSimple</a></div>
+<div class="line"><a name="l01374"></a><span class="lineno"> 1374</span>&#160;{</div>
+<div class="line"><a name="l01375"></a><span class="lineno"> 1375</span>&#160;<span class="keyword">public</span>:</div>
+<div class="line"><a name="l01376"></a><span class="lineno"> 1376</span>&#160;    <span class="keyword">enum</span> { k_set=0, k_add, k_remove, k_clear, };</div>
+<div class="line"><a name="l01377"></a><span class="lineno"> 1377</span>&#160;</div>
+<div class="line"><a name="l01378"></a><span class="lineno"> 1378</span>&#160;    <a class="code" href="classCmdSelection.html">CmdSelection</a>(<span class="keywordtype">int</span> cmd, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l01379"></a><span class="lineno"> 1379</span>&#160;    <a class="code" href="classCmdSelection.html">CmdSelection</a>(<span class="keywordtype">int</span> cmd, ImoId <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; name=<span class="stringliteral">&quot;&quot;</span>);</div>
+<div class="line"><a name="l01380"></a><span class="lineno"> 1380</span>&#160;};</div>
+<div class="line"><a name="l01381"></a><span class="lineno"> 1381</span>&#160;</div>
 <div class="ttc" id="classCmdDeleteStaffObj_html_a80dcc7bd66ac43943e0118926ecec767"><div class="ttname"><a href="classCmdDeleteStaffObj.html#a80dcc7bd66ac43943e0118926ecec767">CmdDeleteStaffObj::CmdDeleteStaffObj</a></div><div class="ttdeci">CmdDeleteStaffObj(const string &amp;name=&quot;&quot;)</div></div>
-<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a1ea6d02c815b4dfbc8f562200c4403af"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a1ea6d02c815b4dfbc8f562200c4403af">CmdCursor::k_move_down</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:893</div></div>
-<div class="ttc" id="classCmdAddTie_html"><div class="ttname"><a href="classCmdAddTie.html">CmdAddTie</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:312</div></div>
-<div class="ttc" id="classCmdCursor_html"><div class="ttname"><a href="classCmdCursor.html">CmdCursor</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:636</div></div>
-<div class="ttc" id="classDocCommand_html_a8f5897829747c5a527d7c7f410182e30a02dd5ef19d923df0381b730b8f1854aa"><div class="ttname"><a href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30a02dd5ef19d923df0381b730b8f1854aa">DocCommand::k_sel_command_specific</a></div><div class="ttdoc">Specific. The command will do whatever is needed. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:52</div></div>
-<div class="ttc" id="classDocCommand_html_a2ee82e62ad143d6c827a47312afd7addaeac986cda2b789c233284477ca789e95"><div class="ttname"><a href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7addaeac986cda2b789c233284477ca789e95">DocCommand::k_update_after_deletion</a></div><div class="ttdoc">Update the cursor. Current pointed object has been deleted and cursor must now point to next object...</div><div class="ttdef"><b>Definition:</b> lomse_command.h:29</div></div>
-<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a0d8f3282a6d280fe4070174d47dfb7b3"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a0d8f3282a6d280fe4070174d47dfb7b3">CmdCursor::k_move_prev</a></div><div class="ttdoc">Move cursor to the previous valid position. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:877</div></div>
+<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a1ea6d02c815b4dfbc8f562200c4403af"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a1ea6d02c815b4dfbc8f562200c4403af">CmdCursor::k_move_down</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:931</div></div>
+<div class="ttc" id="classCmdAddTie_html"><div class="ttname"><a href="classCmdAddTie.html">CmdAddTie</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:338</div></div>
+<div class="ttc" id="classCmdCursor_html"><div class="ttname"><a href="classCmdCursor.html">CmdCursor</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:673</div></div>
+<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a0d8f3282a6d280fe4070174d47dfb7b3"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a0d8f3282a6d280fe4070174d47dfb7b3">CmdCursor::k_move_prev</a></div><div class="ttdoc">Move cursor to the previous valid position. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:915</div></div>
 <div class="ttc" id="classCmdAddNoteRest_html_abfbe2be6deeb6a6437a2165344859309"><div class="ttname"><a href="classCmdAddNoteRest.html#abfbe2be6deeb6a6437a2165344859309">CmdAddNoteRest::CmdAddNoteRest</a></div><div class="ttdeci">CmdAddNoteRest(const string &amp;source, int editMode, const string &amp;name=&quot;&quot;)</div></div>
-<div class="ttc" id="classCmdSelection_html"><div class="ttname"><a href="classCmdSelection.html">CmdSelection</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1233</div></div>
-<div class="ttc" id="classDocCommand_html"><div class="ttname"><a href="classDocCommand.html">DocCommand</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:15</div></div>
-<div class="ttc" id="classDocCommand_html_a0a7a5b650d7d0b6af7aba50ca0e4173b"><div class="ttname"><a href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173b">DocCommand::ECmdUndoPolicy</a></div><div class="ttdeci">ECmdUndoPolicy</div><div class="ttdef"><b>Definition:</b> lomse_command.h:38</div></div>
+<div class="ttc" id="classCmdSelection_html"><div class="ttname"><a href="classCmdSelection.html">CmdSelection</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1373</div></div>
+<div class="ttc" id="group__enumerations_html_ggac8538ac72eeeed032d54ce597bbb7d70a1d9998199bd218f26d72781d091203d4"><div class="ttname"><a href="group__enumerations.html#ggac8538ac72eeeed032d54ce597bbb7d70a1d9998199bd218f26d72781d091203d4">k_edit_mode_ripple</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:18</div></div>
+<div class="ttc" id="classDocCommand_html"><div class="ttname"><a href="classDocCommand.html">DocCommand</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:29</div></div>
 <div class="ttc" id="classCmdCursor_html_a29b02390a6756f023d79818528812abe"><div class="ttname"><a href="classCmdCursor.html#a29b02390a6756f023d79818528812abe">CmdCursor::CmdCursor</a></div><div class="ttdeci">CmdCursor(ECursorAction cmd, const string &amp;name=&quot;&quot;)</div></div>
-<div class="ttc" id="classUndoElement_html"><div class="ttname"><a href="classUndoElement.html">UndoElement</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:149</div></div>
-<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8ae9bc640e47055c33ba94153bbee8d45c"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8ae9bc640e47055c33ba94153bbee8d45c">CmdCursor::k_to_time</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:888</div></div>
-<div class="ttc" id="classDocCommand_html_ac1e21dc807ca0d323e046f7da6ac9ecf"><div class="ttname"><a href="classDocCommand.html#ac1e21dc807ca0d323e046f7da6ac9ecf">DocCommand::is_recordable</a></div><div class="ttdeci">bool is_recordable()</div><div class="ttdef"><b>Definition:</b> lomse_command.h:75</div></div>
-<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a900ed49cd3c564b3854cae4acc0bea8f"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a900ed49cd3c564b3854cae4acc0bea8f">CmdCursor::k_enter</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:878</div></div>
-<div class="ttc" id="classDocCommand_html_a2ee82e62ad143d6c827a47312afd7adda50c70dcd3a2a122248dfe14f2253e3f4"><div class="ttname"><a href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7adda50c70dcd3a2a122248dfe14f2253e3f4">DocCommand::k_update_after_insertion</a></div><div class="ttdoc">Update the cursor. Cursor must point to inserted object. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:30</div></div>
+<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8ae9bc640e47055c33ba94153bbee8d45c"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8ae9bc640e47055c33ba94153bbee8d45c">CmdCursor::k_to_time</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:926</div></div>
+<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a900ed49cd3c564b3854cae4acc0bea8f"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a900ed49cd3c564b3854cae4acc0bea8f">CmdCursor::k_enter</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:916</div></div>
 <div class="ttc" id="classCmdAddTie_html_a45dbe6f9f689921bca0c1e6231d25e27"><div class="ttname"><a href="classCmdAddTie.html#a45dbe6f9f689921bca0c1e6231d25e27">CmdAddTie::CmdAddTie</a></div><div class="ttdeci">CmdAddTie(const string &amp;name=&quot;Add tie&quot;)</div></div>
-<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a15413e384ea656a771ef55dcfaafcf15"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a15413e384ea656a771ef55dcfaafcf15">CmdCursor::k_move_up</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:890</div></div>
-<div class="ttc" id="classDocCommandExecuter_html"><div class="ttname"><a href="classDocCommandExecuter.html">DocCommandExecuter</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:172</div></div>
-<div class="ttc" id="classDocCmdComposite_html"><div class="ttname"><a href="classDocCmdComposite.html">DocCmdComposite</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:113</div></div>
-<div class="ttc" id="classDocCommand_html_a2ee82e62ad143d6c827a47312afd7adda98ced85e4c68d82628807d38f1c82eed"><div class="ttname"><a href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7adda98ced85e4c68d82628807d38f1c82eed">DocCommand::k_refresh</a></div><div class="ttdoc">Refresh cursor. Pointed object is valid but other related info. could have changed. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:31</div></div>
-<div class="ttc" id="classDocCommand_html_a0a7a5b650d7d0b6af7aba50ca0e4173ba1ab5572a41d7a3792fee7f3f2955579c"><div class="ttname"><a href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173ba1ab5572a41d7a3792fee7f3f2955579c">DocCommand::k_undo_policy_full_checkpoint</a></div><div class="ttdoc">Undo is based on a full checkpoint. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:39</div></div>
-<div class="ttc" id="classCmdInsert_html_a29965b4a403df78be730cf7f050403d9"><div class="ttname"><a href="classCmdInsert.html#a29965b4a403df78be730cf7f050403d9">CmdInsert::last_inserted_id</a></div><div class="ttdeci">ImoId last_inserted_id()</div><div class="ttdef"><b>Definition:</b> lomse_command.h:1096</div></div>
-<div class="ttc" id="classDocCommand_html_a242c0e33ef744f0b1958ac0c4176f823"><div class="ttname"><a href="classDocCommand.html#a242c0e33ef744f0b1958ac0c4176f823">DocCommand::~DocCommand</a></div><div class="ttdeci">virtual ~DocCommand()</div><div class="ttdef"><b>Definition:</b> lomse_command.h:21</div></div>
-<div class="ttc" id="classCmdChangeAttribute_html"><div class="ttname"><a href="classCmdChangeAttribute.html">CmdChangeAttribute</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:489</div></div>
-<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8aae02b727a5b3f85ee51374697b1d0d9c"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aae02b727a5b3f85ee51374697b1d0d9c">CmdCursor::k_to_state</a></div><div class="ttdoc">Move cursor to the specified state. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:885</div></div>
+<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a15413e384ea656a771ef55dcfaafcf15"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a15413e384ea656a771ef55dcfaafcf15">CmdCursor::k_move_up</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:928</div></div>
+<div class="ttc" id="classDocCmdComposite_html"><div class="ttname"><a href="classDocCmdComposite.html">DocCmdComposite</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:137</div></div>
+<div class="ttc" id="classCmdInsertManyStaffObjs_html_a0f81061adcebc8027dfb8a94f52dc71e"><div class="ttname"><a href="classCmdInsertManyStaffObjs.html#a0f81061adcebc8027dfb8a94f52dc71e">CmdInsertManyStaffObjs::CmdInsertManyStaffObjs</a></div><div class="ttdeci">CmdInsertManyStaffObjs(const string &amp;source, const string &amp;name=&quot;Insert staff objects&quot;)</div></div>
+<div class="ttc" id="classCmdInsert_html_a29965b4a403df78be730cf7f050403d9"><div class="ttname"><a href="classCmdInsert.html#a29965b4a403df78be730cf7f050403d9">CmdInsert::last_inserted_id</a></div><div class="ttdeci">ImoId last_inserted_id()</div><div class="ttdef"><b>Definition:</b> lomse_command.h:1135</div></div>
+<div class="ttc" id="classCmdChangeAttribute_html"><div class="ttname"><a href="classCmdChangeAttribute.html">CmdChangeAttribute</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:515</div></div>
+<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8aae02b727a5b3f85ee51374697b1d0d9c"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aae02b727a5b3f85ee51374697b1d0d9c">CmdCursor::k_to_state</a></div><div class="ttdoc">Move cursor to the specified state. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:923</div></div>
 <div class="ttc" id="classCmdInsertBlockLevelObj_html_a41a1543420bc98413be17a75016a96a8"><div class="ttname"><a href="classCmdInsertBlockLevelObj.html#a41a1543420bc98413be17a75016a96a8">CmdInsertBlockLevelObj::CmdInsertBlockLevelObj</a></div><div class="ttdeci">CmdInsertBlockLevelObj(int type, const string &amp;name)</div></div>
 <div class="ttc" id="classCmdDeleteBlockLevelObj_html_a28355a3b438842a612fe2ad06ae97496"><div class="ttname"><a href="classCmdDeleteBlockLevelObj.html#a28355a3b438842a612fe2ad06ae97496">CmdDeleteBlockLevelObj::CmdDeleteBlockLevelObj</a></div><div class="ttdeci">CmdDeleteBlockLevelObj(const string &amp;name=&quot;&quot;)</div></div>
-<div class="ttc" id="classDocCommand_html_adf68714b754c17c1c7f9b36187d321c8"><div class="ttname"><a href="classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8">DocCommand::get_name</a></div><div class="ttdeci">std::string get_name()</div><div class="ttdef"><b>Definition:</b> lomse_command.h:59</div></div>
-<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a53258dae633b7b18d074e3aeb4039313"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a53258dae633b7b18d074e3aeb4039313">CmdCursor::k_to_measure</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:886</div></div>
-<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8aedfbb4fe1effda85019b800a3258de2c"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aedfbb4fe1effda85019b800a3258de2c">CmdCursor::k_move_next</a></div><div class="ttdoc">Move cursor to the next valid position. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:876</div></div>
-<div class="ttc" id="classCmdDeleteRelation_html"><div class="ttname"><a href="classCmdDeleteRelation.html">CmdDeleteRelation</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:947</div></div>
+<div class="ttc" id="classDocCommand_html_adf68714b754c17c1c7f9b36187d321c8"><div class="ttname"><a href="classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8">DocCommand::get_name</a></div><div class="ttdeci">std::string get_name()</div><div class="ttdef"><b>Definition:</b> lomse_command.h:83</div></div>
+<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a53258dae633b7b18d074e3aeb4039313"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a53258dae633b7b18d074e3aeb4039313">CmdCursor::k_to_measure</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:924</div></div>
+<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8aedfbb4fe1effda85019b800a3258de2c"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8aedfbb4fe1effda85019b800a3258de2c">CmdCursor::k_move_next</a></div><div class="ttdoc">Move cursor to the next valid position. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:914</div></div>
+<div class="ttc" id="classCmdJoinBeam_html_af66f8a719144270535bd2653a88214cd"><div class="ttname"><a href="classCmdJoinBeam.html#af66f8a719144270535bd2653a88214cd">CmdJoinBeam::CmdJoinBeam</a></div><div class="ttdeci">CmdJoinBeam(const string &amp;name=&quot;Join beam&quot;)</div></div>
+<div class="ttc" id="classCmdDeleteRelation_html"><div class="ttname"><a href="classCmdDeleteRelation.html">CmdDeleteRelation</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:985</div></div>
 <div class="ttc" id="classCmdChangeDots_html_addd6ad21bb5806e37556721ed951378e"><div class="ttname"><a href="classCmdChangeDots.html#addd6ad21bb5806e37556721ed951378e">CmdChangeDots::CmdChangeDots</a></div><div class="ttdeci">CmdChangeDots(int dots, const string &amp;name=&quot;Change dots&quot;)</div></div>
-<div class="ttc" id="classDocCommand_html_a8f5897829747c5a527d7c7f410182e30ac492f71c4619a39a2e6bc17609d10ddb"><div class="ttname"><a href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30ac492f71c4619a39a2e6bc17609d10ddb">DocCommand::k_sel_do_nothing</a></div><div class="ttdoc">Do nothing. The selection is not changed after command execution. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:50</div></div>
-<div class="ttc" id="classCmdInsertBlockLevelObj_html"><div class="ttname"><a href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1105</div></div>
-<div class="ttc" id="classDocCmdSimple_html"><div class="ttname"><a href="classDocCmdSimple.html">DocCmdSimple</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:99</div></div>
+<div class="ttc" id="classCmdInsertBlockLevelObj_html"><div class="ttname"><a href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1144</div></div>
+<div class="ttc" id="classDocCmdSimple_html"><div class="ttname"><a href="classDocCmdSimple.html">DocCmdSimple</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:123</div></div>
 <div class="ttc" id="classCmdAddTuplet_html_a5f0ac3d3553f91b5bba3610507b24512"><div class="ttname"><a href="classCmdAddTuplet.html#a5f0ac3d3553f91b5bba3610507b24512">CmdAddTuplet::CmdAddTuplet</a></div><div class="ttdeci">CmdAddTuplet(const string &amp;src, const string &amp;name=&quot;Add tuplet&quot;)</div></div>
-<div class="ttc" id="classCmdAddChordNote_html"><div class="ttname"><a href="classCmdAddChordNote.html">CmdAddChordNote</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:198</div></div>
-<div class="ttc" id="classCmdInsert_html"><div class="ttname"><a href="classCmdInsert.html">CmdInsert</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1086</div></div>
-<div class="ttc" id="classCmdMoveObjectPoint_html"><div class="ttname"><a href="classCmdMoveObjectPoint.html">CmdMoveObjectPoint</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1217</div></div>
-<div class="ttc" id="classCmdAddTuplet_html"><div class="ttname"><a href="classCmdAddTuplet.html">CmdAddTuplet</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:352</div></div>
-<div class="ttc" id="classCmdDelete_html"><div class="ttname"><a href="classCmdDelete.html">CmdDelete</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:906</div></div>
-<div class="ttc" id="classCmdAddNoteRest_html"><div class="ttname"><a href="classCmdAddNoteRest.html">CmdAddNoteRest</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:254</div></div>
-<div class="ttc" id="classCmdInsertManyStaffObjs_html"><div class="ttname"><a href="classCmdInsertManyStaffObjs.html">CmdInsertManyStaffObjs</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1168</div></div>
-<div class="ttc" id="classDocCommand_html_a2ee82e62ad143d6c827a47312afd7addacb7d2c957a249b23d34dfb270e7d631f"><div class="ttname"><a href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7addacb7d2c957a249b23d34dfb270e7d631f">DocCommand::k_do_nothing</a></div><div class="ttdoc">Do nothing. All cursor data remains valid after command execution. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:28</div></div>
-<div class="ttc" id="classDocCommand_html_a0a7a5b650d7d0b6af7aba50ca0e4173ba6d4c35909a655dd7597e871a801a8dad"><div class="ttname"><a href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173ba6d4c35909a655dd7597e871a801a8dad">DocCommand::k_undo_policy_specific</a></div><div class="ttdoc">Undo is implemented by the command. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:41</div></div>
-<div class="ttc" id="classDocCommand_html_a4fcd738f3a6c0f375b44f16987a5937b"><div class="ttname"><a href="classDocCommand.html#a4fcd738f3a6c0f375b44f16987a5937b">DocCommand::get_error</a></div><div class="ttdeci">string get_error()</div><div class="ttdef"><b>Definition:</b> lomse_command.h:81</div></div>
+<div class="ttc" id="classCmdAddChordNote_html"><div class="ttname"><a href="classCmdAddChordNote.html">CmdAddChordNote</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:224</div></div>
+<div class="ttc" id="group__enumerations_html_gac8538ac72eeeed032d54ce597bbb7d70"><div class="ttname"><a href="group__enumerations.html#gac8538ac72eeeed032d54ce597bbb7d70">EEditMode</a></div><div class="ttdeci">EEditMode</div><div class="ttdef"><b>Definition:</b> lomse_command.h:12</div></div>
+<div class="ttc" id="classCmdInsert_html"><div class="ttname"><a href="classCmdInsert.html">CmdInsert</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1124</div></div>
+<div class="ttc" id="classCmdAddTuplet_html"><div class="ttname"><a href="classCmdAddTuplet.html">CmdAddTuplet</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:378</div></div>
+<div class="ttc" id="classCmdDelete_html"><div class="ttname"><a href="classCmdDelete.html">CmdDelete</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:944</div></div>
+<div class="ttc" id="classCmdAddNoteRest_html"><div class="ttname"><a href="classCmdAddNoteRest.html">CmdAddNoteRest</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:280</div></div>
+<div class="ttc" id="classCmdInsertManyStaffObjs_html"><div class="ttname"><a href="classCmdInsertManyStaffObjs.html">CmdInsertManyStaffObjs</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1212</div></div>
+<div class="ttc" id="classDocCommand_html_a4fcd738f3a6c0f375b44f16987a5937b"><div class="ttname"><a href="classDocCommand.html#a4fcd738f3a6c0f375b44f16987a5937b">DocCommand::get_error</a></div><div class="ttdeci">string get_error()</div><div class="ttdef"><b>Definition:</b> lomse_command.h:105</div></div>
+<div class="ttc" id="classCmdInsertStaffObj_html_a3d3a6f88d58a736ded9d0936decce57f"><div class="ttname"><a href="classCmdInsertStaffObj.html#a3d3a6f88d58a736ded9d0936decce57f">CmdInsertStaffObj::CmdInsertStaffObj</a></div><div class="ttdeci">CmdInsertStaffObj(const string &amp;source, const string &amp;name=&quot;&quot;)</div></div>
 <div class="ttc" id="classCmdDeleteRelation_html_a9afdd246e6481cb1f710a92eecc24fcb"><div class="ttname"><a href="classCmdDeleteRelation.html#a9afdd246e6481cb1f710a92eecc24fcb">CmdDeleteRelation::CmdDeleteRelation</a></div><div class="ttdeci">CmdDeleteRelation(const string &amp;name=&quot;&quot;)</div></div>
+<div class="ttc" id="group__enumerations_html_ggac8538ac72eeeed032d54ce597bbb7d70a008fa35bf0c9fc83c63f3311581eee97"><div class="ttname"><a href="group__enumerations.html#ggac8538ac72eeeed032d54ce597bbb7d70a008fa35bf0c9fc83c63f3311581eee97">k_edit_mode_replace</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:14</div></div>
 <div class="ttc" id="classCmdBreakBeam_html_a124a0647866043d172bb02f8dcf3ec15"><div class="ttname"><a href="classCmdBreakBeam.html#a124a0647866043d172bb02f8dcf3ec15">CmdBreakBeam::CmdBreakBeam</a></div><div class="ttdeci">CmdBreakBeam(const string &amp;name=&quot;Break beam&quot;)</div></div>
-<div class="ttc" id="classCmdChangeAccidentals_html"><div class="ttname"><a href="classCmdChangeAccidentals.html">CmdChangeAccidentals</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:445</div></div>
-<div class="ttc" id="classDocCommand_html_a0a7a5b650d7d0b6af7aba50ca0e4173baeb8a0f5795c40e192a6024e8bf435bd0"><div class="ttname"><a href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173baeb8a0f5795c40e192a6024e8bf435bd0">DocCommand::k_undo_policy_partial_checkpoint</a></div><div class="ttdoc">Undo is based on a partial checkpoint. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:40</div></div>
-<div class="ttc" id="classDocCommand_html_a2ee82e62ad143d6c827a47312afd7add"><div class="ttname"><a href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7add">DocCommand::ECmdCursorPolicy</a></div><div class="ttdeci">ECmdCursorPolicy</div><div class="ttdef"><b>Definition:</b> lomse_command.h:27</div></div>
+<div class="ttc" id="classCmdChangeAccidentals_html"><div class="ttname"><a href="classCmdChangeAccidentals.html">CmdChangeAccidentals</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:471</div></div>
 <div class="ttc" id="classCmdAddChordNote_html_a033c364e124e9e5bc484f6ca1e1b935b"><div class="ttname"><a href="classCmdAddChordNote.html#a033c364e124e9e5bc484f6ca1e1b935b">CmdAddChordNote::CmdAddChordNote</a></div><div class="ttdeci">CmdAddChordNote(const string &amp;pitch, const string &amp;name=&quot;Add chord note&quot;)</div></div>
-<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a396248433b812cdf7cb3cb9ceb9ea77c"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a396248433b812cdf7cb3cb9ceb9ea77c">CmdCursor::k_point_to</a></div><div class="ttdoc">Move cursor to the specified element. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:884</div></div>
-<div class="ttc" id="classCmdDeleteBlockLevelObj_html"><div class="ttname"><a href="classCmdDeleteBlockLevelObj.html">CmdDeleteBlockLevelObj</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:922</div></div>
-<div class="ttc" id="classCmdDeleteStaffObj_html"><div class="ttname"><a href="classCmdDeleteStaffObj.html">CmdDeleteStaffObj</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1042</div></div>
-<div class="ttc" id="classDocCommand_html_a8f5897829747c5a527d7c7f410182e30"><div class="ttname"><a href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30">DocCommand::ECmdSelectionPolicy</a></div><div class="ttdeci">ECmdSelectionPolicy</div><div class="ttdef"><b>Definition:</b> lomse_command.h:49</div></div>
-<div class="ttc" id="classCmdChangeDots_html"><div class="ttname"><a href="classCmdChangeDots.html">CmdChangeDots</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:596</div></div>
-<div class="ttc" id="classDocCommand_html_a8f5897829747c5a527d7c7f410182e30a27b58554799cfc160494cbb36d42b247"><div class="ttname"><a href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30a27b58554799cfc160494cbb36d42b247">DocCommand::k_sel_clear</a></div><div class="ttdoc">Clear the selection after executing the command. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:51</div></div>
-<div class="ttc" id="classCmdBreakBeam_html"><div class="ttname"><a href="classCmdBreakBeam.html">CmdBreakBeam</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:402</div></div>
-<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">CmdCursor::ECursorAction</a></div><div class="ttdeci">ECursorAction</div><div class="ttdef"><b>Definition:</b> lomse_command.h:875</div></div>
+<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a396248433b812cdf7cb3cb9ceb9ea77c"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a396248433b812cdf7cb3cb9ceb9ea77c">CmdCursor::k_point_to</a></div><div class="ttdoc">Move cursor to the specified element. </div><div class="ttdef"><b>Definition:</b> lomse_command.h:922</div></div>
+<div class="ttc" id="classCmdDeleteBlockLevelObj_html"><div class="ttname"><a href="classCmdDeleteBlockLevelObj.html">CmdDeleteBlockLevelObj</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:960</div></div>
+<div class="ttc" id="classCmdDeleteStaffObj_html"><div class="ttname"><a href="classCmdDeleteStaffObj.html">CmdDeleteStaffObj</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1080</div></div>
+<div class="ttc" id="classCmdChangeDots_html"><div class="ttname"><a href="classCmdChangeDots.html">CmdChangeDots</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:633</div></div>
+<div class="ttc" id="classCmdBreakBeam_html"><div class="ttname"><a href="classCmdBreakBeam.html">CmdBreakBeam</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:428</div></div>
+<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8">CmdCursor::ECursorAction</a></div><div class="ttdeci">ECursorAction</div><div class="ttdef"><b>Definition:</b> lomse_command.h:913</div></div>
 <div class="ttc" id="classCmdDeleteSelection_html_a178447f44f0212c95bdc9120248b14e3"><div class="ttname"><a href="classCmdDeleteSelection.html#a178447f44f0212c95bdc9120248b14e3">CmdDeleteSelection::CmdDeleteSelection</a></div><div class="ttdeci">CmdDeleteSelection(const string &amp;name=&quot;Delete selection&quot;)</div></div>
-<div class="ttc" id="classDocCommand_html_a83621dd7d28d0a6d474bfc14cbe5397d"><div class="ttname"><a href="classDocCommand.html#a83621dd7d28d0a6d474bfc14cbe5397d">DocCommand::is_reversible</a></div><div class="ttdeci">bool is_reversible()</div><div class="ttdef"><b>Definition:</b> lomse_command.h:65</div></div>
 <div class="ttc" id="classCmdChangeAttribute_html_a79a4d12c9accd4119bc4f49f287cc165"><div class="ttname"><a href="classCmdChangeAttribute.html#a79a4d12c9accd4119bc4f49f287cc165">CmdChangeAttribute::CmdChangeAttribute</a></div><div class="ttdeci">CmdChangeAttribute(ImoObj *pImo, EImoAttribute attrb, const string &amp;value, const string &amp;cmdName=&quot;&quot;)</div></div>
 <div class="ttc" id="classCmdChangeAccidentals_html_a02dd90b985e80ff0c2006e22d7f21366"><div class="ttname"><a href="classCmdChangeAccidentals.html#a02dd90b985e80ff0c2006e22d7f21366">CmdChangeAccidentals::CmdChangeAccidentals</a></div><div class="ttdeci">CmdChangeAccidentals(EAccidentals acc, const string &amp;name=&quot;Change accidentals&quot;)</div></div>
-<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a82a913a91cb3e7c7feab2a30e141222b"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a82a913a91cb3e7c7feab2a30e141222b">CmdCursor::k_cursor_dump</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:896</div></div>
-<div class="ttc" id="classCmdInsertStaffObj_html"><div class="ttname"><a href="classCmdInsertStaffObj.html">CmdInsertStaffObj</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1186</div></div>
-<div class="ttc" id="classCmdJoinBeam_html"><div class="ttname"><a href="classCmdJoinBeam.html">CmdJoinBeam</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1201</div></div>
-<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8afdce23cac5c729639e3623f4318f1aae"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8afdce23cac5c729639e3623f4318f1aae">CmdCursor::k_exit</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:881</div></div>
-<div class="ttc" id="classCmdDeleteSelection_html"><div class="ttname"><a href="classCmdDeleteSelection.html">CmdDeleteSelection</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1002</div></div>
+<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8a82a913a91cb3e7c7feab2a30e141222b"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8a82a913a91cb3e7c7feab2a30e141222b">CmdCursor::k_cursor_dump</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:934</div></div>
+<div class="ttc" id="classCmdInsertStaffObj_html"><div class="ttname"><a href="classCmdInsertStaffObj.html">CmdInsertStaffObj</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1241</div></div>
+<div class="ttc" id="classCmdJoinBeam_html"><div class="ttname"><a href="classCmdJoinBeam.html">CmdJoinBeam</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1288</div></div>
+<div class="ttc" id="classCmdCursor_html_ad8041aac6663ce2523a6fbcea3201fa8afdce23cac5c729639e3623f4318f1aae"><div class="ttname"><a href="classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8afdce23cac5c729639e3623f4318f1aae">CmdCursor::k_exit</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:919</div></div>
+<div class="ttc" id="classCmdDeleteSelection_html"><div class="ttname"><a href="classCmdDeleteSelection.html">CmdDeleteSelection</a></div><div class="ttdef"><b>Definition:</b> lomse_command.h:1040</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_0188a3e6da905bc60aceb35bf790b8c9.html">api</a></li><li class="navelem"><b>lomse_command.h</b></li>
-    <li class="footer">Generated on Wed Apr 27 2016 16:41:08 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Apr 28 2016 17:00:16 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -24,7 +24,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"classLomseDoorway.html#a88195b52e6d777edd400609128759167a417b96cf45bb2b11ea7c835dfa9cafea"
+"lomse-introduction.html#overview-doorway"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

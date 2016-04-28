@@ -1,10 +1,8 @@
 var searchData=
 [
   ['editing_20documents_20overview',['Editing documents overview',['../document-edition-overview.html',1,'index']]],
-  ['ecmdcursorpolicy',['ECmdCursorPolicy',['../classDocCommand.html#a2ee82e62ad143d6c827a47312afd7add',1,'DocCommand']]],
-  ['ecmdselectionpolicy',['ECmdSelectionPolicy',['../classDocCommand.html#a8f5897829747c5a527d7c7f410182e30',1,'DocCommand']]],
-  ['ecmdundopolicy',['ECmdUndoPolicy',['../classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173b',1,'DocCommand']]],
   ['ecursoraction',['ECursorAction',['../classCmdCursor.html#ad8041aac6663ce2523a6fbcea3201fa8',1,'CmdCursor']]],
+  ['eeditmode',['EEditMode',['../group__enumerations.html#gac8538ac72eeeed032d54ce597bbb7d70',1,'lomse_command.h']]],
   ['eeventflag',['EEventFlag',['../group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107',1,'lomse_interactor.h']]],
   ['einteractoropmode',['EInteractorOpMode',['../classInteractor.html#ad4f899789a36ae984e9861aa6b91a6f8',1,'Interactor']]],
   ['enable_5fedition_5frestricted_5fto',['enable_edition_restricted_to',['../classInteractor.html#ad4bb24b0a1deda5216e35ee111328fba',1,'Interactor']]],

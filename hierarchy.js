@@ -24,11 +24,9 @@ var hierarchy =
           [ "CmdInsertStaffObj", "classCmdInsertStaffObj.html", null ]
         ] ],
         [ "CmdJoinBeam", "classCmdJoinBeam.html", null ],
-        [ "CmdMoveObjectPoint", "classCmdMoveObjectPoint.html", null ],
         [ "CmdSelection", "classCmdSelection.html", null ]
       ] ]
     ] ],
-    [ "DocCommandExecuter", "classDocCommandExecuter.html", null ],
     [ "EnableSharedFromThis", null, [
       [ "Interactor", "classInteractor.html", null ]
     ] ],
@@ -44,6 +42,5 @@ var hierarchy =
     ] ],
     [ "render-overview", null, [
       [ "Presenter", "classPresenter.html", null ]
-    ] ],
-    [ "UndoElement", "classUndoElement.html", null ]
+    ] ]
 ];

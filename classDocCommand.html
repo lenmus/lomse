@@ -108,7 +108,6 @@ $(document).ready(function(){initNavTree('classDocCommand.html','');});
 
 <div class="header">
   <div class="summary">
-<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classDocCommand-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -137,136 +136,19 @@ Inheritance diagram for DocCommand:</div>
 <area href="classCmdDelete.html" alt="CmdDelete" shape="rect" coords="314,616,461,640"/>
 <area href="classCmdInsert.html" alt="CmdInsert" shape="rect" coords="314,672,461,696"/>
 <area href="classCmdJoinBeam.html" alt="CmdJoinBeam" shape="rect" coords="314,728,461,752"/>
-<area href="classCmdMoveObjectPoint.html" alt="CmdMoveObjectPoint" shape="rect" coords="314,784,461,808"/>
-<area href="classCmdSelection.html" alt="CmdSelection" shape="rect" coords="314,840,461,864"/>
+<area href="classCmdSelection.html" alt="CmdSelection" shape="rect" coords="314,784,461,808"/>
 </map>
  </div></div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Abstract base class from which all commands must derive. Represents an edition command. </p>
 </div><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
-Public Types</h2></td></tr>
-<tr class="memitem:a2ee82e62ad143d6c827a47312afd7add"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7add">ECmdCursorPolicy</a> </td></tr>
-<tr class="separator:a2ee82e62ad143d6c827a47312afd7add"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0a7a5b650d7d0b6af7aba50ca0e4173b"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173b">ECmdUndoPolicy</a> </td></tr>
-<tr class="separator:a0a7a5b650d7d0b6af7aba50ca0e4173b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8f5897829747c5a527d7c7f410182e30"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30">ECmdSelectionPolicy</a> </td></tr>
-<tr class="separator:a8f5897829747c5a527d7c7f410182e30"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a242c0e33ef744f0b1958ac0c4176f823"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a242c0e33ef744f0b1958ac0c4176f823">~DocCommand</a> ()</td></tr>
-<tr class="separator:a242c0e33ef744f0b1958ac0c4176f823"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adf68714b754c17c1c7f9b36187d321c8"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8">get_name</a> ()</td></tr>
 <tr class="separator:adf68714b754c17c1c7f9b36187d321c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83621dd7d28d0a6d474bfc14cbe5397d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a83621dd7d28d0a6d474bfc14cbe5397d">is_reversible</a> ()</td></tr>
-<tr class="separator:a83621dd7d28d0a6d474bfc14cbe5397d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac1e21dc807ca0d323e046f7da6ac9ecf"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#ac1e21dc807ca0d323e046f7da6ac9ecf">is_recordable</a> ()</td></tr>
-<tr class="separator:ac1e21dc807ca0d323e046f7da6ac9ecf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4fcd738f3a6c0f375b44f16987a5937b"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a4fcd738f3a6c0f375b44f16987a5937b">get_error</a> ()</td></tr>
 <tr class="separator:a4fcd738f3a6c0f375b44f16987a5937b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Enumeration Documentation</h2>
-<a class="anchor" id="a2ee82e62ad143d6c827a47312afd7add"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum <a class="el" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7add">DocCommand::ECmdCursorPolicy</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>This enum describes the policies for updating the cursor after executing a command. </p>
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="a2ee82e62ad143d6c827a47312afd7addacb7d2c957a249b23d34dfb270e7d631f"></a>k_do_nothing</em>&#160;</td><td class="fielddoc">
-<p>Do nothing. All cursor data remains valid after command execution. </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="a2ee82e62ad143d6c827a47312afd7addaeac986cda2b789c233284477ca789e95"></a>k_update_after_deletion</em>&#160;</td><td class="fielddoc">
-<p>Update the cursor. Current pointed object has been deleted and cursor must now point to next object. </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="a2ee82e62ad143d6c827a47312afd7adda50c70dcd3a2a122248dfe14f2253e3f4"></a>k_update_after_insertion</em>&#160;</td><td class="fielddoc">
-<p>Update the cursor. Cursor must point to inserted object. </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="a2ee82e62ad143d6c827a47312afd7adda98ced85e4c68d82628807d38f1c82eed"></a>k_refresh</em>&#160;</td><td class="fielddoc">
-<p>Refresh cursor. Pointed object is valid but other related info. could have changed. </p>
-</td></tr>
-</table>
-
-</div>
-</div>
-<a class="anchor" id="a8f5897829747c5a527d7c7f410182e30"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum <a class="el" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30">DocCommand::ECmdSelectionPolicy</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>This enum describes the available policies for updating the SelectionSet after executing a command </p>
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="a8f5897829747c5a527d7c7f410182e30ac492f71c4619a39a2e6bc17609d10ddb"></a>k_sel_do_nothing</em>&#160;</td><td class="fielddoc">
-<p>Do nothing. The selection is not changed after command execution. </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="a8f5897829747c5a527d7c7f410182e30a27b58554799cfc160494cbb36d42b247"></a>k_sel_clear</em>&#160;</td><td class="fielddoc">
-<p>Clear the selection after executing the command. </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="a8f5897829747c5a527d7c7f410182e30a02dd5ef19d923df0381b730b8f1854aa"></a>k_sel_command_specific</em>&#160;</td><td class="fielddoc">
-<p>Specific. The command will do whatever is needed. </p>
-</td></tr>
-</table>
-
-</div>
-</div>
-<a class="anchor" id="a0a7a5b650d7d0b6af7aba50ca0e4173b"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">enum <a class="el" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173b">DocCommand::ECmdUndoPolicy</a></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>This enum describes the available undo policies for commands </p>
-<table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="a0a7a5b650d7d0b6af7aba50ca0e4173ba1ab5572a41d7a3792fee7f3f2955579c"></a>k_undo_policy_full_checkpoint</em>&#160;</td><td class="fielddoc">
-<p>Undo is based on a full checkpoint. </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="a0a7a5b650d7d0b6af7aba50ca0e4173baeb8a0f5795c40e192a6024e8bf435bd0"></a>k_undo_policy_partial_checkpoint</em>&#160;</td><td class="fielddoc">
-<p>Undo is based on a partial checkpoint. </p>
-</td></tr>
-<tr><td class="fieldname"><em><a class="anchor" id="a0a7a5b650d7d0b6af7aba50ca0e4173ba6d4c35909a655dd7597e871a801a8dad"></a>k_undo_policy_specific</em>&#160;</td><td class="fielddoc">
-<p>Undo is implemented by the command. </p>
-</td></tr>
-</table>
-
-</div>
-</div>
-<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a242c0e33ef744f0b1958ac0c4176f823"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual DocCommand::~DocCommand </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Destructor. </p>
-
-</div>
-</div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a class="anchor" id="a4fcd738f3a6c0f375b44f16987a5937b"></a>
 <div class="memitem">
@@ -288,7 +170,7 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns an error message with the error explanation. This method should be invoked after executing a command that fails. </p>
+<p>Returns an error message with the error explanation. This method should be invoked after executing a command that fails. Otherwise it will return an empty string. </p>
 
 </div>
 </div>
@@ -312,56 +194,8 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Returns the name of the command. </p>
-
-</div>
-</div>
-<a class="anchor" id="ac1e21dc807ca0d323e046f7da6ac9ecf"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool DocCommand::is_recordable </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Returns <span class="literal">true</span> if the command is recordable.</p>
-<p>Command sequences can be recorded and replayed at other point or on another document, allowing the creation of <em>macros</em> or <em>scripts</em>. But not all commands are suitable to be recorded and replayed. Recordable commands are those that can be recorded and replayed safely. All reversible commands are recordable by nature, as this is required for supporting redo. See <a class="el" href="classDocCommand.html#a83621dd7d28d0a6d474bfc14cbe5397d">is_reversible()</a>. </p>
-
-</div>
-</div>
-<a class="anchor" id="a83621dd7d28d0a6d474bfc14cbe5397d"></a>
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool DocCommand::is_reversible </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Returns <span class="literal">true</span> if the command is reversible, that is, if the command supports undo/redo (e.g. insert object), and <span class="literal">false</span> if it does not support undo/redo (e.g. print) </p>
+<p>Returns the name of the command.</p>
+<dl class="section remark"><dt>Remarks</dt><dd>For some commands, if this method is invoked before executing the command, the name could have not been set and the returned value could be empty or could be an incomplete string. </dd></dl>
 
 </div>
 </div>
@@ -371,7 +205,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classDocCommand.html">DocCommand</a></li>
-    <li class="footer">Generated on Wed Apr 27 2016 16:41:08 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Apr 28 2016 17:00:17 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

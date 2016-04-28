@@ -108,7 +108,6 @@ $(document).ready(function(){initNavTree('classDocCmdComposite.html','');});
 
 <div class="header">
   <div class="summary">
-<a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="classDocCmdComposite-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">DocCmdComposite Class Reference</div>  </div>
@@ -128,71 +127,13 @@ Inheritance diagram for DocCmdComposite:</div>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Abstract class, base for all composite commands. </p>
 </div><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
-Public Member Functions</h2></td></tr>
-<tr class="memitem:a1fdd3d58f52985e89499e6c9ec89afdc"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1fdd3d58f52985e89499e6c9ec89afdc"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>DocCmdComposite</b> (const string &amp;name)</td></tr>
-<tr class="separator:a1fdd3d58f52985e89499e6c9ec89afdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9976bc78278fdd1741bfb42fb5f255fe"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9976bc78278fdd1741bfb42fb5f255fe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>mark_as_no_reversible</b> ()</td></tr>
-<tr class="separator:a9976bc78278fdd1741bfb42fb5f255fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae206817e6d052e222048133bb712ef0b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae206817e6d052e222048133bb712ef0b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>mark_as_no_recordable</b> ()</td></tr>
-<tr class="separator:ae206817e6d052e222048133bb712ef0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1c0239333e2adb5f6b9dd35be595246b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1c0239333e2adb5f6b9dd35be595246b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>mark_as_target_set_in_constructor</b> ()</td></tr>
-<tr class="separator:a1c0239333e2adb5f6b9dd35be595246b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa21db253f7e9c18a136cd8f0f37170ab"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa21db253f7e9c18a136cd8f0f37170ab"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>add_child_command</b> (<a class="el" href="classDocCommand.html">DocCommand</a> *pCmd)</td></tr>
-<tr class="separator:aa21db253f7e9c18a136cd8f0f37170ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad44033d46f84593cb4c82894ea38208d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad44033d46f84593cb4c82894ea38208d"></a>
-virtual int&#160;</td><td class="memItemRight" valign="bottom"><b>set_target</b> (Document *pDoc, DocCursor *pCursor, SelectionSet *pSelection)</td></tr>
-<tr class="separator:ad44033d46f84593cb4c82894ea38208d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a31e44ebf241ecc84ca78f50f3bb86c68"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a31e44ebf241ecc84ca78f50f3bb86c68"></a>
-virtual int&#160;</td><td class="memItemRight" valign="bottom"><b>perform_action</b> (Document *pDoc, DocCursor *pCursor)</td></tr>
-<tr class="separator:a31e44ebf241ecc84ca78f50f3bb86c68"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a99e79c780e824e15cc5174e88d26fc99"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a99e79c780e824e15cc5174e88d26fc99"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>undo_action</b> (Document *pDoc, DocCursor *pCursor)</td></tr>
-<tr class="separator:a99e79c780e824e15cc5174e88d26fc99"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa1d254dc389c9ad392d6773d3f3c37d2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa1d254dc389c9ad392d6773d3f3c37d2"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>get_cursor_update_policy</b> ()</td></tr>
-<tr class="separator:aa1d254dc389c9ad392d6773d3f3c37d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1f0ae227191db1c86b37748316fcbb86"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1f0ae227191db1c86b37748316fcbb86"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>get_undo_policy</b> ()</td></tr>
-<tr class="separator:a1f0ae227191db1c86b37748316fcbb86"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af4692f53236a29d27600e3fa441d809e"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="af4692f53236a29d27600e3fa441d809e"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>get_selection_update_policy</b> ()</td></tr>
-<tr class="separator:af4692f53236a29d27600e3fa441d809e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa9962cb51059cd8999dd7f823ce60c81"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aa9962cb51059cd8999dd7f823ce60c81"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_composite</b> ()</td></tr>
-<tr class="separator:aa9962cb51059cd8999dd7f823ce60c81"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad4a6e385c3c080f34c1b84cd15dd85a0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ad4a6e385c3c080f34c1b84cd15dd85a0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>update_cursor</b> (DocCursor *pCursor, <a class="el" href="classDocCommandExecuter.html">DocCommandExecuter</a> *pExecuter)</td></tr>
-<tr class="separator:ad4a6e385c3c080f34c1b84cd15dd85a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a41ce37c166ea9e2b822708af12b4d19d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a41ce37c166ea9e2b822708af12b4d19d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>update_selection</b> (SelectionSet *pSelection, <a class="el" href="classDocCommandExecuter.html">DocCommandExecuter</a> *pExecuter)</td></tr>
-<tr class="separator:a41ce37c166ea9e2b822708af12b4d19d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="inherit_header pub_methods_classDocCommand"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classDocCommand')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classDocCommand.html">DocCommand</a></td></tr>
-<tr class="memitem:a242c0e33ef744f0b1958ac0c4176f823 inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a242c0e33ef744f0b1958ac0c4176f823">~DocCommand</a> ()</td></tr>
-<tr class="separator:a242c0e33ef744f0b1958ac0c4176f823 inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf68714b754c17c1c7f9b36187d321c8 inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8">get_name</a> ()</td></tr>
-<tr class="separator:adf68714b754c17c1c7f9b36187d321c8 inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83621dd7d28d0a6d474bfc14cbe5397d inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a83621dd7d28d0a6d474bfc14cbe5397d">is_reversible</a> ()</td></tr>
-<tr class="separator:a83621dd7d28d0a6d474bfc14cbe5397d inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac1e21dc807ca0d323e046f7da6ac9ecf inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#ac1e21dc807ca0d323e046f7da6ac9ecf">is_recordable</a> ()</td></tr>
-<tr class="separator:ac1e21dc807ca0d323e046f7da6ac9ecf inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4fcd738f3a6c0f375b44f16987a5937b inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a4fcd738f3a6c0f375b44f16987a5937b">get_error</a> ()</td></tr>
-<tr class="separator:a4fcd738f3a6c0f375b44f16987a5937b inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
-<tr class="inherit_header pub_types_classDocCommand"><td colspan="2" onclick="javascript:toggleInherit('pub_types_classDocCommand')"><img src="closed.png" alt="-"/>&#160;Public Types inherited from <a class="el" href="classDocCommand.html">DocCommand</a></td></tr>
-<tr class="memitem:a2ee82e62ad143d6c827a47312afd7add inherit pub_types_classDocCommand"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a2ee82e62ad143d6c827a47312afd7add">ECmdCursorPolicy</a> </td></tr>
-<tr class="separator:a2ee82e62ad143d6c827a47312afd7add inherit pub_types_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0a7a5b650d7d0b6af7aba50ca0e4173b inherit pub_types_classDocCommand"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a0a7a5b650d7d0b6af7aba50ca0e4173b">ECmdUndoPolicy</a> </td></tr>
-<tr class="separator:a0a7a5b650d7d0b6af7aba50ca0e4173b inherit pub_types_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8f5897829747c5a527d7c7f410182e30 inherit pub_types_classDocCommand"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a8f5897829747c5a527d7c7f410182e30">ECmdSelectionPolicy</a> </td></tr>
-<tr class="separator:a8f5897829747c5a527d7c7f410182e30 inherit pub_types_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_classDocCommand"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classDocCommand')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classDocCommand.html">DocCommand</a></td></tr>
+<tr class="memitem:adf68714b754c17c1c7f9b36187d321c8 inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8">get_name</a> ()</td></tr>
+<tr class="separator:adf68714b754c17c1c7f9b36187d321c8 inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4fcd738f3a6c0f375b44f16987a5937b inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a4fcd738f3a6c0f375b44f16987a5937b">get_error</a> ()</td></tr>
+<tr class="separator:a4fcd738f3a6c0f375b44f16987a5937b inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -200,7 +141,7 @@ Additional Inherited Members</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classDocCmdComposite.html">DocCmdComposite</a></li>
-    <li class="footer">Generated on Wed Apr 27 2016 16:41:08 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Apr 28 2016 17:00:17 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -15,5 +15,8 @@ var searchData=
   ['cmddeleteselection',['CmdDeleteSelection',['../classCmdDeleteSelection.html#a178447f44f0212c95bdc9120248b14e3',1,'CmdDeleteSelection']]],
   ['cmddeletestaffobj',['CmdDeleteStaffObj',['../classCmdDeleteStaffObj.html#a80dcc7bd66ac43943e0118926ecec767',1,'CmdDeleteStaffObj']]],
   ['cmdinsertblocklevelobj',['CmdInsertBlockLevelObj',['../classCmdInsertBlockLevelObj.html#a41a1543420bc98413be17a75016a96a8',1,'CmdInsertBlockLevelObj::CmdInsertBlockLevelObj(int type, const string &amp;name)'],['../classCmdInsertBlockLevelObj.html#ac65c374bf4ba414985214ca3385e40fb',1,'CmdInsertBlockLevelObj::CmdInsertBlockLevelObj(const string &amp;source, const string &amp;name)']]],
+  ['cmdinsertmanystaffobjs',['CmdInsertManyStaffObjs',['../classCmdInsertManyStaffObjs.html#a0f81061adcebc8027dfb8a94f52dc71e',1,'CmdInsertManyStaffObjs']]],
+  ['cmdinsertstaffobj',['CmdInsertStaffObj',['../classCmdInsertStaffObj.html#a3d3a6f88d58a736ded9d0936decce57f',1,'CmdInsertStaffObj']]],
+  ['cmdjoinbeam',['CmdJoinBeam',['../classCmdJoinBeam.html#af66f8a719144270535bd2653a88214cd',1,'CmdJoinBeam']]],
   ['create_5fscore_5fplayer',['create_score_player',['../classLomseDoorway.html#a50dbce970b84945868887966a0708634',1,'LomseDoorway']]]
 ];

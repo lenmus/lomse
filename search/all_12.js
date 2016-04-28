@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['view_5fneeds_5frepaint',['view_needs_repaint',['../classInteractor.html#add8da1fe0fd8adddf1b30bcebf608636',1,'Interactor']]]
+  ['wpinteractor',['WpInteractor',['../group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602',1,'lomse_presenter.h']]]
 ];

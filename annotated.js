@@ -19,14 +19,11 @@ var annotated =
     [ "CmdInsertManyStaffObjs", "classCmdInsertManyStaffObjs.html", "classCmdInsertManyStaffObjs" ],
     [ "CmdInsertStaffObj", "classCmdInsertStaffObj.html", "classCmdInsertStaffObj" ],
     [ "CmdJoinBeam", "classCmdJoinBeam.html", "classCmdJoinBeam" ],
-    [ "CmdMoveObjectPoint", "classCmdMoveObjectPoint.html", "classCmdMoveObjectPoint" ],
     [ "CmdSelection", "classCmdSelection.html", "classCmdSelection" ],
-    [ "DocCmdComposite", "classDocCmdComposite.html", "classDocCmdComposite" ],
-    [ "DocCmdSimple", "classDocCmdSimple.html", "classDocCmdSimple" ],
+    [ "DocCmdComposite", "classDocCmdComposite.html", null ],
+    [ "DocCmdSimple", "classDocCmdSimple.html", null ],
     [ "DocCommand", "classDocCommand.html", "classDocCommand" ],
-    [ "DocCommandExecuter", "classDocCommandExecuter.html", "classDocCommandExecuter" ],
     [ "Interactor", "classInteractor.html", "classInteractor" ],
     [ "LomseDoorway", "classLomseDoorway.html", "classLomseDoorway" ],
-    [ "Presenter", "classPresenter.html", "classPresenter" ],
-    [ "UndoElement", "classUndoElement.html", "classUndoElement" ]
+    [ "Presenter", "classPresenter.html", "classPresenter" ]
 ];

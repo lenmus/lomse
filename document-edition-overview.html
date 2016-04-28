@@ -173,7 +173,7 @@ Supported edition modes</h1>
 <dl class="section attention"><dt>Attention</dt><dd>Currently Lomse does not ensure the correctness of the music notation in operations resulting in music shifts. For instance, if a quarter note crosses a barline by the duration of a removed eighth note, the quarter note should be splitted into two tied eighth notes. Or when two tied notes in different measures are shifted an are now placed in the same measure, it is no longer clear if they should continue tied or should be replaced by a longer single note. As these decisions are not trivial, Lomse does not attempt (for now) to fix these situations and therefore the commands limit the operation to inserting or deleting the requested notes or rests without more considerations.</dd></dl>
 <h1><a class="anchor" id="edit-commands"></a>
 Edition commands</h1>
-<p>This section presents a list of available commands (but more commands need to be programmed). For more information on each command read the class documentation for the command.</p>
+<p>This section presents a list of available commands (but more commands need to be programmed and a couple could be removed). For more information on each command read the class documentation for the command.</p>
 <p><b>Document edition commands:</b></p>
 <ul>
 <li><a class="el" href="classCmdAddChordNote.html">CmdAddChordNote()</a> - Add a new note to an existing note or chord.</li>
@@ -189,12 +189,11 @@ Edition commands</h1>
 <li><a class="el" href="classCmdDeleteSelection.html">CmdDeleteSelection()</a> - Delete all selected objects.</li>
 <li><a class="el" href="classCmdDeleteStaffObj.html">CmdDeleteStaffObj()</a> - Delete the staff object (e.g. note, rest, clef, barline, etc.) pointed by the cursor.</li>
 <li><a class="el" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj()</a> - Insert a new block level object (e.g. paragraph, music score, header, etc.).</li>
-<li><a class="el" href="classCmdInsertManyStaffObjs.html">CmdInsertManyStaffObjs()</a></li>
-<li><a class="el" href="classCmdInsertStaffObj.html">CmdInsertStaffObj()</a></li>
-<li><a class="el" href="classCmdJoinBeam.html">CmdJoinBeam()</a></li>
-<li><a class="el" href="classCmdMoveObjectPoint.html">CmdMoveObjectPoint()</a></li>
+<li><a class="el" href="classCmdInsertManyStaffObjs.html">CmdInsertManyStaffObjs()</a> - Insert a group of consecutive staff objects (e.g. note, rest, clef, barline, etc.).</li>
+<li><a class="el" href="classCmdInsertStaffObj.html">CmdInsertStaffObj()</a> - Insert one staff object (e.g. a note, rest, clef, barline, etc.) at current cursor position.</li>
+<li><a class="el" href="classCmdJoinBeam.html">CmdJoinBeam()</a> - Create and join beams, and add notes to a beam, depending on current selection.</li>
 </ul>
-<p><b>Selection set commands:</b></p>
+<p><b>Selection commands:</b></p>
 <ul>
 <li><a class="el" href="classCmdSelection.html">CmdSelection()</a></li>
 </ul>
@@ -208,7 +207,7 @@ Edition commands</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Wed Apr 27 2016 16:41:08 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Apr 28 2016 17:00:17 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

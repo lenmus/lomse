@@ -110,12 +110,37 @@ $(document).ready(function(){initNavTree('group__enumerations.html','');});
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
+<tr class="memitem:gac8538ac72eeeed032d54ce597bbb7d70"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gac8538ac72eeeed032d54ce597bbb7d70">EEditMode</a> </td></tr>
+<tr class="separator:gac8538ac72eeeed032d54ce597bbb7d70"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6f553cc68bf4f84707dce1f1145d2107"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107">EEventFlag</a> </td></tr>
 <tr class="separator:ga6f553cc68bf4f84707dce1f1145d2107"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafb559e26bc610db43ba605230a142898"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__enumerations.html#gafb559e26bc610db43ba605230a142898">EPixelFormat</a> </td></tr>
 <tr class="separator:gafb559e26bc610db43ba605230a142898"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
+<a class="anchor" id="gac8538ac72eeeed032d54ce597bbb7d70"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__enumerations.html#gac8538ac72eeeed032d54ce597bbb7d70">EEditMode</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This enum describes the behavior of edition commands related to adding or removing notes and rests.</p>
+<p>See <a class="el" href="document-edition-overview.html#edit-modes">Supported edition modes</a>.</p>
+<p>#include &lt;<a class="el" href="lomse__command_8h_source.html">lomse_command.h</a>&gt; </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="ggac8538ac72eeeed032d54ce597bbb7d70a008fa35bf0c9fc83c63f3311581eee97"></a>k_edit_mode_replace</em>&#160;</td><td class="fielddoc">
+<p><em>Replace mode</em>: Notes and rests are not inserted. Instead they <em>overwrite</em> the music so that measure duration is maintained. Also, notes are not deleted but replaced by rests. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="ggac8538ac72eeeed032d54ce597bbb7d70a1d9998199bd218f26d72781d091203d4"></a>k_edit_mode_ripple</em>&#160;</td><td class="fielddoc">
+<p><em>Limited ripple mode</em>: when inserting or deleting notes/rests the barlines are also shifted. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
 <a class="anchor" id="ga6f553cc68bf4f84707dce1f1145d2107"></a>
 <div class="memitem">
 <div class="memproto">
@@ -234,7 +259,7 @@ Enumerations</h2></td></tr>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Apr 27 2016 16:41:08 for Lomse library. API documentation by
+    <li class="footer">Generated on Thu Apr 28 2016 17:00:17 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

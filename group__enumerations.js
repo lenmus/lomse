@@ -1,5 +1,9 @@
 var group__enumerations =
 [
+    [ "EEditMode", "group__enumerations.html#gac8538ac72eeeed032d54ce597bbb7d70", [
+      [ "k_edit_mode_replace", "group__enumerations.html#ggac8538ac72eeeed032d54ce597bbb7d70a008fa35bf0c9fc83c63f3311581eee97", null ],
+      [ "k_edit_mode_ripple", "group__enumerations.html#ggac8538ac72eeeed032d54ce597bbb7d70a1d9998199bd218f26d72781d091203d4", null ]
+    ] ],
     [ "EEventFlag", "group__enumerations.html#ga6f553cc68bf4f84707dce1f1145d2107", [
       [ "k_mouse_left", "group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107abe591d30a7cff0359685ffb8e135b70b", null ],
       [ "k_mouse_right", "group__enumerations.html#gga6f553cc68bf4f84707dce1f1145d2107a61c5b8b06ae88e059d24936e8cf20dd9", null ],
