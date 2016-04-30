@@ -189,8 +189,8 @@ Public Member Functions</h2></td></tr>
 </li>
 </ul>
 <p><b>Example</b></p>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandHandler::insert_note(<span class="keywordtype">string</span> stepLetter, <span class="keywordtype">int</span> octave, EAccidentals acc,</div>
-<div class="line">                                 ENoteType noteType, <span class="keywordtype">int</span> dots,</div>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandHandler::insert_note(<span class="keywordtype">string</span> stepLetter, <span class="keywordtype">int</span> octave, <a class="code" href="group__enumerations.html#ga4c1fdff1651be19b8880fab9921cabd6">EAccidentals</a> acc,</div>
+<div class="line">                                 <a class="code" href="group__enumerations.html#ga09a15f850423776c0a4c4e6cc43e7dfc">ENoteType</a> noteType, <span class="keywordtype">int</span> dots,</div>
 <div class="line">                                 <span class="keywordtype">int</span> voice, <span class="keywordtype">int</span> staff)</div>
 <div class="line">{</div>
 <div class="line">    <span class="comment">//insert a note at current cursor position</span></div>
@@ -199,7 +199,7 @@ Public Member Functions</h2></td></tr>
 <div class="line">    {</div>
 <div class="line">        stringstream src;</div>
 <div class="line">        src &lt;&lt; <span class="stringliteral">&quot;(n &quot;</span>;</div>
-<div class="line">        <span class="keywordflow">if</span> (acc != k_no_accidentals)</div>
+<div class="line">        <span class="keywordflow">if</span> (acc != <a class="code" href="group__enumerations.html#gga4c1fdff1651be19b8880fab9921cabd6a0e22b622238ef63b5f5a697ffee982c6">k_no_accidentals</a>)</div>
 <div class="line">            src &lt;&lt; LdpExporter::accidentals_to_string(acc);</div>
 <div class="line">        src &lt;&lt; stepLetter &lt;&lt; octave</div>
 <div class="line">            &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; LdpExporter::notetype_to_string(noteType, dots)</div>
@@ -221,7 +221,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classCmdAddNoteRest.html">CmdAddNoteRest</a></li>
-    <li class="footer">Generated on Thu Apr 28 2016 17:00:17 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Apr 30 2016 17:16:16 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

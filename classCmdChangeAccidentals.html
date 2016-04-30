@@ -132,7 +132,7 @@ Inheritance diagram for CmdChangeAccidentals:</div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a02dd90b985e80ff0c2006e22d7f21366"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdChangeAccidentals.html#a02dd90b985e80ff0c2006e22d7f21366">CmdChangeAccidentals</a> (EAccidentals acc, const string &amp;name=&quot;Change accidentals&quot;)</td></tr>
+<tr class="memitem:a02dd90b985e80ff0c2006e22d7f21366"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdChangeAccidentals.html#a02dd90b985e80ff0c2006e22d7f21366">CmdChangeAccidentals</a> (<a class="el" href="group__enumerations.html#ga4c1fdff1651be19b8880fab9921cabd6">EAccidentals</a> acc, const string &amp;name=&quot;Change accidentals&quot;)</td></tr>
 <tr class="separator:a02dd90b985e80ff0c2006e22d7f21366"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classDocCommand"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classDocCommand')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classDocCommand.html">DocCommand</a></td></tr>
 <tr class="memitem:adf68714b754c17c1c7f9b36187d321c8 inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8">get_name</a> ()</td></tr>
@@ -148,7 +148,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">CmdChangeAccidentals::CmdChangeAccidentals </td>
           <td>(</td>
-          <td class="paramtype">EAccidentals&#160;</td>
+          <td class="paramtype"><a class="el" href="group__enumerations.html#ga4c1fdff1651be19b8880fab9921cabd6">EAccidentals</a>&#160;</td>
           <td class="paramname"><em>acc</em>, </td>
         </tr>
         <tr>
@@ -167,7 +167,7 @@ Public Member Functions</h2></td></tr>
 <p>This command changes the accidentals of the selected notes. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">acc</td><td>The new accidentals to put on the selected notes. It must be a value from enum #EAccidentals. </td></tr>
+    <tr><td class="paramname">acc</td><td>The new accidentals to put on the selected notes. It must be a value from enum <a class="el" href="group__enumerations.html#ga4c1fdff1651be19b8880fab9921cabd6">EAccidentals</a>. </td></tr>
     <tr><td class="paramname">name</td><td>The displayable name for the command. If not specified will default to "Change accidentals".</td></tr>
   </table>
   </dd>
@@ -182,7 +182,7 @@ Public Member Functions</h2></td></tr>
 </li>
 </ul>
 <p><b>Example</b></p>
-<div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandHandler::change_note_accidentals(EAccidentals acc)</div>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandHandler::change_note_accidentals(<a class="code" href="group__enumerations.html#ga4c1fdff1651be19b8880fab9921cabd6">EAccidentals</a> acc)</div>
 <div class="line">{</div>
 <div class="line">    <span class="comment">//change note accidentals for current selected notes</span></div>
 <div class="line"></div>
@@ -192,8 +192,7 @@ Public Member Functions</h2></td></tr>
 <div class="line">        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdChangeAccidentals.html#a02dd90b985e80ff0c2006e22d7f21366">CmdChangeAccidentals</a>(acc, name) )</div>
 <div class="line">    }</div>
 <div class="line">}</div>
-</div><!-- fragment --><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000006">Todo:</a></b></dt><dd>Document EAccidentals</dd></dl>
-
+</div><!-- fragment --> 
 </div>
 </div>
 </div><!-- contents -->
@@ -202,7 +201,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classCmdChangeAccidentals.html">CmdChangeAccidentals</a></li>
-    <li class="footer">Generated on Thu Apr 28 2016 17:00:17 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Apr 30 2016 17:16:16 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

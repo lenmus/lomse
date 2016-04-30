@@ -206,7 +206,7 @@ ImoId&#160;</td><td class="memItemRight" valign="bottom"><b>cursor_final_pos_id<
 <p>This command deletes all selected relation objects of type given by parameter <em>type</em>. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">type</td><td>Type of relation object to insert. Must be one of the values for relation objects (ImoRelObj) in enum #EImoObjType. </td></tr>
+    <tr><td class="paramname">type</td><td>Type of relation object to insert. Must be one of the values for relation objects (ImoRelObj) in enum <a class="el" href="group__enumerations.html#ga51de1c04259c674284dd0c9f4d0d651f">EImoObjType</a>. </td></tr>
     <tr><td class="paramname">name</td><td>The displayable name for the command. If not specified or empty will default to string "Delete " followed by the name of the object to delete.</td></tr>
   </table>
   </dd>
@@ -215,7 +215,7 @@ ImoId&#160;</td><td class="memItemRight" valign="bottom"><b>cursor_final_pos_id<
 <ul>
 <li>If the first object in current selection is not a relation object (imoRelObj) the command will not be executed and will return a failure code.</li>
 <li>After executing the command:<ul>
-<li>the selection will not be changed. <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Check. Selection should only contain all other objects but not the deleted ones.</dd></dl>
+<li>the selection will not be changed. <dl class="todo"><dt><b><a class="el" href="todo.html#_todo000010">Todo:</a></b></dt><dd>Check. Selection should only contain all other objects but not the deleted ones.</dd></dl>
 </li>
 </ul>
 </li>
@@ -227,7 +227,7 @@ ImoId&#160;</td><td class="memItemRight" valign="bottom"><b>cursor_final_pos_id<
 <div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">    {</div>
 <div class="line">        <span class="keywordtype">string</span> name = gettext(<span class="stringliteral">&quot;Delete tuplet&quot;</span>);</div>
-<div class="line">        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdDeleteRelation.html#a9afdd246e6481cb1f710a92eecc24fcb">CmdDeleteRelation</a>(k_imo_tuplet, name) );</div>
+<div class="line">        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdDeleteRelation.html#a9afdd246e6481cb1f710a92eecc24fcb">CmdDeleteRelation</a>(<a class="code" href="group__enumerations.html#gga51de1c04259c674284dd0c9f4d0d651faa17b18de66f511c91721d5fa6425c2fb">k_imo_tuplet</a>, name) );</div>
 <div class="line">    }</div>
 <div class="line">}</div>
 </div><!-- fragment --> 
@@ -239,7 +239,7 @@ ImoId&#160;</td><td class="memItemRight" valign="bottom"><b>cursor_final_pos_id<
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classCmdDeleteRelation.html">CmdDeleteRelation</a></li>
-    <li class="footer">Generated on Thu Apr 28 2016 17:00:17 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Apr 30 2016 17:16:17 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
