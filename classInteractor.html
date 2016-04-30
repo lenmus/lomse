@@ -128,7 +128,7 @@ Inheritance diagram for Interactor:</div>
 <div class="textblock"><p>The Interactor is the key object to interact with the document (here the name 'Interactor'). It is the interface between your application, the associated View and the Document (see <a class="el" href="render-overview.html#mvc-overview">The Lomse Model-View-Controller</a>). It is responsible for translating your application requests into commands that manipulate the associated View and/or the Document, coordinating all the necessary actions. It also provides support for managing the user interaction with your application GUI (see <a class="el" href="tasks-page.html">Interaction with your application GUI</a>).</p>
 <p>The Interactor plays the role of the Controller in the MVC model. Each View has an associated Interactor (in fact the View is owned by the Interactor). The Interactor is owned by the <a class="el" href="classPresenter.html">Presenter</a>.</p>
 <p>The Interactor for a View is provided by the <a class="el" href="classPresenter.html">Presenter</a>. It is best practise not to save pointers to the Interactor because when processing a Lomse event the Document (and thus, the <a class="el" href="classInteractor.html">Interactor</a>) could have been deleted (i.e. because your application has closed the window displaying the document).</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000013">Todo:</a></b></dt><dd>Explain SpInteractor type</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo:</a></b></dt><dd>Explain SpInteractor type</dd></dl>
 <p>It is always recommended to get the pointer to the Interactor when needed and to use smart pointers:</p>
 <div class="fragment"><div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">{</div>
@@ -219,7 +219,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a8d486a75231279d13370cb9744f8cf11"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a8d486a75231279d13370cb9744f8cf11">zoom_fit_width</a> (Pixels width, bool fForceRedraw=true)</td></tr>
 <tr class="separator:a8d486a75231279d13370cb9744f8cf11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Selection rectangle</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000017">Todo:</a></b></dt><dd>Selection rectangle methods and explanation </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000018">Todo:</a></b></dt><dd>Selection rectangle methods and explanation </dd></dl>
 </div></td></tr>
 <tr class="memitem:a9de671ca65612c859732ad6434428733"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9de671ca65612c859732ad6434428733"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>start_selection_rectangle</b> (Pixels x1, Pixels y1)</td></tr>
@@ -228,7 +228,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>start_selecti
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>hide_selection_rectangle</b> ()</td></tr>
 <tr class="separator:a4d304039336565267cd3a6d201dc2813"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Playback effects: tempo line</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000018">Todo:</a></b></dt><dd>Tempo line methods and Playback effects explanation </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000019">Todo:</a></b></dt><dd>Tempo line methods and Playback effects explanation </dd></dl>
 </div></td></tr>
 <tr class="memitem:a2def330212e2b83cbfabae9ed9b20cb0"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a2def330212e2b83cbfabae9ed9b20cb0"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>show_tempo_line</b> (Pixels x1, Pixels y1, Pixels x2, Pixels y2)</td></tr>
@@ -240,7 +240,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>hide_tempo_li
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>update_tempo_line</b> (Pixels x2, Pixels y2)</td></tr>
 <tr class="separator:a3b33f9e7acfbd40f4b5d0178d2f634c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Interface to GraphicView. Playback effects: highlight played notes/rests</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000019">Todo:</a></b></dt><dd>Highlight methods and Playback effects explanation </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000020">Todo:</a></b></dt><dd>Highlight methods and Playback effects explanation </dd></dl>
 </div></td></tr>
 <tr class="memitem:ab4dcd3324a54fa2055aa0bf1b9d732e2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab4dcd3324a54fa2055aa0bf1b9d732e2"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>highlight_object</b> (ImoStaffObj *pSO)</td></tr>
@@ -278,7 +278,7 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>on_visual_hig
 <tr class="memitem:a81cf3a31b6c7e7bd4c6b22c20bb87f73"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classInteractor.html#a81cf3a31b6c7e7bd4c6b22c20bb87f73">select_voice</a> (int voice)</td></tr>
 <tr class="separator:a81cf3a31b6c7e7bd4c6b22c20bb87f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Drag image associated to mouse cursor</div></td></tr>
-<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000020">Todo:</a></b></dt><dd>Drag images explanation and methods for dragging images </dd></dl>
+<tr><td colspan="2"><div class="groupText"><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000021">Todo:</a></b></dt><dd>Drag images explanation and methods for dragging images </dd></dl>
 </div></td></tr>
 <tr class="memitem:ae1718f600ea3dec0017e200e1f00869a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae1718f600ea3dec0017e200e1f00869a"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>show_drag_image</b> (bool value)</td></tr>
@@ -631,7 +631,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 </div><div class="memdoc">
 <p>Invoking this method forces Lomse to render again the View and, therefore, the rendering buffer gets updated. After doing it, Lomse <b>will</b> generate a EventPaint event.</p>
 <dl class="section note"><dt>Note</dt><dd>Lomse will ignore the request if forced updates are disabled. See <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>.</dd></dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000014">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be refactored.</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000015">Todo:</a></b></dt><dd>Clarify the need of methods <a class="el" href="classInteractor.html#ae370a7f70f2ea4269f38f9361428d133">force_redraw()</a>, <a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a> and <a class="el" href="classInteractor.html#a5d45c58e82e2de3c3bb31e414984923b">enable_forced_view_updates()</a>. Probably This code has to be refactored.</dd></dl>
 <dl class="section see"><dt>See Also</dt><dd><a class="el" href="classInteractor.html#a06e3f55dc1042e165adc50493d0f90b4">redraw_bitmap()</a>. </dd></dl>
 
 </div>
@@ -1730,7 +1730,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000015">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document. </dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000016">Todo:</a></b></dt><dd>This method should be for internal use. Analyse and refactor or document. </dd></dl>
 
 </div>
 </div>
@@ -1970,7 +1970,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
   </table>
   </dd>
 </dl>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000016">Todo:</a></b></dt><dd>Document enum ERenderOptions</dd></dl>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000017">Todo:</a></b></dt><dd>Document enum ERenderOptions</dd></dl>
 <p>Example:</p>
 <div class="fragment"><div class="line"><span class="keywordtype">void</span> DocumentWindow::display_voices_in_colours(<span class="keywordtype">bool</span> value)</div>
 <div class="line">{</div>
@@ -2385,7 +2385,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>enable_drag_image</b>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classInteractor.html">Interactor</a></li>
-    <li class="footer">Generated on Sat Apr 30 2016 17:16:17 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Apr 30 2016 17:44:08 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

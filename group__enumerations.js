@@ -224,7 +224,7 @@ var group__enumerations =
       [ "k_quarter", "group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfca17931dd81ae3da82cd26d473da25ebb1", null ],
       [ "k_eighth", "group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfca5c1c45ec0a027a1b1b0b67faa2848cc8", null ],
       [ "k_16th", "group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfca8ad4a2c1c1911b1858b4ec9c3556cf1b", null ],
-      [ "k_32th", "group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfcab9d9f709d294dbee7658b6aa8aef66fa", null ],
+      [ "k_32nd", "group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfca99d449bb8c1eb6d6763d4e7781cc2bc3", null ],
       [ "k_64th", "group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfca12b3d4630357cc39e9c9e501ddd6ce2a", null ],
       [ "k_128th", "group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfca680c5f392f9876efa404d6785def06b0", null ],
       [ "k_256th", "group__enumerations.html#gga09a15f850423776c0a4c4e6cc43e7dfcaaaef672ec4a7c450a85c1873cb54b9dd", null ],

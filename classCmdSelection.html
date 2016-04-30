@@ -115,6 +115,8 @@ $(document).ready(function(){initNavTree('classCmdSelection.html','');});
 <div class="title">CmdSelection Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="lomse__command_8h_source.html">lomse_command.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for CmdSelection:</div>
 <div class="dyncontent">
@@ -125,19 +127,20 @@ Inheritance diagram for CmdSelection:</div>
 <area href="classDocCommand.html" alt="DocCommand" shape="rect" coords="0,0,97,24"/>
 </map>
  </div></div>
-<table class="memberdecls">
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A command for modifying current set of selected objects.</p>
+<p>See constructor for details. </p>
+</div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a655c44975e06a0c4e08e1e3fadd45e51"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"></td></tr>
-<tr class="separator:a655c44975e06a0c4e08e1e3fadd45e51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97f4175a58147ee08c9c400e69f0f4ec"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdSelection.html#a97f4175a58147ee08c9c400e69f0f4ec">ESelectionAction</a> </td></tr>
+<tr class="separator:a97f4175a58147ee08c9c400e69f0f4ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a9febfd6fdb356120b28f51758282db27"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a9febfd6fdb356120b28f51758282db27"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CmdSelection</b> (int cmd, const string &amp;name=&quot;&quot;)</td></tr>
+<tr class="memitem:a9febfd6fdb356120b28f51758282db27"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdSelection.html#a9febfd6fdb356120b28f51758282db27">CmdSelection</a> (int cmd, const string &amp;name=&quot;&quot;)</td></tr>
 <tr class="separator:a9febfd6fdb356120b28f51758282db27"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac1228377b1bbf1e8396ac81b27356788"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ac1228377b1bbf1e8396ac81b27356788"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>CmdSelection</b> (int cmd, ImoId id, const string &amp;name=&quot;&quot;)</td></tr>
+<tr class="memitem:ac1228377b1bbf1e8396ac81b27356788"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdSelection.html#ac1228377b1bbf1e8396ac81b27356788">CmdSelection</a> (int cmd, ImoId id, const string &amp;name=&quot;&quot;)</td></tr>
 <tr class="separator:ac1228377b1bbf1e8396ac81b27356788"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classDocCommand"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classDocCommand')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classDocCommand.html">DocCommand</a></td></tr>
 <tr class="memitem:adf68714b754c17c1c7f9b36187d321c8 inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#adf68714b754c17c1c7f9b36187d321c8">get_name</a> ()</td></tr>
@@ -145,13 +148,149 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4fcd738f3a6c0f375b44f16987a5937b inherit pub_methods_classDocCommand"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classDocCommand.html#a4fcd738f3a6c0f375b44f16987a5937b">get_error</a> ()</td></tr>
 <tr class="separator:a4fcd738f3a6c0f375b44f16987a5937b inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Enumeration Documentation</h2>
+<a class="anchor" id="a97f4175a58147ee08c9c400e69f0f4ec"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="classCmdSelection.html#a97f4175a58147ee08c9c400e69f0f4ec">CmdSelection::ESelectionAction</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This enum describes the posible actions for <a class="el" href="classCmdSelection.html">CmdSelection</a> commands. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><em><a class="anchor" id="a97f4175a58147ee08c9c400e69f0f4ecaf9c48a30ebf583622f6067fb5238090e"></a>k_set</em>&#160;</td><td class="fielddoc">
+<p>Set selection: clear current selection and add the objects in the command. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="a97f4175a58147ee08c9c400e69f0f4eca0e2a1b6af0b16a8664193a63e06543f7"></a>k_add</em>&#160;</td><td class="fielddoc">
+<p>Increment the selection by adding the objects in the command. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="a97f4175a58147ee08c9c400e69f0f4ecad5c4dc14485f31c9a1bdd4bd9e2c7341"></a>k_remove</em>&#160;</td><td class="fielddoc">
+<p>Remove the objects in the command from the selection. </p>
+</td></tr>
+<tr><td class="fieldname"><em><a class="anchor" id="a97f4175a58147ee08c9c400e69f0f4ecaa9f6dc21250c8f90aa76b0467494eaac"></a>k_clear</em>&#160;</td><td class="fielddoc">
+<p>Empty the selection set. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a class="anchor" id="a9febfd6fdb356120b28f51758282db27"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CmdSelection::CmdSelection </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>cmd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>name</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This command changes clears the set of selected objects. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cmd</td><td>The type of action to do on the selection set. Must be <a class="el" href="classCmdSelection.html#a97f4175a58147ee08c9c400e69f0f4ecaa9f6dc21250c8f90aa76b0467494eaac" title="Empty the selection set. ">CmdSelection::k_clear</a> </td></tr>
+    <tr><td class="paramname">name</td><td>The displayable name for the command. If not specified or empty will be replaced by "Selection: clear selection".</td></tr>
+  </table>
+  </dd>
+</dl>
+<p><b>Remarks</b></p>
+<ul>
+<li>After executing the command:<ul>
+<li>the selection will be empty.</li>
+<li>the cursor will not change its position.</li>
+</ul>
+</li>
+</ul>
+<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000011">Todo:</a></b></dt><dd>Remove redundant parameter <em>cmd</em> as it always must be <em>k_clear</em>, and rename this command (e.g. CmdClearSelection) </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="ac1228377b1bbf1e8396ac81b27356788"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">CmdSelection::CmdSelection </td>
+          <td>(</td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>cmd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ImoId&#160;</td>
+          <td class="paramname"><em>id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const string &amp;&#160;</td>
+          <td class="paramname"><em>name</em> = <code>&quot;&quot;</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>This command changes the content of the set of selected objects. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">cmd</td><td>The type of action to do on the selection set. Must be a value from enum <a class="el" href="classCmdSelection.html#a97f4175a58147ee08c9c400e69f0f4ec">ESelectionAction</a>. </td></tr>
+    <tr><td class="paramname">id</td><td>The ID of the object to add to or remove from the selection set. </td></tr>
+    <tr><td class="paramname">name</td><td>The displayable name for the command. If not specified or empty will be replaced by one of the following strings, depending on value for parameter <em>cmd</em>:<ul>
+<li>k_set: "Selection: set selection".</li>
+<li>k_add: "Selection: add obj. to selection".</li>
+<li>k_remove: "Selection: remove obj. from selection".</li>
+</ul>
+</td></tr>
+  </table>
+  </dd>
+</dl>
+<p><b>Remarks</b></p>
+<ul>
+<li>After executing the command:<ul>
+<li>the selection will be modified as implied by the command.</li>
+<li>the cursor will not change its position.</li>
+</ul>
+</li>
+</ul>
+<p><b>Example</b></p>
+<div class="fragment"><div class="line"><span class="keywordtype">void</span> CommandHandler::select_object(ImoId <span class="keywordtype">id</span>, <span class="keywordtype">bool</span> fClearSelection)</div>
+<div class="line">{</div>
+<div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
+<div class="line">    {</div>
+<div class="line">        <span class="keywordtype">string</span> name = gettext(<span class="stringliteral">&quot;Select object&quot;</span>);</div>
+<div class="line">        <span class="keywordtype">int</span> op = fClearSelection ? <a class="code" href="classCmdSelection.html#a97f4175a58147ee08c9c400e69f0f4ecaf9c48a30ebf583622f6067fb5238090e">CmdSelection::k_set</a> : <a class="code" href="classCmdSelection.html#a97f4175a58147ee08c9c400e69f0f4eca0e2a1b6af0b16a8664193a63e06543f7">CmdSelection::k_add</a>;</div>
+<div class="line">        <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdSelection.html#a9febfd6fdb356120b28f51758282db27">CmdSelection</a>(op, <span class="keywordtype">id</span>, name) );</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --> 
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classCmdSelection.html">CmdSelection</a></li>
-    <li class="footer">Generated on Sat Apr 30 2016 17:16:17 for Lomse library. API documentation by
+    <li class="footer">Generated on Sat Apr 30 2016 17:44:08 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

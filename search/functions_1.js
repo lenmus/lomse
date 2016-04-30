@@ -18,5 +18,6 @@ var searchData=
   ['cmdinsertmanystaffobjs',['CmdInsertManyStaffObjs',['../classCmdInsertManyStaffObjs.html#a0f81061adcebc8027dfb8a94f52dc71e',1,'CmdInsertManyStaffObjs']]],
   ['cmdinsertstaffobj',['CmdInsertStaffObj',['../classCmdInsertStaffObj.html#a3d3a6f88d58a736ded9d0936decce57f',1,'CmdInsertStaffObj']]],
   ['cmdjoinbeam',['CmdJoinBeam',['../classCmdJoinBeam.html#af66f8a719144270535bd2653a88214cd',1,'CmdJoinBeam']]],
+  ['cmdselection',['CmdSelection',['../classCmdSelection.html#a9febfd6fdb356120b28f51758282db27',1,'CmdSelection::CmdSelection(int cmd, const string &amp;name=&quot;&quot;)'],['../classCmdSelection.html#ac1228377b1bbf1e8396ac81b27356788',1,'CmdSelection::CmdSelection(int cmd, ImoId id, const string &amp;name=&quot;&quot;)']]],
   ['create_5fscore_5fplayer',['create_score_player',['../classLomseDoorway.html#a50dbce970b84945868887966a0708634',1,'LomseDoorway']]]
 ];

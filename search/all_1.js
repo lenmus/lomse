@@ -20,7 +20,7 @@ var searchData=
   ['cmdinsertmanystaffobjs',['CmdInsertManyStaffObjs',['../classCmdInsertManyStaffObjs.html',1,'CmdInsertManyStaffObjs'],['../classCmdInsertManyStaffObjs.html#a0f81061adcebc8027dfb8a94f52dc71e',1,'CmdInsertManyStaffObjs::CmdInsertManyStaffObjs()']]],
   ['cmdinsertstaffobj',['CmdInsertStaffObj',['../classCmdInsertStaffObj.html',1,'CmdInsertStaffObj'],['../classCmdInsertStaffObj.html#a3d3a6f88d58a736ded9d0936decce57f',1,'CmdInsertStaffObj::CmdInsertStaffObj()']]],
   ['cmdjoinbeam',['CmdJoinBeam',['../classCmdJoinBeam.html',1,'CmdJoinBeam'],['../classCmdJoinBeam.html#af66f8a719144270535bd2653a88214cd',1,'CmdJoinBeam::CmdJoinBeam()']]],
-  ['cmdselection',['CmdSelection',['../classCmdSelection.html',1,'']]],
+  ['cmdselection',['CmdSelection',['../classCmdSelection.html',1,'CmdSelection'],['../classCmdSelection.html#a9febfd6fdb356120b28f51758282db27',1,'CmdSelection::CmdSelection(int cmd, const string &amp;name=&quot;&quot;)'],['../classCmdSelection.html#ac1228377b1bbf1e8396ac81b27356788',1,'CmdSelection::CmdSelection(int cmd, ImoId id, const string &amp;name=&quot;&quot;)']]],
   ['create_5fscore_5fplayer',['create_score_player',['../classLomseDoorway.html#a50dbce970b84945868887966a0708634',1,'LomseDoorway']]],
   ['coordinate_20systems_2c_20units_2c_20scaling_20and_20viewport',['Coordinate systems, units, scaling and viewport',['../viewport-overview.html',1,'index']]]
 ];

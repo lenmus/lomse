@@ -24,6 +24,7 @@ var searchData=
   ['eornaments',['EOrnaments',['../group__enumerations.html#ga30515edb5649d16b2943936d695f05c9',1,'lomse_internal_model.h']]],
   ['epixelformat',['EPixelFormat',['../group__enumerations.html#gafb559e26bc610db43ba605230a142898',1,'lomse_pixel_formats.h']]],
   ['eplacement',['EPlacement',['../group__enumerations.html#ga314c59562f7d4c993a0e5330fa59df50',1,'lomse_internal_model.h']]],
+  ['eselectionaction',['ESelectionAction',['../classCmdSelection.html#a97f4175a58147ee08c9c400e69f0f4ec',1,'CmdSelection']]],
   ['esteps',['ESteps',['../group__enumerations.html#gaeae8853f80e4ededd64180f81d0083fb',1,'lomse_pitch.h']]],
   ['etechnical',['ETechnical',['../group__enumerations.html#ga603173cd8f31b8852b951f52043d114a',1,'lomse_internal_model.h']]],
   ['etimingtarget',['ETimingTarget',['../classInteractor.html#ad8858370241ddad5b8a36300b22f5665',1,'Interactor']]],
