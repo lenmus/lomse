@@ -243,7 +243,7 @@ protected:
 //    void continue_move_drag(Event& event);
 //    void end_move_drag(Event& event);
 //
-//    double get_ellapsed_time();
+//    double get_elapsed_time();
 //
 //};
 

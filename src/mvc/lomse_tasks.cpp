@@ -27,6 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
+#define LOMSE_INTERNAL_API
 #include "lomse_tasks.h"
 
 #include "lomse_interactor.h"
@@ -383,8 +384,8 @@ void TaskSelection::mouse_in_out(Event& event)
 //                case Event::k_mouse_left_up:
 //                case Event::k_mouse_right_up:
 //                {
-//                    double ellapsed = get_ellapsed_time();
-//                    if (ellapsed < k_double_click_time)
+//                    double elapsed = get_elapsed_time();
+//                    if (elapsed < k_double_click_time)
 //                        m_state = k_waiting_for_dclick;
 //                    else
 //                    {
@@ -403,13 +404,13 @@ void TaskSelection::mouse_in_out(Event& event)
 //        //--------------------------------------------------------------------------
 //        case k_waiting_for_dclick:
 //        {
-//            double ellapsed = get_ellapsed_time();
+//            double elapsed = get_elapsed_time();
 //            switch (event.type())
 //            {
 //                case Event::k_mouse_left_down:
 //                case Event::k_mouse_right_down:
 //                {
-//                    if (ellapsed < k_double_click_time)
+//                    if (elapsed < k_double_click_time)
 //                        m_state = k_waiting_for_double_up;
 //                    else
 //                    {
@@ -420,7 +421,7 @@ void TaskSelection::mouse_in_out(Event& event)
 //                }
 //                case Event::k_mouse_move:
 //                {
-//                    if (ellapsed < k_double_click_time)
+//                    if (elapsed < k_double_click_time)
 //                        m_state = k_waiting_for_dclick;
 //                    else
 //                    {
@@ -437,13 +438,13 @@ void TaskSelection::mouse_in_out(Event& event)
 //        //--------------------------------------------------------------------------
 //        case k_waiting_for_double_up:
 //        {
-//            double ellapsed = get_ellapsed_time();
+//            double elapsed = get_elapsed_time();
 //            switch (event.type())
 //            {
 //                case Event::k_mouse_left_up:
 //                case Event::k_mouse_right_up:
 //                {
-//                    if (ellapsed < k_double_click_time)
+//                    if (elapsed < k_double_click_time)
 //                    {
 //                        m_state = k_waiting_for_first_point;
 //                        double_click();
@@ -457,7 +458,7 @@ void TaskSelection::mouse_in_out(Event& event)
 //                }
 //                case Event::k_mouse_move:
 //                {
-//                    if (ellapsed < k_double_click_time)
+//                    if (elapsed < k_double_click_time)
 //                        m_state = k_waiting_for_double_up;
 //                    else
 //                    {
@@ -551,7 +552,7 @@ void TaskSelection::mouse_in_out(Event& event)
 //}
 //
 ////---------------------------------------------------------------------------------------
-//double TaskSelection::get_ellapsed_time()
+//double TaskSelection::get_elapsed_time()
 //{
 //    //millisecods
 //

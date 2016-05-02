@@ -105,7 +105,7 @@ TimeUnits get_duration_for_ref_note(int bottomNumber)
         case 16:
             return pow(2.0, (10 - k_16th));
         case 32:
-            return pow(2.0, (10 - k_32th));
+            return pow(2.0, (10 - k_32nd));
         case 64:
             return pow(2.0, (10 - k_64th));
         default:

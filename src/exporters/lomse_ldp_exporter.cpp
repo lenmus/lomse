@@ -2697,7 +2697,7 @@ string LdpExporter::notetype_to_string(int noteType, int dots)
         case k_quarter: source << "q";  break;
         case k_eighth:  source << "e";  break;
         case k_16th:    source << "s";  break;
-        case k_32th:    source << "t";  break;
+        case k_32nd:    source << "t";  break;
         case k_64th:    source << "i";  break;
         case k_128th:   source << "o";  break;
         case k_256th:   source << "f";  break;

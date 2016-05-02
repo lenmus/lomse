@@ -135,7 +135,6 @@ public:
     //access to collaborators in MVC model
     GraphicModel* get_graphic_model();
     inline View* get_view() { return m_pView; }
-    inline DocCursor* get_cursor() { return m_pCursor; }
     inline SelectionSet* get_selection_set() { return m_pSelections; }
 
     //interface to View
@@ -191,13 +190,8 @@ public:
     virtual void print_page(int page, VPoint viewport=VPoint(0, 0));
     virtual int get_num_pages();
 
-    //interface to SelectionSet
-    virtual void select_object(GmoObj* pGmo, bool fClearSelection=true);
-    virtual void select_object(ImoId id, bool fClearSelection=true);
-//    void select_object(ImoObj* pImo, bool fClearSelection=true);
-    virtual bool is_in_selection(GmoObj* pGmo);
-
-    //caret
+    //cursor / caret
+    inline DocCursor* get_cursor() { return m_pCursor; }
     void blink_caret();
 //    void show_caret(bool fShow=true);
 //    void hide_caret();
@@ -234,36 +228,9 @@ public:
     //virtual void on_key(Pixels x, Pixels y, unsigned key, unsigned flags);
     //virtual void on_ctrl_change();
 
-
-    //actions requested by Task objects
-    virtual void task_action_click_at_screen_point(Pixels x, Pixels y, unsigned flags);
-    virtual void task_action_select_objects_in_screen_rectangle(Pixels x1, Pixels y1,
-                                                                Pixels x2, Pixels y2,
-                                                                unsigned flags);
-    virtual void task_action_select_object_and_show_contextual_menu(Pixels x, Pixels y,
-                                                                    unsigned flags);
-    virtual void task_action_mouse_in_out(Pixels x, Pixels y, unsigned flags);
-    virtual void task_action_insert_object_at_point(Pixels x, Pixels y, unsigned flags);
-    virtual void task_action_drag_the_view(Pixels x, Pixels y);
-    virtual void task_action_decide_on_switching_task(Pixels x, Pixels y, unsigned flags);
-    virtual void task_action_switch_to_default_task();
-    virtual void task_action_move_drag_image(Pixels x, Pixels y);
-    virtual void task_action_move_object(Pixels x, Pixels y);
-    virtual void task_action_move_handler(Pixels x, Pixels y);
-    virtual void task_action_move_handler_end_point(Pixels xFinal, Pixels yFinal,
-                                                    Pixels xTotalShift, Pixels yTotalShift);
-    virtual void task_action_update_selection_rectangle(Pixels x2, Pixels y2);
-
-//    virtual void task_action_single_click_at(Pixels x, Pixels y, bool fLeftButton);
-//    virtual void task_action_double_click_at(Pixels x, Pixels y, bool fLeftButton);
-//    virtual void task_action_start_move_drag(Pixels x, Pixels y, bool fLeftButton);
-//    virtual void task_action_continue_move_drag(Pixels x, Pixels y, bool fLeftButton);
-//    virtual void task_action_end_move_drag(Pixels x, Pixels y, bool fLeftButton,
-//                                           Pixels xTotalShift, Pixels yTotalShift);
-
     //for performance measurements
     void timing_repaint_done();
-    inline double* get_ellapsed_times() { return &m_ellapsedTimes[0]; }
+    inline double* get_elapsed_times() { return &m_elapsedTimes[0]; }
 
     //Debugging
     virtual void set_box_to_draw(int boxType);
@@ -297,6 +264,37 @@ public:
     void timing_visual_effects_start();
     void timing_renderization_end();
 
+    //interface to SelectionSet
+    virtual void select_object(GmoObj* pGmo, bool fClearSelection=true);
+    virtual void select_object(ImoId id, bool fClearSelection=true);
+    virtual bool is_in_selection(GmoObj* pGmo);
+
+    //actions requested by Task objects
+    virtual void task_action_click_at_screen_point(Pixels x, Pixels y, unsigned flags);
+    virtual void task_action_select_objects_in_screen_rectangle(Pixels x1, Pixels y1,
+                                                                Pixels x2, Pixels y2,
+                                                                unsigned flags);
+    virtual void task_action_select_object_and_show_contextual_menu(Pixels x, Pixels y,
+                                                                    unsigned flags);
+    virtual void task_action_mouse_in_out(Pixels x, Pixels y, unsigned flags);
+    virtual void task_action_insert_object_at_point(Pixels x, Pixels y, unsigned flags);
+    virtual void task_action_drag_the_view(Pixels x, Pixels y);
+    virtual void task_action_decide_on_switching_task(Pixels x, Pixels y, unsigned flags);
+    virtual void task_action_switch_to_default_task();
+    virtual void task_action_move_drag_image(Pixels x, Pixels y);
+    virtual void task_action_move_object(Pixels x, Pixels y);
+    virtual void task_action_move_handler(Pixels x, Pixels y);
+    virtual void task_action_move_handler_end_point(Pixels xFinal, Pixels yFinal,
+                                                    Pixels xTotalShift, Pixels yTotalShift);
+    virtual void task_action_update_selection_rectangle(Pixels x2, Pixels y2);
+
+//    virtual void task_action_single_click_at(Pixels x, Pixels y, bool fLeftButton);
+//    virtual void task_action_double_click_at(Pixels x, Pixels y, bool fLeftButton);
+//    virtual void task_action_start_move_drag(Pixels x, Pixels y, bool fLeftButton);
+//    virtual void task_action_continue_move_drag(Pixels x, Pixels y, bool fLeftButton);
+//    virtual void task_action_end_move_drag(Pixels x, Pixels y, bool fLeftButton,
+//                                           Pixels xTotalShift, Pixels yTotalShift);
+
 #else
 protected:
     Interactor(LibraryScope& libraryScope, WpDocument wpDoc, View* pView,
@@ -306,7 +304,7 @@ protected:
 
 protected:
     //for performance measurements
-    double m_ellapsedTimes[k_timing_max_value];
+    double m_elapsedTimes[k_timing_max_value];
     ptime m_renderStartTime;
     ptime m_visualEffectsStartTime;
     ptime m_repaintStartTime;
@@ -334,7 +332,7 @@ protected:
     void redraw_caret();
     void send_update_UI_event(EEventType type);
     ptime get_current_time() const;
-    double get_ellapsed_time_since(ptime startTime) const;
+    double get_elapsed_time_since(ptime startTime) const;
     Handler* handlers_hit_test(Pixels x, Pixels y);
     void restore_selection();
     bool is_operating_mode_allowed(int mode);

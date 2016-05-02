@@ -1884,7 +1884,7 @@ SUITE(DocCommandTest)
         DocCursor cursor(m_pDoc);
         DocCommandExecuter executer(m_pDoc);
         CHECK( m_pDoc->is_dirty() == false );
-        DocCommand* pCmd = LOMSE_NEW CmdCursor(CmdCursor::k_point_to, 26L);    //first note
+        DocCommand* pCmd = LOMSE_NEW CmdCursor(26L);    //first note
 
         MySelectionSet sel(m_pDoc);
         executer.execute(&cursor, pCmd, &sel);
@@ -3199,7 +3199,7 @@ SUITE(DocCommandTest)
         MySelectionSet sel(&doc);
         executer.execute(&cursor, pCmd, &sel);
 
-        pCmd = LOMSE_NEW CmdCursor(CmdCursor::k_point_to, 25L);     //point to first note
+        pCmd = LOMSE_NEW CmdCursor(25L);     //point to first note
         executer.execute(&cursor, pCmd, &sel);
         ImoObj* pNoteE4 = *cursor;
 

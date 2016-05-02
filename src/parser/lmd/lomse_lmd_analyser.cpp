@@ -284,7 +284,7 @@ int LmdAutoBeamer::get_beaming_level(ImoNote* pNote)
             return 0;
         case k_16th:
             return 1;
-        case k_32th:
+        case k_32nd:
             return 2;
         case k_64th:
             return 3;
@@ -3398,7 +3398,7 @@ protected:
                 return 0;
             case k_16th:
                 return 1;
-            case k_32th:
+            case k_32nd:
                 return 2;
             case k_64th:
                 return 3;

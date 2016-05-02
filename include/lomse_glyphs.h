@@ -209,7 +209,7 @@ enum EGlyphIndex
     k_glyph_small_quarter_note,
     k_glyph_small_eighth_note,
     k_glyph_small_16th_note,
-    k_glyph_small_32th_note,
+    k_glyph_small_32nd_note,
     k_glyph_small_64th_note,
     k_glyph_small_128th_note,
     k_glyph_small_256th_note,

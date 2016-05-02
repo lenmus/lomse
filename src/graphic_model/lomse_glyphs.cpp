@@ -184,7 +184,7 @@ const GlyphData m_glyphs_smufl[] =
     GlyphData(0xECA5),  // small quarter note up
     GlyphData(0xECA7),  // small eighth note up
     GlyphData(0xECA9),  // small 16th note up
-    GlyphData(0xECAB),  // small 32th note up
+    GlyphData(0xECAB),  // small 32nd note up
     GlyphData(0xECAD),  // small 64th note up
     GlyphData(0xECAF),  // small 128th note up
     GlyphData(0xECB1),  // small 256th note up

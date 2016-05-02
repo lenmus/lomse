@@ -4,7 +4,19 @@
 [Since last version] 0.18.0
 =============================
 
--none
+Continue defining and documenting the public API.
+
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.18.0
+
+Some typos fixed in public members and enum values:
+
+- Constant *k_glyph_small_32th_note* in enum EGlyphIndex renamed as *k_glyph_small_32nd_note*
+- Constant *k_32th* in enum ENoteTypes renamed as *k_32nd*
+- Constant *k_duration_32th_dotted* in enum ENotesDuration renamed as *k_duration_32nd_dotted*
+- Constant *k_duration_32th* in enum ENotesDuration renamed as *k_duration_32nd*
+- Method *Interactor::get_ellapsed_times()* renamed as *Interactor::get_elapsed_times()*
+
+And some methods are no longer available in public API.
 
 
 Version [0.18.0] (26/Mar/2016)

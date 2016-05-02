@@ -27,6 +27,7 @@
 // the project at cecilios@users.sourceforge.net
 //---------------------------------------------------------------------------------------
 
+#define LOMSE_INTERNAL_API
 #include "lomse_command.h"
 #include "lomse_build_options.h"
 
@@ -1350,6 +1351,9 @@ int CmdChangeAttribute::set_target(Document* UNUSED(pDoc), DocCursor* pCursor,
                                    SelectionSet* UNUSED(pSelection))
 {
     //TODO: treatment for selections
+    if (m_name == "")
+        m_name = "Change attribute";
+
     ImoObj* pImo = pCursor->get_pointee();
     return set_target(pImo);
 }
@@ -1498,16 +1502,16 @@ void CmdChangeDots::undo_action(Document* pDoc, DocCursor* pCursor)
 //=======================================================================================
 // CmdCursor implementation
 //=======================================================================================
-CmdCursor::CmdCursor(int cmd, ImoId id, const string& name)
+CmdCursor::CmdCursor(ImoId id, const string& name)
     : DocCmdSimple(name)
-    , m_operation(cmd)
+    , m_operation(k_point_to)
     , m_targetId(id)
 {
     initialize();
 }
 
 //---------------------------------------------------------------------------------------
-CmdCursor::CmdCursor(int cmd, const string& name)
+CmdCursor::CmdCursor(ECursorAction cmd, const string& name)
     : DocCmdSimple(name)
     , m_operation(cmd)
     , m_targetId(k_no_imoid)

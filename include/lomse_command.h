@@ -80,7 +80,7 @@ public:
     virtual ~DocCommand() {}
 
     //cursor update policy to be used with this command
-    enum {
+    enum ECmdCursorPolicy {
         k_do_nothing=0,
         k_update_after_deletion,
         k_update_after_insertion,
@@ -89,7 +89,7 @@ public:
     virtual int get_cursor_update_policy() = 0;
 
     //undo policy used by this command
-    enum {
+    enum ECmdUndoPolicy {
         k_undo_policy_full_checkpoint=0,
         k_undo_policy_partial_checkpoint,
         k_undo_policy_specific,
@@ -97,7 +97,7 @@ public:
     virtual int get_undo_policy() = 0;
 
     //selection set update policy to be used with this command
-    enum {
+    enum ECmdSelectionPolicy {
         k_sel_do_nothing=0,
         k_sel_clear,
         k_sel_command_specific,
@@ -108,10 +108,16 @@ public:
     inline std::string get_name() { return m_name; }
     inline bool is_reversible() { return m_flags &  k_reversible; }
     inline bool is_recordable() { return m_flags &  k_recordable; }
-    inline bool is_target_set_in_constructor() { return m_flags &  k_target_set_in_constructor; }
-    inline bool is_included_in_composite_cmd() { return m_flags &  k_included_in_composite_cmd; }
     inline string get_error() { return m_error; }
     virtual bool is_composite() = 0;
+
+
+//excluded from public API. Only for internal use.
+#ifdef LOMSE_INTERNAL_API
+public:
+    inline bool is_target_set_in_constructor() { return m_flags &  k_target_set_in_constructor; }
+    inline bool is_included_in_composite_cmd() { return m_flags &  k_included_in_composite_cmd; }
+
     virtual void update_selection(SelectionSet* UNUSED(pSelection)) {}
 
     //settings
@@ -121,6 +127,8 @@ public:
     virtual int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection)=0;
     virtual int perform_action(Document* pDoc, DocCursor* pCursor)=0;
     virtual void undo_action(Document* pDoc, DocCursor* pCursor);
+
+#endif  //excluded from public API
 
 protected:
     void create_checkpoint(Document* pDoc);
@@ -501,16 +509,16 @@ protected:
     TimeUnits       m_time;
 
 public:
-    CmdCursor(int cmd, const string& name="");
-    CmdCursor(int cmd, ImoId id, const string& name="");
+    enum ECursorAction { k_move_next=0, k_move_prev, k_enter, k_exit, k_point_to,
+           k_to_state, k_to_measure, k_to_time, k_move_up, k_move_down,
+           k_cursor_dump, };
+
+    CmdCursor(ECursorAction cmd, const string& name="");
+    CmdCursor(ImoId id, const string& name="");
     CmdCursor(int measure, int instr, int staff, const string& name="");
     CmdCursor(TimeUnits time, int instr, int staff, const string& name="");
     CmdCursor(DocCursorState& state, const string& name="");
     virtual ~CmdCursor() {};
-
-    enum { k_move_next=0, k_move_prev, k_enter, k_exit, k_point_to,
-           k_to_state, k_to_measure, k_to_time, k_move_up, k_move_down,
-           k_cursor_dump, };
 
     int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
@@ -692,7 +700,7 @@ public:
 
     int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
-    int get_cursor_update_policy() { return k_refresh; }  //k_update_after_insertion; }
+    int get_cursor_update_policy() { return k_refresh; }
     int get_undo_policy() { return k_undo_policy_partial_checkpoint; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
 
@@ -713,7 +721,7 @@ public:
     int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
     void undo_action(Document* pDoc, DocCursor* pCursor);
-    int get_cursor_update_policy() { return k_refresh; }  //k_update_after_insertion; }
+    int get_cursor_update_policy() { return k_refresh; }
     int get_undo_policy() { return k_undo_policy_specific; }
     int get_selection_update_policy() { return k_sel_do_nothing; }
 };
@@ -776,7 +784,7 @@ public:
     //CmdSelection(DocCursorState& state, const string& name="");
     virtual ~CmdSelection() {};
 
-    enum { k_set=0, k_add, k_remove, k_clear, };
+    enum ESelectionAction { k_set=0, k_add, k_remove, k_clear, };
 
     int set_target(Document* pDoc, DocCursor* pCursor, SelectionSet* pSelection);
     int perform_action(Document* pDoc, DocCursor* pCursor);
