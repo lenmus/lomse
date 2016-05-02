@@ -1,8 +1,14 @@
 # Lomse Library. Log of changes
 
 
-[Since last version] 0.18.0
+[Since last version] 0.19.0
 =============================
+
+- none
+
+
+Version [0.19.0] (2/May/2016)
+==============================
 
 Continue defining and documenting the public API.
 
@@ -16,7 +22,10 @@ Some typos fixed in public members and enum values:
 - Constant *k_duration_32th* in enum ENotesDuration renamed as *k_duration_32nd*
 - Method *Interactor::get_ellapsed_times()* renamed as *Interactor::get_elapsed_times()*
 
-And some methods are no longer available in public API.
+Some methods changed:
+- Removed unnecesary parameter in some CmdCursor constructors.
+
+And some methods removed from public API.
 
 
 Version [0.18.0] (26/Mar/2016)
@@ -373,7 +382,8 @@ Version 0.10.b1
 - Initial public release, used in Phonascus 5.0 beta for Linux.
 
 
-[Since last version]: https://github.com/lenmus/lomse/compare/0.18.0...HEAD
+[Since last version]: https://github.com/lenmus/lomse/compare/0.19.0...HEAD
+[0.19.0]: https://github.com/lenmus/lomse/compare/0.18.0...0.19.0
 [0.18.0]: https://github.com/lenmus/lomse/compare/0.17.20...0.18.0
 [0.17.20]: https://github.com/lenmus/lomse/compare/0.16.1...0.17.20
 [0.16.1]: https://github.com/lenmus/lomse/compare/0.15.0...0.16.1
