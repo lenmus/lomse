@@ -2931,8 +2931,8 @@ protected:
                 noteType = k_duration_eighth;
             else if (is_equal_time(units, k_duration_16th))
                 noteType = k_duration_16th;
-            else if (is_equal_time(units, k_duration_32th))
-                noteType = k_duration_32th;
+            else if (is_equal_time(units, k_duration_32nd))
+                noteType = k_duration_32nd;
             else if (is_equal_time(units, k_duration_64th))
                 noteType = k_duration_64th;
             else if (is_equal_time(units, k_duration_128th))
@@ -2958,7 +2958,7 @@ protected:
         else if (type == "half")
             noteType = k_half;
         else if (type == "32nd")
-            noteType = k_32th;
+            noteType = k_32nd;
         else if (type == "64th")
             noteType = k_64th;
         else if (type == "whole")
@@ -5526,7 +5526,7 @@ void MxlBeamsBuilder::add_relation_to_notes_rests(ImoBeamDto* pEndInfo)
 //            return 0;
 //        case k_16th:
 //            return 1;
-//        case k_32th:
+//        case k_32nd:
 //            return 2;
 //        case k_64th:
 //            return 3;

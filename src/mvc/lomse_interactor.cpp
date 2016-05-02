@@ -157,7 +157,7 @@ void Interactor::create_graphic_model()
 
         timing_graphic_model_build_end();
 
-        double buildTime = get_ellapsed_time_since(m_gmodelBuildStartTime);
+        double buildTime = get_elapsed_time_since(m_gmodelBuildStartTime);
         stringstream msg;
         msg << "gmodel build time = " << buildTime << " ms.";
         LOMSE_LOG_INFO(msg.str());
@@ -285,14 +285,6 @@ void Interactor::select_object(GmoObj* pGmo, bool fClearSelection)
     m_pSelections->add(pGmo);
     send_update_UI_event(k_selection_set_change);
 }
-
-////---------------------------------------------------------------------------------------
-//void Interactor::select_object(ImoObj* pImo, bool fClearSelection)
-//{
-//    GraphicModel* pGM = get_graphic_model();
-//    GmoObj* pGmo = pGM->find_shape_for_object( static_cast<ImoStaffObj*>(pImo) );
-//    select_object(pGmo, fClearSelection);
-//}
 
 //---------------------------------------------------------------------------------------
 void Interactor::select_object(ImoId id, bool fClearSelection)
@@ -1573,7 +1565,7 @@ ptime Interactor::get_current_time() const
 }
 
 //---------------------------------------------------------------------------------------
-double Interactor::get_ellapsed_time_since(ptime startTime) const
+double Interactor::get_elapsed_time_since(ptime startTime) const
 {
     //millisecods
 
@@ -1588,7 +1580,7 @@ void Interactor::timing_start_measurements()
     //timing starts. render_start = now, gmodel_build=0, gmodel_draw=0, visual_start = now
 
     for (int i=0; i < k_timing_max_value; ++i)
-        m_ellapsedTimes[i] = 0.0;
+        m_elapsedTimes[i] = 0.0;
 
     m_renderStartTime = microsec_clock::universal_time();
     m_visualEffectsStartTime = m_renderStartTime;
@@ -1601,7 +1593,7 @@ void Interactor::timing_graphic_model_build_end()
 
     ptime now = microsec_clock::universal_time();
     time_duration diff = now - m_renderStartTime;
-    m_ellapsedTimes[k_timing_gmodel_build_time] = double( diff.total_milliseconds() );
+    m_elapsedTimes[k_timing_gmodel_build_time] = double( diff.total_milliseconds() );
 }
 
 //---------------------------------------------------------------------------------------
@@ -1611,8 +1603,8 @@ void Interactor::timing_graphic_model_render_end()
 
     ptime now = microsec_clock::universal_time();
     time_duration diff = now - m_renderStartTime;
-    m_ellapsedTimes[k_timing_gmodel_draw_time] =
-        double( diff.total_milliseconds() ) - m_ellapsedTimes[k_timing_gmodel_build_time];
+    m_elapsedTimes[k_timing_gmodel_draw_time] =
+        double( diff.total_milliseconds() ) - m_elapsedTimes[k_timing_gmodel_build_time];
 }
 
 //---------------------------------------------------------------------------------------
@@ -1631,11 +1623,11 @@ void Interactor::timing_renderization_end()
 
     ptime now = microsec_clock::universal_time();
     time_duration diff = now - m_visualEffectsStartTime;
-    m_ellapsedTimes[k_timing_visual_effects_draw_time] =
+    m_elapsedTimes[k_timing_visual_effects_draw_time] =
         double( diff.total_milliseconds() );
 
     diff = now - m_renderStartTime;
-    m_ellapsedTimes[k_timing_total_render_time] =
+    m_elapsedTimes[k_timing_total_render_time] =
         double( diff.total_milliseconds() );
 
     m_repaintStartTime = now;
@@ -1648,7 +1640,7 @@ void Interactor::timing_repaint_done()
 
     ptime now = microsec_clock::universal_time();
     time_duration diff = now - m_repaintStartTime;
-    m_ellapsedTimes[k_timing_repaint_time] =  double( diff.total_milliseconds() );
+    m_elapsedTimes[k_timing_repaint_time] =  double( diff.total_milliseconds() );
 }
 
 //---------------------------------------------------------------------------------------

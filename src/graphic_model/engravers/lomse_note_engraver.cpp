@@ -686,7 +686,7 @@ int StemFlagEngraver::get_glyph_for_flag()
             return (m_fStemDown ? k_glyph_eighth_flag_down : k_glyph_eighth_flag_up);
         case k_16th :
             return  (m_fStemDown ? k_glyph_16th_flag_down : k_glyph_16th_flag_up);
-        case k_32th :
+        case k_32nd :
             return  (m_fStemDown ? k_glyph_32nd_flag_down : k_glyph_32nd_flag_up);
         case k_64th :
             return  (m_fStemDown ? k_glyph_64th_flag_down : k_glyph_64th_flag_up);

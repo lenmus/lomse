@@ -70,7 +70,7 @@ namespace lomse
 
 //System layouter
     //spacing function parameters
-#define LOMSE_DMIN                       8.0f   //TODO: float(e32thDuration)        //Dmin: min. duration to consider
+#define LOMSE_DMIN                       8.0f   //TODO: float(e32ndDuration)        //Dmin: min. duration to consider
 #define LOMSE_MIN_SPACE                 10.0f   //Smin: space for Dmin
     //space
 #define LOMSE_MIN_SPACE_BETWEEN_NOTE_AND_CLEF   10.0f

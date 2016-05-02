@@ -201,8 +201,8 @@ int MetronomeMarkEngraver::select_glyph(int noteType)
             return k_glyph_small_eighth_note;
         case k_16th:
             return k_glyph_small_16th_note;
-        case k_32th:
-            return k_glyph_small_32th_note;
+        case k_32nd:
+            return k_glyph_small_32nd_note;
         case k_64th:
             return k_glyph_small_64th_note;
         case k_128th:

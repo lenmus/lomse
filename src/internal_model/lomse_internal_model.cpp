@@ -4223,7 +4223,7 @@ int to_note_type(const char& letter)
     //  quarter       crochet                 negra             q       k_quarter = 4
     //  eighth        quaver                  corchea           e       k_eighth = 5
     //  sixteenth     semiquaver              semicorchea       s       k_16th = 6
-    //  32nd          demisemiquaver          fusa              t       k_32th = 7
+    //  32nd          demisemiquaver          fusa              t       k_32nd = 7
     //  64th          hemidemisemiquaver      semifusa          i       k_64th = 8
     //  128th         semihemidemisemiquaver  garrapatea        o       k_128th = 9
     //  256th         ???                     semigarrapatea    f       k_256th = 10
@@ -4237,7 +4237,7 @@ int to_note_type(const char& letter)
         case 'q':     return k_quarter;
         case 'e':     return k_eighth;
         case 's':     return k_16th;
-        case 't':     return k_32th;
+        case 't':     return k_32nd;
         case 'i':     return k_64th;
         case 'o':     return k_128th;
         case 'f':     return k_256th;
@@ -4292,7 +4292,7 @@ TimeUnits to_duration(int nNoteType, int nDots)
         case k_quarter: rDuration=64.0;   break;    //  4
         case k_eighth:  rDuration=32.0;   break;    //  5
         case k_16th:    rDuration=16.0;   break;    //  6
-        case k_32th:    rDuration=8.0;    break;    //  7
+        case k_32nd:    rDuration=8.0;    break;    //  7
         case k_64th:    rDuration=4.0;    break;    //  8
         case k_128th:   rDuration=2.0;    break;    //  9
         case k_256th:   rDuration=1.0;    break;    //  10

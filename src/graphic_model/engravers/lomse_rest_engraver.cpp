@@ -141,7 +141,7 @@ int RestEngraver::find_glyph()
         case k_quarter:      return k_glyph_quarter_rest;
         case k_eighth:       return k_glyph_eighth_rest;
         case k_16th:         return k_glyph_16th_rest;
-        case k_32th:         return k_glyph_32nd_rest;
+        case k_32nd:         return k_glyph_32nd_rest;
         case k_64th:         return k_glyph_64th_rest;
         case k_128th:        return k_glyph_128th_rest;
         case k_256th:        return k_glyph_256th_rest;
@@ -199,7 +199,7 @@ Tenths RestEngraver::get_offset_for_dot()
     switch (m_restType)
     {
         case k_whole:        return -15.0f;
-        case k_32th:         return -35.0f;
+        case k_32nd:         return -35.0f;
         case k_64th:         return -35.0f;
         case k_128th:        return -45.0f;
         case k_256th:        return -45.0f;
