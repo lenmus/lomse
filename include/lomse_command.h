@@ -671,8 +671,8 @@ protected:
     bool m_fFromSource;
 
 public:
-    CmdInsertBlockLevelObj(int type, const string& name);
-    CmdInsertBlockLevelObj(const string& source, const string& name);
+    CmdInsertBlockLevelObj(int type, const string& name="");
+    CmdInsertBlockLevelObj(const string& source, const string& name="");
     virtual ~CmdInsertBlockLevelObj() {};
 
     int perform_action(Document* pDoc, DocCursor* pCursor);
