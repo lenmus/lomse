@@ -4,7 +4,13 @@
 [Since last version] 0.19.0
 =============================
 
+##### BACKWARDS INCOMPATIBLE CHANGES WITH 0.19.0
+
 - none
+
+##### COMPATIBLE CHANGES
+
+- Fixed issue #42: Whitespace in text now proprely managed in LMD files.
 
 
 Version [0.19.0] (2/May/2016)
