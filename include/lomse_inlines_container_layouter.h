@@ -90,7 +90,7 @@ protected:
     void page_initializations(GmoBox* pMainBox);
 //    void create_engrouters();
 
-    Engrouter* create_next_engrouter();
+    Engrouter* create_next_engrouter(bool fRemoveLeftSpace);
     bool enough_space_in_box();
     void add_engrouter_to_line(Engrouter* pEngrouter);
     void add_engrouter_shape(Engrouter* pEngrouter, LUnits height);

@@ -37,7 +37,7 @@
     #include <locale>
 #endif
 #include <vector>
-#include <algorithm>   // for find
+#include <algorithm>
 #include "lomse_ldp_factory.h"
 #include "lomse_tree.h"
 #include "lomse_xml_parser.h"
@@ -56,6 +56,13 @@
 #include "lomse_ldp_analyser.h"
 
 using namespace std;
+
+//helper functions
+inline bool both_are_spaces(char lhs, char rhs) { return (lhs == rhs) && (lhs == ' '); }
+inline bool is_tab(const char& c) { return c == '\t'; }
+inline bool is_newline(const char& c) { return c == '\n'; }
+
+
 
 namespace lomse
 {
@@ -388,6 +395,7 @@ protected:
 
     //-----------------------------------------------------------------------------------
     //XmlNode helper methods
+    //-----------------------------------------------------------------------------------
     inline ImoId get_node_id(XmlNode* node) { return m_pAnalyser->get_node_id(node); }
     inline bool has_attribute(XmlNode* node, const string& name)
     {
@@ -404,6 +412,48 @@ protected:
         return 0.0f;
     }
 
+    //-----------------------------------------------------------------------------------
+    // white space management
+    //-----------------------------------------------------------------------------------
+    string collapse_whitespace(string str)
+    {
+        //remove consecutive spaces leaving only one space
+        string::iterator new_end = std::unique(str.begin(), str.end(), both_are_spaces);
+        str.erase(new_end, str.end());
+        return str;
+    }
+
+    string replace_tabs_by_spaces(string str)
+    {
+        //every tab (U+0009, '\t') is converted to a space (U+0020, ' ')
+        std::replace_if(str.begin(), str.end(), is_tab, ' ');
+        return str;
+    }
+
+    string remove_special_chars_before_linefeeds(string str)
+    {
+        //Each tab (U+0009, '\t'), carriage return (U+000D, '\r'), or space (U+0020, ' ')
+        //character surrounding a linefeed (U+000A, '\n') character is removed
+
+        //TODO implement remove_special_chars_before_linefeeds(string str)
+        return str;
+    }
+
+    string replace_newlines_by_spaces(string str)
+    {
+        //Each newline (U+000A, '\n') is replaced by an space
+        std::replace_if(str.begin(), str.end(), is_newline, ' ');
+        return str;
+    }
+
+    string remove_newlines(string str)
+    {
+        //remove new line chars
+        str.erase(std::remove(str.begin(), str.end(), '\n'), str.end());
+        return str;
+    }
+
+    //-----------------------------------------------------------------------------------
 
     //-----------------------------------------------------------------------------------
     inline void post_event(SpEventInfo event)
@@ -876,11 +926,7 @@ protected:
             else if (type == k_string)
             {
                 //string: implicit <txt>
-                Document* pDoc = m_pAnalyser->get_document_being_analysed();
-                ImoTextItem* pText = static_cast<ImoTextItem*>(
-                                            ImFactory::inject(k_imo_text_item, pDoc) );
-                pText->set_text( string(m_childToAnalyse.value()) );
-                return pText;
+                return create_text_item( m_childToAnalyse.value() );
             }
             else
                 error_invalid_child();
@@ -888,6 +934,16 @@ protected:
             move_to_next_child();
         }
         return NULL;
+    }
+
+    //-----------------------------------------------------------------------------------
+    ImoTextItem* create_text_item(string value, ImoId id=k_no_imoid)
+    {
+        Document* pDoc = m_pAnalyser->get_document_being_analysed();
+        ImoTextItem* pText = static_cast<ImoTextItem*>(
+                                    ImFactory::inject(k_imo_text_item, pDoc, id) );
+        pText->set_text( collapse_whitespace( replace_newlines_by_spaces(value) ));
+        return pText;
     }
 
     //-----------------------------------------------------------------------------------
@@ -941,11 +997,7 @@ protected:
             }
             else if (type == k_string)
             {
-                //string: implicit <txt>
-                Document* pDoc = m_pAnalyser->get_document_being_analysed();
-                ImoTextItem* pText = static_cast<ImoTextItem*>(
-                                            ImFactory::inject(k_imo_text_item, pDoc) );
-                pText->set_text( string(m_childToAnalyse.value()) );
+                ImoTextItem* pText = create_text_item( m_childToAnalyse.value() );
                 ImoObj* pSave = m_pAnchor;
                 m_pAnchor = pParent;
                 add_to_model(pText);
@@ -4886,10 +4938,7 @@ public:
         }
         else
         {
-            Document* pDoc = m_pAnalyser->get_document_being_analysed();
-            ImoTextItem* pText = static_cast<ImoTextItem*>(
-                            ImFactory::inject(k_imo_text_item, pDoc, get_node_id()) );
-            pText->set_text(value);
+            ImoTextItem* pText = create_text_item(value, get_node_id());
             pText->set_style(pStyle);
 
             add_to_model(pText);

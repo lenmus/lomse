@@ -55,27 +55,27 @@ EngroutersCreator::EngroutersCreator(LibraryScope& libraryScope,
     : m_libraryScope(libraryScope)
     , m_itCurContent(itStart)
     , m_itEndContent(itEnd)
-    , m_pCurText(NULL)
-    , m_pCurEngrouter(NULL)
     , m_pTextSplitter(NULL)
+    , m_pCurText(NULL)
+    , m_pPendingEngr(NULL)
 {
 }
 
 //---------------------------------------------------------------------------------------
 EngroutersCreator::~EngroutersCreator()
 {
-    delete m_pCurEngrouter;
+    delete m_pPendingEngr;
     delete m_pTextSplitter;
 }
 
 //---------------------------------------------------------------------------------------
 bool EngroutersCreator::more_content()
 {
-    return m_itCurContent != m_itEndContent || m_pCurEngrouter != NULL;
+    return m_itCurContent != m_itEndContent || m_pPendingEngr != NULL;
 }
 
 //---------------------------------------------------------------------------------------
-Engrouter* EngroutersCreator::create_next_engrouter(LUnits maxSpace)
+Engrouter* EngroutersCreator::create_next_engrouter(LUnits maxSpace, bool fFirstOfLine)
 {
     if (!more_content())
     {
@@ -84,7 +84,8 @@ Engrouter* EngroutersCreator::create_next_engrouter(LUnits maxSpace)
     }
 
     LOMSE_LOG_DEBUG(Logger::k_layout, "");
-    if (!m_pCurEngrouter)
+    Engrouter* pEngr = NULL;
+    if (!is_there_a_pending_engrouter())
     {
         ImoInlineLevelObj* pImo = static_cast<ImoInlineLevelObj*>( *m_itCurContent );
         LOMSE_LOG_TRACE(Logger::k_layout, str(boost::format(
@@ -95,52 +96,50 @@ Engrouter* EngroutersCreator::create_next_engrouter(LUnits maxSpace)
         if (pImo->is_text_item())
         {
             ImoTextItem* pText = static_cast<ImoTextItem*>(pImo);
-            m_pCurEngrouter = create_next_text_engrouter_for(pText, maxSpace);
+            pEngr = create_next_text_engrouter_for(pText, maxSpace, fFirstOfLine);
             LOMSE_LOG_TRACE(Logger::k_layout, str(boost::format(
                 "Text item [%s]") % pText->get_text() ));
         }
         else if (pImo->is_box_inline())
         {
             ImoBoxInline* pIB = static_cast<ImoBoxInline*>(pImo);
-            m_pCurEngrouter = create_wrapper_engrouter_for(pIB, maxSpace);
+            pEngr = create_wrapper_engrouter_for(pIB, maxSpace);
         }
 
         //atomic content objects
         else
         {
-            m_pCurEngrouter = create_engrouter_for(pImo);
+            pEngr = create_engrouter_for(pImo);
             ++m_itCurContent;
         }
 
-        if (m_pCurEngrouter)
-            m_pCurEngrouter->measure();
+        if (pEngr)
+            pEngr->measure();
     }
     else
     {
-        LOMSE_LOG_TRACE(Logger::k_layout, "EngroutersCreator already exists.");
+        LOMSE_LOG_TRACE(Logger::k_layout, "A pending engrouter exists.");
+        pEngr = get_pending_engrouter();
     }
 
-    if (m_pCurEngrouter)
+    if (pEngr)
     {
-        LUnits width = m_pCurEngrouter->get_width();
+        LUnits width = pEngr->get_width();
 
         if (width <= maxSpace)
-        {
-            Engrouter* pEngr = m_pCurEngrouter;
-            m_pCurEngrouter = NULL;
             return pEngr;
-        }
         else
         {
             LOMSE_LOG_TRACE(Logger::k_layout, str(boost::format(
-                "Not enough space. Needed=%.02f, available=%.02f")
+                "Not enough space for engrouter. Needed=%.02f, available=%.02f")
                 % width % maxSpace ));
+            save_engrouter_for_next_call(pEngr);
             return NULL;
         }
     }
     else
     {
-        LOMSE_LOG_TRACE(Logger::k_layout, "EngroutersCreator not created!");
+        LOMSE_LOG_TRACE(Logger::k_layout, "Error: Engrouter not created!");
         return NULL;
     }
 }
@@ -189,7 +188,7 @@ Engrouter* EngroutersCreator::create_wrapper_engrouter_for(ImoBoxInline* pIB,
 
 //---------------------------------------------------------------------------------------
 void EngroutersCreator::create_engrouters_for_box_content(ImoBoxInline* pImo,
-                                                           BoxEngrouter* pBoxEngr)
+                                                          BoxEngrouter* pBoxEngr)
 {
     //recursive. Need to create a new EngroutersCreator
 
@@ -197,7 +196,7 @@ void EngroutersCreator::create_engrouters_for_box_content(ImoBoxInline* pImo,
 
     while (creator.more_content())
     {
-        Engrouter* pEngr = creator.create_next_engrouter(10000000.0f /*a lot of available space so that all contents fit in box */);
+        Engrouter* pEngr = creator.create_next_engrouter(10000000.0f /*a lot of available space so that all contents fit in box */, false);
         if (pEngr)
             pBoxEngr->add_engrouter(pEngr);
     }
@@ -207,28 +206,30 @@ void EngroutersCreator::create_engrouters_for_box_content(ImoBoxInline* pImo,
 
 //---------------------------------------------------------------------------------------
 Engrouter* EngroutersCreator::create_next_text_engrouter_for(ImoTextItem* pText,
-                                                             LUnits maxSpace)
+                                                             LUnits maxSpace,
+                                                             bool fFirstOfLine)
 {
     if (m_pCurText != pText)
-        return first_text_engrouter_for(pText, maxSpace);
+        return first_text_engrouter_for(pText, maxSpace, fFirstOfLine);
     else
-        return next_text_engouter(maxSpace);
+        return next_text_engouter(maxSpace, fFirstOfLine);
 }
 
 //---------------------------------------------------------------------------------------
 Engrouter* EngroutersCreator::first_text_engrouter_for(ImoTextItem* pText,
-                                                       LUnits maxSpace)
+                                                       LUnits maxSpace,
+                                                       bool fFirstOfLine)
 {
     m_pCurText = pText;
     delete m_pTextSplitter;
     m_pTextSplitter = create_text_splitter_for(pText);
-    return next_text_engouter(maxSpace);
+    return next_text_engouter(maxSpace, fFirstOfLine);
 }
 
 //---------------------------------------------------------------------------------------
-Engrouter* EngroutersCreator::next_text_engouter(LUnits maxSpace)
+Engrouter* EngroutersCreator::next_text_engouter(LUnits maxSpace, bool fFirstOfLine)
 {
-    Engrouter* pEngr = m_pTextSplitter->get_next_text_engrouter(maxSpace);
+    Engrouter* pEngr = m_pTextSplitter->get_next_text_engrouter(maxSpace, fFirstOfLine);
     if (!m_pTextSplitter->more_text())
         ++m_itCurContent;
     return pEngr;
@@ -583,6 +584,12 @@ GmoObj* WordEngrouter::create_gm_object(UPoint pos, LineReferences& refs)
 
     return LOMSE_NEW GmoShapeWord(m_pCreatorImo, 0, m_text, m_pStyle,
                             m_language, pos.x, pos.y, m_halfLeading, m_libraryScope);
+}
+
+//---------------------------------------------------------------------------------------
+bool WordEngrouter::text_has_space_at_end()
+{
+    return L' ' == *(m_text.rbegin());      //use m_text.back() in C++11
 }
 
 

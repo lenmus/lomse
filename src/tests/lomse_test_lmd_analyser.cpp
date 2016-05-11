@@ -6967,6 +6967,52 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LmdAnalyserTestFixture, TextItem_whitespace_collapsed)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text("<txt> This is a         text        </txt>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_text_item() == true );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
+        CHECK( pText != NULL );
+        CHECK( pText->get_text() == " This is a text " );
+        //cout << "result: \"" << pText->get_text() << "\"";
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, TextItem_whitespace_normal)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text("<txt> This is a\n         text\nwith newlines\n        </txt>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root()->is_text_item() == true );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pIModel->get_root() );
+        CHECK( pText != NULL );
+        CHECK( pText->get_text() == " This is a text with newlines " );
+        //cout << "result: \"" << pText->get_text() << "\"" << endl;
+
+        delete pIModel;
+    }
+
     // para -----------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, paragraph_creation)
@@ -7030,6 +7076,30 @@ SUITE(LmdAnalyserTest)
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "This is a paragraph" );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, Paragraph_anonymous_text_whitespace)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text("<para>\n      This is a\n      paragraph\n       </para>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pIModel->get_root() );
+        CHECK( pPara->get_num_items() == 1 );
+        ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
+        CHECK( pItem->get_text() == " This is a paragraph " );
+        //cout << "7102-result: \"" << pItem->get_text() << "\"" << endl;
 
         delete pIModel;
     }
@@ -8362,6 +8432,34 @@ SUITE(LmdAnalyserTest)
         CHECK( pAB->get_num_items() == 1 );
         ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
         CHECK( pText->get_text() == "This is a cell" );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, tableCell_whitespace)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text(
+            "<tableCell>\n    This is\n   a cell\n    </tableCell>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoTableCell* pCell = dynamic_cast<ImoTableCell*>( pIModel->get_root() );
+        CHECK( pCell->is_table_cell() == true );
+        CHECK( pCell->get_num_content_items() == 1 );
+        ImoAnonymousBlock* pAB = dynamic_cast<ImoAnonymousBlock*>( pCell->get_content_item(0) );
+        CHECK( pAB->get_num_items() == 1 );
+        ImoTextItem* pText = dynamic_cast<ImoTextItem*>( pAB->get_first_item() );
+        CHECK( pText->get_text() == " This is a cell " );
+        //cout << "8462-result: \"" << pText->get_text() << "\"" << endl;
 
         delete pIModel;
     }

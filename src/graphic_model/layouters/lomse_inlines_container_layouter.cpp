@@ -148,20 +148,32 @@ void InlinesContainerLayouter::prepare_line()
                                           % m_availableSpace ));
 
     bool fSomethingAdded = false;
+    bool fFirstEngrouterOfLine = true;
+    Engrouter* pEngr = NULL;
     while (space_in_line() && !fBreak)
     {
-        Engrouter* pEngr = create_next_engrouter();
+        bool fRemoveLeftSpace = fFirstEngrouterOfLine;
+        if (pEngr)
+        {
+            WordEngrouter* pWE = dynamic_cast<WordEngrouter*>(pEngr);
+            if (pWE)
+                fRemoveLeftSpace |= pWE->text_has_space_at_end();
+        }
+
+        pEngr = create_next_engrouter(fRemoveLeftSpace);
+
         if (pEngr)
         {
             add_engrouter_to_line(pEngr);
             fBreak = pEngr->break_requested();
             fSomethingAdded = true;
+            fFirstEngrouterOfLine = false;
         }
         else
         {
             if (!fSomethingAdded)
             {
-                LOMSE_LOG_TRACE(Logger::k_layout, "No engrouter created.");
+                LOMSE_LOG_TRACE(Logger::k_layout, "Line empty! No engrouter created.");
             }
             break;
         }
@@ -169,11 +181,12 @@ void InlinesContainerLayouter::prepare_line()
 }
 
 //---------------------------------------------------------------------------------------
-Engrouter* InlinesContainerLayouter::create_next_engrouter()
+Engrouter* InlinesContainerLayouter::create_next_engrouter(bool fRemoveLeftSpace)
 {
     if (logger.debug_mode_enabled() || logger.trace_mode_enabled())
     {
-        Engrouter* pEngr = m_pEngrCreator->create_next_engrouter(m_availableSpace);
+        Engrouter* pEngr = m_pEngrCreator->create_next_engrouter(m_availableSpace,
+                                                                 fRemoveLeftSpace);
         if (pEngr)
         {
             LOMSE_LOG_DEBUG(Logger::k_layout, "Engrouter created");
@@ -185,7 +198,7 @@ Engrouter* InlinesContainerLayouter::create_next_engrouter()
         return pEngr;
     }
     else
-        return m_pEngrCreator->create_next_engrouter(m_availableSpace);
+        return m_pEngrCreator->create_next_engrouter(m_availableSpace, fRemoveLeftSpace);
 }
 
 //---------------------------------------------------------------------------------------

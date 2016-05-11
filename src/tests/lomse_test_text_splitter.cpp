@@ -131,7 +131,7 @@ SUITE(DefaultTextSplitterTest)
         ImoTextItem* pText = prepare_test(doc, "This is a paragraph");
         DefaultTextSplitter splitter(pText, m_libraryScope);
 
-        Engrouter* pEngr = splitter.get_next_text_engrouter(1000.0f);
+        Engrouter* pEngr = splitter.get_next_text_engrouter(1000.0f, false);
 
         CHECK( pEngr != NULL );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
@@ -150,9 +150,9 @@ SUITE(DefaultTextSplitterTest)
         ImoTextItem* pText = prepare_test(doc, "This is a paragraph");
         DefaultTextSplitter splitter(pText, m_libraryScope);
 
-        Engrouter* pEngr = splitter.get_next_text_engrouter(1000.0f);
+        Engrouter* pEngr = splitter.get_next_text_engrouter(1000.0f, false);
         delete pEngr;
-        pEngr = splitter.get_next_text_engrouter(6000.0f);
+        pEngr = splitter.get_next_text_engrouter(6000.0f, false);
 
         CHECK( pEngr != NULL );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
@@ -171,13 +171,13 @@ SUITE(DefaultTextSplitterTest)
         ImoTextItem* pText = prepare_test(doc, "This is a paragraph");
         DefaultTextSplitter splitter(pText, m_libraryScope);
 
-        Engrouter* pEngr = splitter.get_next_text_engrouter(1000.0f);
+        Engrouter* pEngr = splitter.get_next_text_engrouter(1000.0f, false);
         delete pEngr;
-        pEngr = splitter.get_next_text_engrouter(6000.0f);
+        pEngr = splitter.get_next_text_engrouter(6000.0f, false);
         delete pEngr;
         CHECK( splitter.more_text() == false );
 
-        pEngr = splitter.get_next_text_engrouter(6000.0f);
+        pEngr = splitter.get_next_text_engrouter(6000.0f, false);
         CHECK( pEngr != NULL );
         NullEngrouter* pEngrouter = dynamic_cast<NullEngrouter*>( pEngr );
         CHECK( pEngrouter != NULL );
@@ -194,7 +194,7 @@ SUITE(DefaultTextSplitterTest)
 
         CHECK( splitter.more_text() == false );
 
-        Engrouter* pEngr = splitter.get_next_text_engrouter(1000.0f);
+        Engrouter* pEngr = splitter.get_next_text_engrouter(1000.0f, false);
         CHECK( pEngr != NULL );
         NullEngrouter* pEngrouter = dynamic_cast<NullEngrouter*>( pEngr );
         CHECK( pEngrouter != NULL );
@@ -209,7 +209,7 @@ SUITE(DefaultTextSplitterTest)
         ImoTextItem* pText = prepare_test(doc, "This   is a paragraph");
         DefaultTextSplitter splitter(pText, m_libraryScope);
 
-        Engrouter* pEngr = splitter.get_next_text_engrouter(1000.0f);
+        Engrouter* pEngr = splitter.get_next_text_engrouter(1000.0f, false);
 
         CHECK( pEngr != NULL );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
@@ -220,7 +220,7 @@ SUITE(DefaultTextSplitterTest)
         CHECK( splitter.more_text() == true );
         delete pEngr;
 
-        pEngr = splitter.get_next_text_engrouter(6000.0f);
+        pEngr = splitter.get_next_text_engrouter(6000.0f, false);
 
         CHECK( pEngr != NULL );
         pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
@@ -239,7 +239,7 @@ SUITE(DefaultTextSplitterTest)
         ImoTextItem* pText = prepare_test(doc, "Hello world!");
         DefaultTextSplitter splitter(pText, m_libraryScope);
 
-        Engrouter* pEngr = splitter.get_next_text_engrouter(1000.0f);
+        Engrouter* pEngr = splitter.get_next_text_engrouter(1000.0f, false);
 
         CHECK( pEngr != NULL );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
@@ -334,7 +334,7 @@ SUITE(ChineseTextSplitterTest)
         ImoTextItem* pText = prepare_test(doc, "编辑名称，缩写，MIDI设置和其他特性");
         ChineseTextSplitter splitter(pText, m_libraryScope);
 
-        Engrouter* pEngr = splitter.get_next_text_engrouter(2600.0f);
+        Engrouter* pEngr = splitter.get_next_text_engrouter(2600.0f, false);
 
         CHECK( pEngr != NULL );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
@@ -354,11 +354,11 @@ SUITE(ChineseTextSplitterTest)
         ImoTextItem* pText = prepare_test(doc, "编辑名称，缩写，MIDI设置和其他特性");
         ChineseTextSplitter splitter(pText, m_libraryScope);
 
-        Engrouter* pEngr = splitter.get_next_text_engrouter(2600.0f);
+        Engrouter* pEngr = splitter.get_next_text_engrouter(2600.0f, false);
         CHECK( splitter.more_text() == true );
         delete pEngr;
 
-        pEngr = splitter.get_next_text_engrouter(10000.0f);
+        pEngr = splitter.get_next_text_engrouter(10000.0f, false);
         CHECK( pEngr != NULL );
         WordEngrouter* pEngrouter = dynamic_cast<WordEngrouter*>( pEngr );
         CHECK( pEngrouter != NULL );
@@ -376,13 +376,13 @@ SUITE(ChineseTextSplitterTest)
         ImoTextItem* pText = prepare_test(doc, "编辑名称，缩写，MIDI设置和其他特性");
         ChineseTextSplitter splitter(pText, m_libraryScope);
 
-        Engrouter* pEngr = splitter.get_next_text_engrouter(2600.0f);
+        Engrouter* pEngr = splitter.get_next_text_engrouter(2600.0f, false);
         delete pEngr;
-        pEngr = splitter.get_next_text_engrouter(10000.0f);
+        pEngr = splitter.get_next_text_engrouter(10000.0f, false);
         delete pEngr;
         CHECK( splitter.more_text() == false );
 
-        pEngr = splitter.get_next_text_engrouter(5000.0f);
+        pEngr = splitter.get_next_text_engrouter(5000.0f, false);
         CHECK( pEngr == NULL );
         CHECK( splitter.more_text() == false );
         delete pEngr;

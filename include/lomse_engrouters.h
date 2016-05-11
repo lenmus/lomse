@@ -220,6 +220,7 @@ public:
     //info
     inline LUnits get_descent() { return m_descent; }
     inline LUnits get_ascent() { return m_ascent; }
+    bool text_has_space_at_end();
 };
 
 
@@ -307,9 +308,11 @@ protected:
     TreeNode<ImoObj>::children_iterator m_itEndContent;
 
     //helper:
-    ImoTextItem* m_pCurText;    //current text item being processed
-    Engrouter* m_pCurEngrouter;
-    TextSplitter* m_pTextSplitter;
+    TextSplitter* m_pTextSplitter;  //text splitter for current ImoTextItem
+    ImoTextItem* m_pCurText;        //current text item being processed
+    Engrouter* m_pPendingEngr;      //next engrouter to add. It was created in previous
+                                    //invocation to create_next_engrouter() but could not
+                                    //be added to line because not enough space.
 
 public:
     EngroutersCreator(LibraryScope& libraryScope,
@@ -317,7 +320,7 @@ public:
                       TreeNode<ImoObj>::children_iterator itEnd);
     virtual ~EngroutersCreator();
 
-    Engrouter* create_next_engrouter(LUnits maxSpace);
+    Engrouter* create_next_engrouter(LUnits maxSpace, bool fFirstOfLine);
     bool more_content();
 
     Engrouter* create_prefix_engrouter(ImoInlinesContainer* pBoxContent,
@@ -325,13 +328,25 @@ public:
 
 protected:
     Engrouter* create_engrouter_for(ImoInlineLevelObj* pImo);
-    Engrouter* create_next_text_engrouter_for(ImoTextItem* pText, LUnits maxSpace);
-    Engrouter* first_text_engrouter_for(ImoTextItem* pText, LUnits maxSpace);
-    Engrouter* next_text_engouter(LUnits maxSpace);
+    Engrouter* create_next_text_engrouter_for(ImoTextItem* pText, LUnits maxSpace,
+                                              bool fFirstOfLine);
+    Engrouter* first_text_engrouter_for(ImoTextItem* pText, LUnits maxSpace,
+                                        bool fFirstOfLine);
+    Engrouter* next_text_engouter(LUnits maxSpace, bool fFirstOfLine);
     Engrouter* create_wrapper_engrouter_for(ImoBoxInline* pIB, LUnits maxSpace);
     void create_engrouters_for_box_content(ImoBoxInline* pImo, BoxEngrouter* pBox);
     void layout_engrouters_in_engrouterbox_and_measure(BoxEngrouter* pBox);
     TextSplitter* create_text_splitter_for(ImoTextItem* pText);
+
+    //helper
+    inline bool is_there_a_pending_engrouter() { return m_pPendingEngr != NULL; }
+    inline void save_engrouter_for_next_call(Engrouter* pEngr) { m_pPendingEngr = pEngr; }
+    inline Engrouter* get_pending_engrouter()
+    {
+        Engrouter* pEngr = m_pPendingEngr;
+        m_pPendingEngr = NULL;
+        return pEngr;
+    }
 
 };
 
