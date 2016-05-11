@@ -104,6 +104,9 @@ public:
 
     ptrdiff_t offset();
 
+protected:
+    string normalize_value(string str);
+
 };
 
 //---------------------------------------------------------------------------------------

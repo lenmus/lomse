@@ -134,7 +134,6 @@ class ImoTupletDto;
 class ImoTuplet;
 class ImoWrapperBox;
 
-class DtoObj;
 
 //---------------------------------------------------------------------------------------
 // some helper defines
@@ -596,7 +595,7 @@ private:
 
 
 //=======================================================================================
-// InternalModel: A container for the objects forming the internal model
+// InternalModel: A container for the root of the internal model
 //=======================================================================================
 
 class InternalModel
@@ -610,7 +609,6 @@ public:
 
     //getters
     inline ImoObj* get_root() { return m_pRoot; }
-    ImoObj* get_pointer_to_imo(ImoId id);
 
 };
 
