@@ -3895,7 +3895,6 @@ public:
         while (get_optional("credit"));
 
         // add default styles
-        //TODO: review if this is necessary
         add_default(pImoDoc);
 
         // <part-list>

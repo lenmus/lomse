@@ -142,16 +142,16 @@ public:
     void create_document_1()
     {
         //"(lenmusdoc#0 (vers 0.0) (content#3 "
-        //    "(score#4 (vers 2.0) "
-        //        "(instrument#19 (musicData#20 (clef#21 G)(key#22 C)"
-        //        "(time#23 2 4)(n#24 c4 q)(r#25 q) )))"
-        //    "(para#26 (txt#27 \"Hello world!\"))"
+        //    "(score#94 (vers 2.0) "
+        //        "(instrument#119 (musicData#120 (clef#121 G)(key#122 C)"
+        //        "(time#123 2 4)(n#124 c4 q)(r#125 q) )))"
+        //    "(para#126 (txt#127 \"Hello world!\"))"
         //"))"
 
         m_pDoc = LOMSE_NEW Document(m_libraryScope);
         m_pDoc->from_string("(lenmusdoc (vers 0.0) (content "
-            "(score (vers 2.0) "
-                "(instrument (musicData (clef G)(key C)(time 2 4)(n c4 q)(r q) )))"
+            "(score#94 (vers 2.0) "
+                "(instrument#119 (musicData (clef G)(key C)(time 2 4)(n c4 q)(r q) )))"
             "(para (txt \"Hello world!\"))"
             "))" );
     }
@@ -372,12 +372,12 @@ SUITE(DocumentTest)
     {
         //110. get_pointer_to_imo() locates the imo
         Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
+        doc.from_string("(lenmusdoc (vers 0.0) (content#100 (score (vers 1.6) "
             "(instrument (musicData (n c4 q))))))");
 //        cout << doc.to_string(k_save_ids) << endl;
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         CHECK( pScore != NULL );
-        CHECK( doc.get_pointer_to_imo(4L) == pScore );
+        CHECK( doc.get_pointer_to_imo(101L) == pScore );
     }
 
 //    TEST_FIXTURE(DocumentTestFixture, id_assigner_111)
@@ -435,26 +435,26 @@ SUITE(DocumentTest)
     {
         //211. replace object from checkpoint data
         create_document_1();
-        ImoObj* pImo = m_pDoc->get_pointer_to_imo(23L);
+        ImoObj* pImo = m_pDoc->get_pointer_to_imo(121L);
         CHECK( pImo->is_clef() );
         string data =
             "<ldpmusic>"
-            "(score#4 (vers 2.0)(instrument#21 (musicData#22 (n#43 c4 q) )))"
+            "(score#180 (vers 2.0)(instrument#221 (musicData#222 (n#243 c4 q) )))"
             "</ldpmusic>";
 
-        m_pDoc->replace_object_from_checkpoint_data(4L, data);
+        m_pDoc->replace_object_from_checkpoint_data(94L, data);
 
-        //"(lenmusdoc#0 (vers 0.0) (content#3 "
-        //    "(score#4 (vers 2.0) "
-        //        "(instrument#20 (musicData#21 (clef#22 G)(key#23 C)"
-        //        "(time#24 2 4)(n#25 c4 q)(r#26 q) )))"
-        //    "(para#27 (txt#28 \"Hello world!\"))"
+        //"(lenmusdoc#0 (vers 0.0) (content "
+        //    "(score#94 (vers 2.0) "
+        //        "(instrument#120 (musicData#121 (clef#122 G)(key#123 C)"
+        //        "(time#124 2 4)(n#125 c4 q)(r#126 q) )))"
+        //    "(para#127 (txt#128 \"Hello world!\"))"
         //"))"
 
         //cout << m_pDoc->get_checkpoint_data();
-        pImo = m_pDoc->get_pointer_to_imo(23L);
+        pImo = m_pDoc->get_pointer_to_imo(121L);
         CHECK( pImo == NULL );
-        pImo = m_pDoc->get_pointer_to_imo(43L);
+        pImo = m_pDoc->get_pointer_to_imo(243L);
         CHECK( pImo->is_note() );
     }
 

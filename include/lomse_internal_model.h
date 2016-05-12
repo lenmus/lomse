@@ -3947,7 +3947,7 @@ public:
 
 protected:
     void delete_text_styles();
-    ImoStyle* create_default_styles();
+    void create_default_styles();
 
  	friend class StylesLmdGenerator;
  	inline std::map<std::string, ImoStyle*>& get_styles_collection() { return m_nameToStyle; }
