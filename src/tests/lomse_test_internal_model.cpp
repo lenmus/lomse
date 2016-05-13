@@ -976,6 +976,22 @@ SUITE(InternalModelTest)
         CHECK( is_equal( pStyle->margin_bottom(), 300.0f ) );
     }
 
+    TEST_FIXTURE(InternalModelTestFixture, ObjectHasNoStyle)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0)(content "
+            "(para (txt \"hello\")) ))" );
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoContent* pContent = pDoc->get_content();
+        TreeNode<ImoObj>::children_iterator it = pContent->begin();
+        CHECK( (*it)->is_paragraph() == true );
+        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(*it);
+        ImoObj* pTxt = pImo->get_child(0);
+        CHECK( pTxt->is_text_item() );
+        ImoStyle* pStyle = static_cast<ImoTextItem*>(pTxt)->get_style(false);
+        CHECK( pStyle == NULL );
+    }
+
     TEST_FIXTURE(InternalModelTestFixture, ObjectInheritsParentStyle)
     {
         Document doc(m_libraryScope);

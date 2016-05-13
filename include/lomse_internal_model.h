@@ -400,47 +400,67 @@ class ImoWrapperBox;
 
             //ImoDto (A)
             k_imo_dto,
+                k_imo_beam_dto,
+                k_imo_border_dto,
+                k_imo_color_dto,
                 k_imo_font_style_dto,
+                k_imo_point_dto,
+                k_imo_size_dto,
+                k_imo_slur_dto,
+                k_imo_tie_dto,
                 k_imo_time_modification_dto,
+                k_imo_tuplet_dto,
             k_imo_dto_last,
 
             // ImoSimpleObj (A)
             k_imo_simpleobj,
-                k_imo_beam_dto, k_imo_bezier_info, k_imo_border_dto,
-                k_imo_textblock_info,
-                k_imo_color_dto, k_imo_cursor_info, k_imo_figured_bass_info,
+
+                // value objects, never nodes in tree
+                k_imo_bezier_info,
+                k_imo_cursor_info,
+                k_imo_figured_bass_info,
                 k_imo_instr_group,
-                k_imo_line_style, k_imo_lyrics_text_info, k_imo_lyrics_extend_info,
-                k_imo_midi_info, k_imo_option, k_imo_page_info,
-                k_imo_param_info, k_imo_point_dto,
-                k_imo_size_dto, k_imo_slur_dto, k_imo_staff_info, k_imo_system_info,
+                k_imo_line_style,
+                k_imo_lyrics_text_info,
+                k_imo_lyrics_extend_info,
+                k_imo_midi_info,
+                k_imo_page_info,
+                k_imo_staff_info,
+                k_imo_system_info,
                 k_imo_text_info,
-                k_imo_text_style, k_imo_style,
-                k_imo_tie_dto, k_imo_tuplet_dto,
+                k_imo_textblock_info,
+                k_imo_text_style,
+
+                // nodes in tree
+                k_imo_option,
+                k_imo_param_info,
+                k_imo_style,
+
+                // ImoRelDataObj (A)
+                k_imo_reldataobj,
+                    k_imo_beam_data, k_imo_lyrics_data, k_imo_slur_data,
+                    k_imo_tie_data, k_imo_tuplet_data,
+                k_imo_reldataobj_last,
+
+                //ImoCollection(A)
+                k_imo_collection,
+                    k_imo_attachments,
+                    k_imo_instruments,
+                    k_imo_instrument_groups, k_imo_music_data, k_imo_options,
+                    k_imo_table_head, k_imo_table_body,
+                k_imo_collection_last,
+
+                // Special collections
+                k_imo_styles,
+                k_imo_relations,
+
+                // ImoContainerObj (A)
+                k_imo_containerobj,
+                    k_imo_instrument,
+                k_imo_containerobj_last,
+
             k_imo_simpleobj_last,
 
-            // ImoRelDataObj (A)
-            k_imo_reldataobj,
-                k_imo_beam_data, k_imo_lyrics_data, k_imo_slur_data,
-                k_imo_tie_data, k_imo_tuplet_data,
-            k_imo_reldataobj_last,
-
-            //ImoCollection(A)
-            k_imo_collection,
-                k_imo_attachments,
-                k_imo_instruments,
-                k_imo_instrument_groups, k_imo_music_data, k_imo_options,
-                k_imo_table_head, k_imo_table_body,
-            k_imo_collection_last,
-
-            // Special collections
-            k_imo_styles,
-            k_imo_relations,
-
-            // ImoContainerObj (A)
-            k_imo_containerobj,
-                k_imo_instrument,
-            k_imo_containerobj_last,
 
             // ImoContentObj (A)
             k_imo_contentobj,
@@ -1550,7 +1570,8 @@ public:
                            void (*pt2Func)(SpEventInfo event) );
 
     //style
-    virtual ImoStyle* get_style();
+    virtual ImoStyle* get_style(bool fInherit=true);
+    ImoStyle* get_inherited_style();
     ImoStyle* copy_style_as(const std::string& name);
     void set_style(ImoStyle* pStyle);
 

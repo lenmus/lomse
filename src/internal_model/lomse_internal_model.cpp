@@ -1642,11 +1642,20 @@ ImoAuxObj* ImoContentObj::find_attachment(int type)
 }
 
 //---------------------------------------------------------------------------------------
-ImoStyle* ImoContentObj::get_style()
+ImoStyle* ImoContentObj::get_style(bool fInherit)
 {
     if (m_pStyle)
         return m_pStyle;
 
+    if (fInherit)
+        return get_inherited_style();
+
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
+ImoStyle* ImoContentObj::get_inherited_style()
+{
     string name;
     switch(get_obj_type())
     {
@@ -1665,7 +1674,7 @@ ImoStyle* ImoContentObj::get_style()
             break;
 
         default:
-            ImoContentObj* pParent = dynamic_cast<ImoContentObj*>( get_parent() );
+            ImoContentObj* pParent = dynamic_cast<ImoContentObj*>( get_contentobj_parent() );
             if (pParent)
                 return pParent->get_style();
             else if (this->is_document())

@@ -7300,6 +7300,32 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
+    TEST_FIXTURE(LmdAnalyserTestFixture, Paragraph_NoStyle)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text("<lenmusdoc vers='0.0'><content>"
+            "<para>Hello world!</para></content></lenmusdoc>");
+        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
+        CHECK( pPara != NULL );
+        ImoStyle* pStyle = pPara->get_style(false);
+        CHECK( pStyle == NULL );
+
+        delete pIModel;
+    }
+
     // section --------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Section_Creation)
