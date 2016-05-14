@@ -1,13 +1,13 @@
 (score
-   (vers 1.5)(language en iso-8859-1)
+   (vers 2.0)
 
-   (title center "One instrument, two staves" (font bold 14))
-   (title center "Single voice across both staves" (font italic 12))
+   //(title center "One instrument, two staves" (font bold 14))
+   //(title center "Single voice across both staves" (font italic 12))
 
    (instrument (staves 2)
       (musicData 
-            (clef treble p1)   //sol clef in staff 1
-            (clef bass p2)     //fa4 clef in staff 2
+            (clef G p1)   //sol clef in staff 1
+            (clef F4 p2)     //fa4 clef in staff 2
             (key A-)
             (time 2 4)
             (n g2 e g+ p2)(n d3 e)(n g3 e)(n b3 e g-)   //first note in staff 2. All coming notes also in staff 1 while not changed

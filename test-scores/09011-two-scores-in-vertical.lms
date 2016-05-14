@@ -1,28 +1,28 @@
 (lenmusdoc (vers 0.0) (content
     (score
-       (vers 1.6)(language en utf-8)
+       (vers 2.0)
        (opt Render.SpacingMethod 1)
        (opt Render.SpacingValue 30)
        (instrument (staves 1)
           (musicData
              (clef G)
-             (n a4 w v1)
-             (n a4 h v1)
-             (n a4 h v1)
-             (n a4 q v1)
-             (n a4 q v1)
-             (n a4 e g+ v1)
-             (n a4 e g- v1)
-             (n a4 s g+ v1)
-             (n a4 s g- v1)
-             (n a4 t g+ v1)
-             (n a4 t g- v1)
+             (n a4 w)
+             (n a4 h)
+             (n a4 h)
+             (n a4 q)
+             (n a4 q)
+             (n a4 e g+)
+             (n a4 e g-)
+             (n a4 s g+)
+             (n a4 s g-)
+             (n a4 t g+)
+             (n a4 t g-)
           )
        )
     )
     
     (score
-       (vers 1.6)
+       (vers 2.0)
        (instrument
           (musicData
              (clef G)

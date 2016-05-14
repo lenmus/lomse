@@ -93,7 +93,7 @@
             (chord (n d4 e (beam 17 -))(n g4 e))
             (chord (n c5 e (beam 18 +))(n f5 e))
             (chord (n d5 e (beam 18 -))(n g5 e))
-            (barline -)
+            (barline end)
 
         )
     )
