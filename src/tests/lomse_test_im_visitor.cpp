@@ -214,7 +214,7 @@ SUITE(ImVisitorTest)
 //             << ", num_in_nodes=" << v.num_in_nodes()
 //             << ", num_out_nodes=" << v.num_out_nodes() << endl;
         CHECK( v.max_depth() == 3 );
-        CHECK( v.num_in_nodes() == 4 );
+        CHECK( v.num_in_nodes() == 12 );
         CHECK( v.num_out_nodes() == v.num_in_nodes() );
     }
 
@@ -227,11 +227,11 @@ SUITE(ImVisitorTest)
         MyObjVisitor v(m_libraryScope);
         pRoot->accept_visitor(v);
 
-        //cout << "max_depth=" << v.max_depth()
-        //     << ", num_in_nodes=" << v.num_in_nodes()
-        //     << ", num_out_nodes=" << v.num_out_nodes() << endl;
+//        cout << "max_depth=" << v.max_depth()
+//             << ", num_in_nodes=" << v.num_in_nodes()
+//             << ", num_out_nodes=" << v.num_out_nodes() << endl;
         CHECK( v.max_depth() == 9 );
-        CHECK( v.num_in_nodes() == 91 );
+        CHECK( v.num_in_nodes() == 99 );
         CHECK( v.num_out_nodes() == v.num_in_nodes() );
     }
 

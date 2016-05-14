@@ -135,6 +135,7 @@ SUITE(LmdAnalyserTest)
 
     TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_parsed)
     {
+        ///1.lenmusdoc: parsed
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -159,6 +160,7 @@ SUITE(LmdAnalyserTest)
 
     TEST_FIXTURE(LmdAnalyserTestFixture, id_in_lenmusdoc)
     {
+        ///2.lenmusdoc: id parsed
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -180,6 +182,7 @@ SUITE(LmdAnalyserTest)
 
     TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_has_content)
     {
+        ///3.lenmusdoc: has content
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -203,6 +206,7 @@ SUITE(LmdAnalyserTest)
 
     TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_get_content_item)
     {
+        ///4.lenmusdoc: access to content
         Document doc(m_libraryScope);
         XmlParser parser;
         string src =
@@ -221,6 +225,7 @@ SUITE(LmdAnalyserTest)
 
     TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_missing_vers)
     {
+        ///5.lenmusdoc: no version error
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -243,6 +248,7 @@ SUITE(LmdAnalyserTest)
 
     TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_language)
     {
+        ///6.lenmusdoc: has language
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -261,6 +267,32 @@ SUITE(LmdAnalyserTest)
         CHECK( pDoc != NULL );
         CHECK( pDoc->get_num_content_items() == 0 );
         CHECK( pDoc->get_language() == "zh_CN" );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_7)
+    {
+        ///7.lenmusdoc: default styles created
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("<lenmusdoc vers='0.0' language='zh_CN'><content/></lenmusdoc>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        ImoStyle* pStyle = pDoc->find_style("Table");
+        CHECK( pStyle != NULL );
+        CHECK( pStyle->get_name() == "Table" );
 
         delete pIModel;
     }
@@ -7260,10 +7292,36 @@ SUITE(LmdAnalyserTest)
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != NULL );
         ImoStyle* pStyle = pPara->get_style();
-        CHECK( pStyle->get_name() == "Default style" );
+        CHECK( pStyle->get_name() == "Paragraph" );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, Paragraph_NoStyle)
+    {
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text("<lenmusdoc vers='0.0'><content>"
+            "<para>Hello world!</para></content></lenmusdoc>");
+        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
+
+        //cout << "[" << errormsg.str() << "]" << endl;
+        //cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
+        CHECK( pPara != NULL );
+        ImoStyle* pStyle = pPara->get_style(false);
+        CHECK( pStyle == NULL );
 
         delete pIModel;
     }

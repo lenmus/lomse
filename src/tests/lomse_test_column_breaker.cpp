@@ -92,11 +92,11 @@ SUITE(ColumnBreakerTest)
         //@ 101. one staff, with time signature: break after barlines
 
         Document doc(m_libraryScope);
-        //"(musicData (clef#23L G)(time#24L 2 4)(n#25L c4 q)(n#26L e4 q)(barline#27L)"
-        //"(n#28L d4 q)(n#29L g4 q)(barline#30L)"
-        //"(n#31L e4 q) ))) ))" );
+        //"(musicData (clef#123L G)(time#124L 2 4)(n#125L c4 q)(n#126L e4 q)(barline#127L)"
+        //"(n#128L d4 q)(n#129L g4 q)(barline#130L)"
+        //"(n#131L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
             "(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
@@ -109,14 +109,14 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_101" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 28L );
+        CHECK( soCursor.imo_object()->get_id() == 128L );
         CHECK( is_equal_time(soCursor.time(), 128.0f) );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 31L );
+        CHECK( soCursor.imo_object()->get_id() == 131L );
         CHECK( is_equal_time(soCursor.time(), 256.0f) );
     }
 
@@ -125,12 +125,12 @@ SUITE(ColumnBreakerTest)
         //@ 102. one staff, with time signature: don't break after middle barlines
 
         Document doc(m_libraryScope);
-        //(musicData (clef#23L G)(time#24L 4 4)(n#25L c4 q)(n#26L e4 q)
-        //(barline#27L simple middle)
-        //(n#28L d4 q)(n#29L g4 q)(barline#30L)"
-        //(n#31L e4 q) ))) ))" );
+        //(musicData (clef#123L G)(time#124L 4 4)(n#125L c4 q)(n#126L e4 q)
+        //(barline#127L simple middle)
+        //(n#128L d4 q)(n#129L g4 q)(barline#130L)"
+        //(n#131L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(time 4 4)(n c4 q)(n e4 q)"
+            "(instrument#121L (musicData (clef G)(time 4 4)(n c4 q)(n e4 q)"
             "(barline simple middle)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
@@ -143,7 +143,7 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_102" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 31L );
+        CHECK( soCursor.imo_object()->get_id() == 131L );
         CHECK( is_equal_time(soCursor.time(), 256.0f) );
 
     }
@@ -154,12 +154,12 @@ SUITE(ColumnBreakerTest)
         //@      At next barline if just one staffobj exceeded
 
         Document doc(m_libraryScope);
-        //(musicData (clef#23L G)(time#24L 2 4)(n#25L c4 q)(n#26L e4 q)(n#27L g4 q)
-        //(barline#28L)
-        //(n#29L d4 q)(n#30L g4 q)(barline#31L)"
-        //(n#32L e4 q) ))) ))" );
+        //(musicData (clef#123L G)(time#124L 2 4)(n#125L c4 q)(n#126L e4 q)(n#127L g4 q)
+        //(barline#128L)
+        //(n#129L d4 q)(n#130L g4 q)(barline#131L)"
+        //(n#132L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)"
+            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)"
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
@@ -172,14 +172,14 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_111" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 29L );
+        CHECK( soCursor.imo_object()->get_id() == 129L );
         CHECK( is_equal_time(soCursor.time(), 192.0f) );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 32L );
+        CHECK( soCursor.imo_object()->get_id() == 132L );
         CHECK( is_equal_time(soCursor.time(), 320.0f) );
 
     }
@@ -190,12 +190,12 @@ SUITE(ColumnBreakerTest)
         //@      Before suitable notes/rests. Isolated notes
 
         Document doc(m_libraryScope);
-        //(musicData (clef#23L G)(time#24L 2 4)(n#25L c4 q)(n#26L e4 q)(n#27L g4 q)
-        //(n#28L c5 q)(barline#29L)
-        //(n#30L d4 q)(n#31L g4 q)(barline#32L)"
-        //(n#33L e4 q) ))) ))" );
+        //(musicData (clef#123L G)(time#124L 2 4)(n#125L c4 q)(n#126L e4 q)(n#127L g4 q)
+        //(n#128L c5 q)(barline#129L)
+        //(n#130L d4 q)(n#131L g4 q)(barline#132L)"
+        //(n#133L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)(n c5 q)"
+            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)(n c5 q)"
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
@@ -208,21 +208,21 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_112" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 28L );
+        CHECK( soCursor.imo_object()->get_id() == 128L );
         CHECK( is_equal_time(soCursor.time(), 192.0f) );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 30L );
+        CHECK( soCursor.imo_object()->get_id() == 130L );
         CHECK( is_equal_time(soCursor.time(), 256.0f) );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 33L );
+        CHECK( soCursor.imo_object()->get_id() == 133L );
         CHECK( is_equal_time(soCursor.time(), 384.0f) );
 
     }
@@ -233,12 +233,12 @@ SUITE(ColumnBreakerTest)
         //@      Before suitable notes/rests. Beamed notes
 
         Document doc(m_libraryScope);
-        //(musicData (clef#23L G)(time#24L 2 4)(n#25L c4 q)(n#26L e4 e)(n#27L g4 e)
-        //(n#28L c5 q)(barline#34L)
-        //(n#35L d4 q)(n#36L g4 q)(barline#37L)"
-        //(n#38L e4 q) ))) ))" );
+        //(musicData (clef#123L G)(time#124L 2 4)(n#125L c4 q)(n#126L e4 e)(n#127L g4 e)
+        //(n#128L c5 q)(barline#134L)
+        //(n#135L d4 q)(n#136L g4 q)(barline#137L)"
+        //(n#138L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)"
+            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)"
             "(n g4 e g+)(n c5 e g-)"
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
@@ -252,14 +252,14 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_113" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 35L );
+        CHECK( soCursor.imo_object()->get_id() == 135L );
         CHECK( is_equal_time(soCursor.time(), 192.0f) );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 38L );
+        CHECK( soCursor.imo_object()->get_id() == 138L );
         CHECK( is_equal_time(soCursor.time(), 320.0f) );
 
     }
@@ -270,12 +270,12 @@ SUITE(ColumnBreakerTest)
         //@      Before suitable notes/rests. Tied prev notes
 
         Document doc(m_libraryScope);
-        //(musicData (clef#23L G)(time#24L 2 4)(n#25L c4 q)(n#26L e4 q)(n#27L g4 e l+)
-        //(n#28L g4 e)(barline#34L)
-        //(n#35L d4 q)(n#36L g4 q)(barline#37L)"
-        //(n#38L e4 q) ))) ))" );
+        //(musicData (clef#123L G)(time#124L 2 4)(n#125L c4 q)(n#126L e4 q)(n#127L g4 e l+)
+        //(n#128L g4 e)(barline#134L)
+        //(n#135L d4 q)(n#136L g4 q)(barline#137L)"
+        //(n#138L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)"
+            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)"
             "(n g4 e l+)(n g4 e)"
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
@@ -289,14 +289,14 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_114" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 35L );
+        CHECK( soCursor.imo_object()->get_id() == 135L );
         CHECK( is_equal_time(soCursor.time(), 192.0f) );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 38L );
+        CHECK( soCursor.imo_object()->get_id() == 138L );
         CHECK( is_equal_time(soCursor.time(), 320.0f) );
 
     }
@@ -307,12 +307,12 @@ SUITE(ColumnBreakerTest)
         //@      Before suitable notes/rests. Rests
 
         Document doc(m_libraryScope);
-        //(musicData (clef#23L G)(time#24L 2 4)(n#25L c4 q)(n#26L e4 q)(n#27L g4 q)
-        //(r#28L q)(barline#29L)
-        //(n#30L d4 q)(n#31L g4 q)(barline#32L)"
-        //(n#33L e4 q) ))) ))" );
+        //(musicData (clef#123L G)(time#124L 2 4)(n#125L c4 q)(n#126L e4 q)(n#127L g4 q)
+        //(r#128L q)(barline#129L)
+        //(n#130L d4 q)(n#131L g4 q)(barline#132L)"
+        //(n#133L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)(r q)"
+            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(n g4 q)(r q)"
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
 
@@ -325,21 +325,21 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_115" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 28L );
+        CHECK( soCursor.imo_object()->get_id() == 128L );
         CHECK( is_equal_time(soCursor.time(), 192.0f) );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 30L );
+        CHECK( soCursor.imo_object()->get_id() == 130L );
         CHECK( is_equal_time(soCursor.time(), 256.0f) );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 33L );
+        CHECK( soCursor.imo_object()->get_id() == 133L );
         CHECK( is_equal_time(soCursor.time(), 384.0f) );
 
     }
@@ -350,13 +350,13 @@ SUITE(ColumnBreakerTest)
         //@ after middle barlines
 
         Document doc(m_libraryScope);
-        //(musicData (clef#23L G)(time#24L 2 4)(n#25L c4 q)(n#26L e4 q)
-        //(n#27L g4 q)(barline#28L simple middle)
-        //(n#29L c5 q)(barline#30L)
-        //(n#31L d4 q)(n#32L g4 q)(barline#33L)"
-        //(n#34L e4 q) ))) ))" );
+        //(musicData (clef#123L G)(time#124L 2 4)(n#125L c4 q)(n#126L e4 q)
+        //(n#127L g4 q)(barline#128L simple middle)
+        //(n#129L c5 q)(barline#130L)
+        //(n#131L d4 q)(n#132L g4 q)(barline#133L)"
+        //(n#134L e4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)"
+            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)"
             "(n g4 q)(barline simple middle)(n c5 q)"
             "(barline)(n d4 q)(n g4 q)(barline)"
             "(n e4 q) ))) ))" );
@@ -370,21 +370,21 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_116" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 29L );
+        CHECK( soCursor.imo_object()->get_id() == 129L );
         CHECK( is_equal_time(soCursor.time(), 192.0f) );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 31L );
+        CHECK( soCursor.imo_object()->get_id() == 131L );
         CHECK( is_equal_time(soCursor.time(), 256.0f) );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 34L );
+        CHECK( soCursor.imo_object()->get_id() == 134L );
         CHECK( is_equal_time(soCursor.time(), 384.0f) );
 
     }
@@ -395,12 +395,12 @@ SUITE(ColumnBreakerTest)
         //@      Before suitable notes/rests once measure duration exceeded
 
         Document doc(m_libraryScope);
-        //(musicData (clef#23L G)(time#24L 2 4)(n#25L c4 q)(n#26L e4 q)
-        //(barline#27L)
-        //(n#28L g4 q)(n#29L c5 q)(n#30L e4 e l+)
-        //(n#31L e4 q)(n#37L g4 e g+)(n#38L e4 e g-)(n#44L b4 q))) ))" );
+        //(musicData (clef#123L G)(time#124L 2 4)(n#125L c4 q)(n#126L e4 q)
+        //(barline#127L)
+        //(n#128L g4 q)(n#129L c5 q)(n#130L e4 e l+)
+        //(n#131L e4 q)(n#137L g4 e g+)(n#138L e4 e g-)(n#144L b4 q))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
+            "(instrument#121L (musicData (clef G)(time 2 4)(n c4 q)(n e4 q)(barline)"
             "(n g4 q)(n c5 q)(n e4 e l+)"
             "(n e4 q)(n g4 e g+)(n e4 e g-)(n b4 q)))) ))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
@@ -412,19 +412,19 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_131" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 28L );
+        CHECK( soCursor.imo_object()->get_id() == 128L );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 37L );
+        CHECK( soCursor.imo_object()->get_id() == 137L );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 44L );
+        CHECK( soCursor.imo_object()->get_id() == 144L );
 
     }
 
@@ -434,11 +434,11 @@ SUITE(ColumnBreakerTest)
         //@      Before suitable notes/rests
 
         Document doc(m_libraryScope);
-        //(musicData (clef#23L G)(n#24L c4 q)(n#25L e4 q)
-        //(n#26L g4 q)(n#27L c5 q)(n#28L e4 e l+)
-        //(n#29L e4 q)(n#35L g4 e g+)(n#36L e4 e g-)(n#42L b4 q))) ))" );
+        //(musicData (clef#123L G)(n#124L c4 q)(n#125L e4 q)
+        //(n#126L g4 q)(n#127L c5 q)(n#128L e4 e l+)
+        //(n#129L e4 q)(n#135L g4 e g+)(n#136L e4 e g-)(n#142L b4 q))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(n c4 q)(n e4 q)"
+            "(instrument#121L (musicData (clef G)(n c4 q)(n e4 q)"
             "(n g4 q)(n c5 q)(n e4 e l+)"
             "(n e4 q)(n g4 e g+)(n e4 e g-)(n b4 q)))) ))" );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
@@ -450,37 +450,37 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_201" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 25L );
+        CHECK( soCursor.imo_object()->get_id() == 125L );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 26L );
+        CHECK( soCursor.imo_object()->get_id() == 126L );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 27L );
+        CHECK( soCursor.imo_object()->get_id() == 127L );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 28L );
+        CHECK( soCursor.imo_object()->get_id() == 128L );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 35L );
+        CHECK( soCursor.imo_object()->get_id() == 135L );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 42L );
+        CHECK( soCursor.imo_object()->get_id() == 142L );
     }
 
     TEST_FIXTURE(ColumnBreakerTestFixture, column_breaker_301)
@@ -489,13 +489,13 @@ SUITE(ColumnBreakerTest)
         //@      Break only before objects that imply a new timepos
 
         Document doc(m_libraryScope);
-            //(clef#23L G p1)(clef#24L F4 p2)(time#25L 2 4)"
-            //(n#26L c4 q p1 v1)(n#27L e4 q)
-            //(n#28L c3 q p2 v2)(n#29L e3 q)(barline#30L)"
-            //(n#31L g4 q p1 v1)(n#32L c5 q)(n#33L e5 q)(n#34L g5 q)(n#35L c6 q)
-            //(n#36L e3 q p2 v2)(n#37L c4 q)(n#38L e4 q)(n#39L g4 q) ))) ))" );
+            //(clef#123L G p1)(clef#124L F4 p2)(time#125L 2 4)"
+            //(n#126L c4 q p1 v1)(n#127L e4 q)
+            //(n#128L c3 q p2 v2)(n#129L e3 q)(barline#130L)"
+            //(n#131L g4 q p1 v1)(n#132L c5 q)(n#133L e5 q)(n#134L g5 q)(n#135L c6 q)
+            //(n#136L e3 q p2 v2)(n#137L c4 q)(n#138L e4 q)(n#139L g4 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
-            "(instrument (staves 2) (musicData "
+            "(instrument#121L (staves 2) (musicData "
             "(clef G p1)(clef F4 p2)(time 2 4)"
             "(n c4 q p1 v1)(n e4 q)"
             "(n c3 q p2 v2)(n e3 q)(barline)"
@@ -510,19 +510,19 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_301" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 31L );
+        CHECK( soCursor.imo_object()->get_id() == 131L );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 34L );
+        CHECK( soCursor.imo_object()->get_id() == 134L );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 35L );
+        CHECK( soCursor.imo_object()->get_id() == 135L );
 
     }
 
@@ -532,15 +532,15 @@ SUITE(ColumnBreakerTest)
         //@      Do not split a note/rest in other voice
 
         Document doc(m_libraryScope);
-            //(clef#23L G p1)(clef#24L F4 p2)(time#25L 2 4)"
-            //(n#26L c4 q p1 v1)(n#27L e4 q)
-            //(n#28L c3 q p2 v2)(n#29L e3 q)(barline#30L)"
-            //(n#31L g4 q p1 v1)(n#32L c5 q)(n#33L e5 q)(n#34L g5 q)
-            //(n#35L c6 q)(n#36L b5 q)(n#37L a5 q)
-            //(n#38L e3 w p2 v2)(n#39L f3 h)"
-            //(n#40L a2 q p2 v3)(n#41L c3 q) ))) ))" );
+            //(clef#123L G p1)(clef#124L F4 p2)(time#125L 2 4)"
+            //(n#126L c4 q p1 v1)(n#127L e4 q)
+            //(n#128L c3 q p2 v2)(n#129L e3 q)(barline#130L)"
+            //(n#131L g4 q p1 v1)(n#132L c5 q)(n#133L e5 q)(n#134L g5 q)
+            //(n#135L c6 q)(n#136L b5 q)(n#137L a5 q)
+            //(n#138L e3 w p2 v2)(n#139L f3 h)"
+            //(n#140L a2 q p2 v3)(n#141L c3 q) ))) ))" );
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
-            "(instrument (staves 2) (musicData "
+            "(instrument#121L (staves 2) (musicData "
             "(clef G p1)(clef F4 p2)(time 2 4)"
             "(n c4 q p1 v1)(n e4 q)"
             "(n c3 q p2 v2)(n e3 q)(barline)"
@@ -557,19 +557,19 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_302" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 31L );
+        CHECK( soCursor.imo_object()->get_id() == 131L );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 35L );
+        CHECK( soCursor.imo_object()->get_id() == 135L );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 37L );
+        CHECK( soCursor.imo_object()->get_id() == 137L );
 
     }
 
@@ -580,7 +580,7 @@ SUITE(ColumnBreakerTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
-            "(instrument (staves 2) (musicData (clef G p1)(clef F4 p2)(key C)"
+            "(instrument#121L (staves 2) (musicData (clef G p1)(clef F4 p2)(key C)"
             "(n c4 e p1 v1 g+)(n d4 s p1)(n e4 s p1 g-)(n f4 s p1 g+)(n g4 s p1 g-)"
             "(n c4 s p1 g+)(n d4 s g-)(n e4 q)"
             "(n c3 q p2 v2)(n d3 s p2 g+)(n e3 s)(n f3 s)(n g3 s g-)"
@@ -595,13 +595,13 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_302" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 36L );
+        CHECK( soCursor.imo_object()->get_id() == 136L );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 50L );
+        CHECK( soCursor.imo_object()->get_id() == 150L );
     }
 
     TEST_FIXTURE(ColumnBreakerTestFixture, column_breaker_304)
@@ -611,7 +611,7 @@ SUITE(ColumnBreakerTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 2.0) "
-            "(instrument (staves 2) (musicData (clef G p1)(clef F4 p2)(key C)"
+            "(instrument#121L (staves 2) (musicData (clef G p1)(clef F4 p2)(key C)"
             "(n c4 e p1 v1 g+)(n d4 s p1)(n e4 s p1 g-)(n f4 s p1 g+)(n g4 s p1 g-)"
             "(n c4 s p1 g+)(n d4 s g-)(n e4 q)"
             "(n c3 q p2 v2)(n d3 e l+)(n d3 e)"
@@ -626,13 +626,13 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_302" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 36L );
+        CHECK( soCursor.imo_object()->get_id() == 136L );
 
         soCursor.move_next();
         find_next_break(breaker, soCursor);
 
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 50L );
+        CHECK( soCursor.imo_object()->get_id() == 150L );
     }
 
     TEST_FIXTURE(ColumnBreakerTestFixture, column_breaker_401)
@@ -642,7 +642,7 @@ SUITE(ColumnBreakerTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData (clef G)(key C)"
+            "(instrument#121L (musicData (clef G)(key C)"
             "(n c4 e g+)(n d4 e g-)(barline)(n e4 q) ))"
             "(instrument (musicData (clef F4)(key C)"
             "(n c3 q)(barline)(n d3 q) ))"
@@ -657,7 +657,7 @@ SUITE(ColumnBreakerTest)
 //        cout << "test: column_breaker_401" << endl;
 //        cout << pScore->get_staffobjs_table()->dump() << endl;
 //        cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 33L );
+        CHECK( soCursor.imo_object()->get_id() == 133L );
         CHECK( is_equal_time(soCursor.time(), 64.0f) );
     }
 
@@ -667,7 +667,7 @@ SUITE(ColumnBreakerTest)
 
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData "
+            "(instrument#121L (musicData "
             "(clef G)(key G)(time 3 4)(chord (n g3 q)(n d4 q))"
             "(r e)(n g5 e)(n g5 s g+)(n f5 s)(n g5 e g-)(barline)"
             "(r h.)(barline)"
@@ -695,7 +695,7 @@ SUITE(ColumnBreakerTest)
         ColumnBreaker breaker(pScore->get_num_instruments(), &soCursor);
         find_next_break(breaker, soCursor);
         //cout << "cursor id=" << soCursor.imo_object()->get_id() << endl;
-        CHECK( soCursor.imo_object()->get_id() == 47L );
+        CHECK( soCursor.imo_object()->get_id() == 147L );
         CHECK( is_equal_time(soCursor.time(), 384.0f) );
 
     }

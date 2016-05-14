@@ -1,14 +1,14 @@
 (score
-   (vers 1.6)(language en utf-8)
+   (vers 2.0)
    (instrument
       (musicData
          (clef F4)
          (key C)
          (time 2 4)
          (figuredBass "6 +")
-         (n a2 q (stem down) v4)
+         (n a2 q (stem down))
          (figuredBass "(5) 3")
-         (n c3 q (stem down) v4)
+         (n c3 q (stem down))
       )
    )
 )

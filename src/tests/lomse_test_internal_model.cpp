@@ -955,7 +955,7 @@ SUITE(InternalModelTest)
         CHECK( pStyle->font_size() == 12.0f );
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, ObjectInheritsParentStyle)
+    TEST_FIXTURE(InternalModelTestFixture, ObjectInheritsDefaultStyle)
     {
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0)(content "
@@ -967,12 +967,46 @@ SUITE(InternalModelTest)
         ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(*it);
         ImoStyle* pStyle = pImo->get_style();
         CHECK( pStyle != NULL );
-        CHECK( pStyle->get_name() == "Default style" );
+        CHECK( pStyle->get_name() == "Paragraph" );
         CHECK( is_equal(pStyle->color(), Color(0,0,0,255)) );
         CHECK( pStyle->font_name() == "Liberation serif" );
         CHECK( pStyle->font_style() == ImoStyle::k_font_style_normal );
         CHECK( pStyle->font_weight() == ImoStyle::k_font_weight_normal );
         CHECK( pStyle->font_size() == 12.0f );
+        CHECK( is_equal( pStyle->margin_bottom(), 300.0f ) );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, ObjectHasNoStyle)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0)(content "
+            "(para (txt \"hello\")) ))" );
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoContent* pContent = pDoc->get_content();
+        TreeNode<ImoObj>::children_iterator it = pContent->begin();
+        CHECK( (*it)->is_paragraph() == true );
+        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(*it);
+        ImoObj* pTxt = pImo->get_child(0);
+        CHECK( pTxt->is_text_item() );
+        ImoStyle* pStyle = static_cast<ImoTextItem*>(pTxt)->get_style(false);
+        CHECK( pStyle == NULL );
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, ObjectInheritsParentStyle)
+    {
+        Document doc(m_libraryScope);
+        doc.from_string("(lenmusdoc (vers 0.0)(content "
+            "(para (txt \"hello\")) ))" );
+        ImoDocument* pDoc = doc.get_imodoc();
+        ImoContent* pContent = pDoc->get_content();
+        TreeNode<ImoObj>::children_iterator it = pContent->begin();
+        CHECK( (*it)->is_paragraph() == true );
+        ImoContentObj* pImo = dynamic_cast<ImoContentObj*>(*it);
+        ImoObj* pTxt = pImo->get_child(0);
+        CHECK( pTxt->is_text_item() );
+        ImoStyle* pStyle = static_cast<ImoTextItem*>(pTxt)->get_style();
+        CHECK( pStyle != NULL );
+        CHECK( pStyle->get_name() == "Paragraph" );
     }
 
     TEST_FIXTURE(InternalModelTestFixture, ObjectInheritsParentStyleAttributes)

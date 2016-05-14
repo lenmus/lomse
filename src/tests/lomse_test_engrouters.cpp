@@ -497,10 +497,10 @@ SUITE(EngroutersCreatorTest)
         BoxEngrouter* pEngrouter = dynamic_cast<BoxEngrouter*>( pEngr );
         CHECK( pEngrouter != NULL );
 
-//        cout << "box width = " << pEngrouter->get_width() << endl;
-//        cout << "box height = " << pEngrouter->get_height() << endl;
+        //cout << "box width = " << pEngrouter->get_width() << endl;
+        //cout << "box height = " << pEngrouter->get_height() << endl;
         CHECK( pEngrouter->get_width() == 4000.0f );
-        CHECK( pEngrouter->get_height() == 600.0f );
+        CHECK( pEngrouter->get_height() == 900.0f );
         std::list<Engrouter*>& children = pEngrouter->get_engrouters();
         std::list<Engrouter*>::iterator it = children.begin();
         CHECK( children.size() == 2 );
