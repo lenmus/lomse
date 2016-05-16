@@ -1,15 +1,21 @@
 var NAVTREEINDEX2 =
 {
+"group__enumerations.html#ggafb559e26bc610db43ba605230a142898acbfd950e1ef577e4a697ad2dadd30ec7":[2,0,17,14],
+"group__enumerations.html#ggafb559e26bc610db43ba605230a142898ad6396874d1012fad53ebaff1393c8df8":[2,0,17,11],
+"group__enumerations.html#ggafb559e26bc610db43ba605230a142898ae08a284498019c3e44da73f6decf84a5":[2,0,17,7],
+"group__enumerations.html#ggafb559e26bc610db43ba605230a142898afc1729500350cdf9d23dedd64a752b8c":[2,0,17,5],
+"group__enumerations.html#ggafb559e26bc610db43ba605230a142898afeceafd77aa9e19083226f0679f5011c":[2,0,17,15],
+"group__typedefs.html":[2,1],
 "group__typedefs.html#ga181f35b41b4e59a8a126bb8d71d6919d":[2,1,0],
 "group__typedefs.html#ga1da4093c649c02ee8666c17353aa3602":[2,1,3],
 "group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e":[2,1,2],
 "group__typedefs.html#gaa9ebd8fde9709536464d35a96f108cbf":[2,1,1],
 "hierarchy.html":[1,2],
-"index.html":[0],
 "index.html":[],
+"index.html":[0],
 "library-license.html":[5],
-"lomse-callbacks.html":[0,7],
-"lomse-events.html":[0,8],
+"lomse-callbacks.html":[0,8],
+"lomse-events.html":[0,9],
 "lomse-introduction.html":[0,0],
 "lomse-introduction.html#lomse-philosophy":[0,0,0],
 "lomse-introduction.html#overview-doorway":[0,0,1],
@@ -49,8 +55,8 @@ var NAVTREEINDEX2 =
 "tasks-page.html#task-selection-rectangle":[0,5,1,3],
 "tasks-page.html#tasks-overview":[0,5,1],
 "todo.html":[6],
-"viewport-overview.html":[0,6],
-"viewport-overview.html#lomse-units":[0,6,0],
-"viewport-overview.html#scale-factor":[0,6,1],
-"viewport-overview.html#viewport-concept":[0,6,2]
+"viewport-overview.html":[0,7],
+"viewport-overview.html#lomse-units":[0,7,0],
+"viewport-overview.html#scale-factor":[0,7,1],
+"viewport-overview.html#viewport-concept":[0,7,2]
 };

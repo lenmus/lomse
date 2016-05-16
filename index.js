@@ -22,7 +22,8 @@ var index =
       [ "Save memory by tiling", "print-api.html#print-tiles", null ]
     ] ],
     [ "Editing documents overview", "document-edition-overview.html", [
-      [ "The edition API", "document-edition-overview.html#edit-overview", [
+      [ "How to modify a document", "document-edition-overview.html#edit-overview", null ],
+      [ "The high-level API: edition commands", "document-edition-overview.html#edit-high-level", [
         [ "Undo/Redo", "document-edition-overview.html#edit-overview-undo", null ],
         [ "Cursor and selections", "document-edition-overview.html#edit-overview-cursor", null ]
       ] ],
@@ -47,6 +48,13 @@ var index =
         [ "TaskMoveObject class", "tasks-page.html#task-move-object", null ],
         [ "TaskMoveHandler class", "tasks-page.html#task-move-handler", null ],
         [ "TaskDataEntry class", "tasks-page.html#task-data-entry", null ]
+      ] ]
+    ] ],
+    [ "File formats supoported by Lomse", "file-formats.html", [
+      [ "Supported file formats", "file-formats.html#file-formats-overview", [
+        [ "LDP format", "file-formats.html#ldp-format", null ],
+        [ "LMD format", "file-formats.html#lmd-format", null ],
+        [ "MusicXML format", "file-formats.html#mxl-format", null ]
       ] ]
     ] ],
     [ "Coordinate systems, units, scaling and viewport", "viewport-overview.html", [

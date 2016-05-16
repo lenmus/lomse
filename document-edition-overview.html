@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.18.0</span>
+   &#160;<span id="projectnumber">0.19.0</span>
    </div>
   </td>
  </tr>
@@ -104,7 +104,8 @@ $(document).ready(function(){initNavTree('document-edition-overview.html','');})
 </div><!--header-->
 <div class="contents">
 <div class="toc"><h3>Table of Contents</h3>
-<ul><li class="level1"><a href="#edit-overview">The edition API</a><ul><li class="level2"><a href="#edit-overview-undo">Undo/Redo</a></li>
+<ul><li class="level1"><a href="#edit-overview">How to modify a document</a></li>
+<li class="level1"><a href="#edit-high-level">The high-level API: edition commands</a><ul><li class="level2"><a href="#edit-overview-undo">Undo/Redo</a></li>
 <li class="level2"><a href="#edit-overview-cursor">Cursor and selections</a></li>
 </ul>
 </li>
@@ -113,12 +114,20 @@ $(document).ready(function(){initNavTree('document-edition-overview.html','');})
 </ul>
 </div>
 <div class="textblock"><h1><a class="anchor" id="edit-overview"></a>
-The edition API</h1>
-<p>Edition commands work by modifying the internal model of the document. This model is often named the <em>DOM</em> (Document Object Model), but in Lomse it is named the <em>Internal Model</em>. This is to distinguish it from other internal structures also modeling the document, such as the <em>Graphic Model</em>.</p>
-<p>The source document (in LDP or MusicXML format) is parsed and the <em>Internal Model</em> is built. The <em>Internal Model</em> is, mainly, a tree structure in memory. The root element of the <em>Internal Model</em> tree represents the whole document. And the children of the root element represent the basic blocks for building a document: headers, paragraphs, music scores, lists, etc.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000001">Todo:</a></b></dt><dd>Explain the <em>Internal Model</em></dd></dl>
-<p>All edition commands are objects derived from base abstract class <a class="el" href="classDocCommand.html">DocCommand</a>, and they work by modifying the <em>Internal Model</em> tree, either by inserting or removing elements or by modifying the attributes of an element. For instance, <a class="el" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj()</a> is a command for inserting a block level object. This command, as well as most commands for inserting new elements, require a parameter with the source code of the element to insert. Currently the source code for all edition commands must be in LDP format, but it is not complex to support other formats such as MusicXML for music scores or HTML for other elements. In future, when the library is more advanced, other formats could be supported.</p>
-<dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>LDP manual</dd></dl>
+How to modify a document</h1>
+<p>When a source document (in LDP or MusicXML format) is loaded, it is not stored as text or as an XML Document Object Model (<em>DOM</em>). Instead, the document is parsed and an <em>Internal Model</em> is built. The <em>Internal Model</em> is, mainly, a tree structure in memory. The root element of the <em>Internal Model</em> tree represents the whole document. And the children of the root element represent the basic blocks for building a document: headers, paragraphs, music scores, lists, etc. For an overview of the <em>Internal Model</em> see internal-model-overview.</p>
+<p>Once the <em>Internal Model</em> is created, for modifying the document your application has two options, either</p>
+<ol type="1">
+<li>use the edition commands API; or</li>
+<li>directly modify the internal model.</li>
+</ol>
+<p><b>Edition commands</b> are a high level API for supporting edition. It is based on executing commands and provides undo/redo (that is, reverting the last change done to the document and to reverting the undo by re-executing the undone command). It is appropriate for applications whising to provide an interface to the user for editing documents (e.g. a music score notation editor application).</p>
+<p><b>Direct internal model manipulation</b> is a low level API. Your application directly accesses the <em>Internal Model</em> and modifies the internal <em>Internal Model</em> structures. Obviously, there are no high level related services such as undo/redo and good knowledge of the internal model and related structures is needed for maintainin consistency. This API, faster and more flexible, is appropriate for applications that programatically create and modify documents (e.g. an application for creating random music scores).</p>
+<p>Of course, both APIs are compatible and can be used by your application for offering different services.</p>
+<p>The rest of this page describes the high level API using edition commands. For a description of the low level API see direct-im-modification.</p>
+<h1><a class="anchor" id="edit-high-level"></a>
+The high-level API: edition commands</h1>
+<p>All edition commands are objects derived from base abstract class <a class="el" href="classDocCommand.html">DocCommand</a>, and they work by modifying the <em>Internal Model</em> tree, either by inserting or removing elements or by modifying the attributes of an element. For instance, <a class="el" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj()</a> is a command for inserting a block level object. This command, as well as most commands for inserting new elements, require a parameter with the source code of the element to insert. Currently the source code for all edition commands must be in LMD format.</p>
 <p>Executing a command is just invoking <a class="el" href="classInteractor.html#ac0f2b87ac27d4d4a4692dc9ce5b42291">Interactor::exec_command()</a> method and passing the command to execute, for instance:</p>
 <div class="fragment"><div class="line">    <span class="comment">//insert a paragraph and an empty music score</span></div>
 <div class="line">    <span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;get_interactor(0).lock())</div>
@@ -207,7 +216,7 @@ Edition commands</h1>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="index.html">Overview</a></li>
-    <li class="footer">Generated on Sat Apr 30 2016 17:52:11 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon May 16 2016 17:22:48 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

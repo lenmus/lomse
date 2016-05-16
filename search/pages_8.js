@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['scores_20playback_20overview',['Scores playback overview',['../sound-generation.html',1,'index']]]
+  ['rendering_20documents_20overview',['Rendering documents overview',['../render-overview.html',1,'index']]]
 ];

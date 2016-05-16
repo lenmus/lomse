@@ -5,12 +5,19 @@ h1, h2, h3, h4, h5, h6
 {
     color: #616FDC;
     font-weight: normal;
-    margin-top: 1em;
+    margin-top: 2em;
     margin-bottom: 0.5em;
     padding-top: 8px;
     padding-bottom: 4px;
     width: 100%;
 }
+
+/* more space before lower level headers */
+h2, h3, h4, h5, h6
+{
+	margin-top: 2.5em;
+}
+
 
 /* doxygen headers also with the same color */
 h1.groupheader, h2.groupheader, h3.groupheader, h4.groupheader, h5.groupheader, h6.groupheader
@@ -202,4 +209,40 @@ span.literal {
     font-weight: bold;
     font-family: monospace, fixed;
 }
+
+/* border around images */
+div.image img {
+    border: 1px solid #C4CFE5;
+}
+
+/* caption for images in italics. And some bottom margin */
+.caption
+{
+	font-weight: bold;
+    font-style: italic;
+    margin-bottom: 3em;
+}
+
+/*----------------------------------------------------------------------------
+CSS selectors summary:
+
+* descendant:  h1 em
+    em inside h1:           h1 { color: red } em { color: red } h1 em { color: blue }
+
+* child:    div ol > li p
+     element that is a descendant of an LI; the LI element must be the child of an OL element; the OL element must be a descendant of a DIV 
+
+* Adjacent sibling  h1 + h2
+    h2 immediately following h1:    i.e. reduce the vertical space separating an H1 and an H2:
+                                         h1 + h2 { margin-top: -5mm }   
+* Class selectors
+    .classname              applies to all elements with class = classname
+    h1.classname            all h1 with class == classname
+    p.marine.pastoral       P elements with both classes, marine and pastoral
+
+* ID selectors
+    #idname                 applies to all elements with id = idname
+    h1#idname               all h1 with id = idname
+
+----------------------------------------------------------------------------*/
 

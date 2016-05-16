@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['introduction',['Introduction',['../lomse-introduction.html',1,'index']]],
-  ['interaction_20with_20your_20application_20gui',['Interaction with your application GUI',['../tasks-page.html',1,'index']]]
+  ['how_20lomse_20callbacks_20work',['How Lomse callbacks work',['../lomse-callbacks.html',1,'index']]]
 ];

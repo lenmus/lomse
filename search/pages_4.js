@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['library_20license',['Library license',['../library-license.html',1,'']]],
-  ['license_20for_20code_20samples',['License for code samples',['../samples-license.html',1,'']]]
+  ['introduction',['Introduction',['../lomse-introduction.html',1,'index']]],
+  ['interaction_20with_20your_20application_20gui',['Interaction with your application GUI',['../tasks-page.html',1,'index']]]
 ];

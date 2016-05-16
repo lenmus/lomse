@@ -32,7 +32,7 @@
   <td id="projectlogo"><img alt="Logo" src="logo_100x195.png"/></td>
   <td style="padding-left: 0.5em;">
    <div id="projectname">Lomse library. API documentation
-   &#160;<span id="projectnumber">0.18.0</span>
+   &#160;<span id="projectnumber">0.19.0</span>
    </div>
   </td>
  </tr>
@@ -133,10 +133,10 @@ Inheritance diagram for CmdInsertBlockLevelObj:</div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a41a1543420bc98413be17a75016a96a8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdInsertBlockLevelObj.html#a41a1543420bc98413be17a75016a96a8">CmdInsertBlockLevelObj</a> (int type, const string &amp;name)</td></tr>
-<tr class="separator:a41a1543420bc98413be17a75016a96a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac65c374bf4ba414985214ca3385e40fb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdInsertBlockLevelObj.html#ac65c374bf4ba414985214ca3385e40fb">CmdInsertBlockLevelObj</a> (const string &amp;source, const string &amp;name)</td></tr>
-<tr class="separator:ac65c374bf4ba414985214ca3385e40fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6014f7db3f1276c4904ce96bf84425c0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdInsertBlockLevelObj.html#a6014f7db3f1276c4904ce96bf84425c0">CmdInsertBlockLevelObj</a> (int type, const string &amp;name=&quot;&quot;)</td></tr>
+<tr class="separator:a6014f7db3f1276c4904ce96bf84425c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3213857993cb8a450f4b07ab803a742b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdInsertBlockLevelObj.html#a3213857993cb8a450f4b07ab803a742b">CmdInsertBlockLevelObj</a> (const string &amp;source, const string &amp;name=&quot;&quot;)</td></tr>
+<tr class="separator:a3213857993cb8a450f4b07ab803a742b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classCmdInsert"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classCmdInsert')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classCmdInsert.html">CmdInsert</a></td></tr>
 <tr class="memitem:a29965b4a403df78be730cf7f050403d9 inherit pub_methods_classCmdInsert"><td class="memItemLeft" align="right" valign="top">ImoId&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classCmdInsert.html#a29965b4a403df78be730cf7f050403d9">last_inserted_id</a> ()</td></tr>
 <tr class="separator:a29965b4a403df78be730cf7f050403d9 inherit pub_methods_classCmdInsert"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -147,7 +147,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a4fcd738f3a6c0f375b44f16987a5937b inherit pub_methods_classDocCommand"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a class="anchor" id="a41a1543420bc98413be17a75016a96a8"></a>
+<a class="anchor" id="a6014f7db3f1276c4904ce96bf84425c0"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -161,7 +161,7 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const string &amp;&#160;</td>
-          <td class="paramname"><em>name</em>&#160;</td>
+          <td class="paramname"><em>name</em> = <code>&quot;&quot;</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -174,7 +174,7 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">type</td><td>Type of block level object to insert. Must be one of the values for block level objects in enum <a class="el" href="group__enumerations.html#ga51de1c04259c674284dd0c9f4d0d651f">EImoObjType</a>. </td></tr>
-    <tr><td class="paramname">name</td><td>The displayable name for the command. If empty will be replaced by the string "Insert " followed by the name of the object, as implied by param <em>type</em>.</td></tr>
+    <tr><td class="paramname">name</td><td>The displayable name for the command. If not specified or empty will be replaced by the string "Insert " followed by the name of the object, as implied by param <em>type</em>.</td></tr>
   </table>
   </dd>
 </dl>
@@ -197,12 +197,12 @@ Public Member Functions</h2></td></tr>
 <div class="line"><span class="keywordflow">if</span> (<a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a> spInteractor = m_pPresenter-&gt;<a class="code" href="classPresenter.html#a3542802890a4615d251a5a786cee62b5">get_interactor</a>(0).lock())</div>
 <div class="line">{</div>
 <div class="line">    src = <span class="stringliteral">&quot;&lt;ldpmusic&gt;(score (vers 2.0)(instrument (musicData)))&lt;/ldpmusic&gt;&quot;</span>;</div>
-<div class="line">    <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdInsertBlockLevelObj.html#a41a1543420bc98413be17a75016a96a8">CmdInsertBlockLevelObj</a>(src, <span class="stringliteral">&quot;Add empty music score&quot;</span>) );</div>
+<div class="line">    <a class="code" href="group__typedefs.html#ga4d5b8da041fe9443104697bc6444363e">SpInteractor</a>-&gt;exec_command( <span class="keyword">new</span> <a class="code" href="classCmdInsertBlockLevelObj.html#a6014f7db3f1276c4904ce96bf84425c0">CmdInsertBlockLevelObj</a>(src, <span class="stringliteral">&quot;Add empty music score&quot;</span>) );</div>
 <div class="line">}</div>
 </div><!-- fragment --> 
 </div>
 </div>
-<a class="anchor" id="ac65c374bf4ba414985214ca3385e40fb"></a>
+<a class="anchor" id="a3213857993cb8a450f4b07ab803a742b"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -216,7 +216,7 @@ Public Member Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const string &amp;&#160;</td>
-          <td class="paramname"><em>name</em>&#160;</td>
+          <td class="paramname"><em>name</em> = <code>&quot;&quot;</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -229,7 +229,7 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">source</td><td>The source code of the element to insert. It must be in LDP format. </td></tr>
-    <tr><td class="paramname">name</td><td>The displayable name for the command. If empty will be replaced by "Insert block".</td></tr>
+    <tr><td class="paramname">name</td><td>The displayable name for the command. If not specified or empty will be replaced by "Insert block".</td></tr>
   </table>
   </dd>
 </dl>
@@ -261,7 +261,7 @@ Public Member Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="classCmdInsertBlockLevelObj.html">CmdInsertBlockLevelObj</a></li>
-    <li class="footer">Generated on Sat Apr 30 2016 17:52:11 for Lomse library. API documentation by
+    <li class="footer">Generated on Mon May 16 2016 17:22:48 for Lomse library. API documentation by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
