@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE lenmusdoc PUBLIC
+    "-//LenMus//DTD LenMus Document 0.0//EN" 
+    "https://raw.githubusercontent.com/lenmus/lomse/master/dtd/lenmusdoc-0.0.dtd" >
 <lenmusdoc vers="0.0" language="en">
    <styles>
    </styles>

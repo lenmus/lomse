@@ -52,7 +52,7 @@
         style    associated style info
 -->
 <!ENTITY % common-attrs
-"id          ID            #IMPLIED
+"id          %Integer;     #IMPLIED
  style       %Style;       #IMPLIED
 ">
 
@@ -71,13 +71,14 @@
     Mandatory attribute 'language' is a language code drawn from 
     ISO 639, optionally extended with a country code drawn from 
     ISO 3166, as 'en-US'. It represents the default language for all
-    texts in the document; it can overriden for specific text items.
+    texts in the document. If not specified "en" is assumed.
+    TODO: It can overriden for specific text items.
 -->
 <!ELEMENT lenmusdoc (styles?, content)>
 <!ATTLIST lenmusdoc 
-    id          ID          #IMPLIED
+    id          %Integer;   #IMPLIED
     vers        %String;    #REQUIRED 
-    language    %String;    #REQUIRED 
+    language    %String;    #IMPLIED 
 > 
 
 
@@ -116,6 +117,7 @@
     "border-width | border-width-top | border-width-right |
      border-width-bottom | border-width-left" >
 
+    <!ELEMENT border-width (#PCDATA) >
     <!ELEMENT border-width-top (#PCDATA) >
     <!ELEMENT border-width-right (#PCDATA) >
     <!ELEMENT border-width-bottom (#PCDATA) >
@@ -128,6 +130,7 @@
 <!ENTITY % MarginProperty
     "margin | margin-top | margin-right | margin-bottom | margin-left " >
 
+    <!ELEMENT margin (#PCDATA) >
     <!ELEMENT margin-top (#PCDATA) >
     <!ELEMENT margin-right (#PCDATA) >
     <!ELEMENT margin-bottom (#PCDATA) >
@@ -140,6 +143,7 @@
 <!ENTITY % PaddingProperty
     "padding | padding-top | padding-right | padding-bottom | padding-left " >
     
+    <!ELEMENT padding (#PCDATA) >
     <!ELEMENT padding-top (#PCDATA) >
     <!ELEMENT padding-right (#PCDATA) >
     <!ELEMENT padding-bottom (#PCDATA) >
@@ -185,7 +189,7 @@
 <!-- 
     styles: The collection of styles to be used in this document 
 -->
-<!ELEMENT styles (defineStyle+) >
+<!ELEMENT styles (defineStyle*) >
 
 <!-- 
     defineStyle: Definition for a particular style
@@ -209,7 +213,7 @@
 
 <!-- these can occur only at block level -->
 <!ENTITY % Block
-    "%TextContent; | %MusicContent; | %OtherContent; | %GuiContent; " >
+    "content | %TextContent; | %MusicContent; | %OtherContent; | %GuiContent; " >
 
 <!-- these can occur at both, block or inline level -->
 <!ENTITY % BlockAndInline "image">
@@ -224,8 +228,10 @@
 <!--================= Document content ==============================-->
 
 <!--
-    The building blocks describing the document content are enclosed
-    by a 'content' tag.
+    The building blocks describing the document content must be enclosed
+    by a top level 'content' tag (analogous to the HTML 'body' tag). The
+    'content' element can be also used for grouping other content
+    blocks (analogous to the HTML 'div' tag).
 -->
 <!ELEMENT content (%Block;)* >
     
@@ -303,7 +309,7 @@
 <!ELEMENT tableRow (tableCell)+ >
 <!ATTLIST tableRow %common-attrs; >
 
-<!ELEMENT tableCell (%InlineOrBlock;) >
+<!ELEMENT tableCell (#PCDATA | %InlineOrBlock; )* >
 <!ATTLIST tableCell
     %common-attrs;
     rowspan     %Integer;   "1"
