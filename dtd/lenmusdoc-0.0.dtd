@@ -1,0 +1,378 @@
+<!--=================================================================
+    DTD for LenMus documents. Version 0.0
+    This file is part of Lomse project, at:
+    https://github.com/lenmus/lomse
+
+
+    Redistribution and use of this file with or without modification,
+    is permitted without restrictions. For more information, please 
+    refer to <http:unlicense.org>
+
+    For any comment, suggestion or feature request, please go to the
+    lomse issues page https://github.com/lenmus/lomse/issues and
+    create a new issue.
+
+    This DTD module is identified by the PUBLIC and SYSTEM identifiers:
+
+    PUBLIC "-//LenMus//DTD LenMus Document 0.0//EN"
+    SYSTEM "https://github.com/lenmus/lomse/dtds/lenmusdoc-0.0.dtd"
+
+=====================================================================-->
+
+
+<!--
+    Usage:
+       <!DOCTYPE lenmusdoc PUBLIC "-//LenMus//DTD LenMus Document 0.0//EN" "https://github.com/lenmus/lomse/dtds/lenmusdoc-0.0.dtd">
+       <!DOCTYPE lenmusdoc SYSTEM "https://github.com/lenmus/lomse/dtds/lenmusdoc-0.0.dtd">
+-->
+
+
+<!--================== parameter entities ===========================-->
+
+<!-- 
+    An style name (string). It must has been defined in an 'defStyle'
+    element.
+-->
+<!ENTITY % Style "CDATA">
+    
+<!--  An string -->
+<!ENTITY % String "CDATA">
+
+<!--  An integer number -->
+<!ENTITY % Integer "CDATA">
+
+<!-- 
+    Attributes common to most elements:
+        id       document-wide unique id
+        style    associated style info
+-->
+<!ENTITY % common-attrs
+"id          ID            #IMPLIED
+ style       %Style;       #IMPLIED
+">
+
+  
+
+
+<!--======================== The Document ===========================-->
+
+<!--
+    lenmusdoc
+    The root of the LenMus document.
+    
+    Mandatory attribute 'vers' refers to the specific version of this
+    DTD that is used in the document.
+    
+    Mandatory attribute 'language' is a language code drawn from 
+    ISO 639, optionally extended with a country code drawn from 
+    ISO 3166, as 'en-US'. It represents the default language for all
+    texts in the document; it can overriden for specific text items.
+-->
+<!ELEMENT lenmusdoc (styles?, content)>
+<!ATTLIST lenmusdoc 
+    id          ID          "0"
+    vers        %String;    #REQUIRED 
+    language    %String;    #REQUIRED 
+> 
+
+
+
+<!--============================ Styles =============================-->
+
+<!-- properties for styles -->
+
+<!ENTITY % ColorProperty
+    "color | background-color" >
+    
+    <!ELEMENT color (#PCDATA) >
+        <!-- rgb or rgba format, in hex. i.e. "#00ff28", "#125a377f" -->
+    <!ELEMENT background-color (#PCDATA) >
+        <!-- rgb or rgba format, in hex. i.e. "#00ff28", "#125a377f" -->
+
+<!ENTITY % FontProperty
+    "font-file | font-name | font-size | font-style | font-weight" >
+    
+    <!ELEMENT font-file (#PCDATA) >
+        <!-- an string: e.g. "FreeSerif.ttf" -->
+    <!ELEMENT font-name (#PCDATA) >
+        <!-- an string: e.g. "Times New Roman" -->
+    <!ELEMENT font-size (#PCDATA) >
+        <!-- a real number followed by "pt". i.e. "12.5pt" -->
+    <!ELEMENT font-style (#PCDATA) >
+        <!-- valid values: ( normal | italic ). Default: normal -->
+    <!ELEMENT font-weight (#PCDATA) >
+        <!-- valid values: ( normal | bold ). Default: normal -->
+
+<!--
+    All border values are integer or real numbers in LUnits (cents 
+    of a millimeter)
+-->
+<!ENTITY % BorderProperty
+    "border-width | border-width-top | border-width-right |
+     border-width-bottom | border-width-left" >
+
+    <!ELEMENT border-width-top (#PCDATA) >
+    <!ELEMENT border-width-right (#PCDATA) >
+    <!ELEMENT border-width-bottom (#PCDATA) >
+    <!ELEMENT border-width-left (#PCDATA) >
+
+<!--
+    All margin values are integer or real numbers in LUnits (cents
+    of a millimeter)
+-->
+<!ENTITY % MarginProperty
+    "margin | margin-top | margin-right | margin-bottom | margin-left " >
+
+    <!ELEMENT margin-top (#PCDATA) >
+    <!ELEMENT margin-right (#PCDATA) >
+    <!ELEMENT margin-bottom (#PCDATA) >
+    <!ELEMENT margin-left (#PCDATA) > 
+
+<!--
+    All padding values are integer or real numbers in LUnits (cents
+    of a millimeter)
+-->
+<!ENTITY % PaddingProperty
+    "padding | padding-top | padding-right | padding-bottom | padding-left " >
+    
+    <!ELEMENT padding-top (#PCDATA) >
+    <!ELEMENT padding-right (#PCDATA) >
+    <!ELEMENT padding-bottom (#PCDATA) >
+    <!ELEMENT padding-left (#PCDATA) >
+    
+<!ENTITY % TextProperty
+    "text-decoration | vertical-align | text-align | line-height " >
+
+    <!ELEMENT text-decoration (#PCDATA) >
+        <!-- valid values:  none | underline | overline | line-through -->
+    <!ELEMENT vertical-align (#PCDATA) >
+        <!-- valid values:  baseline | sub | super | top | text-top | middle | bottom | text-bottom -->
+    <!ELEMENT text-align (#PCDATA) >
+        <!-- valid values:  left | right | center | justify -->
+    <!ELEMENT line-height (#PCDATA) >  
+        <!-- An integer or real numbers in LUnits (cents of a millimeter) -->
+
+<!--
+    All size values are integer or real numbers in LUnits (cents of a millimeter)
+-->
+<!ENTITY % SizeProperty
+    "min-height | min-width | max-height | max-width | height | width " >
+
+    <!ELEMENT min-height (#PCDATA) >
+    <!ELEMENT min-width (#PCDATA) >
+    <!ELEMENT max-height (#PCDATA) >
+    <!ELEMENT max-width (#PCDATA) >
+    <!ELEMENT height (#PCDATA) >
+    <!ELEMENT width (#PCDATA) >
+    
+<!ENTITY % TableProperty
+    "table-col-width" >
+
+<!ELEMENT table-col-width (#PCDATA) >
+    <!-- An integer or real numbers in LUnits (cents of a millimeter) -->
+    
+
+<!ENTITY % StyleProperty
+    "%ColorProperty; | %FontProperty; | %BorderProperty; | %MarginProperty; |
+     %PaddingProperty; | %TextProperty; | %SizeProperty; | %TableProperty; " >
+
+
+<!-- 
+    styles: The collection of styles to be used in this document 
+-->
+<!ELEMENT styles (defineStyle+) >
+
+<!-- 
+    defineStyle: Definition for a particular style
+-->
+<!ELEMENT defineStyle (name, (%StyleProperty;)+) >
+<!ELEMENT name (#PCDATA) >
+        <!-- an string: e.g. "bold green" -->
+
+
+
+<!--
+    =================================================================
+    The collection of building blocks describing the document content
+    =================================================================
+-->
+<!ENTITY % lists "itemizedlist | orderedlist" >
+<!ENTITY % TextContent "section | para | table | %lists; " >
+<!ENTITY % MusicContent "ldpmusic | score" >
+<!ENTITY % OtherContent "image | dynamic" >
+<!ENTITY % GuiContent "scorePlayer" >
+
+<!-- these can occur only at block level -->
+<!ENTITY % Block
+    "%TextContent; | %MusicContent; | %OtherContent; | %GuiContent; " >
+
+<!-- these can occur at both, block or inline level -->
+<!ENTITY % BlockAndInline "image">
+
+<!-- these can occur only at inline level -->
+<!ENTITY % Inline "link | txt | %BlockAndInline;" >
+
+<!-- content for list items and table cells -->
+<!ENTITY % InlineOrBlock "%Inline; | %lists; | para | table | score">
+
+
+<!--================= Document content ==============================-->
+
+<--
+    The building blocks describing the document content are enclosed
+    by a 'content' tag.
+-->
+<!ELEMENT content (%Block;)* >
+    
+
+
+<!--============== Now the content details ==========================-->
+
+<!--
+    'section' element is for structuring the document and for providing
+    a displayable title for the section.
+    Up to six levels are allowed, from level="1" (the most important)
+    to level="6" (the least important).
+    It is analogous to HTML 'h1-h6' tags.
+-->
+<!ELEMENT section (#PCDATA | %Inline;)* >
+<!ATTLIST section
+    %common-attrs;
+    level       CDATA       #REQUIRED
+>
+
+<!-- 
+    para: a paragraph. It is analogous to HTML 'p' tag
+-->
+<!ELEMENT para (#PCDATA | %Inline;)* >
+<!ATTLIST para %common-attrs; >
+
+<!-- 
+    txt: a generic container for a string of text. It is somehow
+    analogous to HTML 'span' tag.
+-->
+<!ELEMENT txt (#PCDATA) >
+<!ATTLIST txt %common-attrs; >
+
+<!--
+    Ordered list (numbered items). It is analogous to HTML 'ol' tag.
+-->
+<!ELEMENT orderedlist (listitem)+ >
+<!ATTLIST orderedlist %common-attrs; >
+
+<!--
+    Itemized list (non-numbered items). It is analogous to HTML 'ul' tag.
+-->
+<!ELEMENT itemizedlist (listitem)+ >
+<!ATTLIST itemizedlist %common-attrs; >
+
+<!--
+    List item. It is analogous to HTML 'li' tag.
+-->
+<!ELEMENT listitem (#PCDATA | %InlineOrBlock; )* >
+<!ATTLIST listitem %common-attrs; >
+
+<!--
+    Table. Defines a table. It is analogous to HTML 'table' tag. 
+    The 'tableColumn' element specifies the width (in logical units)
+    for each column. It is analogous to HTML 'col' tag. 
+    The 'tableHead' element defines the start of the table header. It
+    is analogous to HTML 'thead' tag.
+    The 'tableBody' element defines the start of the table content. It
+    is analogous to HTML 'tbody' tag.
+    The 'tableRow' element defines a row in a table. It is analogous
+    to HTML 'tr' tag.
+    The 'tableCell' element defines a cell in a table. It is analogous
+    to HTML 'td' tag.
+-->
+<!ELEMENT table (tableColumn*, tableHead?, tableBody)) >
+<!ATTLIST table %common-attrs; >
+
+<!ELEMENT tableColumn EMPTY >
+<!ATTLIST tableColumn %common-attrs; >
+
+<!ELEMENT tableHead (tableRow)+ >
+
+<!ELEMENT tableBody (tableRow)+ >
+
+<!ELEMENT tableRow (tableCell)+ >
+<!ATTLIST tableRow %common-attrs; >
+
+<!ELEMENT tableCell %InlineOrBlock; >
+<!ATTLIST tableCell
+    %common-attrs;
+    rowspan     %Integer;   "1"
+    colspan     %Integer;   "1"
+>
+
+<!--
+    Image. It is analogous to HTML 'img' tag. For specifying the
+    file containing the image, it uses a 'file' element. It contains
+    the image filename and extension, without path.
+-->
+<!ELEMENT image file >
+<!ATTLIST image %common-attrs; >
+
+<!ELEMENT file (#PCDATA) >
+
+<!--
+    An hyperlink. It is analogous to HTML 'a' tag.
+-->
+<!ENTITY link (#PCDATA | %Inline; )*>
+<!ATTLIST link 
+    %common-attrs; 
+    url         #PCDATA     #REQUIRED
+>
+
+<!-- 
+    scorePlayer: an score player GUI control, for score playback.
+    Elements 'playLabel' and 'stopLabel' provide labels to be used for
+    play and stop play buttons, useful for GUI internationalization.
+    Element 'mm' provides the metronome default setting. It is an 
+    integer number in beats per minute. If not specified 60 is assumed.
+-->
+<!ELEMENT scorePlayer (playLabel?, stopLabel?, mm?)>
+<!ATTLIST scorePlayer %common-attrs; >
+
+<!ELEMENT mm (#PCDATA) >
+<!ELEMENT playLabel (#PCDATA) >
+<!ELEMENT stopLabel (#PCDATA) >
+
+<!--
+    The 'dynamic' element defines an embedded object within the
+    document. The content for this object must be dynamically
+    generated by your application as result of receiving a
+    'RequestDynamic' request from Lomse library.
+
+    'classid' attribute is an application specific name so that your
+    application can uniquely identify the type of content that has
+    to generate.
+
+    The 'dynamic' element accepts parameters, as pairs name-value.
+-->
+<!ELEMENT dynamic (param)* >
+<!ATTLIST 
+    classid     %String;    #REQUIRED
+>
+
+<!ELEMENT param (#PCDATA) >
+<!ATTLIST 
+    name        %String;    #REQUIRED
+>
+
+
+<!-- 
+    Music score in LDP format (Lisp like syntax)
+-->
+<!ELEMENT ldpmusic (#CDATA)>
+<!ATTLIST ldpmusic %common-attrs; >
+
+
+<!-- 
+    A Music score in LenMus Document format.
+    This is a work in progress for migrating LDP to an XML format.
+    Not documented yet.
+-->
+<!ELEMENT score ANY >
+<!ATTLIST score %common-attrs; >
+
