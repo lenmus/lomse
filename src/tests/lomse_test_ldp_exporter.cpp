@@ -132,7 +132,7 @@ SUITE(LdpExporterTest)
         //@ barline, type, id
 
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6) (instrument (musicData (barline end))))");
+        doc.from_string("(score (vers 1.6) (instrument#100 (musicData (barline end))))");
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         ImoMusicData* pMD = pInstr->get_musicdata();
@@ -143,7 +143,7 @@ SUITE(LdpExporterTest)
         exporter.set_add_id(true);
         string source = exporter.get_source(pImo);
         //cout << "\"" << source << "\"" << endl;
-        CHECK( source == "(barline#23 end)" );
+        CHECK( source == "(barline#102 end)" );
     }
 
     // BeamLdpGenerator -----------------------------------------------------------------
@@ -153,7 +153,7 @@ SUITE(LdpExporterTest)
         //beam
         Document doc(m_libraryScope);
         doc.from_string(
-            "(score (vers 1.6)(instrument (musicData "
+            "(score (vers 1.6)(instrument#100 (musicData "
             "(clef G)(n g5 s g+)(n f5 s)(n g5 e g-)(barline))) )"
             );
         ImoScore* pScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
@@ -164,10 +164,10 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << "\"" << source << "\"" << endl;
+        //cout << "167: \"" << source << "\"" << endl;
         string expected =
-            "(musicData (clef G p1 )(n g5 s v1  p1 (beam 27 ++))"
-            "(n f5 s v1  p1 (beam 27 =-))(n g5 e v1  p1 (beam 27 -))(barline simple))";
+            "(musicData (clef G p1 )(n g5 s v1  p1 (beam 106 ++))"
+            "(n f5 s v1  p1 (beam 106 =-))(n g5 e v1  p1 (beam 106 -))(barline simple))";
         CHECK( source == expected );
     }
 
@@ -175,7 +175,7 @@ SUITE(LdpExporterTest)
     {
         //chord: beam only in base note
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument (musicData (clef G)"
+        doc.from_string("(score (vers 1.6)(instrument#100 (musicData (clef G)"
             "(chord (n e4 e. g+ (stem up))(n g4 e.))"
             "(chord (n d4 s g- (stem up))(n f4 s))"
             ")))" );
@@ -187,10 +187,10 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << "\"" << source << "\"" << endl;
+        //cout << "190: \"" << source << "\"" << endl;
         string expected = "(musicData (clef G p1 )"
-            "(chord (n e4 e. v1  (stem up) p1 (beam 32 +))(n g4 e. v1  p1 ))"
-            "(chord (n d4 s v1  (stem up) p1 (beam 32 -b))(n f4 s v1  p1 )))";
+            "(chord (n e4 e. v1  (stem up) p1 (beam 111 +))(n g4 e. v1  p1 ))"
+            "(chord (n d4 s v1  (stem up) p1 (beam 111 -b))(n f4 s v1  p1 )))";
         CHECK( source == expected );
     }
 
@@ -198,7 +198,7 @@ SUITE(LdpExporterTest)
     {
         //chord after goBack: beam only in base note
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument (musicData (clef G)"
+        doc.from_string("(score (vers 1.6)(instrument#100 (musicData (clef G)"
             "(n c4 q)(n e4 q)(goBack 64)"
             "(chord (n e4 e. g+ v2 (stem up))(n g4 e. v2))"
             "(chord (n d4 s g- v2 (stem up))(n f4 s v2))"
@@ -211,11 +211,11 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << "\"" << source << "\"" << endl;
+        //cout << "214: \"" << source << "\"" << endl;
         string expected = "(musicData (clef G p1 )"
             "(n c4 q v1  p1 )(n e4 q v1  p1 )(goFwd 64 v2 p1)"
-            "(chord (n e4 e. v2  (stem up) p1 (beam 35 +))(n g4 e. v2  p1 ))"
-            "(chord (n d4 s v2  (stem up) p1 (beam 35 -b))(n f4 s v2  p1 )))";
+            "(chord (n e4 e. v2  (stem up) p1 (beam 114 +))(n g4 e. v2  p1 ))"
+            "(chord (n d4 s v2  (stem up) p1 (beam 114 -b))(n f4 s v2  p1 )))";
         CHECK( source == expected );
     }
 
@@ -223,7 +223,7 @@ SUITE(LdpExporterTest)
     {
         //beamed notes must be generated in sequence
         Document doc(m_libraryScope);
-        doc.from_string("(score (vers 1.6)(instrument (musicData "
+        doc.from_string("(score (vers 1.6)(instrument#100 (musicData "
             "(clef F4)(n e3 e g+)(n g3 e)(n c4 e g-)"
             "(goBack start)(n c2 w v3)(barline)"
             ")))" );
@@ -235,10 +235,10 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << "\"" << source << "\"" << endl;
+        //cout << "238: \"" << source << "\"" << endl;
         string expected = "(musicData (clef F4 p1 )"
-            "(n e3 e v1  p1 (beam 27 +))(n c2 w v3  p1 )(n g3 e v1  p1 (beam 27 =))"
-            "(n c4 e v1  p1 (beam 27 -))(barline simple))";
+            "(n e3 e v1  p1 (beam 106 +))(n c2 w v3  p1 )(n g3 e v1  p1 (beam 106 =))"
+            "(n c4 e v1  p1 (beam 106 -))(barline simple))";
         CHECK( source == expected );
     }
 
@@ -536,7 +536,7 @@ SUITE(LdpExporterTest)
         //multimetrics import 1.6 / export 2.0 example
         Document doc(m_libraryScope);
         doc.from_string(
-            "(score (vers 1.6)(instrument (musicData "
+            "(score (vers 1.6)(instrument#100 (musicData "
             "(clef G)(key G)(time 3 4)(chord (n g3 q)(n d4 q))(r e)(n g5 e)"
             "(n g5 s g+)(n f5 s)(n g5 e g-)(barline)"
             "(chord (n a4 q)(n e5 q))(r q)(chord (n d4 q)(n g4 q)(n f5 q))"
@@ -555,11 +555,11 @@ SUITE(LdpExporterTest)
         exporter.set_current_score(pScore);
         exporter.set_remove_newlines(true);
         string source = exporter.get_source(pMD);
-        //cout << "\"" << source << "\"" << endl;
+        //cout << "558: \"" << source << "\"" << endl;
         string expected =
             "(musicData (clef G p1 )(key G)(time 3 4)(chord (n g3 q v1  p1 )(n d4 q v1  p1 ))"
-            "(r e v1  p1 )(n g5 e v1  p1 )(n g5 s v1  p1 (beam 36 ++))(n f5 s v1  p1 (beam 36 =-))"
-            "(n g5 e v1  p1 (beam 36 -))(barline simple)"
+            "(r e v1  p1 )(n g5 e v1  p1 )(n g5 s v1  p1 (beam 115 ++))(n f5 s v1  p1 (beam 115 =-))"
+            "(n g5 e v1  p1 (beam 115 -))(barline simple)"
             "(chord (n a4 q v1  p1 )(n e5 q v1  p1 ))(r q v1  p1 )"
             "(chord (n d4 q v1  p1 )(n g4 q v1  p1 )(n f5 q v1  p1 ))(barline simple))";
         CHECK( source == expected );

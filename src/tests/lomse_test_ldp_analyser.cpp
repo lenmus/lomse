@@ -4477,7 +4477,7 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         //expected << "" << endl;
-        parser.parse_text("(lenmusdoc#11 (vers 0.0)(content#10 (score#9 (vers 1.6)(instrument (musicData))) ))");
+        parser.parse_text("(lenmusdoc (vers 0.0)(content#60 (score#9 (vers 1.6)(instrument (musicData))) ))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -4486,7 +4486,31 @@ SUITE(LdpAnalyserTest)
         CHECK( errormsg.str() == expected.str() );
         ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
         ImoObj* pImo = pDoc->get_content();
-        CHECK( pImo->get_id() == 10L );
+        CHECK( pImo->get_id() == 60L );
+
+        delete tree->get_root();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LdpAnalyserTestFixture, lenmusdoc_10)
+    {
+        ///10. ImoDocument: default styles created
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        LdpParser parser(errormsg, m_libraryScope.ldp_factory());
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("(lenmusdoc (vers 0.0)(content (score (vers 2.0)(instrument (musicData))) ))");
+        LdpTree* tree = parser.get_ldp_tree();
+        LdpAnalyser a(errormsg, m_libraryScope, &doc);
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        ImoStyle* pStyle = pDoc->find_style("Heading-1");
+        CHECK( pStyle != NULL );
+        CHECK( pStyle->get_name() == "Heading-1" );
 
         delete tree->get_root();
         delete pIModel;
@@ -8375,7 +8399,7 @@ SUITE(LdpAnalyserTest)
         ImoParagraph* pPara = dynamic_cast<ImoParagraph*>( pDoc->get_content_item(0) );
         CHECK( pPara != NULL );
         ImoStyle* pStyle = pPara->get_style();
-        CHECK( pStyle->get_name() == "Default style" );
+        CHECK( pStyle->get_name() == "Paragraph" );
         CHECK( pPara->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pPara->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );
@@ -8553,7 +8577,7 @@ SUITE(LdpAnalyserTest)
         ImoHeading* pH = dynamic_cast<ImoHeading*>( pDoc->get_content_item(0) );
         CHECK( pH != NULL );
         ImoStyle* pStyle = pH->get_style();
-        CHECK( pStyle->get_name() == "Default style" );
+        CHECK( pStyle->get_name() == "Heading-1" );
         CHECK( pH->get_num_items() == 1 );
         ImoTextItem* pItem = dynamic_cast<ImoTextItem*>( pH->get_first_item() );
         CHECK( pItem->get_text() == "Hello world!" );

@@ -24,14 +24,14 @@
          (key C)
          (spacer 50)
          (spacer 0
-            (text "text1" left (style "Style3"))
+            (text "text1" (style "Style3"))
          )
          (spacer 50)
          (barline simple)
 
          //Measure 2
          (spacer 0
-            (text "text2" left (style "Style3") dx:15.0000 dy:-20.0000)
+            (text "text2" (style "Style3") dx:15.0000 dy:-20.0000)
          )
          (spacer 50)
          (barline end)

@@ -331,6 +331,13 @@ const GmoRef k_no_gmo_ref = make_pair(-1, -1);
 typedef double TimeUnits;           //time units (TU). Relative, depends on metronome speed
 
 //---------------------------------------------------------------------------------------
+// Units comparison (LUnits, Tenths)
+inline bool is_equal(float c1, float c2) {
+    return fabs(c1-c2) < 0.001f;
+}
+
+
+//---------------------------------------------------------------------------------------
 //some common constants
 enum {
     k_failure = 0,

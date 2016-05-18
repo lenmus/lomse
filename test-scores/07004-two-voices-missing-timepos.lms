@@ -1,13 +1,13 @@
 (score
-   (vers 1.6)(language en iso-8859-1)
+   (vers 2.0)
    (instrument
       (musicData
          (clef G)
-         (n g4 e (stem up) v1)
+         (n g4 e (stem up))
 
-         (goBack start)
-         (n c4 q (stem down) v2)
-         (n e4 q (stem down) v2)
+         (goBack e)
+         (n c4 q v2 (stem down))
+         (n e4 q v2 (stem down))
       )
    )
 )
