@@ -15,15 +15,20 @@
     This DTD module is identified by the PUBLIC and SYSTEM identifiers:
 
     PUBLIC "-//LenMus//DTD LenMus Document 0.0//EN"
-    SYSTEM "https://github.com/lenmus/lomse/dtd/lenmusdoc-0.0.dtd"
+    SYSTEM "https://raw.githubusercontent.com/lenmus/lomse/master/dtd/lenmusdoc-0.0.dtd"
+"
 
 =====================================================================-->
 
 
 <!--
     Usage:
-       <!DOCTYPE lenmusdoc PUBLIC "-//LenMus//DTD LenMus Document 0.0//EN" "https://github.com/lenmus/lomse/dtd/lenmusdoc-0.0.dtd">
-       <!DOCTYPE lenmusdoc SYSTEM "https://github.com/lenmus/lomse/dtd/lenmusdoc-0.0.dtd">
+        <!DOCTYPE lenmusdoc PUBLIC
+            "-//LenMus//DTD LenMus Document 0.0//EN" 
+            "https://raw.githubusercontent.com/lenmus/lomse/master/dtd/lenmusdoc-0.0.dtd" >
+
+       <!DOCTYPE lenmusdoc SYSTEM  
+            "https://raw.githubusercontent.com/lenmus/lomse/master/dtd/lenmusdoc-0.0.dtd" >
 -->
 
 
@@ -70,7 +75,7 @@
 -->
 <!ELEMENT lenmusdoc (styles?, content)>
 <!ATTLIST lenmusdoc 
-    id          ID          "0"
+    id          ID          #IMPLIED
     vers        %String;    #REQUIRED 
     language    %String;    #REQUIRED 
 > 
