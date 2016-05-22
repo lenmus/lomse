@@ -777,8 +777,7 @@ void ColumnsBuilder::collect_content_for_this_column()
 
         if (pSO->is_system_break())
         {
-            if (m_iColumn > 0)
-                m_ColLayouters[m_iColumn-1]->set_system_break(true);
+            m_ColLayouters[m_iColumn]->set_system_break(true);
         }
         else
         {
