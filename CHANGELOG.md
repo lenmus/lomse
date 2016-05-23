@@ -12,6 +12,7 @@
 
 - Whitespace in text now proprely managed in LMD files (issue #42).
 - Default styles added to headings, paragraps and tables (issue #43).
+- New system tag now works again (issue #1).
 
 
 Version [0.19.0] (2/May/2016)
