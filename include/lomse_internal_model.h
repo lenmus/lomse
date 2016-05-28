@@ -3121,7 +3121,8 @@ protected:
     ImoScoreText    m_name;
     ImoScoreText    m_abbrev;
     ImoMidiInfo     m_midi;
-    ImoInstrGroup*  m_pGroup;
+//    ImoInstrGroup*  m_pGroup;
+    string          m_partId;
     std::list<ImoStaffInfo*> m_staves;
 
     friend class ImFactory;
@@ -3141,10 +3142,11 @@ public:
     inline int get_instrument() { return m_midi.get_instrument(); }
     inline int get_channel() { return m_midi.get_channel(); }
     ImoMusicData* get_musicdata();
-    inline bool is_in_group() { return m_pGroup != NULL; }
-    inline ImoInstrGroup* get_group() { return m_pGroup; }
+//    inline bool is_in_group() { return m_pGroup != NULL; }
+//    inline ImoInstrGroup* get_group() { return m_pGroup; }
     ImoStaffInfo* get_staff(int iStaff);
     LUnits get_line_spacing_for_staff(int iStaff);
+    inline const string& get_instr_id() { return m_partId; }
 
     //setters
     ImoStaffInfo* add_staff();
@@ -3155,8 +3157,9 @@ public:
     void set_midi_info(ImoMidiInfo* pInfo);
     void set_midi_instrument(int instr);
     void set_midi_channel(int channel);
-    inline void set_in_group(ImoInstrGroup* pGroup) { m_pGroup = pGroup; }
+//    inline void set_in_group(ImoInstrGroup* pGroup) { m_pGroup = pGroup; }
     void replace_staff_info(ImoStaffInfo* pInfo);
+    inline void set_instr_id(const string& id) { m_partId = id; }
 
     //info
     inline bool has_name() { return m_name.get_text() != ""; }
@@ -3716,8 +3719,9 @@ public:
 	void accept_visitor(BaseVisitor& v);
 
     //instruments
-    void add_instrument(ImoInstrument* pInstr);
+    void add_instrument(ImoInstrument* pInstr, const string& partId="");
     ImoInstrument* get_instrument(int iInstr);   //0..n-1
+    ImoInstrument* get_instrument(const string& partId);
     int get_num_instruments();
     ImoInstruments* get_instruments();
     int get_instr_number_for(ImoInstrument* pInstr);

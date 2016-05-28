@@ -188,7 +188,7 @@ protected:
     ImoScore*       m_pLastScore;
     ImoDocument*    m_pImoDoc;
     int             m_scoreVersion;
-    ImoObj*         m_pNodeImo;
+    bool            m_fInstrIdRequired;
 
     //analysis input
     XmlNode* m_pTree;
@@ -266,7 +266,11 @@ public:
     //access to score being analysed
     int set_score_version(const string& version);
     inline int get_score_version() { return m_scoreVersion; }
-    inline void score_analysis_begin(ImoScore* pScore) { m_pCurScore = pScore; }
+    inline void score_analysis_begin(ImoScore* pScore)
+    {
+        m_pCurScore = pScore;
+        m_fInstrIdRequired = false;
+    }
     inline void score_analysis_end() {
         m_pLastScore = m_pCurScore;
         m_pCurScore = NULL;
@@ -287,6 +291,10 @@ public:
     static int ldp_name_to_clef_type(const string& value);
     static bool ldp_pitch_to_components(const string& pitch, int *step, int* octave,
                                         EAccidentals* accidentals);
+
+    //methods related to analysing instruments
+    void require_instr_id() { m_fInstrIdRequired = true; }
+    bool is_instr_id_required() { return m_fInstrIdRequired; }
 
 
     //-----------------------------------------------------------------------------------
@@ -310,19 +318,6 @@ public:
         ELdpElement type = elm->get_type();
         delete elm;
         return type;
-    }
-
-    //-----------------------------------------------------------------------------------
-    ImoObj* get_imo(XmlNode* UNUSED(node))
-    {
-        //TODO_X
-        return NULL;
-    }
-
-    //-----------------------------------------------------------------------------------
-    void set_imo(XmlNode* UNUSED(node), ImoObj* pImo)
-    {
-        m_pNodeImo = pImo;
     }
 
     //-----------------------------------------------------------------------------------
