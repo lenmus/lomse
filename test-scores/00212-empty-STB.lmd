@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE lenmusdoc PUBLIC
+    "-//LenMus//DTD LenMus Document 0.0//EN" 
+    "https://raw.githubusercontent.com/lenmus/lomse/master/dtd/lenmusdoc-0.1.dtd" >
+<lenmusdoc vers='0.0'>
+    <content>
+        <score>
+            <parts>
+                <instrId>S</instrId>
+                <instrId>T</instrId>
+                <instrId>B</instrId>
+                <group>
+                    <firstInstr>S</firstInstr>
+                    <lastInstr>B</lastInstr>
+                </group>
+            </parts>
+            <instrument><instrId>S</instrId><musicData/></instrument>
+            <instrument><instrId>B</instrId><musicData/></instrument>
+            <instrument><instrId>T</instrId><musicData/></instrument>
+        </score>
+    </content>
+</lenmusdoc>
