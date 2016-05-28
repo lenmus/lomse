@@ -1,13 +1,9 @@
-﻿<lenmusdoc vers="0.0">
-
-<styles>
-    <defineStyle>
-        <name>credits</name>
-    </defineStyle>
-</styles>
-
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE lenmusdoc PUBLIC
+    "-//LenMus//DTD LenMus Document 0.0//EN" 
+    "https://raw.githubusercontent.com/lenmus/lomse/master/dtd/lenmusdoc-0.0.dtd" >
+<lenmusdoc vers="0.0">
 <content>
     <para>This is a text for this example.</para>
-
 </content>
 </lenmusdoc>
