@@ -46,7 +46,7 @@ namespace lomse
 
 //---------------------------------------------------------------------------------------
 // DocLayouter implementation
-//  Main object responsible for layouting a document. It takes care of creating pages,
+//  Main object responsible for laying out a document. It takes care of creating pages,
 //  adding footers and headers, controlling of margins, available space, page
 //  numbering, etc. And delegates content layout to ContentLayouter object who, in turn,
 //  delegates in specialized layouters.

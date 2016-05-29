@@ -68,8 +68,10 @@ public:
     }
     virtual ~MyScoreLayouter() {}
 
-    void my_create_instrument_engravers() { create_instrument_engravers(); }
-    std::vector<InstrumentEngraver*>& my_get_instrument_engravers() { return m_instrEngravers; }
+    std::vector<InstrumentEngraver*>& my_get_instrument_engravers() {
+        return m_pPartsEngraver->dbg_get_instrument_engravers();
+    }
+    void my_initialice_score_layouter() { initialice_score_layouter(); }
     void my_page_initializations(GmoBox* pBox) { page_initializations(pBox); }
     void my_move_cursor_to_top_left_corner() { move_cursor_to_top_left_corner(); }
     int my_get_num_page() { return m_iCurPage; }
@@ -292,7 +294,7 @@ SUITE(ScoreLayouterTest)
     // ScoreLayouter initialization tests
     //===================================================================================
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_Creation)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_initialice)
     {
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
@@ -300,21 +302,10 @@ SUITE(ScoreLayouterTest)
         GraphicModel gmodel;
         ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
         MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
+        scoreLyt.my_initialice_score_layouter();
 
         CHECK( scoreLyt.my_get_columns_builder() != NULL);
         CHECK( scoreLyt.my_shapes_creator() != NULL );
-    }
-
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_CreateInstrEngravers)
-    {
-        Document doc(m_libraryScope);
-        doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "
-            "(instrument (musicData ))) ))" );
-        GraphicModel gmodel;
-        ImoScore* pImoScore = static_cast<ImoScore*>( doc.get_imodoc()->get_content_item(0) );
-        MyScoreLayouter scoreLyt(pImoScore, &gmodel, m_libraryScope);
-
-        scoreLyt.my_create_instrument_engravers();
         std::vector<InstrumentEngraver*>& instrEngravers =
             scoreLyt.my_get_instrument_engravers();
         CHECK( instrEngravers.size() == 1 );

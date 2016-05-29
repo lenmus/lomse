@@ -44,6 +44,78 @@ namespace lomse
 {
 
 //---------------------------------------------------------------------------------------
+// PartsEngraver implementation
+//---------------------------------------------------------------------------------------
+
+PartsEngraver::PartsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                               ImoInstrGroups* pGroups, ImoScore* pScore)
+    : Engraver(libraryScope, pScoreMeter)
+    , m_pGroups(pGroups)
+    , m_pScore(pScore)
+    , m_pFontStorage( libraryScope.font_storage() )
+    , m_uFirstSystemIndent(0.0f)
+    , m_uOtherSystemIndent(0.0f)
+{
+    create_instrument_engravers();
+}
+
+//---------------------------------------------------------------------------------------
+PartsEngraver::~PartsEngraver()
+{
+    delete_instrument_engravers();
+}
+
+//---------------------------------------------------------------------------------------
+LUnits PartsEngraver::tenths_to_logical(Tenths value, int iStaff)
+{
+    //return (value * m_pInstr->get_staff(iStaff)->get_line_spacing()) / 10.0f;
+    return 0.0;
+}
+
+//---------------------------------------------------------------------------------------
+void PartsEngraver::create_instrument_engravers()
+{
+    for (int iInstr = 0; iInstr < m_pScore->get_num_instruments(); iInstr++)
+    {
+        ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
+        m_instrEngravers.push_back(
+                    LOMSE_NEW InstrumentEngraver(m_libraryScope, m_pMeter,
+                                                 pInstr, m_pScore) );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void PartsEngraver::delete_instrument_engravers()
+{
+    std::vector<InstrumentEngraver*>::iterator it;
+    for (it = m_instrEngravers.begin(); it != m_instrEngravers.end(); ++it)
+        delete *it;
+    m_instrEngravers.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void PartsEngraver::decide_systems_indentation()
+{
+    m_uFirstSystemIndent = 0.0f;
+    m_uOtherSystemIndent = 0.0f;
+    std::vector<InstrumentEngraver*>::iterator it;
+    for (it = m_instrEngravers.begin(); it != m_instrEngravers.end(); ++it)
+    {
+        (*it)->measure_indents();
+        m_uFirstSystemIndent = max(m_uFirstSystemIndent, (*it)->get_indent_first());
+        m_uOtherSystemIndent = max(m_uOtherSystemIndent, (*it)->get_indent_other());
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void PartsEngraver::set_staves_horizontal_position(int iInstr, LUnits x, LUnits width,
+                                                   LUnits indent)
+{
+    InstrumentEngraver* engrv = m_instrEngravers[iInstr];
+    engrv->set_staves_horizontal_position(x, width, indent);
+}
+
+//---------------------------------------------------------------------------------------
 // InstrumentEngraver implementation
 //---------------------------------------------------------------------------------------
 
@@ -270,7 +342,7 @@ LUnits InstrumentEngraver::get_staves_bottom_line()
 //                                     int nSystem)
 //{
 //    //Layout.
-//    // invoked when layouting first measure in system, to add instrument name and bracket/brace.
+//    // invoked when laying out first measure in system, to add instrument name and bracket/brace.
 //    // This method is also responsible for managing group name and bracket/brace layout
 //    // When reaching this point, BoxSystem and BoxSliceInstr have their bounds correctly
 //    // set (except xRight)
@@ -290,7 +362,6 @@ LUnits InstrumentEngraver::get_staves_bottom_line()
 //        m_pGroup->AddNameAndBracket(pBSystem, pPaper, nSystem, pBSliceInstr->GetXLeft(),
 //                                    yTopGroup, pBSliceInstr->GetYBottom() );
 //}
-
 
 
 }  //namespace lomse

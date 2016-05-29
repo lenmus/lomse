@@ -102,7 +102,7 @@ void InlinesContainerLayouter::layout_in_box()
     //AWARE: This method is invoked to layout a page. If there are more pages to
     //layout, it will be invoked more times. Therefore, this method must not initialize
     //anything. All initializations must be done in 'prepare_to_start_layout()'.
-    //layout_in_box() method must always continue layouting from current state.
+    //layout_in_box() method must always continue laying out from current state.
 
     set_cursor_and_available_space();
     page_initializations(m_pItemMainBox);

@@ -68,6 +68,7 @@ class ColumnsBuilder;
 class ShapesCreator;
 class ScoreStub;
 class ColumnBreaker;
+class PartsEngraver;
 
 //---------------------------------------------------------------------------------------
 // helper struct to store data about aux objs to be engraved when the system is ready
@@ -106,18 +107,18 @@ protected:
     ColumnsBuilder* m_pColsBuilder;
     ShapesStorage   m_shapesStorage;
     ShapesCreator*  m_pShapesCreator;
+    PartsEngraver*  m_pPartsEngraver;
     UPoint          m_cursor;
     LUnits          m_startTop;
 
-    std::vector<InstrumentEngraver*> m_instrEngravers;
     std::vector<ColumnLayouter*> m_ColLayouters;
     std::vector<SystemLayouter*> m_sysLayouters;
     std::vector<int> m_breaks;
 
-    //temposry data about current page being layouted
+    //temporary data about current page being laid out
     int m_iCurPage;     //[0..n-1] current page. (-1 if no page yet created!)
 
-    //temporary data about current syustem being layouted
+    //temporary data about current system being laid out
     int m_iCurSystem;   //[0..n-1] Current system (-1 if no system yet created!)
     SystemLayouter* m_pCurSysLyt;
 
@@ -131,7 +132,7 @@ protected:
     LUnits              m_uFirstSystemIndent;
     LUnits              m_uOtherSystemIndent;
 
-    //score stub and current boxes being layouted
+    //score stub and current boxes being laid out
     ScoreStub*          m_pStub;
     GmoBoxScorePage*    m_pCurBoxPage;
     GmoBoxSystem*       m_pCurBoxSystem;
@@ -181,8 +182,10 @@ protected:
     inline bool is_first_system_in_score() { return m_iCurSystem == 0; }
 
     //---------------------------------------------------------------
-    void create_instrument_engravers();
+    void initialice_score_layouter();
+    void create_parts_engraver();
     void decide_systems_indentation();
+    void split_content_in_columns();
     void create_stub();
     void add_score_titles();
     bool enough_space_in_page();
@@ -194,7 +197,6 @@ protected:
     void fill_page_with_empty_systems_if_required();
     bool score_page_is_the_only_content_of_parent_box();
 
-    void delete_instrument_engravers();
     void delete_system_layouters();
     void get_score_renderization_options();
 
@@ -249,8 +251,8 @@ protected:
     ImoScore*       m_pScore;
     ShapesStorage&  m_shapesStorage;
     ShapesCreator*  m_pShapesCreator;
+    PartsEngraver*  m_pPartsEngraver;
     std::vector<ColumnLayouter*>& m_ColLayouters;   //layouter for each column
-    std::vector<InstrumentEngraver*>& m_instrEngravers;
     StaffObjsCursor* m_pSysCursor;  //cursor for traversing the score
     ColumnBreaker*  m_pBreaker;
     std::vector<LUnits> m_SliceInstrHeights;
@@ -268,7 +270,7 @@ public:
                    ShapesStorage& shapesStorage,
                    ShapesCreator* pShapesCreator,
                    std::vector<ColumnLayouter*>& colLayouters,
-                   std::vector<InstrumentEngraver*>& instrEngravers);
+                   PartsEngraver* pPartsEngraver);
     ~ColumnsBuilder();
 
 
@@ -353,12 +355,11 @@ protected:
     LibraryScope& m_libraryScope;
     ScoreMeter* m_pScoreMeter;
     ShapesStorage& m_shapesStorage;
-    std::vector<InstrumentEngraver*>& m_instrEngravers;
+    PartsEngraver* m_pPartsEngraver;
 
 public:
     ShapesCreator(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                  ShapesStorage& shapesStorage,
-                  std::vector<InstrumentEngraver*>& instrEngravers);
+                  ShapesStorage& shapesStorage, PartsEngraver* pPartsEngraver);
     ~ShapesCreator() {}
 
     enum {k_flag_small_clef=1, };

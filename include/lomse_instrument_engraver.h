@@ -44,11 +44,61 @@ namespace lomse
 
 //forward declarations
 class ImoInstrument;
+class ImoInstrGroups;
 class ImoScore;
 class FontStorage;
 class GmoBox;
 class GmoBoxSystem;
 class GmoShapeStaff;
+class InstrumentEngraver;
+
+//---------------------------------------------------------------------------------------
+// PartsEngraver: Responsible for laying out names and brackets/braces for
+// parts (instruments) and groups of instruments.
+class PartsEngraver : public Engraver
+{
+protected:
+    ImoInstrGroups* m_pGroups;
+    ImoScore* m_pScore;
+    FontStorage* m_pFontStorage;
+
+    std::vector<InstrumentEngraver*> m_instrEngravers;
+
+    //spacing to use
+    LUnits  m_uFirstSystemIndent;
+    LUnits  m_uOtherSystemIndent;
+
+public:
+    PartsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                  ImoInstrGroups* pGroups, ImoScore* pScore);
+    ~PartsEngraver();
+
+    inline InstrumentEngraver* get_engraver_for(int iInstr)
+    {
+        return m_instrEngravers[iInstr];
+    }
+
+    void decide_systems_indentation();
+    inline LUnits get_first_system_indent() { return m_uFirstSystemIndent; }
+    inline LUnits get_other_system_indent() { return m_uOtherSystemIndent; }
+
+    void set_staves_horizontal_position(int iInstr, LUnits x, LUnits width, LUnits indent);
+
+
+    //helper
+    LUnits tenths_to_logical(Tenths value, int iStaff=0);
+
+    //Unit Test
+    inline std::vector<InstrumentEngraver*>& dbg_get_instrument_engravers() {
+        return m_instrEngravers;
+    }
+
+
+protected:
+    void create_instrument_engravers();
+    void delete_instrument_engravers();
+
+};
 
 //---------------------------------------------------------------------------------------
 class InstrumentEngraver : public Engraver
@@ -109,7 +159,6 @@ protected:
     bool has_brace_or_bracket();
 
 };
-
 
 }   //namespace lomse
 

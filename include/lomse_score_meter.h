@@ -46,7 +46,7 @@ class ImoStyle;
 
 //---------------------------------------------------------------------------------------
 //ScoreMeter: encapsulates the methods and values for options that are needed in many
-//places for score measurements during layouting and engraving
+//places for score measurements during laying out and engraving
 //---------------------------------------------------------------------------------------
 class ScoreMeter
 {

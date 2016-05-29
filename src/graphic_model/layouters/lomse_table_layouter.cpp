@@ -98,7 +98,7 @@ void TableLayouter::layout_in_box()
     //AWARE: This method is invoked to layout a page. If there are more pages to
     //layout, it will be invoked more times. Therefore, this method must not initialize
     //anything. All initializations must be done in 'prepare_to_start_layout()'.
-    //layout_in_box() method must always continue layouting from current state.
+    //layout_in_box() method must always continue laying out from current state.
 
     set_cursor_and_available_space();
 
@@ -113,7 +113,7 @@ void TableLayouter::layout_in_box()
 
         if (!is_body_row_ready())
         {
-            //problem or empty body. Terminate table layouting
+            //problem or empty body. Terminate table laying out
             set_layout_is_finished(true);
             return;
         }

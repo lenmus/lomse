@@ -90,7 +90,7 @@ GmoBox* Layouter::start_new_page()
 void Layouter::layout_item(ImoContentObj* pItem, GmoBox* pParentBox)
 {
     LOMSE_LOG_DEBUG(Logger::k_layout, str(boost::format(
-        "Layouting id %d %s") % pItem->get_id() % pItem->get_name() ));
+        "Laying out id %d %s") % pItem->get_id() % pItem->get_name() ));
 
     m_pCurLayouter = create_layouter(pItem);
 
@@ -243,7 +243,7 @@ bool LayouterFactory::compute_value_for_add_shapes_flag(ImoContentObj* pItem,
         return true;
 
     //objects inside a table cell never add shapes. Table cell shapes wiil
-    //be added when the table row is fully layouted.
+    //be added when the table row is fully laid out.
     if (pParent->is_table_cell())
         return false;
 

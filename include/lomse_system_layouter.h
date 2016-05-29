@@ -63,7 +63,7 @@ class ShapesStorage;
 class ColStaffObjsEntry;
 class InstrumentEngraver;
 class ShapesCreator;
-
+class PartsEngraver;
 class ScoreLayouter;
 class SystemLayouter;
 class ColumnLayouter;
@@ -485,7 +485,7 @@ protected:
     ShapesStorage&  m_shapesStorage;
     ShapesCreator*  m_pShapesCreator;
     std::vector<ColumnLayouter*>& m_ColLayouters;
-    std::vector<InstrumentEngraver*>& m_instrEngravers;
+    PartsEngraver*  m_pPartsEngraver;
 
     LUnits m_uPrologWidth;
     GmoBoxSystem* m_pBoxSystem;
@@ -505,7 +505,7 @@ public:
                    ShapesStorage& shapesStorage,
                    ShapesCreator* pShapesCreator,
                    std::vector<ColumnLayouter*>& colLayouters,
-                   std::vector<InstrumentEngraver*>& instrEngravers);
+                   PartsEngraver* pPartsEngraver);
     ~SystemLayouter();
 
     GmoBoxSystem* create_system_box(LUnits left, LUnits top, LUnits width, LUnits height);
