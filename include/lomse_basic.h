@@ -218,12 +218,12 @@ struct Rectangle
         return *this;
     }
 
-    Rectangle intersection(const Rectangle& rect) const
-    {
-        Rectangle r = *this;
-        r.intersect(rect);
-        return r;
-    }
+//    Rectangle intersection(const Rectangle& rect) const
+//    {
+//        Rectangle r = *this;
+//        r.intersect(rect);
+//        return r;
+//    }
 
     Rectangle& Union(const Rectangle& rect)
     {

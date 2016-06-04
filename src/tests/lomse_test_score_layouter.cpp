@@ -294,7 +294,7 @@ SUITE(ScoreLayouterTest)
     // ScoreLayouter initialization tests
     //===================================================================================
 
-    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_initialice)
+    TEST_FIXTURE(ScoreLayouterTestFixture, ScoreLayouter_initialize)
     {
         Document doc(m_libraryScope);
         doc.from_string("(lenmusdoc (vers 0.0) (content (score (vers 1.6) "

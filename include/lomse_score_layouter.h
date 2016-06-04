@@ -171,6 +171,7 @@ protected:
 
     friend class ColumnsBuilder;
     friend class SystemLayouter;
+    friend class PartsEngraver;
 
     //helpers
     inline bool is_first_page() { return m_iCurPage == 0; }

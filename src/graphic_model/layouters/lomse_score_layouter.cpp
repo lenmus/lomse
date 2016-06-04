@@ -109,14 +109,14 @@ ScoreLayouter::~ScoreLayouter()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::prepare_to_start_layout()
 {
-    //base class is initialized
+    //initialize base class
     Layouter::prepare_to_start_layout();
 
-    //Now all auxiliary helper objects are created (PartsEngraver, ShapesCreator,
-    //ColumnsBuilder), and internal variables are initialized
+    //Create all auxiliary helper objects (PartsEngraver, ShapesCreator,
+    //ColumnsBuilder), and initialize internal variables
     initialice_score_layouter();
 
-    //Now the real work starts by asking PartsEngraver to decide systems indentation
+    //start the real work by asking PartsEngraver to decide systems indentation
     //In this step, GroupEngraver object measures the group brace/bracket, the group
     //name and the instruments names/abbrevs, as well as possible braces or brackets
     //for multi-staff instruments.
@@ -150,7 +150,7 @@ void ScoreLayouter::layout_in_box()
         decide_line_breaks();
         //AWARE: deciding line breaks cannot be moved to the preparation phase because
         //for deciding break points it is necessary to know page size, and this
-        //information is not know in the preparation phase.
+        //information is not known in the preparation phase.
 
         add_score_titles();
         move_cursor_after_headers();
@@ -561,7 +561,7 @@ void ScoreLayouter::create_parts_engraver()
 {
     ImoInstrGroups* pGroups = m_pScore->get_instrument_groups();
     m_pPartsEngraver = LOMSE_NEW PartsEngraver(m_libraryScope, m_pScoreMeter,
-                                               pGroups, m_pScore);
+                                               pGroups, m_pScore, this);
 }
 
 //---------------------------------------------------------------------------------------

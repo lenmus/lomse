@@ -498,7 +498,7 @@ SUITE(InstrEngraverTest)
                                     ImFactory::inject(k_imo_instrument, &doc));
         ScoreMeter meter(1, 1, 180.0f);
         InstrumentEngraver engraver(m_libraryScope, &meter, pInstr, NULL);
-        engraver.measure_indents();
+        engraver.measure_name_and_bracket();
         CHECK( engraver.get_indent_first() == 0.0f );
         CHECK( engraver.get_indent_other() == 0.0f );
 
@@ -513,7 +513,7 @@ SUITE(InstrEngraverTest)
         pInstr->add_staff();
         ScoreMeter meter(1, 1, 180.0f);
         InstrumentEngraver engraver(m_libraryScope, &meter, pInstr, NULL);
-        engraver.measure_indents();
+        engraver.measure_name_and_bracket();
         CHECK( engraver.get_indent_first() > 0.0f );
         CHECK( engraver.get_indent_other() > 0.0f );
 

@@ -38,6 +38,8 @@
 #include "lomse_box_system.h"
 #include "lomse_text_engraver.h"
 #include "lomse_shape_text.h"
+#include "lomse_score_layouter.h"
+#include "lomse_right_aligner.h"
 
 
 namespace lomse
@@ -48,21 +50,27 @@ namespace lomse
 //---------------------------------------------------------------------------------------
 
 PartsEngraver::PartsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
-                               ImoInstrGroups* pGroups, ImoScore* pScore)
+                             ImoInstrGroups* pGroups, ImoScore* pScore,
+                             ScoreLayouter* pScoreLyt)
     : Engraver(libraryScope, pScoreMeter)
     , m_pGroups(pGroups)
     , m_pScore(pScore)
     , m_pFontStorage( libraryScope.font_storage() )
+    , m_pScoreLyt(pScoreLyt)
     , m_uFirstSystemIndent(0.0f)
     , m_uOtherSystemIndent(0.0f)
+    , m_pRightAligner(NULL)
 {
+    create_group_engravers();
     create_instrument_engravers();
 }
 
 //---------------------------------------------------------------------------------------
 PartsEngraver::~PartsEngraver()
 {
+    delete_group_engravers();
     delete_instrument_engravers();
+    delete m_pRightAligner;
 }
 
 //---------------------------------------------------------------------------------------
@@ -70,6 +78,30 @@ LUnits PartsEngraver::tenths_to_logical(Tenths value, int iStaff)
 {
     //return (value * m_pInstr->get_staff(iStaff)->get_line_spacing()) / 10.0f;
     return 0.0;
+}
+
+//---------------------------------------------------------------------------------------
+void PartsEngraver::create_group_engravers()
+{
+    if (m_pGroups)
+    {
+        ImoObj::children_iterator it;
+        for (it= m_pGroups->begin(); it != m_pGroups->end(); ++it)
+        {
+            ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(*it);
+            m_groupEngravers.push_back(
+                LOMSE_NEW GroupEngraver(m_libraryScope, m_pMeter, pGroup, m_pScore) );
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void PartsEngraver::delete_group_engravers()
+{
+    std::vector<GroupEngraver*>::iterator it;
+    for (it = m_groupEngravers.begin(); it != m_groupEngravers.end(); ++it)
+        delete *it;
+    m_groupEngravers.clear();
 }
 
 //---------------------------------------------------------------------------------------
@@ -96,15 +128,33 @@ void PartsEngraver::delete_instrument_engravers()
 //---------------------------------------------------------------------------------------
 void PartsEngraver::decide_systems_indentation()
 {
-    m_uFirstSystemIndent = 0.0f;
-    m_uOtherSystemIndent = 0.0f;
-    std::vector<InstrumentEngraver*>::iterator it;
-    for (it = m_instrEngravers.begin(); it != m_instrEngravers.end(); ++it)
-    {
-        (*it)->measure_indents();
-        m_uFirstSystemIndent = max(m_uFirstSystemIndent, (*it)->get_indent_first());
-        m_uOtherSystemIndent = max(m_uOtherSystemIndent, (*it)->get_indent_other());
-    }
+    //Algorithm for laying out parts names and brackets/braces
+    //----------------------------------------------------------------
+
+    //Traverse all instruments and determine yTop for staves
+    determine_staves_vertical_position();
+
+    //Create a RightAligner to contain and assign final positions to all
+    //names, brackets and braces. Initially empty.
+    m_pRightAligner = LOMSE_NEW RightAligner();
+
+    //Traverse all groups from inner to outer (backwards, from last defined one to
+    //first one). For each group:
+    // - measure bracket/brace. Bracket/brace coords: x=0, y = determined by first
+    //   instrument yTop and last instrument yBottom.
+    // - add bracket/brace to the RightAligner
+    measure_groups_name_and_bracket();
+
+    //Traverse all instruments. For each instrument:
+    // - engrave name/abbr at x=0, y= instr.center (middle of instrument yTop and
+    //   instrument yBottom).
+    // - add name/abbr to the RightAligner
+    measure_instruments_name_and_bracket();
+
+    //As each shape is added to the RightAligner it is repositioned to
+    //the right position. Therefore, at this point, all the shapes for names
+    //and brackets/braces are correctly positioned. Save the information.
+    save_names_and_brackets_positions();
 }
 
 //---------------------------------------------------------------------------------------
@@ -113,6 +163,93 @@ void PartsEngraver::set_staves_horizontal_position(int iInstr, LUnits x, LUnits 
 {
     InstrumentEngraver* engrv = m_instrEngravers[iInstr];
     engrv->set_staves_horizontal_position(x, width, indent);
+}
+
+//---------------------------------------------------------------------------------------
+void PartsEngraver::determine_staves_vertical_position()
+{
+    //computed vertical positions are relative to 0.0f, that is, first stave will
+    //be positioned at 0.0f
+
+    LUnits yPos = 0.0f;
+
+    int numInstrs = m_pScore->get_num_instruments();
+    for (int iInstr = 0; iInstr < numInstrs; iInstr++)
+    {
+        yPos = m_instrEngravers[iInstr]->set_staves_vertical_position(yPos);
+
+        if (iInstr != numInstrs-1)
+            yPos += m_pScoreLyt->determine_top_space(iInstr+1);
+    }
+    //m_systemHeight = yPos;
+}
+
+//---------------------------------------------------------------------------------------
+void PartsEngraver::measure_groups_name_and_bracket()
+{
+    //Traverse all groups from inner to outer (backwards, from last defined one to
+    //first one). For each group:
+    // - measure bracket/brace. Bracket/brace coords: x=0, y = determined by first
+    //   instrument yTop and last instrument yBottom.
+    // - add bracket/brace to the RightAligner
+
+    std::vector<GroupEngraver*>::iterator it;
+    for (it = m_groupEngravers.begin(); it != m_groupEngravers.end(); ++it)
+    {
+        (*it)->measure_name_and_bracket();
+        //m_pRightAligner->add_box( (*it)->get_box_for_bracket() );
+        //m_pRightAligner->add_box( (*it)->get_box_for_name() );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void PartsEngraver::measure_instruments_name_and_bracket()
+{
+    std::vector<InstrumentEngraver*>::iterator it;
+    for (it = m_instrEngravers.begin(); it != m_instrEngravers.end(); ++it)
+    {
+        (*it)->measure_name_and_bracket();
+        m_pRightAligner->add_box( (*it)->get_box_for_bracket() );
+        //m_pRightAligner->add_box( (*it)->get_box_for_name() );
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void PartsEngraver::save_names_and_brackets_positions()
+{
+    m_uFirstSystemIndent = 0.0f;
+    m_uOtherSystemIndent = 0.0f;
+    std::vector<InstrumentEngraver*>::iterator it;
+    for (it = m_instrEngravers.begin(); it != m_instrEngravers.end(); ++it)
+    {
+        m_uFirstSystemIndent = max(m_uFirstSystemIndent, (*it)->get_indent_first());
+        m_uOtherSystemIndent = max(m_uOtherSystemIndent, (*it)->get_indent_other());
+    }
+}
+
+
+//---------------------------------------------------------------------------------------
+// GroupEngraver implementation
+//---------------------------------------------------------------------------------------
+
+GroupEngraver::GroupEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                             ImoInstrGroup* pGroup, ImoScore* pScore)
+    : Engraver(libraryScope, pScoreMeter)
+    , m_pGroup(pGroup)
+    , m_pScore(pScore)
+    , m_pFontStorage( libraryScope.font_storage() )
+{
+}
+
+//---------------------------------------------------------------------------------------
+GroupEngraver::~GroupEngraver()
+{
+}
+
+//---------------------------------------------------------------------------------------
+void GroupEngraver::measure_name_and_bracket()
+{
+
 }
 
 //---------------------------------------------------------------------------------------
@@ -145,7 +282,7 @@ LUnits InstrumentEngraver::tenths_to_logical(Tenths value, int iStaff)
 }
 
 //---------------------------------------------------------------------------------------
-void InstrumentEngraver::measure_indents()
+void InstrumentEngraver::measure_name_and_bracket()
 {
     m_uIndentFirst = 0.0f;
     m_uIndentOther = 0.0f;
@@ -204,13 +341,22 @@ void InstrumentEngraver::measure_brace_or_bracket()
 }
 
 //---------------------------------------------------------------------------------------
+URect InstrumentEngraver::get_box_for_bracket()
+{
+    if (has_brace_or_bracket())
+    {
+        LUnits height = m_stavesBottom - m_stavesTop;
+        LUnits width = m_uBracketWidth + m_uBracketGap;
+        return URect(0.0f, m_stavesTop, width, height);
+    }
+    else
+        return URect(0.0f, 0.0f, 0.0f, 0.0f);   //xTop, yTop, width, height
+}
+
+//---------------------------------------------------------------------------------------
 bool InstrumentEngraver::has_brace_or_bracket()
 {
     return (m_pInstr->get_num_staves() > 1);
-
-    //return (m_pInstr->get_num_staves() > 1 && m_bracketSymbol == ImoInstrGroup::k_default ||
-    //        m_bracketSymbol == ImoInstrGroup::k_bracket ||
-    //        m_bracketSymbol == ImoInstrGroup::k_brace );
 }
 
 //---------------------------------------------------------------------------------------
@@ -300,7 +446,7 @@ void InstrumentEngraver::set_staves_horizontal_position(LUnits x, LUnits width,
 }
 
 //---------------------------------------------------------------------------------------
-void InstrumentEngraver::set_staves_vertical_position(LUnits y)
+LUnits InstrumentEngraver::set_staves_vertical_position(LUnits y)
 {
     m_org.x = m_org.y = 0.0f;
 
@@ -316,6 +462,7 @@ void InstrumentEngraver::set_staves_vertical_position(LUnits y)
         m_lineThickness[iStaff] = pStaff->get_line_thickness();
     }
     m_stavesBottom = y;
+    return m_stavesBottom + m_org.y;
 }
 
 //---------------------------------------------------------------------------------------
@@ -336,6 +483,8 @@ LUnits InstrumentEngraver::get_staves_bottom_line()
     int iStaff = m_pInstr->get_num_staves() - 1;
     return  m_org.y + m_stavesBottom - m_lineThickness[iStaff] / 2.0f;
 }
+
+
 
 ////---------------------------------------------------------------------------------------
 //void InstrumentEngraver::AddNameAndBracket(GmoBox* pBSystem, GmoBox* pBSliceInstr, lmPaper* pPaper,
