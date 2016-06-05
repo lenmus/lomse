@@ -99,6 +99,7 @@ set(GRAPHIC_MODEL_FILES
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_document_layouter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_inlines_container_layouter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_layouter.cpp
+    ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_right_aligner.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_score_layouter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_score_meter.cpp
     ${LOMSE_SRC_DIR}/graphic_model/layouters/lomse_staffobjs_cursor.cpp

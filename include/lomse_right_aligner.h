@@ -43,10 +43,8 @@ class RightAligner
 {
 protected:
     list<URect> m_boxes;
-    //surrounding rectangle
-    LUnits m_width;
-
     list<UPoint> m_border;      //border segment points (x, y)
+    LUnits m_width;             //surrounding rectangle width
 
     friend class PartsEngraver;
     RightAligner();
@@ -57,6 +55,7 @@ public:
     int add_box(URect rect);
     URect get_box(int iBox);
     LUnits get_total_height();
+    inline LUnits get_total_width() { return m_width; }
 
 protected:
     void shift_boxes_right(LUnits shift);

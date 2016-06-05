@@ -1430,7 +1430,7 @@ void SystemLayouter::engrave_instrument_details()
         if (fDrawStafflines)
             engrv->add_staff_lines(m_pBoxSystem);
         engrv->add_name_abbrev(m_pBoxSystem, m_iSystem);
-        engrv->add_brace_bracket(m_pBoxSystem);
+        engrv->add_brace_bracket(m_pBoxSystem, m_iSystem);
     }
 }
 

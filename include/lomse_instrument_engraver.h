@@ -75,7 +75,14 @@ protected:
     LUnits  m_uOtherSystemIndent;
 
     //helper objects
-    RightAligner* m_pRightAligner;
+    RightAligner* m_pRightAlignerFirst;     //for first system
+    RightAligner* m_pRightAlignerOther;     //for other systems
+
+    //indexes to boxes
+    vector<int> m_iInstrBracketFirst;
+    vector<int> m_iInstrName;
+    vector<int> m_iInstrBracketOther;
+    vector<int> m_iInstrAbbrev;
 
 public:
     PartsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
@@ -123,11 +130,16 @@ protected:
     ImoScore* m_pScore;
     FontStorage* m_pFontStorage;
     UPoint m_org;
-    LUnits m_uIndentFirst;
-    LUnits m_uIndentOther;
     LUnits m_uBracketWidth;
     LUnits m_uBracketGap;
     //int m_bracketSymbol;
+
+    //vertical positions are relative to SystemBox origin
+    //horizontal positions are relative to 0.0
+    URect m_bracketFirstBox;
+    URect m_bracketOtherBox;
+    URect m_nameBox;
+    URect m_abbrevBox;
 
     //vertical positions are relative to SystemBox origin
     LUnits m_stavesTop;
@@ -150,14 +162,20 @@ public:
 
     //indents
     void measure_name_and_bracket();
-    LUnits get_indent_first() { return m_uIndentFirst; }
-    LUnits get_indent_other() { return m_uIndentOther; }
-    URect get_box_for_bracket();
+    URect get_box_for_bracket() { return m_bracketFirstBox; }
+
+    URect get_box_for_name() { return m_nameBox; }
+    void set_name_final_pos(URect rect) { m_nameBox = rect; }
+    void set_bracket_first_final_pos(URect rect) { m_bracketFirstBox = rect; }
+
+    URect get_box_for_abbrev() { return m_abbrevBox; }
+    void set_abbrev_final_pos(URect rect) { m_abbrevBox = rect; }
+    void set_bracket_other_final_pos(URect rect) { m_bracketOtherBox = rect; }
 
     //shapes
     void add_staff_lines(GmoBoxSystem* pBox);
     void add_name_abbrev(GmoBoxSystem* pBox, int iSystem);
-    void add_brace_bracket(GmoBoxSystem* pBox);
+    void add_brace_bracket(GmoBoxSystem* pBox, int iSystem);
     inline LUnits get_staves_bottom() { return m_stavesBottom + m_org.y; }
     LUnits get_staves_top_line();
     LUnits get_staves_bottom_line();
