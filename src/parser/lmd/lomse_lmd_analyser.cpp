@@ -373,6 +373,7 @@ protected:
     bool get_mandatory(ELdpElement type);
     bool get_mandatory(const string& name);
     void analyse_mandatory(ELdpElement type, ImoObj* pAnchor=NULL);
+    void analyse_mandatory(const string& name, ImoObj* pAnchor=NULL);
     bool get_optional(ELdpElement type);
     bool get_optional(const string& name);
     bool analyse_optional(ELdpElement type, ImoObj* pAnchor=NULL);
@@ -2412,11 +2413,21 @@ public:
         pGrp->add_instrument(pFirstInstr);
         pGrp->add_instrument(pLastInstr);
 
-//        // grpName?
-//        analyse_optional(k_name, pGrp);
-//
-//        // grpAbbrev?
-//        analyse_optional(k_abbrev, pGrp);
+        // grpName?
+        if (get_optional("grpName"))
+        {
+            ImoScoreText* pText = get_name_abbrev();
+            if (pText)
+                pGrp->set_name(pText);
+        }
+
+        // grpAbbrev?
+        if (get_optional("grpAbbrev"))
+        {
+            ImoScoreText* pText = get_name_abbrev();
+            if (pText)
+                pGrp->set_abbrev(pText);
+        }
 
         // grpSymbol?
         if (get_optional("grpSymbol"))
@@ -2470,6 +2481,26 @@ protected:
     {
         m_childToAnalyse = m_childToAnalyse.first_child();
         pGrp->set_join_barlines( get_bool_value(true) );
+    }
+
+    ImoScoreText* get_name_abbrev()
+    {
+        string name = m_childToAnalyse.value();
+        if (!name.empty())
+        {
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            ImoScoreText* pText = static_cast<ImoScoreText*>(
+                                        ImFactory::inject(k_imo_score_text, pDoc));
+            pText->set_text(name);
+
+            ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
+            ImoStyle* pStyle = NULL;
+            if (pScore)     //in unit tests the score might not exist
+                pStyle = pScore->get_default_style();
+            pText->set_style(pStyle);
+            return pText;
+        }
+        return NULL;
     }
 
 };
@@ -2620,24 +2651,34 @@ public:
             pInstrument = static_cast<ImoInstrument*>(
                             ImFactory::inject(k_imo_instrument, pDoc) );
 
-        // [<name>]
-        analyse_optional(k_name, pInstrument);
+        // instrName?
+        if (get_optional("instrName"))
+        {
+            ImoScoreText* pText = get_name_abbrev();
+            if (pText)
+                pInstrument->set_name(pText);
+        }
 
-        // [<abbrev>]
-        analyse_optional(k_abbrev, pInstrument);
+        // instrAbbrev?
+        if (get_optional("instrAbbrev"))
+        {
+            ImoScoreText* pText = get_name_abbrev();
+            if (pText)
+                pInstrument->set_abbrev(pText);
+        }
 
-        // [<staves>]
-        if (get_optional(k_staves))
+        // staves?
+        if (get_optional("staves"))
             set_staves(pInstrument);
 
-        // [<staff>]*
-        while (analyse_optional(k_staff, pInstrument));
+        // staff*
+        while (analyse_optional("staff", pInstrument));
 
-        // [<infoMIDI>]
-        analyse_optional(k_infoMIDI, pInstrument);
+        // infoMIDI?
+        analyse_optional("infoMIDI", pInstrument);
 
-        // <musicData>
-        analyse_mandatory(k_musicData, pInstrument);
+        // musicData
+        analyse_mandatory("musicData", pInstrument);
 
         error_if_more_elements();
 
@@ -2651,18 +2692,10 @@ protected:
 
     void set_staves(ImoInstrument* pInstrument)
     {
-        // <staves> = (staves <num>)
-
-        XmlNode node = m_childToAnalyse.first_child();
-        string staves = node.value();
+        string staves = m_childToAnalyse.value();
         int nStaves;
-        bool fError = !is_type(&node, k_number);
-        if (!fError)
-        {
-            std::istringstream iss(staves);
-            fError = (iss >> std::dec >> nStaves).fail();
-        }
-        if (fError)
+        std::istringstream iss(staves);
+        if ((iss >> std::dec >> nStaves).fail())
         {
             report_msg(m_pAnalyser->get_line_number(&m_childToAnalyse),
                 "Invalid value '" + staves + "' for staves. Replaced by 1.");
@@ -2672,6 +2705,26 @@ protected:
             for(; nStaves > 1; --nStaves)
                 pInstrument->add_staff();
         }
+    }
+
+    ImoScoreText* get_name_abbrev()
+    {
+        string name = m_childToAnalyse.value();
+        if (!name.empty())
+        {
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            ImoScoreText* pText = static_cast<ImoScoreText*>(
+                                        ImFactory::inject(k_imo_score_text, pDoc));
+            pText->set_text(name);
+
+            ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
+            ImoStyle* pStyle = NULL;
+            if (pScore)     //in unit tests the score might not exist
+                pStyle = pScore->get_default_style();
+            pText->set_style(pStyle);
+            return pText;
+        }
+        return NULL;
     }
 
 };
@@ -5133,15 +5186,6 @@ public:
 
 };
 
-class InstrNameLmdAnalyser : public TextStringLmdAnalyser
-{
-public:
-    InstrNameLmdAnalyser(LmdAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
-                      ImoObj* pAnchor)
-        : TextStringLmdAnalyser(pAnalyser, reporter, libraryScope, pAnchor,
-                             "Instrument names") {}
-};
-
 
 //@--------------------------------------------------------------------------------------
 //@ <tie> = (tie num <tieType>[<bezier>][color] )   ;num = tie number. integer
@@ -5633,6 +5677,13 @@ bool LmdElementAnalyser::get_mandatory(const string& type)
 void LmdElementAnalyser::analyse_mandatory(ELdpElement type, ImoObj* pAnchor)
 {
     if (get_mandatory(type))
+        m_pAnalyser->analyse_node(&m_childToAnalyse, pAnchor);
+}
+
+//---------------------------------------------------------------------------------------
+void LmdElementAnalyser::analyse_mandatory(const string& name, ImoObj* pAnchor)
+{
+    if (get_mandatory(name))
         m_pAnalyser->analyse_node(&m_childToAnalyse, pAnchor);
 }
 
@@ -6295,7 +6346,6 @@ LmdElementAnalyser* LmdAnalyser::new_analyser(const string& name, ImoObj* pAncho
 //        case k_tag_metronome:       return LOMSE_NEW MetronomeLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_tag_musicData:       return LOMSE_NEW MusicDataLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_tag_na:              return LOMSE_NEW NoteRestLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
-//        case k_tag_name:            return LOMSE_NEW InstrNameLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_tag_newSystem:       return LOMSE_NEW ControlLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_tag_note:            return LOMSE_NEW NoteRestLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);
 //        case k_tag_opt:             return LOMSE_NEW OptLmdAnalyser(this, m_reporter, m_libraryScope, pAnchor);

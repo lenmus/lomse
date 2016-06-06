@@ -990,15 +990,7 @@ void SystemLayouter::reposition_staves(LUnits indent)
     org.y += m_pScoreLyt->determine_top_space(0);
     org.x = 0.0f;
 
-    LUnits width = m_pBoxSystem->get_content_width_old();
-    LUnits left = m_pBoxSystem->get_left();
-    int maxInstr = m_pScore->get_num_instruments() - 1;
-    for (int iInstr = 0; iInstr <= maxInstr; iInstr++)
-    {
-        InstrumentEngraver* engrv = m_pPartsEngraver->get_engraver_for(iInstr);
-        engrv->set_staves_horizontal_position(left, width, indent);
-        engrv->set_slice_instr_origin(org);
-    }
+    m_pPartsEngraver->reposition_staves(indent, org, m_pBoxSystem);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1423,15 +1415,8 @@ void SystemLayouter::engrave_instrument_details()
     ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.Hide");
     bool fDrawStafflines = (pOpt == NULL || pOpt->get_bool_value() == false);
 
-    int maxInstr = m_pScore->get_num_instruments() - 1;
-    for (int iInstr = 0; iInstr <= maxInstr; iInstr++)
-    {
-        InstrumentEngraver* engrv = m_pPartsEngraver->get_engraver_for(iInstr);
-        if (fDrawStafflines)
-            engrv->add_staff_lines(m_pBoxSystem);
-        engrv->add_name_abbrev(m_pBoxSystem, m_iSystem);
-        engrv->add_brace_bracket(m_pBoxSystem, m_iSystem);
-    }
+    m_pPartsEngraver->engrave_names_and_brackets(fDrawStafflines, m_pBoxSystem,
+                                                 m_iSystem);
 }
 
 //---------------------------------------------------------------------------------------

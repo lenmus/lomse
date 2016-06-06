@@ -7,15 +7,18 @@
         <score>
             <parts>
                 <instrId>S</instrId>
+                <instrId>A</instrId>
                 <instrId>T</instrId>
                 <instrId>B</instrId>
                 <group>
                     <firstInstr>S</firstInstr>
                     <lastInstr>B</lastInstr>
+                    <grpName>Choir</grpName>
                     <grpSymbol>bracket</grpSymbol>
                 </group>
             </parts>
             <instrument><instrId>S</instrId><instrName>S</instrName><musicData/></instrument>
+            <instrument><instrId>A</instrId><instrName>A</instrName><musicData/></instrument>
             <instrument><instrId>B</instrId><instrName>B</instrName><musicData/></instrument>
             <instrument><instrId>T</instrId><instrName>T</instrName><musicData/></instrument>
         </score>

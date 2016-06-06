@@ -2386,7 +2386,7 @@ ImoInstrGroup::ImoInstrGroup()
     : ImoSimpleObj(k_imo_instr_group)
     , m_pScore(NULL)
     , m_fJoinBarlines(true)
-    , m_symbol(k_brace)
+    , m_symbol(k_none)
     , m_name()
     , m_abbrev()
 {
@@ -2395,7 +2395,7 @@ ImoInstrGroup::ImoInstrGroup()
 //---------------------------------------------------------------------------------------
 ImoInstrGroup::~ImoInstrGroup()
 {
-    //AWARE: instruments MUST NOT be deleted. Thay are nodes in the tree and
+    //AWARE: instruments MUST NOT be deleted. They are nodes in the tree and
     //will be deleted when deleting the tree. Here, in the ImoGroup, we just
     //keep pointers to locate them
 

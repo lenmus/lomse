@@ -3093,8 +3093,10 @@ public:
     //getters
     inline bool join_barlines() { return m_fJoinBarlines; }
     inline int get_symbol() { return m_symbol; }
-    inline const std::string& get_name() { return m_name.get_text(); }
-    inline const std::string& get_abbrev() { return m_abbrev.get_text(); }
+    inline const std::string& get_name_string() { return m_name.get_text(); }
+    inline const std::string& get_abbrev_string() { return m_abbrev.get_text(); }
+    inline ImoScoreText& get_name() { return m_name; }
+    inline ImoScoreText& get_abbrev() { return m_abbrev; }
 
     //setters
     void set_name(ImoScoreText* pText);
@@ -3107,9 +3109,13 @@ public:
     void add_instrument(ImoInstrument* pInstr);
     ImoInstrument* get_instrument(int iInstr);   //0..n-1
     int get_num_instruments();
+    ImoInstrument* get_first_instrument() { return m_instruments.front(); }
+    ImoInstrument* get_last_instrument() { return m_instruments.back(); }
 
     //info
     inline ImoScore* get_score() { return m_pScore; }
+    inline bool has_name() { return m_name.get_text() != ""; }
+    inline bool has_abbrev() { return m_abbrev.get_text() != ""; }
 
 };
 

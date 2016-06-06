@@ -5409,8 +5409,8 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pIModel->get_root()->is_instr_group() == true );
 //        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
 //        CHECK( pGrp != NULL );
-//        CHECK( pGrp->get_name() == "Group" );
-//        CHECK( pGrp->get_abbrev() == "G." );
+//        CHECK( pGrp->get_name_string() == "Group" );
+//        CHECK( pGrp->get_abbrev_string() == "G." );
 //        CHECK( pGrp->join_barlines() == false );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
@@ -5445,8 +5445,8 @@ SUITE(LmdAnalyserTest)
 //
 //        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
 //        CHECK( pGrp != NULL );
-//        CHECK( pGrp->get_name() == "" );
-//        CHECK( pGrp->get_abbrev() == "G." );
+//        CHECK( pGrp->get_name_string() == "" );
+//        CHECK( pGrp->get_abbrev_string() == "G." );
 //        CHECK( pGrp->join_barlines() == false );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
@@ -5481,8 +5481,8 @@ SUITE(LmdAnalyserTest)
 //
 //        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
 //        CHECK( pGrp != NULL );
-//        CHECK( pGrp->get_name() == "Group" );
-//        CHECK( pGrp->get_abbrev() == "" );
+//        CHECK( pGrp->get_name_string() == "Group" );
+//        CHECK( pGrp->get_abbrev_string() == "" );
 //        CHECK( pGrp->join_barlines() == false );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
@@ -5516,8 +5516,8 @@ SUITE(LmdAnalyserTest)
 //
 //        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
 //        CHECK( pGrp != NULL );
-//        CHECK( pGrp->get_name() == "" );
-//        CHECK( pGrp->get_abbrev() == "" );
+//        CHECK( pGrp->get_name_string() == "" );
+//        CHECK( pGrp->get_abbrev_string() == "" );
 //        CHECK( pGrp->join_barlines() == false );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
@@ -5575,8 +5575,8 @@ SUITE(LmdAnalyserTest)
 //
 //        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
 //        CHECK( pGrp != NULL );
-//        CHECK( pGrp->get_name() == "" );
-//        CHECK( pGrp->get_abbrev() == "" );
+//        CHECK( pGrp->get_name_string() == "" );
+//        CHECK( pGrp->get_abbrev_string() == "" );
 //        CHECK( pGrp->join_barlines() == true );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
 //        CHECK( pGrp->get_num_instruments() == 3 );
@@ -5630,8 +5630,8 @@ SUITE(LmdAnalyserTest)
 //
 //        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
 //        CHECK( pGrp != NULL );
-//        CHECK( pGrp->get_name() == "" );
-//        CHECK( pGrp->get_abbrev() == "" );
+//        CHECK( pGrp->get_name_string() == "" );
+//        CHECK( pGrp->get_abbrev_string() == "" );
 //        CHECK( pGrp->join_barlines() == false );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
 //        CHECK( pGrp->get_num_instruments() == 2 );
@@ -9168,9 +9168,9 @@ SUITE(LmdAnalyserTest)
         CHECK( pGroup != NULL );
         CHECK( pGroup->get_instrument(0) != NULL );
         CHECK( pGroup->get_instrument(1) != NULL );
-        CHECK( pGroup->get_abbrev() == "" );
-        CHECK( pGroup->get_name() == "" );
-        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_brace );
+        CHECK( pGroup->get_abbrev_string() == "" );
+        CHECK( pGroup->get_name_string() == "" );
+        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
 
         delete pIModel;
     }
@@ -9214,8 +9214,8 @@ SUITE(LmdAnalyserTest)
         CHECK( pGroup != NULL );
         CHECK( pGroup->get_instrument(0) != NULL );
         CHECK( pGroup->get_instrument(1) != NULL );
-        CHECK( pGroup->get_abbrev() == "" );
-        CHECK( pGroup->get_name() == "" );
+        CHECK( pGroup->get_abbrev_string() == "" );
+        CHECK( pGroup->get_name_string() == "" );
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
 
         delete pIModel;
