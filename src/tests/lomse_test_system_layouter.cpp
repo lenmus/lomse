@@ -106,13 +106,13 @@ public:
     MySystemLayouter(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                      ShapesStorage& shapesStorage,
                      std::vector<ColumnLayouter*>& colLayouters,
-                     std::vector<InstrumentEngraver*>& instrEngravers)
+                     PartsEngraver* pPartsEngravers)
         : SystemLayouter(NULL, //ScoreLayouter* pScoreLyt,
                          libraryScope, pScoreMeter,
                          NULL, //ImoScore* pScore,
                          shapesStorage,
                          NULL, //ShapesCreator* pShapesCreator,
-                         colLayouters, instrEngravers)
+                         colLayouters, pPartsEngravers)
     {
     }
     virtual ~MySystemLayouter() {}
@@ -194,11 +194,10 @@ SUITE(SystemLayouterTest)
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
         colLayouters.push_back(&colLyt1);
-        std::vector<InstrumentEngraver*> instrEngravers;
         ShapesStorage shapesStorage;
 
         MySystemLayouter sysLyt(m_libraryScope, &meter, shapesStorage,
-                                colLayouters, instrEngravers);
+                                colLayouters, NULL);
         sysLyt.my_set_page_cursor(1500.0f, 2000.0f);
         sysLyt.my_set_is_first_column_in_system(true);
 
@@ -220,11 +219,10 @@ SUITE(SystemLayouterTest)
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
         colLayouters.push_back(&colLyt1);
-        std::vector<InstrumentEngraver*> instrEngravers;
         ShapesStorage shapesStorage;
 
         MySystemLayouter sysLyt(m_libraryScope, &meter, shapesStorage,
-                                colLayouters, instrEngravers);
+                                colLayouters, NULL);
         sysLyt.my_set_page_cursor(1500.0f, 2000.0f);
         sysLyt.my_set_is_first_column_in_system(false);
 
@@ -246,11 +244,10 @@ SUITE(SystemLayouterTest)
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
         colLayouters.push_back(&colLyt1);
-        std::vector<InstrumentEngraver*> instrEngravers;
         ShapesStorage shapesStorage;
 
         MySystemLayouter sysLyt(m_libraryScope, &meter, shapesStorage,
-                                colLayouters, instrEngravers);
+                                colLayouters, NULL);
         sysLyt.my_set_page_cursor(1500.0f, 2000.0f);
         sysLyt.my_set_is_first_column_in_system(false);
 
@@ -278,11 +275,10 @@ SUITE(SystemLayouterTest)
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
         colLayouters.push_back(&colLyt1);
-        std::vector<InstrumentEngraver*> instrEngravers;
         ShapesStorage shapesStorage;
 
         MySystemLayouter sysLyt(m_libraryScope, &meter, shapesStorage,
-                                colLayouters, instrEngravers);
+                                colLayouters, NULL);
         sysLyt.my_set_page_cursor(1500.0f, 2000.0f);
         sysLyt.my_set_is_first_column_in_system(true);
 
@@ -310,11 +306,10 @@ SUITE(SystemLayouterTest)
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
         colLayouters.push_back(&colLyt1);
-        std::vector<InstrumentEngraver*> instrEngravers;
         ShapesStorage shapesStorage;
 
         MySystemLayouter sysLyt(m_libraryScope, &meter, shapesStorage,
-                                colLayouters, instrEngravers);
+                                colLayouters, NULL);
         sysLyt.my_set_page_cursor(1500.0f, 2000.0f);
         sysLyt.my_set_is_first_column_in_system(false);
 
@@ -342,11 +337,10 @@ SUITE(SystemLayouterTest)
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
         colLayouters.push_back(&colLyt1);
-        std::vector<InstrumentEngraver*> instrEngravers;
         ShapesStorage shapesStorage;
 
         MySystemLayouter sysLyt(m_libraryScope, &meter, shapesStorage,
-                                colLayouters, instrEngravers);
+                                colLayouters, NULL);
         sysLyt.my_set_page_cursor(1500.0f, 2000.0f);
         sysLyt.my_set_is_first_column_in_system(false);
 
@@ -372,11 +366,10 @@ SUITE(SystemLayouterTest)
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
         colLayouters.push_back(&colLyt1);
-        std::vector<InstrumentEngraver*> instrEngravers;
         ShapesStorage shapesStorage;
 
         MySystemLayouter sysLyt(m_libraryScope, &meter, shapesStorage,
-                                colLayouters, instrEngravers);
+                                colLayouters, NULL);
         sysLyt.my_set_page_cursor(1500.0f, 2000.0f);
         sysLyt.my_set_columns_range(0, 2);
 
@@ -402,11 +395,10 @@ SUITE(SystemLayouterTest)
         std::vector<ColumnLayouter*> colLayouters;
         colLayouters.push_back(&colLyt0);
         colLayouters.push_back(&colLyt1);
-        std::vector<InstrumentEngraver*> instrEngravers;
         ShapesStorage shapesStorage;
 
         MySystemLayouter sysLyt(m_libraryScope, &meter, shapesStorage,
-                                colLayouters, instrEngravers);
+                                colLayouters, NULL);
         sysLyt.my_set_page_cursor(1500.0f, 2000.0f);
         sysLyt.my_set_columns_range(0, 2);
 

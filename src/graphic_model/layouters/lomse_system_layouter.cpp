@@ -82,7 +82,7 @@ LineEntry::LineEntry(ImoStaffObj* pSO, GmoShape* pShape, bool fProlog, TimeUnits
     , m_yUserShift(yUserShift)
 {
     //AWARE: At this moment is not possible to use shape information because, as
-    //layouting continues and more objects are added to the line, the shape
+    //laying out continues and more objects are added to the line, the shape
     //position or its geometry could change (i.e chord engraving). Therefore,
     //information from the shape is obtained later, when starting justification,
     //and method LineEntry::add_shape_info() is invoked.
@@ -912,7 +912,7 @@ SystemLayouter::SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& librarySc
                                ShapesStorage& shapesStorage,
                                ShapesCreator* pShapesCreator,
                                std::vector<ColumnLayouter*>& colLayouters,
-                               std::vector<InstrumentEngraver*>& instrEngravers)
+                               PartsEngraver* pPartsEngraver)
     : m_pScoreLyt(pScoreLyt)
     , m_libraryScope(libraryScope)
     , m_pScoreMeter(pScoreMeter)
@@ -920,7 +920,7 @@ SystemLayouter::SystemLayouter(ScoreLayouter* pScoreLyt, LibraryScope& librarySc
     , m_shapesStorage(shapesStorage)
     , m_pShapesCreator(pShapesCreator)
     , m_ColLayouters(colLayouters)
-    , m_instrEngravers(instrEngravers)
+    , m_pPartsEngraver(pPartsEngraver)
     , m_uPrologWidth(0.0f)
     , m_pBoxSystem(NULL)
     , m_yMin(0.0f)
@@ -990,15 +990,7 @@ void SystemLayouter::reposition_staves(LUnits indent)
     org.y += m_pScoreLyt->determine_top_space(0);
     org.x = 0.0f;
 
-    LUnits width = m_pBoxSystem->get_content_width_old();
-    LUnits left = m_pBoxSystem->get_left();
-    int maxInstr = m_pScore->get_num_instruments() - 1;
-    for (int iInstr = 0; iInstr <= maxInstr; iInstr++)
-    {
-        InstrumentEngraver* engrv = m_instrEngravers[iInstr];
-        engrv->set_staves_horizontal_position(left, width, indent);
-        engrv->set_slice_instr_origin(org);
-    }
+    m_pPartsEngraver->reposition_staves(indent, org, m_pBoxSystem);
 }
 
 //---------------------------------------------------------------------------------------
@@ -1008,7 +1000,7 @@ void SystemLayouter::fill_current_system_with_columns()
     if (m_pScoreLyt->get_num_systems() == 0)
         return;
 
-    InstrumentEngraver* pEngrv = m_instrEngravers[0];
+    InstrumentEngraver* pEngrv = m_pPartsEngraver->get_engraver_for(0);
     m_pagePos.x = pEngrv->get_staves_left();
 
     m_uFreeSpace = (m_iSystem == 0 ? m_pScoreLyt->get_first_system_staves_size()
@@ -1170,10 +1162,11 @@ LUnits SystemLayouter::engrave_prolog(int iInstr)
     GmoBoxSystem* pBox = get_box_system();
 
     int numStaves = pInstr->get_num_staves();
+    InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
     for (int iStaff=0; iStaff < numStaves; ++iStaff)
     {
         LUnits xPos = xStartPos;
-        m_pagePos.y = m_instrEngravers[iInstr]->get_top_line_of_staff(iStaff);
+        m_pagePos.y = pInstrEngrv->get_top_line_of_staff(iStaff);
         int iStaffIndex = m_pScoreMeter->staff_index(iInstr, iStaff);
         ColStaffObjsEntry* pClefEntry =
             m_ColLayouters[m_iFirstCol]->get_prolog_clef(iStaffIndex);
@@ -1387,11 +1380,13 @@ void SystemLayouter::add_initial_line_joining_all_staves_in_system()
     //TODO: HideStaffLines option
 	if (m_pScoreMeter->must_draw_left_barline())    //&& !pVStaff->HideStaffLines() )
 	{
+        InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(0);
         ImoObj* pCreator = m_pScore->get_instrument(0);
-        LUnits xPos = m_instrEngravers[0]->get_staves_left();
-        LUnits yTop = m_instrEngravers[0]->get_staves_top_line();
+        LUnits xPos = pInstrEngrv->get_staves_left();
+        LUnits yTop = pInstrEngrv->get_staves_top_line();
         int iInstr = m_pScoreMeter->num_instruments() - 1;
-        LUnits yBottom = m_instrEngravers[iInstr]->get_staves_bottom_line();
+        pInstrEngrv = m_pPartsEngraver->get_engraver_for(iInstr);
+        LUnits yBottom = pInstrEngrv->get_staves_bottom_line();
         BarlineEngraver engrv(m_libraryScope, m_pScoreMeter);
         Color color = Color(0,0,0); //TODO staff lines color?
         GmoShape* pLine =
@@ -1420,15 +1415,8 @@ void SystemLayouter::engrave_instrument_details()
     ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.Hide");
     bool fDrawStafflines = (pOpt == NULL || pOpt->get_bool_value() == false);
 
-    int maxInstr = m_pScore->get_num_instruments() - 1;
-    for (int iInstr = 0; iInstr <= maxInstr; iInstr++)
-    {
-        InstrumentEngraver* engrv = m_instrEngravers[iInstr];
-        if (fDrawStafflines)
-            engrv->add_staff_lines(m_pBoxSystem);
-        engrv->add_name_abbrev(m_pBoxSystem, m_iSystem);
-        engrv->add_brace_bracket(m_pBoxSystem);
-    }
+    m_pPartsEngraver->engrave_names_and_brackets(fDrawStafflines, m_pBoxSystem,
+                                                 m_iSystem);
 }
 
 //---------------------------------------------------------------------------------------

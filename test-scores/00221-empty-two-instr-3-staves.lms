@@ -1,0 +1,13 @@
+(score
+   (vers 2.0)
+
+   (instrument (name "Flute")(abbrev "F") 
+      (musicData)
+   )
+   
+   (instrument (name "Piano")(abbrev "P")(staves 2)
+      (musicData)
+   )
+   
+)
+

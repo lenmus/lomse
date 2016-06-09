@@ -108,30 +108,6 @@ SUITE(InternalModelTest)
         CHECK( pDoc->get_content_item(0) == pText );
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, EmptyInstrument_OneStaff)
-    {
-        Document doc(m_libraryScope);
-        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
-                                    ImFactory::inject(k_imo_instrument, &doc));
-        CHECK( pInstr->get_musicdata() == NULL );
-        CHECK( pInstr->get_num_staves() == 1 );
-        CHECK( pInstr->is_in_group() == false );
-
-        delete pInstr;
-    }
-
-    TEST_FIXTURE(InternalModelTestFixture, EmptyInstrument_AddStaff)
-    {
-        Document doc(m_libraryScope);
-        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
-                                    ImFactory::inject(k_imo_instrument, &doc));
-        pInstr->add_staff();
-        CHECK( pInstr->get_musicdata() == NULL );
-        CHECK( pInstr->get_num_staves() == 2 );
-        CHECK( pInstr->is_in_group() == false );
-        delete pInstr;
-    }
-
     TEST_FIXTURE(InternalModelTestFixture, NoreDefaults)
     {
         Document doc(m_libraryScope);
@@ -144,6 +120,45 @@ SUITE(InternalModelTest)
         CHECK( pNote->get_step() == k_no_pitch );
 
         delete pNote;
+    }
+
+
+    // instrument -----------------------------------------------------------------------
+
+    TEST_FIXTURE(InternalModelTestFixture, EmptyInstrument_OneStaff)
+    {
+        Document doc(m_libraryScope);
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        CHECK( pInstr->get_musicdata() == NULL );
+        CHECK( pInstr->get_num_staves() == 1 );
+//        CHECK( pInstr->is_in_group() == false );
+        CHECK( pInstr->get_instr_id() == "" );
+
+        delete pInstr;
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, Instrument_set_part_id)
+    {
+        Document doc(m_libraryScope);
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        pInstr->set_instr_id("P8");
+        CHECK( pInstr->get_instr_id() == "P8" );
+
+        delete pInstr;
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, EmptyInstrument_AddStaff)
+    {
+        Document doc(m_libraryScope);
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        pInstr->add_staff();
+        CHECK( pInstr->get_musicdata() == NULL );
+        CHECK( pInstr->get_num_staves() == 2 );
+        //CHECK( pInstr->is_in_group() == false );
+        delete pInstr;
     }
 
     TEST_FIXTURE(InternalModelTestFixture, Instrument_SetNumStaves)
@@ -214,8 +229,13 @@ SUITE(InternalModelTest)
         delete pInstr;
     }
 
+
+    // score ----------------------------------------------------------------------------
+
     TEST_FIXTURE(InternalModelTestFixture, ScoreInitialize)
     {
+        // score has default options, empty ImoInstruments, and no ImoInstrGroups
+
         Document doc(m_libraryScope);
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
         CHECK( pScore->has_options() == true );
@@ -231,10 +251,140 @@ SUITE(InternalModelTest)
         CHECK( pScore->get_option("Render.SpacingValue")->get_long_value() == 35L );
         ImoInstruments* pColInstr = pScore->get_instruments();
         CHECK( pColInstr != NULL );
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups == NULL );
         CHECK( pColInstr->get_num_children() == 0 );
         CHECK( pScore->get_num_instruments() == 0 );
         delete pScore;
     }
+
+    TEST_FIXTURE(InternalModelTestFixture, ScoreFirstInstrument)
+    {
+        // adding an instrument creates a child in ImoInstruments
+
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        ImoMusicData* pMD = static_cast<ImoMusicData*>(
+                                ImFactory::inject(k_imo_music_data, &doc) );
+        pInstr->append_child_imo(pMD);
+        pInstr->set_instr_id("P8");
+        pScore->add_instrument(pInstr);
+
+        ImoInstruments* pColInstr = pScore->get_instruments();
+        CHECK( pColInstr != NULL );
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups == NULL );
+        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore->get_instrument(0) == pInstr );
+        CHECK( pInstr->get_instr_id() == "P8" );
+        CHECK( pScore->get_instrument("P8") == pInstr );
+
+        delete pScore;
+    }
+
+    TEST_FIXTURE(InternalModelTestFixture, ScoreAddFirstInstrGroup)
+    {
+        // adding the first <group> creates an ImoInstrGroups in score.
+
+        Document doc(m_libraryScope);
+        ImoScore* pScore = static_cast<ImoScore*>(
+                                    ImFactory::inject(k_imo_score, &doc));
+        CHECK( pScore->get_num_instruments() == 0 );
+        ImoInstrument* pInstr1 = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        pScore->add_instrument(pInstr1, "P1");
+        CHECK( pScore->get_num_instruments() == 1 );
+        ImoInstrument* pInstr2 = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        pScore->add_instrument(pInstr2, "P2");
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr3 = static_cast<ImoInstrument*>(
+                                    ImFactory::inject(k_imo_instrument, &doc));
+        pScore->add_instrument(pInstr3, "P3");
+        CHECK( pScore->get_num_instruments() == 3 );
+
+        ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(
+                                    ImFactory::inject(k_imo_instr_group, &doc));
+        pGroup->add_instrument(pInstr1);
+        pGroup->add_instrument(pInstr2);
+        pScore->add_instruments_group(pGroup);
+
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups != NULL );
+        //cout << "Num.instruments = " << pScore->get_num_instruments() << endl;
+
+        CHECK( pScore->get_num_instruments() == 3 );
+        CHECK( pScore->get_instrument(0) == pInstr1 );
+        CHECK( pScore->get_instrument(1) == pInstr2 );
+        CHECK( pScore->get_instrument(2) == pInstr3 );
+
+        delete pScore;
+    }
+
+//    TEST_FIXTURE(InternalModelTestFixture, GroupTwoInstruments)
+//    {
+//        // adding the first <group> creates an ImoInstrGroups in score
+//
+//        Document doc(m_libraryScope);
+//        ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(
+//                                    ImFactory::inject(k_imo_instr_group, &doc));
+//        CHECK( pGroup->get_num_instruments() == 0 );
+//        ImoInstrument* pInstr1 = static_cast<ImoInstrument*>(
+//                                    ImFactory::inject(k_imo_instrument, &doc));
+//        CHECK( pInstr1->is_in_group() == false );
+//        CHECK( pInstr1->get_group() == NULL );
+//
+//        pGroup->add_instrument(pInstr1);
+//        CHECK( pGroup->get_num_instruments() == 1 );
+//        CHECK( pGroup->get_instrument(0) == pInstr1 );
+//        CHECK( pInstr1->is_in_group() == true );
+//        CHECK( pInstr1->get_group() == pGroup );
+//
+//        ImoInstrument* pInstr2 = static_cast<ImoInstrument*>(
+//                                    ImFactory::inject(k_imo_instrument, &doc));
+//        pGroup->add_instrument(pInstr2);
+//        CHECK( pGroup->get_num_instruments() == 2 );
+//        CHECK( pGroup->get_instrument(0) == pInstr1 );
+//        CHECK( pGroup->get_instrument(1) == pInstr2 );
+//        CHECK( pInstr2->is_in_group() == true );
+//        CHECK( pInstr2->get_group() == pGroup );
+//
+//        delete pGroup;
+//        delete pInstr1;
+//        delete pInstr2;
+//    }
+
+//    TEST_FIXTURE(InternalModelTestFixture, ScoreWithInstrGroup)
+//    {
+//        Document doc(m_libraryScope);
+//        ImoScore* pScore = static_cast<ImoScore*>(
+//                                    ImFactory::inject(k_imo_score, &doc));
+//        ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(
+//                                    ImFactory::inject(k_imo_instr_group, &doc));
+//        ImoInstrument* pInstr1 = static_cast<ImoInstrument*>(
+//                                    ImFactory::inject(k_imo_instrument, &doc));
+//        pGroup->add_instrument(pInstr1);
+//        ImoInstrument* pInstr2 = static_cast<ImoInstrument*>(
+//                                    ImFactory::inject(k_imo_instrument, &doc));
+//        pGroup->add_instrument(pInstr2);
+//
+//        pScore->add_instruments_group(pGroup);
+//        CHECK( pScore->get_num_instruments() == 2 );
+//        CHECK( pScore->get_instrument(0) == pInstr1 );
+//        CHECK( pScore->get_instrument(1) == pInstr2 );
+//
+//        ImoInstrument* pInstr3 = static_cast<ImoInstrument*>(
+//                                    ImFactory::inject(k_imo_instrument, &doc));
+//        pScore->add_instrument(pInstr3);
+//
+//        CHECK( pScore->get_num_instruments() == 3 );
+//        CHECK( pScore->get_instrument(2) == pInstr3 );
+//
+//        delete pScore;
+//    }
+
 
     // score options --------------------------------------------------------------------
 
@@ -366,7 +516,7 @@ SUITE(InternalModelTest)
         delete pScore;
     }
 
-    TEST_FIXTURE(InternalModelTestFixture, ScoreWithInstrument)
+    TEST_FIXTURE(InternalModelTestFixture, ScoreWithInstrumentAndOptions)
     {
         Document doc(m_libraryScope);
         ImoScore* pScore = static_cast<ImoScore*>(ImFactory::inject(k_imo_score, &doc));
@@ -396,69 +546,6 @@ SUITE(InternalModelTest)
         CHECK( pOpt2->get_bool_value() == true );
         CHECK( pScore->get_num_instruments() == 1 );
         CHECK( pScore->get_instrument(0) == pInstr );
-
-        delete pScore;
-    }
-
-
-    // instruments group ----------------------------------------------------------------
-
-    TEST_FIXTURE(InternalModelTestFixture, GroupTwoInstruments)
-    {
-        Document doc(m_libraryScope);
-        ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(
-                                    ImFactory::inject(k_imo_instr_group, &doc));
-        CHECK( pGroup->get_num_instruments() == 0 );
-        ImoInstrument* pInstr1 = static_cast<ImoInstrument*>(
-                                    ImFactory::inject(k_imo_instrument, &doc));
-        CHECK( pInstr1->is_in_group() == false );
-        CHECK( pInstr1->get_group() == NULL );
-
-        pGroup->add_instrument(pInstr1);
-        CHECK( pGroup->get_num_instruments() == 1 );
-        CHECK( pGroup->get_instrument(0) == pInstr1 );
-        CHECK( pInstr1->is_in_group() == true );
-        CHECK( pInstr1->get_group() == pGroup );
-
-        ImoInstrument* pInstr2 = static_cast<ImoInstrument*>(
-                                    ImFactory::inject(k_imo_instrument, &doc));
-        pGroup->add_instrument(pInstr2);
-        CHECK( pGroup->get_num_instruments() == 2 );
-        CHECK( pGroup->get_instrument(0) == pInstr1 );
-        CHECK( pGroup->get_instrument(1) == pInstr2 );
-        CHECK( pInstr2->is_in_group() == true );
-        CHECK( pInstr2->get_group() == pGroup );
-
-        delete pGroup;
-        delete pInstr1;
-        delete pInstr2;
-    }
-
-    TEST_FIXTURE(InternalModelTestFixture, ScoreWithInstrGroup)
-    {
-        Document doc(m_libraryScope);
-        ImoScore* pScore = static_cast<ImoScore*>(
-                                    ImFactory::inject(k_imo_score, &doc));
-        ImoInstrGroup* pGroup = static_cast<ImoInstrGroup*>(
-                                    ImFactory::inject(k_imo_instr_group, &doc));
-        ImoInstrument* pInstr1 = static_cast<ImoInstrument*>(
-                                    ImFactory::inject(k_imo_instrument, &doc));
-        pGroup->add_instrument(pInstr1);
-        ImoInstrument* pInstr2 = static_cast<ImoInstrument*>(
-                                    ImFactory::inject(k_imo_instrument, &doc));
-        pGroup->add_instrument(pInstr2);
-
-        pScore->add_instruments_group(pGroup);
-        CHECK( pScore->get_num_instruments() == 2 );
-        CHECK( pScore->get_instrument(0) == pInstr1 );
-        CHECK( pScore->get_instrument(1) == pInstr2 );
-
-        ImoInstrument* pInstr3 = static_cast<ImoInstrument*>(
-                                    ImFactory::inject(k_imo_instrument, &doc));
-        pScore->add_instrument(pInstr3);
-
-        CHECK( pScore->get_num_instruments() == 3 );
-        CHECK( pScore->get_instrument(2) == pInstr3 );
 
         delete pScore;
     }

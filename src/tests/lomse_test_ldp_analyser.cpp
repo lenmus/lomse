@@ -6325,8 +6325,8 @@ SUITE(LdpAnalyserTest)
         CHECK( pIModel->get_root()->is_instr_group() == true );
         ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
         CHECK( pGrp != NULL );
-        CHECK( pGrp->get_name() == "Group" );
-        CHECK( pGrp->get_abbrev() == "G." );
+        CHECK( pGrp->get_name_string() == "Group" );
+        CHECK( pGrp->get_abbrev_string() == "G." );
         CHECK( pGrp->join_barlines() == false );
         CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
         CHECK( pGrp->get_num_instruments() == 3 );
@@ -6362,8 +6362,8 @@ SUITE(LdpAnalyserTest)
 
         ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
         CHECK( pGrp != NULL );
-        CHECK( pGrp->get_name() == "" );
-        CHECK( pGrp->get_abbrev() == "G." );
+        CHECK( pGrp->get_name_string() == "" );
+        CHECK( pGrp->get_abbrev_string() == "G." );
         CHECK( pGrp->join_barlines() == false );
         CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
         CHECK( pGrp->get_num_instruments() == 3 );
@@ -6399,8 +6399,8 @@ SUITE(LdpAnalyserTest)
 
         ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
         CHECK( pGrp != NULL );
-        CHECK( pGrp->get_name() == "Group" );
-        CHECK( pGrp->get_abbrev() == "" );
+        CHECK( pGrp->get_name_string() == "Group" );
+        CHECK( pGrp->get_abbrev_string() == "" );
         CHECK( pGrp->join_barlines() == false );
         CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
         CHECK( pGrp->get_num_instruments() == 3 );
@@ -6435,8 +6435,8 @@ SUITE(LdpAnalyserTest)
 
         ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
         CHECK( pGrp != NULL );
-        CHECK( pGrp->get_name() == "" );
-        CHECK( pGrp->get_abbrev() == "" );
+        CHECK( pGrp->get_name_string() == "" );
+        CHECK( pGrp->get_abbrev_string() == "" );
         CHECK( pGrp->join_barlines() == false );
         CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
         CHECK( pGrp->get_num_instruments() == 3 );
@@ -6496,8 +6496,8 @@ SUITE(LdpAnalyserTest)
 
         ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
         CHECK( pGrp != NULL );
-        CHECK( pGrp->get_name() == "" );
-        CHECK( pGrp->get_abbrev() == "" );
+        CHECK( pGrp->get_name_string() == "" );
+        CHECK( pGrp->get_abbrev_string() == "" );
         CHECK( pGrp->join_barlines() == true );
         CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
         CHECK( pGrp->get_num_instruments() == 3 );
@@ -6553,8 +6553,8 @@ SUITE(LdpAnalyserTest)
 
         ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
         CHECK( pGrp != NULL );
-        CHECK( pGrp->get_name() == "" );
-        CHECK( pGrp->get_abbrev() == "" );
+        CHECK( pGrp->get_name_string() == "" );
+        CHECK( pGrp->get_abbrev_string() == "" );
         CHECK( pGrp->join_barlines() == false );
         CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
         CHECK( pGrp->get_num_instruments() == 2 );

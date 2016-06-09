@@ -5409,8 +5409,8 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pIModel->get_root()->is_instr_group() == true );
 //        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
 //        CHECK( pGrp != NULL );
-//        CHECK( pGrp->get_name() == "Group" );
-//        CHECK( pGrp->get_abbrev() == "G." );
+//        CHECK( pGrp->get_name_string() == "Group" );
+//        CHECK( pGrp->get_abbrev_string() == "G." );
 //        CHECK( pGrp->join_barlines() == false );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
@@ -5445,8 +5445,8 @@ SUITE(LmdAnalyserTest)
 //
 //        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
 //        CHECK( pGrp != NULL );
-//        CHECK( pGrp->get_name() == "" );
-//        CHECK( pGrp->get_abbrev() == "G." );
+//        CHECK( pGrp->get_name_string() == "" );
+//        CHECK( pGrp->get_abbrev_string() == "G." );
 //        CHECK( pGrp->join_barlines() == false );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
@@ -5481,8 +5481,8 @@ SUITE(LmdAnalyserTest)
 //
 //        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
 //        CHECK( pGrp != NULL );
-//        CHECK( pGrp->get_name() == "Group" );
-//        CHECK( pGrp->get_abbrev() == "" );
+//        CHECK( pGrp->get_name_string() == "Group" );
+//        CHECK( pGrp->get_abbrev_string() == "" );
 //        CHECK( pGrp->join_barlines() == false );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
@@ -5516,8 +5516,8 @@ SUITE(LmdAnalyserTest)
 //
 //        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
 //        CHECK( pGrp != NULL );
-//        CHECK( pGrp->get_name() == "" );
-//        CHECK( pGrp->get_abbrev() == "" );
+//        CHECK( pGrp->get_name_string() == "" );
+//        CHECK( pGrp->get_abbrev_string() == "" );
 //        CHECK( pGrp->join_barlines() == false );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
@@ -5575,8 +5575,8 @@ SUITE(LmdAnalyserTest)
 //
 //        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
 //        CHECK( pGrp != NULL );
-//        CHECK( pGrp->get_name() == "" );
-//        CHECK( pGrp->get_abbrev() == "" );
+//        CHECK( pGrp->get_name_string() == "" );
+//        CHECK( pGrp->get_abbrev_string() == "" );
 //        CHECK( pGrp->join_barlines() == true );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
 //        CHECK( pGrp->get_num_instruments() == 3 );
@@ -5630,8 +5630,8 @@ SUITE(LmdAnalyserTest)
 //
 //        ImoInstrGroup* pGrp = dynamic_cast<ImoInstrGroup*>( pIModel->get_root() );
 //        CHECK( pGrp != NULL );
-//        CHECK( pGrp->get_name() == "" );
-//        CHECK( pGrp->get_abbrev() == "" );
+//        CHECK( pGrp->get_name_string() == "" );
+//        CHECK( pGrp->get_abbrev_string() == "" );
 //        CHECK( pGrp->join_barlines() == false );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
 //        CHECK( pGrp->get_num_instruments() == 2 );
@@ -8936,5 +8936,290 @@ SUITE(LmdAnalyserTest)
 
         delete pIModel;
     }
+
+    // score ----------------------------------------------------------------------------
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, score_00)
+    {
+        //00. minimun score ok: has version and one instrument.
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. link: missing mandatory element 'url'." << endl;
+        parser.parse_text(
+            "<score><instrument><musicData/></instrument></score>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore->get_version_string() == "2.0" );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, score_20)
+    {
+        //20. parts defined. error: instrument requires <instrId>
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. instrument: missing 'instrId' element. Instrument ignored."
+                 << endl;
+        parser.parse_text(
+            "<score>"
+            "<parts><instrId>P1</instrId></parts>"
+            "<instrument>"
+                "<musicData/>"
+            "</instrument>"
+            "</score>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pIModel->get_root()->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore->get_instrument("P1") != NULL );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, score_21)
+    {
+        //21. parts, minimum content: one instr id.
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text(
+            "<score>"
+            "<parts><instrId>P1</instrId></parts>"
+            "<instrument>"
+                "<instrId>P1</instrId>"
+                "<musicData/>"
+            "</instrument>"
+            "</score>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pIModel->get_root()->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore->get_instrument("P1") != NULL );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, score_22)
+    {
+        //22. error: <instrId> not defined in <parts>
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. 'instrId' is not defined in <parts> element. Instrument ignored."
+                 << endl;
+        parser.parse_text(
+            "<score>"
+            "<parts><instrId>P1</instrId></parts>"
+            "<instrument>"
+                "<instrId>P2</instrId>"
+                "<musicData/>"
+            "</instrument>"
+            "</score>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pIModel->get_root()->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore->get_instrument("P1") != NULL );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, score_23)
+    {
+        //23. parts. error: duplicated <instrId>
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. parts: duplicated <instrId> will be ignored."
+                 << endl;
+        parser.parse_text(
+            "<score>"
+            "<parts>"
+                "<instrId>P1</instrId>"
+                "<instrId>P1</instrId>"
+            "</parts>"
+            "<instrument>"
+                "<instrId>P1</instrId>"
+                "<musicData/>"
+            "</instrument>"
+            "</score>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pIModel->get_root()->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore->get_num_instruments() == 1 );
+        CHECK( pScore->get_instrument("P1") != NULL );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, score_24)
+    {
+        //24. parts, error: at least on <instrId> is required
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. parts: at least one <instrId> is required." << endl;
+        parser.parse_text(
+            "<score>"
+            "<parts></parts>"
+            "<instrument><musicData/></instrument>"
+            "</score>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pIModel->get_root()->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore->get_num_instruments() == 1 );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, score_25)
+    {
+        //25. parts, with one group. ok.
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text(
+            "<score>"
+            "<parts>"
+                "<instrId>P1</instrId>"
+                "<instrId>P2</instrId>"
+                "<group><firstInstr>P1</firstInstr><lastInstr>P2</lastInstr></group>"
+            "</parts>"
+            "<instrument><instrId>P1</instrId><musicData/></instrument>"
+            "<instrument><instrId>P2</instrId><musicData/></instrument>"
+            "</score>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pIModel->get_root()->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups != NULL );
+        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+        CHECK( pGroup != NULL );
+        CHECK( pGroup->get_instrument(0) != NULL );
+        CHECK( pGroup->get_instrument(1) != NULL );
+        CHECK( pGroup->get_abbrev_string() == "" );
+        CHECK( pGroup->get_name_string() == "" );
+        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
+
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(LmdAnalyserTestFixture, score_26)
+    {
+        //26. parts, one group with grpSymbol.
+
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "Line 0. " << endl;
+        parser.parse_text(
+            "<score>"
+            "<parts>"
+                "<instrId>P1</instrId>"
+                "<instrId>P2</instrId>"
+                "<group>"
+                    "<firstInstr>P1</firstInstr><lastInstr>P2</lastInstr>"
+                    "<grpSymbol>bracket</grpSymbol>"
+                "</group>"
+            "</parts>"
+            "<instrument><instrId>P1</instrId><musicData/></instrument>"
+            "<instrument><instrId>P2</instrId><musicData/></instrument>"
+            "</score>");
+        LmdAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+
+        CHECK( pIModel->get_root()->is_score() == true );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pIModel->get_root() );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups != NULL );
+        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+        CHECK( pGroup != NULL );
+        CHECK( pGroup->get_instrument(0) != NULL );
+        CHECK( pGroup->get_instrument(1) != NULL );
+        CHECK( pGroup->get_abbrev_string() == "" );
+        CHECK( pGroup->get_name_string() == "" );
+        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
+
+        delete pIModel;
+    }
+
 }
 

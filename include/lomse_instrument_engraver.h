@@ -44,11 +44,93 @@ namespace lomse
 
 //forward declarations
 class ImoInstrument;
+class ImoInstrGroup;
+class ImoInstrGroups;
 class ImoScore;
 class FontStorage;
 class GmoBox;
 class GmoBoxSystem;
 class GmoShapeStaff;
+class InstrumentEngraver;
+class GroupEngraver;
+class ScoreLayouter;
+class RightAligner;
+
+//---------------------------------------------------------------------------------------
+// PartsEngraver: Responsible for laying out names and brackets/braces for
+// parts (instruments) and groups of instruments.
+class PartsEngraver : public Engraver
+{
+protected:
+    ImoInstrGroups* m_pGroups;
+    ImoScore* m_pScore;
+    FontStorage* m_pFontStorage;
+    ScoreLayouter* m_pScoreLyt;
+
+    std::vector<GroupEngraver*> m_groupEngravers;
+    std::vector<InstrumentEngraver*> m_instrEngravers;
+
+    //spacing to use
+    LUnits  m_uFirstSystemIndent;
+    LUnits  m_uOtherSystemIndent;
+
+    //helper objects
+    RightAligner* m_pRightAlignerFirst;     //for first system
+    RightAligner* m_pRightAlignerOther;     //for other systems
+
+    //indexes to boxes
+    vector<int> m_iInstrBracketFirst;
+    vector<int> m_iInstrName;
+    vector<int> m_iInstrBracketOther;
+    vector<int> m_iInstrAbbrev;
+    vector<int> m_iGrpBracketFirst;
+    vector<int> m_iGrpName;
+    vector<int> m_iGrpBracketOther;
+    vector<int> m_iGrpAbbrev;
+
+public:
+    PartsEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                  ImoInstrGroups* pGroups, ImoScore* pScore, ScoreLayouter* pScoreLyt);
+    ~PartsEngraver();
+
+    inline InstrumentEngraver* get_engraver_for(int iInstr)
+    {
+        return m_instrEngravers[iInstr];
+    }
+
+    void decide_systems_indentation();
+    inline LUnits get_first_system_indent() { return m_uFirstSystemIndent; }
+    inline LUnits get_other_system_indent() { return m_uOtherSystemIndent; }
+
+    //staves position
+    void set_staves_horizontal_position(int iInstr, LUnits x, LUnits width, LUnits indent);
+    void reposition_staves(LUnits indent, UPoint org, GmoBoxSystem* pBox);
+
+    //info about instruments
+    LUnits get_staff_top_position_for(ImoInstrument* pInstr);
+    LUnits get_staff_bottom_position_for(ImoInstrument* pInstr);
+
+    //engraving
+    void engrave_names_and_brackets(bool fDrawStafflines, GmoBoxSystem* pBox,
+                                    int iSystem);
+
+    //Unit Test
+    inline std::vector<InstrumentEngraver*>& dbg_get_instrument_engravers() {
+        return m_instrEngravers;
+    }
+
+
+protected:
+    void create_group_engravers();
+    void create_instrument_engravers();
+    void delete_group_engravers();
+    void delete_instrument_engravers();
+    void determine_staves_vertical_position();
+    void measure_groups_name_and_bracket();
+    void measure_instruments_name_and_bracket();
+    void save_names_and_brackets_positions();
+
+};
 
 //---------------------------------------------------------------------------------------
 class InstrumentEngraver : public Engraver
@@ -58,11 +140,14 @@ protected:
     ImoScore* m_pScore;
     FontStorage* m_pFontStorage;
     UPoint m_org;
-    LUnits m_uIndentFirst;
-    LUnits m_uIndentOther;
-    LUnits m_uBracketWidth;
     LUnits m_uBracketGap;
-    //int m_bracketSymbol;
+
+    //vertical positions are relative to SystemBox origin
+    //horizontal positions are relative to 0.0
+    URect m_bracketFirstBox;
+    URect m_bracketOtherBox;
+    URect m_nameBox;
+    URect m_abbrevBox;
 
     //vertical positions are relative to SystemBox origin
     LUnits m_stavesTop;
@@ -80,18 +165,29 @@ public:
     ~InstrumentEngraver();
 
     void set_staves_horizontal_position(LUnits x, LUnits width, LUnits indent);
-    void set_staves_vertical_position(LUnits y);
+    LUnits set_staves_vertical_position(LUnits y);
     inline void set_slice_instr_origin(UPoint org) { m_org = org; }
 
     //indents
-    void measure_indents();
-    LUnits get_indent_first() { return m_uIndentFirst; }
-    LUnits get_indent_other() { return m_uIndentOther; }
+    void measure_name_and_bracket();
+    URect get_box_for_bracket() { return m_bracketFirstBox; }
+
+    URect get_box_for_name() { return m_nameBox; }
+    void set_name_final_pos(URect rect) { m_nameBox = rect; }
+    void set_bracket_first_final_pos(URect rect) { m_bracketFirstBox = rect; }
+
+    URect get_box_for_abbrev() { return m_abbrevBox; }
+    void set_abbrev_final_pos(URect rect) { m_abbrevBox = rect; }
+    void set_bracket_other_final_pos(URect rect) { m_bracketOtherBox = rect; }
+
+    //staves position
+    LUnits get_staff_top_position() { return m_stavesTop; }
+    LUnits get_staff_bottom_position() { return m_stavesBottom; }
 
     //shapes
     void add_staff_lines(GmoBoxSystem* pBox);
     void add_name_abbrev(GmoBoxSystem* pBox, int iSystem);
-    void add_brace_bracket(GmoBoxSystem* pBox);
+    void add_brace_bracket(GmoBoxSystem* pBox, int iSystem);
     inline LUnits get_staves_bottom() { return m_stavesBottom + m_org.y; }
     LUnits get_staves_top_line();
     LUnits get_staves_bottom_line();
@@ -110,6 +206,62 @@ protected:
 
 };
 
+//---------------------------------------------------------------------------------------
+class GroupEngraver : public Engraver
+{
+protected:
+    ImoInstrGroup* m_pGroup;
+    ImoScore* m_pScore;
+    PartsEngraver* m_pParts;
+    FontStorage* m_pFontStorage;
+    UPoint m_org;
+
+    //vertical positions are relative to SystemBox origin
+    LUnits m_stavesTop;
+    LUnits m_stavesBottom;
+
+    //measurements
+    LUnits m_uBracketGap;
+
+    //vertical positions are relative to SystemBox origin
+    //horizontal positions are relative to 0.0
+    URect m_bracketFirstBox;
+    URect m_bracketOtherBox;
+    URect m_nameBox;
+    URect m_abbrevBox;
+
+public:
+    GroupEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
+                  ImoInstrGroup* pGroup, ImoScore* pScore, PartsEngraver* pParts);
+    ~GroupEngraver();
+
+    void measure_name_and_bracket();
+
+    //boxes
+    URect get_box_for_bracket() { return m_bracketFirstBox; }
+
+    URect get_box_for_name() { return m_nameBox; }
+    void set_name_final_pos(URect rect) { m_nameBox = rect; }
+    void set_bracket_first_final_pos(URect rect) { m_bracketFirstBox = rect; }
+
+    URect get_box_for_abbrev() { return m_abbrevBox; }
+    void set_abbrev_final_pos(URect rect) { m_abbrevBox = rect; }
+    void set_bracket_other_final_pos(URect rect) { m_bracketOtherBox = rect; }
+
+    //shapes
+    void add_name_abbrev(GmoBoxSystem* pBox, int iSystem);
+    void add_brace_bracket(GmoBoxSystem* pBox, int iSystem);
+
+    //position
+    inline void set_slice_instr_origin(UPoint org) { m_org = org; }
+
+protected:
+    void determine_staves_position();
+    void measure_name_abbrev();
+    void measure_brace_or_bracket();
+    bool has_brace_or_bracket();
+
+};
 
 }   //namespace lomse
 

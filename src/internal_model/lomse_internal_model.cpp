@@ -2057,7 +2057,8 @@ ImoInstrument::ImoInstrument()
     , m_name()
     , m_abbrev()
     , m_midi()
-    , m_pGroup(NULL)
+//    , m_pGroup(NULL)
+    , m_partId("")
 {
     add_staff();
 //	m_midiChannel = g_pMidi->DefaultVoiceChannel();
@@ -2385,7 +2386,7 @@ ImoInstrGroup::ImoInstrGroup()
     : ImoSimpleObj(k_imo_instr_group)
     , m_pScore(NULL)
     , m_fJoinBarlines(true)
-    , m_symbol(k_brace)
+    , m_symbol(k_none)
     , m_name()
     , m_abbrev()
 {
@@ -2394,7 +2395,7 @@ ImoInstrGroup::ImoInstrGroup()
 //---------------------------------------------------------------------------------------
 ImoInstrGroup::~ImoInstrGroup()
 {
-    //AWARE: instruments MUST NOT be deleted. Thay are nodes in the tree and
+    //AWARE: instruments MUST NOT be deleted. They are nodes in the tree and
     //will be deleted when deleting the tree. Here, in the ImoGroup, we just
     //keep pointers to locate them
 
@@ -2431,8 +2432,7 @@ ImoInstrument* ImoInstrGroup::get_instrument(int iInstr)    //iInstr = 0..n-1
 void ImoInstrGroup::add_instrument(ImoInstrument* pInstr)
 {
     m_instruments.push_back(pInstr);
-    pInstr->set_in_group(this);
-    pInstr->set_owner_score(m_pScore);
+//    pInstr->set_in_group(this);
 }
 
 //---------------------------------------------------------------------------------------
@@ -2958,6 +2958,20 @@ ImoInstrument* ImoScore::get_instrument(int iInstr)    //iInstr = 0..n-1
 }
 
 //---------------------------------------------------------------------------------------
+ImoInstrument* ImoScore::get_instrument(const string& partId)
+{
+    ImoInstruments* pColInstr = get_instruments();
+    ImoObj::children_iterator it;
+    for (it= pColInstr->begin(); it != pColInstr->end(); ++it)
+    {
+        ImoInstrument* pInstr = static_cast<ImoInstrument*>(*it);
+        if (pInstr->get_instr_id() == partId)
+            return pInstr;
+    }
+    return NULL;
+}
+
+//---------------------------------------------------------------------------------------
 int ImoScore::get_instr_number_for(ImoInstrument* pInstr)
 {
     ImoInstruments* pColInstr = get_instruments();
@@ -2973,9 +2987,11 @@ int ImoScore::get_instr_number_for(ImoInstrument* pInstr)
 }
 
 //---------------------------------------------------------------------------------------
-void ImoScore::add_instrument(ImoInstrument* pInstr)
+void ImoScore::add_instrument(ImoInstrument* pInstr, const string& partId)
 {
     pInstr->set_owner_score(this);
+    if (pInstr->get_instr_id() == "")
+        pInstr->set_instr_id(partId);
     ImoInstruments* pColInstr = get_instruments();
     return pColInstr->append_child_imo(pInstr);
 }
@@ -3068,9 +3084,6 @@ void ImoScore::add_instruments_group(ImoInstrGroup* pGroup)
     }
     pGroups->append_child_imo(pGroup);
     pGroup->set_owner_score(this);
-
-    for (int i=0; i < pGroup->get_num_instruments(); i++)
-        add_instrument(pGroup->get_instrument(i));
 }
 
 //---------------------------------------------------------------------------------------

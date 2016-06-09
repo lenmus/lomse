@@ -55,11 +55,11 @@ namespace lomse
 #define LOMSE_INSTR_SPACE_AFTER_NAME    10.0f   //"Instr/Space after name/"
 
 //Instruments / Groups
-#define LOMSE_GRP_SPACE_AFTER_NAME      10.0f   //"InstrGroup/Space after name/"
-#define LOMSE_GRP_BRACKET_WIDTH         12.5f   //"InstrGroup/Width of bracket/"
-#define LOMSE_GRP_BRACKET_GAP            5.0f   //"InstrGroup/Space after bracket/"
-#define LOMSE_GRP_BRACE_WIDTH            6.0f   //"InstrGroup/Width of brace/"
-#define LOMSE_GRP_BRACE_GAP              5.0f   //"InstrGroup/Space after brace bar/"
+#define LOMSE_GRP_SPACE_AFTER_NAME      10.0f   //"InstrGroup/Space after name"
+#define LOMSE_GRP_BRACKET_WIDTH          5.0f   //"InstrGroup/Width of bracket"
+#define LOMSE_GRP_BRACKET_GAP            5.0f   //"InstrGroup/Space after bracket"
+#define LOMSE_GRP_BRACE_WIDTH           12.5f   //"InstrGroup/Width of brace"
+#define LOMSE_GRP_BRACE_GAP              5.0f   //"InstrGroup/Space after brace"
 
 //Notes / accidentals
 #define LOMSE_STEM_THICKNESS             1.2f
