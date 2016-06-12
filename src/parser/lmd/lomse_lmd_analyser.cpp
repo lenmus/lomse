@@ -2434,27 +2434,8 @@ public:
             set_symbol(pGrp);
 
 //        // joinBarlines?
-//        if (get_optional(k_joinBarlines))
-//            set_join_barlines(pGrp);
-//
-//        // <instrument>+
-//        if (!more_children_to_analyse())
-//        {
-//            error_msg("Missing instruments in group!. Group ignored.");
-//            delete pGrp;
-//            return NULL;
-//        }
-//        else
-//        {
-//            while (more_children_to_analyse())
-//            {
-//                if (!analyse_optional(k_instrument, pGrp))
-//                {
-//                    error_invalid_child();
-//                    move_to_next_child();
-//                }
-//            }
-//        }
+//        if (get_optional("joinBarlines"))
+//            pGrp->set_join_barlines(true);
 //
         error_if_more_elements();
 
@@ -2474,13 +2455,8 @@ protected:
         else if (symbol == "none")
             pGrp->set_symbol(ImoInstrGroup::k_none);
         else
-            error_msg("Missing or invalid <grpSymbol>. Must be 'none', 'brace' or 'bracket'. 'brace' assumed.");
-    }
-
-    void set_join_barlines(ImoInstrGroup* pGrp)
-    {
-        m_childToAnalyse = m_childToAnalyse.first_child();
-        pGrp->set_join_barlines( get_bool_value(true) );
+            error_msg("Invalid value for <grpSymbol>. Must be 'none', 'brace' or "
+                      "'bracket'. 'none' assumed.");
     }
 
     ImoScoreText* get_name_abbrev()

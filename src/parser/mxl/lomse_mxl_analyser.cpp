@@ -141,6 +141,78 @@ void PartList::check_if_missing_parts(ostream& reporter)
 
 
 //=======================================================================================
+// PartGroups implementation: helper class to manage open <part-group> tags
+//=======================================================================================
+PartGroups::PartGroups()
+{
+}
+
+//---------------------------------------------------------------------------------------
+PartGroups::~PartGroups()
+{
+    map<int, ImoInstrGroup*>::iterator it;
+    for (it = m_groups.begin(); it != m_groups.end(); ++it)
+        delete it->second;
+
+    m_groups.clear();
+}
+
+//---------------------------------------------------------------------------------------
+void PartGroups::add_instrument_to_groups(ImoInstrument* pInstr)
+{
+    map<int, ImoInstrGroup*>::const_iterator it;
+    for (it = m_groups.begin(); it != m_groups.end(); ++it)
+    {
+        ImoInstrGroup* pGrp = it->second;
+        pGrp->add_instrument(pInstr);
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void PartGroups::start_group(int number, ImoInstrGroup* pGrp)
+{
+    m_groups[number] = pGrp;
+}
+
+//---------------------------------------------------------------------------------------
+void PartGroups::remove_group(int number)
+{
+    map<int, ImoInstrGroup*>::iterator it = m_groups.find(number);
+	if (it != m_groups.end())
+        m_groups.erase(it);
+}
+
+//---------------------------------------------------------------------------------------
+bool PartGroups::group_exists(int number)
+{
+    map<int, ImoInstrGroup*>::const_iterator it = m_groups.find(number);
+	return (it != m_groups.end());
+}
+
+//---------------------------------------------------------------------------------------
+ImoInstrGroup* PartGroups::get_group(int number)
+{
+    map<int, ImoInstrGroup*>::iterator it = m_groups.find(number);
+	if (it != m_groups.end())
+        return it->second;
+    else
+        return NULL;
+
+}
+
+//---------------------------------------------------------------------------------------
+void PartGroups::check_if_all_groups_are_closed(ostream& reporter)
+{
+    map<int, ImoInstrGroup*>::const_iterator it;
+    for (it = m_groups.begin(); it != m_groups.end(); ++it)
+    {
+        reporter << "Error: missing <part-group type='stop'> for <part-group> number='"
+                 << it->first << "'." << endl;
+    }
+}
+
+
+//=======================================================================================
 // Enum to assign a int to each valid MusicXML element
 enum EMxlTag
 {
@@ -162,6 +234,7 @@ enum EMxlTag
     k_mxl_tag_note,
     k_mxl_tag_ornaments,
     k_mxl_tag_part,
+    k_mxl_tag_part_group,
     k_mxl_tag_part_list,
     k_mxl_tag_part_name,
     k_mxl_tag_pitch,
@@ -900,14 +973,7 @@ int MxlElementAnalyser::get_attribute_as_integer(const string& name, int nDefaul
     long nNumber;
     std::istringstream iss(number);
     if ((iss >> std::dec >> nNumber).fail())
-    {
-        stringstream replacement;
-        replacement << nDefault;
-        report_msg(m_pAnalyser->get_line_number(&m_analysedNode),
-            "Invalid integer number '" + number + "'. Replaced by '"
-            + replacement.str() + "'.");
         return nDefault;
-    }
     else
         return nNumber;
 }
@@ -3486,7 +3552,181 @@ protected:
 
 
 //@--------------------------------------------------------------------------------------
-//@ <part-list> = <part-group>* <score-part> { <part-group> | <score-part> }*
+//@ <!ELEMENT part-group (group-name?, group-name-display?,
+//@           group-abbreviation?, group-abbreviation-display?,
+//@           group-symbol?, group-barline?, group-time?, %editorial;)>
+//@
+//@ attrb:  number="4" type="start"
+//
+class PartGroupMxlAnalyser : public MxlElementAnalyser
+{
+public:
+    PartGroupMxlAnalyser(MxlAnalyser* pAnalyser, ostream& reporter,
+                         LibraryScope& libraryScope, ImoObj* pAnchor)
+        : MxlElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    ImoObj* do_analysis()
+    {
+        //attrb: number
+        int number = get_attribute_as_integer("number", -1);
+        if (number == -1)
+        {
+            error_msg("<part-group>: invalid or missing mandatory 'number' attribute."
+                      " Tag ignored.");
+            return NULL;
+        }
+
+        //attrb: type = "start | stop"
+        string type = get_optional_string_attribute("type", "");
+        if (type.empty())
+        {
+            error_msg("<part-group>: missing mandatory 'type' attribute. Tag ignored.");
+            return NULL;
+        }
+
+        if (type == "stop")
+        {
+            ImoInstrGroup* pGrp = m_pAnalyser->get_part_group(number);
+            if (pGrp)
+            {
+                ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
+                pScore->add_instruments_group(pGrp);
+                m_pAnalyser->remove_part_group(number);
+                return pGrp;
+            }
+            else
+            {
+                error_msg("<part-group> type='stop': missing <part-group> with the same number and type='start'.");
+                return NULL;
+            }
+        }
+
+        if (type != "start")
+        {
+            error_msg("<part-group>: invalid mandatory 'type' attribute. Must be "
+                      "'start' or 'stop'.");
+            return NULL;
+        }
+
+        ImoInstrGroup* pGrp = m_pAnalyser->start_part_group(number);
+        if (pGrp == NULL)
+        {
+            error_msg("<part-group> type=start for number already started and not stopped");
+            return NULL;
+        }
+
+        // group-name?
+        if (get_optional("group-name"))
+        {
+            ImoScoreText* pText = get_name_abbrev();
+            if (pText)
+                pGrp->set_name(pText);
+        }
+
+        // group-name-display?
+        if (get_optional("group-name-display"))
+        {
+            ;   //TODO
+        }
+
+        // group-abbreviation?
+        if (get_optional("group-abbreviation"))
+        {
+            ImoScoreText* pText = get_name_abbrev();
+            if (pText)
+                pGrp->set_abbrev(pText);
+        }
+
+        // group-abbreviation-display?
+        if (get_optional("group-abbreviation-display"))
+        {
+            ;   //TODO
+        }
+
+        // group-symbol?
+        if (get_optional("group-symbol"))
+        {
+            set_symbol(pGrp);
+        }
+
+        // group-barline?
+        if (get_optional("group-barline"))
+        {
+            set_join_barlines(pGrp);
+        }
+
+        // group-time?
+        if (get_optional("group-time"))
+        {
+            ;   //TODO
+        }
+
+        error_if_more_elements();
+
+        return NULL;
+    }
+
+protected:
+
+    void set_symbol(ImoInstrGroup* pGrp)
+    {
+        string symbol = m_childToAnalyse.first_child().value();
+        if (symbol == "brace")
+            pGrp->set_symbol(ImoInstrGroup::k_brace);
+        else if (symbol == "bracket")
+            pGrp->set_symbol(ImoInstrGroup::k_bracket);
+        else if (symbol == "none")
+            pGrp->set_symbol(ImoInstrGroup::k_none);
+        else
+            error_msg("Invalid value for <group-symbol>. Must be "
+                      "'none', 'brace', 'line' or 'bracket'. 'none' assumed.");
+    }
+
+    void set_join_barlines(ImoInstrGroup* pGrp)
+    {
+        string value = m_childToAnalyse.value();
+        if (value == "yes")
+            pGrp->set_join_barlines(true);
+        else if (value == "no")
+            pGrp->set_join_barlines(false);
+        else if (value == "Mensurstrich")
+        {
+            pGrp->set_join_barlines(true);
+            error_msg("Value 'Mensurstrich' for <group-barline> not yet "
+                      "supported. Replaced by 'yes'.");
+        }
+        else
+        {
+            pGrp->set_join_barlines(true);
+            error_msg("Invalid value for <group-barline>. Must be "
+                      "'yes', 'no' or 'Mensurstrich'. 'yes' assumed.");
+        }
+    }
+
+    ImoScoreText* get_name_abbrev()
+    {
+        string name = m_childToAnalyse.value();
+        if (!name.empty())
+        {
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            ImoScoreText* pText = static_cast<ImoScoreText*>(
+                                        ImFactory::inject(k_imo_score_text, pDoc));
+            pText->set_text(name);
+
+            ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
+            ImoStyle* pStyle = NULL;
+            if (pScore)     //in unit tests the score might not exist
+                pStyle = pScore->get_default_style();
+            pText->set_style(pStyle);
+            return pText;
+        }
+        return NULL;
+    }
+};
+
+
+//@--------------------------------------------------------------------------------------
+//@ <!ELEMENT part-list (part-group*, score-part, (part-group | score-part)*)>
 //@ attrb:
 //@ Doc:  the <part-list> element lists all the parts or instruments in a musical score
 //
@@ -3500,22 +3740,19 @@ public:
 
     ImoObj* do_analysis()
     {
-        // <part-group>*
-        while (get_optional("part-group"))
-        {
-            ;   //TODO: add part-group to table
-        }
+        // part-group*
+        while (analyse_optional("part-group"));
 
-        // <score-part>
+        // score-part
         analyse_mandatory("score-part");
 
-        // { <part-group> | <score-part> }*
+        // { part-group | score-part }*
         while (more_children_to_analyse())
         {
             if (analyse_optional("score-part"))
                 ;
             else if (analyse_optional("part-group"))
-                ;   //TODO: add part-group to table
+                ;
             else
             {
                 error_invalid_child();
@@ -3524,6 +3761,8 @@ public:
         }
 
         error_if_more_elements();
+
+        m_pAnalyser->check_if_all_groups_are_closed();
 
         return NULL;
     }
@@ -4573,6 +4812,7 @@ MxlAnalyser::MxlAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     m_NameToEnum["note"] = k_mxl_tag_note;
     m_NameToEnum["ornaments"] = k_mxl_tag_ornaments;
     m_NameToEnum["part"] = k_mxl_tag_part;
+    m_NameToEnum["part-group"] = k_mxl_tag_part_group;
     m_NameToEnum["part-list"] = k_mxl_tag_part_list;
     m_NameToEnum["part-name"] = k_mxl_tag_part_name;
     m_NameToEnum["pitch"] = k_mxl_tag_pitch;
@@ -4707,6 +4947,40 @@ void MxlAnalyser::add_lyrics_data(ImoNote* pNote, ImoLyricsData* pData)
 
     //add pData & pNote to the relation
     pNote->include_in_relation(pDoc, pLyrics, pData);
+}
+
+//---------------------------------------------------------------------------------------
+ImoInstrGroup* MxlAnalyser::start_part_group(int number)
+{
+    if (m_partGroups.group_exists(number))
+        return NULL;
+
+    Document* pDoc = get_document_being_analysed();
+    ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
+                                    ImFactory::inject(k_imo_instr_group, pDoc));
+
+    m_partGroups.start_group(number, pGrp);
+    return pGrp;
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::remove_part_group(int number)
+{
+    ImoInstrGroup* pGrp = m_partGroups.get_group(number);
+    if (pGrp)
+        m_partGroups.remove_group(number);
+}
+
+//---------------------------------------------------------------------------------------
+ImoInstrGroup* MxlAnalyser::get_part_group(int number)
+{
+    return m_partGroups.get_group(number);
+}
+
+//---------------------------------------------------------------------------------------
+void MxlAnalyser::check_if_all_groups_are_closed()
+{
+    m_partGroups.check_if_all_groups_are_closed(m_reporter);
 }
 
 //---------------------------------------------------------------------------------------
@@ -5098,6 +5372,7 @@ MxlElementAnalyser* MxlAnalyser::new_analyser(const string& name, ImoObj* pAncho
         case k_mxl_tag_note:                 return LOMSE_NEW NoteRestMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_ornaments:            return LOMSE_NEW OrnamentsMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part:                 return LOMSE_NEW PartMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_mxl_tag_part_group:           return LOMSE_NEW PartGroupMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_part_list:            return LOMSE_NEW PartListMxlAnalyser(this, m_reporter, m_libraryScope);
         case k_mxl_tag_part_name:            return LOMSE_NEW PartNameMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_mxl_tag_pitch:                return LOMSE_NEW PitchMxlAnalyser(this, m_reporter, m_libraryScope, pAnchor);
