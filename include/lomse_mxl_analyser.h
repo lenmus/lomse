@@ -170,6 +170,40 @@ protected:
 
 };
 
+//---------------------------------------------------------------------------------------
+// helper class to manage open <part-group> tags
+class PartGroups
+{
+protected:
+    map<int, ImoInstrGroup*> m_groups;
+
+//    int m_number;
+//    int m_symbol;
+//    bool m_fBarline;
+
+public:
+    PartGroups();
+    ~PartGroups();
+
+//    void set_name(const string& name);
+//    void set_name_display(const string& name);
+//    void set_abbreviation(const string& abbrev);
+//    void set_abbreviation_display(const string& abbrev);
+//    void set_number(int num);
+//    void set_symbol(int symbol);
+//    void set_barline(bool value);
+
+    void add_instrument_to_groups(ImoInstrument* pInstr);
+    void start_group(int number, ImoInstrGroup* pGrp);
+    void remove_group(int number);
+    bool group_exists(int number);
+    ImoInstrGroup* get_group(int number);
+    void check_if_all_groups_are_closed(ostream& reporter);
+
+protected:
+
+};
+
 
 
 //---------------------------------------------------------------------------------------
@@ -206,7 +240,8 @@ protected:
     ImoNote*        m_pLastNote;        //last note added to the score
     ImoBarline*     m_pLastBarline;     //last barline added to current instrument
     ImoDocument*    m_pImoDoc;          //the document containing the score
-    PartList        m_partList;         //the list of instruments and their grouping
+    PartList        m_partList;         //the list of instruments
+    PartGroups      m_partGroups;       //the list of intrument groups
     TimeUnits       m_time;             //time-position counter
     TimeUnits       m_maxTime;          //max time-position reached
     float           m_divisions;        //fractions of quarter note to use as units for 'duration' values
@@ -235,20 +270,28 @@ public:
     ImoObj* analyse_node(XmlNode* pNode, ImoObj* pAnchor=NULL);
     void prepare_for_new_instrument_content();
 
-    //global info: setters, getters and checkers
-    int set_musicxml_version(const string& version);
-    inline int get_musicxml_version() { return m_musicxmlVersion; }
-    void add_all_instruments(ImoScore* pScore) { m_partList.add_all_instruments(pScore); }
+    //part-list
     bool part_list_is_valid() { return m_partList.get_num_items() > 0; }
-    void add_score_part(const string& id, ImoInstrument* pInstrument)
-    {
+    void add_score_part(const string& id, ImoInstrument* pInstrument) {
         m_partList.add_score_part(id, pInstrument);
+        m_partGroups.add_instrument_to_groups(pInstrument);
     }
-    ImoInstrument* get_instrument(const string& id) { return m_partList.get_instrument(id); }
+    void add_all_instruments(ImoScore* pScore) { m_partList.add_all_instruments(pScore); }
     bool mark_part_as_added(const string& id) {
         return m_partList.mark_part_as_added(id);
     }
     void check_if_missing_parts() { m_partList.check_if_missing_parts(m_reporter); }
+
+    //part-group
+    ImoInstrGroup* start_part_group(int number);
+    void remove_part_group(int number);
+    ImoInstrGroup* get_part_group(int number);
+    void check_if_all_groups_are_closed();
+
+    //global info: setters, getters and checkers
+    int set_musicxml_version(const string& version);
+    inline int get_musicxml_version() { return m_musicxmlVersion; }
+    ImoInstrument* get_instrument(const string& id) { return m_partList.get_instrument(id); }
     float current_divisions() { return m_divisions; }
     void set_current_divisions(float value) { m_divisions = value; }
     TimeUnits duration_to_timepos(int duration);

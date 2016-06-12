@@ -113,7 +113,7 @@ public:
 SUITE(MxlAnalyserTest)
 {
 
-    // score_partwise ------------------------------------------------------------------------
+    //@ score_partwise ------------------------------------------------------------------------
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_1)
     {
@@ -129,7 +129,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00001" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -156,7 +156,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00002" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( a.get_musicxml_version() == 100 );
@@ -180,7 +180,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << "MxlAnalyser Test  00003" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -208,7 +208,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << "MxlAnalyser Test  00004" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -245,7 +245,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << "MxlAnalyser Test  00005" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -281,7 +281,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << "MxlAnalyser Test  00006" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -311,7 +311,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << "MxlAnalyser Test  00007" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -344,7 +344,7 @@ SUITE(MxlAnalyserTest)
         MxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
-//        cout << "MxlAnalyser Test  00008" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -382,7 +382,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00009" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -411,7 +411,7 @@ SUITE(MxlAnalyserTest)
     }
 
 
-    // score-part -------------------------------------------------------------
+    //@ score-part -------------------------------------------------------------
 
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_part_101)
@@ -426,7 +426,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00101" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -448,12 +448,547 @@ SUITE(MxlAnalyserTest)
     }
 
 
-    // clef -------------------------------------------------------------
+    //@ part-group -------------------------------------------------------------
 
-
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_120)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_110)
     {
-        //@00120 minimum content parsed ok
+        //@00110 <part-group> type=start matched with type=stop
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("<score-partwise version='3.0'><part-list>"
+            "<part-group number='1' type='start'></part-group>"
+            "<score-part id='P1'><part-name>Voice</part-name></score-part>"
+            "<score-part id='P2'><part-name>Piano</part-name></score-part>"
+            "<part-group number='1' type='stop'></part-group>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups != NULL );
+        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+        CHECK( pGroup != NULL );
+        CHECK( pGroup->get_instrument(0) != NULL );
+        CHECK( pGroup->get_instrument(1) != NULL );
+        CHECK( pGroup->get_abbrev_string() == "" );
+        CHECK( pGroup->get_name_string() == "" );
+        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_111)
+    {
+        //@00111 <part-group> type=start present but missing type=stop
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Error: missing <part-group type='stop'> for <part-group> number='1'."
+                 << endl;
+        parser.parse_text("<score-partwise version='3.0'><part-list>"
+            "<part-group number='1' type='start'></part-group>"
+            "<score-part id='P1'><part-name>Voice</part-name></score-part>"
+            "<score-part id='P2'><part-name>Piano</part-name></score-part>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups == NULL );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_112)
+    {
+        //@00112 <part-group> missing number
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. <part-group>: invalid or missing mandatory 'number' "
+                    "attribute. Tag ignored." << endl;
+        parser.parse_text("<score-partwise version='3.0'><part-list>"
+            "<part-group type='start'></part-group>"
+            "<score-part id='P1'><part-name>Voice</part-name></score-part>"
+            "<score-part id='P2'><part-name>Piano</part-name></score-part>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups == NULL );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_113)
+    {
+        //@00113 <part-group> missing type
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. <part-group>: missing mandatory 'type' attribute. Tag ignored."
+                 << endl;
+        parser.parse_text("<score-partwise version='3.0'><part-list>"
+            "<part-group number='1'></part-group>"
+            "<score-part id='P1'><part-name>Voice</part-name></score-part>"
+            "<score-part id='P2'><part-name>Piano</part-name></score-part>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups == NULL );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_114)
+    {
+        //@00114 <part-group> missing type start for this number
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. <part-group> type='stop': missing <part-group> with the "
+                    "same number and type='start'." << endl;
+        parser.parse_text("<score-partwise version='3.0'><part-list>"
+            "<score-part id='P1'><part-name>Voice</part-name></score-part>"
+            "<score-part id='P2'><part-name>Piano</part-name></score-part>"
+            "<part-group number='1' type='stop'></part-group>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups == NULL );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_115)
+    {
+        //@00115 <part-group> type is not either 'start' or 'stop'
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. <part-group>: invalid mandatory 'type' attribute. Must be "
+                    "'start' or 'stop'." << endl;
+        parser.parse_text("<score-partwise version='3.0'><part-list>"
+            "<part-group number='1' type='begin'></part-group>"
+            "<score-part id='P1'><part-name>Voice</part-name></score-part>"
+            "<score-part id='P2'><part-name>Piano</part-name></score-part>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups == NULL );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_116)
+    {
+        //@00116 <part-group> type=start for number already started and not stopped
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. <part-group> type=start for number already started and not stopped"
+                 << endl;
+        parser.parse_text("<score-partwise version='3.0'><part-list>"
+            "<part-group number='1' type='start'></part-group>"
+            "<score-part id='P1'><part-name>Voice</part-name></score-part>"
+            "<score-part id='P2'><part-name>Piano</part-name></score-part>"
+            "<part-group number='1' type='start'></part-group>"
+            "<part-group number='1' type='stop'></part-group>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups != NULL );
+        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+        CHECK( pGroup != NULL );
+        CHECK( pGroup->get_instrument(0) != NULL );
+        CHECK( pGroup->get_instrument(1) != NULL );
+        CHECK( pGroup->get_abbrev_string() == "" );
+        CHECK( pGroup->get_name_string() == "" );
+        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_117)
+    {
+        //@00117 <part-group> group name and group abbrev ok
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("<score-partwise version='3.0'><part-list>"
+            "<part-group number='1' type='start'>"
+                "<group-name>Group</group-name>"
+                "<group-abbreviation>Grp</group-abbreviation>"
+            "</part-group>"
+            "<score-part id='P1'><part-name>Voice</part-name></score-part>"
+            "<score-part id='P2'><part-name>Piano</part-name></score-part>"
+            "<part-group number='1' type='stop'></part-group>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups != NULL );
+        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+        CHECK( pGroup != NULL );
+        CHECK( pGroup->get_instrument(0) != NULL );
+        CHECK( pGroup->get_instrument(1) != NULL );
+        CHECK( pGroup->get_abbrev_string() == "Grp" );
+        CHECK( pGroup->get_name_string() == "Group" );
+        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_118)
+    {
+        //@00118 <part-group> group symbol ok
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("<score-partwise version='3.0'><part-list>"
+            "<part-group number='1' type='start'>"
+                "<group-name>Group</group-name>"
+                "<group-symbol>brace</group-symbol>"
+            "</part-group>"
+            "<score-part id='P1'><part-name>Voice</part-name></score-part>"
+            "<score-part id='P2'><part-name>Piano</part-name></score-part>"
+            "<part-group number='1' type='stop'></part-group>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups != NULL );
+        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+        CHECK( pGroup != NULL );
+        CHECK( pGroup->get_instrument(0) != NULL );
+        CHECK( pGroup->get_instrument(1) != NULL );
+        CHECK( pGroup->get_abbrev_string() == "" );
+        CHECK( pGroup->get_name_string() == "Group" );
+        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_brace );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_119)
+    {
+        //@00119 <part-group> group symbol: invalid value
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        expected << "Line 0. Invalid value for <group-symbol>. Must be "
+                    "'none', 'brace', 'line' or 'bracket'. 'none' assumed." << endl;
+        parser.parse_text("<score-partwise version='3.0'><part-list>"
+            "<part-group number='1' type='start'>"
+                "<group-name>Group</group-name>"
+                "<group-symbol>dots</group-symbol>"
+            "</part-group>"
+            "<score-part id='P1'><part-name>Voice</part-name></score-part>"
+            "<score-part id='P2'><part-name>Piano</part-name></score-part>"
+            "<part-group number='1' type='stop'></part-group>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups != NULL );
+        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+        CHECK( pGroup != NULL );
+        CHECK( pGroup->get_instrument(0) != NULL );
+        CHECK( pGroup->get_instrument(1) != NULL );
+        CHECK( pGroup->get_abbrev_string() == "" );
+        CHECK( pGroup->get_name_string() == "Group" );
+        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
+        CHECK( pGroup->join_barlines() == true );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_120)
+    {
+        //@00120 <part-group> group symbol: invalid value
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("<score-partwise version='3.0'><part-list>"
+            "<part-group number='1' type='start'>"
+                "<group-name>Group</group-name>"
+                "<group-symbol>bracket</group-symbol>"
+                "<group-barline>no</group-barline>"
+            "</part-group>"
+            "<score-part id='P1'><part-name>Voice</part-name></score-part>"
+            "<score-part id='P2'><part-name>Piano</part-name></score-part>"
+            "<part-group number='1' type='stop'></part-group>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups != NULL );
+        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+        CHECK( pGroup != NULL );
+        CHECK( pGroup->get_instrument(0) != NULL );
+        CHECK( pGroup->get_instrument(1) != NULL );
+        CHECK( pGroup->get_abbrev_string() == "" );
+        CHECK( pGroup->get_name_string() == "Group" );
+        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
+        CHECK( pGroup->join_barlines() == false );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+
+    //@ clef -------------------------------------------------------------
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_130)
+    {
+        //@00130 minimum content parsed ok
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -463,7 +998,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00120" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -478,9 +1013,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_121)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_131)
     {
-        //@00121 error in clef sign
+        //@00131 error in clef sign
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -491,7 +1026,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00121" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -505,9 +1040,9 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_122)
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_clef_132)
     {
-        //@00122 staff num parsed ok
+        //@00132 staff num parsed ok
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -517,7 +1052,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00120" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -532,7 +1067,7 @@ SUITE(MxlAnalyserTest)
         delete pIModel;
     }
 
-    // time ---------------------------------------------------------------------------
+    //@ time ---------------------------------------------------------------------------
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_time_140)
     {
@@ -546,7 +1081,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00140" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -556,7 +1091,8 @@ SUITE(MxlAnalyserTest)
         CHECK( pTimeSignature != NULL );
         CHECK( pTimeSignature->get_top_number() == 6 );
         CHECK( pTimeSignature->get_bottom_number() == 8 );
-//        cout << "MxlAnalyser Test  00140: top number=" << pTimeSignature->get_top_number()
+//        cout << UnitTest::CurrentTest::Details()->testName
+//             << ": top number=" << pTimeSignature->get_top_number()
 //             << ", bottom: " << pTimeSignature->get_bottom_number() << endl;
 
         a.do_not_delete_instruments_in_destructor();
@@ -576,7 +1112,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00141" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -592,7 +1128,7 @@ SUITE(MxlAnalyserTest)
     }
 
 
-    // key ------------------------------------------------------------------------------
+    //@ key ------------------------------------------------------------------------------
 
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_key_160)
@@ -607,7 +1143,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00160" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -634,7 +1170,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00160" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -677,7 +1213,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00180" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -722,7 +1258,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00181" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -752,7 +1288,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00182" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "divisons:" << a.current_divisions() << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
@@ -779,7 +1315,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00300" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -816,7 +1352,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00301" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -852,7 +1388,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00302" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -888,7 +1424,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00303" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -926,7 +1462,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00304" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -964,7 +1500,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00305" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1003,7 +1539,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00306" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1047,7 +1583,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00307" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1103,7 +1639,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00308" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1155,7 +1691,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00303" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1203,7 +1739,7 @@ SUITE(MxlAnalyserTest)
 //        XmlNode* tree = parser.get_tree_root();
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //
-////        cout << "MxlAnalyser Test  00309" << endl;
+////        cout << UnitTest::CurrentTest::Details()->testName << endl;
 ////        cout << "[" << errormsg.str() << "]" << endl;
 ////        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
@@ -1294,7 +1830,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00352" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1327,7 +1863,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  00400" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
@@ -1359,7 +1895,7 @@ SUITE(MxlAnalyserTest)
 //        XmlNode* tree = parser.get_tree_root();
 //        InternalModel* pIModel = a.analyse_tree(tree, "string:");
 //
-//        cout << "MxlAnalyser Test  00420" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
 //        CHECK( errormsg.str() == expected.str() );
@@ -1400,7 +1936,7 @@ SUITE(MxlAnalyserTest)
         XmlNode* tree = parser.get_tree_root();
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
 
-//        cout << "MxlAnalyser Test  99999" << endl;
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
 //        cout << "[" << errormsg.str() << "]" << endl;
 //        cout << "[" << expected.str() << "]" << endl;
         CHECK( errormsg.str() == expected.str() );
