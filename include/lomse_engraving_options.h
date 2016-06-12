@@ -58,8 +58,11 @@ namespace lomse
 #define LOMSE_GRP_SPACE_AFTER_NAME      10.0f   //"InstrGroup/Space after name"
 #define LOMSE_GRP_BRACKET_WIDTH          5.0f   //"InstrGroup/Width of bracket"
 #define LOMSE_GRP_BRACKET_GAP            5.0f   //"InstrGroup/Space after bracket"
+#define LOMSE_GRP_BRACKET_HOOK          10.0f   //"InstrGroup/Length of hook for bracket"
 #define LOMSE_GRP_BRACE_WIDTH           12.5f   //"InstrGroup/Width of brace"
 #define LOMSE_GRP_BRACE_GAP              5.0f   //"InstrGroup/Space after brace"
+#define LOMSE_GRP_SQBRACKET_WIDTH        8.0f   //"InstrGroup/Width of squared bracket"
+#define LOMSE_GRP_SQBRACKET_LINE         2.0f   //"InstrGroup/line thickness for squared bracket"
 
 //Notes / accidentals
 #define LOMSE_STEM_THICKNESS             1.2f

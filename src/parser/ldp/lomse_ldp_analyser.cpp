@@ -2448,6 +2448,8 @@ protected:
             pGrp->set_symbol(ImoInstrGroup::k_brace);
         else if (symbol == "bracket")
             pGrp->set_symbol(ImoInstrGroup::k_bracket);
+        else if (symbol == "line")
+            pGrp->set_symbol(ImoInstrGroup::k_line);
         else if (symbol == "none")
             pGrp->set_symbol(ImoInstrGroup::k_none);
         else

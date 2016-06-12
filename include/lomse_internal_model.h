@@ -3088,7 +3088,7 @@ protected:
 public:
     virtual ~ImoInstrGroup();
 
-    enum { k_none=0, k_default, k_brace, k_bracket, };
+    enum { k_none=0, k_brace, k_bracket, k_line, };
 
     //getters
     inline bool join_barlines() { return m_fJoinBarlines; }

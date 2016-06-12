@@ -201,6 +201,7 @@ const string& GmoObj::get_name(int objtype)
         m_typeToName[k_shape_rest_glyph]        = "rest-glyph     ";
         m_typeToName[k_shape_slur]              = "slur           ";
         m_typeToName[k_shape_stem]              = "stem           ";
+        m_typeToName[k_shape_squared_bracket]   = "squared-bracket";
         m_typeToName[k_shape_staff]             = "staff          ";
         m_typeToName[k_shape_technical]         = "technical      ";
         m_typeToName[k_shape_text]              = "text           ";

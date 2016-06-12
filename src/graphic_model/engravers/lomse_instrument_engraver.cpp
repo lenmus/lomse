@@ -41,6 +41,7 @@
 #include "lomse_score_layouter.h"
 #include "lomse_right_aligner.h"
 
+#include "lomse_shapes.h"
 
 namespace lomse
 {
@@ -408,11 +409,20 @@ void GroupEngraver::measure_brace_or_bracket()
 
         LUnits uBracketWidth;
         if (symbol == ImoInstrGroup::k_brace)
+        {
             uBracketWidth = tenths_to_logical(LOMSE_GRP_BRACE_WIDTH);
-        else
+            m_uBracketGap = tenths_to_logical(LOMSE_GRP_BRACKET_GAP);
+        }
+        else if  (symbol == ImoInstrGroup::k_bracket)
+        {
             uBracketWidth = tenths_to_logical(LOMSE_GRP_BRACKET_WIDTH);
-
-        m_uBracketGap = tenths_to_logical(LOMSE_GRP_BRACKET_GAP);
+            m_uBracketGap = tenths_to_logical(LOMSE_GRP_BRACKET_GAP);
+        }
+        else
+        {
+            uBracketWidth = tenths_to_logical(LOMSE_GRP_SQBRACKET_WIDTH);
+            m_uBracketGap = tenths_to_logical(1.0f);   //0.0f;
+        }
 
         m_bracketFirstBox.x = 0.0f;
         m_bracketFirstBox.y = m_stavesTop;
@@ -425,7 +435,7 @@ void GroupEngraver::measure_brace_or_bracket()
 bool GroupEngraver::has_brace_or_bracket()
 {
     int symbol = m_pGroup->get_symbol();
-    return (symbol == ImoInstrGroup::k_brace || symbol == ImoInstrGroup::k_bracket);
+    return (symbol != ImoInstrGroup::k_none);
 }
 
 //---------------------------------------------------------------------------------------
@@ -494,11 +504,17 @@ void GroupEngraver::add_brace_bracket(GmoBoxSystem* pBox, int iSystem)
         if (symbol == ImoInstrGroup::k_brace)
             pShape = LOMSE_NEW GmoShapeBrace(m_pGroup, idx, xLeft, yTop,
                                              xRight, yBottom, Color(0,0,0));
-        else
+        else if (symbol == ImoInstrGroup::k_bracket)
         {
-            LUnits dyHook = tenths_to_logical(6.0f);
+            LUnits dyHook = tenths_to_logical(LOMSE_GRP_BRACKET_HOOK);
             pShape = LOMSE_NEW GmoShapeBracket(m_pGroup, idx, xLeft, yTop, xRight,
                                                yBottom, dyHook, Color(0,0,0));
+        }
+        else
+        {
+            LUnits lineThickness = tenths_to_logical(LOMSE_GRP_SQBRACKET_LINE);
+            pShape = LOMSE_NEW GmoShapeSquaredBracket(m_pGroup, idx, xLeft, yTop, xRight,
+                                               yBottom, lineThickness, Color(0,0,0));
         }
         pBox->add_shape(pShape, GmoShape::k_layer_staff);
     }

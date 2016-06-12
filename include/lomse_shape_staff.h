@@ -55,7 +55,7 @@ public: //TO_FIX: constructor invoked from test
 public:
     ~GmoShapeStaff();
 
-//	//implementation of pure virtual methods in base class
+	//implementation of pure virtual methods in base class
     void on_draw(Drawer* pDrawer, RenderOptions& opt);
 //    void Shift(LUnits xIncr, LUnits yIncr);
 

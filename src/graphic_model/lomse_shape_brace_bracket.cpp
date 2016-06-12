@@ -323,4 +323,54 @@ unsigned GmoShapeBracket::vertex(double* px, double* py)
 }
 
 
+
+//---------------------------------------------------------------------------------------
+// Implementation of GmoShapeSquaredBracket
+//---------------------------------------------------------------------------------------
+GmoShapeSquaredBracket::GmoShapeSquaredBracket(ImoObj* pCreatorImo, ShapeId idx,
+                                               LUnits xLeft, LUnits yTop,
+                                               LUnits xRight, LUnits yBottom,
+                                               LUnits lineThickness, Color color)
+    : GmoSimpleShape(pCreatorImo, GmoObj::k_shape_squared_bracket, idx, color)
+    , m_lineThickness(lineThickness)
+{
+    set_origin(xLeft, yTop);
+	set_width(xRight - xLeft);
+	set_height(yBottom - yTop);
+
+}
+
+//---------------------------------------------------------------------------------------
+GmoShapeSquaredBracket::~GmoShapeSquaredBracket()
+{
+}
+
+//---------------------------------------------------------------------------------------
+void GmoShapeSquaredBracket::on_draw(Drawer* pDrawer, RenderOptions& opt)
+{
+    Color color = determine_color_to_use(opt);
+    pDrawer->begin_path();
+    pDrawer->stroke(color);
+    pDrawer->fill(Color(0,0,0,0));  //transparent
+    pDrawer->stroke_width(m_lineThickness);
+
+    //top hook
+    double yPos = m_origin.y;
+    pDrawer->move_to(m_origin.x + m_size.width, yPos);
+    pDrawer->hline_to(m_origin.x);
+
+    //vertical line
+    yPos += m_size.height;
+    pDrawer->vline_to(yPos);
+
+    //bottom hook
+    pDrawer->hline_to(m_origin.x + m_size.width);
+
+    pDrawer->end_path();
+    pDrawer->render();
+
+    GmoSimpleShape::on_draw(pDrawer, opt);
+}
+
+
 }  //namespace lomse

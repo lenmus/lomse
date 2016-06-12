@@ -113,6 +113,29 @@ protected:
 };
 
 
+//---------------------------------------------------------------------------------------
+class GmoShapeSquaredBracket : public GmoSimpleShape
+{
+protected:
+    LUnits m_lineThickness;
+
+    friend class InstrumentEngraver;
+    friend class GroupEngraver;
+    GmoShapeSquaredBracket(ImoObj* pCreatorImo, ShapeId idx, LUnits xLeft, LUnits yTop,
+                           LUnits xRight, LUnits yBottom, LUnits lineThickness,
+                           Color color);
+
+public:
+    ~GmoShapeSquaredBracket();
+
+	//implementation of pure virtual methods in base class
+    void on_draw(Drawer* pDrawer, RenderOptions& opt);
+
+protected:
+
+};
+
+
 }   //namespace lomse
 
 #endif    // __LOMSE_SHAPE_BRACE_BRACKET_H__
