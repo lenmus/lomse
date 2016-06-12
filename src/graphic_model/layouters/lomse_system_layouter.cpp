@@ -973,10 +973,7 @@ void SystemLayouter::engrave_system(LUnits indent, int iFirstCol, int iLastCol,
     engrave_instrument_details();
     add_instruments_info();
 
-    ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.Hide");
-    bool fDrawStafflines = (pOpt == NULL || pOpt->get_bool_value() == false);
-    if (!m_pScoreLyt->is_system_empty(m_iSystem) && fDrawStafflines)
-        add_initial_line_joining_all_staves_in_system();
+    add_initial_line_joining_all_staves_in_system();
 }
 
 //---------------------------------------------------------------------------------------
@@ -1374,8 +1371,17 @@ void SystemLayouter::add_initial_line_joining_all_staves_in_system()
     //instrument. This should be changed and the line should go from first visible
     //staff to last visible one.
 
-    if (m_pScoreMeter->is_empty_score())
+    ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.Hide");
+    bool fDrawStafflines = (pOpt == NULL || pOpt->get_bool_value() == false);
+    if (!fDrawStafflines)
         return;
+
+    if (m_pScore->get_num_instruments() == 1)
+    {
+        ImoInstrument* pInstr = m_pScore->get_instrument(0);
+        if (pInstr->get_num_staves() == 1 && m_pScoreMeter->is_empty_score())
+            return;
+    }
 
     //TODO: HideStaffLines option
 	if (m_pScoreMeter->must_draw_left_barline())    //&& !pVStaff->HideStaffLines() )

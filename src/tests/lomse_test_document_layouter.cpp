@@ -407,7 +407,7 @@ SUITE(DocLayouterTest)
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         CHECK( pBSP->get_num_boxes() == 1 );
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
-        CHECK( pBSys->get_num_shapes() == 3 );  // two staves + bracket
+        CHECK( pBSys->get_num_shapes() == 4 );  // two staves + bracket + left barline
         GmoShape* pShape = pBSys->get_staff_shape(0);
         CHECK( pShape != NULL );
         CHECK( pShape->is_shape_staff() == true );
@@ -439,7 +439,7 @@ SUITE(DocLayouterTest)
         GmoBox* pBSP = pBDPC->get_child_box(0);     //ScorePage
         CHECK( pBSP->get_num_boxes() == 1 );
         GmoBoxSystem* pBSys = dynamic_cast<GmoBoxSystem*>( pBSP->get_child_box(0) );
-        CHECK( pBSys->get_num_shapes() == 2 );
+        CHECK( pBSys->get_num_shapes() == 3 );
         GmoShape* pShape = pBSys->get_staff_shape(0);
         CHECK( pShape != NULL );
         CHECK( pShape->is_shape_staff() == true );

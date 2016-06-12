@@ -15,6 +15,8 @@
 - Default styles added to headings, paragraps and tables (issue #43).
 - New system tag now works again (issue #1).
 - MusicXML importer now supports part groups.
+- Added squared bracket for part groups (group symbol == line)
+- Left barline at start of sytems now also drawn in empty scores
 
 
 Version [0.19.0] (2/May/2016)
