@@ -3688,18 +3688,14 @@ protected:
     {
         string value = m_childToAnalyse.value();
         if (value == "yes")
-            pGrp->set_join_barlines(true);
+            pGrp->set_join_barlines(ImoInstrGroup::k_standard);
         else if (value == "no")
-            pGrp->set_join_barlines(false);
+            pGrp->set_join_barlines(ImoInstrGroup::k_no);
         else if (value == "Mensurstrich")
-        {
-            pGrp->set_join_barlines(true);
-            error_msg("Value 'Mensurstrich' for <group-barline> not yet "
-                      "supported. Replaced by 'yes'.");
-        }
+            pGrp->set_join_barlines(ImoInstrGroup::k_mensurstrich);
         else
         {
-            pGrp->set_join_barlines(true);
+            pGrp->set_join_barlines(ImoInstrGroup::k_standard);
             error_msg("Invalid value for <group-barline>. Must be "
                       "'yes', 'no' or 'Mensurstrich'. 'yes' assumed.");
         }

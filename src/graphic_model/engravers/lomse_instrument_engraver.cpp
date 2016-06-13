@@ -41,8 +41,6 @@
 #include "lomse_score_layouter.h"
 #include "lomse_right_aligner.h"
 
-#include "lomse_shapes.h"
-
 namespace lomse
 {
 

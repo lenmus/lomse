@@ -5411,7 +5411,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pGrp != NULL );
 //        CHECK( pGrp->get_name_string() == "Group" );
 //        CHECK( pGrp->get_abbrev_string() == "G." );
-//        CHECK( pGrp->join_barlines() == false );
+//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
 //
@@ -5447,7 +5447,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pGrp != NULL );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "G." );
-//        CHECK( pGrp->join_barlines() == false );
+//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
 //
@@ -5483,7 +5483,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pGrp != NULL );
 //        CHECK( pGrp->get_name_string() == "Group" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
-//        CHECK( pGrp->join_barlines() == false );
+//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
 //
@@ -5518,7 +5518,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pGrp != NULL );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
-//        CHECK( pGrp->join_barlines() == false );
+//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
 //
@@ -5577,7 +5577,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pGrp != NULL );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
-//        CHECK( pGrp->join_barlines() == true );
+//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_standard );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
 //        CHECK( pGrp->get_num_instruments() == 3 );
 //
@@ -5632,7 +5632,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pGrp != NULL );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
-//        CHECK( pGrp->join_barlines() == false );
+//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
 //        CHECK( pGrp->get_num_instruments() == 2 );
 //

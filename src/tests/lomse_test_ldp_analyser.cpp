@@ -6327,7 +6327,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pGrp != NULL );
         CHECK( pGrp->get_name_string() == "Group" );
         CHECK( pGrp->get_abbrev_string() == "G." );
-        CHECK( pGrp->join_barlines() == false );
+        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
         CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
         CHECK( pGrp->get_num_instruments() == 3 );
 
@@ -6364,7 +6364,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pGrp != NULL );
         CHECK( pGrp->get_name_string() == "" );
         CHECK( pGrp->get_abbrev_string() == "G." );
-        CHECK( pGrp->join_barlines() == false );
+        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
         CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
         CHECK( pGrp->get_num_instruments() == 3 );
 
@@ -6401,7 +6401,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pGrp != NULL );
         CHECK( pGrp->get_name_string() == "Group" );
         CHECK( pGrp->get_abbrev_string() == "" );
-        CHECK( pGrp->join_barlines() == false );
+        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
         CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
         CHECK( pGrp->get_num_instruments() == 3 );
 
@@ -6437,7 +6437,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pGrp != NULL );
         CHECK( pGrp->get_name_string() == "" );
         CHECK( pGrp->get_abbrev_string() == "" );
-        CHECK( pGrp->join_barlines() == false );
+        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
         CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
         CHECK( pGrp->get_num_instruments() == 3 );
 
@@ -6481,7 +6481,8 @@ SUITE(LdpAnalyserTest)
         Document doc(m_libraryScope);
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
-        expected << "Line 0. Invalid boolean value 'perhaps'. Replaced by '1'." << endl;
+        expected << "Line 0. Invalid value for joinBarlines. Must be "
+                    "'yes', 'no' or 'mensurstrich'. 'yes' assumed." << endl;
         parser.parse_text("(group (symbol brace)(joinBarlines perhaps)"
                 "(instrument (name \"Soprano\")(abbrev \"S\")(musicData))"
                 "(instrument (name \"Tenor\")(abbrev \"T\")(musicData))"
@@ -6498,7 +6499,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pGrp != NULL );
         CHECK( pGrp->get_name_string() == "" );
         CHECK( pGrp->get_abbrev_string() == "" );
-        CHECK( pGrp->join_barlines() == true );
+        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_standard );
         CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
         CHECK( pGrp->get_num_instruments() == 3 );
 
@@ -6518,7 +6519,7 @@ SUITE(LdpAnalyserTest)
         LdpParser parser(errormsg, m_libraryScope.ldp_factory());
         stringstream expected;
         expected << "Line 0. Missing instruments in group!. Group ignored." << endl;
-        parser.parse_text("(group (symbol brace)(joinBarlines true))");
+        parser.parse_text("(group (symbol brace)(joinBarlines yes))");
         LdpTree* tree = parser.get_ldp_tree();
         LdpAnalyser a(errormsg, m_libraryScope, &doc);
         InternalModel* pIModel = a.analyse_tree(tree, "string:");
@@ -6555,7 +6556,7 @@ SUITE(LdpAnalyserTest)
         CHECK( pGrp != NULL );
         CHECK( pGrp->get_name_string() == "" );
         CHECK( pGrp->get_abbrev_string() == "" );
-        CHECK( pGrp->join_barlines() == false );
+        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
         CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
         CHECK( pGrp->get_num_instruments() == 2 );
 

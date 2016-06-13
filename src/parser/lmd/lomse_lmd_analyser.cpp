@@ -2435,7 +2435,7 @@ public:
 
 //        // joinBarlines?
 //        if (get_optional("joinBarlines"))
-//            pGrp->set_join_barlines(true);
+//            pGrp->set_join_barlines(ImoInstrGroup::k_standard);
 //
         error_if_more_elements();
 

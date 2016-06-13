@@ -202,10 +202,10 @@ void LineEntry::dump(int iEntry, ostream& outStream)
 //    }
 //    else
     {
-		outStream << "  pSO "
-					<< setw(4) << m_pSO->get_obj_type()
-					<< setw(4) << m_pSO->get_id()
-					<< (m_fProlog ? "   S  " : "      ");
+        string name = m_pSO->get_name();
+        name.resize(10, ' ');
+		outStream << name << setw(4) << m_pSO->get_id()
+                  << (m_fProlog ? "   S  " : "      ");
     }
 
     outStream << fixed << setprecision(2) << setfill(' ')
@@ -1367,15 +1367,13 @@ void SystemLayouter::redistribute_free_space()
 //---------------------------------------------------------------------------------------
 void SystemLayouter::add_initial_line_joining_all_staves_in_system()
 {
-    //TODO: In current code, the decision about joining staves depends only on first
-    //instrument. This should be changed and the line should go from first visible
-    //staff to last visible one.
-
+    //do not draw if 'hide staff lines' option enabled
     ImoOptionInfo* pOpt = m_pScore->get_option("StaffLines.Hide");
     bool fDrawStafflines = (pOpt == NULL || pOpt->get_bool_value() == false);
     if (!fDrawStafflines)
         return;
 
+    //do not draw if empty score with one instrument with one staff
     if (m_pScore->get_num_instruments() == 1)
     {
         ImoInstrument* pInstr = m_pScore->get_instrument(0);
@@ -1383,8 +1381,8 @@ void SystemLayouter::add_initial_line_joining_all_staves_in_system()
             return;
     }
 
-    //TODO: HideStaffLines option
-	if (m_pScoreMeter->must_draw_left_barline())    //&& !pVStaff->HideStaffLines() )
+    //do not draw if so asked when score meter was created (//TODO: what is this for?)
+	if (m_pScoreMeter->must_draw_left_barline())
 	{
         InstrumentEngraver* pInstrEngrv = m_pPartsEngraver->get_engraver_for(0);
         ImoObj* pCreator = m_pScore->get_instrument(0);

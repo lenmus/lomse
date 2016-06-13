@@ -2385,7 +2385,7 @@ list<ImoStaffObj*> ImoInstrument::insert_staff_objects_at(ImoStaffObj* pAt,
 ImoInstrGroup::ImoInstrGroup()
     : ImoSimpleObj(k_imo_instr_group)
     , m_pScore(NULL)
-    , m_fJoinBarlines(true)
+    , m_joinBarlines(k_standard)
     , m_symbol(k_none)
     , m_name()
     , m_abbrev()

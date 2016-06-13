@@ -922,7 +922,7 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroup->get_abbrev_string() == "" );
         CHECK( pGroup->get_name_string() == "Group" );
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_none );
-        CHECK( pGroup->join_barlines() == true );
+        CHECK( pGroup->join_barlines() == ImoInstrGroup::k_standard );
 
         a.do_not_delete_instruments_in_destructor();
         delete pIModel;
@@ -930,7 +930,7 @@ SUITE(MxlAnalyserTest)
 
     TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_120)
     {
-        //@00120 <part-group> group symbol: invalid value
+        //@00120 <part-group> group-barline ok
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -977,7 +977,62 @@ SUITE(MxlAnalyserTest)
         CHECK( pGroup->get_abbrev_string() == "" );
         CHECK( pGroup->get_name_string() == "Group" );
         CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
-        CHECK( pGroup->join_barlines() == false );
+        CHECK( pGroup->join_barlines() == ImoInstrGroup::k_no );
+
+        a.do_not_delete_instruments_in_destructor();
+        delete pIModel;
+    }
+
+    TEST_FIXTURE(MxlAnalyserTestFixture, MxlAnalyser_score_partwise_121)
+    {
+        //@00121 <part-group> group-barline mensurstrich ok
+        stringstream errormsg;
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        stringstream expected;
+        //expected << "" << endl;
+        parser.parse_text("<score-partwise version='3.0'><part-list>"
+            "<part-group number='1' type='start'>"
+                "<group-name>Group</group-name>"
+                "<group-symbol>bracket</group-symbol>"
+                "<group-barline>Mensurstrich</group-barline>"
+            "</part-group>"
+            "<score-part id='P1'><part-name>Voice</part-name></score-part>"
+            "<score-part id='P2'><part-name>Piano</part-name></score-part>"
+            "<part-group number='1' type='stop'></part-group>"
+            "</part-list>"
+            "<part id='P1'></part>"
+            "<part id='P2'></part>"
+            "</score-partwise>");
+        MyMxlAnalyser a(errormsg, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+
+//        cout << UnitTest::CurrentTest::Details()->testName << endl;
+//        cout << "[" << errormsg.str() << "]" << endl;
+//        cout << "[" << expected.str() << "]" << endl;
+        CHECK( errormsg.str() == expected.str() );
+        CHECK( pIModel->get_root() != NULL);
+        CHECK( pIModel->get_root()->is_document() == true );
+        ImoDocument* pDoc = dynamic_cast<ImoDocument*>( pIModel->get_root() );
+        CHECK( pDoc != NULL );
+        CHECK( pDoc->get_num_content_items() == 1 );
+        ImoScore* pScore = dynamic_cast<ImoScore*>( pDoc->get_content_item(0) );
+        CHECK( pScore != NULL );
+        CHECK( pScore->get_num_instruments() == 2 );
+        ImoInstrument* pInstr = pScore->get_instrument(0);
+        CHECK( pInstr != NULL );
+
+        ImoInstrGroups* pGroups = pScore->get_instrument_groups();
+        CHECK( pGroups != NULL );
+        ImoInstrGroup* pGroup = dynamic_cast<ImoInstrGroup*>( pGroups->get_first_child() );
+        CHECK( pGroup != NULL );
+        CHECK( pGroup->get_instrument(0) != NULL );
+        CHECK( pGroup->get_instrument(1) != NULL );
+        CHECK( pGroup->get_abbrev_string() == "" );
+        CHECK( pGroup->get_name_string() == "Group" );
+        CHECK( pGroup->get_symbol() == ImoInstrGroup::k_bracket );
+        CHECK( pGroup->join_barlines() == ImoInstrGroup::k_mensurstrich );
 
         a.do_not_delete_instruments_in_destructor();
         delete pIModel;
@@ -5897,7 +5952,7 @@ SUITE(MxlAnalyserTest)
 ////        CHECK( pGrp != NULL );
 ////        CHECK( pGrp->get_name() == "Group" );
 ////        CHECK( pGrp->get_abbrev() == "G." );
-////        CHECK( pGrp->join_barlines() == false );
+////        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 ////        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 ////        CHECK( pGrp->get_num_instruments() == 3 );
 ////
@@ -5933,7 +5988,7 @@ SUITE(MxlAnalyserTest)
 ////        CHECK( pGrp != NULL );
 ////        CHECK( pGrp->get_name() == "" );
 ////        CHECK( pGrp->get_abbrev() == "G." );
-////        CHECK( pGrp->join_barlines() == false );
+////        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 ////        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 ////        CHECK( pGrp->get_num_instruments() == 3 );
 ////
@@ -5969,7 +6024,7 @@ SUITE(MxlAnalyserTest)
 ////        CHECK( pGrp != NULL );
 ////        CHECK( pGrp->get_name() == "Group" );
 ////        CHECK( pGrp->get_abbrev() == "" );
-////        CHECK( pGrp->join_barlines() == false );
+////        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 ////        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 ////        CHECK( pGrp->get_num_instruments() == 3 );
 ////
@@ -6004,7 +6059,7 @@ SUITE(MxlAnalyserTest)
 ////        CHECK( pGrp != NULL );
 ////        CHECK( pGrp->get_name() == "" );
 ////        CHECK( pGrp->get_abbrev() == "" );
-////        CHECK( pGrp->join_barlines() == false );
+////        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 ////        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 ////        CHECK( pGrp->get_num_instruments() == 3 );
 ////
@@ -6063,7 +6118,7 @@ SUITE(MxlAnalyserTest)
 ////        CHECK( pGrp != NULL );
 ////        CHECK( pGrp->get_name() == "" );
 ////        CHECK( pGrp->get_abbrev() == "" );
-////        CHECK( pGrp->join_barlines() == true );
+////        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_standard );
 ////        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
 ////        CHECK( pGrp->get_num_instruments() == 3 );
 ////
@@ -6118,7 +6173,7 @@ SUITE(MxlAnalyserTest)
 ////        CHECK( pGrp != NULL );
 ////        CHECK( pGrp->get_name() == "" );
 ////        CHECK( pGrp->get_abbrev() == "" );
-////        CHECK( pGrp->join_barlines() == false );
+////        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 ////        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
 ////        CHECK( pGrp->get_num_instruments() == 2 );
 ////
