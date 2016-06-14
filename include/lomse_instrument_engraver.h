@@ -159,6 +159,9 @@ protected:
     std::vector<LUnits> m_staffTopLine;
     std::vector<LUnits> m_lineThickness;
 
+    //next instrument engraver
+    InstrumentEngraver* m_pNextInstrEngr;
+
 public:
     InstrumentEngraver(LibraryScope& libraryScope, ScoreMeter* pScoreMeter,
                        ImoInstrument* pInstr, ImoScore* pScore);
@@ -196,6 +199,10 @@ public:
     inline LUnits get_staves_left() { return m_stavesLeft; }
     inline LUnits get_staves_right() { return m_stavesLeft + m_stavesWidth; }
 
+    //barlines' segments
+    LUnits get_barline_top();
+    LUnits get_barline_bottom();
+
     //helper
     LUnits tenths_to_logical(Tenths value, int iStaff=0);
 
@@ -203,6 +210,11 @@ protected:
     void measure_name_abbrev();
     void measure_brace_or_bracket();
     bool has_brace_or_bracket();
+
+    friend class PartsEngraver;
+    void set_next_instrument_engraver(InstrumentEngraver* pNextEngrv) {
+        m_pNextInstrEngr = pNextEngrv;
+    }
 
 };
 

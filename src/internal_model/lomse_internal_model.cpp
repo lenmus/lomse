@@ -2059,6 +2059,7 @@ ImoInstrument::ImoInstrument()
     , m_midi()
 //    , m_pGroup(NULL)
     , m_partId("")
+    , m_barlineLayout(k_isolated)
 {
     add_staff();
 //	m_midiChannel = g_pMidi->DefaultVoiceChannel();

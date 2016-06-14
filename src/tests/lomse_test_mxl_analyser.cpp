@@ -1022,6 +1022,10 @@ SUITE(MxlAnalyserTest)
         CHECK( pScore->get_num_instruments() == 2 );
         ImoInstrument* pInstr = pScore->get_instrument(0);
         CHECK( pInstr != NULL );
+        CHECK( pInstr->get_barline_layout() == ImoInstrument::k_mensurstrich );
+        pInstr = pScore->get_instrument(1);
+        CHECK( pInstr != NULL );
+        CHECK( pInstr->get_barline_layout() == ImoInstrument::k_nothing );
 
         ImoInstrGroups* pGroups = pScore->get_instrument_groups();
         CHECK( pGroups != NULL );

@@ -3106,7 +3106,7 @@ public:
     inline void set_join_barlines(int value) { m_joinBarlines = value; }
 
     //instruments
-    //ImoInstruments* get_instruments();
+    inline list<ImoInstrument*>& get_instruments() { return m_instruments; }
     void add_instrument(ImoInstrument* pInstr);
     ImoInstrument* get_instrument(int iInstr);   //0..n-1
     int get_num_instruments();
@@ -3131,6 +3131,7 @@ protected:
 //    ImoInstrGroup*  m_pGroup;
     string          m_partId;
     std::list<ImoStaffInfo*> m_staves;
+    int             m_barlineLayout;        //enum EBarlineLayout
 
     friend class ImFactory;
     ImoInstrument();
@@ -3141,6 +3142,8 @@ protected:
 
 public:
     virtual ~ImoInstrument();
+
+    enum EBarlineLayout { k_isolated=0, k_joined, k_mensurstrich, k_nothing, };
 
     //getters
     inline int get_num_staves() { return static_cast<int>(m_staves.size()); }
@@ -3154,6 +3157,7 @@ public:
     ImoStaffInfo* get_staff(int iStaff);
     LUnits get_line_spacing_for_staff(int iStaff);
     inline const string& get_instr_id() { return m_partId; }
+    inline int get_barline_layout() { return m_barlineLayout; }
 
     //setters
     ImoStaffInfo* add_staff();
@@ -3167,6 +3171,7 @@ public:
 //    inline void set_in_group(ImoInstrGroup* pGroup) { m_pGroup = pGroup; }
     void replace_staff_info(ImoStaffInfo* pInfo);
     inline void set_instr_id(const string& id) { m_partId = id; }
+    inline void set_barline_layout(int value) { m_barlineLayout = value; }
 
     //info
     inline bool has_name() { return m_name.get_text() != ""; }
