@@ -11,12 +11,13 @@
 ##### COMPATIBLE CHANGES
 
 - Names and brackets/braces for groups of instruments now supported and rendered.
+- Barlines for groups now can be joined. Also mensurstrich layout is supported.
+- Left barline at start of sytems now also drawn in empty scores
 - Whitespace in text now proprely managed in LMD files (issue #42).
 - Default styles added to headings, paragraps and tables (issue #43).
 - New system tag now works again (issue #1).
 - MusicXML importer now supports part groups.
 - Added squared bracket for part groups (group symbol == line)
-- Left barline at start of sytems now also drawn in empty scores
 
 
 Version [0.19.0] (2/May/2016)

@@ -2365,7 +2365,7 @@ public:
 //@ <!ELEMENT grpAbbrev (#PCDATA) >
 //@ <!ELEMENT grpSymbol (#PCDATA) >
 //@ <grpSymbol> = (symbol {none | brace | bracket} )
-//@ <!ELEMENT joinBarlines EMPTY >
+//@ <!ELEMENT joinBarlines (#PCDATA) >
 //@
 
 class GroupLmdAnalyser : public LmdElementAnalyser
