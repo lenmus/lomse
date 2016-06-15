@@ -2365,7 +2365,7 @@ public:
 //@ <!ELEMENT grpAbbrev (#PCDATA) >
 //@ <!ELEMENT grpSymbol (#PCDATA) >
 //@ <grpSymbol> = (symbol {none | brace | bracket} )
-//@ <!ELEMENT joinBarlines EMPTY >
+//@ <!ELEMENT joinBarlines (#PCDATA) >
 //@
 
 class GroupLmdAnalyser : public LmdElementAnalyser
@@ -2435,7 +2435,7 @@ public:
 
 //        // joinBarlines?
 //        if (get_optional("joinBarlines"))
-//            pGrp->set_join_barlines(true);
+//            pGrp->set_join_barlines(ImoInstrGroup::k_standard);
 //
         error_if_more_elements();
 
@@ -2452,11 +2452,13 @@ protected:
             pGrp->set_symbol(ImoInstrGroup::k_brace);
         else if (symbol == "bracket")
             pGrp->set_symbol(ImoInstrGroup::k_bracket);
+        else if (symbol == "line")
+            pGrp->set_symbol(ImoInstrGroup::k_line);
         else if (symbol == "none")
             pGrp->set_symbol(ImoInstrGroup::k_none);
         else
-            error_msg("Invalid value for <grpSymbol>. Must be 'none', 'brace' or "
-                      "'bracket'. 'none' assumed.");
+            error_msg("Invalid value for <grpSymbol>. Must be 'none', 'brace', "
+                      "'bracket' or 'line'. 'none' assumed.");
     }
 
     ImoScoreText* get_name_abbrev()

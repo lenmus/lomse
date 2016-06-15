@@ -2382,7 +2382,7 @@ public:
 //@ <grpName> = <textString>
 //@ <grpAbbrev> = <textString>
 //@ <grpSymbol> = (symbol {none | brace | bracket} )
-//@ <joinBarlines> = (joinBarlines {yes | no} )
+//@ <joinBarlines> = (joinBarlines {yes | no | mensurstrich } )
 
 class GroupAnalyser : public ElementAnalyser
 {
@@ -2448,6 +2448,8 @@ protected:
             pGrp->set_symbol(ImoInstrGroup::k_brace);
         else if (symbol == "bracket")
             pGrp->set_symbol(ImoInstrGroup::k_bracket);
+        else if (symbol == "line")
+            pGrp->set_symbol(ImoInstrGroup::k_line);
         else if (symbol == "none")
             pGrp->set_symbol(ImoInstrGroup::k_none);
         else
@@ -2459,7 +2461,19 @@ protected:
     void set_join_barlines(ImoInstrGroup* pGrp)
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
-        pGrp->set_join_barlines( get_bool_value(true) );
+        string value = get_string_value();
+        if (value == "yes")
+            pGrp->set_join_barlines(ImoInstrGroup::k_standard);
+        else if (value == "no")
+            pGrp->set_join_barlines(ImoInstrGroup::k_no);
+        else if (value == "mensurstrich")
+            pGrp->set_join_barlines(ImoInstrGroup::k_mensurstrich);
+        else
+        {
+            pGrp->set_join_barlines(ImoInstrGroup::k_standard);
+            error_msg("Invalid value for joinBarlines. Must be "
+                      "'yes', 'no' or 'mensurstrich'. 'yes' assumed.");
+        }
     }
 
 };

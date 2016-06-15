@@ -195,12 +195,13 @@ public:
 
     void add_instrument_to_groups(ImoInstrument* pInstr);
     void start_group(int number, ImoInstrGroup* pGrp);
-    void remove_group(int number);
+    void terminate_group(int number);
     bool group_exists(int number);
     ImoInstrGroup* get_group(int number);
     void check_if_all_groups_are_closed(ostream& reporter);
 
 protected:
+    void set_barline_layout_in_instruments(ImoInstrGroup* pGrp);
 
 };
 
@@ -284,7 +285,7 @@ public:
 
     //part-group
     ImoInstrGroup* start_part_group(int number);
-    void remove_part_group(int number);
+    void terminate_part_group(int number);
     ImoInstrGroup* get_part_group(int number);
     void check_if_all_groups_are_closed();
 

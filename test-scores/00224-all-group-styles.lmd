@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE lenmusdoc PUBLIC
+    "-//LenMus//DTD LenMus Document 0.0//EN" 
+    "https://raw.githubusercontent.com/lenmus/lomse/master/dtd/lenmusdoc-0.1.dtd" >
+<lenmusdoc vers='0.0'>
+    <content>
+        <score>
+            <parts>
+                <instrId>P1</instrId>
+                <instrId>P2</instrId>
+                <instrId>P3</instrId>
+                <instrId>P4</instrId>
+                <instrId>P5</instrId>
+                <instrId>P6</instrId>
+                <instrId>P7</instrId>
+                <instrId>P8</instrId>
+                <group>
+                    <firstInstr>P1</firstInstr>
+                    <lastInstr>P2</lastInstr>
+                    <grpName>Brace</grpName>
+                    <grpSymbol>brace</grpSymbol>
+                </group>
+                <group>
+                    <firstInstr>P3</firstInstr>
+                    <lastInstr>P4</lastInstr>
+                    <grpName>Bracket</grpName>
+                    <grpSymbol>bracket</grpSymbol>
+                </group>
+                <group>
+                    <firstInstr>P5</firstInstr>
+                    <lastInstr>P6</lastInstr>
+                    <grpName>Line</grpName>
+                    <grpSymbol>line</grpSymbol>
+                </group>
+                <group>
+                    <firstInstr>P7</firstInstr>
+                    <lastInstr>P8</lastInstr>
+                    <grpName>None</grpName>
+                    <grpSymbol>none</grpSymbol>
+                </group>
+            </parts>
+            <instrument><instrId>P1</instrId><instrName>P1</instrName><musicData/></instrument>
+            <instrument><instrId>P2</instrId><instrName>P2</instrName><musicData/></instrument>
+            <instrument><instrId>P3</instrId><instrName>P3</instrName><musicData/></instrument>
+            <instrument><instrId>P4</instrId><instrName>P4</instrName><musicData/></instrument>
+            <instrument><instrId>P5</instrId><instrName>P5</instrName><musicData/></instrument>
+            <instrument><instrId>P6</instrId><instrName>P6</instrName><musicData/></instrument>
+            <instrument><instrId>P7</instrId><instrName>P7</instrName><musicData/></instrument>
+            <instrument><instrId>P8</instrId><instrName>P8</instrName><musicData/></instrument>
+        </score>
+    </content>
+</lenmusdoc>

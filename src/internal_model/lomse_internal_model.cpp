@@ -2059,6 +2059,7 @@ ImoInstrument::ImoInstrument()
     , m_midi()
 //    , m_pGroup(NULL)
     , m_partId("")
+    , m_barlineLayout(k_isolated)
 {
     add_staff();
 //	m_midiChannel = g_pMidi->DefaultVoiceChannel();
@@ -2385,7 +2386,7 @@ list<ImoStaffObj*> ImoInstrument::insert_staff_objects_at(ImoStaffObj* pAt,
 ImoInstrGroup::ImoInstrGroup()
     : ImoSimpleObj(k_imo_instr_group)
     , m_pScore(NULL)
-    , m_fJoinBarlines(true)
+    , m_joinBarlines(k_standard)
     , m_symbol(k_none)
     , m_name()
     , m_abbrev()

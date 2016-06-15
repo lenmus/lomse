@@ -3073,7 +3073,7 @@ class ImoInstrGroup : public ImoSimpleObj
 {
 protected:
     ImoScore* m_pScore;
-    bool m_fJoinBarlines;
+    int m_joinBarlines;     // enum k_no, k_standard, k_mensurstrich
     int m_symbol;           // enum k_none, k_default, k_brace, k_bracket, ...
     ImoScoreText m_name;
     ImoScoreText m_abbrev;
@@ -3088,10 +3088,11 @@ protected:
 public:
     virtual ~ImoInstrGroup();
 
-    enum { k_none=0, k_default, k_brace, k_bracket, };
+    enum { k_none=0, k_brace, k_bracket, k_line, };
+    enum { k_no=0, k_standard, k_mensurstrich, };
 
     //getters
-    inline bool join_barlines() { return m_fJoinBarlines; }
+    inline int join_barlines() { return m_joinBarlines; }
     inline int get_symbol() { return m_symbol; }
     inline const std::string& get_name_string() { return m_name.get_text(); }
     inline const std::string& get_abbrev_string() { return m_abbrev.get_text(); }
@@ -3102,10 +3103,10 @@ public:
     void set_name(ImoScoreText* pText);
     void set_abbrev(ImoScoreText* pText);
     inline void set_symbol(int symbol) { m_symbol = symbol; }
-    inline void set_join_barlines(bool value) { m_fJoinBarlines = value; }
+    inline void set_join_barlines(int value) { m_joinBarlines = value; }
 
     //instruments
-    //ImoInstruments* get_instruments();
+    inline list<ImoInstrument*>& get_instruments() { return m_instruments; }
     void add_instrument(ImoInstrument* pInstr);
     ImoInstrument* get_instrument(int iInstr);   //0..n-1
     int get_num_instruments();
@@ -3130,6 +3131,7 @@ protected:
 //    ImoInstrGroup*  m_pGroup;
     string          m_partId;
     std::list<ImoStaffInfo*> m_staves;
+    int             m_barlineLayout;        //enum EBarlineLayout
 
     friend class ImFactory;
     ImoInstrument();
@@ -3140,6 +3142,8 @@ protected:
 
 public:
     virtual ~ImoInstrument();
+
+    enum EBarlineLayout { k_isolated=0, k_joined, k_mensurstrich, k_nothing, };
 
     //getters
     inline int get_num_staves() { return static_cast<int>(m_staves.size()); }
@@ -3153,6 +3157,7 @@ public:
     ImoStaffInfo* get_staff(int iStaff);
     LUnits get_line_spacing_for_staff(int iStaff);
     inline const string& get_instr_id() { return m_partId; }
+    inline int get_barline_layout() { return m_barlineLayout; }
 
     //setters
     ImoStaffInfo* add_staff();
@@ -3166,6 +3171,7 @@ public:
 //    inline void set_in_group(ImoInstrGroup* pGroup) { m_pGroup = pGroup; }
     void replace_staff_info(ImoStaffInfo* pInfo);
     inline void set_instr_id(const string& id) { m_partId = id; }
+    inline void set_barline_layout(int value) { m_barlineLayout = value; }
 
     //info
     inline bool has_name() { return m_name.get_text() != ""; }

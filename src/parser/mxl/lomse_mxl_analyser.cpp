@@ -175,11 +175,17 @@ void PartGroups::start_group(int number, ImoInstrGroup* pGrp)
 }
 
 //---------------------------------------------------------------------------------------
-void PartGroups::remove_group(int number)
+void PartGroups::terminate_group(int number)
 {
     map<int, ImoInstrGroup*>::iterator it = m_groups.find(number);
-	if (it != m_groups.end())
-        m_groups.erase(it);
+	if (it == m_groups.end())
+        return;
+
+    ImoInstrGroup* pGrp = it->second;
+    if (pGrp->join_barlines() != ImoInstrGroup::k_no)
+        set_barline_layout_in_instruments(pGrp);
+
+    m_groups.erase(it);
 }
 
 //---------------------------------------------------------------------------------------
@@ -208,6 +214,25 @@ void PartGroups::check_if_all_groups_are_closed(ostream& reporter)
     {
         reporter << "Error: missing <part-group type='stop'> for <part-group> number='"
                  << it->first << "'." << endl;
+    }
+}
+
+//---------------------------------------------------------------------------------------
+void PartGroups::set_barline_layout_in_instruments(ImoInstrGroup* pGrp)
+{
+    int layout = (pGrp->join_barlines() == ImoInstrGroup::k_standard
+                    ? ImoInstrument::k_joined
+                    : ImoInstrument::k_mensurstrich);
+
+    ImoInstrument* pLastInstr = pGrp->get_last_instrument();
+    list<ImoInstrument*>& instrs = pGrp->get_instruments();
+    list<ImoInstrument*>::iterator it;
+    for (it = instrs.begin(); it != instrs.end(); ++it)
+    {
+        if (*it != pLastInstr)
+            (*it)->set_barline_layout(layout);
+        else if (layout == ImoInstrument::k_mensurstrich)
+            (*it)->set_barline_layout(ImoInstrument::k_nothing);
     }
 }
 
@@ -3591,7 +3616,7 @@ public:
             {
                 ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
                 pScore->add_instruments_group(pGrp);
-                m_pAnalyser->remove_part_group(number);
+                m_pAnalyser->terminate_part_group(number);
                 return pGrp;
             }
             else
@@ -3675,6 +3700,8 @@ protected:
             pGrp->set_symbol(ImoInstrGroup::k_brace);
         else if (symbol == "bracket")
             pGrp->set_symbol(ImoInstrGroup::k_bracket);
+        else if (symbol == "line")
+            pGrp->set_symbol(ImoInstrGroup::k_line);
         else if (symbol == "none")
             pGrp->set_symbol(ImoInstrGroup::k_none);
         else
@@ -3686,18 +3713,14 @@ protected:
     {
         string value = m_childToAnalyse.value();
         if (value == "yes")
-            pGrp->set_join_barlines(true);
+            pGrp->set_join_barlines(ImoInstrGroup::k_standard);
         else if (value == "no")
-            pGrp->set_join_barlines(false);
+            pGrp->set_join_barlines(ImoInstrGroup::k_no);
         else if (value == "Mensurstrich")
-        {
-            pGrp->set_join_barlines(true);
-            error_msg("Value 'Mensurstrich' for <group-barline> not yet "
-                      "supported. Replaced by 'yes'.");
-        }
+            pGrp->set_join_barlines(ImoInstrGroup::k_mensurstrich);
         else
         {
-            pGrp->set_join_barlines(true);
+            pGrp->set_join_barlines(ImoInstrGroup::k_standard);
             error_msg("Invalid value for <group-barline>. Must be "
                       "'yes', 'no' or 'Mensurstrich'. 'yes' assumed.");
         }
@@ -4964,11 +4987,11 @@ ImoInstrGroup* MxlAnalyser::start_part_group(int number)
 }
 
 //---------------------------------------------------------------------------------------
-void MxlAnalyser::remove_part_group(int number)
+void MxlAnalyser::terminate_part_group(int number)
 {
     ImoInstrGroup* pGrp = m_partGroups.get_group(number);
     if (pGrp)
-        m_partGroups.remove_group(number);
+        m_partGroups.terminate_group(number);
 }
 
 //---------------------------------------------------------------------------------------

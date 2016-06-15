@@ -41,7 +41,6 @@
 #include "lomse_score_layouter.h"
 #include "lomse_right_aligner.h"
 
-
 namespace lomse
 {
 
@@ -109,12 +108,17 @@ void PartsEngraver::create_instrument_engravers()
 {
     int numInstr = m_pScore->get_num_instruments();
 
+    InstrumentEngraver* pPrevEngrv = NULL;
     for (int iInstr = 0; iInstr < numInstr; iInstr++)
     {
         ImoInstrument* pInstr = m_pScore->get_instrument(iInstr);
-        m_instrEngravers.push_back(
-                    LOMSE_NEW InstrumentEngraver(m_libraryScope, m_pMeter,
-                                                 pInstr, m_pScore) );
+        InstrumentEngraver* pEngrv = LOMSE_NEW InstrumentEngraver(m_libraryScope, m_pMeter,
+                                                                  pInstr, m_pScore);
+        m_instrEngravers.push_back(pEngrv);
+        if (pPrevEngrv)
+            pPrevEngrv->set_next_instrument_engraver(pEngrv);
+
+        pPrevEngrv = pEngrv;
     }
 
     m_iInstrName.reserve(numInstr);
@@ -408,11 +412,20 @@ void GroupEngraver::measure_brace_or_bracket()
 
         LUnits uBracketWidth;
         if (symbol == ImoInstrGroup::k_brace)
+        {
             uBracketWidth = tenths_to_logical(LOMSE_GRP_BRACE_WIDTH);
-        else
+            m_uBracketGap = tenths_to_logical(LOMSE_GRP_BRACKET_GAP);
+        }
+        else if  (symbol == ImoInstrGroup::k_bracket)
+        {
             uBracketWidth = tenths_to_logical(LOMSE_GRP_BRACKET_WIDTH);
-
-        m_uBracketGap = tenths_to_logical(LOMSE_GRP_BRACKET_GAP);
+            m_uBracketGap = tenths_to_logical(LOMSE_GRP_BRACKET_GAP);
+        }
+        else
+        {
+            uBracketWidth = tenths_to_logical(LOMSE_GRP_SQBRACKET_WIDTH);
+            m_uBracketGap = tenths_to_logical(1.0f);   //0.0f;
+        }
 
         m_bracketFirstBox.x = 0.0f;
         m_bracketFirstBox.y = m_stavesTop;
@@ -425,7 +438,7 @@ void GroupEngraver::measure_brace_or_bracket()
 bool GroupEngraver::has_brace_or_bracket()
 {
     int symbol = m_pGroup->get_symbol();
-    return (symbol == ImoInstrGroup::k_brace || symbol == ImoInstrGroup::k_bracket);
+    return (symbol != ImoInstrGroup::k_none);
 }
 
 //---------------------------------------------------------------------------------------
@@ -494,11 +507,17 @@ void GroupEngraver::add_brace_bracket(GmoBoxSystem* pBox, int iSystem)
         if (symbol == ImoInstrGroup::k_brace)
             pShape = LOMSE_NEW GmoShapeBrace(m_pGroup, idx, xLeft, yTop,
                                              xRight, yBottom, Color(0,0,0));
-        else
+        else if (symbol == ImoInstrGroup::k_bracket)
         {
-            LUnits dyHook = tenths_to_logical(6.0f);
+            LUnits dyHook = tenths_to_logical(LOMSE_GRP_BRACKET_HOOK);
             pShape = LOMSE_NEW GmoShapeBracket(m_pGroup, idx, xLeft, yTop, xRight,
                                                yBottom, dyHook, Color(0,0,0));
+        }
+        else
+        {
+            LUnits lineThickness = tenths_to_logical(LOMSE_GRP_SQBRACKET_LINE);
+            pShape = LOMSE_NEW GmoShapeSquaredBracket(m_pGroup, idx, xLeft, yTop, xRight,
+                                               yBottom, lineThickness, Color(0,0,0));
         }
         pBox->add_shape(pShape, GmoShape::k_layer_staff);
     }
@@ -516,6 +535,7 @@ InstrumentEngraver::InstrumentEngraver(LibraryScope& libraryScope,
     , m_pInstr(pInstr)
     , m_pScore(pScore)
     , m_pFontStorage( libraryScope.font_storage() )
+    , m_pNextInstrEngr(NULL)
 {
     int numStaves = m_pInstr->get_num_staves();
     m_staffTop.reserve(numStaves);
@@ -722,6 +742,35 @@ LUnits InstrumentEngraver::get_staves_bottom_line()
 {
     int iStaff = m_pInstr->get_num_staves() - 1;
     return  m_org.y + m_stavesBottom - m_lineThickness[iStaff] / 2.0f;
+}
+
+//---------------------------------------------------------------------------------------
+LUnits InstrumentEngraver::get_barline_top()
+{
+    int layout = m_pInstr->get_barline_layout();
+    if (layout == ImoInstrument::k_isolated || layout == ImoInstrument::k_joined)
+        return get_staves_top_line();
+    else if (layout == ImoInstrument::k_mensurstrich)
+        return get_staves_bottom_line();
+    else
+        return 0.0f;    //k_nothing
+}
+
+//---------------------------------------------------------------------------------------
+LUnits InstrumentEngraver::get_barline_bottom()
+{
+    int layout = m_pInstr->get_barline_layout();
+    if (layout == ImoInstrument::k_isolated)
+        return get_staves_bottom_line();
+    else if (layout == ImoInstrument::k_joined || layout == ImoInstrument::k_mensurstrich)
+    {
+        if (m_pNextInstrEngr)
+            return m_pNextInstrEngr->get_staves_top_line();
+        else
+            return get_staves_bottom_line();
+    }
+    else
+        return 0.0f;    //k_nothing
 }
 
 

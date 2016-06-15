@@ -108,6 +108,7 @@ public:
 
 SUITE(LmdAnalyserTest)
 {
+    // preliminary-tests ----------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, analyse_node)
     {
@@ -2371,7 +2372,7 @@ SUITE(LmdAnalyserTest)
 //        delete pIModel;
 //    }
 
-    // clef -----------------------------------------------------------------------------
+    //@ clef ----------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Clef)
     {
@@ -5253,7 +5254,7 @@ SUITE(LmdAnalyserTest)
 //        delete pIModel;
 //    }
 
-    // color ----------------------------------------------------------------------------
+    //@ color ---------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, ImoColorDto)
     {
@@ -5411,7 +5412,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pGrp != NULL );
 //        CHECK( pGrp->get_name_string() == "Group" );
 //        CHECK( pGrp->get_abbrev_string() == "G." );
-//        CHECK( pGrp->join_barlines() == false );
+//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
 //
@@ -5447,7 +5448,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pGrp != NULL );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "G." );
-//        CHECK( pGrp->join_barlines() == false );
+//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
 //
@@ -5483,7 +5484,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pGrp != NULL );
 //        CHECK( pGrp->get_name_string() == "Group" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
-//        CHECK( pGrp->join_barlines() == false );
+//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
 //
@@ -5518,7 +5519,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pGrp != NULL );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
-//        CHECK( pGrp->join_barlines() == false );
+//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_bracket );
 //        CHECK( pGrp->get_num_instruments() == 3 );
 //
@@ -5577,7 +5578,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pGrp != NULL );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
-//        CHECK( pGrp->join_barlines() == true );
+//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_standard );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
 //        CHECK( pGrp->get_num_instruments() == 3 );
 //
@@ -5632,7 +5633,7 @@ SUITE(LmdAnalyserTest)
 //        CHECK( pGrp != NULL );
 //        CHECK( pGrp->get_name_string() == "" );
 //        CHECK( pGrp->get_abbrev_string() == "" );
-//        CHECK( pGrp->join_barlines() == false );
+//        CHECK( pGrp->join_barlines() == ImoInstrGroup::k_no );
 //        CHECK( pGrp->get_symbol() == ImoInstrGroup::k_brace );
 //        CHECK( pGrp->get_num_instruments() == 2 );
 //
@@ -5893,7 +5894,7 @@ SUITE(LmdAnalyserTest)
 //        delete pIModel;
 //    }
 
-    // defineStyle ----------------------------------------------------------------------
+    //@ defineStyle ---------------------------------------------------------------------
 
 //    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_DefineStyle)
 //    {
@@ -6896,7 +6897,7 @@ SUITE(LmdAnalyserTest)
 //        delete pIModel;
 //    }
 
-    // textItem -------------------------------------------------------------------------
+    //@ textItem ------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, TextItem)
     {
@@ -7552,7 +7553,7 @@ SUITE(LmdAnalyserTest)
 //        delete pIModel;
 //    }
 
-    // styles ---------------------------------------------------------------------------
+    //@ styles --------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Styles)
     {
@@ -7778,7 +7779,7 @@ SUITE(LmdAnalyserTest)
 //        delete pIModel;
 //    }
 
-    // param ----------------------------------------------------------------------------
+    //@ param ---------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, ParamInfo_Ok)
     {
@@ -8063,7 +8064,7 @@ SUITE(LmdAnalyserTest)
 ////        delete pIModel;
 ////    }
 
-    // list -----------------------------------------------------------------------------
+    //@ list ----------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Listitem_created)
     {
@@ -8268,7 +8269,7 @@ SUITE(LmdAnalyserTest)
 //    }
 
 
-    // scorePlayer ----------------------------------------------------------------------
+    //@ scorePlayer ---------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, scorePlayer_Creation)
     {
