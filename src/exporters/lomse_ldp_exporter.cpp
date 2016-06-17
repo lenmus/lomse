@@ -768,6 +768,7 @@ public:
     string generate_source(ImoObj* UNUSED(pParent) =NULL)
     {
         start_element("instrument", m_pObj->get_id());
+        add_part_id();
         add_name_abbreviation();
         add_staves_info();
         add_midi_info();
@@ -811,6 +812,13 @@ protected:
             m_source << instr << " " << channel;
             end_element(k_in_same_line);
         }
+    }
+
+    void add_part_id()
+    {
+        string partId = m_pObj->get_instr_id();
+        if (!partId.empty())
+            m_source << partId;
     }
 
     void add_name_abbreviation()
@@ -1612,7 +1620,8 @@ public:
         //add_page_layout();
         add_system_layout();
         add_options();
-        add_instruments_and_groups();
+        add_parts();
+        add_instruments();
         end_element();
         return m_source.str();
     }
@@ -1743,7 +1752,126 @@ protected:
         }
     }
 
-    void add_instruments_and_groups()
+    void add_parts()
+    {
+        ImoInstrGroups* pGroups = m_pObj->get_instrument_groups();
+        if (pGroups == NULL)
+            return;
+
+        start_element("parts", k_no_imoid, k_in_new_line);
+        add_instr_ids();
+        add_groups();
+        end_element(k_in_new_line);
+    }
+
+    void add_instr_ids()
+    {
+        start_element("instrIds", k_no_imoid, k_in_new_line);
+        int numInstr = m_pObj->get_num_instruments();
+        for (int i=0; i < numInstr; ++i)
+        {
+            ImoInstrument* pInstr = m_pObj->get_instrument(i);
+            if (i > 0)
+                m_source << " ";
+            m_source << pInstr->get_instr_id();
+        }
+        end_element(k_in_same_line);
+    }
+
+    void add_groups()
+    {
+        ImoInstrGroups* pGroups = m_pObj->get_instrument_groups();
+        ImoObj::children_iterator it;
+        for (it= pGroups->begin(); it != pGroups->end(); ++it)
+        {
+            start_element("group", k_no_imoid, k_in_new_line);
+
+            ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(*it);
+            ImoInstrument* pInstr = pGrp->get_first_instrument();
+            m_source << pInstr->get_instr_id();
+            pInstr = pGrp->get_last_instrument();
+            m_source << " " << pInstr->get_instr_id();
+            bool fAddSpace = true;
+
+            string value = pGrp->get_name_string();
+            if (!value.empty())
+            {
+                if (fAddSpace)
+                {
+                    m_source << " ";
+                    fAddSpace = false;
+                }
+                start_element("name", k_no_imoid, k_in_same_line);
+                m_source << "\"" << value << "\"";
+                end_element(k_in_same_line);
+            }
+
+
+            value = pGrp->get_abbrev_string();
+            if (!value.empty())
+            {
+                if (fAddSpace)
+                {
+                    m_source << " ";
+                    fAddSpace = false;
+                }
+                start_element("abbrev", k_no_imoid, k_in_same_line);
+                m_source << "\"" << value << "\"";
+                end_element(k_in_same_line);
+            }
+
+            if (pGrp->get_symbol() != ImoInstrGroup::k_none)
+            {
+                if (fAddSpace)
+                {
+                    m_source << " ";
+                    fAddSpace = false;
+                }
+                start_element("symbol", k_no_imoid, k_in_same_line);
+                switch (pGrp->get_symbol())
+                {
+                    case ImoInstrGroup::k_bracket:
+                        m_source << "bracket";
+                        break;
+                    case ImoInstrGroup::k_brace:
+                        m_source << "brace";
+                        break;
+                    case ImoInstrGroup::k_line:
+                        m_source << "line";
+                        break;
+                    default:
+                        m_source << "none";
+                }
+                end_element(k_in_same_line);
+            }
+
+            if (pGrp->join_barlines() != ImoInstrGroup::k_no)
+            {
+                if (fAddSpace)
+                {
+                    m_source << " ";
+                    fAddSpace = false;
+                }
+                start_element("joinBarlines", k_no_imoid, k_in_same_line);
+                switch (pGrp->join_barlines())
+                {
+                    case ImoInstrGroup::k_standard:
+                        m_source << "yes";
+                        break;
+                    case ImoInstrGroup::k_mensurstrich:
+                        m_source << "mensurstrich";
+                        break;
+                    default:
+                        m_source << "no";
+                }
+                end_element(k_in_same_line);
+            }
+
+            end_element(k_in_same_line);    //group
+        }
+    }
+
+    void add_instruments()
     {
         int numInstr = m_pObj->get_num_instruments();
         for (int i=0; i < numInstr; ++i)
