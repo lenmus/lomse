@@ -56,13 +56,14 @@ class ImoOptionInfo;
 class ImoPageInfo;
 class ImoParamInfo;
 class ImoRelObj;
-class ImoStaffObj;
-class ImoSystemInfo;
+class ImoScore;
 class ImoScoreText;
 class ImoScoreTitle;
 class ImoStaffInfo;
-class ImoTextItem;
+class ImoStaffObj;
 class ImoStyle;
+class ImoSystemInfo;
+class ImoTextItem;
 
 
 //---------------------------------------------------------------------------------------
@@ -107,6 +108,8 @@ protected:
     //ImoObj* add_inline_or_block_item(ImoInlineLevelObj* pImo);
     ImoObj* add_inline_level_item(ImoInlineLevelObj* pImo);
     ImoObj* add_block_level_item(ImoBlockLevelObj* pImo);
+
+    void set_barline_layout_in_instruments(ImoInstrGroup* pGrp);
 
 };
 

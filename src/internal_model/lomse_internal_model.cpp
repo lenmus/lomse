@@ -2433,7 +2433,6 @@ ImoInstrument* ImoInstrGroup::get_instrument(int iInstr)    //iInstr = 0..n-1
 void ImoInstrGroup::add_instrument(ImoInstrument* pInstr)
 {
     m_instruments.push_back(pInstr);
-//    pInstr->set_in_group(this);
 }
 
 //---------------------------------------------------------------------------------------

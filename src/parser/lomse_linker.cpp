@@ -168,8 +168,31 @@ ImoObj* Linker::add_instruments_group(ImoInstrGroup* pGrp)
     {
         ImoScore* pScore = static_cast<ImoScore*>(m_pParent);
         pScore->add_instruments_group(pGrp);
+        set_barline_layout_in_instruments(pGrp);
     }
     return pGrp;
+}
+
+//---------------------------------------------------------------------------------------
+void Linker::set_barline_layout_in_instruments(ImoInstrGroup* pGrp)
+{
+    if (pGrp->join_barlines() == ImoInstrGroup::k_no)
+        return;
+
+    int layout = (pGrp->join_barlines() == ImoInstrGroup::k_standard
+                    ? ImoInstrument::k_joined
+                    : ImoInstrument::k_mensurstrich);
+
+    ImoInstrument* pLastInstr = pGrp->get_last_instrument();
+    list<ImoInstrument*>& instrs = pGrp->get_instruments();
+    list<ImoInstrument*>::iterator it;
+    for (it = instrs.begin(); it != instrs.end(); ++it)
+    {
+        if (*it != pLastInstr)
+            (*it)->set_barline_layout(layout);
+        else if (layout == ImoInstrument::k_mensurstrich)
+            (*it)->set_barline_layout(ImoInstrument::k_nothing);
+    }
 }
 
 //---------------------------------------------------------------------------------------

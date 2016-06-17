@@ -23,7 +23,7 @@
    (instrument (name "Piano")(abbrev "P")(staves 2)
       (musicData 
             (clef G p1)
-            (clef bass p2)  
+            (clef F4 p2)  
             (key a)
             (time 2 4)
             (n g2 s g+ p2)(n d3 s)(n g3 s)(n b3 s g-)   

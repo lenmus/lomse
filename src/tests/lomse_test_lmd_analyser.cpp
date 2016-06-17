@@ -108,7 +108,7 @@ public:
 
 SUITE(LmdAnalyserTest)
 {
-    // preliminary-tests ----------------------------------------------------------------
+    //@ preliminary-tests ---------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, analyse_node)
     {
@@ -132,7 +132,7 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    // lenmusdoc ------------------------------------------------------------------------
+    //@ lenmusdoc -----------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, lenmusdoc_parsed)
     {
@@ -2374,8 +2374,9 @@ SUITE(LmdAnalyserTest)
 
     //@ clef ----------------------------------------------------------------------------
 
-    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Clef)
+    TEST_FIXTURE(LmdAnalyserTestFixture, clef_01)
     {
+        //@01. clef. Created ok
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -2396,8 +2397,9 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Clef_Error)
+    TEST_FIXTURE(LmdAnalyserTestFixture, clef_02)
     {
+        //@02. clef. Error in clef type. G2 assumed
         stringstream errormsg;
         Document doc(m_libraryScope);
         XmlParser parser;
@@ -2417,8 +2419,9 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Clef_LocationX)
+    TEST_FIXTURE(LmdAnalyserTestFixture, clef_03)
     {
+        //@03. clef. Location present
         Document doc(m_libraryScope);
         XmlParser parser;
         parser.parse_text("<clef><type>G</type><dx>70</dx></clef>");
@@ -2435,8 +2438,9 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Clef_NoVisible)
+    TEST_FIXTURE(LmdAnalyserTestFixture, clef_04)
     {
+        //@04. clef. No visible
         Document doc(m_libraryScope);
         XmlParser parser;
         parser.parse_text("<clef><type>C2</type><visible>no</visible></clef>");
@@ -2454,8 +2458,9 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Clef_NoVisible_Staff2)
+    TEST_FIXTURE(LmdAnalyserTestFixture, clef_05)
     {
+        //@05. clef. staff 2
         Document doc(m_libraryScope);
         XmlParser parser;
         parser.parse_text(
@@ -2480,7 +2485,28 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-//    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Clef_SymbolSizeOk)
+    TEST_FIXTURE(LmdAnalyserTestFixture, clef_06)
+    {
+        //@06. clef. id_in_clef
+        Document doc(m_libraryScope);
+        XmlParser parser;
+        parser.parse_text(
+            "<clef id='12'>"
+                "<type>C2</type>"
+            "</clef>"
+        );
+        LmdAnalyser a(cout, m_libraryScope, &doc, &parser);
+        XmlNode* tree = parser.get_tree_root();
+        InternalModel* pIModel = a.analyse_tree(tree, "string:");
+        ImoClef* pClef = dynamic_cast<ImoClef*>( pIModel->get_root() );
+        CHECK( pClef != NULL );
+        CHECK( pClef->get_clef_type() == k_clef_C2 );
+        CHECK( pClef->get_id() == 12L );
+
+        delete pIModel;
+    }
+
+//    TEST_FIXTURE(LmdAnalyserTestFixture, clef_07)
 //    {
 //        Document doc(m_libraryScope);
 //        XmlParser parser;
@@ -2500,7 +2526,7 @@ SUITE(LmdAnalyserTest)
 //        delete pIModel;
 //    }
 //
-//    TEST_FIXTURE(LmdAnalyserTestFixture, Analyser_Clef_SymbolSizeError)
+//    TEST_FIXTURE(LmdAnalyserTestFixture, clef_08)
 //    {
 //        stringstream errormsg;
 //        Document doc(m_libraryScope);
@@ -2526,9 +2552,9 @@ SUITE(LmdAnalyserTest)
 //        delete tree->get_root();
 //        delete pIModel;
 //    }
-//
-//    // key ------------------------------------------------------------------------------
-//
+
+    //@ key -----------------------------------------------------------------------------
+
 //    TEST_FIXTURE(LmdAnalyserTestFixture, AnalyserKey)
 //    {
 //        stringstream errormsg;
@@ -7046,7 +7072,7 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    // para -----------------------------------------------------------------------------
+    //@ para ----------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, paragraph_creation)
     {
@@ -7327,7 +7353,7 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    // section --------------------------------------------------------------------------
+    //@ section -------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Section_Creation)
     {
@@ -7820,7 +7846,7 @@ SUITE(LmdAnalyserTest)
     }
 
 
-    // dynamic --------------------------------------------------------------------------
+    //@ dynamic -------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Dynamic_Ok)
     {
@@ -7940,7 +7966,7 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    // link -----------------------------------------------------------------------------
+    //@ link ----------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, Link_Ok)
     {
@@ -8384,7 +8410,7 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    // tableCell ------------------------------------------------------------------------
+    //@ tableCell -----------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, tableCell_Creation)
     {
@@ -8523,7 +8549,7 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    // tableRow -------------------------------------------------------------------------
+    //@ tableRow ------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, tableRow_Creation)
     {
@@ -8579,7 +8605,7 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    // tableHead ------------------------------------------------------------------------
+    //@ tableHead -----------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, tableHead_Creation)
     {
@@ -8636,7 +8662,7 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    // tableBody ------------------------------------------------------------------------
+    //@ tableBody -----------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, tableBody_Creation)
     {
@@ -8692,7 +8718,7 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    // table ----------------------------------------------------------------------------
+    //@ table ---------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, table_Creation)
     {
@@ -8751,7 +8777,7 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    // tableColumn ----------------------------------------------------------------------
+    //@ tableColumn ---------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, tableColumn_Creation)
     {
@@ -8901,7 +8927,7 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    // ldpmusic -------------------------------------------------------------------------
+    //@ ldpmusic ------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, ldpmusic_ok)
     {
@@ -8938,7 +8964,7 @@ SUITE(LmdAnalyserTest)
         delete pIModel;
     }
 
-    // score ----------------------------------------------------------------------------
+    //@ score ---------------------------------------------------------------------------
 
     TEST_FIXTURE(LmdAnalyserTestFixture, score_00)
     {

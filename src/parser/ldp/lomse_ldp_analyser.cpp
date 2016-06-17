@@ -264,7 +264,6 @@ int AutoBeamer::get_beaming_level(ImoNote* pNote)
 }
 
 
-
 //---------------------------------------------------------------------------------------
 // The syntax analyser is based on the Interpreter pattern ()
 //
@@ -2376,12 +2375,12 @@ public:
 #endif  //LOMSE_COMPATIBILITY_LDP_1_5
 
 //@--------------------------------------------------------------------------------------
-//@ <group> = (group [<grpName>][<grpAbbrev>]<grpSymbol>[<joinBarlines>]
-//@                  <instrument>+ )
+//@ <group> = (group firstInstrId lastInstrId [<name>][<abbrev>][<symbol>]
+//@                  [<joinBarlines>] )
 //@
-//@ <grpName> = <textString>
-//@ <grpAbbrev> = <textString>
-//@ <grpSymbol> = (symbol {none | brace | bracket} )
+//@ <name> = <textString>
+//@ <abbrev> = <textString>
+//@ <symbol> = (symbol {none | brace | bracket | line} )
 //@ <joinBarlines> = (joinBarlines {yes | no | mensurstrich } )
 
 class GroupAnalyser : public ElementAnalyser
@@ -2393,54 +2392,63 @@ public:
 
     void do_analysis()
     {
+        ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
+
+        // firstInstrId
+        ImoInstrument* pFirstInstr = NULL;
+        if (get_mandatory(k_label))
+        {
+            string partId = m_pParamToAnalyse->get_value();
+            pFirstInstr = pScore->get_instrument(partId);
+//            if (pFirstInstr == NULL)
+//            {
+//                error_msg("");
+//            }
+        }
+        else
+            return;
+
+        // lastInstrId
+        ImoInstrument* pLastInstr = NULL;
+        if (get_mandatory(k_label))
+        {
+            string partId = m_pParamToAnalyse->get_value();
+            pLastInstr = pScore->get_instrument(partId);
+//            if (pFirstInstr == NULL)
+//            {
+//                error_msg("");
+//            }
+        }
+        else
+            return;
+
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoInstrGroup* pGrp = static_cast<ImoInstrGroup*>(
                         ImFactory::inject(k_imo_instr_group, pDoc, get_node_id()));
 
-
-        // [<grpName>]
+        // [<name>]
         analyse_optional(k_name, pGrp);
 
-        // [<grpAbbrev>]
+        // [<abbrev>]
         analyse_optional(k_abbrev, pGrp);
 
-        // <grpSymbol>
-        if (!get_optional(k_symbol) || !set_symbol(pGrp))
-        {
-            error_msg("Missing or invalid group symbol. Must be 'none', 'brace' or 'bracket'. Group ignored.");
-            delete pGrp;
-            return;
-        }
+        // [<symbol>]
+        if (get_optional(k_symbol))
+            set_symbol(pGrp);
 
         // [<joinBarlines>]
         if (get_optional(k_joinBarlines))
             set_join_barlines(pGrp);
 
-        // <instrument>+
-        if (!more_params_to_analyse())
-        {
-            error_msg("Missing instruments in group!. Group ignored.");
-            delete pGrp;
-            return;
-        }
-        else
-        {
-            while (more_params_to_analyse())
-            {
-                if (!analyse_optional(k_instrument, pGrp))
-                {
-                    error_invalid_param();
-                    move_to_next_param();
-                }
-            }
-        }
+        error_if_more_elements();
 
+        add_instruments_to_group(pScore, pGrp, pFirstInstr, pLastInstr);
         add_to_model(pGrp);
     }
 
 protected:
 
-    bool set_symbol(ImoInstrGroup* pGrp)
+    void set_symbol(ImoInstrGroup* pGrp)
     {
         m_pParamToAnalyse = m_pParamToAnalyse->get_parameter(1);
         string symbol = get_string_value();
@@ -2453,9 +2461,8 @@ protected:
         else if (symbol == "none")
             pGrp->set_symbol(ImoInstrGroup::k_none);
         else
-            return false;   //error
-
-        return true;    //ok
+            error_msg("Invalid value for <grpSymbol>. Must be 'none', 'brace', "
+                      "'bracket' or 'line'. 'none' assumed.");
     }
 
     void set_join_barlines(ImoInstrGroup* pGrp)
@@ -2473,6 +2480,31 @@ protected:
             pGrp->set_join_barlines(ImoInstrGroup::k_standard);
             error_msg("Invalid value for joinBarlines. Must be "
                       "'yes', 'no' or 'mensurstrich'. 'yes' assumed.");
+        }
+    }
+
+    void add_instruments_to_group(ImoScore* pScore, ImoInstrGroup* pGrp,
+                                  ImoInstrument* pFirstInstr, ImoInstrument* pLastInstr)
+    {
+        ImoInstruments* pColInstr = pScore->get_instruments();
+        ImoObj::children_iterator it;
+        bool fAdd = false;
+        for (it= pColInstr->begin(); it != pColInstr->end(); ++it)
+        {
+            ImoInstrument* pInstr = static_cast<ImoInstrument*>(*it);
+            if (fAdd)
+                pGrp->add_instrument(pInstr);
+
+            if (pInstr == pFirstInstr)
+            {
+                pGrp->add_instrument(pInstr);
+                fAdd = true;
+            }
+            else if (pInstr == pLastInstr)
+            {
+                pGrp->add_instrument(pInstr);
+                break;
+            }
         }
     }
 
@@ -2618,8 +2650,9 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <instrument> = (instrument [<instrName>][<instrAbbrev>][<staves>][<staff>]*
-//@                            [<infoMIDI>] <musicData> )
+//@ <instrument> = (instrument [<partId>][<instrName>][<instrAbbrev>][<staves>]
+//@                            [<staff>]*[<infoMIDI>] <musicData> )
+//@ Note. partId is mandatory if <parts> has been defined.
 //@ <instrName> = <textString>
 //@ <instrAbbrev> = <textString>
 
@@ -2636,13 +2669,34 @@ public:
         m_pAnalyser->reset_defaults_for_instrument();
 
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoInstrument* pInstrument = static_cast<ImoInstrument*>(
+        ImoInstrument* pInstrument = NULL;
+
+        // [<instrId>]
+        if (get_optional(k_label))
+        {
+            string partId = m_pParamToAnalyse->get_value();
+            ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
+            pInstrument = pScore->get_instrument(partId);
+            if (pInstrument == NULL)
+            {
+                error_msg("'partId' is not defined in <parts> element. Instrument ignored.");
+                return;
+            }
+            pInstrument->set_instr_id(partId);
+        }
+        else if (m_pAnalyser->is_instr_id_required())
+        {
+            error_msg("instrument: missing 'partId'. Instrument ignored.");
+            return;
+        }
+        else
+            pInstrument = static_cast<ImoInstrument*>(
                             ImFactory::inject(k_imo_instrument, pDoc, get_node_id()) );
 
-        // [<name>]
+        // [<instrName>]
         analyse_optional(k_name, pInstrument);
 
-        // [<abbrev>]
+        // [<instrAbbrev>]
         analyse_optional(k_abbrev, pInstrument);
 
         // [<staves>]
@@ -2660,7 +2714,9 @@ public:
 
         error_if_more_elements();
 
-        add_to_model(pInstrument);
+        if (!m_pAnalyser->is_instr_id_required())
+            add_to_model(pInstrument);
+
     }
 
 protected:
@@ -4046,6 +4102,64 @@ public:
 };
 
 //@--------------------------------------------------------------------------------------
+//@ <parts> = (parts <instrIds> <group>*)
+//@ <instrIds> (instrIds id+)
+//@ id = A label. Must begin with a letter ([A-Za-z]) and may be followed by any number
+//@      of letters, digits ([0-9]), hyphens ("-"), underscores ("_"), colons (":"),
+//@      and periods (".").
+//@
+class PartsAnalyser : public ElementAnalyser
+{
+public:
+    PartsAnalyser(LdpAnalyser* pAnalyser, ostream& reporter, LibraryScope& libraryScope,
+                  ImoObj* pAnchor)
+        : ElementAnalyser(pAnalyser, reporter, libraryScope, pAnchor) {}
+
+    void do_analysis()
+    {
+        ImoScore* pScore = m_pAnalyser->get_score_being_analysed();
+
+        // <instrIds>
+        if (get_optional(k_instrIds))
+        {
+            int numParts = m_pParamToAnalyse->get_num_parameters();
+            for (int i=1; i <= numParts; ++i)
+                add_instrument(i, pScore);
+            m_pAnalyser->require_instr_id();
+        }
+        else
+        {
+            error_msg("parts: at least one <partId> is required.");
+            return;
+        }
+
+        // <group>*
+        while (analyse_optional(k_group, pScore));
+
+        error_if_more_elements();
+    }
+
+protected:
+
+    void add_instrument(int nInstr, ImoScore* pScore)
+    {
+        string partId = m_pParamToAnalyse->get_parameter(nInstr)->get_value();
+        if (pScore->get_instrument(partId) == NULL)
+        {
+            Document* pDoc = m_pAnalyser->get_document_being_analysed();
+            ImoInstrument* pInstr = static_cast<ImoInstrument*>(
+                                        ImFactory::inject(k_imo_instrument, pDoc) );
+            pScore->add_instrument(pInstr, partId);
+        }
+        else
+        {
+            error_msg("parts: duplicated <partId> will be ignored.");
+        }
+    }
+
+};
+
+//@--------------------------------------------------------------------------------------
 //@ <point> = (tag (dx value)(dy value))
 
 class PointAnalyser : public ElementAnalyser
@@ -4099,7 +4213,7 @@ public:
 //@--------------------------------------------------------------------------------------
 //@ <score> = (score <vers>[<language>][<style>][<undoData>][<creationMode>]
 //@                  [<defineStyle>*][<title>*][<pageLayout>*][<systemLayout>*]
-//@                  [<option>*]{<instrument> | <group>}* )
+//@                  [<option>*][<parts>]<instrument>* )
 
 class ScoreAnalyser : public ElementAnalyser
 {
@@ -4161,15 +4275,17 @@ public:
         // [<option>*]
         while (analyse_optional(k_opt, pScore));
 
-        // {<instrument> | <group>}*
+        // [<parts>]
+        analyse_optional(k_parts, pScore);
+
+        // <instrument>*
         if (!more_params_to_analyse())
             error_missing_element(k_instrument);
         else
         {
             while (more_params_to_analyse())
             {
-                if (! (analyse_optional(k_instrument, pScore)
-                    || analyse_optional(k_group) ))
+                if (! (analyse_optional(k_instrument, pScore)))
                 {
                     error_invalid_param();
                     move_to_next_param();
@@ -5778,6 +5894,7 @@ LdpAnalyser::LdpAnalyser(ostream& reporter, LibraryScope& libraryScope, Document
     , m_nShowTupletBracket(k_yesno_default)
     , m_nShowTupletNumber(k_yesno_default)
     , m_pLastNote(NULL)
+    , m_fInstrIdRequired(false)
 {
 }
 
@@ -6277,6 +6394,7 @@ ElementAnalyser* LdpAnalyser::new_analyser(ELdpElement type, ImoObj* pAnchor)
         case k_pageSize:        return LOMSE_NEW PageSizeAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_para:            return LOMSE_NEW ParagraphAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_parameter:       return LOMSE_NEW ParamAnalyser(this, m_reporter, m_libraryScope, pAnchor);
+        case k_parts:           return LOMSE_NEW PartsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_rest:            return LOMSE_NEW NoteRestAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_settings:        return LOMSE_NEW SettingsAnalyser(this, m_reporter, m_libraryScope, pAnchor);
         case k_score:           return LOMSE_NEW ScoreAnalyser(this, m_reporter, m_libraryScope, pAnchor);

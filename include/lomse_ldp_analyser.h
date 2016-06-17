@@ -201,6 +201,9 @@ protected:
     //saved values
     ImoNote* m_pLastNote;
 
+    //other
+    bool        m_fInstrIdRequired;     //Id required in instruments
+
 public:
     LdpAnalyser(ostream& reporter, LibraryScope& libraryScope, Document* pDoc);
     ~LdpAnalyser();
@@ -280,6 +283,10 @@ public:
     //access to root ImoDocument
     inline void save_root_imo_document(ImoDocument* pDoc) { m_pImoDoc = pDoc; }
     inline ImoDocument* get_root_imo_document() { return m_pImoDoc; }
+
+    //methods related to analysing instruments
+    void require_instr_id() { m_fInstrIdRequired = true; }
+    bool is_instr_id_required() { return m_fInstrIdRequired; }
 
     //static methods for general use
     static int ldp_name_to_key_type(const string& value);
