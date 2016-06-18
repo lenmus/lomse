@@ -1404,7 +1404,9 @@ protected:
 
 };
 
-//---------------------------------------------------------------------------------------
+//@--------------------------------------------------------------------------------------
+//@ <!ELEMENT clef (type, symbolSize?, staff?, visible?, %Location;?) >
+//
 class ClefLmdAnalyser : public LmdElementAnalyser
 {
 public:
@@ -1415,17 +1417,18 @@ public:
     ImoObj* do_analysis()
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
-        ImoClef* pClef = static_cast<ImoClef*>( ImFactory::inject(k_imo_clef, pDoc) );
+        ImoClef* pClef = static_cast<ImoClef*>(
+                            ImFactory::inject(k_imo_clef, pDoc, get_node_id()) );
 
-        // <type>
+        // type
         if (get_optional("type"))
             pClef->set_clef_type( get_clef_type() );
 
-        // [<symbolSize>]
+        // symbolSize?
         if (get_optional(k_symbolSize))
             set_symbol_size(pClef);
 
-        // [<staff>][visible][<location>]
+        // staff?, visible?, %Location;?
         analyse_staffobjs_options(pClef);
 
         error_if_more_elements();
@@ -2708,10 +2711,11 @@ protected:
 };
 
 //@--------------------------------------------------------------------------------------
-//@ <key> = (key <type>[<staffobjOptions>*] )
-//@ <type> = label: { C | G | D | A | E | B | F+ | C+ | C- | G- | D- | A- |
-//@                   E- | B- | F | a | e | b | f+ | c+ | g+ | d+ | a+ | a- |
-//@                   e- | b- | f | c | g | d }
+//@ <!ELEMENT key type %staffobjOptions;* ) >
+//@ <!ELEMENT type (#PCDATA)>
+//@ type = { C | G | D | A | E | B | F+ | C+ | C- | G- | D- | A- |
+//@          E- | B- | F | a | e | b | f+ | c+ | g+ | d+ | a+ | a- |
+//@          e- | b- | f | c | g | d }
 
 class KeySignatureLmdAnalyser : public LmdElementAnalyser
 {
@@ -2724,13 +2728,13 @@ public:
     {
         Document* pDoc = m_pAnalyser->get_document_being_analysed();
         ImoKeySignature* pKey = static_cast<ImoKeySignature*>(
-                                    ImFactory::inject(k_imo_key_signature, pDoc) );
+                        ImFactory::inject(k_imo_key_signature, pDoc, get_node_id()) );
 
-        // <type> (label)
+        // type
         if (get_optional(k_label))
             pKey->set_key_type( get_key_type() );
 
-        // [<staffobjOptions>*]
+        // %staffobjOptions;*
         analyse_staffobjs_options(pKey);
 
         error_if_more_elements();
@@ -4276,15 +4280,14 @@ public:
         // [<parts>]
         analyse_optional("parts", pScore);
 
-        // {<instrument> | <group>}*
+        // <instrument>+
         if (!more_children_to_analyse())
             error_missing_element(k_instrument);
         else
         {
             while (more_children_to_analyse())
             {
-                if (! (analyse_optional(k_instrument, pScore)
-                    || analyse_optional(k_group) ))
+                if (! analyse_optional(k_instrument, pScore))
                 {
                     error_invalid_child();
                     move_to_next_child();

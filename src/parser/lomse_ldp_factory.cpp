@@ -128,6 +128,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_height] = "height";
     m_TypeToName[k_image] = "image";
     m_TypeToName[k_infoMIDI] = "infoMIDI";
+    m_TypeToName[k_instrIds] = "instrIds";
     m_TypeToName[k_instrument] = "instrument";
     m_TypeToName[k_font_style_italic] = "italic";
     m_TypeToName[k_itemizedlist] = "itemizedlist";
@@ -177,6 +178,7 @@ LdpFactory::LdpFactory()
     m_TypeToName[k_para] = "para";
     m_TypeToName[k_parameter] = "param";
     m_TypeToName[k_parenthesis] = "parenthesis";
+    m_TypeToName[k_parts] = "parts";
     m_TypeToName[k_pitch] = "pitch";
     m_TypeToName[k_playLabel] = "playLabel";
     m_TypeToName[k_portrait] = "portrait";
@@ -307,6 +309,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["height"] = LOMSE_NEW LdpElementFunctor<k_height>;
     m_NameToFunctor["image"] = LOMSE_NEW LdpElementFunctor<k_image>;
     m_NameToFunctor["infoMIDI"] = LOMSE_NEW LdpElementFunctor<k_infoMIDI>;
+    m_NameToFunctor["instrIds"] = LOMSE_NEW LdpElementFunctor<k_instrIds>;
     m_NameToFunctor["instrument"] = LOMSE_NEW LdpElementFunctor<k_instrument>;
     m_NameToFunctor["italic"] = LOMSE_NEW LdpElementFunctor<k_font_style_italic>;
     m_NameToFunctor["itemizedlist"] = LOMSE_NEW LdpElementFunctor<k_itemizedlist>;
@@ -356,6 +359,7 @@ LdpFactory::LdpFactory()
     m_NameToFunctor["para"] = LOMSE_NEW LdpElementFunctor<k_para>;
     m_NameToFunctor["param"] = LOMSE_NEW LdpElementFunctor<k_parameter>;
     m_NameToFunctor["parenthesis"] = LOMSE_NEW LdpElementFunctor<k_parenthesis>;
+    m_NameToFunctor["parts"] = LOMSE_NEW LdpElementFunctor<k_parts>;
     m_NameToFunctor["pitch"] = LOMSE_NEW LdpElementFunctor<k_pitch>;
     m_NameToFunctor["playLabel"] = LOMSE_NEW LdpElementFunctor<k_playLabel>;
     m_NameToFunctor["portrait"] = LOMSE_NEW LdpElementFunctor<k_portrait>;

@@ -4080,6 +4080,8 @@ protected:
                                         ImFactory::inject(k_imo_instrument, pDoc) );
         ImoMusicData* pMD = static_cast<ImoMusicData*>(
                                 ImFactory::inject(k_imo_music_data, pDoc) );
+        pInstrument->set_instr_id(id);
+
         Linker linker(pDoc);
         linker.add_child_to_model(pInstrument, pMD, pMD->get_obj_type());
 

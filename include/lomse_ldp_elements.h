@@ -59,6 +59,7 @@ enum ELdpElement
     k_instrument,
     k_lenmusdoc,
     k_meta,
+    k_parts,
     k_score,
     k_settings,
 
@@ -153,6 +154,7 @@ enum ELdpElement
     k_height,
     k_image,
     k_infoMIDI,
+    k_instrIds,
     k_joinBarlines,
     k_landscape,
     k_language,
