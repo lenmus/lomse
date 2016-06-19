@@ -175,25 +175,11 @@ GmoShapeBracketBrace::~GmoShapeBracketBrace()
 {
 }
 
-////---------------------------------------------------------------------------------------
-//void GmoShapeBracketBrace::Shift(LUnits xIncr, LUnits yIncr)
-//{
-//    get_left() += xIncr;
-//	get_top() += yIncr;
-//    get_right() += xIncr;
-//	get_bottom() += yIncr;
-//
-//    ShiftBoundsAndSelRec(xIncr, yIncr);
-//    set_affine_transform();
-//
-//	//if included in a composite shape update parent bounding and selection rectangles
-//	if (this->IsChildShape())
-//		((lmCompositeShape*)GetParentShape())->RecomputeBounds();
-//}
-
 //---------------------------------------------------------------------------------------
 void GmoShapeBracketBrace::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
+    set_affine_transform();
+
     Color color = determine_color_to_use(opt);
     pDrawer->begin_path();
     pDrawer->fill(color);
@@ -214,9 +200,6 @@ GmoShapeBrace::GmoShapeBrace(ImoObj* pCreatorImo, ShapeId idx, LUnits xLeft, LUn
     set_origin(xLeft, yTop);
 	set_width(xRight - xLeft);
 	set_height(yBottom - yTop);
-
-    //set scaling and translation
-    set_affine_transform();
 }
 
 //---------------------------------------------------------------------------------------
@@ -263,8 +246,6 @@ GmoShapeBracket::GmoShapeBracket(ImoObj* pCreatorImo, ShapeId idx, LUnits xLeft,
 
     m_udyHook = dyHook;
     m_rBracketBarHeight = (double)(yBottom - yTop);
-
-    set_affine_transform();
 }
 
 //---------------------------------------------------------------------------------------
