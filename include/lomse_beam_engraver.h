@@ -104,6 +104,7 @@ protected:
     void compute_beam_segments();
 	void add_segment(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
     void update_bounds(LUnits uxStart, LUnits uyStart, LUnits uxEnd, LUnits uyEnd);
+    void make_segments_relative();
 
     bool m_fStemForced;     //at least one stem forced
     bool m_fStemMixed;      //not all stems in the same direction
