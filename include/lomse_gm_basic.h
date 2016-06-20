@@ -410,7 +410,7 @@ public:
     LUnits get_content_height();
 
     //position
-    void shift_origin(const USize& shift);
+    void shift_origin_and_content(const USize& shift);
     inline void new_left(LUnits xLeft) { m_origin.x = xLeft; }
     inline void new_top(LUnits yTop) { m_origin.y = yTop; }
     inline void new_origin(UPoint& pos) { m_origin = pos; }

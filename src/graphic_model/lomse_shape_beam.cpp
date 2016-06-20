@@ -71,13 +71,13 @@ void GmoShapeBeam::on_draw(Drawer* pDrawer, RenderOptions& opt)
     std::list<LUnits>::iterator it = m_segments.begin();
     while (it != m_segments.end())
     {
-        LUnits uxStart = *it;
+        LUnits uxStart = *it + m_origin.x;
         ++it;
-        LUnits uyStart = *it;
+        LUnits uyStart = *it + m_origin.y;
         ++it;
-        LUnits uxEnd = *it;
+        LUnits uxEnd = *it + m_origin.x;
         ++it;
-        LUnits uyEnd = *it;
+        LUnits uyEnd = *it + m_origin.y;
         ++it;
 
         draw_beam_segment(pDrawer, uxStart, uyStart, uxEnd, uyEnd, color);
@@ -89,7 +89,7 @@ void GmoShapeBeam::on_draw(Drawer* pDrawer, RenderOptions& opt)
 void GmoShapeBeam::draw_beam_segment(Drawer* pDrawer, LUnits uxStart, LUnits uyStart,
                              LUnits uxEnd, LUnits uyEnd, Color color)
 {
-//    //check to see if the beam segment has to be splitted in two systems
+//    //check to see if the beam segment has to be split in two systems
 //    //if (pStartNote && pEndNote) {
 //    //    lmUPoint paperPosStart = pStartNote->GetReferencePaperPos();
 //    //    lmUPoint paperPosEnd = pEndNote->GetReferencePaperPos();
@@ -103,8 +103,8 @@ void GmoShapeBeam::draw_beam_segment(Drawer* pDrawer, LUnits uxStart, LUnits uyS
 //    //        return; //to avoid rendering bad lines across the score. It is less noticeable
 //    //    }
 //    //}
-//
-//    //draw the segment
+
+    //draw the segment
     pDrawer->begin_path();
     pDrawer->fill(color);
     pDrawer->line(uxStart, uyStart, uxEnd, uyEnd, m_uBeamThickness, k_edge_vertical);
