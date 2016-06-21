@@ -121,6 +121,8 @@ protected:
     //temporary data about current system being laid out
     int m_iCurSystem;   //[0..n-1] Current system (-1 if no system yet created!)
     SystemLayouter* m_pCurSysLyt;
+    int m_iSysPage;     //value of m_iCurPage when system was engraved
+    UPoint m_sysCursor; //value of m_cursor when system was engraved
 
     int m_iCurColumn;   //[0..n-1] current column. (-1 if no column yet created!)
 
@@ -136,7 +138,6 @@ protected:
     ScoreStub*          m_pStub;
     GmoBoxScorePage*    m_pCurBoxPage;
     GmoBoxSystem*       m_pCurBoxSystem;
-    UPoint              m_PageOrg;      //BoxPage origin when system was engraved
 
     //support for debug and unit test
     int                 m_iColumnToTrace;
@@ -221,7 +222,7 @@ protected:
     void create_empty_system();
     void engrave_empty_system();
 
-    void reposition_system_if_page_box_origin_has_changed();
+    void reposition_system_if_page_has_changed();
     void move_paper_cursor_to_bottom_of_added_system();
     LUnits get_first_system_staves_size();
     LUnits get_other_systems_staves_size();

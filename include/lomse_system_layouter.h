@@ -510,6 +510,7 @@ public:
 
     GmoBoxSystem* create_system_box(LUnits left, LUnits top, LUnits width, LUnits height);
     void engrave_system(LUnits indent, int iFirstCol, int iLastCol, UPoint pos);
+    void on_origin_shift(LUnits yShift);
 
         //Access to information
     inline void set_prolog_width(LUnits width) { m_uPrologWidth = width; }

@@ -159,7 +159,7 @@ void ScoreLayouter::layout_in_box()
 
     //loop for creating and adding systems
     bool fSystemsAdded = false;
-    while(m_iCurColumn < get_num_columns())
+    while(m_iCurColumn < get_num_columns() || system_created())
     {
         if (!system_created())
             create_system();
@@ -315,12 +315,15 @@ void ScoreLayouter::engrave_system()
 void ScoreLayouter::create_system_box()
 {
     m_iCurSystem++;
-    m_PageOrg = m_pCurBoxPage->get_origin();
 
     LUnits width = m_pCurBoxPage->get_width();
     LUnits top = m_cursor.y
                  + distance_to_top_of_system(m_iCurSystem, m_fFirstSystemInPage);
     LUnits left = m_cursor.x;
+
+    //save info for repositioning system if necessary
+    m_iSysPage = m_iCurPage;
+    m_sysCursor = m_cursor;
 
     ImoSystemInfo* pInfo = m_pScore->get_other_system_info();
 
@@ -334,7 +337,7 @@ void ScoreLayouter::create_system_box()
 //---------------------------------------------------------------------------------------
 void ScoreLayouter::add_system_to_page()
 {
-    reposition_system_if_page_box_origin_has_changed();
+    reposition_system_if_page_has_changed();
 
     m_pCurBoxPage->add_system(m_pCurBoxSystem, m_iCurSystem);
     m_pCurBoxSystem->add_shapes_to_tables();
@@ -345,17 +348,18 @@ void ScoreLayouter::add_system_to_page()
 }
 
 //---------------------------------------------------------------------------------------
-void ScoreLayouter::reposition_system_if_page_box_origin_has_changed()
+void ScoreLayouter::reposition_system_if_page_has_changed()
 {
     //if the parent box used when engraving the system has changed (because not
     //enough space in parent box to add the system and a new page has been added)
     //it is necessary to reposition all content of the engraved system.
 
-    if (m_PageOrg != m_pCurBoxPage->get_origin())
+    if (m_iSysPage != m_iCurPage)
     {
-        USize shift(m_pCurBoxPage->get_origin().x - m_PageOrg.x,
-                    m_pCurBoxPage->get_origin().y - m_PageOrg.y );
+        USize shift(m_cursor.x - m_sysCursor.x,
+                    m_cursor.y - m_sysCursor.y );
         m_pCurBoxSystem->shift_origin_and_content(shift);
+        m_pCurSysLyt->on_origin_shift(shift.height);
     }
 }
 
