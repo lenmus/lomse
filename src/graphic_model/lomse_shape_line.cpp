@@ -54,26 +54,27 @@ GmoShapeLine::GmoShapeLine(ImoObj* pCreatorImo, ShapeId idx,
     , m_nStartCap(nStartCap)
     , m_nEndCap(nEndCap)
 {
-    m_uPoint[k_start].x = xStart;
-    m_uPoint[k_start].y = yStart;
-    m_uPoint[k_end].x = xEnd;
-    m_uPoint[k_end].y = yEnd;
+    //origin
+    m_origin.x = xStart;
+    m_origin.y = yStart;
 
-    // store boundling rectangle position and size
+    //points (relative to origin)
+    m_uPoint[k_start].x = 0.0;
+    m_uPoint[k_start].y = 0.0;
+    m_uPoint[k_end].x = xEnd - xStart;
+    m_uPoint[k_end].y = yEnd - yStart;
+
+    // bounding rectangle size
 	//TODO: For now it is assumed that the line is either vertical or horizontal
 	if (xStart == xEnd)
 	{
 		//vertical line
-		m_origin.x = xStart;    //- uWidth / 2.0f;
-		m_origin.y = yStart;
         m_size.width = uWidth + uBoundsExtraWidth;
         m_size.height = yEnd - yStart + uBoundsExtraWidth;
 	}
 	else
 	{
 		//Horizontal line
-		m_origin.x = xStart;
-		m_origin.y = yStart;    // - uWidth / 2.0f;
 		m_size.width = xEnd - xStart + uBoundsExtraWidth;
         m_size.height = uWidth + uBoundsExtraWidth;
 	}
@@ -88,13 +89,14 @@ GmoShapeLine::~GmoShapeLine()
 void GmoShapeLine::on_draw(Drawer* pDrawer, RenderOptions& opt)
 {
     Color color = determine_color_to_use(opt);
+    UPoint start = m_uPoint[k_start] + m_origin;
+    UPoint end = m_uPoint[k_end] + m_origin;
 
     pDrawer->begin_path();
     pDrawer->fill(color);
     pDrawer->stroke(color);
     pDrawer->stroke_width(10.0);  //0.1 mm
-    pDrawer->line_with_markers(m_uPoint[k_start], m_uPoint[k_end], m_uWidth,
-                               m_nStartCap, m_nEndCap);
+    pDrawer->line_with_markers(start, end, m_uWidth, m_nStartCap, m_nEndCap);
     pDrawer->end_path();
 
     GmoSimpleShape::on_draw(pDrawer, opt);

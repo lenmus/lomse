@@ -97,7 +97,7 @@ void LyricsEngraver::set_start_staffobj(ImoRelObj* pRO, ImoStaffObj* pSO,
 
     ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(NULL, iSystem, iCol, iInstr);
     m_shapesInfo.push_back(pInfo);
-    m_staffTops.push_back(yTop);
+    m_staffTops.push_back(yTop - pStaffObjShape->get_top());
 }
 
 //---------------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ void LyricsEngraver::set_middle_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pS
 
     ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(NULL, iSystem, iCol, iInstr);
     m_shapesInfo.push_back(pInfo);
-    m_staffTops.push_back(yTop);
+    m_staffTops.push_back(yTop - pStaffObjShape->get_top());
 }
 
 //---------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ void LyricsEngraver::set_end_staffobj(ImoRelObj* UNUSED(pRO), ImoStaffObj* pSO,
 
     ShapeBoxInfo* pInfo = LOMSE_NEW ShapeBoxInfo(NULL, iSystem, iCol, iInstr);
     m_shapesInfo.push_back(pInfo);
-    m_staffTops.push_back(yTop);
+    m_staffTops.push_back(yTop - pStaffObjShape->get_top());
 }
 
 //---------------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ void LyricsEngraver::create_shape(int iNote, GmoShapeNote* pNoteShape, ImoNote* 
     //      amount (23.0f)
     int lineNum = m_pLyrics->get_number();
     int tenths = 60.0f + 23.0f * float(lineNum);
-    LUnits y = m_staffTops[iNote] + tenths_to_logical(tenths);
+    LUnits y = m_staffTops[iNote] + pNoteShape->get_top() + tenths_to_logical(tenths);
 
     //get text
     ImoLyricsData* pData = static_cast<ImoLyricsData*>(m_pLyrics->get_data_for(pNote));
