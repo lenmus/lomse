@@ -235,9 +235,11 @@ void GmoShapeTuplet::draw_horizontal_line(Drawer* pDrawer)
             //broken line
             float rTanAlpha = (m_yLineEnd - m_yLineStart) / (m_uxEnd - m_uxStart);
             LUnits x1 = m_xNumber + m_origin.x - m_uSpaceToNumber;
-            LUnits y1 = m_yLineStart + m_origin.y + (x1 - m_uxStart) * rTanAlpha;
+            LUnits y1 = m_yLineStart + m_origin.y
+                        + ((x1 - m_uxStart - m_origin.x) * rTanAlpha);
             LUnits x2 = m_xNumber + m_origin.x + m_uNumberWidth + m_uSpaceToNumber;
-            LUnits y2 = m_yLineStart + m_origin.y + (x2 - m_uxStart) * rTanAlpha;
+            LUnits y2 = m_yLineStart + m_origin.y
+                        + ((x2 - m_uxStart - m_origin.x) * rTanAlpha);
             pDrawer->line(m_uxStart + m_origin.x, m_yLineStart + m_origin.y,
                           x1, y1, m_uLineThick, k_edge_vertical);
             pDrawer->line(x2, y2, m_uxEnd + m_origin.x, m_yLineEnd + m_origin.y,
